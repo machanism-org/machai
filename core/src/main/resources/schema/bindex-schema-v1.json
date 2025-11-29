@@ -1,0 +1,483 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "BIndex",
+	"description": "A schema to describe artifacts (e.g., libraries) for automatic recognition and integration with GenAI engines.",
+	"type": "object",
+	"required": [
+		"id",
+		"name",
+		"version",
+		"description",
+		"author",
+		"license",
+		"classification",
+		"features",
+		"artifactLocation"
+	],
+	"properties": {
+		"id": {
+			"type": "string",
+			"description": "A unique identifier for the artifact (e.g., Maven coordinate or UUID)."
+		},
+		"name": {
+			"type": "string",
+			"description": "The full name of the artifact or library. For Maven artifacts, use groupId:artifactId."
+		},
+		"version": {
+			"type": "string",
+			"description": "Version of the artifact (e.g., semantic versioning, tag, or hash)."
+		},
+		"artifactLocation": {
+			"type": "object",
+			"description": "Details about the artifact's storage location, repository type, and metadata.",
+			"required": [
+				"repositoryType",
+				"coordinates"
+			],
+			"properties": {
+				"repositoryType": {
+					"type": "string",
+					"description": "Type of repository (e.g., Maven, NPM, Git, DockerHub, PyPI)."
+				},
+				"repositoryUrl": {
+					"type": "string",
+					"format": "uri",
+					"description": "URL of the repository hosting the artifact."
+				},
+				"coordinates": {
+					"type": "object",
+					"description": "Coordinates identifying the artifact within the repository.",
+					"required": [
+						"group",
+						"artifactId",
+						"version"
+					],
+					"properties": {
+						"group": {
+							"type": "string",
+							"description": "Group or namespace of the artifact (e.g., Maven groupId)."
+						},
+						"artifactId": {
+							"type": "string",
+							"description": "Name of the artifact within its group (e.g., artifactId in Maven)."
+						},
+						"version": {
+							"type": "string",
+							"description": "Version of the artifact."
+						},
+						"classifier": {
+							"type": "string",
+							"description": "Optional classifier providing context (e.g., 'sources', 'javadoc')."
+						},
+						"extension": {
+							"type": "string",
+							"description": "File extension or type (e.g., JAR, WAR, tar.gz, whl)."
+						}
+					}
+				}
+			}
+		},
+		"description": {
+			"type": "string",
+			"description": "A brief description of the artifact's purpose and functionality."
+		},
+		"summary": {
+			"type": "string",
+			"description": "A machine-generated summary of the artifact's purpose or metadata, produced by the GenAI engine using the data in the bindex.json file."
+		},
+		"author": {
+			"type": "object",
+			"description": "Describes the author or organization responsible for the artifact.",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "Name of the author or organization."
+				},
+				"email": {
+					"type": "string",
+					"format": "email",
+					"description": "Email for support or queries."
+				},
+				"website": {
+					"type": "string",
+					"format": "uri",
+					"description": "Link to the website or documentation."
+				}
+			}
+		},
+		"license": {
+			"type": "string",
+			"description": "License type (e.g., MIT, Apache 2.0, etc.)."
+		},
+		"tags": {
+			"type": "array",
+			"description": "Tags or keywords describing the artifact.",
+			"items": {
+				"type": "string",
+				"description": "A single tag or keyword."
+			}
+		},
+		"classification": {
+			"type": "object",
+			"description": "Categorizes the artifact by type, domain, and supported languages.",
+			"required": [
+				"type",
+				"domain",
+				"language"
+			],
+			"properties": {
+				"type": {
+					"type": "string",
+					"description": "Type of the artifact (e.g., library, plugin, module)."
+				},
+				"domain": {
+					"type": "string",
+					"description": "Application domain (e.g., Data Processing, Machine Learning)."
+				},
+				"language": {
+					"type": "array",
+					"description": "Programming languages supported.",
+					"items": {
+						"type": "string",
+						"description": "A supported programming language."
+					}
+				}
+			}
+		},
+		"techStack": {
+			"type": "array",
+			"description": "List of technologies, frameworks, environments, deployment styles, runtimes, or other key technology elements used by this artifact. E.g., [\"Spring Boot\", \"JPA\", \"PostgreSQL\", \"Docker\", \"Kubernetes\", \"Microservices\", \"Java 17\"].",
+			"items": {
+				"type": "string",
+				"description": "A technology, runtime, framework, environment, or deployment option."
+			}
+		},
+		"features": {
+			"type": "array",
+			"description": "Main features or capabilities provided by the artifact.",
+			"items": {
+				"type": "object",
+				"required": [
+					"name",
+					"description",
+					"inputs",
+					"outputs"
+				],
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "Name of the function or feature."
+					},
+					"signature": {
+						"type": "string",
+						"description": "The full signature of the feature (e.g., Java method signature)."
+					},
+					"description": {
+						"type": "string",
+						"description": "Detailed explanation of the feature."
+					},
+					"inputs": {
+						"type": "object",
+						"description": "Information about the input expected by the feature.",
+						"required": [
+							"type"
+						],
+						"properties": {
+							"type": {
+								"type": "string",
+								"description": "Input data type (e.g., String, Integer, JSON, Array)."
+							},
+							"constraints": {
+								"type": "string",
+								"description": "Constraints on the input (e.g., format, range)."
+							},
+							"example": {
+								"type": [
+									"string",
+									"object",
+									"array",
+									"number",
+									"null"
+								],
+								"description": "Example of the expected input."
+							}
+						}
+					},
+					"outputs": {
+						"type": "object",
+						"description": "Information about the output returned by the feature.",
+						"required": [
+							"type",
+							"description"
+						],
+						"properties": {
+							"type": {
+								"type": "string",
+								"description": "Output data type."
+							},
+							"description": {
+								"type": "string",
+								"description": "Explanation of the output."
+							},
+							"example": {
+								"type": [
+									"string",
+									"object",
+									"array",
+									"number",
+									"null"
+								],
+								"description": "Example output."
+							}
+						}
+					}
+				}
+			}
+		},
+		"customizations": {
+			"type": "array",
+			"description": "Extension or customization points for developers to extend or modify the artifact's functionality.",
+			"items": {
+				"type": "object",
+				"required": [
+					"name",
+					"description",
+					"type"
+				],
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "Name of the customization or extension point (e.g., class, interface, method)."
+					},
+					"description": {
+						"type": "string",
+						"description": "Detailed description of the extension or customization point."
+					},
+					"type": {
+						"type": "string",
+						"description": "Type of customization point (e.g., method, interface, configuration property)."
+					},
+					"methods": {
+						"type": "array",
+						"description": "Customizable methods if the point is an interface or class.",
+						"items": {
+							"type": "object",
+							"required": [
+								"name",
+								"description"
+							],
+							"properties": {
+								"name": {
+									"type": "string",
+									"description": "Method name."
+								},
+								"description": {
+									"type": "string",
+									"description": "Description of the method and its possible modifications."
+								},
+								"input": {
+									"type": "object",
+									"description": "Details of the expected input.",
+									"properties": {
+										"type": {
+											"type": "string",
+											"description": "Input data type."
+										},
+										"example": {
+											"type": [
+												"string",
+												"object",
+												"array",
+												"number",
+												"null"
+											],
+											"description": "Example expected input."
+										}
+									}
+								},
+								"output": {
+									"type": "object",
+									"description": "Details of output returned by method.",
+									"properties": {
+										"type": {
+											"type": "string",
+											"description": "Output data type."
+										},
+										"description": {
+											"type": "string",
+											"description": "Description and purpose of output."
+										},
+										"example": {
+											"type": [
+												"string",
+												"object",
+												"array",
+												"number",
+												"null"
+											],
+											"description": "Example output."
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"dependencies": {
+			"type": "array",
+			"description": "Required software dependencies/packages for this artifact.",
+			"items": {
+				"type": "object",
+				"description": "Describes a single dependency.",
+				"properties": {
+					"repositoryType": {
+						"type": "string",
+						"description": "Type of package repository (e.g., Maven, NPM, PyPI, etc.)."
+					},
+					"group": {
+						"type": "string",
+						"description": "Package group or namespace."
+					},
+					"artifactId": {
+						"type": "string",
+						"description": "Name of the package or artifact."
+					},
+					"version": {
+						"type": "string",
+						"description": "Version of the dependency."
+					},
+					"optional": {
+						"type": "boolean",
+						"description": "If the dependency is optional."
+					},
+					"scope": {
+						"type": "string",
+						"description": "Dependency scope (e.g., compile, test, runtime)."
+					}
+				},
+				"required": [
+					"repositoryType",
+					"artifactId",
+					"version"
+				]
+			}
+		},
+		"studs": {
+			"type": "array",
+			"description": "A list of interfaces or abstract classes defined in this artifact, intended for implementation or extension by other modules to support forking, plugin, or extension scenarios.",
+			"items": {
+				"type": "object",
+				"required": [
+					"name",
+					"type",
+					"description",
+					"methods",
+					"implement"
+				],
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "Fully qualified name of the interface or abstract class, as exported in this artifact."
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"interface",
+							"abstract class"
+						],
+						"description": "Kind of stub: always 'interface' or 'abstract class' as provided by this artifact."
+					},
+					"description": {
+						"type": "string",
+						"description": "Summary of the purpose and intended use of this interface or abstract class."
+					},
+					"methods": {
+						"type": "array",
+						"description": "List of required method signatures for the stub.",
+						"items": {
+							"type": "object",
+							"required": [
+								"name",
+								"signature",
+								"description",
+								"inputs",
+								"outputs"
+							],
+							"properties": {
+								"name": {
+									"type": "string",
+									"description": "Method name."
+								},
+								"signature": {
+									"type": "string",
+									"description": "Method signature (e.g., String getValue(String key))."
+								},
+								"description": {
+									"type": "string",
+									"description": "Description of this method's purpose."
+								},
+								"inputs": {
+									"type": "object",
+									"description": "Describes method input(s).",
+									"properties": {
+										"type": {
+											"type": "string",
+											"description": "Input data type."
+										},
+										"description": {
+											"type": "string",
+											"description": "Input parameter details."
+										},
+										"example": {
+											"type": [
+												"string",
+												"object",
+												"array",
+												"number",
+												"null"
+											],
+											"description": "Example input."
+										}
+									}
+								},
+								"outputs": {
+									"type": "object",
+									"description": "Describes method output.",
+									"properties": {
+										"type": {
+											"type": "string",
+											"description": "Output data type."
+										},
+										"description": {
+											"type": "string",
+											"description": "Output description."
+										},
+										"example": {
+											"type": [
+												"string",
+												"object",
+												"array",
+												"number",
+												"null"
+											],
+											"description": "Example output."
+										}
+									}
+								}
+							}
+						}
+					},
+					"implement": {
+						"type": "string",
+						"description": "Fully qualified name of the class in this artifact that implements or extends this stub."
+					}
+				}
+			}
+		}
+	}
+}
