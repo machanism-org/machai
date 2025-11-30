@@ -11,7 +11,7 @@
 
 	<name>Machai Project</name>
 	<description />
-	<url>https://machai.machanism.org/</url>
+	<url>https://machanism.org/machai</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

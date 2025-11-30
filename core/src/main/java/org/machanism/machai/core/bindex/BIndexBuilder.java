@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
@@ -48,14 +49,18 @@ public class BIndexBuilder {
 		String effectivePom = EffectivePomReader.printModel(model);
 		provider.prompt(effectivePom);
 
-		Path startPath = Paths.get(sourceDirectory);
-		Files.walk(startPath).filter(Files::isRegularFile).forEach((f) -> {
-			try {
-				provider.promptFile(f.toFile());
-			} catch (IOException e) {
-				System.out.println("File: " + f + " adding failed.");
-			}
-		});
+		Path startPath = Paths.get(
+				StringUtils.defaultIfEmpty(sourceDirectory, new File(projectDir, "src/main/java").getAbsolutePath()));
+
+		if (Files.exists(startPath)) {
+			Files.walk(startPath).filter(Files::isRegularFile).forEach((f) -> {
+				try {
+					provider.promptFile(f.toFile());
+				} catch (IOException e) {
+					System.out.println("File: " + f + " adding failed.");
+				}
+			});
+		} 
 
 		provider.prompt(
 				"Generate detail json object according to bindex schema. No additional text required, output format should be only json object.");
