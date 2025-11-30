@@ -20,6 +20,7 @@ public class BIndexBuilder {
 	private File projectDir;
 	private GenAIProvider provider;
 	private ObjectMapper mapper = new ObjectMapper();
+	private File bindexDir;
 
 	public BIndexBuilder provider(GenAIProvider provider) {
 		this.provider = provider;
@@ -33,21 +34,15 @@ public class BIndexBuilder {
 		provider.prompt(
 				"Next posts will be project file. They should be analyzed for generation brick-index json response.");
 
-		Model model = EffectivePomReader.getEffectivePom(new File(projectDir, "pom.xml"));
+		File file = new File(projectDir, "pom.xml");
+
+		Model model = PomReader.getProjectModel(file);
 
 		String sourceDirectory = model.getBuild().getSourceDirectory();
-		model.setDistributionManagement(null);
+		removeNotImportantData(model);
 
-		model.setDistributionManagement(null);
-		model.setProperties(null);
-		model.setDependencyManagement(null);
-		model.setBuild(null);
-		model.setReporting(null);
-		model.setScm(null);
-		model.setPluginRepositories(null);
-
-		String effectivePom = EffectivePomReader.printModel(model);
-		provider.prompt(effectivePom);
+		String pom = PomReader.printModel(model);
+		provider.prompt("Project POM:\n" + pom);
 
 		Path startPath = Paths.get(
 				StringUtils.defaultIfEmpty(sourceDirectory, new File(projectDir, "src/main/java").getAbsolutePath()));
@@ -60,12 +55,15 @@ public class BIndexBuilder {
 					System.out.println("File: " + f + " adding failed.");
 				}
 			});
-		} 
+		}
 
 		provider.prompt(
 				"Generate detail json object according to bindex schema. No additional text required, output format should be only json object.");
 
-		provider.saveInput(new File("input.txt"));
+		if (bindexDir != null) {
+			provider.saveInput(new File(bindexDir, "inputs.txt"));
+		}
+
 		String output = provider.perform();
 
 		BIndex value = null;
@@ -75,8 +73,25 @@ public class BIndexBuilder {
 		return value;
 	}
 
+	private void removeNotImportantData(Model model) {
+		model.setDistributionManagement(null);
+
+		model.setDistributionManagement(null);
+		model.setProperties(null);
+		model.setDependencyManagement(null);
+		model.setBuild(null);
+		model.setReporting(null);
+		model.setScm(null);
+		model.setPluginRepositories(null);
+	}
+
 	public BIndexBuilder projectDir(File projectDir) {
 		this.projectDir = projectDir;
+		return this;
+	}
+
+	public BIndexBuilder bindexDir(File bindexDir) {
+		this.bindexDir = bindexDir;
 		return this;
 	}
 

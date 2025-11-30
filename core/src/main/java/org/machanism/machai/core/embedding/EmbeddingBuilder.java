@@ -1,4 +1,4 @@
-package org.machanism.machai.core.bindex;
+package org.machanism.machai.core.embedding;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,18 +7,18 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.machanism.machai.core.ai.GenAIProvider;
+import org.bson.BsonValue;
 import org.machanism.machai.schema.BIndex;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openai.models.ChatModel;
 
 public class EmbeddingBuilder {
 
-	private GenAIProvider provider;
-	private String description;
+	private EmbeddingProvider provider;
+	private List<Double> embedding;
+	private BIndex bindex;
 
-	public EmbeddingBuilder provider(GenAIProvider provider) {
+	public EmbeddingBuilder provider(EmbeddingProvider provider) {
 		this.provider = provider;
 		return this;
 	}
@@ -31,19 +31,21 @@ public class EmbeddingBuilder {
 	}
 
 	public EmbeddingBuilder bindex(BIndex bindex) {
-		if (bindex != null) {
-			description(bindex.getDescription());
-		}
+		this.bindex = bindex;
 		return this;
 	}
 
-	private void description(String description) {
-		this.description = description;
+	public BsonValue build() throws IOException {
+		if (embedding == null) {
+			embedding = provider.getEmbedding(bindex.getDescription());
+		}
+		String text = new ObjectMapper().writeValueAsString(bindex);
+		return provider.create(text, embedding);
 	}
 
-	public List<Float> build() throws IOException {
-		List<Float> embedding = provider.embedding(description);
-		return embedding;
+	public EmbeddingBuilder embedding(List<Double> embedding) {
+		this.embedding = embedding;
+		return this;
 	}
 
 }

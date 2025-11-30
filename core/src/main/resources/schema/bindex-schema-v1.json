@@ -376,8 +376,7 @@
 					"name",
 					"type",
 					"description",
-					"methods",
-					"implement"
+					"methods"
 				],
 				"properties": {
 					"name": {

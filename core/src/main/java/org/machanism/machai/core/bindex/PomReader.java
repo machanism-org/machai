@@ -1,14 +1,21 @@
 package org.machanism.machai.core.bindex;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.model.License;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.building.DefaultModelBuilder;
 import org.apache.maven.model.building.DefaultModelBuildingRequest;
@@ -27,7 +34,6 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RequestTrace;
@@ -46,31 +52,71 @@ import org.eclipse.aether.transport.wagon.WagonTransporterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EffectivePomReader {
+public class PomReader {
+	private static Logger logger = LoggerFactory.getLogger(PomReader.class);
 
-	private static Logger logger = LoggerFactory.getLogger(EffectivePomReader.class);
+	private static Map<String, String> pomProperties = new HashMap<>();
+	private static List<License> defaultLicenses;
 
-	public static Model getEffectivePom(File pomFile) {
+	public static Model getProjectModel(File pomFile, boolean effective) {
 		ModelBuildingRequest request = new DefaultModelBuildingRequest();
 		request.setPomFile(pomFile);
 
 		Model model = null;
 		try {
-			DefaultModelBuilder modelBuilder = getModelBuilder(request);
-			ModelBuildingResult result = modelBuilder.build(request);
-			model = result.getEffectiveModel();
+			if (effective) {
+				DefaultModelBuilder modelBuilder;
+				modelBuilder = getModelBuilder(request);
+				ModelBuildingResult result = modelBuilder.build(request);
+				model = result.getEffectiveModel();
 
+			} else {
+				MavenXpp3Reader reader = new MavenXpp3Reader();
+				FileReader fileReader = new FileReader(pomFile);
+				String pomStr = IOUtils.toString(fileReader);
+				pomStr = replaceProperty(pomStr);
+				model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
+			}
 		} catch (Exception e) {
-			logger.warn("Unable to obtain effective pom: " + StringUtils.abbreviate(e.getLocalizedMessage(), 60));
-			MavenXpp3Reader reader = new MavenXpp3Reader();
-			try {
-				model = reader.read(new FileReader(pomFile));
-			} catch (IOException | XmlPullParserException e1) {
-				e1.printStackTrace();
+			throw new IllegalArgumentException(e);
+		}
+
+		Set<Entry<Object, Object>> propertiesEntries = model.getProperties().entrySet();
+		for (Entry<Object, Object> entry : propertiesEntries) {
+			pomProperties.put((String) entry.getKey(), (String) entry.getValue());
+		}
+
+		if (!effective) {
+			String version = model.getVersion();
+			if (version != null) {
+				pomProperties.put("project.version", version);
 			}
 		}
 
+		List<License> licenses = model.getLicenses();
+		if (licenses.isEmpty()) {
+			if (defaultLicenses != null) {
+				model.setLicenses(defaultLicenses);
+			}
+		} else if (defaultLicenses == null) {
+			defaultLicenses = licenses;
+		}
+
 		return model;
+	}
+
+	private static String replaceProperty(String pomStr) {
+		if (pomStr != null) {
+			Set<Entry<String, String>> propertiesEntries = pomProperties.entrySet();
+			for (Entry<String, String> entry : propertiesEntries) {
+				String placeholder = "${" + entry.getKey() + "}";
+				String value = entry.getValue();
+				if (value != null) {
+					pomStr = pomStr.replace(placeholder, value);
+				}
+			}
+		}
+		return pomStr;
 	}
 
 	private static DefaultModelBuilder getModelBuilder(ModelBuildingRequest request)
@@ -129,6 +175,21 @@ public class EffectivePomReader {
 		locator.addService(TransporterFactory.class,
 				WagonTransporterFactory.class);
 		return locator;
+	}
+
+	public static Map<String, String> getPomProperties() {
+		return pomProperties;
+	}
+
+	public static Model getProjectModel(File file) {
+		Model model;
+		try {
+			model = PomReader.getProjectModel(file, true);
+		} catch (Exception e) {
+			logger.warn("Effective pom creation failed: " + StringUtils.abbreviate(e.getLocalizedMessage(), 80));
+			model = PomReader.getProjectModel(file, false);
+		}
+		return model;
 	}
 
 }

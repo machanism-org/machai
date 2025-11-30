@@ -15,6 +15,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
@@ -41,6 +43,7 @@ import com.openai.models.responses.ResponseOutputMessage.Content;
 import com.openai.models.responses.Tool;
 
 public class GenAIProvider {
+	private static Logger logger = LoggerFactory.getLogger(GenAIProvider.class);
 
 	private OpenAIClient client;
 	private ChatModel chatModel;
@@ -101,7 +104,11 @@ public class GenAIProvider {
 		builder.tools(tools);
 
 		if (!debugMode) {
-			saveInput(new File("input.txt"));
+			try {
+				saveInput(new File("input.txt"));
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
 		}
 
 		String outputTest = null;
@@ -165,7 +172,9 @@ public class GenAIProvider {
 		return null;
 	}
 
-	public void saveInput(File file) {
+	public void saveInput(File file) throws IOException {
+		logger.info("Bindex inputs file: " + file);
+		file.getParentFile().mkdirs();
 		try (Writer streamWriter = new FileWriter(file, false)) {
 			for (ResponseInputItem responseInputItem : inputs) {
 				String inputText = "";
@@ -182,8 +191,6 @@ public class GenAIProvider {
 				streamWriter.write(inputText);
 				streamWriter.write("\n\n");
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
