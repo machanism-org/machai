@@ -6,11 +6,9 @@
 
 ![](src/site/resources/images/bindex-run.png)
 
-## Assembling the Application
+## Assembly
 
-## Run
-
-![](src/site/resources/images/machai-cli-run.png)
+![](src/site/resources/images/assembly-run.png)
 
 ## Result
 

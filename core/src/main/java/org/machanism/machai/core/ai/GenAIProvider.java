@@ -54,6 +54,11 @@ public class GenAIProvider {
 
 	public GenAIProvider(ChatModel chatModel) {
 		super();
+		String uri = System.getenv("OPENAI_API_KEY");
+		if (uri == null || uri.isEmpty()) {
+			throw new RuntimeException("OPENAI_API_KEY env variable is not set or is empty.");
+		}
+
 		client = OpenAIOkHttpClient.builder().fromEnv().build();
 		this.chatModel = chatModel;
 	}

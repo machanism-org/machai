@@ -9,10 +9,14 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.jline.reader.LineReader;
 import org.machanism.machai.core.Register;
 import org.machanism.machai.core.embedding.EmbeddingProvider;
 import org.machanism.machai.schema.BIndex;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -25,12 +29,20 @@ public class BindexCommand {
 	private List<BIndex> bindexList;
 	private String findQuery;
 
+	@Autowired
+	@Lazy
+	LineReader reader;
+
 	@ShellMethod()
 	public void bindex(
-			@ShellOption(help = "The path to the project  directory.", value = "dir") File dir,
+			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The overwrite mode: all saved data will be updated.", value = "overwrite") boolean overwrite,
 			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create an index.", value = "debug") boolean debug)
 			throws IOException, XmlPullParserException {
+
+		if (dir == null) {
+			dir = SystemUtils.getUserDir();
+		}
 
 		try (Register register = new Register(debug)) {
 			register.setRewriteMode(overwrite);
@@ -53,13 +65,13 @@ public class BindexCommand {
 
 	@ShellMethod()
 	public void assembly(
-			@ShellOption(value = "query", defaultValue = "", help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
+			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
 			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "10") int limits)
 			throws IOException {
 
 		String prompt = query;
 
-		if (StringUtils.isBlank(query)) {
+		if (query == null) {
 			if (bindexList == null) {
 				throw new IllegalArgumentException("The query is empty.");
 			}
@@ -93,4 +105,5 @@ public class BindexCommand {
 		}
 		return bindexList;
 	}
+
 }
