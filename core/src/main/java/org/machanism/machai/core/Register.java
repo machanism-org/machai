@@ -83,7 +83,7 @@ public class Register implements Closeable {
 		}
 
 		if (bindex != null) {
-			BsonValue embeddingId;
+			String embeddingId;
 			File embeddingFile = new File(bindexDir, "embedding.data");
 			EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder().provider(embeddingProvider);
 			if (embeddingFile.exists()) {

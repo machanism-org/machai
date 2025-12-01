@@ -11,10 +11,16 @@ import java.util.stream.Collectors;
 
 import org.bson.BsonArray;
 import org.bson.BsonDouble;
-import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
+import org.machanism.machai.schema.BIndex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -27,6 +33,7 @@ import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.model.output.Response;
 
 public class EmbeddingProvider implements Closeable {
+	private static Logger logger = LoggerFactory.getLogger(EmbeddingProvider.class);
 
 	private static final String BINDEX_PROPERTY_NAME = "bindex";
 
@@ -62,18 +69,32 @@ public class EmbeddingProvider implements Closeable {
 		mongoClient.close();
 	}
 
-	public BsonValue create(String text, List<Double> embedding) {
-		BsonArray bsonArray = new BsonArray(
-				embedding.stream()
-						.map(BsonDouble::new)
-						.collect(Collectors.toList()));
+	public String create(BIndex bindex, List<Double> embedding) throws JsonProcessingException {
 
-		Document doc = new Document(BINDEX_PROPERTY_NAME, text).append("embedding", bsonArray);
-		InsertOneResult result = collection.insertOne(doc);
-		BsonValue insertedId = result.getInsertedId();
-		System.out.println("insertedId: " + insertedId);
+		Document query = new Document("id", bindex.getId());
+		FindIterable<Document> find = collection.find(query);
+		Document first = find.first();
+		String _id;
+		if (first == null) {
+			BsonArray bsonArray = new BsonArray(
+					embedding.stream()
+							.map(BsonDouble::new)
+							.collect(Collectors.toList()));
 
-		return insertedId;
+			String bindexStr = new ObjectMapper().writeValueAsString(bindex);
+			Document doc = new Document(BINDEX_PROPERTY_NAME, bindexStr).append("id", bindex.getId()).append(
+					"embedding",
+					bsonArray);
+
+			InsertOneResult result = collection.insertOne(doc);
+			_id = result.getInsertedId().toString();
+			logger.info("BIndex registered: " + bindex.getId() + ", _id: " + _id);
+		} else {
+			_id = ((ObjectId) first.get("_id")).toString();
+			logger.info("BIndex already exists in the register: " + bindex.getId() + ", _id: " + _id);
+		}
+
+		return _id;
 	}
 
 	public List<Double> getEmbedding(String text) {
@@ -83,7 +104,8 @@ public class EmbeddingProvider implements Closeable {
 				.collect(Collectors.toList());
 	}
 
-	public void search(String query) {
+	public List<String> search(String query) {
+		List<String> arrayList = new ArrayList<>();
 		List<Double> embedding = getEmbedding(query);
 
 		String indexName = "vector_index";
@@ -103,12 +125,16 @@ public class EmbeddingProvider implements Closeable {
 
 		List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
 		if (results.isEmpty()) {
-			System.out.println("No results found.");
+			logger.info("No results found.");
 		} else {
 			results.forEach(doc -> {
-				System.out.println("Bindex: " + doc.getString(BINDEX_PROPERTY_NAME));
-				System.out.println("Score: " + doc.getDouble("score"));
+				String bindex = doc.getString(BINDEX_PROPERTY_NAME);
+				arrayList.add(bindex);
+				logger.info("Bindex: " + bindex);
+				logger.info("Score: " + doc.getDouble("score"));
 			});
 		}
+
+		return arrayList;
 	}
 }

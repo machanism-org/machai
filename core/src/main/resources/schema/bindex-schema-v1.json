@@ -27,7 +27,7 @@
 			"type": "string",
 			"description": "Version of the artifact (e.g., semantic versioning, tag, or hash)."
 		},
-		"artifactLocation": {
+		"location": {
 			"type": "object",
 			"description": "Details about the artifact's storage location, repository type, and metadata.",
 			"required": [
@@ -80,10 +80,6 @@
 		"description": {
 			"type": "string",
 			"description": "A brief description of the artifact's purpose and functionality."
-		},
-		"summary": {
-			"type": "string",
-			"description": "A machine-generated summary of the artifact's purpose or metadata, produced by the GenAI engine using the data in the bindex.json file."
 		},
 		"author": {
 			"type": "object",
@@ -161,15 +157,20 @@
 			"items": {
 				"type": "object",
 				"required": [
+					"package",
 					"name",
+					"signature",
 					"description",
-					"inputs",
-					"outputs"
+					"examples"
 				],
 				"properties": {
 					"name": {
 						"type": "string",
-						"description": "Name of the function or feature."
+						"description": "Name of the function."
+					},
+					"package": {
+						"type": "string",
+						"description": "Name of the package."
 					},
 					"signature": {
 						"type": "string",
@@ -179,58 +180,24 @@
 						"type": "string",
 						"description": "Detailed explanation of the feature."
 					},
-					"inputs": {
-						"type": "object",
-						"description": "Information about the input expected by the feature.",
-						"required": [
-							"type"
-						],
-						"properties": {
-							"type": {
-								"type": "string",
-								"description": "Input data type (e.g., String, Integer, JSON, Array)."
-							},
-							"constraints": {
-								"type": "string",
-								"description": "Constraints on the input (e.g., format, range)."
-							},
-							"example": {
-								"type": [
-									"string",
-									"object",
-									"array",
-									"number",
-									"null"
-								],
-								"description": "Example of the expected input."
-							}
-						}
-					},
-					"outputs": {
-						"type": "object",
-						"description": "Information about the output returned by the feature.",
-						"required": [
-							"type",
-							"description"
-						],
-						"properties": {
-							"type": {
-								"type": "string",
-								"description": "Output data type."
-							},
-							"description": {
-								"type": "string",
-								"description": "Explanation of the output."
-							},
-							"example": {
-								"type": [
-									"string",
-									"object",
-									"array",
-									"number",
-									"null"
-								],
-								"description": "Example output."
+					"examples": {
+						"type": "array",
+						"description": "Code examples for the feature.",
+						"items": {
+							"type": "object",
+							"required": [
+								"snippet",
+								"description"
+							],
+							"properties": {
+								"snippet": {
+									"type": "string",
+									"description": "A code example snippet."
+								},
+								"description": {
+									"type": "string",
+									"description": "Detailed description of the example snippet."
+								}
 							}
 						}
 					}
@@ -252,6 +219,10 @@
 						"type": "string",
 						"description": "Name of the customization or extension point (e.g., class, interface, method)."
 					},
+					"package": {
+						"type": "string",
+						"description": "Name of the package."
+					},
 					"description": {
 						"type": "string",
 						"description": "Detailed description of the extension or customization point."
@@ -260,111 +231,28 @@
 						"type": "string",
 						"description": "Type of customization point (e.g., method, interface, configuration property)."
 					},
-					"methods": {
+					"examples": {
 						"type": "array",
-						"description": "Customizable methods if the point is an interface or class.",
+						"description": "Code examples for the feature.",
 						"items": {
 							"type": "object",
 							"required": [
-								"name",
+								"snippet",
 								"description"
 							],
 							"properties": {
-								"name": {
+								"snippet": {
 									"type": "string",
-									"description": "Method name."
+									"description": "A code example snippet."
 								},
 								"description": {
 									"type": "string",
-									"description": "Description of the method and its possible modifications."
-								},
-								"input": {
-									"type": "object",
-									"description": "Details of the expected input.",
-									"properties": {
-										"type": {
-											"type": "string",
-											"description": "Input data type."
-										},
-										"example": {
-											"type": [
-												"string",
-												"object",
-												"array",
-												"number",
-												"null"
-											],
-											"description": "Example expected input."
-										}
-									}
-								},
-								"output": {
-									"type": "object",
-									"description": "Details of output returned by method.",
-									"properties": {
-										"type": {
-											"type": "string",
-											"description": "Output data type."
-										},
-										"description": {
-											"type": "string",
-											"description": "Description and purpose of output."
-										},
-										"example": {
-											"type": [
-												"string",
-												"object",
-												"array",
-												"number",
-												"null"
-											],
-											"description": "Example output."
-										}
-									}
+									"description": "Detailed description of the example snippet."
 								}
 							}
 						}
 					}
 				}
-			}
-		},
-		"dependencies": {
-			"type": "array",
-			"description": "Required software dependencies/packages for this artifact.",
-			"items": {
-				"type": "object",
-				"description": "Describes a single dependency.",
-				"properties": {
-					"repositoryType": {
-						"type": "string",
-						"description": "Type of package repository (e.g., Maven, NPM, PyPI, etc.)."
-					},
-					"group": {
-						"type": "string",
-						"description": "Package group or namespace."
-					},
-					"artifactId": {
-						"type": "string",
-						"description": "Name of the package or artifact."
-					},
-					"version": {
-						"type": "string",
-						"description": "Version of the dependency."
-					},
-					"optional": {
-						"type": "boolean",
-						"description": "If the dependency is optional."
-					},
-					"scope": {
-						"type": "string",
-						"description": "Dependency scope (e.g., compile, test, runtime)."
-					}
-				},
-				"required": [
-					"repositoryType",
-					"artifactId",
-					"version"
-				]
 			}
 		},
 		"studs": {
@@ -383,6 +271,10 @@
 						"type": "string",
 						"description": "Fully qualified name of the interface or abstract class, as exported in this artifact."
 					},
+					"package": {
+						"type": "string",
+						"description": "Name of the package."
+					},
 					"type": {
 						"type": "string",
 						"enum": [
@@ -395,78 +287,23 @@
 						"type": "string",
 						"description": "Summary of the purpose and intended use of this interface or abstract class."
 					},
-					"methods": {
+					"examples": {
 						"type": "array",
-						"description": "List of required method signatures for the stub.",
+						"description": "Code examples for the feature.",
 						"items": {
 							"type": "object",
 							"required": [
-								"name",
-								"signature",
-								"description",
-								"inputs",
-								"outputs"
+								"snippet",
+								"description"
 							],
 							"properties": {
-								"name": {
+								"snippet": {
 									"type": "string",
-									"description": "Method name."
-								},
-								"signature": {
-									"type": "string",
-									"description": "Method signature (e.g., String getValue(String key))."
+									"description": "A code example snippet."
 								},
 								"description": {
 									"type": "string",
-									"description": "Description of this method's purpose."
-								},
-								"inputs": {
-									"type": "object",
-									"description": "Describes method input(s).",
-									"properties": {
-										"type": {
-											"type": "string",
-											"description": "Input data type."
-										},
-										"description": {
-											"type": "string",
-											"description": "Input parameter details."
-										},
-										"example": {
-											"type": [
-												"string",
-												"object",
-												"array",
-												"number",
-												"null"
-											],
-											"description": "Example input."
-										}
-									}
-								},
-								"outputs": {
-									"type": "object",
-									"description": "Describes method output.",
-									"properties": {
-										"type": {
-											"type": "string",
-											"description": "Output data type."
-										},
-										"description": {
-											"type": "string",
-											"description": "Output description."
-										},
-										"example": {
-											"type": [
-												"string",
-												"object",
-												"array",
-												"number",
-												"null"
-											],
-											"description": "Example output."
-										}
-									}
+									"description": "Detailed description of the example snippet."
 								}
 							}
 						}

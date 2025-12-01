@@ -35,12 +35,12 @@ public class EmbeddingBuilder {
 		return this;
 	}
 
-	public BsonValue build() throws IOException {
+	public String build() throws IOException {
 		if (embedding == null) {
 			embedding = provider.getEmbedding(bindex.getDescription());
 		}
-		String text = new ObjectMapper().writeValueAsString(bindex);
-		return provider.create(text, embedding);
+		
+		return provider.create(bindex, embedding);
 	}
 
 	public EmbeddingBuilder embedding(List<Double> embedding) {
