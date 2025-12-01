@@ -24,9 +24,11 @@ public class EmbeddingBuilder {
 
 	public EmbeddingBuilder bindex(File file) throws FileNotFoundException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		String bindexStr = IOUtils.toString(new FileInputStream(file), "UTF8");
-		BIndex bindex = mapper.readValue(bindexStr, BIndex.class);
-		return bindex(bindex);
+		try (FileInputStream input = new FileInputStream(file)) {
+			String bindexStr = IOUtils.toString(input, "UTF8");
+			BIndex bindex = mapper.readValue(bindexStr, BIndex.class);
+			return bindex(bindex);
+		}
 	}
 
 	public EmbeddingBuilder bindex(BIndex bindex) {
@@ -38,7 +40,7 @@ public class EmbeddingBuilder {
 		if (embedding == null) {
 			embedding = provider.getEmbedding(bindex.getDescription());
 		}
-		
+
 		return provider.create(bindex, embedding);
 	}
 
