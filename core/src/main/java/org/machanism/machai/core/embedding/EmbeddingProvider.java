@@ -103,13 +103,12 @@ public class EmbeddingProvider implements Closeable {
 				.collect(Collectors.toList());
 	}
 
-	public List<String> search(String query) {
-		List<String> arrayList = new ArrayList<>();
+	public List<BIndex> search(String query, long limit) {
+		List<BIndex> arrayList = new ArrayList<>();
 		List<Double> embedding = getEmbedding(query);
 
 		String indexName = "vector_index";
 		FieldSearchPath fieldSearchPath = fieldPath("embedding");
-		int limit = 5;
 		List<Bson> pipeline = java.util.Arrays.asList(
 				com.mongodb.client.model.Aggregates.vectorSearch(
 						fieldSearchPath,
@@ -127,10 +126,15 @@ public class EmbeddingProvider implements Closeable {
 			logger.info("No results found.");
 		} else {
 			results.forEach(doc -> {
-				String bindex = doc.getString(BINDEX_PROPERTY_NAME);
-				arrayList.add(bindex);
-				logger.info("Bindex: " + bindex);
-				logger.info("Score: " + doc.getDouble("score"));
+				String bindexStr = doc.getString(BINDEX_PROPERTY_NAME);
+				BIndex bindex;
+				try {
+					bindex = new ObjectMapper().readValue(bindexStr, BIndex.class);
+					arrayList.add(bindex);
+					//logger.info("Score: " + doc.getDouble("score"));
+				} catch (JsonProcessingException e) {
+					e.printStackTrace();
+				}
 			});
 		}
 

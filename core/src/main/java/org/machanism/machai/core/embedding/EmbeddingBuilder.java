@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.bson.BsonValue;
 import org.machanism.machai.schema.BIndex;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

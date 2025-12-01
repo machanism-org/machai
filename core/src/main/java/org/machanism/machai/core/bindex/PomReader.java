@@ -123,7 +123,7 @@ public class PomReader {
 			throws PlexusContainerException, ComponentLookupException {
 		DefaultServiceLocator locator = serviceLocator();
 		RepositorySystem system = locator.getService(RepositorySystem.class);
-		LocalRepository localRepo = new LocalRepository("C:\\Users\\vikto\\.m2\\repository2");
+		LocalRepository localRepo = new LocalRepository(".m2");
 
 		DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
 		LocalRepositoryManager repManager = system.newLocalRepositoryManager(session, localRepo);
@@ -186,7 +186,7 @@ public class PomReader {
 		try {
 			model = PomReader.getProjectModel(file, true);
 		} catch (Exception e) {
-			logger.warn("Effective pom creation failed: " + StringUtils.abbreviate(e.getLocalizedMessage(), 80));
+			logger.debug("Effective pom creation failed: " + StringUtils.abbreviate(e.getLocalizedMessage(), 80));
 			model = PomReader.getProjectModel(file, false);
 		}
 		return model;
