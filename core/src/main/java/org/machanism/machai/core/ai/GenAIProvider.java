@@ -51,7 +51,6 @@ public class GenAIProvider {
 	private ArrayList<Tool> tools = new ArrayList<Tool>();
 	private ArrayList<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
 	private boolean debugMode;
-	private boolean requestDisable;
 
 	public GenAIProvider(ChatModel chatModel) {
 		super();
@@ -66,11 +65,11 @@ public class GenAIProvider {
 		return this;
 	}
 
-	public GenAIProvider promptFile(File file) throws IOException, FileNotFoundException {
+	public GenAIProvider promptFile(String description, File file) throws IOException, FileNotFoundException {
 		String type = FilenameUtils.getExtension(file.getName());
 		try (FileInputStream input = new FileInputStream(file)) {
 			String fileData = IOUtils.toString(input, "UTF8");
-			prompt("File: " + file.getName() + "```" + type + "\n" + fileData + "```");
+			prompt(description + "```" + type + "\n" + fileData + "```");
 		}
 		return this;
 	}
@@ -103,16 +102,8 @@ public class GenAIProvider {
 		Builder builder = ResponseCreateParams.builder().model(chatModel).input(Input.ofResponse(inputs));
 		builder.tools(tools);
 
-		if (!debugMode) {
-			try {
-				saveInput(new File("input.txt"));
-			} catch (IOException e) {
-				throw new IllegalArgumentException(e);
-			}
-		}
-
 		String outputTest = null;
-		if (!requestDisable) {
+		if (!debugMode) {
 			Response response = client.responses().create(builder.build());
 
 			List<ResponseInputItem> funcInputs = new ArrayList<>();
@@ -200,10 +191,6 @@ public class GenAIProvider {
 
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
-	}
-
-	public void setRequestDisable(boolean requestDisable) {
-		this.requestDisable = requestDisable;
 	}
 
 }

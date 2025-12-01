@@ -18,11 +18,15 @@ import org.springframework.shell.standard.ShellOption;
 public class BindexCommand {
 
 	@ShellMethod()
-	public void load(
-			@ShellOption(value = "dir") File dir) throws IOException, XmlPullParserException {
+	public void bindex(
+			@ShellOption(help = "The path to the project  directory.", value = "dir") File dir,
+			@ShellOption(help = "The overwrite mode: all saved data will be updated.", value="overwrite") boolean overwrite,
+			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create an index.", value = "debug") boolean debug)
+			throws IOException, XmlPullParserException {
 
-		try (Register register = new Register()) {
-			register.scanProject(dir);
+		try (Register register = new Register(debug)) {
+			register.setRewriteMode(overwrite);
+			register.regProjects(dir);
 		}
 	}
 

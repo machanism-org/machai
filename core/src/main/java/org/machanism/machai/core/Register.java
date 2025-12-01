@@ -2,12 +2,12 @@ package org.machanism.machai.core;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.maven.model.Model;
-import org.bson.BsonValue;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.core.bindex.BIndexBuilder;
@@ -19,7 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.core.exc.StreamWriteException;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openai.models.ChatModel;
 
@@ -31,15 +33,16 @@ public class Register implements Closeable {
 
 	private EmbeddingProvider embeddingProvider;
 
-	public Register() {
+	private boolean rewriteMode;
+
+	public Register(boolean debugMode) {
 		provider = new GenAIProvider(ChatModel.GPT_5);
-		provider.setDebugMode(true);
-		provider.setRequestDisable(true);
+		provider.setDebugMode(debugMode);
 
 		embeddingProvider = new EmbeddingProvider("machanism", "bindex");
 	}
 
-	public void scanProject(File projectDir) throws IOException, XmlPullParserException {
+	public void regProjects(File projectDir) throws IOException, XmlPullParserException {
 		File pomFile = new File(projectDir, "pom.xml");
 
 		Model model = PomReader.getProjectModel(pomFile, false);
@@ -52,55 +55,51 @@ public class Register implements Closeable {
 			}
 			List<String> modules = model.getModules();
 			for (String module : modules) {
-				scanProject(new File(projectDir, module));
+				regProjects(new File(projectDir, module));
 			}
 		} else {
-			regProject(projectDir);
+			regBindex(projectDir);
 		}
 	}
 
-	public void regProject(File projectDir)
+	public String regBindex(File bindexFile)
 			throws IOException, JsonProcessingException {
+		BIndex bindex = getBindex(bindexFile, rewriteMode);
+
+		String regId = null;
+		if (bindex != null) {
+			EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder().provider(embeddingProvider);
+			regId = embeddingBuilder.bindex(bindex).build();
+			logger.info("embeddingId: " + regId);
+		}
+
+		return regId;
+	}
+
+	public BIndex getBindex(File projectDir, boolean rewriteMode)
+			throws IOException, StreamReadException, DatabindException, FileNotFoundException, StreamWriteException {
 		logger.info("Project dir: " + projectDir);
 
 		File bindexDir = new File(projectDir, "src/bindex");
 		File bindexFile = new File(bindexDir, "bindex.json");
 
 		BIndex bindex;
-		if (bindexFile.exists()) {
+		if (!rewriteMode && bindexFile.exists()) {
 			logger.info("BIndex file exists: " + bindexFile);
 			bindex = new ObjectMapper().readValue(new FileReader(bindexFile), BIndex.class);
 		} else {
 			bindex = new BIndexBuilder()
 					.projectDir(projectDir)
-					.provider(provider)
 					.bindexDir(bindexDir)
+					.provider(provider)
 					.build();
 			if (bindex != null) {
+				bindexFile.getParentFile().mkdirs();
 				new ObjectMapper().writeValue(bindexFile, bindex);
 				logger.info("BIndex file: " + bindexFile);
 			}
 		}
-
-		if (bindex != null) {
-			String embeddingId;
-			File embeddingFile = new File(bindexDir, "embedding.data");
-			EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder().provider(embeddingProvider);
-			if (embeddingFile.exists()) {
-				logger.info("BIndex Embedding file exists: " + embeddingFile);
-				List<Double> embedding = new ObjectMapper().readValue(new FileReader(embeddingFile),
-						new TypeReference<List<Double>>() {
-						});
-				embeddingId = embeddingBuilder.bindex(bindex)
-						.embedding(embedding)
-						.build();
-			} else {
-				embeddingId = embeddingBuilder.bindex(bindex).build();
-				logger.info("BIndex Embedding file: " + embeddingFile);
-			}
-
-			System.out.println("embeddingId: " + embeddingId);
-		}
+		return bindex;
 	}
 
 	@Override
@@ -108,10 +107,8 @@ public class Register implements Closeable {
 		embeddingProvider.close();
 	}
 
-	public static void main(String[] args) throws IOException, XmlPullParserException {
-		try (Register register = new Register()) {
-			register.scanProject(new File(args[0]));
-		}
+	public void setRewriteMode(boolean rewriteMode) {
+		this.rewriteMode = rewriteMode;
 	}
 
 }

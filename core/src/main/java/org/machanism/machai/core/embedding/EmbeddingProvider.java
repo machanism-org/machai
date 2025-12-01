@@ -88,10 +88,9 @@ public class EmbeddingProvider implements Closeable {
 
 			InsertOneResult result = collection.insertOne(doc);
 			_id = result.getInsertedId().toString();
-			logger.info("BIndex registered: " + bindex.getId() + ", _id: " + _id);
 		} else {
 			_id = ((ObjectId) first.get("_id")).toString();
-			logger.info("BIndex already exists in the register: " + bindex.getId() + ", _id: " + _id);
+			logger.info("BIndex already exists in the register: " + bindex.getId());
 		}
 
 		return _id;

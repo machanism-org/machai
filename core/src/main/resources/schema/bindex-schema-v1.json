@@ -17,7 +17,7 @@
 	"properties": {
 		"id": {
 			"type": "string",
-			"description": "A unique identifier for the artifact (e.g., Maven coordinate or UUID)."
+			"description": "A unique identifier for the artifact (e.g.: [groupId]:[artifactId]:[version])."
 		},
 		"name": {
 			"type": "string",
