@@ -12,7 +12,7 @@ Below is a breakdown of the workflow:
 
 ![](src/site/resources/images/bindex-creation-workflow.png)
 
-### 1. User Request Semantic Search
+### 1. User Request Bindex Creation
 The process begins with the user initiating a request to create and register a Bindex file.
 
 ### 2. Analysis of Project Information
