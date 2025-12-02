@@ -49,7 +49,7 @@ Based on the analysis, GenAI generates the `bindex.json` file. This file serves 
 
 ### Overview of Information Contained in `bindex.json`
 
-The `bindex.json` file provides essential metadata for describing an artifact (e.g., library or component). It contains the following key pieces of information:
+The `bindex.json` file provides essential metadata for describing an artifact. It contains the following key pieces of information:
 
 - Basic Artifact Metadata
 - Authorship and Legal Information
