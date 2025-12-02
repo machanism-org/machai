@@ -4,7 +4,7 @@
 
 ## BINDEX.JSON
 
-The `bindex.json` creation workflow involves the generation of a descriptor file that encapsulates library and content information, which can be used to automatically assemble customer applications. This process leverages GenAI to analyze project information and store the descriptor file in a vector database for semantic search functionality in response to user queries. 
+The `bindex.json` is a descriptor file that encapsulates library and content information, which can be used to automatically assemble customer applications. This process leverages GenAI to analyze project information and store the descriptor file in a vector database for semantic search functionality in response to user queries. 
 
 ### BINDEX Schema
 
