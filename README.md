@@ -50,9 +50,6 @@ Once created, the `bindex.json` file is stored in a vector database. Vector data
    - The contents of the `bindex.json` file are indexed using semantic embeddings, ensuring that the file can be retrieved based on meaning, not just exact keywords.
    - The search and indexing process ensures that developers can quickly find relevant libraries and files based on high-level queries.
 
-### 5. Semantic Search and Feedback
-When the user queries the system, the vector database utilizes its semantic indexes to identify the most relevant results — finding libraries or related components based on "intent" rather than exact matches. The user is notified of the availability of the requested files or relevant results.
-
 ### BINDEX Schema
 
 Schema location: https://machanism.org/machai/schema/bindex-schema-v1.json or [bindex-schema-v1.json](core/src/main/resources/schema/bindex-schema-v1.json)
@@ -72,6 +69,10 @@ Schema location: https://machanism.org/machai/schema/bindex-schema-v1.json or [b
 | techStack | array | A collection of technologies, frameworks, tools, and runtimes that are used by the artifact (e.g.: Docker, Kubernetes, Java). |
 | customizations | array | Developer extension points provided by the artifact, including classes, interfaces, and configurable options. |
 | studs | array | Definitions of interfaces or abstract classes that are designed to be extended or implemented by other modules. |
+
+## Semantic Search
+
+When the user queries the system, the vector database utilizes its semantic indexes to identify the most relevant results — finding libraries or related components based on "intent" rather than exact matches. The user is notified of the availability of the requested files or relevant results.
 
 
 ##  CLI
