@@ -33,7 +33,7 @@ Below is a breakdown of the workflow:
 ![](src/site/resources/images/bindex-creation-workflow.png)
 
 ### 1. User Request Semantic Search
-The process begins with the user initiating a request to locate and identify related libraries or components that could be used in their application. This request is sent to the GenAI system, which will process the underlying requirements.
+The process begins with the user initiating a request to create and register a Bindex file.
 
 ### 2. Analysis of Project Information
 GenAI analyzes various project artifacts to extract relevant information. These include:

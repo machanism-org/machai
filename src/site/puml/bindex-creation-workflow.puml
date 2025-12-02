@@ -7,7 +7,7 @@ participant "Project Information (pom.xml,\nsource files, etc.)" as P
 participant "bindex.json" as B
 participant "Vector Database" as V
 
-U -> G : Request semantic search for libraries
+U -> G : Request BINDEX creation
 G -> P : Analyze project information using GenAI
 P -> G : Return insights
 
@@ -19,7 +19,7 @@ note right of B
 end note
 
 B -> V : Store bindex.json in vector database
-V -> U : Acknowledge storage and respond to user queries
+V -> U : Acknowledge storage
 note right of V
 Files can be semantically searched
 for relevant libraries in the future
