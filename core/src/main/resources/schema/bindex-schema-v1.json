@@ -12,7 +12,7 @@
 		"license",
 		"classification",
 		"features",
-		"artifactLocation"
+		"location"
 	],
 	"properties": {
 		"id": {
@@ -79,7 +79,7 @@
 		},
 		"description": {
 			"type": "string",
-			"description": "A brief description of the artifact's purpose and functionality."
+			"description": "A critical property for bindex.json that is used to generate embeddings for semantic search in assembling customer applications. The description must include all relevant information to support accurate and comprehensive embeddings. This should be generated based on project description info and any additional contextual information from the project, if required, such as dependencies, features, and domain-specific details. Providing a detailed and representative description is essential for ensuring high-quality search results."
 		},
 		"author": {
 			"type": "object",
