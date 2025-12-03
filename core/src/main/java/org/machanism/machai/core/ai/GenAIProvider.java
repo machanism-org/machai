@@ -8,8 +8,13 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -18,8 +23,14 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.core.JsonString;
+import com.openai.core.JsonValue;
 import com.openai.models.ChatModel;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
@@ -27,10 +38,11 @@ import com.openai.models.embeddings.EmbeddingModel;
 import com.openai.models.files.FileCreateParams;
 import com.openai.models.files.FileObject;
 import com.openai.models.files.FilePurpose;
+import com.openai.models.responses.FunctionTool;
+import com.openai.models.responses.FunctionTool.Parameters;
 import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCreateParams;
 import com.openai.models.responses.ResponseCreateParams.Builder;
-import com.openai.models.responses.ResponseCreateParams.Input;
 import com.openai.models.responses.ResponseFunctionToolCall;
 import com.openai.models.responses.ResponseInputContent;
 import com.openai.models.responses.ResponseInputFile;
@@ -40,6 +52,8 @@ import com.openai.models.responses.ResponseInputItem.Message.Role;
 import com.openai.models.responses.ResponseOutputItem;
 import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputMessage.Content;
+import com.openai.models.responses.ResponseReasoningItem;
+import com.openai.models.responses.ResponseReasoningItem.Summary;
 import com.openai.models.responses.Tool;
 
 public class GenAIProvider {
@@ -48,8 +62,8 @@ public class GenAIProvider {
 	private OpenAIClient client;
 	private ChatModel chatModel;
 
-	private ArrayList<Tool> tools = new ArrayList<Tool>();
-	private ArrayList<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
+	private Map<Tool, Function<JsonNode, Object>> toolMap = new HashMap<>();
+	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
 	private boolean debugMode;
 
 	public GenAIProvider(ChatModel chatModel) {
@@ -104,52 +118,71 @@ public class GenAIProvider {
 	}
 
 	public String perform() {
-		Builder builder = ResponseCreateParams.builder().model(chatModel).input(Input.ofResponse(inputs));
-		builder.tools(tools);
+		Builder builder = ResponseCreateParams.builder().model(chatModel);
+		builder.tools(new ArrayList(toolMap.keySet()));
+		builder.inputOfResponse(inputs);
+		Response response = client.responses().create(builder.build());
 
-		String outputTest = null;
-		if (!debugMode) {
-			Response response = client.responses().create(builder.build());
+		List<ResponseOutputItem> output = response.output();
+		boolean fcall = false;
+		ResponseInputItem asReasoning = null;
+		for (ResponseOutputItem item : output) {
+			logger.debug(">>>>" + item);
 
-			List<ResponseInputItem> funcInputs = new ArrayList<>();
-			List<ResponseInputItem> reasoningInputs = new ArrayList<>();
-			response.output().forEach(item -> {
-				if (item.isFunctionCall()) {
-					ResponseFunctionToolCall functionCall = item.asFunctionCall();
-
-					funcInputs.add(ResponseInputItem.ofFunctionCall(functionCall));
-					Object callFunction = ObjectUtils.defaultIfNull(callFunction(functionCall), StringUtils.EMPTY);
-					funcInputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
-							.callId(functionCall.callId()).outputAsJson(callFunction).build()));
+			if (item.isFunctionCall()) {
+				if (asReasoning != null) {
+					inputs.add(asReasoning);
 				}
-				if (item.isReasoning()) {
-					ResponseInputItem reasoning = ResponseInputItem.ofReasoning(item.asReasoning());
-					reasoningInputs.add(reasoning);
-				}
-			});
+				ResponseFunctionToolCall functionCall = item.asFunctionCall();
 
-			if (!funcInputs.isEmpty()) {
-				inputs.addAll(reasoningInputs);
-				inputs.addAll(funcInputs);
-				builder.input(ResponseCreateParams.Input.ofResponse(inputs));
-				response = client.responses().create(builder.build());
+				inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
+				Object value = callFunction(functionCall);
+
+				Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
+				ResponseInputItem ofOutput = ResponseInputItem.ofFunctionCallOutput(
+						ResponseInputItem.FunctionCallOutput.builder()
+								.callId(functionCall.callId())
+								.outputAsJson(callFunction)
+								.build());
+				inputs.add(ofOutput);
+				fcall = true;
 			}
-
-			List<ResponseOutputItem> output = response.output();
-
-			for (ResponseOutputItem responseOutputItem : output) {
-				Optional<ResponseOutputMessage> messageOpt = responseOutputItem.message();
-				if (messageOpt.isPresent()) {
-					Content content = messageOpt.get().content().get(0);
-					String responseText = content.outputText().get().text();
-					outputTest = responseText;
-					break;
+			if (item.isMessage()) {
+				asReasoning = null;
+				ResponseOutputMessage outMessage = item.asMessage();
+				List<Content> contentList = outMessage.content();
+				for (Content content : contentList) {
+					String text = content.toString();
+					logger.info(text);
+					Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
+							.addInputTextContent(text).build();
+					inputs.add(ResponseInputItem.ofMessage(message));
 				}
+			}
+			if (item.isReasoning()) {
+				ResponseReasoningItem reasoningItem = item.asReasoning();
+				asReasoning = ResponseInputItem.ofReasoning(reasoningItem);
+				for (Summary summary : reasoningItem.summary()) {
+					logger.info(summary.text());
+				}
+
 			}
 		}
 
-		clear();
-		return outputTest;
+		if (fcall) {
+			return perform();
+		}
+
+		for (ResponseOutputItem responseOutputItem : output) {
+			Optional<ResponseOutputMessage> messageOpt = responseOutputItem.message();
+			if (messageOpt.isPresent()) {
+				Content content = messageOpt.get().content().get(0);
+				String responseText = content.outputText().get().text();
+				return responseText;
+			}
+		}
+
+		return null;
 	}
 
 	public List<Float> embedding(String text) {
@@ -164,13 +197,32 @@ public class GenAIProvider {
 	}
 
 	private Object callFunction(ResponseFunctionToolCall functionCall) {
-		System.out.println(">>>>" + functionCall);
-		return null;
+		String name = functionCall.name();
+		JsonNode arguments;
+		try {
+			arguments = new ObjectMapper().readTree(functionCall.arguments());
+
+			Set<Entry<Tool, Function<JsonNode, Object>>> entrySet = toolMap.entrySet();
+
+			Object result = null;
+			for (Entry<Tool, Function<JsonNode, Object>> entry : entrySet) {
+				if (StringUtils.equals(name, entry.getKey().asFunction().name())) {
+					result = entry.getValue().apply(arguments);
+					break;
+				}
+			}
+
+			return result;
+		} catch (JsonProcessingException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	public void saveInput(File file) throws IOException {
 		logger.info("Bindex inputs file: " + file);
-		file.getParentFile().mkdirs();
+		if (file.getParentFile() != null) {
+			file.getParentFile().mkdirs();
+		}
 		try (Writer streamWriter = new FileWriter(file, false)) {
 			for (ResponseInputItem responseInputItem : inputs) {
 				String inputText = "";
@@ -196,6 +248,45 @@ public class GenAIProvider {
 
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
+	}
+
+	public void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
+
+		Map<String, Map<String, String>> fromValue = new HashMap<>();
+		ObjectMapper mapper = new ObjectMapper();
+		ArrayNode requiregProps = mapper.createArrayNode();
+		for (String pDesc : paramsDesc) {
+			String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
+
+			if (StringUtils.equals(desc[2], "required")) {
+				requiregProps.add(desc[0]);
+			}
+
+			Map<String, String> value = new HashMap<>();
+			value.put("type", desc[1]);
+			value.put("description", desc[3]);
+			fromValue.put(desc[0], value);
+		}
+
+		JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
+		JsonValue requiredVal = JsonValue.from(mapper.createArrayNode());
+
+		Parameters params = Parameters.builder()
+				.putAdditionalProperty("properties", propsVal)
+				.putAdditionalProperty("type", JsonString.of("object"))
+				.putAdditionalProperty("required", requiredVal)
+				.build();
+
+		com.openai.models.responses.FunctionTool.Builder toolBuilder = FunctionTool.builder()
+				.name(name)
+				.description(description);
+
+		if (params != null) {
+			toolBuilder.parameters(params);
+		}
+
+		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
+		toolMap.put(tool, function);
 	}
 
 }

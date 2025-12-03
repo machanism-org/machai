@@ -6,16 +6,16 @@
 
 The `bindex.json` is a descriptor file that encapsulates library and content information, which can be used to automatically assemble customer applications. This process leverages GenAI to analyze project information and store the descriptor file in a vector database for semantic search functionality in response to user queries. 
 
-## BINDEX Generation and Registration
+### BINDEX Generation and Registration
 
 Below is a breakdown of the workflow:
 
 ![](src/site/resources/images/bindex-creation-workflow.png)
 
-### 1. Bindex Creation Request
+#### 1. Bindex Creation Request
 The process begins with the user initiating a request to create and register a Bindex file.
 
-### 2. Analysis of Project Information
+#### 2. Analysis of Project Information
 GenAI analyzes various project artifacts to extract relevant information. These include:
    - **`pom.xml`:** The configuration file of Java-based projects using Apache Maven.
    - **Source Code Files:** Analyzed to extract API usage, coding patterns, and other relevant information.
@@ -23,11 +23,11 @@ GenAI analyzes various project artifacts to extract relevant information. These 
    
 GenAI uses its advanced natural language understanding and pattern recognition capabilities to process both structured and unstructured content of the project files. 
 
-### 3. Generating `bindex.json`
+#### 3. Generating `bindex.json`
 Based on the analysis, GenAI generates the `bindex.json` file. This file serves as the descriptor of the library and application-specific content. It typically contains:
    The `bindex.json` file contains the following information:
 
-### Overview of Information Contained in `bindex.json`
+##### Overview of Information Contained in `bindex.json`
 
 The `bindex.json` file provides essential metadata for describing an artifact. It contains the following key pieces of information:
 
@@ -44,7 +44,7 @@ This compact list outlines the high-level structure and content of the `bindex.j
 
 The `bindex.json` file is created programmatically to ensure it complies with a predefined [schema](https://machanism.org/machai/schema/bindex-schema-v1.json) for consistency.
 
-### 4. Storing `bindex.json` in a Vector Database
+#### 4. Storing `bindex.json` in a Vector Database
 Once created, the `bindex.json` file is stored in a vector database. Vector databases are specifically designed for operations such as storing and retrieving embeddings, thus allowing efficient **semantic search** and ranking.
 
    - The contents of the `bindex.json` file are indexed using semantic embeddings, ensuring that the file can be retrieved based on meaning, not just exact keywords.
@@ -70,10 +70,13 @@ Schema location: https://machanism.org/machai/schema/bindex-schema-v1.json or [b
 | customizations | array | Developer extension points provided by the artifact, including classes, interfaces, and configurable options. |
 | studs | array | Definitions of interfaces or abstract classes that are designed to be extended or implemented by other modules. |
 
-## Semantic Search
+## Assembly 
+
+### Semantic Search
 
 When the user queries the system, the vector database utilizes its semantic indexes to identify the most relevant results — finding libraries or related components based on "intent" rather than exact matches. The user is notified of the availability of the requested files or relevant results.
 
+![](src/site/resources/images/search-bindex.png)
 
 ##  CLI
 

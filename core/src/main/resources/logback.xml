@@ -8,7 +8,7 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/application.log</file>
+        <file>logs/assembly.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
             <fileNamePattern>logs/application.%d{yyyy-MM-dd}.log</fileNamePattern>
@@ -20,7 +20,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.machanism.machai.core" level="DEBUG" additivity="false">
+    <logger name="org.machanism.machai" level="DEBUG" additivity="false">
         <appender-ref ref="FILE" />
         <appender-ref ref="CONSOLE" />
     </logger>

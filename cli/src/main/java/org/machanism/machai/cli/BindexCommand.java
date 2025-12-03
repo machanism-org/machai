@@ -1,30 +1,32 @@
 package org.machanism.machai.cli;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
-import java.net.URL;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jline.reader.LineReader;
 import org.machanism.machai.core.Register;
+import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.core.assembly.ApplicationAssembly;
 import org.machanism.machai.core.embedding.EmbeddingProvider;
 import org.machanism.machai.schema.BIndex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openai.models.ChatModel;
 
 @ShellComponent
 public class BindexCommand {
+
+	private static Logger logger = LoggerFactory.getLogger(BindexCommand.class);
+	private static final ChatModel CHAT_MODEL = ChatModel.GPT_5;
 
 	private List<BIndex> bindexList;
 	private String findQuery;
@@ -44,7 +46,10 @@ public class BindexCommand {
 			dir = SystemUtils.getUserDir();
 		}
 
-		try (Register register = new Register(debug)) {
+		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
+		provider.setDebugMode(debug);
+
+		try (Register register = new Register(provider)) {
 			register.setRewriteMode(overwrite);
 			register.regProjects(dir);
 		}
@@ -66,7 +71,8 @@ public class BindexCommand {
 	@ShellMethod()
 	public void assembly(
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
-			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "10") int limits)
+			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "10") int limits,
+			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create an index.", value = "debug") boolean debug)
 			throws IOException {
 
 		String prompt = query;
@@ -78,24 +84,19 @@ public class BindexCommand {
 			prompt = this.findQuery;
 		} else {
 			bindexList = getBricks(query, limits);
+
+			for (BIndex bindex : bindexList) {
+				logger.info("ArtifactId: " + bindex.getId());
+			}
 		}
 
-		URL systemResource = getClass().getResource("/schema/bindex-schema-v1.json");
-		String schema = IOUtils.toString(systemResource, "UTF8");
+		ApplicationAssembly assembly = new ApplicationAssembly();
 
-		StringBuilder assemblPromptBuilder = new StringBuilder(
-				"The bindex schema https://machanism.org/machai/schema/bindex-schema-v1.json:\n" + schema + "\n\n");
-		for (BIndex bindex : bindexList) {
-			System.out.println("ArtifactId: " + bindex.getId());
-			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(bindex);
-			assemblPromptBuilder.append("```json\n" + bindexStr + "\n```\n\n");
-		}
+		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
+		provider.setDebugMode(debug);
+		assembly.provider(provider);
 
-		assemblPromptBuilder.append(prompt);
-
-		try (Writer writer = new FileWriter(new File("assemble.txt"))) {
-			IOUtils.write(assemblPromptBuilder.toString().getBytes(), writer, "UTF8");
-		}
+		assembly.assembly(prompt, bindexList);
 	}
 
 	private List<BIndex> getBricks(String query, int limits) throws IOException {

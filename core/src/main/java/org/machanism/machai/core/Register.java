@@ -23,22 +23,16 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.exc.StreamWriteException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openai.models.ChatModel;
 
 public class Register implements Closeable {
 
 	private static Logger logger = LoggerFactory.getLogger(Register.class);
 
 	private GenAIProvider provider;
-
 	private EmbeddingProvider embeddingProvider;
-
 	private boolean rewriteMode;
 
-	public Register(boolean debugMode) {
-		provider = new GenAIProvider(ChatModel.GPT_5);
-		provider.setDebugMode(debugMode);
-
+	public Register(GenAIProvider provider2) {
 		embeddingProvider = new EmbeddingProvider("machanism", "bindex");
 	}
 
