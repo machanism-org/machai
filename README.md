@@ -4,7 +4,7 @@
 
 ## Project Description
 
-Machai leverages the power of GenAI to revolutionize how customer projects are assembled from libraries available on the Machanism platform. The key idea is to enable automatic assembly by utilizing structured metadata and semantic insights. To realize this concept, the `bindex.json` file is proposed as a central descriptor for all libraries in the Machanism ecosystem.
+Machai leverages the power of GenAI to revolutionize how customer projects are assembled from libraries available on the Machanism platform. The key idea is to enable automatic assembly by utilizing structured metadata and semantic insights. To realize this concept, the `bindex.json` file is proposed as a central descriptor for all libraries in the [Machanism](https://machanism.org) ecosystem.
 
 The `bindex.json` file serves as a structured repository of library information tailored for GenAI-powered automatic assembly and configuration generation. It contains detailed metadata, including example usage and integration points, making libraries more accessible and usable. One of the file's key attributes, the `description` parameter, is used for semantic search. This allows GenAI to intelligently collect and propose libraries potentially relevant to customer applications based on their high-level intent. By integrating this approach, Machai ensures streamlined project assembly using advanced AI-driven insights.
 
