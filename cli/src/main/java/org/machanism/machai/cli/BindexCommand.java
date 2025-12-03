@@ -26,7 +26,7 @@ import com.openai.models.ChatModel;
 public class BindexCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(BindexCommand.class);
-	private static final ChatModel CHAT_MODEL = ChatModel.GPT_5;
+	private static final ChatModel CHAT_MODEL = ChatModel.GPT_5_1;
 
 	private List<BIndex> bindexList;
 	private String findQuery;
@@ -63,8 +63,27 @@ public class BindexCommand {
 
 		findQuery = query;
 		bindexList = getBricks(query, limits);
-		for (BIndex bindex : bindexList) {
-			System.out.println("ArtifactId: " + bindex.getId());
+		printFindResult(bindexList);
+	}
+
+	private void printFindResult(List<BIndex> bindexList) {
+		logger.info("Search Context: Semantic search based on 'bindex' description embeddings.");
+
+		if (!bindexList.isEmpty()) {
+			logger.info("Matching Artifacts Found:");
+			logger.info("---------------------------------------------------------------");
+
+			int i = 1;
+			for (BIndex bindex : bindexList) {
+				logger.info(String.format("%2$3s. %1s", bindex.getId(), i++));
+			}
+
+			logger.info("---------------------------------------------------------------");
+			logger.info("Number of Artifacts Found: " + bindexList.size());
+		} else {
+			logger.info("");
+			logger.info("No Artifacts Found:");
+			logger.info("---------------------------------------------------------------");
 		}
 	}
 

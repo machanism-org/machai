@@ -32,7 +32,8 @@ public class Register implements Closeable {
 	private EmbeddingProvider embeddingProvider;
 	private boolean rewriteMode;
 
-	public Register(GenAIProvider provider2) {
+	public Register(GenAIProvider provider) {
+		this.provider = provider;
 		embeddingProvider = new EmbeddingProvider("machanism", "bindex");
 	}
 
@@ -56,9 +57,9 @@ public class Register implements Closeable {
 		}
 	}
 
-	public String regBindex(File bindexFile)
+	public String regBindex(File projectDir)
 			throws IOException, JsonProcessingException {
-		BIndex bindex = getBindex(bindexFile, rewriteMode);
+		BIndex bindex = getBindex(projectDir, rewriteMode);
 
 		String regId = null;
 		if (bindex != null) {

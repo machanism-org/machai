@@ -121,11 +121,22 @@ public class GenAIProvider {
 		Builder builder = ResponseCreateParams.builder().model(chatModel);
 		builder.tools(new ArrayList(toolMap.keySet()));
 		builder.inputOfResponse(inputs);
-		Response response = client.responses().create(builder.build());
+
+		String result = null;
+		if (!debugMode) {
+			Response response = client.responses().create(builder.build());
+			result = parseResponse(response);
+		}
+		return result;
+	}
+
+	private String parseResponse(Response response) {
+		String result = null;
 
 		List<ResponseOutputItem> output = response.output();
 		boolean fcall = false;
 		ResponseInputItem asReasoning = null;
+		String text = null;
 		for (ResponseOutputItem item : output) {
 			logger.debug(">>>>" + item);
 
@@ -152,9 +163,10 @@ public class GenAIProvider {
 				ResponseOutputMessage outMessage = item.asMessage();
 				List<Content> contentList = outMessage.content();
 				for (Content content : contentList) {
-					String text = content.toString();
+					text = content.outputText().get().text();
 					logger.info(text);
-					Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
+					Message message = com.openai.models.responses.ResponseInputItem.Message.builder()
+							.role(Role.USER)
 							.addInputTextContent(text).build();
 					inputs.add(ResponseInputItem.ofMessage(message));
 				}
@@ -170,19 +182,11 @@ public class GenAIProvider {
 		}
 
 		if (fcall) {
-			return perform();
+			result = perform();
+		} else {
+			result = text;
 		}
-
-		for (ResponseOutputItem responseOutputItem : output) {
-			Optional<ResponseOutputMessage> messageOpt = responseOutputItem.message();
-			if (messageOpt.isPresent()) {
-				Content content = messageOpt.get().content().get(0);
-				String responseText = content.outputText().get().text();
-				return responseText;
-			}
-		}
-
-		return null;
+		return result;
 	}
 
 	public List<Float> embedding(String text) {
