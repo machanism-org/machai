@@ -1,14 +1,20 @@
 @startuml
+!theme black-knight
 title Semantic Search and Report Generation for Artifacts
 
-actor User as U
-participant "GenAI Input Processor" as GIP
-participant "Semantic Search Module" as SSM
-participant "Vector Database" as VDB
+start
+:User inputs application assembly\nrequirements query;
+:Parse query and generate query embedding;
+:Perform semantic search based on embedding;
 
-U -> GIP : Input application assembly\n requirements query
-GIP -> SSM : Parse query and generate\n query embedding
-SSM -> VDB : Perform semantic search \n based on embedding
-VDB --> GIP: Return list of matching bindex objects
-GIP-> U : Return bindex report \nand relevant artifacts
+if (Matching bindex objects found?) then (Yes)
+  :Return list of matching bindex objects;
+  :Generate bindex report and find\nrelevant artifacts;
+  :Return report to the User;
+  stop
+else (No)
+  :No matching bindex objects found;
+  :Return "No results found" to the User;
+  stop
+endif
 @enduml

@@ -1,10 +1,11 @@
 @startjson
+!theme black-knight
 <style>
 jsonDiagram {
-  node {
-    LineColor: lightblue
-    FontColor: black
-    FontSize: 18
+  arrow {
+    BackgroundColor: white
+    LineColor: gray
+    FontColor: black 
   }
 }
 </style>
