@@ -12,7 +12,7 @@ The `bindex.json` file serves as a structured repository of library information 
 
 The `bindex.json` is a descriptor file that encapsulates library and content information, which can be used to automatically assemble customer applications. This process leverages GenAI to analyze project information and store the descriptor file in a vector database for semantic search functionality in response to user queries. 
 
-![](src/site/resources/images/bindex-schema.png)
+![](src/site/resources/images/bindex-schema.svg)
 
 ### BINDEX Generation and Registration
 

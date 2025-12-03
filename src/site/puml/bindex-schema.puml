@@ -1,10 +1,19 @@
 @startjson
+<style>
+jsonDiagram {
+  node {
+    LineColor: lightblue
+    FontColor: black
+    FontSize: 18
+  }
+}
+</style>
 {
   "bindex": {
     "id": "string",
     "name": "string",
     "version": "string",
-    "<color:green>description</color:green>": "string", 
+    "description": "string", 
     "author": {
       "name": "string",
       "email": "string",
