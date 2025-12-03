@@ -1,0 +1,14 @@
+@startuml
+title Semantic Search and Report Generation for Artifacts
+
+actor User as U
+participant "GenAI Input Processor" as GIP
+participant "Semantic Search Module" as SSM
+participant "Vector Database" as VDB
+
+U -> GIP : Input application assembly\n requirements query
+GIP -> SSM : Parse query and generate\n query embedding
+SSM -> VDB : Perform semantic search \n based on embedding
+VDB --> GIP: Return list of matching bindex objects
+GIP-> U : Return bindex report \nand relevant artifacts
+@enduml
