@@ -47,27 +47,13 @@ public class ApplicationAssembly {
 
 	private GenAIProvider provider;
 
-	public ApplicationAssembly provider(GenAIProvider provider) {
+	public ApplicationAssembly(GenAIProvider provider) {
+		super();
 		this.provider = provider;
-		return this;
 	}
 
 	public void assembly(String prompt, List<BIndex> bindexList) {
-		provider.addTool("read_file_from_file_system", "Read the contents of a file from the disk.", p -> readFile(p),
-				"file_path:string:required:The path to the file to be read.");
-		provider.addTool("write_file_to_file_system", "Write changes to a file on the file system.", p -> writeFile(p),
-				"file_path:string:required:The path to the file you want to write to or create.",
-				"text:string:required:The content to be written into the file (text, code, etc.).");
-		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
-				p -> listFiles(p),
-				"dir_path:string:optional:The path to the directory to list contents of.");
-		provider.addTool("get_recursive_file_list",
-				"List files recursively in a directory (includes files in subdirectories).", p -> getRecursiveFiles(p),
-				"dir_path:string:optional:Path to the folder to list contents recursively.");
-		provider.addTool("run_command_line_tool",
-				"Execute allowed shell commands (Linux/OSX only, some commands are denied for safety).",
-				p -> executeCommand(p),
-				"command:string:required:The command to run in the shell.");
+		provider.addDefaultTools();
 
 		provider.prompt(SYSTEM_INSTRUCTIONS);
 
@@ -86,144 +72,15 @@ public class ApplicationAssembly {
 			provider.prompt(prompt);
 
 			provider.saveInput(new File("inputs.txt"));
-			provider.perform();
+
+			String response = provider.perform();
+			if (response != null) {
+				logger.info(response);
+			}
 
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
-	}
-
-	private Object getRecursiveFiles(JsonNode params) {
-		JsonNode jsonNode = params.get("file_path");
-		File directory;
-		if (jsonNode != null) {
-			String filePath = jsonNode.textValue();
-			if (StringUtils.isBlank(filePath)) {
-				directory = SystemUtils.getUserDir();
-			} else {
-				directory = new File(filePath);
-			}
-		} else {
-			directory = SystemUtils.getUserDir();
-		}
-
-		logger.info("List files recursively: " + params);
-
-		List<File> listFiles = listFilesRecursively(directory);
-		StringBuilder content = new StringBuilder();
-		for (File file : listFiles) {
-			content.append(file.getAbsolutePath() + "\n");
-		}
-
-		return content.toString();
-	}
-
-	private List<File> listFilesRecursively(File directory) {
-		List<File> allFiles = new ArrayList<>();
-
-		if (directory.exists() && directory.isDirectory()) {
-			File[] files = directory.listFiles();
-			if (files != null) {
-				for (File file : files) {
-					if (file.isFile()) {
-						allFiles.add(file);
-					} else if (file.isDirectory()) {
-						allFiles.addAll(listFilesRecursively(file));
-					}
-				}
-			}
-		}
-		return allFiles;
-	}
-
-	private Object listFiles(JsonNode params) {
-		String filePath = params.get("dir_path").asText();
-		File directory = new File(StringUtils.defaultIfBlank(filePath, "."));
-
-		String result;
-		if (directory.isDirectory()) {
-			File[] listFiles = directory.listFiles();
-			StringBuilder content = new StringBuilder();
-			for (File file : listFiles) {
-				content.append(file.getAbsolutePath() + "\n");
-			}
-
-			result = content.toString();
-		} else {
-			result = "No files found in directory.";
-		}
-		return result;
-	}
-
-	private Object writeFile(JsonNode params) {
-		String filePath = params.get("file_path").asText();
-		String text = params.get("text").asText();
-
-		logger.info("Write file: " + params);
-
-		File file = new File(filePath);
-		if (file.getParentFile() != null) {
-			file.getParentFile().mkdirs();
-		}
-		try (Writer writer = new FileWriter(file)) {
-			IOUtils.write(text, writer);
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
-
-		return true;
-	}
-
-	private Object readFile(JsonNode params) {
-		String filePath = params.get("file_path").asText();
-
-		logger.info("Read file: " + params);
-
-		try (FileInputStream io = new FileInputStream(new File(filePath))) {
-			return IOUtils.toString(io, "UTF8");
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-
-	public static String executeCommand(JsonNode params) {
-		logger.info("Run shell command: " + params);
-
-		String command = params.get("command").asText();
-
-		StringBuilder output = new StringBuilder();
-		String os = System.getProperty("os.name").toLowerCase();
-		ProcessBuilder processBuilder;
-
-		try {
-			if (os.contains("win")) {
-				List<String> argList = Lists.asList("wsl.exe", CommandLineUtils.translateCommandline(command));
-				processBuilder = new ProcessBuilder(argList);
-			} else {
-				List<String> argList = Lists.asList("sh", "-c", CommandLineUtils.translateCommandline(command));
-				processBuilder = new ProcessBuilder(argList);
-			}
-
-			Process process;
-			process = processBuilder.start();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				output.append(line);
-				output.append("\n");
-			}
-
-			int exitCode = process.waitFor();
-			if (exitCode != 0) {
-				output.append("Command exited with code: " + exitCode);
-			}
-		} catch (IOException | CommandLineException | InterruptedException e) {
-			throw new IllegalArgumentException(e);
-		}
-
-		String outputStr = output.toString();
-		logger.info(outputStr);
-		return outputStr;
 	}
 
 }

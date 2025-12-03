@@ -33,6 +33,8 @@ import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.model.output.Response;
 
 public class EmbeddingProvider implements Closeable {
+	private static final String MODEL_NAME = "text-embedding-3-small";
+
 	private static Logger logger = LoggerFactory.getLogger(EmbeddingProvider.class);
 
 	private static final String BINDEX_PROPERTY_NAME = "bindex";
@@ -55,7 +57,7 @@ public class EmbeddingProvider implements Closeable {
 
 		embeddingModel = OpenAiEmbeddingModel.builder()
 				.apiKey(apiKey)
-				.modelName("text-embedding-3-small")
+				.modelName(MODEL_NAME)
 				.timeout(java.time.Duration.ofSeconds(60))
 				.build();
 

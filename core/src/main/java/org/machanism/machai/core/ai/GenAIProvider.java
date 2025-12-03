@@ -1,10 +1,12 @@
 package org.machanism.machai.core.ai;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
@@ -12,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -20,6 +21,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
+import org.apache.maven.shared.utils.cli.CommandLineException;
+import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.collect.Lists;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
@@ -164,7 +169,6 @@ public class GenAIProvider {
 				List<Content> contentList = outMessage.content();
 				for (Content content : contentList) {
 					text = content.outputText().get().text();
-					logger.info(text);
 					Message message = com.openai.models.responses.ResponseInputItem.Message.builder()
 							.role(Role.USER)
 							.addInputTextContent(text).build();
@@ -177,11 +181,11 @@ public class GenAIProvider {
 				for (Summary summary : reasoningItem.summary()) {
 					logger.info(summary.text());
 				}
-
 			}
 		}
 
 		if (fcall) {
+			logger.info(text);
 			result = perform();
 		} else {
 			result = text;
@@ -291,6 +295,157 @@ public class GenAIProvider {
 
 		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
 		toolMap.put(tool, function);
+	}
+
+	public void addDefaultTools() {
+		addTool("read_file_from_file_system", "Read the contents of a file from the disk.", p -> readFile(p),
+				"file_path:string:required:The path to the file to be read.");
+		addTool("write_file_to_file_system", "Write changes to a file on the file system.", p -> writeFile(p),
+				"file_path:string:required:The path to the file you want to write to or create.",
+				"text:string:required:The content to be written into the file (text, code, etc.).");
+		addTool("list_files_in_directory", "List files and directories in a specified folder.",
+				p -> listFiles(p),
+				"dir_path:string:optional:The path to the directory to list contents of.");
+		addTool("get_recursive_file_list",
+				"List files recursively in a directory (includes files in subdirectories).", p -> getRecursiveFiles(p),
+				"dir_path:string:optional:Path to the folder to list contents recursively.");
+		addTool("run_command_line_tool",
+				"Execute allowed shell commands (Linux/OSX only, some commands are denied for safety).",
+				p -> executeCommand(p),
+				"command:string:required:The command to run in the shell.");
+	}
+
+	private Object getRecursiveFiles(JsonNode params) {
+		JsonNode jsonNode = params.get("file_path");
+		File directory;
+		if (jsonNode != null) {
+			String filePath = jsonNode.textValue();
+			if (StringUtils.isBlank(filePath)) {
+				directory = SystemUtils.getUserDir();
+			} else {
+				directory = new File(filePath);
+			}
+		} else {
+			directory = SystemUtils.getUserDir();
+		}
+
+		logger.info("List files recursively: " + params);
+
+		List<File> listFiles = listFilesRecursively(directory);
+		StringBuilder content = new StringBuilder();
+		for (File file : listFiles) {
+			content.append(file.getAbsolutePath() + "\n");
+		}
+
+		return content.toString();
+	}
+
+	private List<File> listFilesRecursively(File directory) {
+		List<File> allFiles = new ArrayList<>();
+
+		if (directory.exists() && directory.isDirectory()) {
+			File[] files = directory.listFiles();
+			if (files != null) {
+				for (File file : files) {
+					if (file.isFile()) {
+						allFiles.add(file);
+					} else if (file.isDirectory()) {
+						allFiles.addAll(listFilesRecursively(file));
+					}
+				}
+			}
+		}
+		return allFiles;
+	}
+
+	private Object listFiles(JsonNode params) {
+		String filePath = params.get("dir_path").asText();
+		File directory = new File(StringUtils.defaultIfBlank(filePath, "."));
+
+		String result;
+		if (directory.isDirectory()) {
+			File[] listFiles = directory.listFiles();
+			StringBuilder content = new StringBuilder();
+			for (File file : listFiles) {
+				content.append(file.getAbsolutePath() + "\n");
+			}
+
+			result = content.toString();
+		} else {
+			result = "No files found in directory.";
+		}
+		return result;
+	}
+
+	private Object writeFile(JsonNode params) {
+		String filePath = params.get("file_path").asText();
+		String text = params.get("text").asText();
+
+		logger.info("Write file: " + params);
+
+		File file = new File(filePath);
+		if (file.getParentFile() != null) {
+			file.getParentFile().mkdirs();
+		}
+		try (Writer writer = new FileWriter(file)) {
+			IOUtils.write(text, writer);
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
+
+		return true;
+	}
+
+	private Object readFile(JsonNode params) {
+		String filePath = params.get("file_path").asText();
+
+		logger.info("Read file: " + params);
+
+		try (FileInputStream io = new FileInputStream(new File(filePath))) {
+			return IOUtils.toString(io, "UTF8");
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	public static String executeCommand(JsonNode params) {
+		logger.info("Run shell command: " + params);
+
+		String command = params.get("command").asText();
+
+		StringBuilder output = new StringBuilder();
+		String os = System.getProperty("os.name").toLowerCase();
+		ProcessBuilder processBuilder;
+
+		try {
+			if (os.contains("win")) {
+				List<String> argList = Lists.asList("wsl.exe", CommandLineUtils.translateCommandline(command));
+				processBuilder = new ProcessBuilder(argList);
+			} else {
+				List<String> argList = Lists.asList("sh", "-c", CommandLineUtils.translateCommandline(command));
+				processBuilder = new ProcessBuilder(argList);
+			}
+
+			Process process;
+			process = processBuilder.start();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				output.append(line);
+				output.append("\n");
+			}
+
+			int exitCode = process.waitFor();
+			if (exitCode != 0) {
+				output.append("Command exited with code: " + exitCode);
+			}
+		} catch (IOException | CommandLineException | InterruptedException e) {
+			throw new IllegalArgumentException(e);
+		}
+
+		String outputStr = output.toString();
+		logger.info(outputStr);
+		return outputStr;
 	}
 
 }

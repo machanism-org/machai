@@ -63,6 +63,7 @@ public class BIndexBuilder {
 		}
 
 		String output = provider.perform();
+		provider.clear();
 
 		BIndex value = null;
 		if (output != null) {
