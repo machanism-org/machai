@@ -1,0 +1,48 @@
+@startjson
+{
+  "bindex": {
+    "id": "string",
+    "name": "string",
+    "version": "string",
+    "<color:green>description</color:green>": "string", 
+    "author": {
+      "name": "string",
+      "email": "string",
+      "website": "string"
+    },
+    "license": "string",
+    "tags": ["string"],
+    "classification": {
+      "type": "string",
+      "domain": "string",
+      "languages": ["string"]
+    },
+    "location": {
+      "repositoryType": "string",
+      "url": "string",
+      "coordinates": "string"
+    },
+    "features": [
+      {
+        "name": "string",
+        "description": "string",
+        "exampleCode": "string"
+      }
+    ],
+    "techStack": ["string"],
+    "customizations": [
+      {
+        "class": "string",
+        "interface": "string",
+        "configurableOptions": ["string"]
+      }
+    ],
+    "studs": [
+      {
+        "definition": "string",
+        "description": "string"
+      }
+    ]
+  }
+}
+@endjson

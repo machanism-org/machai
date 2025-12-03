@@ -2,9 +2,17 @@
 
 # Machai | Machanism.Org
 
+## Project Description
+
+Machai leverages the power of GenAI to revolutionize how customer projects are assembled from libraries available on the Machanism platform. The key idea is to enable automatic assembly by utilizing structured metadata and semantic insights. To realize this concept, the `bindex.json` file is proposed as a central descriptor for all libraries in the Machanism ecosystem.
+
+The `bindex.json` file serves as a structured repository of library information tailored for GenAI-powered automatic assembly and configuration generation. It contains detailed metadata, including example usage and integration points, making libraries more accessible and usable. One of the file's key attributes, the `description` parameter, is used for semantic search. This allows GenAI to intelligently collect and propose libraries potentially relevant to customer applications based on their high-level intent. By integrating this approach, Machai ensures streamlined project assembly using advanced AI-driven insights.
+
 ## BINDEX.JSON
 
 The `bindex.json` is a descriptor file that encapsulates library and content information, which can be used to automatically assemble customer applications. This process leverages GenAI to analyze project information and store the descriptor file in a vector database for semantic search functionality in response to user queries. 
+
+![](src/site/resources/images/bindex-schema.png)
 
 ### BINDEX Generation and Registration
 
@@ -77,12 +85,3 @@ Schema location: https://machanism.org/machai/schema/bindex-schema-v1.json or [b
 When the user queries the system, the vector database utilizes its semantic indexes to identify the most relevant results — finding libraries or related components based on "intent" rather than exact matches. The user is notified of the availability of the requested files or relevant results.
 
 ![](src/site/resources/images/search-bindex.png)
-
-##  CLI
-
-![](src/site/resources/images/bindex-run.png)
-![](src/site/resources/images/mongodb.png)
-![](src/site/resources/images/find-run.png)
-
-
-
