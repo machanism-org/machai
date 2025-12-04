@@ -1,5 +1,5 @@
 @startuml
-!theme black-knight
+!theme spacelab
 title Semantic Search and Report Generation for Artifacts
 
 start

@@ -2,6 +2,12 @@
 !theme black-knight
 <style>
 jsonDiagram {
+  node {
+    BackgroundColor: white
+    LineColor: lightblue
+    FontColor: black
+    FontSize: 18
+  }
   arrow {
     BackgroundColor: white
     LineColor: gray

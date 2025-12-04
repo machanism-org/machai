@@ -1,5 +1,5 @@
 @startuml
-!theme black-knight
+!theme spacelab
 title BIndex.json File Creation Workflow
 
 start
