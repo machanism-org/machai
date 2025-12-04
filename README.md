@@ -4,23 +4,6 @@
 
 **Machai** is a critical component of the [Machanism](https://machanism.org) platform, designed to revolutionize how customer applications are developed and assembled. By leveraging Generative AI (GenAI) and metadata-driven insights, Machai automates intelligent library selection and integration processes using semantic search capabilities.
 
-- **License**: [Apache License 2.0](LICENSE)
-
-## Table of Contents
-
-- [Machai](#machai)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Key Features](#key-features)
-  - [How Machai Works](#how-machai-works)
-  - [CLI Machai](#cli-machai)
-    - [Download the CLI Application](#download-the-cli-application)
-    - [How to Use the CLI](#how-to-use-the-cli)
-  - [License](#license)
-  - [Contributing](#contributing)
-    - [How to Contribute:](#how-to-contribute)
-  - [Contact](#contact)
-
 ## Overview
 
 Machai empowers developers with AI-assisted project assembly in the **Machanism** ecosystem by automating repetitive development tasks.  
@@ -106,26 +89,10 @@ You can download the CLI application as a `.jar` file from the following link:
    shell:> assembly "Create a spring application for user login by commercetool."
    ```
 
-4. **Output**:
-   The CLI tool will generate a detailed report with recommended libraries and their corresponding metadata (`bindex.json`), including integration points.
-
 ## License
 
 Machai is licensed under the Apache License 2.0.  
 You can view the full license text [here](LICENSE).
-
-## Contributing
-
-We welcome contributions from the community!  
-
-### How to Contribute:
-1. Fork this repository.
-2. Create a feature branch: `git checkout -b my-new-feature`.
-3. Commit your changes: `git commit -am "Add some feature"`.
-4. Push to the branch: `git push origin my-new-feature`.
-5. Submit a pull request.
-
-Feel free to report issues, bugs, or request new features by opening an [issue](https://github.com/machanism/machai/issues).
 
 ## Contact
 
