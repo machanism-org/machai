@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.MongoCommandException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -43,11 +44,16 @@ public class EmbeddingProvider implements Closeable {
 	private MongoCollection<Document> collection;
 	private MongoClient mongoClient;
 
+	private String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+
 	public EmbeddingProvider(String instanceName, String connection) {
 
-		String uri = System.getenv("MONGODB_URI");
-		if (uri == null || uri.isEmpty()) {
-			throw new RuntimeException("MONGODB_URI env variable is not set or is empty.");
+		String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
+		String uri;
+		if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
+			uri = "mongodb+srv://user:user@" + dbUrl;
+		} else {
+			uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
 		}
 
 		String apiKey = System.getenv("OPENAI_API_KEY");
@@ -72,30 +78,36 @@ public class EmbeddingProvider implements Closeable {
 	}
 
 	public String create(BIndex bindex, List<Double> embedding) throws JsonProcessingException {
+		try {
+			Document query = new Document("id", bindex.getId());
+			FindIterable<Document> find = collection.find(query);
+			Document first = find.first();
+			String _id;
+			if (first == null) {
+				BsonArray bsonArray = new BsonArray(
+						embedding.stream()
+								.map(BsonDouble::new)
+								.collect(Collectors.toList()));
 
-		Document query = new Document("id", bindex.getId());
-		FindIterable<Document> find = collection.find(query);
-		Document first = find.first();
-		String _id;
-		if (first == null) {
-			BsonArray bsonArray = new BsonArray(
-					embedding.stream()
-							.map(BsonDouble::new)
-							.collect(Collectors.toList()));
+				String bindexStr = new ObjectMapper().writeValueAsString(bindex);
+				Document doc = new Document(BINDEX_PROPERTY_NAME, bindexStr).append("id", bindex.getId()).append(
+						"embedding",
+						bsonArray);
 
-			String bindexStr = new ObjectMapper().writeValueAsString(bindex);
-			Document doc = new Document(BINDEX_PROPERTY_NAME, bindexStr).append("id", bindex.getId()).append(
-					"embedding",
-					bsonArray);
-
-			InsertOneResult result = collection.insertOne(doc);
-			_id = result.getInsertedId().toString();
-		} else {
-			_id = ((ObjectId) first.get("_id")).toString();
-			logger.info("BIndex already exists in the register: " + bindex.getId());
+				InsertOneResult result = collection.insertOne(doc);
+				_id = result.getInsertedId().toString();
+			} else {
+				_id = ((ObjectId) first.get("_id")).toString();
+				logger.info("BIndex already exists in the register: " + bindex.getId());
+			}
+			return _id;
+		} catch (MongoCommandException e) {
+			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
+			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
+				logger.error("ERROR: To register Bindex, the BINDEX_REG_PASSWORD env property is required.");
+			} 
+			throw e;
 		}
-
-		return _id;
 	}
 
 	public List<Double> getEmbedding(String text) {
@@ -133,7 +145,7 @@ public class EmbeddingProvider implements Closeable {
 				try {
 					bindex = new ObjectMapper().readValue(bindexStr, BIndex.class);
 					arrayList.add(bindex);
-					//logger.info("Score: " + doc.getDouble("score"));
+					// logger.info("Score: " + doc.getDouble("score"));
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}

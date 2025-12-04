@@ -43,10 +43,10 @@ public class AssembyCommand {
 
 		findQuery = query;
 		bindexList = getBricks(query, limits);
-		printFindResult(bindexList);
+		printFindResult(bindexList, limits);
 	}
 
-	private void printFindResult(List<BIndex> bindexList) {
+	private void printFindResult(List<BIndex> bindexList, int limits) {
 		logger.info("Search Context: Semantic search based on 'bindex' description embeddings.");
 
 		if (!bindexList.isEmpty()) {
@@ -59,7 +59,7 @@ public class AssembyCommand {
 			}
 
 			logger.info("---------------------------------------------------------------");
-			logger.info("Number of Artifacts Found: " + bindexList.size());
+			logger.info("Number of Artifacts Found: " + bindexList.size() + ". Limits: " + limits);
 		} else {
 			logger.info("");
 			logger.info("No Artifacts Found:");
