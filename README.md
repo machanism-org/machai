@@ -31,7 +31,16 @@ To generate and register a `bindex.json` file for your library, follow these ste
 
    [![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)  
 
-2. **Run the Machai CLI**  
+2. **Set Environment Variables**
+
+   Before using the Machai CLI for generating or registering `bindex.json` files, you need to configure the following environment variables to ensure proper functionality:
+
+   | **Variable Name**    | **Description**                                                                                 |
+   |----------------------|-------------------------------------------------------------------------------------------------|
+   | BINDEX_REG_PASSWORD  | The password for write access to the registration database. Not required for assembly commands. |
+   | OPENAI_API_KEY       | Your OpenAI API key, required for AI-powered features.                                          |
+
+3. **Run the Machai CLI**  
    Open a terminal or command prompt and navigate to the directory where the `machai.jar` file is saved. Then execute the following command:  
    ```bash
    java -jar machai.jar
@@ -39,17 +48,17 @@ To generate and register a `bindex.json` file for your library, follow these ste
 
    Upon starting, you will see the Machai CLI banner and a prompt where you can enter commands. Use the `help` command to see the list of available options.
 
-3. **Generate `bindex.json` for Your Library**  
+4. **Generate `bindex.json` for Your Library**  
    Use the CLI to analyze your library's project files and automatically generate the corresponding `bindex.json`. Navigate to your library directory and run:  
    ```bash
    > bindex <path-to-your-library>
    ```  
    Replace `<path-to-your-library>` with the path to your library's root directory. This command analyzes files such as `pom.xml`, source code, and other metadata to create a structured `bindex.json` file.
 
-4. **Validate and Edit the `bindex.json`**  
+5. **Validate and Edit the `bindex.json`**  
    After generating the file, it is recommended to inspect and verify the contents of the `src/bindex/bindex.json` to ensure accuracy. You can manually edit the file to add or adjust descriptions, metadata, or integration details.
 
-5. **Register Your `bindex.json`**  
+6. **Register Your `bindex.json`**  
    Once you are satisfied with the metadata, you can register your library and its `bindex.json` file into the Machanism platform via the Machai CLI:  
    ```bash
    > bindex <path-to-bindex.json>
