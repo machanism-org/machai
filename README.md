@@ -72,7 +72,7 @@ You can download the CLI application as a `.jar` file from the following link:
      /'`  \  | |\/| |/ _` |/ __| '_ \ / _` | |
     /<"\     | |  | | (_| | (__| | | | (_| | |
    /  _.-.  .|_|  |_|\__,_|\___|_| |_|\__,_|_|
-   `-' f/ | The Machai CLI | Machanism.Org
+   `-' f/  | The Machai CLI | Machanism.Org
          `-' Powered by Spring Boot 3.4.0
 
    Starting Application using Java 22.0.2 with PID 20928 (C:\Users\vikto\Downloads\machai.jar started by Viktor in C:\Users\vikto\Downloads)
