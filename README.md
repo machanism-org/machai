@@ -27,8 +27,9 @@ For developers creating libraries for the Machanism platform, **bindex** files a
 To generate and register a `bindex.json` file for your library, follow these steps:
 
 1. **Download the Machai CLI**  
-   Get the latest version of the Machai CLI as a `.jar` file from the link below:  
-   [Download machai.jar from SourceForge](https://sourceforge.net/projects/machanism/files/machai.jar/download)
+   Get the latest version of the Machai CLI as a `.jar` file from the link below:
+
+   [![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)  
 
 2. **Run the Machai CLI**  
    Open a terminal or command prompt and navigate to the directory where the `machai.jar` file is saved. Then execute the following command:  
@@ -66,8 +67,8 @@ C:\projects\test>java -jar machai.jar
   \`"' ' |  \/  | __ _  ___| |__   __ _(_)
  /'`  \  | |\/| |/ _` |/ __| '_ \ / _` | |
 /<"\     | |  | | (_| | (__| | | | (_| | |
-/  _.-.  .|_|  |_|\__,_|\___|_| |_|\__,_|_|
-`-' f/  | The Machai CLI | Machanism.Org
+/  _.-. .|_|  |_|\__,_|\___|_| |_|\__,_|_|
+`-' f/ | The Machai CLI | Machanism.Org
      `-' Powered by Spring Boot 3.4.0
 
 Starting Application using Java 22.0.2 with PID 20928 (C:\Users\vikto\Downloads\machai.jar started by Viktor in C:\Users\vikto\Downloads)
