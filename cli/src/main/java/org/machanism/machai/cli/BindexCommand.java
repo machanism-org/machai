@@ -6,7 +6,8 @@ import java.io.IOException;
 import org.apache.commons.lang.SystemUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jline.reader.LineReader;
-import org.machanism.machai.core.Register;
+import org.machanism.machai.core.BindexCreator;
+import org.machanism.machai.core.BindexRegister;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -28,8 +29,8 @@ public class BindexCommand {
 	@ShellMethod()
 	public void bindex(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "The overwrite mode: all saved data will be updated.", value = "overwrite") boolean overwrite,
-			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create an index.", value = "debug") boolean debug)
+			@ShellOption(help = "The refresh mode: all saved data will be updated.", value = "refresh") boolean refresh,
+			@ShellOption(help = "Generates only the inputs.txt file; no request is sent to OpenAI to create a bindex.", value = "inputs") boolean debug)
 			throws IOException, XmlPullParserException {
 
 		if (dir == null) {
@@ -39,10 +40,24 @@ public class BindexCommand {
 		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
 		provider.setDebugMode(debug);
 
-		try (Register register = new Register(provider)) {
-			register.setRewriteMode(overwrite);
-			register.regProjects(dir);
-		}
+		BindexCreator register = new BindexCreator(provider);
+		register.rewriteMode(refresh);
+		register.scanProjects(dir);
 	}
 
+	@ShellMethod()
+	public void register(
+			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
+			@ShellOption(help = "The refresh mode: all saved data will be updated.", value = "refresh") boolean refresh)
+			throws IOException, XmlPullParserException {
+
+		if (dir == null) {
+			dir = SystemUtils.getUserDir();
+		}
+
+		try (BindexRegister register = new BindexRegister()) {
+			register.overwrite(refresh);
+			register.scanProjects(dir);
+		}
+	}
 }

@@ -27,6 +27,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.search.FieldSearchPath;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 
 import dev.langchain4j.data.embedding.Embedding;
@@ -79,35 +80,38 @@ public class EmbeddingProvider implements Closeable {
 
 	public String create(BIndex bindex, List<Double> embedding) throws JsonProcessingException {
 		try {
-			Document query = new Document("id", bindex.getId());
-			FindIterable<Document> find = collection.find(query);
-			Document first = find.first();
-			String _id;
-			if (first == null) {
-				BsonArray bsonArray = new BsonArray(
-						embedding.stream()
-								.map(BsonDouble::new)
-								.collect(Collectors.toList()));
-
-				String bindexStr = new ObjectMapper().writeValueAsString(bindex);
-				Document doc = new Document(BINDEX_PROPERTY_NAME, bindexStr).append("id", bindex.getId()).append(
-						"embedding",
-						bsonArray);
-
-				InsertOneResult result = collection.insertOne(doc);
-				_id = result.getInsertedId().toString();
-			} else {
-				_id = ((ObjectId) first.get("_id")).toString();
-				logger.info("BIndex already exists in the register: " + bindex.getId());
+			Document doc = getDocument(bindex);
+			if (doc != null) {
+				collection.deleteOne(doc);
 			}
-			return _id;
+
+			BsonArray bsonArray = new BsonArray(
+					embedding.stream()
+							.map(BsonDouble::new)
+							.collect(Collectors.toList()));
+
+			String bindexStr = new ObjectMapper().writeValueAsString(bindex);
+			doc = new Document(BINDEX_PROPERTY_NAME, bindexStr).append("id", bindex.getId()).append(
+					"embedding",
+					bsonArray);
+
+			InsertOneResult result = collection.insertOne(doc);
+			return result.getInsertedId().toString();
+
 		} catch (MongoCommandException e) {
 			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
 			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
 				logger.error("ERROR: To register Bindex, the BINDEX_REG_PASSWORD env property is required.");
-			} 
+			}
 			throw e;
 		}
+	}
+
+	public Document getDocument(BIndex bindex) {
+		Document query = new Document("id", bindex.getId());
+		FindIterable<Document> find = collection.find(query);
+		Document first = find.first();
+		return first;
 	}
 
 	public List<Double> getEmbedding(String text) {

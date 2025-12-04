@@ -123,12 +123,11 @@ public class GenAIProvider {
 	}
 
 	public String perform() {
-		Builder builder = ResponseCreateParams.builder().model(chatModel);
-		builder.tools(new ArrayList(toolMap.keySet()));
-		builder.inputOfResponse(inputs);
-
 		String result = null;
 		if (!debugMode) {
+			Builder builder = ResponseCreateParams.builder().model(chatModel);
+			builder.tools(new ArrayList(toolMap.keySet()));
+			builder.inputOfResponse(inputs);
 			Response response = client.responses().create(builder.build());
 			result = parseResponse(response);
 		}
