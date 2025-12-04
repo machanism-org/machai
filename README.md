@@ -2,42 +2,135 @@
 
 # Machai
 
+**Machai** is a critical component of the [Machanism](https://machanism.org) platform, designed to revolutionize how customer applications are developed and assembled. By leveraging Generative AI (GenAI) and metadata-driven insights, Machai automates intelligent library selection and integration processes using semantic search capabilities.
+
+- **License**: [Apache License 2.0](LICENSE)
+
+## Table of Contents
+
+- [Machai](#machai)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Key Features](#key-features)
+  - [How Machai Works](#how-machai-works)
+  - [CLI Machai](#cli-machai)
+    - [Download the CLI Application](#download-the-cli-application)
+    - [How to Use the CLI](#how-to-use-the-cli)
+  - [License](#license)
+  - [Contributing](#contributing)
+    - [How to Contribute:](#how-to-contribute)
+  - [Contact](#contact)
+
 ## Overview
 
-Machai is a core component of the [Machanism](https://machanism.org) platform designed to automate the assembly of customer applications. It leverages GenAI to generate and utilize `bindex.json` metadata for intelligent library selection and integration using semantic search. The primary goal of Machai is to streamline application builds by enabling AI-driven decision-making and automating repetitive development tasks.
+Machai empowers developers with AI-assisted project assembly in the **Machanism** ecosystem by automating repetitive development tasks.  
+Each library in the platform is associated with a structured metadata file called `bindex.json`. This file contains crucial information about the library's features, integration points, and example usage.  
 
-For more information, please follow to [AI Assembly](https://machanism.org/ai-assembly).
+Machai stores these metadata files in a **vector database**, enabling efficient semantic search to find and recommend libraries based on natural language queries. This automated process simplifies application assembly and accelerates development.
 
-## Key Idea
+For more information, visit [AI Assembly](https://machanism.org/ai-assembly).
 
-The core idea behind Machai is to enable AI-assisted project assembly for the Machanism ecosystem. Each library in the platform is accompanied by a `bindex.json` file, a structured metadata file that describes the library’s features, integration points, and example usage. These files are stored and indexed in a vector database to facilitate semantic search and retrieval of relevant libraries for application assembly. By analyzing customer application requirements through a natural language query, Machai helps developers quickly identify and integrate libraries that align with their needs.
+## Key Features
 
-## Implementation Details
+1. **Metadata File (`bindex.json`)**:  
+   - A comprehensive JSON file that describes library attributes:
+     - **Metadata**: Name, version, ID, description, tags, author, and license.
+     - **Integration Points**: Details on features, tech stack, and customizations.
+     - **Semantic Optimizations**: Enhanced descriptions for AI embeddings and semantic search.
 
-### 1. `bindex.json` File
-- **Purpose**: The `bindex.json` file is central to the functionality of Machai. It acts as a descriptor file containing detailed information about each library in the Machanism platform, focusing on its technical features, examples, and integration points.
-- **Key Attributes**:
-  - **Metadata**: Includes name, version, ID, description, tags, author information, and license details.
-  - **Integration Details**: Provides technical details on how the library can be integrated, including its features, tech stack, and customizations.
-  - **Semantic Search**: The `description` parameter in the file is optimized for embedding generation, allowing the search engine to perform intelligent semantic matching based on user intent.
+2. **AI-Driven Semantic Search**:  
+   - Indexed in a **vector database**, all `bindex.json` files are searchable using embeddings.
+   - GenAI:
+     - Parses natural language queries.  
+     - Generates embeddings from user input.  
+     - Matches the intent of the query with indexed libraries.
 
-### 2. Semantic Search and Library Retrieval
-- A vector database stores all `bindex.json` objects, indexing their meaningful content using AI-generated embeddings.
-- When developers input their application requirements, Machai uses GenAI to:
-  1. Parse the natural language query.
-  2. Generate a query embedding.
-  3. Perform semantic search in the vector database to identify relevant libraries.
-- **Outcome**: Developers receive a report containing all relevant `bindex.json` metadata and suggested libraries that match their application's requirements.
+3. **Streamlined Application Assembly**:  
+   - Developers input project requirements in plain English.
+   - Machai generates a list of suggested libraries.
+   - Each recommendation includes detailed integration data for streamlined development.
 
-## How It Works
+## How Machai Works
 
-1. **Library Metadata Creation**:  
-   For every library on the Machanism platform, a `bindex.json` file is automatically generated by analyzing project artifacts such as `pom.xml`, code files, and other metadata using GenAI.
+1. **Library Metadata Automated Generation**:  
+   For each library on the Machanism platform, a `bindex.json` metadata file is auto-generated by analyzing project artifacts (e.g., `pom.xml`, source code, and library details).
 
 2. **Vector Database Storage**:  
-   The `bindex.json` file is indexed in a vector database. This enables efficient semantic search, allowing libraries to be retrieved based on high-level user queries.
+   The `bindex.json` files are stored in a vector database for optimized indexing and retrieval.
 
-3. **Application Assembly Workflow**:
-   - Developers input their project requirements as natural language queries through the Machanism platform.
-   - GenAI takes the input, generates a semantic representation, and searches the vector database for relevant libraries.
-   - A detailed report of potential libraries and their integration points is provided, making application assembly seamless and efficient.
+3. **Natural Language Inputs**:  
+   Developers input a natural language query specifying application requirements.
+
+4. **AI-Powered Search**:  
+   - GenAI processes the query and generates embeddings.  
+   - Semantic search retrieves relevant libraries stored in the vector database.  
+
+5. **Output**:  
+   A report is generated with:
+   - Suggested libraries.
+   - Metadata from corresponding `bindex.json` files.
+   - Detailed information for seamless library integration.
+
+## CLI Machai 
+
+Machai is also available as a **Command-Line Interface (CLI)** tool for developers who prefer to work locally. The CLI version enables the same functionality as the platform interface but provides additional flexibility for power users. This offering is particularly useful for CI/CD pipelines and automated development flows.
+
+### Download the CLI Application
+You can download the CLI application as a `.jar` file from the following link:  
+[Download machai.jar from SourceForge](https://sourceforge.net/projects/machanism/files/machai.jar/download)
+
+### How to Use the CLI
+1. **Download the `machai.jar` file.**
+2. **Run the CLI Tool**:
+   ```text
+   C:\Users\vikto\Downloads>java -jar machai.jar
+         _ . __  __            _           _
+      \`"' ' |  \/  | __ _  ___| |__   __ _(_)
+     /'`  \  | |\/| |/ _` |/ __| '_ \ / _` | |
+    /<"\     | |  | | (_| | (__| | | | (_| | |
+   /  _.-.  .|_|  |_|\__,_|\___|_| |_|\__,_|_|
+   `-' f/ | The Machai CLI | Machanism.Org
+         `-' Powered by Spring Boot 3.4.0
+
+   Starting Application using Java 22.0.2 with PID 20928 (C:\Users\vikto\Downloads\machai.jar started by Viktor in C:\Users\vikto\Downloads)
+   No active profile set, falling back to 1 default profile: "default"
+   Unable to create a system terminal, creating a dumb terminal (enable debug logging for more information)
+   Started Application in 3.135 seconds (process running for 3.881)
+   shell:> help
+   ```
+   This command will show you a list of available CLI commands.
+
+3. **Assemble an Application Using CLI**:
+   Provide your project's requirements as a query:
+   ```text
+   shell:> assembly "Create a spring application for user login by commercetool."
+   ```
+
+4. **Output**:
+   The CLI tool will generate a detailed report with recommended libraries and their corresponding metadata (`bindex.json`), including integration points.
+
+## License
+
+Machai is licensed under the Apache License 2.0.  
+You can view the full license text [here](LICENSE).
+
+## Contributing
+
+We welcome contributions from the community!  
+
+### How to Contribute:
+1. Fork this repository.
+2. Create a feature branch: `git checkout -b my-new-feature`.
+3. Commit your changes: `git commit -am "Add some feature"`.
+4. Push to the branch: `git push origin my-new-feature`.
+5. Submit a pull request.
+
+Feel free to report issues, bugs, or request new features by opening an [issue](https://github.com/machanism/machai/issues).
+
+## Contact
+
+If you have any questions or need support, feel free to reach out:
+- Official Website: [Machanism](https://machanism.org)
+- Email: [support@machanism.org](mailto:develop@machanism.org)
+
+Machai simplifies and accelerates application assembly, empowering developers to focus on innovation.
