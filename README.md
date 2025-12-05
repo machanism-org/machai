@@ -48,49 +48,36 @@ To generate and register a `bindex.json` file for your library, follow these ste
 
    Upon starting, you will see the Machai CLI banner and a prompt where you can enter commands. Use the `help` command to see the list of available options.
 
-4. **Generate `bindex.json` for Your Library**  
+#### Generate `bindex.json` for Your Library**  
+ 
+ 1. **Run `bindex` Command** 
    Use the CLI to analyze your library's project files and automatically generate the corresponding `bindex.json`. Navigate to your library directory and run:  
    ```bash
    > bindex <path-to-your-library>
    ```  
    Replace `<path-to-your-library>` with the path to your library's root directory. This command analyzes files such as `pom.xml`, source code, and other metadata to create a structured `bindex.json` file.
 
-5. **Validate and Edit the `bindex.json`**  
+2. **Validate and Edit the `bindex.json`**  
    After generating the file, it is recommended to inspect and verify the contents of the `src/bindex/bindex.json` to ensure accuracy. You can manually edit the file to add or adjust descriptions, metadata, or integration details.
 
-6. **Register Your `bindex.json`**  
+#### Bindex Registration
+
+#### Bindex Registration
+
+1. **Register Your `bindex.json`**  
    Once you are satisfied with the metadata, you can register your library and its `bindex.json` file into the Machanism platform via the Machai CLI:  
    ```bash
-   > bindex <path-to-bindex.json>
+   > register <path-to-bindex.json>
    ```  
    Replace `<path-to-bindex.json>` with the path to the generated `bindex.json` file. This command uploads your library metadata to the platform and makes it discoverable for users.
 
----
+2. **Check Registration**  
+   To verify the registration process and ensure the library is successfully uploaded, use the `find` command:  
+   ```bash
+   > find <library-name>
+   ```  
+   Replace `<library-name>` with the name or identifier of the library. This command will search the platform and confirm the library's availability within the system.
 
-### CLI Overview Output
-
-When starting the Machai CLI, you will see the banner and usage information, as shown below:
-```text
-C:\projects\test>java -jar machai.jar
-     _ . __  __            _           _
-  \`"' ' |  \/  | __ _  ___| |__   __ _(_)
- /'`  \  | |\/| |/ _` |/ __| '_ \ / _` | |
-/<"\     | |  | | (_| | (__| | | | (_| | |
-/  _.-. .|_|  |_|\__,_|\___|_| |_|\__,_|_|
-`-' f/ | The Machai CLI | Machanism.Org
-     `-' Powered by Spring Boot 3.4.0
-
-Starting Application using Java 22.0.2 with PID 20928 (C:\Users\vikto\Downloads\machai.jar started by Viktor in C:\Users\vikto\Downloads)
-No active profile set, falling back to 1 default profile: "default"
-Unable to create a system terminal, creating a dumb terminal (enable debug logging for more information)
-Started Application in 3.135 seconds (process running for 3.881)
-shell:> help
-```
-Type `help` in the CLI to get a full overview of the available commands and their usage.
-
-By using the Machai CLI for generating and registering `bindex.json` files, developers can ensure seamless integration with the Machanism platform, making their libraries easily discoverable and accessible to users.
-
-### Bindex Registration
 
 ### Assembly
 
