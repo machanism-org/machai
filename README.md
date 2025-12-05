@@ -48,7 +48,7 @@ To generate and register a `bindex.json` file for your library, follow these ste
 
    Upon starting, you will see the Machai CLI banner and a prompt where you can enter commands. Use the `help` command to see the list of available options.
 
-#### Generate `bindex.json` for Your Library**  
+#### Generate `bindex.json` for Your Library  
  
  1. **Run `bindex` Command** 
    Use the CLI to analyze your library's project files and automatically generate the corresponding `bindex.json`. Navigate to your library directory and run:  
