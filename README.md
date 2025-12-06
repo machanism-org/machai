@@ -96,6 +96,6 @@ You can view the full license text [here](LICENSE).
 
 If you have any questions or need support, feel free to reach out:
 - Official Website: [Machanism](https://machanism.org)
-- Email: [support@machanism.org](mailto:develop@machanism.org)
+- Email: [develop@machanism.org](mailto:develop@machanism.org)
 
 Machai simplifies and accelerates application assembly, empowering developers to focus on innovation.
