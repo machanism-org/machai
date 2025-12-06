@@ -184,7 +184,9 @@ public class GenAIProvider {
 		}
 
 		if (fcall) {
-			logger.info(text);
+			if(text != null) {
+				logger.info(text);
+			}
 			result = perform();
 		} else {
 			result = text;

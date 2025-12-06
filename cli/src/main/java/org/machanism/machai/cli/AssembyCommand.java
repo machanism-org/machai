@@ -20,7 +20,7 @@ import com.openai.models.ChatModel;
 public class AssembyCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
-	private static final ChatModel CHAT_MODEL = ChatModel.GPT_5_MINI;
+	private static final ChatModel CHAT_MODEL = ChatModel.GPT_5_1;
 
 	private List<BIndex> bindexList;
 	private String findQuery;
@@ -62,7 +62,7 @@ public class AssembyCommand {
 			logger.info("Number of Artifacts Found: " + bindexList.size() + ". Limits: " + limits);
 		} else {
 			logger.info("");
-			logger.info("No Artifacts Found:");
+			logger.info("No Artifacts Found.");
 			logger.info("---------------------------------------------------------------");
 		}
 	}
