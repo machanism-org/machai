@@ -9,10 +9,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
@@ -63,6 +65,7 @@ import com.openai.models.responses.Tool;
 
 public class GenAIProvider {
 	private static Logger logger = LoggerFactory.getLogger(GenAIProvider.class);
+	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private OpenAIClient client;
 	private ChatModel chatModel;
@@ -89,11 +92,13 @@ public class GenAIProvider {
 		return this;
 	}
 
-	public GenAIProvider promptFile(String description, File file) throws IOException, FileNotFoundException {
+	public GenAIProvider promptFile(String bundleMessageName, File file) throws IOException, FileNotFoundException {
 		String type = FilenameUtils.getExtension(file.getName());
 		try (FileInputStream input = new FileInputStream(file)) {
 			String fileData = IOUtils.toString(input, "UTF8");
-			prompt(description + "```" + type + "\n" + fileData + "```");
+			String prompt = MessageFormat.format(promptBundle.getString(bundleMessageName), file.getName(), type,
+					fileData);
+			prompt(prompt);
 		}
 		return this;
 	}
@@ -184,7 +189,7 @@ public class GenAIProvider {
 		}
 
 		if (fcall) {
-			if(text != null) {
+			if (text != null) {
 				logger.info(text);
 			}
 			result = perform();

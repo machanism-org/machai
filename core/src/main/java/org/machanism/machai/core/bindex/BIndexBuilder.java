@@ -6,6 +6,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +18,8 @@ import org.machanism.machai.schema.BIndex;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BIndexBuilder {
+
+	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private File projectDir;
 	private GenAIProvider provider;
@@ -28,19 +32,17 @@ public class BIndexBuilder {
 	}
 
 	public BIndex build() throws IOException {
-		URL systemResource = getClass().getResource("/schema/bindex-schema-v1.json");
-		String schema = IOUtils.toString(systemResource, "UTF8");
-		provider.prompt("The bindex schema https://machanism.org/machai/schema/bindex-schema-v1.json:\n" + schema);
+		bindexSchemaPrompt(provider);
 
 		File file = new File(projectDir, "pom.xml");
-
 		Model model = PomReader.getProjectModel(file);
 
 		String sourceDirectory = model.getBuild().getSourceDirectory();
 		removeNotImportantData(model);
 
 		String pom = PomReader.printModel(model);
-		provider.prompt("Project POM file:\n" + pom);
+		String prompt = MessageFormat.format(promptBundle.getString("pom_resource_section"), pom);
+		provider.prompt(prompt);
 
 		Path startPath = Paths.get(
 				StringUtils.defaultIfEmpty(sourceDirectory, new File(projectDir, "src/main/java").getAbsolutePath()));
@@ -48,15 +50,15 @@ public class BIndexBuilder {
 		if (Files.exists(startPath)) {
 			Files.walk(startPath).filter(Files::isRegularFile).forEach((f) -> {
 				try {
-					provider.promptFile("This is a source file: " + f.toFile().getName() + "\n\n", f.toFile());
+					provider.promptFile("source_resource_section", f.toFile());
 				} catch (IOException e) {
 					System.out.println("File: " + f + " adding failed.");
 				}
 			});
 		}
 
-		provider.prompt(
-				"Based on bindex schema generate detail json object. No additional text required, output format should be only json object.");
+		prompt = promptBundle.getString("bindex_generation_prompt");
+		provider.prompt(prompt);
 
 		if (bindexDir != null) {
 			provider.saveInput(new File(bindexDir, "inputs.txt"));
@@ -70,6 +72,13 @@ public class BIndexBuilder {
 			value = mapper.readValue(output, BIndex.class);
 		}
 		return value;
+	}
+
+	public static void bindexSchemaPrompt(GenAIProvider provider) throws IOException {
+		URL systemResource = BIndex.class.getResource("/schema/bindex-schema-v1.json");
+		String schema = IOUtils.toString(systemResource, "UTF8");
+		String prompt = MessageFormat.format(promptBundle.getString("bindex_schema_section"), schema);
+		provider.prompt(prompt);
 	}
 
 	private void removeNotImportantData(Model model) {
