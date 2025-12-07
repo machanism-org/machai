@@ -1,0 +1,36 @@
+<Recipe name="Bindex Generation by AI DIAL">
+	<Extern class="Web" timeout="10s">
+		<ElementNotExists id="theme-main" timeout="1s">
+			<Var name="AI DIAL URL" init="console" /> 
+			<Page url="$var{AI DIAL URL}" /> 
+			<Click xpath="//*[@id='__next']/div/div[2]/div/div[2]/button" /> 
+			<Var name="email" init="console" /> 
+			<Text value="$var{email}" name="loginfmt" /> 
+			<Click id="idSIButton9" /> 
+		</ElementNotExists> 
+		<Var name="Project Directory" init="console" /> 
+		<Listdir name="inputsFiles" path="$var{Project Directory}" fileFilter="inputs.txt" /> 
+		<Out name="Inputs Files" level="debug" /> 
+		<Loop name="path" source="Inputs Files">
+			<Var name="path" end="inputs.txt" /> 
+			<Remove name="bindex" /> 
+			<Load name="bindex" file="$var{path}/bindex.json" exception="java.io.FileNotFoundException" /> 
+			<If isNull="bindex">
+				<Load name="inputs" file="$var{path}/inputs.txt" /> 
+				<Clipboard name="inputs" /> 
+				<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div[2]/span[2]/button" /> 
+				<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div/div[1]" /> 
+				<Text value="$var{\Ctrl+v}" id="chat-text-field" /> 
+				<Wait delay="500" /> 
+				<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div/div[2]/div[2]/button[2]" /> 
+				<Wait delay="500" /> 
+				<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[3]/div[2]/div/div[2]/button" exception="ignore" timeout="1s" /> 
+				<Wait delay="1s" /> 
+				<GetText name="bindex" xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/pre/div/pre" /> 
+				<Out name="bindex" /> 
+				<Confirm message="Create the Bindex file: $var{path}/bindex.json ?" /> 
+				<Out file="$var{path}/bindex.json" name="bindex" /> 
+			</If> 
+		</Loop> 
+	</Extern> 
+</Recipe> 

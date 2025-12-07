@@ -21,4 +21,26 @@
 		<module>core</module>
 		<module>cli</module>
 	</modules>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.ganteater</groupId>
+					<artifactId>ae-maven-plugin</artifactId>
+					<configuration>
+						<aeDir>src/ae</aeDir>
+					</configuration>	
+					<dependencies>
+						<dependency>
+							<groupId>com.ganteater.plugins</groupId>
+							<artifactId>web-ae-plugin</artifactId>
+							<version>1.2.9-SNAPSHOT</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
 </project>
