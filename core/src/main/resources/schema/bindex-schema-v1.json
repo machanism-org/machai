@@ -277,10 +277,6 @@
 					},
 					"type": {
 						"type": "string",
-						"enum": [
-							"interface",
-							"abstract class"
-						],
 						"description": "Kind of stub: always 'interface' or 'abstract class' as provided by this artifact."
 					},
 					"description": {
