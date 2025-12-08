@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.Map.Entry;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -73,6 +73,7 @@ public class GenAIProvider {
 	private Map<Tool, Function<JsonNode, Object>> toolMap = new HashMap<>();
 	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
 	private boolean debugMode;
+	private File workingDir = SystemUtils.getUserDir();
 
 	public GenAIProvider(ChatModel chatModel) {
 		super();
@@ -240,18 +241,21 @@ public class GenAIProvider {
 		try (Writer streamWriter = new FileWriter(file, false)) {
 			for (ResponseInputItem responseInputItem : inputs) {
 				String inputText = "";
-				ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
-				if (responseInputContent.isValid()) {
-					if (responseInputContent.isInputText()) {
-						inputText = responseInputContent.inputText().get().text();
-					} else if (responseInputContent.isInputFile()) {
-						inputText = "Add resource by URL: " + responseInputContent.inputFile().get().fileUrl().get();
+				if (responseInputItem.isMessage()) {
+					ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
+					if (responseInputContent.isValid()) {
+						if (responseInputContent.isInputText()) {
+							inputText = responseInputContent.inputText().get().text();
+						} else if (responseInputContent.isInputFile()) {
+							inputText = "Add resource by URL: "
+									+ responseInputContent.inputFile().get().fileUrl().get();
+						}
+					} else {
+						inputText = "Data invalid: " + responseInputItem;
 					}
-				} else {
-					inputText = "Data invalid: " + responseInputItem;
+					streamWriter.write(inputText);
+					streamWriter.write("\n\n");
 				}
-				streamWriter.write(inputText);
-				streamWriter.write("\n\n");
 			}
 		}
 	}
@@ -322,25 +326,29 @@ public class GenAIProvider {
 	}
 
 	private Object getRecursiveFiles(JsonNode params) {
-		JsonNode jsonNode = params.get("file_path");
+		JsonNode jsonNode = params.get("dir_path");
 		File directory;
 		if (jsonNode != null) {
 			String filePath = jsonNode.textValue();
 			if (StringUtils.isBlank(filePath)) {
-				directory = SystemUtils.getUserDir();
+				directory = workingDir;
 			} else {
-				directory = new File(filePath);
+				directory = new File(workingDir, filePath);
 			}
 		} else {
-			directory = SystemUtils.getUserDir();
+			directory = workingDir;
 		}
 
 		logger.info("List files recursively: " + params);
 
 		List<File> listFiles = listFilesRecursively(directory);
 		StringBuilder content = new StringBuilder();
-		for (File file : listFiles) {
-			content.append(file.getAbsolutePath() + "\n");
+		if (!listFiles.isEmpty()) {
+			for (File file : listFiles) {
+				content.append(file.getAbsolutePath() + "\n");
+			}
+		} else {
+			content.append("No files found in directory.");
 		}
 
 		return content.toString();
@@ -366,7 +374,7 @@ public class GenAIProvider {
 
 	private Object listFiles(JsonNode params) {
 		String filePath = params.get("dir_path").asText();
-		File directory = new File(StringUtils.defaultIfBlank(filePath, "."));
+		File directory = new File(workingDir, StringUtils.defaultIfBlank(filePath, "."));
 
 		String result;
 		if (directory.isDirectory()) {
@@ -389,7 +397,7 @@ public class GenAIProvider {
 
 		logger.info("Write file: " + params);
 
-		File file = new File(filePath);
+		File file = new File(workingDir, filePath);
 		if (file.getParentFile() != null) {
 			file.getParentFile().mkdirs();
 		}
@@ -407,14 +415,14 @@ public class GenAIProvider {
 
 		logger.info("Read file: " + params);
 
-		try (FileInputStream io = new FileInputStream(new File(filePath))) {
+		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
 			return IOUtils.toString(io, "UTF8");
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	public static String executeCommand(JsonNode params) {
+	public String executeCommand(JsonNode params) {
 		logger.info("Run shell command: " + params);
 
 		String command = params.get("command").asText();
@@ -433,6 +441,7 @@ public class GenAIProvider {
 			}
 
 			Process process;
+			processBuilder.directory(workingDir);
 			process = processBuilder.start();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String line;
@@ -452,6 +461,10 @@ public class GenAIProvider {
 		String outputStr = output.toString();
 		logger.info(outputStr);
 		return outputStr;
+	}
+
+	public void workingDir(File workingDir) {
+		this.workingDir = workingDir;
 	}
 
 }

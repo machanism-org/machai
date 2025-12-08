@@ -1,8 +1,10 @@
 package org.machanism.machai.cli;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.core.assembly.ApplicationAssembly;
@@ -70,10 +72,17 @@ public class AssembyCommand {
 	@ShellMethod()
 	public void assembly(
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
+			@ShellOption(help = "The path to the assembled project directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "10") int limits,
 			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create an index.", value = "debug") boolean debug)
 			throws IOException {
 
+		if (dir == null) {
+			dir = SystemUtils.getUserDir();
+		} else {
+			dir.mkdirs();
+		}
+		
 		provider.setDebugMode(debug);
 		String prompt = query;
 
@@ -91,6 +100,7 @@ public class AssembyCommand {
 		}
 
 		ApplicationAssembly assembly = new ApplicationAssembly(provider);
+		assembly.projectDir(dir);
 		assembly.assembly(prompt, bindexList);
 	}
 

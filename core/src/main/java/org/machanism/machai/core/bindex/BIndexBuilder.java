@@ -19,6 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BIndexBuilder {
 
+	private static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v1.json";
+
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private File projectDir;
@@ -61,7 +63,7 @@ public class BIndexBuilder {
 		provider.prompt(prompt);
 
 		if (bindexDir != null) {
-			provider.saveInput(new File(bindexDir, "inputs.txt"));
+			provider.saveInput(new File("inputs.txt"));
 		}
 
 		String output = provider.perform();
@@ -75,7 +77,7 @@ public class BIndexBuilder {
 	}
 
 	public static void bindexSchemaPrompt(GenAIProvider provider) throws IOException {
-		URL systemResource = BIndex.class.getResource("/schema/bindex-schema-v1.json");
+		URL systemResource = BIndex.class.getResource(BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, "UTF8");
 		String prompt = MessageFormat.format(promptBundle.getString("bindex_schema_section"), schema);
 		provider.prompt(prompt);

@@ -13,7 +13,6 @@ import org.bson.BsonArray;
 import org.bson.BsonDouble;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.search.FieldSearchPath;
-import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 
 import dev.langchain4j.data.embedding.Embedding;
