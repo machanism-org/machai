@@ -44,7 +44,7 @@ public class ApplicationAssembly {
 
 			provider.prompt(prompt);
 
-			provider.saveInput(new File(projectDir, "inputs.txt"));
+			provider.saveInput(new File("inputs.txt"));
 
 			String response = provider.perform();
 			if (response != null) {

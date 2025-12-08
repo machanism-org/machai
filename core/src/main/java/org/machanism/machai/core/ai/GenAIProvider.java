@@ -395,7 +395,7 @@ public class GenAIProvider {
 		String filePath = params.get("file_path").asText();
 		String text = params.get("text").asText();
 
-		logger.info("Write file: " + params);
+		logger.info("Write file: " + StringUtils.abbreviate(params.toString(), 80));
 
 		File file = new File(workingDir, filePath);
 		if (file.getParentFile() != null) {
@@ -459,7 +459,7 @@ public class GenAIProvider {
 		}
 
 		String outputStr = output.toString();
-		logger.info(outputStr);
+		logger.debug(outputStr);
 		return outputStr;
 	}
 

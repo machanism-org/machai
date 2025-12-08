@@ -14,10 +14,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BIndexBuilder {
+	private static Logger logger = LoggerFactory.getLogger(BIndexBuilder.class);
 
 	private static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v1.json";
 
@@ -54,7 +57,7 @@ public class BIndexBuilder {
 				try {
 					provider.promptFile("source_resource_section", f.toFile());
 				} catch (IOException e) {
-					System.out.println("File: " + f + " adding failed.");
+					logger.warn("File: " + f + " adding failed.");
 				}
 			});
 		}
@@ -63,7 +66,7 @@ public class BIndexBuilder {
 		provider.prompt(prompt);
 
 		if (bindexDir != null) {
-			provider.saveInput(new File("inputs.txt"));
+			provider.saveInput(new File(projectDir, "inputs.txt"));
 		}
 
 		String output = provider.perform();
