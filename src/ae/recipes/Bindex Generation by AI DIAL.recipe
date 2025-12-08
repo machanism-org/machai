@@ -7,6 +7,7 @@
 			<Var name="email" init="console" /> 
 			<Text value="$var{email}" name="loginfmt" /> 
 			<Click id="idSIButton9" /> 
+			<Confirm message="Please select and configure an agent." /> 
 			<Text value="Hi$var{\n}" id="chat-text-field" /> 
 		</ElementNotExists> 
 		<Var name="Project Directory" init="console" /> 
@@ -28,8 +29,8 @@
 					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div/div[2]/div[2]/button[2]" /> 
 					<Wait delay="500" /> 
 					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[3]/div[2]/div/div[2]/button" exception="ignore" timeout="1s" /> 
-					<Wait delay="1s" /> 
-					<GetText name="bindex" xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/pre/div/pre" /> 
+					<ElementExists xpath="//*[contains(concat(' ', normalize-space(@class), ' '), ' tabler-icon-send ')]" timeout="1m" /> 
+					<GetText name="bindex" xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[1]/pre/div/pre" /> 
 					<Out name="bindex" /> 
 					<Confirm message="Create the Bindex file: $var{path}/bindex.json ?" /> 
 					<Out file="$var{path}/bindex.json" name="bindex" /> 
