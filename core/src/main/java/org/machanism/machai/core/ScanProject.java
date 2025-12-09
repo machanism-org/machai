@@ -45,17 +45,19 @@ public abstract class ScanProject {
 
 	public abstract String processProject(File projectDir);
 
-	public BIndex getBindex(File projectDir)
-			throws IOException, StreamReadException, DatabindException, FileNotFoundException, StreamWriteException {
+	public BIndex getBindex(File projectDir) throws IOException {
 		logger.info("Project dir: " + projectDir);
-
 		File bindexFile = getBindexFile(projectDir);
 
+		try {
 		BIndex bindex = null;
 		if (bindexFile.exists()) {
 			bindex = new ObjectMapper().readValue(new FileReader(bindexFile), BIndex.class);
 		}
 		return bindex;
+		}catch (Exception e) {
+			throw new IllegalArgumentException("Bindex: " + bindexFile, e);
+		}
 	}
 
 	public File getBindexFile(File projectDir) {

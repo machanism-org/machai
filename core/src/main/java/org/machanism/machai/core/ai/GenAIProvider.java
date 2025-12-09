@@ -74,6 +74,7 @@ public class GenAIProvider {
 	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
 	private boolean debugMode;
 	private File workingDir = SystemUtils.getUserDir();
+	private String instructions;
 
 	public GenAIProvider(ChatModel chatModel) {
 		super();
@@ -131,16 +132,22 @@ public class GenAIProvider {
 	public String perform() {
 		String result = null;
 		if (!debugMode) {
-			Builder builder = ResponseCreateParams.builder().model(chatModel);
-			builder.tools(new ArrayList(toolMap.keySet()));
-			builder.inputOfResponse(inputs);
+			Builder builder = ResponseCreateParams.builder()
+					.model(chatModel)
+					.tools(new ArrayList(toolMap.keySet()))
+					.inputOfResponse(inputs);
+
+			if (instructions != null) {
+				builder.instructions(instructions);
+			}
+
 			Response response = client.responses().create(builder.build());
-			result = parseResponse(response);
+			result = parseResponse(response, instructions);
 		}
 		return result;
 	}
 
-	private String parseResponse(Response response) {
+	private String parseResponse(Response response, String instructions) {
 		String result = null;
 
 		List<ResponseOutputItem> output = response.output();
@@ -148,8 +155,6 @@ public class GenAIProvider {
 		ResponseInputItem asReasoning = null;
 		String text = null;
 		for (ResponseOutputItem item : output) {
-			logger.debug(">>>>" + item);
-
 			if (item.isFunctionCall()) {
 				if (asReasoning != null) {
 					inputs.add(asReasoning);
@@ -233,12 +238,20 @@ public class GenAIProvider {
 		}
 	}
 
-	public void saveInput(File file) throws IOException {
-		logger.info("Bindex inputs file: " + file);
-		if (file.getParentFile() != null) {
-			file.getParentFile().mkdirs();
+	public void saveInput(File dir) throws IOException {
+		dir.mkdirs();
+
+		File instructionsFile = new File(dir, "instructions.txt");
+		try (Writer streamWriter = new FileWriter(instructionsFile, false)) {
+			if (instructions != null) {
+				streamWriter.write(instructions);
+			}
 		}
-		try (Writer streamWriter = new FileWriter(file, false)) {
+
+		File inputsFile = new File(dir, "inputs.txt");
+		try (Writer streamWriter = new FileWriter(inputsFile, false)) {
+			logger.info("Bindex inputs file: " + inputsFile);
+
 			for (ResponseInputItem responseInputItem : inputs) {
 				String inputText = "";
 				if (responseInputItem.isMessage()) {
@@ -465,6 +478,11 @@ public class GenAIProvider {
 
 	public void workingDir(File workingDir) {
 		this.workingDir = workingDir;
+	}
+
+	public GenAIProvider instructions(String instructions) {
+		this.instructions = instructions;
+		return this;
 	}
 
 }

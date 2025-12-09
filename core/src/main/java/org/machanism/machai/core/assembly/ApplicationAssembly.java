@@ -28,8 +28,8 @@ public class ApplicationAssembly {
 	}
 
 	public void assembly(final String prompt, List<BIndex> bindexList) {
-		String systemPrompt = promptBundle.getString("system_instructions");
-		provider.prompt(systemPrompt);
+		String systemPrompt = promptBundle.getString("assembly_system_instructions");
+		provider.instructions(systemPrompt);
 		provider.workingDir(projectDir);
 
 		try {
@@ -44,7 +44,7 @@ public class ApplicationAssembly {
 
 			provider.prompt(prompt);
 
-			provider.saveInput(new File("inputs.txt"));
+			provider.saveInput(SystemUtils.getUserDir());
 
 			String response = provider.perform();
 			if (response != null) {

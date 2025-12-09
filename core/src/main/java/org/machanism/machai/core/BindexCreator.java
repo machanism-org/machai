@@ -29,8 +29,8 @@ public class BindexCreator extends ScanProject {
 			bindex = getBindex(projectDir);
 
 			String result = null;
+			File bindexFile = getBindexFile(projectDir);
 			if (overwrite || bindex == null) {
-				File bindexFile = getBindexFile(projectDir);
 				if (bindexFile.getParentFile() != null) {
 					bindexFile.getParentFile().mkdirs();
 				}
@@ -39,11 +39,11 @@ public class BindexCreator extends ScanProject {
 						.bindexDir(bindexFile.getParentFile())
 						.provider(provider)
 						.build();
-				if (bindex != null) {
-					result = new ObjectMapper().writeValueAsString(bindex);
-					new ObjectMapper().writeValue(bindexFile, bindex);
-					logger.info("BIndex file: " + bindexFile);
-				}
+			}
+			if (bindex != null) {
+				result = new ObjectMapper().writeValueAsString(bindex);
+				new ObjectMapper().writeValue(bindexFile, bindex);
+				logger.info("BIndex file: " + bindexFile);
 			}
 
 			return result;

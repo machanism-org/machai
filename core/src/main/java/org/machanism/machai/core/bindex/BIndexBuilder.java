@@ -33,6 +33,9 @@ public class BIndexBuilder {
 
 	public BIndexBuilder provider(GenAIProvider provider) {
 		this.provider = provider;
+		String systemPrompt = promptBundle.getString("bindex_system_instructions");
+		provider.instructions(systemPrompt);
+
 		return this;
 	}
 
@@ -66,7 +69,7 @@ public class BIndexBuilder {
 		provider.prompt(prompt);
 
 		if (bindexDir != null) {
-			provider.saveInput(new File(projectDir, "inputs.txt"));
+			provider.saveInput(new File(projectDir, "src/bindex"));
 		}
 
 		String output = provider.perform();

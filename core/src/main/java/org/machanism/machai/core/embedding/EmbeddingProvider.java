@@ -147,7 +147,7 @@ public class EmbeddingProvider implements Closeable {
 				try {
 					bindex = new ObjectMapper().readValue(bindexStr, BIndex.class);
 					arrayList.add(bindex);
-					// logger.info("Score: " + doc.getDouble("score"));
+					//logger.info("Score: " + doc.getDouble("score"));
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}

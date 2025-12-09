@@ -20,6 +20,7 @@
 			<If isNull="bindex">
 				<Remove name="inputs" /> 
 				<Load name="inputs" file="$var{path}/inputs.txt" exception="java.io.FileNotFoundException" /> 
+				<Out name="inputs" /> 
 				<If isNotNull="inputs">
 					<Clipboard name="inputs" /> 
 					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div[2]/span[2]/button" /> 
@@ -29,7 +30,7 @@
 					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div/div[2]/div[2]/button[2]" /> 
 					<Wait delay="500" /> 
 					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[3]/div[2]/div/div[2]/button" exception="ignore" timeout="1s" /> 
-					<ElementExists xpath="//*[contains(concat(' ', normalize-space(@class), ' '), ' tabler-icon-send ')]" timeout="1m" /> 
+					<ElementExists xpath="//*[contains(concat(' ', normalize-space(@class), ' '), ' tabler-icon-send ')]" timeout="3m" /> 
 					<GetText name="bindex" xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[1]/pre/div/pre" /> 
 					<Out name="bindex" type="json" /> 
 					<Out file="$var{path}/bindex.json" name="bindex" /> 
