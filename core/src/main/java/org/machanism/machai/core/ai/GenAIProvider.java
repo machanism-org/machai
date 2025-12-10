@@ -158,6 +158,7 @@ public class GenAIProvider {
 			if (item.isFunctionCall()) {
 				if (asReasoning != null) {
 					inputs.add(asReasoning);
+					asReasoning = null;
 				}
 				ResponseFunctionToolCall functionCall = item.asFunctionCall();
 
