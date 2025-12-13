@@ -3,27 +3,18 @@ package org.machanism.machai.core.bindex;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.maven.model.Model;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class BIndexBuilder {
-	private static Logger logger = LoggerFactory.getLogger(BIndexBuilder.class);
-
-	private static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v1.json";
-
+public abstract class BIndexBuilder {
+	private static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private File projectDir;
@@ -35,45 +26,23 @@ public class BIndexBuilder {
 		this.provider = provider;
 		String systemPrompt = promptBundle.getString("bindex_system_instructions");
 		provider.instructions(systemPrompt);
-
 		return this;
 	}
 
 	public BIndex build() throws IOException {
-		bindexSchemaPrompt(provider);
+		bindexSchemaPrompt(getProvider());
 
-		File file = new File(projectDir, "pom.xml");
-		Model model = PomReader.getProjectModel(file);
+		projectContext();
 
-		String sourceDirectory = model.getBuild().getSourceDirectory();
-		removeNotImportantData(model);
-
-		String pom = PomReader.printModel(model);
-		String prompt = MessageFormat.format(promptBundle.getString("pom_resource_section"), pom);
-		provider.prompt(prompt);
-
-		Path startPath = Paths.get(
-				StringUtils.defaultIfEmpty(sourceDirectory, new File(projectDir, "src/main/java").getAbsolutePath()));
-
-		if (Files.exists(startPath)) {
-			Files.walk(startPath).filter(Files::isRegularFile).forEach((f) -> {
-				try {
-					provider.promptFile("source_resource_section", f.toFile());
-				} catch (IOException e) {
-					logger.warn("File: " + f + " adding failed.");
-				}
-			});
-		}
-
-		prompt = promptBundle.getString("bindex_generation_prompt");
-		provider.prompt(prompt);
+		String prompt = promptBundle.getString("bindex_generation_prompt");
+		getProvider().prompt(prompt);
 
 		if (bindexDir != null) {
-			provider.saveInput(new File(projectDir, "src/bindex"));
+			getProvider().saveInput(new File(getProjectDir(), "bindex"));
 		}
 
-		String output = provider.perform();
-		provider.clear();
+		String output = getProvider().perform();
+		getProvider().clear();
 
 		BIndex value = null;
 		if (output != null) {
@@ -82,23 +51,13 @@ public class BIndexBuilder {
 		return value;
 	}
 
+	protected abstract void projectContext() throws IOException;
+
 	public static void bindexSchemaPrompt(GenAIProvider provider) throws IOException {
 		URL systemResource = BIndex.class.getResource(BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, "UTF8");
 		String prompt = MessageFormat.format(promptBundle.getString("bindex_schema_section"), schema);
 		provider.prompt(prompt);
-	}
-
-	private void removeNotImportantData(Model model) {
-		model.setDistributionManagement(null);
-
-		model.setDistributionManagement(null);
-		model.setProperties(null);
-		model.setDependencyManagement(null);
-		model.setBuild(null);
-		model.setReporting(null);
-		model.setScm(null);
-		model.setPluginRepositories(null);
 	}
 
 	public BIndexBuilder projectDir(File projectDir) {
@@ -110,5 +69,15 @@ public class BIndexBuilder {
 		this.bindexDir = bindexDir;
 		return this;
 	}
+
+	public File getProjectDir() {
+		return projectDir;
+	}
+
+	protected GenAIProvider getProvider() {
+		return provider;
+	}
+
+	public abstract List<String> getModules() throws IOException;
 
 }
