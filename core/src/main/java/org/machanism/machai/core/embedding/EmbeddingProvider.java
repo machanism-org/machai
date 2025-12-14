@@ -5,20 +5,27 @@ import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSea
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.bson.BsonArray;
 import org.bson.BsonDouble;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.FindIterable;
@@ -30,6 +37,7 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.InsertOneResult;
+import com.openai.models.ChatModel;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
@@ -40,8 +48,8 @@ public class EmbeddingProvider implements Closeable {
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
 	private static Logger logger = LoggerFactory.getLogger(EmbeddingProvider.class);
-
 	private static final String BINDEX_PROPERTY_NAME = "bindex";
+	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private OpenAiEmbeddingModel embeddingModel;
 	private MongoCollection<Document> collection;
@@ -49,7 +57,10 @@ public class EmbeddingProvider implements Closeable {
 
 	private String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 
+	private GenAIProvider provider;
+
 	public EmbeddingProvider(String instanceName, String connection) {
+		this.provider = new GenAIProvider(ChatModel.GPT_5_MINI);
 
 		String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
 		String uri;
@@ -92,14 +103,13 @@ public class EmbeddingProvider implements Closeable {
 			BsonArray descriptionEmbedding = getEmbeddingBson(bindex.getDescription());
 			BsonArray classificationEmbedding = getEmbeddingBson(bindex.getClassification());
 
-			Document bindexDocument = Document.parse(bindexJson)
+			Document bindexDocument = Document.parse(objectMapper.writeValueAsString(bindex.getClassification()))
 					.append(BINDEX_PROPERTY_NAME, bindexJson)
 					.append("description_embedding", descriptionEmbedding)
 					.append("classification_embedding", classificationEmbedding)
 					.append("id", bindex.getId());
 
 			InsertOneResult result = collection.insertOne(bindexDocument);
-
 			return result.getInsertedId().toString();
 
 		} catch (MongoCommandException e) {
@@ -140,29 +150,30 @@ public class EmbeddingProvider implements Closeable {
 				.collect(Collectors.toList());
 	}
 
-	public List<BIndex> search(String query, long limit) {
+	public List<BIndex> search(String query, long limit) throws IOException {
 		List<BIndex> arrayList = new ArrayList<>();
-		List<Double> embedding = getEmbedding(query);
-
 		String indexName = "vector_index_1";
+
+		URL systemResource = BIndex.class.getResource(BIndexBuilder.BINDEX_SCHEMA_RESOURCE);
+		String schema = IOUtils.toString(systemResource, "UTF8");
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode schemaJson = objectMapper.readTree(schema);
+		JsonNode jsonNode = schemaJson.get("properties").get("classification");
+		String classification = objectMapper.writeValueAsString(jsonNode);
+
+		String classificationInstruction = MessageFormat.format(promptBundle.getString("classification_instruction"),
+				classification);
+		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform();
+
+		Iterable<Double> classificationEmbedding = getEmbedding(classificationQuery);
 
 		List<Bson> pipeline = Arrays.asList(
 				Aggregates.vectorSearch(
-						fieldPath("description_embedding"),
-						embedding,
+						fieldPath("classification_embedding"),
+						classificationEmbedding,
 						indexName,
 						limit,
 						exactVectorSearchOptions()),
-
-				Aggregates.unionWith(
-						collection.getNamespace().getCollectionName(),
-						Arrays.asList(
-								Aggregates.vectorSearch(
-										fieldPath("classification_embedding"),
-										embedding,
-										indexName,
-										limit,
-										exactVectorSearchOptions()))),
 
 				Aggregates.project(
 						Projections.fields(

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class BIndexBuilder {
 	public static final String BINDEX_TEMP_DIR = ".bindex";
-	private static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
+	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 	
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
