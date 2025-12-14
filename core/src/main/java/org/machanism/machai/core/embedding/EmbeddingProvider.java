@@ -21,6 +21,7 @@ import org.bson.conversions.Bson;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema.Classification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +46,15 @@ import dev.langchain4j.model.openai.OpenAiEmbeddingModelName;
 import dev.langchain4j.model.output.Response;
 
 public class EmbeddingProvider implements Closeable {
+
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
 	private static Logger logger = LoggerFactory.getLogger(EmbeddingProvider.class);
-	private static final String BINDEX_PROPERTY_NAME = "bindex";
+
+	public static final String BINDEX_PROPERTY_NAME = "bindex";
+	public static final String DESCRIPTION_EMBEDDING_PROPERTY_NAME = "description_embedding";
+	public static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
+
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private OpenAiEmbeddingModel embeddingModel;
@@ -105,8 +111,8 @@ public class EmbeddingProvider implements Closeable {
 
 			Document bindexDocument = Document.parse(objectMapper.writeValueAsString(bindex.getClassification()))
 					.append(BINDEX_PROPERTY_NAME, bindexJson)
-					.append("description_embedding", descriptionEmbedding)
-					.append("classification_embedding", classificationEmbedding)
+					.append(DESCRIPTION_EMBEDDING_PROPERTY_NAME, descriptionEmbedding)
+					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME, classificationEmbedding)
 					.append("id", bindex.getId());
 
 			InsertOneResult result = collection.insertOne(bindexDocument);
@@ -159,26 +165,34 @@ public class EmbeddingProvider implements Closeable {
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode schemaJson = objectMapper.readTree(schema);
 		JsonNode jsonNode = schemaJson.get("properties").get("classification");
-		String classification = objectMapper.writeValueAsString(jsonNode);
+		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
 
 		String classificationInstruction = MessageFormat.format(promptBundle.getString("classification_instruction"),
-				classification);
+				classificationSchema);
 		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform();
 
-		Iterable<Double> classificationEmbedding = getEmbedding(classificationQuery);
+		Classification classification = objectMapper.readValue(classificationQuery, Classification.class);
 
+		Iterable<Double> queryEmbedding = getEmbedding(query);
+
+		List<String> languages = classification.getLanguage().stream().map(i -> i.getName())
+				.collect(Collectors.toList());
 		List<Bson> pipeline = Arrays.asList(
 				Aggregates.vectorSearch(
-						fieldPath("classification_embedding"),
-						classificationEmbedding,
+						fieldPath(DESCRIPTION_EMBEDDING_PROPERTY_NAME),
+						queryEmbedding,
 						indexName,
 						limit,
 						exactVectorSearchOptions()),
+
+				Aggregates.match(Filters.in("language.name", languages)),
+				Aggregates.match(Filters.in("domains", classification.getDomains())),
 
 				Aggregates.project(
 						Projections.fields(
 								Projections.exclude("_id"),
 								Projections.include(BINDEX_PROPERTY_NAME),
+								Projections.include("id"),
 								Projections.metaVectorSearchScore("score"))));
 
 		List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
@@ -192,7 +206,7 @@ public class EmbeddingProvider implements Closeable {
 				try {
 					bindex = new ObjectMapper().readValue(bindexStr, BIndex.class);
 					arrayList.add(bindex);
-					// logger.info("Score: " + doc.getDouble("score"));
+					// logger.info(doc.getString("id") + ": " + doc.getDouble("score"));
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}
