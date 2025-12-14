@@ -6,6 +6,7 @@ import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSea
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,15 +26,18 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.search.FieldSearchPath;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.InsertOneResult;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiEmbeddingModelName;
 import dev.langchain4j.model.output.Response;
 
 public class EmbeddingProvider implements Closeable {
-	private static final String MODEL_NAME = "text-embedding-3-small";
+	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
 	private static Logger logger = LoggerFactory.getLogger(EmbeddingProvider.class);
 
@@ -62,7 +66,7 @@ public class EmbeddingProvider implements Closeable {
 
 		embeddingModel = OpenAiEmbeddingModel.builder()
 				.apiKey(apiKey)
-				.modelName(MODEL_NAME)
+				.modelName(EMBEDDING_MODEL_NAME)
 				.timeout(java.time.Duration.ofSeconds(60))
 				.build();
 
@@ -76,33 +80,50 @@ public class EmbeddingProvider implements Closeable {
 		mongoClient.close();
 	}
 
-	public String create(BIndex bindex, List<Double> embedding) throws JsonProcessingException {
+	public String create(BIndex bindex) throws JsonProcessingException {
 		try {
-			Document doc = getDocument(bindex);
-			if (doc != null) {
-				collection.deleteOne(doc);
-			}
 
-			BsonArray bsonArray = new BsonArray(
-					embedding.stream()
-							.map(BsonDouble::new)
-							.collect(Collectors.toList()));
+			ObjectMapper objectMapper = new ObjectMapper();
+			String bindexJson = objectMapper.writeValueAsString(bindex);
 
-			String bindexStr = new ObjectMapper().writeValueAsString(bindex);
-			doc = new Document(BINDEX_PROPERTY_NAME, bindexStr).append("id", bindex.getId()).append(
-					"embedding",
-					bsonArray);
+			Bson filter = Filters.eq("id", bindex.getId());
+			collection.deleteOne(filter);
 
-			InsertOneResult result = collection.insertOne(doc);
+			BsonArray descriptionEmbedding = getEmbeddingBson(bindex.getDescription());
+			BsonArray classificationEmbedding = getEmbeddingBson(bindex.getClassification());
+
+			Document bindexDocument = Document.parse(bindexJson)
+					.append(BINDEX_PROPERTY_NAME, bindexJson)
+					.append("description_embedding", descriptionEmbedding)
+					.append("classification_embedding", classificationEmbedding)
+					.append("id", bindex.getId());
+
+			InsertOneResult result = collection.insertOne(bindexDocument);
+
 			return result.getInsertedId().toString();
 
 		} catch (MongoCommandException e) {
 			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
 			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-				logger.error("ERROR: To register Bindex, the BINDEX_REG_PASSWORD env property is required.");
+				logger.error("ERROR: To register BIndex, the BINDEX_REG_PASSWORD env property is required.");
 			}
 			throw e;
 		}
+	}
+
+	private BsonArray getEmbeddingBson(Object data) throws JsonProcessingException {
+		String text;
+		if (data instanceof String) {
+			text = (String) data;
+		} else {
+			text = new ObjectMapper().writeValueAsString(data);
+		}
+		List<Double> descEmbedding = getEmbedding(text);
+		BsonArray bsonArray = new BsonArray(
+				descEmbedding.stream()
+						.map(BsonDouble::new)
+						.collect(Collectors.toList()));
+		return bsonArray;
 	}
 
 	public Document getDocument(BIndex bindex) {
@@ -123,21 +144,34 @@ public class EmbeddingProvider implements Closeable {
 		List<BIndex> arrayList = new ArrayList<>();
 		List<Double> embedding = getEmbedding(query);
 
-		String indexName = "vector_index";
-		FieldSearchPath fieldSearchPath = fieldPath("embedding");
-		List<Bson> pipeline = java.util.Arrays.asList(
-				com.mongodb.client.model.Aggregates.vectorSearch(
-						fieldSearchPath,
+		String indexName = "vector_index_1";
+
+		List<Bson> pipeline = Arrays.asList(
+				Aggregates.vectorSearch(
+						fieldPath("description_embedding"),
 						embedding,
 						indexName,
 						limit,
 						exactVectorSearchOptions()),
-				com.mongodb.client.model.Aggregates.project(
-						com.mongodb.client.model.Projections.fields(com.mongodb.client.model.Projections.exclude("_id"),
-								com.mongodb.client.model.Projections.include(BINDEX_PROPERTY_NAME),
-								com.mongodb.client.model.Projections.metaVectorSearchScore("score"))));
+
+				Aggregates.unionWith(
+						collection.getNamespace().getCollectionName(),
+						Arrays.asList(
+								Aggregates.vectorSearch(
+										fieldPath("classification_embedding"),
+										embedding,
+										indexName,
+										limit,
+										exactVectorSearchOptions()))),
+
+				Aggregates.project(
+						Projections.fields(
+								Projections.exclude("_id"),
+								Projections.include(BINDEX_PROPERTY_NAME),
+								Projections.metaVectorSearchScore("score"))));
 
 		List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+
 		if (results.isEmpty()) {
 			logger.info("No results found.");
 		} else {
@@ -147,7 +181,7 @@ public class EmbeddingProvider implements Closeable {
 				try {
 					bindex = new ObjectMapper().readValue(bindexStr, BIndex.class);
 					arrayList.add(bindex);
-					//logger.info("Score: " + doc.getDouble("score"));
+					// logger.info("Score: " + doc.getDouble("score"));
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}

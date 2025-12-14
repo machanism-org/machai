@@ -17,7 +17,7 @@
 	"properties": {
 		"id": {
 			"type": "string",
-			"description": "A unique identifier for the artifact (e.g.: [groupId]:[artifactId]:[version])."
+			"description": "A unique identifier for the artifact."
 		},
 		"name": {
 			"type": "string",

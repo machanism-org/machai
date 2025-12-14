@@ -61,6 +61,9 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 				}
 			});
 		}
+		
+		String prompt = promptBundle.getString("additional_rules");
+		getProvider().prompt(prompt);
 	}
 
 	public static boolean isPackageJsonPresent(File projectDir) {
@@ -82,19 +85,15 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 				while (iterator.hasNext()) {
 					String module = iterator.next().asText();
 
-					try (Stream<Path> stream = Files.walk(getProjectDir().toPath())) {
+					String requiredStartWith = StringUtils.substringBefore(module, "**");
+					File dirToScan = new File(getProjectDir(), requiredStartWith);
+
+					try (Stream<Path> stream = Files.walk(dirToScan.toPath())) {
 						stream.filter(p -> {
 							File file = p.toFile();
-
 							String relativePath = getRelatedPath(currentPath, file);
-							String requiredStartWith = StringUtils.substringBefore(module, "**");
-
-							if (StringUtils.startsWith(relativePath, requiredStartWith)
-									&& !StringUtils.containsAny(relativePath, EXCLUDE_DIRS)) {
-								return StringUtils.equals(file.getName(), PROJECT_MODEL_FILE_NAME);
-							}
-
-							return false;
+							return StringUtils.equals(file.getName(), PROJECT_MODEL_FILE_NAME)
+									&& !StringUtils.containsAny(relativePath, EXCLUDE_DIRS);
 						}).forEach(p -> {
 							File dir = p.toFile().getParentFile();
 							String relativePath = getRelatedPath(currentPath, dir);

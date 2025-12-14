@@ -44,6 +44,9 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 				}
 			});
 		}
+
+		prompt = promptBundle.getString("additional_rules");
+		getProvider().prompt(prompt);
 	}
 
 	private void removeNotImportantData(Model model) {
