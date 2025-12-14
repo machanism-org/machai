@@ -14,7 +14,9 @@ import org.machanism.machai.schema.BIndex;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class BIndexBuilder {
+	public static final String BINDEX_TEMP_DIR = ".bindex";
 	private static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
+	
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private File projectDir;
@@ -38,7 +40,8 @@ public abstract class BIndexBuilder {
 		getProvider().prompt(prompt);
 
 		if (bindexDir != null) {
-			getProvider().saveInput(new File(getProjectDir(), "bindex"));
+			File dir = new File(getProjectDir(), BINDEX_TEMP_DIR);
+			getProvider().saveInput(dir);
 		}
 
 		String output = getProvider().perform();

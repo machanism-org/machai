@@ -52,7 +52,7 @@ public abstract class ScanProject {
 	}
 
 	public File getBindexFile(File projectDir) {
-		return new File(projectDir, "bindex/bindex.json");
+		return new File(projectDir, "bindex.json");
 	}
 
 }

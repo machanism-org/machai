@@ -14,12 +14,12 @@
 		<Listdir name="Inputs Files" path="$var{Project Directory}" filter="inputs.txt" /> 
 		<Out name="Inputs Files" level="debug" /> 
 		<Loop name="path" source="Inputs Files">
-			<Var name="path" end="inputs.txt" /> 
+			<Var name="path" end="\.bindex\inputs.txt" /> 
 			<Remove name="bindex" /> 
-			<Load name="bindex" file="$var{path}/bindex.json" exception="java.io.FileNotFoundException" /> 
+			<Load name="bindex" file="$var{path}\bindex.json" exception="java.io.FileNotFoundException" /> 
 			<If isNull="bindex">
 				<Remove name="inputs" /> 
-				<Load name="inputs" file="$var{path}/inputs.txt" exception="java.io.FileNotFoundException" /> 
+				<Load name="inputs" file="$var{path}\.bindex\inputs.txt" exception="java.io.FileNotFoundException" /> 
 				<Out name="inputs" /> 
 				<If isNotNull="inputs">
 					<Clipboard name="inputs" /> 
@@ -33,7 +33,7 @@
 					<ElementExists xpath="//*[contains(concat(' ', normalize-space(@class), ' '), ' tabler-icon-send ')]" timeout="3m" /> 
 					<GetText name="bindex" xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[1]/pre/div/pre" /> 
 					<Out name="bindex" type="json" /> 
-					<Out file="$var{path}/bindex.json" name="bindex" /> 
+					<Out file="$var{path}\bindex.json" name="bindex" /> 
 				</If> 
 			</If> 
 		</Loop> 

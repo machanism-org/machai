@@ -44,7 +44,8 @@ public class ApplicationAssembly {
 
 			provider.prompt(prompt);
 
-			provider.saveInput(SystemUtils.getUserDir());
+			File bindexTempDir = new File(SystemUtils.getUserDir(), BIndexBuilder.BINDEX_TEMP_DIR);
+			provider.saveInput(bindexTempDir);
 
 			String response = provider.perform();
 			if (response != null) {
