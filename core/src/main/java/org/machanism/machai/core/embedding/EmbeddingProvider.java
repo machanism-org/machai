@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -21,7 +22,6 @@ import org.bson.conversions.Bson;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
-import org.machanism.machai.schema.Classification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,48 +171,57 @@ public class EmbeddingProvider implements Closeable {
 				classificationSchema);
 		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform();
 
-		Classification classification = objectMapper.readValue(classificationQuery, Classification.class);
+		Set<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query, limit);
+		Set<String> resultsByClassification = getResults(indexName, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+				classificationQuery,
+				limit);
 
+		resultsByDescription.retainAll(resultsByClassification);
+
+		if (resultsByDescription.isEmpty()) {
+			logger.info("No results found.");
+		} else {
+			resultsByDescription.forEach(id -> {
+				BIndex bindex = getBindex(id);
+				arrayList.add(bindex);
+			});
+		}
+
+		return arrayList;
+	}
+
+	private BIndex getBindex(String id) {
+		Document doc = collection.find(com.mongodb.client.model.Filters.eq("id", id)).first();
+		String bindexStr = doc.getString("bindex");
+		try {
+			return new ObjectMapper().readValue(bindexStr, BIndex.class);
+		} catch (JsonProcessingException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	private Set<String> getResults(String indexName, String propertyPath, String query, long limit) {
 		Iterable<Double> queryEmbedding = getEmbedding(query);
 
-		List<String> languages = classification.getLanguage().stream().map(i -> i.getName())
-				.collect(Collectors.toList());
 		List<Bson> pipeline = Arrays.asList(
 				Aggregates.vectorSearch(
-						fieldPath(DESCRIPTION_EMBEDDING_PROPERTY_NAME),
+						fieldPath(propertyPath),
 						queryEmbedding,
 						indexName,
 						limit,
 						exactVectorSearchOptions()),
 
-				Aggregates.match(Filters.in("language.name", languages)),
-				Aggregates.match(Filters.in("domains", classification.getDomains())),
-
 				Aggregates.project(
 						Projections.fields(
 								Projections.exclude("_id"),
-								Projections.include(BINDEX_PROPERTY_NAME),
-								Projections.include("id"),
-								Projections.metaVectorSearchScore("score"))));
+								Projections.include("id"))));
 
-		List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
-		if (results.isEmpty()) {
-			logger.info("No results found.");
-		} else {
-			results.forEach(doc -> {
-				String bindexStr = doc.getString(BINDEX_PROPERTY_NAME);
-				BIndex bindex;
-				try {
-					bindex = new ObjectMapper().readValue(bindexStr, BIndex.class);
-					arrayList.add(bindex);
-					// logger.info(doc.getString("id") + ": " + doc.getDouble("score"));
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
-			});
-		}
+		Set<String> results = docs.stream()
+				.map(doc -> doc.getString("id"))
+				.collect(Collectors.toSet());
 
-		return arrayList;
+		return results;
 	}
 }
