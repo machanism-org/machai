@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -57,7 +56,6 @@ public class Picker implements Closeable {
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 	public static final String DESCRIPTION_EMBEDDING_PROPERTY_NAME = "description_embedding";
 	public static final String DOMAIN_EMBEDDING_PROPERTY_NAME = "domain_embedding";
-	public static final String LANGUAGE_EMBEDDING_PROPERTY_NAME = "language_embedding";
 
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
@@ -112,14 +110,10 @@ public class Picker implements Closeable {
 
 			Classification classification = bindex.getClassification();
 
-			List<String> languages = classification.getLanguage().stream().map(l -> l.getName())
-					.collect(Collectors.toList());
-
 			Document bindexDocument = Document.parse(objectMapper.writeValueAsString(bindex.getClassification()))
 					.append(BINDEX_PROPERTY_NAME, bindexJson)
 					.append(DESCRIPTION_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(bindex.getDescription()))
 					.append(DOMAIN_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(classification.getDomains()))
-					.append(LANGUAGE_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(languages))
 					.append("id", bindex.getId());
 
 			InsertOneResult result = collection.insertOne(bindexDocument);
@@ -185,27 +179,21 @@ public class Picker implements Closeable {
 
 		int sourceLimits = limit * 4;
 
-		Collection<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query,
-				sourceLimits);
-
+		logger.info("Detected classification:");
 		List<String> languages = classification.getLanguage().stream().map(l -> l.getName())
 				.collect(Collectors.toList());
 		String languagesQuery = StringUtils.join(languages, ", ");
-		logger.info("Detected classification:");
 		logger.info("- Languages: {}", languagesQuery);
-		Collection<String> resultsByLanguages = getResults(indexName, LANGUAGE_EMBEDDING_PROPERTY_NAME,
-				languagesQuery,
-				sourceLimits);
-		if (!resultsByLanguages.isEmpty()) {
-			resultsByDescription.retainAll(resultsByLanguages);
-		}
+
+		Collection<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query,
+				sourceLimits, Aggregates.match(Filters.in("language.name", languages)));
 
 		List<String> domains = classification.getDomains();
 		String domainsQuery = StringUtils.join(domains, ", ");
 		logger.info("- Domains: {}", domainsQuery);
 		Collection<String> resultsByDomains = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
 				domainsQuery,
-				sourceLimits);
+				sourceLimits, null);
 		if (!resultsByDomains.isEmpty()) {
 			resultsByDescription.retainAll(resultsByDomains);
 		}
@@ -234,21 +222,26 @@ public class Picker implements Closeable {
 		}
 	}
 
-	private Collection<String> getResults(String indexName, String propertyPath, String query, long limit) {
+	private Collection<String> getResults(String indexName, String propertyPath, String query, long limit,
+			Bson bson) {
 		Iterable<Double> queryEmbedding = getEmbedding(query);
 
-		List<Bson> pipeline = Arrays.asList(
-				Aggregates.vectorSearch(
-						fieldPath(propertyPath),
-						queryEmbedding,
-						indexName,
-						limit,
-						exactVectorSearchOptions()),
+		List<Bson> pipeline = new ArrayList<>();
 
-				Aggregates.project(
-						Projections.fields(
-								Projections.exclude("_id"),
-								Projections.include("id"))));
+		pipeline.add(Aggregates.vectorSearch(
+				fieldPath(propertyPath),
+				queryEmbedding,
+				indexName,
+				limit,
+				exactVectorSearchOptions()));
+
+		if (bson != null) {
+			pipeline.add(bson);
+		}
+
+		pipeline.add(Aggregates.project(Projections.fields(
+				Projections.exclude("_id"),
+				Projections.include("id"))));
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
