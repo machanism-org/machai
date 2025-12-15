@@ -37,7 +37,7 @@ public abstract class ScanProject {
 	public abstract String processProject(File projectDir);
 
 	public BIndex getBindex(File projectDir) throws IOException {
-		logger.info("Project dir: " + projectDir);
+		logger.info("Project dir: {}", projectDir);
 		File bindexFile = getBindexFile(projectDir);
 
 		try {

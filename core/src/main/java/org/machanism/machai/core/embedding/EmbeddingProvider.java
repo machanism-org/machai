@@ -9,12 +9,14 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.bson.BsonArray;
 import org.bson.BsonDouble;
 import org.bson.Document;
@@ -22,6 +24,7 @@ import org.bson.conversions.Bson;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema.Classification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +56,8 @@ public class EmbeddingProvider implements Closeable {
 
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 	public static final String DESCRIPTION_EMBEDDING_PROPERTY_NAME = "description_embedding";
-	public static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
+	public static final String DOMAIN_EMBEDDING_PROPERTY_NAME = "domain_embedding";
+	public static final String LANGUAGE_EMBEDDING_PROPERTY_NAME = "language_embedding";
 
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
@@ -106,13 +110,16 @@ public class EmbeddingProvider implements Closeable {
 			Bson filter = Filters.eq("id", bindex.getId());
 			collection.deleteOne(filter);
 
-			BsonArray descriptionEmbedding = getEmbeddingBson(bindex.getDescription());
-			BsonArray classificationEmbedding = getEmbeddingBson(bindex.getClassification());
+			Classification classification = bindex.getClassification();
+
+			List<String> languages = classification.getLanguage().stream().map(l -> l.getName())
+					.collect(Collectors.toList());
 
 			Document bindexDocument = Document.parse(objectMapper.writeValueAsString(bindex.getClassification()))
 					.append(BINDEX_PROPERTY_NAME, bindexJson)
-					.append(DESCRIPTION_EMBEDDING_PROPERTY_NAME, descriptionEmbedding)
-					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME, classificationEmbedding)
+					.append(DESCRIPTION_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(bindex.getDescription()))
+					.append(DOMAIN_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(classification.getDomains()))
+					.append(LANGUAGE_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(languages))
 					.append("id", bindex.getId());
 
 			InsertOneResult result = collection.insertOne(bindexDocument);
@@ -156,9 +163,9 @@ public class EmbeddingProvider implements Closeable {
 				.collect(Collectors.toList());
 	}
 
-	public List<BIndex> search(String query, long limit) throws IOException {
+	public List<BIndex> search(String query, int limit) throws IOException {
 		List<BIndex> arrayList = new ArrayList<>();
-		String indexName = "vector_index_1";
+		String indexName = "vector_index";
 
 		URL systemResource = BIndex.class.getResource(BIndexBuilder.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, "UTF8");
@@ -170,21 +177,39 @@ public class EmbeddingProvider implements Closeable {
 		String classificationInstruction = MessageFormat.format(promptBundle.getString("classification_instruction"),
 				classificationSchema);
 		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform();
+		Classification classification = new ObjectMapper().readValue(classificationQuery, Classification.class);
 
-		Set<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query, limit);
-		Set<String> resultsByClassification = getResults(indexName, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
-				classificationQuery,
-				limit);
+		int sourceLimits = limit * 4;
 
-		resultsByDescription.retainAll(resultsByClassification);
+		Collection<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query,
+				sourceLimits);
+
+		List<String> languages = classification.getLanguage().stream().map(l -> l.getName())
+				.collect(Collectors.toList());
+		Collection<String> resultsByLanguages = getResults(indexName, LANGUAGE_EMBEDDING_PROPERTY_NAME,
+				StringUtils.join(languages, ","),
+				sourceLimits);
+		if (!resultsByLanguages.isEmpty()) {
+			resultsByDescription.retainAll(resultsByLanguages);
+		}
+
+		List<String> domains = classification.getDomains();
+		Collection<String> resultsByDomains = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
+				StringUtils.join(domains, ","),
+				sourceLimits);
+		if (!resultsByDomains.isEmpty()) {
+			resultsByDescription.retainAll(resultsByDomains);
+		}
 
 		if (resultsByDescription.isEmpty()) {
 			logger.info("No results found.");
 		} else {
-			resultsByDescription.forEach(id -> {
-				BIndex bindex = getBindex(id);
-				arrayList.add(bindex);
-			});
+			resultsByDescription.stream()
+					.limit(limit)
+					.forEach(id -> {
+						BIndex bindex = getBindex(id);
+						arrayList.add(bindex);
+					});
 		}
 
 		return arrayList;
@@ -200,7 +225,7 @@ public class EmbeddingProvider implements Closeable {
 		}
 	}
 
-	private Set<String> getResults(String indexName, String propertyPath, String query, long limit) {
+	private Collection<String> getResults(String indexName, String propertyPath, String query, long limit) {
 		Iterable<Double> queryEmbedding = getEmbedding(query);
 
 		List<Bson> pipeline = Arrays.asList(
@@ -218,9 +243,9 @@ public class EmbeddingProvider implements Closeable {
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
-		Set<String> results = docs.stream()
+		Collection<String> results = docs.stream()
 				.map(doc -> doc.getString("id"))
-				.collect(Collectors.toSet());
+				.collect(Collectors.toList());
 
 		return results;
 	}

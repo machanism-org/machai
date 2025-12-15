@@ -57,11 +57,11 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 				try {
 					getProvider().promptFile("source_resource_section", f.toFile());
 				} catch (IOException e) {
-					logger.warn("File: " + f + " adding failed.");
+					logger.warn("File: {P} adding failed.", f);
 				}
 			});
 		}
-		
+
 		String prompt = promptBundle.getString("additional_rules");
 		getProvider().prompt(prompt);
 	}

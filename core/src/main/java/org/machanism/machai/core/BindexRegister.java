@@ -36,7 +36,7 @@ public class BindexRegister extends ScanProject implements Closeable {
 				if (document == null || overwrite) {
 					EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder().provider(embeddingProvider);
 					regId = embeddingBuilder.bindex(bindex).build();
-					logger.info("embeddingId: " + regId);
+					logger.info("embeddingId: {}", regId);
 				} else {
 					regId = ((ObjectId) document.get("_id")).toString();
 				}

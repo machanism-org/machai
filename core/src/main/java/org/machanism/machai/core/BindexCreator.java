@@ -46,7 +46,7 @@ public class BindexCreator extends ScanProject {
 			if (bindex != null) {
 				result = new ObjectMapper().writeValueAsString(bindex);
 				new ObjectMapper().writeValue(bindexFile, bindex);
-				logger.info("BIndex file: " + bindexFile);
+				logger.info("BIndex file: {}", bindexFile);
 			}
 
 			return result;

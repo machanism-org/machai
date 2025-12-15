@@ -186,7 +186,7 @@ public class PomReader {
 		try {
 			model = PomReader.getProjectModel(file, true);
 		} catch (Exception e) {
-			logger.debug("Effective pom creation failed: " + StringUtils.abbreviate(e.getLocalizedMessage(), 80));
+			logger.debug("Effective pom creation failed: {}", StringUtils.abbreviate(e.getLocalizedMessage(), 80));
 			model = PomReader.getProjectModel(file, false);
 		}
 		return model;

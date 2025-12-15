@@ -3,6 +3,7 @@ package org.machanism.machai.cli;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
@@ -45,27 +46,20 @@ public class AssembyCommand {
 
 		findQuery = query;
 		bindexList = getBricks(query, limits);
+		logger.info("Search results for libraries matching the requested query:");
 		printFindResult(bindexList, limits);
 	}
 
 	private void printFindResult(List<BIndex> bindexList, int limits) {
-		logger.info("Search Context: Semantic search based on 'bindex' description embeddings.");
-
 		if (!bindexList.isEmpty()) {
-			logger.info("Matching Artifacts Found:");
-			logger.info("---------------------------------------------------------------");
-
 			int i = 1;
 			for (BIndex bindex : bindexList) {
 				logger.info(String.format("%2$3s. %1s", bindex.getId(), i++));
 			}
 
-			logger.info("---------------------------------------------------------------");
-			logger.info("Number of Artifacts Found: " + bindexList.size() + ". Limits: " + limits);
+			logger.info("Number of Artifacts Found: {}. Limits: {}", bindexList.size(), limits);
 		} else {
-			logger.info("");
 			logger.info("No Artifacts Found.");
-			logger.info("---------------------------------------------------------------");
 		}
 	}
 
@@ -74,7 +68,7 @@ public class AssembyCommand {
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
 			@ShellOption(help = "The path to the assembled project directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "10") int limits,
-			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create an index.", value = "debug") boolean debug)
+			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create the project.", value = "inputs") boolean debug)
 			throws IOException {
 
 		if (dir == null) {
@@ -82,7 +76,7 @@ public class AssembyCommand {
 		} else {
 			dir.mkdirs();
 		}
-		
+
 		provider.setDebugMode(debug);
 		String prompt = query;
 
@@ -100,7 +94,13 @@ public class AssembyCommand {
 		}
 
 		ApplicationAssembly assembly = new ApplicationAssembly(provider);
+
+		logger.info("The project directory: {}", dir);
+
 		assembly.projectDir(dir);
+		List<BIndex> bindexList = this.bindexList.stream().limit(limits).collect(Collectors.toList());
+		logger.info("Recommended libraries:");
+		printFindResult(bindexList, limits);
 		assembly.assembly(prompt, bindexList);
 	}
 

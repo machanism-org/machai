@@ -40,7 +40,7 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 				try {
 					getProvider().promptFile("source_resource_section", f.toFile());
 				} catch (IOException e) {
-					logger.warn("File: " + f + " adding failed.");
+					logger.warn("File: {} adding failed.", f);
 				}
 			});
 		}

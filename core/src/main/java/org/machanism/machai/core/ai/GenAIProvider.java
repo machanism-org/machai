@@ -251,7 +251,7 @@ public class GenAIProvider {
 
 		File inputsFile = new File(dir, "inputs.txt");
 		try (Writer streamWriter = new FileWriter(inputsFile, false)) {
-			logger.info("Bindex inputs file: " + inputsFile);
+			logger.info("Bindex inputs file: {}", inputsFile);
 
 			for (ResponseInputItem responseInputItem : inputs) {
 				String inputText = "";
@@ -353,7 +353,7 @@ public class GenAIProvider {
 			directory = workingDir;
 		}
 
-		logger.info("List files recursively: " + params);
+		logger.info("List files recursively: {}", params);
 
 		List<File> listFiles = listFilesRecursively(directory);
 		StringBuilder content = new StringBuilder();
@@ -409,7 +409,7 @@ public class GenAIProvider {
 		String filePath = params.get("file_path").asText();
 		String text = params.get("text").asText();
 
-		logger.info("Write file: " + StringUtils.abbreviate(params.toString(), 80));
+		logger.info("Write file: {}", StringUtils.abbreviate(params.toString(), 80));
 
 		File file = new File(workingDir, filePath);
 		if (file.getParentFile() != null) {
@@ -427,7 +427,7 @@ public class GenAIProvider {
 	private Object readFile(JsonNode params) {
 		String filePath = params.get("file_path").asText();
 
-		logger.info("Read file: " + params);
+		logger.info("Read file: {}", params);
 
 		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
 			return IOUtils.toString(io, "UTF8");
@@ -437,7 +437,7 @@ public class GenAIProvider {
 	}
 
 	public String executeCommand(JsonNode params) {
-		logger.info("Run shell command: " + params);
+		logger.info("Run shell command: {}", params);
 
 		String command = params.get("command").asText();
 
