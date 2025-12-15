@@ -1,4 +1,4 @@
-package org.machanism.machai.core.embedding;
+package org.machanism.machai.core;
 
 import static com.mongodb.client.model.search.SearchPath.fieldPath;
 import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSearchOptions;
@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -21,6 +20,7 @@ import org.bson.BsonArray;
 import org.bson.BsonDouble;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
@@ -48,11 +48,11 @@ import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModelName;
 import dev.langchain4j.model.output.Response;
 
-public class EmbeddingProvider implements Closeable {
+public class Picker implements Closeable {
 
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
-	private static Logger logger = LoggerFactory.getLogger(EmbeddingProvider.class);
+	private static Logger logger = LoggerFactory.getLogger(Picker.class);
 
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 	public static final String DESCRIPTION_EMBEDDING_PROPERTY_NAME = "description_embedding";
@@ -69,7 +69,7 @@ public class EmbeddingProvider implements Closeable {
 
 	private GenAIProvider provider;
 
-	public EmbeddingProvider(String instanceName, String connection) {
+	public Picker(String instanceName, String connection) {
 		this.provider = new GenAIProvider(ChatModel.GPT_5_MINI);
 
 		String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
@@ -149,21 +149,25 @@ public class EmbeddingProvider implements Closeable {
 		return bsonArray;
 	}
 
-	public Document getDocument(BIndex bindex) {
+	public String getRegistredId(BIndex bindex) {
 		Document query = new Document("id", bindex.getId());
 		FindIterable<Document> find = collection.find(query);
-		Document first = find.first();
-		return first;
+		Document document = find.first();
+		String id = null;
+		if (document != null) {
+			id = ((ObjectId) document.get("_id")).toString();
+		}
+		return id;
 	}
 
-	public List<Double> getEmbedding(String text) {
+	private List<Double> getEmbedding(String text) {
 		Response<Embedding> response = embeddingModel.embed(text);
 		return response.content().vectorAsList().stream()
 				.map(Double::new)
 				.collect(Collectors.toList());
 	}
 
-	public List<BIndex> search(String query, int limit) throws IOException {
+	public List<BIndex> pick(String query, int limit) throws IOException {
 		List<BIndex> arrayList = new ArrayList<>();
 		String indexName = "vector_index";
 
@@ -186,16 +190,21 @@ public class EmbeddingProvider implements Closeable {
 
 		List<String> languages = classification.getLanguage().stream().map(l -> l.getName())
 				.collect(Collectors.toList());
+		String languagesQuery = StringUtils.join(languages, ", ");
+		logger.info("Detected classification:");
+		logger.info("- Languages: {}", languagesQuery);
 		Collection<String> resultsByLanguages = getResults(indexName, LANGUAGE_EMBEDDING_PROPERTY_NAME,
-				StringUtils.join(languages, ","),
+				languagesQuery,
 				sourceLimits);
 		if (!resultsByLanguages.isEmpty()) {
 			resultsByDescription.retainAll(resultsByLanguages);
 		}
 
 		List<String> domains = classification.getDomains();
+		String domainsQuery = StringUtils.join(domains, ", ");
+		logger.info("- Domains: {}", domainsQuery);
 		Collection<String> resultsByDomains = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
-				StringUtils.join(domains, ","),
+				domainsQuery,
 				sourceLimits);
 		if (!resultsByDomains.isEmpty()) {
 			resultsByDescription.retainAll(resultsByDomains);

@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
+import org.machanism.machai.core.Picker;
+import org.machanism.machai.core.ai.ApplicationAssembly;
 import org.machanism.machai.core.ai.GenAIProvider;
-import org.machanism.machai.core.assembly.ApplicationAssembly;
-import org.machanism.machai.core.embedding.EmbeddingProvider;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,28 +39,15 @@ public class AssembyCommand {
 	}
 
 	@ShellMethod()
-	public void find(
+	public void pick(
 			@ShellOption(value = "The application assembly prompt.") String query,
 			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "10") int limits)
 			throws IOException {
 
 		findQuery = query;
-		bindexList = getBricks(query, limits);
+		bindexList = pickBricks(query, limits);
 		logger.info("Search results for libraries matching the requested query:");
 		printFindResult(bindexList, limits);
-	}
-
-	private void printFindResult(List<BIndex> bindexList, int limits) {
-		if (!bindexList.isEmpty()) {
-			int i = 1;
-			for (BIndex bindex : bindexList) {
-				logger.info(String.format("%2$3s. %1s", bindex.getId(), i++));
-			}
-
-			logger.info("Number of Artifacts Found: {}. Limits: {}", bindexList.size(), limits);
-		} else {
-			logger.info("No Artifacts Found.");
-		}
 	}
 
 	@ShellMethod()
@@ -86,7 +73,7 @@ public class AssembyCommand {
 			}
 			prompt = this.findQuery;
 		} else {
-			bindexList = getBricks(query, limits);
+			bindexList = pickBricks(query, limits);
 
 			for (BIndex bindex : bindexList) {
 				logger.info("ArtifactId: " + bindex.getId());
@@ -114,12 +101,25 @@ public class AssembyCommand {
 		}
 	}
 
-	private List<BIndex> getBricks(String query, int limits) throws IOException {
+	private List<BIndex> pickBricks(String query, int limits) throws IOException {
 		List<BIndex> bindexList = null;
-		try (EmbeddingProvider provider = new EmbeddingProvider("machanism", "bindex")) {
-			bindexList = provider.search(query, limits);
+		try (Picker provider = new Picker("machanism", "bindex")) {
+			bindexList = provider.pick(query, limits);
 		}
 		return bindexList;
+	}
+
+	private void printFindResult(List<BIndex> bindexList, int limits) {
+		if (!bindexList.isEmpty()) {
+			int i = 1;
+			for (BIndex bindex : bindexList) {
+				logger.info(String.format("%2$3s. %1s", bindex.getId(), i++));
+			}
+
+			logger.info("Number of Artifacts Found: {}. Limits: {}", bindexList.size(), limits);
+		} else {
+			logger.info("No Artifacts Found.");
+		}
 	}
 
 }

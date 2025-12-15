@@ -6,8 +6,6 @@ import java.io.IOException;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.machanism.machai.core.embedding.EmbeddingBuilder;
-import org.machanism.machai.core.embedding.EmbeddingProvider;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +14,13 @@ public class BindexRegister extends ScanProject implements Closeable {
 
 	private static Logger logger = LoggerFactory.getLogger(BindexRegister.class);
 
-	private EmbeddingProvider embeddingProvider;
+	private Picker embeddingProvider;
 
 	private boolean overwrite;
 
 	public BindexRegister() {
 		super();
-		embeddingProvider = new EmbeddingProvider("machanism", "bindex");
+		embeddingProvider = new Picker("machanism", "bindex");
 	}
 
 	public String processProject(File projectDir) {
@@ -32,13 +30,10 @@ public class BindexRegister extends ScanProject implements Closeable {
 
 			String regId = null;
 			if (bindex != null) {
-				Document document = embeddingProvider.getDocument(bindex);
-				if (document == null || overwrite) {
-					EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder().provider(embeddingProvider);
-					regId = embeddingBuilder.bindex(bindex).build();
+				regId = embeddingProvider.getRegistredId(bindex);
+				if (regId == null || overwrite) {
+					regId = embeddingProvider.create(bindex);
 					logger.info("embeddingId: {}", regId);
-				} else {
-					regId = ((ObjectId) document.get("_id")).toString();
 				}
 			}
 
