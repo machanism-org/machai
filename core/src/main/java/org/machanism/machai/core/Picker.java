@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -180,13 +182,16 @@ public class Picker implements Closeable {
 		int sourceLimits = limit * 4;
 
 		logger.info("Detected classification:");
-		List<String> languages = classification.getLanguage().stream().map(l -> l.getName())
-				.collect(Collectors.toList());
+		Set<String> languages = classification.getLanguage().stream().map(l -> l.getName())
+				.collect(Collectors.toSet());
 		String languagesQuery = StringUtils.join(languages, ", ");
 		logger.info("- Languages: {}", languagesQuery);
 
+		List<Bson> regexFilters = languages.stream()
+				.map(lang -> Filters.regex("language.name", "^" + Pattern.quote(lang) + "$", "i"))
+				.collect(Collectors.toList());
 		Collection<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query,
-				sourceLimits, Aggregates.match(Filters.in("language.name", languages)));
+				sourceLimits, Aggregates.match(Filters.or(regexFilters)));
 
 		List<String> domains = classification.getDomains();
 		String domainsQuery = StringUtils.join(domains, ", ");
