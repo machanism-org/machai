@@ -133,7 +133,7 @@
 						"description": "Application domain."
 					}
 				},
-				"language": {
+				"languages": {
 					"type": "array",
 					"description": "Programming languages supported.",
 					"items": {

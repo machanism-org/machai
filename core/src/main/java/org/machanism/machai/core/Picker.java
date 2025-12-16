@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -26,6 +25,7 @@ import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
 import org.machanism.machai.schema.Classification;
+import org.machanism.machai.schema.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +58,8 @@ public class Picker implements Closeable {
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 	public static final String DESCRIPTION_EMBEDDING_PROPERTY_NAME = "description_embedding";
 	public static final String DOMAIN_EMBEDDING_PROPERTY_NAME = "domain_embedding";
+	private static final String LANGUAGES_PROPERTY_NAME = "languages";
+	private static final String DOMAINS_PROPERTY_NAME = "domains";
 
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
@@ -89,6 +91,7 @@ public class Picker implements Closeable {
 				.apiKey(apiKey)
 				.modelName(EMBEDDING_MODEL_NAME)
 				.timeout(java.time.Duration.ofSeconds(60))
+				.dimensions(50)
 				.build();
 
 		mongoClient = MongoClients.create(uri);
@@ -111,9 +114,12 @@ public class Picker implements Closeable {
 			collection.deleteOne(filter);
 
 			Classification classification = bindex.getClassification();
+			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
+					.distinct().collect(Collectors.toSet());
 
-			Document bindexDocument = Document.parse(objectMapper.writeValueAsString(bindex.getClassification()))
-					.append(BINDEX_PROPERTY_NAME, bindexJson)
+			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson)
+					.append(DOMAINS_PROPERTY_NAME, classification.getDomains())
+					.append(LANGUAGES_PROPERTY_NAME, languages)
 					.append(DESCRIPTION_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(bindex.getDescription()))
 					.append(DOMAIN_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(classification.getDomains()))
 					.append("id", bindex.getId());
@@ -182,16 +188,13 @@ public class Picker implements Closeable {
 		int sourceLimits = limit * 4;
 
 		logger.info("Detected classification:");
-		Set<String> languages = classification.getLanguage().stream().map(l -> l.getName())
-				.collect(Collectors.toSet());
+		Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
+				.distinct().collect(Collectors.toSet());
 		String languagesQuery = StringUtils.join(languages, ", ");
 		logger.info("- Languages: {}", languagesQuery);
 
-		List<Bson> regexFilters = languages.stream()
-				.map(lang -> Filters.regex("language.name", "^" + Pattern.quote(lang) + "$", "i"))
-				.collect(Collectors.toList());
 		Collection<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query,
-				sourceLimits, Aggregates.match(Filters.or(regexFilters)));
+				sourceLimits, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
 
 		List<String> domains = classification.getDomains();
 		String domainsQuery = StringUtils.join(domains, ", ");
@@ -255,5 +258,11 @@ public class Picker implements Closeable {
 				.collect(Collectors.toList());
 
 		return results;
+	}
+
+	private static String getNormalizedLanguageName(Language language) {
+		String lang = language.getName().toLowerCase().trim();
+		lang = StringUtils.substringBefore(lang, "(").trim();
+		return lang;
 	}
 }
