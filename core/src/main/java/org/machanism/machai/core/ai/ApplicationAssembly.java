@@ -27,9 +27,13 @@ public class ApplicationAssembly {
 	}
 
 	public void assembly(final String prompt, List<BIndex> bindexList) {
+		provider.workingDir(projectDir);
+
 		String systemPrompt = promptBundle.getString("assembly_system_instructions");
 		provider.instructions(systemPrompt);
-		provider.workingDir(projectDir);
+
+		String assemblyInstructions = promptBundle.getString("assembly_instructions");
+		provider.prompt(assemblyInstructions);
 
 		try {
 			BIndexBuilder.bindexSchemaPrompt(provider);
@@ -43,7 +47,7 @@ public class ApplicationAssembly {
 
 			provider.prompt(prompt);
 
-			File bindexTempDir = new File(SystemUtils.getUserDir(), BIndexBuilder.BINDEX_TEMP_DIR);
+			File bindexTempDir = new File(projectDir, BIndexBuilder.BINDEX_TEMP_DIR);
 			provider.saveInput(bindexTempDir);
 
 			String response = provider.perform();

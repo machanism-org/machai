@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.core.bindex.BIndexBuilderFactory;
@@ -36,19 +37,19 @@ public abstract class ScanProject {
 
 	public abstract String processProject(File projectDir);
 
-	public BIndex getBindex(File projectDir) throws IOException {
+	public BIndex getBindex(File projectDir) {
 		logger.info("Project dir: {}", projectDir);
 		File bindexFile = getBindexFile(projectDir);
 
+		BIndex bindex = null;
 		try {
-			BIndex bindex = null;
 			if (bindexFile.exists()) {
 				bindex = new ObjectMapper().readValue(new FileReader(bindexFile), BIndex.class);
 			}
-			return bindex;
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Bindex: " + bindexFile, e);
+			logger.error("Bindex: {}, Error: {}", bindexFile, StringUtils.abbreviate(e.getMessage(), 80));
 		}
+		return bindex;
 	}
 
 	public File getBindexFile(File projectDir) {

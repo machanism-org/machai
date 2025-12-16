@@ -6,11 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.Formatter;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
+import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +23,10 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 
 	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
+	private Model model;
+
 	protected void projectContext() throws IOException {
-		Model model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
+		model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
 
 		String sourceDirectory = model.getBuild().getSourceDirectory();
 		removeNotImportantData(model);
@@ -47,6 +51,16 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 
 		prompt = promptBundle.getString("additional_rules");
 		getProvider().prompt(prompt);
+	}
+
+	@Override
+	public BIndex build() throws IOException {
+		BIndex bindex = super.build();
+
+		bindex.setId(model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion());
+		bindex.setName(model.getName());
+
+		return bindex;
 	}
 
 	private void removeNotImportantData(Model model) {

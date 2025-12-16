@@ -31,7 +31,10 @@
 					<Wait delay="500" /> 
 					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[3]/div[2]/div/div[2]/button" exception="ignore" timeout="1s" /> 
 					<ElementExists xpath="//*[contains(concat(' ', normalize-space(@class), ' '), ' tabler-icon-send ')]" timeout="3m" /> 
-					<GetText name="bindex" xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[1]/pre/div/pre" /> 
+					<GetText name="bindex">
+						<xpath>//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[1]/pre/div/pre</xpath> 
+						<xpath>//*[@id="chat"]/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/pre/div/pre</xpath> 
+					</GetText> 
 					<Out name="bindex" type="json" /> 
 					<Out file="$var{path}\bindex.json" name="bindex" /> 
 				</If> 

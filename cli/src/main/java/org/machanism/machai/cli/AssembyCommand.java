@@ -1,10 +1,13 @@
 package org.machanism.machai.cli;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
 import org.machanism.machai.core.Picker;
@@ -44,10 +47,22 @@ public class AssembyCommand {
 			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "10") int limits)
 			throws IOException {
 
+		query = getQueryFromFile(query);
+
 		findQuery = query;
 		bindexList = pickBricks(query, limits);
 		logger.info("Search results for libraries matching the requested query:");
 		printFindResult(bindexList, limits);
+	}
+
+	private String getQueryFromFile(String query) throws IOException, FileNotFoundException {
+		File queryFile = new File(query);
+		if (queryFile.exists()) {
+			try (FileReader reader = new FileReader(queryFile)) {
+				query = IOUtils.toString(reader);
+			}
+		}
+		return query;
 	}
 
 	@ShellMethod()
@@ -73,6 +88,7 @@ public class AssembyCommand {
 			}
 			prompt = this.findQuery;
 		} else {
+			query = getQueryFromFile(query);
 			bindexList = pickBricks(query, limits);
 
 			for (BIndex bindex : bindexList) {

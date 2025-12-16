@@ -11,6 +11,7 @@
 		"authors",
 		"license",
 		"classification",
+		"constructors",
 		"features",
 		"location"
 	],
@@ -170,9 +171,57 @@
 				}
 			}
 		},
+		"constructors": {
+			"type": "array",
+			"description": "This section should contain information about how the object (service) is created and how it is configured before use.",
+			"items": {
+				"type": "object",
+				"required": [
+					"package",
+					"signature",
+					"description",
+					"examples"
+				],
+				"properties": {
+					"package": {
+						"type": "string",
+						"description": "Name of the package."
+					},
+					"signature": {
+						"type": "string",
+						"description": "The full signature with fully qualified names including package for parameters and exceptions."
+					},
+					"description": {
+						"type": "string",
+						"description": "Detailed explanation."
+					},
+					"examples": {
+						"type": "array",
+						"description": "Code examples for the object creation.",
+						"items": {
+							"type": "object",
+							"required": [
+								"snippet",
+								"description"
+							],
+							"properties": {
+								"snippet": {
+									"type": "string",
+									"description": "A code example snippet."
+								},
+								"description": {
+									"type": "string",
+									"description": "Detailed description of the example snippet."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"features": {
 			"type": "array",
-			"description": "Main features or capabilities provided by the artifact.",
+			"description": "The primary functions or capabilities provided by the artifact.",
 			"items": {
 				"type": "object",
 				"required": [
@@ -185,7 +234,7 @@
 				"properties": {
 					"name": {
 						"type": "string",
-						"description": "Name of the function."
+						"description": "Name of the function or constructor."
 					},
 					"package": {
 						"type": "string",
@@ -193,7 +242,7 @@
 					},
 					"signature": {
 						"type": "string",
-						"description": "The full signature of the feature (e.g., Java method signature)."
+						"description": "The full signature with fully qualified names including package for parameters and exceptions."
 					},
 					"description": {
 						"type": "string",

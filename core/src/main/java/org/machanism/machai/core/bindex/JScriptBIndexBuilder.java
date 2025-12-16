@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.schema.BIndex;
@@ -53,7 +54,7 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 		Path startPath = Paths.get(new File(getProjectDir(), "src").getAbsolutePath());
 
 		if (Files.exists(startPath)) {
-			Files.walk(startPath).filter(Files::isRegularFile).forEach((f) -> {
+			Files.walk(startPath).filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js")).forEach((f) -> {
 				try {
 					getProvider().promptFile("source_resource_section", f.toFile());
 				} catch (IOException e) {
