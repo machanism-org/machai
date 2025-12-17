@@ -34,6 +34,7 @@
 					<GetText name="bindex">
 						<xpath>//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[1]/pre/div/pre</xpath> 
 						<xpath>//*[@id="chat"]/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/pre/div/pre</xpath> 
+						<xpath>//*[@id="chat"]/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/p</xpath> 
 					</GetText> 
 					<Out name="bindex" type="json" /> 
 					<Out file="$var{path}\bindex.json" name="bindex" /> 

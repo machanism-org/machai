@@ -28,7 +28,6 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("js_project_prompts");
 
 	private static final String PROJECT_MODEL_FILE_NAME = "package.json";
-	private static final String[] EXCLUDE_DIRS = { "node_modules", ".venv", ".git", ".svn", ".nx" };
 
 	@Override
 	public BIndex build() throws IOException {
@@ -94,7 +93,7 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 							File file = p.toFile();
 							String relativePath = getRelatedPath(currentPath, file);
 							return StringUtils.equals(file.getName(), PROJECT_MODEL_FILE_NAME)
-									&& !StringUtils.containsAny(relativePath, EXCLUDE_DIRS);
+									&& !StringUtils.startsWithAny(relativePath, STARTS_WITH_EXCLUDE_DIRS);
 						}).forEach(p -> {
 							File dir = p.toFile().getParentFile();
 							String relativePath = getRelatedPath(currentPath, dir);
@@ -113,14 +112,6 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 		File packageFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
 		JsonNode packageJson = new ObjectMapper().readTree(packageFile);
 		return packageJson;
-	}
-
-	private String getRelatedPath(String currentPath, File file) {
-		String relativePath = file.getAbsolutePath().replace("\\", "/").replace(currentPath, "");
-		if (StringUtils.startsWith(relativePath, "/")) {
-			relativePath = StringUtils.substring(relativePath, 1);
-		}
-		return relativePath;
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
 
@@ -16,7 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class BIndexBuilder {
 	public static final String BINDEX_TEMP_DIR = ".bindex";
 	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
-	
+
+	public static final String[] STARTS_WITH_EXCLUDE_DIRS = { "node_modules", ".", "_" };
+
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private File projectDir;
@@ -81,6 +84,16 @@ public abstract class BIndexBuilder {
 		return provider;
 	}
 
-	public abstract List<String> getModules() throws IOException;
+	public List<String> getModules() throws IOException {
+		return null;
+	};
+
+	public String getRelatedPath(String currentPath, File file) {
+		String relativePath = file.getAbsolutePath().replace("\\", "/").replace(currentPath, "");
+		if (StringUtils.startsWith(relativePath, "/")) {
+			relativePath = StringUtils.substring(relativePath, 1);
+		}
+		return relativePath;
+	}
 
 }
