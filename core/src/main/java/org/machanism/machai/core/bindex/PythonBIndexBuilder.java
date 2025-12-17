@@ -3,8 +3,13 @@ package org.machanism.machai.core.bindex;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.List;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
 import org.tomlj.Toml;
+import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
 
 public class PythonBIndexBuilder extends BIndexBuilder {
@@ -52,7 +57,21 @@ public class PythonBIndexBuilder extends BIndexBuilder {
 				File pyprojectTomlFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
 				TomlParseResult toml = Toml.parse(pyprojectTomlFile.toPath());
 				String projectName = toml.getString("project.name");
-				result = projectName != null;
+
+				boolean privateProject = false;
+				@Nullable
+				TomlArray classifiers = toml.getArray("project.classifiers");
+				if (classifiers != null) {
+					List<Object> classifierList = classifiers.toList();
+					for (Object classifier : classifierList) {
+						if (StringUtils.containsIgnoreCase((String) classifier, "Private")) {
+							privateProject = true;
+							break;
+						}
+					}
+				}
+
+				result = projectName != null && !privateProject;
 			}
 		} catch (IOException e) {
 			result = false;
