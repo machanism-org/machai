@@ -53,12 +53,12 @@ To generate and register a `bindex.json` file for your library, follow these ste
  1. **Run `bindex` Command** 
    Use the CLI to analyze your library's project files and automatically generate the corresponding `bindex.json`. Navigate to your library directory and run:  
    ```bash
-   > bindex <path-to-your-library>
+   > bindex <project-path>
    ```  
-   Replace `<path-to-your-library>` with the path to your library's root directory. This command analyzes files such as `pom.xml`, source code, and other metadata to create a structured `bindex.json` file.
+   Replace `<project-path>` with the path to your library project root directory. This command analyzes files such as `pom.xml`, `packaje.json` or `pyproject.toml`, source code, and other metadata to create a structured `bindex.json` file.
 
 2. **Validate and Edit the `bindex.json`**  
-   After generating the file, it is recommended to inspect and verify the contents of the `src/bindex/bindex.json` to ensure accuracy. You can manually edit the file to add or adjust descriptions, metadata, or integration details.
+   After generating the file, it is recommended to inspect and verify the contents of the `bindex.json` to ensure accuracy. You can manually edit the file to add or adjust descriptions, metadata, or integration details.
 
 #### Bindex Registration
 
@@ -67,16 +67,16 @@ To generate and register a `bindex.json` file for your library, follow these ste
 1. **Register Your `bindex.json`**  
    Once you are satisfied with the metadata, you can register your library and its `bindex.json` file into the Machanism platform via the Machai CLI:  
    ```bash
-   > register <path-to-bindex.json>
+   > register <project-path>
    ```  
-   Replace `<path-to-bindex.json>` with the path to the generated `bindex.json` file. This command uploads your library metadata to the platform and makes it discoverable for users.
+   Replace `<project-path>` with the path to the project with `bindex.json` file. This command uploads your library metadata to the platform and makes it discoverable for users.
 
 2. **Check Registration**  
-   To verify the registration process and ensure the library is successfully uploaded, use the `find` command:  
+   To verify the registration process and ensure the library is successfully uploaded, use the `pick` command:  
    ```bash
-   > find <library-name>
+   > pick <prompt>
    ```  
-   Replace `<library-name>` with the name or identifier of the library. This command will search the platform and confirm the library's availability within the system.
+   Replace `<prompt>` with the description of the application to be created. This command will pick the "bricks" and confirm the presence of the library in the system.
 
 
 ### Assembly
