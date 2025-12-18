@@ -55,7 +55,8 @@ public class BindexCommand {
 			dir = SystemUtils.getUserDir();
 		}
 
-		try (BindexRegister register = new BindexRegister()) {
+		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
+		try (BindexRegister register = new BindexRegister(provider)) {
 			register.overwrite(refresh);
 			register.scanProjects(dir);
 		}

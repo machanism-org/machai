@@ -4,8 +4,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 
-import org.bson.Document;
-import org.bson.types.ObjectId;
+import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +17,9 @@ public class BindexRegister extends ScanProject implements Closeable {
 
 	private boolean overwrite;
 
-	public BindexRegister() {
+	public BindexRegister(GenAIProvider provider) {
 		super();
-		embeddingProvider = new Picker("machanism", "bindex");
+		embeddingProvider = new Picker(provider, "machanism", "bindex");
 	}
 
 	public String processProject(File projectDir) {

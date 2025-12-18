@@ -48,7 +48,6 @@ public abstract class BIndexBuilder {
 		}
 
 		String output = getProvider().perform();
-		getProvider().clear();
 
 		BIndex value = null;
 		if (output != null) {

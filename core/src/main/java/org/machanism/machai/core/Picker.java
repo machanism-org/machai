@@ -9,13 +9,16 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.bson.BsonArray;
 import org.bson.BsonDouble;
 import org.bson.Document;
@@ -42,7 +45,6 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.InsertOneResult;
-import com.openai.models.ChatModel;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
@@ -71,8 +73,8 @@ public class Picker implements Closeable {
 
 	private GenAIProvider provider;
 
-	public Picker(String instanceName, String connection) {
-		this.provider = new GenAIProvider(ChatModel.GPT_5_MINI);
+	public Picker(GenAIProvider provider, String instanceName, String connection) {
+		this.provider = provider;
 
 		String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
 		String uri;
@@ -201,7 +203,7 @@ public class Picker implements Closeable {
 		logger.info("- Domains: {}", domainsQuery);
 		Collection<String> resultsByDomains = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
 				domainsQuery,
-				sourceLimits, null);
+				sourceLimits, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
 		if (!resultsByDomains.isEmpty()) {
 			resultsByDescription.retainAll(resultsByDomains);
 		}
@@ -253,8 +255,27 @@ public class Picker implements Closeable {
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
-		Collection<String> results = docs.stream()
-				.map(doc -> doc.getString("id"))
+		Map<String, String> libraryVersionMap = new HashMap<>();
+		for (Document doc : docs) {
+			String id = doc.getString("id");
+			String name = StringUtils.substringBeforeLast(id, ":");
+			String version = StringUtils.substringAfterLast(id, ":");
+			
+			if(libraryVersionMap.containsKey(name)) {
+				String existsVersion = libraryVersionMap.get(name);
+				
+		        ComparableVersion v1 = new ComparableVersion(existsVersion);
+		        ComparableVersion v2 = new ComparableVersion(version);
+				if(v1.compareTo(v2) > 0) {
+					version = existsVersion;
+				} 
+			}
+			
+			libraryVersionMap.put(name, version);
+		}
+		
+		Collection<String> results = libraryVersionMap.entrySet().stream()
+				.map(entry -> entry.getKey() + ":" + entry.getValue())
 				.collect(Collectors.toList());
 
 		return results;

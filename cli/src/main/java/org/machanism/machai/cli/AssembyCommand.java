@@ -119,8 +119,8 @@ public class AssembyCommand {
 
 	private List<BIndex> pickBricks(String query, int limits) throws IOException {
 		List<BIndex> bindexList = null;
-		try (Picker provider = new Picker("machanism", "bindex")) {
-			bindexList = provider.pick(query, limits);
+		try (Picker picker = new Picker(provider, "machanism", "bindex")) {
+			bindexList = picker.pick(query, limits);
 		}
 		return bindexList;
 	}

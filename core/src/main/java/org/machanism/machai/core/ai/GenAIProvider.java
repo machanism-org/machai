@@ -144,6 +144,7 @@ public class GenAIProvider {
 			Response response = client.responses().create(builder.build());
 			result = parseResponse(response, instructions);
 		}
+		clear();
 		return result;
 	}
 

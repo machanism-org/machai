@@ -25,8 +25,10 @@ public class DefaultBIndexBuilder extends BIndexBuilder {
 			}
 		});
 
-		for (File file : listFiles) {
-			modules.add(file.getName());
+		if (listFiles != null) {
+			for (File file : listFiles) {
+				modules.add(file.getName());
+			}
 		}
 
 		return modules;
