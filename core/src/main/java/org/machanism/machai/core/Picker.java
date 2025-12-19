@@ -114,14 +114,21 @@ public class Picker implements Closeable {
 			ObjectMapper objectMapper = new ObjectMapper();
 			String bindexJson = objectMapper.writeValueAsString(bindex);
 
-			Bson filter = Filters.eq("id", bindex.getId());
+			String id = bindex.getId();
+			Bson filter = Filters.eq("id", id);
 			collection.deleteOne(filter);
 
 			Classification classification = bindex.getClassification();
 			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
 					.distinct().collect(Collectors.toSet());
 
+			if (languages.isEmpty()) {
+				logger.warn("WARNING! No language defined for: {}.", id);
+			}
+
 			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson)
+					.append("name", bindex.getName())
+					.append("version", bindex.getVersion())
 					.append(DOMAINS_PROPERTY_NAME, classification.getDomains())
 					.append(LANGUAGES_PROPERTY_NAME, languages)
 					.append(DESCRIPTION_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(bindex.getDescription()))
@@ -250,15 +257,16 @@ public class Picker implements Closeable {
 
 		pipeline.add(Aggregates.project(Projections.fields(
 				Projections.exclude("_id"),
-				Projections.include("id"))));
+				Projections.include("id"),
+				Projections.include("name"),
+				Projections.include("version"))));
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
 		Map<String, String> libraryVersionMap = new HashMap<>();
 		for (Document doc : docs) {
-			String id = doc.getString("id");
-			String name = StringUtils.substringBeforeLast(id, ":");
-			String version = StringUtils.substringAfterLast(id, ":");
+			String name = doc.getString("name");
+			String version = doc.getString("version");
 
 			if (libraryVersionMap.containsKey(name)) {
 				String existsVersion = libraryVersionMap.get(name);
