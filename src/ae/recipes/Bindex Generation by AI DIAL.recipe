@@ -30,7 +30,7 @@
 					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div/div[2]/div[2]/button[2]" /> 
 					<Wait delay="500" /> 
 					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[3]/div[2]/div/div[2]/button" exception="ignore" timeout="1s" /> 
-					<ElementExists xpath="//*[contains(concat(' ', normalize-space(@class), ' '), ' tabler-icon-send ')]" timeout="3m" /> 
+					<ElementExists xpath="//*[contains(concat(' ', normalize-space(@class), ' '), ' tabler-icon-send ')]" timeout="5m" /> 
 					<GetText name="bindex">
 						<xpath>//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[1]/pre/div/pre</xpath> 
 						<xpath>//*[@id="chat"]/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/pre/div/pre</xpath> 

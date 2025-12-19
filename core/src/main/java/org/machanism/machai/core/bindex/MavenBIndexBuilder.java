@@ -55,10 +55,10 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 	@Override
 	public BIndex build() throws IOException {
 		BIndex bindex = super.build();
-
-		bindex.setId(model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion());
-		bindex.setName(model.getName());
-
+		if (bindex != null) {
+			bindex.setId(model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion());
+			bindex.setName(model.getName());
+		}
 		return bindex;
 	}
 
