@@ -10,12 +10,48 @@
 	</parent>
 
 	<artifactId>machai-cli</artifactId>
-	<name>Apps Import CLI</name>
+	<name>Machai CLI</name>
 	<description></description>
 
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+
+	<profiles>
+		<profile>
+			<id>pack</id>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<executions>
+								<execution>
+									<phase>install</phase>
+									<goals>
+										<goal>single</goal>
+									</goals>
+									<configuration>
+										<finalName>machai</finalName>
+										<archive>
+											<manifest>
+												<mainClass>
+													org.machanism.machai.cli.Application</mainClass>
+											</manifest>
+										</archive>
+										<appendAssemblyId>false</appendAssemblyId>
+										<descriptorRefs>
+											<descriptorRef>jar-with-dependencies</descriptorRef>
+										</descriptorRefs>
+									</configuration>
+								</execution>
+							</executions>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
 
 	<dependencyManagement>
 		<dependencies>
@@ -47,6 +83,12 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -56,29 +98,6 @@
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>install</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<finalName>machai</finalName>
-							<archive>
-								<manifest>
-									<mainClass>org.machanism.machai.cli.Application</mainClass>
-								</manifest>
-							</archive>
-							<appendAssemblyId>false</appendAssemblyId>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

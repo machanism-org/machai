@@ -53,6 +53,8 @@ import dev.langchain4j.model.output.Response;
 
 public class Picker implements Closeable {
 
+	private static final int VECTOR_SEARCH_LIMITS = 200;
+
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
 	private static Logger logger = LoggerFactory.getLogger(Picker.class);
@@ -187,8 +189,6 @@ public class Picker implements Closeable {
 		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform();
 		Classification classification = new ObjectMapper().readValue(classificationQuery, Classification.class);
 
-		int sourceLimits = limit * 4;
-
 		logger.info("Detected classification:");
 		Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
 				.distinct().collect(Collectors.toSet());
@@ -196,14 +196,14 @@ public class Picker implements Closeable {
 		logger.info("- Languages: {}", languagesQuery);
 
 		Collection<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query,
-				sourceLimits, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
+				Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
 
 		List<String> domains = classification.getDomains();
 		String domainsQuery = StringUtils.join(domains, ", ");
 		logger.info("- Domains: {}", domainsQuery);
 		Collection<String> resultsByDomains = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
 				domainsQuery,
-				sourceLimits, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
+				Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
 		if (!resultsByDomains.isEmpty()) {
 			resultsByDescription.retainAll(resultsByDomains);
 		}
@@ -232,8 +232,7 @@ public class Picker implements Closeable {
 		}
 	}
 
-	private Collection<String> getResults(String indexName, String propertyPath, String query, long limit,
-			Bson bson) {
+	private Collection<String> getResults(String indexName, String propertyPath, String query, Bson bson) {
 		Iterable<Double> queryEmbedding = getEmbedding(query);
 
 		List<Bson> pipeline = new ArrayList<>();
@@ -242,7 +241,7 @@ public class Picker implements Closeable {
 				fieldPath(propertyPath),
 				queryEmbedding,
 				indexName,
-				limit,
+				VECTOR_SEARCH_LIMITS,
 				exactVectorSearchOptions()));
 
 		if (bson != null) {
@@ -260,20 +259,20 @@ public class Picker implements Closeable {
 			String id = doc.getString("id");
 			String name = StringUtils.substringBeforeLast(id, ":");
 			String version = StringUtils.substringAfterLast(id, ":");
-			
-			if(libraryVersionMap.containsKey(name)) {
+
+			if (libraryVersionMap.containsKey(name)) {
 				String existsVersion = libraryVersionMap.get(name);
-				
-		        ComparableVersion v1 = new ComparableVersion(existsVersion);
-		        ComparableVersion v2 = new ComparableVersion(version);
-				if(v1.compareTo(v2) > 0) {
+
+				ComparableVersion v1 = new ComparableVersion(existsVersion);
+				ComparableVersion v2 = new ComparableVersion(version);
+				if (v1.compareTo(v2) > 0) {
 					version = existsVersion;
-				} 
+				}
 			}
-			
+
 			libraryVersionMap.put(name, version);
 		}
-		
+
 		Collection<String> results = libraryVersionMap.entrySet().stream()
 				.map(entry -> entry.getKey() + ":" + entry.getValue())
 				.collect(Collectors.toList());
