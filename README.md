@@ -6,6 +6,8 @@
 
 ## Overview
 
+![](src/site/resources/images/machai-screenshot.png)
+
 Machai empowers developers with AI-assisted project assembly in the **Machanism** ecosystem by automating repetitive development tasks.  
 Each library in the platform is associated with a structured metadata file called `bindex.json`. This file contains crucial information about the library's features, integration points, and example usage.  
 
@@ -59,8 +61,6 @@ To generate and register a `bindex.json` file for your library, follow these ste
 
 2. **Validate and Edit the `bindex.json`**  
    After generating the file, it is recommended to inspect and verify the contents of the `bindex.json` to ensure accuracy. You can manually edit the file to add or adjust descriptions, metadata, or integration details.
-
-#### Bindex Registration
 
 #### Bindex Registration
 
