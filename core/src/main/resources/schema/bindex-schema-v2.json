@@ -117,8 +117,8 @@
       "description": "Categorizes the artifact by type, domain, and supported languages.",
       "required": [
         "type",
-        "domain",
-        "language"
+        "domains",
+        "languages"
       ],
       "properties": {
         "type": {
