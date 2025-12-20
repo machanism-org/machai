@@ -10,6 +10,7 @@
 		<artifactId>machai</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
+	<packaging>maven-plugin</packaging>
 
 	<artifactId>bindex-maven-plugin</artifactId>
 	<name>Bindex Maven Plugin</name>

@@ -8,12 +8,12 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
-	@Parameter(defaultValue = "false")
+	
+	@Parameter(property = "machai.debug", defaultValue = "false")
 	protected boolean debug;
-	@Parameter(defaultValue = "GPT_5_1")
+	
+	@Parameter(property = "machai.model", defaultValue = "GPT_5")
 	protected String model;
-	@Parameter(defaultValue = "true")
-	protected boolean update;
 
 	public AbstractBindexMojo() {
 		super();

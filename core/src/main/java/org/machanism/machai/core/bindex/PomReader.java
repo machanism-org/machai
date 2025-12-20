@@ -121,7 +121,7 @@ public class PomReader {
 
 	private static DefaultModelBuilder getModelBuilder(ModelBuildingRequest request)
 			throws PlexusContainerException, ComponentLookupException {
-		DefaultServiceLocator locator = serviceLocator();
+		DefaultServiceLocator locator = new DefaultServiceLocator();
 		RepositorySystem system = locator.getService(RepositorySystem.class);
 		LocalRepository localRepo = new LocalRepository(".m2");
 

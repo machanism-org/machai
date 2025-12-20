@@ -12,8 +12,8 @@ import org.machanism.machai.core.ai.GenAIProvider;
 
 import com.openai.models.ChatModel;
 
-@Mojo(name = "bindex", requiresProject = false, requiresDependencyCollection = ResolutionScope.TEST, requiresDependencyResolution = ResolutionScope.TEST)
-public class Bindex extends AbstractBindexMojo {
+@Mojo(name = "update", requiresProject = false, requiresDependencyCollection = ResolutionScope.TEST, requiresDependencyResolution = ResolutionScope.TEST)
+public class Update extends AbstractBindexMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
@@ -21,7 +21,7 @@ public class Bindex extends AbstractBindexMojo {
 		provider.setDebugMode(debug);
 
 		BindexCreator register = new BindexCreator(provider);
-		register.update(update);
+		register.update(true);
 		try {
 			register.scanProjects(project.getBasedir());
 		} catch (IOException | XmlPullParserException e) {

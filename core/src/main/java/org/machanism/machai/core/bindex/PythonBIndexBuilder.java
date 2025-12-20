@@ -2,11 +2,15 @@ package org.machanism.machai.core.bindex;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileReader;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.tomlj.Toml;
 import org.tomlj.TomlArray;
@@ -14,11 +18,19 @@ import org.tomlj.TomlParseResult;
 
 public class PythonBIndexBuilder extends BIndexBuilder {
 
+	private static ResourceBundle promptBundle = ResourceBundle.getBundle("python_project_prompts");
 	private static final String PROJECT_MODEL_FILE_NAME = "pyproject.toml";
 
 	@Override
 	protected void projectContext() throws IOException {
 		File pyprojectTomlFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
+		
+		try (FileReader reader = new FileReader(pyprojectTomlFile)) {
+			String prompt = MessageFormat.format(promptBundle.getString("project_build_section"),
+					IOUtils.toString(reader));
+			getProvider().prompt(prompt);
+		}
+		
 		TomlParseResult result = Toml.parse(pyprojectTomlFile.toPath());
 		String projectName = result.getString("project.name");
 		if (projectName != null) {
@@ -37,6 +49,9 @@ public class PythonBIndexBuilder extends BIndexBuilder {
 				}
 			}
 		}
+		
+		String prompt = promptBundle.getString("additional_rules");
+		getProvider().prompt(prompt);
 	}
 
 	/**

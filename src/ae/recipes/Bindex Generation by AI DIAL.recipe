@@ -7,8 +7,10 @@
 			<Var name="email" init="console" /> 
 			<Text value="$var{email}" name="loginfmt" /> 
 			<Click id="idSIButton9" /> 
-			<Confirm message="Please select and configure an agent." /> 
-			<Text value="Hi$var{\n}" id="chat-text-field" /> 
+			<Wait delay="2s" /> 
+			<WhileRun message="Please authorize in manually.">
+				<Text value="Hi$var{\n}" id="chat-text-field" timeout="5m" /> 
+			</WhileRun> 
 		</ElementNotExists> 
 		<Var name="Project Directory" init="console" /> 
 		<Listdir name="Inputs Files" path="$var{Project Directory}" filter="inputs.txt" /> 
