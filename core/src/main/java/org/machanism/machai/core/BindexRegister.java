@@ -15,7 +15,7 @@ public class BindexRegister extends ScanProject implements Closeable {
 
 	private Picker embeddingProvider;
 
-	private boolean overwrite;
+	private boolean update;
 
 	public BindexRegister(GenAIProvider provider) {
 		super();
@@ -30,7 +30,7 @@ public class BindexRegister extends ScanProject implements Closeable {
 			String regId = null;
 			if (bindex != null) {
 				regId = embeddingProvider.getRegistredId(bindex);
-				if (regId == null || overwrite) {
+				if (regId == null || update) {
 					regId = embeddingProvider.create(bindex);
 					logger.info("embeddingId: {}", regId);
 				}
@@ -47,8 +47,8 @@ public class BindexRegister extends ScanProject implements Closeable {
 		embeddingProvider.close();
 	}
 
-	public BindexRegister overwrite(boolean overwrite) {
-		this.overwrite = overwrite;
+	public BindexRegister update(boolean overwrite) {
+		this.update = overwrite;
 		return this;
 	}
 

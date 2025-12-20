@@ -17,7 +17,7 @@ public class BindexCreator extends ScanProject {
 	private static Logger logger = LoggerFactory.getLogger(BindexCreator.class);
 
 	private GenAIProvider provider;
-	private boolean overwrite;
+	private boolean update;
 
 	public BindexCreator(GenAIProvider provider) {
 		super();
@@ -31,13 +31,14 @@ public class BindexCreator extends ScanProject {
 
 			String result = null;
 			File bindexFile = getBindexFile(projectDir);
-			if (overwrite || bindex == null) {
+			if (update || bindex == null) {
 				if (bindexFile.getParentFile() != null) {
 					bindexFile.getParentFile().mkdirs();
 				}
 				BIndexBuilder bindexBuilder = BIndexBuilderFactory.builder(projectDir);
 				
 				bindex = bindexBuilder
+						.source(bindex)
 						.projectDir(projectDir)
 						.bindexDir(bindexFile.getParentFile())
 						.provider(provider)
@@ -55,8 +56,8 @@ public class BindexCreator extends ScanProject {
 		}
 	}
 
-	public BindexCreator rewriteMode(boolean overwrite) {
-		this.overwrite = overwrite;
+	public BindexCreator update(boolean update) {
+		this.update = update;
 		return this;
 	}
 

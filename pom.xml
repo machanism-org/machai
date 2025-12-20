@@ -20,6 +20,7 @@
 	<modules>
 		<module>core</module>
 		<module>cli</module>
+		<module>bindex-maven-plugin</module>
 	</modules>
 
 	<build>

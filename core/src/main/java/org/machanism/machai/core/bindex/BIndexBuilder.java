@@ -26,6 +26,7 @@ public abstract class BIndexBuilder {
 	private GenAIProvider provider;
 	private ObjectMapper mapper = new ObjectMapper();
 	private File bindexDir;
+	private BIndex source;
 
 	public BIndexBuilder provider(GenAIProvider provider) {
 		this.provider = provider;
@@ -36,6 +37,12 @@ public abstract class BIndexBuilder {
 
 	public BIndex build() throws IOException {
 		bindexSchemaPrompt(getProvider());
+
+		if (source != null) {
+			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(source);
+			String prompt = MessageFormat.format(promptBundle.getString("update_bindex_prompt"), bindexStr);
+			getProvider().prompt(prompt);
+		}
 
 		projectContext();
 
@@ -93,6 +100,11 @@ public abstract class BIndexBuilder {
 			relativePath = StringUtils.substring(relativePath, 1);
 		}
 		return relativePath;
+	}
+
+	public BIndexBuilder source(BIndex bindex) {
+		this.source = bindex;
+		return this;
 	}
 
 }

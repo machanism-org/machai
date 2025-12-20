@@ -29,7 +29,7 @@ public class BindexCommand {
 	@ShellMethod()
 	public void bindex(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "The refresh mode: all saved data will be updated.", value = "refresh") boolean refresh,
+			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update,
 			@ShellOption(help = "Generates only the inputs.txt file; no request is sent to OpenAI to create a bindex.", value = "inputs") boolean debug)
 			throws IOException, XmlPullParserException {
 
@@ -41,14 +41,14 @@ public class BindexCommand {
 		provider.setDebugMode(debug);
 
 		BindexCreator register = new BindexCreator(provider);
-		register.rewriteMode(refresh);
+		register.update(update);
 		register.scanProjects(dir);
 	}
 
 	@ShellMethod()
 	public void register(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "The refresh mode: all saved data will be updated.", value = "refresh") boolean refresh)
+			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update)
 			throws IOException, XmlPullParserException {
 
 		if (dir == null) {
@@ -57,7 +57,7 @@ public class BindexCommand {
 
 		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
 		try (BindexRegister register = new BindexRegister(provider)) {
-			register.overwrite(refresh);
+			register.update(update);
 			register.scanProjects(dir);
 		}
 	}
