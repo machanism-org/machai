@@ -20,7 +20,7 @@ public class BindexRegister extends ScanProject implements Closeable {
 
 	public BindexRegister(GenAIProvider provider) {
 		super();
-		embeddingProvider = new Picker(provider, "machanism", "bindex");
+		embeddingProvider = new Picker(provider);
 	}
 
 	public String processProject(File projectDir, BIndexBuilder bindexBuilder) {

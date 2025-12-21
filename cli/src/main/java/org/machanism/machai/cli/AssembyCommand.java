@@ -119,7 +119,7 @@ public class AssembyCommand {
 
 	private List<BIndex> pickBricks(String query, int limits) throws IOException {
 		List<BIndex> bindexList = null;
-		try (Picker picker = new Picker(provider, "machanism", "bindex")) {
+		try (Picker picker = new Picker(provider)) {
 			bindexList = picker.pick(query, limits);
 		}
 		return bindexList;

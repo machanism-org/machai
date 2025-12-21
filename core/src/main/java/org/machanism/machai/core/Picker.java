@@ -59,6 +59,9 @@ public class Picker implements Closeable {
 
 	private static Logger logger = LoggerFactory.getLogger(Picker.class);
 
+	private static final String INSTANCENAME = "machanism";
+	private static final String CONNECTION = "bindex";
+
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 	public static final String DESCRIPTION_EMBEDDING_PROPERTY_NAME = "description_embedding";
 	public static final String DOMAIN_EMBEDDING_PROPERTY_NAME = "domain_embedding";
@@ -75,7 +78,7 @@ public class Picker implements Closeable {
 
 	private GenAIProvider provider;
 
-	public Picker(GenAIProvider provider, String instanceName, String connection) {
+	public Picker(GenAIProvider provider) {
 		this.provider = provider;
 
 		String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
@@ -99,8 +102,8 @@ public class Picker implements Closeable {
 				.build();
 
 		mongoClient = MongoClients.create(uri);
-		MongoDatabase database = mongoClient.getDatabase(instanceName);
-		collection = database.getCollection(connection);
+		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
+		collection = database.getCollection(CONNECTION);
 	}
 
 	@Override
