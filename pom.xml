@@ -15,8 +15,10 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>17</java.version>
+		<java.version>8</java.version>
+		<maven.version>3.6.0</maven.version>
 	</properties>
+	
 	<modules>
 		<module>core</module>
 		<module>cli</module>

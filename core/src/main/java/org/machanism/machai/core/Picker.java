@@ -70,13 +70,14 @@ public class Picker implements Closeable {
 
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
-	private OpenAiEmbeddingModel embeddingModel;
 	private MongoCollection<Document> collection;
 	private MongoClient mongoClient;
 
 	private String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 
 	private GenAIProvider provider;
+
+	private String apiKey;
 
 	public Picker(GenAIProvider provider) {
 		this.provider = provider;
@@ -89,17 +90,10 @@ public class Picker implements Closeable {
 			uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
 		}
 
-		String apiKey = System.getenv("OPENAI_API_KEY");
+		apiKey = System.getenv("OPENAI_API_KEY");
 		if (apiKey == null || apiKey.isEmpty()) {
 			throw new IllegalStateException("OPEN_AI_API_KEY env variable is not set or is empty.");
 		}
-
-		embeddingModel = OpenAiEmbeddingModel.builder()
-				.apiKey(apiKey)
-				.modelName(EMBEDDING_MODEL_NAME)
-				.timeout(java.time.Duration.ofSeconds(60))
-				.dimensions(50)
-				.build();
 
 		mongoClient = MongoClients.create(uri);
 		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
@@ -157,7 +151,7 @@ public class Picker implements Closeable {
 		} else {
 			text = new ObjectMapper().writeValueAsString(data);
 		}
-		List<Double> descEmbedding = getEmbedding(text);
+		List<Double> descEmbedding = getEmbedding(text, 700);
 		BsonArray bsonArray = new BsonArray(
 				descEmbedding.stream()
 						.map(BsonDouble::new)
@@ -176,7 +170,14 @@ public class Picker implements Closeable {
 		return id;
 	}
 
-	private List<Double> getEmbedding(String text) {
+	private List<Double> getEmbedding(String text, Integer dimensions) {
+		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder()
+				.apiKey(apiKey)
+				.modelName(EMBEDDING_MODEL_NAME)
+				.timeout(java.time.Duration.ofSeconds(60))
+				.dimensions(dimensions)
+				.build();
+		
 		Response<Embedding> response = embeddingModel.embed(text);
 		return response.content().vectorAsList().stream()
 				.map(Double::new)
@@ -243,7 +244,7 @@ public class Picker implements Closeable {
 	}
 
 	private Collection<String> getResults(String indexName, String propertyPath, String query, Bson bson) {
-		Iterable<Double> queryEmbedding = getEmbedding(query);
+		Iterable<Double> queryEmbedding = getEmbedding(query, 50);
 
 		List<Bson> pipeline = new ArrayList<>();
 

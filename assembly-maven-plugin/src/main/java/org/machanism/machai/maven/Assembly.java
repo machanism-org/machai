@@ -89,9 +89,7 @@ public class Assembly extends AbstractMojo {
 						}
 					}
 
-				} else {
-					getLog().info("No Artifacts Found.");
-				}
+				} 
 
 			}
 		} catch (IOException | PrompterException e) {

@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class ScanProject {
 	private static Logger logger = LoggerFactory.getLogger(ScanProject.class);
 
-	public String scanProjects(File projectDir) throws IOException, XmlPullParserException {
+	public String scanProjects(File projectDir) throws IOException {
 		BIndexBuilder bindexBuilder = BIndexBuilderFactory.builder(projectDir);
 		bindexBuilder.projectDir(projectDir);
 		List<String> modules = bindexBuilder.getModules();

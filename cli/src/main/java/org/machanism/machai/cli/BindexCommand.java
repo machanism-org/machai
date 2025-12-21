@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.lang.SystemUtils;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.jline.reader.LineReader;
 import org.machanism.machai.core.BindexCreator;
 import org.machanism.machai.core.BindexRegister;
@@ -31,7 +30,7 @@ public class BindexCommand {
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update,
 			@ShellOption(help = "Generates only the inputs.txt file; no request is sent to OpenAI to create a bindex.", value = "inputs") boolean debug)
-			throws IOException, XmlPullParserException {
+			throws IOException {
 
 		if (dir == null) {
 			dir = SystemUtils.getUserDir();
@@ -49,7 +48,7 @@ public class BindexCommand {
 	public void register(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update)
-			throws IOException, XmlPullParserException {
+			throws IOException {
 
 		if (dir == null) {
 			dir = SystemUtils.getUserDir();

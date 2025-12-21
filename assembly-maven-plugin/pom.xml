@@ -27,11 +27,18 @@
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-plugin-api</artifactId>
 			<version>3.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.plugin-tools</groupId>
 			<artifactId>maven-plugin-annotations</artifactId>
 			<version>3.4</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.shared</groupId>
+			<artifactId>maven-shared-utils</artifactId>
+			<version>3.4.2</version>
 		</dependency>
 
 		<dependency>
@@ -41,13 +48,14 @@
 		</dependency>
 	</dependencies>
 
-	<!--mvn org.machanism.machai:assembly-maven-plugin:0.0.1-SNAPSHOT:assembly -->
+	<!-- mvn org.machanism.machai:assembly-maven-plugin:0.0.1-SNAPSHOT:assembly
+	(java8 required)-->
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.6.0</version>
+				<version>3.15.2</version>
 				<configuration>
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
 					<mojoDependencies>org.machanism.machai:assembly-maven-plugin</mojoDependencies>

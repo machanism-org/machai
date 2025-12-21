@@ -6,13 +6,12 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.machanism.machai.core.BindexRegister;
 import org.machanism.machai.core.ai.GenAIProvider;
 
 import com.openai.models.ChatModel;
 
-@Mojo(name = "register",  defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.INSTALL)
+@Mojo(name = "register", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.INSTALL)
 public class Register extends AbstractBindexMojo {
 
 	@Parameter(defaultValue = "true")
@@ -25,7 +24,7 @@ public class Register extends AbstractBindexMojo {
 			try (BindexRegister register = new BindexRegister(provider)) {
 				register.update(update);
 				register.scanProjects(project.getBasedir());
-			} catch (IOException | XmlPullParserException e) {
+			} catch (IOException e) {
 				throw new MojoExecutionException("Bindex register failed.", e);
 			}
 		}
