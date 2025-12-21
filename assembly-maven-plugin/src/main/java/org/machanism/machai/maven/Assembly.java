@@ -1,9 +1,11 @@
 package org.machanism.machai.maven;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -38,12 +40,23 @@ public class Assembly extends AbstractMojo {
 	@Parameter(property = "pick.limits", defaultValue = "10")
 	protected int limits;
 
+	@Parameter(property = "assembly.prompt.file", defaultValue = "project.txt")
+	protected File assemblyPromptFile;
+
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
 	protected File basedir;
 
 	public void execute() throws MojoExecutionException {
 		try {
-			String query = prompter.prompt("Please enter the project assembly prompt or specify the file name");
+			String query;
+
+			if (assemblyPromptFile.exists()) {
+				try (FileReader reader = new FileReader(assemblyPromptFile)) {
+					query = IOUtils.toString(reader);
+				}
+			} else {
+				query = prompter.prompt("Please enter the project assembly prompt or specify the file name");
+			}
 
 			GenAIProvider provider = new GenAIProvider(ChatModel.of(pickChatModel));
 			provider.addDefaultTools();
