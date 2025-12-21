@@ -1,22 +1,47 @@
 package org.machanism.machai.maven;
 
+import java.io.File;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.machanism.machai.core.BindexCreator;
+import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.core.bindex.MavenBIndexBuilder;
+
+import com.openai.models.ChatModel;
 
 public abstract class AbstractBindexMojo extends AbstractMojo {
 
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
-	
-	@Parameter(property = "machai.debug", defaultValue = "false")
-	protected boolean debug;
-	
-	@Parameter(property = "machai.model", defaultValue = "GPT_5")
-	protected String model;
+
+	@Parameter(property = "bindex.inputs.only", defaultValue = "false")
+	protected boolean inputsOnly;
+
+	@Parameter(property = "bindex.chatModel", defaultValue = "gpt-5")
+	protected String chatModel;
+
+	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
+	protected File basedir;
 
 	public AbstractBindexMojo() {
 		super();
 	}
 
+	void createBindex(boolean update) {
+		GenAIProvider provider = new GenAIProvider(ChatModel.of(chatModel));
+		provider.setInputsOnly(inputsOnly);
+
+		BindexCreator creator = new BindexCreator(provider);
+		creator.update(update);
+
+		MavenBIndexBuilder bindexBuilder = new MavenBIndexBuilder();
+		bindexBuilder.model(project.getModel());
+		creator.processProject(basedir, bindexBuilder);
+	}
+
+	boolean isBindexed() {
+		return !"pom".equals(project.getPackaging());
+	}
 }

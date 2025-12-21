@@ -38,7 +38,7 @@ public class BindexCommand {
 		}
 
 		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
-		provider.setDebugMode(debug);
+		provider.setInputsOnly(debug);
 
 		BindexCreator register = new BindexCreator(provider);
 		register.update(update);

@@ -121,7 +121,8 @@ public class PomReader {
 
 	private static DefaultModelBuilder getModelBuilder(ModelBuildingRequest request)
 			throws PlexusContainerException, ComponentLookupException {
-		DefaultServiceLocator locator = new DefaultServiceLocator();
+		
+		DefaultServiceLocator locator = serviceLocator();
 		RepositorySystem system = locator.getService(RepositorySystem.class);
 		LocalRepository localRepo = new LocalRepository(".m2");
 
@@ -164,7 +165,7 @@ public class PomReader {
 		return stringWriter.toString();
 	}
 
-	private static DefaultServiceLocator serviceLocator() {
+	public static DefaultServiceLocator serviceLocator() {
 		DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
 		locator.addService(RepositoryConnectorFactory.class,
 				BasicRepositoryConnectorFactory.class);

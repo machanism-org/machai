@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.core.bindex.BIndexBuilder;
-import org.machanism.machai.core.bindex.BIndexBuilderFactory;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ public class BindexCreator extends ScanProject {
 		this.provider = provider;
 	}
 
-	public String processProject(File projectDir) {
+	public String processProject(File projectDir, BIndexBuilder bindexBuilder) {
 		BIndex bindex;
 		try {
 			bindex = getBindex(projectDir);
@@ -35,7 +34,6 @@ public class BindexCreator extends ScanProject {
 				if (bindexFile.getParentFile() != null) {
 					bindexFile.getParentFile().mkdirs();
 				}
-				BIndexBuilder bindexBuilder = BIndexBuilderFactory.builder(projectDir);
 
 				bindex = bindexBuilder
 						.source(bindex)

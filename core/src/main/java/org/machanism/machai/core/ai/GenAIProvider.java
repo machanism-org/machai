@@ -72,7 +72,7 @@ public class GenAIProvider {
 
 	private Map<Tool, Function<JsonNode, Object>> toolMap = new HashMap<>();
 	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
-	private boolean debugMode;
+	private boolean inputsOnly;
 	private File workingDir = SystemUtils.getUserDir();
 	private String instructions;
 
@@ -131,7 +131,7 @@ public class GenAIProvider {
 
 	public String perform() {
 		String result = null;
-		if (!debugMode) {
+		if (!inputsOnly) {
 			Builder builder = ResponseCreateParams.builder()
 					.model(chatModel)
 					.tools(new ArrayList(toolMap.keySet()))
@@ -272,8 +272,8 @@ public class GenAIProvider {
 		inputs.clear();
 	}
 
-	public void setDebugMode(boolean debugMode) {
-		this.debugMode = debugMode;
+	public void setInputsOnly(boolean inputsOnly) {
+		this.inputsOnly = inputsOnly;
 	}
 
 	public void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {

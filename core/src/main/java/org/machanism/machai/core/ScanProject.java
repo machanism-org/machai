@@ -29,13 +29,14 @@ public abstract class ScanProject {
 				scanProjects(new File(projectDir, module));
 			}
 		} else {
-			regBindex = processProject(projectDir);
+			bindexBuilder = BIndexBuilderFactory.builder(projectDir);
+			regBindex = processProject(projectDir, bindexBuilder);
 		}
 
 		return regBindex;
 	}
 
-	public abstract String processProject(File projectDir);
+	public abstract String processProject(File projectDir, BIndexBuilder bindexBuilder);
 
 	public BIndex getBindex(File projectDir) {
 		logger.info("Project dir: {}", projectDir);

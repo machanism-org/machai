@@ -79,7 +79,7 @@ public class AssembyCommand {
 			dir.mkdirs();
 		}
 
-		provider.setDebugMode(debug);
+		provider.setInputsOnly(debug);
 		String prompt = query;
 
 		if (query == null) {

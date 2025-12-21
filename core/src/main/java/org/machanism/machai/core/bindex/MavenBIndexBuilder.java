@@ -25,7 +25,9 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 	private Model model;
 
 	protected void projectContext() throws IOException {
-		model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
+		if (model == null) {
+			model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
+		}
 
 		String sourceDirectory = model.getBuild().getSourceDirectory();
 		removeNotImportantData(model);
@@ -89,12 +91,17 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 			try {
 				model = PomReader.getProjectModel(pomFile, true);
 			} catch (Exception e) {
-				// ignore.
+				logger.error("Effective model building failed: {}",
+						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
 			}
 			modules = model.getModules();
 		}
 
 		return modules;
+	}
+
+	public void model(Model model) {
+		this.model = model;
 	}
 
 }

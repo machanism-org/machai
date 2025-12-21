@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class BindexRegister extends ScanProject implements Closeable {
 		embeddingProvider = new Picker(provider, "machanism", "bindex");
 	}
 
-	public String processProject(File projectDir) {
+	public String processProject(File projectDir, BIndexBuilder bindexBuilder) {
 		BIndex bindex;
 		try {
 			bindex = getBindex(projectDir);
