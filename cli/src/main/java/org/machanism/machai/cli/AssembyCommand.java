@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -44,7 +43,7 @@ public class AssembyCommand {
 	@ShellMethod()
 	public void pick(
 			@ShellOption(value = "The application assembly prompt.") String query,
-			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = "0.85") double score)
+			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score)
 			throws IOException {
 
 		query = getQueryFromFile(query);
@@ -69,7 +68,7 @@ public class AssembyCommand {
 	public void assembly(
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
 			@ShellOption(help = "The path to the assembled project directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = "0.85") double score,
+			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score,
 			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create the project.", value = "inputs") boolean debug)
 			throws IOException {
 

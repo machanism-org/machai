@@ -57,6 +57,7 @@ public class Picker implements Closeable {
 	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
 	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
 	private static final int VECTOR_SEARCH_LIMITS = 200;
+	public static final String DEFAULT_MIN_SCORE = "0.84";
 
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
@@ -207,28 +208,31 @@ public class Picker implements Closeable {
 		String domainsQuery = StringUtils.join(domains, ", ");
 		logger.info("- Domains: {}", domainsQuery);
 
-		Collection<String> resultsByDescription = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+		Collection<String> classificatioResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
 				classificationQuery,
-				CLASSIFICATION_EMBEDDING_DIMENTIONS, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)))
-				.stream().collect(Collectors.toSet());
+				CLASSIFICATION_EMBEDDING_DIMENTIONS, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
 
 		List<String> integrations = classification.getIntegrations();
 		if (!integrations.isEmpty()) {
 			String integrationsQuery = StringUtils.join(integrations, ", ");
 			logger.info("- Integrations: {}", integrationsQuery);
 
-			Collection<String> resultsByIntegrations = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+			Collection<String> integrationsResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
 					classificationQuery,
 					CLASSIFICATION_EMBEDDING_DIMENTIONS,
 					Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
 					Aggregates.match(Filters.in(INTEGRATIONS_PROPERTY_NAME, integrations)));
 
-			if (resultsByIntegrations != null) {
-				resultsByDescription.addAll(resultsByIntegrations);
+			if (integrationsResults != null) {
+				for (String id : integrationsResults) {
+					if (!classificatioResults.contains(id)) {
+						classificatioResults.add(id);
+					}
+				}
 			}
 		}
 
-		List<BIndex> pickResult = resultsByDescription.stream().map(id -> {
+		List<BIndex> pickResult = classificatioResults.stream().map(id -> {
 			return getBindex(id);
 		}).collect(Collectors.toList());
 

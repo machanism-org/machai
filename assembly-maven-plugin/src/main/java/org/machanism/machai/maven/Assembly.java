@@ -40,7 +40,7 @@ public class Assembly extends AbstractMojo {
 	@Parameter(property = "assembly.prompt.file", defaultValue = "project.txt")
 	protected File assemblyPromptFile;
 
-	@Parameter(property = "assembly.score", defaultValue = "0.85")
+	@Parameter(property = "assembly.score", defaultValue = Picker.DEFAULT_MIN_SCORE)
 	protected Double score;
 
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
