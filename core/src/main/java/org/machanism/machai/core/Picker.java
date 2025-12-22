@@ -53,6 +53,8 @@ import dev.langchain4j.model.output.Response;
 
 public class Picker implements Closeable {
 
+	private static final int DESCRIPTION_EMBEDDING_DIMENTIONS = 700;
+	private static final int DOMAIN_EMBEDDING_DIMENTIONS = 50;
 	private static final int VECTOR_SEARCH_LIMITS = 200;
 
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
@@ -67,6 +69,7 @@ public class Picker implements Closeable {
 	public static final String DOMAIN_EMBEDDING_PROPERTY_NAME = "domain_embedding";
 	private static final String LANGUAGES_PROPERTY_NAME = "languages";
 	private static final String DOMAINS_PROPERTY_NAME = "domains";
+	private static final String INTEGRATIONS_PROPERTY_NAME = "integrations";
 
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
@@ -119,6 +122,9 @@ public class Picker implements Closeable {
 			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
 					.distinct().collect(Collectors.toSet());
 
+			Set<String> integrations = classification.getIntegrations().stream().map(e -> e.toLowerCase())
+					.distinct().collect(Collectors.toSet());
+
 			if (languages.isEmpty()) {
 				logger.warn("WARNING! No language defined for: {}.", id);
 			}
@@ -128,8 +134,11 @@ public class Picker implements Closeable {
 					.append("version", bindex.getVersion())
 					.append(DOMAINS_PROPERTY_NAME, classification.getDomains())
 					.append(LANGUAGES_PROPERTY_NAME, languages)
-					.append(DESCRIPTION_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(bindex.getDescription()))
-					.append(DOMAIN_EMBEDDING_PROPERTY_NAME, getEmbeddingBson(classification.getDomains()))
+					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
+					.append(DESCRIPTION_EMBEDDING_PROPERTY_NAME,
+							getEmbeddingBson(bindex.getDescription(), DESCRIPTION_EMBEDDING_DIMENTIONS))
+					.append(DOMAIN_EMBEDDING_PROPERTY_NAME,
+							getEmbeddingBson(classification.getDomains(), DOMAIN_EMBEDDING_DIMENTIONS))
 					.append("id", bindex.getId());
 
 			InsertOneResult result = collection.insertOne(bindexDocument);
@@ -144,14 +153,14 @@ public class Picker implements Closeable {
 		}
 	}
 
-	private BsonArray getEmbeddingBson(Object data) throws JsonProcessingException {
+	private BsonArray getEmbeddingBson(Object data, Integer dimensions) throws JsonProcessingException {
 		String text;
 		if (data instanceof String) {
 			text = (String) data;
 		} else {
 			text = new ObjectMapper().writeValueAsString(data);
 		}
-		List<Double> descEmbedding = getEmbedding(text, 700);
+		List<Double> descEmbedding = getEmbedding(text, dimensions);
 		BsonArray bsonArray = new BsonArray(
 				descEmbedding.stream()
 						.map(BsonDouble::new)
@@ -177,7 +186,7 @@ public class Picker implements Closeable {
 				.timeout(java.time.Duration.ofSeconds(60))
 				.dimensions(dimensions)
 				.build();
-		
+
 		Response<Embedding> response = embeddingModel.embed(text);
 		return response.content().vectorAsList().stream()
 				.map(Double::new)
@@ -206,28 +215,46 @@ public class Picker implements Closeable {
 		String languagesQuery = StringUtils.join(languages, ", ");
 		logger.info("- Languages: {}", languagesQuery);
 
-		Collection<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query,
-				Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
-
 		List<String> domains = classification.getDomains();
 		String domainsQuery = StringUtils.join(domains, ", ");
 		logger.info("- Domains: {}", domainsQuery);
-		Collection<String> resultsByDomains = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
-				domainsQuery,
-				Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
-		if (!resultsByDomains.isEmpty()) {
-			resultsByDescription.retainAll(resultsByDomains);
+		List<String> integrations = classification.getIntegrations();
+		Collection<String> resultsByIntegrations = null;
+		if (!integrations.isEmpty()) {
+			String integrationsQuery = StringUtils.join(integrations, ", ");
+			logger.info("- Integrations: {}", integrationsQuery);
+
+			resultsByIntegrations = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
+					integrationsQuery,
+					DOMAIN_EMBEDDING_DIMENTIONS,
+					Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
+					Aggregates.match(Filters.in(INTEGRATIONS_PROPERTY_NAME, integrations)));
 		}
 
-		if (resultsByDescription.isEmpty()) {
-			logger.info("No results found.");
+		Collection<String> resultsByDomains = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
+				domainsQuery,
+				DOMAIN_EMBEDDING_DIMENTIONS, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
+
+		Collection<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query,
+				DESCRIPTION_EMBEDDING_DIMENTIONS, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
+
+		if (resultsByDomains.isEmpty()) {
+			resultsByDomains.addAll(resultsByDescription);
 		} else {
-			resultsByDescription.stream()
-					.limit(limit)
-					.forEach(id -> {
-						BIndex bindex = getBindex(id);
-						arrayList.add(bindex);
-					});
+			resultsByDomains.retainAll(resultsByDescription);
+		}
+
+		resultsByDescription = resultsByDescription.stream().limit(limit).collect(Collectors.toSet());
+
+		if (resultsByIntegrations != null) {
+			resultsByDescription.addAll(resultsByIntegrations);
+		}
+
+		if (!resultsByDescription.isEmpty()) {
+			resultsByDescription.stream().forEach(id -> {
+				BIndex bindex = getBindex(id);
+				arrayList.add(bindex);
+			});
 		}
 
 		return arrayList;
@@ -243,8 +270,9 @@ public class Picker implements Closeable {
 		}
 	}
 
-	private Collection<String> getResults(String indexName, String propertyPath, String query, Bson bson) {
-		Iterable<Double> queryEmbedding = getEmbedding(query, 50);
+	private Collection<String> getResults(String indexName, String propertyPath, String query, Integer dimensions,
+			Bson... bsons) {
+		Iterable<Double> queryEmbedding = getEmbedding(query, dimensions);
 
 		List<Bson> pipeline = new ArrayList<>();
 
@@ -255,8 +283,10 @@ public class Picker implements Closeable {
 				VECTOR_SEARCH_LIMITS,
 				exactVectorSearchOptions()));
 
-		if (bson != null) {
-			pipeline.add(bson);
+		if (bsons != null) {
+			for (Bson bson : bsons) {
+				pipeline.add(bson);
+			}
 		}
 
 		pipeline.add(Aggregates.project(Projections.fields(

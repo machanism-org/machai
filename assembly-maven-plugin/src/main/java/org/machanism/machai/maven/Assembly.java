@@ -37,7 +37,7 @@ public class Assembly extends AbstractMojo {
 	@Parameter(property = "pick.chatModel", defaultValue = "gpt-5-mini")
 	protected String pickChatModel;
 
-	@Parameter(property = "pick.limits", defaultValue = "10")
+	@Parameter(property = "pick.limits", defaultValue = "20")
 	protected int limits;
 
 	@Parameter(property = "assembly.prompt.file", defaultValue = "project.txt")

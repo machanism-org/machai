@@ -44,7 +44,7 @@ public class AssembyCommand {
 	@ShellMethod()
 	public void pick(
 			@ShellOption(value = "The application assembly prompt.") String query,
-			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "10") int limits)
+			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "20") int limits)
 			throws IOException {
 
 		query = getQueryFromFile(query);
@@ -52,7 +52,7 @@ public class AssembyCommand {
 		findQuery = query;
 		bindexList = pickBricks(query, limits);
 		logger.info("Search results for libraries matching the requested query:");
-		printFindResult(bindexList, limits);
+		printFindResult(bindexList);
 	}
 
 	private String getQueryFromFile(String query) throws IOException, FileNotFoundException {
@@ -103,7 +103,7 @@ public class AssembyCommand {
 		assembly.projectDir(dir);
 		List<BIndex> bindexList = this.bindexList.stream().limit(limits).collect(Collectors.toList());
 		logger.info("Recommended libraries:");
-		printFindResult(bindexList, limits);
+		printFindResult(bindexList);
 		assembly.assembly(prompt, bindexList);
 	}
 
@@ -125,14 +125,12 @@ public class AssembyCommand {
 		return bindexList;
 	}
 
-	private void printFindResult(List<BIndex> bindexList, int limits) {
+	private void printFindResult(List<BIndex> bindexList) {
 		if (!bindexList.isEmpty()) {
 			int i = 1;
 			for (BIndex bindex : bindexList) {
 				logger.info(String.format("%2$3s. %1s", bindex.getId(), i++));
 			}
-
-			logger.info("Number of Artifacts Found: {}. Limits: {}", bindexList.size(), limits);
 		} else {
 			logger.info("No Artifacts Found.");
 		}

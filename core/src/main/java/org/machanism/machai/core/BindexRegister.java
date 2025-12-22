@@ -53,4 +53,8 @@ public class BindexRegister extends ScanProject implements Closeable {
 		return this;
 	}
 
+	public void scanProjects(File basedir) throws IOException {
+		scanProjects(basedir, false);
+	}
+
 }

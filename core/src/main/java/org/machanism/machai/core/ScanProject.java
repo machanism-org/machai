@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.core.bindex.BIndexBuilderFactory;
 import org.machanism.machai.schema.BIndex;
@@ -18,18 +17,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class ScanProject {
 	private static Logger logger = LoggerFactory.getLogger(ScanProject.class);
 
-	public String scanProjects(File projectDir) throws IOException {
-		BIndexBuilder bindexBuilder = BIndexBuilderFactory.builder(projectDir);
+	public void scanProjects(File basedir) throws IOException {
+		scanProjects(basedir, true);
+	}
+
+	public String scanProjects(File projectDir, boolean create) throws IOException {
+		BIndexBuilder bindexBuilder = BIndexBuilderFactory.builder(projectDir, create);
 		bindexBuilder.projectDir(projectDir);
 		List<String> modules = bindexBuilder.getModules();
 
 		String regBindex = null;
 		if (modules != null) {
 			for (String module : modules) {
-				scanProjects(new File(projectDir, module));
+				scanProjects(new File(projectDir, module), create);
 			}
 		} else {
-			bindexBuilder = BIndexBuilderFactory.builder(projectDir);
+			bindexBuilder = BIndexBuilderFactory.builder(projectDir, create);
 			regBindex = processProject(projectDir, bindexBuilder);
 		}
 
@@ -56,5 +59,4 @@ public abstract class ScanProject {
 	public File getBindexFile(File projectDir) {
 		return new File(projectDir, "bindex.json");
 	}
-
 }

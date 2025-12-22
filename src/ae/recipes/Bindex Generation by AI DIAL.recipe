@@ -17,32 +17,32 @@
 		<Out name="Inputs Files" level="debug" /> 
 		<Loop name="path" source="Inputs Files">
 			<Var name="path" end="\.bindex\inputs.txt" /> 
-			<Remove name="bindex" /> 
+			<Remove name="existedBindex" /> 
 			<Load name="existedBindex" file="$var{path}\bindex.json" exception="java.io.FileNotFoundException" /> 
-			<If isNotNull="existedBindex">
-				<Out name="existedBindex" /> 
-				<Remove file="$var{path}\bindex.json" /> 
-			</If> 
-			<Remove name="inputs" /> 
-			<Load name="inputs" file="$var{path}\.bindex\inputs.txt" exception="java.io.FileNotFoundException" /> 
-			<Out name="inputs" /> 
-			<If isNotNull="inputs">
-				<Clipboard name="inputs" /> 
-				<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div[2]/span[2]/button" /> 
-				<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div/div[1]" /> 
-				<Text value="$var{\CONTROL+v}" id="chat-text-field" /> 
-				<Wait delay="500" /> 
-				<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div/div[2]/div[2]/button[2]" /> 
-				<Wait delay="500" /> 
-				<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[3]/div[2]/div/div[2]/button" exception="ignore" timeout="1s" /> 
-				<ElementExists xpath="//*[contains(concat(' ', normalize-space(@class), ' '), ' tabler-icon-send ')]" timeout="5m" /> 
-				<GetText name="bindex">
-					<xpath>//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[1]/pre/div/pre</xpath> 
-					<xpath>//*[@id="chat"]/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/pre/div/pre</xpath> 
-					<xpath>//*[@id="chat"]/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/p</xpath> 
-				</GetText> 
-				<Out name="bindex" type="json" /> 
-				<Out file="$var{path}\bindex.json" name="bindex" /> 
+			<If isNull="existedBindex">
+				<Remove name="inputs" /> 
+				<Load name="inputs" file="$var{path}\.bindex\inputs.txt" exception="java.io.FileNotFoundException" /> 
+				<Out name="inputs" /> 
+				<If isNotNull="inputs">
+					<Clipboard name="inputs" /> 
+					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div[2]/span[2]/button" /> 
+					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div/div[1]" /> 
+					<Text value="$var{\CONTROL+v}" id="chat-text-field" /> 
+					<Wait delay="1s" /> 
+					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div/div[2]/div/div[2]/div[2]/button[2]" /> 
+					<Wait delay="1s" /> 
+					<Click xpath="//*[@id='chat']/div[2]/div/div/div/div[3]/div[2]/div/div[2]/button" exception="ignore" timeout="2s" /> 
+					<ElementExists xpath="//*[contains(concat(' ', normalize-space(@class), ' '), ' tabler-icon-send ')]" timeout="6m" /> 
+					<Wait delay="1s" /> 
+					<GetText name="bindex">
+						<xpath>//*[@id='chat']/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[1]/pre/div/pre</xpath> 
+						<xpath>//*[@id="chat"]/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/pre/div/pre</xpath> 
+						<xpath>//*[@id="chat"]/div[2]/div/div/div/div[2]/div[2]/div/div[2]/div/div/div/div/div[2]/div[1]/div[2]/p</xpath> 
+					</GetText> 
+					<Out name="bindex" type="json" /> 
+					<Out type="path" level="warn">$var{path}\bindex.json</Out> 
+					<Out file="$var{path}\bindex.json" name="bindex" /> 
+				</If> 
 			</If> 
 		</Loop> 
 	</Extern> 

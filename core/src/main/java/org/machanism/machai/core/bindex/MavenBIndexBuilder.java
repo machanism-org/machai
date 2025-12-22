@@ -23,6 +23,7 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
 	private Model model;
+	private boolean effectivePomRequired;
 
 	protected void projectContext() throws IOException {
 		if (model == null) {
@@ -89,9 +90,9 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 
 		if ("pom".equals(model.getPackaging())) {
 			try {
-				model = PomReader.getProjectModel(pomFile, true);
+				model = PomReader.getProjectModel(pomFile, effectivePomRequired);
 			} catch (Exception e) {
-				logger.error("Effective model building failed: {}",
+				logger.warn("Effective model building failed: {}",
 						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
 			}
 			modules = model.getModules();
@@ -100,8 +101,13 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 		return modules;
 	}
 
-	public void model(Model model) {
+	public MavenBIndexBuilder model(Model model) {
 		this.model = model;
+		return this;
 	}
 
+	public MavenBIndexBuilder effectivePomRequired(boolean effectivePomRequired) {
+		this.effectivePomRequired = effectivePomRequired;
+		return this;
+	}
 }

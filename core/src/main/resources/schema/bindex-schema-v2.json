@@ -1,392 +1,400 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "BIndex",
-  "description": "A schema to describe artifacts (e.g., libraries) for automatic recognition and integration with GenAI engines.",
-  "type": "object",
-  "required": [
-    "id",
-    "name",
-    "version",
-    "description",
-    "authors",
-    "license",
-    "classification",
-    "constructors",
-    "features",
-    "location"
-  ],
-  "properties": {
-    "id": {
-      "type": "string",
-      "description": "A unique identifier for the artifact."
-    },
-    "name": {
-      "type": "string",
-      "description": "The full name of the artifact or library. For Maven artifacts, use groupId:artifactId."
-    },
-    "version": {
-      "type": "string",
-      "description": "Version of the artifact (e.g., semantic versioning, tag, or hash)."
-    },
-    "location": {
-      "type": "object",
-      "description": "Details about the artifact's storage location, repository type, and metadata.",
-      "required": [
-        "repositoryType",
-        "coordinates"
-      ],
-      "properties": {
-        "repositoryType": {
-          "type": "string",
-          "description": "Type of repository (e.g., Maven, NPM, Git, DockerHub, PyPI)."
-        },
-        "repositoryUrl": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL of the repository hosting the artifact."
-        },
-        "coordinates": {
-          "type": "object",
-          "description": "Coordinates identifying the artifact within the repository.",
-          "required": [
-            "group",
-            "artifactId",
-            "version"
-          ],
-          "properties": {
-            "group": {
-              "type": "string",
-              "description": "Group or namespace of the artifact (e.g., Maven groupId)."
-            },
-            "artifactId": {
-              "type": "string",
-              "description": "Name of the artifact within its group (e.g., artifactId in Maven)."
-            },
-            "version": {
-              "type": "string",
-              "description": "Version of the artifact."
-            },
-            "classifier": {
-              "type": "string",
-              "description": "Optional classifier providing context (e.g., 'sources', 'javadoc')."
-            },
-            "extension": {
-              "type": "string",
-              "description": "File extension or type (e.g., JAR, WAR, tar.gz, whl)."
-            }
-          }
-        }
-      }
-    },
-    "description": {
-      "type": "string",
-      "description": "A critical property for bindex.json that is used to generate embeddings for semantic search in assembling customer applications. The description must include all relevant information to support accurate and comprehensive embeddings. This should be generated based on project description info and any additional contextual information from the project, if required, such as dependencies, features, and domain-specific details. Providing a detailed and representative description is essential for ensuring high-quality search results."
-    },
-    "authors": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "description": "Describes the author or organization responsible for the artifact.",
-        "required": [
-          "name"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the author or organization."
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "description": "Email for support or queries."
-          },
-          "website": {
-            "type": "string",
-            "format": "uri",
-            "description": "Link to the website or documentation."
-          }
-        }
-      }
-    },
-    "license": {
-      "type": "string",
-      "description": "License type (e.g., MIT, Apache 2.0, etc.)."
-    },
-    "classification": {
-      "type": "object",
-      "description": "Categorizes the artifact by type, domain, and supported languages.",
-      "required": [
-        "type",
-        "domains",
-        "languages"
-      ],
-      "properties": {
-        "type": {
-          "type": "string",
-          "description": "Type of the artifact (e.g., library, plugin, module)."
-        },
-        "domains": {
-          "type": "array",
-          "description": "Application domains (e.g., Data Processing, Machine Learning).",
-          "items": {
-            "type": "string",
-            "description": "Application domain."
-          }
-        },
-        "languages": {
-          "type": "array",
-          "description": "Programming languages supported.",
-          "items": {
-            "type": "object",
-            "description": "The implementation language.",
-            "required": [
-              "name",
-              "version"
-            ],
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "The name of the programming language (e.g., Python, Java, C++)"
-              },
-              "version": {
-                "type": "string",
-                "description": "The version of the programming language (e.g., 3.9.1, 11, 17)"
-              }
-            }
-          }
-        },
-        "usageContext": {
-          "type": "array",
-          "description": "Specifies the contexts or environments in which the library can be used.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "targetEnvironment": {
-          "type": "array",
-          "description": "A property that defines the fundamental runtime or platform required for the library to function. This property should specify only the base environment (e.g., `Java', `Node.js`, `Python`) rather than listing every possible deployment scenario. For example, if a library is written in pure Java, set targetEnvironment to `Java`, indicating compatibility with any environment that supports Java, without the need to enumerate all Java-compatible platforms (such as Windows, Linux, or macOS).",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "constructors": {
-      "type": "array",
-      "description": "This section should contain information about how the object (service) is created and how it is configured before use.",
-      "items": {
-        "type": "object",
-        "required": [
-          "package",
-          "signature",
-          "description",
-          "examples"
-        ],
-        "properties": {
-          "package": {
-            "type": "string",
-            "description": "Name of the package."
-          },
-          "signature": {
-            "type": "string",
-            "description": "The full signature with fully qualified names including package for parameters and exceptions."
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed explanation."
-          },
-          "examples": {
-            "type": "array",
-            "description": "Code examples for the object creation.",
-            "items": {
-              "type": "object",
-              "required": [
-                "snippet",
-                "description"
-              ],
-              "properties": {
-                "snippet": {
-                  "type": "string",
-                  "description": "A code example snippet."
-                },
-                "description": {
-                  "type": "string",
-                  "description": "Detailed description of the example snippet."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "features": {
-      "type": "array",
-      "description": "The primary functions or capabilities provided by the artifact.",
-      "items": {
-        "type": "object",
-        "required": [
-          "package",
-          "name",
-          "signature",
-          "description",
-          "examples"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the function or constructor."
-          },
-          "package": {
-            "type": "string",
-            "description": "Name of the package."
-          },
-          "signature": {
-            "type": "string",
-            "description": "The full signature with fully qualified names including package for parameters and exceptions."
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed explanation of the feature."
-          },
-          "examples": {
-            "type": "array",
-            "description": "Code examples for the feature.",
-            "items": {
-              "type": "object",
-              "required": [
-                "snippet",
-                "description"
-              ],
-              "properties": {
-                "snippet": {
-                  "type": "string",
-                  "description": "A code example snippet."
-                },
-                "description": {
-                  "type": "string",
-                  "description": "Detailed description of the example snippet."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "customizations": {
-      "type": "array",
-      "description": "Extension or customization points for developers to extend or modify the artifact's functionality.",
-      "items": {
-        "type": "object",
-        "required": [
-          "name",
-          "description",
-          "type"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the customization or extension point (e.g., class, interface, method)."
-          },
-          "package": {
-            "type": "string",
-            "description": "Name of the package."
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description of the extension or customization point."
-          },
-          "type": {
-            "type": "string",
-            "description": "Type of customization point (e.g., method, interface, configuration property)."
-          },
-          "examples": {
-            "type": "array",
-            "description": "Code examples for the feature.",
-            "items": {
-              "type": "object",
-              "required": [
-                "snippet",
-                "description"
-              ],
-              "properties": {
-                "snippet": {
-                  "type": "string",
-                  "description": "A code example snippet."
-                },
-                "description": {
-                  "type": "string",
-                  "description": "Detailed description of the example snippet."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "studs": {
-      "type": "array",
-      "description": "A list of interfaces or abstract classes defined in this artifact, intended for implementation or extension by other modules to support forking, plugin, or extension scenarios.",
-      "items": {
-        "type": "object",
-        "required": [
-          "name",
-          "type",
-          "description",
-          "methods"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Fully qualified name of the interface or abstract class, as exported in this artifact."
-          },
-          "package": {
-            "type": "string",
-            "description": "Name of the package."
-          },
-          "type": {
-            "type": "string",
-            "description": "Kind of stub: always 'interface' or 'abstract class' as provided by this artifact."
-          },
-          "description": {
-            "type": "string",
-            "description": "Summary of the purpose and intended use of this interface or abstract class."
-          },
-          "examples": {
-            "type": "array",
-            "description": "Code examples for the feature.",
-            "items": {
-              "type": "object",
-              "required": [
-                "snippet",
-                "description"
-              ],
-              "properties": {
-                "snippet": {
-                  "type": "string",
-                  "description": "A code example snippet."
-                },
-                "description": {
-                  "type": "string",
-                  "description": "Detailed description of the example snippet."
-                }
-              }
-            }
-          },
-          "implement": {
-            "type": "string",
-            "description": "Fully qualified name of the class in this artifact that implements or extends this stub."
-          }
-        }
-      }
-    },
-    "examples": {
-      "type": "array",
-      "description": "General usage examples for the artifact, containing any structured data to help LLMs understand how the library can be used.",
-      "items": {
-        "type": "object",
-        "description": "A usage example object. The structure is flexible to allow for various demonstration formats.",
-        "additionalProperties": true
-      }
-    }
-  }
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "BIndex",
+	"description": "A schema to describe artifacts (e.g., libraries) for automatic recognition and integration with GenAI engines.",
+	"type": "object",
+	"required": [
+		"id",
+		"name",
+		"version",
+		"description",
+		"authors",
+		"license",
+		"classification",
+		"constructors",
+		"features",
+		"location"
+	],
+	"properties": {
+		"id": {
+			"type": "string",
+			"description": "A unique identifier for the artifact."
+		},
+		"name": {
+			"type": "string",
+			"description": "The full name of the artifact or library. For Maven artifacts, use groupId:artifactId."
+		},
+		"version": {
+			"type": "string",
+			"description": "Version of the artifact (e.g., semantic versioning, tag, or hash)."
+		},
+		"location": {
+			"type": "object",
+			"description": "Details about the artifact's storage location, repository type, and metadata.",
+			"required": [
+				"repositoryType",
+				"coordinates"
+			],
+			"properties": {
+				"repositoryType": {
+					"type": "string",
+					"description": "Type of repository (e.g., Maven, NPM, Git, DockerHub, PyPI)."
+				},
+				"repositoryUrl": {
+					"type": "string",
+					"format": "uri",
+					"description": "URL of the repository hosting the artifact."
+				},
+				"coordinates": {
+					"type": "object",
+					"description": "Coordinates identifying the artifact within the repository.",
+					"required": [
+						"group",
+						"artifactId",
+						"version"
+					],
+					"properties": {
+						"group": {
+							"type": "string",
+							"description": "Group or namespace of the artifact (e.g., Maven groupId)."
+						},
+						"artifactId": {
+							"type": "string",
+							"description": "Name of the artifact within its group (e.g., artifactId in Maven)."
+						},
+						"version": {
+							"type": "string",
+							"description": "Version of the artifact."
+						},
+						"classifier": {
+							"type": "string",
+							"description": "Optional classifier providing context (e.g., 'sources', 'javadoc')."
+						},
+						"extension": {
+							"type": "string",
+							"description": "File extension or type (e.g., JAR, WAR, tar.gz, whl)."
+						}
+					}
+				}
+			}
+		},
+		"description": {
+			"type": "string",
+			"description": "A critical property for bindex.json that is used to generate embeddings for semantic search in assembling customer applications. The description must include all relevant information to support accurate and comprehensive embeddings. This should be generated based on project description info and any additional contextual information from the project, if required, such as dependencies, features, and domain-specific details. Providing a detailed and representative description is essential for ensuring high-quality search results."
+		},
+		"authors": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"description": "Describes the author or organization responsible for the artifact.",
+				"required": [
+					"name"
+				],
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "Name of the author or organization."
+					},
+					"email": {
+						"type": "string",
+						"format": "email",
+						"description": "Email for support or queries."
+					},
+					"website": {
+						"type": "string",
+						"format": "uri",
+						"description": "Link to the website or documentation."
+					}
+				}
+			}
+		},
+		"license": {
+			"type": "string",
+			"description": "License type (e.g., MIT, Apache 2.0, etc.)."
+		},
+		"classification": {
+			"type": "object",
+			"description": "Categorizes the artifact by type, domain, and supported languages.",
+			"required": [
+				"type",
+				"domains",
+				"languages"
+			],
+			"properties": {
+				"type": {
+					"type": "string",
+					"description": "Type of the artifact (e.g., library, plugin, module)."
+				},
+				"domains": {
+					"type": "array",
+					"description": "Application domains (e.g., Data Processing, Machine Learning).",
+					"items": {
+						"type": "string",
+						"description": "Application domain."
+					}
+				},
+				"languages": {
+					"type": "array",
+					"description": "Programming languages supported.",
+					"items": {
+						"type": "object",
+						"description": "The implementation language.",
+						"required": [
+							"name",
+							"version"
+						],
+						"properties": {
+							"name": {
+								"type": "string",
+								"description": "The name of the programming language (e.g., Python, Java, C++)"
+							},
+							"version": {
+								"type": "string",
+								"description": "The version of the programming language (e.g., 3.9.1, 11, 17)"
+							}
+						}
+					}
+				},
+				"usageContext": {
+					"type": "array",
+					"description": "Specifies the contexts or environments in which the library can be used.",
+					"items": {
+						"type": "string"
+					}
+				},
+				"targetEnvironment": {
+					"type": "array",
+					"description": "A property that defines the fundamental runtime or platform required for the library to function. This property should specify only the base environment (e.g., `Java', `Node.js`, `Python`) rather than listing every possible deployment scenario. For example, if a library is written in pure Java, set targetEnvironment to `Java`, indicating compatibility with any environment that supports Java, without the need to enumerate all Java-compatible platforms (such as Windows, Linux, or macOS).",
+					"items": {
+						"type": "string"
+					}
+				},
+				"integrations": {
+					"type": "array",
+					"description": "Names of external backing systems the library integrates with (e.g., commercetools, Adyen, Braintree), if supported. This should only include actual external backend systems, not dependent libraries.",
+					"items": {
+					  "type": "string",
+					  "description": "Name of the external backing system."
+					}
+				}
+			}
+		},
+		"constructors": {
+			"type": "array",
+			"description": "This section should contain information about how the object (service) is created and how it is configured before use.",
+			"items": {
+				"type": "object",
+				"required": [
+					"package",
+					"signature",
+					"description",
+					"examples"
+				],
+				"properties": {
+					"package": {
+						"type": "string",
+						"description": "Name of the package."
+					},
+					"signature": {
+						"type": "string",
+						"description": "The full signature with fully qualified names including package for parameters and exceptions."
+					},
+					"description": {
+						"type": "string",
+						"description": "Detailed explanation."
+					},
+					"examples": {
+						"type": "array",
+						"description": "Code examples for the object creation.",
+						"items": {
+							"type": "object",
+							"required": [
+								"snippet",
+								"description"
+							],
+							"properties": {
+								"snippet": {
+									"type": "string",
+									"description": "A code example snippet."
+								},
+								"description": {
+									"type": "string",
+									"description": "Detailed description of the example snippet."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"features": {
+			"type": "array",
+			"description": "The primary functions or capabilities provided by the artifact.",
+			"items": {
+				"type": "object",
+				"required": [
+					"package",
+					"name",
+					"signature",
+					"description",
+					"examples"
+				],
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "Name of the function or constructor."
+					},
+					"package": {
+						"type": "string",
+						"description": "Name of the package."
+					},
+					"signature": {
+						"type": "string",
+						"description": "The full signature with fully qualified names including package for parameters and exceptions."
+					},
+					"description": {
+						"type": "string",
+						"description": "Detailed explanation of the feature."
+					},
+					"examples": {
+						"type": "array",
+						"description": "Code examples for the feature.",
+						"items": {
+							"type": "object",
+							"required": [
+								"snippet",
+								"description"
+							],
+							"properties": {
+								"snippet": {
+									"type": "string",
+									"description": "A code example snippet."
+								},
+								"description": {
+									"type": "string",
+									"description": "Detailed description of the example snippet."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"customizations": {
+			"type": "array",
+			"description": "Extension or customization points for developers to extend or modify the artifact's functionality.",
+			"items": {
+				"type": "object",
+				"required": [
+					"name",
+					"description",
+					"type"
+				],
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "Name of the customization or extension point (e.g., class, interface, method)."
+					},
+					"package": {
+						"type": "string",
+						"description": "Name of the package."
+					},
+					"description": {
+						"type": "string",
+						"description": "Detailed description of the extension or customization point."
+					},
+					"type": {
+						"type": "string",
+						"description": "Type of customization point (e.g., method, interface, configuration property)."
+					},
+					"examples": {
+						"type": "array",
+						"description": "Code examples for the feature.",
+						"items": {
+							"type": "object",
+							"required": [
+								"snippet",
+								"description"
+							],
+							"properties": {
+								"snippet": {
+									"type": "string",
+									"description": "A code example snippet."
+								},
+								"description": {
+									"type": "string",
+									"description": "Detailed description of the example snippet."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"studs": {
+			"type": "array",
+			"description": "A list of interfaces or abstract classes defined in this artifact, intended for implementation or extension by other modules to support forking, plugin, or extension scenarios.",
+			"items": {
+				"type": "object",
+				"required": [
+					"name",
+					"type",
+					"description",
+					"methods"
+				],
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "Fully qualified name of the interface or abstract class, as exported in this artifact."
+					},
+					"package": {
+						"type": "string",
+						"description": "Name of the package."
+					},
+					"type": {
+						"type": "string",
+						"description": "Kind of stub: always 'interface' or 'abstract class' as provided by this artifact."
+					},
+					"description": {
+						"type": "string",
+						"description": "Summary of the purpose and intended use of this interface or abstract class."
+					},
+					"examples": {
+						"type": "array",
+						"description": "Code examples for the feature.",
+						"items": {
+							"type": "object",
+							"required": [
+								"snippet",
+								"description"
+							],
+							"properties": {
+								"snippet": {
+									"type": "string",
+									"description": "A code example snippet."
+								},
+								"description": {
+									"type": "string",
+									"description": "Detailed description of the example snippet."
+								}
+							}
+						}
+					},
+					"implement": {
+						"type": "string",
+						"description": "Fully qualified name of the class in this artifact that implements or extends this stub."
+					}
+				}
+			}
+		},
+		"examples": {
+			"type": "array",
+			"description": "General usage examples for the artifact, containing any structured data to help LLMs understand how the library can be used.",
+			"items": {
+				"type": "object",
+				"description": "A usage example object. The structure is flexible to allow for various demonstration formats.",
+				"additionalProperties": true
+			}
+		}
+	}
 }

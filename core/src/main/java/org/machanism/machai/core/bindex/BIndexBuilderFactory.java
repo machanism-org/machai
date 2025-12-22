@@ -4,10 +4,10 @@ import java.io.File;
 
 public class BIndexBuilderFactory {
 
-	public static BIndexBuilder builder(File projectDir) {
+	public static BIndexBuilder builder(File projectDir, boolean create) {
 		BIndexBuilder bindex = null;
 		if (MavenBIndexBuilder.isMavenProject(projectDir)) {
-			bindex = new MavenBIndexBuilder();
+			bindex = new MavenBIndexBuilder().effectivePomRequired(create);
 		} else if (JScriptBIndexBuilder.isPackageJsonPresent(projectDir)) {
 			bindex = new JScriptBIndexBuilder();
 		} else if (PythonBIndexBuilder.isPythonProject(projectDir)) {
