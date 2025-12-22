@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoCommandException;
@@ -53,9 +54,8 @@ import dev.langchain4j.model.output.Response;
 
 public class Picker implements Closeable {
 
-	private static final double SCORE_THRESHOLD = 0.7;
-	private static final int DESCRIPTION_EMBEDDING_DIMENTIONS = 700;
-	private static final int DOMAIN_EMBEDDING_DIMENTIONS = 50;
+	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
+	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
 	private static final int VECTOR_SEARCH_LIMITS = 200;
 
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
@@ -64,13 +64,12 @@ public class Picker implements Closeable {
 
 	private static final String INSTANCENAME = "machanism";
 	private static final String CONNECTION = "bindex";
-
-	public static final String BINDEX_PROPERTY_NAME = "bindex";
-	public static final String DESCRIPTION_EMBEDDING_PROPERTY_NAME = "description_embedding";
-	public static final String DOMAIN_EMBEDDING_PROPERTY_NAME = "domain_embedding";
+	private static final String INDEXNAME = "vector_index";
 	private static final String LANGUAGES_PROPERTY_NAME = "languages";
 	private static final String DOMAINS_PROPERTY_NAME = "domains";
 	private static final String INTEGRATIONS_PROPERTY_NAME = "integrations";
+
+	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
@@ -82,6 +81,7 @@ public class Picker implements Closeable {
 	private GenAIProvider provider;
 
 	private String apiKey;
+	private Double score = 0.85;
 
 	public Picker(GenAIProvider provider) {
 		this.provider = provider;
@@ -136,10 +136,8 @@ public class Picker implements Closeable {
 					.append(DOMAINS_PROPERTY_NAME, classification.getDomains())
 					.append(LANGUAGES_PROPERTY_NAME, languages)
 					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
-					.append(DESCRIPTION_EMBEDDING_PROPERTY_NAME,
-							getEmbeddingBson(bindex.getDescription(), DESCRIPTION_EMBEDDING_DIMENTIONS))
-					.append(DOMAIN_EMBEDDING_PROPERTY_NAME,
-							getEmbeddingBson(classification.getDomains(), DOMAIN_EMBEDDING_DIMENTIONS))
+					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+							getEmbeddingBson(bindex.getClassification(), CLASSIFICATION_EMBEDDING_DIMENTIONS))
 					.append("id", bindex.getId());
 
 			InsertOneResult result = collection.insertOne(bindexDocument);
@@ -194,20 +192,9 @@ public class Picker implements Closeable {
 				.collect(Collectors.toList());
 	}
 
-	public List<BIndex> pick(String query, int limit) throws IOException {
-		List<BIndex> arrayList = new ArrayList<>();
-		String indexName = "vector_index";
+	public List<BIndex> pick(String query) throws IOException {
 
-		URL systemResource = BIndex.class.getResource(BIndexBuilder.BINDEX_SCHEMA_RESOURCE);
-		String schema = IOUtils.toString(systemResource, "UTF8");
-		ObjectMapper objectMapper = new ObjectMapper();
-		JsonNode schemaJson = objectMapper.readTree(schema);
-		JsonNode jsonNode = schemaJson.get("properties").get("classification");
-		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
-
-		String classificationInstruction = MessageFormat.format(promptBundle.getString("classification_instruction"),
-				classificationSchema);
-		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform();
+		String classificationQuery = getClassificationQuery(query);
 		Classification classification = new ObjectMapper().readValue(classificationQuery, Classification.class);
 
 		logger.info("Detected classification:");
@@ -219,44 +206,48 @@ public class Picker implements Closeable {
 		List<String> domains = classification.getDomains();
 		String domainsQuery = StringUtils.join(domains, ", ");
 		logger.info("- Domains: {}", domainsQuery);
+
+		Collection<String> resultsByDescription = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+				classificationQuery,
+				CLASSIFICATION_EMBEDDING_DIMENTIONS, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)))
+				.stream().collect(Collectors.toSet());
+
 		List<String> integrations = classification.getIntegrations();
-		Collection<String> resultsByIntegrations = null;
 		if (!integrations.isEmpty()) {
 			String integrationsQuery = StringUtils.join(integrations, ", ");
 			logger.info("- Integrations: {}", integrationsQuery);
 
-			resultsByIntegrations = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
-					integrationsQuery,
-					DOMAIN_EMBEDDING_DIMENTIONS,
+			Collection<String> resultsByIntegrations = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+					classificationQuery,
+					CLASSIFICATION_EMBEDDING_DIMENTIONS,
 					Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
 					Aggregates.match(Filters.in(INTEGRATIONS_PROPERTY_NAME, integrations)));
+
+			if (resultsByIntegrations != null) {
+				resultsByDescription.addAll(resultsByIntegrations);
+			}
 		}
 
-		Collection<String> resultsByDomains = getResults(indexName, DOMAIN_EMBEDDING_PROPERTY_NAME,
-				domainsQuery,
-				DOMAIN_EMBEDDING_DIMENTIONS, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
+		List<BIndex> pickResult = resultsByDescription.stream().map(id -> {
+			return getBindex(id);
+		}).collect(Collectors.toList());
 
-		Collection<String> resultsByDescription = getResults(indexName, DESCRIPTION_EMBEDDING_PROPERTY_NAME, query,
-				DESCRIPTION_EMBEDDING_DIMENTIONS, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
+		return pickResult;
+	}
 
-		if (resultsByDomains.isEmpty()) {
-			resultsByDomains.addAll(resultsByDescription);
-		} else {
-			resultsByDomains.retainAll(resultsByDescription);
-		}
+	private String getClassificationQuery(String query)
+			throws IOException, JsonProcessingException, JsonMappingException {
+		URL systemResource = BIndex.class.getResource(BIndexBuilder.BINDEX_SCHEMA_RESOURCE);
+		String schema = IOUtils.toString(systemResource, "UTF8");
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode schemaJson = objectMapper.readTree(schema);
+		JsonNode jsonNode = schemaJson.get("properties").get("classification");
+		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
 
-		if (resultsByIntegrations != null) {
-			resultsByDescription.addAll(resultsByIntegrations);
-		}
-
-		if (!resultsByDescription.isEmpty()) {
-			resultsByDescription.stream().forEach(id -> {
-				BIndex bindex = getBindex(id);
-				arrayList.add(bindex);
-			});
-		}
-
-		return arrayList;
+		String classificationInstruction = MessageFormat.format(promptBundle.getString("classification_instruction"),
+				classificationSchema);
+		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform();
+		return classificationQuery;
 	}
 
 	private BIndex getBindex(String id) {
@@ -295,7 +286,7 @@ public class Picker implements Closeable {
 				Projections.include("version"),
 				Projections.metaVectorSearchScore("score"))));
 
-		pipeline.add(Aggregates.match(Filters.gte("score", SCORE_THRESHOLD)));
+		pipeline.add(Aggregates.match(Filters.gte("score", score)));
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
@@ -328,5 +319,9 @@ public class Picker implements Closeable {
 		String lang = language.getName().toLowerCase().trim();
 		lang = StringUtils.substringBefore(lang, "(").trim();
 		return lang;
+	}
+
+	public void setScore(Double score) {
+		this.score = score;
 	}
 }

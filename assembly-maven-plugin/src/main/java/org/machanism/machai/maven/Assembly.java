@@ -37,11 +37,11 @@ public class Assembly extends AbstractMojo {
 	@Parameter(property = "pick.chatModel", defaultValue = "gpt-5-mini")
 	protected String pickChatModel;
 
-	@Parameter(property = "pick.limits", defaultValue = "20")
-	protected int limits;
-
 	@Parameter(property = "assembly.prompt.file", defaultValue = "project.txt")
 	protected File assemblyPromptFile;
+
+	@Parameter(property = "assembly.score", defaultValue = "0.85")
+	protected Double score;
 
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
 	protected File basedir;
@@ -62,8 +62,8 @@ public class Assembly extends AbstractMojo {
 			provider.addDefaultTools();
 
 			try (Picker picker = new Picker(provider)) {
-
-				List<BIndex> bindexList = picker.pick(query, limits);
+				picker.setScore(score);
+				List<BIndex> bindexList = picker.pick(query);
 
 				if (!bindexList.isEmpty()) {
 					int i = 1;
@@ -71,8 +71,6 @@ public class Assembly extends AbstractMojo {
 					for (BIndex bindex : bindexList) {
 						getLog().info(String.format("%2$3s. %1s", bindex.getId(), i++));
 					}
-
-					getLog().info("Number of Artifacts Found: " + bindexList.size() + ". Limits: " + limits);
 
 					GenAIProvider assemblyProvider = new GenAIProvider(ChatModel.of(chatModel));
 					assemblyProvider.setInputsOnly(inputsOnly);
@@ -89,7 +87,7 @@ public class Assembly extends AbstractMojo {
 						}
 					}
 
-				} 
+				}
 
 			}
 		} catch (IOException | PrompterException e) {

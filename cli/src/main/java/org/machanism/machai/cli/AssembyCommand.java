@@ -44,13 +44,13 @@ public class AssembyCommand {
 	@ShellMethod()
 	public void pick(
 			@ShellOption(value = "The application assembly prompt.") String query,
-			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "20") int limits)
+			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = "0.85") double score)
 			throws IOException {
 
 		query = getQueryFromFile(query);
 
 		findQuery = query;
-		bindexList = pickBricks(query, limits);
+		bindexList = pickBricks(query, score);
 		logger.info("Search results for libraries matching the requested query:");
 		printFindResult(bindexList);
 	}
@@ -69,7 +69,7 @@ public class AssembyCommand {
 	public void assembly(
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
 			@ShellOption(help = "The path to the assembled project directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "Max number of artifacts.", value = "limits", defaultValue = "10") int limits,
+			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = "0.85") double score,
 			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create the project.", value = "inputs") boolean debug)
 			throws IOException {
 
@@ -89,7 +89,7 @@ public class AssembyCommand {
 			prompt = this.findQuery;
 		} else {
 			query = getQueryFromFile(query);
-			bindexList = pickBricks(query, limits);
+			bindexList = pickBricks(query, score);
 
 			for (BIndex bindex : bindexList) {
 				logger.info("ArtifactId: " + bindex.getId());
@@ -101,7 +101,6 @@ public class AssembyCommand {
 		logger.info("The project directory: {}", dir);
 
 		assembly.projectDir(dir);
-		List<BIndex> bindexList = this.bindexList.stream().limit(limits).collect(Collectors.toList());
 		logger.info("Recommended libraries:");
 		printFindResult(bindexList);
 		assembly.assembly(prompt, bindexList);
@@ -117,10 +116,11 @@ public class AssembyCommand {
 		}
 	}
 
-	private List<BIndex> pickBricks(String query, int limits) throws IOException {
+	private List<BIndex> pickBricks(String query, Double score) throws IOException {
 		List<BIndex> bindexList = null;
 		try (Picker picker = new Picker(provider)) {
-			bindexList = picker.pick(query, limits);
+			picker.setScore(score);
+			bindexList = picker.pick(query);
 		}
 		return bindexList;
 	}
