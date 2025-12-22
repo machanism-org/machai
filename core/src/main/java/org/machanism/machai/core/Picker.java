@@ -53,6 +53,7 @@ import dev.langchain4j.model.output.Response;
 
 public class Picker implements Closeable {
 
+	private static final double SCORE_THRESHOLD = 0.7;
 	private static final int DESCRIPTION_EMBEDDING_DIMENTIONS = 700;
 	private static final int DOMAIN_EMBEDDING_DIMENTIONS = 50;
 	private static final int VECTOR_SEARCH_LIMITS = 200;
@@ -244,8 +245,6 @@ public class Picker implements Closeable {
 			resultsByDomains.retainAll(resultsByDescription);
 		}
 
-		resultsByDescription = resultsByDescription.stream().limit(limit).collect(Collectors.toSet());
-
 		if (resultsByIntegrations != null) {
 			resultsByDescription.addAll(resultsByIntegrations);
 		}
@@ -293,7 +292,10 @@ public class Picker implements Closeable {
 				Projections.exclude("_id"),
 				Projections.include("id"),
 				Projections.include("name"),
-				Projections.include("version"))));
+				Projections.include("version"),
+				Projections.metaVectorSearchScore("score"))));
+
+		pipeline.add(Aggregates.match(Filters.gte("score", SCORE_THRESHOLD)));
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
