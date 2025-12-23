@@ -155,6 +155,19 @@
 						}
 					}
 				},
+				"layers": {
+					"type": "array",
+					"description": "Defines which Clean Architecture layers the library belongs to.",
+					"items": {
+						"enum": [
+							"Utils",
+							"Entities",
+							"Interactors",
+							"Adapters",
+							"Infrastructure"
+						]
+					}
+				},
 				"usageContext": {
 					"type": "array",
 					"description": "Specifies the contexts or environments in which the library can be used.",
@@ -173,8 +186,8 @@
 					"type": "array",
 					"description": "Names of external backing systems the library integrates with (e.g., commercetools, Adyen, Braintree), if supported. This should only include actual external backend systems, not dependent libraries.",
 					"items": {
-					  "type": "string",
-					  "description": "Name of the external backing system."
+						"type": "string",
+						"description": "Name of the external backing system."
 					}
 				}
 			}

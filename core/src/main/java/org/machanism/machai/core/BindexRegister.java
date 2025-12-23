@@ -54,10 +54,7 @@ public class BindexRegister extends ScanProject implements Closeable {
 	}
 
 	public void scanProjects(File basedir) throws IOException {
-		String result = scanProjects(basedir, false);
-		if (result == null) {
-			throw new IOException(basedir.getAbsolutePath());
-		}
+		scanProjects(basedir, false);
 	}
 
 }

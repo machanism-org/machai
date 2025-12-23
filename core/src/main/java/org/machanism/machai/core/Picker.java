@@ -68,6 +68,7 @@ public class Picker implements Closeable {
 	private static final String INDEXNAME = "vector_index";
 	private static final String LANGUAGES_PROPERTY_NAME = "languages";
 	private static final String DOMAINS_PROPERTY_NAME = "domains";
+	private static final String LAYERS_PROPERTY_NAME = "layers";
 	private static final String INTEGRATIONS_PROPERTY_NAME = "integrations";
 
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
@@ -135,6 +136,7 @@ public class Picker implements Closeable {
 					.append("name", bindex.getName())
 					.append("version", bindex.getVersion())
 					.append(DOMAINS_PROPERTY_NAME, classification.getDomains())
+					.append(LAYERS_PROPERTY_NAME, classification.getLayers())
 					.append(LANGUAGES_PROPERTY_NAME, languages)
 					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
 					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
