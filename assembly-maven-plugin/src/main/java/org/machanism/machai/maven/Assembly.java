@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -69,16 +70,18 @@ public class Assembly extends AbstractMojo {
 					int i = 1;
 					getLog().info("Recommended libraries:");
 					for (BIndex bindex : bindexList) {
-						getLog().info(String.format("%2$3s. %1s", bindex.getId(), i++));
+						String scoreStr = picker.getScore(bindex.getId()) != null
+								? picker.getScore(bindex.getId()).toString()
+								: "";
+						getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
 					}
 
 					GenAIProvider assemblyProvider = new GenAIProvider(ChatModel.of(chatModel));
-					assemblyProvider.setInputsOnly(inputsOnly);
 					ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider);
 
 					getLog().info("The project directory: " + basedir);
 					assembly.projectDir(basedir);
-					assembly.assembly(query, bindexList);
+					assembly.assembly(query, bindexList, !inputsOnly);
 
 					if (!inputsOnly) {
 						String prompt;

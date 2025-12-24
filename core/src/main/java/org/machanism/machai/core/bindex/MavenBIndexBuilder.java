@@ -10,12 +10,18 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Resource;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MavenBIndexBuilder extends BIndexBuilder {
+
+	public MavenBIndexBuilder(boolean callLLM) {
+		super(callLLM);
+	}
 
 	private static Logger logger = LoggerFactory.getLogger(MavenBIndexBuilder.class);
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("maven_project_prompts");
@@ -30,29 +36,47 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 			model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
 		}
 
-		String sourceDirectory = model.getBuild().getSourceDirectory();
+		Build build = model.getBuild();
+		String sourceDirectory = build.getSourceDirectory();
+		addResources(sourceDirectory);
+
+		List<Resource> resourcesDirectory = build.getResources();
+		for (Resource resource : resourcesDirectory) {
+			addResources(resource.getDirectory());
+		}
+
+		List<Resource> testResourcesDirectory = build.getTestResources();
+		for (Resource resource : testResourcesDirectory) {
+			addResources(resource.getDirectory());
+		}
+
+		String testSourceDirectory = build.getTestSourceDirectory();
+		addResources(testSourceDirectory);
+
 		removeNotImportantData(model);
 
 		String pom = PomReader.printModel(model);
 		String prompt = MessageFormat.format(promptBundle.getString("pom_resource_section"), pom);
 		getProvider().prompt(prompt);
 
-		Path startPath = Paths.get(
-				StringUtils.defaultIfEmpty(sourceDirectory,
-						new File(getProjectDir(), "src/main/java").getAbsolutePath()));
-
-		if (Files.exists(startPath)) {
-			Files.walk(startPath).filter(Files::isRegularFile).forEach((f) -> {
-				try {
-					getProvider().promptFile("source_resource_section", f.toFile());
-				} catch (IOException e) {
-					logger.warn("File: {} adding failed.", f);
-				}
-			});
-		}
-
 		prompt = promptBundle.getString("additional_rules");
 		getProvider().prompt(prompt);
+	}
+
+	private void addResources(String sourceDirectory) throws IOException {
+		if (StringUtils.isNotBlank(sourceDirectory)) {
+			Path startPath = Paths.get(sourceDirectory);
+
+			if (Files.exists(startPath)) {
+				Files.walk(startPath).filter(Files::isRegularFile).forEach((f) -> {
+					try {
+						getProvider().promptFile("source_resource_section", f.toFile());
+					} catch (IOException e) {
+						logger.warn("File: {} adding failed.", f);
+					}
+				});
+			}
+		}
 	}
 
 	@Override
@@ -69,9 +93,9 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 		model.setDistributionManagement(null);
 
 		model.setDistributionManagement(null);
+		model.setBuild(null);
 		model.setProperties(null);
 		model.setDependencyManagement(null);
-		model.setBuild(null);
 		model.setReporting(null);
 		model.setScm(null);
 		model.setPluginRepositories(null);

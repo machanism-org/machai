@@ -29,7 +29,7 @@ public class BindexCommand {
 	public void bindex(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update,
-			@ShellOption(help = "Generates only the inputs.txt file; no request is sent to OpenAI to create a bindex.", value = "inputs") boolean debug)
+			@ShellOption(help = "Generates only the inputs.txt file; no request is sent to OpenAI to create a bindex.", value = "inputs") boolean inputs)
 			throws IOException {
 
 		if (dir == null) {
@@ -37,11 +37,10 @@ public class BindexCommand {
 		}
 
 		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
-		provider.setInputsOnly(debug);
 
 		BindexCreator register = new BindexCreator(provider);
 		register.update(update);
-		register.scanProjects(dir);
+		register.scanProjects(dir, !inputs);
 	}
 
 	@ShellMethod()
@@ -57,7 +56,7 @@ public class BindexCommand {
 		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
 		try (BindexRegister register = new BindexRegister(provider)) {
 			register.update(update);
-			register.scanProjects(dir);
+			register.scanProjects(dir, true);
 		}
 	}
 }

@@ -26,7 +26,7 @@ public class ApplicationAssembly {
 		this.provider = provider;
 	}
 
-	public void assembly(final String prompt, List<BIndex> bindexList) {
+	public void assembly(final String prompt, List<BIndex> bindexList, boolean callLLM) {
 		provider.workingDir(projectDir);
 
 		String systemPrompt = promptBundle.getString("assembly_system_instructions");
@@ -50,7 +50,7 @@ public class ApplicationAssembly {
 			File bindexTempDir = new File(projectDir, BIndexBuilder.BINDEX_TEMP_DIR);
 			provider.saveInput(bindexTempDir);
 
-			String response = provider.perform();
+			String response = provider.perform(callLLM);
 			if (response != null) {
 				logger.info(response);
 			}

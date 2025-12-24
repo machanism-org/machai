@@ -29,6 +29,10 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 
 	private static final String PROJECT_MODEL_FILE_NAME = "package.json";
 
+	public JScriptBIndexBuilder(boolean callLLM) {
+		super(callLLM);
+	}
+
 	@Override
 	public BIndex build() throws IOException {
 		JsonNode packageJson = getPackageJson();
@@ -53,13 +57,14 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 		Path startPath = Paths.get(new File(getProjectDir(), "src").getAbsolutePath());
 
 		if (Files.exists(startPath)) {
-			Files.walk(startPath).filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js")).forEach((f) -> {
-				try {
-					getProvider().promptFile("source_resource_section", f.toFile());
-				} catch (IOException e) {
-					logger.warn("File: {P} adding failed.", f);
-				}
-			});
+			Files.walk(startPath).filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js"))
+					.forEach((f) -> {
+						try {
+							getProvider().promptFile("source_resource_section", f.toFile());
+						} catch (IOException e) {
+							logger.warn("File: {P} adding failed.", f);
+						}
+					});
 		}
 
 		String prompt = promptBundle.getString("additional_rules");

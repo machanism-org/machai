@@ -8,7 +8,7 @@
 			<Text value="$var{email}" name="loginfmt" /> 
 			<Click id="idSIButton9" /> 
 			<Wait delay="2s" /> 
-			<WhileRun message="Please authorize in manually.">
+			<WhileRun message="Please authorize on the web page manually.">
 				<Text value="Hi$var{\n}" id="chat-text-field" timeout="5m" /> 
 			</WhileRun> 
 		</ElementNotExists> 

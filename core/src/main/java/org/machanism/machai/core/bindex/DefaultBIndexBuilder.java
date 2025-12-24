@@ -10,6 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public class DefaultBIndexBuilder extends BIndexBuilder {
 
+	public DefaultBIndexBuilder(boolean callLLM) {
+		super(callLLM);
+	}
+
 	@Override
 	protected void projectContext() throws IOException {
 	}

@@ -58,8 +58,8 @@ public class Picker implements Closeable {
 
 	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
 	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
-	private static final int VECTOR_SEARCH_LIMITS = 5;
-	public static final String DEFAULT_MIN_SCORE = "0.85";
+	private static final int VECTOR_SEARCH_LIMITS = 10;
+	public static final String DEFAULT_MIN_SCORE = "0.88";
 
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
@@ -86,6 +86,7 @@ public class Picker implements Closeable {
 
 	private String apiKey;
 	private Double score = 0.85;
+	private Map<String, Double> scoreMap = new HashMap<>();
 
 	public Picker(GenAIProvider provider) {
 		this.provider = provider;
@@ -268,7 +269,7 @@ public class Picker implements Closeable {
 
 		String classificationInstruction = MessageFormat.format(promptBundle.getString("classification_instruction"),
 				classificationSchema);
-		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform();
+		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform(true);
 		return classificationQuery;
 	}
 
@@ -319,9 +320,13 @@ public class Picker implements Closeable {
 
 		Map<String, String> libraryVersionMap = new HashMap<>();
 		for (Document doc : docs) {
+			String id = doc.getString("id");
 			String name = doc.getString("name");
 			String version = doc.getString("version");
-			logger.debug("BindexId: {}: {}", name, doc.getDouble("score"));
+
+			Double score = doc.getDouble("score");
+			scoreMap.put(id, score);
+			logger.debug("BindexId: {}: {}", name, score);
 
 			if (libraryVersionMap.containsKey(name)) {
 				String existsVersion = libraryVersionMap.get(name);
@@ -351,5 +356,9 @@ public class Picker implements Closeable {
 
 	public void setScore(Double score) {
 		this.score = score;
+	}
+
+	public Double getScore(String id) {
+		return scoreMap.get(id);
 	}
 }

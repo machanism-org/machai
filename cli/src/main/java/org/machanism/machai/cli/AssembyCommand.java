@@ -50,8 +50,6 @@ public class AssembyCommand {
 
 		findQuery = query;
 		bindexList = pickBricks(query, score);
-		logger.info("Search results for libraries matching the requested query:");
-		printFindResult(bindexList);
 	}
 
 	private String getQueryFromFile(String query) throws IOException, FileNotFoundException {
@@ -69,7 +67,7 @@ public class AssembyCommand {
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
 			@ShellOption(help = "The path to the assembled project directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score,
-			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create the project.", value = "inputs") boolean debug)
+			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create the project.", value = "inputs") boolean inputs)
 			throws IOException {
 
 		if (dir == null) {
@@ -77,8 +75,8 @@ public class AssembyCommand {
 		} else {
 			dir.mkdirs();
 		}
+		logger.info("The project directory: {}", dir);
 
-		provider.setInputsOnly(debug);
 		String prompt = query;
 
 		if (query == null) {
@@ -89,27 +87,18 @@ public class AssembyCommand {
 		} else {
 			query = getQueryFromFile(query);
 			bindexList = pickBricks(query, score);
-
-			for (BIndex bindex : bindexList) {
-				logger.info("ArtifactId: " + bindex.getId());
-			}
 		}
 
 		ApplicationAssembly assembly = new ApplicationAssembly(provider);
-
-		logger.info("The project directory: {}", dir);
-
 		assembly.projectDir(dir);
-		logger.info("Recommended libraries:");
-		printFindResult(bindexList);
-		assembly.assembly(prompt, bindexList);
+		assembly.assembly(prompt, bindexList, !inputs);
 	}
 
 	@ShellMethod()
 	public void prompt(
 			@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
 		provider.prompt(prompt);
-		String response = provider.perform();
+		String response = provider.perform(true);
 		if (response != null) {
 			logger.info(response);
 		}
@@ -120,15 +109,21 @@ public class AssembyCommand {
 		try (Picker picker = new Picker(provider)) {
 			picker.setScore(score);
 			bindexList = picker.pick(query);
+			logger.info("Search results for libraries matching the requested query:");
+			printFindResult(bindexList, picker);
 		}
 		return bindexList;
 	}
 
-	private void printFindResult(List<BIndex> bindexList) {
+	private void printFindResult(List<BIndex> bindexList, Picker picker) {
 		if (!bindexList.isEmpty()) {
 			int i = 1;
 			for (BIndex bindex : bindexList) {
-				logger.info(String.format("%2$3s. %1s", bindex.getId(), i++));
+				String scoreStr = picker.getScore(bindex.getId()) != null
+						? "(" + picker.getScore(bindex.getId()).toString() + ")"
+						: "";
+
+				logger.info("{}. {} {}", i++, bindex.getId(), scoreStr);
 			}
 		} else {
 			logger.info("No Artifacts Found.");

@@ -17,12 +17,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class ScanProject {
 	private static Logger logger = LoggerFactory.getLogger(ScanProject.class);
 
-	public void scanProjects(File basedir) throws IOException {
-		scanProjects(basedir, true);
+	public void scanProjects(File basedir, boolean callLLM) throws IOException {
+		scanProjects(basedir, true, callLLM);
 	}
 
-	public String scanProjects(File projectDir, boolean create) throws IOException {
-		BIndexBuilder bindexBuilder = BIndexBuilderFactory.builder(projectDir, create);
+	public String scanProjects(File projectDir, boolean create, boolean callLLM) throws IOException {
+		BIndexBuilder bindexBuilder = BIndexBuilderFactory.builder(projectDir, create, callLLM);
 		bindexBuilder.projectDir(projectDir);
 		List<String> modules = bindexBuilder.getModules();
 
@@ -32,7 +32,7 @@ public abstract class ScanProject {
 				scanProjects(new File(projectDir, module), create);
 			}
 		} else {
-			bindexBuilder = BIndexBuilderFactory.builder(projectDir, create);
+			bindexBuilder = BIndexBuilderFactory.builder(projectDir, create, callLLM);
 			try {
 				regBindex = processProject(projectDir, bindexBuilder);
 			} catch (Exception e) {

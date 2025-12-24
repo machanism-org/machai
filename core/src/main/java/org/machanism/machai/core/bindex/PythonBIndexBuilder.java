@@ -21,16 +21,20 @@ public class PythonBIndexBuilder extends BIndexBuilder {
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("python_project_prompts");
 	private static final String PROJECT_MODEL_FILE_NAME = "pyproject.toml";
 
+	public PythonBIndexBuilder(boolean callLLM) {
+		super(callLLM);
+	}
+
 	@Override
 	protected void projectContext() throws IOException {
 		File pyprojectTomlFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
-		
+
 		try (FileReader reader = new FileReader(pyprojectTomlFile)) {
 			String prompt = MessageFormat.format(promptBundle.getString("project_build_section"),
 					IOUtils.toString(reader));
 			getProvider().prompt(prompt);
 		}
-		
+
 		TomlParseResult result = Toml.parse(pyprojectTomlFile.toPath());
 		String projectName = result.getString("project.name");
 		if (projectName != null) {
@@ -49,7 +53,7 @@ public class PythonBIndexBuilder extends BIndexBuilder {
 				}
 			}
 		}
-		
+
 		String prompt = promptBundle.getString("additional_rules");
 		getProvider().prompt(prompt);
 	}

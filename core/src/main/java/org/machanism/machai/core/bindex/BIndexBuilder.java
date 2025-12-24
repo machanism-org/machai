@@ -27,6 +27,12 @@ public abstract class BIndexBuilder {
 	private ObjectMapper mapper = new ObjectMapper();
 	private File bindexDir;
 	private BIndex source;
+	private boolean callLLM;
+
+	public BIndexBuilder(boolean callLLM) {
+		super();
+		this.callLLM = callLLM;
+	}
 
 	public BIndexBuilder provider(GenAIProvider provider) {
 		this.provider = provider;
@@ -54,7 +60,7 @@ public abstract class BIndexBuilder {
 			getProvider().saveInput(dir);
 		}
 
-		String output = getProvider().perform();
+		String output = getProvider().perform(callLLM);
 
 		BIndex value = null;
 		if (output != null) {

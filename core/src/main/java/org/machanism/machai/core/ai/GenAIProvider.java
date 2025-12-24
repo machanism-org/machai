@@ -72,7 +72,6 @@ public class GenAIProvider {
 
 	private Map<Tool, Function<JsonNode, Object>> toolMap = new HashMap<>();
 	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
-	private boolean inputsOnly;
 	private File workingDir = SystemUtils.getUserDir();
 	private String instructions;
 
@@ -129,9 +128,9 @@ public class GenAIProvider {
 		inputs.add(ResponseInputItem.ofMessage(message));
 	}
 
-	public String perform() {
+	public String perform(boolean callLLM) {
 		String result = null;
-		if (!inputsOnly) {
+		if (callLLM) {
 			Builder builder = ResponseCreateParams.builder()
 					.model(chatModel)
 					.tools(new ArrayList(toolMap.keySet()))
@@ -142,13 +141,13 @@ public class GenAIProvider {
 			}
 
 			Response response = client.responses().create(builder.build());
-			result = parseResponse(response, instructions);
+			result = parseResponse(response, instructions, callLLM);
 		}
 		clear();
 		return result;
 	}
 
-	private String parseResponse(Response response, String instructions) {
+	private String parseResponse(Response response, String instructions, boolean callLLM) {
 		String result = null;
 
 		List<ResponseOutputItem> output = response.output();
@@ -200,7 +199,7 @@ public class GenAIProvider {
 			if (text != null) {
 				logger.info(text);
 			}
-			result = perform();
+			result = perform(callLLM);
 		} else {
 			result = text;
 		}
@@ -270,10 +269,6 @@ public class GenAIProvider {
 
 	public void clear() {
 		inputs.clear();
-	}
-
-	public void setInputsOnly(boolean inputsOnly) {
-		this.inputsOnly = inputsOnly;
 	}
 
 	public void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
