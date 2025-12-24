@@ -33,7 +33,11 @@ public abstract class ScanProject {
 			}
 		} else {
 			bindexBuilder = BIndexBuilderFactory.builder(projectDir, create);
-			regBindex = processProject(projectDir, bindexBuilder);
+			try {
+				regBindex = processProject(projectDir, bindexBuilder);
+			} catch (Exception e) {
+				logger.error("Project dir: {}, Error: {}", projectDir, StringUtils.abbreviate(e.getMessage(), 120));
+			}
 		}
 
 		return regBindex;
@@ -51,7 +55,7 @@ public abstract class ScanProject {
 				bindex = new ObjectMapper().readValue(new FileReader(bindexFile), BIndex.class);
 			}
 		} catch (Exception e) {
-			logger.error("Bindex: {}, Error: {}", bindexFile, StringUtils.abbreviate(e.getMessage(), 80));
+			throw new IllegalArgumentException(e);
 		}
 		return bindex;
 	}

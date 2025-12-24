@@ -10,6 +10,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -29,6 +30,7 @@ import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
 import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Language;
+import org.machanism.machai.schema.Layer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +58,8 @@ public class Picker implements Closeable {
 
 	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
 	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
-	private static final int VECTOR_SEARCH_LIMITS = 200;
-	public static final String DEFAULT_MIN_SCORE = "0.84";
+	private static final int VECTOR_SEARCH_LIMITS = 5;
+	public static final String DEFAULT_MIN_SCORE = "0.85";
 
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
@@ -206,39 +208,53 @@ public class Picker implements Closeable {
 		String languagesQuery = StringUtils.join(languages, ", ");
 		logger.info("- Languages: {}", languagesQuery);
 
-		List<String> domains = classification.getDomains();
-		String domainsQuery = StringUtils.join(domains, ", ");
-		logger.info("- Domains: {}", domainsQuery);
+		List<Layer> layers = classification.getLayers();
+		logger.info("- Layers: {}", StringUtils.join(layers, ", "));
 
-		Collection<String> classificatioResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
-				classificationQuery,
-				CLASSIFICATION_EMBEDDING_DIMENTIONS, Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)));
-
-		List<String> integrations = classification.getIntegrations();
-		if (!integrations.isEmpty()) {
-			String integrationsQuery = StringUtils.join(integrations, ", ");
-			logger.info("- Integrations: {}", integrationsQuery);
-
-			Collection<String> integrationsResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+		Collection<String> classificatioResults = new HashSet<>();
+		for (Layer layer : layers) {
+			Collection<String> layerResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
 					classificationQuery,
 					CLASSIFICATION_EMBEDDING_DIMENTIONS,
 					Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
-					Aggregates.match(Filters.in(INTEGRATIONS_PROPERTY_NAME, integrations)));
-
-			if (integrationsResults != null) {
-				for (String id : integrationsResults) {
-					if (!classificatioResults.contains(id)) {
-						classificatioResults.add(id);
-					}
-				}
-			}
+					Aggregates.match(Filters.in(LAYERS_PROPERTY_NAME, layer)));
+			classificatioResults.addAll(layerResults);
 		}
 
+		Set<String> dependencies = new HashSet<>();
 		List<BIndex> pickResult = classificatioResults.stream().map(id -> {
+			BIndex bindex = getBindex(id);
+			List<String> dependencyList = bindex.getDependencies();
+			dependencies.addAll(dependencyList);
+			return bindex;
+		}).collect(Collectors.toList());
+
+		Set<String> allDependencies = new HashSet<>();
+		for (String bindexId : dependencies) {
+			addDependencies(allDependencies, bindexId);
+		}
+
+		List<BIndex> dependenciesResult = allDependencies.stream().map(id -> {
 			return getBindex(id);
 		}).collect(Collectors.toList());
 
+		pickResult.addAll(dependenciesResult);
+
 		return pickResult;
+	}
+
+	private void addDependencies(Set<String> dependencies, String bindexId) {
+		BIndex bindex = getBindex(bindexId);
+		if (bindex != null) {
+			String id = bindex.getId();
+			if (!dependencies.contains(id)) {
+				List<String> dependencyList = bindex.getDependencies();
+				dependencies.add(id);
+				for (String dependencyId : dependencyList) {
+					addDependencies(dependencies, dependencyId);
+				}
+			}
+		}
 	}
 
 	private String getClassificationQuery(String query)
@@ -257,13 +273,18 @@ public class Picker implements Closeable {
 	}
 
 	private BIndex getBindex(String id) {
+		BIndex result = null;
 		Document doc = collection.find(com.mongodb.client.model.Filters.eq("id", id)).first();
-		String bindexStr = doc.getString("bindex");
-		try {
-			return new ObjectMapper().readValue(bindexStr, BIndex.class);
-		} catch (JsonProcessingException e) {
-			throw new IllegalArgumentException(e);
+		if (doc != null) {
+			String bindexStr = doc.getString("bindex");
+			try {
+				result = new ObjectMapper().readValue(bindexStr, BIndex.class);
+			} catch (JsonProcessingException e) {
+				throw new IllegalArgumentException(e);
+			}
 		}
+
+		return result;
 	}
 
 	private Collection<String> getResults(String indexName, String propertyPath, String query, Integer dimensions,
@@ -300,6 +321,7 @@ public class Picker implements Closeable {
 		for (Document doc : docs) {
 			String name = doc.getString("name");
 			String version = doc.getString("version");
+			logger.debug("BindexId: {}: {}", name, doc.getDouble("score"));
 
 			if (libraryVersionMap.containsKey(name)) {
 				String existsVersion = libraryVersionMap.get(name);

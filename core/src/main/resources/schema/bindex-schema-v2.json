@@ -408,6 +408,14 @@
 				"description": "A usage example object. The structure is flexible to allow for various demonstration formats.",
 				"additionalProperties": true
 			}
+		},
+		"dependencies": {
+		  "type": "array",
+		  "description": "A list of artifact dependencies in the format groupId:artifactId:id.",
+		  "items": {
+		    "type": "string",
+		    "description": "Dependency artifact id in the format groupId:artifactId:id."
+		  }
 		}
 	}
 }

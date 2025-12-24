@@ -14,13 +14,13 @@ public class BindexRegister extends ScanProject implements Closeable {
 
 	private static Logger logger = LoggerFactory.getLogger(BindexRegister.class);
 
-	private Picker embeddingProvider;
+	private Picker picker;
 
 	private boolean update;
 
 	public BindexRegister(GenAIProvider provider) {
 		super();
-		embeddingProvider = new Picker(provider);
+		picker = new Picker(provider);
 	}
 
 	public String processProject(File projectDir, BIndexBuilder bindexBuilder) {
@@ -30,10 +30,10 @@ public class BindexRegister extends ScanProject implements Closeable {
 
 			String regId = null;
 			if (bindex != null) {
-				regId = embeddingProvider.getRegistredId(bindex);
+				regId = picker.getRegistredId(bindex);
 				if (regId == null || update) {
-					regId = embeddingProvider.create(bindex);
-					logger.info("embeddingId: {}", regId);
+					regId = picker.create(bindex);
+					logger.info("Registration id: {}", regId);
 				}
 			}
 
@@ -45,7 +45,7 @@ public class BindexRegister extends ScanProject implements Closeable {
 
 	@Override
 	public void close() throws IOException {
-		embeddingProvider.close();
+		picker.close();
 	}
 
 	public BindexRegister update(boolean overwrite) {
