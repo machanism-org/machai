@@ -35,7 +35,7 @@
 									<archive>
 										<manifest>
 											<mainClass>
-												org.machanism.machai.cli.Application</mainClass>
+												org.machanism.machai.cli.MachaiCLI</mainClass>
 										</manifest>
 									</archive>
 									<appendAssemblyId>false</appendAssemblyId>
@@ -66,7 +66,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
-			<artifactId>machai-core</artifactId>
+			<artifactId>bindex</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 

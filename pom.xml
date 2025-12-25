@@ -20,8 +20,8 @@
 	</properties>
 	
 	<modules>
-		<module>core</module>
-		<module>cli</module>
+		<module>bindex</module>
+		<module>machai-cli</module>
 		<module>bindex-maven-plugin</module>
 		<module>assembly-maven-plugin</module>
 	</modules>

@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * from the specified XML resource.
  */
 @SpringBootApplication
-public class Application {
+public class MachaiCLI {
 
     /**
      * Main method to start the CLI import application.
@@ -18,6 +18,6 @@ public class Application {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
-        System.exit(SpringApplication.exit(SpringApplication.run(Application.class, args)));
+        System.exit(SpringApplication.exit(SpringApplication.run(MachaiCLI.class, args)));
     }
 }
