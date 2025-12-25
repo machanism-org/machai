@@ -29,7 +29,7 @@ public abstract class ScanProject {
 		String regBindex = null;
 		if (modules != null) {
 			for (String module : modules) {
-				scanProjects(new File(projectDir, module), create);
+				scanProjects(new File(projectDir, module), callLLM);
 			}
 		} else {
 			bindexBuilder = BIndexBuilderFactory.builder(projectDir, create, callLLM);

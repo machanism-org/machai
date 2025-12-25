@@ -41,13 +41,17 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 		addResources(sourceDirectory);
 
 		List<Resource> resourcesDirectory = build.getResources();
-		for (Resource resource : resourcesDirectory) {
-			addResources(resource.getDirectory());
+		if (resourcesDirectory != null) {
+			for (Resource resource : resourcesDirectory) {
+				addResources(resource.getDirectory());
+			}
 		}
 
 		List<Resource> testResourcesDirectory = build.getTestResources();
-		for (Resource resource : testResourcesDirectory) {
-			addResources(resource.getDirectory());
+		if (testResourcesDirectory != null) {
+			for (Resource resource : testResourcesDirectory) {
+				addResources(resource.getDirectory());
+			}
 		}
 
 		String testSourceDirectory = build.getTestSourceDirectory();

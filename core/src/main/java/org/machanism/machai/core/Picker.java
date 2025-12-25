@@ -58,8 +58,8 @@ public class Picker implements Closeable {
 
 	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
 	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
-	private static final int VECTOR_SEARCH_LIMITS = 10;
-	public static final String DEFAULT_MIN_SCORE = "0.88";
+	private static final int VECTOR_SEARCH_LIMITS = 5;
+	public static final String DEFAULT_MIN_SCORE = "0.80";
 
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
@@ -158,13 +158,10 @@ public class Picker implements Closeable {
 		}
 	}
 
-	private BsonArray getEmbeddingBson(Object data, Integer dimensions) throws JsonProcessingException {
-		String text;
-		if (data instanceof String) {
-			text = (String) data;
-		} else {
-			text = new ObjectMapper().writeValueAsString(data);
-		}
+	private BsonArray getEmbeddingBson(Classification classification, Integer dimensions)
+			throws JsonProcessingException {
+		String text = getClassificationText(classification);
+
 		List<Double> descEmbedding = getEmbedding(text, dimensions);
 		BsonArray bsonArray = new BsonArray(
 				descEmbedding.stream()
@@ -200,26 +197,29 @@ public class Picker implements Closeable {
 
 	public List<BIndex> pick(String query) throws IOException {
 
-		String classificationQuery = getClassificationQuery(query);
-		Classification classification = new ObjectMapper().readValue(classificationQuery, Classification.class);
+		String classificationStr = getClassification(query);
 
-		logger.info("Detected classification:");
-		Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
-				.distinct().collect(Collectors.toSet());
-		String languagesQuery = StringUtils.join(languages, ", ");
-		logger.info("- Languages: {}", languagesQuery);
-
-		List<Layer> layers = classification.getLayers();
-		logger.info("- Layers: {}", StringUtils.join(layers, ", "));
+		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
 
 		Collection<String> classificatioResults = new HashSet<>();
-		for (Layer layer : layers) {
-			Collection<String> layerResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
-					classificationQuery,
-					CLASSIFICATION_EMBEDDING_DIMENTIONS,
-					Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
-					Aggregates.match(Filters.in(LAYERS_PROPERTY_NAME, layer)));
-			classificatioResults.addAll(layerResults);
+		for (Classification classification : classifications) {
+			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
+					.distinct().collect(Collectors.toSet());
+
+			List<Layer> layers = classification.getLayers();
+			String languagesQuery = StringUtils.join(languages, ", ");
+			logger.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
+			
+			String classificationQuery = getClassificationText(classification);
+
+			for (Layer layer : layers) {
+				Collection<String> layerResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+						classificationQuery,
+						CLASSIFICATION_EMBEDDING_DIMENTIONS,
+						Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
+						Aggregates.match(Filters.in(LAYERS_PROPERTY_NAME, layer)));
+				classificatioResults.addAll(layerResults);
+			}
 		}
 
 		Set<String> dependencies = new HashSet<>();
@@ -244,6 +244,11 @@ public class Picker implements Closeable {
 		return pickResult;
 	}
 
+	private String getClassificationText(Classification classification) throws JsonProcessingException {
+		String classificationStr = new ObjectMapper().writeValueAsString(classification);
+		return classificationStr;
+	}
+
 	private void addDependencies(Set<String> dependencies, String bindexId) {
 		BIndex bindex = getBindex(bindexId);
 		if (bindex != null) {
@@ -258,7 +263,7 @@ public class Picker implements Closeable {
 		}
 	}
 
-	private String getClassificationQuery(String query)
+	private String getClassification(String query)
 			throws IOException, JsonProcessingException, JsonMappingException {
 		URL systemResource = BIndex.class.getResource(BIndexBuilder.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, "UTF8");
@@ -267,10 +272,10 @@ public class Picker implements Closeable {
 		JsonNode jsonNode = schemaJson.get("properties").get("classification");
 		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
 
-		String classificationInstruction = MessageFormat.format(promptBundle.getString("classification_instruction"),
-				classificationSchema);
-		String classificationQuery = provider.instructions(classificationInstruction).prompt(query).perform(true);
-		return classificationQuery;
+		String classificationQuery = MessageFormat.format(promptBundle.getString("classification_instruction"),
+				classificationSchema, query);
+		String classificationStr = provider.prompt(classificationQuery).perform(true);
+		return classificationStr;
 	}
 
 	private BIndex getBindex(String id) {

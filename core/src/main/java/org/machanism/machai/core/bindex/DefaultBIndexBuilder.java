@@ -25,7 +25,7 @@ public class DefaultBIndexBuilder extends BIndexBuilder {
 			@Override
 			public boolean accept(File pathname) {
 				return pathname.isDirectory()
-						&& !StringUtils.startsWithAny(pathname.getName(), STARTS_WITH_EXCLUDE_DIRS);
+						&& !StringUtils.startsWithAny(pathname.getName(), EXCLUDE_DIRS);
 			}
 		});
 

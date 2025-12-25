@@ -96,9 +96,15 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 					try (Stream<Path> stream = Files.walk(dirToScan.toPath())) {
 						stream.filter(p -> {
 							File file = p.toFile();
-							String relativePath = getRelatedPath(currentPath, file);
-							return StringUtils.equals(file.getName(), PROJECT_MODEL_FILE_NAME)
-									&& !StringUtils.startsWithAny(relativePath, STARTS_WITH_EXCLUDE_DIRS);
+							boolean containsAny = StringUtils.containsAny(file.getAbsolutePath(),
+									EXCLUDE_DIRS);
+							boolean isProjectBuildFile = StringUtils.equals(file.getName(), PROJECT_MODEL_FILE_NAME);
+							if (isProjectBuildFile) {
+								if (!containsAny) {
+									return true;
+								}
+							}
+							return false;
 						}).forEach(p -> {
 							File dir = p.toFile().getParentFile();
 							String relativePath = getRelatedPath(currentPath, dir);
