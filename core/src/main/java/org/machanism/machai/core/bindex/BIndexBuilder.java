@@ -18,7 +18,8 @@ public abstract class BIndexBuilder {
 	public static final String BINDEX_TEMP_DIR = ".bindex";
 	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 
-	public static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn", ".bindex", "target", "build", ".vent" };
+	public static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn", ".bindex", "target", "build",
+			".venv", "__", ".pytest_cache", ".idea", ".egg-info" };
 
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 

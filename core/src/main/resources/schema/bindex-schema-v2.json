@@ -411,10 +411,10 @@
 		},
 		"dependencies": {
 			"type": "array",
-			"description": "A list of artifact dependencies in the format groupId:artifactId:id.",
+			"description": "A list of artifact dependencies.",
 			"items": {
 				"type": "string",
-				"description": "Dependency artifact id in the format groupId:artifactId:id."
+				"description": "Dependency artifact id in the format groupId:artifactId:version or packageName:version groupId is not supported."
 			}
 		}
 	}
