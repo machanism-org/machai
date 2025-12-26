@@ -58,7 +58,7 @@ public class Picker implements Closeable {
 
 	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
 	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
-	private static final int VECTOR_SEARCH_LIMITS = 5;
+	private static final int VECTOR_SEARCH_LIMITS = 50;
 	public static final String DEFAULT_MIN_SCORE = "0.80";
 
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
