@@ -11,8 +11,12 @@
 
 	<artifactId>machai-cli</artifactId>
 	<name>Machai CLI</name>
-	<description></description>
-
+	<description>
+		Machai CLI is a command-line tool for generating, registering, and
+		managing library metadata within the Machanism ecosystem. It leverages
+		GenAI to automate project assembly and enable semantic search for
+		efficient library discovery and integration.
+	</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -66,7 +70,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
-			<artifactId>bindex</artifactId>
+			<artifactId>bindex-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 

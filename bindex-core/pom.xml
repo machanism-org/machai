@@ -11,7 +11,15 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bindex</artifactId>
+	<artifactId>bindex-core</artifactId>
+	<name>Bindex Core</name>
+	<description>
+		bindex-core provides core functionality for bindex metadata management,
+		including generation, registration, library selection, and project
+		assembly. It enables automated handling of library metadata to support
+		efficient discovery, integration, and assembly workflows within the
+		Machanism ecosystem.
+	</description>
 
 	<dependencies>
 		<dependency>
@@ -19,7 +27,7 @@
 			<artifactId>openai-java</artifactId>
 			<version>4.8.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>

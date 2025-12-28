@@ -19,7 +19,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
-			<artifactId>bindex</artifactId>
+			<artifactId>bindex-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 

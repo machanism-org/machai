@@ -10,7 +10,12 @@
 	<packaging>pom</packaging>
 
 	<name>Machai Project</name>
-	<description />
+	<description>
+		Machai is a GenAI-powered tool for automated creation, registration, and
+		enhancement of software projects. It streamlines project assembly and
+		library integration within the Machanism ecosystem using AI-driven
+		semantic search and metadata management.
+	</description>
 	<url>https://machanism.org/machai</url>
 
 	<properties>
@@ -18,9 +23,9 @@
 		<java.version>8</java.version>
 		<maven.version>3.6.0</maven.version>
 	</properties>
-	
+
 	<modules>
-		<module>bindex</module>
+		<module>bindex-core</module>
 		<module>cli</module>
 		<module>bindex-maven-plugin</module>
 		<module>assembly-maven-plugin</module>
@@ -35,7 +40,7 @@
 					<version>1.2.9-SNAPSHOT</version>
 					<configuration>
 						<aeDir>src/ae</aeDir>
-					</configuration>	
+					</configuration>
 					<dependencies>
 						<dependency>
 							<groupId>com.ganteater.plugins</groupId>
