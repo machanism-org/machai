@@ -44,7 +44,16 @@ Add the plugin to your Maven project’s `pom.xml`:
 
 ### Usage
 
-#### 1. Generate bindex.json
+#### 1. Set Environment Variables
+
+Before using the Machai CLI for generating or registering `bindex.json` files, you need to configure the following environment variables to ensure proper functionality:
+
+| **Variable Name**    | **Description**                                                                                 |
+|----------------------|-------------------------------------------------------------------------------------------------|
+| BINDEX_REG_PASSWORD  | The password for write access to the registration database. Not required for assembly commands. |
+| OPENAI_API_KEY       | Your OpenAI API key, required for AI-powered features.                                          |
+
+#### 2. Generate bindex.json
 
 Run the following command in your project directory:
 
@@ -54,11 +63,11 @@ mvn bindex:bindex
 
 This will analyze your project and generate a `bindex.json` file in the designated output directory (by default, in the project root).
 
-#### 2. Review and Edit
+#### 3. Review and Edit
 
 After generation, review the `bindex.json` file to ensure all metadata, descriptions, and integration points are accurate. You can manually edit the file to refine details as needed.
 
-#### 3. Register Goal
+#### 4. Register Goal
 
 The plugin provides a `register` goal to upload and register your `bindex.json` file with the Machanism platform. This step makes your library discoverable via semantic search and available for automated assembly in other projects.
 
