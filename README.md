@@ -2,15 +2,11 @@
 
 # Machai
 
-**Machai** is an integral part of the [Machanism](https://machanism.org) platform, focused on streamlining the development and assembly of customer applications. Utilizing Generative AI (GenAI) and metadata-driven insights, Machai automates the selection and integration of libraries through advanced semantic search capabilities.
+Machai is an innovative project designed to harness Generative AI (GenAI) for the creation, registration, and enhancement of software projects within the [Machanism](https://machanism.org) ecosystem. With Machai, teams can streamline project assembly, automate repetitive tasks, and continuously improve their applications through intelligent recommendations and metadata-driven insights. Whether you are building new solutions or enhancing existing ones, Machai provides the tools and automation needed to accelerate development and ensure high-quality results.
 
-## Overview
-
-Machai streamlines project assembly within the **Machanism** ecosystem by automating repetitive development tasks through AI assistance. Each library on the platform is accompanied by a structured metadata file, `bindex.json`, which contains essential details such as features, integration points, technology stack, and usage examples.
+Machai streamlines project assembly by automating repetitive development tasks through AI assistance. Each library on the platform is accompanied by a structured metadata file, `bindex.json`, which contains essential details such as features, integration points, technology stack, and usage examples.
 
 These metadata files are stored in a **vector database** and optimized for semantic search, enabling Machai to efficiently match libraries to natural language queries. Developers can specify their project requirements in plain language, and Machai recommends suitable libraries along with comprehensive integration information, accelerating application assembly and development.
-
-For every library, Machai automatically generates a `bindex.json` file by analyzing project artifacts (e.g., `pom.xml`) and source code. The resulting metadata is indexed in the vector database, allowing GenAI to perform semantic searches and retrieve relevant libraries based on user input. Machai then generates a report with recommendations and integration details, simplifying the development workflow.
 
 For more information, visit [AI Assembly](https://machanism.org/ai-assembly).
 
