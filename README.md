@@ -20,6 +20,8 @@ The **Machai Command Line Interface (CLI)** is a powerful tool for generating, r
 - **Library Registration:** Register new or updated libraries, making them discoverable and ready for integration.
 - **Flexible Command Set:** Generate metadata, search libraries, register artifacts, and more.
 
+[![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)  
+
 For full details and usage instructions, see the [Machai CLI README](./cli/README.md).
 
 ## License
