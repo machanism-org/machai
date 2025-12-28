@@ -24,11 +24,11 @@ The `assembly-maven-plugin` is a submodule of the Machai project that enables se
 
 #### 1. Set Environment Variables
 
-   Before using assembly-maven-plugin you need to configure the following environment variables to ensure proper functionality:
+Before using assembly-maven-plugin you need to configure the following environment variables to ensure proper functionality:
 
-   | **Variable Name**    | **Description**                                                                                   |
-   |----------------------|---------------------------------------------------------------------------------------------------|
-   | OPENAI_API_KEY       | Your OpenAI API key, required for AI-powered features.                                            |
+| **Variable Name**    | **Description**                                                                                   |
+|----------------------|---------------------------------------------------------------------------------------------------|
+| OPENAI_API_KEY       | Your OpenAI API key, required for AI-powered features.                                            |
 
 #### 2. Assembly Goal
 
@@ -57,7 +57,7 @@ You can customize the plugin’s behavior using additional parameters:
 
 | Parameter                      | Description                                                                                    | Default      |
 |--------------------------------|------------------------------------------------------------------------------------------------|--------------|
-| `assembly.inputs.only`   | If set to `true`, only input files specified by the user will be considered during assembly. | false        |
+| `assembly.inputs.only` | If set to true, activates debug mode: only essential calls are sent to the LLM model. Large bindex context requests are saved to an inputs.txt file for review, without being sent to the LLM. | false |
 | `assembly.chatModel`     | Specifies the AI model to use for the assembly process.                                        | gpt-5        |
 | `pick.chatModel`          | Specifies the AI model to use for the pick (library selection) process.                        | gpt-5-mini   |
 | `assembly.prompt.file`  | Path to the file containing the prompt or requirements for the assembly process.               | project.txt  |
@@ -75,7 +75,7 @@ You can customize the plugin’s behavior using additional parameters:
 2. Run the plugin with the following command:
 
    ```bash
-   mvn org.machanism:assembly-maven-plugin:assembly -Dassembly.prompt.file=project.txt
+   mvn org.machanism:assembly-maven-plugin:assembly:0.0.1
    ```
 
 *The plugin will read your requirements from `project.txt` and assemble the Maven project accordingly.*
@@ -83,7 +83,7 @@ You can customize the plugin’s behavior using additional parameters:
 Or, if you need to customize parameters:
 
 ```bash
-mvn org.machanism:assembly-maven-plugin:assembly\
+mvn org.machanism:assembly-maven-plugin:assembly:0.0.1\
  -Dassembly.prompt.file=project.txt\
  -Dassembly.inputs.only=false\
  -Dassembly.chatModel=gpt-5\
