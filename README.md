@@ -14,13 +14,13 @@ For more information, visit [AI Assembly](https://machanism.org/ai-assembly).
 
 The **Machai Command Line Interface (CLI)** is a powerful tool for generating, registering, and managing library metadata within the [Machanism](https://machanism.org) platform. It gives developers direct access to Machai’s AI-powered features, streamlining project assembly and integration workflows from the terminal.
 
+[![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)  
+
 **Key Features:**
 - **Automated Metadata Generation:** Analyze project files and source code to create structured `bindex.json` metadata files.
 - **Semantic Search Integration:** Use AI to match libraries with project requirements via natural language queries.
 - **Library Registration:** Register new or updated libraries, making them discoverable and ready for integration.
 - **Flexible Command Set:** Generate metadata, search libraries, register artifacts, and more.
-
-[![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)  
 
 For full details and usage instructions, see the [Machai CLI README](./cli/README.md).
 
