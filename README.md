@@ -2,25 +2,32 @@
 
 # Machai
 
-**Machai** is a critical component of the [Machanism](https://machanism.org) platform, designed to revolutionize how customer applications are developed and assembled. By leveraging Generative AI (GenAI) and metadata-driven insights, Machai automates intelligent library selection and integration processes using semantic search capabilities.
+**Machai** is an integral part of the [Machanism](https://machanism.org) platform, focused on streamlining the development and assembly of customer applications. Utilizing Generative AI (GenAI) and metadata-driven insights, Machai automates the selection and integration of libraries through advanced semantic search capabilities.
 
 ## Overview
 
-![](src/site/resources/images/machai-screenshot.png)
+Machai streamlines project assembly within the **Machanism** ecosystem by automating repetitive development tasks through AI assistance. Each library on the platform is accompanied by a structured metadata file, `bindex.json`, which contains essential details such as features, integration points, technology stack, and usage examples.
 
-Machai empowers developers with AI-assisted project assembly in the **Machanism** ecosystem by automating repetitive development tasks.  
-Each library in the platform is associated with a structured metadata file called `bindex.json`. This file contains crucial information about the library's features, integration points, and example usage.  
+These metadata files are stored in a **vector database** and optimized for semantic search, enabling Machai to efficiently match libraries to natural language queries. Developers can specify their project requirements in plain language, and Machai recommends suitable libraries along with comprehensive integration information, accelerating application assembly and development.
 
-Machai stores these metadata files in a **vector database**, enabling efficient semantic search to find and recommend libraries based on natural language queries. This automated process simplifies application assembly and accelerates development.
-
-Machai uses a special metadata file called bindex.json, which includes detailed information about each library, such as its name, version, features, tech stack, and usage instructions. These files are optimized for semantic search and stored in a vector database, allowing AI to match them with user queries. Developers can describe their project needs in simple language, and Machai provides a list of recommended libraries with all necessary integration details, making application assembly fast and efficient.
-How Machai Works
-
-For each library on the Machanism platform, Machai automatically generates a bindex.json file by analyzing project files like pom.xml and source code. These files are indexed in a vector database, enabling AI to perform semantic searches based on natural language input. Developers simply describe their application requirements, and GenAI processes the query, retrieves relevant libraries, and generates a report with suggestions and integration details, simplifying the development process.
+For every library, Machai automatically generates a `bindex.json` file by analyzing project artifacts (e.g., `pom.xml`) and source code. The resulting metadata is indexed in the vector database, allowing GenAI to perform semantic searches and retrieve relevant libraries based on user input. Machai then generates a report with recommendations and integration details, simplifying the development workflow.
 
 For more information, visit [AI Assembly](https://machanism.org/ai-assembly).
 
 ## Machai CLI
+
+The Machai Command Line Interface (CLI) is a versatile tool designed to facilitate the generation, registration, and management of library metadata within the **Machanism** platform. It provides developers with direct access to Machai’s AI-powered features, enabling efficient project assembly and integration workflows from the terminal.
+
+![](src/site/resources/images/machai-screenshot.png)
+
+**Key Features:**
+
+- Automated Metadata Generation: Analyze project files and source code to automatically create structured `bindex.json` metadata files for libraries.
+- Semantic Search Integration: Leverage AI to match libraries with project requirements using natural language queries.
+- Library Registration: Register new or updated libraries in the Machanism platform, ensuring they are discoverable and ready for integration.
+- Flexible Command Set: Access a range of commands for generating metadata, searching libraries, registering artifacts, and more.
+
+### Getting Started
 
 1. **Download the Machai CLI**  
    Get the latest version of the Machai CLI as a `.jar` file from the link below:
@@ -44,7 +51,7 @@ For more information, visit [AI Assembly](https://machanism.org/ai-assembly).
 
    Upon starting, you will see the Machai CLI banner and a prompt where you can enter commands. Use the `help` command to see the list of available options.
 
-### Generate `bindex.json` for Your Library 
+### Generate `bindex.json`
 
 For developers creating libraries for the Machanism platform, **bindex** files are essential metadata that describe your library and enable efficient library discovery and integration via Machai's AI-powered system. These files are automatically generated and registered in the Machanism platform using the **Machai Command-Line Interface (CLI)**. The CLI provides an easy, flexible way for library developers to manage and generate `bindex.json` files locally, whether for publishing new libraries or updating existing ones.
  
