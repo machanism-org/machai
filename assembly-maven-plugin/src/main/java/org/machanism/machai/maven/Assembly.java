@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;

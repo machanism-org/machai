@@ -16,7 +16,7 @@
 		<Listdir name="Inputs Files" path="$var{Project Directory}" filter="inputs.txt" /> 
 		<Out name="Inputs Files" level="debug" /> 
 		<Loop name="path" source="Inputs Files">
-			<Var name="path" end="\.bindex\inputs.txt" /> 
+			<Var name="path" end="\.machai\inputs.txt" /> 
 			<Remove name="existedBindex" /> 
 			<Load name="existedBindex" file="$var{path}\bindex.json" exception="java.io.FileNotFoundException" /> 
 			<If isNull="existedBindex">
