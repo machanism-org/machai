@@ -20,13 +20,7 @@ For each library on the Machanism platform, Machai automatically generates a bin
 
 For more information, visit [AI Assembly](https://machanism.org/ai-assembly).
 
-## Bindex
-
-For developers creating libraries for the Machanism platform, **bindex** files are essential metadata that describe your library and enable efficient library discovery and integration via Machai's AI-powered system. These files are automatically generated and registered in the Machanism platform using the **Machai Command-Line Interface (CLI)**. The CLI provides an easy, flexible way for library developers to manage and generate `bindex.json` files locally, whether for publishing new libraries or updating existing ones.
-
-### How to Generate and Register a `bindex.json`
-
-To generate and register a `bindex.json` file for your library, follow these steps:
+## Machai CLI
 
 1. **Download the Machai CLI**  
    Get the latest version of the Machai CLI as a `.jar` file from the link below:
@@ -50,7 +44,9 @@ To generate and register a `bindex.json` file for your library, follow these ste
 
    Upon starting, you will see the Machai CLI banner and a prompt where you can enter commands. Use the `help` command to see the list of available options.
 
-#### Generate `bindex.json` for Your Library  
+### Generate `bindex.json` for Your Library 
+
+For developers creating libraries for the Machanism platform, **bindex** files are essential metadata that describe your library and enable efficient library discovery and integration via Machai's AI-powered system. These files are automatically generated and registered in the Machanism platform using the **Machai Command-Line Interface (CLI)**. The CLI provides an easy, flexible way for library developers to manage and generate `bindex.json` files locally, whether for publishing new libraries or updating existing ones.
  
  1. **Run `bindex` Command** 
    Use the CLI to analyze your library's project files and automatically generate the corresponding `bindex.json`. Navigate to your library directory and run:  
@@ -62,21 +58,21 @@ To generate and register a `bindex.json` file for your library, follow these ste
 2. **Validate and Edit the `bindex.json`**  
    After generating the file, it is recommended to inspect and verify the contents of the `bindex.json` to ensure accuracy. You can manually edit the file to add or adjust descriptions, metadata, or integration details.
 
-#### Bindex Registration
+### Bindex Registration
 
-1. **Register Your `bindex.json`**  
-   Once you are satisfied with the metadata, you can register your library and its `bindex.json` file into the Machanism platform via the Machai CLI:  
-   ```bash
-   > register <project-path>
-   ```  
-   Replace `<project-path>` with the path to the project with `bindex.json` file. This command uploads your library metadata to the platform and makes it discoverable for users.
+Once you are satisfied with the metadata, you can register your library and its `bindex.json` file into the Machanism platform via the Machai CLI:  
+```bash
+shell:> register <project-path>
+```  
+Replace `<project-path>` with the path to the project with `bindex.json` file. This command uploads your library metadata to the platform and makes it discoverable for users.
 
-2. **Check Registration**  
-   To verify the registration process and ensure the library is successfully uploaded, use the `pick` command:  
-   ```bash
-   > pick <prompt>
-   ```  
-   Replace `<prompt>` with the description of the application to be created. This command will pick the "bricks" and confirm the presence of the library in the system.
+### Pick Libraries
+
+To verify the registration process and ensure the library is successfully uploaded, use the `pick` command:  
+```bash
+shell:> pick <prompt>
+```  
+Replace `<prompt>` with the description of the application to be created. This command will pick the "bricks" and confirm the presence of the library in the system.
 
 
 ### Assembly
@@ -84,7 +80,7 @@ To generate and register a `bindex.json` file for your library, follow these ste
 **Assemble an Application Using CLI**:
    Provide your project's requirements as a query:
    ```text
-   shell:> assembly "Create a spring application for user login by commercetool."
+   shell:> assembly
    ```
 
 ## License
