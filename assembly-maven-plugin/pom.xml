@@ -14,7 +14,13 @@
 
 	<artifactId>assembly-maven-plugin</artifactId>
 	<name>Project Assembly Maven Plugin</name>
-	<description>The Machai Maven plugin.</description>
+	<description>
+		assembly-maven-plugin automates the assembly of projects within the
+		Machanism ecosystem by integrating libraries based on bindex metadata.
+		It streamlines dependency resolution, library selection, and project
+		packaging using GenAI-powered semantic search and metadata-driven
+		workflows.
+	</description>
 
 	<dependencies>
 		<dependency>

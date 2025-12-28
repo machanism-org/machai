@@ -14,8 +14,12 @@
 
 	<artifactId>bindex-maven-plugin</artifactId>
 	<name>Bindex Maven Plugin</name>
-	<description>The Machai Maven plugin.</description>
-
+	<description>
+		bindex-maven-plugin enables automated generation and registration of
+		bindex metadata for Maven projects. It facilitates library discovery,
+		integration, and assembly by leveraging structured metadata and
+		GenAI-powered semantic search within the Machanism ecosystem.
+	</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
