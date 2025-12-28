@@ -73,3 +73,14 @@ Replace `<prompt>` with the description of the application to be created. This c
    ```text
    shell:> assembly
    ```
+
+## License
+
+This project is licensed under the Apache 2.0 License.
+
+## Links
+
+- [Machanism Platform](https://machanism.org)
+- [AI Assembly Documentation](https://machanism.org/ai-assembly)
+- [Machai Project on GitHub](https://github.com/machanism-org/machai)
+
