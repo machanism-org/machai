@@ -24,6 +24,30 @@ The **Machai Command Line Interface (CLI)** is a powerful tool for generating, r
 
 For full details and usage instructions, see the [Machai CLI README](./cli/README.md).
 
+## Assembly Maven Plugin
+
+The **assembly-maven-plugin** extends Machai’s AI-powered assembly capabilities to Maven projects. This plugin enables developers to use natural language queries to select and integrate the most relevant libraries from the Machanism platform, automating the creation of project structure, configuration files, and initial code.
+
+**Key Features:**
+- **AI-Driven Library Selection:** Describe your project requirements in plain language and let Machai recommend the best libraries.
+- **Automated Project Assembly:** Instantly generate Maven project structure, dependencies, and boilerplate code.
+- **Semantic Search Integration:** Leverage Machanism’s vector database for precise library matching.
+- **Customizable Workflow:** Review and refine generated files to fit your needs.
+
+For installation, configuration, and usage details, see the [assembly-maven-plugin README](./assembly-maven-plugin/README.md).
+
+## Bindex Maven Plugin
+
+The **bindex-maven-plugin** automates the generation and management of `bindex.json` metadata files for your Java libraries and projects. By analyzing your project’s source code and build files, it produces comprehensive descriptors that enable intelligent library discovery and semantic search within the Machanism ecosystem.
+
+**Key Features:**
+- **Automated bindex.json Generation:** Create standardized metadata files with features, integration points, and usage examples.
+- **GenAI-Powered Analysis:** Extract and summarize project details using Generative AI.
+- **Seamless Registration:** Register your library metadata with the Machanism platform for enhanced discoverability.
+- **Customizable Output:** Review and edit generated files before registration.
+
+For installation, configuration, and usage details, see the [bindex-maven-plugin README](./bindex-maven-plugin/README.md).
+
 ## License
 
 Machai is licensed under the Apache License 2.0.  
