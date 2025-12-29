@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>machai</artifactId>
-		<version>0.0.1</version>
+		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 	<packaging>maven-plugin</packaging>
 
@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>bindex-core</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
