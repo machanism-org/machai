@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
-import org.machanism.machai.core.BindexCreator;
-import org.machanism.machai.core.BindexRegister;
+import org.machanism.machai.bindex.BindexCreator;
+import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

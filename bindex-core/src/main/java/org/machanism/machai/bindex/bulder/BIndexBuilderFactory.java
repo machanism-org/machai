@@ -1,4 +1,4 @@
-package org.machanism.machai.core.bindex;
+package org.machanism.machai.bindex.bulder;
 
 import java.io.File;
 import java.io.FileNotFoundException;

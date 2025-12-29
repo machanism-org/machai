@@ -1,4 +1,4 @@
-package org.machanism.machai.core;
+package org.machanism.machai.bindex;
 
 import static com.mongodb.client.model.search.SearchPath.fieldPath;
 import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSearchOptions;
@@ -25,8 +25,8 @@ import org.bson.BsonDouble;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.machanism.machai.bindex.bulder.BIndexBuilder;
 import org.machanism.machai.core.ai.GenAIProvider;
-import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
 import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Language;
@@ -191,7 +191,7 @@ public class Picker implements Closeable {
 
 		Response<Embedding> response = embeddingModel.embed(text);
 		return response.content().vectorAsList().stream()
-				.map(Double::new)
+				.map(Double::valueOf)
 				.collect(Collectors.toList());
 	}
 

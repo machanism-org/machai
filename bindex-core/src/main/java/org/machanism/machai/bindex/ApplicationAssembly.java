@@ -1,4 +1,4 @@
-package org.machanism.machai.core.ai;
+package org.machanism.machai.bindex;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.SystemUtils;
-import org.machanism.machai.core.bindex.BIndexBuilder;
+import org.machanism.machai.bindex.bulder.BIndexBuilder;
+import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

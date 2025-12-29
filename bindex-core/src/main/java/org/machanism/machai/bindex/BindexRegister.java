@@ -1,11 +1,11 @@
-package org.machanism.machai.core;
+package org.machanism.machai.bindex;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 
+import org.machanism.machai.bindex.bulder.BIndexBuilder;
 import org.machanism.machai.core.ai.GenAIProvider;
-import org.machanism.machai.core.bindex.BIndexBuilder;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

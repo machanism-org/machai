@@ -1,4 +1,4 @@
-package org.machanism.machai.core.bindex;
+package org.machanism.machai.bindex.bulder;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,7 +74,7 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 			if (Files.exists(startPath)) {
 				Files.walk(startPath).filter(Files::isRegularFile).forEach((f) -> {
 					try {
-						getProvider().promptFile("source_resource_section", f.toFile());
+						getProvider().promptFile(f.toFile(), "source_resource_section");
 					} catch (IOException e) {
 						logger.warn("File: {} adding failed.", f);
 					}

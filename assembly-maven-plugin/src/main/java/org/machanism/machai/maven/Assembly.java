@@ -15,8 +15,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
-import org.machanism.machai.core.Picker;
-import org.machanism.machai.core.ai.ApplicationAssembly;
+import org.machanism.machai.bindex.ApplicationAssembly;
+import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
 

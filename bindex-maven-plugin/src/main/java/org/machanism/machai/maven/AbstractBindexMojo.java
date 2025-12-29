@@ -5,9 +5,9 @@ import java.io.File;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.machanism.machai.core.BindexCreator;
+import org.machanism.machai.bindex.BindexCreator;
+import org.machanism.machai.bindex.bulder.MavenBIndexBuilder;
 import org.machanism.machai.core.ai.GenAIProvider;
-import org.machanism.machai.core.bindex.MavenBIndexBuilder;
 
 import com.openai.models.ChatModel;
 

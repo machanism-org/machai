@@ -1,4 +1,4 @@
-package org.machanism.machai.core.bindex;
+package org.machanism.machai.bindex.bulder;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
-
-import javax.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +47,7 @@ public class PythonBIndexBuilder extends BIndexBuilder {
 
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					getProvider().promptFile("source_resource_section", file);
+					getProvider().promptFile(file, "source_resource_section");
 				}
 			}
 		}
@@ -78,7 +76,6 @@ public class PythonBIndexBuilder extends BIndexBuilder {
 				String projectName = toml.getString("project.name");
 
 				boolean privateProject = false;
-				@Nullable
 				TomlArray classifiers = toml.getArray("project.classifiers");
 				if (classifiers != null) {
 					List<Object> classifierList = classifiers.toList();

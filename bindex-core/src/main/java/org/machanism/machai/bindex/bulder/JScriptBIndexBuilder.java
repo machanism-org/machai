@@ -1,4 +1,4 @@
-package org.machanism.machai.core.bindex;
+package org.machanism.machai.bindex.bulder;
 
 import java.io.File;
 import java.io.FileReader;
@@ -60,7 +60,7 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 			Files.walk(startPath).filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js"))
 					.forEach((f) -> {
 						try {
-							getProvider().promptFile("source_resource_section", f.toFile());
+							getProvider().promptFile(f.toFile(), "source_resource_section");
 						} catch (IOException e) {
 							logger.warn("File: {P} adding failed.", f);
 						}

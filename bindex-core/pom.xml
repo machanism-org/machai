@@ -23,20 +23,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.openai</groupId>
-			<artifactId>openai-java</artifactId>
-			<version>4.8.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.20.0</version>
+			<groupId>org.machanism.machai</groupId>
+			<artifactId>genai-client</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 
 		<dependency>

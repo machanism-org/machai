@@ -65,7 +65,6 @@ import com.openai.models.responses.Tool;
 
 public class GenAIProvider {
 	private static Logger logger = LoggerFactory.getLogger(GenAIProvider.class);
-	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private OpenAIClient client;
 	private ChatModel chatModel;
@@ -74,6 +73,7 @@ public class GenAIProvider {
 	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
 	private File workingDir = SystemUtils.getUserDir();
 	private String instructions;
+	private ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	public GenAIProvider(ChatModel chatModel) {
 		super();
@@ -93,7 +93,7 @@ public class GenAIProvider {
 		return this;
 	}
 
-	public GenAIProvider promptFile(String bundleMessageName, File file) throws IOException, FileNotFoundException {
+	public GenAIProvider promptFile(File file, String bundleMessageName) throws IOException {
 		String type = FilenameUtils.getExtension(file.getName());
 		try (FileInputStream input = new FileInputStream(file)) {
 			String fileData = IOUtils.toString(input, "UTF8");
@@ -133,7 +133,7 @@ public class GenAIProvider {
 		if (callLLM) {
 			Builder builder = ResponseCreateParams.builder()
 					.model(chatModel)
-					.tools(new ArrayList(toolMap.keySet()))
+					.tools(new ArrayList<Tool>(toolMap.keySet()))
 					.inputOfResponse(inputs);
 
 			if (instructions != null) {
@@ -472,6 +472,11 @@ public class GenAIProvider {
 
 	public GenAIProvider instructions(String instructions) {
 		this.instructions = instructions;
+		return this;
+	}
+
+	public GenAIProvider promptBundle(ResourceBundle promptBundle) {
+		this.promptBundle = promptBundle;
 		return this;
 	}
 
