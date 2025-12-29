@@ -22,7 +22,7 @@ The **Machai Command Line Interface (CLI)** is a powerful tool for generating, r
 - **Library Registration:** Register new or updated libraries, making them discoverable and ready for integration.
 - **Flexible Command Set:** Generate metadata, search libraries, register artifacts, and more.
 
-For full details and usage instructions, see the [Machai CLI README](./cli/README.md).
+For full details and usage instructions, see the [Machai CLI](./cli/README.md).
 
 ## Assembly Maven Plugin
 
@@ -34,7 +34,7 @@ The **assembly-maven-plugin** extends Machai’s AI-powered assembly capabilitie
 - **Semantic Search Integration:** Leverage Machanism’s vector database for precise library matching.
 - **Customizable Workflow:** Review and refine generated files to fit your needs.
 
-For installation, configuration, and usage details, see the [assembly-maven-plugin README](./assembly-maven-plugin/README.md).
+For installation, configuration, and usage details, see the [assembly-maven-plugin](./assembly-maven-plugin/README.md).
 
 ## Bindex Maven Plugin
 
@@ -46,7 +46,7 @@ The **bindex-maven-plugin** automates the generation and management of `bindex.j
 - **Seamless Registration:** Register your library metadata with the Machanism platform for enhanced discoverability.
 - **Customizable Output:** Review and edit generated files before registration.
 
-For installation, configuration, and usage details, see the [bindex-maven-plugin README](./bindex-maven-plugin/README.md).
+For installation, configuration, and usage details, see the [bindex-maven-plugin](./bindex-maven-plugin/README.md).
 
 ## License
 
