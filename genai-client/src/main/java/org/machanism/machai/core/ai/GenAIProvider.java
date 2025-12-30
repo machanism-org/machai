@@ -97,8 +97,14 @@ public class GenAIProvider {
 		String type = FilenameUtils.getExtension(file.getName());
 		try (FileInputStream input = new FileInputStream(file)) {
 			String fileData = IOUtils.toString(input, "UTF8");
-			String prompt = MessageFormat.format(promptBundle.getString(bundleMessageName), file.getName(), type,
-					fileData);
+			String prompt;
+			if (bundleMessageName != null) {
+				prompt = MessageFormat.format(promptBundle.getString(bundleMessageName), file.getName(), type,
+						fileData);
+			} else {
+				prompt = fileData;
+			}
+
 			prompt(prompt);
 		}
 		return this;
@@ -276,17 +282,19 @@ public class GenAIProvider {
 		Map<String, Map<String, String>> fromValue = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
 		ArrayNode requiregProps = mapper.createArrayNode();
-		for (String pDesc : paramsDesc) {
-			String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
+		if (paramsDesc != null) {
+			for (String pDesc : paramsDesc) {
+				String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
 
-			if (StringUtils.equals(desc[2], "required")) {
-				requiregProps.add(desc[0]);
+				if (StringUtils.equals(desc[2], "required")) {
+					requiregProps.add(desc[0]);
+				}
+
+				Map<String, String> value = new HashMap<>();
+				value.put("type", desc[1]);
+				value.put("description", desc[3]);
+				fromValue.put(desc[0], value);
 			}
-
-			Map<String, String> value = new HashMap<>();
-			value.put("type", desc[1]);
-			value.put("description", desc[3]);
-			fromValue.put(desc[0], value);
 		}
 
 		JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));

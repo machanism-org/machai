@@ -38,7 +38,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 		MavenBIndexBuilder bindexBuilder = new MavenBIndexBuilder(!inputsOnly);
 		bindexBuilder.effectivePomRequired(true);
 		bindexBuilder.model(project.getModel());
-		creator.processProject(basedir, bindexBuilder);
+		creator.processProject(bindexBuilder);
 	}
 
 	boolean isBindexed() {

@@ -24,7 +24,7 @@ public class PythonBIndexBuilder extends BIndexBuilder {
 	}
 
 	@Override
-	protected void projectContext() throws IOException {
+	public void projectContext() throws IOException {
 		File pyprojectTomlFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
 
 		try (FileReader reader = new FileReader(pyprojectTomlFile)) {
@@ -94,6 +94,24 @@ public class PythonBIndexBuilder extends BIndexBuilder {
 		}
 
 		return result;
+	}
+
+	@Override
+	public List<String> getSources() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getDocuments() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getTests() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

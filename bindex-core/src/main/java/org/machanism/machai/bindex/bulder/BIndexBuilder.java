@@ -27,7 +27,7 @@ public abstract class BIndexBuilder {
 	private GenAIProvider provider;
 	private ObjectMapper mapper = new ObjectMapper();
 	private File bindexDir;
-	private BIndex source;
+	private BIndex origin;
 	private boolean callLLM;
 
 	public BIndexBuilder(boolean callLLM) {
@@ -45,8 +45,8 @@ public abstract class BIndexBuilder {
 	public BIndex build() throws IOException {
 		bindexSchemaPrompt(getProvider());
 
-		if (source != null) {
-			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(source);
+		if (origin != null) {
+			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
 			String prompt = MessageFormat.format(promptBundle.getString("update_bindex_prompt"), bindexStr);
 			getProvider().prompt(prompt);
 		}
@@ -70,7 +70,7 @@ public abstract class BIndexBuilder {
 		return value;
 	}
 
-	protected abstract void projectContext() throws IOException;
+	public abstract void projectContext() throws IOException;
 
 	public static void bindexSchemaPrompt(GenAIProvider provider) throws IOException {
 		URL systemResource = BIndex.class.getResource(BINDEX_SCHEMA_RESOURCE);
@@ -109,9 +109,15 @@ public abstract class BIndexBuilder {
 		return relativePath;
 	}
 
-	public BIndexBuilder source(BIndex bindex) {
-		this.source = bindex;
+	public BIndexBuilder origin(BIndex bindex) {
+		this.origin = bindex;
 		return this;
 	}
+
+	public abstract List<String> getSources();
+
+	public abstract List<String> getDocuments();
+
+	public abstract List<String> getTests();
 
 }

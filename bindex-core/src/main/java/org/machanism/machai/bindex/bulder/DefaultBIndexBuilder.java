@@ -15,7 +15,7 @@ public class DefaultBIndexBuilder extends BIndexBuilder {
 	}
 
 	@Override
-	protected void projectContext() throws IOException {
+	public void projectContext() throws IOException {
 	}
 
 	@Override
@@ -36,6 +36,21 @@ public class DefaultBIndexBuilder extends BIndexBuilder {
 		}
 
 		return modules;
+	}
+
+	@Override
+	public List<String> getSources() {
+		return null;
+	}
+
+	@Override
+	public List<String> getDocuments() {
+		return null;
+	}
+
+	@Override
+	public List<String> getTests() {
+		return null;
 	}
 
 }

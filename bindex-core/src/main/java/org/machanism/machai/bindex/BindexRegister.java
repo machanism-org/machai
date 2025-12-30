@@ -10,7 +10,7 @@ import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BindexRegister extends ScanProject implements Closeable {
+public class BindexRegister extends BIndexProjectProcessor implements Closeable {
 
 	private static Logger logger = LoggerFactory.getLogger(BindexRegister.class);
 
@@ -23,9 +23,10 @@ public class BindexRegister extends ScanProject implements Closeable {
 		picker = new Picker(provider);
 	}
 
-	public String processProject(File projectDir, BIndexBuilder bindexBuilder) {
+	public void processProject(BIndexBuilder projectStructure) {
 		BIndex bindex;
 		try {
+			File projectDir = projectStructure.getProjectDir();
 			bindex = getBindex(projectDir);
 
 			String regId = null;
@@ -37,7 +38,6 @@ public class BindexRegister extends ScanProject implements Closeable {
 				}
 			}
 
-			return regId;
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}

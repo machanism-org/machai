@@ -6,13 +6,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Resource;
+import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +34,8 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 	private Model model;
 	private boolean effectivePomRequired;
 
-	protected void projectContext() throws IOException {
-		if (model == null) {
-			model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
-		}
-
-		Build build = model.getBuild();
+	public void projectContext() throws IOException {
+		Build build = getModel().getBuild();
 		String sourceDirectory = build.getSourceDirectory();
 		addResources(sourceDirectory);
 
@@ -57,6 +56,7 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 		String testSourceDirectory = build.getTestSourceDirectory();
 		addResources(testSourceDirectory);
 
+		Model model = getModel();
 		removeNotImportantData(model);
 
 		String pom = PomReader.printModel(model);
@@ -65,6 +65,14 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 
 		prompt = promptBundle.getString("additional_rules");
 		getProvider().prompt(prompt);
+	}
+
+	private Model getModel() {
+		if (model == null) {
+			model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
+		}
+
+		return model;
 	}
 
 	private void addResources(String sourceDirectory) throws IOException {
@@ -87,6 +95,7 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 	public BIndex build() throws IOException {
 		BIndex bindex = super.build();
 		if (bindex != null) {
+			Model model = getModel();
 			bindex.setId(model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion());
 			bindex.setName(model.getName());
 		}
@@ -114,7 +123,7 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 		List<String> modules = null;
 
 		File pomFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
-		Model model = PomReader.getProjectModel(pomFile, false);
+		Model model = getModel();
 
 		if ("pom".equals(model.getPackaging())) {
 			try {
@@ -137,5 +146,45 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 	public MavenBIndexBuilder effectivePomRequired(boolean effectivePomRequired) {
 		this.effectivePomRequired = effectivePomRequired;
 		return this;
+	}
+
+	@Override
+	public List<String> getSources() {
+		List<String> sources = new ArrayList<>();
+
+		Model model = getModel();
+		sources.add(ProjectProcessor.getRelatedPath(getProjectDir(), new File(model.getBuild().getSourceDirectory())));
+		sources.addAll(
+				model.getBuild()
+						.getResources()
+						.stream()
+						.map(r -> r.getDirectory())
+						.map(p -> ProjectProcessor.getRelatedPath(getProjectDir(), new File(p)))
+						.collect(Collectors.toList()));
+		return sources;
+	}
+
+	@Override
+	public List<String> getDocuments() {
+		List<String> docs = new ArrayList<>();
+		String sourceDirectory = "src/site/markdown";
+		docs.add(sourceDirectory);
+		return docs;
+	}
+
+	@Override
+	public List<String> getTests() {
+		List<String> sources = new ArrayList<>();
+		Model model = getModel();
+		sources.add(
+				ProjectProcessor.getRelatedPath(getProjectDir(), new File(model.getBuild().getTestSourceDirectory())));
+		sources.addAll(
+				model.getBuild()
+						.getTestResources()
+						.stream()
+						.map(r -> r.getDirectory())
+						.map(p -> ProjectProcessor.getRelatedPath(getProjectDir(), new File(p)))
+						.collect(Collectors.toList()));
+		return sources;
 	}
 }

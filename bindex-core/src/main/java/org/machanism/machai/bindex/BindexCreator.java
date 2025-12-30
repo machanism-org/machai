@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class BindexCreator extends ScanProject {
+public class BindexCreator extends BIndexProjectProcessor {
 
 	private static Logger logger = LoggerFactory.getLogger(BindexCreator.class);
 
@@ -23,12 +23,12 @@ public class BindexCreator extends ScanProject {
 		this.provider = provider;
 	}
 
-	public String processProject(File projectDir, BIndexBuilder bindexBuilder) {
+	public void processProject(BIndexBuilder bindexBuilder) {
 		BIndex bindex;
 		try {
+			File projectDir = bindexBuilder.getProjectDir();
 			bindex = getBindex(projectDir);
 
-			String result = null;
 			File bindexFile = getBindexFile(projectDir);
 			if (update || bindex == null) {
 				if (bindexFile.getParentFile() != null) {
@@ -36,20 +36,18 @@ public class BindexCreator extends ScanProject {
 				}
 
 				bindex = bindexBuilder
-						.source(bindex)
+						.origin(bindex)
 						.projectDir(projectDir)
 						.bindexDir(bindexFile.getParentFile())
 						.provider(provider)
 						.build();
 
 				if (bindex != null) {
-					result = new ObjectMapper().writeValueAsString(bindex);
 					new ObjectMapper().writeValue(bindexFile, bindex);
 					logger.info("BIndex file: {}", bindexFile);
 				}
 			}
 
-			return result;
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}

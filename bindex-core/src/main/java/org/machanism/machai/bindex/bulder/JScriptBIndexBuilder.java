@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 	}
 
 	@Override
-	protected void projectContext() throws IOException {
+	public void projectContext() throws IOException {
 
 		File packageFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
 		try (FileReader reader = new FileReader(packageFile)) {
@@ -85,7 +86,6 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 			List<String> modules = new ArrayList<String>();
 
 			if (workspacesNode.isArray()) {
-				String currentPath = getProjectDir().getAbsolutePath().replace("\\", "/");
 				Iterator<JsonNode> iterator = workspacesNode.iterator();
 				while (iterator.hasNext()) {
 					String module = iterator.next().asText();
@@ -107,7 +107,7 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 							return false;
 						}).forEach(p -> {
 							File dir = p.toFile().getParentFile();
-							String relativePath = getRelatedPath(currentPath, dir);
+							String relativePath = ProjectProcessor.getRelatedPath(getProjectDir(), dir);
 							modules.add(relativePath);
 						});
 					}
@@ -123,6 +123,24 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 		File packageFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
 		JsonNode packageJson = new ObjectMapper().readTree(packageFile);
 		return packageJson;
+	}
+
+	@Override
+	public List<String> getSources() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getDocuments() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getTests() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
