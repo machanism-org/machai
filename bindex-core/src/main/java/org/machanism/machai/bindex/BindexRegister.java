@@ -15,7 +15,6 @@ public class BindexRegister extends BIndexProjectProcessor implements Closeable 
 	private static Logger logger = LoggerFactory.getLogger(BindexRegister.class);
 
 	private Picker picker;
-
 	private boolean update;
 
 	public BindexRegister(GenAIProvider provider) {
@@ -51,10 +50,6 @@ public class BindexRegister extends BIndexProjectProcessor implements Closeable 
 	public BindexRegister update(boolean overwrite) {
 		this.update = overwrite;
 		return this;
-	}
-
-	public void scanProjects(File basedir, boolean callLLM) throws IOException {
-		scanProjects(basedir, false, callLLM);
 	}
 
 }

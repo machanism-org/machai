@@ -13,21 +13,17 @@ import org.slf4j.LoggerFactory;
 public abstract class ProjectProcessor {
 	private static Logger logger = LoggerFactory.getLogger(ProjectProcessor.class);
 
-	public void scanProjects(File basedir, boolean callLLM) throws IOException {
-		scanProjects(basedir, true, callLLM);
-	}
-
-	public void scanProjects(File projectDir, boolean create, boolean callLLM) throws IOException {
-		BIndexBuilder bindexBuilder = BIndexBuilderFactory.builder(projectDir, create, callLLM);
+	public void scanProjects(File projectDir) throws IOException {
+		BIndexBuilder bindexBuilder = BIndexBuilderFactory.builder(projectDir);
 		bindexBuilder.projectDir(projectDir);
 		List<String> modules = bindexBuilder.getModules();
 
 		if (modules != null) {
 			for (String module : modules) {
-				scanProjects(new File(projectDir, module), callLLM);
+				scanProjects(new File(projectDir, module));
 			}
 		} else {
-			bindexBuilder = BIndexBuilderFactory.builder(projectDir, create, callLLM);
+			bindexBuilder = BIndexBuilderFactory.builder(projectDir);
 			try {
 				processProject(bindexBuilder);
 			} catch (Exception e) {

@@ -18,9 +18,12 @@ public class BindexCreator extends BIndexProjectProcessor {
 	private GenAIProvider provider;
 	private boolean update;
 
-	public BindexCreator(GenAIProvider provider) {
+	private boolean callLLM;
+
+	public BindexCreator(GenAIProvider provider, boolean callLLM) {
 		super();
 		this.provider = provider;
+		this.callLLM = callLLM;
 	}
 
 	public void processProject(BIndexBuilder bindexBuilder) {
@@ -40,7 +43,7 @@ public class BindexCreator extends BIndexProjectProcessor {
 						.projectDir(projectDir)
 						.bindexDir(bindexFile.getParentFile())
 						.provider(provider)
-						.build();
+						.build(callLLM);
 
 				if (bindex != null) {
 					new ObjectMapper().writeValue(bindexFile, bindex);

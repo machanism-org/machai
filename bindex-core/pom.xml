@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>genai-client</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 
 		<!-- MongoDB Java Sync Driver v5.2.0 or later -->

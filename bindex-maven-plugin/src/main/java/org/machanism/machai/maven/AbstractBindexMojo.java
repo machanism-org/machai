@@ -32,10 +32,10 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	void createBindex(boolean update) {
 		GenAIProvider provider = new GenAIProvider(ChatModel.of(chatModel));
 
-		BindexCreator creator = new BindexCreator(provider);
+		BindexCreator creator = new BindexCreator(provider, !inputsOnly);
 		creator.update(update);
 
-		MavenBIndexBuilder bindexBuilder = new MavenBIndexBuilder(!inputsOnly);
+		MavenBIndexBuilder bindexBuilder = new MavenBIndexBuilder();
 		bindexBuilder.effectivePomRequired(true);
 		bindexBuilder.model(project.getModel());
 		creator.processProject(bindexBuilder);

@@ -49,7 +49,7 @@ public class DocsProcessor extends ProjectProcessor {
 
 	public static void main(String[] args) throws IOException {
 		DocsProcessor documents = new DocsProcessor();
-		documents.scanProjects(new File("D:\\projects\\machanism.org\\macha\\core\\commons\\configurator"), false);
+		documents.scanProjects(new File("D:\\projects\\machanism.org\\macha\\core\\commons\\configurator"));
 	}
 
 }

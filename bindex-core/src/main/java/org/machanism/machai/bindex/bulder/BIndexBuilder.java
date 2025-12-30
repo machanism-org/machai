@@ -28,12 +28,6 @@ public abstract class BIndexBuilder {
 	private ObjectMapper mapper = new ObjectMapper();
 	private File bindexDir;
 	private BIndex origin;
-	private boolean callLLM;
-
-	public BIndexBuilder(boolean callLLM) {
-		super();
-		this.callLLM = callLLM;
-	}
 
 	public BIndexBuilder provider(GenAIProvider provider) {
 		this.provider = provider;
@@ -42,7 +36,7 @@ public abstract class BIndexBuilder {
 		return this;
 	}
 
-	public BIndex build() throws IOException {
+	public BIndex build(boolean callLLM) throws IOException {
 		bindexSchemaPrompt(getProvider());
 
 		if (origin != null) {

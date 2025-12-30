@@ -19,10 +19,6 @@ public class PythonBIndexBuilder extends BIndexBuilder {
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("python_project_prompts");
 	private static final String PROJECT_MODEL_FILE_NAME = "pyproject.toml";
 
-	public PythonBIndexBuilder(boolean callLLM) {
-		super(callLLM);
-	}
-
 	@Override
 	public void projectContext() throws IOException {
 		File pyprojectTomlFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);

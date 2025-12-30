@@ -30,16 +30,12 @@ public class JScriptBIndexBuilder extends BIndexBuilder {
 
 	private static final String PROJECT_MODEL_FILE_NAME = "package.json";
 
-	public JScriptBIndexBuilder(boolean callLLM) {
-		super(callLLM);
-	}
-
 	@Override
-	public BIndex build() throws IOException {
+	public BIndex build(boolean callLLM) throws IOException {
 		JsonNode packageJson = getPackageJson();
 		JsonNode workspacesNode = packageJson.get("private");
 		if (workspacesNode == null || !workspacesNode.asBoolean()) {
-			return super.build();
+			return super.build(callLLM);
 		}
 
 		return null;

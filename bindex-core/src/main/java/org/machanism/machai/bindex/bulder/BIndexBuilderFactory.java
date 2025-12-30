@@ -5,16 +5,16 @@ import java.io.FileNotFoundException;
 
 public class BIndexBuilderFactory {
 
-	public static BIndexBuilder builder(File projectDir, boolean create, boolean callLLM) throws FileNotFoundException {
+	public static BIndexBuilder builder(File projectDir) throws FileNotFoundException {
 		BIndexBuilder bindexBuilder;
 		if (MavenBIndexBuilder.isMavenProject(projectDir)) {
-			bindexBuilder = new MavenBIndexBuilder(callLLM).effectivePomRequired(create);
+			bindexBuilder = new MavenBIndexBuilder();
 		} else if (JScriptBIndexBuilder.isPackageJsonPresent(projectDir)) {
-			bindexBuilder = new JScriptBIndexBuilder(callLLM);
+			bindexBuilder = new JScriptBIndexBuilder();
 		} else if (PythonBIndexBuilder.isPythonProject(projectDir)) {
-			bindexBuilder = new PythonBIndexBuilder(callLLM);
+			bindexBuilder = new PythonBIndexBuilder();
 		} else if (projectDir.exists()) {
-			bindexBuilder = new DefaultBIndexBuilder(callLLM);
+			bindexBuilder = new DefaultBIndexBuilder();
 		} else {
 			throw new FileNotFoundException(projectDir.getAbsolutePath());
 		}

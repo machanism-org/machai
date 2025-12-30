@@ -22,10 +22,6 @@ import org.slf4j.LoggerFactory;
 
 public class MavenBIndexBuilder extends BIndexBuilder {
 
-	public MavenBIndexBuilder(boolean callLLM) {
-		super(callLLM);
-	}
-
 	private static Logger logger = LoggerFactory.getLogger(MavenBIndexBuilder.class);
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("maven_project_prompts");
 
@@ -92,8 +88,8 @@ public class MavenBIndexBuilder extends BIndexBuilder {
 	}
 
 	@Override
-	public BIndex build() throws IOException {
-		BIndex bindex = super.build();
+	public BIndex build(boolean callLLM) throws IOException {
+		BIndex bindex = super.build(callLLM);
 		if (bindex != null) {
 			Model model = getModel();
 			bindex.setId(model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion());

@@ -38,9 +38,9 @@ public class BindexCommand {
 
 		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
 
-		BindexCreator register = new BindexCreator(provider);
+		BindexCreator register = new BindexCreator(provider, !inputs);
 		register.update(update);
-		register.scanProjects(dir, !inputs);
+		register.scanProjects(dir);
 	}
 
 	@ShellMethod()
@@ -56,7 +56,7 @@ public class BindexCommand {
 		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
 		try (BindexRegister register = new BindexRegister(provider)) {
 			register.update(update);
-			register.scanProjects(dir, true);
+			register.scanProjects(dir);
 		}
 	}
 }
