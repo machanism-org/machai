@@ -18,9 +18,8 @@ import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.core.ai.GenAIProviderManager;
 import org.machanism.machai.schema.BIndex;
-
-import com.openai.models.ChatModel;
 
 @Mojo(name = "assembly", requiresProject = false, requiresDependencyCollection = ResolutionScope.NONE)
 public class Assembly extends AbstractMojo {
@@ -58,7 +57,7 @@ public class Assembly extends AbstractMojo {
 				query = prompter.prompt("Please enter the project assembly prompt or specify the file name");
 			}
 
-			GenAIProvider provider = new GenAIProvider(ChatModel.of(pickChatModel));
+			GenAIProvider provider = GenAIProviderManager.getProvider(pickChatModel);
 			provider.addDefaultTools();
 
 			try (Picker picker = new Picker(provider)) {
@@ -75,7 +74,7 @@ public class Assembly extends AbstractMojo {
 						getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
 					}
 
-					GenAIProvider assemblyProvider = new GenAIProvider(ChatModel.of(chatModel));
+					GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(chatModel);
 					ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider);
 
 					getLog().info("The project directory: " + basedir);

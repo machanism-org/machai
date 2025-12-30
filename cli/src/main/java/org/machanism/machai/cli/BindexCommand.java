@@ -8,6 +8,7 @@ import org.jline.reader.LineReader;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.core.ai.GenAIProviderManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
@@ -19,7 +20,7 @@ import com.openai.models.ChatModel;
 @ShellComponent
 public class BindexCommand {
 
-	private static final ChatModel CHAT_MODEL = ChatModel.GPT_5_1;
+	private static final String CHAT_MODEL = ChatModel.GPT_5_1.toString();
 
 	@Autowired
 	@Lazy
@@ -36,7 +37,7 @@ public class BindexCommand {
 			dir = SystemUtils.getUserDir();
 		}
 
-		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
+		GenAIProvider provider = GenAIProviderManager.getProvider(CHAT_MODEL);
 
 		BindexCreator register = new BindexCreator(provider, !inputs);
 		register.update(update);
@@ -53,7 +54,7 @@ public class BindexCommand {
 			dir = SystemUtils.getUserDir();
 		}
 
-		GenAIProvider provider = new GenAIProvider(CHAT_MODEL);
+		GenAIProvider provider = GenAIProviderManager.getProvider(CHAT_MODEL);
 		try (BindexRegister register = new BindexRegister(provider)) {
 			register.update(update);
 			register.scanProjects(dir);

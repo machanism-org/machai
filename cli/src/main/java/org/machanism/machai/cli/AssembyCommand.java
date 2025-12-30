@@ -12,6 +12,7 @@ import org.jline.reader.LineReader;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.core.ai.GenAIProviderManager;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ import com.openai.models.ChatModel;
 public class AssembyCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
-	private static final ChatModel CHAT_MODEL = ChatModel.GPT_5_1;
+	private static final String CHAT_MODEL = ChatModel.GPT_5_1.toString();
 
 	private List<BIndex> bindexList;
 	private String findQuery;
@@ -36,7 +37,7 @@ public class AssembyCommand {
 
 	public AssembyCommand() {
 		super();
-		provider = new GenAIProvider(CHAT_MODEL);
+		provider = GenAIProviderManager.getProvider(CHAT_MODEL);
 		provider.addDefaultTools();
 	}
 

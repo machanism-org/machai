@@ -8,7 +8,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang.SystemUtils;
 import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.core.ai.GenAIProviderManager;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -18,6 +20,7 @@ public class DocsProcessor extends ProjectProcessor {
 	public String[] GUIDANCE_FILE_NAMES = { "guidance.txt", "package-info.java" };
 
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
+	private String chatModel = ChatModel.GPT_5_1_MINI.toString();
 
 	public String loadGuidanceFileContent(File file) throws IOException {
 		for (String fileName : GUIDANCE_FILE_NAMES) {
@@ -38,9 +41,13 @@ public class DocsProcessor extends ProjectProcessor {
 		List<String> documents = projectLayout.getDocuments();
 		List<String> tests = projectLayout.getTests();
 
-		GenAIProvider provider = new GenAIProvider(ChatModel.GPT_5_1_MINI);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		provider.promptBundle(promptBundle);
 		provider.addDefaultTools();
+
+		String prompt = "";
+		provider.prompt(prompt);
+		provider.perform(false);
 
 		System.out.println();
 
@@ -48,7 +55,7 @@ public class DocsProcessor extends ProjectProcessor {
 
 	public static void main(String[] args) throws IOException {
 		DocsProcessor documents = new DocsProcessor();
-		documents.scanProjects(new File("D:\\projects\\machanism.org\\macha\\core\\commons\\configurator"));
+		documents.scanProjects(SystemUtils.getUserDir());
 	}
 
 }

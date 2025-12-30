@@ -7,9 +7,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.core.ai.GenAIProviderManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
-
-import com.openai.models.ChatModel;
 
 public abstract class AbstractBindexMojo extends AbstractMojo {
 
@@ -30,7 +29,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	}
 
 	void createBindex(boolean update) {
-		GenAIProvider provider = new GenAIProvider(ChatModel.of(chatModel));
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 
 		BindexCreator creator = new BindexCreator(provider, !inputsOnly);
 		creator.update(update);

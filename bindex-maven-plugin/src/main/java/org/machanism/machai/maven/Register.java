@@ -8,8 +8,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.core.ai.GenAIProvider;
-
-import com.openai.models.ChatModel;
+import org.machanism.machai.core.ai.GenAIProviderManager;
 
 @Mojo(name = "register", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.INSTALL)
 public class Register extends AbstractBindexMojo {
@@ -20,7 +19,7 @@ public class Register extends AbstractBindexMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (isBindexed()) {
-			GenAIProvider provider = new GenAIProvider(ChatModel.of(chatModel));
+			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 			try (BindexRegister register = new BindexRegister(provider)) {
 				register.update(update);
 				register.scanProjects(project.getBasedir());
