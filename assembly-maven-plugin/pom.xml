@@ -54,7 +54,7 @@
 		</dependency>
 	</dependencies>
 
-	<!-- mvn org.machanism.machai:assembly-maven-plugin:0.0.1-SNAPSHOT:assembly
+	<!-- mvn org.machanism.machai:assembly-maven-plugin:0.0.1:assembly
 	(java8 required)-->
 	<build>
 		<plugins>

@@ -245,10 +245,12 @@ public class GenAIProvider {
 		}
 	}
 
-	public void saveInput(File dir) throws IOException {
-		dir.mkdirs();
+	public void saveInput(File inputsFile) throws IOException {
+		File parentFile = inputsFile.getParentFile();
+		if (parentFile != null && !parentFile.exists()) {
+			parentFile.mkdirs();
+		}
 
-		File inputsFile = new File(dir, "inputs.txt");
 		try (Writer streamWriter = new FileWriter(inputsFile, false)) {
 			logger.info("Bindex inputs file: {}", inputsFile);
 

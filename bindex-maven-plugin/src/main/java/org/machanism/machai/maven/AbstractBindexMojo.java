@@ -6,8 +6,8 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.machanism.machai.bindex.BindexCreator;
-import org.machanism.machai.bindex.bulder.MavenBIndexBuilder;
 import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.project.layout.MavenProjectLayout;
 
 import com.openai.models.ChatModel;
 
@@ -35,10 +35,11 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 		BindexCreator creator = new BindexCreator(provider, !inputsOnly);
 		creator.update(update);
 
-		MavenBIndexBuilder bindexBuilder = new MavenBIndexBuilder();
-		bindexBuilder.effectivePomRequired(true);
-		bindexBuilder.model(project.getModel());
-		creator.processProject(bindexBuilder);
+		MavenProjectLayout projectLayout = new MavenProjectLayout();
+		projectLayout.projectDir(basedir);
+		projectLayout.effectivePomRequired(true);
+		projectLayout.model(project.getModel());
+		creator.processProject(projectLayout);
 	}
 
 	boolean isBindexed() {

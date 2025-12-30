@@ -1,0 +1,103 @@
+package org.machanism.machai.project.layout;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.maven.model.Model;
+import org.machanism.machai.project.ProjectProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MavenProjectLayout extends ProjectLayout {
+
+	private static Logger logger = LoggerFactory.getLogger(MavenProjectLayout.class);
+	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
+
+	private Model model;
+	private boolean effectivePomRequired;
+
+	public static boolean isMavenProject(File projectDir) {
+		return new File(projectDir, PROJECT_MODEL_FILE_NAME).exists();
+	}
+
+	@Override
+	public List<String> getModules() {
+		List<String> modules = null;
+
+		File pomFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
+		Model model = getModel();
+
+		if ("pom".equals(model.getPackaging())) {
+			try {
+				model = PomReader.getProjectModel(pomFile, effectivePomRequired);
+			} catch (Exception e) {
+				logger.warn("Effective model building failed: {}",
+						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
+			}
+			modules = model.getModules();
+		}
+
+		return modules;
+	}
+
+	public Model getModel() {
+		if (model == null) {
+			model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
+		}
+
+		return model;
+	}
+
+	public MavenProjectLayout model(Model model) {
+		this.model = model;
+		return this;
+	}
+
+	public MavenProjectLayout effectivePomRequired(boolean effectivePomRequired) {
+		this.effectivePomRequired = effectivePomRequired;
+		return this;
+	}
+
+	@Override
+	public List<String> getSources() {
+		List<String> sources = new ArrayList<>();
+
+		Model model = getModel();
+		sources.add(ProjectProcessor.getRelatedPath(getProjectDir(), new File(model.getBuild().getSourceDirectory())));
+		sources.addAll(
+				model.getBuild()
+						.getResources()
+						.stream()
+						.map(r -> r.getDirectory())
+						.map(p -> ProjectProcessor.getRelatedPath(getProjectDir(), new File(p)))
+						.collect(Collectors.toList()));
+		return sources;
+	}
+
+	@Override
+	public List<String> getDocuments() {
+		List<String> docs = new ArrayList<>();
+		String sourceDirectory = "src/site/markdown";
+		docs.add(sourceDirectory);
+		return docs;
+	}
+
+	@Override
+	public List<String> getTests() {
+		List<String> sources = new ArrayList<>();
+		Model model = getModel();
+		sources.add(
+				ProjectProcessor.getRelatedPath(getProjectDir(), new File(model.getBuild().getTestSourceDirectory())));
+		sources.addAll(
+				model.getBuild()
+						.getTestResources()
+						.stream()
+						.map(r -> r.getDirectory())
+						.map(p -> ProjectProcessor.getRelatedPath(getProjectDir(), new File(p)))
+						.collect(Collectors.toList()));
+		return sources;
+	}
+}

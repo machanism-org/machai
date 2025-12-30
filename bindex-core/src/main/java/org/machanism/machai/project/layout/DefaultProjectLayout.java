@@ -1,4 +1,4 @@
-package org.machanism.machai.bindex.bulder;
+package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -8,11 +8,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class DefaultBIndexBuilder extends BIndexBuilder {
-
-	@Override
-	public void projectContext() throws IOException {
-	}
+public class DefaultProjectLayout extends ProjectLayout {
 
 	@Override
 	public List<String> getModules() throws IOException {

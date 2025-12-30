@@ -9,7 +9,7 @@ public class Update extends AbstractBindexMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		if (isBindexed()) {
-			createBindex(inputsOnly);
+			createBindex(true);
 		}
 	}
 

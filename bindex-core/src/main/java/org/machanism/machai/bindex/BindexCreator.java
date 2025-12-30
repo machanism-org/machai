@@ -3,8 +3,9 @@ package org.machanism.machai.bindex;
 import java.io.File;
 import java.io.IOException;
 
-import org.machanism.machai.bindex.bulder.BIndexBuilder;
+import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +27,12 @@ public class BindexCreator extends BIndexProjectProcessor {
 		this.callLLM = callLLM;
 	}
 
-	public void processProject(BIndexBuilder bindexBuilder) {
+	public void processProject(ProjectLayout projectLayout) {
 		BIndex bindex;
 		try {
-			File projectDir = bindexBuilder.getProjectDir();
+			BindexBuilder bindexBuilder = BindexBuilderFactory.create(projectLayout);
+			
+			File projectDir = bindexBuilder.getProjectLayout().getProjectDir();
 			bindex = getBindex(projectDir);
 
 			File bindexFile = getBindexFile(projectDir);
@@ -40,9 +43,7 @@ public class BindexCreator extends BIndexProjectProcessor {
 
 				bindex = bindexBuilder
 						.origin(bindex)
-						.projectDir(projectDir)
-						.bindexDir(bindexFile.getParentFile())
-						.provider(provider)
+						.genAIProvider(provider)
 						.build(callLLM);
 
 				if (bindex != null) {

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.SystemUtils;
-import org.machanism.machai.bindex.bulder.BIndexBuilder;
+import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
@@ -16,8 +16,11 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ApplicationAssembly {
+
 	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
+
+	private static final String ASSEMBLY_TEMP_DIR = ".machai/assembly-inputs.txt";
 
 	private GenAIProvider provider;
 	private File projectDir = SystemUtils.getUserDir();
@@ -37,7 +40,7 @@ public class ApplicationAssembly {
 		provider.prompt(assemblyInstructions);
 
 		try {
-			BIndexBuilder.bindexSchemaPrompt(provider);
+			BindexBuilder.bindexSchemaPrompt(provider);
 
 			for (BIndex bindex : bindexList) {
 				String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(bindex);
@@ -48,7 +51,7 @@ public class ApplicationAssembly {
 
 			provider.prompt(prompt);
 
-			File bindexTempDir = new File(projectDir, BIndexBuilder.BINDEX_TEMP_DIR);
+			File bindexTempDir = new File(projectDir, ASSEMBLY_TEMP_DIR);
 			provider.saveInput(bindexTempDir);
 
 			String response = provider.perform(callLLM);

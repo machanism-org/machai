@@ -1,4 +1,4 @@
-package org.machanism.machai.bindex.bulder;
+package org.machanism.machai.project.layout;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

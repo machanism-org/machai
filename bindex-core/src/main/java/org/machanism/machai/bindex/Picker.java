@@ -25,7 +25,7 @@ import org.bson.BsonDouble;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-import org.machanism.machai.bindex.bulder.BIndexBuilder;
+import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
 import org.machanism.machai.schema.Classification;
@@ -265,7 +265,7 @@ public class Picker implements Closeable {
 
 	private String getClassification(String query)
 			throws IOException, JsonProcessingException, JsonMappingException {
-		URL systemResource = BIndex.class.getResource(BIndexBuilder.BINDEX_SCHEMA_RESOURCE);
+		URL systemResource = BIndex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, "UTF8");
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode schemaJson = objectMapper.readTree(schema);

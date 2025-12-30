@@ -1,4 +1,4 @@
-package org.machanism.machai.bindex.bulder;
+package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.io.FileReader;
@@ -17,56 +17,15 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.project.ProjectProcessor;
-import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JScriptBIndexBuilder extends BIndexBuilder {
-	private static Logger logger = LoggerFactory.getLogger(JScriptBIndexBuilder.class);
-	private static ResourceBundle promptBundle = ResourceBundle.getBundle("js_project_prompts");
-
-	private static final String PROJECT_MODEL_FILE_NAME = "package.json";
-
-	@Override
-	public BIndex build(boolean callLLM) throws IOException {
-		JsonNode packageJson = getPackageJson();
-		JsonNode workspacesNode = packageJson.get("private");
-		if (workspacesNode == null || !workspacesNode.asBoolean()) {
-			return super.build(callLLM);
-		}
-
-		return null;
-	}
-
-	@Override
-	public void projectContext() throws IOException {
-
-		File packageFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
-		try (FileReader reader = new FileReader(packageFile)) {
-			String prompt = MessageFormat.format(promptBundle.getString("js_resource_section"),
-					IOUtils.toString(reader));
-			getProvider().prompt(prompt);
-		}
-
-		Path startPath = Paths.get(new File(getProjectDir(), "src").getAbsolutePath());
-
-		if (Files.exists(startPath)) {
-			Files.walk(startPath).filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js"))
-					.forEach((f) -> {
-						try {
-							getProvider().promptFile(f.toFile(), "source_resource_section");
-						} catch (IOException e) {
-							logger.warn("File: {P} adding failed.", f);
-						}
-					});
-		}
-
-		String prompt = promptBundle.getString("additional_rules");
-		getProvider().prompt(prompt);
-	}
+public class JScriptProjectLayout extends ProjectLayout {
+	private static Logger logger = LoggerFactory.getLogger(JScriptProjectLayout.class);
+	public static final String PROJECT_MODEL_FILE_NAME = "package.json";
 
 	public static boolean isPackageJsonPresent(File projectDir) {
 		return new File(projectDir, PROJECT_MODEL_FILE_NAME).exists();

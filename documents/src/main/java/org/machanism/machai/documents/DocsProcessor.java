@@ -8,9 +8,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.machanism.machai.bindex.bulder.BIndexBuilder;
 import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.project.ProjectProcessor;
+import org.machanism.machai.project.layout.ProjectLayout;
 
 import com.openai.models.ChatModel;
 
@@ -30,14 +30,13 @@ public class DocsProcessor extends ProjectProcessor {
 	}
 
 	@Override
-	public void processProject(BIndexBuilder projectStructure) {
+	public void processProject(ProjectLayout projectLayout) {
 
-		File projectDir = projectStructure.getProjectDir();
-		projectStructure.bindexDir(projectDir);
+		File projectDir = projectLayout.getProjectDir();
 
-		List<String> sources = projectStructure.getSources();
-		List<String> documents = projectStructure.getDocuments();
-		List<String> tests = projectStructure.getTests();
+		List<String> sources = projectLayout.getSources();
+		List<String> documents = projectLayout.getDocuments();
+		List<String> tests = projectLayout.getTests();
 
 		GenAIProvider provider = new GenAIProvider(ChatModel.GPT_5_1_MINI);
 		provider.promptBundle(promptBundle);
