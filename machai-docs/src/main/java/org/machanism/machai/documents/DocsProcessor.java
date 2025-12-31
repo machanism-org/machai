@@ -3,10 +3,10 @@ package org.machanism.machai.documents;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,7 +21,8 @@ import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 public class DocsProcessor extends ProjectProcessor {
-	private static final String GUIDANCE_FILE_NAME = "@guidance.txt";
+	private static final String GUIDANCE_TAG_NAME = "@guidance";
+	private static final String GUIDANCE_FILE_NAME = GUIDANCE_TAG_NAME + ".txt";
 
 	private static final String DOCS_TEMP_DIR = ".machai/docs-inputs";
 
@@ -30,6 +31,8 @@ public class DocsProcessor extends ProjectProcessor {
 
 	private GenAIProvider provider;
 	private SystemFunctionTools systemFunctionTools;
+
+	private Map<String, String> dirGuidanceMap = new HashMap<>();
 
 	public DocsProcessor() {
 		provider = GenAIProviderManager.getProvider(chatModel);
@@ -55,6 +58,20 @@ public class DocsProcessor extends ProjectProcessor {
 					String guidance = parseGuidanceFile(projectDir, guidancesFile);
 
 					if (guidance != null) {
+						fillProjectLayerInformation(projectLayout);
+
+						String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
+						String[] parents = StringUtils.split(parentsPath, "/");
+
+						StringBuilder path = new StringBuilder();
+						for (String parent : parents) {
+							path.append("/" + parent);
+							String dirGuidance = dirGuidanceMap.get(path.toString());
+							if (StringUtils.isNotBlank(dirGuidance)) {
+								provider.prompt(dirGuidance);
+							}
+						}
+
 						provider.prompt(guidance);
 						String inputsFileName = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
 						File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
@@ -62,18 +79,21 @@ public class DocsProcessor extends ProjectProcessor {
 						provider.perform(false);
 					}
 				}
-
-				List<String> sources = projectLayout.getSources();
-				List<String> documents = projectLayout.getDocuments();
-				List<String> tests = projectLayout.getTests();
-
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
 
-		System.out.println();
+	private void fillProjectLayerInformation(ProjectLayout projectLayout) {
+		List<String> sources = projectLayout.getSources();
+		provider.prompt("Sources folders: " + StringUtils.join(sources, ", ") + ".");
 
+		List<String> documents = projectLayout.getDocuments();
+		provider.prompt("Documents folders: " + StringUtils.join(documents, ", ") + ".");
+
+		List<String> tests = projectLayout.getTests();
+		provider.prompt("Tests folders: " + StringUtils.join(tests, ", ") + ".");
 	}
 
 	private String parseGuidanceFile(File projectDir, File guidancesFile) throws IOException {
@@ -104,6 +124,8 @@ public class DocsProcessor extends ProjectProcessor {
 		String guidance = null;
 		if (StringUtils.equals(guidancesFile.getName(), GUIDANCE_FILE_NAME)) {
 			guidance = Files.readString(guidancesFile.toPath());
+			String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
+			dirGuidanceMap.put("/" + parentsPath, guidance);
 		}
 		return guidance;
 	}
@@ -111,10 +133,10 @@ public class DocsProcessor extends ProjectProcessor {
 	private String parseJavaFile(File projectDir, File guidancesFile) throws IOException {
 		String content = Files.readString(guidancesFile.toPath());
 		StringBuilder result = null;
-		if (StringUtils.contains(content, "@guidance")) {
+		if (StringUtils.contains(content, GUIDANCE_TAG_NAME)) {
 			result = new StringBuilder();
 			if (StringUtils.equals(guidancesFile.getName(), "package-info.java")) {
-				Pattern pattern = Pattern.compile("/\\*.*?@guidance:\\s*(.*?)\\s*\\*/", Pattern.DOTALL);
+				Pattern pattern = Pattern.compile("/\\*.*?" + GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*\\*/", Pattern.DOTALL);
 				Matcher matcher = pattern.matcher(content);
 
 				if (matcher.find()) {
@@ -140,7 +162,7 @@ public class DocsProcessor extends ProjectProcessor {
 	private String parseMarkdownFile(File projectDir, File guidancesFile) throws IOException {
 		String content = Files.readString(guidancesFile.toPath());
 
-		Pattern pattern = Pattern.compile("\\[@guidance\\]\\s*#\\s*\\((.*?)\\)", Pattern.DOTALL);
+		Pattern pattern = Pattern.compile("\\[" + GUIDANCE_TAG_NAME + "\\]\\s*#\\s*\\((.*?)\\)", Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(content);
 
 		String result = null;

@@ -8,7 +8,7 @@
 		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>documents</artifactId>
+	<artifactId>machai-docs</artifactId>
 
 	<dependencies>
 		<dependency>

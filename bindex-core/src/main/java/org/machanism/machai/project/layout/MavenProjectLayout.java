@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
-import org.machanism.machai.project.ProjectProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
