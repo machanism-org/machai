@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.machanism.machai.project.ProjectProcessor;
 import org.slf4j.Logger;
@@ -66,14 +67,20 @@ public class MavenProjectLayout extends ProjectLayout {
 		List<String> sources = new ArrayList<>();
 
 		Model model = getModel();
-		sources.add(ProjectProcessor.getRelatedPath(getProjectDir(), new File(model.getBuild().getSourceDirectory())));
-		sources.addAll(
-				model.getBuild()
-						.getResources()
-						.stream()
-						.map(r -> r.getDirectory())
-						.map(p -> ProjectProcessor.getRelatedPath(getProjectDir(), new File(p)))
-						.collect(Collectors.toList()));
+		Build build = model.getBuild();
+		String sourceDirectory = build.getSourceDirectory();
+		if (sourceDirectory != null) {
+			sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(sourceDirectory)));
+		}
+		if (build.getResources() != null) {
+			sources.addAll(
+					build
+							.getResources()
+							.stream()
+							.map(r -> r.getDirectory())
+							.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p)))
+							.collect(Collectors.toList()));
+		}
 		return sources;
 	}
 
@@ -89,15 +96,20 @@ public class MavenProjectLayout extends ProjectLayout {
 	public List<String> getTests() {
 		List<String> sources = new ArrayList<>();
 		Model model = getModel();
-		sources.add(
-				ProjectProcessor.getRelatedPath(getProjectDir(), new File(model.getBuild().getTestSourceDirectory())));
-		sources.addAll(
-				model.getBuild()
-						.getTestResources()
-						.stream()
-						.map(r -> r.getDirectory())
-						.map(p -> ProjectProcessor.getRelatedPath(getProjectDir(), new File(p)))
-						.collect(Collectors.toList()));
+		Build build = model.getBuild();
+		if (build.getTestSourceDirectory() != null) {
+			sources.add(
+					ProjectLayout.getRelatedPath(getProjectDir(), new File(build.getTestSourceDirectory())));
+		}
+		if (build.getTestResources() != null) {
+			sources.addAll(
+					build
+							.getTestResources()
+							.stream()
+							.map(r -> r.getDirectory())
+							.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p)))
+							.collect(Collectors.toList()));
+		}
 		return sources;
 	}
 }

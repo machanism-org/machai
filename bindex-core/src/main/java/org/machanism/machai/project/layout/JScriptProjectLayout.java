@@ -56,7 +56,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 							return false;
 						}).forEach(p -> {
 							File dir = p.toFile().getParentFile();
-							String relativePath = ProjectProcessor.getRelatedPath(getProjectDir(), dir);
+							String relativePath = ProjectLayout.getRelatedPath(getProjectDir(), dir);
 							modules.add(relativePath);
 						});
 					}

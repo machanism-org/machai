@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 public abstract class ProjectLayout {
 
 	public static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn", ".machai", "target", "build",
-			".venv", "__", ".pytest_cache", ".idea", ".egg-info" };
+			".venv", "__", ".pytest_cache", ".idea", ".egg-info", ".classpath", ".settings", "logs" };
 
 	private File projectDir;
 
@@ -40,4 +40,12 @@ public abstract class ProjectLayout {
 
 	public abstract List<String> getTests();
 
+	public static String getRelatedPath(File dir, File file) {
+		String currentPath = dir.getAbsolutePath().replace("\\", "/");
+		String relativePath = file.getAbsolutePath().replace("\\", "/").replace(currentPath, "");
+		if (StringUtils.startsWith(relativePath, "/")) {
+			relativePath = StringUtils.substring(relativePath, 1);
+		}
+		return relativePath;
+	}
 }

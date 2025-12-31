@@ -253,7 +253,7 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 
 		try (Writer streamWriter = new FileWriter(inputsFile, false)) {
-			logger.info("Bindex inputs file: {}", inputsFile);
+			logger.info("GenAI inputs file: {}", inputsFile);
 
 			for (ResponseInputItem responseInputItem : inputs) {
 				String inputText = "";
