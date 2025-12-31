@@ -1,4 +1,4 @@
-package org.machanism.machai.core.ai;
+package org.machanism.machai.ai.manager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,11 +20,7 @@ public interface GenAIProvider {
 
 	void addFile(URL fileUrl) throws IOException, FileNotFoundException;
 
-	String perform(boolean callLLM);
-
 	List<Float> embedding(String text);
-
-	void saveInput(File inputsFile) throws IOException;
 
 	void clear();
 
@@ -34,8 +30,10 @@ public interface GenAIProvider {
 
 	GenAIProvider promptBundle(ResourceBundle promptBundle);
 
-	void addDefaultTools();
-
 	void workingDir(File projectDir);
 
+	void saveInput(File inputsFile) throws IOException;
+
+	String perform(boolean callLLM);
+	
 }

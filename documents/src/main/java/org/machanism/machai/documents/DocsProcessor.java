@@ -9,18 +9,17 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.SystemUtils;
-import org.machanism.machai.core.ai.GenAIProvider;
-import org.machanism.machai.core.ai.GenAIProviderManager;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
-
-import com.openai.models.ChatModel;
 
 public class DocsProcessor extends ProjectProcessor {
 	public String[] GUIDANCE_FILE_NAMES = { "guidance.txt", "package-info.java" };
 
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
-	private String chatModel = ChatModel.GPT_5_1_MINI.toString();
+	private String chatModel = "OpenAI:gpt-5-mini";
 
 	public String loadGuidanceFileContent(File file) throws IOException {
 		for (String fileName : GUIDANCE_FILE_NAMES) {
@@ -43,7 +42,7 @@ public class DocsProcessor extends ProjectProcessor {
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		provider.promptBundle(promptBundle);
-		provider.addDefaultTools();
+		new SystemFunctionTools(projectDir).applyTools(provider);
 
 		String prompt = "";
 		provider.prompt(prompt);

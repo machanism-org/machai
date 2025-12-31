@@ -7,7 +7,7 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 import org.apache.commons.io.IOUtils;
-import org.machanism.machai.core.ai.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.BIndex;
 

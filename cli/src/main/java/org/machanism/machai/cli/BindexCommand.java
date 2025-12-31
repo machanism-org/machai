@@ -5,22 +5,20 @@ import java.io.IOException;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
-import org.machanism.machai.core.ai.GenAIProvider;
-import org.machanism.machai.core.ai.GenAIProviderManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
-import com.openai.models.ChatModel;
-
 @ShellComponent
 public class BindexCommand {
 
-	private static final String CHAT_MODEL = ChatModel.GPT_5_1.toString();
+	private static final String CHAT_MODEL = "OpenAI:gpt-5.1";
 
 	@Autowired
 	@Lazy

@@ -9,10 +9,11 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
-import org.machanism.machai.core.ai.GenAIProvider;
-import org.machanism.machai.core.ai.GenAIProviderManager;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +21,11 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
-import com.openai.models.ChatModel;
-
 @ShellComponent
 public class AssembyCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
-	private static final String CHAT_MODEL = ChatModel.GPT_5_1.toString();
+	private static final String CHAT_MODEL = "gpt-5.1";
 
 	private List<BIndex> bindexList;
 	private String findQuery;
@@ -34,11 +33,13 @@ public class AssembyCommand {
 	LineReader reader;
 
 	private GenAIProvider provider;
+	private SystemFunctionTools functionTools;
 
 	public AssembyCommand() {
 		super();
 		provider = GenAIProviderManager.getProvider(CHAT_MODEL);
-		provider.addDefaultTools();
+		functionTools = new SystemFunctionTools(null);
+		functionTools.applyTools(provider);
 	}
 
 	@ShellMethod()
@@ -77,7 +78,7 @@ public class AssembyCommand {
 			dir.mkdirs();
 		}
 		logger.info("The project directory: {}", dir);
-
+		functionTools.setWorkingDir(dir);
 		String prompt = query;
 
 		if (query == null) {

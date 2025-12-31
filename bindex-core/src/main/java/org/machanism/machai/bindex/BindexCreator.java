@@ -3,8 +3,8 @@ package org.machanism.machai.bindex;
 import java.io.File;
 import java.io.IOException;
 
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
-import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;

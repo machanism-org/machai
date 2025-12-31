@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.SystemUtils;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
-import org.machanism.machai.core.ai.GenAIProvider;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

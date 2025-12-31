@@ -15,10 +15,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
-import org.machanism.machai.core.ai.GenAIProvider;
-import org.machanism.machai.core.ai.GenAIProviderManager;
 import org.machanism.machai.schema.BIndex;
 
 @Mojo(name = "assembly", requiresProject = false, requiresDependencyCollection = ResolutionScope.NONE)
@@ -33,7 +34,7 @@ public class Assembly extends AbstractMojo {
 	@Parameter(property = "assembly.chatModel", defaultValue = "gpt-5")
 	protected String chatModel;
 
-	@Parameter(property = "pick.chatModel", defaultValue = "gpt-5-mini")
+	@Parameter(property = "pick.chatModel", defaultValue = "OpenAI:gpt-5-mini")
 	protected String pickChatModel;
 
 	@Parameter(property = "assembly.prompt.file", defaultValue = "project.txt")
@@ -58,7 +59,7 @@ public class Assembly extends AbstractMojo {
 			}
 
 			GenAIProvider provider = GenAIProviderManager.getProvider(pickChatModel);
-			provider.addDefaultTools();
+			new SystemFunctionTools(basedir).applyTools(provider);
 
 			try (Picker picker = new Picker(provider)) {
 				picker.setScore(score);
