@@ -12,7 +12,7 @@ public abstract class ProjectProcessor {
 	private static Logger logger = LoggerFactory.getLogger(ProjectProcessor.class);
 
 	public void scanProjects(File projectDir) throws IOException {
-		ProjectLayout projectLayout = ProjectLayoutManager.builder(projectDir);
+		ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
 		List<String> modules = projectLayout.getModules();
 
 		if (modules != null) {
@@ -20,7 +20,7 @@ public abstract class ProjectProcessor {
 				scanProjects(new File(projectDir, module));
 			}
 		} else {
-			projectLayout = ProjectLayoutManager.builder(projectDir);
+			projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
 			try {
 				processProject(projectLayout);
 			} catch (Exception e) {

@@ -11,7 +11,7 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
 
 public class ProjectLayoutManager {
 
-	public static ProjectLayout builder(File projectDir) throws FileNotFoundException {
+	public static ProjectLayout detectProjectLayout(File projectDir) throws FileNotFoundException {
 		ProjectLayout projectLayout;
 		if (MavenProjectLayout.isMavenProject(projectDir)) {
 			projectLayout = new MavenProjectLayout();
