@@ -3,8 +3,21 @@ package org.machanism.machai.ghostwriter.reviewer;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Interface for file reviewers that analyze project files
+ * to extract or process guidance for documentation generation.
+ */
 public interface Reviewer {
 
-	String perform(File projectDir, File file) throws IOException;
+    /**
+     * Analyzes and extracts guidance information from the specified file
+     * to aid documentation generation.
+     *
+     * @param projectDir the root directory of the project for context
+     * @param file the file to be reviewed and analyzed
+     * @return the extracted guidance or documentation fragment, or {@code null} if none found
+     * @throws IOException if an error occurs reading the file
+     */
+    String perform(File projectDir, File file) throws IOException;
 
 }
