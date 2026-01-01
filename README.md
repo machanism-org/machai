@@ -21,41 +21,41 @@ For further details about Machai, its philosophy, and ecosystem, please visit:
 - [AI Assembly](https://machanism.org/ai-assembly)
 - [Machanism Platform](https://machanism.org)
 
-[@guidance]: # (
+<!-- @guidance:
 List all sub-projects below, providing for each:
-- The sub-project name as a heading.
+- The sub-project name as a heading; For getting name need to open sub-module pom.xml file, read the project.name and use it for the heading text.
 - A concise description summarizing its purpose and functionality.
 - A reference link to the sub-project’s directory or main documentation page (do not include `/README.md` in the URL; link only to the directory or appropriate documentation page).
 Place the reference link immediately after the description.
 
 Review the current sub-projects and ensure this section is accurate and complete. Update the list as needed to reflect all existing sub-projects.
-)
+-- > 
 
 ## Project Modules Overview
 
-### bindex-core
-Central library for Machai metadata operations. Provides core APIs and tools for handling `bindex.json` files, semantic search contexts, and project descriptors. Powers metadata generation and parsing for all Machai modules.  
-[Explore bindex-core](./bindex-core/)
+### Bindex Core
+Provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly. Enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.  
+[Explore Bindex Core](./bindex-core/)
 
-### cli
-The Machai Command Line Interface enables developers to generate, register, and manage project metadata directly from the terminal, integrating Machai's AI-powered assembly and semantic search features.  
-[Explore CLI](./cli/)
+### Machai CLI
+Command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. Leverages GenAI to automate project assembly and enables semantic search for efficient library discovery and integration.  
+[Explore Machai CLI](./cli/)
 
-### bindex-maven-plugin
-Maven plugin that automates the generation of `bindex.json` files for Java projects. Integrates with GenAI providers and the Machanism platform to analyze code and generate comprehensive metadata descriptors for smart library discovery.  
-[Explore bindex-maven-plugin](./bindex-maven-plugin/)
+### Bindex Maven Plugin
+Automates the generation and registration of bindex metadata for Maven projects. Facilitates library discovery, integration, and assembly by leveraging structured metadata and GenAI-powered semantic search.  
+[Explore Bindex Maven Plugin](./bindex-maven-plugin/)
 
-### assembly-maven-plugin
-AI-powered Maven plugin for automated project assembly. Allows developers to use natural language queries to assemble Maven projects, select relevant libraries, and bootstrap code with semantic search from Machanism.  
-[Explore assembly-maven-plugin](./assembly-maven-plugin/)
+### Project Assembly Maven Plugin
+Automates assembly of projects by integrating libraries based on bindex metadata. Streamlines dependency resolution, library selection, and packaging using GenAI-powered semantic search and metadata-driven workflows.  
+[Explore Project Assembly Maven Plugin](./assembly-maven-plugin/)
 
-### ghostwriter
-Automated documentation engine for Machai projects. Scans sources and resources, extracts embedded guidance, and generates rule-based documentation using AI, supporting multi-module and large codebases.  
-[Explore ghostwriter](./ghostwriter/)
+### Ghostwriter
+Advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.  
+[Explore Ghostwriter](./ghostwriter/)
 
-### genai-client
-Java library providing pluggable interfaces and utilities to interact with Generative AI providers (primarily OpenAI). Powers AI-based prompts, embeddings, and tools consumed by other Machai modules and applications.  
-[Explore genai-client](./genai-client/)
+### GenAI Client
+Java library for interacting with Generative AI providers. Provides foundational prompt and embedding capabilities to power AI-based features in other Machai modules.  
+[Explore GenAI Client](./genai-client/)
 
 ## Usage and Documentation
 
