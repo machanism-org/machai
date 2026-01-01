@@ -1,9 +1,9 @@
-[//] <> (@guidance: This is a home page of `Machai Docs` project.)
+[@guidance]: # (This is a home page of `Machai Docs` project.)
 
 ![](src/site/resources/images/machai-docs-logo.png)
 
 # Machai Docs
-[@guidance] # (Analyze the source code and generate detailed functional description for the project.)
+[@guidance]: # (Analyze the source code and generate detailed functional description for the project.)
 
 Machai Docs is centered around the `DocsProcessor`, the main engine for scanning, parsing, and generating documentation throughout Machai-based projects. The processor automatically analyzes project layouts, identifies sources and document resources, and robustly processes files in Markdown, Java, and custom guidance formats.
 
