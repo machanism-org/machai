@@ -7,7 +7,7 @@ Machai is an innovative project designed to harness Generative AI (GenAI) for th
 
 For more information, visit [AI Assembly](https://machanism.org/ai-assembly).
 
-[@guidance]: # (Below, list all sub-projects with a short description and provide references to their README pages. When creating links to the sub-projects' README files, do not include `/README.md` in the URL; instead, link to the directory or appropriate documentation page.)
+[@guidance]: # (List all sub-projects below, each with a brief description and a reference to its README or documentation page. When creating links, do not include `/README.md` in the URL; instead, link to the sub-project’s directory or the appropriate documentation page. Review the current sub-projects and update this section as needed to ensure accuracy and completeness.)
 
 ## Project Modules Overview
 
@@ -25,8 +25,8 @@ Automates the creation and management of `bindex.json` metadata for Java librari
 ### [Bindex Core](./bindex-core/)
 Core library for bindex metadata creation, processing, and registration. Supplies builder and processor implementations to support language-specific bindex file generation for various project types.
 
-### [Machai Docs](./machai-docs/)
-Documentation engine and generator for Machai projects. Uses AI-driven parsing and guidance-tag extraction to assemble, check, and present documentation from source and markdown files.
+### [Ghostwriter](./ghostwriter/)
+Automated documentation and code generation engine for Machai and Machanism projects. Utilizes GenAI and project metadata to author, check, and enhance code and documentation in a structured workflow.
 
 ### [GenAI Client](./genai-client/)
 GenAI provider and client library powering Machai’s AI-driven analysis, prompt management, model selection, and integration with third-party AI services for both code assembly and documentation.

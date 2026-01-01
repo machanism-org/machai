@@ -1,11 +1,11 @@
-[@guidance]: # (This is a home page of `Machai Docs` project.)
+[@guidance]: # (This is a home page of `Ghostwriter` project.)
 
-![](src/site/resources/images/machai-docs-logo.png)
+![](src/site/resources/images/machai-ghostwriter-logo.png)
 
-# Machai Docs
+# Ghostwriter
 [@guidance]: # (Analyze the source code and generate detailed functional description for the project.)
 
-Machai Docs is centered around the `DocsProcessor`, the main engine for scanning, parsing, and generating documentation throughout Machai-based projects. The processor automatically analyzes project layouts, identifies sources and document resources, and robustly processes files in Markdown, Java, and custom guidance formats.
+Ghostwriter is centered around the `DocsProcessor`, the main engine for scanning, parsing, and generating documentation throughout Machai-based projects. The processor automatically analyzes project layouts, identifies sources and document resources, and robustly processes files in Markdown, Java, and custom guidance formats.
 
 Key functionalities include:
 - **Project scanning**: Detects project structures, divides source and document folders, and traverses files while excluding irrelevant directories.
@@ -14,7 +14,7 @@ Key functionalities include:
 - **Format support**: Handles various input formats, including `.md`, `.java`, and custom files, parsing each according to embedded guidance and project context.
 - **Extensible and modular**: Built to process multi-module projects, supporting scalable and automated document creation across large codebases.
 
-Machai Docs provides documentation for Machai, a toolkit to simplify and accelerate the assembly of applications. This project gathers guides, references, and resources to help developers leverage Machai and the Machanism ecosystem efficiently.
+Ghostwriter provides documentation for Machai, a toolkit to simplify and accelerate the assembly of applications. This project gathers guides, references, and resources to help developers leverage Machai and the Machanism ecosystem efficiently.
 
 ## License
 

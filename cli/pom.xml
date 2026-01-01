@@ -75,7 +75,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
-			<artifactId>machai-docs</artifactId>
+			<artifactId>ghostwriter</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 
