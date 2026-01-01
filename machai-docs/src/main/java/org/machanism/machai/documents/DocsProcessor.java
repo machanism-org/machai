@@ -113,7 +113,7 @@ public class DocsProcessor extends ProjectProcessor {
 					}
 				}
 			}
-			String projectInfo = getProjectStructureDescriprion(projectLayout);
+			String projectInfo = getProjectStructureDescription(projectLayout);
 			provider.prompt(projectInfo);
 			provider.prompt(guidance);
 
@@ -126,15 +126,15 @@ public class DocsProcessor extends ProjectProcessor {
 		}
 	}
 
-	private String getProjectStructureDescriprion(ProjectLayout projectLayout) throws IOException {
+	private String getProjectStructureDescription(ProjectLayout projectLayout) throws IOException {
 		List<String> content = new ArrayList<String>();
 
 		File projectDir = projectLayout.getProjectDir();
 		String path = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), projectDir);
 		content.add(path);
 		content.add(getDirInfoLine(projectLayout.getSources()));
-		content.add(getDirInfoLine(projectLayout.getDocuments()));
 		content.add(getDirInfoLine(projectLayout.getTests()));
+		content.add(getDirInfoLine(projectLayout.getDocuments()));
 		content.add(getDirInfoLine(projectLayout.getModules()));
 
 		return MessageFormat.format(promptBundle.getString("project_information"), content.toArray());
