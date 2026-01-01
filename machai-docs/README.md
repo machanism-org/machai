@@ -1,4 +1,4 @@
-[@guidance: This is a home page of `Machai Docs` project.] #
+[//] <> (@guidance: This is a home page of `Machai Docs` project.)
 
 ![](src/site/resources/images/machai-docs-logo.png)
 
