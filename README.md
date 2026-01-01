@@ -6,7 +6,6 @@ The Home Project page should have following structure:
 4. Usage and Documentation  
 5. License Information  
 6. Contact Information  
-7. Closing Statement 
 -->
 
 ![](src/site/resources/images/machai-logo.png)
@@ -74,7 +73,3 @@ You can view the full license text [here](LICENSE).
 If you have any questions or need support, feel free to reach out:
 - Official Website: [Machanism](https://machanism.org)
 - Email: [develop@machanism.org](mailto:develop@machanism.org)
-
-## Closing Statement
-
-Machai simplifies and accelerates application assembly, empowering developers to focus on innovation.
