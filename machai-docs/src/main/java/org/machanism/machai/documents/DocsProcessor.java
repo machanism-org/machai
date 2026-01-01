@@ -213,7 +213,7 @@ public class DocsProcessor extends ProjectProcessor {
 	private String parseMarkdownFile(File projectDir, File guidancesFile) throws IOException {
 		String content = Files.readString(guidancesFile.toPath());
 
-		Pattern pattern = Pattern.compile("\\[" + GUIDANCE_TAG_NAME + "\\]\\s*#\\s*\\((.*?)\\)", Pattern.DOTALL);
+		Pattern pattern = Pattern.compile("\\[" + GUIDANCE_TAG_NAME + "\\]:\\s*#\\s*\\((.*?)\\)", Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(content);
 
 		String result = null;
