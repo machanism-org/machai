@@ -1,7 +1,4 @@
-![](src/site/resources/images/machai-logo.png)
-
-# Machai
-[@guidance]: # (
+[@guidance:
 The Home Project page should have following structure:
 1. Project Introduction  
 2. Reference to Further Information  
@@ -9,7 +6,11 @@ The Home Project page should have following structure:
 4. Usage and Documentation  
 5. License Information  
 6. Contact Information  
-7. Closing Statement)
+7. Closing Statement]: # ()
+
+![](src/site/resources/images/machai-logo.png)
+
+# Machai
 
 Machai is an innovative project designed to harness Generative AI (GenAI) for the creation, registration, and enhancement of software projects within the [Machanism](https://machanism.org) ecosystem. With Machai, teams can streamline project assembly, automate repetitive tasks, and continuously improve their applications through intelligent recommendations and metadata-driven insights. Each library on the platform is accompanied by a structured metadata file, `bindex.json`, optimized for semantic search and natural language queries, accelerating integration and development.
 
