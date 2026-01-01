@@ -9,6 +9,12 @@
 	</parent>
 
 	<artifactId>ghostwriter</artifactId>
+	<name>Ghostwriter</name>
+	<description>
+		Ghostwriter is an advanced documentation engine that automatically
+		scans, analyzes, and assembles project documentation using embedded
+		guidance tags and AI-powered synthesis.
+	</description>
 
 	<dependencies>
 		<dependency>

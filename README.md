@@ -1,47 +1,79 @@
-[@guidance]: # (This is a home page of `Machai` project.)
+[@guidance]: # (
+The Home Project page should have following structure:
+1. Project Introduction  
+2. Reference to Further Information  
+3. Project Modules Overview  
+4. Usage and Documentation  
+5. License Information  
+6. Contact Information  
+7. Closing Statement 
+)
 ![](src/site/resources/images/machai-logo.png)
 
 # Machai
 
 Machai is an innovative project designed to harness Generative AI (GenAI) for the creation, registration, and enhancement of software projects within the [Machanism](https://machanism.org) ecosystem. With Machai, teams can streamline project assembly, automate repetitive tasks, and continuously improve their applications through intelligent recommendations and metadata-driven insights. Each library on the platform is accompanied by a structured metadata file, `bindex.json`, optimized for semantic search and natural language queries, accelerating integration and development.
 
-For more information, visit [AI Assembly](https://machanism.org/ai-assembly).
+## Reference to Further Information
 
-[@guidance]: # (List all sub-projects below, each with a brief description and a reference to its README or documentation page. When creating links, do not include `/README.md` in the URL; instead, link to the sub-project’s directory or the appropriate documentation page. Review the current sub-projects and update this section as needed to ensure accuracy and completeness.)
+For further details about Machai, its philosophy, and ecosystem, please visit:
+- [AI Assembly](https://machanism.org/ai-assembly)
+- [Machanism Platform](https://machanism.org)
+
+[@guidance]: # (
+List all sub-projects below, providing for each:
+- The sub-project name as a heading.
+- A concise description summarizing its purpose and functionality.
+- A reference link to the sub-project’s directory or main documentation page (do not include `/README.md` in the URL; link only to the directory or appropriate documentation page).
+Place the reference link immediately after the description.
+
+Review the current sub-projects and ensure this section is accurate and complete. Update the list as needed to reflect all existing sub-projects.
+)
 
 ## Project Modules Overview
 
-Machai comprises several powerful modules, each addressing specific development or documentation needs within the Machanism ecosystem:
+### bindex-core
+Central library for Machai metadata operations. Provides core APIs and tools for handling `bindex.json` files, semantic search contexts, and project descriptors. Powers metadata generation and parsing for all Machai modules.  
+[Explore bindex-core](./bindex-core/)
 
-### [Machai CLI](./cli/)
-A feature-rich command-line tool for generating, registering, and managing `bindex.json` metadata, performing semantic search, and assembling applications via terminal commands.
+### cli
+The Machai Command Line Interface enables developers to generate, register, and manage project metadata directly from the terminal, integrating Machai's AI-powered assembly and semantic search features.  
+[Explore CLI](./cli/)
 
-### [Assembly Maven Plugin](./assembly-maven-plugin/)
-A Maven plugin for AI-powered project assembly. Use natural language queries to automatically select libraries, generate structure, and configure dependencies for new Java projects.
+### bindex-maven-plugin
+Maven plugin that automates the generation of `bindex.json` files for Java projects. Integrates with GenAI providers and the Machanism platform to analyze code and generate comprehensive metadata descriptors for smart library discovery.  
+[Explore bindex-maven-plugin](./bindex-maven-plugin/)
 
-### [Bindex Maven Plugin](./bindex-maven-plugin/)
-Automates the creation and management of `bindex.json` metadata for Java libraries using GenAI. Enables library registration and semantic search integration in Machanism.
+### assembly-maven-plugin
+AI-powered Maven plugin for automated project assembly. Allows developers to use natural language queries to assemble Maven projects, select relevant libraries, and bootstrap code with semantic search from Machanism.  
+[Explore assembly-maven-plugin](./assembly-maven-plugin/)
 
-### [Bindex Core](./bindex-core/)
-Core library for bindex metadata creation, processing, and registration. Supplies builder and processor implementations to support language-specific bindex file generation for various project types.
+### ghostwriter
+Automated documentation engine for Machai projects. Scans sources and resources, extracts embedded guidance, and generates rule-based documentation using AI, supporting multi-module and large codebases.  
+[Explore ghostwriter](./ghostwriter/)
 
-### [Ghostwriter](./ghostwriter/)
-Automated documentation and code generation engine for Machai and Machanism projects. Utilizes GenAI and project metadata to author, check, and enhance code and documentation in a structured workflow.
+### genai-client
+Java library providing pluggable interfaces and utilities to interact with Generative AI providers (primarily OpenAI). Powers AI-based prompts, embeddings, and tools consumed by other Machai modules and applications.  
+[Explore genai-client](./genai-client/)
 
-### [GenAI Client](./genai-client/)
-GenAI provider and client library powering Machai’s AI-driven analysis, prompt management, model selection, and integration with third-party AI services for both code assembly and documentation.
+## Usage and Documentation
 
-> For detailed usage, configuration, and examples, refer to each module’s README or the [Machanism Platform](https://machanism.org).
+To get started:
+- See example usage and configuration details in each module’s README within its directory.
+- Explore general platform documentation at [Machanism Platform](https://machanism.org).
+- For semantic search, project assembly, and metadata generation, refer to the [Machai CLI](./cli/), [Assembly Maven Plugin](./assembly-maven-plugin/), and other modules.
 
-## License
+## License Information
 
 Machai is licensed under the Apache License 2.0.  
 You can view the full license text [here](LICENSE).
 
-## Contact
+## Contact Information
 
 If you have any questions or need support, feel free to reach out:
 - Official Website: [Machanism](https://machanism.org)
 - Email: [develop@machanism.org](mailto:develop@machanism.org)
+
+## Closing Statement
 
 Machai simplifies and accelerates application assembly, empowering developers to focus on innovation.

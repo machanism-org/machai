@@ -9,6 +9,10 @@
 	</parent>
 
 	<artifactId>genai-client</artifactId>
+	<name>GenAI Client</name>
+	<description>
+	
+	</description>
 
 	<dependencies>
 		<dependency>
