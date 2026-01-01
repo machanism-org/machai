@@ -12,7 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
@@ -49,15 +48,11 @@ public class DocsProcessor extends ProjectProcessor {
 		if (modules != null) {
 			File[] files = projectDir.listFiles();
 			if (files != null) {
+				systemFunctionTools.setWorkingDir(projectDir);
 				for (File file : files) {
 					if (file.isDirectory()
 							&& !StringUtils.equalsAnyIgnoreCase(file.getName(), modules.toArray(new String[] {}))
 							&& !StringUtils.containsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
-
-						systemFunctionTools.setWorkingDir(projectDir);
-						if (modules != null) {
-							provider.prompt("Child projects: " + StringUtils.join(modules, ", ") + ".");
-						}
 
 						processProject(projectLayout, file);
 					}
@@ -88,21 +83,19 @@ public class DocsProcessor extends ProjectProcessor {
 		}
 	}
 
-	private void processFile(ProjectLayout projectLayout, File file)
-			throws IOException {
+	private void processFile(ProjectLayout projectLayout, File file) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
 		String guidance = parseGuidanceFile(projectDir, file);
 
 		if (guidance != null) {
-			fillProjectLayerInformation(projectLayout);
+			String projectInfo = getProjectStructureDescriprion(projectLayout);
 
 			String parentsPath = ProjectLayout.getRelatedPath(projectDir, file.getParentFile());
 			String[] parents = StringUtils.split(parentsPath, "/");
 
 			provider.instructions(
 					"You are smart software engineer and developer. You are expert in all popular programming languages, frameworks, platforms.\r\n\r\n"
-							+ "# Constraints\r\n\r\n"
-							+ "1. You must implement comprehensive, correct code.\r\n"
+							+ "# Constraints\r\n\r\n" + "1. You must implement comprehensive, correct code.\r\n"
 							+ "Important:\r\n"
 							+ "1. You have ability to work with local file system and command line.");
 
@@ -115,6 +108,7 @@ public class DocsProcessor extends ProjectProcessor {
 				}
 			}
 
+			provider.prompt(projectInfo);
 			provider.prompt(guidance);
 
 			String inputsFileName = ProjectLayout.getRelatedPath(projectDir, file);
@@ -126,19 +120,26 @@ public class DocsProcessor extends ProjectProcessor {
 		}
 	}
 
-	private void fillProjectLayerInformation(ProjectLayout projectLayout) throws IOException {
+	private String getProjectStructureDescriprion(ProjectLayout projectLayout) throws IOException {
 		List<String> sources = projectLayout.getSources();
+		StringBuilder result = new StringBuilder();
 		if (sources != null) {
-			provider.prompt("Sources folders: " + StringUtils.join(sources, ", ") + ".");
+			result.append("Sources folders: " + StringUtils.join(sources, ", ") + ".\r\n");
 		}
 		List<String> documents = projectLayout.getDocuments();
 		if (documents != null) {
-			provider.prompt("Documents folders: " + StringUtils.join(documents, ", ") + ".");
+			result.append("Documents folders: " + StringUtils.join(documents, ", ") + ".\r\n");
 		}
 		List<String> tests = projectLayout.getTests();
 		if (tests != null) {
-			provider.prompt("Tests folders: " + StringUtils.join(tests, ", ") + ".");
+			result.append("Tests folders: " + StringUtils.join(tests, ", ") + ".\r\n");
 		}
+		List<String> modules = projectLayout.getModules();
+		if (modules != null) {
+			result.append("Child projects: " + StringUtils.join(modules, ", ") + ".\r\n");
+		}
+
+		return result.isEmpty() ? null : ("# Project Structure\r\n\r\n" + result.toString()).trim();
 	}
 
 	private String parseGuidanceFile(File projectDir, File guidancesFile) throws IOException {
@@ -198,17 +199,15 @@ public class DocsProcessor extends ProjectProcessor {
 					String guidanceText = matcher.group(1).replaceAll("\\s*\\*\\s?", " ").trim();
 					result.append("# Java Package Gudance File\r\n\r\n");
 					result.append("Important: Do not remove @guidance directives.\r\n");
-					result.append(
-							"Folder: " + ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile())
-									+ "\r\n\r\n");
+					result.append("Folder: " + ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile())
+							+ "\r\n\r\n");
 					result.append("Guidance: " + guidanceText);
 				}
 
 			} else {
 				result.append("# Java Source File: `" + guidancesFile.getName() + "`\r\n\r\n");
 				result.append("Important: Do not remove @guidance directives.\r\n");
-				result.append(
-						"Path: " + ProjectLayout.getRelatedPath(projectDir, guidancesFile) + "\r\n\r\n");
+				result.append("Path: " + ProjectLayout.getRelatedPath(projectDir, guidancesFile) + "\r\n\r\n");
 				result.append("```java\r\n");
 				result.append(content);
 				result.append("\r\n```\r\n");
@@ -229,9 +228,9 @@ public class DocsProcessor extends ProjectProcessor {
 			StringBuilder prompt = new StringBuilder();
 
 			prompt.append("# Markdown File: `" + guidancesFile.getName() + "`\r\n\r\n");
-			prompt.append("Important: Do not remove @guidance directives.\r\n");
+			prompt.append("Important: Do not remove @guidance directives.\r\n\r\n");
 			prompt.append(
-					"Follow the rules described in markdown reference-style link comments marked as `@guidance` in the format `[@guidance] # ({RULES})`. Process the file below accordingly.\r\n");
+					"You should follow the rules described in markdown reference-style link comments marked as `@guidance` in the format `[@guidance] # ({RULES})`. Process the file below accordingly.\r\n");
 			prompt.append("Path: " + ProjectLayout.getRelatedPath(projectDir, guidancesFile) + "\r\n\r\n");
 			prompt.append("```md\r\n");
 			prompt.append(content);
@@ -260,11 +259,6 @@ public class DocsProcessor extends ProjectProcessor {
 			}
 		}
 		return result;
-	}
-
-	public static void main(String[] args) throws IOException {
-		DocsProcessor documents = new DocsProcessor();
-		documents.scanProjects(SystemUtils.getUserDir());
 	}
 
 }

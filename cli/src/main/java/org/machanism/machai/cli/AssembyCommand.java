@@ -42,7 +42,7 @@ public class AssembyCommand {
 		functionTools.applyTools(provider);
 	}
 
-	@ShellMethod()
+	@ShellMethod("Picks libraries based on user request.")
 	public void pick(
 			@ShellOption(value = "The application assembly prompt.") String query,
 			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score)
@@ -64,7 +64,7 @@ public class AssembyCommand {
 		return query;
 	}
 
-	@ShellMethod()
+	@ShellMethod("Creates a project via picked librariy set.")
 	public void assembly(
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
 			@ShellOption(help = "The path to the assembled project directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
@@ -96,7 +96,7 @@ public class AssembyCommand {
 		assembly.assembly(prompt, bindexList, !inputs);
 	}
 
-	@ShellMethod()
+	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(
 			@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
 		provider.prompt(prompt);

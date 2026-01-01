@@ -73,6 +73,11 @@
 			<artifactId>bindex-core</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.machanism.machai</groupId>
+			<artifactId>machai-docs</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

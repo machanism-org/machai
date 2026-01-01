@@ -24,7 +24,7 @@ public class BindexCommand {
 	@Lazy
 	LineReader reader;
 
-	@ShellMethod()
+	@ShellMethod("Generates bindex files.")
 	public void bindex(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update,
@@ -42,7 +42,7 @@ public class BindexCommand {
 		register.scanProjects(dir);
 	}
 
-	@ShellMethod()
+	@ShellMethod("Registers bindex file.")
 	public void register(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update)
