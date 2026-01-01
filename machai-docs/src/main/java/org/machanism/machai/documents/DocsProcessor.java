@@ -59,11 +59,13 @@ public class DocsProcessor extends ProjectProcessor {
 			File[] files = projectDir.listFiles();
 			if (files != null) {
 				for (File file : files) {
-					if (file.isDirectory()
-							&& !StringUtils.equalsAnyIgnoreCase(file.getName(), modules.toArray(new String[] {}))
+					if (!StringUtils.equalsAnyIgnoreCase(file.getName(), modules.toArray(new String[] {}))
 							&& !StringUtils.containsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
-
-						processProject(projectLayout, file);
+						if (file.isDirectory()) {
+							processProject(projectLayout, file);
+						} else {
+							processFile(projectLayout, file);
+						}
 					}
 				}
 			}

@@ -1,52 +1,37 @@
+[@guidance]: # (This is a home page of `Machai` project.)
 ![](src/site/resources/images/machai-logo.png)
 
 # Machai
 
-Machai is an innovative project designed to harness Generative AI (GenAI) for the creation, registration, and enhancement of software projects within the [Machanism](https://machanism.org) ecosystem. With Machai, teams can streamline project assembly, automate repetitive tasks, and continuously improve their applications through intelligent recommendations and metadata-driven insights. Whether you are building new solutions or enhancing existing ones, Machai provides the tools and automation needed to accelerate development and ensure high-quality results.
-
-Machai streamlines project assembly by automating repetitive development tasks through AI assistance. Each library on the platform is accompanied by a structured metadata file, `bindex.json`, which contains essential details such as features, integration points, technology stack, and usage examples.
-
-These metadata files are stored in a **vector database** and optimized for semantic search, enabling Machai to efficiently match libraries to natural language queries. Developers can specify their project requirements in plain language, and Machai recommends suitable libraries along with comprehensive integration information, accelerating application assembly and development.
+Machai is an innovative project designed to harness Generative AI (GenAI) for the creation, registration, and enhancement of software projects within the [Machanism](https://machanism.org) ecosystem. With Machai, teams can streamline project assembly, automate repetitive tasks, and continuously improve their applications through intelligent recommendations and metadata-driven insights. Each library on the platform is accompanied by a structured metadata file, `bindex.json`, optimized for semantic search and natural language queries, accelerating integration and development.
 
 For more information, visit [AI Assembly](https://machanism.org/ai-assembly).
 
-## Machai CLI
+[@guidance]: # (Below, list all sub-projects with a short description and provide references to their README pages. When creating links to the sub-projects' README files, do not include `/README.md` in the URL; instead, link to the directory or appropriate documentation page.)
 
-The **Machai Command Line Interface (CLI)** is a powerful tool for generating, registering, and managing library metadata within the [Machanism](https://machanism.org) platform. It gives developers direct access to Machai’s AI-powered features, streamlining project assembly and integration workflows from the terminal.
+## Project Modules Overview
 
-[![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)  
+Machai comprises several powerful modules, each addressing specific development or documentation needs within the Machanism ecosystem:
 
-**Key Features:**
-- **Automated Metadata Generation:** Analyze project files and source code to create structured `bindex.json` metadata files.
-- **Semantic Search Integration:** Use AI to match libraries with project requirements via natural language queries.
-- **Library Registration:** Register new or updated libraries, making them discoverable and ready for integration.
-- **Flexible Command Set:** Generate metadata, search libraries, register artifacts, and more.
+### [Machai CLI](./cli/)
+A feature-rich command-line tool for generating, registering, and managing `bindex.json` metadata, performing semantic search, and assembling applications via terminal commands.
 
-For full details and usage instructions, see the [Machai CLI](./cli/README.md).
+### [Assembly Maven Plugin](./assembly-maven-plugin/)
+A Maven plugin for AI-powered project assembly. Use natural language queries to automatically select libraries, generate structure, and configure dependencies for new Java projects.
 
-## Assembly Maven Plugin
+### [Bindex Maven Plugin](./bindex-maven-plugin/)
+Automates the creation and management of `bindex.json` metadata for Java libraries using GenAI. Enables library registration and semantic search integration in Machanism.
 
-The **assembly-maven-plugin** extends Machai’s AI-powered assembly capabilities to Maven projects. This plugin enables developers to use natural language queries to select and integrate the most relevant libraries from the Machanism platform, automating the creation of project structure, configuration files, and initial code.
+### [Bindex Core](./bindex-core/)
+Core library for bindex metadata creation, processing, and registration. Supplies builder and processor implementations to support language-specific bindex file generation for various project types.
 
-**Key Features:**
-- **AI-Driven Library Selection:** Describe your project requirements in plain language and let Machai recommend the best libraries.
-- **Automated Project Assembly:** Instantly generate Maven project structure, dependencies, and boilerplate code.
-- **Semantic Search Integration:** Leverage Machanism’s vector database for precise library matching.
-- **Customizable Workflow:** Review and refine generated files to fit your needs.
+### [Machai Docs](./machai-docs/)
+Documentation engine and generator for Machai projects. Uses AI-driven parsing and guidance-tag extraction to assemble, check, and present documentation from source and markdown files.
 
-For installation, configuration, and usage details, see the [assembly-maven-plugin](./assembly-maven-plugin/README.md).
+### [GenAI Client](./genai-client/)
+GenAI provider and client library powering Machai’s AI-driven analysis, prompt management, model selection, and integration with third-party AI services for both code assembly and documentation.
 
-## Bindex Maven Plugin
-
-The **bindex-maven-plugin** automates the generation and management of `bindex.json` metadata files for your Java libraries and projects. By analyzing your project’s source code and build files, it produces comprehensive descriptors that enable intelligent library discovery and semantic search within the Machanism ecosystem.
-
-**Key Features:**
-- **Automated bindex.json Generation:** Create standardized metadata files with features, integration points, and usage examples.
-- **GenAI-Powered Analysis:** Extract and summarize project details using Generative AI.
-- **Seamless Registration:** Register your library metadata with the Machanism platform for enhanced discoverability.
-- **Customizable Output:** Review and edit generated files before registration.
-
-For installation, configuration, and usage details, see the [bindex-maven-plugin](./bindex-maven-plugin/README.md).
+> For detailed usage, configuration, and examples, refer to each module’s README or the [Machanism Platform](https://machanism.org).
 
 ## License
 
