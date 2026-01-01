@@ -33,23 +33,23 @@ Review the current sub-projects and ensure this section is accurate and complete
 ## Project Modules Overview
 
 ### Bindex Core
-Provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly. Enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.  
+bindex-core provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly. It enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.  
 [Explore Bindex Core](./bindex-core/)
 
 ### Machai CLI
-Command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. Leverages GenAI to automate project assembly and enables semantic search for efficient library discovery and integration.  
+Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library discovery and integration.  
 [Explore Machai CLI](./cli/)
 
 ### Bindex Maven Plugin
-Automates the generation and registration of bindex metadata for Maven projects. Facilitates library discovery, integration, and assembly by leveraging structured metadata and GenAI-powered semantic search.  
+bindex-maven-plugin enables automated generation and registration of bindex metadata for Maven projects. It facilitates library discovery, integration, and assembly by leveraging structured metadata and GenAI-powered semantic search within the Machanism ecosystem.  
 [Explore Bindex Maven Plugin](./bindex-maven-plugin/)
 
 ### Project Assembly Maven Plugin
-Automates assembly of projects by integrating libraries based on bindex metadata. Streamlines dependency resolution, library selection, and packaging using GenAI-powered semantic search and metadata-driven workflows.  
+assembly-maven-plugin automates the assembly of projects within the Machanism ecosystem by integrating libraries based on bindex metadata. It streamlines dependency resolution, library selection, and project packaging using GenAI-powered semantic search and metadata-driven workflows.  
 [Explore Project Assembly Maven Plugin](./assembly-maven-plugin/)
 
 ### Ghostwriter
-Advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.  
+Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.  
 [Explore Ghostwriter](./ghostwriter/)
 
 ### GenAI Client
