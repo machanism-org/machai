@@ -35,7 +35,7 @@ public class DocsCommand {
 		}
 
 		DocsProcessor documents = new DocsProcessor();
-		logger.info("Scanning documents has started...");
+		logger.info("Scanning documents in the root directory: {}", dir);
 		documents.scanDocuments(dir);
 		logger.info("Scanning finished.");
 	}

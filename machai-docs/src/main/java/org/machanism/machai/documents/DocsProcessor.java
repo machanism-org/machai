@@ -191,20 +191,20 @@ public class DocsProcessor extends ProjectProcessor {
 		String content = Files.readString(guidancesFile.toPath());
 		String result = null;
 		if (StringUtils.contains(content, GUIDANCE_TAG_NAME)) {
-			if (StringUtils.equals(guidancesFile.getName(), "package-info.java")) {
-				Pattern pattern = Pattern.compile("/\\*.*?" + GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*\\*/", Pattern.DOTALL);
-				Matcher matcher = pattern.matcher(content);
-
-				if (matcher.find()) {
+			Pattern pattern = Pattern.compile("(?:/\\*.*?" + GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*\\*/)|(?://\\s*"
+					+ GUIDANCE_TAG_NAME + ":\\s*(.*))", Pattern.DOTALL);
+			Matcher matcher = pattern.matcher(content);
+			if (matcher.find()) {
+				if (StringUtils.equals(guidancesFile.getName(), "package-info.java")) {
 					String guidanceText = matcher.group(1).replaceAll("\\s*\\*\\s?", " ").trim();
 					result = MessageFormat.format(promptBundle.getString("java_package_info_file"),
 							ProjectLayout.getRelatedPath(getRootDir(projectDir), guidancesFile.getParentFile()),
 							guidanceText);
+				} else {
+					String relatedPath = ProjectLayout.getRelatedPath(getRootDir(projectDir), guidancesFile);
+					String name = guidancesFile.getName();
+					result = MessageFormat.format(promptBundle.getString("java_file"), name, relatedPath, content);
 				}
-
-			} else {
-				result = MessageFormat.format(promptBundle.getString("java_file"), guidancesFile.getName(),
-						ProjectLayout.getRelatedPath(getRootDir(projectDir), guidancesFile), content);
 			}
 		}
 		return result;

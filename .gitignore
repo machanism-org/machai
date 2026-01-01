@@ -20,3 +20,4 @@ buildNumber.properties
 *.iml
 *.log
 .m2
+.machai
