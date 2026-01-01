@@ -57,7 +57,7 @@ public class DocsProcessor extends ProjectProcessor {
         reviewMap.put("txt", new TextReviewer(dirGuidanceMap));
         reviewMap.put("java", new JavaReviewer());
         reviewMap.put("md", new MarkdownReviewer());
-        reviewMap.put("md", new PythonReviewer());
+        reviewMap.put("py", new PythonReviewer());
     }
 
     /**

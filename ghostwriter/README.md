@@ -5,16 +5,16 @@
 # Ghostwriter
 [@guidance]: # (Analyze the source code and generate detailed functional description for the project.)
 
-Ghostwriter is centered around the `DocsProcessor`, the main engine for scanning, parsing, and generating documentation throughout Machai-based projects. The processor automatically analyzes project layouts, identifies sources and document resources, and robustly processes files in Markdown, Java, and custom guidance formats.
+Ghostwriter is an advanced documentation engine for Machai projects. It automates the scanning, analysis, and assembly of project documentation, driven by rules and guidance embedded throughout the codebase and supporting resources. At its core is the `DocsProcessor`, which orchestrates:
 
-Key functionalities include:
-- **Project scanning**: Detects project structures, divides source and document folders, and traverses files while excluding irrelevant directories.
-- **Guidance parsing**: Extracts functional and descriptive guidance marked by `@guidance` tags in source code and documentation, ensuring rule-driven documentation assembly.
-- **AI-powered documentation**: Integrates with generative AI models to synthesize clear, concise, and context-aware documentation using project details, source content, and extracted guidance.
-- **Format support**: Handles various input formats, including `.md`, `.java`, and custom files, parsing each according to embedded guidance and project context.
-- **Extensible and modular**: Built to process multi-module projects, supporting scalable and automated document creation across large codebases.
+- **Automated Project Scanning:** Detects the layout, traverses all sources and documentation folders (including `src/main/java`, `src/main/resources`, `src/test/java`, `src/test/resources`, and `src/site/markdown`), and efficiently excludes irrelevant directories.
+- **Guidance-Driven Extraction:** Finds and parses `@guidance` comments embedded in Markdown (`.md`), Java (`.java`), and custom resource files. These guidance tags steer documentation generation according to best practices and project-specific rules.
+- **Extensible Reviewers:** Utilizes specialized reviewers for each format (`MarkdownReviewer`, `JavaReviewer`, `PythonReviewer`, and `TextReviewer`) to extract context, comments, and functional details from diverse file types.
+- **Contextual Content Assembly:** Integrates extracted guidance with project layout descriptions and additional context to generate comprehensive, rule-based documentation.
+- **AI-Powered Synthesis:** Connects with generative AI models to produce clear, focused documentation by merging code-derived knowledge, developer-supplied guidance, and contextual project information.
+- **Modular and Scalable Architecture:** Built to process monolithic and multi-module projects. Detects sources, tests, documents, modules, and automates documentation creation across complex or large codebases.
 
-Ghostwriter provides documentation for Machai, a toolkit to simplify and accelerate the assembly of applications. This project gathers guides, references, and resources to help developers leverage Machai and the Machanism ecosystem efficiently.
+Ghostwriter empowers developers to generate high-quality documentation automatically, reduce manual effort, and maintain consistency. It serves as the backbone for Machai and Machanism guides, tutorials, and project references—making application assembly and onboarding faster and easier.
 
 ## License
 
