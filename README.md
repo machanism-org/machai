@@ -1,4 +1,4 @@
-[@guidance]: # (
+[@guidance]: <> (
 The Home Project page should have following structure:
 1. Project Introduction  
 2. Reference to Further Information  
