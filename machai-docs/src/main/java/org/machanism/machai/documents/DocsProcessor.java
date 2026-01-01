@@ -139,7 +139,7 @@ public class DocsProcessor extends ProjectProcessor {
 			result.append("Child projects: " + StringUtils.join(modules, ", ") + ".\r\n");
 		}
 
-		return result.isEmpty() ? null : ("# Project Structure\r\n\r\n" + result.toString()).trim();
+		return result.length() == 0 ? null : ("# Project Structure\r\n\r\n" + result.toString()).trim();
 	}
 
 	private String parseGuidanceFile(File projectDir, File guidancesFile) throws IOException {
