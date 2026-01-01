@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
 import org.machanism.machai.bindex.ApplicationAssembly;
-import org.machanism.machai.documents.DocsProcessor;
+import org.machanism.machai.ghostwriter.DocsProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
