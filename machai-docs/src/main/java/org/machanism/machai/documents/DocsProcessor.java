@@ -3,6 +3,7 @@ package org.machanism.machai.documents;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -85,19 +87,14 @@ public class DocsProcessor extends ProjectProcessor {
 
 	private void processFile(ProjectLayout projectLayout, File file) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
-		String guidance = parseGuidanceFile(projectDir, file);
+		String guidance = parseFile(projectDir, file);
 
 		if (guidance != null) {
-			String projectInfo = getProjectStructureDescriprion(projectLayout);
 
 			String parentsPath = ProjectLayout.getRelatedPath(projectDir, file.getParentFile());
 			String[] parents = StringUtils.split(parentsPath, "/");
 
-			provider.instructions(
-					"You are smart software engineer and developer. You are expert in all popular programming languages, frameworks, platforms.\r\n\r\n"
-							+ "# Constraints\r\n\r\n" + "1. You must implement comprehensive, correct code.\r\n"
-							+ "Important:\r\n"
-							+ "1. You have ability to work with local file system and command line.");
+			provider.instructions(promptBundle.getString("docs_instractions"));
 
 			StringBuilder path = new StringBuilder();
 			for (String parent : parents) {
@@ -107,7 +104,7 @@ public class DocsProcessor extends ProjectProcessor {
 					provider.prompt(dirGuidance);
 				}
 			}
-
+			String projectInfo = getProjectStructureDescriprion(projectLayout);
 			provider.prompt(projectInfo);
 			provider.prompt(guidance);
 
@@ -121,34 +118,35 @@ public class DocsProcessor extends ProjectProcessor {
 	}
 
 	private String getProjectStructureDescriprion(ProjectLayout projectLayout) throws IOException {
-		List<String> sources = projectLayout.getSources();
-		StringBuilder result = new StringBuilder();
-		if (sources != null) {
-			result.append("Sources folders: " + StringUtils.join(sources, ", ") + ".\r\n");
-		}
-		List<String> documents = projectLayout.getDocuments();
-		if (documents != null) {
-			result.append("Documents folders: " + StringUtils.join(documents, ", ") + ".\r\n");
-		}
-		List<String> tests = projectLayout.getTests();
-		if (tests != null) {
-			result.append("Tests folders: " + StringUtils.join(tests, ", ") + ".\r\n");
-		}
-		List<String> modules = projectLayout.getModules();
-		if (modules != null) {
-			result.append("Child projects: " + StringUtils.join(modules, ", ") + ".\r\n");
-		}
+		List<String> content = new ArrayList<String>();
 
-		return result.length() == 0 ? null : ("# Project Structure\r\n\r\n" + result.toString()).trim();
+		content.add(getDirInfoLine(projectLayout.getSources()));
+		content.add(getDirInfoLine(projectLayout.getDocuments()));
+		content.add(getDirInfoLine(projectLayout.getTests()));
+		content.add(getDirInfoLine(projectLayout.getModules()));
+
+		return MessageFormat.format(promptBundle.getString("project_information"), content.toArray());
 	}
 
-	private String parseGuidanceFile(File projectDir, File guidancesFile) throws IOException {
+	private String getDirInfoLine(List<String> sources) {
+		String line;
+		if (sources != null && !sources.isEmpty()) {
+			line = StringUtils.join(sources.stream().map(e -> "`" + e + "`").collect(Collectors.toList()), ", ");
+		} else {
+			line = "not defined";
+		}
+		return line;
+	}
+
+	private String parseFile(File projectDir, File guidancesFile) throws IOException {
 		String extension = FilenameUtils.getExtension(guidancesFile.getName()).toLowerCase();
 
 		String result = null;
 		switch (extension) {
 		case "txt":
-			result = parseTextFile(projectDir, guidancesFile);
+			if (StringUtils.equals(guidancesFile.getName(), GUIDANCE_FILE_NAME)) {
+				result = getGuidanceFile(projectDir, guidancesFile);
+			}
 			break;
 
 		case "java":
@@ -166,55 +164,37 @@ public class DocsProcessor extends ProjectProcessor {
 		return result;
 	}
 
-	private String parseTextFile(File projectDir, File guidancesFile) throws IOException {
-		String guidance = null;
-		if (StringUtils.equals(guidancesFile.getName(), GUIDANCE_FILE_NAME)) {
-			guidance = Files.readString(guidancesFile.toPath());
-			if (StringUtils.isNotBlank(guidance)) {
-				String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
-
-				StringBuilder prompt = new StringBuilder();
-				prompt.append("# Directory Guidance\r\n\r\n");
-				prompt.append("Important: Do not remove @guidance directives.\r\n");
-				prompt.append("Path: " + parentsPath + "\r\n\r\n");
-				prompt.append(guidance + "\r\n");
-
-				guidance = prompt.toString();
-				dirGuidanceMap.put("/" + parentsPath, guidance);
-			}
+	private String getGuidanceFile(File projectDir, File guidancesFile) throws IOException {
+		String guidance = Files.readString(guidancesFile.toPath());
+		if (StringUtils.isNotBlank(guidance)) {
+			String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
+			guidance = MessageFormat.format(promptBundle.getString("guidance_file"), parentsPath, guidance);
+			dirGuidanceMap.put("/" + parentsPath, guidance);
 		}
+
 		return guidance;
 	}
 
 	private String parseJavaFile(File projectDir, File guidancesFile) throws IOException {
 		String content = Files.readString(guidancesFile.toPath());
-		StringBuilder result = null;
+		String result = null;
 		if (StringUtils.contains(content, GUIDANCE_TAG_NAME)) {
-			result = new StringBuilder();
 			if (StringUtils.equals(guidancesFile.getName(), "package-info.java")) {
 				Pattern pattern = Pattern.compile("/\\*.*?" + GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*\\*/", Pattern.DOTALL);
 				Matcher matcher = pattern.matcher(content);
 
 				if (matcher.find()) {
 					String guidanceText = matcher.group(1).replaceAll("\\s*\\*\\s?", " ").trim();
-					result.append("# Java Package Gudance File\r\n\r\n");
-					result.append("Important: Do not remove @guidance directives.\r\n");
-					result.append("Folder: " + ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile())
-							+ "\r\n\r\n");
-					result.append("Guidance: " + guidanceText);
+					result = MessageFormat.format(promptBundle.getString("java_package_info_file"),
+							ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile()), guidanceText);
 				}
 
 			} else {
-				result.append("# Java Source File: `" + guidancesFile.getName() + "`\r\n\r\n");
-				result.append("Important: Do not remove @guidance directives.\r\n");
-				result.append("Path: " + ProjectLayout.getRelatedPath(projectDir, guidancesFile) + "\r\n\r\n");
-				result.append("```java\r\n");
-				result.append(content);
-				result.append("\r\n```\r\n");
+				result = MessageFormat.format(promptBundle.getString("java_file"), guidancesFile.getName(),
+						ProjectLayout.getRelatedPath(projectDir, guidancesFile), content);
 			}
-
 		}
-		return result != null ? result.toString() : null;
+		return result;
 	}
 
 	private String parseMarkdownFile(File projectDir, File guidancesFile) throws IOException {
@@ -225,18 +205,8 @@ public class DocsProcessor extends ProjectProcessor {
 
 		String result = null;
 		if (matcher.find()) {
-			StringBuilder prompt = new StringBuilder();
-
-			prompt.append("# Markdown File: `" + guidancesFile.getName() + "`\r\n\r\n");
-			prompt.append("Important: Do not remove @guidance directives.\r\n\r\n");
-			prompt.append(
-					"You should follow the rules described in markdown reference-style link comments marked as `@guidance` in the format `[@guidance] # ({RULES})`. Process the file below accordingly.\r\n");
-			prompt.append("Path: " + ProjectLayout.getRelatedPath(projectDir, guidancesFile) + "\r\n\r\n");
-			prompt.append("```md\r\n");
-			prompt.append(content);
-			prompt.append("\r\n```\r\n");
-
-			result = prompt.toString();
+			result = MessageFormat.format(promptBundle.getString("markdown_file"), guidancesFile.getName(),
+					ProjectLayout.getRelatedPath(projectDir, guidancesFile), content);
 		}
 
 		return result;
