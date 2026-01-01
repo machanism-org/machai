@@ -1,4 +1,4 @@
-[@guidance]: <> (
+[@guidance]: # (
 The Home Project page should have following structure:
 1. Project Introduction  
 2. Reference to Further Information  
@@ -6,8 +6,8 @@ The Home Project page should have following structure:
 4. Usage and Documentation  
 5. License Information  
 6. Contact Information  
-7. Closing Statement 
-)
+7. Closing Statement)
+
 ![](src/site/resources/images/machai-logo.png)
 
 # Machai
