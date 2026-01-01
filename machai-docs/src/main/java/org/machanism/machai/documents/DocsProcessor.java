@@ -35,6 +35,7 @@ public class DocsProcessor extends ProjectProcessor {
 	private SystemFunctionTools systemFunctionTools;
 
 	private Map<String, String> dirGuidanceMap = new HashMap<>();
+	private File rootDir;
 
 	public DocsProcessor() {
 		provider = GenAIProviderManager.getProvider(chatModel);
@@ -43,14 +44,20 @@ public class DocsProcessor extends ProjectProcessor {
 		systemFunctionTools.applyTools(provider);
 	}
 
+	public void scanDocuments(File rootDir) throws IOException {
+		this.rootDir = rootDir;
+		scanProjects(rootDir);
+	}
+
 	@Override
 	public void scanProjects(File projectDir) throws IOException {
+		systemFunctionTools.setWorkingDir(getRootDir(projectDir));
+
 		ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
 		List<String> modules = projectLayout.getModules();
 		if (modules != null) {
 			File[] files = projectDir.listFiles();
 			if (files != null) {
-				systemFunctionTools.setWorkingDir(projectDir);
 				for (File file : files) {
 					if (file.isDirectory()
 							&& !StringUtils.equalsAnyIgnoreCase(file.getName(), modules.toArray(new String[] {}))
@@ -76,7 +83,6 @@ public class DocsProcessor extends ProjectProcessor {
 			List<File> files = findFiles(scanDir);
 			if (!files.isEmpty()) {
 				for (File file : files) {
-					systemFunctionTools.setWorkingDir(scanDir);
 					processFile(projectLayout, file);
 				}
 			}
@@ -91,7 +97,8 @@ public class DocsProcessor extends ProjectProcessor {
 
 		if (guidance != null) {
 
-			String parentsPath = ProjectLayout.getRelatedPath(projectDir, file.getParentFile());
+			String parentsPath = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
+					file.getParentFile());
 			String[] parents = StringUtils.split(parentsPath, "/");
 
 			provider.instructions(promptBundle.getString("docs_instractions"));
@@ -99,16 +106,18 @@ public class DocsProcessor extends ProjectProcessor {
 			StringBuilder path = new StringBuilder();
 			for (String parent : parents) {
 				path.append("/" + parent);
-				String dirGuidance = dirGuidanceMap.get(path.toString());
-				if (StringUtils.isNotBlank(dirGuidance)) {
-					provider.prompt(dirGuidance);
+				if (!StringUtils.equals(path, "/" + parentsPath)) {
+					String dirGuidance = dirGuidanceMap.get(path.toString());
+					if (StringUtils.isNotBlank(dirGuidance)) {
+						provider.prompt(dirGuidance);
+					}
 				}
 			}
 			String projectInfo = getProjectStructureDescriprion(projectLayout);
 			provider.prompt(projectInfo);
 			provider.prompt(guidance);
 
-			String inputsFileName = ProjectLayout.getRelatedPath(projectDir, file);
+			String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
 			File docsTempDir = new File(projectDir, DOCS_TEMP_DIR);
 			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 			provider.saveInput(inputsFile);
@@ -120,6 +129,9 @@ public class DocsProcessor extends ProjectProcessor {
 	private String getProjectStructureDescriprion(ProjectLayout projectLayout) throws IOException {
 		List<String> content = new ArrayList<String>();
 
+		File projectDir = projectLayout.getProjectDir();
+		String path = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), projectDir);
+		content.add(path);
 		content.add(getDirInfoLine(projectLayout.getSources()));
 		content.add(getDirInfoLine(projectLayout.getDocuments()));
 		content.add(getDirInfoLine(projectLayout.getTests()));
@@ -167,7 +179,7 @@ public class DocsProcessor extends ProjectProcessor {
 	private String getGuidanceFile(File projectDir, File guidancesFile) throws IOException {
 		String guidance = Files.readString(guidancesFile.toPath());
 		if (StringUtils.isNotBlank(guidance)) {
-			String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
+			String parentsPath = ProjectLayout.getRelatedPath(getRootDir(projectDir), guidancesFile.getParentFile());
 			guidance = MessageFormat.format(promptBundle.getString("guidance_file"), parentsPath, guidance);
 			dirGuidanceMap.put("/" + parentsPath, guidance);
 		}
@@ -186,12 +198,13 @@ public class DocsProcessor extends ProjectProcessor {
 				if (matcher.find()) {
 					String guidanceText = matcher.group(1).replaceAll("\\s*\\*\\s?", " ").trim();
 					result = MessageFormat.format(promptBundle.getString("java_package_info_file"),
-							ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile()), guidanceText);
+							ProjectLayout.getRelatedPath(getRootDir(projectDir), guidancesFile.getParentFile()),
+							guidanceText);
 				}
 
 			} else {
 				result = MessageFormat.format(promptBundle.getString("java_file"), guidancesFile.getName(),
-						ProjectLayout.getRelatedPath(projectDir, guidancesFile), content);
+						ProjectLayout.getRelatedPath(getRootDir(projectDir), guidancesFile), content);
 			}
 		}
 		return result;
@@ -206,7 +219,7 @@ public class DocsProcessor extends ProjectProcessor {
 		String result = null;
 		if (matcher.find()) {
 			result = MessageFormat.format(promptBundle.getString("markdown_file"), guidancesFile.getName(),
-					ProjectLayout.getRelatedPath(projectDir, guidancesFile), content);
+					ProjectLayout.getRelatedPath(getRootDir(projectDir), guidancesFile), content);
 		}
 
 		return result;
@@ -229,6 +242,10 @@ public class DocsProcessor extends ProjectProcessor {
 			}
 		}
 		return result;
+	}
+
+	public File getRootDir(File projectDir) {
+		return rootDir != null ? rootDir : projectDir;
 	}
 
 }
