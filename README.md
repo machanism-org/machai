@@ -28,8 +28,8 @@ List all sub-projects below, providing for each:
 - A reference link to the sub-project’s directory or main documentation page (do not include `/README.md` in the URL; link only to the directory or appropriate documentation page).
 Place the reference link immediately after the description.
 
-Review the current sub-projects and ensure this section is accurate and complete. Update the list as needed to reflect all existing sub-projects.
--- > 
+Review the current sub-projects and ensure this section is accurate and complete. Update the list as needed to reflect all existing sub-projects. 
+--> 
 
 ## Project Modules Overview
 
