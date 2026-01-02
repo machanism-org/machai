@@ -1,0 +1,31 @@
+<Recipe name="CodeMie UInterface">
+	<Var name="!Project Dir" init="mandatory" type="path" /> 
+	<If name="!CodeMie Plugin Path" notEqual="$var{!Project Dir}">
+		<Confirm name="CodeMie Run Confirmation" message="Please confirm CodeMie plugin run.">
+			<Task name="Run CodeMie Plugin" mode="async" /> 
+			<Loop numbers="30">
+				<If name="!CodeMie Plugin Path" equals="$var{!Project Dir}">
+					<Break /> 
+				</If> 
+				<Wait delay="2s" /> 
+			</Loop> 
+		</Confirm> 
+	</If> 
+	<CheckValue actual="$var{!CodeMie Plugin Path}" expected="$var{!Project Dir}" onErrorMsg="CodeMie plugin --repo-path wrong." /> 
+	<Extern class="Web">
+		<Page url="https://codemie.lab.epam.com/#/chats" /> 
+		<ElementNotExists xpath="//*[@id='app']/div[2]/header/div[1]/a" timeout="1s">
+			<Click xpath="//*[normalize-space(text())='Sign in with EPAM SSO']" timeout="10s" /> 
+			<Click xpath="//*[normalize-space(text())='Tell Me More']" exception="ignored" timeout="1s" /> 
+		</ElementNotExists> 
+		<Click xpath="//button[@data-tooltip-content='Delete message']" exception="ignored" /> 
+		<Click xpath="//button[normalize-space(text())='Delete']" exception="ignored" /> 
+		<Var name="Prompt" init="console" type="text" /> 
+		<Clipboard name="Prompt" /> 
+		<Text value="$var{\CONTROL+v}$var{\n}" xpath="//*[@id='app']/div[2]/div[2]/div/main/div/div[2]/div/div/div/div[2]/div/div/div[1]/div[2]/div[1]/p" timeout="5s" /> 
+		<Wait delay="5s" /> 
+		<ElementExists xpath="//button[contains(text(), 'Send')]" timeout="300s" /> 
+		<GetText name="Updated Files" xpath="(//div[@class='flex flex-col grow min-w-0']/div)[last()-1]" /> 
+		<Out name="Updated Files" /> 
+	</Extern> 
+</Recipe> 

@@ -1,0 +1,31 @@
+<Recipe name="Run CodeMie Plugin">
+	<Finally>
+		<Remove name="!CodeMie Plugin Path" /> 
+		<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command> 
+	</Finally> 
+	<Var name="!Project Dir" init="mandatory" type="path" /> 
+	<Out name="!Project Dir" /> 
+	<View name="output" reuse="true" type="Text" /> 
+	<Command name="output" os=".*" cmd="uvx codemie-plugins development run --repo-path $var{!Project Dir}">
+		<Out view="output" name="output" level="debug" /> 
+		<Var name="!CodeMie Plugin Path" source="!Project Dir" /> 
+	</Command> 
+	<Remove name="!CodeMie Plugin Path" /> 
+	<About>
+		<description>
+# Preparation
+## Install codemie-plugin CLI
+```
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex" 
+uvx pip install codemie-plugins  
+uvx codemie-plugins config generate-key 
+```
+See: EPAM AI/Run CodeMie in Action Part 2: Advanced AI for Business and Technology::Setting Up Plugins
+## Environment Variables
+```
+set PYTHONIOENCODING utf-8
+set PYTHONLEGACYWINDOWSSTDIO utf-8
+```
+</description> 
+	</About> 
+</Recipe> 
