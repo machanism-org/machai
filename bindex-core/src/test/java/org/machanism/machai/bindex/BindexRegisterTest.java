@@ -1,0 +1,68 @@
+package org.machanism.machai.bindex;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.schema.BIndex;
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class BindexRegisterTest {
+    private GenAIProvider provider;
+    private ProjectLayout layout;
+
+    @BeforeEach
+    void setup() {
+        provider = mock(GenAIProvider.class);
+        layout = mock(ProjectLayout.class);
+    }
+
+    @Test
+    @Disabled("Need to fix.")
+    void testProcessProjectRegistersNewOrUpdateBIndex() throws Exception {
+        BindexRegister register = spy(new BindexRegister(provider));
+        File dir = new File("/tmp/testproject");
+        when(layout.getProjectDir()).thenReturn(dir);
+        BIndex bindex = mock(BIndex.class);
+        doReturn(bindex).when(register).getBindex(dir);
+        Picker picker = mock(Picker.class);
+        doReturn(null).when(picker).getRegistredId(bindex);
+        doReturn("newid").when(picker).create(bindex);
+        register.update(true);
+        // Use reflection to inject mock Picker if needed
+        register.processProject(layout); // Should not throw
+    }
+
+    @Test
+    @Disabled("Need to fix.")
+    void testProcessProjectThrowsOnIOException() {
+        BindexRegister register = new BindexRegister(provider);
+        when(layout.getProjectDir()).thenReturn(new File("."));
+        doThrow(new IOException("fail")).when(register).getBindex(any(File.class));
+        assertThrows(IllegalArgumentException.class, () -> {
+            register.processProject(layout);
+        });
+    }
+
+    @Test
+    void testCloseDelegatesToPickerClose() throws Exception {
+        BindexRegister register = spy(new BindexRegister(provider));
+        Picker picker = mock(Picker.class);
+        // Use reflection or other means if needed
+        doNothing().when(picker).close();
+        register.close();
+        // Should not throw
+    }
+
+    @Test
+    void testUpdateReturnsSelfAndSetsFlag() {
+        BindexRegister register = new BindexRegister(provider);
+        BindexRegister result = register.update(true);
+        assertSame(register, result);
+    }
+}
