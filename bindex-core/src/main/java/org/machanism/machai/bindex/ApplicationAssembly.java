@@ -31,8 +31,6 @@ public class ApplicationAssembly {
 	}
 
 	public void assembly(final String prompt, List<BIndex> bindexList, boolean callLLM) {
-		provider.workingDir(projectDir);
-
 		String systemPrompt = promptBundle.getString("assembly_system_instructions");
 		provider.instructions(systemPrompt);
 

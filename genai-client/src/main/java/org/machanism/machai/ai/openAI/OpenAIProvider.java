@@ -325,9 +325,6 @@ public class OpenAIProvider implements GenAIProvider {
 		toolMap.put(tool, function);
 	}
 
-	public void workingDir(File workingDir) {
-	}
-
 	@Override
 	public GenAIProvider instructions(String instructions) {
 		this.instructions = instructions;

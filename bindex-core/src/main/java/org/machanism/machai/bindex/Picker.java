@@ -155,8 +155,7 @@ public class Picker implements Closeable {
 		}
 	}
 
-	private BsonArray getEmbeddingBson(Classification classification, Integer dimensions)
-			throws JsonProcessingException {
+	BsonArray getEmbeddingBson(Classification classification, Integer dimensions) throws JsonProcessingException {
 		String text = getClassificationText(classification);
 
 		List<Double> descEmbedding = getEmbedding(text, dimensions);
@@ -237,7 +236,7 @@ public class Picker implements Closeable {
 		return classificationStr;
 	}
 
-	private void addDependencies(Set<String> dependencies, String bindexId) {
+	void addDependencies(Set<String> dependencies, String bindexId) {
 		BIndex bindex = getBindex(bindexId);
 		if (bindex != null) {
 			String id = bindex.getId();
@@ -332,7 +331,7 @@ public class Picker implements Closeable {
 		return results;
 	}
 
-	private static String getNormalizedLanguageName(Language language) {
+	static String getNormalizedLanguageName(Language language) {
 		String lang = language.getName().toLowerCase().trim();
 		lang = StringUtils.substringBefore(lang, "(").trim();
 		return lang;

@@ -30,8 +30,6 @@ public interface GenAIProvider {
 
 	GenAIProvider promptBundle(ResourceBundle promptBundle);
 
-	void workingDir(File projectDir);
-
 	String perform(boolean callLLM);
 
 	GenAIProvider inputsLog(File bindexTempDir);
