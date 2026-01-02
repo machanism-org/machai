@@ -18,12 +18,12 @@
 			<Click xpath="//*[normalize-space(text())='Sign in with EPAM SSO']" timeout="10s" /> 
 			<Click xpath="//*[normalize-space(text())='Tell Me More']" exception="ignored" timeout="1s" /> 
 		</ElementNotExists> 
-		<Click xpath="//button[@data-tooltip-content='Delete message']" exception="ignored" timeout="1s" /> 
-		<Click xpath="//button[normalize-space(text())='Delete']" exception="ignored" timeout="1s" /> 
 		<!-- Inputs processing --> 
 		<Listdir name="Inputs Files" path="$var{!Project Dir}" filter=".*\.txt" dirFilter=".*\.machai\\docs-inputs\\.*" /> 
 		<Out name="Inputs Files" /> 
 		<Loop name="inputsFile" source="Inputs Files">
+			<Click xpath="//button[@data-tooltip-content='Delete message']" exception="ignored" timeout="1s" /> 
+			<Click xpath="//button[normalize-space(text())='Delete']" exception="ignored" timeout="1s" /> 
 			<Out name="inputsFile" /> 
 			<Load name="inputs" file="$var{inputsFile}" /> 
 			<Out name="inputs" /> 
