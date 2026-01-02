@@ -24,15 +24,10 @@ Integrate Bindex Core within your Machanism-based projects for metadata handling
 
 Refer to the [Machanism documentation](https://github.com/machanism-org/machai) for detailed usage, developer guides, and advanced configuration.
 
-## Documentation & Resources
-- [Project Repository](https://github.com/machanism-org/machai)
-- [Issue Tracker](https://github.com/machanism-org/machai/issues)
-- [License: Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+## License
+
+This project is licensed under the Apache 2.0 License.
 
 ## Contact
 For questions, support, or contributions, contact:
 - Viktor Tovstyi ([viktor.tovstyi@gmail.com](mailto:viktor.tovstyi@gmail.com))
-
----
-
-© 2025 Machanism.org. Licensed under the Apache License, Version 2.0.

@@ -24,11 +24,5 @@ Add the following dependency to your `pom.xml`:
 2. Use the `GenAIProvider` and `GenAIProviderManager` classes to access provider features.
 3. Check the [prompts.properties](src/main/resources/prompts.properties) file for prompt configuration.
 
-## Documentation
-See `src/site/markdown` for additional documentation (site folder may require manual setup).
-
-## Support
-For issues or questions, contact: info@machanism.org
-
 ## License
 This project is licensed under the Apache License 2.0. See [LICENSE.txt](LICENSE.txt) for details.
