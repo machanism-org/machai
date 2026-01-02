@@ -24,6 +24,17 @@ public class PythonReviewer implements Reviewer {
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
+	 * Returns the file extensions supported by this reviewer.
+	 * This reviewer handles files with the 'py' extension.
+	 *
+	 * @return an array of supported file extension strings
+	 */
+	@Override
+	public String[] getSupportedFileExtentions() {
+		return new String[] { "py" };
+	}
+
+	/**
 	 * Performs analysis on the specified Python source file, extracting
 	 * documentation guidance if marked with the appropriate tag.
 	 *
@@ -36,10 +47,8 @@ public class PythonReviewer implements Reviewer {
 		String content = Files.readString(guidancesFile.toPath());
 		String result = null;
 		if (StringUtils.contains(content, DocsProcessor.GUIDANCE_TAG_NAME)) {
-			// Match guidance in Python comments: # @guidance: ... or triple-quoted
-			// docstrings
 			Pattern pattern = Pattern.compile("(?:#\\s*" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*))"
-					+ "|(?:[\"']{3}\\s*" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*[\"']{3})", Pattern.DOTALL);
+					+ "|(?:[\"\']{3}\\s*" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*[\"\']{3})", Pattern.DOTALL);
 			Matcher matcher = pattern.matcher(content);
 			if (matcher.find()) {
 				String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
@@ -54,8 +63,4 @@ public class PythonReviewer implements Reviewer {
 		return result;
 	}
 
-	@Override
-	public String[] getSupportedFileExtentions() {
-		return new String[] { "py" };
-	}
 }

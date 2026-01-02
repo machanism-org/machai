@@ -26,12 +26,26 @@ public class TextReviewer implements Reviewer {
 
 	/**
 	 * Constructs a TextReviewer with tracking map for directory guidance context.
+	 * This constructor initializes the reviewer to use the provided directory
+	 * guidance map, allowing context accumulation for documentation workflows
+	 * related to file location.
 	 *
-	 * @param dirGuidanceMap map of directory to accumulated guidance text
+	 * @param dirGuidanceMap map of directory paths to accumulated guidance text
 	 */
 	public TextReviewer(Map<String, String> dirGuidanceMap) {
 		super();
 		this.dirGuidanceMap = dirGuidanceMap;
+	}
+
+	/**
+	 * Returns the file extensions supported by this reviewer.
+	 * This reviewer handles files with the 'txt' extension.
+	 *
+	 * @return an array of supported file extension strings
+	 */
+	@Override
+	public String[] getSupportedFileExtentions() {
+		return new String[] { "txt" };
 	}
 
 	/**
@@ -51,14 +65,10 @@ public class TextReviewer implements Reviewer {
 				guidance = MessageFormat.format(promptBundle.getString("guidance_file"), parentsPath, guidance);
 				dirGuidanceMap.put("/" + parentsPath, guidance);
 			}
+		} else {
+			guidance = null;
 		}
 
 		return guidance;
 	}
-
-	@Override
-	public String[] getSupportedFileExtentions() {
-		return new String[] { "txt" };
-	}
-
 }

@@ -20,6 +20,12 @@ public interface Reviewer {
      */
     String perform(File projectDir, File file) throws IOException;
 
-	String[] getSupportedFileExtentions();
+    /**
+     * Returns an array of supported file extensions for this reviewer.
+     * These extensions determine which files the reviewer is capable of processing.
+     *
+     * @return an array of supported file extension strings (without dot)
+     */
+    String[] getSupportedFileExtentions();
 
 }

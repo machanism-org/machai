@@ -24,6 +24,17 @@ public class TypeScriptReviewer implements Reviewer {
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
+	 * Returns the file extensions supported by this reviewer.
+	 * This reviewer processes files with extension: ts.
+	 *
+	 * @return an array of supported file extension strings
+	 */
+	@Override
+	public String[] getSupportedFileExtentions() {
+		return new String[] { "ts" };
+	}
+
+	/**
 	 * Performs analysis on the specified TypeScript source file, extracting
 	 * documentation guidance if marked with the appropriate tag.
 	 *
@@ -36,8 +47,6 @@ public class TypeScriptReviewer implements Reviewer {
 		String content = Files.readString(guidancesFile.toPath());
 		String result = null;
 		if (StringUtils.contains(content, DocsProcessor.GUIDANCE_TAG_NAME)) {
-			// Match guidance in TypeScript comments: // @guidance: ... or /* @guidance: ...
-			// */
 			Pattern pattern = Pattern.compile("(?://\\s*" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*))"
 					+ "|(?:/\\*.*?" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*\\*/)", Pattern.DOTALL);
 			Matcher matcher = pattern.matcher(content);
@@ -52,10 +61,5 @@ public class TypeScriptReviewer implements Reviewer {
 			}
 		}
 		return result;
-	}
-
-	@Override
-	public String[] getSupportedFileExtentions() {
-		return new String[] { "ts" };
 	}
 }
