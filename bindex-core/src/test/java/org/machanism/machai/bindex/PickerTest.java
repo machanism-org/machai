@@ -1,20 +1,22 @@
 package org.machanism.machai.bindex;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.schema.BIndex;
-import org.machanism.machai.schema.Classification;
-import org.machanism.machai.schema.Language;
-import org.machanism.machai.schema.Layer;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.schema.Classification;
+import org.machanism.machai.schema.Language;
 
 class PickerTest {
     private GenAIProvider provider;
@@ -52,7 +54,6 @@ class PickerTest {
     @Disabled("Need to fix.")
     void testGetEmbeddingBsonCreatesEmbeddings() throws Exception {
         Classification classification = mock(Classification.class);
-        List<Double> dummyEmbedding = Arrays.asList(0.1, 0.2, 0.3);
         // Would require API and environment. Here we can check for thrown exceptions.
         assertThrows(IllegalStateException.class, () -> {
             picker.getEmbeddingBson(classification, 3);

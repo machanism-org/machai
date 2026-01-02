@@ -1,11 +1,16 @@
 package org.machanism.machai.bindex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+
+import java.io.File;
+
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.BIndex;
-import java.io.File;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 class BIndexProjectProcessorTest {

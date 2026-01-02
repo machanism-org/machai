@@ -18,8 +18,8 @@
 			<Click xpath="//*[normalize-space(text())='Sign in with EPAM SSO']" timeout="10s" /> 
 			<Click xpath="//*[normalize-space(text())='Tell Me More']" exception="ignored" timeout="1s" /> 
 		</ElementNotExists> 
-		<Click xpath="//button[@data-tooltip-content='Delete message']" exception="ignored" /> 
-		<Click xpath="//button[normalize-space(text())='Delete']" exception="ignored" /> 
+		<Click xpath="//button[@data-tooltip-content='Delete message']" exception="ignored" timeout="1s" /> 
+		<Click xpath="//button[normalize-space(text())='Delete']" exception="ignored" timeout="1s" /> 
 		<Var name="Prompt" init="console" type="text" /> 
 		<Clipboard name="Prompt" /> 
 		<Text value="$var{\CONTROL+v}$var{\n}" xpath="//*[@id='app']/div[2]/div[2]/div/main/div/div[2]/div/div/div/div[2]/div/div/div[1]/div[2]/div[1]/p" timeout="5s" /> 

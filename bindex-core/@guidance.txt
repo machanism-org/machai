@@ -1,0 +1,14 @@
+In the project root directory, ensure the following files are present and properly created:
+
+1. LICENSE.txt
+   - Include the full text of the project's license.
+   - If the license file is missing, create it using the license type defined in the pom.xml file.
+   - Ensure the license terms are accurate and up to date.
+
+2. README.txt (if not present)
+   - Provide a concise project overview, including its purpose and main features.
+   - List installation and usage instructions.
+   - Reference any important documentation or resources.
+   - Include contact information for support or questions.
+
+Review the contents of LICENSE.txt and README.txt to ensure clarity, completeness, and accuracy.

@@ -1,5 +1,13 @@
 package org.machanism.machai.bindex;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.bindex.builder.JScriptBindexBuilder;
@@ -7,14 +15,8 @@ import org.machanism.machai.bindex.builder.MavenBindexBuilder;
 import org.machanism.machai.bindex.builder.PythonBindexBuilder;
 import org.machanism.machai.project.layout.JScriptProjectLayout;
 import org.machanism.machai.project.layout.MavenProjectLayout;
-import org.machanism.machai.project.layout.PythonProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.machanism.machai.project.layout.PythonProjectLayout;
 
 class BindexBuilderFactoryTest {
 
