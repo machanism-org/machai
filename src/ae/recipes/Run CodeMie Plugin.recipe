@@ -1,4 +1,6 @@
 <Recipe name="Run CodeMie Plugin">
+	<Remove name="!CodeMie Plugin Path" /> 
+	<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command> 
 	<Finally>
 		<Remove name="!CodeMie Plugin Path" /> 
 		<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command> 
