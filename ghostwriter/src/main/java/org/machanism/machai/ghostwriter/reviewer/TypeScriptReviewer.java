@@ -15,43 +15,47 @@ import org.machanism.machai.project.layout.ProjectLayout;
 /**
  * Reviewer implementation for TypeScript source files (.ts).
  * <p>
- * Extracts guidance information or comments annotated with the {@link DocsProcessor#GUIDANCE_TAG_NAME} for
- * documentation input processing, supporting TypeScript file comment conventions.
+ * Extracts guidance information or comments annotated with the
+ * {@link DocsProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
+ * supporting TypeScript file comment conventions.
  */
 public class TypeScriptReviewer implements Reviewer {
 
-    private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
+	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-    /**
-     * Performs analysis on the specified TypeScript source file,
-     * extracting documentation guidance if marked with the appropriate tag.
-     *
-     * @param projectDir the root directory of the project for context
-     * @param guidancesFile the TypeScript file to be analyzed
-     * @return formatted documentation guidance or {@code null} if none found
-     * @throws IOException if an error occurs reading the file
-     */
-    public String perform(File projectDir, File guidancesFile) throws IOException {
-        String content = Files.readString(guidancesFile.toPath());
-        String result = null;
-        if (StringUtils.contains(content, DocsProcessor.GUIDANCE_TAG_NAME)) {
-            // Match guidance in TypeScript comments: // @guidance: ... or /* @guidance: ... */
-            Pattern pattern = Pattern.compile(
-                "(?://\\s*" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*))" +
-                "|(?:/\\*.*?" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*\\*/)",
-                Pattern.DOTALL
-            );
-            Matcher matcher = pattern.matcher(content);
-            if (matcher.find()) {
-                String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
-                if (guidanceText != null) {
-                    String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
-                    String name = guidancesFile.getName();
-                    result = MessageFormat.format(promptBundle.getString("typescript_file"), name, relatedPath, guidanceText.trim());
-                }
-            }
-        }
-        return result;
-    }
+	/**
+	 * Performs analysis on the specified TypeScript source file, extracting
+	 * documentation guidance if marked with the appropriate tag.
+	 *
+	 * @param projectDir    the root directory of the project for context
+	 * @param guidancesFile the TypeScript file to be analyzed
+	 * @return formatted documentation guidance or {@code null} if none found
+	 * @throws IOException if an error occurs reading the file
+	 */
+	public String perform(File projectDir, File guidancesFile) throws IOException {
+		String content = Files.readString(guidancesFile.toPath());
+		String result = null;
+		if (StringUtils.contains(content, DocsProcessor.GUIDANCE_TAG_NAME)) {
+			// Match guidance in TypeScript comments: // @guidance: ... or /* @guidance: ...
+			// */
+			Pattern pattern = Pattern.compile("(?://\\s*" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*))"
+					+ "|(?:/\\*.*?" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*\\*/)", Pattern.DOTALL);
+			Matcher matcher = pattern.matcher(content);
+			if (matcher.find()) {
+				String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+				if (guidanceText != null) {
+					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
+					String name = guidancesFile.getName();
+					result = MessageFormat.format(promptBundle.getString("typescript_file"), name, relatedPath,
+							guidanceText.trim());
+				}
+			}
+		}
+		return result;
+	}
 
+	@Override
+	public String[] getSupportedFileExtentions() {
+		return new String[] { "ts" };
+	}
 }

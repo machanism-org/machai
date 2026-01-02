@@ -54,4 +54,8 @@ public class PythonReviewer implements Reviewer {
 		return result;
 	}
 
+	@Override
+	public String[] getSupportedFileExtentions() {
+		return new String[] { "py" };
+	}
 }

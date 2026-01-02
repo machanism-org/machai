@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
+import org.machanism.machai.ghostwriter.reviewer.HtmlReviewer;
 import org.machanism.machai.ghostwriter.reviewer.JavaReviewer;
 import org.machanism.machai.ghostwriter.reviewer.MarkdownReviewer;
 import org.machanism.machai.ghostwriter.reviewer.PythonReviewer;
@@ -56,11 +57,20 @@ public class DocsProcessor extends ProjectProcessor {
 		systemFunctionTools = new SystemFunctionTools(null);
 		systemFunctionTools.applyTools(provider);
 
-		reviewMap.put("txt", new TextReviewer(dirGuidanceMap));
-		reviewMap.put("java", new JavaReviewer());
-		reviewMap.put("ts", new TypeScriptReviewer());
-		reviewMap.put("md", new MarkdownReviewer());
-		reviewMap.put("py", new PythonReviewer());
+		addReviewer(new TextReviewer(dirGuidanceMap));
+		addReviewer(new JavaReviewer());
+		addReviewer(new TypeScriptReviewer());
+		addReviewer(new MarkdownReviewer());
+		addReviewer(new PythonReviewer());
+		addReviewer(new HtmlReviewer());
+		addReviewer(new HtmlReviewer());
+	}
+
+	private void addReviewer(Reviewer reviwer) {
+		String[] extentions = reviwer.getSupportedFileExtentions();
+		for (String extention : extentions) {
+			reviewMap.put(extention, reviwer);
+		}
 	}
 
 	/**
@@ -155,9 +165,8 @@ public class DocsProcessor extends ProjectProcessor {
 			String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
 			File docsTempDir = new File(projectDir, DOCS_TEMP_DIR);
 			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
-			provider.saveInput(inputsFile);
 
-			provider.perform(false);
+			provider.inputsLog(inputsFile).perform(false);
 		}
 	}
 

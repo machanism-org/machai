@@ -128,19 +128,16 @@ public class Picker implements Closeable {
 			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
 					.distinct().collect(Collectors.toSet());
 
-			Set<String> integrations = classification.getIntegrations().stream().map(e -> e.toLowerCase())
-					.distinct().collect(Collectors.toSet());
+			Set<String> integrations = classification.getIntegrations().stream().map(e -> e.toLowerCase()).distinct()
+					.collect(Collectors.toSet());
 
 			if (languages.isEmpty()) {
 				logger.warn("WARNING! No language defined for: {}.", id);
 			}
 
-			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson)
-					.append("name", bindex.getName())
-					.append("version", bindex.getVersion())
-					.append(DOMAINS_PROPERTY_NAME, classification.getDomains())
-					.append(LAYERS_PROPERTY_NAME, classification.getLayers())
-					.append(LANGUAGES_PROPERTY_NAME, languages)
+			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson).append("name", bindex.getName())
+					.append("version", bindex.getVersion()).append(DOMAINS_PROPERTY_NAME, classification.getDomains())
+					.append(LAYERS_PROPERTY_NAME, classification.getLayers()).append(LANGUAGES_PROPERTY_NAME, languages)
 					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
 					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
 							getEmbeddingBson(bindex.getClassification(), CLASSIFICATION_EMBEDDING_DIMENTIONS))
@@ -163,10 +160,7 @@ public class Picker implements Closeable {
 		String text = getClassificationText(classification);
 
 		List<Double> descEmbedding = getEmbedding(text, dimensions);
-		BsonArray bsonArray = new BsonArray(
-				descEmbedding.stream()
-						.map(BsonDouble::new)
-						.collect(Collectors.toList()));
+		BsonArray bsonArray = new BsonArray(descEmbedding.stream().map(BsonDouble::new).collect(Collectors.toList()));
 		return bsonArray;
 	}
 
@@ -182,17 +176,12 @@ public class Picker implements Closeable {
 	}
 
 	private List<Double> getEmbedding(String text, Integer dimensions) {
-		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder()
-				.apiKey(apiKey)
-				.modelName(EMBEDDING_MODEL_NAME)
-				.timeout(java.time.Duration.ofSeconds(60))
-				.dimensions(dimensions)
+		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder().apiKey(apiKey)
+				.modelName(EMBEDDING_MODEL_NAME).timeout(java.time.Duration.ofSeconds(60)).dimensions(dimensions)
 				.build();
 
 		Response<Embedding> response = embeddingModel.embed(text);
-		return response.content().vectorAsList().stream()
-				.map(Double::valueOf)
-				.collect(Collectors.toList());
+		return response.content().vectorAsList().stream().map(Double::valueOf).collect(Collectors.toList());
 	}
 
 	public List<BIndex> pick(String query) throws IOException {
@@ -209,13 +198,12 @@ public class Picker implements Closeable {
 			List<Layer> layers = classification.getLayers();
 			String languagesQuery = StringUtils.join(languages, ", ");
 			logger.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
-			
+
 			String classificationQuery = getClassificationText(classification);
 
 			for (Layer layer : layers) {
 				Collection<String> layerResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
-						classificationQuery,
-						CLASSIFICATION_EMBEDDING_DIMENTIONS,
+						classificationQuery, CLASSIFICATION_EMBEDDING_DIMENTIONS,
 						Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
 						Aggregates.match(Filters.in(LAYERS_PROPERTY_NAME, layer)));
 				classificatioResults.addAll(layerResults);
@@ -263,8 +251,7 @@ public class Picker implements Closeable {
 		}
 	}
 
-	private String getClassification(String query)
-			throws IOException, JsonProcessingException, JsonMappingException {
+	private String getClassification(String query) throws IOException, JsonProcessingException, JsonMappingException {
 		URL systemResource = BIndex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, "UTF8");
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -299,11 +286,7 @@ public class Picker implements Closeable {
 
 		List<Bson> pipeline = new ArrayList<>();
 
-		pipeline.add(Aggregates.vectorSearch(
-				fieldPath(propertyPath),
-				queryEmbedding,
-				indexName,
-				VECTOR_SEARCH_LIMITS,
+		pipeline.add(Aggregates.vectorSearch(fieldPath(propertyPath), queryEmbedding, indexName, VECTOR_SEARCH_LIMITS,
 				exactVectorSearchOptions()));
 
 		if (bsons != null) {
@@ -312,12 +295,9 @@ public class Picker implements Closeable {
 			}
 		}
 
-		pipeline.add(Aggregates.project(Projections.fields(
-				Projections.exclude("_id"),
-				Projections.include("id"),
-				Projections.include("name"),
-				Projections.include("version"),
-				Projections.metaVectorSearchScore("score"))));
+		pipeline.add(Aggregates.project(
+				Projections.fields(Projections.exclude("_id"), Projections.include("id"), Projections.include("name"),
+						Projections.include("version"), Projections.metaVectorSearchScore("score"))));
 
 		pipeline.add(Aggregates.match(Filters.gte("score", score)));
 
@@ -347,8 +327,7 @@ public class Picker implements Closeable {
 		}
 
 		Collection<String> results = libraryVersionMap.entrySet().stream()
-				.map(entry -> entry.getKey() + ":" + entry.getValue())
-				.collect(Collectors.toList());
+				.map(entry -> entry.getKey() + ":" + entry.getValue()).collect(Collectors.toList());
 
 		return results;
 	}

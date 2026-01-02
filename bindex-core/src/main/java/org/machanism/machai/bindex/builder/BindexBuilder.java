@@ -42,9 +42,7 @@ public class BindexBuilder {
 		getGenAIProvider().prompt(prompt);
 
 		File tmpBindexDir = new File(projectLayout.getProjectDir(), BINDEX_TEMP_DIR);
-		getGenAIProvider().saveInput(tmpBindexDir);
-
-		String output = getGenAIProvider().perform(callLLM);
+		String output = getGenAIProvider().inputsLog(tmpBindexDir).perform(callLLM);
 
 		BIndex value = null;
 		if (output != null) {

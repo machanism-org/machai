@@ -43,8 +43,7 @@ public class AssembyCommand {
 	}
 
 	@ShellMethod("Picks libraries based on user request.")
-	public void pick(
-			@ShellOption(value = "The application assembly prompt.") String query,
+	public void pick(@ShellOption(value = "The application assembly prompt.") String query,
 			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score)
 			throws IOException {
 
@@ -97,8 +96,7 @@ public class AssembyCommand {
 	}
 
 	@ShellMethod("Is used for request additional GenAI guidances.")
-	public void prompt(
-			@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
+	public void prompt(@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
 		provider.prompt(prompt);
 		String response = provider.perform(true);
 		if (response != null) {

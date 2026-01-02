@@ -52,8 +52,7 @@ public class ApplicationAssembly {
 			provider.prompt(prompt);
 
 			File bindexTempDir = new File(projectDir, ASSEMBLY_TEMP_DIR);
-			provider.saveInput(bindexTempDir);
-
+			provider.inputsLog(bindexTempDir);
 			String response = provider.perform(callLLM);
 			if (response != null) {
 				logger.info(response);

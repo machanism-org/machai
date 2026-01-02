@@ -53,4 +53,8 @@ public class JavaReviewer implements Reviewer {
         return result;
     }
 
+	@Override
+	public String[] getSupportedFileExtentions() {
+		return new String[] { "java" };
+	}
 }

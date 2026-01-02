@@ -69,6 +69,8 @@ public class OpenAIProvider implements GenAIProvider {
 	private String instructions;
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
+	private File inputsLog;
+
 	public OpenAIProvider(ChatModel chatModel) {
 		super();
 		String uri = System.getenv("OPENAI_API_KEY");
@@ -135,11 +137,19 @@ public class OpenAIProvider implements GenAIProvider {
 	@Override
 	public String perform(boolean callLLM) {
 		String result = null;
+
+		if (inputsLog != null) {
+			saveInput(inputsLog);
+			if (callLLM) {
+				logger.debug("LLM Inputs: {}", inputsLog);
+			} else {
+				logger.info("LLM Inputs: {}", inputsLog);
+			}
+		}
+
 		if (callLLM) {
-			Builder builder = ResponseCreateParams.builder()
-					.model(chatModel)
-					.tools(new ArrayList<Tool>(toolMap.keySet()))
-					.inputOfResponse(inputs);
+			Builder builder = ResponseCreateParams.builder().model(chatModel)
+					.tools(new ArrayList<Tool>(toolMap.keySet())).inputOfResponse(inputs);
 
 			if (instructions != null) {
 				builder.instructions(instructions);
@@ -171,11 +181,8 @@ public class OpenAIProvider implements GenAIProvider {
 				Object value = callFunction(functionCall);
 
 				Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
-				ResponseInputItem ofOutput = ResponseInputItem.ofFunctionCallOutput(
-						ResponseInputItem.FunctionCallOutput.builder()
-								.callId(functionCall.callId())
-								.outputAsJson(callFunction)
-								.build());
+				ResponseInputItem ofOutput = ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput
+						.builder().callId(functionCall.callId()).outputAsJson(callFunction).build());
 				inputs.add(ofOutput);
 				fcall = true;
 			}
@@ -185,8 +192,7 @@ public class OpenAIProvider implements GenAIProvider {
 				List<Content> contentList = outMessage.content();
 				for (Content content : contentList) {
 					text = content.outputText().get().text();
-					Message message = com.openai.models.responses.ResponseInputItem.Message.builder()
-							.role(Role.USER)
+					Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
 							.addInputTextContent(text).build();
 					inputs.add(ResponseInputItem.ofMessage(message));
 				}
@@ -245,16 +251,13 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 	}
 
-	@Override
-	public void saveInput(File inputsFile) throws IOException {
+	private void saveInput(File inputsFile) {
 		File parentFile = inputsFile.getParentFile();
 		if (parentFile != null && !parentFile.exists()) {
 			parentFile.mkdirs();
 		}
 
 		try (Writer streamWriter = new FileWriter(inputsFile, false)) {
-			logger.info("LLM Inputs: {}", inputsFile);
-
 			for (ResponseInputItem responseInputItem : inputs) {
 				String inputText = "";
 				if (responseInputItem.isMessage()) {
@@ -273,6 +276,8 @@ public class OpenAIProvider implements GenAIProvider {
 					streamWriter.write("\n\n");
 				}
 			}
+		} catch (IOException e) {
+			logger.error("Failed to save LLM inputs log to file: {}", inputsFile, e);
 		}
 	}
 
@@ -305,14 +310,11 @@ public class OpenAIProvider implements GenAIProvider {
 		JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
 		JsonValue requiredVal = JsonValue.from(mapper.createArrayNode());
 
-		Parameters params = Parameters.builder()
-				.putAdditionalProperty("properties", propsVal)
-				.putAdditionalProperty("type", JsonString.of("object"))
-				.putAdditionalProperty("required", requiredVal)
+		Parameters params = Parameters.builder().putAdditionalProperty("properties", propsVal)
+				.putAdditionalProperty("type", JsonString.of("object")).putAdditionalProperty("required", requiredVal)
 				.build();
 
-		com.openai.models.responses.FunctionTool.Builder toolBuilder = FunctionTool.builder()
-				.name(name)
+		com.openai.models.responses.FunctionTool.Builder toolBuilder = FunctionTool.builder().name(name)
 				.description(description);
 
 		if (params != null) {
@@ -322,7 +324,6 @@ public class OpenAIProvider implements GenAIProvider {
 		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
 		toolMap.put(tool, function);
 	}
-
 
 	public void workingDir(File workingDir) {
 	}
@@ -336,6 +337,12 @@ public class OpenAIProvider implements GenAIProvider {
 	@Override
 	public GenAIProvider promptBundle(ResourceBundle promptBundle) {
 		this.promptBundle = promptBundle;
+		return this;
+	}
+
+	@Override
+	public GenAIProvider inputsLog(File inputsLog) {
+		this.inputsLog = inputsLog;
 		return this;
 	}
 

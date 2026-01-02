@@ -20,4 +20,6 @@ public interface Reviewer {
      */
     String perform(File projectDir, File file) throws IOException;
 
+	String[] getSupportedFileExtentions();
+
 }

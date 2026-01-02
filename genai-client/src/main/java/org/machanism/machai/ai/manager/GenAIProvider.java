@@ -32,8 +32,8 @@ public interface GenAIProvider {
 
 	void workingDir(File projectDir);
 
-	void saveInput(File inputsFile) throws IOException;
-
 	String perform(boolean callLLM);
-	
+
+	GenAIProvider inputsLog(File bindexTempDir);
+
 }
