@@ -1,4 +1,8 @@
 <Recipe name="Run CodeMie Plugin">
+	<Command name="testConnection" os=".*">ping -w 20 nats-codemie.epmd-edp-anthos.eu.gcp.cloudapp.epam.com</Command> 
+	<If name="testConnection" contains="Ping request could not find host">
+		<CheckValue actual="$var{testConnection}" onErrorMsg="VPN Required" /> 
+	</If> 
 	<Remove name="!CodeMie Plugin Path" /> 
 	<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command> 
 	<Finally>
@@ -7,8 +11,12 @@
 	</Finally> 
 	<Var name="!Project Dir" init="mandatory" type="path" /> 
 	<Out name="!Project Dir" /> 
-	<View name="output" reuse="true" type="Text" /> 
-	<Command name="output" os=".*" cmd="uvx codemie-plugins development run --repo-path $var{!Project Dir}">
+	<View name="output" reuse="true" type="Text" font="MONOSPACED" /> 
+	<Var name="env" type="map">
+		<item key="PYTHONIOENCODING">utf-8</item> 
+		<item key="PYTHONLEGACYWINDOWSSTDIO">utf-8</item> 
+	</Var> 
+	<Command name="output" os=".*" env="env" cmd="uvx codemie-plugins development run --repo-path $var{!Project Dir}">
 		<Out view="output" name="output" level="debug" /> 
 		<Var name="!CodeMie Plugin Path" source="!Project Dir" /> 
 	</Command> 
@@ -23,11 +31,6 @@ uvx pip install codemie-plugins
 uvx codemie-plugins config generate-key 
 ```
 See: EPAM AI/Run CodeMie in Action Part 2: Advanced AI for Business and Technology::Setting Up Plugins
-## Environment Variables
-```
-set PYTHONIOENCODING utf-8
-set PYTHONLEGACYWINDOWSSTDIO utf-8
-```
 </description> 
 	</About> 
 </Recipe> 

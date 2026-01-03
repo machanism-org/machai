@@ -13,11 +13,15 @@
 	</If> 
 	<CheckValue actual="$var{!CodeMie Plugin Path}" expected="$var{!Project Dir}" onErrorMsg="CodeMie plugin --repo-path wrong." /> 
 	<Extern class="Web">
-		<Page url="https://codemie.lab.epam.com/#/chats" /> 
 		<ElementNotExists xpath="//*[@id='app']/div[2]/header/div[1]/a" timeout="1s">
+			<Page url="https://codemie.lab.epam.com" /> 
 			<Click xpath="//*[normalize-space(text())='Sign in with EPAM SSO']" timeout="10s" /> 
 			<Click xpath="//*[normalize-space(text())='Tell Me More']" exception="ignored" timeout="1s" /> 
 		</ElementNotExists> 
+		<Page url="https://codemie.lab.epam.com/#/chats" /> 
+		<WhileRun name="" message="Open `Plugin Assistant` manually.">
+			<ElementExists xpath="//button[@aria-label='Plugin Assistant' and @data-tooltip-content='Plugin Assistant']" timeout="60s" /> 
+		</WhileRun> 
 		<!-- Inputs processing --> 
 		<Listdir name="Inputs Files" path="$var{!Project Dir}" filter=".*\.txt" dirFilter=".*\.machai\\docs-inputs\\.*" /> 
 		<Out name="Inputs Files" /> 
