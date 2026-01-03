@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 public abstract class ProjectLayout {
 
 	public static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn", ".machai", "target", "build",
-			".venv", "__", ".pytest_cache", ".idea", ".egg-info", ".classpath", ".settings", "logs", ".settings",
+			".venv", "__", ".pytest_cache", ".idea", ".egg-info", ".classpath", ".settings", "logs", ".settings", ".project",
 			".m2" };
 
 	private File projectDir;
@@ -49,4 +49,5 @@ public abstract class ProjectLayout {
 		}
 		return StringUtils.defaultIfBlank(relativePath, ".");
 	}
+
 }

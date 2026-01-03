@@ -18,7 +18,7 @@ class BIndexProjectProcessorTest {
     static class TestProcessor extends BIndexProjectProcessor {
 
 		@Override
-		public void processProject(ProjectLayout processor) {
+		public void processFolder(ProjectLayout processor) {
 			// TODO Auto-generated method stub
 			
 		}}

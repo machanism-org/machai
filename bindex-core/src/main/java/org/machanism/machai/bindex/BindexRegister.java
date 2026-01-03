@@ -22,7 +22,7 @@ public class BindexRegister extends BIndexProjectProcessor implements Closeable 
 		picker = new Picker(provider);
 	}
 
-	public void processProject(ProjectLayout projectLayout) {
+	public void processFolder(ProjectLayout projectLayout) {
 		BIndex bindex;
 		try {
 			File projectDir = projectLayout.getProjectDir();

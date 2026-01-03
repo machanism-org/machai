@@ -38,7 +38,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 		projectLayout.projectDir(basedir);
 		projectLayout.effectivePomRequired(true);
 		projectLayout.model(project.getModel());
-		creator.processProject(projectLayout);
+		creator.processFolder(projectLayout);
 	}
 
 	boolean isBindexed() {

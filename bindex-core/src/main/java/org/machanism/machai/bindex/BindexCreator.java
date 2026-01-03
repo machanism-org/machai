@@ -27,7 +27,7 @@ public class BindexCreator extends BIndexProjectProcessor {
 		this.callLLM = callLLM;
 	}
 
-	public void processProject(ProjectLayout projectLayout) {
+	public void processFolder(ProjectLayout projectLayout) {
 		BIndex bindex;
 		try {
 			BindexBuilder bindexBuilder = BindexBuilderFactory.create(projectLayout);

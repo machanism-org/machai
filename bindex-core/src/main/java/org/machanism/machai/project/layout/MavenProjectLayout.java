@@ -28,15 +28,17 @@ public class MavenProjectLayout extends ProjectLayout {
 		List<String> modules = null;
 
 		File pomFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
-		Model model = getModel();
-
-		if ("pom".equals(model.getPackaging())) {
+		if (model == null) {
 			try {
 				model = PomReader.getProjectModel(pomFile, effectivePomRequired);
 			} catch (Exception e) {
 				logger.warn("Effective model building failed: {}",
 						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
 			}
+		}
+
+		Model model = getModel();
+		if ("pom".equals(model.getPackaging())) {
 			modules = model.getModules();
 		}
 
@@ -72,13 +74,8 @@ public class MavenProjectLayout extends ProjectLayout {
 			sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(sourceDirectory)));
 		}
 		if (build.getResources() != null) {
-			sources.addAll(
-					build
-							.getResources()
-							.stream()
-							.map(r -> r.getDirectory())
-							.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p)))
-							.collect(Collectors.toList()));
+			sources.addAll(build.getResources().stream().map(r -> r.getDirectory())
+					.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p))).collect(Collectors.toList()));
 		}
 		return sources;
 	}
@@ -97,18 +94,13 @@ public class MavenProjectLayout extends ProjectLayout {
 		Model model = getModel();
 		Build build = model.getBuild();
 		if (build.getTestSourceDirectory() != null) {
-			sources.add(
-					ProjectLayout.getRelatedPath(getProjectDir(), new File(build.getTestSourceDirectory())));
+			sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(build.getTestSourceDirectory())));
 		}
 		if (build.getTestResources() != null) {
-			sources.addAll(
-					build
-							.getTestResources()
-							.stream()
-							.map(r -> r.getDirectory())
-							.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p)))
-							.collect(Collectors.toList()));
+			sources.addAll(build.getTestResources().stream().map(r -> r.getDirectory())
+					.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p))).collect(Collectors.toList()));
 		}
 		return sources;
 	}
+
 }

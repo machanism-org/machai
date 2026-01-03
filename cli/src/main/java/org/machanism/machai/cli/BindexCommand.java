@@ -39,7 +39,7 @@ public class BindexCommand {
 
 		BindexCreator register = new BindexCreator(provider, !inputs);
 		register.update(update);
-		register.scanProjects(dir);
+		register.scanFolder(dir);
 	}
 
 	@ShellMethod("Registers bindex file.")
@@ -55,7 +55,7 @@ public class BindexCommand {
 		GenAIProvider provider = GenAIProviderManager.getProvider(CHAT_MODEL);
 		try (BindexRegister register = new BindexRegister(provider)) {
 			register.update(update);
-			register.scanProjects(dir);
+			register.scanFolder(dir);
 		}
 	}
 }

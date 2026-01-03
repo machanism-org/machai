@@ -22,7 +22,7 @@ public class Register extends AbstractBindexMojo {
 			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 			try (BindexRegister register = new BindexRegister(provider)) {
 				register.update(update);
-				register.scanProjects(project.getBasedir());
+				register.scanFolder(project.getBasedir());
 			} catch (IOException e) {
 				throw new MojoExecutionException("Bindex register failed.", e);
 			}

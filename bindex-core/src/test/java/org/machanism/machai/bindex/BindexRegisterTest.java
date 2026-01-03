@@ -43,7 +43,7 @@ class BindexRegisterTest {
         doReturn("newid").when(picker).create(bindex);
         register.update(true);
         // Use reflection to inject mock Picker if needed
-        register.processProject(layout); // Should not throw
+        register.processFolder(layout); // Should not throw
     }
 
     @Test
@@ -53,7 +53,7 @@ class BindexRegisterTest {
         when(layout.getProjectDir()).thenReturn(new File("."));
         doThrow(new IOException("fail")).when(register).getBindex(any(File.class));
         assertThrows(IllegalArgumentException.class, () -> {
-            register.processProject(layout);
+            register.processFolder(layout);
         });
     }
 

@@ -86,12 +86,13 @@
 	</profiles>
 
 	<modules>
+		<module>genai-client</module>
 		<module>bindex-core</module>
 		<module>cli</module>
 		<module>bindex-maven-plugin</module>
 		<module>assembly-maven-plugin</module>
 		<module>ghostwriter</module>
-		<module>genai-client</module>
+		<module>ghostwriter-maven-plugin</module>
 	</modules>
 
 	<dependencies>
@@ -129,6 +130,11 @@
 							<version>1.2.9-SNAPSHOT</version>
 						</dependency>
 					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.machanism.machai</groupId>
+					<artifactId>ghostwriter-maven-plugin</artifactId>
+					<version>0.0.2-SNAPSHOT</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

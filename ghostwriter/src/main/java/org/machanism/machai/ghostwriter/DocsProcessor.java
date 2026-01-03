@@ -1,6 +1,7 @@
 package org.machanism.machai.ghostwriter;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -82,7 +83,7 @@ public class DocsProcessor extends ProjectProcessor {
 	 */
 	public void scanDocuments(File rootDir) throws IOException {
 		this.rootDir = rootDir;
-		scanProjects(rootDir);
+		scanFolder(rootDir);
 	}
 
 	/**
@@ -93,10 +94,10 @@ public class DocsProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	@Override
-	public void scanProjects(File projectDir) throws IOException {
+	public void scanFolder(File projectDir) throws IOException {
 		systemFunctionTools.setWorkingDir(getRootDir(projectDir));
 
-		ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
+		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		List<String> modules = projectLayout.getModules();
 		if (modules != null) {
 			File[] files = projectDir.listFiles();
@@ -105,7 +106,7 @@ public class DocsProcessor extends ProjectProcessor {
 					if (!StringUtils.equalsAnyIgnoreCase(file.getName(), modules.toArray(new String[] {}))
 							&& !StringUtils.containsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
 						if (file.isDirectory()) {
-							processProject(projectLayout, file);
+							processProjectDir(projectLayout, file);
 						} else {
 							processFile(projectLayout, file);
 						}
@@ -114,7 +115,7 @@ public class DocsProcessor extends ProjectProcessor {
 			}
 		}
 
-		super.scanProjects(projectDir);
+		super.scanFolder(projectDir);
 	}
 
 	/**
@@ -124,12 +125,12 @@ public class DocsProcessor extends ProjectProcessor {
 	 *                      docs, and modules
 	 */
 	@Override
-	public void processProject(ProjectLayout projectLayout) {
+	public void processFolder(ProjectLayout projectLayout) {
 		File projectDir = projectLayout.getProjectDir();
-		processProject(projectLayout, projectDir);
+		processProjectDir(projectLayout, projectDir);
 	}
 
-	private void processProject(ProjectLayout projectLayout, File scanDir) {
+	private void processProjectDir(ProjectLayout projectLayout, File scanDir) {
 		try {
 			List<File> files = findFiles(scanDir);
 			if (!files.isEmpty()) {

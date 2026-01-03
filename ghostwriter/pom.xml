@@ -19,11 +19,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
-			<artifactId>genai-client</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.machanism.machai</groupId>
 			<artifactId>bindex-core</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
@@ -39,36 +34,43 @@
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-model</artifactId>
 			<version>${maven.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-plugin-api</artifactId>
 			<version>${maven.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
 			<version>${maven.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.resolver</groupId>
 			<artifactId>maven-resolver-connector-basic</artifactId>
 			<version>1.3.3</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.resolver</groupId>
 			<artifactId>maven-resolver-transport-file</artifactId>
 			<version>1.3.3</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.resolver</groupId>
 			<artifactId>maven-resolver-transport-http</artifactId>
 			<version>1.3.3</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.resolver</groupId>
 			<artifactId>maven-resolver-transport-wagon</artifactId>
 			<version>1.3.3</version>
+			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>
