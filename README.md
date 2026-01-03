@@ -21,30 +21,43 @@ For further details about Machai, its philosophy, and ecosystem, please visit:
 - [Machanism Platform](https://machanism.org)
 
 ## Project Modules Overview
+<!-- This section must consistently reflect the most recent and complete list of submodules. Review and update this section whenever changes are made to the submodule configuration to ensure accuracy and alignment with the current project structure. Update according to current sub-module list.
 
-### Bindex Core
-Bindex Core provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly. It enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.  
-[Explore Bindex Core](./bindex-core/)
+Output format:
 
-### Machai CLI
-Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library discovery and integration.  
-[Explore Machai CLI](./cli/)
+### [Sub-Project Name]
+[Sub-Project Name] provides [brief description of core functionality and purpose].  
+[Explore Sub-Project Name](./[sub-project-folder]/)
+ --> 
 
-### Bindex Maven Plugin
-Bindex Maven Plugin enables automated generation and registration of bindex metadata for Maven projects. It facilitates library discovery, integration, and assembly by leveraging structured metadata and GenAI-powered semantic search within the Machanism ecosystem.  
-[Explore Bindex Maven Plugin](./bindex-maven-plugin/)
+### genai-client
+Genai Client provides integration and connectivity to generative AI services for project intelligence and automation.
+[Explore genai-client](./genai-client/)
 
-### Project Assembly Maven Plugin
-Project Assembly Maven Plugin automates the assembly of projects within the Machanism ecosystem by integrating libraries based on bindex metadata. It streamlines dependency resolution, library selection, and project packaging using GenAI-powered semantic search and metadata-driven workflows.  
-[Explore Project Assembly Maven Plugin](./assembly-maven-plugin/)
+### bindex-core
+Bindex Core offers core project metadata management, semantic search, and metadata-driven integration tools.
+[Explore bindex-core](./bindex-core/)
 
-### Ghostwriter
-Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.  
-[Explore Ghostwriter](./ghostwriter/)
+### cli
+CLI delivers a command-line interface for project assembly, searching, and metadata manipulation in the Machai platform.
+[Explore cli](./cli/)
 
-### GenAI Client
-GenAI Client is a Java library for interacting with Generative AI providers. It provides foundational prompt and embedding capabilities to power AI-based features in other Machai modules.  
-[Explore GenAI Client](./genai-client/)
+### bindex-maven-plugin
+Bindex Maven Plugin enables Maven-based extraction, publication, and management of project metadata.
+[Explore bindex-maven-plugin](./bindex-maven-plugin/)
+
+### assembly-maven-plugin
+Assembly Maven Plugin automates the assembly and integration of projects using metadata and intelligent GenAI recommendations.
+[Explore assembly-maven-plugin](./assembly-maven-plugin/)
+
+### ghostwriter
+Ghostwriter generates, maintains, and improves source code using generative AI models within the Machai ecosystem.
+[Explore ghostwriter](./ghostwriter/)
+
+### ghostwriter-maven-plugin
+Ghostwriter Maven Plugin provides Maven integration for source code generation, improvement, and maintenance using GenAI.
+[Explore ghostwriter-maven-plugin](./ghostwriter-maven-plugin/)
+
 
 ## Usage and Documentation
 
