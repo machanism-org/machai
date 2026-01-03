@@ -1,7 +1,6 @@
 package org.machanism.machai.ghostwriter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import org.machanism.machai.ghostwriter.reviewer.PythonReviewer;
 import org.machanism.machai.ghostwriter.reviewer.Reviewer;
 import org.machanism.machai.ghostwriter.reviewer.TextReviewer;
 import org.machanism.machai.ghostwriter.reviewer.TypeScriptReviewer;
-import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -148,14 +146,11 @@ public class DocsProcessor extends ProjectProcessor {
 		String guidance = parseFile(projectDir, file);
 
 		if (guidance != null) {
-			String parentsPath = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
-					file.getParentFile());
-			String[] parents = StringUtils.split(parentsPath, "/");
 
 			provider.instructions(promptBundle.getString("sys_instractions"));
 			provider.prompt(promptBundle.getString("docs_processing_instractions"));
 
-			List<String> parentsGuidances = getParentsGuidances(parentsPath, parents);
+			List<String> parentsGuidances = getParentsGuidances(projectLayout, file);
 			for (String dirGuidance : parentsGuidances) {
 				provider.prompt(dirGuidance);
 			}
@@ -172,15 +167,25 @@ public class DocsProcessor extends ProjectProcessor {
 		}
 	}
 
-	private List<String> getParentsGuidances(String parentsPath, String[] parents) {
-		List<String> guidances = new ArrayList<>();
+	private List<String> getParentsGuidances(ProjectLayout projectLayout, File file) {
+		String projectPath = ProjectLayout.getRelatedPath(rootDir, projectLayout.getProjectDir());
+		int skipNumber = StringUtils.split(projectPath, "/").length;
+
+		String parentsPath = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
+				file.getParentFile());
+
 		StringBuilder path = new StringBuilder();
+		String[] parents = StringUtils.split(parentsPath, "/");
+		List<String> guidances = new ArrayList<String>();
+
 		for (String parent : parents) {
 			path.append("/" + parent);
-			if (!StringUtils.equals(path, "/" + parentsPath)) {
-				String dirGuidance = dirGuidanceMap.get(path.toString());
-				if (StringUtils.isNotBlank(dirGuidance)) {
-					guidances.add(dirGuidance);
+			if (skipNumber-- <= 0) {
+				if (!StringUtils.equals(path, "/" + parentsPath)) {
+					String dirGuidance = dirGuidanceMap.get(path.toString());
+					if (StringUtils.isNotBlank(dirGuidance)) {
+						guidances.add(dirGuidance);
+					}
 				}
 			}
 		}
@@ -209,7 +214,10 @@ public class DocsProcessor extends ProjectProcessor {
 				File file = new File(projectDir, t);
 				boolean exists = file.exists();
 				return exists;
-			}).map(e -> "`" + e + "`").collect(Collectors.toList());
+			}).map(e -> {
+				String path = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
+				return "`" + path + "`";
+			}).collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 

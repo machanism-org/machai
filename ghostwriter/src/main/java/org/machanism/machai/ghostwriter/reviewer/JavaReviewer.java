@@ -52,7 +52,7 @@ public class JavaReviewer implements Reviewer {
 			Matcher matcher = pattern.matcher(content);
 			if (matcher.find()) {
 				if (StringUtils.equals(guidancesFile.getName(), "package-info.java")) {
-					String guidanceText = matcher.group(1).replaceAll("\\s*\\*\\s?", " ").trim();
+					String guidanceText = matcher.group(1).replaceAll("(?m)^\\s*\\*\\s?", "").trim();
 					result = MessageFormat.format(promptBundle.getString("java_package_info_file"),
 							ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile()), guidanceText);
 				} else {
