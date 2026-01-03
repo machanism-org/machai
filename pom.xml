@@ -118,6 +118,9 @@
 					<version>1.2.9-SNAPSHOT</version>
 					<configuration>
 						<aeDir>src/ae</aeDir>
+						<variables>
+							<mavenBaseDir>${project.basedir}</mavenBaseDir>
+						</variables>
 					</configuration>
 					<dependencies>
 						<dependency>

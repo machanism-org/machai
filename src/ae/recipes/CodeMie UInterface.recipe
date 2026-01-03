@@ -1,4 +1,5 @@
 <Recipe name="CodeMie UInterface">
+	<Var name="!Project Dir" init="default" type="path" source="mavenBaseDir" /> 
 	<Var name="!Project Dir" init="mandatory" type="path" /> 
 	<If name="!CodeMie Plugin Path" notEqual="$var{!Project Dir}">
 		<Confirm name="CodeMie Run Confirmation" message="Please confirm CodeMie plugin run.">

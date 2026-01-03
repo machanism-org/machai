@@ -9,6 +9,7 @@
 		<Remove name="!CodeMie Plugin Path" /> 
 		<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command> 
 	</Finally> 
+	<Var name="!Project Dir" init="default" type="path" source="mavenBaseDir" /> 
 	<Var name="!Project Dir" init="mandatory" type="path" /> 
 	<Out name="!Project Dir" /> 
 	<View name="output" reuse="true" type="Text" font="MONOSPACED" /> 
