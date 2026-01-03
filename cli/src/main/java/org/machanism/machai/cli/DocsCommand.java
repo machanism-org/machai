@@ -25,7 +25,7 @@ public class DocsCommand {
 	LineReader reader;
 
 	@ShellMethod("GenAI document processing command.")
-	public void assist(
+	public void docs(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "Generates only the inputs.txt file; no request is sent to OpenAI to create a bindex.", value = "inputs") boolean inputs)
 			throws IOException {

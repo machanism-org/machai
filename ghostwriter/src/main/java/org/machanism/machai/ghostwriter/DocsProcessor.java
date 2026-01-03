@@ -152,7 +152,8 @@ public class DocsProcessor extends ProjectProcessor {
 					file.getParentFile());
 			String[] parents = StringUtils.split(parentsPath, "/");
 
-			provider.instructions(promptBundle.getString("docs_instractions"));
+			provider.instructions(promptBundle.getString("sys_instractions"));
+			provider.prompt(promptBundle.getString("docs_processing_instractions"));
 
 			List<String> parentsGuidances = getParentsGuidances(parentsPath, parents);
 			for (String dirGuidance : parentsGuidances) {
