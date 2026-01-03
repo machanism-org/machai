@@ -83,7 +83,7 @@ public class MavenProjectLayout extends ProjectLayout {
 	@Override
 	public List<String> getDocuments() {
 		List<String> docs = new ArrayList<>();
-		String sourceDirectory = "src/site/markdown";
+		String sourceDirectory = "src/site";
 		docs.add(sourceDirectory);
 		return docs;
 	}

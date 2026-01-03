@@ -191,20 +191,28 @@ public class DocsProcessor extends ProjectProcessor {
 
 		File projectDir = projectLayout.getProjectDir();
 		String path = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), projectDir);
+
 		content.add(path);
-		content.add(getDirInfoLine(projectLayout.getSources()));
-		content.add(getDirInfoLine(projectLayout.getTests()));
-		content.add(getDirInfoLine(projectLayout.getDocuments()));
-		content.add(getDirInfoLine(projectLayout.getModules()));
+		content.add(getDirInfoLine(projectLayout.getSources(), projectDir));
+		content.add(getDirInfoLine(projectLayout.getTests(), projectDir));
+		content.add(getDirInfoLine(projectLayout.getDocuments(), projectDir));
+		content.add(getDirInfoLine(projectLayout.getModules(), projectDir));
 
 		return MessageFormat.format(promptBundle.getString("project_information"), content.toArray());
 	}
 
-	private String getDirInfoLine(List<String> sources) {
-		String line;
+	private String getDirInfoLine(List<String> sources, File projectDir) {
+		String line = null;
 		if (sources != null && !sources.isEmpty()) {
-			line = StringUtils.join(sources.stream().map(e -> "`" + e + "`").collect(Collectors.toList()), ", ");
-		} else {
+			List<String> dirs = sources.stream().filter(t -> {
+				File file = new File(projectDir, t);
+				boolean exists = file.exists();
+				return exists;
+			}).map(e -> "`" + e + "`").collect(Collectors.toList());
+			line = StringUtils.join(dirs, ", ");
+		}
+
+		if (StringUtils.isBlank(line)) {
 			line = "not defined";
 		}
 		return line;
