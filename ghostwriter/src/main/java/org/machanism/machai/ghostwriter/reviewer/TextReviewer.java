@@ -63,7 +63,7 @@ public class TextReviewer implements Reviewer {
 			if (StringUtils.isNotBlank(guidance)) {
 				String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
 				guidance = MessageFormat.format(promptBundle.getString("guidance_file"), parentsPath, guidance);
-				dirGuidanceMap.put("/" + parentsPath, guidance);
+				dirGuidanceMap.put(parentsPath, guidance);
 			}
 		} else {
 			guidance = null;

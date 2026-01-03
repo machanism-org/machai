@@ -42,6 +42,10 @@ public abstract class ProjectLayout {
 	public abstract List<String> getTests();
 
 	public static String getRelatedPath(File dir, File file) {
+		return getRelatedPath(dir, file, false);
+	}
+
+	public static String getRelatedPath(File dir, File file, boolean addSingleDot) {
 		String currentPath = dir.getAbsolutePath().replace("\\", "/");
 		String relativePath = file.getAbsolutePath().replace("\\", "/").replace(currentPath, "");
 		if (StringUtils.startsWith(relativePath, "/")) {
@@ -50,7 +54,10 @@ public abstract class ProjectLayout {
 		String result = StringUtils.defaultIfBlank(relativePath, ".");
 		if (StringUtils.isBlank(result)) {
 			result = ".";
-		} 
+		} else if (!StringUtils.startsWith(result, ".") && addSingleDot) {
+			result = "./" + result;
+		}
+
 		return result;
 	}
 

@@ -1,9 +1,9 @@
-package org.machanism.machai.bindex;
+package org.machanism.machai.project;
 
 /*
  * @guidance: Create high-quality unit tests in this folder for all public and package-private classes
- * and methods in the package org.machanism.machai.bindex.
- * The source files are located in [Project Path]/src/main/java/org/machanism/machai/bindex.
+ * and methods in the package org.machanism.machai.project.
+ * The source files are located in [Project Path]/src/main/java/org/machanism/machai/project.
  *
  * - Ensure comprehensive coverage of all core logic, edge cases, and error handling.
  * - Use descriptive test method names and meaningful assertions.

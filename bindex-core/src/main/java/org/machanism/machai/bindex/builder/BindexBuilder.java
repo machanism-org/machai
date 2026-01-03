@@ -20,6 +20,7 @@ public class BindexBuilder {
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	private BIndex origin;
+
 	private GenAIProvider genAIProvider;
 	private ProjectLayout projectLayout;
 
@@ -64,6 +65,10 @@ public class BindexBuilder {
 	public BindexBuilder origin(BIndex bindex) {
 		this.origin = bindex;
 		return this;
+	}
+
+	public BIndex getOrigin() {
+		return origin;
 	}
 
 	public GenAIProvider getGenAIProvider() {

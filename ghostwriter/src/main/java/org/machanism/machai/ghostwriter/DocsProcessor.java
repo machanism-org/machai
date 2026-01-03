@@ -46,6 +46,7 @@ public class DocsProcessor extends ProjectProcessor {
 	private Map<String, Reviewer> reviewMap = new HashMap<>();
 
 	private File rootDir;
+	private boolean inheritance = true;
 
 	/**
 	 * Constructs a DocsProcessor for documentation input preparation.
@@ -158,6 +159,7 @@ public class DocsProcessor extends ProjectProcessor {
 			String projectInfo = getProjectStructureDescription(projectLayout);
 			provider.prompt(projectInfo);
 			provider.prompt(guidance);
+			provider.prompt(promptBundle.getString("output_format"));
 
 			String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
 			File docsTempDir = new File(projectDir, DOCS_TEMP_DIR);
@@ -168,20 +170,23 @@ public class DocsProcessor extends ProjectProcessor {
 	}
 
 	private List<String> getParentsGuidances(ProjectLayout projectLayout, File file) {
-		String projectPath = ProjectLayout.getRelatedPath(rootDir, projectLayout.getProjectDir());
+		String projectPath = ProjectLayout.getRelatedPath(rootDir, projectLayout.getProjectDir(), true);
 		int skipNumber = StringUtils.split(projectPath, "/").length;
 
 		String parentsPath = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
-				file.getParentFile());
+				file.getParentFile(), true);
 
 		StringBuilder path = new StringBuilder();
 		String[] parents = StringUtils.split(parentsPath, "/");
 		List<String> guidances = new ArrayList<String>();
 
 		for (String parent : parents) {
-			path.append("/" + parent);
-			if (skipNumber-- <= 0) {
-				if (!StringUtils.equals(path, "/" + parentsPath)) {
+			if (!".".equals(parent)) {
+				path.append("/");
+			}
+			path.append(parent);
+			if (skipNumber-- <= 0 || inheritance) {
+				if (!StringUtils.equals(path, parentsPath)) {
 					String dirGuidance = dirGuidanceMap.get(path.toString());
 					if (StringUtils.isNotBlank(dirGuidance)) {
 						guidances.add(dirGuidance);
@@ -267,6 +272,14 @@ public class DocsProcessor extends ProjectProcessor {
 	 */
 	public File getRootDir(File projectDir) {
 		return rootDir != null ? rootDir : projectDir;
+	}
+
+	public boolean isInheritance() {
+		return inheritance;
+	}
+
+	public void setInheritance(boolean inheritance) {
+		this.inheritance = inheritance;
 	}
 
 }
