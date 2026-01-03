@@ -195,10 +195,10 @@ public class DocsProcessor extends ProjectProcessor {
 	private String getProjectStructureDescription(ProjectLayout projectLayout) throws IOException {
 		List<String> content = new ArrayList<String>();
 
-		File projectDir = projectLayout.getProjectDir();
-		String path = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), projectDir);
+		String path = ProjectLayout.getRelatedPath(rootDir, projectLayout.getProjectDir());
 
 		content.add(path);
+		File projectDir = projectLayout.getProjectDir();
 		content.add(getDirInfoLine(projectLayout.getSources(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getTests(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getDocuments(), projectDir));
