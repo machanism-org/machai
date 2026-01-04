@@ -11,7 +11,13 @@
 	<artifactId>genai-client</artifactId>
 	<name>GenAI Client</name>
 	<description>
-	
+		GenAI Client is a Java library designed for seamless integration with
+		Generative AI providers. It offers foundational prompt management and
+		embedding capabilities, enabling AI-powered features across Machai
+		modules. The library simplifies interactions with AI services,
+		supporting advanced use cases such as semantic search, automated content
+		generation, and intelligent project assembly within the Machanism
+		ecosystem.
 	</description>
 
 	<dependencies>
@@ -41,7 +47,7 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.20.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>

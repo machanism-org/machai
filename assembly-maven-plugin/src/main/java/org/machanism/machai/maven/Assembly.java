@@ -28,7 +28,7 @@ import org.machanism.machai.schema.BIndex;
  * This mojo provides an interactive prompt and automated selection of dependencies using a prompt
  * and AI provider. It can recommend libraries and assemble the project structure based on user input or
  * prompt files. See usage example below for typical invocation.
- * </p>
+ *
  *
  * <pre>
  * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
@@ -44,7 +44,6 @@ import org.machanism.machai.schema.BIndex;
  *   <li>basedir: Project directory (File)</li>
  * </ul>
  *
- * @guidance
  */
 @Mojo(name = "assembly", requiresProject = false, requiresDependencyCollection = ResolutionScope.NONE)
 public class Assembly extends AbstractMojo {
@@ -95,7 +94,7 @@ public class Assembly extends AbstractMojo {
      * Attempts to load a prompt from the file (if it exists), then uses the Picker to recommend libraries
      * and applies the AI-powered system functions to generate or update project content.
      * If inputsOnly is false, prompts the user in a loop for API interaction until they enter "exit".
-     * </p>
+     *
      *
      * <h3>Parameters</h3>
      * <ul>

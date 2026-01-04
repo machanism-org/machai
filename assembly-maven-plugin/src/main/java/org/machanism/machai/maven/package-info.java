@@ -19,7 +19,7 @@
  * <p>
  * For advanced users, customize the chat models and scoring parameters to leverage different AI providers
  * or control the recommendation quality.
- * </p>
+ *
  *
  * <h2>Best Practices</h2>
  * <ul>

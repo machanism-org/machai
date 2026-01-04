@@ -19,7 +19,7 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  *     ProjectLayout layout = ...;
  *     BindexBuilder builder = BindexBuilderFactory.create(layout);
  * </pre>
- * </p>
+ * 
  * Depending on the layout type, returns an appropriate builder instance, or throws if directory is missing.
  *
  * @author machanism.org

@@ -10,12 +10,12 @@ import org.apache.commons.lang3.StringUtils;
  * Abstract base class for project layout structures.
  * <p>
  * Defines a common interface and directory exclusion strategy for child layouts like Maven, JS/TS, Python, etc. Provides relative path helpers for consistent path management.
- * </p>
  *
+ *
+ * <p>Example usage:
  * <pre>
- * Example usage:
  * ProjectLayout layout = new MavenProjectLayout().projectDir(new File("/workspace"));
- * List<String> sources = layout.getSources();
+ * List&lt;String&gt; sources = layout.getSources();
  * </pre>
  *
  * @author machai

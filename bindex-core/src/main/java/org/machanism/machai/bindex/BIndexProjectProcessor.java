@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <p>
  * Provides functions to fetch BIndex objects and files from project directories.
  * Extends {@link ProjectProcessor} to allow BIndex-specific project work.
- * </p>
+ *
  *
  * Usage Example:
  * <pre>

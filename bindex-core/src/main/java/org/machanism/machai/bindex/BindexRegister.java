@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  *         register.processFolder(layout);
  *     }
  * </pre>
- * </p>
+ *
  * This class supports registration, ID lookup, and document update via Picker.
  *
  * @author machanism.org

@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
  * Abstract base class for processing project structures and modules.
  * <p>
  * Handles project folder scanning and delegates module or folder-specific processing to subclasses.
- * </p>
- * <h3>Usage Example</h3>
+ *
+ * <p>Usage Example:
  * <pre>{@code
  *   ProjectProcessor processor = ...;
  *   processor.scanFolder(new File("/path/to/project"));

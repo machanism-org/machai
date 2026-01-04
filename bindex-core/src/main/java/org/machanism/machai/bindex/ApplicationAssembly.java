@@ -17,13 +17,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Handles assembly operations for BIndex projects using GenAIProvider and prompts.
- * <p>
- * Typical usage example:
+ * 
+ * <p>Typical usage example:
  * <pre>
  *     ApplicationAssembly assembly = new ApplicationAssembly(provider);
  *     assembly.assembly(prompt, bindexList, true);
  * </pre>
- * </p>
  *
  * @author machanism.org
  * @since 1.0

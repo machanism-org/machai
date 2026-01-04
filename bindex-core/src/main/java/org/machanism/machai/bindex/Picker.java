@@ -59,13 +59,13 @@ import dev.langchain4j.model.output.Response;
  * <p>
  * Provides registration and query operations for BIndex repositories, supporting classification embedding
  * for semantic retrieval and indexing.
- * Usage example:
+ * <p>Usage example:
  * <pre>
  *     try(Picker picker = new Picker(provider)) {
- *         List<BIndex> results = picker.pick("search query");
+ *         List&lt;BIndex&gt; results = picker.pick("search query");
  *     }
  * </pre>
- * </p>
+ *
  * @author machanism.org
  * @since 1.0
  */

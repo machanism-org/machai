@@ -16,7 +16,7 @@
  *     ApplicationAssembly assembly = new ApplicationAssembly(provider);
  *     assembly.assembly(prompt, bindexList, true);
  * </pre>
- * </p>
+ *
  * <b>Important Guidance:</b>
  * <ul>
  *     <li>All public/protected classes, interfaces, and fields must be documented.</li>

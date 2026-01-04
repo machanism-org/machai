@@ -13,7 +13,7 @@ import org.tomlj.TomlParseResult;
  * Project layout implementation for Python-based projects.
  * <p>
  * Determines if a directory contains a Python project using <code>pyproject.toml</code> and related metadata. Handles analysis of modules, sources, documents, and tests in a Python environment.
- * </p>
+ *
  * @author machai
  * @since 1.0
  */

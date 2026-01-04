@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * Utility for reading and processing Maven <code>pom.xml</code> files into Maven models.
  * <p>
  * Provides model parsing, effective POM calculation, property replacement, license detection, and model serialization.
- * </p>
+ *
  * @author machai
  * @since 1.0
  */

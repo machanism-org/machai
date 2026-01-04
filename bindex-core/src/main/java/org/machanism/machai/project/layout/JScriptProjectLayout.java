@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * A project layout utility for JavaScript/TypeScript-based projects.
  * <p>
  * Scans for workspace modules defined in <code>package.json</code>, and determines project sources, documents, and test directories.
- * </p>
+ *
  * @author machai
  * @since 1.0
  */

@@ -15,8 +15,8 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  * <p>
  * This class determines the appropriate project layout for various languages and build tools
  * such as Maven, Node (package.json), and Python, defaulting to a generic layout if necessary.
- * </p>
- * <h3>Usage Example</h3>
+ *
+ * <p>Usage Example:
  * <pre>{@code
  *   File dir = new File("/path/to/project");
  *   ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);

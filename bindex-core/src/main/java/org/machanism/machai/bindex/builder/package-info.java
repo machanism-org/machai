@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package org.machanism.machai.bindex.builder;
 
 /*

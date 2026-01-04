@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
  * Provides a default implementation for project layout handling.
  * <p>
  * This class determines modules, sources, documents, and tests within a standard project directory. It excludes common build and version control directories based on {@link ProjectLayout#EXCLUDE_DIRS}.
- * </p>
+ *
  * @author machai
  * @since 1.0
  * @see ProjectLayout
@@ -55,7 +55,7 @@ public class DefaultProjectLayout extends ProjectLayout {
      * Returns a list of sources for this project layout.
      * <p>
      * Currently not implemented for the default layout.
-     * </p>
+     *
      * @return always {@code null}
      */
     @Override
@@ -67,7 +67,7 @@ public class DefaultProjectLayout extends ProjectLayout {
      * Returns a list of document sources for this project layout.
      * <p>
      * Currently not implemented for the default layout.
-     * </p>
+     *
      * @return always {@code null}
      */
     @Override
@@ -79,7 +79,7 @@ public class DefaultProjectLayout extends ProjectLayout {
      * Returns a list of test sources for this project layout.
      * <p>
      * Currently not implemented for the default layout.
-     * </p>
+     *
      * @return always {@code null}
      */
     @Override

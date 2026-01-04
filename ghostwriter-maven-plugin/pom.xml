@@ -15,15 +15,20 @@
 	<artifactId>ghostwriter-maven-plugin</artifactId>
 	<name>Ghostwriter Maven Plugin</name>
 	<description>
+		Ghostwriter Maven Plugin is an advanced documentation automation tool
+		for Java projects. It automatically scans, analyzes, and assembles
+		project documentation using embedded guidance tags and AI-powered
+		synthesis. The plugin streamlines the creation and maintenance of
+		high-quality, consistent documentation, ensuring best practices and
+		up-to-date information across all modules.
 	</description>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>ghostwriter</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>

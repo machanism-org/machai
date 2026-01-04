@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *     BindexCreator creator = new BindexCreator(provider, true);
  *     creator.processFolder(layout);
  * </pre>
- * </p>
+ *
  * This class can update or create BIndex documents based on the model provided by the builder
  * and the current contents in the project directory.
  *

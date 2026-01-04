@@ -22,6 +22,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>9</java.version>
 		<maven.version>3.6.0</maven.version>
+
+		<stagingDirectory>${env.MACHAI_SITE}</stagingDirectory>
 	</properties>
 
 	<profiles>
@@ -237,11 +239,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
+					<doclint>none</doclint>
 					<show>package</show>
-					<detectLinks>true</detectLinks>
-					<detectOfflineLinks>true</detectOfflineLinks>
-					<linksource>true</linksource>
-					<docfilessubdirs>true</docfilessubdirs>
 					<useStandardDocletOptions>true</useStandardDocletOptions>
 					<bottom><![CDATA[&copy;2025 Machanism.org. All Rights Reserved.]]></bottom>
 					<header><![CDATA[<h1><a href="${project.url}">${project.name}<a></h1>]]></header>
@@ -263,6 +262,13 @@
 		<developerConnection>scm:git:https://github.com/machanism-org/machai.git</developerConnection>
 		<url>https://github.com/machanism-org/machai.git</url>
 	</scm>
+
+	<distributionManagement>
+		<site>
+			<id>machai.machanism.org</id>
+			<url>scp://machanism.org/@machai</url>
+		</site>
+	</distributionManagement>
 
 	<issueManagement>
 		<url>https://github.com/machanism-org/machai/issues</url>

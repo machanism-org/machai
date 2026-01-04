@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * A Maven-specific implementation for project layout.
  * <p>
  * Supports detection of modules, sources, documents, and tests within Maven projects by parsing <code>pom.xml</code> and its effective model.
- * </p>
+ *
  * @author machai
  * @since 1.0
  * @see PomReader
