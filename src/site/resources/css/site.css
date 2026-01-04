@@ -1,0 +1,27 @@
+.youtube {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  max-height: 480px;
+  max-width: 854px;
+}
+
+p + u {
+  margin-bottom: 0;
+}
+
+blockquote p {
+  margin-bottom: 10px;
+}  
+
+li > p {
+  margin-bottom: 0;
+}
+
+h2, h3, h4, h5 {
+  margin-top: 16px;
+}
+
+a[href="https://www.free-counters.org/"] {
+    visibility: hidden;
+}

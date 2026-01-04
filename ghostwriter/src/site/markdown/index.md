@@ -1,9 +1,6 @@
-[@guidance]: # (This is a home page of `Ghostwriter` project.)
-
-![](src/site/resources/images/machai-ghostwriter-logo.png)
+![](images/machai-ghostwriter-logo.png)
 
 # Ghostwriter
-[@guidance]: # (Analyze the source code and generate detailed functional description for the project.)
 
 Ghostwriter is an advanced documentation engine for Machai projects. It automates the scanning, analysis, and assembly of project documentation, driven by rules and guidance embedded throughout the codebase and supporting resources. At its core is the `DocsProcessor`, which orchestrates:
 
