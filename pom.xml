@@ -5,18 +5,21 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.machanism.machai</groupId>
-	<artifactId>machai</artifactId>
+	<artifactId>
+		machai</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Machai Project</name>
+	<name>Machai
+		Project</name>
 	<description>
 		Machai is a GenAI-powered tool for automated creation, registration, and
 		enhancement of software projects. It streamlines project assembly and
 		library integration within the Machanism ecosystem using AI-driven
 		semantic search and metadata management.
 	</description>
-	<url>https://machanism.org/machai</url>
+	<url>
+		https://machanism.org/machai</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,23 +43,6 @@
 								<id>attach-sources</id>
 								<goals>
 									<goal>jar-no-fork</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.12.0</version>
-						<configuration>
-							<doclint>all,-missing</doclint>
-							<doclint>none</doclint>
-						</configuration>
-						<executions>
-							<execution>
-								<id>attach-javadocs</id>
-								<goals>
-									<goal>jar</goal>
 								</goals>
 							</execution>
 						</executions>
@@ -165,16 +151,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M4</version>
-				<configuration>
-					<excludes>
-						<exclude>**/*ManualTest.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.11.2</version>
 				<configuration>
@@ -233,6 +209,7 @@
 		</plugins>
 	</build>
 
+	<!-- mvn clean install site site:stage -->
 	<reporting>
 		<plugins>
 			<plugin>

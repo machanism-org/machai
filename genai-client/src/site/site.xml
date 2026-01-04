@@ -39,13 +39,11 @@
 			<link rel="apple-touch-icon" sizes="180x180" href="/images/logo-180x180.png">
 		]]>
 		</head>
-		<links>
+		<links >
 			<item name="GitHub"
 				href="https://github.com/machanism-org/machai" />
 		</links>
-		<menu name="Parent Project">
-			<item name="Machanism" href="http://www.machanism.org/" />
-		</menu>
+		<menu ref="parent" />
 		<menu ref="modules" />
 		<menu ref="reports" />
 		<footer><![CDATA[©2025 Machanism.org. All Rights Reserved.

@@ -32,7 +32,6 @@
  *
  * @see org.machanism.machai.maven.Assembly
  *
- * @guidance
  */
 package org.machanism.machai.maven;
 
@@ -66,6 +65,8 @@ package org.machanism.machai.maven;
  * 7. **Leverage Javadoc Tools:** - Use IDE features or static analysis tools to
  * check for missing or incomplete Javadoc. - Generate and review Javadoc HTML
  * output regularly to verify quality and completeness.
+ * 
+ * 8. `@guidance` is not a javadoc tag, do not use it in javadoc comments.
  * 
  * Apply these practices to all Java code within the package to ensure
  * high-quality, maintainable, and user-friendly documentation.

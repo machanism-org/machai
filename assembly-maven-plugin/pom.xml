@@ -13,7 +13,7 @@
 	<packaging>maven-plugin</packaging>
 
 	<artifactId>assembly-maven-plugin</artifactId>
-	<name>Project Assembly Maven Plugin</name>
+	<name>Assembly Maven Plugin</name>
 	<description>
 		assembly-maven-plugin automates the assembly of projects within the
 		Machanism ecosystem by integrating libraries based on bindex metadata.
@@ -77,4 +77,5 @@
 			</plugin>
 		</plugins>
 	</build>
+
 </project>
