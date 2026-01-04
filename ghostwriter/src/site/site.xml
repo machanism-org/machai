@@ -15,6 +15,11 @@
 			<sourceLineNumbersEnabled>false</sourceLineNumbersEnabled>
 			<topBarEnabled>false</topBarEnabled>
 			<sideBarEnabled>true</sideBarEnabled>
+			<gitHub>
+				<projectId>machanism-org/machai</projectId>
+				<ribbonOrientation>right</ribbonOrientation>
+				<ribbonColor>black</ribbonColor>
+      		</gitHub>
 		</fluidoSkin>
 	</custom>
 	<bannerLeft>
@@ -39,10 +44,7 @@
 			<link rel="apple-touch-icon" sizes="180x180" href="/images/logo-180x180.png">
 		]]>
 		</head>
-		<links>
-			<item name="GitHub"
-				href="https://github.com/machanism-org/machai" />
-		</links>
+ 
 		<menu ref="parent" />
 		<menu ref="modules" />
 		<menu ref="reports" />
