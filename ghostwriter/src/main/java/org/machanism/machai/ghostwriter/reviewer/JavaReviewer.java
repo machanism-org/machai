@@ -55,7 +55,7 @@ public class JavaReviewer implements Reviewer {
 					String guidanceText = matcher.group(1).replaceAll("(?m)^\\s*\\*\\s?", "").trim();
 					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
 					result = MessageFormat.format(promptBundle.getString("java_package_info_file"), relatedPath,
-							StringUtils.substringBetween(content, "package", ";").trim(), guidanceText);
+							StringUtils.trim(StringUtils.substringBetween(content, "package", ";")), guidanceText);
 				} else {
 					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
 					String name = guidancesFile.getName();
