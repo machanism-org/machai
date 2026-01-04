@@ -35,16 +35,16 @@
 			<meta property="og:locale" content="en_US" />
 			<link rel="stylesheet" href="https://machai.machanism.org/css/site.css">
 			<link rel="icon" sizes="180x180" href="/images/logo-180x180.png" type="image/png">
-			<link rel="icon" sizes="any" href="/images/icon.svg" type="image/svg+xml">
 			<link rel="apple-touch-icon" sizes="180x180" href="/images/logo-180x180.png">
-			<link rel="mask-icon" href="/images/icon.svg" color="#808080">
 		]]>
 		</head>
 		<links>
 			<item name="GitHub" href="https://github.com/machanism-org/machai" />
 		</links>
+		<menu name="Parent Project">
+			<item name="Machanism" href="http://www.machanism.org/" />
+		</menu>
 		<menu ref="modules" />
-		<menu ref="reports" />
 		<footer><![CDATA[©2025 Machanism.org. All Rights Reserved.
 		<a href='https://www.free-counters.org/'>... by Free-Counters.org</a> <script type='text/javascript' src='https://www.freevisitorcounters.com/auth.php?id=63e69a0bc6ea1760f17541b1860f55fad73a1819'></script>
 <script type="text/javascript" src="https://freevisitorcounters.com/en/home/counter/1475075/t/4"></script>]]></footer>
