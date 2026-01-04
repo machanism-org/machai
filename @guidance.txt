@@ -1,15 +1,39 @@
 In the project root directory, ensure the following files are present and properly created:
 
-1. LICENSE.txt
+**LICENSE.txt**
    - Include the full text of the project's license.
    - If the license file is missing, create it using the license type defined in the pom.xml file.
    - Ensure the license terms are accurate and up to date.
 
-2. README.md (create if not present)
-   - Check modules in the project and update content if it's required.
-   - Provide a concise project overview, including its purpose and main features.
-   - List installation and usage instructions.
-   - Reference any important documentation or resources.
-   - Include contact information for support or questions.
+**Generate a standard `README.md`** file for a multi-module Java project managed in a Git repository. 
 
-Review the contents of LICENSE.txt and README.md to ensure clarity, completeness, and accuracy.
+The README should include the following sections:
+
+	1. **Project Title and Overview:**  
+	   - Provide the project name and a brief description of its purpose and main features.
+	
+	2. **Module List:**  
+	   - List all modules in the project.
+	   - For each module, include its name, a short description, and a link to its subdirectory.
+	
+	3. **Installation Instructions:**  
+	   - Describe how to clone the repository and build the project (e.g., using Maven or Gradle).
+	   - Include prerequisites such as Java version and build tools.
+	
+	4. **Usage:**  
+	   - Explain how to run or use the project and its modules.
+	   - Provide example commands or code snippets if applicable.
+	
+	5. **Contributing:**  
+	   - Outline guidelines for contributing to the project, including code style, pull request process, and issue reporting.
+	
+	6. **License:**  
+	   - State the project’s license and provide a link to the license file.
+	
+	7. **Contact and Support:**  
+	   - Include contact information or links for support and further questions.
+	
+	**Formatting Requirements:**
+	- Use Markdown syntax for headings, lists, code blocks, and links.
+	- Ensure clarity and conciseness in each section.
+	- Organize the README for easy navigation and readability.
