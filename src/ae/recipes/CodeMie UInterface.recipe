@@ -24,7 +24,7 @@
 			<ElementExists xpath="//button[@aria-label='Plugin Assistant' and @data-tooltip-content='Plugin Assistant']" timeout="60s" /> 
 		</WhileRun> 
 		<!-- Inputs processing --> 
-		<Listdir name="Inputs Files" path="$var{!Project Dir}" filter=".*\.txt" dirFilter=".*\.machai\\docs-inputs\\.*" /> 
+		<Listdir name="Inputs Files" path="$var{!Project Dir}" filter=".*\.txt" dirFilter=".*\.machai\\docs-inputs.*" /> 
 		<Out name="Inputs Files" /> 
 		<Loop name="inputsFile" source="Inputs Files">
 			<Out name="inputsFile" /> 
