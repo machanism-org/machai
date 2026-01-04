@@ -78,7 +78,7 @@ public class MavenBindexBuilder extends BindexBuilder {
 		}
 	}
 
-	private void removeNotImportantData(Model model) {
+	void removeNotImportantData(Model model) {
 		model.setDistributionManagement(null);
 
 		model.setDistributionManagement(null);

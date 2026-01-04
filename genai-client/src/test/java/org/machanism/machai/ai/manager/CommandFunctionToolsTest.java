@@ -1,21 +1,56 @@
 package org.machanism.machai.ai.manager;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
+import java.io.IOException;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 class CommandFunctionToolsTest {
-    @Test
-    void throwsIfWorkingDirIsNull() {
-        CommandFunctionTools tools = new CommandFunctionTools(null);
-        Exception exception = assertThrows(IllegalArgumentException.class, tools::getWorkingDir);
-        assertTrue(exception.getMessage().contains("working dir is not defined"));
+    private CommandFunctionTools commandFunctionTools;
+    private File tempDir;
+    private static final Logger logger = LoggerFactory.getLogger(CommandFunctionToolsTest.class);
+
+    @BeforeEach
+    void setUp() {
+        tempDir = new File(System.getProperty("java.io.tmpdir"));
+        commandFunctionTools = new CommandFunctionTools(tempDir);
     }
 
     @Test
-    void setAndGetWorkingDirWorksCorrectly() {
-        File dir = new File("/");
-        CommandFunctionTools tools = new CommandFunctionTools(dir);
-        assertEquals(dir, tools.getWorkingDir());
+    void getWorkingDir_withNullWorkingDir_throwsException() {
+        CommandFunctionTools tools = new CommandFunctionTools(null);
+        Exception ex = assertThrows(IllegalArgumentException.class, tools::getWorkingDir);
+        assertEquals("The function tool working dir is not defined.", ex.getMessage());
     }
+
+    @Test
+    void setWorkingDir_setsDirSuccessfully() {
+        File newDir = new File(tempDir, "testDir");
+        commandFunctionTools.setWorkingDir(newDir);
+        assertSame(newDir, commandFunctionTools.getWorkingDir());
+    }
+
+    @Test
+    void applyTools_invokesAddTool() {
+        GenAIProvider mockProvider = Mockito.mock(GenAIProvider.class);
+        commandFunctionTools.applyTools(mockProvider);
+        Mockito.verify(mockProvider, Mockito.atLeastOnce()).addTool(
+                Mockito.eq("run_command_line_tool"),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.any());
+    }
+
 }

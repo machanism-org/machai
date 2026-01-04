@@ -10,46 +10,89 @@ import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * BindexRegister handles registration and update of BIndex documents for given projects,
+ * leveraging Picker for registration id management.
+ * <p>
+ * Usage Example:
+ * <pre>
+ *     try(BindexRegister register = new BindexRegister(provider)) {
+ *         register.processFolder(layout);
+ *     }
+ * </pre>
+ * </p>
+ * This class supports registration, ID lookup, and document update via Picker.
+ *
+ * @author machanism.org
+ * @since 1.0
+ * @see BIndexProjectProcessor
+ */
 public class BindexRegister extends BIndexProjectProcessor implements Closeable {
 
-	private static Logger logger = LoggerFactory.getLogger(BindexRegister.class);
+    /** Logger instance for the BindexRegister class. */
+    private static Logger logger = LoggerFactory.getLogger(BindexRegister.class);
 
-	private Picker picker;
-	private boolean update;
+    /** Picker instance for registration id management. */
+    private Picker picker;
 
-	public BindexRegister(GenAIProvider provider) {
-		super();
-		picker = new Picker(provider);
-	}
+    /** Update flag to force registration document updates. */
+    private boolean update;
 
-	public void processFolder(ProjectLayout projectLayout) {
-		BIndex bindex;
-		try {
-			File projectDir = projectLayout.getProjectDir();
-			bindex = getBindex(projectDir);
+    /**
+     * Constructs a BindexRegister with specified GenAIProvider.
+     *
+     * @param provider GenAIProvider used for Picker instantiation
+     */
+    public BindexRegister(GenAIProvider provider) {
+        super();
+        picker = new Picker(provider);
+    }
 
-			String regId = null;
-			if (bindex != null) {
-				regId = picker.getRegistredId(bindex);
-				if (regId == null || update) {
-					regId = picker.create(bindex);
-					logger.info("Registration id: {}", regId);
-				}
-			}
+    /**
+     * Processes folder registration using the provided project layout, optionally updating IDs.
+     *
+     * @param projectLayout ProjectLayout to process
+     * @throws IllegalArgumentException If an IO error occurs during registration
+     */
+    public void processFolder(ProjectLayout projectLayout) {
+        BIndex bindex;
+        try {
+            File projectDir = projectLayout.getProjectDir();
+            bindex = getBindex(projectDir);
 
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
+            String regId = null;
+            if (bindex != null) {
+                regId = picker.getRegistredId(bindex);
+                if (regId == null || update) {
+                    regId = picker.create(bindex);
+                    logger.info("Registration id: {}", regId);
+                }
+            }
 
-	@Override
-	public void close() throws IOException {
-		picker.close();
-	}
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 
-	public BindexRegister update(boolean overwrite) {
-		this.update = overwrite;
-		return this;
-	}
+    /**
+     * Closes the Picker resource.
+     *
+     * @throws IOException If Picker close fails
+     */
+    @Override
+    public void close() throws IOException {
+        picker.close();
+    }
+
+    /**
+     * Sets the update mode for registration, enabling overwrite if true.
+     *
+     * @param overwrite Whether to force update registration
+     * @return This BindexRegister instance for chained calls
+     */
+    public BindexRegister update(boolean overwrite) {
+        this.update = overwrite;
+        return this;
+    }
 
 }

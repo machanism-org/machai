@@ -11,96 +11,153 @@ import org.apache.maven.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A Maven-specific implementation for project layout.
+ * <p>
+ * Supports detection of modules, sources, documents, and tests within Maven projects by parsing <code>pom.xml</code> and its effective model.
+ * </p>
+ * @author machai
+ * @since 1.0
+ * @see PomReader
+ */
 public class MavenProjectLayout extends ProjectLayout {
 
-	private static Logger logger = LoggerFactory.getLogger(MavenProjectLayout.class);
-	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
+    private static Logger logger = LoggerFactory.getLogger(MavenProjectLayout.class);
+    private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
-	private Model model;
-	private boolean effectivePomRequired;
+    private Model model;
+    private boolean effectivePomRequired;
 
-	public static boolean isMavenProject(File projectDir) {
-		return new File(projectDir, PROJECT_MODEL_FILE_NAME).exists();
-	}
+    /**
+     * Checks if the given directory is a Maven project by looking for <code>pom.xml</code>.
+     *
+     * @param projectDir The directory to check
+     * @return true if <code>pom.xml</code> exists; false otherwise
+     */
+    public static boolean isMavenProject(File projectDir) {
+        return new File(projectDir, PROJECT_MODEL_FILE_NAME).exists();
+    }
 
-	@Override
-	public List<String> getModules() {
-		List<String> modules = null;
+    /**
+     * Returns a list of modules for Maven projects if packaging is <code>pom</code>.
+     *
+     * @return List of module names, or {@code null} if not a multi-module Maven project
+     * @see PomReader#getProjectModel(File, boolean)
+     */
+    @Override
+    public List<String> getModules() {
+        List<String> modules = null;
 
-		File pomFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
-		if (model == null) {
-			try {
-				model = PomReader.getProjectModel(pomFile, effectivePomRequired);
-			} catch (Exception e) {
-				logger.warn("Effective model building failed: {}",
-						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
-			}
-		}
+        File pomFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
+        if (model == null) {
+            try {
+                model = PomReader.getProjectModel(pomFile, effectivePomRequired);
+            } catch (Exception e) {
+                logger.warn("Effective model building failed: {}",
+                        StringUtils.abbreviate(e.getLocalizedMessage(), 120));
+            }
+        }
 
-		Model model = getModel();
-		if ("pom".equals(model.getPackaging())) {
-			modules = model.getModules();
-		}
+        Model model = getModel();
+        if ("pom".equals(model.getPackaging())) {
+            modules = model.getModules();
+        }
 
-		return modules;
-	}
+        return modules;
+    }
 
-	public Model getModel() {
-		if (model == null) {
-			model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
-		}
+    /**
+     * Returns the current Maven Model (parsed <code>pom.xml</code>).
+     *
+     * @return Parsed Maven Model for this project
+     * @see PomReader#getProjectModel(File)
+     */
+    public Model getModel() {
+        if (model == null) {
+            model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
+        }
 
-		return model;
-	}
+        return model;
+    }
 
-	public MavenProjectLayout model(Model model) {
-		this.model = model;
-		return this;
-	}
+    /**
+     * Sets the Maven Model for chaining configuration.
+     * @param model The model to set
+     * @return this object (for method chaining)
+     */
+    public MavenProjectLayout model(Model model) {
+        this.model = model;
+        return this;
+    }
 
-	public MavenProjectLayout effectivePomRequired(boolean effectivePomRequired) {
-		this.effectivePomRequired = effectivePomRequired;
-		return this;
-	}
+    /**
+     * Enables/disables effective POM calculation for module resolution.
+     * @param effectivePomRequired true to enable, false otherwise
+     * @return this object (for method chaining)
+     */
+    public MavenProjectLayout effectivePomRequired(boolean effectivePomRequired) {
+        this.effectivePomRequired = effectivePomRequired;
+        return this;
+    }
 
-	@Override
-	public List<String> getSources() {
-		List<String> sources = new ArrayList<>();
+    /**
+     * Returns a list of source directories by inspecting the Maven build section.
+     *
+     * @return List of source directories defined in Maven <code>pom.xml</code>
+     * <pre>
+     * Example usage:
+     * MavenProjectLayout layout = new MavenProjectLayout();
+     * List<String> sources = layout.projectDir(new File("/repo")).getSources();
+     * </pre>
+     */
+    @Override
+    public List<String> getSources() {
+        List<String> sources = new ArrayList<>();
 
-		Model model = getModel();
-		Build build = model.getBuild();
-		String sourceDirectory = build.getSourceDirectory();
-		if (sourceDirectory != null) {
-			sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(sourceDirectory)));
-		}
-		if (build.getResources() != null) {
-			sources.addAll(build.getResources().stream().map(r -> r.getDirectory())
-					.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p))).collect(Collectors.toList()));
-		}
-		return sources;
-	}
+        Model model = getModel();
+        Build build = model.getBuild();
+        String sourceDirectory = build.getSourceDirectory();
+        if (sourceDirectory != null) {
+            sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(sourceDirectory)));
+        }
+        if (build.getResources() != null) {
+            sources.addAll(build.getResources().stream().map(r -> r.getDirectory())
+                    .map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p))).collect(Collectors.toList()));
+        }
+        return sources;
+    }
 
-	@Override
-	public List<String> getDocuments() {
-		List<String> docs = new ArrayList<>();
-		String sourceDirectory = "src/site";
-		docs.add(sourceDirectory);
-		return docs;
-	}
+    /**
+     * Returns a list of documentation sources for Maven projects.
+     *
+     * @return List of documentation sources (default: <code>src/site</code>)
+     */
+    @Override
+    public List<String> getDocuments() {
+        List<String> docs = new ArrayList<>();
+        String sourceDirectory = "src/site";
+        docs.add(sourceDirectory);
+        return docs;
+    }
 
-	@Override
-	public List<String> getTests() {
-		List<String> sources = new ArrayList<>();
-		Model model = getModel();
-		Build build = model.getBuild();
-		if (build.getTestSourceDirectory() != null) {
-			sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(build.getTestSourceDirectory())));
-		}
-		if (build.getTestResources() != null) {
-			sources.addAll(build.getTestResources().stream().map(r -> r.getDirectory())
-					.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p))).collect(Collectors.toList()));
-		}
-		return sources;
-	}
+    /**
+     * Returns a list of test directories by inspecting the Maven build section.
+     *
+     * @return List of test source directories defined in Maven <code>pom.xml</code>
+     */
+    @Override
+    public List<String> getTests() {
+        List<String> sources = new ArrayList<>();
+        Model model = getModel();
+        Build build = model.getBuild();
+        if (build.getTestSourceDirectory() != null) {
+            sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(build.getTestSourceDirectory())));
+        }
+        if (build.getTestResources() != null) {
+            sources.addAll(build.getTestResources().stream().map(r -> r.getDirectory())
+                    .map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p))).collect(Collectors.toList()));
+        }
+        return sources;
+    }
 
 }
