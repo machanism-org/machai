@@ -24,8 +24,8 @@ public class JavaReviewer implements Reviewer {
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Returns the file extensions supported by this reviewer.
-	 * This reviewer processes files with extension: java.
+	 * Returns the file extensions supported by this reviewer. This reviewer
+	 * processes files with extension: java.
 	 *
 	 * @return an array of supported file extension strings
 	 */
@@ -53,8 +53,9 @@ public class JavaReviewer implements Reviewer {
 			if (matcher.find()) {
 				if (StringUtils.equals(guidancesFile.getName(), "package-info.java")) {
 					String guidanceText = matcher.group(1).replaceAll("(?m)^\\s*\\*\\s?", "").trim();
-					result = MessageFormat.format(promptBundle.getString("java_package_info_file"),
-							ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile()), guidanceText);
+					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
+					result = MessageFormat.format(promptBundle.getString("java_package_info_file"), relatedPath,
+							StringUtils.substringBetween(content, "package", ";").trim(), guidanceText);
 				} else {
 					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
 					String name = guidancesFile.getName();

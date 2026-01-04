@@ -37,9 +37,9 @@
 			<ElementExists xpath="//button[contains(text(), 'Send')]" timeout="300s" /> 
 			<GetText name="Updated Files" xpath="(//div[@class='flex flex-col grow min-w-0']/div)[last()-1]" /> 
 			<Out name="Updated Files" /> 
-			<Wait delay="1s" /> 
-			<Click xpath="//button[@data-tooltip-content='Delete message']" exception="ignored" timeout="1s" /> 
-			<Click xpath="//button[normalize-space(text())='Delete']" exception="ignored" timeout="1s" /> 
+			<Wait delay="2s" /> 
+			<Click xpath="//button[@data-tooltip-content='Clear Chat']" exception="ignored" timeout="1s" /> 
+			<Click xpath="//button[normalize-space(text())='Clear']" exception="ignored" timeout="1s" /> 
 		</Loop> 
 	</Extern> 
 </Recipe> 

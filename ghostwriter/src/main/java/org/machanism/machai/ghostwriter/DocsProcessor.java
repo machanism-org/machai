@@ -46,7 +46,8 @@ public class DocsProcessor extends ProjectProcessor {
 	private Map<String, Reviewer> reviewMap = new HashMap<>();
 
 	private File rootDir;
-	private boolean inheritance = true;
+	private boolean inheritance;
+	private boolean useParentsGuidances;
 
 	/**
 	 * Constructs a DocsProcessor for documentation input preparation.
@@ -151,9 +152,11 @@ public class DocsProcessor extends ProjectProcessor {
 			provider.instructions(promptBundle.getString("sys_instractions"));
 			provider.prompt(promptBundle.getString("docs_processing_instractions"));
 
-			List<String> parentsGuidances = getParentsGuidances(projectLayout, file);
-			for (String dirGuidance : parentsGuidances) {
-				provider.prompt(dirGuidance);
+			if (useParentsGuidances) {
+				List<String> parentsGuidances = getParentsGuidances(projectLayout, file);
+				for (String dirGuidance : parentsGuidances) {
+					provider.prompt(dirGuidance);
+				}
 			}
 
 			String projectInfo = getProjectStructureDescription(projectLayout);
@@ -280,6 +283,14 @@ public class DocsProcessor extends ProjectProcessor {
 
 	public void setInheritance(boolean inheritance) {
 		this.inheritance = inheritance;
+	}
+
+	public boolean isUseParentsGuidances() {
+		return useParentsGuidances;
+	}
+
+	public void setUseParentsGuidances(boolean useParentsGuidances) {
+		this.useParentsGuidances = useParentsGuidances;
 	}
 
 }
