@@ -27,7 +27,7 @@
 		<href>https://machai.machanism.org/</href>
 	</bannerLeft>
 	<poweredBy>
-		<logo img="https://machanism.org/img/machanism.png"
+		<logo img="/images/machanism.png"
 			href="http://www.machanism.org/" />
 	</poweredBy>
 	<body>
