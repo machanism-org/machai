@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.lang.StringUtils;
+import org.machanism.machai.ai.none.NoneProvider;
 
 public class GenAIProviderManager {
 
@@ -13,7 +14,7 @@ public class GenAIProviderManager {
 
 		if (StringUtils.isBlank(chatModelName)) {
 			chatModelName = providerName;
-			providerName = "Non";
+			providerName = NoneProvider.NAME;
 		}
 
 		String className;

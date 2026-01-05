@@ -102,7 +102,7 @@ public class AssembyCommand {
 		}
 
 		if (!bindexList.isEmpty()) {
-			GenAIProvider provider = getProvider(inputs ? "Non" : CHAT_MODEL);
+			GenAIProvider provider = getProvider(inputs ? null : CHAT_MODEL);
 			functionTools.setWorkingDir(dir);
 
 			ApplicationAssembly assembly = new ApplicationAssembly(provider);

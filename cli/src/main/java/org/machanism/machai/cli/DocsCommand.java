@@ -20,6 +20,8 @@ import org.springframework.shell.standard.ShellOption;
 @ShellComponent
 public class DocsCommand {
 
+	private static final String CHAT_MODEL = "OpenAI:gpt-5-mini";
+
 	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
 
 	@Autowired
@@ -36,7 +38,7 @@ public class DocsCommand {
 			dir = SystemUtils.getUserDir();
 		}
 
-		String chatModel = inputs ? "Non" : "OpenAI:gpt-5-mini";
+		String chatModel = inputs ? null : CHAT_MODEL;
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		DocsProcessor documents = new DocsProcessor(provider);
 		logger.info("Scanning documents in the root directory: {}", dir);

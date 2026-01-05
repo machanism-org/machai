@@ -36,7 +36,7 @@ public class Docs extends AbstractMojo {
 
 	public void execute() throws MojoExecutionException {
 		
-		GenAIProvider provider = GenAIProviderManager.getProvider(inputsOnly ? "Non" : chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(inputsOnly ? null : chatModel);
 		DocsProcessor documents = new DocsProcessor(provider) {
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

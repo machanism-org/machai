@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class NoneProvider implements GenAIProvider {
+	public static final String NAME = "None";
+
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
 	private StringBuilder prompts = new StringBuilder();
