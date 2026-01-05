@@ -75,7 +75,7 @@ No active profile set, falling back to 1 default profile: "default"
 
 Unable to create a system terminal, creating a dumb terminal (enable debug logging for more information)
 Started MachaiCLI in 2.159 seconds (process running for 3.276)
-shell:>
+shell:> help
 ```
 
 ### Maven Plugins
