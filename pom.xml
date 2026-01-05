@@ -16,8 +16,7 @@
 		library integration within the Machanism ecosystem using AI-driven
 		semantic search and metadata management.
 	</description>
-	<url>
-		https://machanism.org/machai</url>
+	<url>https://machanism.org/machai</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
