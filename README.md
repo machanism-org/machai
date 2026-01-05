@@ -56,11 +56,26 @@ Each module can be used independently or together as part of the Machanism ecosy
 Run the Machai CLI (after building):
 ```sh
 cd cli
-target/machai-cli-*/bin/machai
+java -jar target/machai.jar
 ```
+
 For help:
 ```sh
-machai --help
+>java -jar machai.jar
+        _ . __  __            _           _
+    \`"' ' |  \/  | __ _  ___| |__   __ _(_)
+   /'`\\\  | |\/| |/ _` |/ __| '_ \ / _` | |
+  /<"\ \\\ | |  | | (_| | (__| | | | (_| | |
+ /::_.-.  .|_|  |_|\__,_|\___|_| |_|\__,_|_|
+ `-\\ / | The Machai CLI 0.0.2-SNAPSHOT
+    \ `-' www.machanism.org
+
+Starting MachaiCLI using Java 24.0.2 with PID 33888 (C:\projects\machanism.org\machai\cli\target\machai.jar started by ViktorTovstyi in C:\projects\machanism.org\machai\cli\target)
+No active profile set, falling back to 1 default profile: "default"
+
+Unable to create a system terminal, creating a dumb terminal (enable debug logging for more information)
+Started MachaiCLI in 2.159 seconds (process running for 3.276)
+shell:>
 ```
 
 ### Maven Plugins
