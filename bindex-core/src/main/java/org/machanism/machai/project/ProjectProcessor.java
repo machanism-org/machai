@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * }</pre>
  *
  * @author machanism
- * @since 1.0
+ * @since 0.0.2
  */
 public abstract class ProjectProcessor {
     /** Logger instance for this processor */

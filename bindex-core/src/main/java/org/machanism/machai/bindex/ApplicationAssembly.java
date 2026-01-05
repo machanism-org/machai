@@ -24,8 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *     assembly.assembly(prompt, bindexList, true);
  * </pre>
  *
- * @author machanism.org
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 public class ApplicationAssembly {
 

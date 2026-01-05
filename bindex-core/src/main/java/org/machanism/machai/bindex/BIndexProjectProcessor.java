@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *     File bindexFile = getBindexFile(new File("project-dir"));
  * </pre>
  *
- * @author machanism.org
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 public abstract class BIndexProjectProcessor extends ProjectProcessor {
 

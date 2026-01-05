@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Supports detection of modules, sources, documents, and tests within Maven projects by parsing <code>pom.xml</code> and its effective model.
  *
- * @author machai
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  * @see PomReader
  */
 public class MavenProjectLayout extends ProjectLayout {

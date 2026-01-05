@@ -24,7 +24,7 @@
  *     <li>Consistent, clear, and comprehensive Javadoc usage throughout the package is required.</li>
  * </ul>
  *
- * @author machanism.org
+ * @author Viktor Tovstyi
  */
 package org.machanism.machai.bindex;
 

@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <p>
  * Scans for workspace modules defined in <code>package.json</code>, and determines project sources, documents, and test directories.
  *
- * @author machai
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 public class JScriptProjectLayout extends ProjectLayout {
     private static Logger logger = LoggerFactory.getLogger(JScriptProjectLayout.class);

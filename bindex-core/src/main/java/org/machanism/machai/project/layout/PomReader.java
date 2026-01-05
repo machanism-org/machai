@@ -57,8 +57,8 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Provides model parsing, effective POM calculation, property replacement, license detection, and model serialization.
  *
- * @author machai
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 public class PomReader {
     private static Logger logger = LoggerFactory.getLogger(PomReader.class);

@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
  *
  * This class supports registration, ID lookup, and document update via Picker.
  *
- * @author machanism.org
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  * @see BIndexProjectProcessor
  */
 public class BindexRegister extends BIndexProjectProcessor implements Closeable {

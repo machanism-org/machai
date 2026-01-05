@@ -22,8 +22,8 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  * 
  * Depending on the layout type, returns an appropriate builder instance, or throws if directory is missing.
  *
- * @author machanism.org
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 public class BindexBuilderFactory {
 

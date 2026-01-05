@@ -13,8 +13,8 @@ import org.apache.commons.lang3.StringUtils;
  * <p>
  * This class determines modules, sources, documents, and tests within a standard project directory. It excludes common build and version control directories based on {@link ProjectLayout#EXCLUDE_DIRS}.
  *
- * @author machai
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  * @see ProjectLayout
  */
 public class DefaultProjectLayout extends ProjectLayout {
