@@ -36,7 +36,8 @@ public class DocsCommand {
 			dir = SystemUtils.getUserDir();
 		}
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(inputs ? "Non" : "OpenAI:gpt-5-mini");
+		String chatModel = inputs ? "Non" : "OpenAI:gpt-5-mini";
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		DocsProcessor documents = new DocsProcessor(provider);
 		logger.info("Scanning documents in the root directory: {}", dir);
 		documents.scanDocuments(dir);

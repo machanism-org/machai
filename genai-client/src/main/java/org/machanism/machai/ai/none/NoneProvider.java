@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.non;
+package org.machanism.machai.ai.none;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class NonProvider implements GenAIProvider {
+public class NoneProvider implements GenAIProvider {
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
 	private StringBuilder prompts = new StringBuilder();
@@ -26,28 +26,24 @@ public class NonProvider implements GenAIProvider {
 	private File inputsLog;
 
 	@Override
-	public GenAIProvider prompt(String text) {
+	public void prompt(String text) {
 		prompts.append(text);
 		prompts.append("\r\n\r\n");
-		return this;
 	}
 
 	@Override
-	public GenAIProvider promptFile(File file, String bundleMessageName) throws IOException {
+	public void promptFile(File file, String bundleMessageName) throws IOException {
 		// TODO Auto-generated method stub
-		return this;
 	}
 
 	@Override
-	public GenAIProvider addFile(File file) throws IOException, FileNotFoundException {
+	public void addFile(File file) throws IOException, FileNotFoundException {
 		// TODO Auto-generated method stub
-		return this;
 	}
 
 	@Override
-	public GenAIProvider addFile(URL fileUrl) throws IOException, FileNotFoundException {
+	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
 		// TODO Auto-generated method stub
-		return this;
 	}
 
 	@Override
@@ -56,21 +52,18 @@ public class NonProvider implements GenAIProvider {
 	}
 
 	@Override
-	public GenAIProvider clear() {
+	public void clear() {
 		prompts = new StringBuilder();
-		return this;
 	}
 
 	@Override
-	public GenAIProvider addTool(String name, String description, Function<JsonNode, Object> function,
+	public void addTool(String name, String description, Function<JsonNode, Object> function,
 			String... paramsDesc) {
-		return this;
 	}
 
 	@Override
-	public GenAIProvider instructions(String instructions) {
+	public void instructions(String instructions) {
 		this.instructions = instructions;
-		return this;
 	}
 
 	@Override
@@ -109,14 +102,12 @@ public class NonProvider implements GenAIProvider {
 	}
 
 	@Override
-	public GenAIProvider inputsLog(File inputsLog) {
+	public void inputsLog(File inputsLog) {
 		this.inputsLog = inputsLog;
-		return this;
 	}
 
 	@Override
-	public GenAIProvider model(String chatModelName) {
-		return this;
+	public void model(String chatModelName) {
 	}
 
 }

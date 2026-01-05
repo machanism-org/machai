@@ -55,15 +55,18 @@ import dev.langchain4j.model.openai.OpenAiEmbeddingModelName;
 import dev.langchain4j.model.output.Response;
 
 /**
- * Picker handles BIndex registration, lookup, and semantic queries using embeddings and MongoDB.
+ * Picker handles BIndex registration, lookup, and semantic queries using
+ * embeddings and MongoDB.
  * <p>
- * Provides registration and query operations for BIndex repositories, supporting classification embedding
- * for semantic retrieval and indexing.
- * <p>Usage example:
+ * Provides registration and query operations for BIndex repositories,
+ * supporting classification embedding for semantic retrieval and indexing.
+ * <p>
+ * Usage example:
+ * 
  * <pre>
- *     try(Picker picker = new Picker(provider)) {
- *         List&lt;BIndex&gt; results = picker.pick("search query");
- *     }
+ * try (Picker picker = new Picker(provider)) {
+ * 	List&lt;BIndex&gt; results = picker.pick("search query");
+ * }
  * </pre>
  *
  * @author machanism.org
@@ -71,396 +74,404 @@ import dev.langchain4j.model.output.Response;
  */
 public class Picker implements Closeable {
 
-    /** Embedding vector dimensions for classification. */
-    private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
-    /** MongoDB field name for classification embeddings. */
-    private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
-    /** Result limit for vector search operations. */
-    private static final int VECTOR_SEARCH_LIMITS = 50;
-    /** Default minimum similarity score for queries. */
-    public static final String DEFAULT_MIN_SCORE = "0.80";
+	/** Embedding vector dimensions for classification. */
+	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
+	/** MongoDB field name for classification embeddings. */
+	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
+	/** Result limit for vector search operations. */
+	private static final int VECTOR_SEARCH_LIMITS = 50;
+	/** Default minimum similarity score for queries. */
+	public static final String DEFAULT_MIN_SCORE = "0.80";
 
-    private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
+	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
-    private static Logger logger = LoggerFactory.getLogger(Picker.class);
+	private static Logger logger = LoggerFactory.getLogger(Picker.class);
 
-    private static final String INSTANCENAME = "machanism";
-    private static final String CONNECTION = "bindex";
-    private static final String INDEXNAME = "vector_index";
-    private static final String LANGUAGES_PROPERTY_NAME = "languages";
-    private static final String DOMAINS_PROPERTY_NAME = "domains";
-    private static final String LAYERS_PROPERTY_NAME = "layers";
-    private static final String INTEGRATIONS_PROPERTY_NAME = "integrations";
+	private static final String INSTANCENAME = "machanism";
+	private static final String CONNECTION = "bindex";
+	private static final String INDEXNAME = "vector_index";
+	private static final String LANGUAGES_PROPERTY_NAME = "languages";
+	private static final String DOMAINS_PROPERTY_NAME = "domains";
+	private static final String LAYERS_PROPERTY_NAME = "layers";
+	private static final String INTEGRATIONS_PROPERTY_NAME = "integrations";
 
-    public static final String BINDEX_PROPERTY_NAME = "bindex";
+	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
-    private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
+	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
-    private MongoCollection<Document> collection;
-    private MongoClient mongoClient;
+	private MongoCollection<Document> collection;
+	private MongoClient mongoClient;
 
-    private String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+	private String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 
-    private GenAIProvider provider;
+	private GenAIProvider provider;
 
-    private String apiKey;
-    private Double score = 0.85;
-    private Map<String, Double> scoreMap = new HashMap<>();
+	private String apiKey;
+	private Double score = 0.85;
+	private Map<String, Double> scoreMap = new HashMap<>();
 
-    /**
-     * Constructs a Picker for registration and semantic search.
-     *
-     * @param provider GenAIProvider instance used for embedding, schema classification, etc.
-     * @throws IllegalStateException If the required environment variables are missing for DB or OpenAI access
-     */
-    public Picker(GenAIProvider provider) {
-        this.provider = provider;
+	/**
+	 * Constructs a Picker for registration and semantic search.
+	 *
+	 * @param provider GenAIProvider instance used for embedding, schema
+	 *                 classification, etc.
+	 * @throws IllegalStateException If the required environment variables are
+	 *                               missing for DB or OpenAI access
+	 */
+	public Picker(GenAIProvider provider) {
+		this.provider = provider;
 
-        String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
-        String uri;
-        if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-            uri = "mongodb+srv://user:user@" + dbUrl;
-        } else {
-            uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
-        }
+		String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
+		String uri;
+		if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
+			uri = "mongodb+srv://user:user@" + dbUrl;
+		} else {
+			uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
+		}
 
-        apiKey = System.getenv("OPENAI_API_KEY");
-        if (apiKey == null || apiKey.isEmpty()) {
-            throw new IllegalStateException("OPEN_AI_API_KEY env variable is not set or is empty.");
-        }
+		apiKey = System.getenv("OPENAI_API_KEY");
+		if (apiKey == null || apiKey.isEmpty()) {
+			throw new IllegalStateException("OPEN_AI_API_KEY env variable is not set or is empty.");
+		}
 
-        mongoClient = MongoClients.create(uri);
-        MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
-        collection = database.getCollection(CONNECTION);
-    }
+		mongoClient = MongoClients.create(uri);
+		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
+		collection = database.getCollection(CONNECTION);
+	}
 
-    /**
-     * Closes the resource-backed connections.
-     *
-     * @throws IOException if closing the MongoDB client fails
-     */
-    @Override
-    public void close() throws IOException {
-        mongoClient.close();
-    }
+	/**
+	 * Closes the resource-backed connections.
+	 *
+	 * @throws IOException if closing the MongoDB client fails
+	 */
+	@Override
+	public void close() throws IOException {
+		mongoClient.close();
+	}
 
-    /**
-     * Registers (inserts or updates) a BIndex document for the supplied BIndex instance.
-     *
-     * @param bindex BIndex instance to register
-     * @return Generated database ID string
-     * @throws JsonProcessingException If conversion to JSON string fails or MongoDB throws exception
-     * @throws MongoCommandException On MongoDB insert or connection errors
-     */
-    public String create(BIndex bindex) throws JsonProcessingException {
-        try {
+	/**
+	 * Registers (inserts or updates) a BIndex document for the supplied BIndex
+	 * instance.
+	 *
+	 * @param bindex BIndex instance to register
+	 * @return Generated database ID string
+	 * @throws JsonProcessingException If conversion to JSON string fails or MongoDB
+	 *                                 throws exception
+	 * @throws MongoCommandException   On MongoDB insert or connection errors
+	 */
+	public String create(BIndex bindex) throws JsonProcessingException {
+		try {
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String bindexJson = objectMapper.writeValueAsString(bindex);
+			ObjectMapper objectMapper = new ObjectMapper();
+			String bindexJson = objectMapper.writeValueAsString(bindex);
 
-            String id = bindex.getId();
-            Bson filter = Filters.eq("id", id);
-            collection.deleteOne(filter);
+			String id = bindex.getId();
+			Bson filter = Filters.eq("id", id);
+			collection.deleteOne(filter);
 
-            Classification classification = bindex.getClassification();
-            Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
-                    .distinct().collect(Collectors.toSet());
+			Classification classification = bindex.getClassification();
+			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
+					.distinct().collect(Collectors.toSet());
 
-            Set<String> integrations = classification.getIntegrations().stream().map(e -> e.toLowerCase()).distinct()
-                    .collect(Collectors.toSet());
+			Set<String> integrations = classification.getIntegrations().stream().map(e -> e.toLowerCase()).distinct()
+					.collect(Collectors.toSet());
 
-            if (languages.isEmpty()) {
-                logger.warn("WARNING! No language defined for: {}.", id);
-            }
+			if (languages.isEmpty()) {
+				logger.warn("WARNING! No language defined for: {}.", id);
+			}
 
-            Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson).append("name", bindex.getName())
-                    .append("version", bindex.getVersion()).append(DOMAINS_PROPERTY_NAME, classification.getDomains())
-                    .append(LAYERS_PROPERTY_NAME, classification.getLayers()).append(LANGUAGES_PROPERTY_NAME, languages)
-                    .append(INTEGRATIONS_PROPERTY_NAME, integrations)
-                    .append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
-                            getEmbeddingBson(bindex.getClassification(), CLASSIFICATION_EMBEDDING_DIMENTIONS))
-                    .append("id", bindex.getId());
+			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson).append("name", bindex.getName())
+					.append("version", bindex.getVersion()).append(DOMAINS_PROPERTY_NAME, classification.getDomains())
+					.append(LAYERS_PROPERTY_NAME, classification.getLayers()).append(LANGUAGES_PROPERTY_NAME, languages)
+					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
+					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+							getEmbeddingBson(bindex.getClassification(), CLASSIFICATION_EMBEDDING_DIMENTIONS))
+					.append("id", bindex.getId());
 
-            InsertOneResult result = collection.insertOne(bindexDocument);
-            return result.getInsertedId().toString();
+			InsertOneResult result = collection.insertOne(bindexDocument);
+			return result.getInsertedId().toString();
 
-        } catch (MongoCommandException e) {
-            String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
-            if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-                logger.error("ERROR: To register BIndex, the BINDEX_REG_PASSWORD env property is required.");
-            }
-            throw e;
-        }
-    }
+		} catch (MongoCommandException e) {
+			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
+			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
+				logger.error("ERROR: To register BIndex, the BINDEX_REG_PASSWORD env property is required.");
+			}
+			throw e;
+		}
+	}
 
-    /**
-     * Generates a BSON array representing the embedding of a classification for semantic search.
-     *
-     * @param classification Classification instance
-     * @param dimensions Number of vector dimensions
-     * @return BsonArray of vector values
-     * @throws JsonProcessingException On embedding or serialization errors
-     */
-    BsonArray getEmbeddingBson(Classification classification, Integer dimensions) throws JsonProcessingException {
-        String text = getClassificationText(classification);
+	/**
+	 * Generates a BSON array representing the embedding of a classification for
+	 * semantic search.
+	 *
+	 * @param classification Classification instance
+	 * @param dimensions     Number of vector dimensions
+	 * @return BsonArray of vector values
+	 * @throws JsonProcessingException On embedding or serialization errors
+	 */
+	BsonArray getEmbeddingBson(Classification classification, Integer dimensions) throws JsonProcessingException {
+		String text = getClassificationText(classification);
 
-        List<Double> descEmbedding = getEmbedding(text, dimensions);
-        BsonArray bsonArray = new BsonArray(descEmbedding.stream().map(BsonDouble::new).collect(Collectors.toList()));
-        return bsonArray;
-    }
+		List<Double> descEmbedding = getEmbedding(text, dimensions);
+		BsonArray bsonArray = new BsonArray(descEmbedding.stream().map(BsonDouble::new).collect(Collectors.toList()));
+		return bsonArray;
+	}
 
-    /**
-     * Looks up the registered database ID for a BIndex (if it exists).
-     *
-     * @param bindex BIndex instance
-     * @return String database ID, or null if not present
-     */
-    public String getRegistredId(BIndex bindex) {
-        Document query = new Document("id", bindex.getId());
-        FindIterable<Document> find = collection.find(query);
-        Document document = find.first();
-        String id = null;
-        if (document != null) {
-            id = ((ObjectId) document.get("_id")).toString();
-        }
-        return id;
-    }
+	/**
+	 * Looks up the registered database ID for a BIndex (if it exists).
+	 *
+	 * @param bindex BIndex instance
+	 * @return String database ID, or null if not present
+	 */
+	public String getRegistredId(BIndex bindex) {
+		Document query = new Document("id", bindex.getId());
+		FindIterable<Document> find = collection.find(query);
+		Document document = find.first();
+		String id = null;
+		if (document != null) {
+			id = ((ObjectId) document.get("_id")).toString();
+		}
+		return id;
+	}
 
-    /**
-     * Calculates OpenAI embedding vector for the given classification text.
-     *
-     * @param text Classification text
-     * @param dimensions Required embedding vector dimensions
-     * @return List of Double values (embedding vector)
-     */
-    private List<Double> getEmbedding(String text, Integer dimensions) {
-        OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder().apiKey(apiKey)
-                .modelName(EMBEDDING_MODEL_NAME).timeout(java.time.Duration.ofSeconds(60)).dimensions(dimensions)
-                .build();
+	/**
+	 * Calculates OpenAI embedding vector for the given classification text.
+	 *
+	 * @param text       Classification text
+	 * @param dimensions Required embedding vector dimensions
+	 * @return List of Double values (embedding vector)
+	 */
+	private List<Double> getEmbedding(String text, Integer dimensions) {
+		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder().apiKey(apiKey)
+				.modelName(EMBEDDING_MODEL_NAME).timeout(java.time.Duration.ofSeconds(60)).dimensions(dimensions)
+				.build();
 
-        Response<Embedding> response = embeddingModel.embed(text);
-        return response.content().vectorAsList().stream().map(Double::valueOf).collect(Collectors.toList());
-    }
+		Response<Embedding> response = embeddingModel.embed(text);
+		return response.content().vectorAsList().stream().map(Double::valueOf).collect(Collectors.toList());
+	}
 
-    /**
-     * Performs a semantic pick/search with a query string, retrieving BIndex results and dependencies.
-     *
-     * @param query Query string
-     * @return List of BIndex results related to the query (and their dependencies)
-     * @throws IOException If prompt or IO operation fails
-     */
-    public List<BIndex> pick(String query) throws IOException {
+	/**
+	 * Performs a semantic pick/search with a query string, retrieving BIndex
+	 * results and dependencies.
+	 *
+	 * @param query Query string
+	 * @return List of BIndex results related to the query (and their dependencies)
+	 * @throws IOException If prompt or IO operation fails
+	 */
+	public List<BIndex> pick(String query) throws IOException {
 
-        String classificationStr = getClassification(query);
+		String classificationStr = getClassification(query);
 
-        Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
+		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
 
-        Collection<String> classificatioResults = new HashSet<>();
-        for (Classification classification : classifications) {
-            Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
-                    .distinct().collect(Collectors.toSet());
+		Collection<String> classificatioResults = new HashSet<>();
+		for (Classification classification : classifications) {
+			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
+					.distinct().collect(Collectors.toSet());
 
-            List<Layer> layers = classification.getLayers();
-            String languagesQuery = StringUtils.join(languages, ", ");
-            logger.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
+			List<Layer> layers = classification.getLayers();
+			String languagesQuery = StringUtils.join(languages, ", ");
+			logger.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
 
-            String classificationQuery = getClassificationText(classification);
+			String classificationQuery = getClassificationText(classification);
 
-            for (Layer layer : layers) {
-                Collection<String> layerResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
-                        classificationQuery, CLASSIFICATION_EMBEDDING_DIMENTIONS,
-                        Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
-                        Aggregates.match(Filters.in(LAYERS_PROPERTY_NAME, layer)));
-                classificatioResults.addAll(layerResults);
-            }
-        }
+			for (Layer layer : layers) {
+				Collection<String> layerResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+						classificationQuery, CLASSIFICATION_EMBEDDING_DIMENTIONS,
+						Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
+						Aggregates.match(Filters.in(LAYERS_PROPERTY_NAME, layer)));
+				classificatioResults.addAll(layerResults);
+			}
+		}
 
-        Set<String> dependencies = new HashSet<>();
-        List<BIndex> pickResult = classificatioResults.stream().map(id -> {
-            BIndex bindex = getBindex(id);
-            List<String> dependencyList = bindex.getDependencies();
-            dependencies.addAll(dependencyList);
-            return bindex;
-        }).collect(Collectors.toList());
+		Set<String> dependencies = new HashSet<>();
+		List<BIndex> pickResult = classificatioResults.stream().map(id -> {
+			BIndex bindex = getBindex(id);
+			List<String> dependencyList = bindex.getDependencies();
+			dependencies.addAll(dependencyList);
+			return bindex;
+		}).collect(Collectors.toList());
 
-        Set<String> allDependencies = new HashSet<>();
-        for (String bindexId : dependencies) {
-            addDependencies(allDependencies, bindexId);
-        }
+		Set<String> allDependencies = new HashSet<>();
+		for (String bindexId : dependencies) {
+			addDependencies(allDependencies, bindexId);
+		}
 
-        List<BIndex> dependenciesResult = allDependencies.stream().map(id -> {
-            return getBindex(id);
-        }).collect(Collectors.toList());
+		List<BIndex> dependenciesResult = allDependencies.stream().map(id -> {
+			return getBindex(id);
+		}).collect(Collectors.toList());
 
-        pickResult.addAll(dependenciesResult);
+		pickResult.addAll(dependenciesResult);
 
-        return pickResult;
-    }
+		return pickResult;
+	}
 
-    /**
-     * Generates the classification text for embedding and schema queries.
-     *
-     * @param classification Classification instance
-     * @return String JSON value of the classification
-     * @throws JsonProcessingException If serialization fails
-     */
-    private String getClassificationText(Classification classification) throws JsonProcessingException {
-        String classificationStr = new ObjectMapper().writeValueAsString(classification);
-        return classificationStr;
-    }
+	/**
+	 * Generates the classification text for embedding and schema queries.
+	 *
+	 * @param classification Classification instance
+	 * @return String JSON value of the classification
+	 * @throws JsonProcessingException If serialization fails
+	 */
+	private String getClassificationText(Classification classification) throws JsonProcessingException {
+		String classificationStr = new ObjectMapper().writeValueAsString(classification);
+		return classificationStr;
+	}
 
-    /**
-     * Adds all transitive dependencies of a BIndex into the provided set.
-     *
-     * @param dependencies HashSet of dependency IDs to accumulate
-     * @param bindexId BIndex ID to explore
-     */
-    void addDependencies(Set<String> dependencies, String bindexId) {
-        BIndex bindex = getBindex(bindexId);
-        if (bindex != null) {
-            String id = bindex.getId();
-            if (!dependencies.contains(id)) {
-                List<String> dependencyList = bindex.getDependencies();
-                dependencies.add(id);
-                for (String dependencyId : dependencyList) {
-                    addDependencies(dependencies, dependencyId);
-                }
-            }
-        }
-    }
+	/**
+	 * Adds all transitive dependencies of a BIndex into the provided set.
+	 *
+	 * @param dependencies HashSet of dependency IDs to accumulate
+	 * @param bindexId     BIndex ID to explore
+	 */
+	void addDependencies(Set<String> dependencies, String bindexId) {
+		BIndex bindex = getBindex(bindexId);
+		if (bindex != null) {
+			String id = bindex.getId();
+			if (!dependencies.contains(id)) {
+				List<String> dependencyList = bindex.getDependencies();
+				dependencies.add(id);
+				for (String dependencyId : dependencyList) {
+					addDependencies(dependencies, dependencyId);
+				}
+			}
+		}
+	}
 
-    /**
-     * Performs a schema classification prompt using GenAIProvider.
-     *
-     * @param query Search query string
-     * @return Classification schema in String form
-     * @throws IOException, JsonProcessingException, JsonMappingException
-     */
-    private String getClassification(String query) throws IOException, JsonProcessingException, JsonMappingException {
-        URL systemResource = BIndex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
-        String schema = IOUtils.toString(systemResource, "UTF8");
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode schemaJson = objectMapper.readTree(schema);
-        JsonNode jsonNode = schemaJson.get("properties").get("classification");
-        String classificationSchema = objectMapper.writeValueAsString(jsonNode);
+	/**
+	 * Performs a schema classification prompt using GenAIProvider.
+	 *
+	 * @param query Search query string
+	 * @return Classification schema in String form
+	 * @throws IOException, JsonProcessingException, JsonMappingException
+	 */
+	private String getClassification(String query) throws IOException, JsonProcessingException, JsonMappingException {
+		URL systemResource = BIndex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
+		String schema = IOUtils.toString(systemResource, "UTF8");
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode schemaJson = objectMapper.readTree(schema);
+		JsonNode jsonNode = schemaJson.get("properties").get("classification");
+		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
 
-        String classificationQuery = MessageFormat.format(promptBundle.getString("classification_instruction"),
-                classificationSchema, query);
-        String classificationStr = provider.prompt(classificationQuery).perform();
-        return classificationStr;
-    }
+		String classificationQuery = MessageFormat.format(promptBundle.getString("classification_instruction"),
+				classificationSchema, query);
+		provider.prompt(classificationQuery);
+		String classificationStr = provider.perform();
+		return classificationStr;
+	}
 
-    /**
-     * Retrieves a BIndex instance from the database by its ID.
-     *
-     * @param id String identifier
-     * @return BIndex object, or null if not present in the DB
-     */
-    private BIndex getBindex(String id) {
-        BIndex result = null;
-        Document doc = collection.find(com.mongodb.client.model.Filters.eq("id", id)).first();
-        if (doc != null) {
-            String bindexStr = doc.getString("bindex");
-            try {
-                result = new ObjectMapper().readValue(bindexStr, BIndex.class);
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException(e);
-            }
-        }
+	/**
+	 * Retrieves a BIndex instance from the database by its ID.
+	 *
+	 * @param id String identifier
+	 * @return BIndex object, or null if not present in the DB
+	 */
+	private BIndex getBindex(String id) {
+		BIndex result = null;
+		Document doc = collection.find(com.mongodb.client.model.Filters.eq("id", id)).first();
+		if (doc != null) {
+			String bindexStr = doc.getString("bindex");
+			try {
+				result = new ObjectMapper().readValue(bindexStr, BIndex.class);
+			} catch (JsonProcessingException e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    /**
-     * Executes a vector search query for BIndexes by semantic embedding using MongoDB aggregation pipeline.
-     *
-     * @param indexName Index name in MongoDB
-     * @param propertyPath Embedding property field path
-     * @param query Classification query text
-     * @param dimensions Number of vector dimensions
-     * @param bsons Additional filters (language, layers, etc.)
-     * @return Collection of result IDs (name:version tuples)
-     */
-    private Collection<String> getResults(String indexName, String propertyPath, String query, Integer dimensions,
-            Bson... bsons) {
-        Iterable<Double> queryEmbedding = getEmbedding(query, dimensions);
+	/**
+	 * Executes a vector search query for BIndexes by semantic embedding using
+	 * MongoDB aggregation pipeline.
+	 *
+	 * @param indexName    Index name in MongoDB
+	 * @param propertyPath Embedding property field path
+	 * @param query        Classification query text
+	 * @param dimensions   Number of vector dimensions
+	 * @param bsons        Additional filters (language, layers, etc.)
+	 * @return Collection of result IDs (name:version tuples)
+	 */
+	private Collection<String> getResults(String indexName, String propertyPath, String query, Integer dimensions,
+			Bson... bsons) {
+		Iterable<Double> queryEmbedding = getEmbedding(query, dimensions);
 
-        List<Bson> pipeline = new ArrayList<>();
+		List<Bson> pipeline = new ArrayList<>();
 
-        pipeline.add(Aggregates.vectorSearch(fieldPath(propertyPath), queryEmbedding, indexName, VECTOR_SEARCH_LIMITS,
-                exactVectorSearchOptions()));
+		pipeline.add(Aggregates.vectorSearch(fieldPath(propertyPath), queryEmbedding, indexName, VECTOR_SEARCH_LIMITS,
+				exactVectorSearchOptions()));
 
-        if (bsons != null) {
-            for (Bson bson : bsons) {
-                pipeline.add(bson);
-            }
-        }
+		if (bsons != null) {
+			for (Bson bson : bsons) {
+				pipeline.add(bson);
+			}
+		}
 
-        pipeline.add(Aggregates.project(
-                Projections.fields(Projections.exclude("_id"), Projections.include("id"), Projections.include("name"),
-                        Projections.include("version"), Projections.metaVectorSearchScore("score"))));
+		pipeline.add(Aggregates.project(
+				Projections.fields(Projections.exclude("_id"), Projections.include("id"), Projections.include("name"),
+						Projections.include("version"), Projections.metaVectorSearchScore("score"))));
 
-        pipeline.add(Aggregates.match(Filters.gte("score", score)));
+		pipeline.add(Aggregates.match(Filters.gte("score", score)));
 
-        List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
+		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
-        Map<String, String> libraryVersionMap = new HashMap<>();
-        for (Document doc : docs) {
-            String id = doc.getString("id");
-            String name = doc.getString("name");
-            String version = doc.getString("version");
+		Map<String, String> libraryVersionMap = new HashMap<>();
+		for (Document doc : docs) {
+			String id = doc.getString("id");
+			String name = doc.getString("name");
+			String version = doc.getString("version");
 
-            Double score = doc.getDouble("score");
-            scoreMap.put(id, score);
-            logger.debug("BindexId: {}: {}", name, score);
+			Double score = doc.getDouble("score");
+			scoreMap.put(id, score);
+			logger.debug("BindexId: {}: {}", name, score);
 
-            if (libraryVersionMap.containsKey(name)) {
-                String existsVersion = libraryVersionMap.get(name);
+			if (libraryVersionMap.containsKey(name)) {
+				String existsVersion = libraryVersionMap.get(name);
 
-                ComparableVersion v1 = new ComparableVersion(existsVersion);
-                ComparableVersion v2 = new ComparableVersion(version);
-                if (v1.compareTo(v2) > 0) {
-                    version = existsVersion;
-                }
-            }
+				ComparableVersion v1 = new ComparableVersion(existsVersion);
+				ComparableVersion v2 = new ComparableVersion(version);
+				if (v1.compareTo(v2) > 0) {
+					version = existsVersion;
+				}
+			}
 
-            libraryVersionMap.put(name, version);
-        }
+			libraryVersionMap.put(name, version);
+		}
 
-        Collection<String> results = libraryVersionMap.entrySet().stream()
-                .map(entry -> entry.getKey() + ":" + entry.getValue()).collect(Collectors.toList());
+		Collection<String> results = libraryVersionMap.entrySet().stream()
+				.map(entry -> entry.getKey() + ":" + entry.getValue()).collect(Collectors.toList());
 
-        return results;
-    }
+		return results;
+	}
 
-    /**
-     * Normalizes a Language name for semantic aggregation queries.
-     *
-     * @param language Language object
-     * @return Normalized language name string
-     */
-    static String getNormalizedLanguageName(Language language) {
-        String lang = language.getName().toLowerCase().trim();
-        lang = StringUtils.substringBefore(lang, "(").trim();
-        return lang;
-    }
+	/**
+	 * Normalizes a Language name for semantic aggregation queries.
+	 *
+	 * @param language Language object
+	 * @return Normalized language name string
+	 */
+	static String getNormalizedLanguageName(Language language) {
+		String lang = language.getName().toLowerCase().trim();
+		lang = StringUtils.substringBefore(lang, "(").trim();
+		return lang;
+	}
 
-    /**
-     * Manually set minimum score for semantic vector search queries.
-     *
-     * @param score Minimum similarity value
-     */
-    public void setScore(Double score) {
-        this.score = score;
-    }
+	/**
+	 * Manually set minimum score for semantic vector search queries.
+	 *
+	 * @param score Minimum similarity value
+	 */
+	public void setScore(Double score) {
+		this.score = score;
+	}
 
-    /**
-     * Retrieves similarity score for a BIndex result by its ID.
-     *
-     * @param id BIndex identifier
-     * @return score value for semantic result
-     */
-    public Double getScore(String id) {
-        return scoreMap.get(id);
-    }
+	/**
+	 * Retrieves similarity score for a BIndex result by its ID.
+	 *
+	 * @param id BIndex identifier
+	 * @return score value for semantic result
+	 */
+	public Double getScore(String id) {
+		return scoreMap.get(id);
+	}
 }

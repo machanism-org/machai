@@ -29,12 +29,12 @@ public class BindexBuilder {
 	}
 
 	public BIndex build(boolean callLLM) throws IOException {
-		bindexSchemaPrompt(getGenAIProvider());
+		bindexSchemaPrompt(genAIProvider);
 
 		if (origin != null) {
 			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
 			String prompt = MessageFormat.format(promptBundle.getString("update_bindex_prompt"), bindexStr);
-			getGenAIProvider().prompt(prompt);
+			genAIProvider.prompt(prompt);
 		}
 
 		projectContext();
@@ -43,7 +43,8 @@ public class BindexBuilder {
 		getGenAIProvider().prompt(prompt);
 
 		File tmpBindexDir = new File(projectLayout.getProjectDir(), BINDEX_TEMP_DIR);
-		String output = getGenAIProvider().inputsLog(tmpBindexDir).perform();
+		genAIProvider.inputsLog(tmpBindexDir);
+		String output = genAIProvider.perform();
 
 		BIndex value = null;
 		if (output != null) {

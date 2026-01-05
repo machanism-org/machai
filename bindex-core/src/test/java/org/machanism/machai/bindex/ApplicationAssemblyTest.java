@@ -2,9 +2,6 @@ package org.machanism.machai.bindex;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -43,9 +40,6 @@ class ApplicationAssemblyTest {
     void testAssemblyExecutesLLMAndLogsResponse() throws IOException {
         String prompt = "Test prompt";
         List<BIndex> bindexList = new ArrayList<>();
-        when(provider.instructions(anyString())).thenReturn(provider);
-        when(provider.prompt(anyString())).thenReturn(provider);
-        when(provider.inputsLog(any(File.class))).thenReturn(provider);
         when(provider.perform()).thenReturn("Response from LLM");
         ResourceBundle.clearCache();
         // BindexBuilder.bindexSchemaPrompt and MessageFormat exercised indirectly
@@ -58,8 +52,6 @@ class ApplicationAssemblyTest {
     void testAssemblyThrowsOnIOException() throws IOException {
         GenAIProvider faultyProvider = mock(GenAIProvider.class);
         ApplicationAssembly faultyAssembly = new ApplicationAssembly(faultyProvider);
-        when(faultyProvider.instructions(anyString())).thenReturn(faultyProvider);
-        when(faultyProvider.prompt(anyString())).thenReturn(faultyProvider);
         doThrow(new IOException("fail")).when(faultyProvider).perform();
         List<BIndex> bindexList = new ArrayList<>();
         assertThrows(IllegalArgumentException.class, () -> {

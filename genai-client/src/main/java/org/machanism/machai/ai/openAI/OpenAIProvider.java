@@ -72,15 +72,14 @@ public class OpenAIProvider implements GenAIProvider {
 	private File inputsLog;
 
 	@Override
-	public OpenAIProvider prompt(String text) {
+	public void prompt(String text) {
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
 				.addInputTextContent(text).build();
 		inputs.add(ResponseInputItem.ofMessage(message));
-		return this;
 	}
 
 	@Override
-	public OpenAIProvider promptFile(File file, String bundleMessageName) throws IOException {
+	public void promptFile(File file, String bundleMessageName) throws IOException {
 		String type = FilenameUtils.getExtension(file.getName());
 		try (FileInputStream input = new FileInputStream(file)) {
 			String fileData = IOUtils.toString(input, "UTF8");
@@ -94,11 +93,10 @@ public class OpenAIProvider implements GenAIProvider {
 
 			prompt(prompt);
 		}
-		return this;
 	}
 
 	@Override
-	public OpenAIProvider addFile(File file) throws IOException, FileNotFoundException {
+	public void addFile(File file) throws IOException, FileNotFoundException {
 		try (FileInputStream input = new FileInputStream(file)) {
 			FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input))
 					.purpose(FilePurpose.USER_DATA).build();
@@ -111,34 +109,29 @@ public class OpenAIProvider implements GenAIProvider {
 					.addContent(builder.build()).build();
 			inputs.add(ResponseInputItem.ofMessage(message));
 		}
-		return this;
 	}
 
 	@Override
-	public OpenAIProvider addFile(URL fileUrl) throws IOException, FileNotFoundException {
+	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
 		com.openai.models.responses.ResponseInputFile.Builder builder = ResponseInputFile.builder()
 				.fileUrl(fileUrl.toString());
 
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
 				.addContent(builder.build()).build();
 		inputs.add(ResponseInputItem.ofMessage(message));
-		return this;
 	}
 
 	@Override
 	public String perform() {
 		String result = null;
-
-		if (inputsLog != null) {
-			saveInput();
-		}
-
-		Builder builder = ResponseCreateParams.builder().model(chatModel)
-				.tools(new ArrayList<Tool>(toolMap.keySet())).inputOfResponse(inputs);
+		Builder builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()))
+				.inputOfResponse(inputs);
 
 		if (instructions != null) {
 			builder.instructions(instructions);
 		}
+
+		logInputs();
 
 		Response response = client.responses().create(builder.build());
 		result = parseResponse(response, instructions);
@@ -235,46 +228,46 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 	}
 
-	private void saveInput() {
-		File parentFile = inputsLog.getParentFile();
-		if (parentFile != null && !parentFile.exists()) {
-			parentFile.mkdirs();
-		}
-
-		try (Writer streamWriter = new FileWriter(inputsLog, false)) {
-			for (ResponseInputItem responseInputItem : inputs) {
-				String inputText = "";
-				if (responseInputItem.isMessage()) {
-					ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
-					if (responseInputContent.isValid()) {
-						if (responseInputContent.isInputText()) {
-							inputText = responseInputContent.inputText().get().text();
-						} else if (responseInputContent.isInputFile()) {
-							inputText = "Add resource by URL: "
-									+ responseInputContent.inputFile().get().fileUrl().get();
-						}
-					} else {
-						inputText = "Data invalid: " + responseInputItem;
-					}
-					streamWriter.write(inputText);
-					streamWriter.write("\n\n");
-				}
+	private void logInputs() {
+		if (inputsLog != null) {
+			File parentFile = inputsLog.getParentFile();
+			if (parentFile != null && !parentFile.exists()) {
+				parentFile.mkdirs();
 			}
-			logger.debug("LLM Inputs: {}", inputsLog);
-		} catch (IOException e) {
-			logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
+
+			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
+				for (ResponseInputItem responseInputItem : inputs) {
+					String inputText = "";
+					if (responseInputItem.isMessage()) {
+						ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
+						if (responseInputContent.isValid()) {
+							if (responseInputContent.isInputText()) {
+								inputText = responseInputContent.inputText().get().text();
+							} else if (responseInputContent.isInputFile()) {
+								inputText = "Add resource by URL: "
+										+ responseInputContent.inputFile().get().fileUrl().get();
+							}
+						} else {
+							inputText = "Data invalid: " + responseInputItem;
+						}
+						streamWriter.write(inputText);
+						streamWriter.write("\n\n");
+					}
+				}
+				logger.debug("LLM Inputs: {}", inputsLog);
+			} catch (IOException e) {
+				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
+			}
 		}
 	}
 
 	@Override
-	public OpenAIProvider clear() {
+	public void clear() {
 		inputs.clear();
-		return this;
 	}
 
 	@Override
-	public OpenAIProvider addTool(String name, String description, Function<JsonNode, Object> function,
-			String... paramsDesc) {
+	public void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
 
 		Map<String, Map<String, String>> fromValue = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
@@ -310,28 +303,24 @@ public class OpenAIProvider implements GenAIProvider {
 
 		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
 		toolMap.put(tool, function);
-		return this;
 	}
 
 	@Override
-	public OpenAIProvider instructions(String instructions) {
+	public void instructions(String instructions) {
 		this.instructions = instructions;
-		return this;
 	}
 
-	public OpenAIProvider promptBundle(ResourceBundle promptBundle) {
+	public void promptBundle(ResourceBundle promptBundle) {
 		this.promptBundle = promptBundle;
-		return this;
 	}
 
 	@Override
-	public OpenAIProvider inputsLog(File inputsLog) {
+	public void inputsLog(File inputsLog) {
 		this.inputsLog = inputsLog;
-		return this;
 	}
 
 	@Override
-	public OpenAIProvider model(String chatModelName) {
+	public void model(String chatModelName) {
 		chatModel = ChatModel.of(chatModelName);
 		String uri = System.getenv("OPENAI_API_KEY");
 		if (uri == null || uri.isEmpty()) {
@@ -339,7 +328,6 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 
 		client = OpenAIOkHttpClient.builder().fromEnv().build();
-		return this;
 	}
 
 }

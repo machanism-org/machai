@@ -4,15 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -55,8 +52,6 @@ class BindexBuilderTest {
 
 	@Test
 	void testBuildReturnsNullOnNullOutput() throws IOException {
-		when(genAIProvider.prompt(anyString())).thenReturn(null);
-		when(genAIProvider.inputsLog(any(File.class))).thenReturn(genAIProvider);
 		when(genAIProvider.perform()).thenReturn(null);
 		assertNull(bindexBuilder.build(true));
 	}

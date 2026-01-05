@@ -1,10 +1,10 @@
 package org.machanism.machai.ai.manager;
 
+import java.io.File;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import java.io.File;
-import static org.junit.jupiter.api.Assertions.*;
 
 class SystemFunctionToolsTest {
     private SystemFunctionTools systemFunctionTools;

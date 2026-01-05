@@ -14,6 +14,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
+import org.machanism.machai.ai.openAI.OpenAIProvider;
 import org.machanism.machai.ghostwriter.reviewer.HtmlReviewer;
 import org.machanism.machai.ghostwriter.reviewer.JavaReviewer;
 import org.machanism.machai.ghostwriter.reviewer.MarkdownReviewer;
@@ -23,6 +24,8 @@ import org.machanism.machai.ghostwriter.reviewer.TextReviewer;
 import org.machanism.machai.ghostwriter.reviewer.TypeScriptReviewer;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Processor for project documentation generation.
@@ -32,6 +35,8 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * document generation.
  */
 public class DocsProcessor extends ProjectProcessor {
+	private static Logger logger = LoggerFactory.getLogger(DocsProcessor.class);
+
 	public static final String GUIDANCE_TAG_NAME = "@guidance";
 	private static final String DOCS_TEMP_DIR = ".machai/docs-inputs";
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
@@ -48,11 +53,12 @@ public class DocsProcessor extends ProjectProcessor {
 
 	/**
 	 * Constructs a DocsProcessor for documentation input preparation.
-	 * @param p 
+	 * 
+	 * @param p
 	 */
 	public DocsProcessor(GenAIProvider provider) {
 		this.provider = provider;
-		
+
 		systemFunctionTools = new SystemFunctionTools(null);
 		systemFunctionTools.applyTools(provider);
 
@@ -106,7 +112,10 @@ public class DocsProcessor extends ProjectProcessor {
 						if (file.isDirectory()) {
 							processProjectDir(projectLayout, file);
 						} else {
-							processFile(projectLayout, file);
+							String result = processFile(projectLayout, file);
+							if (result != null) {
+								logger.info(result);
+							}
 						}
 					}
 				}
@@ -133,7 +142,10 @@ public class DocsProcessor extends ProjectProcessor {
 			List<File> files = findFiles(scanDir);
 			if (!files.isEmpty()) {
 				for (File file : files) {
-					processFile(projectLayout, file);
+					String result = processFile(projectLayout, file);
+					if (result != null) {
+						logger.info(result);
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -141,10 +153,11 @@ public class DocsProcessor extends ProjectProcessor {
 		}
 	}
 
-	private void processFile(ProjectLayout projectLayout, File file) throws IOException {
+	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
 		String guidance = parseFile(projectDir, file);
 
+		String result = null;
 		if (guidance != null) {
 
 			provider.instructions(promptBundle.getString("sys_instractions"));
@@ -166,8 +179,11 @@ public class DocsProcessor extends ProjectProcessor {
 			File docsTempDir = new File(projectDir, DOCS_TEMP_DIR);
 			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 
-			provider.inputsLog(inputsFile).perform();
+			provider.inputsLog(inputsFile);
+			result = provider.perform();
 		}
+
+		return result;
 	}
 
 	private List<String> getParentsGuidances(ProjectLayout projectLayout, File file) {
