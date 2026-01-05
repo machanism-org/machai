@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.ghostwriter.DocsProcessor;
 import org.slf4j.Logger;
@@ -34,7 +36,8 @@ public class DocsCommand {
 			dir = SystemUtils.getUserDir();
 		}
 
-		DocsProcessor documents = new DocsProcessor();
+		GenAIProvider provider = GenAIProviderManager.getProvider(inputs ? "Non" : "OpenAI:gpt-5-mini");
+		DocsProcessor documents = new DocsProcessor(provider);
 		logger.info("Scanning documents in the root directory: {}", dir);
 		documents.scanDocuments(dir);
 		logger.info("Scanning finished.");

@@ -346,7 +346,7 @@ public class Picker implements Closeable {
 
         String classificationQuery = MessageFormat.format(promptBundle.getString("classification_instruction"),
                 classificationSchema, query);
-        String classificationStr = provider.prompt(classificationQuery).perform(true);
+        String classificationStr = provider.prompt(classificationQuery).perform();
         return classificationStr;
     }
 

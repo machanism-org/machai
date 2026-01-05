@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -32,14 +34,24 @@ public class AssembyCommand {
 
 	LineReader reader;
 
-	private GenAIProvider provider;
 	private SystemFunctionTools functionTools;
+	private Map<String, GenAIProvider> providers = new HashMap<>();
 
 	public AssembyCommand() {
 		super();
-		provider = GenAIProviderManager.getProvider(CHAT_MODEL);
-		functionTools = new SystemFunctionTools(null);
-		functionTools.applyTools(provider);
+	}
+
+	private GenAIProvider getProvider(String name) {
+
+		GenAIProvider provider = null;
+		if (providers.get(name) == null) {
+			provider = GenAIProviderManager.getProvider(name);
+			functionTools = new SystemFunctionTools(null);
+			functionTools.applyTools(provider);
+			providers.put(name, provider);
+		}
+
+		return provider;
 	}
 
 	@ShellMethod("Picks libraries based on user request.")
@@ -77,7 +89,6 @@ public class AssembyCommand {
 			dir.mkdirs();
 		}
 		logger.info("The project directory: {}", dir);
-		functionTools.setWorkingDir(dir);
 		String prompt = query;
 
 		if (query == null) {
@@ -90,15 +101,21 @@ public class AssembyCommand {
 			bindexList = pickBricks(query, score);
 		}
 
-		ApplicationAssembly assembly = new ApplicationAssembly(provider);
-		assembly.projectDir(dir);
-		assembly.assembly(prompt, bindexList, !inputs);
+		if (!bindexList.isEmpty()) {
+			GenAIProvider provider = getProvider(inputs ? "Non" : CHAT_MODEL);
+			functionTools.setWorkingDir(dir);
+
+			ApplicationAssembly assembly = new ApplicationAssembly(provider);
+			assembly.projectDir(dir);
+			assembly.assembly(prompt, bindexList);
+		}
 	}
 
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
+		GenAIProvider provider = getProvider(CHAT_MODEL);
 		provider.prompt(prompt);
-		String response = provider.perform(true);
+		String response = provider.perform();
 		if (response != null) {
 			logger.info(response);
 		}
@@ -106,7 +123,7 @@ public class AssembyCommand {
 
 	private List<BIndex> pickBricks(String query, Double score) throws IOException {
 		List<BIndex> bindexList = null;
-		try (Picker picker = new Picker(provider)) {
+		try (Picker picker = new Picker(getProvider(CHAT_MODEL))) {
 			picker.setScore(score);
 			bindexList = picker.pick(query);
 			logger.info("Search results for libraries matching the requested query:");

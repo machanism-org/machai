@@ -46,10 +46,10 @@ class ApplicationAssemblyTest {
         when(provider.instructions(anyString())).thenReturn(provider);
         when(provider.prompt(anyString())).thenReturn(provider);
         when(provider.inputsLog(any(File.class))).thenReturn(provider);
-        when(provider.perform(true)).thenReturn("Response from LLM");
+        when(provider.perform()).thenReturn("Response from LLM");
         ResourceBundle.clearCache();
         // BindexBuilder.bindexSchemaPrompt and MessageFormat exercised indirectly
-        assembly.assembly(prompt, bindexList, true);
+        assembly.assembly(prompt, bindexList);
         // There should be no exceptions
     }
 
@@ -60,10 +60,10 @@ class ApplicationAssemblyTest {
         ApplicationAssembly faultyAssembly = new ApplicationAssembly(faultyProvider);
         when(faultyProvider.instructions(anyString())).thenReturn(faultyProvider);
         when(faultyProvider.prompt(anyString())).thenReturn(faultyProvider);
-        doThrow(new IOException("fail")).when(faultyProvider).perform(anyBoolean());
+        doThrow(new IOException("fail")).when(faultyProvider).perform();
         List<BIndex> bindexList = new ArrayList<>();
         assertThrows(IllegalArgumentException.class, () -> {
-            faultyAssembly.assembly("prompt", bindexList, true);
+            faultyAssembly.assembly("prompt", bindexList);
         });
     }
 }

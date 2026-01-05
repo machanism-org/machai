@@ -10,6 +10,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ghostwriter.DocsProcessor;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -20,10 +22,10 @@ import org.slf4j.LoggerFactory;
 public class Docs extends AbstractMojo {
 	private static Logger logger = LoggerFactory.getLogger(Docs.class);
 
-	@Parameter(property = "assist.inputs.only", defaultValue = "false")
+	@Parameter(property = "docs.inputs.only", defaultValue = "false")
 	protected boolean inputsOnly;
 
-	@Parameter(property = "assist.chatModel", defaultValue = "OpenAI:gpt-5")
+	@Parameter(property = "docs.chatModel", defaultValue = "OpenAI:gpt-5")
 	protected String chatModel;
 
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
@@ -33,7 +35,9 @@ public class Docs extends AbstractMojo {
 	protected MavenProject project;
 
 	public void execute() throws MojoExecutionException {
-		DocsProcessor documents = new DocsProcessor() {
+		
+		GenAIProvider provider = GenAIProviderManager.getProvider(inputsOnly ? "Non" : chatModel);
+		DocsProcessor documents = new DocsProcessor(provider) {
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				MavenProjectLayout projectLayout = new MavenProjectLayout();

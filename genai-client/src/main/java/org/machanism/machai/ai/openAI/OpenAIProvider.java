@@ -126,34 +126,27 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	@Override
-	public String perform(boolean callLLM) {
+	public String perform() {
 		String result = null;
 
 		if (inputsLog != null) {
-			saveInput(inputsLog);
-			if (callLLM) {
-				logger.debug("LLM Inputs: {}", inputsLog);
-			} else {
-				logger.info("LLM Inputs: {}", inputsLog);
-			}
+			saveInput();
 		}
 
-		if (callLLM) {
-			Builder builder = ResponseCreateParams.builder().model(chatModel)
-					.tools(new ArrayList<Tool>(toolMap.keySet())).inputOfResponse(inputs);
+		Builder builder = ResponseCreateParams.builder().model(chatModel)
+				.tools(new ArrayList<Tool>(toolMap.keySet())).inputOfResponse(inputs);
 
-			if (instructions != null) {
-				builder.instructions(instructions);
-			}
-
-			Response response = client.responses().create(builder.build());
-			result = parseResponse(response, instructions, callLLM);
+		if (instructions != null) {
+			builder.instructions(instructions);
 		}
+
+		Response response = client.responses().create(builder.build());
+		result = parseResponse(response, instructions);
 		clear();
 		return result;
 	}
 
-	private String parseResponse(Response response, String instructions, boolean callLLM) {
+	private String parseResponse(Response response, String instructions) {
 		String result = null;
 
 		List<ResponseOutputItem> output = response.output();
@@ -201,7 +194,7 @@ public class OpenAIProvider implements GenAIProvider {
 			if (text != null) {
 				logger.info(text);
 			}
-			result = perform(callLLM);
+			result = perform();
 		} else {
 			result = text;
 		}
@@ -242,13 +235,13 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 	}
 
-	private void saveInput(File inputsFile) {
-		File parentFile = inputsFile.getParentFile();
+	private void saveInput() {
+		File parentFile = inputsLog.getParentFile();
 		if (parentFile != null && !parentFile.exists()) {
 			parentFile.mkdirs();
 		}
 
-		try (Writer streamWriter = new FileWriter(inputsFile, false)) {
+		try (Writer streamWriter = new FileWriter(inputsLog, false)) {
 			for (ResponseInputItem responseInputItem : inputs) {
 				String inputText = "";
 				if (responseInputItem.isMessage()) {
@@ -267,8 +260,9 @@ public class OpenAIProvider implements GenAIProvider {
 					streamWriter.write("\n\n");
 				}
 			}
+			logger.debug("LLM Inputs: {}", inputsLog);
 		} catch (IOException e) {
-			logger.error("Failed to save LLM inputs log to file: {}", inputsFile, e);
+			logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
 		}
 	}
 
@@ -279,7 +273,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	@Override
-	public OpenAIProvider addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
+	public OpenAIProvider addTool(String name, String description, Function<JsonNode, Object> function,
+			String... paramsDesc) {
 
 		Map<String, Map<String, String>> fromValue = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
@@ -324,7 +319,6 @@ public class OpenAIProvider implements GenAIProvider {
 		return this;
 	}
 
-	@Override
 	public OpenAIProvider promptBundle(ResourceBundle promptBundle) {
 		this.promptBundle = promptBundle;
 		return this;

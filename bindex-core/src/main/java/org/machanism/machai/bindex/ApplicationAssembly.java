@@ -56,7 +56,7 @@ public class ApplicationAssembly {
      * @param callLLM Whether to call LLM for assembly execution.
      * @throws IllegalArgumentException If an I/O error occurs during assembly.
      */
-    public void assembly(final String prompt, List<BIndex> bindexList, boolean callLLM) {
+    public void assembly(final String prompt, List<BIndex> bindexList) {
         String systemPrompt = promptBundle.getString("assembly_system_instructions");
         provider.instructions(systemPrompt);
 
@@ -77,7 +77,7 @@ public class ApplicationAssembly {
 
             File bindexTempDir = new File(projectDir, ASSEMBLY_TEMP_DIR);
             provider.inputsLog(bindexTempDir);
-            String response = provider.perform(callLLM);
+            String response = provider.perform();
             if (response != null) {
                 logger.info(response);
             }

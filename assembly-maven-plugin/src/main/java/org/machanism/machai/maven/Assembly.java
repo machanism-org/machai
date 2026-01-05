@@ -147,12 +147,12 @@ public class Assembly extends AbstractMojo {
                         getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
                     }
 
-                    GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(chatModel);
+                    GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(inputsOnly ? "Non" : chatModel);
                     ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider);
 
                     getLog().info("The project directory: " + basedir);
                     assembly.projectDir(basedir);
-                    assembly.assembly(query, bindexList, !inputsOnly);
+                    assembly.assembly(query, bindexList);
 
                     if (!inputsOnly) {
                         String prompt;

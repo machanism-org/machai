@@ -57,7 +57,7 @@ class BindexBuilderTest {
 	void testBuildReturnsNullOnNullOutput() throws IOException {
 		when(genAIProvider.prompt(anyString())).thenReturn(null);
 		when(genAIProvider.inputsLog(any(File.class))).thenReturn(genAIProvider);
-		when(genAIProvider.perform(anyBoolean())).thenReturn(null);
+		when(genAIProvider.perform()).thenReturn(null);
 		assertNull(bindexBuilder.build(true));
 	}
 

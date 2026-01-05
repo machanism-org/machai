@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.ghostwriter.reviewer.HtmlReviewer;
 import org.machanism.machai.ghostwriter.reviewer.JavaReviewer;
@@ -37,8 +36,6 @@ public class DocsProcessor extends ProjectProcessor {
 	private static final String DOCS_TEMP_DIR = ".machai/docs-inputs";
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	private String chatModel = "OpenAI:gpt-5-mini";
-
 	private GenAIProvider provider;
 	private SystemFunctionTools systemFunctionTools;
 
@@ -51,10 +48,11 @@ public class DocsProcessor extends ProjectProcessor {
 
 	/**
 	 * Constructs a DocsProcessor for documentation input preparation.
+	 * @param p 
 	 */
-	public DocsProcessor() {
-		provider = GenAIProviderManager.getProvider(chatModel);
-		provider.promptBundle(promptBundle);
+	public DocsProcessor(GenAIProvider provider) {
+		this.provider = provider;
+		
 		systemFunctionTools = new SystemFunctionTools(null);
 		systemFunctionTools.applyTools(provider);
 
@@ -168,7 +166,7 @@ public class DocsProcessor extends ProjectProcessor {
 			File docsTempDir = new File(projectDir, DOCS_TEMP_DIR);
 			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 
-			provider.inputsLog(inputsFile).perform(false);
+			provider.inputsLog(inputsFile).perform();
 		}
 	}
 

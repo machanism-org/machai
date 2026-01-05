@@ -35,7 +35,7 @@ public class BindexCommand {
 			dir = SystemUtils.getUserDir();
 		}
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(CHAT_MODEL);
+		GenAIProvider provider = GenAIProviderManager.getProvider(inputs ? "Non" : CHAT_MODEL);
 
 		BindexCreator register = new BindexCreator(provider, !inputs);
 		register.update(update);
