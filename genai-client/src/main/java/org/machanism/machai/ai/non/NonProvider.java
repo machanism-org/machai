@@ -76,18 +76,12 @@ public class NonProvider implements GenAIProvider {
 	@Override
 	public String perform() {
 		File parentFile = inputsLog.getParentFile();
-		if (parentFile != null && !parentFile.exists()) {
-			parentFile.mkdirs();
+		if (parentFile != null) {
+			if (!parentFile.exists()) {
+				parentFile.mkdirs();
+			}
 		} else {
 			parentFile = SystemUtils.getUserDir();
-		}
-
-		try (Writer streamWriter = new FileWriter(inputsLog, false)) {
-			streamWriter.write(inputsLog.toString());
-			logger.info("LLM Inputs: {}", inputsLog);
-
-		} catch (IOException e) {
-			logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
 		}
 
 		if (instructions != null) {
@@ -99,6 +93,14 @@ public class NonProvider implements GenAIProvider {
 			} catch (IOException e) {
 				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
 			}
+		}
+
+		try (Writer streamWriter = new FileWriter(inputsLog, false)) {
+			streamWriter.write(inputsLog.toString());
+			logger.info("LLM Inputs: {}", inputsLog);
+
+		} catch (IOException e) {
+			logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
 		}
 
 		return null;

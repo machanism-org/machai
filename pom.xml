@@ -5,13 +5,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.machanism.machai</groupId>
-	<artifactId>
-		machai</artifactId>
+	<artifactId>machai</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Machai
-		Project</name>
+	<name>Machai Project</name>
 	<description>
 		Machai is a GenAI-powered tool for automated creation, registration, and
 		enhancement of software projects. It streamlines project assembly and
