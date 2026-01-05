@@ -75,32 +75,34 @@ public class NonProvider implements GenAIProvider {
 
 	@Override
 	public String perform() {
-		File parentFile = inputsLog.getParentFile();
-		if (parentFile != null) {
-			if (!parentFile.exists()) {
-				parentFile.mkdirs();
+		if (inputsLog != null) {
+			File parentFile = inputsLog.getParentFile();
+			if (parentFile != null) {
+				if (!parentFile.exists()) {
+					parentFile.mkdirs();
+				}
+			} else {
+				parentFile = SystemUtils.getUserDir();
 			}
-		} else {
-			parentFile = SystemUtils.getUserDir();
-		}
 
-		if (instructions != null) {
-			File file = new File(parentFile, "instructions.txt");
-			try (Writer streamWriter = new FileWriter(file, false)) {
-				streamWriter.write(instructions);
-				logger.info("LLM Instruction: {}", file);
+			if (instructions != null) {
+				File file = new File(parentFile, "instructions.txt");
+				try (Writer streamWriter = new FileWriter(file, false)) {
+					streamWriter.write(instructions);
+					logger.info("LLM Instruction: {}", file);
+
+				} catch (IOException e) {
+					logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
+				}
+			}
+
+			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
+				streamWriter.write(prompts.toString());
+				logger.info("LLM Inputs: {}", inputsLog);
 
 			} catch (IOException e) {
 				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
 			}
-		}
-
-		try (Writer streamWriter = new FileWriter(inputsLog, false)) {
-			streamWriter.write(inputsLog.toString());
-			logger.info("LLM Inputs: {}", inputsLog);
-
-		} catch (IOException e) {
-			logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
 		}
 
 		return null;
