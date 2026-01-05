@@ -16,15 +16,15 @@ public interface GenAIProvider {
 
 	GenAIProvider promptFile(File file, String bundleMessageName) throws IOException;
 
-	void addFile(File file) throws IOException, FileNotFoundException;
+	GenAIProvider addFile(File file) throws IOException, FileNotFoundException;
 
-	void addFile(URL fileUrl) throws IOException, FileNotFoundException;
+	GenAIProvider addFile(URL fileUrl) throws IOException, FileNotFoundException;
 
 	List<Float> embedding(String text);
 
-	void clear();
+	GenAIProvider clear();
 
-	void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc);
+	GenAIProvider addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc);
 
 	GenAIProvider instructions(String instructions);
 
@@ -33,5 +33,7 @@ public interface GenAIProvider {
 	String perform(boolean callLLM);
 
 	GenAIProvider inputsLog(File bindexTempDir);
+
+	GenAIProvider model(String chatModelName);
 
 }

@@ -1,9 +1,9 @@
 package org.machanism.machai.ai.manager;
 
-import org.apache.commons.lang.StringUtils;
-import org.machanism.machai.ai.openAI.OpenAIProvider;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
-import com.openai.models.ChatModel;
+import org.apache.commons.lang.StringUtils;
 
 public class GenAIProviderManager {
 
@@ -13,13 +13,30 @@ public class GenAIProviderManager {
 
 		if (StringUtils.isBlank(chatModelName)) {
 			chatModelName = providerName;
-			providerName = "OpenAI";
+			providerName = "Non";
 		}
 
-		if (!StringUtils.equals(providerName, "OpenAI")) {
-			throw new IllegalArgumentException("GenAI provider:" + providerName + " is not supported.");
+		String className;
+		if (StringUtils.contains(providerName, '.')) {
+			className = providerName;
+		} else {
+			String packageName = providerName.substring(0, 1).toLowerCase() + providerName.substring(1);
+			className = String.format("org.machanism.machai.ai.%s.%sProvider", packageName, providerName);
 		}
-		return new OpenAIProvider(ChatModel.of(chatModelName));
+
+		GenAIProvider provider;
+		try {
+			@SuppressWarnings("unchecked")
+			Class<? extends GenAIProvider> providerClass = (Class<? extends GenAIProvider>) Class.forName(className);
+			Constructor<? extends GenAIProvider> constructor = providerClass.getConstructor();
+			provider = constructor.newInstance();
+			provider.model(chatModelName);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| ClassNotFoundException | NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException("GenAI provider: " + providerName + " is not supported.", e);
+		}
+
+		return provider;
 	}
 
 }

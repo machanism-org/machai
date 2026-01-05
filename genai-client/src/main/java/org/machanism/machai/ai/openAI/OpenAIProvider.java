@@ -71,19 +71,8 @@ public class OpenAIProvider implements GenAIProvider {
 
 	private File inputsLog;
 
-	public OpenAIProvider(ChatModel chatModel) {
-		super();
-		String uri = System.getenv("OPENAI_API_KEY");
-		if (uri == null || uri.isEmpty()) {
-			throw new RuntimeException("OPENAI_API_KEY env variable is not set or is empty.");
-		}
-
-		client = OpenAIOkHttpClient.builder().fromEnv().build();
-		this.chatModel = chatModel;
-	}
-
 	@Override
-	public GenAIProvider prompt(String text) {
+	public OpenAIProvider prompt(String text) {
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
 				.addInputTextContent(text).build();
 		inputs.add(ResponseInputItem.ofMessage(message));
@@ -91,7 +80,7 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	@Override
-	public GenAIProvider promptFile(File file, String bundleMessageName) throws IOException {
+	public OpenAIProvider promptFile(File file, String bundleMessageName) throws IOException {
 		String type = FilenameUtils.getExtension(file.getName());
 		try (FileInputStream input = new FileInputStream(file)) {
 			String fileData = IOUtils.toString(input, "UTF8");
@@ -109,7 +98,7 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	@Override
-	public void addFile(File file) throws IOException, FileNotFoundException {
+	public OpenAIProvider addFile(File file) throws IOException, FileNotFoundException {
 		try (FileInputStream input = new FileInputStream(file)) {
 			FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input))
 					.purpose(FilePurpose.USER_DATA).build();
@@ -122,16 +111,18 @@ public class OpenAIProvider implements GenAIProvider {
 					.addContent(builder.build()).build();
 			inputs.add(ResponseInputItem.ofMessage(message));
 		}
+		return this;
 	}
 
 	@Override
-	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
+	public OpenAIProvider addFile(URL fileUrl) throws IOException, FileNotFoundException {
 		com.openai.models.responses.ResponseInputFile.Builder builder = ResponseInputFile.builder()
 				.fileUrl(fileUrl.toString());
 
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
 				.addContent(builder.build()).build();
 		inputs.add(ResponseInputItem.ofMessage(message));
+		return this;
 	}
 
 	@Override
@@ -282,12 +273,13 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	@Override
-	public void clear() {
+	public OpenAIProvider clear() {
 		inputs.clear();
+		return this;
 	}
 
 	@Override
-	public void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
+	public OpenAIProvider addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
 
 		Map<String, Map<String, String>> fromValue = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
@@ -323,23 +315,36 @@ public class OpenAIProvider implements GenAIProvider {
 
 		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
 		toolMap.put(tool, function);
+		return this;
 	}
 
 	@Override
-	public GenAIProvider instructions(String instructions) {
+	public OpenAIProvider instructions(String instructions) {
 		this.instructions = instructions;
 		return this;
 	}
 
 	@Override
-	public GenAIProvider promptBundle(ResourceBundle promptBundle) {
+	public OpenAIProvider promptBundle(ResourceBundle promptBundle) {
 		this.promptBundle = promptBundle;
 		return this;
 	}
 
 	@Override
-	public GenAIProvider inputsLog(File inputsLog) {
+	public OpenAIProvider inputsLog(File inputsLog) {
 		this.inputsLog = inputsLog;
+		return this;
+	}
+
+	@Override
+	public OpenAIProvider model(String chatModelName) {
+		chatModel = ChatModel.of(chatModelName);
+		String uri = System.getenv("OPENAI_API_KEY");
+		if (uri == null || uri.isEmpty()) {
+			throw new RuntimeException("OPENAI_API_KEY env variable is not set or is empty.");
+		}
+
+		client = OpenAIOkHttpClient.builder().fromEnv().build();
 		return this;
 	}
 

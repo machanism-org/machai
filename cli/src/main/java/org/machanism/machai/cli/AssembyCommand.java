@@ -25,7 +25,7 @@ import org.springframework.shell.standard.ShellOption;
 public class AssembyCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
-	private static final String CHAT_MODEL = "gpt-5.1";
+	private static final String CHAT_MODEL = "OpenAI:gpt-5.1";
 
 	private List<BIndex> bindexList;
 	private String findQuery;

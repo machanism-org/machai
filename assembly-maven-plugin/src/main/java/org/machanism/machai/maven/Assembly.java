@@ -61,7 +61,7 @@ public class Assembly extends AbstractMojo {
     /**
      * Specifies the AI chat model to use for assembly-related tasks.
      */
-    @Parameter(property = "assembly.chatModel", defaultValue = "gpt-5")
+    @Parameter(property = "assembly.chatModel", defaultValue = "OpenAI:gpt-5")
     protected String chatModel;
 
     /**

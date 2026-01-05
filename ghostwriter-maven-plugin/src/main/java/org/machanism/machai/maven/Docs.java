@@ -23,7 +23,7 @@ public class Docs extends AbstractMojo {
 	@Parameter(property = "assist.inputs.only", defaultValue = "false")
 	protected boolean inputsOnly;
 
-	@Parameter(property = "assist.chatModel", defaultValue = "gpt-5")
+	@Parameter(property = "assist.chatModel", defaultValue = "OpenAI:gpt-5")
 	protected String chatModel;
 
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)

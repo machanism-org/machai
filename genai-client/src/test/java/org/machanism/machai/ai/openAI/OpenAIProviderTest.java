@@ -29,7 +29,7 @@ public class OpenAIProviderTest {
         chatModel = mock(ChatModel.class);
         // Set up OPENAI_API_KEY so it doesn't throw
         System.setProperty("OPENAI_API_KEY", "testapikey");
-        provider = new OpenAIProvider(chatModel);
+        provider = new OpenAIProvider().model(chatModel.toString());
     }
 
     @Test

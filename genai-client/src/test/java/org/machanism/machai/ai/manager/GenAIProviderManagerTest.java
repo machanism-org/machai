@@ -1,8 +1,10 @@
 package org.machanism.machai.ai.manager;
 
-import com.openai.models.ChatModel;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class GenAIProviderManagerTest {
     @Test
@@ -14,7 +16,7 @@ class GenAIProviderManagerTest {
 
     @Test
     void infersOpenAIProviderWhenOnlyModelIsGiven() {
-        GenAIProvider provider = GenAIProviderManager.getProvider("gpt-3.5-turbo");
+        GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
         assertNotNull(provider);
         assertTrue(provider instanceof org.machanism.machai.ai.openAI.OpenAIProvider);
     }

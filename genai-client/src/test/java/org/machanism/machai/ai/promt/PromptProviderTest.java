@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PromptProviderTest {
 
-    private PromptProvider provider;
+    private NonProvider provider;
 
     @BeforeEach
     void setUp() {
-        provider = new PromptProvider();
+        provider = new NonProvider();
     }
 
     @Test

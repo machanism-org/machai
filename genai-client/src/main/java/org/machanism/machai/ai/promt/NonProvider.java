@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.machanism.machai.ai.manager.GenAIProvider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class PromptProvider implements GenAIProvider {
+public class NonProvider implements GenAIProvider {
 
 	@Override
 	public GenAIProvider prompt(String text) {
@@ -28,32 +27,33 @@ public class PromptProvider implements GenAIProvider {
 	}
 
 	@Override
-	public void addFile(File file) throws IOException, FileNotFoundException {
+	public GenAIProvider addFile(File file) throws IOException, FileNotFoundException {
 		// TODO Auto-generated method stub
-
+		return this;
 	}
 
 	@Override
-	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
+	public GenAIProvider addFile(URL fileUrl) throws IOException, FileNotFoundException {
 		// TODO Auto-generated method stub
-
+		return this;
 	}
 
 	@Override
 	public List<Float> embedding(String text) {
-		throw new NotImplementedException();
+		throw new IllegalArgumentException("NonProvider doesn't support embedding generation.");
 	}
 
 	@Override
-	public void clear() {
+	public GenAIProvider clear() {
 		// TODO Auto-generated method stub
-
+		return this;
 	}
 
 	@Override
-	public void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
+	public GenAIProvider addTool(String name, String description, Function<JsonNode, Object> function,
+			String... paramsDesc) {
 		// TODO Auto-generated method stub
-
+		return this;
 	}
 
 	@Override
@@ -78,6 +78,11 @@ public class PromptProvider implements GenAIProvider {
 	public GenAIProvider inputsLog(File bindexTempDir) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public GenAIProvider model(String chatModelName) {
+		return this;
 	}
 
 }
