@@ -59,8 +59,7 @@ public class NoneProvider implements GenAIProvider {
 	}
 
 	@Override
-	public void addTool(String name, String description, Function<JsonNode, Object> function,
-			String... paramsDesc) {
+	public void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
 	}
 
 	@Override
@@ -99,7 +98,7 @@ public class NoneProvider implements GenAIProvider {
 				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
 			}
 		}
-
+		clear();
 		return null;
 	}
 

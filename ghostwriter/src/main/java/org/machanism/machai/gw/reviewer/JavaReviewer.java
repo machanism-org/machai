@@ -55,7 +55,7 @@ public class JavaReviewer implements Reviewer {
 					String guidanceText = matcher.group(1).replaceAll("(?m)^\\s*\\*\\s?", "").trim();
 					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
 					result = MessageFormat.format(promptBundle.getString("java_package_info_file"), relatedPath,
-							StringUtils.trim(StringUtils.substringBetween(content, "package", ";")), guidanceText);
+							extractPackageName(content), guidanceText);
 				} else {
 					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
 					String name = guidancesFile.getName();
@@ -66,4 +66,20 @@ public class JavaReviewer implements Reviewer {
 		return result;
 	}
 
+	/**
+	 * Extracts the package name from the content of a package-info.java file.
+	 * 
+	 * @param content The full text content of the package-info.java file.
+	 * @return The package name, or null if not found.
+	 */
+	public static String extractPackageName(String content) {
+		// Regex: matches 'package' followed by whitespace, then the package name,
+		// ending with a semicolon
+		Pattern pattern = Pattern.compile("\\bpackage\\s+([a-zA-Z_][\\w\\.]*);");
+		Matcher matcher = pattern.matcher(content);
+		if (matcher.find()) {
+			return matcher.group(1);
+		}
+		return null; // Package declaration not found
+	}
 }
