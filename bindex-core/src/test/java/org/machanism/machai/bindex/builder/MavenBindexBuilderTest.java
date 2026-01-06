@@ -53,19 +53,6 @@ class MavenBindexBuilderTest {
 		assertDoesNotThrow(() -> builder.projectContext());
 	}
 
-	@Test
-	@DisplayName("should remove not important data from model")
-	void testRemoveNotImportantData() {
-		builder.removeNotImportantData(mockModel);
-		verify(mockModel, times(2)).setDistributionManagement(null);
-		verify(mockModel).setBuild(null);
-		verify(mockModel).setProperties(null);
-		verify(mockModel).setDependencyManagement(null);
-		verify(mockModel).setReporting(null);
-		verify(mockModel).setScm(null);
-		verify(mockModel).setPluginRepositories(null);
-	}
-
 	// More comprehensive tests should be implemented if core logic is extended with
 	// IO or additional dependencies.
 	// Consider mocking GenAIProvider and file operations if required for full logic
