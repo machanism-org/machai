@@ -13,11 +13,12 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 /**
  * Abstract base Mojo for Bindex Maven plugin operations.
  * <p>
- * This class provides common functionality for the core plugin goals
- * (create, update, register) and manages interaction with the Bindex AI
- * provider, resource processing, and Maven project context.
+ * This class provides common functionality for the core plugin goals (create,
+ * update, register) and manages interaction with the Bindex AI provider,
+ * resource processing, and Maven project context.
  * <p>
  * Usage example:
+ * 
  * <pre>
  * {@code
  * AbstractBindexMojo mojo = new Create();
@@ -34,12 +35,6 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
-
-	/**
-	 * If true, only input resources are processed; output generation is skipped.
-	 */
-	@Parameter(property = "bindex.inputs.only", defaultValue = "false")
-	protected boolean inputsOnly;
 
 	/**
 	 * The chat model identifier used by Bindex AI provider.
@@ -68,7 +63,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	void createBindex(boolean update) {
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 
-		BindexCreator creator = new BindexCreator(provider, !inputsOnly);
+		BindexCreator creator = new BindexCreator(provider);
 		creator.update(update);
 
 		MavenProjectLayout projectLayout = new MavenProjectLayout();

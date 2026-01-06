@@ -9,6 +9,7 @@ import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
+import org.machanism.machai.gw.Ghostwriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
@@ -44,23 +45,29 @@ public class BindexCommand {
 	 * Generates bindex files for the given directory using GenAI provider.
 	 * @param dir The directory to scan for bindex creation
 	 * @param update Update mode: all saved data will be updated
-	 * @param inputs Debug mode: only generates inputs.txt, no AI requests
+	 * @param chatModel GenAI service provider/model (default is Ghostwriter.CHAT_MODEL)
 	 * @throws IOException if scan or creation fails
 	 */
 	@ShellMethod("Generates bindex files.")
 	public void bindex(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update,
-			@ShellOption(help = "Generates only the inputs.txt file; no request is sent to OpenAI to create a bindex.", value = "inputs") boolean inputs)
+			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model '"
+					+ Ghostwriter.CHAT_MODEL
+					+ "' will be used.", value = "genai", defaultValue = "None") String chatModel)
 			throws IOException {
+
+		if (chatModel == null) {
+			chatModel = Ghostwriter.CHAT_MODEL;
+		}
 
 		if (dir == null) {
 			dir = SystemUtils.getUserDir();
 		}
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(inputs ? null : CHAT_MODEL);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 
-		BindexCreator register = new BindexCreator(provider, !inputs);
+		BindexCreator register = new BindexCreator(provider);
 		register.update(update);
 		register.scanFolder(dir);
 	}

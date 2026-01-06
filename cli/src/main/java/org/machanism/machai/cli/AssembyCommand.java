@@ -16,6 +16,7 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
+import org.machanism.machai.gw.Ghostwriter;
 import org.machanism.machai.schema.BIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,17 +25,21 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 /**
- * Shell command for application assembly and library picking operations via GenAI.
+ * Shell command for application assembly and library picking operations via
+ * GenAI.
  * <p>
- * Provides functionality to query, pick libraries, and assemble projects using AI-assisted logic.
+ * Provides functionality to query, pick libraries, and assemble projects using
+ * AI-assisted logic.
  * <p>
  * Usage Example:
+ * 
  * <pre>
  * {@code
  * AssembyCommand command = new AssembyCommand();
  * command.pick("Create a web app", 0.8);
  * }
  * </pre>
+ * 
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
@@ -65,7 +70,9 @@ public class AssembyCommand {
 	}
 
 	/**
-	 * Retrieves a GenAI provider for the specified model name. Caches providers for reuse.
+	 * Retrieves a GenAI provider for the specified model name. Caches providers for
+	 * reuse.
+	 * 
 	 * @param name the model/provider name
 	 * @return GenAIProvider instance
 	 */
@@ -84,6 +91,7 @@ public class AssembyCommand {
 
 	/**
 	 * Picks libraries based on user request.
+	 * 
 	 * @param query The application assembly prompt or path to query file.
 	 * @param score The minimum similarity threshold for search results.
 	 * @throws IOException if reading file or picking fails
@@ -101,6 +109,7 @@ public class AssembyCommand {
 
 	/**
 	 * Gets query text from file if input is a file path.
+	 * 
 	 * @param query query text or file path
 	 * @return String containing the query
 	 * @throws IOException if file read fails
@@ -117,11 +126,13 @@ public class AssembyCommand {
 
 	/**
 	 * Creates a project via picked library set.
-	 * @param query The application assembly prompt (may be null to reuse last query)
-	 * @param dir The directory for the assembled project
-	 * @param score Minimum similarity threshold
-	 * @param inputs Debug mode flag (true for inputs-only, no AI request)
-	 * @throws IOException if an error occurs
+	 * 
+	 * @param query  The application assembly prompt (may be null to reuse last
+	 *               query)
+	 * @param dir    The directory for the assembled project
+	 * @param score  Minimum similarity threshold
+	 * @param chatModel GenAI service provider/model (default is Ghostwriter.CHAT_MODEL)
+	 * @throws IOException              if an error occurs
 	 * @throws IllegalArgumentException if query or bindexList is missing
 	 */
 	@ShellMethod("Creates a project via picked librariy set.")
@@ -129,8 +140,14 @@ public class AssembyCommand {
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
 			@ShellOption(help = "The path to the assembled project directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score,
-			@ShellOption(help = "The debug mode: no request is sent to OpenAI to create the project.", value = "inputs") boolean inputs)
+			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model '"
+					+ Ghostwriter.CHAT_MODEL
+					+ "' will be used.", value = "genai", defaultValue = "None") String chatModel)
 			throws IOException {
+
+		if (chatModel == null) {
+			chatModel = Ghostwriter.CHAT_MODEL;
+		}
 
 		if (dir == null) {
 			dir = SystemUtils.getUserDir();
@@ -151,7 +168,7 @@ public class AssembyCommand {
 		}
 
 		if (!bindexList.isEmpty()) {
-			GenAIProvider provider = getProvider(inputs ? null : CHAT_MODEL);
+			GenAIProvider provider = getProvider(chatModel);
 			functionTools.setWorkingDir(dir);
 
 			ApplicationAssembly assembly = new ApplicationAssembly(provider);
@@ -162,6 +179,7 @@ public class AssembyCommand {
 
 	/**
 	 * Sends a user prompt to the GenAI provider for guidance.
+	 * 
 	 * @param prompt The prompt supplied by the user.
 	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
@@ -176,6 +194,7 @@ public class AssembyCommand {
 
 	/**
 	 * Picks bricks (libraries) using a Picker service and scores them.
+	 * 
 	 * @param query The query string describing requirements
 	 * @param score Minimum similarity score
 	 * @return List&lt;BIndex&gt; found matching libraries
@@ -194,8 +213,9 @@ public class AssembyCommand {
 
 	/**
 	 * Prints search results for picked libraries.
+	 * 
 	 * @param bindexList List of picked libraries
-	 * @param picker Picker used for scoring
+	 * @param picker     Picker used for scoring
 	 */
 	private void printFindResult(List<BIndex> bindexList, Picker picker) {
 		if (!bindexList.isEmpty()) {

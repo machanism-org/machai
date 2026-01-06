@@ -38,7 +38,7 @@ class BindexCreatorTest {
         builder = mock(BindexBuilder.class);
         bindex = mock(BIndex.class);
         objectMapper = mock(ObjectMapper.class);
-        creator = new BindexCreator(provider, true);
+        creator = new BindexCreator(provider);
     }
 
     @Test
@@ -58,7 +58,7 @@ class BindexCreatorTest {
         BindexCreator creatorSpy = spy(creator);
         doReturn(null).when(creatorSpy).getBindex(projectDir);
         doReturn(bindexFile).when(creatorSpy).getBindexFile(projectDir);
-        doReturn(bindex).when(builder).build(true);
+        doReturn(bindex).when(builder).build();
         doNothing().when(objectMapper).writeValue(bindexFile, bindex);
         creatorSpy.update(true);
         // Should not throw any exceptions
@@ -69,12 +69,12 @@ class BindexCreatorTest {
     @Disabled("Need to fix.")
     void testProcessFolderThrowsOnIOException() throws IOException {
         ProjectLayout layout = mock(ProjectLayout.class);
-        BindexCreator creatorSpy = spy(new BindexCreator(provider, true));
+        BindexCreator creatorSpy = spy(new BindexCreator(provider));
         File projectDir = new File("/tmp/project2");
         when(layout.getProjectDir()).thenReturn(projectDir);
         doReturn(null).when(creatorSpy).getBindex(projectDir);
         doReturn(new File(projectDir, "bindex.json")).when(creatorSpy).getBindexFile(projectDir);
-        doThrow(new IOException("fail")).when(builder).build(true);
+        doThrow(new IOException("fail")).when(builder).build();
         doReturn(builder).when(BindexBuilderFactory.class);
         creatorSpy.update(true);
         assertThrows(IllegalArgumentException.class, () -> creatorSpy.processFolder(layout));

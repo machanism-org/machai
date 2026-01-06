@@ -53,7 +53,7 @@ class BindexBuilderTest {
 	@Test
 	void testBuildReturnsNullOnNullOutput() throws IOException {
 		when(genAIProvider.perform()).thenReturn(null);
-		assertNull(bindexBuilder.build(true));
+		assertNull(bindexBuilder.build());
 	}
 
 	@Test

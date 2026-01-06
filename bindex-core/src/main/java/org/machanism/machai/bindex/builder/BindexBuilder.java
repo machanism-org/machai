@@ -28,7 +28,7 @@ public class BindexBuilder {
 		this.projectLayout = projectLayout;
 	}
 
-	public BIndex build(boolean callLLM) throws IOException {
+	public BIndex build() throws IOException {
 		bindexSchemaPrompt(genAIProvider);
 
 		if (origin != null) {
