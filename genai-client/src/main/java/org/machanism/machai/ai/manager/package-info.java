@@ -1,39 +1,4 @@
-/**
- * The <code>org.machanism.machai.maven</code> package provides Maven plugin components enabling
- * AI-powered project assembly and automated library recommendations. Its core Mojo interacts
- * with users and AI providers to generate project structures and dependency sets based on user prompts
- * or specification files (e.g., <code>project.txt</code>), integrating advanced automation and interactivity.
- *
- * <h2>Key Features</h2>
- * <ul>
- *   <li>Interactive prompts and AI-driven project assembly.</li>
- *   <li>Automated recommendation of Java libraries via AI chat models.</li>
- *   <li>Flexible configuration using parameters such as chat models, score thresholds, and prompt files.</li>
- *   <li>Consistent and extensible architecture for custom project assembly workflows.</li>
- * </ul>
- *
- * <h2>Usage Example</h2>
- * <pre>
- * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
- * </pre>
- * <p>
- * For advanced users, customize the chat models and scoring parameters to leverage different AI providers
- * or control the recommendation quality.
- *
- *
- * <h2>Best Practices</h2>
- * <ul>
- *   <li>Document all public and protected elements with comprehensive Javadoc comments.</li>
- *   <li>Use meaningful summaries and detailed descriptions for all classes, methods, and fields.</li>
- *   <li>Update documentation with every code change to maintain accuracy.</li>
- *   <li>Review Javadoc output regularly for completeness and quality.</li>
- *   <li>Never remove <code>@guidance</code> comments; preserve them for project standards compliance.</li>
- * </ul>
- *
- * @see org.machanism.machai.maven.Assembly
- *
- */
-package org.machanism.machai.maven;
+package org.machanism.machai.ai.manager;
 
 /*
  * @guidance:

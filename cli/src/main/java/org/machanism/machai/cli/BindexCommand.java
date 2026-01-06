@@ -15,15 +15,38 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
+/**
+ * Shell command for creating and registering Bindex files using GenAI.
+ * <p>
+ * Provides CLI access to bindex generation and registration logic.
+ * <p>
+ * Usage Example:
+ * <pre>
+ * {@code
+ * BindexCommand cmd = new BindexCommand();
+ * cmd.bindex(new File("/myapp/"), true, false);
+ * }
+ * </pre>
+ * @author Viktor Tovstyi
+ * @since 0.0.2
+ */
 @ShellComponent
 public class BindexCommand {
 
 	private static final String CHAT_MODEL = "OpenAI:gpt-5.1";
 
+	/** JLine line reader for shell interaction. */
 	@Autowired
 	@Lazy
 	LineReader reader;
 
+	/**
+	 * Generates bindex files for the given directory using GenAI provider.
+	 * @param dir The directory to scan for bindex creation
+	 * @param update Update mode: all saved data will be updated
+	 * @param inputs Debug mode: only generates inputs.txt, no AI requests
+	 * @throws IOException if scan or creation fails
+	 */
 	@ShellMethod("Generates bindex files.")
 	public void bindex(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
@@ -42,6 +65,12 @@ public class BindexCommand {
 		register.scanFolder(dir);
 	}
 
+	/**
+	 * Registers bindex file for the given directory using GenAI provider.
+	 * @param dir The directory to register bindex from
+	 * @param update Update mode: all saved data will be updated
+	 * @throws IOException if registration fails
+	 */
 	@ShellMethod("Registers bindex file.")
 	public void register(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,

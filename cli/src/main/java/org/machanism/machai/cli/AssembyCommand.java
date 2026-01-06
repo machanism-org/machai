@@ -23,24 +23,52 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
+/**
+ * Shell command for application assembly and library picking operations via GenAI.
+ * <p>
+ * Provides functionality to query, pick libraries, and assemble projects using AI-assisted logic.
+ * <p>
+ * Usage Example:
+ * <pre>
+ * {@code
+ * AssembyCommand command = new AssembyCommand();
+ * command.pick("Create a web app", 0.8);
+ * }
+ * </pre>
+ * @author Viktor Tovstyi
+ * @since 0.0.2
+ */
 @ShellComponent
 public class AssembyCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
 	private static final String CHAT_MODEL = "OpenAI:gpt-5.1";
 
+	/** List of picked BIndex objects matching the search query. */
 	private List<BIndex> bindexList;
+	/** Last query (search string) used for picking. */
 	private String findQuery;
 
+	/** JLine line reader for shell interaction. */
 	LineReader reader;
 
+	/** Utility for applying system function tools to GenAI providers. */
 	private SystemFunctionTools functionTools;
+	/** Map of GenAI providers by model name. */
 	private Map<String, GenAIProvider> providers = new HashMap<>();
 
+	/**
+	 * Default constructor.
+	 */
 	public AssembyCommand() {
 		super();
 	}
 
+	/**
+	 * Retrieves a GenAI provider for the specified model name. Caches providers for reuse.
+	 * @param name the model/provider name
+	 * @return GenAIProvider instance
+	 */
 	private GenAIProvider getProvider(String name) {
 
 		GenAIProvider provider = null;
@@ -54,6 +82,12 @@ public class AssembyCommand {
 		return provider;
 	}
 
+	/**
+	 * Picks libraries based on user request.
+	 * @param query The application assembly prompt or path to query file.
+	 * @param score The minimum similarity threshold for search results.
+	 * @throws IOException if reading file or picking fails
+	 */
 	@ShellMethod("Picks libraries based on user request.")
 	public void pick(@ShellOption(value = "The application assembly prompt.") String query,
 			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score)
@@ -65,6 +99,12 @@ public class AssembyCommand {
 		bindexList = pickBricks(query, score);
 	}
 
+	/**
+	 * Gets query text from file if input is a file path.
+	 * @param query query text or file path
+	 * @return String containing the query
+	 * @throws IOException if file read fails
+	 */
 	private String getQueryFromFile(String query) throws IOException, FileNotFoundException {
 		File queryFile = new File(query);
 		if (queryFile.exists()) {
@@ -75,6 +115,15 @@ public class AssembyCommand {
 		return query;
 	}
 
+	/**
+	 * Creates a project via picked library set.
+	 * @param query The application assembly prompt (may be null to reuse last query)
+	 * @param dir The directory for the assembled project
+	 * @param score Minimum similarity threshold
+	 * @param inputs Debug mode flag (true for inputs-only, no AI request)
+	 * @throws IOException if an error occurs
+	 * @throws IllegalArgumentException if query or bindexList is missing
+	 */
 	@ShellMethod("Creates a project via picked librariy set.")
 	public void assembly(
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
@@ -111,6 +160,10 @@ public class AssembyCommand {
 		}
 	}
 
+	/**
+	 * Sends a user prompt to the GenAI provider for guidance.
+	 * @param prompt The prompt supplied by the user.
+	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
 		GenAIProvider provider = getProvider(CHAT_MODEL);
@@ -121,6 +174,13 @@ public class AssembyCommand {
 		}
 	}
 
+	/**
+	 * Picks bricks (libraries) using a Picker service and scores them.
+	 * @param query The query string describing requirements
+	 * @param score Minimum similarity score
+	 * @return List&lt;BIndex&gt; found matching libraries
+	 * @throws IOException if picking fails
+	 */
 	private List<BIndex> pickBricks(String query, Double score) throws IOException {
 		List<BIndex> bindexList = null;
 		try (Picker picker = new Picker(getProvider(CHAT_MODEL))) {
@@ -132,6 +192,11 @@ public class AssembyCommand {
 		return bindexList;
 	}
 
+	/**
+	 * Prints search results for picked libraries.
+	 * @param bindexList List of picked libraries
+	 * @param picker Picker used for scoring
+	 */
 	private void printFindResult(List<BIndex> bindexList, Picker picker) {
 		if (!bindexList.isEmpty()) {
 			int i = 1;

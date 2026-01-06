@@ -58,276 +58,354 @@ import com.openai.models.responses.ResponseReasoningItem;
 import com.openai.models.responses.ResponseReasoningItem.Summary;
 import com.openai.models.responses.Tool;
 
+/**
+ * OpenAIProvider integrates with OpenAI API and provides implementation of GenAIProvider.
+ * <p>
+ * This class provides capabilities to send prompts, manage files, perform LLM requests, and create embeddings using OpenAI Chat models.
+ * </p>
+ * <p>Usage example:</p>
+ * <pre>
+ *     OpenAIProvider provider = new OpenAIProvider();
+ *     provider.model("gpt-4");
+ *     provider.prompt("Hello, how are you?");
+ *     String response = provider.perform();
+ * </pre>
+ * <p>
+ * Thread safety: This implementation is NOT thread-safe.
+ * </p>
+ */
 public class OpenAIProvider implements GenAIProvider {
-	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
-	private OpenAIClient client;
-	private ChatModel chatModel;
+    /** Logger instance for this provider. */
+    private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
-	private Map<Tool, Function<JsonNode, Object>> toolMap = new HashMap<>();
-	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
-	private String instructions;
-	private ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
+    /** OpenAI client for API interactions. */
+    private OpenAIClient client;
+    /** Active chat model. */
+    private ChatModel chatModel;
 
-	private File inputsLog;
+    /** Maps tools to handler functions. */
+    private Map<Tool, Function<JsonNode, Object>> toolMap = new HashMap<>();
+    /** List of prompt items for conversation. */
+    private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
+    /** Instructions for the model, if any. */
+    private String instructions;
+    /** ResourceBundle for localized prompt templates. */
+    private ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
-	@Override
-	public void prompt(String text) {
-		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
-				.addInputTextContent(text).build();
-		inputs.add(ResponseInputItem.ofMessage(message));
-	}
+    /** Optional log file for input data. */
+    private File inputsLog;
 
-	@Override
-	public void promptFile(File file, String bundleMessageName) throws IOException {
-		String type = FilenameUtils.getExtension(file.getName());
-		try (FileInputStream input = new FileInputStream(file)) {
-			String fileData = IOUtils.toString(input, "UTF8");
-			String prompt;
-			if (bundleMessageName != null) {
-				prompt = MessageFormat.format(promptBundle.getString(bundleMessageName), file.getName(), type,
-						fileData);
-			} else {
-				prompt = fileData;
-			}
+    /**
+     * Adds a text prompt to the current conversation.
+     * @param text the prompt string
+     */
+    @Override
+    public void prompt(String text) {
+        Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
+                .addInputTextContent(text).build();
+        inputs.add(ResponseInputItem.ofMessage(message));
+    }
 
-			prompt(prompt);
-		}
-	}
+    /**
+     * Adds a prompt from a file, formatting the file content according to a ResourceBundle message.
+     * @param file the file containing prompt data
+     * @param bundleMessageName key for message in ResourceBundle, or null for raw file content
+     * @throws IOException if reading the file fails
+     */
+    @Override
+    public void promptFile(File file, String bundleMessageName) throws IOException {
+        String type = FilenameUtils.getExtension(file.getName());
+        try (FileInputStream input = new FileInputStream(file)) {
+            String fileData = IOUtils.toString(input, "UTF8");
+            String prompt;
+            if (bundleMessageName != null) {
+                prompt = MessageFormat.format(promptBundle.getString(bundleMessageName), file.getName(), type, fileData);
+            } else {
+                prompt = fileData;
+            }
+            prompt(prompt);
+        }
+    }
 
-	@Override
-	public void addFile(File file) throws IOException, FileNotFoundException {
-		try (FileInputStream input = new FileInputStream(file)) {
-			FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input))
-					.purpose(FilePurpose.USER_DATA).build();
-			FileObject fileObject = client.files().create(params);
+    /**
+     * Uploads a file to OpenAI and adds its reference as input.
+     * @param file local file to upload
+     * @throws IOException if reading file fails
+     * @throws FileNotFoundException if file is missing
+     */
+    @Override
+    public void addFile(File file) throws IOException, FileNotFoundException {
+        try (FileInputStream input = new FileInputStream(file)) {
+            FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input))
+                    .purpose(FilePurpose.USER_DATA).build();
+            FileObject fileObject = client.files().create(params);
 
-			com.openai.models.responses.ResponseInputFile.Builder builder = ResponseInputFile.builder()
-					.fileId(fileObject.id());
+            com.openai.models.responses.ResponseInputFile.Builder builder = ResponseInputFile.builder()
+                    .fileId(fileObject.id());
 
-			Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
-					.addContent(builder.build()).build();
-			inputs.add(ResponseInputItem.ofMessage(message));
-		}
-	}
+            Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
+                    .addContent(builder.build()).build();
+            inputs.add(ResponseInputItem.ofMessage(message));
+        }
+    }
 
-	@Override
-	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
-		com.openai.models.responses.ResponseInputFile.Builder builder = ResponseInputFile.builder()
-				.fileUrl(fileUrl.toString());
+    /**
+     * Adds input from a file by URL.
+     * @param fileUrl the URL of the input file
+     * @throws IOException on network error
+     * @throws FileNotFoundException if the file cannot be found
+     */
+    @Override
+    public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
+        com.openai.models.responses.ResponseInputFile.Builder builder = ResponseInputFile.builder()
+                .fileUrl(fileUrl.toString());
 
-		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
-				.addContent(builder.build()).build();
-		inputs.add(ResponseInputItem.ofMessage(message));
-	}
+        Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
+                .addContent(builder.build()).build();
+        inputs.add(ResponseInputItem.ofMessage(message));
+    }
 
-	@Override
-	public String perform() {
-		String result = null;
-		Builder builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()))
-				.inputOfResponse(inputs);
+    /**
+     * Performs a request using current inputs and returns the response string.
+     * @return the model response
+     */
+    @Override
+    public String perform() {
+        String result = null;
+        Builder builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()))
+                .inputOfResponse(inputs);
 
-		if (instructions != null) {
-			builder.instructions(instructions);
-		}
+        if (instructions != null) {
+            builder.instructions(instructions);
+        }
 
-		logInputs();
+        logInputs();
 
-		Response response = client.responses().create(builder.build());
-		result = parseResponse(response, instructions);
-		clear();
-		return result;
-	}
+        Response response = client.responses().create(builder.build());
+        result = parseResponse(response, instructions);
+        clear();
+        return result;
+    }
 
-	private String parseResponse(Response response, String instructions) {
-		String result = null;
+    /**
+     * Parses the given response and recursively handles tool calls and reasoning.
+     * @param response response object
+     * @param instructions optional instructions
+     * @return response string, following reasoning and/or tool calls
+     */
+    private String parseResponse(Response response, String instructions) {
+        String result = null;
+        List<ResponseOutputItem> output = response.output();
+        boolean fcall = false;
+        ResponseInputItem asReasoning = null;
+        String text = null;
+        for (ResponseOutputItem item : output) {
+            if (item.isFunctionCall()) {
+                if (asReasoning != null) {
+                    inputs.add(asReasoning);
+                    asReasoning = null;
+                }
+                ResponseFunctionToolCall functionCall = item.asFunctionCall();
+                inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
+                Object value = callFunction(functionCall);
 
-		List<ResponseOutputItem> output = response.output();
-		boolean fcall = false;
-		ResponseInputItem asReasoning = null;
-		String text = null;
-		for (ResponseOutputItem item : output) {
-			if (item.isFunctionCall()) {
-				if (asReasoning != null) {
-					inputs.add(asReasoning);
-					asReasoning = null;
-				}
-				ResponseFunctionToolCall functionCall = item.asFunctionCall();
+                Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
+                ResponseInputItem ofOutput = ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput
+                        .builder().callId(functionCall.callId()).outputAsJson(callFunction).build());
+                inputs.add(ofOutput);
+                fcall = true;
+            }
+            if (item.isMessage()) {
+                asReasoning = null;
+                ResponseOutputMessage outMessage = item.asMessage();
+                List<Content> contentList = outMessage.content();
+                for (Content content : contentList) {
+                    text = content.outputText().get().text();
+                    Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
+                            .addInputTextContent(text).build();
+                    inputs.add(ResponseInputItem.ofMessage(message));
+                }
+            }
+            if (item.isReasoning()) {
+                ResponseReasoningItem reasoningItem = item.asReasoning();
+                asReasoning = ResponseInputItem.ofReasoning(reasoningItem);
+                for (Summary summary : reasoningItem.summary()) {
+                    logger.info(summary.text());
+                }
+            }
+        }
+        if (fcall) {
+            if (text != null) {
+                logger.info(text);
+            }
+            result = perform();
+        } else {
+            result = text;
+        }
+        return result;
+    }
 
-				inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
-				Object value = callFunction(functionCall);
+    /**
+     * Requests embeddings for the given text using the current embedding model.
+     * @param text input to embed
+     * @return embedding as a list of {@code float} values
+     */
+    @Override
+    public List<Float> embedding(String text) {
+        List<Float> embedding = null;
+        if (text != null) {
+            EmbeddingModel embModel = EmbeddingModel.TEXT_EMBEDDING_ADA_002;
+            EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(embModel).build();
+            CreateEmbeddingResponse response = client.embeddings().create(params);
+            embedding = response.data().get(0).embedding();
+        }
+        return embedding;
+    }
 
-				Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
-				ResponseInputItem ofOutput = ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput
-						.builder().callId(functionCall.callId()).outputAsJson(callFunction).build());
-				inputs.add(ofOutput);
-				fcall = true;
-			}
-			if (item.isMessage()) {
-				asReasoning = null;
-				ResponseOutputMessage outMessage = item.asMessage();
-				List<Content> contentList = outMessage.content();
-				for (Content content : contentList) {
-					text = content.outputText().get().text();
-					Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
-							.addInputTextContent(text).build();
-					inputs.add(ResponseInputItem.ofMessage(message));
-				}
-			}
-			if (item.isReasoning()) {
-				ResponseReasoningItem reasoningItem = item.asReasoning();
-				asReasoning = ResponseInputItem.ofReasoning(reasoningItem);
-				for (Summary summary : reasoningItem.summary()) {
-					logger.info(summary.text());
-				}
-			}
-		}
+    /**
+     * Handles a function tool call from the response by looking for a registered handler.
+     * @param functionCall call details
+     * @return result from function handler, or null if not found
+     */
+    private Object callFunction(ResponseFunctionToolCall functionCall) {
+        String name = functionCall.name();
+        JsonNode arguments;
+        try {
+            arguments = new ObjectMapper().readTree(functionCall.arguments());
+            Set<Entry<Tool, Function<JsonNode, Object>>> entrySet = toolMap.entrySet();
+            Object result = null;
+            for (Entry<Tool, Function<JsonNode, Object>> entry : entrySet) {
+                if (StringUtils.equals(name, entry.getKey().asFunction().name())) {
+                    result = entry.getValue().apply(arguments);
+                    break;
+                }
+            }
+            return result;
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 
-		if (fcall) {
-			if (text != null) {
-				logger.info(text);
-			}
-			result = perform();
-		} else {
-			result = text;
-		}
-		return result;
-	}
+    /**
+     * Logs the input items to a file, if logging is enabled.
+     */
+    private void logInputs() {
+        if (inputsLog != null) {
+            File parentFile = inputsLog.getParentFile();
+            if (parentFile != null && !parentFile.exists()) {
+                parentFile.mkdirs();
+            }
+            try (Writer streamWriter = new FileWriter(inputsLog, false)) {
+                for (ResponseInputItem responseInputItem : inputs) {
+                    String inputText = "";
+                    if (responseInputItem.isMessage()) {
+                        ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
+                        if (responseInputContent.isValid()) {
+                            if (responseInputContent.isInputText()) {
+                                inputText = responseInputContent.inputText().get().text();
+                            } else if (responseInputContent.isInputFile()) {
+                                inputText = "Add resource by URL: " + responseInputContent.inputFile().get().fileUrl().get();
+                            }
+                        } else {
+                            inputText = "Data invalid: " + responseInputItem;
+                        }
+                        streamWriter.write(inputText);
+                        streamWriter.write("\n\n");
+                    }
+                }
+                logger.debug("LLM Inputs: {}", inputsLog);
+            } catch (IOException e) {
+                logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
+            }
+        }
+    }
 
-	@Override
-	public List<Float> embedding(String text) {
-		List<Float> embedding = null;
-		if (text != null) {
-			EmbeddingModel embModel = EmbeddingModel.TEXT_EMBEDDING_ADA_002;
-			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(embModel).build();
-			CreateEmbeddingResponse response = client.embeddings().create(params);
-			embedding = response.data().get(0).embedding();
-		}
-		return embedding;
-	}
+    /**
+     * Clears all input items for the next request.
+     */
+    @Override
+    public void clear() {
+        inputs.clear();
+    }
 
-	private Object callFunction(ResponseFunctionToolCall functionCall) {
-		String name = functionCall.name();
-		JsonNode arguments;
-		try {
-			arguments = new ObjectMapper().readTree(functionCall.arguments());
+    /**
+     * Adds a tool to the current session, providing its function handler.
+     * @param name tool function name
+     * @param description tool description
+     * @param function handler callback for tool execution
+     * @param paramsDesc array of parameter descriptions in format name:type:required:description
+     */
+    @Override
+    public void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
+        Map<String, Map<String, String>> fromValue = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode requiregProps = mapper.createArrayNode();
+        if (paramsDesc != null) {
+            for (String pDesc : paramsDesc) {
+                String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
+                if (StringUtils.equals(desc[2], "required")) {
+                    requiregProps.add(desc[0]);
+                }
+                Map<String, String> value = new HashMap<>();
+                value.put("type", desc[1]);
+                value.put("description", desc[3]);
+                fromValue.put(desc[0], value);
+            }
+        }
+        JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
+        JsonValue requiredVal = JsonValue.from(mapper.createArrayNode());
+        Parameters params = Parameters.builder().putAdditionalProperty("properties", propsVal)
+                .putAdditionalProperty("type", JsonString.of("object")).putAdditionalProperty("required", requiredVal)
+                .build();
+        com.openai.models.responses.FunctionTool.Builder toolBuilder = FunctionTool.builder().name(name)
+                .description(description);
+        if (params != null) {
+            toolBuilder.parameters(params);
+        }
+        Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
+        toolMap.put(tool, function);
+    }
 
-			Set<Entry<Tool, Function<JsonNode, Object>>> entrySet = toolMap.entrySet();
+    /**
+     * Sets instructions for the model to use in the session.
+     * @param instructions text for model instructions
+     */
+    @Override
+    public void instructions(String instructions) {
+        this.instructions = instructions;
+    }
 
-			Object result = null;
-			for (Entry<Tool, Function<JsonNode, Object>> entry : entrySet) {
-				if (StringUtils.equals(name, entry.getKey().asFunction().name())) {
-					result = entry.getValue().apply(arguments);
-					break;
-				}
-			}
+    /**
+     * Set the ResourceBundle for prompts.
+     * @param promptBundle ResourceBundle instance
+     */
+    public void promptBundle(ResourceBundle promptBundle) {
+        this.promptBundle = promptBundle;
+    }
 
-			return result;
-		} catch (JsonProcessingException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
+    /**
+     * Set the file used for logging model inputs.
+     * @param inputsLog file for input logging
+     */
+    @Override
+    public void inputsLog(File inputsLog) {
+        this.inputsLog = inputsLog;
+    }
 
-	private void logInputs() {
-		if (inputsLog != null) {
-			File parentFile = inputsLog.getParentFile();
-			if (parentFile != null && !parentFile.exists()) {
-				parentFile.mkdirs();
-			}
-
-			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
-				for (ResponseInputItem responseInputItem : inputs) {
-					String inputText = "";
-					if (responseInputItem.isMessage()) {
-						ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
-						if (responseInputContent.isValid()) {
-							if (responseInputContent.isInputText()) {
-								inputText = responseInputContent.inputText().get().text();
-							} else if (responseInputContent.isInputFile()) {
-								inputText = "Add resource by URL: "
-										+ responseInputContent.inputFile().get().fileUrl().get();
-							}
-						} else {
-							inputText = "Data invalid: " + responseInputItem;
-						}
-						streamWriter.write(inputText);
-						streamWriter.write("\n\n");
-					}
-				}
-				logger.debug("LLM Inputs: {}", inputsLog);
-			} catch (IOException e) {
-				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
-			}
-		}
-	}
-
-	@Override
-	public void clear() {
-		inputs.clear();
-	}
-
-	@Override
-	public void addTool(String name, String description, Function<JsonNode, Object> function, String... paramsDesc) {
-
-		Map<String, Map<String, String>> fromValue = new HashMap<>();
-		ObjectMapper mapper = new ObjectMapper();
-		ArrayNode requiregProps = mapper.createArrayNode();
-		if (paramsDesc != null) {
-			for (String pDesc : paramsDesc) {
-				String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
-
-				if (StringUtils.equals(desc[2], "required")) {
-					requiregProps.add(desc[0]);
-				}
-
-				Map<String, String> value = new HashMap<>();
-				value.put("type", desc[1]);
-				value.put("description", desc[3]);
-				fromValue.put(desc[0], value);
-			}
-		}
-
-		JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
-		JsonValue requiredVal = JsonValue.from(mapper.createArrayNode());
-
-		Parameters params = Parameters.builder().putAdditionalProperty("properties", propsVal)
-				.putAdditionalProperty("type", JsonString.of("object")).putAdditionalProperty("required", requiredVal)
-				.build();
-
-		com.openai.models.responses.FunctionTool.Builder toolBuilder = FunctionTool.builder().name(name)
-				.description(description);
-
-		if (params != null) {
-			toolBuilder.parameters(params);
-		}
-
-		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
-		toolMap.put(tool, function);
-	}
-
-	@Override
-	public void instructions(String instructions) {
-		this.instructions = instructions;
-	}
-
-	public void promptBundle(ResourceBundle promptBundle) {
-		this.promptBundle = promptBundle;
-	}
-
-	@Override
-	public void inputsLog(File inputsLog) {
-		this.inputsLog = inputsLog;
-	}
-
-	@Override
-	public void model(String chatModelName) {
-		chatModel = ChatModel.of(chatModelName);
-		String uri = System.getenv("OPENAI_API_KEY");
-		if (uri == null || uri.isEmpty()) {
-			throw new RuntimeException("OPENAI_API_KEY env variable is not set or is empty.");
-		}
-
-		client = OpenAIOkHttpClient.builder().fromEnv().build();
-	}
-
+    /**
+     * Initializes the chat model and OpenAI client.
+     * Requires OPENAI_API_KEY environment variable to be set.
+     * @param chatModelName the model name (e.g., "gpt-4")
+     * @throws RuntimeException if API key is missing
+     */
+    @Override
+    public void model(String chatModelName) {
+        chatModel = ChatModel.of(chatModelName);
+        String uri = System.getenv("OPENAI_API_KEY");
+        if (uri == null || uri.isEmpty()) {
+            throw new RuntimeException("OPENAI_API_KEY env variable is not set or is empty.");
+        }
+        client = OpenAIOkHttpClient.builder().fromEnv().build();
+    }
 }

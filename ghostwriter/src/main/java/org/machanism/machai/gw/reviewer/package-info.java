@@ -1,39 +1,35 @@
 /**
- * The <code>org.machanism.machai.maven</code> package provides Maven plugin components enabling
- * AI-powered project assembly and automated library recommendations. Its core Mojo interacts
- * with users and AI providers to generate project structures and dependency sets based on user prompts
- * or specification files (e.g., <code>project.txt</code>), integrating advanced automation and interactivity.
- *
- * <h2>Key Features</h2>
- * <ul>
- *   <li>Interactive prompts and AI-driven project assembly.</li>
- *   <li>Automated recommendation of Java libraries via AI chat models.</li>
- *   <li>Flexible configuration using parameters such as chat models, score thresholds, and prompt files.</li>
- *   <li>Consistent and extensible architecture for custom project assembly workflows.</li>
- * </ul>
- *
- * <h2>Usage Example</h2>
- * <pre>
- * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
- * </pre>
+ * Provides file reviewer implementations for various source formats including Java, Python, TypeScript, HTML, Markdown, and plain text.
  * <p>
- * For advanced users, customize the chat models and scoring parameters to leverage different AI providers
- * or control the recommendation quality.
- *
- *
- * <h2>Best Practices</h2>
+ * Reviewers in this package are responsible for analyzing project files of supported types and extracting custom documentation guidance.
+ * This guidance, typically annotated with the <code>@guidance</code> tag in comments, is used to automate documentation workflows and improve code quality.
+ * <p>
+ * Common reviewer logic includes reading files, parsing for annotated documentation fragments, and formatting outputs for further processing.
+ * <p>
+ * Supported reviewers:
  * <ul>
- *   <li>Document all public and protected elements with comprehensive Javadoc comments.</li>
- *   <li>Use meaningful summaries and detailed descriptions for all classes, methods, and fields.</li>
- *   <li>Update documentation with every code change to maintain accuracy.</li>
- *   <li>Review Javadoc output regularly for completeness and quality.</li>
- *   <li>Never remove <code>@guidance</code> comments; preserve them for project standards compliance.</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer}: Reviews Java source and package-info files.</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer}: Reviews Python files.</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer}: Reviews TypeScript files.</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer}: Reviews HTML and XML files.</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer}: Reviews Markdown files.</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer}: Reviews plain text files for guidance propagation.</li>
  * </ul>
- *
- * @see org.machanism.machai.maven.Assembly
- *
+ * Reviewers implement the {@link org.machanism.machai.gw.reviewer.Reviewer} interface for standardized access and automation.
+ * <p>
+ * When adding or updating code in this package, ensure every public or protected class, interface, method, and field has a clear, comprehensive Javadoc.
+ * See @guidance for detailed documentation standards.
+ * <p>
+ * <b>Usage Example:</b>
+ * <pre>
+ *   Reviewer reviewer = new JavaReviewer();
+ *   String guidance = reviewer.perform(new File("/project/root"), new File("src/Example.java"));
+ *   if (guidance != null) {
+ *       // use extracted guidance for documentation
+ *   }
+ * </pre>
  */
-package org.machanism.machai.maven;
+package org.machanism.machai.gw.reviewer;
 
 /*
  * @guidance:

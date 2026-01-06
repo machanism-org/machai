@@ -19,17 +19,31 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Unit tests for {@link FileFunctionTools}.
+ * <p>
+ * Covers construction, working directory setting, and read/write/list functionality.
+ *
+ * @author Viktor Tovstyi
+ * @guidance
+ */
 class FileFunctionToolsTest {
     private FileFunctionTools fileFunctionTools;
     private File tempDir;
     private static final Logger logger = LoggerFactory.getLogger(FileFunctionToolsTest.class);
 
+    /**
+     * Set up a FileFunctionTools instance for each test using a unique temp directory.
+     */
     @BeforeEach
     void setUp() throws IOException {
         tempDir = Files.createTempDirectory("testFileFuncTools").toFile();
         fileFunctionTools = new FileFunctionTools(tempDir);
     }
 
+    /**
+     * Verify that getWorkingDir throws when working directory is not set.
+     */
     @Test
     void getWorkingDir_withNullWorkingDir_throwsException() {
         FileFunctionTools tools = new FileFunctionTools(null);
@@ -37,6 +51,9 @@ class FileFunctionToolsTest {
         assertEquals("The function tool working dir is not defined.", ex.getMessage());
     }
 
+    /**
+     * Validate that setWorkingDir correctly updates the directory.
+     */
     @Test
     void setWorkingDir_setsDirSuccessfully() {
         File newDir = new File(tempDir, "otherDir");
@@ -44,6 +61,9 @@ class FileFunctionToolsTest {
         assertSame(newDir, fileFunctionTools.getWorkingDir());
     }
 
+    /**
+     * Verify that applyTools adds the correct file tools to provider.
+     */
     @Test
     void applyTools_invokesAddTool() {
         GenAIProvider mockProvider = Mockito.mock(GenAIProvider.class);
@@ -55,6 +75,9 @@ class FileFunctionToolsTest {
                 Mockito.any());
     }
 
+    /**
+     * Test writing to and reading from file system functions.
+     */
     @Test
     @Disabled("Need to fix.")
     void writeFile_and_readFile_workCorrectly() throws Exception {
@@ -73,6 +96,9 @@ class FileFunctionToolsTest {
         assertEquals(testText, content);
     }
 
+    /**
+     * Test recursive file listing functionality.
+     */
     @Test
     @Disabled("Need to fix.")
     void getRecursiveFiles_listsFilesRecursively() throws Exception {

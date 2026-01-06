@@ -28,8 +28,9 @@ package org.machanism.machai.project;
 
 /*
  * @guidance: 
- * **ADD JAVADOC TO ALL CLASSES IN THIS FOLDER**
  * 
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND UNIT TESTS FOR THIS PACKAGE!**	
+ *
  * 1. **Document All Public and Protected Elements:** - Ensure every public and
  * protected class, interface, method, and field has a comprehensive Javadoc
  * comment. 

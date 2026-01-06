@@ -6,7 +6,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Unit tests for {@link GenAIProviderManager}.
+ * <p>
+ * Verifies correct provider resolution, model parsing, and error cases based on model identifier inputs.
+ *
+ * @author Viktor Tovstyi
+ * @guidance
+ */
 class GenAIProviderManagerTest {
+    /**
+     * Checks correct resolution of OpenAI provider with direct model specification.
+     */
     @Test
     void returnsOpenAIProviderForValidModel() {
         GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
@@ -14,6 +25,9 @@ class GenAIProviderManagerTest {
         assertTrue(provider instanceof org.machanism.machai.ai.openAI.OpenAIProvider);
     }
 
+    /**
+     * Validates correct provider inference when only model is supplied.
+     */
     @Test
     void infersOpenAIProviderWhenOnlyModelIsGiven() {
         GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
@@ -21,6 +35,9 @@ class GenAIProviderManagerTest {
         assertTrue(provider instanceof org.machanism.machai.ai.openAI.OpenAIProvider);
     }
 
+    /**
+     * Confirms error case when unsupported provider string is supplied.
+     */
     @Test
     void throwsForUnsupportedProvider() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {

@@ -12,17 +12,31 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Unit tests for {@link CommandFunctionTools}.
+ * <p>
+ * Covers construction, working directory handling, and tool application logic.
+ *
+ * @author Viktor Tovstyi
+ * @guidance
+ */
 class CommandFunctionToolsTest {
     private CommandFunctionTools commandFunctionTools;
     private File tempDir;
     private static final Logger logger = LoggerFactory.getLogger(CommandFunctionToolsTest.class);
 
+    /**
+     * Set up a CommandFunctionTools instance for each test using system temp directory.
+     */
     @BeforeEach
     void setUp() {
         tempDir = new File(System.getProperty("java.io.tmpdir"));
         commandFunctionTools = new CommandFunctionTools(tempDir);
     }
 
+    /**
+     * Verify that getWorkingDir throws if working dir is not set.
+     */
     @Test
     void getWorkingDir_withNullWorkingDir_throwsException() {
         CommandFunctionTools tools = new CommandFunctionTools(null);
@@ -30,6 +44,9 @@ class CommandFunctionToolsTest {
         assertEquals("The function tool working dir is not defined.", ex.getMessage());
     }
 
+    /**
+     * Validate correct working directory is set and returned.
+     */
     @Test
     void setWorkingDir_setsDirSuccessfully() {
         File newDir = new File(tempDir, "testDir");
@@ -37,6 +54,9 @@ class CommandFunctionToolsTest {
         assertSame(newDir, commandFunctionTools.getWorkingDir());
     }
 
+    /**
+     * Verify that applyTools adds the shell command tool to provider.
+     */
     @Test
     void applyTools_invokesAddTool() {
         GenAIProvider mockProvider = Mockito.mock(GenAIProvider.class);
@@ -47,5 +67,4 @@ class CommandFunctionToolsTest {
                 Mockito.any(),
                 Mockito.any());
     }
-
 }

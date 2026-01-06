@@ -1,37 +1,33 @@
 /**
- * The <code>org.machanism.machai.maven</code> package provides Maven plugin components enabling
- * AI-powered project assembly and automated library recommendations. Its core Mojo interacts
- * with users and AI providers to generate project structures and dependency sets based on user prompts
- * or specification files (e.g., <code>project.txt</code>), integrating advanced automation and interactivity.
+ * Provides Mojo implementations for Maven-based document processing using
+ * GenAI-powered workflows. The classes in this package enable scanning, updating,
+ * and managing documentation in Maven projects utilizing advanced AI provider support.
  *
- * <h2>Key Features</h2>
- * <ul>
- *   <li>Interactive prompts and AI-driven project assembly.</li>
- *   <li>Automated recommendation of Java libraries via AI chat models.</li>
- *   <li>Flexible configuration using parameters such as chat models, score thresholds, and prompt files.</li>
- *   <li>Consistent and extensible architecture for custom project assembly workflows.</li>
- * </ul>
- *
- * <h2>Usage Example</h2>
- * <pre>
- * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
- * </pre>
  * <p>
- * For advanced users, customize the chat models and scoring parameters to leverage different AI providers
- * or control the recommendation quality.
+ * This package aims to automate and streamline documentation tasks in Maven projects
+ * by leveraging the power of GenAI and Maven project layout abstractions. It is designed
+ * for users who wish to add, review, or improve project documentation automatically
+ * during the build lifecycle.
+ * </p>
  *
+ * <pre>
+ * Example Usage:
+ * &lt;plugin&gt;
+ *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
+ *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
+ *   &lt;version&gt;${project.version}&lt;/version&gt;
+ *   &lt;executions&gt;
+ *     &lt;execution&gt;
+ *       &lt;goals&gt;
+ *         &lt;goal&gt;docs&lt;/goal&gt;
+ *       &lt;/goals&gt;
+ *     &lt;/execution&gt;
+ *   &lt;/executions&gt;
+ * &lt;/plugin&gt;
+ * </pre>
  *
- * <h2>Best Practices</h2>
- * <ul>
- *   <li>Document all public and protected elements with comprehensive Javadoc comments.</li>
- *   <li>Use meaningful summaries and detailed descriptions for all classes, methods, and fields.</li>
- *   <li>Update documentation with every code change to maintain accuracy.</li>
- *   <li>Review Javadoc output regularly for completeness and quality.</li>
- *   <li>Never remove <code>@guidance</code> comments; preserve them for project standards compliance.</li>
- * </ul>
- *
- * @see org.machanism.machai.maven.Assembly
- *
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 package org.machanism.machai.maven;
 

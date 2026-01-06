@@ -1,41 +1,32 @@
 /**
- * The <code>org.machanism.machai.maven</code> package provides Maven plugin components enabling
- * AI-powered project assembly and automated library recommendations. Its core Mojo interacts
- * with users and AI providers to generate project structures and dependency sets based on user prompts
- * or specification files (e.g., <code>project.txt</code>), integrating advanced automation and interactivity.
- *
- * <h2>Key Features</h2>
- * <ul>
- *   <li>Interactive prompts and AI-driven project assembly.</li>
- *   <li>Automated recommendation of Java libraries via AI chat models.</li>
- *   <li>Flexible configuration using parameters such as chat models, score thresholds, and prompt files.</li>
- *   <li>Consistent and extensible architecture for custom project assembly workflows.</li>
- * </ul>
- *
- * <h2>Usage Example</h2>
- * <pre>
- * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
- * </pre>
+ * Provides CLI (Command Line Interface) commands and tools for interacting with GenAI-powered automation,
+ * bindex management, library picking, and document processing.
  * <p>
- * For advanced users, customize the chat models and scoring parameters to leverage different AI providers
- * or control the recommendation quality.
- *
- *
- * <h2>Best Practices</h2>
+ * The classes in this package offer advanced shell commands enabling users and tools to interact with
+ * various aspects of Machai applications, including project assembly, bindex creation/registration, and
+ * document scanning using AI guidance. Shell commands follow Spring Shell conventions.
+ * <p>
+ * <b>Main commands:</b>
  * <ul>
- *   <li>Document all public and protected elements with comprehensive Javadoc comments.</li>
- *   <li>Use meaningful summaries and detailed descriptions for all classes, methods, and fields.</li>
- *   <li>Update documentation with every code change to maintain accuracy.</li>
- *   <li>Review Javadoc output regularly for completeness and quality.</li>
- *   <li>Never remove <code>@guidance</code> comments; preserve them for project standards compliance.</li>
+ *   <li><b>AssembyCommand</b> - Pick libraries and assemble projects via GenAI.</li>
+ *   <li><b>BindexCommand</b> - Generate and register bindex files for project libraries.</li>
+ *   <li><b>DocsCommand</b> - Scan and process documents leveraging GenAI provider.</li>
+ *   <li><b>MachaiCLI</b> - The main entry point (application bootstrap class).</li>
  * </ul>
+ * <p>
+ * <b>Best Practices:</b>
+ * <ul>
+ *   <li>All public/protected elements must include comprehensive Javadoc.</li>
+ *   <li>Parameters, return values, and exceptions are documented.</li>
+ *   <li>Usage examples are provided in Javadoc where relevant.</li>
+ *   <li>Modifications to code should be reflected in the Javadoc immediately.</li>
+ * </ul>
+ * <p>
+ * See individual class Javadocs for further details and usage instructions.
  *
- * @see org.machanism.machai.maven.Assembly
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  *
- */
-package org.machanism.machai.maven;
-
-/*
  * @guidance:
  *
  * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND UNIT TESTS FOR THIS PACKAGE!**	
@@ -75,3 +66,4 @@ package org.machanism.machai.maven;
  *
  * Apply these practices to all Java code within the package to ensure high-quality, maintainable, and user-friendly documentation.
  */
+package org.machanism.machai.cli;

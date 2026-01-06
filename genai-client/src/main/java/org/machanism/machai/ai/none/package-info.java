@@ -1,39 +1,24 @@
 /**
- * The <code>org.machanism.machai.maven</code> package provides Maven plugin components enabling
- * AI-powered project assembly and automated library recommendations. Its core Mojo interacts
- * with users and AI providers to generate project structures and dependency sets based on user prompts
- * or specification files (e.g., <code>project.txt</code>), integrating advanced automation and interactivity.
- *
- * <h2>Key Features</h2>
- * <ul>
- *   <li>Interactive prompts and AI-driven project assembly.</li>
- *   <li>Automated recommendation of Java libraries via AI chat models.</li>
- *   <li>Flexible configuration using parameters such as chat models, score thresholds, and prompt files.</li>
- *   <li>Consistent and extensible architecture for custom project assembly workflows.</li>
- * </ul>
- *
- * <h2>Usage Example</h2>
+ * Provides classes and interfaces representing a non-operational AI Provider implementation.
+ * <p>
+ * This package contains the {@link NoneProvider} class, which is a stub implementation of the {@link org.machanism.machai.ai.manager.GenAIProvider} interface
+ * and does not connect to or operate any Large Language Model (LLM) or AI service. {@code NoneProvider} is intended to be used as a placeholder
+ * or for scenarios where AI services are intentionally disabled.
+ * <p>
+ * <b>Usage Example:</b>
  * <pre>
- * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
+ * {@code
+ *   GenAIProvider provider = new NoneProvider();
+ *   provider.prompt("A prompt");
+ *   provider.perform(); // returns null, does not call any LLM
+ * }
  * </pre>
  * <p>
- * For advanced users, customize the chat models and scoring parameters to leverage different AI providers
- * or control the recommendation quality.
+ * All classes, interfaces, methods, and fields in this package should be thoroughly documented following the project guidance. This ensures clarity for users and maintainers.
  *
- *
- * <h2>Best Practices</h2>
- * <ul>
- *   <li>Document all public and protected elements with comprehensive Javadoc comments.</li>
- *   <li>Use meaningful summaries and detailed descriptions for all classes, methods, and fields.</li>
- *   <li>Update documentation with every code change to maintain accuracy.</li>
- *   <li>Review Javadoc output regularly for completeness and quality.</li>
- *   <li>Never remove <code>@guidance</code> comments; preserve them for project standards compliance.</li>
- * </ul>
- *
- * @see org.machanism.machai.maven.Assembly
- *
+ * @see org.machanism.machai.ai.manager.GenAIProvider
  */
-package org.machanism.machai.maven;
+package org.machanism.machai.ai.none;
 
 /*
  * @guidance:
@@ -42,7 +27,7 @@ package org.machanism.machai.maven;
  *
  * 1. Document All Public and Protected Elements:
  *    - Ensure every public and protected class, interface, method, and field has a comprehensive Javadoc comment.
- *    - Include package-level Javadoc in a `package-info.java` file to describe the package’s purpose and usage.
+ *    - Include package-level Javadoc in a `package-info.java` file to describe the packages purpose and usage.
  *
  * 2. Use Clear and Concise Descriptions:
  *    - Write meaningful summaries that explain the purpose, behavior, and usage of each element.

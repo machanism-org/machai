@@ -4,16 +4,24 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Entry point for the CLI import application.
+ * Main entry point for the Machai CLI application.
  * <p>
- * This class bootstraps the Spring Boot application and loads additional configuration
- * from the specified XML resource.
+ * Boots and runs the Spring Boot CLI shell, enabling user access to GenAI-powered
+ * commands such as assembly, bindex, and document processing.
+ * Usage Example:
+ * <pre>
+ * {@code
+ * MachaiCLI.main(new String[]{ });
+ * }
+ * </pre>
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 @SpringBootApplication
 public class MachaiCLI {
 
     /**
-     * Main method to start the CLI import application.
+     * Starts the Machai CLI application.
      *
      * @param args command-line arguments
      */
