@@ -16,6 +16,10 @@
 		guidance tags and AI-powered synthesis.
 	</description>
 
+	<properties>
+		<maven.javadoc.skip>false</maven.javadoc.skip>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>

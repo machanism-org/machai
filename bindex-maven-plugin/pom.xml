@@ -20,6 +20,11 @@
 		integration, and assembly by leveraging structured metadata and
 		GenAI-powered semantic search within the Machanism ecosystem.
 	</description>
+
+	<properties>
+		<maven.javadoc.skip>false</maven.javadoc.skip>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>

@@ -20,6 +20,10 @@
 		ecosystem.
 	</description>
 
+	<properties>
+		<maven.javadoc.skip>false</maven.javadoc.skip>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.openai</groupId>

@@ -17,7 +17,9 @@
 		GenAI to automate project assembly and enable semantic search for
 		efficient library discovery and integration.
 	</description>
+
 	<properties>
+		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<java.version>17</java.version>
 	</properties>
 

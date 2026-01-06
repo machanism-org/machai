@@ -106,4 +106,3 @@ This project is licensed under the [Apache License, Version 2.0](LICENSE.txt).
 - GitHub: [https://github.com/machanism-org/machai](https://github.com/machanism-org/machai)
 - Issues: [https://github.com/machanism-org/machai/issues](https://github.com/machanism-org/machai/issues)
 
-<!-- @guidance: Do not remove this comment. Keep it for documentation guidance. -->
