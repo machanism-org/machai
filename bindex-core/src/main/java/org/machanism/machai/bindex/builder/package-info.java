@@ -1,5 +1,31 @@
 /**
- * 
+ * Provides builder implementations for generating BIndex documents in support of semantic, AI-powered indexing operations.
+ * <p>
+ * This package includes specialized builders for Maven, Python, JScript/TypeScript/Vue, and generic project types,
+ * encapsulating logic for manifest extraction, source aggregation, rules composition, and AI context construction.
+ * <p>
+ * Common builder features:
+ * <ul>
+ *     <li>Integration with GenAIProvider for prompt-based index generation</li>
+ *     <li>Reading project manifests (pom.xml, pyproject.toml, package.json) and source files</li>
+ *     <li>Builder factory handling for different layouts</li>
+ *     <li>Extensible base builder (BindexBuilder) for custom logic</li>
+ * </ul>
+ * <b>Usage Example:</b>
+ * <pre>
+ *     MavenBindexBuilder builder = new MavenBindexBuilder(layout);
+ *     builder.genAIProvider(provider);
+ *     BIndex bindex = builder.build();
+ * </pre>
+ *
+ * Important Guidance:
+ * <ul>
+ *   <li>All public/protected classes, methods, and fields must be fully documented with comprehensive Javadoc.</li>
+ *   <li>Describe parameters, return values, and exceptions for methods.</li>
+ *   <li>Maintain consistent formatting and update Javadoc as code evolves.</li>
+ * </ul>
+ *
+ * @author Viktor Tovstyi
  */
 package org.machanism.machai.bindex.builder;
 

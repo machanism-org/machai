@@ -1,4 +1,7 @@
 # assembly-maven-plugin
+<!-- @guidance: 
+Analyze the source file and create a Maven Site-style introductory home page for your project.
+Do not use the `---` separator between sections. -->
 
 [![assembly-maven-plugin](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
 

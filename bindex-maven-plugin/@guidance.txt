@@ -1,0 +1,24 @@
+In the project root directory, ensure the following files are present and properly created:
+
+**LICENSE.txt**
+   - Include the full text of the project's license.
+   - If the license file is missing, create it using the license type defined in the pom.xml file.
+   - Ensure the license terms are accurate and up to date.
+
+**Generate a standard `README.md`**
+
+README Content:
+
+1. **Project Title and Overview:**  
+   - Provide the project name and a description of its purpose and main features.
+
+2. **Usage:**  
+   - Explain how to run or use the project and its modules.
+   - Provide example commands or code snippets if applicable.
+
+3. **Reference to the paren project**  
+
+**Formatting Requirements:**
+- Use Markdown syntax for headings, lists, code blocks, and links.
+- Ensure clarity and conciseness in each section.
+- Organize the README for easy navigation and readability.

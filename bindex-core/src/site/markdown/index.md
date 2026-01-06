@@ -1,4 +1,7 @@
 # Bindex Core
+<!-- @guidance: 
+Analyze the source file and create a Maven Site-style introductory home page for your project.
+Do not use the `---` separator between sections. -->
 
 Bindex Core is the core library for bindex metadata management in the Machanism ecosystem. It provides the essential functionality for generation, registration, library selection, and project assembly, enabling automated handling of library metadata for efficient discovery, integration, and assembly workflows.
 

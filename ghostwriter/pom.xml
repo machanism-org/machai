@@ -19,7 +19,7 @@
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
 						<configuration>
-							<finalName>ae</finalName>
+							<finalName>gw</finalName>
 							<archive>
 								<manifest>
 									<mainClass>org.machanism.machai.ghostwriter.Ghostwriter</mainClass>
