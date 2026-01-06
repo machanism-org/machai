@@ -30,14 +30,19 @@ public class DocsCommand {
 	@ShellMethod("GenAI document processing command.")
 	public void docs(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "Generates only the inputs.txt file; no request is sent to OpenAI to create a bindex.", value = "inputs") boolean inputs)
+			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model `"
+					+ Ghostwriter.CHAT_MODEL
+					+ "` will be used.", value = "genai", defaultValue = "None") String chatModel)
 			throws IOException {
 
 		if (dir == null) {
 			dir = SystemUtils.getUserDir();
 		}
 
-		String chatModel = inputs ? null : Ghostwriter.CHAT_MODEL;
+		if (chatModel == null) {
+			chatModel = Ghostwriter.CHAT_MODEL;
+		}
+
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		DocsProcessor documents = new DocsProcessor(provider);
 		logger.info("Scanning documents in the root directory: {}", dir);
