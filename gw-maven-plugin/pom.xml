@@ -12,8 +12,8 @@
 	</parent>
 	<packaging>maven-plugin</packaging>
 
-	<artifactId>ghostwriter-maven-plugin</artifactId>
-	<name>Ghostwriter Maven Plugin</name>
+	<artifactId>gw-maven-plugin</artifactId>
+	<name>GW Maven Plugin</name>
 	<description>
 		Ghostwriter Maven Plugin is an advanced documentation automation tool
 		for Java projects. It automatically scans, analyzes, and assembles
@@ -61,8 +61,6 @@
 		</dependency>
 	</dependencies>
 
-	<!-- mvn org.machanism.machai:assembly-maven-plugin:0.0.1:assembly
-	(java8 required)-->
 	<build>
 		<plugins>
 			<plugin>
@@ -72,7 +70,7 @@
 				<configuration>
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
 					<mojoDependencies>
-						org.machanism.machai:ghostwriter-maven-plugin</mojoDependencies>
+						org.machanism.machai:gw-maven-plugin</mojoDependencies>
 				</configuration>
 				<executions>
 					<execution>

@@ -14,7 +14,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
-import org.machanism.machai.ai.openAI.OpenAIProvider;
 import org.machanism.machai.ghostwriter.reviewer.HtmlReviewer;
 import org.machanism.machai.ghostwriter.reviewer.JavaReviewer;
 import org.machanism.machai.ghostwriter.reviewer.MarkdownReviewer;
