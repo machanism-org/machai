@@ -8,7 +8,8 @@ import org.jline.reader.LineReader;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.ApplicationAssembly;
-import org.machanism.machai.ghostwriter.DocsProcessor;
+import org.machanism.machai.gw.DocsProcessor;
+import org.machanism.machai.gw.Ghostwriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,6 @@ import org.springframework.shell.standard.ShellOption;
 
 @ShellComponent
 public class DocsCommand {
-
-	private static final String CHAT_MODEL = "OpenAI:gpt-5-mini";
 
 	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
 
@@ -38,7 +37,7 @@ public class DocsCommand {
 			dir = SystemUtils.getUserDir();
 		}
 
-		String chatModel = inputs ? null : CHAT_MODEL;
+		String chatModel = inputs ? null : Ghostwriter.CHAT_MODEL;
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		DocsProcessor documents = new DocsProcessor(provider);
 		logger.info("Scanning documents in the root directory: {}", dir);

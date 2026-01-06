@@ -10,6 +10,28 @@
 
 	<artifactId>ghostwriter</artifactId>
 	<name>Ghostwriter</name>
+
+	<profiles>
+		<profile>
+			<id>pack</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<configuration>
+							<finalName>ae</finalName>
+							<archive>
+								<manifest>
+									<mainClass>org.machanism.machai.ghostwriter.Ghostwriter</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<description>
 		Ghostwriter is an advanced documentation engine that automatically
 		scans, analyzes, and assembles project documentation using embedded

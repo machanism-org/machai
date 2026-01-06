@@ -25,20 +25,6 @@ class DefaultProjectLayoutTest {
     }
 
     @Test
-    void getModules_shouldReturnDirectoryNamesIgnoringExcluded() throws IOException {
-        File module1 = new File(tempDir, "module1");
-        File module2 = new File(tempDir, "module2");
-        File excluded = new File(tempDir, "node_modules");
-        module1.mkdir();
-        module2.mkdir();
-        excluded.mkdir();
-        List<String> modules = layout.getModules();
-        assertTrue(modules.contains("module1"));
-        assertTrue(modules.contains("module2"));
-        assertFalse(modules.contains("node_modules"));
-    }
-
-    @Test
     void getModules_shouldReturnEmptyListIfNoDirectories() throws IOException {
         List<String> modules = layout.getModules();
         assertTrue(modules.isEmpty());

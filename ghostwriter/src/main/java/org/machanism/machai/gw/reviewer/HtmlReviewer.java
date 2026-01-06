@@ -1,4 +1,4 @@
-package org.machanism.machai.ghostwriter.reviewer;
+package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.machanism.machai.ghostwriter.DocsProcessor;
+import org.machanism.machai.gw.DocsProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**

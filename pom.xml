@@ -78,7 +78,7 @@
 		<module>bindex-maven-plugin</module>
 		<module>assembly-maven-plugin</module>
 		<module>ghostwriter</module>
-		<module>ghostwriter-maven-plugin</module>
+		<module>gw-maven-plugin</module>
 	</modules>
 
 	<dependencies>

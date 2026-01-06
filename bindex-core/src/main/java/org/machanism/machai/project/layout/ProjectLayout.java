@@ -18,8 +18,8 @@ import org.apache.commons.lang3.StringUtils;
  * List&lt;String&gt; sources = layout.getSources();
  * </pre>
  *
- * @author machai
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 public abstract class ProjectLayout {
 

@@ -23,7 +23,7 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  * }</pre>
  *
  * @author machanism
- * @since 1.0
+ * @since 0.0.2
  */
 public class ProjectLayoutManager {
 

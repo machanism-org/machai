@@ -14,8 +14,8 @@ import org.tomlj.TomlParseResult;
  * <p>
  * Determines if a directory contains a Python project using <code>pyproject.toml</code> and related metadata. Handles analysis of modules, sources, documents, and tests in a Python environment.
  *
- * @author machai
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 public class PythonProjectLayout extends ProjectLayout {
 

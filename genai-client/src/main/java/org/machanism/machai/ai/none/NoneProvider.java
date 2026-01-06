@@ -84,7 +84,7 @@ public class NoneProvider implements GenAIProvider {
 				File file = new File(parentFile, "instructions.txt");
 				try (Writer streamWriter = new FileWriter(file, false)) {
 					streamWriter.write(instructions);
-					logger.info("LLM Instruction: {}", file);
+					logger.debug("LLM Instruction: {}", file);
 
 				} catch (IOException e) {
 					logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);

@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * This class can update or create BIndex documents based on the model provided by the builder
  * and the current contents in the project directory.
  *
- * @author machanism.org
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  * @see BIndexProjectProcessor
  */
 public class BindexCreator extends BIndexProjectProcessor {

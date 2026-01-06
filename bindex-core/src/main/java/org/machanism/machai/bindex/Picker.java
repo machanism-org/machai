@@ -69,8 +69,8 @@ import dev.langchain4j.model.output.Response;
  * }
  * </pre>
  *
- * @author machanism.org
- * @since 1.0
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 public class Picker implements Closeable {
 
