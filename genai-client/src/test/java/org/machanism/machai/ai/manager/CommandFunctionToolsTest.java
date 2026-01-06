@@ -9,8 +9,6 @@ import java.io.File;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Unit tests for {@link CommandFunctionTools}.
@@ -23,7 +21,6 @@ import org.slf4j.LoggerFactory;
 class CommandFunctionToolsTest {
     private CommandFunctionTools commandFunctionTools;
     private File tempDir;
-    private static final Logger logger = LoggerFactory.getLogger(CommandFunctionToolsTest.class);
 
     /**
      * Set up a CommandFunctionTools instance for each test using system temp directory.

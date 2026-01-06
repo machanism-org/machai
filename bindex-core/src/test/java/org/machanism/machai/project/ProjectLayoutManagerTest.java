@@ -1,17 +1,19 @@
 package org.machanism.machai.project;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.machanism.machai.project.layout.MavenProjectLayout;
-import org.machanism.machai.project.layout.JScriptProjectLayout;
-import org.machanism.machai.project.layout.PythonProjectLayout;
-import org.machanism.machai.project.layout.DefaultProjectLayout;
-import org.machanism.machai.project.layout.ProjectLayout;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.machanism.machai.project.layout.DefaultProjectLayout;
+import org.machanism.machai.project.layout.JScriptProjectLayout;
+import org.machanism.machai.project.layout.MavenProjectLayout;
+import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.project.layout.PythonProjectLayout;
 
 @DisplayName("ProjectLayoutManager Tests")
 public class ProjectLayoutManagerTest {

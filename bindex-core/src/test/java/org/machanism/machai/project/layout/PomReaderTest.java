@@ -1,15 +1,19 @@
 package org.machanism.machai.project.layout;
 
-import org.apache.maven.model.Model;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.maven.model.Model;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 class PomReaderTest {
     @Test

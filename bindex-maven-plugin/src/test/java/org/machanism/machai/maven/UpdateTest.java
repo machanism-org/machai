@@ -1,12 +1,11 @@
 package org.machanism.machai.maven;
 
-import org.apache.maven.plugin.MojoExecutionException;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for {@link Update} Mojo.

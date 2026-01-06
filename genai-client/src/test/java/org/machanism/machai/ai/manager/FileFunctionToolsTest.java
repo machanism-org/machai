@@ -13,8 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class FileFunctionToolsTest {
     private FileFunctionTools fileFunctionTools;
     private File tempDir;
-    private static final Logger logger = LoggerFactory.getLogger(FileFunctionToolsTest.class);
 
     /**
      * Set up a FileFunctionTools instance for each test using a unique temp directory.
