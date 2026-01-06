@@ -1,4 +1,4 @@
-package org.machanism.machai.ghostwriter;
+package org.machanism.machai.gw;
 
 import java.io.File;
 import java.io.IOException;

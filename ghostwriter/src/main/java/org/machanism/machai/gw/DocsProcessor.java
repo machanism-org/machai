@@ -1,4 +1,4 @@
-package org.machanism.machai.ghostwriter;
+package org.machanism.machai.gw;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,19 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
-import org.machanism.machai.ghostwriter.reviewer.HtmlReviewer;
-import org.machanism.machai.ghostwriter.reviewer.JavaReviewer;
-import org.machanism.machai.ghostwriter.reviewer.MarkdownReviewer;
-import org.machanism.machai.ghostwriter.reviewer.PythonReviewer;
-import org.machanism.machai.ghostwriter.reviewer.Reviewer;
-import org.machanism.machai.ghostwriter.reviewer.TextReviewer;
-import org.machanism.machai.ghostwriter.reviewer.TypeScriptReviewer;
+import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -53,7 +48,7 @@ public class DocsProcessor extends ProjectProcessor {
 	/**
 	 * Constructs a DocsProcessor for documentation input preparation.
 	 * 
-	 * @param p
+	 * @param provider
 	 */
 	public DocsProcessor(GenAIProvider provider) {
 		this.provider = provider;
@@ -61,19 +56,18 @@ public class DocsProcessor extends ProjectProcessor {
 		systemFunctionTools = new SystemFunctionTools(null);
 		systemFunctionTools.applyTools(provider);
 
-		addReviewer(new TextReviewer(dirGuidanceMap));
-		addReviewer(new JavaReviewer());
-		addReviewer(new TypeScriptReviewer());
-		addReviewer(new MarkdownReviewer());
-		addReviewer(new PythonReviewer());
-		addReviewer(new HtmlReviewer());
-		addReviewer(new HtmlReviewer());
+		loadReviewers();
 	}
 
-	private void addReviewer(Reviewer reviwer) {
-		String[] extentions = reviwer.getSupportedFileExtentions();
-		for (String extention : extentions) {
-			reviewMap.put(extention, reviwer);
+	private void loadReviewers() {
+		ServiceLoader<? extends Reviewer> reviewerServiceLoader = ServiceLoader.load(Reviewer.class);
+
+		for (Reviewer reviewer : reviewerServiceLoader) {
+			reviewer.setDirGuidanceMap(dirGuidanceMap);
+			String[] extentions = reviewer.getSupportedFileExtentions();
+			for (String extention : extentions) {
+				reviewMap.put(extention, reviewer);
+			}
 		}
 	}
 

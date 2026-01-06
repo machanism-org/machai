@@ -1,4 +1,4 @@
-package org.machanism.machai.ghostwriter.reviewer;
+package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
-import org.machanism.machai.ghostwriter.DocsProcessor;
+import org.machanism.machai.gw.DocsProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
@@ -25,21 +25,8 @@ public class TextReviewer implements Reviewer {
 	private Map<String, String> dirGuidanceMap;
 
 	/**
-	 * Constructs a TextReviewer with tracking map for directory guidance context.
-	 * This constructor initializes the reviewer to use the provided directory
-	 * guidance map, allowing context accumulation for documentation workflows
-	 * related to file location.
-	 *
-	 * @param dirGuidanceMap map of directory paths to accumulated guidance text
-	 */
-	public TextReviewer(Map<String, String> dirGuidanceMap) {
-		super();
-		this.dirGuidanceMap = dirGuidanceMap;
-	}
-
-	/**
-	 * Returns the file extensions supported by this reviewer.
-	 * This reviewer handles files with the 'txt' extension.
+	 * Returns the file extensions supported by this reviewer. This reviewer handles
+	 * files with the 'txt' extension.
 	 *
 	 * @return an array of supported file extension strings
 	 */
@@ -70,5 +57,10 @@ public class TextReviewer implements Reviewer {
 		}
 
 		return guidance;
+	}
+
+	@Override
+	public void setDirGuidanceMap(Map<String, String> dirGuidanceMap) {
+		this.dirGuidanceMap = dirGuidanceMap;
 	}
 }
