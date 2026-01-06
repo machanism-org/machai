@@ -119,7 +119,7 @@
 				</plugin>
 				<plugin>
 					<groupId>org.machanism.machai</groupId>
-					<artifactId>ghostwriter-maven-plugin</artifactId>
+					<artifactId>gw-maven-plugin</artifactId>
 					<version>0.0.2-SNAPSHOT</version>
 				</plugin>
 			</plugins>

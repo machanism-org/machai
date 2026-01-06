@@ -1,6 +1,7 @@
 <Recipe name="Run CodeMie Plugin">
 	<Command name="testConnection" os=".*">ping -w 20 nats-codemie.epmd-edp-anthos.eu.gcp.cloudapp.epam.com</Command> 
 	<If name="testConnection" contains="Ping request could not find host">
+		<Var name="!CodeMie Plugin Path" value="VPN Required" /> 
 		<CheckValue actual="$var{testConnection}" onErrorMsg="VPN Required" /> 
 	</If> 
 	<Remove name="!CodeMie Plugin Path" /> 

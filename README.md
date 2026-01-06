@@ -22,7 +22,7 @@ Machai is a GenAI-powered tool for automated creation, registration, and enhance
 - [Ghostwriter](ghostwriter)  
   _Documentation engine that automatically scans, analyzes, and assembles project documentation using AI-powered synthesis and embedded guidance tags._
 
-- [Ghostwriter Maven Plugin](ghostwriter-maven-plugin)  
+- [Ghostwriter Maven Plugin](gw-maven-plugin)  
   _Documentation automation plugin that scans, analyzes, and assembles project documentation. Ensures best practices and up-to-date content across all Java modules._
 
 ## Installation Instructions
