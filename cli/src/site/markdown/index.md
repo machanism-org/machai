@@ -1,7 +1,7 @@
 # Machai CLI
 <!-- @guidance: 
 Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the horizontal rule (thematic break) separator between sections. -->
+Do not use the horizontal rule separator between sections. -->
 
 The Machai Command Line Interface (CLI) is a versatile tool designed to facilitate the generation, registration, and management of library metadata within the **Machanism** platform. It provides developers with direct access to Machai’s AI-powered features, enabling efficient project assembly and integration workflows from the terminal.
 

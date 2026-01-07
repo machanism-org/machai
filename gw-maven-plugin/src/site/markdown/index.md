@@ -1,7 +1,7 @@
 # GW Maven Plugin
 <!-- @guidance: 
 Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the horizontal rule (thematic break) separator between sections. -->
+Do not use the horizontal rule separator between sections. -->
 
 Welcome to the GW Maven Plugin! This plugin provides powerful, automated document processing capabilities utilizing advanced GenAI-powered workflows within your Maven project's build lifecycle.
 
@@ -33,8 +33,10 @@ To use the GW Maven Plugin, add the following configuration to your Maven `pom.x
 ```
 
 ### Key Parameters
+- `docs.inputs.only`  
+  If set to `true`, only input documents (not outputs) are processed.
 - `docs.chatModel`  
-  Specifies the chat model for AI assistance in documentation, e.g. `OpenAI:gpt-5` (default: `None`).
+  Specifies the chat model for AI assistance in documentation (default: `OpenAI:gpt-5`).
 
 ## How It Works
 The Docs goal scans documents in your Maven project and processes them using the selected AI provider. It is tailored to your project layout, including both single-module and multi-module configurations. Run your Maven lifecycle (e.g., `mvn install`) to trigger documentation assistance automatically.

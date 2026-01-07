@@ -1,7 +1,7 @@
 # bindex-maven-plugin
 <!-- @guidance: 
 Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the horizontal rule (thematic break) separator between sections. -->
+Do not use the horizontal rule separator between sections. -->
 
 [![bindex-maven-plugin](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 

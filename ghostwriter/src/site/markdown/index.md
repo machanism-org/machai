@@ -1,7 +1,7 @@
 # Ghostwriter
 <!-- @guidance: 
 Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the horizontal rule (thematic break) separator between sections. -->
+Do not use the horizontal rule separator between sections. -->
 
 Ghostwriter is an advanced documentation engine for Machai projects. It automates the scanning, analysis, and assembly of project documentation, driven by rules and guidance embedded throughout the codebase and supporting resources. At its core is the `DocsProcessor`, which orchestrates:
 
