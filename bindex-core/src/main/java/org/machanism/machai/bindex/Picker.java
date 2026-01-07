@@ -81,7 +81,7 @@ public class Picker implements Closeable {
 	/** Result limit for vector search operations. */
 	private static final int VECTOR_SEARCH_LIMITS = 50;
 	/** Default minimum similarity score for queries. */
-	public static final String DEFAULT_MIN_SCORE = "0.80";
+	public static final String DEFAULT_MIN_SCORE = "0.90";
 
 	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
 
