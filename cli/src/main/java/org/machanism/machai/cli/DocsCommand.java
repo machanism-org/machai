@@ -43,6 +43,8 @@ import org.springframework.shell.standard.ShellOption;
 @ShellComponent
 public class DocsCommand {
 
+	private static final String MACHAI_TEMP_DIR = ".machai";
+
 	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
 
 	/** JLine line reader for shell interaction. */
@@ -78,8 +80,8 @@ public class DocsCommand {
 		}
 
 		if (clean) {
-			removeAllDirectoriesByName(rootDir.toPath(), ".machai");
-			logger.info("Cleanup complete: All .machai temporary folders deleted.");
+			removeAllDirectoriesByName(rootDir.toPath(), MACHAI_TEMP_DIR);
+			logger.info("Cleanup complete: All '{}' temporary folders have been deleted in '{}'.", MACHAI_TEMP_DIR, rootDir);
 		}
 
 		String relatedPath = ProjectLayout.getRelatedPath(rootDir, dir);
