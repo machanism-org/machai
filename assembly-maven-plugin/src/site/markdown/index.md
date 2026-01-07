@@ -1,7 +1,7 @@
 # assembly-maven-plugin
 <!-- @guidance: 
 Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the `---` separator between sections. -->
+Do not use the horizontal rule (thematic break) separator between sections. -->
 
 [![assembly-maven-plugin](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
 
@@ -57,12 +57,11 @@ Review the generated files and make any necessary adjustments to fit your projec
 
 You can customize the plugin’s behavior using additional parameters:
 
-| Parameter                      | Description                                                                                    | Default      |
-|--------------------------------|------------------------------------------------------------------------------------------------|--------------|
-| `assembly.inputs.only` | If set to true, activates debug mode: only essential calls are sent to the LLM model. Large bindex context requests are saved to an inputs.txt file for review, without being sent to the LLM. | `false` |
-| `assembly.chatModel`     | Specifies the AI model to use for the assembly process.                                        | `gpt-5`        |
-| `pick.chatModel`          | Specifies the AI model to use for the pick (library selection) process.                        | `gpt-5-mini`   |
-| `assembly.prompt.file`  | Path to the file containing the prompt or requirements for the assembly process.               | `project.txt`  |
+| Parameter                      | Description                                                                                    | Default        |
+|--------------------------------|------------------------------------------------------------------------------------------------|-----------------|
+| `assembly.chatModel`     | Specifies the AI model to use for the assembly process.                                        | `gpt-5`       |
+| `pick.chatModel`          | Specifies the AI model to use for the pick (library selection) process.                        | `gpt-5-mini` |
+| `assembly.prompt.file`  | Path to the file containing the prompt or requirements for the assembly process.               | `project.txt`|
 | `assembly.score`          | Minimum relevance score threshold for including libraries in the assembly.                     | `0.80`         |
 
 
@@ -87,7 +86,6 @@ Or, if you need to customize parameters:
 ```bash
 mvn org.machanism:assembly-maven-plugin:assembly \
  -Dassembly.prompt.file=project.txt \
- -Dassembly.inputs.only=false \
  -Dassembly.chatModel=gpt-5 \
  -Dpick.chatModel=gpt-5-mini \
  -Dassembly.score=0.80
