@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "BIndex",
+	"title": "Bindex",
 	"description": "A schema to describe artifacts (e.g., libraries) for automatic recognition and integration with GenAI engines.",
 	"type": "object",
 	"required": [

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,7 +28,7 @@ class BindexCreatorTest {
     private ProjectLayout projectLayout;
     private BindexCreator creator;
     private BindexBuilder builder;
-    private BIndex bindex;
+    private  Bindex bindex;
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -36,7 +36,7 @@ class BindexCreatorTest {
         provider = mock(GenAIProvider.class);
         projectLayout = mock(ProjectLayout.class);
         builder = mock(BindexBuilder.class);
-        bindex = mock(BIndex.class);
+        bindex = mock( Bindex.class);
         objectMapper = mock(ObjectMapper.class);
         creator = new BindexCreator(provider);
     }

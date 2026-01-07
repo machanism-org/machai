@@ -21,13 +21,13 @@ import org.slf4j.LoggerFactory;
  * MavenBindexBuilder provides project context and source manifest aggregation for Maven projects.
  * <p>
  * Reads pom.xml, source and resource directories, removes unimportant model properties,
- * and prepares prompts for GenAI BIndex creation.
+ * and prepares prompts for GenAI  Bindex creation.
  * <p>
  * Usage example:
  * <pre>
  *     MavenBindexBuilder builder = new MavenBindexBuilder(layout);
  *     builder.genAIProvider(provider);
- *     BIndex bindex = builder.build();
+ *      Bindex bindex = builder.build();
  * </pre>
  *
  * @author Viktor Tovstyi

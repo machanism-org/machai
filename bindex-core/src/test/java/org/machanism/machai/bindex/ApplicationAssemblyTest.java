@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 
 class ApplicationAssemblyTest {
     private GenAIProvider provider;
@@ -39,7 +39,7 @@ class ApplicationAssemblyTest {
     @Test
     void testAssemblyExecutesLLMAndLogsResponse() throws IOException {
         String prompt = "Test prompt";
-        List<BIndex> bindexList = new ArrayList<>();
+        List< Bindex> bindexList = new ArrayList<>();
         when(provider.perform()).thenReturn("Response from LLM");
         ResourceBundle.clearCache();
         // BindexBuilder.bindexSchemaPrompt and MessageFormat exercised indirectly
@@ -53,7 +53,7 @@ class ApplicationAssemblyTest {
         GenAIProvider faultyProvider = mock(GenAIProvider.class);
         ApplicationAssembly faultyAssembly = new ApplicationAssembly(faultyProvider);
         doThrow(new IOException("fail")).when(faultyProvider).perform();
-        List<BIndex> bindexList = new ArrayList<>();
+        List< Bindex> bindexList = new ArrayList<>();
         assertThrows(IllegalArgumentException.class, () -> {
             faultyAssembly.assembly("prompt", bindexList);
         });

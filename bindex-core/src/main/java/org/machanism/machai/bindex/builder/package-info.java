@@ -1,5 +1,5 @@
 /**
- * Provides builder implementations for generating BIndex documents in support of semantic, AI-powered indexing operations.
+ * Provides builder implementations for generating  Bindex documents in support of semantic, AI-powered indexing operations.
  * <p>
  * This package includes specialized builders for Maven, Python, JScript/TypeScript/Vue, and generic project types,
  * encapsulating logic for manifest extraction, source aggregation, rules composition, and AI context construction.
@@ -15,7 +15,7 @@
  * <pre>
  *     MavenBindexBuilder builder = new MavenBindexBuilder(layout);
  *     builder.genAIProvider(provider);
- *     BIndex bindex = builder.build();
+ *      Bindex bindex = builder.build();
  * </pre>
  *
  * Important Guidance:

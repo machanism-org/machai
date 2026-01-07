@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 
 class BindexRegisterTest {
     private GenAIProvider provider;
@@ -32,11 +32,11 @@ class BindexRegisterTest {
 
     @Test
     @Disabled("Need to fix.")
-    void testProcessProjectRegistersNewOrUpdateBIndex() throws Exception {
-        BindexRegister register = spy(new BindexRegister(provider));
+    void testProcessProjectRegistersNewOrUpdateBindex() throws Exception {
+        BindexRegister register = spy(new BindexRegister(provider, null));
         File dir = new File("/tmp/testproject");
         when(layout.getProjectDir()).thenReturn(dir);
-        BIndex bindex = mock(BIndex.class);
+         Bindex bindex = mock( Bindex.class);
         doReturn(bindex).when(register).getBindex(dir);
         Picker picker = mock(Picker.class);
         doReturn(null).when(picker).getRegistredId(bindex);
@@ -49,7 +49,7 @@ class BindexRegisterTest {
     @Test
     @Disabled("Need to fix.")
     void testProcessProjectThrowsOnIOException() {
-        BindexRegister register = new BindexRegister(provider);
+        BindexRegister register = new BindexRegister(provider, null);
         when(layout.getProjectDir()).thenReturn(new File("."));
         doThrow(new IOException("fail")).when(register).getBindex(any(File.class));
         assertThrows(IllegalArgumentException.class, () -> {
@@ -59,7 +59,7 @@ class BindexRegisterTest {
 
     @Test
     void testCloseDelegatesToPickerClose() throws Exception {
-        BindexRegister register = spy(new BindexRegister(provider));
+        BindexRegister register = spy(new BindexRegister(provider, null));
         Picker picker = mock(Picker.class);
         // Use reflection or other means if needed
         doNothing().when(picker).close();
@@ -69,7 +69,7 @@ class BindexRegisterTest {
 
     @Test
     void testUpdateReturnsSelfAndSetsFlag() {
-        BindexRegister register = new BindexRegister(provider);
+        BindexRegister register = new BindexRegister(provider, null);
         BindexRegister result = register.update(true);
         assertSame(register, result);
     }

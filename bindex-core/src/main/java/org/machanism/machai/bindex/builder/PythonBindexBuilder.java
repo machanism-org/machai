@@ -15,13 +15,13 @@ import org.tomlj.TomlParseResult;
 /**
  * PythonBindexBuilder provides project context and manifest aggregation for Python (pyproject.toml) projects.
  * <p>
- * Reads TOML manifest and main source files; prepares prompts for GenAI BIndex creation.
+ * Reads TOML manifest and main source files; prepares prompts for GenAI  Bindex creation.
  * <p>
  * Usage example:
  * <pre>
  *     PythonBindexBuilder builder = new PythonBindexBuilder(layout);
  *     builder.genAIProvider(provider);
- *     BIndex bindex = builder.build();
+ *      Bindex bindex = builder.build();
  * </pre>
  *
  * @author Viktor Tovstyi
@@ -43,7 +43,7 @@ public class PythonBindexBuilder extends BindexBuilder {
     }
 
     /**
-     * Provides project manifest and main sources context to GenAIProvider for BIndex generation.
+     * Provides project manifest and main sources context to GenAIProvider for  Bindex generation.
      * Reads pyproject.toml and sends Python source files as prompt context.
      * @throws IOException On file or prompt failure.
      */

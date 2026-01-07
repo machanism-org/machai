@@ -1,10 +1,10 @@
 /**
- * Provides classes and utilities for creating, assembling, registering, and managing BIndex documents and
+ * Provides classes and utilities for creating, assembling, registering, and managing  Bindex documents and
  * semantic search capabilities using AI-powered technologies and MongoDB vector search.
  * <p>
  * Main responsibilities handled in this package:
  * <ul>
- *   <li>BIndex registration, creation, and project folder processing</li>
+ *   <li> Bindex registration, creation, and project folder processing</li>
  *   <li>Semantic vector search, classification embeddings, and dependency analysis</li>
  *   <li>Integration with GenAIProvider for generative and prompt-driven indexing tasks</li>
  *   <li>Maven, Python, JScript project builders and layout handling through factory methods</li>

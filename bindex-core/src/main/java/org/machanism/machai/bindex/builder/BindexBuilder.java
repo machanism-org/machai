@@ -9,20 +9,20 @@ import java.util.ResourceBundle;
 import org.apache.commons.io.IOUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Builds and generates BIndex documents from a supplied ProjectLayout using GenAI.
+ * Builds and generates  Bindex documents from a supplied ProjectLayout using GenAI.
  * <p>
- * Supports schema prompt, project context retrieval, and AI-driven BIndex creation.
+ * Supports schema prompt, project context retrieval, and AI-driven  Bindex creation.
  * <p>
  * Usage example:
  * <pre>
  *     BindexBuilder builder = new BindexBuilder(layout);
  *     builder.genAIProvider(provider);
- *     BIndex bindex = builder.build();
+ *      Bindex bindex = builder.build();
  * </pre>
  *
  * @author Viktor Tovstyi
@@ -35,32 +35,32 @@ public class BindexBuilder {
 
     /** Temp directory path for assembly inputs. */
     public static final String BINDEX_TEMP_DIR = ".machai/bindex-inputs.txt";
-    /** Path to the BIndex schema resource file. */
+    /** Path to the  Bindex schema resource file. */
     public static String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
     private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
-    /** Optional origin BIndex from which the builder can update. */
-    private BIndex origin;
+    /** Optional origin  Bindex from which the builder can update. */
+    private  Bindex origin;
 
     /** GenAIProvider for AI prompts and assembly. */
     private GenAIProvider genAIProvider;
-    /** Project layout used for BIndex generation. */
+    /** Project layout used for  Bindex generation. */
     private ProjectLayout projectLayout;
 
     /**
      * Constructs a BindexBuilder for the specified ProjectLayout.
-     * @param projectLayout A project layout to analyze for BIndex generation.
+     * @param projectLayout A project layout to analyze for  Bindex generation.
      */
     public BindexBuilder(ProjectLayout projectLayout) {
         this.projectLayout = projectLayout;
     }
 
     /**
-     * Builds a new BIndex, using possible schema prompt, origin update, and AI generation.
-     * @return Newly created BIndex object, or null on failure.
+     * Builds a new  Bindex, using possible schema prompt, origin update, and AI generation.
+     * @return Newly created  Bindex object, or null on failure.
      * @throws IOException When prompt or log operations fail, or result cannot be parsed.
      */
-    public BIndex build() throws IOException {
+    public  Bindex build() throws IOException {
         bindexSchemaPrompt(genAIProvider);
 
         if (origin != null) {
@@ -78,9 +78,9 @@ public class BindexBuilder {
         genAIProvider.inputsLog(tmpBindexDir);
         String output = genAIProvider.perform();
 
-        BIndex value = null;
+         Bindex value = null;
         if (output != null) {
-            value = new ObjectMapper().readValue(output, BIndex.class);
+            value = new ObjectMapper().readValue(output,  Bindex.class);
         }
         return value;
     }
@@ -93,32 +93,32 @@ public class BindexBuilder {
     }
 
     /**
-     * Issues a schema prompt to GenAIProvider for BIndex schema setup.
+     * Issues a schema prompt to GenAIProvider for  Bindex schema setup.
      * @param provider GenAIProvider to receive schema instructions.
      * @throws IOException On prompt or IO errors.
      */
     public static void bindexSchemaPrompt(GenAIProvider provider) throws IOException {
-        URL systemResource = BIndex.class.getResource(BINDEX_SCHEMA_RESOURCE);
+        URL systemResource =  Bindex.class.getResource(BINDEX_SCHEMA_RESOURCE);
         String schema = IOUtils.toString(systemResource, "UTF8");
         String prompt = MessageFormat.format(promptBundle.getString("bindex_schema_section"), schema);
         provider.prompt(prompt);
     }
 
     /**
-     * Sets the origin BIndex for update operations.
-     * @param bindex Origin BIndex instance for updates.
+     * Sets the origin  Bindex for update operations.
+     * @param bindex Origin  Bindex instance for updates.
      * @return This BindexBuilder instance for chain usage.
      */
-    public BindexBuilder origin(BIndex bindex) {
+    public BindexBuilder origin( Bindex bindex) {
         this.origin = bindex;
         return this;
     }
 
     /**
-     * Gets the origin BIndex instance.
-     * @return The currently set origin BIndex (may be null).
+     * Gets the origin  Bindex instance.
+     * @return The currently set origin  Bindex (may be null).
      */
-    public BIndex getOrigin() {
+    public  Bindex getOrigin() {
         return origin;
     }
 
