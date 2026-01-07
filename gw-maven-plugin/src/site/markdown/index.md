@@ -1,7 +1,7 @@
 # GW Maven Plugin
 <!-- @guidance: 
 Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the `---` separator between sections. -->
+Do not use the horizontal rule separator between sections. -->
 
 Welcome to the GW Maven Plugin! This plugin provides powerful, automated document processing capabilities utilizing advanced GenAI-powered workflows within your Maven project's build lifecycle.
 

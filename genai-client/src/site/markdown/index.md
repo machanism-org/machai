@@ -1,7 +1,7 @@
 # GenAI Client
 <!-- @guidance: 
 Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the `---` separator between sections. -->
+Do not use the horizontal rule separator between sections. -->
 
 GenAI Client is a Java library that provides convenient integration with GenAI APIs such as OpenAI and other providers. It enables flexible configuration and usage through a unified interface, including command-function tools, file operations, and prompt management.
 
