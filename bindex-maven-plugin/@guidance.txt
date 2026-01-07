@@ -1,11 +1,8 @@
-In the project root directory, ensure the following files are present and properly created:
+**Generate a standard `README.md`** file for a multi-module Java project managed in a Git repository.
+ 
+IMPORTANT:
 
-**LICENSE.txt**
-   - Include the full text of the project's license.
-   - If the license file is missing, create it using the license type defined in the pom.xml file.
-   - Ensure the license terms are accurate and up to date.
-
-**Generate a standard `README.md`**
+- Do not use the horizontal rule (thematic break) separator between sections.
 
 README Content:
 

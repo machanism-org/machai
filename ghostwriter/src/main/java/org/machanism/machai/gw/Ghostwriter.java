@@ -10,18 +10,44 @@ import org.machanism.machai.bindex.ApplicationAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Entry point for document scanning and review automation.
+ * <p>
+ * Initializes the AI provider, configures the DocsProcessor,
+ * and runs document scan over the user directory. Output is logged.
+ * <p>
+ * Example usage:
+ * <pre>
+ * {@code
+ * java org.machanism.machai.gw.Ghostwriter
+ * }
+ * </pre>
+ * <p>
+ * Usage is typically direct from command line or script/CI runner.
+ *
+ * @author Machanism Team
+ * @since 0.0.2
+ */
 public class Ghostwriter {
-	public static final String CHAT_MODEL = "OpenAI:gpt-5-mini";
-	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
+    /** Default chat model name constant. */
+    public static final String CHAT_MODEL = "OpenAI:gpt-5-mini";
+    /** Logger for the ghostwriter application. */
+    private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
 
-	public static void main(String[] args) throws IOException {
-		File dir = SystemUtils.getUserDir();
+    /**
+     * Main entry point for document scanning run.
+     *
+     * @param args command line arguments
+     * @throws IOException if document scanning fails
+     */
+    public static void main(String[] args) throws IOException {
+        File dir = SystemUtils.getUserDir();
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(null);
-		DocsProcessor documents = new DocsProcessor(provider);
-		logger.info("Scanning documents in the root directory: {}", dir);
-		documents.scanDocuments(dir);
-		logger.info("Scanning finished.");
-	}
-
+        GenAIProvider provider = GenAIProviderManager.getProvider(null);
+        DocsProcessor documents = new DocsProcessor(provider);
+        logger.info("Scanning documents in the root directory: {}", dir);
+        documents.scanDocuments(dir);
+        logger.info("Scanning finished.");
+    }
+    // @guidance: DO NOT REMOVE OR CHANGE THIS TAG AND CONTENT.
 }

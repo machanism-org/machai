@@ -29,6 +29,19 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.apache.maven.plugin-testing</groupId>
+			<artifactId>maven-plugin-testing-harness</artifactId>
+			<version>3.3.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version> <!-- Use the latest 4.x version -->
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>ghostwriter</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
