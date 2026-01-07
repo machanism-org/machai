@@ -7,9 +7,12 @@ import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.gw.Ghostwriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
@@ -35,7 +38,6 @@ import org.springframework.shell.standard.ShellOption;
  */
 @ShellComponent
 public class BindexCommand {
-
 	private static final String CHAT_MODEL = "OpenAI:gpt-5.1";
 
 	/** JLine line reader for shell interaction. */
@@ -70,7 +72,6 @@ public class BindexCommand {
 		}
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
-
 		BindexCreator register = new BindexCreator(provider);
 		register.update(update);
 		register.scanFolder(dir);

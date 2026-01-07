@@ -2,11 +2,6 @@ package org.machanism.machai.cli;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
@@ -43,8 +38,6 @@ import org.springframework.shell.standard.ShellOption;
 @ShellComponent
 public class DocsCommand {
 
-	private static final String MACHAI_TEMP_DIR = ".machai";
-
 	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
 
 	/** JLine line reader for shell interaction. */
@@ -64,7 +57,6 @@ public class DocsCommand {
 	@ShellMethod("GenAI document processing command.")
 	public void docs(
 			@ShellOption(help = "The path to the directory to be processed.", value = "--scan", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "Removes all .machai template folders from the root directory.", value = "--clean", defaultValue = "false", optOut = true) boolean clean,
 			@ShellOption(help = "The path fo the project directory.", value = "--root", defaultValue = ShellOption.NULL, optOut = true) File rootDir,
 			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model '"
 					+ Ghostwriter.CHAT_MODEL
@@ -77,11 +69,6 @@ public class DocsCommand {
 
 		if (dir == null) {
 			dir = rootDir;
-		}
-
-		if (clean) {
-			removeAllDirectoriesByName(rootDir.toPath(), MACHAI_TEMP_DIR);
-			logger.info("Cleanup complete: All '{}' temporary folders have been deleted in '{}'.", MACHAI_TEMP_DIR, rootDir);
 		}
 
 		String relatedPath = ProjectLayout.getRelatedPath(rootDir, dir);
@@ -105,47 +92,4 @@ public class DocsCommand {
 		logger.info("Scanning finished.");
 	}
 
-	/**
-	 * Removes all directories with the specified name from the given root path.
-	 * 
-	 * @param rootPath The root directory to start the search.
-	 * @param dirName  The name of directories to remove.
-	 * @throws IOException If an I/O error occurs.
-	 */
-	public static void removeAllDirectoriesByName(Path rootPath, String dirName) throws IOException {
-		Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				if (dir.getFileName().toString().equals(dirName)) {
-					// Recursively delete the directory and its contents
-					deleteDirectoryRecursively(dir);
-					// Skip visiting entries in this directory since it's deleted
-					return FileVisitResult.SKIP_SUBTREE;
-				}
-				return FileVisitResult.CONTINUE;
-			}
-		});
-	}
-
-	/**
-	 * Recursively deletes a directory and all its contents.
-	 * 
-	 * @param dir The directory to delete.
-	 * @throws IOException If an I/O error occurs.
-	 */
-	private static void deleteDirectoryRecursively(Path dir) throws IOException {
-		Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Files.delete(file);
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult postVisitDirectory(Path directory, IOException exc) throws IOException {
-				Files.delete(directory);
-				return FileVisitResult.CONTINUE;
-			}
-		});
-	}
 }
