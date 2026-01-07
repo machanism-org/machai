@@ -17,7 +17,7 @@ import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.gw.Ghostwriter;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
@@ -49,8 +49,8 @@ public class AssembyCommand {
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
 	private static final String CHAT_MODEL = "OpenAI:gpt-5.1";
 
-	/** List of picked BIndex objects matching the search query. */
-	private List<BIndex> bindexList;
+	/** List of picked  Bindex objects matching the search query. */
+	private List< Bindex> bindexList;
 	/** Last query (search string) used for picking. */
 	private String findQuery;
 
@@ -197,11 +197,11 @@ public class AssembyCommand {
 	 * 
 	 * @param query The query string describing requirements
 	 * @param score Minimum similarity score
-	 * @return List&lt;BIndex&gt; found matching libraries
+	 * @return List&lt; Bindex&gt; found matching libraries
 	 * @throws IOException if picking fails
 	 */
-	private List<BIndex> pickBricks(String query, Double score) throws IOException {
-		List<BIndex> bindexList = null;
+	private List< Bindex> pickBricks(String query, Double score) throws IOException {
+		List< Bindex> bindexList = null;
 		try (Picker picker = new Picker(getProvider(CHAT_MODEL))) {
 			picker.setScore(score);
 			bindexList = picker.pick(query);
@@ -217,10 +217,10 @@ public class AssembyCommand {
 	 * @param bindexList List of picked libraries
 	 * @param picker     Picker used for scoring
 	 */
-	private void printFindResult(List<BIndex> bindexList, Picker picker) {
+	private void printFindResult(List< Bindex> bindexList, Picker picker) {
 		if (!bindexList.isEmpty()) {
 			int i = 1;
-			for (BIndex bindex : bindexList) {
+			for ( Bindex bindex : bindexList) {
 				String scoreStr = picker.getScore(bindex.getId()) != null
 						? "(" + picker.getScore(bindex.getId()).toString() + ")"
 						: "";

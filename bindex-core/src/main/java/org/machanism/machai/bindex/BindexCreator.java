@@ -6,14 +6,14 @@ import java.io.IOException;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * BindexCreator is responsible for generating and updating BIndex
+ * BindexCreator is responsible for generating and updating  Bindex
  * representation files for the supplied project layout using a GenAIProvider.
  * <p>
  * Usage example:
@@ -23,14 +23,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * creator.processFolder(layout);
  * </pre>
  *
- * This class can update or create BIndex documents based on the model provided
+ * This class can update or create  Bindex documents based on the model provided
  * by the builder and the current contents in the project directory.
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
- * @see BIndexProjectProcessor
+ * @see  BindexProjectProcessor
  */
-public class BindexCreator extends BIndexProjectProcessor {
+public class BindexCreator extends  BindexProjectProcessor {
 
 	/** Logger instance for the BindexCreator class. */
 	private static Logger logger = LoggerFactory.getLogger(BindexCreator.class);
@@ -38,14 +38,14 @@ public class BindexCreator extends BIndexProjectProcessor {
 	/** GenAIProvider instance to be used for AI-based indexing. */
 	private GenAIProvider provider;
 
-	/** Flag indicating whether to update existing BIndex, if available. */
+	/** Flag indicating whether to update existing  Bindex, if available. */
 	private boolean update;
 
 	/**
 	 * Constructs a BindexCreator with the specified GenAIProvider and LLM
 	 * invocation setting.
 	 *
-	 * @param provider GenAIProvider used for generating BIndex data
+	 * @param provider GenAIProvider used for generating  Bindex data
 	 * @param callLLM  Indicates if LLM should be involved in the process
 	 */
 	public BindexCreator(GenAIProvider provider) {
@@ -54,7 +54,7 @@ public class BindexCreator extends BIndexProjectProcessor {
 	}
 
 	/**
-	 * Processes the specified project layout folder to create/update the BIndex
+	 * Processes the specified project layout folder to create/update the  Bindex
 	 * file.
 	 *
 	 * @param projectLayout The project layout to be processed for indexing
@@ -62,7 +62,7 @@ public class BindexCreator extends BIndexProjectProcessor {
 	 * @see BindexBuilderFactory
 	 */
 	public void processFolder(ProjectLayout projectLayout) {
-		BIndex bindex;
+		 Bindex bindex;
 		try {
 			BindexBuilder bindexBuilder = BindexBuilderFactory.create(projectLayout);
 
@@ -79,7 +79,7 @@ public class BindexCreator extends BIndexProjectProcessor {
 
 				if (bindex != null) {
 					new ObjectMapper().writeValue(bindexFile, bindex);
-					logger.info("BIndex file: {}", bindexFile);
+					logger.info(" Bindex file: {}", bindexFile);
 				}
 			}
 
@@ -89,10 +89,10 @@ public class BindexCreator extends BIndexProjectProcessor {
 	}
 
 	/**
-	 * Toggles the update mode for BIndex creation, enabling file updates if set to
+	 * Toggles the update mode for  Bindex creation, enabling file updates if set to
 	 * true.
 	 *
-	 * @param update true to update existing BIndex files, false otherwise
+	 * @param update true to update existing  Bindex files, false otherwise
 	 * @return This BindexCreator instance for chained calls
 	 */
 	public BindexCreator update(boolean update) {

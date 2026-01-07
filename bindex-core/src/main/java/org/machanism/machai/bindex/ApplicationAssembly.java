@@ -9,14 +9,14 @@ import java.util.ResourceBundle;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Handles assembly operations for BIndex projects using GenAIProvider and prompts.
+ * Handles assembly operations for Bindex projects using GenAIProvider and prompts.
  * 
  * <p>Typical usage example:
  * <pre>
@@ -50,13 +50,13 @@ public class ApplicationAssembly {
     }
 
     /**
-     * Assemble a BIndex project based on given prompts and instructions.
+     * Assemble a Bindex project based on given prompts and instructions.
      * @param prompt The assembly prompt or command.
-     * @param bindexList List of BIndex objects involved in the assembly.
+     * @param bindexList List of Bindex objects involved in the assembly.
      * @param callLLM Whether to call LLM for assembly execution.
      * @throws IllegalArgumentException If an I/O error occurs during assembly.
      */
-    public void assembly(final String prompt, List<BIndex> bindexList) {
+    public void assembly(final String prompt, List<Bindex> bindexList) {
         String systemPrompt = promptBundle.getString("assembly_system_instructions");
         provider.instructions(systemPrompt);
 
@@ -66,7 +66,7 @@ public class ApplicationAssembly {
         try {
             BindexBuilder.bindexSchemaPrompt(provider);
 
-            for (BIndex bindex : bindexList) {
+            for (Bindex bindex : bindexList) {
                 String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(bindex);
                 String bindexPrompt = MessageFormat.format(promptBundle.getString("recommended_library_section"),
                         bindex.getId(), bindexStr);

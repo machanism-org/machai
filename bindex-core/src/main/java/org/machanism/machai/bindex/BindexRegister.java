@@ -6,12 +6,12 @@ import java.io.IOException;
 
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * BindexRegister handles registration and update of BIndex documents for given projects,
+ * BindexRegister handles registration and update of  Bindex documents for given projects,
  * leveraging Picker for registration id management.
  * <p>
  * Usage Example:
@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
- * @see BIndexProjectProcessor
+ * @see  BindexProjectProcessor
  */
-public class BindexRegister extends BIndexProjectProcessor implements Closeable {
+public class BindexRegister extends  BindexProjectProcessor implements Closeable {
 
     /** Logger instance for the BindexRegister class. */
     private static Logger logger = LoggerFactory.getLogger(BindexRegister.class);
@@ -55,7 +55,7 @@ public class BindexRegister extends BIndexProjectProcessor implements Closeable 
      * @throws IllegalArgumentException If an IO error occurs during registration
      */
     public void processFolder(ProjectLayout projectLayout) {
-        BIndex bindex;
+         Bindex bindex;
         try {
             File projectDir = projectLayout.getProjectDir();
             bindex = getBindex(projectDir);

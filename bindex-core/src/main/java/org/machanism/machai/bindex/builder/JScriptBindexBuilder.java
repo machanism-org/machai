@@ -19,13 +19,13 @@ import org.slf4j.LoggerFactory;
 /**
  * JScriptBindexBuilder provides project context and source file analysis for JavaScript/TypeScript/Vue projects.
  * <p>
- * Reads package.json, walks the src tree, and generates prompts for AI-based BIndex creation.
+ * Reads package.json, walks the src tree, and generates prompts for AI-based  Bindex creation.
  * <p>
  * Usage example:
  * <pre>
  *     JScriptBindexBuilder builder = new JScriptBindexBuilder(layout);
  *     builder.genAIProvider(provider);
- *     BIndex bindex = builder.build();
+ *      Bindex bindex = builder.build();
  * </pre>
  *
  * @author Viktor Tovstyi

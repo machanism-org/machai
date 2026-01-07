@@ -9,13 +9,13 @@ import java.io.File;
 
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-class BIndexProjectProcessorTest {
+class  BindexProjectProcessorTest {
 
-    static class TestProcessor extends BIndexProjectProcessor {
+    static class TestProcessor extends  BindexProjectProcessor {
 
 		@Override
 		public void processFolder(ProjectLayout processor) {
@@ -27,18 +27,18 @@ class BIndexProjectProcessorTest {
     void getBindexReturnsNullWhenFileDoesNotExist() {
         TestProcessor processor = new TestProcessor();
         File tempDir = new File("/tmp/nonexistent");
-        BIndex bindex = processor.getBindex(tempDir);
+         Bindex bindex = processor.getBindex(tempDir);
         assertNull(bindex);
     }
 
     @Test
-    void getBindexReturnsBIndexWhenFileExists() throws Exception {
+    void getBindexReturnsBindexWhenFileExists() throws Exception {
         TestProcessor processor = new TestProcessor();
         File dir = new File(System.getProperty("java.io.tmpdir"));
-        File bindexFile = new File(dir, BIndexProjectProcessor.BINDEX_FILE_NAME);
-        BIndex testBIndex = mock(BIndex.class);
-        new ObjectMapper().writeValue(bindexFile, testBIndex);
-        BIndex result = processor.getBindex(dir);
+        File bindexFile = new File(dir,  BindexProjectProcessor.BINDEX_FILE_NAME);
+         Bindex testBindex = mock( Bindex.class);
+        new ObjectMapper().writeValue(bindexFile, testBindex);
+         Bindex result = processor.getBindex(dir);
         assertNotNull(result);
         bindexFile.delete();
     }
@@ -48,6 +48,6 @@ class BIndexProjectProcessorTest {
         TestProcessor processor = new TestProcessor();
         File dir = new File("/tmp/testdir");
         File file = processor.getBindexFile(dir);
-        assertEquals(new File(dir, BIndexProjectProcessor.BINDEX_FILE_NAME), file);
+        assertEquals(new File(dir,  BindexProjectProcessor.BINDEX_FILE_NAME), file);
     }
 }

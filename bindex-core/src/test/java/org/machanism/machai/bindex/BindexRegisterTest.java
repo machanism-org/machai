@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 
 class BindexRegisterTest {
     private GenAIProvider provider;
@@ -32,11 +32,11 @@ class BindexRegisterTest {
 
     @Test
     @Disabled("Need to fix.")
-    void testProcessProjectRegistersNewOrUpdateBIndex() throws Exception {
+    void testProcessProjectRegistersNewOrUpdateBindex() throws Exception {
         BindexRegister register = spy(new BindexRegister(provider));
         File dir = new File("/tmp/testproject");
         when(layout.getProjectDir()).thenReturn(dir);
-        BIndex bindex = mock(BIndex.class);
+         Bindex bindex = mock( Bindex.class);
         doReturn(bindex).when(register).getBindex(dir);
         Picker picker = mock(Picker.class);
         doReturn(null).when(picker).getRegistredId(bindex);

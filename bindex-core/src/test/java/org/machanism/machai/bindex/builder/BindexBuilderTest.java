@@ -16,20 +16,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 
 class BindexBuilderTest {
 
 	private ProjectLayout projectLayout;
 	private GenAIProvider genAIProvider;
-	private BIndex origin;
+	private  Bindex origin;
 	private BindexBuilder bindexBuilder;
 
 	@BeforeEach
 	void setUp() {
 		projectLayout = mock(ProjectLayout.class);
 		genAIProvider = mock(GenAIProvider.class);
-		origin = mock(BIndex.class);
+		origin = mock( Bindex.class);
 		bindexBuilder = new BindexBuilder(projectLayout).genAIProvider(genAIProvider);
 	}
 

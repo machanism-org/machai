@@ -20,7 +20,7 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
-import org.machanism.machai.schema.BIndex;
+import org.machanism.machai.schema. Bindex;
 
 /**
  * Mojo for assembling Maven projects using AI-powered library recommendations and code generation.
@@ -135,12 +135,12 @@ public class Assembly extends AbstractMojo {
 
             try (Picker picker = new Picker(provider)) {
                 picker.setScore(score);
-                List<BIndex> bindexList = picker.pick(query);
+                List< Bindex> bindexList = picker.pick(query);
 
                 if (!bindexList.isEmpty()) {
                     int i = 1;
                     getLog().info("Recommended libraries:");
-                    for (BIndex bindex : bindexList) {
+                    for ( Bindex bindex : bindexList) {
                         String scoreStr = picker.getScore(bindex.getId()) != null
                                 ? picker.getScore(bindex.getId()).toString()
                                 : "";
