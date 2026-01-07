@@ -22,12 +22,14 @@ import org.springframework.shell.standard.ShellOption;
  * Provides CLI access to bindex generation and registration logic.
  * <p>
  * Usage Example:
+ * 
  * <pre>
  * {@code
  * BindexCommand cmd = new BindexCommand();
  * cmd.bindex(new File("/myapp/"), true, false);
  * }
  * </pre>
+ * 
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
@@ -43,9 +45,11 @@ public class BindexCommand {
 
 	/**
 	 * Generates bindex files for the given directory using GenAI provider.
-	 * @param dir The directory to scan for bindex creation
-	 * @param update Update mode: all saved data will be updated
-	 * @param chatModel GenAI service provider/model (default is Ghostwriter.CHAT_MODEL)
+	 * 
+	 * @param dir       The directory to scan for bindex creation
+	 * @param update    Update mode: all saved data will be updated
+	 * @param chatModel GenAI service provider/model (default is
+	 *                  Ghostwriter.CHAT_MODEL)
 	 * @throws IOException if scan or creation fails
 	 */
 	@ShellMethod("Generates bindex files.")
@@ -74,13 +78,15 @@ public class BindexCommand {
 
 	/**
 	 * Registers bindex file for the given directory using GenAI provider.
-	 * @param dir The directory to register bindex from
+	 * 
+	 * @param dir    The directory to register bindex from
 	 * @param update Update mode: all saved data will be updated
 	 * @throws IOException if registration fails
 	 */
 	@ShellMethod("Registers bindex file.")
 	public void register(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
+			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.", optOut = true) String registerUrl,
 			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update)
 			throws IOException {
 
@@ -89,7 +95,7 @@ public class BindexCommand {
 		}
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(CHAT_MODEL);
-		try (BindexRegister register = new BindexRegister(provider)) {
+		try (BindexRegister register = new BindexRegister(provider, registerUrl)) {
 			register.update(update);
 			register.scanFolder(dir);
 		}

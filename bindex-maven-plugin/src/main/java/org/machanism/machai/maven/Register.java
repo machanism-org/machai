@@ -30,6 +30,12 @@ public class Register extends AbstractBindexMojo {
 	 */
 	@Parameter(defaultValue = "true")
 	protected boolean update;
+	
+	/**
+	 * "URL of the registration database for storing project metadata.
+	 */
+	@Parameter(property = "bindex.register.url")
+	protected String registerUrl;
 
 	/**
 	 * Executes the register goal, updating and scanning Bindex resources.
@@ -41,7 +47,7 @@ public class Register extends AbstractBindexMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (isBindexed()) {
 			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
-			try (BindexRegister register = new BindexRegister(provider)) {
+			try (BindexRegister register = new BindexRegister(provider, registerUrl)) {
 				register.update(update);
 				register.scanFolder(project.getBasedir());
 			} catch (IOException e) {

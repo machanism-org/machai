@@ -17,7 +17,7 @@ import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.gw.Ghostwriter;
-import org.machanism.machai.schema. Bindex;
+import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
@@ -49,8 +49,8 @@ public class AssembyCommand {
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
 	private static final String CHAT_MODEL = "OpenAI:gpt-5.1";
 
-	/** List of picked  Bindex objects matching the search query. */
-	private List< Bindex> bindexList;
+	/** List of picked Bindex objects matching the search query. */
+	private List<Bindex> bindexList;
 	/** Last query (search string) used for picking. */
 	private String findQuery;
 
@@ -97,14 +97,15 @@ public class AssembyCommand {
 	 * @throws IOException if reading file or picking fails
 	 */
 	@ShellMethod("Picks libraries based on user request.")
-	public void pick(@ShellOption(value = "The application assembly prompt.") String query,
-			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score)
+	public void pick(
+			@ShellOption(help = "The application assembly prompt or the name of a prompt file.", value = "") String query,
+			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the registration database for storing project metadata.", optOut = true) String registerUrl,
+			@ShellOption(help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score)
 			throws IOException {
-
 		query = getQueryFromFile(query);
 
 		findQuery = query;
-		bindexList = pickBricks(query, score);
+		bindexList = pickBricks(query, score, registerUrl);
 	}
 
 	/**
@@ -127,22 +128,24 @@ public class AssembyCommand {
 	/**
 	 * Creates a project via picked library set.
 	 * 
-	 * @param query  The application assembly prompt (may be null to reuse last
-	 *               query)
-	 * @param dir    The directory for the assembled project
-	 * @param score  Minimum similarity threshold
-	 * @param chatModel GenAI service provider/model (default is Ghostwriter.CHAT_MODEL)
+	 * @param query     The application assembly prompt (may be null to reuse last
+	 *                  query)
+	 * @param dir       The directory for the assembled project
+	 * @param score     Minimum similarity threshold
+	 * @param chatModel GenAI service provider/model (default is
+	 *                  Ghostwriter.CHAT_MODEL)
 	 * @throws IOException              if an error occurs
 	 * @throws IllegalArgumentException if query or bindexList is missing
 	 */
 	@ShellMethod("Creates a project via picked librariy set.")
 	public void assembly(
-			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The application assembly prompt. If empty, an attempt will be made to use the result of the 'find' command, if one was specified previously.") String query,
-			@ShellOption(help = "The path to the assembled project directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "The minimum similarity threshold for search results.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score,
-			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model '"
+			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The prompt for application assembly. If omitted, the result from the previous 'find' command will be used, if available.") String query,
+			@ShellOption(value = "dir", defaultValue = ShellOption.NULL, help = "Path to the directory where the assembled project will be created.") File dir,
+			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.", optOut = true) String registerUrl,
+			@ShellOption(value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE, help = "Minimum similarity threshold for search results.") double score,
+			@ShellOption(value = "genai", defaultValue = "None", help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is not provided or left empty, the default model '"
 					+ Ghostwriter.CHAT_MODEL
-					+ "' will be used.", value = "genai", defaultValue = "None") String chatModel)
+					+ "' will be used.") String chatModel)
 			throws IOException {
 
 		if (chatModel == null) {
@@ -164,7 +167,8 @@ public class AssembyCommand {
 			prompt = this.findQuery;
 		} else {
 			query = getQueryFromFile(query);
-			bindexList = pickBricks(query, score);
+
+			bindexList = pickBricks(query, score, registerUrl);
 		}
 
 		if (!bindexList.isEmpty()) {
@@ -197,12 +201,13 @@ public class AssembyCommand {
 	 * 
 	 * @param query The query string describing requirements
 	 * @param score Minimum similarity score
+	 * @param url
 	 * @return List&lt; Bindex&gt; found matching libraries
 	 * @throws IOException if picking fails
 	 */
-	private List< Bindex> pickBricks(String query, Double score) throws IOException {
-		List< Bindex> bindexList = null;
-		try (Picker picker = new Picker(getProvider(CHAT_MODEL))) {
+	private List<Bindex> pickBricks(String query, Double score, String url) throws IOException {
+		List<Bindex> bindexList = null;
+		try (Picker picker = new Picker(getProvider(CHAT_MODEL), url)) {
 			picker.setScore(score);
 			bindexList = picker.pick(query);
 			logger.info("Search results for libraries matching the requested query:");
@@ -217,10 +222,10 @@ public class AssembyCommand {
 	 * @param bindexList List of picked libraries
 	 * @param picker     Picker used for scoring
 	 */
-	private void printFindResult(List< Bindex> bindexList, Picker picker) {
+	private void printFindResult(List<Bindex> bindexList, Picker picker) {
 		if (!bindexList.isEmpty()) {
 			int i = 1;
-			for ( Bindex bindex : bindexList) {
+			for (Bindex bindex : bindexList) {
 				String scoreStr = picker.getScore(bindex.getId()) != null
 						? "(" + picker.getScore(bindex.getId()).toString() + ")"
 						: "";

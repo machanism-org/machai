@@ -23,7 +23,7 @@ class PickerTest {
     @BeforeEach
     void setup() {
         provider = mock(GenAIProvider.class);
-        picker = new Picker(provider);
+        picker = new Picker(provider, null);
     }
 
     @Test

@@ -27,7 +27,7 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
-import org.machanism.machai.schema. Bindex;
+import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Language;
 import org.machanism.machai.schema.Layer;
@@ -55,17 +55,17 @@ import dev.langchain4j.model.openai.OpenAiEmbeddingModelName;
 import dev.langchain4j.model.output.Response;
 
 /**
- * Picker handles  Bindex registration, lookup, and semantic queries using
+ * Picker handles Bindex registration, lookup, and semantic queries using
  * embeddings and MongoDB.
  * <p>
- * Provides registration and query operations for  Bindex repositories,
+ * Provides registration and query operations for Bindex repositories,
  * supporting classification embedding for semantic retrieval and indexing.
  * <p>
  * Usage example:
  * 
  * <pre>
  * try (Picker picker = new Picker(provider)) {
- * 	List&lt; Bindex&gt; results = picker.pick("search query");
+ * 	List&lt;Bindex&gt; results = picker.pick("search query");
  * }
  * </pre>
  *
@@ -115,23 +115,25 @@ public class Picker implements Closeable {
 	 *
 	 * @param provider GenAIProvider instance used for embedding, schema
 	 *                 classification, etc.
+	 * @param uri
 	 * @throws IllegalStateException If the required environment variables are
 	 *                               missing for DB or OpenAI access
 	 */
-	public Picker(GenAIProvider provider) {
+	public Picker(GenAIProvider provider, String uri) {
 		this.provider = provider;
 
-		String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
-		String uri;
-		if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-			uri = "mongodb+srv://user:user@" + dbUrl;
-		} else {
-			uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
-		}
+		if (uri == null) {
+			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
+			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
+				uri = "mongodb+srv://user:user@" + dbUrl;
+			} else {
+				uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
+			}
 
-		apiKey = System.getenv("OPENAI_API_KEY");
-		if (apiKey == null || apiKey.isEmpty()) {
-			throw new IllegalStateException("OPEN_AI_API_KEY env variable is not set or is empty.");
+			apiKey = System.getenv("OPENAI_API_KEY");
+			if (apiKey == null || apiKey.isEmpty()) {
+				throw new IllegalStateException("OPEN_AI_API_KEY env variable is not set or is empty.");
+			}
 		}
 
 		mongoClient = MongoClients.create(uri);
@@ -150,16 +152,16 @@ public class Picker implements Closeable {
 	}
 
 	/**
-	 * Registers (inserts or updates) a  Bindex document for the supplied  Bindex
+	 * Registers (inserts or updates) a Bindex document for the supplied Bindex
 	 * instance.
 	 *
-	 * @param bindex  Bindex instance to register
+	 * @param bindex Bindex instance to register
 	 * @return Generated database ID string
 	 * @throws JsonProcessingException If conversion to JSON string fails or MongoDB
 	 *                                 throws exception
 	 * @throws MongoCommandException   On MongoDB insert or connection errors
 	 */
-	public String create( Bindex bindex) throws JsonProcessingException {
+	public String create(Bindex bindex) throws JsonProcessingException {
 		try {
 
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -218,12 +220,12 @@ public class Picker implements Closeable {
 	}
 
 	/**
-	 * Looks up the registered database ID for a  Bindex (if it exists).
+	 * Looks up the registered database ID for a Bindex (if it exists).
 	 *
-	 * @param bindex  Bindex instance
+	 * @param bindex Bindex instance
 	 * @return String database ID, or null if not present
 	 */
-	public String getRegistredId( Bindex bindex) {
+	public String getRegistredId(Bindex bindex) {
 		Document query = new Document("id", bindex.getId());
 		FindIterable<Document> find = collection.find(query);
 		Document document = find.first();
@@ -251,14 +253,14 @@ public class Picker implements Closeable {
 	}
 
 	/**
-	 * Performs a semantic pick/search with a query string, retrieving  Bindex
+	 * Performs a semantic pick/search with a query string, retrieving Bindex
 	 * results and dependencies.
 	 *
 	 * @param query Query string
-	 * @return List of  Bindex results related to the query (and their dependencies)
+	 * @return List of Bindex results related to the query (and their dependencies)
 	 * @throws IOException If prompt or IO operation fails
 	 */
-	public List< Bindex> pick(String query) throws IOException {
+	public List<Bindex> pick(String query) throws IOException {
 
 		String classificationStr = getClassification(query);
 
@@ -285,8 +287,8 @@ public class Picker implements Closeable {
 		}
 
 		Set<String> dependencies = new HashSet<>();
-		List< Bindex> pickResult = classificatioResults.stream().map(id -> {
-			 Bindex bindex = getBindex(id);
+		List<Bindex> pickResult = classificatioResults.stream().map(id -> {
+			Bindex bindex = getBindex(id);
 			List<String> dependencyList = bindex.getDependencies();
 			dependencies.addAll(dependencyList);
 			return bindex;
@@ -297,7 +299,7 @@ public class Picker implements Closeable {
 			addDependencies(allDependencies, bindexId);
 		}
 
-		List< Bindex> dependenciesResult = allDependencies.stream().map(id -> {
+		List<Bindex> dependenciesResult = allDependencies.stream().map(id -> {
 			return getBindex(id);
 		}).collect(Collectors.toList());
 
@@ -319,13 +321,13 @@ public class Picker implements Closeable {
 	}
 
 	/**
-	 * Adds all transitive dependencies of a  Bindex into the provided set.
+	 * Adds all transitive dependencies of a Bindex into the provided set.
 	 *
 	 * @param dependencies HashSet of dependency IDs to accumulate
-	 * @param bindexId      Bindex ID to explore
+	 * @param bindexId     Bindex ID to explore
 	 */
 	void addDependencies(Set<String> dependencies, String bindexId) {
-		 Bindex bindex = getBindex(bindexId);
+		Bindex bindex = getBindex(bindexId);
 		if (bindex != null) {
 			String id = bindex.getId();
 			if (!dependencies.contains(id)) {
@@ -346,7 +348,7 @@ public class Picker implements Closeable {
 	 * @throws IOException, JsonProcessingException, JsonMappingException
 	 */
 	private String getClassification(String query) throws IOException, JsonProcessingException, JsonMappingException {
-		URL systemResource =  Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
+		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, "UTF8");
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode schemaJson = objectMapper.readTree(schema);
@@ -361,18 +363,18 @@ public class Picker implements Closeable {
 	}
 
 	/**
-	 * Retrieves a  Bindex instance from the database by its ID.
+	 * Retrieves a Bindex instance from the database by its ID.
 	 *
 	 * @param id String identifier
-	 * @return  Bindex object, or null if not present in the DB
+	 * @return Bindex object, or null if not present in the DB
 	 */
-	private  Bindex getBindex(String id) {
-		 Bindex result = null;
+	private Bindex getBindex(String id) {
+		Bindex result = null;
 		Document doc = collection.find(com.mongodb.client.model.Filters.eq("id", id)).first();
 		if (doc != null) {
 			String bindexStr = doc.getString("bindex");
 			try {
-				result = new ObjectMapper().readValue(bindexStr,  Bindex.class);
+				result = new ObjectMapper().readValue(bindexStr, Bindex.class);
 			} catch (JsonProcessingException e) {
 				throw new IllegalArgumentException(e);
 			}
@@ -382,7 +384,7 @@ public class Picker implements Closeable {
 	}
 
 	/**
-	 * Executes a vector search query for  Bindexes by semantic embedding using
+	 * Executes a vector search query for Bindexes by semantic embedding using
 	 * MongoDB aggregation pipeline.
 	 *
 	 * @param indexName    Index name in MongoDB
@@ -466,9 +468,9 @@ public class Picker implements Closeable {
 	}
 
 	/**
-	 * Retrieves similarity score for a  Bindex result by its ID.
+	 * Retrieves similarity score for a Bindex result by its ID.
 	 *
-	 * @param id  Bindex identifier
+	 * @param id Bindex identifier
 	 * @return score value for semantic result
 	 */
 	public Double getScore(String id) {

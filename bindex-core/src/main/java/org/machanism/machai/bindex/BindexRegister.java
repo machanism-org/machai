@@ -42,10 +42,11 @@ public class BindexRegister extends  BindexProjectProcessor implements Closeable
      * Constructs a BindexRegister with specified GenAIProvider.
      *
      * @param provider GenAIProvider used for Picker instantiation
+     * @param url 
      */
-    public BindexRegister(GenAIProvider provider) {
+    public BindexRegister(GenAIProvider provider, String url) {
         super();
-        picker = new Picker(provider);
+        picker = new Picker(provider, url);
     }
 
     /**

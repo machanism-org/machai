@@ -33,7 +33,7 @@ class BindexRegisterTest {
     @Test
     @Disabled("Need to fix.")
     void testProcessProjectRegistersNewOrUpdateBindex() throws Exception {
-        BindexRegister register = spy(new BindexRegister(provider));
+        BindexRegister register = spy(new BindexRegister(provider, null));
         File dir = new File("/tmp/testproject");
         when(layout.getProjectDir()).thenReturn(dir);
          Bindex bindex = mock( Bindex.class);
@@ -49,7 +49,7 @@ class BindexRegisterTest {
     @Test
     @Disabled("Need to fix.")
     void testProcessProjectThrowsOnIOException() {
-        BindexRegister register = new BindexRegister(provider);
+        BindexRegister register = new BindexRegister(provider, null);
         when(layout.getProjectDir()).thenReturn(new File("."));
         doThrow(new IOException("fail")).when(register).getBindex(any(File.class));
         assertThrows(IllegalArgumentException.class, () -> {
@@ -59,7 +59,7 @@ class BindexRegisterTest {
 
     @Test
     void testCloseDelegatesToPickerClose() throws Exception {
-        BindexRegister register = spy(new BindexRegister(provider));
+        BindexRegister register = spy(new BindexRegister(provider, null));
         Picker picker = mock(Picker.class);
         // Use reflection or other means if needed
         doNothing().when(picker).close();
@@ -69,7 +69,7 @@ class BindexRegisterTest {
 
     @Test
     void testUpdateReturnsSelfAndSetsFlag() {
-        BindexRegister register = new BindexRegister(provider);
+        BindexRegister register = new BindexRegister(provider, null);
         BindexRegister result = register.update(true);
         assertSame(register, result);
     }
