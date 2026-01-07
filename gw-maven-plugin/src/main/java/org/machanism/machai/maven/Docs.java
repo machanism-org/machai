@@ -53,15 +53,9 @@ public class Docs extends AbstractMojo {
     private static Logger logger = LoggerFactory.getLogger(Docs.class);
 
     /**
-     * If true, only input documents will be processed, not outputs.
+     * The chat model to use for AI assistance in documentation generation e.g. "OpenAI:gpt-5", default value: "None".
      */
-    @Parameter(property = "docs.inputs.only", defaultValue = "false")
-    protected boolean inputsOnly;
-
-    /**
-     * The chat model to use for AI assistance in documentation generation.
-     */
-    @Parameter(property = "docs.chatModel", defaultValue = "OpenAI:gpt-5")
+    @Parameter(property = "docs.chatModel")
     protected String chatModel;
 
     /**
@@ -84,7 +78,7 @@ public class Docs extends AbstractMojo {
      */
     @Override
     public void execute() throws MojoExecutionException {
-        GenAIProvider provider = GenAIProviderManager.getProvider(inputsOnly ? null : chatModel);
+        GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
         DocsProcessor documents = new DocsProcessor(provider) {
             /**
              * Provides the Maven-based project layout for document scanning.
