@@ -6,6 +6,25 @@ The CLI project is a multi-module Java application designed for flexible documen
 
 ## Installation Instructions
 
+### Download
+1. **Prerequisites:**
+   - Java 17 or newer
+2. **Download the CLI Application**
+   You can download the CLI application as a `.jar` file from the following link:  
+   [Download machai.jar from SourceForge](https://sourceforge.net/projects/machanism/files/machai.jar/download)	
+2. **Run the CLI Tool**:
+   ```shell
+   $ java -jar machai.jar
+   ```
+   This command will show you a list of available CLI commands.
+
+3. **Assemble an Application Using CLI**:
+   Provide your project's requirements as a query:
+   ```text
+   shell:> assembly "Create a spring application for user login by commercetool."
+   ```
+
+### Clone the Preject
 1. **Prerequisites:**
    - Java 17 or newer
    - Maven (recommended)
@@ -13,7 +32,7 @@ The CLI project is a multi-module Java application designed for flexible documen
 
 2. **Clone the Repository:**
 ```shell
-$ git clone https://github.com/your-org/cli.git
+$ git clone https://github.com/machanism-org/machai.git
 ```
 3. **Build the Project:**
 ```shell
