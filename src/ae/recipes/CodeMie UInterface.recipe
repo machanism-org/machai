@@ -1,6 +1,6 @@
 <Recipe name="CodeMie UInterface">
 	<Var name="!Project Dir" init="default" type="path" source="mavenBaseDir" /> 
-	<Var name="!Project Dir" init="mandatory" type="path" /> 
+	<Var name="!Project Dir" init="console" type="path" /> 
 	<If name="!CodeMie Plugin Path" notEqual="$var{!Project Dir}">
 		<Confirm name="CodeMie Run Confirmation" message="Please confirm CodeMie plugin run.">
 			<Task name="Run CodeMie Plugin" mode="async" /> 
@@ -17,7 +17,7 @@
 	</If> 
 	<CheckValue actual="$var{!CodeMie Plugin Path}" expected="$var{!Project Dir}" onErrorMsg="CodeMie plugin --repo-path wrong." /> 
 	<Extern class="Web">
-		<ElementNotExists xpath="//*[@id='app']/div[2]/header/div[1]/a" timeout="1s">
+		<ElementNotExists xpath="//*[@id='app']/div[3]/div[2]/div/aside/div[1]/div[1]/h2" timeout="1s">
 			<Page url="https://codemie.lab.epam.com" /> 
 			<Click xpath="//*[normalize-space(text())='Sign in with EPAM SSO']" timeout="10s" /> 
 			<Click xpath="//*[normalize-space(text())='Tell Me More']" exception="ignored" timeout="1s" /> 
@@ -39,7 +39,7 @@
 				<Click xpath="//button[normalize-space(text())='Clear']" exception="ignored" timeout="1s" /> 
 				<Wait delay="1s" /> 
 				<Clipboard name="inputs" /> 
-				<Text value="$var{\CONTROL+v}$var{\n}" xpath="//*[@id='app']/div[2]/div[2]/div/main/div/div[2]/div/div/div/div[2]/div/div/div[1]/div[2]/div[1]/p" timeout="5s" /> 
+				<Text value="$var{\CONTROL+v}$var{\n}" xpath="//*[@id='app']/div[3]/div[2]/div/main/div/div[2]/div/div/div/div[2]/div/div/div[1]/div[2]/div[1]/p" timeout="5s" /> 
 				<Wait delay="2s" /> 
 				<ElementExists xpath="//button[contains(text(), 'Send')]" timeout="300s" /> 
 				<GetText name="Updated Files" xpath="(//div[@class='flex flex-col grow min-w-0']/div)[last()-1]" /> 
