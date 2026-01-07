@@ -14,7 +14,19 @@ import org.machanism.machai.ai.manager.GenAIProvider;
 import org.mockito.Mockito;
 
 /**
- * Unit tests for {@link DocsProcessor}.
+ * Unit tests for {@link DocsProcessor}, covering main public and protected methods.
+ * <p>
+ * Ensures DocsProcessor API behaves as expected under typical scenarios,
+ * including valid and edge cases for configuration and document scanning.
+ * <p>
+ * Example:
+ * <pre>
+ * {@code
+ * DocsProcessor processor = new DocsProcessor(mockProvider);
+ * processor.setInheritance(true);
+ * assertTrue(processor.isInheritance());
+ * }
+ * </pre>
  */
 class DocsProcessorTest {
 
