@@ -1,100 +1,61 @@
 # Machai Project
 
-Machai is a GenAI-powered tool for automated creation, registration, and enhancement of software projects. It streamlines project assembly and library integration within the Machanism ecosystem using AI-driven semantic search and metadata management.
+Machai is a GenAI-powered tool for automated creation, registration, and enhancement of software projects. It streamlines project assembly and library integration within the Machanism ecosystem using AI-driven semantic search and metadata management. The project consists of multiple modular components related to GenAI client, core utilities, command-line interfaces, and Maven plugins for enhanced project automation.
 
-## Project Modules
+## Modules
 
-- [GenAI Client](genai-client)  
-  _A Java library designed for seamless integration with Generative AI providers. Provides foundational prompt management and embedding capabilities for AI-powered features._
+- [genai-client](genai-client): Java library for convenient integration with GenAI APIs, enabling flexible configuration and usage through a unified interface, including command-function tools, file operations, and prompt management.
+- [bindex-core](bindex-core): Core library for bindex metadata management, providing functionality for automated generation, registration, library selection, and project assembly.
+- [cli](cli): Command Line Interface tool for generation, registration, and management of library metadata with AI-powered features, including project assembly and integration workflows.
+- [bindex-maven-plugin](bindex-maven-plugin): Maven plugin that automates `bindex.json` generation and management for Java libraries, powered by GenAI and integration with Machanism platform.
+- [assembly-maven-plugin](assembly-maven-plugin): Plugin for seamless AI-powered assembly of Maven projects using natural language queries and semantic search for optimal library selection and application setup.
+- [ghostwriter](ghostwriter): Documentation engine that automates scanning, analysis, and assembly of project documentation using embedded rules, guidance, and AI synthesis.
+- [gw-maven-plugin](gw-maven-plugin): Plugin for smart, GenAI-powered document processing and assistance in Maven-based projects, automating documentation review and updates.
 
-- [Bindex Core](bindex-core)  
-  _Core engine for bindex metadata management, supporting generation, registration, library selection, and project assembly._
+## Installation
 
-- [Machai CLI](cli)  
-  _Command-line tool for generating, registering, and managing library metadata with GenAI-powered project assembly and semantic search._
+Clone the repository and build with Maven:
 
-- [Bindex Maven Plugin](bindex-maven-plugin)  
-  _Automates the generation and registration of bindex metadata for Maven projects, enabling semantic library discovery and integration._
+```bash
+# Prerequisites
+# - Java 9 or newer
+# - Maven 3.6.0 or newer
 
-- [Assembly Maven Plugin](assembly-maven-plugin)  
-  _Automates project assembly by integrating libraries based on bindex metadata and GenAI semantic search._
-
-- [Ghostwriter](ghostwriter)  
-  _Documentation engine that automatically scans, analyzes, and assembles project documentation using AI-powered synthesis and embedded guidance tags._
-
-- [Ghostwriter Maven Plugin](gw-maven-plugin)  
-  _Documentation automation plugin that scans, analyzes, and assembles project documentation. Ensures best practices and up-to-date content across all Java modules._
-
-## Installation Instructions
-
-**Prerequisites**  
-- Java 9 or higher (Java 17+ recommended for CLI)
-- Apache Maven 3.6.0+
-- Git
-
-**Clone the Repository**
-```sh
 git clone https://github.com/machanism-org/machai.git
 cd machai
-```
-
-**Build the Project (All Modules)**
-```sh
 mvn clean install
-```
-
-**Generate Project Documentation**
-```sh
-mvn site
 ```
 
 ## Usage
 
-Each module can be used independently or together as part of the Machanism ecosystem.
+Each module can be used separately or composed for broader project automation:
 
-### Command-Line Interface
-Run the Machai CLI (after building):
-```sh
-cd cli
-java -jar target/machai.jar
-```
+- To run the CLI:
+  ```bash
+  cd cli
+  mvn exec:java
+  ```
 
-For help:
-```sh
->java -jar machai.jar
-        _ . __  __            _           _
-    \`"' ' |  \/  | __ _  ___| |__   __ _(_)
-   /'`\\\  | |\/| |/ _` |/ __| '_ \ / _` | |
-  /<"\ \\\ | |  | | (_| | (__| | | | (_| | |
- /::_.-.  .|_|  |_|\__,_|\___|_| |_|\__,_|_|
- `-\\ / | The Machai CLI 0.0.2-SNAPSHOT
-    \ `-' www.machanism.org
+- Using Maven plugins (add to your pom.xml):
 
-Starting MachaiCLI using Java 24.0.2 with PID 33888 (C:\projects\machanism.org\machai\cli\target\machai.jar started by ViktorTovstyi in C:\projects\machanism.org\machai\cli\target)
-No active profile set, falling back to 1 default profile: "default"
+  ```xml
+  <plugin>
+    <groupId>org.machanism.machai</groupId>
+    <artifactId>gw-maven-plugin</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+  </plugin>
+  ```
 
-Unable to create a system terminal, creating a dumb terminal (enable debug logging for more information)
-Started MachaiCLI in 2.159 seconds (process running for 3.276)
-shell:> help
-```
-
-### Maven Plugins
-- **Bindex Maven Plugin** and **Assembly Maven Plugin** can be added to your Maven project and invoked via Maven goals.
-    - Example usage:
-      ```sh
-      mvn org.machanism.machai:assembly-maven-plugin:assembly
-      mvn org.machanism.machai:bindex-maven-plugin:register
-      ```
-
-### Documentation Automation
-- **Ghostwriter** and its plugin can automatically review and assemble project documentation.
+Refer to each submodule's README for module-specific details and advanced usage instructions.
 
 ## Contributing
 
-- Fork this repository and create a branch for your feature or bugfix.
-- Follow [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
-- Submit a clear pull request with a detailed description.
-- Report issues or feature requests through [GitHub Issues](https://github.com/machanism-org/machai/issues).
+We welcome contributions! Please:
+
+- Follow code style and best practices adopted in the project.
+- Submit pull requests with clear descriptions and reference related issues if applicable.
+- Use [GitHub Issues](https://github.com/machanism-org/machai/issues) for bug reports and feature requests.
+- Review code and documentation before submitting.
 
 ## License
 
@@ -102,7 +63,6 @@ This project is licensed under the [Apache License, Version 2.0](LICENSE.txt).
 
 ## Contact and Support
 
+- Project website: [machanism.org/machai](https://machanism.org/machai)
+- Issue Tracker: [GitHub Issues](https://github.com/machanism-org/machai/issues)
 - Maintainer: Viktor Tovstyi ([viktor.tovstyi@gmail.com](mailto:viktor.tovstyi@gmail.com))
-- GitHub: [https://github.com/machanism-org/machai](https://github.com/machanism-org/machai)
-- Issues: [https://github.com/machanism-org/machai/issues](https://github.com/machanism-org/machai/issues)
-

@@ -10,7 +10,7 @@ In the project root directory, ensure the following files are present and proper
 README Content:
 
 1. **Project Title and Overview:**  
-   - Provide the project name and a brief description of its purpose and main features.
+   - Provide the project name and a brief description based on `src\site\markdown\index.md` content summary.
 
 2. **Module List:**  
    - List all modules in the project.
