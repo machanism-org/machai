@@ -1,4 +1,4 @@
-# CLI Project
+# Machai CLI Project
 
 ## Overview
 
