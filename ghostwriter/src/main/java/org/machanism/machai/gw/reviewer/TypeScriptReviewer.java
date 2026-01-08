@@ -9,14 +9,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.machanism.machai.gw.DocsProcessor;
+import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
  * Reviewer implementation for TypeScript source files (.ts).
  * <p>
  * Extracts guidance information or comments annotated with the
- * {@link DocsProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
+ * {@link FileProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
  * supporting TypeScript file comment conventions.
  */
 public class TypeScriptReviewer implements Reviewer {
@@ -46,9 +46,9 @@ public class TypeScriptReviewer implements Reviewer {
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String content = Files.readString(guidancesFile.toPath());
 		String result = null;
-		if (StringUtils.contains(content, DocsProcessor.GUIDANCE_TAG_NAME)) {
-			Pattern pattern = Pattern.compile("(?://\\s*" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*))"
-					+ "|(?:/\\*.*?" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*\\*/)", Pattern.DOTALL);
+		if (StringUtils.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
+			Pattern pattern = Pattern.compile("(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*))"
+					+ "|(?:/\\*.*?" + FileProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*\\*/)", Pattern.DOTALL);
 			Matcher matcher = pattern.matcher(content);
 			if (matcher.find()) {
 				String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);

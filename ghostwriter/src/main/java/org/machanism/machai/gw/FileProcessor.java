@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * {@code
  * GenAIProvider provider = ...; // Obtain your provider
- * DocsProcessor processor = new DocsProcessor(provider);
+ * FileProcessor processor = new FileProcessor(provider);
  * processor.scanDocuments(new File("/path/to/project"));
  * }
  * </pre>
@@ -44,12 +44,12 @@ import org.slf4j.LoggerFactory;
  * All public and protected methods and fields are documented as per package
  * guidance.
  *
- * @author Machanism Team
+ * @author Viktor Tovstyi
  * @since 0.0.2
  */
-public class DocsProcessor extends ProjectProcessor {
+public class FileProcessor extends ProjectProcessor {
 	/** Logger for documentation input processing events. */
-	private static Logger logger = LoggerFactory.getLogger(DocsProcessor.class);
+	private static Logger logger = LoggerFactory.getLogger(FileProcessor.class);
 
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@guidance";
@@ -76,11 +76,11 @@ public class DocsProcessor extends ProjectProcessor {
 	private boolean useParentsGuidances;
 
 	/**
-	 * Constructs a DocsProcessor for documentation input preparation.
+	 * Constructs a FileProcessor for documentation input preparation.
 	 *
 	 * @param provider the AI provider for document generation
 	 */
-	public DocsProcessor(GenAIProvider provider) {
+	public FileProcessor(GenAIProvider provider) {
 		this.provider = provider;
 
 		systemFunctionTools = new SystemFunctionTools();

@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
-import org.machanism.machai.gw.DocsProcessor;
+import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
@@ -19,7 +19,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 public class TextReviewer implements Reviewer {
 
-	private static final String GUIDANCE_FILE_NAME = DocsProcessor.GUIDANCE_TAG_NAME + ".txt";
+	private static final String GUIDANCE_FILE_NAME = FileProcessor.GUIDANCE_TAG_NAME + ".txt";
 
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 	private Map<String, String> dirGuidanceMap;

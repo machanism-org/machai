@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Unit tests for {@link DocsCommand}.
+ * Unit tests for {@link ProcessCommand}.
  * <p>
  * These tests cover basic instantiation and shell method exposure.
  *
@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test;
  */
 class DocsCommandTest {
 
-    private DocsCommand command;
+    private ProcessCommand command;
 
     @BeforeEach
     void setUp() {
-        command = new DocsCommand();
+        command = new ProcessCommand();
     }
 
     @Test

@@ -3,26 +3,29 @@
 Analyze the source file and create a Maven Site-style introductory home page for your project.
 Do not use the horizontal rule separator between sections. -->
 
-Ghostwriter is an advanced documentation engine for Machai projects. It automates the scanning, analysis, and assembly of project documentation, driven by rules and guidance embedded throughout the codebase and supporting resources. At its core is the `DocsProcessor`, which orchestrates:
+Welcome to **Ghostwriter** – your robust foundation for document automation and intelligent code generation.
 
-- **Automated Project Scanning:** Detects the layout, traverses all sources and documentation folders (including `src/main/java`, `src/main/resources`, `src/test/java`, `src/test/resources`, and `src/site/markdown`), and efficiently excludes irrelevant directories.
-- **Guidance-Driven Extraction:** Finds and parses `@guidance` comments embedded in Markdown (`.md`), Java (`.java`), and custom resource files. These guidance tags steer documentation generation according to best practices and project-specific rules.
-- **Extensible Reviewers:** Utilizes specialized reviewers for each format (`MarkdownReviewer`, `JavaReviewer`, `PythonReviewer`, and `TextReviewer`) to extract context, comments, and functional details from diverse file types.
-- **Contextual Content Assembly:** Integrates extracted guidance with project layout descriptions and additional context to generate comprehensive, rule-based documentation.
-- **AI-Powered Synthesis:** Connects with generative AI models to produce clear, focused documentation by merging code-derived knowledge, developer-supplied guidance, and contextual project information.
-- **Modular and Scalable Architecture:** Built to process monolithic and multi-module projects. Detects sources, tests, documents, modules, and automates documentation creation across complex or large codebases.
+## Project Overview
+Ghostwriter is designed as a comprehensive solution for your automated document processing and intelligent writing needs. It streamlines workflows, integrates seamlessly into enterprise environments, and accelerates productivity in development and documentation projects.
 
-Ghostwriter empowers developers to generate high-quality documentation automatically, reduce manual effort, and maintain consistency. It serves as the backbone for Machai and Machanism guides, tutorials, and project references—making application assembly and onboarding faster and easier.
+## Key Features
+- Automated document creation and formatting
+- Seamless integration with existing Java-based systems
+- Configurable templates for diverse documentation needs
+- Support for enterprise-scale operations and extensibility
+- Testable architecture with dedicated source and resource directories
 
-## License
+## Getting Started
+1. Clone the repository and import the project into your favorite IDE.
+2. Build the project using your preferred Maven goals.
+3. Explore the sample modules and documentation to start integrating Ghostwriter into your workflow.
 
-Machai is licensed under the Apache License 2.0.  
-You can view the full license text [here](LICENSE).
+## Project Goals
+Ghostwriter aims to:
+- Boost productivity with intelligent automation
+- Promote consistency across documentation and source code
+- Provide a scalable base for sophisticated document-centric projects
 
-## Contact
+## Contribution
+Contributions are welcome! See documentation and open issues to get started.
 
-If you have any questions or need support, feel free to reach out:
-- Official Website: [Machanism](https://machanism.org)
-- Email: [develop@machanism.org](mailto:develop@machanism.org)
-
-Machai simplifies and accelerates application assembly, empowering developers to focus on innovation.

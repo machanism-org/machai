@@ -12,7 +12,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.gw.DocsProcessor;
+import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *   &lt;executions&gt;
  *     &lt;execution&gt;
  *       &lt;goals&gt;
- *         &lt;goal&gt;docs&lt;/goal&gt;
+ *         &lt;goal&gt;process&lt;/goal&gt;
  *       &lt;/goals&gt;
  *     &lt;/execution&gt;
  *   &lt;/executions&gt;
@@ -46,16 +46,16 @@ import org.slf4j.LoggerFactory;
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
-@Mojo(name = "docs", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.INSTALL)
-public class Docs extends AbstractMojo {
+@Mojo(name = "process", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.INSTALL)
+public class Process extends AbstractMojo {
 
     /** Logger for this class. */
-    private static Logger logger = LoggerFactory.getLogger(Docs.class);
+    private static Logger logger = LoggerFactory.getLogger(Process.class);
 
     /**
      * The chat model to use for AI assistance in documentation generation e.g. "OpenAI:gpt-5", default value: "None".
      */
-    @Parameter(property = "docs.chatModel")
+    @Parameter(property = "gw.chatModel")
     protected String chatModel;
 
     /**
@@ -79,7 +79,7 @@ public class Docs extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException {
         GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
-        DocsProcessor documents = new DocsProcessor(provider) {
+        FileProcessor documents = new FileProcessor(provider) {
             /**
              * Provides the Maven-based project layout for document scanning.
              *

@@ -18,8 +18,17 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.project.layout.PythonProjectLayout;
 
+/**
+ * Unit tests for {@link BindexBuilderFactory}.
+ * 
+ * <p>Verifies builder creation logic for different {@link ProjectLayout} implementations and error conditions.</p>
+ *
+ * @author Viktor Tovstyi
+ */
 class BindexBuilderFactoryTest {
-
+    /**
+     * Verifies creation of {@link MavenBindexBuilder} for Maven layout.
+     */
     @Test
     void createReturnsMavenBindexBuilderForMavenProjectLayout() throws Exception {
         MavenProjectLayout layout = mock(MavenProjectLayout.class);
@@ -28,6 +37,9 @@ class BindexBuilderFactoryTest {
         assertTrue(builder instanceof MavenBindexBuilder);
     }
 
+    /**
+     * Verifies creation of {@link JScriptBindexBuilder} for JScript layout.
+     */
     @Test
     void createReturnsJScriptBindexBuilderForJScriptProjectLayout() throws Exception {
         JScriptProjectLayout layout = mock(JScriptProjectLayout.class);
@@ -36,6 +48,9 @@ class BindexBuilderFactoryTest {
         assertTrue(builder instanceof JScriptBindexBuilder);
     }
 
+    /**
+     * Verifies creation of {@link PythonBindexBuilder} for Python layout.
+     */
     @Test
     void createReturnsPythonBindexBuilderForPythonProjectLayout() throws Exception {
         PythonProjectLayout layout = mock(PythonProjectLayout.class);
@@ -44,6 +59,9 @@ class BindexBuilderFactoryTest {
         assertTrue(builder instanceof PythonBindexBuilder);
     }
 
+    /**
+     * Verifies creation of generic {@link BindexBuilder} for layouts with existing directory.
+     */
     @Test
     void createReturnsGenericBindexBuilderWhenProjectDirExists() throws Exception {
         ProjectLayout layout = mock(ProjectLayout.class);
@@ -53,6 +71,9 @@ class BindexBuilderFactoryTest {
         assertTrue(builder instanceof BindexBuilder);
     }
 
+    /**
+     * Verifies exception thrown if the project directory does not exist.
+     */
     @Test
     void createThrowsFileNotFoundExceptionIfDirDoesNotExist() {
         ProjectLayout layout = mock(ProjectLayout.class);

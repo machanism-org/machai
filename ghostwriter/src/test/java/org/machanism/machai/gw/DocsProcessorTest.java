@@ -14,7 +14,7 @@ import org.machanism.machai.ai.manager.GenAIProvider;
 import org.mockito.Mockito;
 
 /**
- * Unit tests for {@link DocsProcessor}, covering main public and protected methods.
+ * Unit tests for {@link FileProcessor}, covering main public and protected methods.
  * <p>
  * Ensures DocsProcessor API behaves as expected under typical scenarios,
  * including valid and edge cases for configuration and document scanning.
@@ -30,13 +30,13 @@ import org.mockito.Mockito;
  */
 class DocsProcessorTest {
 
-    private DocsProcessor docsProcessor;
+    private FileProcessor docsProcessor;
     private GenAIProvider provider;
 
     @BeforeEach
     void setUp() {
         provider = Mockito.mock(GenAIProvider.class);
-        docsProcessor = new DocsProcessor(provider);
+        docsProcessor = new FileProcessor(provider);
     }
 
     /**

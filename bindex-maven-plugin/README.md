@@ -1,38 +1,36 @@
 # bindex-maven-plugin
 
+Multi-module Java project for Maven integration and automated document processing in OSGi-based environments.
+
 ## Overview
 
-**bindex-maven-plugin** is a multi-module Java project designed to streamline and extend Maven plugin functionality for OSGi bundle indexing. The project provides tools and modules to automate the generation of OSGi metadata, support advanced configuration, and facilitate integration into Maven builds. Key features include modular structure, easy extensibility, and adherence to the latest OSGi and Maven conventions.
+The `bindex-maven-plugin` project enables automated indexing of Java packages for OSGi bundle generation. It aims to simplify Maven workflows by providing custom plugins and utilities for manifest creation, validation, and metadata extraction. Main features include:
+- Maven plugin(s) for OSGi bundle index creation
+- Manifest generation and validation automation
+- Support for multi-module Java project structures
+- Integration with standard Maven goals
 
 ## Usage
 
-To build and use the project, clone the repository and run the following commands from the project root:
+Clone the repository and run the plugin using Maven commands:
 
-~~~shell
-# Clone the repository
-$ git clone <repository-url>
-$ cd bindex-maven-plugin
+~~~bash
+mvn clean install
+mvn bindex:index
+~~~
 
-# Build all modules
-$ mvn clean install
+To use the plugin in your project, include it as a dependency in your `pom.xml`:
 
-# Use the plugin in your Maven project
+~~~xml
 <plugin>
-    <groupId>org.osgi</groupId>
-    <artifactId>bindex-maven-plugin</artifactId>
-    <version>YOUR_VERSION_HERE</version>
-    <executions>
-        <execution>
-            <goals>
-                <goal>index</goal>
-            </goals>
-        </execution>
-    </executions>
+  <groupId>org.apache.felix</groupId>
+  <artifactId>bindex-maven-plugin</artifactId>
+  <version>YOUR_VERSION_HERE</version>
 </plugin>
 ~~~
 
-You can customize plugin behavior through Maven configuration properties. Refer to each module's documentation for advanced options and specifics.
+For more advanced usage, refer to each module's documentation and their respective configuration in your `pom.xml` files.
 
 ## Reference
 
-This project is a child of the parent Maven project defined in the repository. For details and extended documentation, see the [parent project documentation](../README.md).
+This project is part of a larger parent project. For complete setup instructions and additional modules, refer to the parent project's repository and documentation.

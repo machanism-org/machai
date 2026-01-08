@@ -3,51 +3,42 @@
 Analyze the source file and create a Maven Site-style introductory home page for your project.
 Do not use the horizontal rule separator between sections. -->
 
-Welcome to the GW Maven Plugin! This plugin provides powerful, automated document processing capabilities utilizing advanced GenAI-powered workflows within your Maven project's build lifecycle.
-
 ## Overview
-GW Maven Plugin automates the scanning, processing, and assistance of documentation for Maven-based projects. Leveraging GenAI and Maven project layout abstraction, it streamlines your documentation workflow and ensures up-to-date, high-quality project docs with minimal effort.
 
-## Key Features
-- **Automated Document Scanning**: Integrates deeply with Maven to locate and process project documentation.
-- **GenAI-Powered Assistance**: Utilizes external AI provider(s) for smart document improvement, generation, and updating.
-- **Flexible Configuration**: Select which documents and models to use via Maven parameters (`docs.inputs.only`, `docs.chatModel`).
-- **Lifecycle Integration**: Executes seamlessly within your build pipeline, making documentation processing part of your project automation.
+The **GW Maven Plugin** (Ghostwriter Maven Plugin) is an advanced documentation automation tool for Java projects. It automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. The plugin streamlines the creation and maintenance of high-quality, consistent documentation, ensuring best practices and up-to-date information across all modules.
+
+## Features
+
+- Automated project documentation synthesis
+- Guidance tag recognition for custom & best-practices documentation
+- Java source code analysis
+- Maven plugin integration and seamless operation
+- Consistency enforcement and best practices
+- Support for modular and multi-module projects
 
 ## Getting Started
-To use the GW Maven Plugin, add the following configuration to your Maven `pom.xml`:
+
+Add the plugin to your Maven project and configure it in your `pom.xml`. The plugin will automatically process your source files and generate up-to-date documentation in the Maven Site lifecycle.
+
+## Usage Example
+
+Include in your build configuration:
 
 ```xml
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>${project.version}</version>
-  <executions>
-    <execution>
-      <goals>
-        <goal>docs</goal>
-      </goals>
-    </execution>
-  </executions>
+  <version>0.0.2-SNAPSHOT</version>
 </plugin>
 ```
 
-### Key Parameters
-- `docs.inputs.only`  
-  If set to `true`, only input documents (not outputs) are processed.
-- `docs.chatModel`  
-  Specifies the chat model for AI assistance in documentation (default: `OpenAI:gpt-5`).
+Documentation will be included in your project's site output using the `mvn site` command.
 
-## How It Works
-The Docs goal scans documents in your Maven project and processes them using the selected AI provider. It is tailored to your project layout, including both single-module and multi-module configurations. Run your Maven lifecycle (e.g., `mvn install`) to trigger documentation assistance automatically.
+## Requirements
 
-## Typical Use Cases
-- Keeping documentation up-to-date with the latest code changes
-- Generating smart summaries or intros for project files
-- Reviewing existing documentation for completeness and clarity
-
-## Contributing & Feedback
-Encounter an issue or have suggestions? Contributions and feedback are welcome! Visit the project repository or get in touch to help improve GW Maven Plugin.
+- Maven 3+
+- Java 8+
 
 ## License
-GW Maven Plugin is distributed under Open Source terms. See your project repository for specific licensing details.
+
+This plugin is released under the Apache License, Version 2.0.

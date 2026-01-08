@@ -8,7 +8,7 @@ import org.jline.reader.LineReader;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.ApplicationAssembly;
-import org.machanism.machai.gw.DocsProcessor;
+import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.gw.Ghostwriter;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import org.springframework.shell.standard.ShellOption;
  * 
  * <pre>
  * {@code
- * DocsCommand docsCmd = new DocsCommand();
+ * ProcessCommand docsCmd = new ProcessCommand();
  * docsCmd.docs(new File("/projects/"), "OpenAI:gpt-5.1");
  * }
  * </pre>
@@ -36,7 +36,7 @@ import org.springframework.shell.standard.ShellOption;
  * @since 0.0.2
  */
 @ShellComponent
-public class DocsCommand {
+public class ProcessCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
 
@@ -54,8 +54,8 @@ public class DocsCommand {
 	 *                  Ghostwriter.CHAT_MODEL)
 	 * @throws IOException if scan or processing fails
 	 */
-	@ShellMethod("GenAI document processing command.")
-	public void docs(
+	@ShellMethod("GenAI file processing command.")
+	public void process(
 			@ShellOption(help = "The path to the directory to be processed.", value = "--scan", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The path fo the project directory.", value = "--root", defaultValue = ShellOption.NULL, optOut = true) File rootDir,
 			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model '"
@@ -87,7 +87,7 @@ public class DocsCommand {
 		}
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
-		DocsProcessor documents = new DocsProcessor(provider);
+		FileProcessor documents = new FileProcessor(provider);
 		documents.scanDocuments(rootDir, dir);
 		logger.info("Scanning finished.");
 	}

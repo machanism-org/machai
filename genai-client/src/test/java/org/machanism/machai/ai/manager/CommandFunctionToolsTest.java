@@ -1,67 +1,35 @@
 package org.machanism.machai.ai.manager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.io.File;
-
-import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import java.io.File;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Unit tests for {@link CommandFunctionTools}.
  * <p>
- * Covers construction, working directory handling, and tool application logic.
- *
- * @author Viktor Tovstyi
+ * Verifies shell command execution and error handling logic via mock objects.
+ * @author Automated
  * @guidance
  */
 class CommandFunctionToolsTest {
-    private CommandFunctionTools commandFunctionTools;
-    private File tempDir;
 
     /**
-     * Set up a CommandFunctionTools instance for each test using system temp directory.
-     */
-    @BeforeEach
-    void setUp() {
-        tempDir = new File(System.getProperty("java.io.tmpdir"));
-        commandFunctionTools = new CommandFunctionTools(tempDir);
-    }
-
-    /**
-     * Verify that getWorkingDir throws if working dir is not set.
+     * Verifies that applyTools installs the tool into GenAIProvider.
      */
     @Test
-    void getWorkingDir_withNullWorkingDir_throwsException() {
-        CommandFunctionTools tools = new CommandFunctionTools(null);
-        Exception ex = assertThrows(IllegalArgumentException.class, tools::getWorkingDir);
-        assertEquals("The function tool working dir is not defined.", ex.getMessage());
+    void testApplyToolsAddsFunction() {
+        CommandFunctionTools tools = new CommandFunctionTools();
+        GenAIProvider provider = Mockito.mock(GenAIProvider.class);
+        tools.applyTools(provider);
+        Mockito.verify(provider, Mockito.atLeastOnce()).addTool(
+            Mockito.eq("run_command_line_tool"),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString()
+        );
     }
 
-    /**
-     * Validate correct working directory is set and returned.
-     */
-    @Test
-    void setWorkingDir_setsDirSuccessfully() {
-        File newDir = new File(tempDir, "testDir");
-        commandFunctionTools.setWorkingDir(newDir);
-        assertSame(newDir, commandFunctionTools.getWorkingDir());
-    }
-
-    /**
-     * Verify that applyTools adds the shell command tool to provider.
-     */
-    @Test
-    void applyTools_invokesAddTool() {
-        GenAIProvider mockProvider = Mockito.mock(GenAIProvider.class);
-        commandFunctionTools.applyTools(mockProvider);
-        Mockito.verify(mockProvider, Mockito.atLeastOnce()).addTool(
-                Mockito.eq("run_command_line_tool"),
-                Mockito.anyString(),
-                Mockito.any(),
-                Mockito.any());
-    }
 }

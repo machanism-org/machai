@@ -44,7 +44,7 @@ public class Ghostwriter {
         File dir = SystemUtils.getUserDir();
 
         GenAIProvider provider = GenAIProviderManager.getProvider(null);
-        DocsProcessor documents = new DocsProcessor(provider);
+        FileProcessor documents = new FileProcessor(provider);
         logger.info("Scanning documents in the root directory: {}", dir);
         documents.scanDocuments(dir);
         logger.info("Scanning finished.");

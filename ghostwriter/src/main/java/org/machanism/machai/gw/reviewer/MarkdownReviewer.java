@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.machanism.machai.gw.DocsProcessor;
+import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
@@ -44,7 +44,7 @@ public class MarkdownReviewer implements Reviewer {
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String content = Files.readString(guidancesFile.toPath());
 
-		Pattern pattern = Pattern.compile("<!--\\s*" + DocsProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*-->",
+		Pattern pattern = Pattern.compile("<!--\\s*" + FileProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*-->",
 				Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(content);
 

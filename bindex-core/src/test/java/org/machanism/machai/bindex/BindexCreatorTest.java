@@ -19,34 +19,52 @@ import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema. Bindex;
+import org.machanism.machai.schema.Bindex;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Unit tests for {@link BindexCreator}.
+ * <p>
+ * Test Bindex creation/updating logic, chaining setter, and error handling.
+ * </p>
+ *
+ * @author Viktor Tovstyi
+ */
 class BindexCreatorTest {
     private GenAIProvider provider;
     private ProjectLayout projectLayout;
     private BindexCreator creator;
     private BindexBuilder builder;
-    private  Bindex bindex;
+    private Bindex bindex;
     private ObjectMapper objectMapper;
 
+    /**
+     * Set up mock objects and test fixture for each test.
+     */
     @BeforeEach
     void setUp() {
         provider = mock(GenAIProvider.class);
         projectLayout = mock(ProjectLayout.class);
         builder = mock(BindexBuilder.class);
-        bindex = mock( Bindex.class);
+        bindex = mock(Bindex.class);
         objectMapper = mock(ObjectMapper.class);
         creator = new BindexCreator(provider);
     }
 
+    /**
+     * Tests that {@link BindexCreator#update(boolean)} returns this instance for chaining.
+     */
     @Test
     void testUpdateSetterReturnsSelf() {
         BindexCreator self = creator.update(true);
         assertSame(creator, self);
     }
 
+    /**
+     * Tests the folder processing creates the Bindex file when update is true.
+     * @throws IOException if mocked components fail
+     */
     @Test
     @Disabled("Need to fix.")
     void testProcessFolderCreatesBindexFileAndLogs() throws IOException {
@@ -65,6 +83,10 @@ class BindexCreatorTest {
         assertDoesNotThrow(() -> creatorSpy.processFolder(projectLayout));
     }
 
+    /**
+     * Tests that folder processing throws IllegalArgumentException on I/O errors.
+     * @throws IOException if mocked builder fails
+     */
     @Test
     @Disabled("Need to fix.")
     void testProcessFolderThrowsOnIOException() throws IOException {

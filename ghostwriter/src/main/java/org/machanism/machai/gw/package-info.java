@@ -3,10 +3,10 @@
  * <p>
  * This package contains the main classes and utilities to scan project directories,
  * orchestrate document preparation, and interact with AI-powered reviewing tools. Core classes
- * include {@link DocsProcessor} for documentation input generation and {@link Ghostwriter}
+ * include {@link FileProcessor} for documentation input generation and {@link Ghostwriter}
  * for initializing project-wide document review operations.
  * <br/><br/>
- * General usage involves creating an instance of {@link DocsProcessor}, optionally configuring guidance,
+ * General usage involves creating an instance of {@link FileProcessor}, optionally configuring guidance,
  * and running scans against source directories to collect, analyze, and process documentation-related files.
  * <p>
  * Example usage:
