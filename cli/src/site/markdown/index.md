@@ -40,38 +40,70 @@ The Machai Command Line Interface (CLI) is a versatile tool designed to facilita
 
    Upon starting, you will see the Machai CLI banner and a prompt where you can enter commands. Use the `help` command to see the list of available options.
 
+
 ## Supported Commands
 
-The Machai CLI exposes a set of commands for working with libraries, files, and documents:
+### Libraries Registration
 
-### bindex
-Generates a `bindex.json` metadata file for the specified library/project directory. Uses GenAI to analyze source files.
-- Usage: `bindex <project-path>`
-- Options: `--update` (update mode), `--genai` (specify GenAI model)
+#### `bindex`
 
-### register
-Registers a previously generated `bindex.json` file into the Machanism platform registration database.
-- Usage: `register <project-path>`
-- Options: `--registerUrl` (target database), `--update` (update mode)
+Generates a `bindex.json` metadata file for the specified library or project directory by leveraging GenAI to analyze source files.  
 
-### pick
-Finds/picks libraries (bricks) by using a natural language prompt describing your project or query file.
-- Usage: `pick <prompt or file>`
-- Options: `--score` (min similarity score), `--registerUrl` (registration DB URL)
+**Usage:** `bindex <project-path>`  
 
-### assembly
-Creates an assembled project from a set of picked libraries and an application prompt.
-- Usage: `assembly` `--query <prompt>` `--dir <output-folder>`
-- Options: `--score`, `--genai` (specify GenAI model), `--registerUrl`
+**Options:**  
+    - `--update` &nbsp;&nbsp;&nbsp;&nbsp;Update an existing `bindex.json`  
+    - `--genai` &nbsp;&nbsp;&nbsp;&nbsp;Specify the GenAI model to use
 
-### clean
-Removes all `.machai` temporary folders from the specified root directory.
-- Usage: `clean [--dir <project-root>]`
+#### `register`
 
-### process
-Scans and processes files/documents in a directory using GenAI.
-- Usage: `process --scan <scan-folder> [--root <root-folder>] [--genai <model>]`
+Registers a previously generated `bindex.json` file into the Machanism platform’s registration database.  
 
-### prompt
-Sends a free-form prompt to the GenAI provider for guidance.
-- Usage: `prompt --prompt <query>`
+**Usage:** `register <project-path>`  
+
+**Options:**  
+    - `--registerUrl` &nbsp;&nbsp;&nbsp;&nbsp;Target registration database URL  
+    - `--update` &nbsp;&nbsp;&nbsp;&nbsp;Update mode
+
+### Project Assembling
+
+#### `pick`
+  
+Finds and selects libraries (“bricks”) using a natural language prompt describing your project or by analyzing a query file.  
+
+**Usage:** `pick <prompt or file>`  
+
+**Options:**  
+    - `--score` &nbsp;&nbsp;&nbsp;&nbsp;Minimum similarity score for results  
+    - `--registerUrl` &nbsp;&nbsp;&nbsp;&nbsp;Registration database URL
+
+#### `assembly`
+
+Assembles a new project from a set of selected libraries and an application prompt.  
+
+**Usage:** `assembly --query <prompt> --dir <output-folder>`  
+
+**Options:**  
+    - `--score` &nbsp;&nbsp;&nbsp;&nbsp;Minimum similarity score  
+    - `--genai` &nbsp;&nbsp;&nbsp;&nbsp;Specify the GenAI model  
+    - `--registerUrl` &nbsp;&nbsp;&nbsp;&nbsp;Registration database URL
+
+#### `prompt`
+
+Sends a free-form prompt to the GenAI provider for guidance or information.  
+
+**Usage:** `prompt --prompt <query>`
+
+### File Processing
+
+#### `process` 
+
+Scans and processes files or documents in a directory using GenAI.  
+
+**Usage:** `process --scan <scan-folder> [--root <root-folder>] [--genai <model>]`
+
+#### `clean`
+
+Removes all `.machai` temporary folders from the specified root directory.  
+
+**Usage:** `clean [--dir <project-root>]`
