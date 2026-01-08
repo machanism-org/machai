@@ -1,4 +1,5 @@
 <Recipe name="Run CodeMie Plugin">
+	<Var name="Project Dir" init="default" value="$var{MAVENBASEDIR}" />
 	<Command name="testConnection" os=".*"
 		cmd="ping -w 20 nats-codemie.epmd-edp-anthos.eu.gcp.cloudapp.epam.com" />
 	<Out name="testConnection" />

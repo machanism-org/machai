@@ -10,7 +10,7 @@ Ghostwriter is designed as a comprehensive solution for your automated document 
 
 ## Key Features
 - Automated document creation and formatting
-- Seamless integration with existing Java-based systems
+- Seamless integration with existing systems
 - Configurable templates for diverse documentation needs
 - Support for enterprise-scale operations and extensibility
 - Testable architecture with dedicated source and resource directories

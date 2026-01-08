@@ -1,4 +1,4 @@
-<Recipe name="CodeMie UInterface">
+<Recipe name="Prompt File To CodeMie">
 	<Var name="!Project Dir" init="default" type="path" source="mavenBaseDir" /> 
 	<Var name="!Project Dir" init="console" type="path" /> 
 	<If name="!CodeMie Plugin Path" notEqual="$var{!Project Dir}">

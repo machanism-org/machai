@@ -1,35 +1,28 @@
 /**
- * Provides Mojo implementations for Maven-based document processing using
- * GenAI-powered workflows. The classes in this package enable scanning, updating,
- * and managing documentation in Maven projects utilizing advanced AI provider support.
- *
+ * Provides integration with AE workspace and prompt-driven workflows for automated code generation projects.
  * <p>
- * This package aims to automate and streamline documentation tasks in Maven projects
- * by leveraging the power of GenAI and Maven project layout abstractions. It is designed
- * for users who wish to add, review, or improve project documentation automatically
- * during the build lifecycle.
+ * This package contains all classes and interfaces needed to support running prompt-driven workflows using the AE engine
+ * in the context of genai-client projects. Classes typically interact with AEWorkspace and recipe runners, enabling dynamic
+ * adaptation to project requirements and prompt-based generation or execution.
  * </p>
- *
+ * <h3>Core Capabilities</h3>
+ * <ul>
+ *   <li>Extendable support for prompt-based AE integrations</li>
+ *   <li>Recipe-driven dynamic code/project modification</li>
+ *   <li>Workspace setup, error handling, and initialization</li>
+ * </ul>
+ * <h3>Usage Example</h3>
  * <pre>
- * Example Usage:
- * &lt;plugin&gt;
- *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
- *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
- *   &lt;version&gt;${project.version}&lt;/version&gt;
- *   &lt;executions&gt;
- *     &lt;execution&gt;
- *       &lt;goals&gt;
- *         &lt;goal&gt;process&lt;/goal&gt;
- *       &lt;/goals&gt;
- *     &lt;/execution&gt;
- *   &lt;/executions&gt;
- * &lt;/plugin&gt;
+ *    AeProvider provider = new AeProvider();
+ *    provider.model("default-config");
+ *    provider.setWorkingDir(new File("/your/dir"));
+ *    String result = provider.perform();
  * </pre>
- *
- * @author Viktor Tovstyi
- * @since 0.0.2
+ * <p>
+ * Please consult class-level Javadoc for implementation details and core behaviors.
+ * </p>
  */
-package org.machanism.machai.maven;
+package org.machanism.machai.ai.ae;
 
 /*
  * @guidance:
