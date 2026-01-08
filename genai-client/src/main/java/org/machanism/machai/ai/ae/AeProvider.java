@@ -2,6 +2,7 @@ package org.machanism.machai.ai.ae;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.none.NoneProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,12 @@ public class AeProvider extends NoneProvider {
 	private static AEWorkspace workspace = new AEWorkspace();
 
 	private File rootDir;
+
+	private String configName;
+
+	static {
+		System.setProperty("java.awt.headless", "false");
+	}
 
 	@Override
 	public String perform() {
@@ -37,12 +44,12 @@ public class AeProvider extends NoneProvider {
 			workspace.setStartDir(new File(workingDir, "src/ae"));
 
 			workspace.getSystemVariables().put("PROJECT DIR", workingDir);
-			workspace.loadConfiguration(true);
+			workspace.loadConfiguration(configName, false);
 			try {
 				workspace.runSetupNodes();
 			} catch (Exception e) {
 				logger.error("The execution of the starting recipes failed.", e);
-				
+
 				workspace.close();
 				workspace = new AEWorkspace();
 				rootDir = null;
@@ -50,4 +57,14 @@ public class AeProvider extends NoneProvider {
 			}
 		}
 	}
+
+	@Override
+	public void model(String configName) {
+		if (this.configName != null && StringUtils.equals(this.configName, configName)) {
+			throw new IllegalArgumentException("Configuration change detected. Requested: `" + configName
+					+ "`; currently in use: `" + this.configName + "`.");
+		}
+		this.configName = configName;
+	}
+
 }
