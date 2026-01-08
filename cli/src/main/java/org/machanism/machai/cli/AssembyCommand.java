@@ -81,7 +81,7 @@ public class AssembyCommand {
 		GenAIProvider provider = null;
 		if (providers.get(name) == null) {
 			provider = GenAIProviderManager.getProvider(name);
-			functionTools = new SystemFunctionTools(null);
+			functionTools = new SystemFunctionTools();
 			functionTools.applyTools(provider);
 			providers.put(name, provider);
 		}
@@ -144,8 +144,7 @@ public class AssembyCommand {
 			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.", optOut = true) String registerUrl,
 			@ShellOption(value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE, help = "Minimum similarity threshold for search results.") double score,
 			@ShellOption(value = "genai", defaultValue = "None", help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is not provided or left empty, the default model '"
-					+ Ghostwriter.CHAT_MODEL
-					+ "' will be used.") String chatModel)
+					+ Ghostwriter.CHAT_MODEL + "' will be used.") String chatModel)
 			throws IOException {
 
 		if (chatModel == null) {
@@ -173,7 +172,7 @@ public class AssembyCommand {
 
 		if (!bindexList.isEmpty()) {
 			GenAIProvider provider = getProvider(chatModel);
-			functionTools.setWorkingDir(dir);
+			provider.setWorkingDir(dir);
 
 			ApplicationAssembly assembly = new ApplicationAssembly(provider);
 			assembly.projectDir(dir);

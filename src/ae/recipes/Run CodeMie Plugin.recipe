@@ -1,38 +1,30 @@
 <Recipe name="Run CodeMie Plugin">
-	<Command name="testConnection" os=".*">ping -w 20 nats-codemie.epmd-edp-anthos.eu.gcp.cloudapp.epam.com</Command> 
-	<If name="testConnection" contains="Ping request could not find host">
-		<Var name="!CodeMie Plugin Path" value="VPN Required" /> 
-		<CheckValue actual="$var{testConnection}" onErrorMsg="VPN Required" /> 
-	</If> 
-	<Remove name="!CodeMie Plugin Path" /> 
-	<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command> 
+	<Command name="testConnection" os=".*"
+		cmd="ping -w 20 nats-codemie.epmd-edp-anthos.eu.gcp.cloudapp.epam.com" />
+	<Out name="testConnection" />
+	<If name="testConnection"
+		contains="Ping request could not find host">
+		<Var name="!CodeMie Plugin Path" value="VPN Required" />
+		<CheckValue actual="$var{testConnection}"
+			onErrorMsg="VPN Required" />
+	</If>
+	<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command>
 	<Finally>
-		<Remove name="!CodeMie Plugin Path" /> 
-		<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command> 
-	</Finally> 
-	<Var name="!Project Dir" init="default" type="path" source="mavenBaseDir" /> 
-	<Var name="!Project Dir" init="mandatory" type="path" /> 
-	<Out name="!Project Dir" /> 
-	<View name="output" reuse="true" type="Text" font="MONOSPACED" /> 
+		<Remove name="!CodeMie Plugin Path" />
+		<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command>
+	</Finally>
+	<Out name="Project Dir" />
+	<View name="output" reuse="true" type="Text" font="MONOSPACED" />
 	<Var name="env" type="map">
-		<item key="PYTHONIOENCODING">utf-8</item> 
-		<item key="PYTHONLEGACYWINDOWSSTDIO">utf-8</item> 
-	</Var> 
-	<Command name="output" os=".*" env="env" cmd="uvx codemie-plugins development run --repo-path $var{!Project Dir}">
-		<Out view="output" name="output" level="debug" /> 
-		<Var name="!CodeMie Plugin Path" source="!Project Dir" /> 
-	</Command> 
-	<Remove name="!CodeMie Plugin Path" /> 
-	<About>
-		<description>
-# Preparation
-## Install codemie-plugin CLI
-```
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex" 
-uvx pip install codemie-plugins  
-uvx codemie-plugins config generate-key 
-```
-See: EPAM AI/Run CodeMie in Action Part 2: Advanced AI for Business and Technology::Setting Up Plugins
-</description> 
-	</About> 
+		<item key="PYTHONIOENCODING">utf-8</item>
+		<item key="PYTHONLEGACYWINDOWSSTDIO">utf-8</item>
+	</Var>
+	<Command name="output" os=".*" env="env"
+		cmd="uvx codemie-plugins development run --repo-path $var{Project Dir}">
+		<Out view="output" name="output" level="debug" />
+		<If name="output"
+			starts="Subscribed to NATS subjects, ready to serve">
+			<Var name="!CodeMie Plugin Path" value="$var{Project Dir}" />
+		</If>
+	</Command>
 </Recipe> 

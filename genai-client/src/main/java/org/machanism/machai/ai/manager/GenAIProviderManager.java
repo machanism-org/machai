@@ -35,7 +35,7 @@ public class GenAIProviderManager {
         String providerName = StringUtils.substringBefore(chatModel, ":");
         String chatModelName = StringUtils.substringAfter(chatModel, ":");
 
-        if (StringUtils.isBlank(chatModelName)) {
+        if (StringUtils.isBlank(providerName)) {
             chatModelName = providerName;
             providerName = NoneProvider.NAME;
         }

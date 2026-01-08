@@ -143,7 +143,8 @@ public class Assembly extends AbstractMojo {
 			}
 
 			GenAIProvider provider = GenAIProviderManager.getProvider(pickChatModel);
-			new SystemFunctionTools(basedir).applyTools(provider);
+			provider.setWorkingDir(basedir);
+			new SystemFunctionTools().applyTools(provider);
 
 			try (Picker picker = new Picker(provider, registerUrl)) {
 				picker.setScore(score);

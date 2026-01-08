@@ -2,6 +2,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://ganteater.com/xml/configuration https://ganteater.com/xml/configuration/anteater-1.2.4.2.xsd">
 
-	<Configuration name="Main"/>
+	<Configuration name="Main">
+		<Startup task="Run CodeMie Plugin" async="true" />
+		<Startup task="Open CodeMie" />
+	</Configuration>
 
 </Environment>

@@ -83,7 +83,7 @@ public class DocsProcessor extends ProjectProcessor {
 	public DocsProcessor(GenAIProvider provider) {
 		this.provider = provider;
 
-		systemFunctionTools = new SystemFunctionTools(null);
+		systemFunctionTools = new SystemFunctionTools();
 		systemFunctionTools.applyTools(provider);
 
 		loadReviewers();
@@ -140,7 +140,7 @@ public class DocsProcessor extends ProjectProcessor {
 	 */
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
-		systemFunctionTools.setWorkingDir(getRootDir(projectDir));
+		provider.setWorkingDir(getRootDir(projectDir));
 
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		List<String> modules = projectLayout.getModules();

@@ -1,0 +1,23 @@
+<Recipe name="Prompt To CodeMie">
+	<!-- Inputs processing -->
+	<Out name="inputs" />
+	<If isNotNull="inputs">
+		<Extern class="Web">
+			<Click xpath="//button[@data-tooltip-content='Clear Chat']"
+				exception="ignored" timeout="1s" />
+			<Click xpath="//button[normalize-space(text())='Clear']"
+				exception="ignored" timeout="1s" />
+			<Wait delay="1s" />
+			<Clipboard name="inputs" />
+			<Text value="$var{\CONTROL+v}$var{\n}"
+				xpath="//*[@id='app']/div[3]/div[2]/div/main/div/div[2]/div/div/div/div[2]/div/div/div[1]/div[2]/div[1]/p"
+				timeout="5s" />
+			<Wait delay="2s" />
+			<ElementExists
+				xpath="//button[contains(text(), 'Send')]" timeout="300s" />
+			<GetText name="Updated Files"
+				xpath="(//div[@class='flex flex-col grow min-w-0']/div)[last()-1]" />
+			<Out name="result" />
+		</Extern>
+	</If>
+</Recipe> 
