@@ -7,41 +7,64 @@
 
 GenAI Client provides an abstraction and integration layer for Large Language Model (LLM) and AI inference services in Java. Its modular architecture supports multiple GenAI providers out of the box and can be easily extended for further providers. The project is designed for usage with prompt engineering, code generation, and classic generative AI workloads in Java applications, tools, or server environments.
 
-## Supported GenAIProvider Implementations
+## Supported GenAI Provider
+<!-- 
+@guidance: 
+IMPORTENT: Update this section! Use from javadoc of classes frm source folder whitch extend the GenAI interface and generate the content for 
+this section following net format:
+### [PROVIDER_NAME]
+... FULL DESCRIPTION ...
+-->
 
-### AEProvider
-- **Package**: `org.machanism.machai.ai.ae`
-- **Class**: `AeProvider`
-- **Description**: Provides integration with AE Workspace for running prompt-to-code tasks. Extends `NoneProvider` to utilize prompt-driven workflows within the AE environment, manages AE workspace, runs setup nodes, and can execute project recipes based on user prompts.
-- **Usage Example**:
-  ```java
-  AeProvider provider = new AeProvider();
-  provider.model("CodeMie");
-  provider.setWorkingDir(new File("/path/to/project"));
-  String result = provider.perform();
-  ```
+### AeProvider
+This provider offers an alternative solution when direct access to the GenAI API is not possible. It functions as a gateway for interacting with web-based user interfaces through a web driver, enabling seamless integration with services like [AI DIAL](https://solutionshub.epam.com/solution/ai-dial) and [EPAM AI/Run CodeMie](https://www.youtube.com/@EPAMAIRunCodeMie). Communication with web pages is automated using [Anteater](https://ganteater.com) recipes, which facilitate the sending and receiving of information.
+
+Please note that this provider may have certain limitations. Depending on the specific recipes executed, there may be special requirements, such as handling streaming security concerns or managing shared resources like the clipboard. Additionally, you might need to install extra plugins when working with platforms such as CodeMie. Be sure to review the instructions for your target system and complete all necessary setup steps before using this provider.
+
+To configure the provider, use the model method to specify the Anteater configuration name (e.g., CodeMie or AIDial). You can also refer to the ae.xml file to view the list of supported configurations.
+
+This class extends `NoneProvider` to utilize prompt-driven workflows within the AE environment. It manages the AE workspace, setup nodes, and can execute project recipes based on user prompts.
+
+**Usage Example:**
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("Ae:CodeMie");
+```
+Thread safety: This implementation is NOT thread-safe.
 
 ### OpenAIProvider
-- **Package**: `org.machanism.machai.ai.openAI`
-- **Class**: `OpenAIProvider`
-- **Description**: Provides integration with the OpenAI API (such as GPT-4, GPT-3.5) and supports prompts, chat, tool-calling, file uploads, embeddings, and instructions. Not thread-safe. Working directory and model name can be set. Tools can be registered to handle function calls.
-- **Usage Example**:
-  ```java
-  OpenAIProvider provider = new OpenAIProvider();
-  provider.model("gpt-4");
-  provider.prompt("Hello, how are you?");
-  String response = provider.perform();
-  ```
+The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+
+This provider enables a wide range of generative AI capabilities, including:
+- Sending prompts and receiving responses from OpenAI Chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+
+This class provides capabilities to send prompts, manage files, perform LLM requests, and create embeddings using OpenAI Chat models.
+
+**Usage Example:**
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+```
+Thread safety: This implementation is NOT thread-safe.
 
 ### NoneProvider
-- **Package**: `org.machanism.machai.ai.none`
-- **Class**: `NoneProvider`
-- **Description**: Fallback or stub implementation for environments where AI features are disabled. All operations are no-ops or throw exceptions. Useful for testing default/fallback scenarios in code.
-- **Usage Example**:
-  ```java
-  GenAIProvider provider = new NoneProvider();
-  provider.prompt("A prompt");
-  provider.perform(); // returns null, does not call any LLM
-  ```
+The `NoneProvider` is a stub implementation of the `GenAIProvider` interface, designed to act as a placeholder when no AI service integration is required or available.
 
+This class does not interact with any external AI service or large language model (LLM). All operations performed by `NoneProvider` are either no-operations (no-ops) or will throw exceptions where appropriate, ensuring that any attempt to use AI functionality is safely handled without side effects.
 
+Typical use cases for `NoneProvider` include:
+- Environments where AI services are disabled (e.g., due to security or compliance requirements).
+- Testing scenarios where AI interactions should be mocked or bypassed.
+- Default fallback when no other provider is configured.
+
+By using `NoneProvider`, you can maintain consistent application behavior and interface compatibility, even when generative AI features are not in use.
+
+**Usage Example:**
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider(null);
+```
+
+This class does not interact with any AI service or LLM. All operations are either no-ops or throw exceptions where appropriate. Intended for environments where AI services are disabled, testing, or default fallback scenarios.

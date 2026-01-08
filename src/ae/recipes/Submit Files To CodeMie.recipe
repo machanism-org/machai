@@ -1,10 +1,10 @@
 <Recipe name="Submit Files To CodeMie">
-	<Var name="!Project Dir" init="default" type="path" source="mavenBaseDir" /> 
-	<If name="!CodeMie Plugin Path" notEqual="$var{!Project Dir}">
+	<Var name="Project_Dir" init="default" type="path" source="mavenBaseDir" /> 
+	<If name="!CodeMie Plugin Path" notEqual="$var{Project_Dir}">
 		<Confirm name="CodeMie Run Confirmation" message="Please confirm CodeMie plugin run.">
 			<Task name="Run CodeMie Plugin" mode="async" /> 
 			<Loop numbers="60">
-				<If name="!CodeMie Plugin Path" equals="$var{!Project Dir}">
+				<If name="!CodeMie Plugin Path" equals="$var{Project_Dir}">
 					<Break /> 
 					<Else equals="VPN Required">
 						<Stop /> 
@@ -14,7 +14,7 @@
 			</Loop> 
 		</Confirm> 
 	</If> 
-	<CheckValue actual="$var{!CodeMie Plugin Path}" expected="$var{!Project Dir}" onErrorMsg="CodeMie plugin --repo-path wrong." /> 
+	<CheckValue actual="$var{!CodeMie Plugin Path}" expected="$var{Project_Dir}" onErrorMsg="CodeMie plugin --repo-path wrong." /> 
 	<Extern class="Web">
 		<ElementNotExists xpath="//*[@id='app']/div[3]/div[2]/div/aside/div[1]/div[1]/h2" timeout="1s">
 			<Page url="https://codemie.lab.epam.com" /> 
@@ -26,7 +26,7 @@
 			<ElementExists xpath="//button[@aria-label='Plugin Assistant' and @data-tooltip-content='Plugin Assistant']" timeout="60s" /> 
 		</WhileRun> 
 		<!-- Inputs processing --> 
-		<Listdir name="Inputs Files" path="$var{!Project Dir}" filter="^(?!instructions\.txt$).*\.txt$" dirFilter=".*\.machai\\docs-inputs.*" /> 
+		<Listdir name="Inputs Files" path="$var{Project_Dir}" filter="^(?!instructions\.txt$).*\.txt$" dirFilter=".*\.machai\\docs-inputs.*" /> 
 		<Out name="Inputs Files" /> 
 		<Loop name="inputsFile" source="Inputs Files">
 			<Out name="inputsFile" type="path" level="warn" /> 

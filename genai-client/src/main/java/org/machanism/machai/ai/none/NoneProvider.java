@@ -15,11 +15,26 @@ import org.machanism.machai.ai.openAI.OpenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 /**
- * The {@code NoneProvider} is a stub implementation of {@link GenAIProvider}
- * used as a placeholder.
+ * The `NoneProvider` is a stub implementation of the `GenAIProvider` interface,
+ * designed to act as a placeholder when no AI service integration is required
+ * or available.
+ * 
+ * This class does not interact with any external AI service or large language
+ * model (LLM). All operations performed by `NoneProvider` are either
+ * no-operations (no-ops) or will throw exceptions where appropriate, ensuring
+ * that any attempt to use AI functionality is safely handled without side
+ * effects.
+ * 
+ * Typical use cases for `NoneProvider` include:
+ * 
+ * - **Environments where AI services are disabled** (e.g., due to security or
+ * compliance requirements). - **Testing scenarios** where AI interactions
+ * should be mocked or bypassed. - **Default fallback** when no other provider
+ * is configured.
+ * 
+ * By using `NoneProvider`, you can maintain consistent application behavior and
+ * interface compatibility, even when generative AI features are not in use.
  * <p>
  * This class does not interact with any AI service or LLM. All operations are
  * either no-ops or throw exceptions where appropriate. Intended for
@@ -29,9 +44,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  * <b>Usage Example:</b>
  * 
  * <pre>
- * GenAIProvider provider = new NoneProvider();
- * provider.prompt("A prompt");
- * provider.perform(); // returns null, does not call any LLM
+ * GenAIProvider provider = GenAIProviderManager.getProvider(null);
  * </pre>
  *
  * @author Viktor Tovstyi

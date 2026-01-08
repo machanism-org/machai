@@ -1,6 +1,6 @@
 <Recipe name="Open CodeMie">
 	<Loop numbers="60">
-		<If name="!CODEMIE PLUGIN PATH" equals="$var{Project Dir}">
+		<If name="!CODEMIE PLUGIN PATH" equals="$var{Project_Dir}">
 			<Break /> 
 			<Else equals="VPN Required">
 				<CheckValue actual="$var{testConnection}" onErrorMsg="VPN Required (!)" /> 

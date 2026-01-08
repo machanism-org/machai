@@ -59,8 +59,22 @@ import com.openai.models.responses.ResponseReasoningItem.Summary;
 import com.openai.models.responses.Tool;
 
 /**
- * OpenAIProvider integrates with OpenAI API and provides implementation of
- * GenAIProvider.
+ * The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving
+ * as a concrete implementation of the `GenAIProvider` interface.
+ * 
+ * This provider enables a wide range of generative AI capabilities, including:
+ * 
+ * - Sending prompts and receiving responses from OpenAI Chat models. - Managing
+ * files for use in various OpenAI workflows. - Performing advanced large
+ * language model (LLM) requests, such as text generation, summarization, and
+ * question answering. - Creating and utilizing vector embeddings for tasks like
+ * semantic search and similarity analysis.
+ * 
+ * By abstracting the complexities of direct API interaction, `OpenAIProvider`
+ * allows developers to leverage OpenAI’s powerful models efficiently within
+ * their applications. It supports both synchronous and asynchronous operations,
+ * and can be easily extended or configured to accommodate different use cases
+ * and model parameters.
  * <p>
  * This class provides capabilities to send prompts, manage files, perform LLM
  * requests, and create embeddings using OpenAI Chat models.
@@ -70,14 +84,14 @@ import com.openai.models.responses.Tool;
  * </p>
  * 
  * <pre>
- * OpenAIProvider provider = new OpenAIProvider();
- * provider.model("gpt-4");
- * provider.prompt("Hello, how are you?");
- * String response = provider.perform();
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
  * </pre>
- * <p>
+ * 
  * Thread safety: This implementation is NOT thread-safe.
  * </p>
+ * 
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 public class OpenAIProvider implements GenAIProvider {
 

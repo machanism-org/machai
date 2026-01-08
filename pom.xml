@@ -114,7 +114,7 @@
 					<configuration>
 						<aeDir>src/ae</aeDir>
 						<variables>
-							<mavenBaseDir>${project.basedir}</mavenBaseDir>
+							<Project_Dir>${project.basedir}</Project_Dir>
 						</variables>
 					</configuration>
 					<dependencies>

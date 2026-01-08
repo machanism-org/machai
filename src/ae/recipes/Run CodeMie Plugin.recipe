@@ -1,5 +1,5 @@
 <Recipe name="Run CodeMie Plugin">
-	<Out name="Project Dir" />
+	<Out name="Project_Dir" />
 	<Command name="testConnection" os=".*"
 		cmd="ping -w 20 nats-codemie.epmd-edp-anthos.eu.gcp.cloudapp.epam.com" />
 	<Out name="testConnection" />
@@ -20,11 +20,11 @@
 		<item key="PYTHONLEGACYWINDOWSSTDIO">utf-8</item>
 	</Var>
 	<Command name="output" os=".*" env="env"
-		cmd="uvx codemie-plugins development run --repo-path $var{Project Dir}">
+		cmd="uvx codemie-plugins development run --repo-path $var{Project_Dir}">
 		<Out view="output" name="output" level="debug" />
 		<If name="output"
 			starts="Subscribed to NATS subjects, ready to serve">
-			<Var name="!CodeMie Plugin Path" value="$var{Project Dir}" />
+			<Var name="!CodeMie Plugin Path" value="$var{Project_Dir}" />
 		</If>
 	</Command>
 </Recipe> 
