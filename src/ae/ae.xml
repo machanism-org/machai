@@ -3,11 +3,13 @@
 	xsi:schemaLocation="http://ganteater.com/xml/configuration https://ganteater.com/xml/configuration/anteater-1.2.4.2.xsd">
 
 	<Configuration name="CodeMie">
+		<Recipes path="recipes" />
 		<Startup task="Run CodeMie Plugin" async="true" />
 		<Startup task="Open CodeMie" />
 	</Configuration>
 
 	<Configuration name="AIDial">
+		<Recipes path="recipes" />
 		<Startup task="Open AIDial" />
 	</Configuration>
 

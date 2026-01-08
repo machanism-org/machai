@@ -1,5 +1,5 @@
 <Recipe name="Run CodeMie Plugin">
-	<Var name="Project Dir" init="default" value="$var{MAVENBASEDIR}" />
+	<Out name="Project Dir" />
 	<Command name="testConnection" os=".*"
 		cmd="ping -w 20 nats-codemie.epmd-edp-anthos.eu.gcp.cloudapp.epam.com" />
 	<Out name="testConnection" />
@@ -14,7 +14,6 @@
 		<Remove name="!CodeMie Plugin Path" />
 		<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command>
 	</Finally>
-	<Out name="Project Dir" />
 	<View name="output" reuse="true" type="Text" font="MONOSPACED" />
 	<Var name="env" type="map">
 		<item key="PYTHONIOENCODING">utf-8</item>
