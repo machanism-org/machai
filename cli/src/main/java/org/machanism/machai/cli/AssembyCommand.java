@@ -78,8 +78,8 @@ public class AssembyCommand {
 	 */
 	private GenAIProvider getProvider(String name) {
 
-		GenAIProvider provider = null;
-		if (providers.get(name) == null) {
+		GenAIProvider provider = providers.get(name);
+		if (provider == null) {
 			provider = GenAIProviderManager.getProvider(name);
 			functionTools = new SystemFunctionTools();
 			functionTools.applyTools(provider);
@@ -186,8 +186,17 @@ public class AssembyCommand {
 	 * @param prompt The prompt supplied by the user.
 	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
-	public void prompt(@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
-		GenAIProvider provider = getProvider(CHAT_MODEL);
+	public void prompt(
+			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model '"
+					+ Ghostwriter.CHAT_MODEL
+					+ "' will be used.", value = "genai", defaultValue = "None", optOut = true) String chatModel,
+			@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
+
+		if (chatModel == null) {
+			chatModel = Ghostwriter.CHAT_MODEL;
+		}
+
+		GenAIProvider provider = getProvider(chatModel);
 		provider.prompt(prompt);
 		String response = provider.perform();
 		if (response != null) {
