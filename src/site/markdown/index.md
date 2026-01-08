@@ -40,7 +40,7 @@ Machai is a GenAI-powered tool for automated creation, registration, and enhance
 
 - [genai-client](/genai-client): GenAI client for interacting with AI-powered services and endpoints.
 - [bindex-core](/bindex-core): Core utilities and abstraction for metadata indexing and semantic search.
-- [cli](/cli): Command-line interface for executing project automation tasks.
+- [machai-cli](/machai-cli): Command-line interface for executing project automation tasks.
 - [bindex-maven-plugin](/bindex-maven-plugin): Maven plugin for integrating indexing and semantic features in the build process.
 - [assembly-maven-plugin](/assembly-maven-plugin): Maven plugin for advanced project assembly and packaging.
 - [ghostwriter](/ghostwriter): Automated project content generation using AI.
