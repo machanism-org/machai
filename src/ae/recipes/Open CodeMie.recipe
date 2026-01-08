@@ -1,27 +1,20 @@
 <Recipe name="Open CodeMie">
 	<Loop numbers="60">
-		<If name="!CodeMie Plugin Path" equals="$var{Project Dir}">
-			<Break />
+		<If name="!CODEMIE PLUGIN PATH" equals="$var{MAVENBASEDIR}">
+			<Break /> 
 			<Else equals="VPN Required">
 				<CheckValue actual="$var{testConnection}" onErrorMsg="VPN Required (!)" /> 
-			</Else>
-		</If>
-		<Wait delay="2s" />
-	</Loop>
+			</Else> 
+		</If> 
+		<Wait delay="2s" /> 
+	</Loop> 
 	<Extern class="Web">
-		<ElementNotExists
-			xpath="//*[@id='app']/div[3]/div[2]/div/aside/div[1]/div[1]/h2"
-			timeout="1s">
-			<Page url="https://codemie.lab.epam.com" />
-			<Click
-				xpath="//*[normalize-space(text())='Sign in with EPAM SSO']"
-				timeout="10s" />
-			<Click xpath="//*[normalize-space(text())='Tell Me More']"
-				exception="ignored" timeout="1s" />
-		</ElementNotExists>
-		<Page url="https://codemie.lab.epam.com/#/chats" />
-		<ElementExists
-			xpath="//button[@aria-label='Plugin Assistant' and @data-tooltip-content='Plugin Assistant']"
-			timeout="60s" />
-	</Extern>
+		<ElementNotExists xpath="//*[@id='app']/div[3]/div[2]/div/aside/div[1]/div[1]/h2" timeout="1s">
+			<Page url="https://codemie.lab.epam.com" /> 
+			<Click xpath="//*[normalize-space(text())='Sign in with EPAM SSO']" timeout="10s" /> 
+			<Click xpath="//*[normalize-space(text())='Tell Me More']" exception="ignored" timeout="1s" /> 
+		</ElementNotExists> 
+		<Page url="https://codemie.lab.epam.com/#/chats" /> 
+		<ElementExists xpath="//button[@aria-label='Plugin Assistant' and @data-tooltip-content='Plugin Assistant']" timeout="60s" /> 
+	</Extern> 
 </Recipe> 

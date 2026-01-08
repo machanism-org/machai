@@ -1,7 +1,9 @@
 # Machai CLI
 <!-- @guidance: 
-Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the horizontal rule separator between sections. -->
+- Analyze the source file and create a Maven Site-style introductory home page for your project.
+- Do not use the horizontal rule separator between sections. 
+- Scan `org/machanism/machai/cli` source folder and describe all supported Commands.
+-->
 
 The Machai Command Line Interface (CLI) is a versatile tool designed to facilitate the generation, registration, and management of library metadata within the **Machanism** platform. It provides developers with direct access to Machai’s AI-powered features, enabling efficient project assembly and integration workflows from the terminal.
 
@@ -38,52 +40,38 @@ The Machai Command Line Interface (CLI) is a versatile tool designed to facilita
 
    Upon starting, you will see the Machai CLI banner and a prompt where you can enter commands. Use the `help` command to see the list of available options.
 
-## Generate `bindex.json`
+## Supported Commands
 
-For developers creating libraries for the Machanism platform, **bindex** files are essential metadata that describe your library and enable efficient library discovery and integration via Machai's AI-powered system. These files are automatically generated and registered in the Machanism platform using the **Machai Command-Line Interface (CLI)**. The CLI provides an easy, flexible way for library developers to manage and generate `bindex.json` files locally, whether for publishing new libraries or updating existing ones.
- 
- 1. **Run `bindex` Command** 
-   Use the CLI to analyze your library's project files and automatically generate the corresponding `bindex.json`. Navigate to your library directory and run:  
-   ```bash
-   > bindex <project-path>
-   ```  
-   Replace `<project-path>` with the path to your library project root directory. This command analyzes files such as `pom.xml`, `packaje.json` or `pyproject.toml`, source code, and other metadata to create a structured `bindex.json` file.
+The Machai CLI exposes a set of commands for working with libraries, files, and documents:
 
-2. **Validate and Edit the `bindex.json`**  
-   After generating the file, it is recommended to inspect and verify the contents of the `bindex.json` to ensure accuracy. You can manually edit the file to add or adjust descriptions, metadata, or integration details.
+### bindex
+Generates a `bindex.json` metadata file for the specified library/project directory. Uses GenAI to analyze source files.
+- Usage: `bindex <project-path>`
+- Options: `--update` (update mode), `--genai` (specify GenAI model)
 
-## Bindex Registration
+### register
+Registers a previously generated `bindex.json` file into the Machanism platform registration database.
+- Usage: `register <project-path>`
+- Options: `--registerUrl` (target database), `--update` (update mode)
 
-Once you are satisfied with the metadata, you can register your library and its `bindex.json` file into the Machanism platform via the Machai CLI:  
-```bash
-shell:> register <project-path>
-```  
-Replace `<project-path>` with the path to the project with `bindex.json` file. This command uploads your library metadata to the platform and makes it discoverable for users.
+### pick
+Finds/picks libraries (bricks) by using a natural language prompt describing your project or query file.
+- Usage: `pick <prompt or file>`
+- Options: `--score` (min similarity score), `--registerUrl` (registration DB URL)
 
-## Pick Libraries
+### assembly
+Creates an assembled project from a set of picked libraries and an application prompt.
+- Usage: `assembly` `--query <prompt>` `--dir <output-folder>`
+- Options: `--score`, `--genai` (specify GenAI model), `--registerUrl`
 
-To verify the registration process and ensure the library is successfully uploaded, use the `pick` command:  
-```bash
-shell:> pick <prompt>
-```  
-Replace `<prompt>` with the description of the application to be created. This command will pick the "bricks" and confirm the presence of the library in the system.
+### clean
+Removes all `.machai` temporary folders from the specified root directory.
+- Usage: `clean [--dir <project-root>]`
 
+### process
+Scans and processes files/documents in a directory using GenAI.
+- Usage: `process --scan <scan-folder> [--root <root-folder>] [--genai <model>]`
 
-## Assembly
-
-**Assemble an Application Using CLI**:
-   Provide your project's requirements as a query:
-   ```text
-   shell:> assembly
-   ```
-
-## License
-
-This project is licensed under the Apache 2.0 License.
-
-## Links
-
-- [Machanism Platform](https://machanism.org)
-- [AI Assembly Documentation](https://machanism.org/ai-assembly)
-- [Machai Project on GitHub](https://github.com/machanism-org/machai)
-
+### prompt
+Sends a free-form prompt to the GenAI provider for guidance.
+- Usage: `prompt --prompt <query>`
