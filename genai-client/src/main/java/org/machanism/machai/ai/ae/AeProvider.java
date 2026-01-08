@@ -58,7 +58,7 @@ public class AeProvider extends NoneProvider {
 	public String perform() {
 		try {
 			workspace.getSystemVariables().put("INPUTS", super.getPrompts());
-			RecipeRunner runTask = workspace.runTask("Prompt To CodeMie", false);
+			RecipeRunner runTask = workspace.runTask("Submit Prompt", false);
 			String result = (String) runTask.getProcessor().variables.get("result");
 
 			clear();

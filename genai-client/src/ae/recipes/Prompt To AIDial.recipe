@@ -1,0 +1,5 @@
+<Recipe name="Prompt To AIDial">
+	<!-- Inputs processing -->
+	<Out name="inputs" />
+	<Out>SHOULD BE IMPLEMENTED!</Out>
+</Recipe> 

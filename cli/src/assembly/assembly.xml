@@ -20,7 +20,7 @@
 			<outputDirectory>/</outputDirectory>
 		</fileSet>
 		<fileSet>
-			<directory>../src/ae</directory>
+			<directory>../genai-client/src/ae</directory>
 			<includes>
 				<include>*/**</include>
 			</includes>

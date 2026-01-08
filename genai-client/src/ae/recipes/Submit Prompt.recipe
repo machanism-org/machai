@@ -1,0 +1,3 @@
+<Recipe name="Submit Prompt">
+	<Task name="$var{PROMPT_RECIPE_NAME}" />
+</Recipe> 
