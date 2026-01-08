@@ -45,6 +45,7 @@ public class AeProvider extends NoneProvider {
 
 			workspace.getSystemVariables().put("PROJECT DIR", workingDir);
 			workspace.loadConfiguration(configName, false);
+
 			try {
 				workspace.runSetupNodes();
 			} catch (Exception e) {
@@ -64,7 +65,7 @@ public class AeProvider extends NoneProvider {
 			throw new IllegalArgumentException("Configuration change detected. Requested: `" + configName
 					+ "`; currently in use: `" + this.configName + "`.");
 		}
-		this.configName = configName;
+		this.configName = StringUtils.trimToNull(configName);
 	}
 
 }
