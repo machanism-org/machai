@@ -10,8 +10,8 @@ GenAI Client provides an abstraction and integration layer for Large Language Mo
 ## Supported GenAI Provider
 <!-- 
 @guidance: 
-IMPORTENT: Update this section! Use from javadoc of classes frm source folder whitch extend the GenAI interface and generate the content for 
-this section following net format:
+IMPORTANT: Update this section! Use from javadoc of classes from source folder which extend the GenAI interface 
+and generate the content for this section following net format:
 ### [PROVIDER_NAME]
 ... FULL DESCRIPTION ...
 -->
