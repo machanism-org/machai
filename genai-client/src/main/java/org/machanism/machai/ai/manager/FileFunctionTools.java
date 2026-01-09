@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  * </pre>
  *
  * @author Viktor Tovstyi
- * @guidance
  */
 public class FileFunctionTools {
 

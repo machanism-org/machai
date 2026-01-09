@@ -15,7 +15,6 @@ package org.machanism.machai.ai.manager;
  * </pre>
  *
  * @author Viktor Tovstyi
- * @guidance
  */
 public class SystemFunctionTools {
 

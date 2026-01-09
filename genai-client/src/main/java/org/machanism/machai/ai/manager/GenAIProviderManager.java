@@ -20,7 +20,6 @@ import org.machanism.machai.ai.none.NoneProvider;
  *
  * @author Viktor Tovstyi
  * @see GenAIProvider
- * @guidance
  */
 public class GenAIProviderManager {
 

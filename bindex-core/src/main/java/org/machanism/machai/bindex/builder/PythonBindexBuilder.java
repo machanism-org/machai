@@ -28,7 +28,6 @@ import org.tomlj.TomlParseResult;
  * @since 0.0.2
  * @see org.machanism.machai.bindex.BindexBuilderFactory
  * @see org.machanism.machai.project.layout.ProjectLayout
- * @guidance: Comprehensive Javadoc required for all public/protected members in this package.
  */
 public class PythonBindexBuilder extends BindexBuilder {
     private static ResourceBundle promptBundle = ResourceBundle.getBundle("python_project_prompts");

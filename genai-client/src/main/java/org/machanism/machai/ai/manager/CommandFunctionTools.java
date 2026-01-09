@@ -29,7 +29,6 @@ import com.google.common.collect.Lists;
  * </pre>
  *
  * @author Viktor Tovstyi
- * @guidance
  */
 public class CommandFunctionTools {
 

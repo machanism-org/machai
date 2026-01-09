@@ -52,11 +52,9 @@ package org.machanism.machai.ai.none;
  *    - Use IDE features or static analysis tools to check for missing or incomplete Javadoc.
  *    - Generate and review Javadoc HTML output regularly to verify quality and completeness.
  *
- * 8. Note: `@guidance` is not a Javadoc tag. Do not use it within Javadoc comments.
+ * 8. Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  *
- * 9. Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
- *
- * 10. Use the Java version specified in `pom.xml` for code generation.
+ * 9. Use the Java version specified in `pom.xml` for code generation.
  *
  * Apply these practices to all Java code within the package to ensure high-quality, maintainable, and user-friendly documentation.
  */
