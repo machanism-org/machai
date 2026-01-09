@@ -1,8 +1,6 @@
 # CLI Project
 <!--
 @guidance:
-**IMPORTENT*: REGENERATE THE CONTENT OF THIS FILE
-
 Content:
 
 1. **Project Title and Overview:**  
