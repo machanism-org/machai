@@ -1,5 +1,3 @@
 <Recipe name="Submit Prompt">
-	<Var name="inputsFile" init="mandatory" type="path"/>
-	<Load name="inputs" file="$var{inputsFile}" />
-	<Task name="$var{PROMPT_RECIPE_NAME}" />
+	<Task name="$var{PROMPT_RECIPE_NAME}" /> 
 </Recipe> 

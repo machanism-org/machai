@@ -1,33 +1,35 @@
 /**
- * Provides CLI (Command Line Interface) commands and tools for interacting with GenAI-powered automation,
- * bindex management, library picking, and document processing.
+ * Provides CLI (Command Line Interface) tools and shell commands for interacting
+ * with GenAI-powered automation, project assembly, bindex management, library selection,
+ * and document processing in Machai applications.
+ *
  * <p>
- * The classes in this package offer advanced shell commands enabling users and tools to interact with
- * various aspects of Machai applications, including project assembly, bindex creation/registration, and
- * document scanning using AI guidance. Shell commands follow Spring Shell conventions.
- * <p>
- * <b>Main commands:</b>
+ * The classes in this package enable users and integrations to:
  * <ul>
- *   <li><b>AssembyCommand</b> - Pick libraries and assemble projects via GenAI.</li>
- *   <li><b>BindexCommand</b> - Generate and register bindex files for project libraries.</li>
- *   <li><b>DocsCommand</b> - Scan and process documents leveraging GenAI provider.</li>
- *   <li><b>MachaiCLI</b> - The main entry point (application bootstrap class).</li>
+ *   <li>Pick libraries and assemble projects via GenAI (see {@link AssembyCommand}).</li>
+ *   <li>Generate and register bindex files ({@link BindexCommand}).</li>
+ *   <li>Clean up Machai temporary directories ({@link CleanCommand}).</li>
+ *   <li>Scan and process documents leveraging GenAI models ({@link ProcessCommand}).</li>
+ *   <li>Bootstrap and run the CLI shell application ({@link MachaiCLI}).</li>
  * </ul>
- * <p>
- * <b>Best Practices:</b>
+ *
+ * <b>Documentation Standards & Best Practices</b>
  * <ul>
- *   <li>All public/protected elements must include comprehensive Javadoc.</li>
- *   <li>Parameters, return values, and exceptions are documented.</li>
- *   <li>Usage examples are provided in Javadoc where relevant.</li>
- *   <li>Modifications to code should be reflected in the Javadoc immediately.</li>
+ *   <li>All public and protected classes, interfaces, methods, and fields must have comprehensive Javadoc.</li>
+ *   <li>Parameters, return values, and exceptions must be clearly described using
+ *     <code>@param</code>, <code>@return</code>, <code>@throws</code> tags.</li>
+ *   <li>Usage examples are provided via <code>&lt;pre&gt;</code> blocks in Javadoc.</li>
+ *   <li>Javadoc should be updated together with any code change.</li>
+ *   <li>Use consistent formatting and escape &lt; and &gt; in <code>&lt;pre&gt;</code> blocks.</li>
+ *   <li>Use IDE/static analysis tools to ensure completeness of Javadoc.</li>
+ *   <li>Refer to <code>pom.xml</code> for the Java version required for all code.</li>
  * </ul>
- * <p>
- * See individual class Javadocs for further details and usage instructions.
+ *
+ * See individual class and test Javadocs for further details and usage instructions.
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
-
 /* @guidance:
  *
  * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND UNIT TESTS FOR THIS PACKAGE!**	

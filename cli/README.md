@@ -41,48 +41,45 @@ Content:
 
 # CLI Project
 
-A multi-module Java CLI application for advanced document processing and intelligent library management. Main features include:
-- Assembly of project structures from selected libraries
-- Bindex operations for modularization
-- Built-in shell and utility commands
-- GenAI-powered document processing utilities
+A comprehensive CLI Java application for intelligent library management, GenAI-powered document processing, and automation.
+
+- Modular, guided Java project assembly
+- Bindex file generation for module dependency management
+- Built-in shell for command automation and scripting
+- GenAI document processing and compliance assistance utilities
 
 ## Installation Instructions
 
-**Clone and Build:**
+**Clone & Build:**
 ~~~bash
 # Clone the repository
 $ git clone https://github.com/machanism-org/machai.git
 $ cd cli
 
-# Build using Maven
+# Build with Maven
 $ mvn clean install
 ~~~
 
 **Prerequisites:**
-- Java 17 or higher
+- Java 17 or newer
 - Maven 3.8+
 - Git
 
 **Machai CLI Application Jar:**
-
 [![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)
 
 ## Usage
 
-### Assembly Command
+#### Assembly Command
 - `pick`: Picks libraries based on user request
 - `assembly`: Creates a project via picked library set
-- `prompt`: Is used for request additional GenAI guidances
+- `prompt`: Request additional GenAI guidance
 
-### Bindex Command
+#### Bindex Command
 - `bindex`: Generates bindex files
 - `register`: Registers bindex file
 
-### Docs Command
-- `docs`: GenAI document processing command
-
-### Built-In Commands
+#### Built-In Commands
 - `help`: Display help about available commands
 - `stacktrace`: Display the full stacktrace of the last error
 - `clear`: Clear the shell screen
@@ -91,6 +88,9 @@ $ mvn clean install
 - `version`: Show version info
 - `script`: Read and execute commands from a file
 
+#### Docs Command
+- `docs`: GenAI document processing command
+
 ## Reference
 
-This project is developed as part of the parent project of [machanism.org](https://machanism.org).
+Developed as part of [machanism.org](https://machanism.org).

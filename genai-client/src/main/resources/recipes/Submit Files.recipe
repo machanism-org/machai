@@ -6,7 +6,6 @@
 	<Loop name="inputsFile" source="Inputs Files">
 		<Out name="inputsFile" type="path" level="warn" /> 
 		<Load name="inputs" file="$var{inputsFile}" /> 
-		<Out name="inputs" /> 
 		<Var name="inputs" init="console" type="text" /> 
 		<Task name="Submit Prompt" level="debug" /> 
 	</Loop> 
