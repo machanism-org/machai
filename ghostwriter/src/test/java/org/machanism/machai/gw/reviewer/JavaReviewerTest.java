@@ -69,6 +69,6 @@ class JavaReviewerTest {
     @Test
     void extractPackageName_returnsNullIfNotFound() {
         String src = "public class Example {}";
-        assertNull(JavaReviewer.extractPackageName(src));
+        assertEquals(JavaReviewer.extractPackageName(src), "<default package>");
     }
 }

@@ -16,41 +16,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The `NoneProvider` is a stub implementation of the `GenAIProvider` interface,
- * designed to act as a placeholder when no AI service integration is required
- * or available.
- * 
- * This class does not interact with any external AI service or large language
- * model (LLM). All operations performed by `NoneProvider` are either
- * no-operations (no-ops) or will throw exceptions where appropriate, ensuring
- * that any attempt to use AI functionality is safely handled without side
- * effects.
- * 
- * Typical use cases for `NoneProvider` include:
- * <ul>
- * <li><b>Environments where AI services are disabled</b> (e.g., due to security
- * or compliance requirements).
- * <li><b>Testing scenarios</b> where AI interactions should be mocked or
- * bypassed.
- * <li><b>Default fallback</b> when no other provider is configured.
- * </ul>
- * 
- * By using `NoneProvider`, you can maintain consistent application behavior and
- * interface compatibility, even when generative AI features are not in use.
+ * The {@code NoneProvider} class is an implementation of the {@code GenAIProvider} interface,
+ * intended for use as a request logger when integration with AI services is not required or available.
  * <p>
- * This class does not interact with any AI service or LLM. All operations are
- * either no-ops or throw exceptions where appropriate. Intended for
- * environments where AI services are disabled, testing, or default fallback
- * scenarios.
+ * This class does not interact with any external AI services or large language models (LLMs).
+ * {@code NoneProvider} stores requests in input files located in the {@code inputsLog} folder,
+ * which can be viewed or processed later in another process. Operations that necessarily require
+ * access to GenAI services will throw an exception or do nothing if it is not a critical action.
  * </p>
- * <b>Usage Example:</b>
- * 
- * <pre>
- * GenAIProvider provider = GenAIProviderManager.getProvider(null);
- * </pre>
  *
- * @author Viktor Tovstyi
+ * <p>
+ * Typical use cases for {@code NoneProvider} include:
+ * <ul>
+ *   <li><b>Environments where AI services are disabled</b> (e.g., due to security or compliance requirements).</li>
+ *   <li><b>Testing scenarios</b> where interaction with AI must be simulated or skipped.</li>
+ *   <li><b>Default fallback</b> when no other provider is configured.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * By using {@code NoneProvider}, you can maintain consistent application behavior and interface compatibility
+ * even when generative AI features are not used.
+ * </p>
+ *
+ * <p>
+ * This class does not interact with any AI services or LLMs. All operations are either non-operations
+ * or throw exceptions when appropriate. Intended for environments where AI services are disabled,
+ * for testing, or as a default backup scenario.
+ * </p>
+ *
  * @see GenAIProvider
+ * @author Viktor Tovstyi
  */
 public class NoneProvider implements GenAIProvider {
 	/**

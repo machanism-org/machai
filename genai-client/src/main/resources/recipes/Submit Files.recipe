@@ -1,0 +1,13 @@
+<Recipe name="Submit Files">
+	<Var name="Project_Dir" init="default" type="path" source="mavenBaseDir" /> 
+	<!-- Inputs processing --> 
+	<Listdir name="Inputs Files" path="$var{Project_Dir}" filter="^(?!instructions\.txt$).*\.txt$" dirFilter=".*\.machai\\docs-inputs.*" /> 
+	<Out name="Inputs Files" /> 
+	<Loop name="inputsFile" source="Inputs Files">
+		<Out name="inputsFile" type="path" level="warn" /> 
+		<Load name="inputs" file="$var{inputsFile}" /> 
+		<Out name="inputs" /> 
+		<Var name="inputs" init="console" type="text" /> 
+		<Task name="Submit Prompt" /> 
+	</Loop> 
+</Recipe> 

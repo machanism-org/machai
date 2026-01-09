@@ -80,6 +80,6 @@ public class JavaReviewer implements Reviewer {
 		if (matcher.find()) {
 			return matcher.group(1);
 		}
-		return null; // Package declaration not found
+		return "<default package>";
 	}
 }

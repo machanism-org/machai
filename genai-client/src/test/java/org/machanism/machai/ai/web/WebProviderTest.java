@@ -2,16 +2,16 @@ package org.machanism.machai.ai.web;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import java.io.File;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for {@link WebProvider}.
  *
  * <p>
- * This class validates the major behaviors and contract of the WebProvider
- * class, including AE workspace integration, configuration handling, and error
- * conditions.
+ * Validates AE workspace integration, configuration handling, and core error conditions
+ * of the {@code WebProvider} class.
  * </p>
- * 
  * <pre>
  * &lt;code&gt;
  * WebProvider provider = new WebProvider();
@@ -20,18 +20,44 @@ import org.junit.jupiter.api.Test;
  * String result = provider.perform();
  * &lt;/code&gt;
  * </pre>
- *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
 @Disabled
 class WebProviderTest {
+    /**
+     * Verifies that setWorkingDir throws IllegalArgumentException
+     * if configuration or AE setup node initialization fails.
+     */
+    @Test
+    void testSetWorkingDir_exception() {
+        WebProvider provider = new WebProvider();
+        provider.model("CodeMie");
+        File invalidDir = new File("/invalid/directory");
+        assertThrows(IllegalArgumentException.class, () -> provider.setWorkingDir(invalidDir));
+    }
 
-	/**
-	 * Test setWorkingDir initialization error.
-	 */
-	@Test
-	void testSetWorkingDir_exception() {
-	}
+    /**
+     * Validates that calling model() with the same config name reports configuration change error.
+     */
+    @Test
+    void testModel_duplicateConfigName_throws() {
+        WebProvider provider = new WebProvider();
+        provider.model("CodeMie");
+        assertThrows(IllegalArgumentException.class, () -> provider.model("CodeMie"));
+    }
 
+    /**
+     * Example test for perform(). Should only be enabled if AEWorkspace is configured.
+     */
+    @Test
+    @Disabled("Perform logic requires live AEWorkspace and configuration.")
+    void testPerform_runsRecipe() {
+        WebProvider provider = new WebProvider();
+        provider.model("CodeMie");
+        provider.setWorkingDir(new File("/tmp/test"));
+        String result = provider.perform();
+        assertNotNull(result);
+        // Further assertions based on actual result could be added here.
+    }
 }

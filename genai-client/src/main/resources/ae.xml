@@ -3,7 +3,6 @@
 	xsi:schemaLocation="http://ganteater.com/xml/configuration https://ganteater.com/xml/configuration/anteater-1.2.4.2.xsd">
 
 	<Configuration name="CodeMie">
-		<Var name="WEBDRIVER_PATH" value="." />
 		<Var name="PROMPT_RECIPE_NAME" value="Prompt To CodeMie" />
 		<Recipes path="recipes" />
 		<Startup task="Run CodeMie Plugin" async="true" />
@@ -11,7 +10,6 @@
 	</Configuration>
 
 	<Configuration name="AIDial">
-		<Var name="WEBDRIVER_PATH" value="." />
 		<Var name="PROMPT_RECIPE_NAME" value="Prompt To AIDial" />
 		<Recipes path="recipes" />
 		<Startup task="Open AIDial" />
