@@ -54,8 +54,8 @@ A multi-module Java CLI application for advanced document processing and intelli
 **Clone and Build:**
 ~~~bash
 # Clone the repository
-$ git clone https://github.com/example/cli-project.git
-$ cd cli-project
+$ git clone https://github.com/machanism-org/machai.git
+$ cd cli
 
 # Build using Maven
 $ mvn clean install
