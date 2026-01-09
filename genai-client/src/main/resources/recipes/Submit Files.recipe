@@ -8,6 +8,6 @@
 		<Load name="inputs" file="$var{inputsFile}" /> 
 		<Out name="inputs" /> 
 		<Var name="inputs" init="console" type="text" /> 
-		<Task name="Submit Prompt" /> 
+		<Task name="Submit Prompt" level="debug" /> 
 	</Loop> 
 </Recipe> 
