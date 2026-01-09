@@ -11,7 +11,7 @@ Content:
 2. **Installation Instructions:**  
    - Describe how to clone the repository and build the project (e.g., using Maven or Gradle).
    - Include prerequisites such as Java version and build tools.
-   - [![Download jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download) link bellow should be present on the page.
+   - Add the Machai CLI application jar download link: [Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download) to the installation section.
 
 3. **Usage:**  
    - Provide example commands by help:
@@ -66,7 +66,8 @@ $ mvn clean install
 - Maven 3.8+
 - Git
 
-[![Download jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)
+**Machai CLI Application Jar:**
+[![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)
 
 ## Usage
 
