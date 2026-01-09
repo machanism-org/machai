@@ -3,7 +3,7 @@
 		<If name="!CODEMIE PLUGIN PATH" equals="$var{Project_Dir}">
 			<Break /> 
 			<Else equals="VPN Required">
-				<CheckValue actual="$var{testConnection}" onErrorMsg="VPN Required (!)" /> 
+				<CheckValue actual="$var{testConnection}" onErrorMsg="You need to run the CodeMie plugin." /> 
 			</Else> 
 		</If> 
 		<Wait delay="2s" /> 
