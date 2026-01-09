@@ -14,7 +14,7 @@
 	<description>
 		Machai is a GenAI-powered tool for automated creation, registration, and enhancement of software projects. It streamlines project assembly and library integration within the Machanism ecosystem using AI-driven semantic search and metadata management. The project consists of multiple modular components (genai-client, bindex-core, cli, bindex-maven-plugin, assembly-maven-plugin, ghostwriter, gw-maven-plugin) related to GenAI client, core utilities, command-line interfaces, and Maven plugins for enhanced project automation.
 	</description>
-	<url>https://machanism.org/machai</url>
+	<url>https://machai.machanism.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -112,7 +112,7 @@
 					<artifactId>ae-maven-plugin</artifactId>
 					<version>1.2.9-SNAPSHOT</version>
 					<configuration>
-						<aeDir>src/ae</aeDir>
+						<aeDir>genai-client/src/main/resources</aeDir>
 						<variables>
 							<Project_Dir>${project.basedir}</Project_Dir>
 						</variables>

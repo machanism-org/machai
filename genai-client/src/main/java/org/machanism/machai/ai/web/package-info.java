@@ -13,7 +13,7 @@
  * </ul>
  * <h3>Usage Example</h3>
  * <pre>
- *    AeProvider provider = new AeProvider();
+ *    WebProvider provider = new WebProvider();
  *    provider.model("default-config");
  *    provider.setWorkingDir(new File("/your/dir"));
  *    String result = provider.perform();
@@ -22,7 +22,7 @@
  * Please consult class-level Javadoc for implementation details and core behaviors.
  * </p>
  */
-package org.machanism.machai.ai.ae;
+package org.machanism.machai.ai.web;
 
 /*
  * @guidance:

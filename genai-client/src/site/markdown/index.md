@@ -16,7 +16,7 @@ and generate the content for this section following net format:
 ... FULL DESCRIPTION ...
 -->
 
-### AeProvider
+### WebProvider
 This provider offers an alternative solution when direct access to the GenAI API is not possible. It functions as a gateway for interacting with web-based user interfaces through a web driver, enabling seamless integration with services like [AI DIAL](https://solutionshub.epam.com/solution/ai-dial) and [EPAM AI/Run CodeMie](https://www.youtube.com/@EPAMAIRunCodeMie). Communication with web pages is automated using [Anteater](https://ganteater.com) recipes, which facilitate the sending and receiving of information.
 
 Please note that this provider may have certain limitations. Depending on the specific recipes executed, there may be special requirements, such as handling streaming security concerns or managing shared resources like the clipboard. Additionally, you might need to install extra plugins when working with platforms such as CodeMie. Be sure to review the instructions for your target system and complete all necessary setup steps before using this provider.
@@ -27,7 +27,7 @@ This class extends `NoneProvider` to utilize prompt-driven workflows within the 
 
 **Usage Example:**
 ```java
-GenAIProvider provider = GenAIProviderManager.getProvider("Ae:CodeMie");
+GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
 ```
 Thread safety: This implementation is NOT thread-safe.
 

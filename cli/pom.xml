@@ -28,19 +28,11 @@
 			<id>pack</id>
 			<build>
 				<plugins>
-					<!-- mvn install assembly:single -->
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<configuration>
-							<appendAssemblyId>false</appendAssemblyId>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-						</configuration>
 						<executions>
 							<execution>
-								<id>desktop</id>
-								<phase>package</phase>
+								<phase>install</phase>
 								<goals>
 									<goal>single</goal>
 								</goals>
@@ -52,9 +44,10 @@
 												org.machanism.machai.cli.MachaiCLI</mainClass>
 										</manifest>
 									</archive>
-									<descriptors>
-										<descriptor>src/assembly/assembly.xml</descriptor>
-									</descriptors>
+									<appendAssemblyId>false</appendAssemblyId>
+									<descriptorRefs>
+										<descriptorRef>jar-with-dependencies</descriptorRef>
+									</descriptorRefs>
 								</configuration>
 							</execution>
 						</executions>

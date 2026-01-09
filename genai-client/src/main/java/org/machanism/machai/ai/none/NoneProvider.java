@@ -27,11 +27,13 @@ import org.slf4j.LoggerFactory;
  * effects.
  * 
  * Typical use cases for `NoneProvider` include:
- * 
- * - **Environments where AI services are disabled** (e.g., due to security or
- * compliance requirements). - **Testing scenarios** where AI interactions
- * should be mocked or bypassed. - **Default fallback** when no other provider
- * is configured.
+ * <ul>
+ * <li><b>Environments where AI services are disabled</b> (e.g., due to security
+ * or compliance requirements).
+ * <li><b>Testing scenarios</b> where AI interactions should be mocked or
+ * bypassed.
+ * <li><b>Default fallback</b> when no other provider is configured.
+ * </ul>
  * 
  * By using `NoneProvider`, you can maintain consistent application behavior and
  * interface compatibility, even when generative AI features are not in use.

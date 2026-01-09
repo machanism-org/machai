@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.ae;
+package org.machanism.machai.ai.web;
 
 import java.io.File;
 
@@ -32,15 +32,10 @@ import com.ganteater.ae.RecipeRunner;
  * configuration name (e.g., CodeMie or AIDial). You can also refer to the
  * ae.xml file to view the list of supported configurations.
  * 
- * <p>
- * This class extends {@link NoneProvider} to utilize prompt-driven workflows
- * within the AE environment. It manages the AE workspace, setup nodes, and can
- * execute project recipes based on user prompts.
- * </p>
  * <h3>Usage Example</h3>
  * 
  * <pre>
- * GenAIProvider provider = GenAIProviderManager.getProvider("Ae:CodeMie");
+ * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
  * </pre>
  * 
  * Thread safety: This implementation is NOT thread-safe.
@@ -48,9 +43,9 @@ import com.ganteater.ae.RecipeRunner;
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
-public class AeProvider extends NoneProvider {
+public class WebProvider extends NoneProvider {
 	/** Logger for this class. */
-	private static Logger logger = LoggerFactory.getLogger(AeProvider.class);
+	private static Logger logger = LoggerFactory.getLogger(WebProvider.class);
 
 	/** AEWorkspace instance used for task execution. */
 	private static AEWorkspace workspace = new AEWorkspace();
@@ -100,19 +95,19 @@ public class AeProvider extends NoneProvider {
 			rootDir = workingDir;
 
 			File startDir = workingDir;
-			File externalAeConfigFile = new File(workingDir, "src/ae/ae.xml");
+			File externalAeConfigFile = new File(workingDir, "genai-client/src/main/resources");
 			if (externalAeConfigFile.exists()) {
-				startDir = externalAeConfigFile.getParentFile();
+				startDir = externalAeConfigFile;
 			}
 			workspace.setStartDir(startDir);
 
-			workspace.getSystemVariables().put("PROJECT DIR", workingDir);
+			workspace.getSystemVariables().put("PROJECT_DIR", workingDir);
 			workspace.loadConfiguration(configName, false);
 
 			try {
 				workspace.runSetupNodes();
 			} catch (Exception e) {
-				logger.error("The execution of the starting recipes failed.", e);
+				logger.error("The execution of the starting recipes failed: {}", e.getMessage());
 
 				workspace.close();
 				workspace = new AEWorkspace();
