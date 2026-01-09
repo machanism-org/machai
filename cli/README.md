@@ -4,6 +4,8 @@ A multi-module Java CLI application for advanced document processing and library
 
 ## Installation Instructions
 
+ [![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)  
+
 ### Prerequisites
 - Java 17 or higher
 - Maven 3.8+
