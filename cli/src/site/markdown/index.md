@@ -21,10 +21,12 @@ The Machai Command Line Interface (CLI) is a versatile tool designed to facilita
    [![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)  
 2. **Set Environment Variables**
    Before using the Machai CLI for generating or registering `bindex.json` files, you need to configure the following environment variables to ensure proper functionality:
-   | **Variable Name**    | **Description**                                                                                   |
-   |----------------------|---------------------------------------------------------------------------------------------------|
-   | OPENAI_API_KEY       | Your OpenAI API key, required for AI-powered features.                                            |
+   
+   | **Variable Name**    | **Description**                                                                                      |
+   |----------------------|------------------------------------------------------------------------------------------------------|
+   | OPENAI_API_KEY       | Your OpenAI API key, required for AI-powered features.                                               |
    | BINDEX_REG_PASSWORD  | The password for write access to the registration database, required for `register` command only. |
+   
 3. **Run the Machai CLI**  
    Open a terminal or command prompt and navigate to the directory where the `machai.jar` file is saved. Then execute the following command:
    ```bash
