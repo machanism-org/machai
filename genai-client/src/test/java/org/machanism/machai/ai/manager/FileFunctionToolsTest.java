@@ -12,8 +12,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * Unit tests for {@link FileFunctionTools}.
  * <p>
  * Verifies filesystem operations such as reading, writing, listing, and recursion.
- * @author Automated
- * @guidance
+ * 
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 class FileFunctionToolsTest {
 

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
  * </p>
  * 
  * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 class NoneProviderTest {
 	private NoneProvider provider;

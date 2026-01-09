@@ -1,18 +1,15 @@
 package org.machanism.machai.ai.manager;
 
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import java.io.File;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Unit tests for {@link CommandFunctionTools}.
  * <p>
  * Verifies shell command execution and error handling logic via mock objects.
- * @author Automated
- * @guidance
+ * 
+ * @author Viktor Tovstyi
+ * @since 0.0.2
  */
 class CommandFunctionToolsTest {
 

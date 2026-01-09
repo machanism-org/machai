@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link GenAIProviderManager}.
  * <p>
  * Verifies correct provider resolution, model parsing, and error cases based on model identifier inputs.
- *
+ * 
  * @author Viktor Tovstyi
- * @guidance
+ * @since 0.0.2
  */
 class GenAIProviderManagerTest {
     /**

@@ -33,7 +33,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *     processor.scanFolder(new File("my-project"));
  * }</pre>
  *
- * @author machanism
+ * @author Viktor Tovstyi
  */
 class DummyProjectProcessor extends ProjectProcessor {
     /** Indicates whether processFolder() was called. */

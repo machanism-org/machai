@@ -26,7 +26,7 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  *     assertTrue(layout instanceof MavenProjectLayout);
  * }</pre>
  *
- * @author machanism
+ * @author Viktor Tovstyi
  */
 @DisplayName("ProjectLayoutManager Tests")
 public class ProjectLayoutManagerTest {

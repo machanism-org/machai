@@ -1,21 +1,19 @@
-# CLI Multi-Module Java Project
+# CLI Project
 
-## Project Overview
-
-The CLI project is a multi-module Java repository designed for building flexible command-line tooling platforms. It integrates core and extendable commands supporting project assembly, library selection, GenAI-based document processing guidance, and bindex file operations. This solution lays the foundation for developer productivity and automation, powered by machanism.org.
+A multi-module Java CLI application for advanced document processing and library management, featuring assembly, bindex operations, built-in shell commands, and GenAI-powered documentation utilities.
 
 ## Installation Instructions
 
 ### Prerequisites
 - Java 17 or higher
-- Maven (recommended) or Gradle
+- Maven 3.8+
 - Git
 
 ### Clone and Build
 ```sh
-git clone https://github.com/your-org/cli.git
+git clone <repository-url>
 cd cli
-mvn clean install # or use your preferred build tool
+mvn clean install
 ```
 
 ## Usage
@@ -23,7 +21,7 @@ mvn clean install # or use your preferred build tool
 ### Assembly Command
 - `pick`: Picks libraries based on user request.
 - `assembly`: Creates a project via picked library set.
-- `prompt`: Is used for request additional GenAI guidances.
+- `prompt`: Is used for additional GenAI guidances.
 
 ### Bindex Command
 - `bindex`: Generates bindex files.
@@ -43,4 +41,4 @@ mvn clean install # or use your preferred build tool
 
 ## Reference
 
-For the parent project and more details, visit [machanism.org](https://machanism.org)
+This project is developed as part of the parent project and the [machanism.org](https://machanism.org) initiative.
