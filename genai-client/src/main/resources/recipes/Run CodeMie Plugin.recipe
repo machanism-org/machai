@@ -4,7 +4,7 @@
 	<Out name="testConnection" /> 
 	<If name="testConnection" contains="Ping request could not find host">
 		<Var name="!CodeMie Plugin Path" value="VPN Required" /> 
-		<CheckValue actual="$var{testConnection}" onErrorMsg="CodeMie plugin is not running." /> 
+		<CheckValue onErrorMsg="VPN Required" /> 
 	</If> 
 	<Command os=".*">taskkill /IM codemie-plugins.exe /F</Command> 
 	<Finally>

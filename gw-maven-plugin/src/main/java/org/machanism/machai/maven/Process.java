@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
-@Mojo(name = "process", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.INSTALL)
+@Mojo(name = "process", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.GENERATE_SOURCES, threadSafe = false)
 public class Process extends AbstractMojo {
 
 	/** Logger for this class. */
@@ -57,7 +57,7 @@ public class Process extends AbstractMojo {
 	 * The chat model to use for AI assistance in documentation generation e.g.
 	 * "OpenAI:gpt-5", default value: "None".
 	 */
-	@Parameter(property = "gw.chatModel")
+	@Parameter(property = "gw.genai")
 	protected String chatModel;
 
 	/**
@@ -72,18 +72,18 @@ public class Process extends AbstractMojo {
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
 
-    /**
-     * The Maven Session object.
-     */
+	/**
+	 * The Maven Session object.
+	 */
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
-    private MavenSession session;
-	
+	private MavenSession session;
+
 	@Override
 	public void execute() throws MojoExecutionException {
 
 		FileProcessor.deleteTempFiles(basedir);
-
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+
 		FileProcessor documents = new FileProcessor(provider) {
 			/**
 			 * Provides the Maven-based project layout for document scanning.

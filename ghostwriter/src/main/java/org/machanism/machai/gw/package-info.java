@@ -1,25 +1,28 @@
 /**
- * Provides project documentation guidance, review logic, and extensible AI-powered
- * document processing tools for the package {@code org.machanism.machai.gw}.
+ * Provides comprehensive documentation practices and review tools for code elements
+ * within the {@code org.machanism.machai.gw} package. This package encapsulates
+ * robust logic for project layout analysis, documentation scanning, and automated
+ * AI-powered document review strategies.
  * <p>
- * This package supplies primary components for scanning, reviewing, and generating documentation
- * inputs for code projects using large language models or conventional review strategies. The package
- * is designed with extensibility, adherence to best practices, and comprehensive Javadoc throughout.
+ * <b>Purpose:</b>
+ * <br>
+ * This package enables: project scanning, reviewer module coordination, best-practices
+ * enforcement for Javadoc on all public and protected classes, interfaces, methods, and fields;
+ * guidance-driven preparation of documentation input for LLM assistants; extensible support
+ * for multiple code and document formats.
  * <p>
- * <strong>Key Features:</strong>
+ * <b>Key Practices and Guidance:</b>
  * <ul>
- *   <li>Scans project layouts and source folders for documentation extraction.</li>
- *   <li>Coordinates reviewer modules for multiple file types (Java, HTML, Markdown, Python, TypeScript, and more).</li>
- *   <li>Implements guidance-driven input preparation for language model document generation (LLMs).</li>
- *   <li>Ensures all public and protected classes, methods, fields, and interfaces have high-quality Javadoc.</li>
- *   <li>Inline usage examples provided for complex classes and methods.</li>
- *   <li>Consistent formatting; <code>&lt;</code> and <code>&gt;</code> escaped in <code>&lt;pre&gt;</code> content.</li>
- *   <li>Javadoc updated with every code change as per project guidance requirements.</li>
- *   <li>Relies on guidance tag <code>@guidance</code> only in comments where specified. Never used in Javadoc.</li>
+ *   <li>Comprehensive Javadoc provided for every public/protected code element.</li>
+ *   <li>Package-level Javadoc describes goals and usage for all users and contributors.</li>
+ *   <li>All parameters, return values, and exceptions for methods documented using Javadoc tags.</li>
+ *   <li>Usage examples integrated into Javadoc where useful.</li>
+ *   <li>Consistent style and formatting; special characters like <code>&lt;</code> and <code>&gt;</code> are escaped in <code>&lt;pre&gt;</code> blocks.</li>
+ *   <li>Documentation updated alongside code changes.</li>
+ *   <li>Static analysis and IDE tooling recommended for quality checks.</li>
+ *   <li>Javadoc output regularly reviewed for completeness and readability.</li>
+ *   <li><strong>Note:</strong> The <code>@guidance</code> tag appears only in non-Javadoc comments, per the project requirements.</li>
  * </ul>
- * <p>
- * For further details on documentation standards and reviewer extensibility, see the file-level and class-level Javadoc
- * and related unit tests.
  * <p>
  * <b>Applied Guidance:</b>
  * <br>

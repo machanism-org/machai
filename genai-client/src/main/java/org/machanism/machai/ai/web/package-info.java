@@ -1,25 +1,33 @@
 /**
- * Provides integration with AE workspace and prompt-driven workflows for automated code generation projects.
+ * Provides integration and extension points for AE workspace and prompt-driven workflows
+ * in genai-client projects. This package contains core interfaces and implementations for
+ * connecting to advanced generative AI engines, managing workspace sessions, running prompt-based
+ * recipe workflows, and enabling automated project assembly and enhancement.
+ *
  * <p>
- * This package contains all classes and interfaces needed to support running prompt-driven workflows using the AE engine
- * in the context of genai-client projects. Classes typically interact with AEWorkspace and recipe runners, enabling dynamic
- * adaptation to project requirements and prompt-based generation or execution.
- * </p>
- * <h3>Core Capabilities</h3>
+ * Core features include:
  * <ul>
- *   <li>Extendable support for prompt-based AE integrations</li>
- *   <li>Recipe-driven dynamic code/project modification</li>
- *   <li>Workspace setup, error handling, and initialization</li>
+ *   <li>Dynamic integration with AE engines via prompt and recipe execution APIs</li>
+ *   <li>Support for workspace setup, persistent context, and error handling</li>
+ *   <li>Extensible runner classes to facilitate new workflows</li>
  * </ul>
- * <h3>Usage Example</h3>
+ * </p>
+ *
+ * <h3>Example Usage</h3>
  * <pre>
- *    WebProvider provider = new WebProvider();
- *    provider.model("default-config");
- *    provider.setWorkingDir(new File("/your/dir"));
- *    String result = provider.perform();
+ *   WebProvider provider = new WebProvider();
+ *   provider.model("default-config");
+ *   provider.setWorkingDir(new File("/your/dir"));
+ *   String result = provider.perform();
  * </pre>
+ *
  * <p>
- * Please consult class-level Javadoc for implementation details and core behaviors.
+ * All public and protected classes, methods, and fields in this package must have comprehensive Javadoc.
+ * Where relevant, usage examples should be included in the Javadoc to assist developers.
+ * </p>
+ *
+ * <p>
+ * For more information, see the class-level Javadoc of key types such as {@code WebProvider}.
  * </p>
  */
 package org.machanism.machai.ai.web;

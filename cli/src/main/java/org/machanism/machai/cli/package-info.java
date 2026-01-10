@@ -1,31 +1,29 @@
 /**
- * Provides CLI (Command Line Interface) tools and shell commands for interacting
- * with GenAI-powered automation, project assembly, bindex management, library selection,
- * and document processing in Machai applications.
+ * Provides CLI (Command Line Interface) tools for interacting with GenAI-powered automation,
+ * project assembly, bindex management, library selection, and document processing in Machai.
  *
  * <p>
- * The classes in this package enable users and integrations to:
+ * Main features include:
  * <ul>
- *   <li>Pick libraries and assemble projects via GenAI (see {@link AssembyCommand}).</li>
- *   <li>Generate and register bindex files ({@link BindexCommand}).</li>
- *   <li>Clean up Machai temporary directories ({@link CleanCommand}).</li>
- *   <li>Scan and process documents leveraging GenAI models ({@link ProcessCommand}).</li>
- *   <li>Bootstrap and run the CLI shell application ({@link MachaiCLI}).</li>
+ *   <li>Project assembly and library picking using GenAI</li>
+ *   <li>Bindex generation/registration</li>
+ *   <li>Cleaning Machai temp directories</li>
+ *   <li>GenAI document scanning, processing</li>
+ *   <li>Bootstrapping the CLI shell</li>
  * </ul>
  *
  * <b>Documentation Standards & Best Practices</b>
  * <ul>
- *   <li>All public and protected classes, interfaces, methods, and fields must have comprehensive Javadoc.</li>
- *   <li>Parameters, return values, and exceptions must be clearly described using
- *     <code>@param</code>, <code>@return</code>, <code>@throws</code> tags.</li>
- *   <li>Usage examples are provided via <code>&lt;pre&gt;</code> blocks in Javadoc.</li>
- *   <li>Javadoc should be updated together with any code change.</li>
- *   <li>Use consistent formatting and escape &lt; and &gt; in <code>&lt;pre&gt;</code> blocks.</li>
- *   <li>Use IDE/static analysis tools to ensure completeness of Javadoc.</li>
- *   <li>Refer to <code>pom.xml</code> for the Java version required for all code.</li>
+ *   <li>All public and protected classes, interfaces, methods, fields require comprehensive Javadoc.</li>
+ *   <li>Describe parameters, return values, and exceptions clearly using <code>@param</code>, <code>@return</code>, <code>@throws</code> tags.</li>
+ *   <li>Provide usage examples in <code>&lt;pre&gt;</code> blocks (escape &lt; and &gt;).</li>
+ *   <li>Update Javadoc with code modifications.</li>
+ *   <li>Maintain formatting and style consistency.</li>
+ *   <li>Review Javadoc output with IDE/static tools for completeness.</li>
+ *   <li>Use Java version 17 (see pom.xml).</li>
  * </ul>
  *
- * See individual class and test Javadocs for further details and usage instructions.
+ * See individual class/test Javadocs for details.
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
