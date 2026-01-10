@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -71,6 +72,12 @@ public class Process extends AbstractMojo {
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
 
+    /**
+     * The Maven Session object.
+     */
+	@Parameter(defaultValue = "${session}", readonly = true, required = true)
+    private MavenSession session;
+	
 	/**
 	 * Executes the document processing workflow; scans documents, processes
 	 * modules, and delegates document handling to DocsProcessor.
@@ -114,7 +121,8 @@ public class Process extends AbstractMojo {
 		};
 		logger.info("Scanning documents in the root directory: {}", basedir);
 		try {
-			documents.scanDocuments(basedir);
+			File rootDir = new File(session.getExecutionRootDirectory());
+			documents.scanDocuments(rootDir, basedir);
 		} catch (IOException e) {
 			throw new MojoExecutionException("Document assistance process failed.", e);
 		}

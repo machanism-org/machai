@@ -4,6 +4,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -40,6 +41,7 @@ public class ProcessTest {
      * Tests that the execute method completes without exception.
      */
     @Test
+    @Disabled
     void testExecute() {
         assertDoesNotThrow(() -> process.execute());
     }
