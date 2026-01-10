@@ -1,15 +1,16 @@
 /**
- * The <code>org.machanism.machai.maven</code> package provides Maven plugin components enabling
- * AI-powered project assembly and automated library recommendations. Its core Mojo interacts
- * with users and AI providers to generate project structures and dependency sets based on user prompts
- * or specification files (e.g., <code>project.txt</code>), integrating advanced automation and interactivity.
+ * The {@code org.machanism.machai.maven} package provides Maven plugin components enabling
+ * AI-powered project assembly and automated library recommendations. The package's core Mojo,
+ * {@link org.machanism.machai.maven.Assembly}, interacts with users and AI providers to generate
+ * project structures and recommend dependency sets based on user prompts or specification files,
+ * integrating advanced automation and interactivity into Maven workflows.
  *
  * <h2>Key Features</h2>
  * <ul>
  *   <li>Interactive prompts and AI-driven project assembly.</li>
  *   <li>Automated recommendation of Java libraries via AI chat models.</li>
- *   <li>Flexible configuration using parameters such as chat models, score thresholds, and prompt files.</li>
- *   <li>Consistent and extensible architecture for custom project assembly workflows.</li>
+ *   <li>Flexible configuration using plugin parameters and prompt files.</li>
+ *   <li>Extensible architecture for custom assembly workflows.</li>
  * </ul>
  *
  * <h2>Usage Example</h2>
@@ -17,9 +18,9 @@
  * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
  * </pre>
  * <p>
- * For advanced users, customize the chat models and scoring parameters to leverage different AI providers
+ * Advanced users may customize chat models and scoring parameters to modify AI provider behavior
  * or control the recommendation quality.
- *
+ * </p>
  *
  * <h2>Best Practices</h2>
  * <ul>
@@ -31,7 +32,6 @@
  * </ul>
  *
  * @see org.machanism.machai.maven.Assembly
- *
  */
 package org.machanism.machai.maven;
 

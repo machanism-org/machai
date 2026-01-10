@@ -1,30 +1,35 @@
 /**
- * Provides classes and interfaces that support the Maven plugin functionality
- * for Bindex in the Machanism project. The package contains utilities, plugin
- * implementations, and supporting infrastructure for integrating Bindex with Maven.
+ * Provides classes and interfaces for the Maven Bindex plugin within the Machanism ecosystem.
  * <p>
- * <b>Key Features:</b>
+ * This package contains core plugin implementations, utilities, and supporting infrastructure for
+ * seamless integration with the Maven build lifecycle. The Bindex Maven plugin enables automated
+ * generation, registration, and management of Bindex metadata, facilitating effective library
+ * discovery, semantic search, and assembly for Maven projects.
+ * </p>
+ * <p><b>Key Features:</b></p>
  * <ul>
- *   <li>Integration with the Maven build lifecycle.</li>
- *   <li>Bindex resource and metadata management.</li>
+ *   <li>Automatic Bindex metadata generation and registration.</li>
+ *   <li>Integration with Maven lifecycles and conventions.</li>
+ *   <li>Resource and metadata management for project libraries.</li>
+ *   <li>Support for advanced library discovery and search.</li>
  * </ul>
- * <p>
- * <b>Usage Example:</b>
+ * <p><b>Usage Example:</b></p>
  * <pre>
  * {@code
- * // Basic usage within Maven configuration
- * <plugin>
- *   <groupId>org.machanism.machai</groupId>
- *   <artifactId>bindex-maven-plugin</artifactId>
- *   <version>1.0.0</version>
- *   <configuration>
+ * <!-- Basic plugin configuration for Maven -->
+ * &lt;plugin&gt;
+ *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
+ *   &lt;artifactId&gt;bindex-maven-plugin&lt;/artifactId&gt;
+ *   &lt;version&gt;0.0.2-SNAPSHOT&lt;/version&gt;
+ *   &lt;configuration&gt;
  *     <!-- configuration options -->
- *   </configuration>
- * </plugin>
+ *   &lt;/configuration&gt;
+ * &lt;/plugin&gt;
  * }
  * </pre>
  * <p>
- * For details, consult individual class-level Javadoc for implementation and configuration options.
+ * For implementation details and further configuration options, refer to class-level Javadoc documentation.
+ * </p>
  */
 package org.machanism.machai.maven;
 

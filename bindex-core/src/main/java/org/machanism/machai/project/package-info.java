@@ -1,28 +1,38 @@
 /**
- * Provides core classes for project structure detection and processing in Machanism systems.
+ * Provides core APIs for project structure detection and processing within Machanism systems.
  * <p>
- * This package defines utilities for identifying the layout and modules of a software project folder
- * and for implementing custom processors that traverse and operate on project structures. It supports
- * various language and tool ecosystems such as Maven, Node.js, and Python through extensible layout detection.
- * <p>
- * <b>Usage Example:</b>
- * <pre>
- *     ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(new File("/my/project/folder"));
- *     // process the detected layout ...
- * </pre>
- * <p>
- * Classes in this package are intended for extension to support build tools, IDE integrations, and automation workflows.
- * 
- * <p>
- * Typical responsibilities include:
+ * <b>Purpose:</b>
+ * <br>
+ * The {@code org.machanism.machai.project} package supplies extensible utilities and base classes for
+ * recognizing the layout, modules, and contents of typical software projects including Maven, Node.js,
+ * and Python, among others. The functionality supports automation, IDE/build tool integration,
+ * and documentation/static analysis use cases.
+ *
+ * <b>Main Features:</b>
  * <ul>
- *   <li>Detecting project type and folder structure</li>
- *   <li>Identifying source folders, modules, and configuration files</li>
- *   <li>Recursively scanning project folders for content analysis</li>
- *   <li>Supporting documentation and static analysis integrations</li>
+ *   <li>Project type and folder structure detection (multi-environment, multi-language)</li>
+ *   <li>Identification of source/resource folders, configuration files, and modules</li>
+ *   <li>Recursive project scanning for code, documentation, and configuration analysis</li>
+ *   <li>Extensible model for supporting new ecosystems or custom layouts</li>
  * </ul>
  *
- * For best practices, see {@link ProjectProcessor} and {@link ProjectLayoutManager}.
+ * <b>Common Usage Example:</b>
+ * <pre>{@code
+ *   // Detect project layout and process contents
+ *   ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(new File("/my/project/folder"));
+ *   ProjectProcessor processor = ...;
+ *   processor.scanFolder(new File("/my/project/folder"));
+ * }</pre>
+ *
+ * <b>Best Practices & Guidance:</b>
+ * <ul>
+ *   <li>Document all public/protected classes, methods, and fields using comprehensive Javadoc.</li>
+ *   <li>Describe method parameters, return types, and thrown exceptions explicitly with Javadoc tags.</li>
+ *   <li>Provide code snippets/examples for complex or critical APIs.</li>
+ *   <li>Keep documentation up-to-date with code changes; leverage IDE/static analysis Javadoc tools.</li>
+ * </ul>
+ *
+ * For further reference, see {@link ProjectLayoutManager} and {@link ProjectProcessor}.
  */
 package org.machanism.machai.project;
 

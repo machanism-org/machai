@@ -1,5 +1,3 @@
-
-
 /*
  * @guidance: Create high-quality unit tests in this folder for all public and package-private classes
  * and methods in the package `org.machanism.machai.ai`.

@@ -5,24 +5,19 @@ Do not use the horizontal rule separator between sections. -->
 
 ## Overview
 
-The **GW Maven Plugin** (Ghostwriter Maven Plugin) is an advanced documentation automation tool for Java projects. It automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. The plugin streamlines the creation and maintenance of high-quality, consistent documentation, ensuring best practices and up-to-date information across all modules.
+The **GW Maven Plugin** (Ghostwriter Maven Plugin) is a powerful documentation automation solution for Java-based Maven projects. Leveraging embedded guidance tags and intelligent synthesis, it enables automatic scanning, analysis, and assembly of project documentation. With its seamless integration into Maven build lifecycles, the plugin ensures your documentation is accurate, consistent, and always aligned with current best practices.
 
 ## Features
 
-- Automated project documentation synthesis
-- Guidance tag recognition for custom & best-practices documentation
-- Java source code analysis
-- Maven plugin integration and seamless operation
-- Consistency enforcement and best practices
-- Support for modular and multi-module projects
+- Automated documentation generation for Java projects
+- Interprets @guidance tags to follow custom and best-practice instructions
+- Analyzes Java source for comprehensive technical and API references
+- Ensures documentation continuity and maintainability
+- Built for modular and multi-module Maven project structures
 
 ## Getting Started
 
-Add the plugin to your Maven project and configure it in your `pom.xml`. The plugin will automatically process your source files and generate up-to-date documentation in the Maven Site lifecycle.
-
-## Usage Example
-
-Include in your build configuration:
+To use GW Maven Plugin, add it to your Maven project's `pom.xml`:
 
 ```xml
 <plugin>
@@ -32,13 +27,13 @@ Include in your build configuration:
 </plugin>
 ```
 
-Documentation will be included in your project's site output using the `mvn site` command.
+Run `mvn site` to generate updated, automated documentation into your project's site output.
 
 ## Requirements
 
-- Maven 3+
-- Java 8+
+- Maven 3 or higher
+- Java 8 or higher
 
 ## License
 
-This plugin is released under the Apache License, Version 2.0.
+Distributed under the Apache License, Version 2.0.

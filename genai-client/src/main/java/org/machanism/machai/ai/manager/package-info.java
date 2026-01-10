@@ -1,3 +1,49 @@
+/**
+ * Provides management and orchestration functionality for AI-driven components within the Machai framework.
+ * <p>
+ * This package contains managers and supporting classes for handling AI operations,
+ * service lifecycles, integrations, and resource control in GenAI Client applications.
+ * </p>
+ * <p>
+ * The classes are responsible for enabling seamless interaction with generative AI providers,
+ * configuring AI strategies, handling prompt and embedding management, and supporting
+ * advanced features such as intelligent search and content generation.
+ * </p>
+ * <p>
+ * <strong>Key Usage:</strong>
+ * <ul>
+ *   <li>Centralized configuration of AI flows and resources.</li>
+ *   <li>Interface definitions for AI-management strategies.</li>
+ *   <li>Lifecycle management for AI services and clients.</li>
+ *   <li>Extensible support for new AI features and providers.</li>
+ * </ul>
+ * </p>
+ * <h3>Example Usage</h3>
+ * <pre>
+ * {@code
+ * AiManager manager = new AiManager(config);
+ * manager.initialize();
+ * manager.processPrompt("Generate report summary...");
+ * }
+ * </pre>
+ * <p>
+ * <b>Javadoc Guidance:</b>
+ * <ul>
+ *   <li>Document all public/protected classes, interfaces, methods, and fields.</li>
+ *   <li>Use clear, concise descriptions of purpose, behavior, and usage.</li>
+ *   <li>Describe parameters, return values, and exceptions with tags.</li>
+ *   <li>Provide meaningful examples where useful.</li>
+ *   <li>Use consistent formatting and structure.</li>
+ *   <li>Update documentation with code changes.</li>
+ *   <li>Generate Javadoc output regularly to verify quality.</li>
+ *   <li>Escape &lt; and &gt; in <pre> and code blocks.</li>
+ *   <li>Follow effective Java documentation conventions.</li>
+ * </ul>
+ * </p>
+ *
+ * @since 0.0.2-SNAPSHOT
+ * @author Machanism Project
+ */
 package org.machanism.machai.ai.manager;
 
 /*

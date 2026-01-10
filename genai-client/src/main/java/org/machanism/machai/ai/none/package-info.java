@@ -27,7 +27,7 @@ package org.machanism.machai.ai.none;
  *
  * 1. Document All Public and Protected Elements:
  *    - Ensure every public and protected class, interface, method, and field has a comprehensive Javadoc comment.
- *    - Include package-level Javadoc in a `package-info.java` file to describe the packages purpose and usage.
+ *    - Include package-level Javadoc in a `package-info.java` file to describe the package's purpose and usage.
  *
  * 2. Use Clear and Concise Descriptions:
  *    - Write meaningful summaries that explain the purpose, behavior, and usage of each element.

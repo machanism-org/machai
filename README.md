@@ -1,69 +1,71 @@
-# Machai Project
+# Machai
 
-Machai is a GenAI-powered tool for automated creation, registration, and enhancement of software projects. It streamlines project assembly and library integration within the Machanism ecosystem using AI-driven semantic search and metadata management. The project consists of multiple modular components related to a GenAI client, core utilities, command-line interfaces, and Maven plugins for enhanced project automation.
-
+Machai is a modular, AI-driven toolkit for automating software project
+setup, semantic indexing, build orchestration, and lifecycle management.
+Powered by GenAI agents—including Ghostwriter, semantic search, metadata
+indexing, and automated code and documentation generation—Machai
+streamlines project integration and assembly. While it is designed to
+work seamlessly within the Machanism ecosystem, Machai can also be used
+independently for a wide range of software automation tasks.
+		
 ## Modules
 
-- [genai-client](/genai-client): GenAI client for interacting with AI-powered services and endpoints.
-- [bindex-core](/bindex-core): Core utilities and abstraction for metadata indexing and semantic search.
-- [cli](/cli): Command-line interface for executing project automation tasks.
-- [bindex-maven-plugin](/bindex-maven-plugin): Maven plugin for integrating indexing and semantic features in the build process.
-- [assembly-maven-plugin](/assembly-maven-plugin): Maven plugin for advanced project assembly and packaging.
-- [ghostwriter](/ghostwriter): Automated project content generation using AI.
-- [gw-maven-plugin](/gw-maven-plugin): Maven plugin to integrate Ghostwriter AI features and automation.
+- [genai-client](/genai-client): Provides remote GenAI endpoint interfaces for contextual automations and AI integrations.
+- [bindex-core](/bindex-core): Supplies core utilities for semantic indexing, metadata management, and project data operations.
+- [cli](/cli): CLI entrypoint for interactive project initialization and Machai task execution.
+- [bindex-maven-plugin](/bindex-maven-plugin): Maven plugin for project semantic indexing and metadata enrichment.
+- [assembly-maven-plugin](/assembly-maven-plugin): Maven plugin for artifact assembly, packaging, and release handling.
+- [ghostwriter](/ghostwriter): Integrates with GenAI for code and documentation generation automation.
+- [gw-maven-plugin](/gw-maven-plugin): Maven extension for incorporating Ghostwriter outputs into the build lifecycle.
 
-## Installation
+## Installation Instructions
 
-Clone the repository and build with Maven:
+To clone and build Machai:
 
-```bash
-# Prerequisites
+~~~bash
+# Prerequisites:
 # - Java 9 or newer
-# - Maven 3.6.0 or newer
+# - Maven 3.6 or newer
 
 git clone https://github.com/machanism-org/machai.git
 cd machai
 mvn clean install
-```
+~~~
 
 ## Usage
 
-Each module can be used separately or composed as part of broader automation:
+To run the CLI:
 
-- To run the CLI:
-
-```bash
+~~~bash
 cd cli
 mvn exec:java
-```
+~~~
 
-- Maven plugins (`bindex-maven-plugin`, `assembly-maven-plugin`, `gw-maven-plugin`) can be added to your project pom.xml:
+To use Machai Maven plugins, add to your `pom.xml`:
 
-```xml
+~~~xml
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
   <version>0.0.2-SNAPSHOT</version>
 </plugin>
-```
+~~~
 
-Refer to each submodule's README for details and advanced usage instructions.
+Module directories provide individual usage documentation and examples.
 
 ## Contributing
 
-We welcome contributions!
-
-- Follow code style and best practices adopted in the project.
-- Submit pull requests with clear descriptions and reference related issues if applicable.
-- Use [GitHub Issues](https://github.com/machanism-org/machai/issues) for bug reports and feature requests.
-- Review code and documentation before submitting.
+- Follow code style and commit conventions adopted in the repository.
+- Reference issues in all pull requests when relevant.
+- Submit bugs or feature requests via [GitHub Issues](https://github.com/machanism-org/machai/issues).
+- Ensure all contributions are documented and comprehensively tested.
 
 ## License
 
-This project is licensed under the [Apache License, Version 2.0](./LICENSE.txt).
+Machai is distributed under the [Apache License, Version 2.0](./LICENSE.txt).
 
-## Contact & Support
+## Contact and Support
 
-- Project website: [machanism.org/machai](https://machanism.org/machai)
-- Issue Tracker: [GitHub Issues](https://github.com/machanism-org/machai/issues)
-- Maintainer: Viktor Tovstyi ([viktor.tovstyi@gmail.com](mailto:viktor.tovstyi@gmail.com))
+- Homepage: [machanism.org/machai](https://machanism.org/machai)
+- Issues: [GitHub Issues](https://github.com/machanism-org/machai/issues)
+- Maintainer: Viktor Tovstyi (<viktor.tovstyi@gmail.com>)

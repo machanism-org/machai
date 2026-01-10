@@ -1,24 +1,7 @@
 /**
- * Provides file reviewer implementations for various source formats including Java, Python, TypeScript, HTML, Markdown, and plain text.
+ * Provides reviewer implementations for analyzing source files and extracting custom documentation guidance for automated workflows.
  * <p>
- * Reviewers in this package are responsible for analyzing project files of supported types and extracting custom documentation guidance.
- * This guidance, typically annotated with the <code>@guidance</code> tag in comments, is used to automate documentation workflows and improve code quality.
- * <p>
- * Common reviewer logic includes reading files, parsing for annotated documentation fragments, and formatting outputs for further processing.
- * <p>
- * Supported reviewers:
- * <ul>
- *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer}: Reviews Java source and package-info files.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer}: Reviews Python files.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer}: Reviews TypeScript files.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer}: Reviews HTML and XML files.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer}: Reviews Markdown files.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer}: Reviews plain text files for guidance propagation.</li>
- * </ul>
- * Reviewers implement the {@link org.machanism.machai.gw.reviewer.Reviewer} interface for standardized access and automation.
- * <p>
- * When adding or updating code in this package, ensure every public or protected class, interface, method, and field has a clear, comprehensive Javadoc.
- * See @guidance for detailed documentation standards.
+ * <b>Supported formats:</b> Java, Python, TypeScript, HTML/XML, Markdown, and plain text. The reviewers in this package parse files, locate @guidance documentation, and drive code documentation automation.
  * <p>
  * <b>Usage Example:</b>
  * <pre>
@@ -28,6 +11,30 @@
  *       // use extracted guidance for documentation
  *   }
  * </pre>
+ * <p>
+ * <b>Reviewer Implementations:</b> All reviewers implement the {@link org.machanism.machai.gw.reviewer.Reviewer} interface.
+ * <ul>
+ *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer}</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer}</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer}</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer}</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer}</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer}</li>
+ * </ul>
+ * <p>
+ * <b>Documentation Guidance:</b> See <b>@guidance</b> section below for documentation requirements and usage practices.
+ * <p>
+ * <b>Javadoc Practices:</b>
+ * <ul>
+ *   <li>Document every public/protected class, interface, method, and field using clear, comprehensive Javadoc.</li>
+ *   <li>Write meaningful summaries and describe parameters, return values, exceptions.</li>
+ *   <li>Include usage examples in comments where useful.</li>
+ *   <li>Escape &lt; and &gt; as &amp;lt; and &amp;gt; in &lt;pre&gt; blocks.</li>
+ *   <li>Follow the Java version specified in pom.xml.</li>
+ *   <li>Update Javadoc with code changes and regularly review output.</li>
+ * </ul>
+ * <p>
+ * <b>Package location:</b> <code>ghostwriter/src/main/java/org/machanism/machai/gw/reviewer</code>
  */
 package org.machanism.machai.gw.reviewer;
 
@@ -38,7 +45,7 @@ package org.machanism.machai.gw.reviewer;
  *
  * 1. Document All Public and Protected Elements:
  *    - Ensure every public and protected class, interface, method, and field has a comprehensive Javadoc comment.
- *    - Include package-level Javadoc in a `package-info.java` file to describe the package’s purpose and usage.
+ *    - Include package-level Javadoc in a `package-info.java` file to describe the packages purpose and usage.
  *
  * 2. Use Clear and Concise Descriptions:
  *    - Write meaningful summaries that explain the purpose, behavior, and usage of each element.

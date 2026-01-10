@@ -5,79 +5,84 @@
 - Scan `org/machanism/machai/cli` source folder and describe all supported Commands.
 -->
 
-The Machai Command Line Interface (CLI) enables developers and teams to generate, register, and manage library metadata for the Machanism platform directly from the terminal. It is designed to simplify complex project assembly and library integration workflows by harnessing advanced AI-powered features and seamless command access.
+The Machai Command Line Interface (CLI) empowers developers and teams to generate, register, and manage library metadata for the Machanism platform directly from the terminal. Enjoy powerful AI-enabled workflows for seamless project assembly, metadata integration, and document processing, all with minimal manual steps.
 
-![](src/site/resources/images/machai-screenshot.png)
+![Machai CLI Screenshot](src/site/resources/images/machai-screenshot.png)
 
-**Key Features:**
-- Automated Metadata Generation: Rapidly analyze source files to create or update structured `bindex.json` files for Java libraries.
-- Semantic Library Search: Use natural language prompts to discover and select libraries relevant to project requirements.
-- Artifact Registration: Securely register library metadata, making it discoverable and ready for integration within the Machanism ecosystem.
-- GenAI Document Processing: Scan and process files or documents using advanced GenAI features to extract insights or automate tasks.
-- Temporary Resource Cleanup: Remove all `.machai` temporary folders with a single command for streamlined resource management.
+**Key Features**
+- **Automated Metadata Generation** — Instantly analyze and produce `bindex.json` files for Java projects using GenAI.
+- **Semantic Library Search** — Discover, select, and integrate libraries using natural language or query files.
+- **Artifact Registration** — Register library metadata securely to make it visible within the Machanism ecosystem.
+- **GenAI Document Processing** — Process project files and documents for insights or automation tasks via GenAI.
+- **Resource Cleanup** — Recursively remove all `.machai` temporary folders from your workspaces for efficient resource management.
 
 ## Getting Started
-1. **Download the Machai CLI**  
-   You can obtain the latest CLI `.jar` file from:
+
+1. **Download Machai CLI**  
+   Download the latest CLI `.jar` file:
    [![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)
-2. **Set Environment Variables**
-   Ensure you configure these environment variables prior to running metadata generation or registration commands:
+2. **Configure Environment Variables**  
+   Set the following environment variables before running commands:
    
-   | **Variable Name**    | **Description**                                                                                      |
-   |----------------------|------------------------------------------------------------------------------------------------------|
-   | OPENAI_API_KEY       | Your OpenAI API key needed for AI-based features.                                                    |
-   | BINDEX_REG_PASSWORD  | Password for registration database write access (required by `register` command only).               |
-   
+   | Variable Name         | Description                                                        |
+   |----------------------|--------------------------------------------------------------------|
+   | OPENAI_API_KEY       | Your OpenAI API key for AI-powered operations.                     |
+   | BINDEX_REG_PASSWORD  | Password for database write access (required for `register`).       |
+
 3. **Run Machai CLI**  
-   Navigate to the directory containing `machai.jar` and run:
+   In terminal:
    ```bash
    java -jar machai.jar
    ```
-   The CLI will display its banner and prompt for commands. Enter `help` to view all available commands.
+   Enter `help` after launch to see available commands.
 
 ## Supported Commands
 
-The Machai CLI supports a flexible set of commands for library and project management. All commands below are implemented in the `org/machanism/machai/cli` package:
+The CLI provides the following commands (all implemented in `org/machanism/machai/cli`):
 
 ### `bindex`
-Generate or update a `bindex.json` metadata file for a specified directory. Uses GenAI to analyze source code and resources.  
+Create or update a `bindex.json` metadata file for a directory using GenAI analysis.  
 **Usage:** `bindex --dir <project-path> [--update=true] [--genai <model>]`
-- `--update`: If true, updates existing `bindex.json` (default: true)
-- `--genai`: GenAI provider/model (default: OpenAI:gpt-5.1)
+- `--dir` — Directory to scan
+- `--update` — Update mode (default: true)
+- `--genai` — GenAI provider/model (default: OpenAI:gpt-5.1)
 
 ### `register`
-Register a generated `bindex.json` file with the Machanism platform’s registration database.  
+Upload the generated `bindex.json` to the Machanism platform's metadata database.  
 **Usage:** `register --dir <project-path> [--registerUrl <url>] [--update=true]`
-- `--registerUrl`: Target registration database URL
-- `--update`: Update mode (default: true)
+- `--dir` — Directory with source `bindex.json`
+- `--registerUrl` — Target database URL
+- `--update` — Update mode (default: true)
 
 ### `pick`
-Find and select libraries (“bricks”) using natural language, a prompt, or a query file.  
+Discover and select libraries (“bricks”) using a prompt or query file.  
 **Usage:** `pick <prompt or file> [--score <min-score>] [--registerUrl <url>]`
-- `--score`: Min similarity score for results  
-- `--registerUrl`: Registration database URL
+- `--score` — Minimum similarity score  
+- `--registerUrl` — Metadata database URL
 
 ### `assembly`
-Create a new project using selected libraries and an application prompt.  
+Generate a new project from selected libraries and an assembly prompt.  
 **Usage:** `assembly --query <prompt> --dir <output-folder> [--score <min-score>] [--genai <model>] [--registerUrl <url>]`
-- `--score`: Min similarity score for library selection
-- `--genai`: GenAI provider/model  
-- `--registerUrl`: Registration database URL
+- `--query` — Assembly prompt (or use previous pick)
+- `--dir` — Output directory
+- `--score` — Library similarity score filter
+- `--genai` — GenAI provider/model
+- `--registerUrl` — Database URL
 
 ### `prompt`
-Send a free-form prompt to GenAI for guidance or answers.  
+Send a prompt directly to GenAI for suggestions or guidance.  
 **Usage:** `prompt --genai <model> --prompt <query>`
 
 ### `process`
-Scan and process files or documents in a given directory using GenAI.  
+Scan and process documents in a directory using GenAI features.  
 **Usage:** `process --scan <scan-folder> [--root <root-folder>] [--genai <model>]`
-- `--scan`: Directory to scan
-- `--root`: Root directory for context
-- `--genai`: GenAI provider/model (default: OpenAI:gpt-5.1)
+- `--scan` — Directory to scan
+- `--root` — Root context directory
+- `--genai` — GenAI provider/model (default: OpenAI:gpt-5.1)
 
 ### `clean`
-Remove all `.machai` temporary folders from a specified directory (recursive).  
+Recursively delete all `.machai` temporary folders from a target directory.  
 **Usage:** `clean [--dir <project-root>]`
-- Erases all folders named `.machai` within the given location (defaults to user directory)
+- `--dir` — Root directory (defaults to user directory)
 
 <!-- @guidance: DO NOT REMOVE OR MODIFY GUIDANCE TAG CONTENT. KEEP IT AS IS. -->

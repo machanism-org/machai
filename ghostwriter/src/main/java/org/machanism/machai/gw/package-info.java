@@ -1,24 +1,33 @@
 /**
- * Provides classes for document processing and code review automation in projects.
+ * Provides comprehensive classes and utilities for document processing and code review automation across Java projects.
  * <p>
- * This package contains the main classes and utilities to scan project directories,
- * orchestrate document preparation, and interact with AI-powered reviewing tools. Core classes
- * include {@link FileProcessor} for documentation input generation and {@link Ghostwriter}
- * for initializing project-wide document review operations.
- * <br/><br/>
- * General usage involves creating an instance of {@link FileProcessor}, optionally configuring guidance,
- * and running scans against source directories to collect, analyze, and process documentation-related files.
+ * The {@code org.machanism.machai.gw} package centralizes logic for scanning project directories, orchestrating automated documentation creation/update, and managing AI-assisted review processes.
  * <p>
- * Example usage:
+ * Key classes usually include file processors for documentation and review workflow coordination.
+ * <br><br>
+ * <b>Typical Usage Example:</b>
  * <pre>
  * {@code
+ *   // Initialize provider and documentation processor
  *   GenAIProvider provider = GenAIProviderManager.getProvider(null);
  *   DocsProcessor docsProcessor = new DocsProcessor(provider);
+ *   // Scan documents in project directory
  *   docsProcessor.scanDocuments(new File("/path/to/project"));
  * }
  * </pre>
- *
- * For further configuration, see the individual Javadocs of each class.
+ * <p>
+ * <b>Best Practices and Guidance:</b>
+ * <ul>
+ * <li>Always provide meaningful Javadoc for all public/protected classes, methods, fields, and interfaces.</li>
+ * <li>Use <b>@param</b>, <b>@return</b>, and <b>@throws</b> to clarify API contracts, exceptions, and object responsibilities.</li>
+ * <li>Revise and maintain Javadoc with every change, leveraging static analysis and IDE tools.</li>
+ * <li>Escape &lt; and &gt; symbols as &amp;lt; and &amp;gt; for any content within &lt;pre&gt; tags.</li>
+ * <li>Provide usage code snippets for complex logic where helpful for developer onboarding.</li>
+ * <li>Reference the Java version in your <b>pom.xml</b> file (e.g., 17+, as appropriate).</li>
+ * <li>Do not remove or merge <b>@guidance</b> tag comments below. These are mandatory and must remain as defined.</li>
+ * </ul>
+ * <p>
+ * For further details and requirements, inspect the guidance block below and individual Javadoc comments.
  *
  * @author Machanism Team
  * @since 0.0.2

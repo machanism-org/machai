@@ -1,27 +1,28 @@
 /**
- * Provides classes and utilities for creating, assembling, registering, and managing  Bindex documents and
- * semantic search capabilities using AI-powered technologies and MongoDB vector search.
+ * Provides core components and utilities for Bindex document management, semantic AI search, and project folder processing.
  * <p>
- * Main responsibilities handled in this package:
+ * This package contains:
  * <ul>
- *   <li> Bindex registration, creation, and project folder processing</li>
- *   <li>Semantic vector search, classification embeddings, and dependency analysis</li>
- *   <li>Integration with GenAIProvider for generative and prompt-driven indexing tasks</li>
- *   <li>Maven, Python, JScript project builders and layout handling through factory methods</li>
- *   <li>Support for MongoDB-backed document lookup and semantic operations</li>
+ *   <li>Creation and registration of Bindex documents</li>
+ *   <li>Semantic vector search, embeddings, and dependency analysis powered by AI and MongoDB vector search</li>
+ *   <li>Integration with GenAIProvider for generative, prompt-driven indexing and AI-powered operations</li>
+ *   <li>Project layout handling via builders for Maven, Python, JavaScript, and related ecosystems</li>
+ *   <li>Document lookup and semantic management using MongoDB backend</li>
  * </ul>
  * <p>
- * <b>Usage Example:</b>
+ * <b>Example Usage:</b>
  * <pre>
  *     ApplicationAssembly assembly = new ApplicationAssembly(provider);
  *     assembly.assembly(prompt, bindexList, true);
  * </pre>
- *
- * <b>Important Guidance:</b>
+ * <p>
+ * <b>Guidance and Best Practices:</b>
  * <ul>
- *     <li>All public/protected classes, interfaces, and fields must be documented.</li>
- *     <li>Parameters, return values, and exceptions should be described for methods.</li>
- *     <li>Consistent, clear, and comprehensive Javadoc usage throughout the package is required.</li>
+ *   <li>Document all public and protected classes, methods, interfaces, and fields comprehensively</li>
+ *   <li>Describe parameters, returns, and exceptions for every method</li>
+ *   <li>Follow consistent Javadoc style and formatting</li>
+ *   <li>Update Javadoc comments with code changes</li>
+ *   <li>Use IDE/static analysis tools to validate Javadoc completeness</li>
  * </ul>
  *
  * @author Viktor Tovstyi

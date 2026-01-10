@@ -74,7 +74,7 @@ $ mvn clean install
 #### Assembly Command
 - `pick`: Picks libraries based on user request
 - `assembly`: Creates a project via picked library set
-- `prompt`: Request additional GenAI guidance
+- `prompt`: Is used for request additional GenAI guidances
 
 #### Bindex Command
 - `bindex`: Generates bindex files
