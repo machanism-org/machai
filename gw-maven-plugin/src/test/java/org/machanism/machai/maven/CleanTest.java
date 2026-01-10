@@ -1,12 +1,15 @@
 package org.machanism.machai.maven;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
-import org.apache.maven.plugin.MojoExecutionException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.machanism.machai.project.ProjectProcessor;
 
 /**
  * Unit tests for {@link Clean} Maven Mojo.
@@ -32,7 +35,7 @@ public class CleanTest {
      */
     @Test
     void testExecuteCleansInputsLog() {
-        File machaiDir = new File(tempDir, Clean.MACHAI_TEMP_DIR);
+        File machaiDir = new File(tempDir, ProjectProcessor.MACHAI_TEMP_DIR);
         assertTrue(machaiDir.mkdirs());
         File docsLog = new File(machaiDir, "docs-inputs");
         assertDoesNotThrow(() -> docsLog.createNewFile());

@@ -79,6 +79,9 @@ public class Process extends AbstractMojo {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
+
+		FileProcessor.deleteTempFiles(basedir);
+
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		FileProcessor documents = new FileProcessor(provider) {
 			/**

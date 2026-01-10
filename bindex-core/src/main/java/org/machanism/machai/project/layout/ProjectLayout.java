@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.machanism.machai.project.ProjectProcessor;
 
 /**
  * Abstract base class for project layout structures.
@@ -30,9 +31,9 @@ public abstract class ProjectLayout {
 	/**
 	 * Standard set of excluded directories for project structure analysis.
 	 */
-	public static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn", ".machai", "target", "build",
-			".venv", "__", ".pytest_cache", ".idea", ".egg-info", ".classpath", ".settings", "logs", ".settings",
-			".project", ".m2" };
+	public static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
+			ProjectProcessor.MACHAI_TEMP_DIR, "target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
+			".classpath", ".settings", "logs", ".settings", ".project", ".m2" };
 
 	private File projectDir;
 

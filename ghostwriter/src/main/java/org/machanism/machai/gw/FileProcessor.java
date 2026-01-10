@@ -11,6 +11,7 @@ import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
@@ -53,8 +54,10 @@ public class FileProcessor extends ProjectProcessor {
 
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@guidance";
+
 	/** Temporary directory for documentation inputs. */
-	private static final String DOCS_TEMP_DIR = ".machai/docs-inputs";
+	public static final String GW_TEMP_DIR = "docs-inputs";
+
 	/** Resource bundle supplying prompt templates for generators. */
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
@@ -140,6 +143,9 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
+
+		deleteTempFiles(projectDir);
+
 		provider.setWorkingDir(getRootDir(projectDir));
 
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
@@ -231,7 +237,7 @@ public class FileProcessor extends ProjectProcessor {
 			provider.prompt(promptBundle.getString("output_format"));
 
 			String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
-			File docsTempDir = new File(projectDir, DOCS_TEMP_DIR);
+			File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
 			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 
 			provider.inputsLog(inputsFile);
@@ -422,5 +428,10 @@ public class FileProcessor extends ProjectProcessor {
 		this.useParentsGuidances = useParentsGuidances;
 	}
 
-	// @guidance: DO NOT REMOVE OR CHANGE THIS TAG AND CONTENT.
+	public static boolean deleteTempFiles(File basedir) {
+		File file = new File(basedir, FileProcessor.MACHAI_TEMP_DIR + "/" + FileProcessor.GW_TEMP_DIR);
+		logger.info("Removing '{}' inputs log file.", file);
+		boolean delete = FileUtils.deleteQuietly(file);
+		return delete;
+	}
 }
