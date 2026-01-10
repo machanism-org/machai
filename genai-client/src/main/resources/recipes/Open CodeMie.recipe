@@ -1,4 +1,10 @@
 <Recipe name="Open CodeMie">
+	<Listdir name="webDriverDir" path="$var{WorkingDir}/$var{WEBDRIVER_PATH}" /> 
+	<If name="webDriverDir" contains="chromedriver.exe">
+		<Else>
+			<Remove name="WEBDRIVER_PATH" /> 
+		</Else> 
+	</If> 
 	<Loop numbers="60">
 		<If name="!CODEMIE PLUGIN PATH" equals="$var{Project_Dir}">
 			<Break /> 
