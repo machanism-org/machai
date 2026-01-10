@@ -78,12 +78,6 @@ public class Process extends AbstractMojo {
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
     private MavenSession session;
 	
-	/**
-	 * Executes the document processing workflow; scans documents, processes
-	 * modules, and delegates document handling to DocsProcessor.
-	 *
-	 * @throws MojoExecutionException if a document assistance process fails
-	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 

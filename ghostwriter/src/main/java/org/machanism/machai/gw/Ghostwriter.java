@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Entry point for document scanning and review automation.
  * <p>
- * Initializes the AI provider, configures the DocsProcessor,
+ * Initializes the AI provider, configures the Ghostwriter,
  * and runs document scan over the user directory. Output is logged.
  * <p>
  * Example usage:
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Usage is typically direct from command line or script/CI runner.
  *
- * @author Machanism Team
+ * @author Viktor Tovstyi
  * @since 0.0.2
  */
 public class Ghostwriter {

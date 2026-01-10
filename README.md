@@ -1,13 +1,7 @@
 # Machai
 
-Machai is a modular, AI-driven toolkit for automating software project
-setup, semantic indexing, build orchestration, and lifecycle management.
-Powered by GenAI agents—including Ghostwriter, semantic search, metadata
-indexing, and automated code and documentation generation—Machai
-streamlines project integration and assembly. While it is designed to
-work seamlessly within the Machanism ecosystem, Machai can also be used
-independently for a wide range of software automation tasks.
-		
+Machai is a modular, AI-driven toolkit for automating software project setup, semantic indexing, build orchestration, and lifecycle management. Powered by GenAI agents (Ghostwriter, semantic search, metadata indexing, and automated code/documentation generation), Machai streamlines project integration and assembly. While it is designed to work seamlessly within the Machanism ecosystem, Machai can also be used independently for a wide range of software automation tasks.
+
 ## Modules
 
 - [genai-client](/genai-client): Provides remote GenAI endpoint interfaces for contextual automations and AI integrations.

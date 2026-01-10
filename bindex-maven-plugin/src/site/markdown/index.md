@@ -5,21 +5,21 @@ Do not use the horizontal rule separator between sections. -->
 
 [![bindex-maven-plugin](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-Welcome to the `bindex-maven-plugin` project, a Maven extension that automates the creation and management of `bindex.json` files for Java projects. Purpose-built for the Machanism ecosystem, it leverages Generative AI via Machanism to extract, document, and register your project's metadata for integration, semantic search, and ecosystem interoperability.
+Welcome to the bindex-maven-plugin project, a modern Maven extension for automating the creation and management of bindex.json files in Java projects. While purpose-built for the Machanism ecosystem, this plugin leverages Generative AI via Machai to extract, document, and register project metadata for semantic search, integration, and platform interoperability. The plugin’s capabilities extend beyond Machanism, supporting a wide range of AI-driven automation and metadata management scenarios.
 
 ## Key Features
 
-- **Automated Metadata Generation:** Parse and analyze your Maven project to produce a standardized `bindex.json` descriptor including metadata, features, entry points, and examples.
-- **GenAI-Driven Analysis:** Use AI-powered summarization to enhance accuracy and completeness of your project descriptor.
-- **Machanism Platform Integration:** Seamless workflow to register and expose your libraries in the Machanism registry.
-- **Editable Output:** Optionally review and modify generated descriptors before registration.
+- **Automated Metadata Generation:** Parse and analyze Maven projects to produce standardized `bindex.json` descriptors including metadata, features, entry points, and illustrative examples.
+- **GenAI-Driven Analysis:** AI-powered summarization ensures accuracy and completeness for descriptors and documentation.
+- **Machanism Registry Integration:** Seamless workflow for exposing libraries/modules in the Machanism registry.
+- **Editable Output:** Modify and validate generated descriptors before official registration.
 
 ## Getting Started
 
 ### Prerequisites
-- Java 8+
-- Maven 3.6.x+
-- Machanism platform account (optional for registration)
+- Java 8 or newer
+- Apache Maven 3.6.x or newer
+- Machanism account for registration (optional for local usage)
 
 ### Installation
 Add to your `pom.xml`:
@@ -50,43 +50,43 @@ Run:
 mvn bindex:bindex
 ```
 
-#### Manual Review
-Edit `bindex.json` for accuracy after generation if desired.
+#### Review & Edit
+Examine the generated `bindex.json` for project accuracy and completeness. The file may be modified prior to registration.
 
 #### Register Descriptor
-To register on Machanism, run:
+To publish to the Machanism registry, run:
 ```bash
 mvn bindex:register
 ```
 Requirements:
-- `bindex.json` up to date
-- Authentication credentials for Machanism (see platform docs)
+- Ensure `bindex.json` is current.
+- Authentication credentials for Machanism (see platform documentation).
 
-## Configuration
+## Plugin Configuration
 
 Parameters:
 | Parameter             | Description                                                                                                                             | Default   |
 |-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| bindex.inputs.only    | If true, enables debug mode: only critical LLM calls, larger context output to `inputs.txt`.                                            | false     |
+| bindex.inputs.only    | Debug mode for critical LLM input/output, context output to `inputs.txt`.                                                               | false     |
 | bindex.chatModel      | Select AI model for GenAI analysis and descriptor generation.                                                                           | gpt-5     |
-| update               | If true, updates existing `bindex.json`.                                                                                                 | true      |
+| update               | Update existing `bindex.json` when true.                                                                                                | true      |
 
 Example:
 ```bash
 mvn bindex:bindex -Dbindex.chatModel=gpt-5
 ```
 
-## Example Workflow
-1. Prepare/edit your project.
-2. Add plugin to `pom.xml`.
-3. Run the plugin to generate `bindex.json`.
-4. Review/edit output.
-5. Register with Machanism (optional).
+## Typical Workflow
+1. Prepare or update your Java project.
+2. Add the plugin to your `pom.xml`.
+3. Run the plugin to generate a `bindex.json` descriptor.
+4. Review and optionally edit the output descriptor.
+5. Register with Machanism if desired.
 
 ## License
-Apache 2.0
+Apache License 2.0
 
-## Links
+## Useful Links
 - [Machanism Platform](https://machanism.org)
 - [AI Assembly Documentation](https://machanism.org/ai-assembly)
 - [Machai Project on GitHub](https://github.com/machanism-org/machai)

@@ -1,11 +1,15 @@
 /**
- * Provides classes and interfaces representing a non-operational AI Provider implementation.
+ * Provides the stub AI Provider implementation for environments where AI services are disabled, not required, or unavailable.
  * <p>
- * This package contains the {@link NoneProvider} class, which is a stub implementation of the {@link org.machanism.machai.ai.manager.GenAIProvider} interface
- * and does not connect to or operate any Large Language Model (LLM) or AI service. {@code NoneProvider} is intended to be used as a placeholder
- * or for scenarios where AI services are intentionally disabled.
+ * The <b>org.machanism.machai.ai.none</b> package contains classes for the {@link org.machanism.machai.ai.none.NoneProvider} implementation—a non-operative GenAI Provider that does not interact with any LLM or generative AI service. Its primary use cases include:
+ * <ul>
+ *     <li>Security/compliance-driven deployments where external AI services must not be accessed.</li>
+ *     <li>Testing environments to simulate or bypass AI functionality.</li>
+ *     <li>Default/fallback when no active AI provider is configured.</li>
+ * </ul>
  * <p>
- * <b>Usage Example:</b>
+ * All classes, interfaces, methods, and fields in this package are thoroughly documented per the latest guidance, ensuring consistency and clarity for maintainers and consumers.
+ * <p><b>Usage Example:</b>
  * <pre>
  * {@code
  *   GenAIProvider provider = new NoneProvider();
@@ -14,9 +18,20 @@
  * }
  * </pre>
  * <p>
- * All classes, interfaces, methods, and fields in this package should be thoroughly documented following the project guidance. This ensures clarity for users and maintainers.
+ * <b>Documentation Guidance:</b><br>
+ * <ul>
+ *     <li>All public and protected API elements are fully documented with Javadoc, including clear descriptions and parameter/return/exception tags.</li>
+ *     <li>Usage examples are provided for complex features.</li>
+ *     <li>Javadoc is regularly reviewed and kept up to date alongside code changes.</li>
+ *     <li>Formatting and style are consistent and Markdown/HTML conventions are followed.</li>
+ *     <li>Javadoc tools and IDE inspection are leveraged for completeness and correctness.</li>
+ *     <li>Escape <code>&lt;</code> and <code>&gt;</code> as <code>&amp;lt;</code> and <code>&amp;gt;</code> in <code>&lt;pre&gt;</code> blocks.</li>
+ *     <li>Documentation follows the Java version defined in <code>pom.xml</code>.</li>
+ * </ul>
+ * <p>
+ * Please refer to the test suite for unit tests covering all public visible behavior in the package.
  *
- * @see org.machanism.machai.ai.manager.GenAIProvider
+ * @see org.machanism.machai.ai.none.NoneProvider
  */
 package org.machanism.machai.ai.none;
 

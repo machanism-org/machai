@@ -1,4 +1,6 @@
 /**
+ * Package org.machanism.machai.gw.reviewer
+ * <p>
  * Provides reviewer implementations for analyzing source files and extracting custom documentation guidance for automated workflows.
  * <p>
  * <b>Supported formats:</b> Java, Python, TypeScript, HTML/XML, Markdown, and plain text. The reviewers in this package parse files, locate @guidance documentation, and drive code documentation automation.

@@ -3,20 +3,21 @@
 Analyze the source file and create a Maven Site-style introductory home page for your project.
 Do not use the horizontal rule separator between sections. -->
 
-[![assembly-maven-plugin](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
 
-Welcome to the `assembly-maven-plugin` documentation. This plugin streamlines Maven project assembly by employing advanced AI-powered semantic search and automation capabilities from the Machanism platform.
+Welcome to the documentation for the assembly-maven-plugin. This Maven plugin provides advanced AI-driven automation for assembling and initializing Java projects, utilizing semantic search and intelligent configuration capabilities powered by the Machai platform. With assembly-maven-plugin, you can streamline project setup, enhance build orchestration, and benefit from intelligent, context-aware assembly processes for your Java applications. The Machai project is versatile and can be used beyond the Machanism platform, supporting a wide range of AI-driven automation scenarios.
 
 ## Overview
 
-The `assembly-maven-plugin` leverages technology from Machanism to provide automatic and intelligent configuration for Maven projects. By interpreting developer goals and requirements, it accelerates dependency selection, initial setup, and project scaffolding.
+The `assembly-maven-plugin` is designed to accelerate setup and streamline dependency selection in Java projects. Powered by Machanism’s metadata-driven architecture, the plugin interprets developer requirements, recommends suitable libraries, and automates essential project initialization tasks.
 
 ## Key Features
 
-- **Smart Library Suggestions:** Describe your goals in natural language and receive tailored library recommendations from Machanism AI.
-- **Automated Assembly & Initialization:** Instantly set up Maven projects with optimal dependencies and starter files.
-- **Rich Integration:** Works seamlessly with Machanism's metadata-driven assembly through files like `bindex.json`.
-- **Developer Fine-Tuning:** All generated outputs are reviewable, editable, and customizable for precise control.
+- **Intelligent Library Discovery:** Enter natural language goals and receive machine-curated, contextually accurate dependency suggestions.
+- **Automated Assembly:** Instantly bootstrap your Maven project with recommended dependencies, configuration files, and source code structure.
+- **Platform Integration:** Seamless integration with Machanism metadata files such as `bindex.json`, as well as support for other platforms, providing enhanced assembly control and reproducibility.
+- **Full Customization:** All modifications are visible and editable—review, adjust, and refine generated outputs to suit your needs.
+- **Versatile Application:** The Machai project supports a wide range of AI-driven automation scenarios and is not limited to use with the Machanism platform.
 
 ## Getting Started
 
@@ -24,47 +25,47 @@ The `assembly-maven-plugin` leverages technology from Machanism to provide autom
 
 - Java 8 or higher
 - Maven 3.6.x or newer
-- Machanism platform account and API key (compatible with OpenAI or similar providers)
+- Access to GenAI service (compatible with OpenAI or similar providers)
 
 ### Environment Variables
 
 | Variable          | Description                                   |
 |-------------------|-----------------------------------------------|
-| OPENAI_API_KEY    | Required for accessing Machanism's AI features|
+| OPENAI_API_KEY    | OpenAI API key                                |
 
-### Plugin Usage
+### Basic Usage
 
-To assemble your Maven project, use the command below in your project's root:
+To assemble your Maven project using the plugin, run:
 
 ```bash
 mvn org.machanism.machai:assembly-maven-plugin:assembly
 ```
 
-#### What Happens
-- Machanism AI interprets your requirements.
-- Suitable libraries are selected and merged into your `pom.xml`.
-- Source files and configurations are generated or updated for your project.
+#### Workflow
+- Your requirements are analyzed by Machanism AI.
+- Recommended dependencies are merged into your `pom.xml`.
+- Project sources and configurations are created or updated as necessary.
 
-## Configuration
+## Plugin Configuration
 
-You can customize the plugin with the following parameters:
+The following parameters can be set to customize plugin behavior:
 
 | Parameter                      | Description                                                 | Default        |
 |--------------------------------|-------------------------------------------------------------|----------------|
-| `assembly.inputs.only`         | Restricts request to essential data for debugging; saves context | `false`    |
-| `assembly.chatModel`           | Selects the AI model for assembly tasks                     | `gpt-5`        |
-| `pick.chatModel`               | Specifies the model used for library picking                | `gpt-5-mini`   |
-| `assembly.prompt.file`         | Sets the path to your project prompt or concept file        | `project.txt`  |
-| `assembly.score`               | Minimum confidence score for library inclusion              | `0.80`         |
+| `assembly.inputs.only`         | Restrict processing to debug-essential context only          | `false`        |
+| `assembly.chatModel`           | AI model used for assembly tasks                            | `gpt-5`        |
+| `pick.chatModel`               | Model used for library selection                            | `gpt-5-mini`   |
+| `assembly.prompt.file`         | Path to your project concept file                           | `project.txt`  |
+| `assembly.score`               | Minimum confidence score for library recommendations         | `0.80`         |
 
 ### Example Workflow
 
-1. Provide your project's goal (e.g., "Build a Spring Boot REST API for user login using Commercetools.") in `project.txt`.
+1. Define your project concept or goals in `project.txt` (e.g., "Build a Spring Boot REST API for user authentication using Commercetools.").
 2. Run the plugin:
    ```bash
    mvn org.machanism.machai:assembly-maven-plugin
    ```
-3. Specify parameters for customization:
+3. Use custom arguments as needed:
    ```bash
    mvn org.machanism.machai:assembly-maven-plugin:assembly \
      -Dassembly.prompt.file=project.txt \
@@ -76,7 +77,7 @@ You can customize the plugin with the following parameters:
 
 ## License
 
-This project is licensed under the Apache 2.0 License.
+Licensed under the Apache 2.0 License.
 
 ## Resources
 - [Machanism Platform](https://machanism.org)

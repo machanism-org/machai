@@ -1,31 +1,39 @@
 /**
- * The <code>org.machanism.machai.ai.openAI</code> package provides integration and utility classes for interacting with the OpenAI platform.
+ * The {@code org.machanism.machai.ai.openAI} package provides integration and utility classes
+ * for interacting with the OpenAI platform as part of Machanism's generative AI solutions.
  * <p>
- * This package enables seamless communication with OpenAI models and endpoints, facilitating features such as prompt management, embedding, and interaction for generative AI solutions within the Machanism ecosystem.
- * <p>
- * <b>Usage Guidance:</b>
+ * This package enables seamless communication with OpenAI models and endpoints, supporting features such as:
  * <ul>
- *     <li>Document all public and protected classes, interfaces, methods, and fields with comprehensive Javadoc comments.</li>
- *     <li>Use clear and concise descriptions for all API elements and package-level documentation.</li>
- *     <li>Employ <code>@param</code> tags to describe method parameters, <code>@return</code> for return values, and <code>@throws</code> for exceptions.</li>
- *     <li>Include code examples for complex features.</li>
- *     <li>Maintain consistent formatting and update Javadocs with code changes.</li>
- *     <li>Escape &lt; and &gt; inside <code>&lt;pre&gt;</code> blocks within Javadoc.</li>
- *     <li>Ensure compatibility with the Java version specified in the <code>pom.xml</code> file.</li>
- *     <li>Leverage IDE and static analysis tools to validate Javadoc completeness and accuracy.</li>
+ *   <li>Prompt management</li>
+ *   <li>Embedding generation and consumption</li>
+ *   <li>Rich generative AI interaction (completions, chat, semantic search, etc.)</li>
  * </ul>
+ * <b>Usage Guidance:</b>
+ * <ol>
+ *   <li>Document all public and protected classes, interfaces, methods, and fields with comprehensive Javadoc comments.</li>
+ *   <li>Use clear, meaningful summaries that specify functionality and intent.</li>
+ *   <li>Describe parameters, return values, and exceptions using {@code @param}, {@code @return}, {@code @throws} tags.</li>
+ *   <li>Provide code snippets/examples in Javadoc for complex features.</li>
+ *   <li>Maintain a consistent structure and update Javadocs as code evolves.</li>
+ *   <li>Escape &lt; and &gt; symbols inside {@code <pre>} blocks.</li>
+ *   <li>Follow the Java version set in <code>pom.xml</code> for all code generation.</li>
+ *   <li>Routinely employ IDE/static analysis tools to validate Javadoc completeness and quality.</li>
+ * </ol>
  * <p>
- * <b>Example:</b>
+ * <b>Example Usage:</b>
  * <pre>
  * {@code
- * // Example usage of a class in this package:
- * OpenAIClient client = new OpenAIClient(apiKey);
- * String prompt = "Hello, AI!";
- * String response = client.getCompletion(prompt);
- * System.out.println(response);
+ *   OpenAIClient client = new OpenAIClient(apiKey);
+ *   String prompt = "Hello, AI!";
+ *   String response = client.getCompletion(prompt);
+ *   System.out.println(response);
  * }
  * </pre>
- * @see <a href="https://platform.openai.com/docs">OpenAI Documentation</a>
+ *
+ * <p>
+ * For further details and API specifications, visit:
+ * <a href="https://platform.openai.com/docs">OpenAI Platform Documentation</a>
+ * </p>
  */
 
 /*
