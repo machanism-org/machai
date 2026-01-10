@@ -21,6 +21,7 @@
 	<properties>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<java.version>17</java.version>
+		<ae.dir>../genai-client/src/main/resources</ae.dir>
 	</properties>
 
 	<profiles>
@@ -148,16 +149,5 @@
 				<filtering>true</filtering>
 			</resource>
 		</resources>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>com.ganteater</groupId>
-					<artifactId>ae-maven-plugin</artifactId>
-					<configuration>
-						<aeDir>../genai-client/src/main/resources</aeDir>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 </project>

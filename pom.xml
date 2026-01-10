@@ -23,6 +23,7 @@
 
 		<stagingDirectory>${env.MACHAI_SITE}</stagingDirectory>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
+		<ae.dir>genai-client/src/main/resources</ae.dir>
 	</properties>
 
 	<profiles>
@@ -112,7 +113,6 @@
 					<artifactId>ae-maven-plugin</artifactId>
 					<version>1.2.9-SNAPSHOT</version>
 					<configuration>
-						<aeDir>genai-client/src/main/resources</aeDir>
 						<variables>
 							<Project_Dir>${project.basedir}</Project_Dir>
 						</variables>
