@@ -143,11 +143,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.machanism.machai</groupId>
-					<artifactId>gw-maven-plugin</artifactId>
-					<version>0.0.2-SNAPSHOT</version>
-				</plugin>
-				<plugin>
-					<groupId>org.machanism.machai</groupId>
 					<artifactId>bindex-maven-plugin</artifactId>
 					<version>0.0.2-SNAPSHOT</version>
 				</plugin>

@@ -18,44 +18,46 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+/*@guidance: Generate javadoc with a description all maven plugin parameters and examples of usage. */
 
 /**
- * Maven plugin Mojo to handle document processing in a Maven-based project.
+ * Mojo to process project files using GenAI provider.
+ * 
  * <p>
- * This Mojo scans the root directory of the project, processes documentation
- * using an external AI provider and project layout structure, and facilitates
- * automated document assistance. Document scanning can be adjusted to process
- * only inputs or utilize a specific chat model as needed.
+ * This Maven plugin scans documents in the project, facilitated by AI
+ * assistance for documentation generation and processing. It allows
+ * configuration of the chat model provider and manages document scanning
+ * lifecycle.
  * </p>
  *
- * <pre>
- * Example Usage in POM:
- * &lt;plugin&gt;
- *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
- *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
- *   &lt;version&gt;${project.version}&lt;/version&gt;
- *   &lt;executions&gt;
- *     &lt;execution&gt;
- *       &lt;goals&gt;
- *         &lt;goal&gt;process&lt;/goal&gt;
- *       &lt;/goals&gt;
- *     &lt;/execution&gt;
- *   &lt;/executions&gt;
- * &lt;/plugin&gt;
- * </pre>
+ * <h2>Parameters</h2>
+ * <ul>
+ * <li><b>gw.genai</b> - The chat model to use for AI assistance in
+ * documentation generation (e.g., "OpenAI:gpt-5"). Optional, defaults to
+ * "None".</li>
+ * <li><b>basedir</b> - Project base directory. Set by Maven. Required and
+ * readonly.</li>
+ * <li><b>project</b> - The MavenProject instance. Set by Maven. Readonly.</li>
+ * <li><b>session</b> - The Maven Session. Required and readonly.</li>
+ * </ul>
  *
- * @author Viktor Tovstyi
- * @since 0.0.2
+ * <h2>Example Usage</h2>
+ * 
+ * <pre>{@code
+ * mvn org.machanism.machai:machai-maven-plugin:process -Dgw.genai=OpenAI:gpt-5
+ * }</pre>
+ * 
  */
-@Mojo(name = "process", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.GENERATE_SOURCES, threadSafe = false)
+@Mojo(name = "process", threadSafe = false)
 public class Process extends AbstractMojo {
 
 	/** Logger for this class. */
 	private static Logger logger = LoggerFactory.getLogger(Process.class);
 
 	/**
-	 * The chat model to use for AI assistance in documentation generation e.g.
-	 * "OpenAI:gpt-5", default value: "None".
+	 * The chat model to use for AI assistance in documentation generation. <br>
+	 * Example: "OpenAI:gpt-5"<br>
+	 * Default: "None"
 	 */
 	@Parameter(property = "gw.genai")
 	protected String chatModel;

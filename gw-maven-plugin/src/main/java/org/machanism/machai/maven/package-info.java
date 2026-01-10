@@ -1,17 +1,17 @@
 /**
- * Provides Mojo implementations for Maven-based document processing using
- * GenAI-powered workflows. The classes in this package enable scanning, updating,
- * and managing documentation in Maven projects utilizing advanced AI provider support.
- *
+ * The {@code org.machanism.machai.maven} package provides comprehensive support for Maven plugin development, focusing on GenAI-powered document processing automation for Java projects.
  * <p>
- * This package aims to automate and streamline documentation tasks in Maven projects
- * by leveraging the power of GenAI and Maven project layout abstractions. It is designed
- * for users who wish to add, review, or improve project documentation automatically
- * during the build lifecycle.
+ * <b>Purpose:</b>
+ * This package is designed to streamline, automate, and enhance documentation workflows within Maven lifecycles by integrating intelligent, extensible solutions. It enables:
+ * <ul>
+ *   <li>Automated scanning, updating, assembling, and cleaning documents in source and resource directories.</li>
+ *   <li>Intelligent integration with GenAI providers for content suggestion and documentation synthesis.</li>
+ *   <li>Extensible APIs for building and customizing Maven goals.</li>
+ * </ul>
  * </p>
  *
+ * <b>Usage Example:</b>
  * <pre>
- * Example Usage:
  * &lt;plugin&gt;
  *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
  *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
@@ -25,6 +25,15 @@
  *   &lt;/executions&gt;
  * &lt;/plugin&gt;
  * </pre>
+ *
+ * <b>Best Practices:</b>
+ * <ul>
+ *   <li>Document all public and protected classes, interfaces, methods, and fields with comprehensive Javadoc.</li>
+ *   <li>Align usage with Java version as defined in <tt>pom.xml</tt>.</li>
+ *   <li>Refer to Mojo documentation for goal configuration and extension points.</li>
+ * </ul>
+ *
+ * <b>Java Version:</b> See <tt>pom.xml</tt> for target compatibility and Javadoc options.
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

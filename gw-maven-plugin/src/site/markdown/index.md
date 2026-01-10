@@ -5,19 +5,19 @@ Do not use the horizontal rule separator between sections. -->
 
 ## Overview
 
-The **GW Maven Plugin** (Ghostwriter Maven Plugin) provides automated documentation generation for Maven-based Java projects. Using embedded guidance tags within your source and configuration files, it scans your project, interprets instructions, and assembles project documentation that follows your specific needs and best practices. Seamlessly integrated with the Maven Site lifecycle, GW Maven Plugin helps maintain consistency, accuracy, and quality in your technical documentation.
+**GW Maven Plugin** (Ghostwriter Maven Plugin) streamlines documentation for Maven-based Java projects by leveraging embedded guidance tags to generate and keep documentation current with your source code and requirements. Integrated with the Maven Site lifecycle, it ensures your documentation remains accurate and up-to-date.
 
 ## Features
 
-- Automated Java project documentation
-- Interprets guidance tags for custom documentation rules
-- Analyzes source code for comprehensive references
-- Ensures documentation stays current and relevant
-- Supports modular Maven project structures
+- Automatic documentation generation for Java projects
+- Customizable output using guidance tags
+- Dynamic analysis of code and documentation sources
+- Documentation always reflects recent project changes
+- Compatible with modular and multi-module Maven project structures
 
 ## Getting Started
 
-To get started, add GW Maven Plugin to your `pom.xml`:
+To add GW Maven Plugin to your Maven project, include the following in your `pom.xml`:
 
 ```xml
 <plugin>
@@ -27,13 +27,13 @@ To get started, add GW Maven Plugin to your `pom.xml`:
 </plugin>
 ```
 
-Then execute:
+Generate your site documentation with:
 
 ```sh
 mvn site
 ```
 
-to produce automated documentation in the Maven site output directory.
+This will produce updated project documentation in your configured Maven site output directory.
 
 ## Requirements
 
@@ -42,4 +42,4 @@ to produce automated documentation in the Maven site output directory.
 
 ## License
 
-This project is licensed under the Apache License, Version 2.0.
+Licensed under the Apache License, Version 2.0.
