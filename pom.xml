@@ -23,7 +23,7 @@
 		<maven.version>3.6.0</maven.version>
 		<stagingDirectory>${env.MACHAI_SITE}</stagingDirectory>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
-		<ae.dir>genai-client/src/main/resources</ae.dir>
+		<ae.dir>genai-client/src/main/ae</ae.dir>
 	</properties>
 
 	<profiles>
@@ -127,27 +127,27 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-plugin-plugin</artifactId>
-					<version>3.15.2</version>
-					<configuration>
-						<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-					</configuration>
-					<executions>
-						<execution>
-							<id>mojo-descriptor</id>
-							<goals>
-								<goal>descriptor</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.machanism.machai</groupId>
-					<artifactId>bindex-maven-plugin</artifactId>
-					<version>0.0.2-SNAPSHOT</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+						<artifactId>maven-plugin-plugin</artifactId>
+						<version>3.15.2</version>
+						<configuration>
+							<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+						</configuration>
+						<executions>
+							<execution>
+								<id>mojo-descriptor</id>
+								<goals>
+									<goal>descriptor</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.machanism.machai</groupId>
+						<artifactId>bindex-maven-plugin</artifactId>
+						<version>0.0.2-SNAPSHOT</version>
+					</plugin>
+				</plugins>
+			</pluginManagement>
 
 		<plugins>
 			<plugin>
