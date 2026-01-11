@@ -318,8 +318,11 @@ public class FileProcessor extends ProjectProcessor {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
 			List<String> dirs = sources.stream().filter(t -> {
-				File file = new File(projectDir, t);
-				boolean exists = file.exists();
+				boolean exists = false;
+				if (t != null) {
+					File file = new File(projectDir, t);
+					exists = file.exists();
+				}
 				return exists;
 			}).map(e -> {
 				String path = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
