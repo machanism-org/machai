@@ -39,7 +39,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	/**
 	 * The chat model identifier used by Bindex AI provider.
 	 */
-	@Parameter(property = "bindex.chatModel", defaultValue = "OpenAI:gpt-5")
+	@Parameter(property = "bindex.genai", defaultValue = "OpenAI:gpt-5")
 	protected String chatModel;
 
 	/**
