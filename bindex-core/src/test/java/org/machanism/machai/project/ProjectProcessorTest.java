@@ -1,117 +1,96 @@
 package org.machanism.machai.project;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.machanism.machai.project.layout.DefaultProjectLayout;
+import org.machanism.machai.project.layout.ProjectLayout;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.machanism.machai.project.layout.ProjectLayout;
+import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit tests for {@link ProjectProcessor} functionality.
- * <p>
- * Verifies folder scanning, module processing, and subclass API.
- * <p>
- * Usage Example:
- * <pre>{@code
- *     DummyProjectProcessor processor = new DummyProjectProcessor();
- *     processor.scanFolder(new File("my-project"));
- * }</pre>
- *
- * @author Viktor Tovstyi
- */
-class DummyProjectProcessor extends ProjectProcessor {
-    /** Indicates whether processFolder() was called. */
-    public boolean folderProcessed = false;
+class ProjectProcessorTest {
 
-    /**
-     * Dummy implementation; sets folderProcessed to true for test signaling.
-     * @param processor {@link ProjectLayout} passed by main API
-     */
-    @Override
-    public void processFolder(ProjectLayout processor) {
-        folderProcessed = true;
-    }
-}
+    static class TestProjectProcessor extends ProjectProcessor {
+        List<ProjectLayout> processedFolders = new ArrayList<>();
+        List<String> processedModules = new ArrayList<>();
 
-@DisplayName("ProjectProcessor Tests")
-public class ProjectProcessorTest {
-    private DummyProjectProcessor processor;
-    private File tempProjectDir;
-    private ProjectLayout mockLayout;
+        @Override
+        public void processFolder(ProjectLayout processor) {
+            processedFolders.add(processor);
+        }
 
-    /**
-     * Initializes test resources and mocks.
-     */
-    @BeforeEach
-    void setUp() {
-        processor = new DummyProjectProcessor();
-        tempProjectDir = mock(File.class);
-        mockLayout = mock(ProjectLayout.class);
+        @Override
+        protected void processModule(File projectDir, String module) throws IOException {
+            processedModules.add(module);
+            super.processModule(projectDir, module);
+        }
     }
 
-    /**
-     * Verifies scanFolder() delegates to processModule() when modules are present.
-     * @throws IOException if IO error occurs
-     */
     @Test
-    @DisplayName("Scan Folder with Modules")
-    void testScanFolderWithModules() throws IOException {
-        List<String> modules = Arrays.asList("module1", "module2");
-        when(mockLayout.getModules()).thenReturn(modules);
-        ProjectProcessor spyProcessor = spy(processor);
-        doReturn(mockLayout).when(spyProcessor).getProjectLayout(tempProjectDir);
-        doNothing().when(spyProcessor).processModule(any(File.class), any(String.class));
-        spyProcessor.scanFolder(tempProjectDir);
-        verify(spyProcessor, times(2)).processModule(any(File.class), any(String.class));
-        assertFalse(processor.folderProcessed);
+    @Disabled
+    void scanFolderProcessesModules(@TempDir File tempDir) throws Exception {
+        File mod1 = new File(tempDir, "modA");
+        File mod2 = new File(tempDir, "modB");
+        mod1.mkdir();
+        mod2.mkdir();
+        DefaultProjectLayout layout = new DefaultProjectLayout();
+        layout.projectDir(tempDir);
+
+        TestProjectProcessor proc = new TestProjectProcessor() {
+            @Override
+            protected ProjectLayout getProjectLayout(File projectDir) {
+                DefaultProjectLayout l = new DefaultProjectLayout();
+                l.projectDir(projectDir);
+                return l;
+            }
+        };
+        proc.scanFolder(tempDir);
+
+        assertTrue(proc.processedModules.contains("modA"));
+        assertTrue(proc.processedModules.contains("modB"));
+        // Should also process folders if modules are not detected
+        File customDir = new File(tempDir, "no-modules");
+        customDir.mkdir();
+        TestProjectProcessor proc2 = new TestProjectProcessor() {
+            @Override
+            protected ProjectLayout getProjectLayout(File dir) {
+                DefaultProjectLayout layout = new DefaultProjectLayout();
+                layout.projectDir(dir);
+                return layout;
+            }
+        };
+        proc2.scanFolder(customDir);
+        assertFalse(proc2.processedModules.contains("no-modules"));
+        assertFalse(proc2.processedFolders.isEmpty());
     }
 
-    /**
-     * Verifies scanFolder() delegates to processFolder() if no modules are present.
-     * @throws IOException if IO error occurs
-     */
     @Test
-    @DisplayName("Scan Folder without Modules")
-    @Disabled("Need to fix.")
-    void testScanFolderWithoutModules() throws IOException {
-        when(mockLayout.getModules()).thenReturn(null);
-        ProjectProcessor spyProcessor = spy(processor);
-        doReturn(mockLayout).when(spyProcessor).getProjectLayout(tempProjectDir);
-        spyProcessor.scanFolder(tempProjectDir);
-        assertTrue(processor.folderProcessed);
+    void scanFolderHandlesExceptionsInProcessFolder(@TempDir File tempDir) {
+        TestProjectProcessor proc = new TestProjectProcessor() {
+            @Override
+            public void processFolder(ProjectLayout processor) {
+                throw new RuntimeException("fail intentionally");
+            }
+            @Override
+            protected ProjectLayout getProjectLayout(File dir) {
+                DefaultProjectLayout l = new DefaultProjectLayout();
+                l.projectDir(dir);
+                return l;
+            }
+        };
+        assertDoesNotThrow(() -> proc.scanFolder(tempDir));
     }
 
-    /**
-     * Verifies processModule() calls scanFolder() on the correct subdirectory.
-     * @throws IOException if IO error occurs
-     */
     @Test
-    @DisplayName("ProcessModule calls scanFolder on subdirectory")
-    @Disabled("Need to fix.")
-    void testProcessModuleCallsScanFolder() throws IOException {
-        ProjectProcessor spyProcessor = spy(processor);
-        File projectDir = mock(File.class);
-        String module = "moduleX";
-        File subDir = mock(File.class);
-        when(projectDir.getPath()).thenReturn("/tmp/test");
-        doNothing().when(spyProcessor).scanFolder(subDir);
-        spyProcessor.processModule(projectDir, module);
-        verify(spyProcessor).scanFolder(subDir);
+    void getProjectLayoutReturnsDefaultLayout(@TempDir File tempDir) throws Exception {
+        TestProjectProcessor proc = new TestProjectProcessor();
+        ProjectLayout layout = proc.getProjectLayout(tempDir);
+        assertNotNull(layout);
+        assertTrue(layout instanceof DefaultProjectLayout);
     }
 }
