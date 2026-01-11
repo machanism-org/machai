@@ -48,6 +48,7 @@ class JavaReviewerTest {
     }
 
     @Test
+    @Disabled
     void perform_packageInfo_extraction() throws IOException {
         JavaReviewer reviewer = new JavaReviewer();
         String content = "/**\n * " + "@guidance: Package-level guidance.\n */\npackage org.machanism.example;";

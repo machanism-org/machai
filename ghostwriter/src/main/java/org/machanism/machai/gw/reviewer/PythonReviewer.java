@@ -47,8 +47,8 @@ public class PythonReviewer implements Reviewer {
 		String content = Files.readString(guidancesFile.toPath());
 		String result = null;
 		if (StringUtils.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
-			Pattern pattern = Pattern.compile("(?:#\\s*" + FileProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*))"
-					+ "|(?:[\"\']{3}\\s*" + FileProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*[\"\']{3})", Pattern.DOTALL);
+			Pattern pattern = Pattern.compile("(?:#\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
+					+ "|(?:[\"\']{3}\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*[\"\']{3})", Pattern.DOTALL);
 			Matcher matcher = pattern.matcher(content);
 			if (matcher.find()) {
 				String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);

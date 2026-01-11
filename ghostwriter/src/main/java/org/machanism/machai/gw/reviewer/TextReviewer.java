@@ -19,7 +19,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 public class TextReviewer implements Reviewer {
 
-	private static final String GUIDANCE_FILE_NAME = FileProcessor.GUIDANCE_TAG_NAME + ".txt";
+	private static final String GUIDANCE_FILE_NAME = "@guidance.txt";
 
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 	private Map<String, String> dirGuidanceMap;

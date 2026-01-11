@@ -48,13 +48,15 @@ public class JavaReviewer implements Reviewer {
 		String result = null;
 		if (StringUtils.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
 			Pattern pattern = Pattern.compile("(?:/\\*.*?" + FileProcessor.GUIDANCE_TAG_NAME
-					+ ":\\s*(.*?)\\s*\\*/)|(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*))", Pattern.DOTALL);
+					+ "\\s*(.*?)\\s*\\*/)|(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))", Pattern.DOTALL);
 			Matcher matcher = pattern.matcher(content);
 			if (matcher.find()) {
 				if (StringUtils.equals(guidancesFile.getName(), "package-info.java")) {
-					String guidanceText = matcher.group(1).replaceAll("(?m)^\\s*\\*\\s?", "").trim();
-					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
-					result = MessageFormat.format(promptBundle.getString("java_package_info_file"), relatedPath,
+					String group = matcher.group(1);
+					String guidanceText = group.replaceAll("(?m)^\\s*\\*\\s?", "").trim();
+					String relatedDirPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
+					String relatedFilePath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
+					result = MessageFormat.format(promptBundle.getString("java_package_info_file"), relatedFilePath, relatedDirPath,
 							extractPackageName(content), guidanceText);
 				} else {
 					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);

@@ -44,7 +44,7 @@ public class MarkdownReviewer implements Reviewer {
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String content = Files.readString(guidancesFile.toPath());
 
-		Pattern pattern = Pattern.compile("<!--\\s*" + FileProcessor.GUIDANCE_TAG_NAME + ":\\s*(.*?)\\s*-->",
+		Pattern pattern = Pattern.compile("<!--\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*-->",
 				Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(content);
 

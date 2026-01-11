@@ -53,7 +53,7 @@ public class FileProcessor extends ProjectProcessor {
 	private static Logger logger = LoggerFactory.getLogger(FileProcessor.class);
 
 	/** Tag name for guidance comments. */
-	public static final String GUIDANCE_TAG_NAME = "@guidance";
+	public static final String GUIDANCE_TAG_NAME = "@guidance:";
 
 	/** Temporary directory for documentation inputs. */
 	public static final String GW_TEMP_DIR = "docs-inputs";
@@ -368,7 +368,7 @@ public class FileProcessor extends ProjectProcessor {
 			File[] files = projectDir.listFiles();
 			if (files != null) {
 				for (File file : files) {
-					if (!StringUtils.containsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
+					if (!StringUtils.equalsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
 						if (file.isDirectory()) {
 							result.addAll(findFiles(file));
 						} else {
