@@ -22,7 +22,7 @@
 
 	<properties>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
-		<ae.dir>../genai-client/src/main/ae</ae.dir>
+		<ae.dir>src/main/ae</ae.dir>
 	</properties>
 
 	<dependencies>
