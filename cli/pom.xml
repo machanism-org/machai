@@ -21,7 +21,7 @@
 	<properties>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<java.version>17</java.version>
-		<ae.dir>../genai-client/src/main/resources</ae.dir>
+		<ae.dir>../genai-client/src/main/ae</ae.dir>
 	</properties>
 
 	<profiles>
@@ -144,6 +144,9 @@
 
 	<build>
 		<resources>
+			<resource>
+				<directory>../genai-client/src/main/ae</directory>
+			</resource>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
 				<filtering>true</filtering>

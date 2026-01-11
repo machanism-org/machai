@@ -25,7 +25,7 @@
 
 	<properties>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
-		<ae.dir>../genai-client/src/main/resources</ae.dir>
+		<ae.dir>../genai-client/src/main/ae</ae.dir>
 	</properties>
 
 	<dependencies>
@@ -81,6 +81,11 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>../genai-client/src/main/ae</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
