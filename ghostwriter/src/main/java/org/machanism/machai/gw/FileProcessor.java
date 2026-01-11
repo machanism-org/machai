@@ -22,32 +22,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Processor for project documentation generation.
- * <p>
- * Scans project sources, applies file reviewers for extracting documentation
- * guidance, and orchestrates the input preparation for large language model
- * document generation.
- * <p>
- * Example usage:
- * 
- * <pre>
- * {@code
- * GenAIProvider provider = ...; // Obtain your provider
- * FileProcessor processor = new FileProcessor(provider);
- * processor.scanDocuments(new File("/path/to/project"));
- * }
- * </pre>
- * <p>
- * The processor coordinates reviewers for supported file types and prepares the
- * document inputs according to best practice guidance.
- * <p>
- * All public and protected methods and fields are documented as per package
- * guidance.
- *
- * @author Viktor Tovstyi
- * @since 0.0.2
- */
 public class FileProcessor extends ProjectProcessor {
 	/** Logger for documentation input processing events. */
 	private static Logger logger = LoggerFactory.getLogger(FileProcessor.class);

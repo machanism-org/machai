@@ -9,24 +9,6 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Unit tests for the {@link FileProcessor} covering all public and protected methods.
- * <p>
- * Example usage:
- * <pre>
- * {@code
- * FileProcessor processor = new FileProcessor(mockProvider);
- * processor.setInheritance(true);
- * assertTrue(processor.isInheritance());
- * }
- * </pre>
- * <p>
- * These tests validate the configuration parameters, correct working directory logic,
- * and document scanning API behavior. Validates edge cases for inheritance and parent guidance settings.
- *
- * @author Machanism Team
- * @since 0.0.2
- */
 class FileProcessorTest {
     private FileProcessor processor;
     private GenAIProvider provider;
