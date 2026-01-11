@@ -27,10 +27,10 @@ To add GW Maven Plugin to your Maven project, include the following in your `pom
 </plugin>
 ```
 
-Generate your site documentation with:
+How to run:
 
 ```sh
-mvn site
+mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:process -Dgenai=Web:CodeMie
 ```
 
 This will produce updated project documentation in your configured Maven site output directory.
