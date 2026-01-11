@@ -1,19 +1,3 @@
-/**
- * Provides foundational building functionalities as part of the <code>org.machanism.machai.bindex.builder</code> package.
- * <p>
- * This package contains utility classes, builders, and supporting logic for constructing and managing components within the Bindex framework. 
- * Use the classes in this package to implement component creation, configuration, and other construction-related tasks essential for Machanism AI extensions.
- * <p>
- * Guidelines for maintaining this package:
- * <ul>
- *   <li>Comprehensive Javadoc must be provided for all public/protected elements.</li>
- *   <li>Describe the purpose, parameters, return values, exceptions, and usage examples clearly for each class and method.</li>
- *   <li>Update the documentation promptly with any code changes.</li>
- *   <li>Usage of <code>@guidance</code> below is informational and not a Javadoc tag. Do not merge with this comment or remove it.</li>
- * </ul>
- * <p>
- * For more information about usage, see individual class documentation, ensure unit tests and review guidance below.
- */
 package org.machanism.machai.bindex.builder;
 
 /*
