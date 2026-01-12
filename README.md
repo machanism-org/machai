@@ -1,6 +1,7 @@
 ![](src/site/resources/images/machai-logo.png)
 
 # Machai
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
 Machai is a modular, AI-driven toolkit for automating software project setup, semantic indexing, build orchestration, and lifecycle management. Powered by GenAI agents (Ghostwriter, semantic search, metadata indexing, and automated code/documentation generation), Machai streamlines project integration and assembly. While it is designed to work seamlessly within the Machanism ecosystem, Machai can also be used independently for a wide range of software automation tasks.
 
