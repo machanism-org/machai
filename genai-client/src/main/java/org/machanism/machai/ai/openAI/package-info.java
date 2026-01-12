@@ -1,29 +1,28 @@
-package org.machanism.machai.ai.openAI;
-
-/*-
- * @guidance:
+/**
+ * Provides integration with OpenAI API, enabling generative AI capabilities such as prompt management, model interaction,
+ * file handling, and vector embedding functionalities.
+ * <p>
+ * The classes in this package abstract interactions with the OpenAI API, facilitating tasks such as:
+ * <ul>
+ *   <li>Sending text and file-based prompts to LLMs (Large Language Models).</li>
+ *   <li>Obtaining model-generated responses in various formats.</li>
+ *   <li>Uploading, referencing, and managing files for AI workflows.</li>
+ *   <li>Creating and using embeddings for semantic search and similarity matching.</li>
+ *   <li>Customizing tools to extend model capabilities and function execution.</li>
+ *   <li>Managing session state, instructions, logging, and working directories.</li>
+ * </ul>
+ * <p>
+ * This package is designed for developers who want to integrate advanced OpenAI features into their applications with a simplified API overlay,
+ * supporting both synchronous and asynchronous operations, extensible tooling, and easy configuration.
+ * <p>
+ * <strong>Usage Example:</strong>
+ * <pre>
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+ * provider.prompt("What is the capital of France?");
+ * String result = provider.perform();
+ * System.out.println(result); // Output: Paris
+ * </pre>
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!**
- * 
- * - Use Clear and Concise Descriptions:
- * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
- * 		- Avoid vague statements; be specific about functionality and intent.
- * 
- * - Update `package-info.java`:
- *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package�s overall purpose and usage.
- *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
- *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
- *      
- * -  Include Usage Examples Where Helpful:
- * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * 
- * -  Maintain Consistency and Formatting:
- * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
- * 
- * -  Update Javadoc with Code Changes:
- * 		- Revise Javadoc comments whenever code is modified to ensure documentation remains accurate and up to date.
- * 
- * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ * Thread safety: Classes in this package are NOT thread-safe unless explicitly documented otherwise.
  */
+package org.machanism.machai.ai.openAI;

@@ -51,8 +51,11 @@ package org.machanism.machai.project;
  * 		- Follow a consistent style and structure for all Javadoc comments.
  * 		- Use proper Markdown or HTML formatting for readability.
  * 
- * -  Update Javadoc with Code Changes:
- * 		- Revise Javadoc comments whenever code is modified to ensure documentation remains accurate and up to date.
+ * - Add Javadoc:
+ *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
+ *          methods, and fields, adhering to established best practices.
+ *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
+ *          and any exceptions thrown.
  * 
  * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */
