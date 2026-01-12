@@ -3,7 +3,7 @@
 Analyze the source file and create a Maven Site-style introductory home page for your project.
 Do not use the horizontal rule separator between sections. -->
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
 Welcome to the documentation for the assembly-maven-plugin. This Maven plugin provides advanced AI-driven automation for assembling and initializing Java projects, utilizing semantic search and intelligent configuration capabilities powered by the Machai platform. With assembly-maven-plugin, you can streamline project setup, enhance build orchestration, and benefit from intelligent, context-aware assembly processes for your Java applications. The Machai project is versatile and can be used beyond the Machanism platform, supporting a wide range of AI-driven automation scenarios.
 
