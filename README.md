@@ -16,7 +16,7 @@ Machai is a modular, AI-driven toolkit for automating software project setup, se
 
 To clone and build Machai:
 
-~~~bash
+```bash
 # Prerequisites:
 # - Java 9 or newer
 # - Maven 3.6 or newer
@@ -24,26 +24,26 @@ To clone and build Machai:
 git clone https://github.com/machanism-org/machai.git
 cd machai
 mvn clean install
-~~~
+```
 
 ## Usage
 
 To run the CLI:
 
-~~~bash
+```bash
 cd cli
 mvn exec:java
-~~~
+```
 
 To use Machai Maven plugins, add to your `pom.xml`:
 
-~~~xml
+```xml
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
   <version>0.0.2-SNAPSHOT</version>
 </plugin>
-~~~
+```
 
 Module directories provide individual usage documentation and examples.
 
