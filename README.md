@@ -1,6 +1,43 @@
+<!--
+@guidance:
+**ADD FOLLOWING SECTIONS TO THIS README FILE:**
+
+1. **Project Title and Overview:**  
+   - Provide the project name and a brief description based on `src\site\markdown\index.md` content summary.
+   - Add `![](src/site/resources/images/machai-logo.png)` before the title.
+   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)` after the title as a new paragraph.
+   
+2. **Module List:**  
+   - List all modules in the project.
+   - For each module, include its name, a short description, and a link to its module.
+
+3. **Installation Instructions:**  
+   - Describe how to clone the repository and build the project (e.g., using Maven or Gradle).
+   - Include prerequisites such as Java version and build tools.
+
+4. **Usage:**  
+   - Explain how to run or use the project and its modules.
+   - Provide example commands or code snippets if applicable.
+
+5. **Contributing:**  
+   - Outline guidelines for contributing to the project, including code style, pull request process, and issue reporting.
+
+6. **License:**  
+   - State the project’s license and provide a link to the license file.
+
+7. **Contact and Support:**  
+   - Include contact information or links for support and further questions.
+
+**Formatting Requirements:**
+- Use Markdown syntax for headings, lists, code blocks, and links.
+- Ensure clarity and conciseness in each section.
+- Organize the README for easy navigation and readability.
+-->
+
 ![](src/site/resources/images/machai-logo.png)
 
 # Machai
+
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
 Machai is a modular, AI-driven toolkit for automating software project setup, semantic indexing, build orchestration, and lifecycle management. Powered by GenAI agents (Ghostwriter, semantic search, metadata indexing, and automated code/documentation generation), Machai streamlines project integration and assembly. While it is designed to work seamlessly within the Machanism ecosystem, Machai can also be used independently for a wide range of software automation tasks.
@@ -19,7 +56,7 @@ Machai is a modular, AI-driven toolkit for automating software project setup, se
 
 To clone and build Machai:
 
-```bash
+~~~bash
 # Prerequisites:
 # - Java 9 or newer
 # - Maven 3.6 or newer
@@ -27,26 +64,26 @@ To clone and build Machai:
 git clone https://github.com/machanism-org/machai.git
 cd machai
 mvn clean install
-```
+~~~
 
 ## Usage
 
 To run the CLI:
 
-```bash
+~~~bash
 cd cli
 mvn exec:java
-```
+~~~
 
 To use Machai Maven plugins, add to your `pom.xml`:
 
-```xml
+~~~xml
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
   <version>0.0.2-SNAPSHOT</version>
 </plugin>
-```
+~~~
 
 Module directories provide individual usage documentation and examples.
 
@@ -59,7 +96,7 @@ Module directories provide individual usage documentation and examples.
 
 ## License
 
-Machai is distributed under the [Apache License, Version 2.0](LICENSE.txt).
+Machai is distributed under the [Apache License, Version 2.0](../../LICENSE.txt).
 
 ## Contact and Support
 
