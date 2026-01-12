@@ -4,13 +4,21 @@
  * This package offers entry points and extensibility for connecting, managing, and using diverse AI models and services. It includes interfaces
  * for prompt handling, model selection, registration of external providers, and safe tool attachment. Sub-packages contain specialized adapters and utilities:
  * <ul>
- *   <li><code>manager</code> – Core interfaces, AI managers, command and file tool integration, and extensibility infrastructure.</li>
- *   <li><code>openAI</code> – Integration classes for OpenAI APIs (e.g., GPT, embeddings, file handling).</li>
- *   <li><code>none</code> – Stub providers for disabling services while preserving compatibility and enabling logging.</li>
- *   <li><code>web</code> – Remote/web AI orchestrator and communication adapters.</li>
+ *   <li><b>manager</b> – Core interfaces, AI managers, command and file tool integration, and extensibility infrastructure.</li>
+ *   <li><b>openAI</b> – Integration classes for OpenAI APIs (e.g., GPT, embeddings, file handling).</li>
+ *   <li><b>none</b> – Stub providers for disabling services while preserving compatibility and enabling logging.</li>
+ *   <li><b>web</b> – Remote/web AI orchestrator and communication adapters.</li>
  * </ul>
  * <p>
- * Usage illustrates provider selection and prompt execution:
+ * <b>Sub-packages:</b>
+ * <ul>
+ *   <li><b>org.machanism.machai.ai.manager</b>: Contains core provider interfaces (e.g. {@link org.machanism.machai.ai.manager.GenAIProvider}), manager classes (e.g. {@link org.machanism.machai.ai.manager.GenAIProviderManager}), and extensibility/utility infrastructure for integrating new models and tools.</li>
+ *   <li><b>org.machanism.machai.ai.openAI</b>: Contains integration classes for OpenAI APIs (GPT models, embeddings, file management, configuration).</li>
+ *   <li><b>org.machanism.machai.ai.none</b>: Provides stub/no-op provider implementations to explicitly disable generative AI while maintaining system compatibility and audit logging.</li>
+ *   <li><b>org.machanism.machai.ai.web</b>: Offers adapters for remote orchestrator/web-based communication and invocation of external AI services.</li>
+ * </ul>
+ * <p>
+ * <b>Usage Example</b>
  * <pre>
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4");
  * provider.prompt("Generate a short story.");

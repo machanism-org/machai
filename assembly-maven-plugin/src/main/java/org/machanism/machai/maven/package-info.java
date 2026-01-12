@@ -1,18 +1,21 @@
 /**
- * Provides Maven plugin support for AI-powered intelligent project assembly and dependency management.
  * <p>
- * The <code>org.machanism.machai.maven</code> package contains classes for automating and streamlining
- * project setup, dependency selection, and assembly tasks using generative AI models. Key components
- * include plugin goals, interactive prompts, model selection, and score-based recommendations for libraries.
- * <p>
- * <b>Main Features:</b>
+ * Provides Maven plugin support for intelligent AI-powered project assembly,
+ * interactive dependency management, and streamlined setup workflows. The
+ * <code>org.machanism.machai.maven</code> package contains classes such as Mojo
+ * implementations and helpers for using generative AI models in the project initialization,
+ * assembly, recommendation, and metadata registration tasks.
+ * </p>
+ *
+ * <p><b>Main Features:</b></p>
  * <ul>
- *   <li>Defines Maven Mojo implementations to guide AI-driven project assembly workflows.</li>
- *   <li>Supports selection of assembly or picking chat models for optimal interaction and recommendation quality.</li>
- *   <li>Handles project metadata registration and prompt-based configuration/initialization.</li>
+ *   <li>Defines Maven Mojo(s) to automate project assembly and dependency picking using AI chat models.</li>
+ *   <li>Supports interactive configuration via command line and prompt files.</li>
+ *   <li>Integrates with GenAI providers for library recommendation and score-based filtering.</li>
+ *   <li>Registers project metadata and facilitates optimal model selection for different assembly and picking purposes.</li>
  * </ul>
- * <p>
- * Example Usage:
+ *
+ * <p><b>Usage Example:</b></p>
  * <pre>
  * &lt;plugin&gt;
  *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
@@ -27,13 +30,9 @@
  * &lt;/plugin&gt;
  * </pre>
  * <p>
- * For interactive usage:
- * <pre>
- * $ mvn org.machanism.machai:assembly-maven-plugin:assembly
- * </pre>
- * <p>
- * Classes in this package should include comprehensive Javadoc explaining their specific roles, behavior,
- * and example usage as appropriate.
+ * Classes in this package include comprehensive Javadoc describing their roles, parameters, and
+ * example usages for assembling and managing Java projects with AI-driven workflows.
+ * </p>
  */
 package org.machanism.machai.maven;
 

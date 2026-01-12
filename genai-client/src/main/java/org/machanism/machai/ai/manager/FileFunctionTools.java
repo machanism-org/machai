@@ -16,12 +16,18 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Provides file system utility tools for use in GenAIProvider environments.
+ * Provides file system utility tools for GenAIProvider environments, enabling reading, writing,
+ * and recursively listing files and directories on disk.
  * <p>
- * Capable of reading, writing, and recursively listing files and directories.
+ * <b>Main Features:</b>
+ * <ul>
+ *   <li>Read the contents of a file from the file system.</li>
+ *   <li>Write changes to a file or create new files on disk.</li>
+ *   <li>List all files and directories in a specified folder.</li>
+ *   <li>Recursively list all files, including those in subdirectories.</li>
+ * </ul>
  * <p>
- * Usage example:
- * 
+ * <b>Usage Example:</b>
  * <pre>
  * FileFunctionTools tools = new FileFunctionTools(new File("/tmp"));
  * tools.applyTools(provider);
@@ -31,161 +37,145 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class FileFunctionTools {
 
-	/** Logger for file tool operations and diagnostics. */
-	private static Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
+    /** Logger for file tool operations and diagnostics. */
+    private static Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
 
-	/**
-	 * Installs file read/write/list tools into the provided GenAIProvider.
-	 * 
-	 * @param provider GenAIProvider instance
-	 */
-	public void applyTools(GenAIProvider provider) {
-		provider.addTool("read_file_from_file_system", "Read the contents of a file from the disk.", p -> readFile(p),
-				"file_path:string:required:The path to the file to be read.");
-		provider.addTool("write_file_to_file_system", "Write changes to a file on the file system.", p -> writeFile(p),
-				"file_path:string:required:The path to the file you want to write to or create.",
-				"text:string:required:The content to be written into the file (text, code, etc.).");
-		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
-				p -> listFiles(p), "dir_path:string:optional:The path to the directory to list contents of.");
-		provider.addTool("get_recursive_file_list",
-				"List files recursively in a directory (includes files in subdirectories).", p -> getRecursiveFiles(p),
-				"dir_path:string:optional:Path to the folder to list contents recursively.");
-	}
+    /**
+     * Installs file read/write/list tools into the provided GenAIProvider.
+     *
+     * @param provider GenAIProvider instance
+     */
+    public void applyTools(GenAIProvider provider) {
+        provider.addTool("read_file_from_file_system", "Read the contents of a file from the disk.", p -> readFile(p),
+                "file_path:string:required:The path to the file to be read.");
+        provider.addTool("write_file_to_file_system", "Write changes to a file on the file system.", p -> writeFile(p),
+                "file_path:string:required:The path to the file you want to write to or create.",
+                "text:string:required:The content to be written into the file (text, code, etc.).");
+        provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
+                p -> listFiles(p), "dir_path:string:optional:The path to the directory to list contents of.");
+        provider.addTool("get_recursive_file_list", "List files recursively in a directory (includes files in subdirectories).",
+                p -> getRecursiveFiles(p), "dir_path:string:optional:Path to the folder to list contents recursively.");
+    }
 
-	/**
-	 * Lists files recursively in a directory.
-	 * 
-	 * @param params JsonNode containing optional "dir_path" field
-	 * @return String listing file paths or message if none found
-	 */
-	private Object getRecursiveFiles(Object[] params) {
+    /**
+     * Lists files recursively in a directory.
+     *
+     * @param params JsonNode containing optional "dir_path" field
+     * @return String listing file paths or message if none found
+     */
+    private Object getRecursiveFiles(Object[] params) {
+        File workingDir = (File) params[1];
+        JsonNode jsonNode = ((JsonNode) params[0]).get("dir_path");
+        File directory;
+        if (jsonNode != null) {
+            String filePath = jsonNode.textValue();
+            if (StringUtils.isBlank(filePath)) {
+                directory = workingDir;
+            } else {
+                directory = new File(workingDir, filePath);
+            }
+        } else {
+            directory = workingDir;
+        }
+        logger.info("List files recursively: {}", params);
+        List<File> listFiles = listFilesRecursively(directory);
+        StringBuilder content = new StringBuilder();
+        if (!listFiles.isEmpty()) {
+            for (File file : listFiles) {
+                content.append(file.getAbsolutePath()).append("\n");
+            }
+        } else {
+            content.append("No files found in directory.");
+        }
+        return content.toString();
+    }
 
-		File workingDir = (File) params[1];
+    /**
+     * Helper to collect all files recursively.
+     *
+     * @param directory Directory to start with
+     * @return List of files
+     */
+    private List<File> listFilesRecursively(File directory) {
+        List<File> allFiles = new ArrayList<>();
+        if (directory.exists() && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile()) {
+                        allFiles.add(file);
+                    } else if (file.isDirectory()) {
+                        allFiles.addAll(listFilesRecursively(file));
+                    }
+                }
+            }
+        }
+        return allFiles;
+    }
 
-		JsonNode jsonNode = ((JsonNode) params[0]).get("dir_path");
-		File directory;
+    /**
+     * Lists files in a directory.
+     *
+     * @param params JsonNode with "dir_path" (optional)
+     * @return String listing file paths
+     */
+    private Object listFiles(Object[] params) {
+        String filePath = ((JsonNode) params[0]).get("dir_path").asText();
+        File workingDir = (File) params[1];
+        File directory = new File(workingDir, StringUtils.defaultIfBlank(filePath, "."));
+        String result;
+        if (directory.isDirectory()) {
+            File[] listFiles = directory.listFiles();
+            StringBuilder content = new StringBuilder();
+            for (File file : listFiles) {
+                content.append(file.getAbsolutePath()).append("\n");
+            }
+            result = content.toString();
+        } else {
+            result = "No files found in directory.";
+        }
+        return result;
+    }
 
-		if (jsonNode != null) {
-			String filePath = jsonNode.textValue();
-			if (StringUtils.isBlank(filePath)) {
-				directory = workingDir;
-			} else {
-				directory = new File(workingDir, filePath);
-			}
-		} else {
-			directory = workingDir;
-		}
+    /**
+     * Writes content to a file in the working directory.
+     *
+     * @param params JsonNode containing "file_path" and "text"
+     * @return true if successful
+     * @throws IllegalArgumentException on IO error
+     */
+    private Object writeFile(Object[] params) {
+        String filePath = ((JsonNode) params[0]).get("file_path").asText();
+        String text = ((JsonNode) params[0]).get("text").asText();
+        logger.info("Write file: {}", StringUtils.abbreviate(params.toString(), 80));
+        File workingDir = (File) params[1];
+        File file = new File(workingDir, filePath);
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
+        try (Writer writer = new FileWriter(file)) {
+            IOUtils.write(text, writer);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+        return true;
+    }
 
-		logger.info("List files recursively: {}", params);
-
-		List<File> listFiles = listFilesRecursively(directory);
-		StringBuilder content = new StringBuilder();
-		if (!listFiles.isEmpty()) {
-			for (File file : listFiles) {
-				content.append(file.getAbsolutePath() + "\n");
-			}
-		} else {
-			content.append("No files found in directory.");
-		}
-
-		return content.toString();
-	}
-
-	/**
-	 * Helper to collect all files recursively.
-	 * 
-	 * @param directory Directory to start with
-	 * @return List of files
-	 */
-	private List<File> listFilesRecursively(File directory) {
-		List<File> allFiles = new ArrayList<>();
-
-		if (directory.exists() && directory.isDirectory()) {
-			File[] files = directory.listFiles();
-			if (files != null) {
-				for (File file : files) {
-					if (file.isFile()) {
-						allFiles.add(file);
-					} else if (file.isDirectory()) {
-						allFiles.addAll(listFilesRecursively(file));
-					}
-				}
-			}
-		}
-		return allFiles;
-	}
-
-	/**
-	 * Lists files in a directory.
-	 * 
-	 * @param params JsonNode with "dir_path" (optional)
-	 * @return String listing file paths
-	 */
-	private Object listFiles(Object[] params) {
-		String filePath = ((JsonNode) params[0]).get("dir_path").asText();
-		File workingDir = (File) params[1];
-		File directory = new File(workingDir, StringUtils.defaultIfBlank(filePath, "."));
-
-		String result;
-		if (directory.isDirectory()) {
-			File[] listFiles = directory.listFiles();
-			StringBuilder content = new StringBuilder();
-			for (File file : listFiles) {
-				content.append(file.getAbsolutePath() + "\n");
-			}
-
-			result = content.toString();
-		} else {
-			result = "No files found in directory.";
-		}
-		return result;
-	}
-
-	/**
-	 * Writes contents to file in the working directory.
-	 * 
-	 * @param params JsonNode containing "file_path" and "text"
-	 * @return true if successful
-	 * @throws IllegalArgumentException on IO error
-	 */
-	private Object writeFile(Object[] params) {
-		String filePath = ((JsonNode) params[0]).get("file_path").asText();
-		String text = ((JsonNode) params[0]).get("text").asText();
-
-		logger.info("Write file: {}", StringUtils.abbreviate(params.toString(), 80));
-
-		File workingDir = (File) params[1];
-		File file = new File(workingDir, filePath);
-		if (file.getParentFile() != null) {
-			file.getParentFile().mkdirs();
-		}
-		try (Writer writer = new FileWriter(file)) {
-			IOUtils.write(text, writer);
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Reads contents of a file in the working directory.
-	 * 
-	 * @param params JsonNode containing "file_path"
-	 * @return File content as string
-	 * @throws IllegalArgumentException on IO error
-	 */
-	private Object readFile(Object[] params) {
-		String filePath = ((JsonNode) params[0]).get("file_path").asText();
-
-		logger.info("Read file: {}", params[0]);
-
-		File workingDir = (File) params[1];
-		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
-			return IOUtils.toString(io, "UTF8");
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-
+    /**
+     * Reads content from a file in the working directory.
+     *
+     * @param params JsonNode containing "file_path"
+     * @return File content as string
+     * @throws IllegalArgumentException on IO error
+     */
+    private Object readFile(Object[] params) {
+        String filePath = ((JsonNode) params[0]).get("file_path").asText();
+        logger.info("Read file: {}", params[0]);
+        File workingDir = (File) params[1];
+        try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
+            return IOUtils.toString(io, "UTF8");
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 }
