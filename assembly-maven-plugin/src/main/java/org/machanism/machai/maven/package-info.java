@@ -1,9 +1,8 @@
 package org.machanism.machai.maven;
 
-/*
- * @guidance:
+/* @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE, UPDATE `package-info.java` AND UNIT TESTS FOR THIS PACKAGE!**	
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!**	
  *
  * - Use Clear and Concise Descriptions:
  *		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
@@ -15,16 +14,17 @@ package org.machanism.machai.maven;
  *		- Use `@param` tags to document all method parameters.
  *		- Use `@return` tags to describe return values.
  *		- Use `@throws` or `@exception` tags to explain when exceptions are thrown.
- * - Include Usage Examples Where Helpful:
+ * -  Include Usage Examples Where Helpful:
  *		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * - Maintain Consistency and Formatting:
+ * -  Maintain Consistency and Formatting:
  *		- Follow a consistent style and structure for all Javadoc comments.
  *		- Use proper Markdown or HTML formatting for readability.
- * - Update Javadoc with Code Changes:
+ * -  Update Javadoc with Code Changes:
  *		- Revise Javadoc comments whenever code is modified to ensure documentation remains accurate and up to date.
- * - Leverage Javadoc Tools:
+ * -  Leverage Javadoc Tools:
  *		- Use IDE features or static analysis tools to check for missing or incomplete Javadoc.
  *		- Generate and review Javadoc HTML output regularly to verify quality and completeness.
- * - Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
- * - Use the Java version specified in `pom.xml` for code generation.
+ * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ * -  Use the Java version specified in `pom.xml` for code generation.
  */
+
