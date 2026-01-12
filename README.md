@@ -96,7 +96,7 @@ Module directories provide individual usage documentation and examples.
 
 ## License
 
-Machai is distributed under the [Apache License, Version 2.0](../../LICENSE.txt).
+Machai is distributed under the [Apache License, Version 2.0](LICENSE.txt).
 
 ## Contact and Support
 
