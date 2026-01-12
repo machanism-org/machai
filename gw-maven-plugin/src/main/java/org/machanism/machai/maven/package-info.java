@@ -1,34 +1,34 @@
 /**
  * Provides Maven plugin goals for generative AI-assisted documentation workflows.
  * <p>
- * This package includes Mojos for processing and cleaning documentation files in Maven projects.
- * It integrates generative AI providers for automated documentation generation, scanning, and cleanup workflows, leveraging configurable options for AI-based enhancements and reproducible documentation management within a Maven build process.
- * </p>
- *
- * <h2>Contained Mojos</h2>
+ * The <code>org.machanism.machai.maven</code> package delivers Maven Mojo implementations designed to automate documentation workflows using generative AI.
+ * This package contains Mojos for processing documentation files, cleaning up temporary files, and integrating AI providers for enhanced document generation and management.
+ * <br>
+ * <strong>Main Mojos:</strong>
  * <ul>
- *   <li><b>Clean</b>: Removes temporary files generated during AI-assisted documentation processes. Ensures clean state for repeated documentation generation workflows.</li>
- *   <li><b>Process</b>: Initiates scanning and generative documentation processes, offering integration with AI providers. Supports parameterization for chat models and detailed control over the document scanning workflow.</li>
+ *   <li><strong>Clean:</strong> Removes temporary AI-related files from the project, ensuring a fresh state for each documentation workflow.</li>
+ *   <li><strong>Process:</strong> Scans documents and integrates with AI models for automated generation and assistance. Highly configurable with support for various provider options.</li>
  * </ul>
  *
- * <h2>Basic Usage Example</h2>
- * <pre>{@code
- * <plugin>
- *   <groupId>org.machanism.machai</groupId>
- *   <artifactId>gw-maven-plugin</artifactId>
- *   <version>${project.version}</version>
- *   <executions>
- *     <execution>
- *       <goals>
- *         <goal>process</goal>
- *         <goal>clean</goal>
- *       </goals>
- *     </execution>
- *   </executions>
- * </plugin>
- * }</pre>
- *
- * This package does not provide guidance or best practices here; refer to individual goal documentation.
+ * <h2>Example Plugin Usage</h2>
+ * <pre>
+ * &lt;plugin&gt;
+ *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
+ *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
+ *   &lt;version&gt;${project.version}&lt;/version&gt;
+ *   &lt;executions&gt;
+ *     &lt;execution&gt;
+ *       &lt;goals&gt;
+ *         &lt;goal&gt;process&lt;/goal&gt;
+ *         &lt;goal&gt;clean&lt;/goal&gt;
+ *       &lt;/goals&gt;
+ *     &lt;/execution&gt;
+ *   &lt;/executions&gt;
+ * &lt;/plugin&gt;
+ * </pre>
+ * <p>
+ * See individual Mojo documentation for parameter details and advanced usage examples.
+ * </p>
  */
 package org.machanism.machai.maven;
 

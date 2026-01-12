@@ -1,23 +1,28 @@
 /**
- * Core management and extension tools for AI providers (GenAIProvider) within the Machanism AI client framework.
+ * Provides core management functionality and extensible tools for AI providers in the Machanism AI client framework.
  * <p>
- * This package contains foundational interfaces and manager classes responsible for prompt handling,
- * dynamic provider selection/instantiation, function augmentation (file and command tools), and utilities for
- * integrating external resources and command-line operations.
+ * The <b>org.machanism.machai.ai.manager</b> package defines interfaces and manager classes for creating,
+ * selecting, and extending <code>GenAIProvider</code> implementations. It includes utilities for prompt
+ * handling, dynamic provider instantiation, file and command function augmentation, and streamlined resource
+ * integration (including external files and secure command-line operations).
  * <p>
  * <b>Main Components:</b>
  * <ul>
- *   <li>{@link GenAIProvider} &ndash; Interface for generic AI providers supporting flexible prompt submission, embeddings, file operations, and runtime extensibility.</li>
- *   <li>{@link GenAIProviderManager} &ndash; Factory and resolver for AI provider implementations by model identifier string.</li>
- *   <li>{@link FileFunctionTools} &ndash; Utilities for reading, writing, and listing files and directories on disk.</li>
- *   <li>{@link CommandFunctionTools} &ndash; Enables secure execution of allowed shell commands from supported OS platforms.</li>
- *   <li>{@link SystemFunctionTools} &ndash; Simplifies attachment of file and command tools for providers.</li>
+ *   <li>{@link GenAIProvider} – Unified interface for submitting prompts, managing model state, handling files,
+ *       computing embeddings, and runtime tool extension.</li>
+ *   <li>{@link GenAIProviderManager} – Dynamic factory/manager offering provider resolution by model identifier
+ *       string.</li>
+ *   <li>{@link FileFunctionTools} – File system utilities for reading, writing, listing, and recursively
+ *       enumerating files and directories.</li>
+ *   <li>{@link CommandFunctionTools} – Secure shell command toolset guarded against dangerous operations,
+ *       supporting diagnostics and OS compatibility.</li>
+ *   <li>{@link SystemFunctionTools} – Convenience wrapper for unified file and command tool attachment.</li>
  * </ul>
  * <p>
  * <b>Usage Example:</b>
  * <pre>
- * GenAIProvider provider = GenAIProviderManager.getProvider(&quot;OpenAI:gpt-3.5-turbo&quot;);
- * provider.prompt(&quot;Hello!&quot;);
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
+ * provider.prompt("Hello!");
  * SystemFunctionTools tools = new SystemFunctionTools();
  * tools.applyTools(provider);
  * </pre>

@@ -2,13 +2,28 @@
  * Provides classes for automating interaction with web-based user interfaces,
  * especially when direct GenAI API access is unavailable.
  * <p>
- * This package enables communication with third-party web services,
- * including <a href="https://solutionshub.epam.com/solution/ai-dial">AI DIAL</a>
+ * This package enables programmatic communication with third-party web services,
+ * such as <a href="https://solutionshub.epam.com/solution/ai-dial">AI DIAL</a>
  * and <a href="https://www.youtube.com/@EPAMAIRunCodeMie">EPAM AI/Run CodeMie</a>,
- * using Anteater workspace and recipe automation. Use these classes to send prompts,
- * receive responses, and perform tasks by programmatically controlling GUIs.
+ * via Anteater workspace and recipe automation tools. It is intended for scenarios
+ * where direct GenAI API connectivity is unsupported or limited. Typical usage
+ * involves sending prompts, receiving responses, and controlling the GUI workflow
+ * of supported web platforms, automating repetitive or complex input/output cycles.
  * <p>
- * <b>Usage:</b>
+ * Implementation centers around the {@link org.machanism.machai.ai.web.WebProvider}
+ * class, which extends {@link org.machanism.machai.ai.none.NoneProvider} and
+ * manages workspace integration using AE recipes for flexible, extensible automation.
+ * <p>
+ * <b>Key Features:</b>
+ * <ul>
+ *   <li>Automates prompt/response cycle with supported web-based GenAI platforms.</li>
+ *   <li>Provides integration with Anteater workspace for recipe-driven task automation.</li>
+ *   <li>Supports configuration by project directory and workspace configuration files.</li>
+ *   <li>Designed for use in environments without direct API access.</li>
+ *   <li>Not guaranteed to be thread-safe.</li>
+ * </ul>
+ * <p>
+ * <b>Basic Usage Example:</b>
  * <pre>
  * {@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
@@ -18,15 +33,11 @@
  * }
  * </pre>
  * <p>
- * <b>Limitations:</b> Configuration may require additional plugins or clipboard handling on some platforms.
- * Please consult the target platform and AE documentation for details.
+ * <b>Limitations:</b> May require additional plugins or clipboard handling on
+ * some platforms. Consult target platform and AE documentation for guidance.
  * <p>
- * <b>Thread Safety:</b> Implementations in this package are not guaranteed to be thread-safe.
- * <p>
- * <b>Extensibility:</b> The main class in this package, {@link WebProvider},
- * extends {@link org.machanism.machai.ai.none.NoneProvider} and incorporates
- * Anteater workspace integration for flexible automation. See class-level Javadoc
- * in source files for more details and advanced usage.
+ * <b>Extensibility:</b> Extend {@link org.machanism.machai.ai.web.WebProvider} for
+ * custom automation or platform-specific integrations as needed.
  */
 package org.machanism.machai.ai.web;
 
