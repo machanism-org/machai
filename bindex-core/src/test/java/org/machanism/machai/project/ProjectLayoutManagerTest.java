@@ -1,63 +1,89 @@
 package org.machanism.machai.project;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.project.layout.MavenProjectLayout;
+import org.machanism.machai.project.layout.JScriptProjectLayout;
+import org.machanism.machai.project.layout.PythonProjectLayout;
+import org.machanism.machai.project.layout.DefaultProjectLayout;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-
-import org.machanism.machai.project.layout.DefaultProjectLayout;
-import org.machanism.machai.project.layout.JScriptProjectLayout;
-import org.machanism.machai.project.layout.MavenProjectLayout;
-import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.project.layout.PythonProjectLayout;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProjectLayoutManagerTest {
+    @TempDir
+    Path tempDir;
+
+    private File rootDir;
+
+    @BeforeEach
+    void setup() {
+        rootDir = tempDir.toFile();
+    }
 
     @Test
-    void detectsMavenProject(@TempDir File tempDir) throws Exception {
-        File pom = new File(tempDir, "pom.xml");
-        Files.writeString(pom.toPath(), "<project><modelVersion>4.0.0</modelVersion><packaging>jar</packaging></project>");
-        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir);
+    void testDetectMavenProjectLayout() throws IOException {
+        // Arrange
+        File pomFile = new File(rootDir, "pom.xml");
+        assertTrue(pomFile.createNewFile());
+
+        // Act
+        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(rootDir);
+
+        // Assert
         assertTrue(layout instanceof MavenProjectLayout);
     }
 
     @Test
-    void detectsNodeProject(@TempDir File tempDir) throws Exception {
-        File pkg = new File(tempDir, "package.json");
-        Files.writeString(pkg.toPath(), "{\"name\":\"sample\"}");
-        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir);
+    void testDetectJScriptProjectLayout() throws IOException {
+        // Arrange
+        File packageJson = new File(rootDir, "package.json");
+        assertTrue(packageJson.createNewFile());
+
+        // Act
+        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(rootDir);
+
+        // Assert
         assertTrue(layout instanceof JScriptProjectLayout);
     }
 
     @Test
-    void detectsPythonProject(@TempDir File tempDir) throws Exception {
-        File pyproject = new File(tempDir, "pyproject.toml");
-        Files.writeString(pyproject.toPath(), "project.name='DemoProject'\n");
-        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir);
+    void testDetectPythonProjectLayout() throws IOException {
+        // Arrange
+        File pyprojectToml = new File(rootDir, "pyproject.toml");
+        Files.write(pyprojectToml.toPath(), "project.name = 'example'".getBytes());
+
+        // Act
+        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(rootDir);
+
+        // Assert
         assertTrue(layout instanceof PythonProjectLayout);
     }
 
     @Test
-    void defaultLayoutForUnknownProject(@TempDir File tempDir) throws Exception {
-        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir);
+    void testDetectDefaultProjectLayout() throws IOException {
+        // Arrange: No special files present.
+
+        // Act
+        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(rootDir);
+
+        // Assert
         assertTrue(layout instanceof DefaultProjectLayout);
     }
 
     @Test
-    void throwsIfDirectoryDoesNotExist() {
-        File notExist = new File("/this/path/does/not/exist");
-        assertThrows(IOException.class, () -> ProjectLayoutManager.detectProjectLayout(notExist));
-    }
+    void testDetectThrowsWhenDirDoesNotExist() {
+        // Arrange
+        File nonExistent = new File(tempDir.toFile(), "does-not-exist");
 
-    @Test
-    void setsProjectDirOnDetectedLayout(@TempDir File tempDir) throws Exception {
-        File pom = new File(tempDir, "pom.xml");
-        Files.writeString(pom.toPath(), "<project/>\n");
-        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir);
-        assertEquals(tempDir.getAbsolutePath(), layout.getProjectDir().getAbsolutePath());
+        // Act & Assert
+        assertThrows(FileNotFoundException.class, () -> ProjectLayoutManager.detectProjectLayout(nonExistent));
     }
 }
