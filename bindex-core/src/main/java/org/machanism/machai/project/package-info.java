@@ -1,19 +1,27 @@
 /**
- * Provides core classes and utilities for building and managing bindex-related constructs
- * within the Machai framework. This package focuses on mechanisms used to assemble, configure,
- * and facilitate bindex components through extensible and maintainable infrastructure.
+ * Provides classes and abstractions for detecting and processing project layouts across various build tools and languages.
  * <p>
- * Main capabilities include:
+ * This package enables management and detection of project structures for Java (Maven), Node.js, Python, and generic project formats.
+ * Core functionality includes scanning project directories, identifying module layouts, and delegating processing actions.
+ * <p>
+ * Main classes include:
  * <ul>
- *   <li>Managing creation and lifecycle of bindex objects.</li>
- *   <li>Providing builder patterns and supporting structures.</li>
- *   <li>Enabling flexible extension and customization of bindex logic.</li>
+ *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} — Detects and instantiates appropriate {@code ProjectLayout} implementations based on directory analysis.</li>
+ *   <li>{@link org.machanism.machai.project.ProjectProcessor} — Provides an abstract base for folder and module processing logic.</li>
  * </ul>
  * <p>
- * The classes in this package are intended to be used as tools to help application developers
- * define, manipulate, and extend bindex features within projects that utilize Machai.
+ * Usage Example:
+ * <pre>
+ *   File dir = new File("/path/to/project");
+ *   ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
+ * </pre>
+ * <p>
+ * See individual class Javadocs for specific usage and details.
+ *
+ * @author machanism
+ * @since 0.0.2
  */
-package org.machanism.machai.bindex.builder;
+package org.machanism.machai.project;
 
 /* @guidance:
  *
@@ -42,4 +50,3 @@ package org.machanism.machai.bindex.builder;
  * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  * -  Use the Java version specified in `pom.xml` for code generation.
  */
-

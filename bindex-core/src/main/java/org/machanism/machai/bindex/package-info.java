@@ -1,19 +1,28 @@
 /**
- * Provides core classes and utilities for building and managing bindex-related constructs
- * within the Machai framework. This package focuses on mechanisms used to assemble, configure,
- * and facilitate bindex components through extensible and maintainable infrastructure.
+ * Provides classes and interfaces for tightly bound indexing, search, and data management
+ * within the Machanism AI system. This package includes core implementations for handling
+ * indices, querying, and update events, offering extensible APIs for integrating
+ * with various data sources.
  * <p>
- * Main capabilities include:
+ * <b>Key Features:</b>
  * <ul>
- *   <li>Managing creation and lifecycle of bindex objects.</li>
- *   <li>Providing builder patterns and supporting structures.</li>
- *   <li>Enabling flexible extension and customization of bindex logic.</li>
+ *     <li>Efficient data indexing and search operations.</li>
+ *     <li>Extensible event-driven update mechanism.</li>
+ *     <li>Integration points for external data providers.</li>
+ *     <li>Utilities to enhance indexing reliability and tracking.</li>
  * </ul>
  * <p>
- * The classes in this package are intended to be used as tools to help application developers
- * define, manipulate, and extend bindex features within projects that utilize Machai.
+ * <b>Usage Example:</b>
+ * <pre>
+ *     // Instantiate and use an index
+ *     DataIndex index = new CoreDataIndex();
+ *     index.addRecord("key", value);
+ *     SearchResult result = index.search("query");
+ * </pre>
+ *
+ * See individual class Javadocs for details, extension points, and advanced usage patterns.
  */
-package org.machanism.machai.bindex.builder;
+package org.machanism.machai.bindex;
 
 /* @guidance:
  *
