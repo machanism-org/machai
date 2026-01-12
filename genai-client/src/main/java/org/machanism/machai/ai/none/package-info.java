@@ -1,9 +1,9 @@
-package org.machanism.machai.maven;
+package org.machanism.machai.ai.none;
 
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!**	
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!**
  * 
  * - Use Clear and Concise Descriptions:
  * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
@@ -11,7 +11,7 @@ package org.machanism.machai.maven;
  * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the package�s overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  *      
@@ -27,4 +27,3 @@ package org.machanism.machai.maven;
  * 
  * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */
-
