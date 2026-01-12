@@ -1,3 +1,32 @@
+/**
+ * Provides core document scanning, guidance extraction, and AI-driven review automation.
+ * <p>
+ * This package contains the main classes responsible for scanning user, source, test, and document directories, extracting guidance and meta-information, and coordinating with AI providers for documentation generation and review processing. Key elements include:
+ * <ul>
+ *     <li>{@link Ghostwriter} - The main application entry point for entire scan and review operations.</li>
+ *     <li>{@link FileProcessor} - Handles deep scanning of directories/files, guidance parsing and context management, and interfaces with AI provider and reviewers.</li>
+ * </ul>
+ * <p>
+ * Typical usage involves creating a {@code FileProcessor} instance and running a scan for documentation input and review, optionally customized by project layout and guidance inheritance flags. See examples below:
+ * <pre>
+ * {@code
+ * // Run document scan on default user directory
+ * Ghostwriter.main(new String[] {});
+ *
+ * // Scan a specific root folder and obtain review guidance:
+ * GenAIProvider provider = GenAIProviderManager.getProvider(null);
+ * FileProcessor processor = new FileProcessor(provider);
+ * processor.scanDocuments(new File("/path/to/project/root"));
+ * }
+ * </pre>
+ * <p>
+ * Guidance inheritance and parent context management can be modified via {@code setInheritance(true)} or {@code setUseParentsGuidances(true)} on the FileProcessor. Javadoc comments throughout this package are maintained to reflect code and project changes for clarity, usability, and up-to-date documentation.
+ *
+ * <p><strong>Note:</strong> This package is designed for extensibility, supporting custom reviewers, prompt bundles, and project analyzer plug-ins.
+ *
+ * @author Viktor Tovstyi
+ * @since 0.0.2
+ */
 package org.machanism.machai.gw;
 
 /*-

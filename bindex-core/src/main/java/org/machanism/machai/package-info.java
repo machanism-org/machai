@@ -6,15 +6,15 @@
  * <p>
  * <b>Sub-packages:</b>
  * <ul>
- *   <li>{@link org.machanism.machai.bindex} - Indexing, search, and data management infrastructure.</li>
- *   <li>{@link org.machanism.machai.project} - Detection, processing, and management of diverse project layouts and organizational models.</li>
+ *   <li>{@link org.machanism.machai.bindex} - Provides infrastructure for efficient indexing, search, and data management. Enables tight integration and extensibility for diverse resource models.</li>
+ *   <li>{@link org.machanism.machai.project} - Supports detection, interpretation, and management of diverse project layouts, organizational models, and processing strategies for scalable resource handling.</li>
  * </ul>
  * <p>
  * <b>Key Features:</b>
  * <ul>
- *   <li>Core algorithms and interfaces for AI-driven mechanisms and data modeling.</li>
- *   <li>Support for flexible, extensible project organization and resource control.</li>
- *   <li>Integration points for building complex AI workflows.</li>
+ *   <li>Core algorithms, interfaces, and extension points for AI-driven mechanisms and data modeling.</li>
+ *   <li>Flexible and extensible project organization and resource control utilities.</li>
+ *   <li>Robust integration points for building, connecting, and orchestrating complex AI workflows across diverse resource types.</li>
  * </ul>
  * <p><b>Usage Example:</b></p>
  * <pre>

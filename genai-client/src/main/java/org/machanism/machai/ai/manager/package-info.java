@@ -1,3 +1,29 @@
+/**
+ * Provides core management and extension tools for generic AI providers (GenAIProvider) 
+ * within the Machanism AI client framework. 
+ * <p>
+ * This package contains primary interfaces, managers, and utility classes to support prompt handling,
+ * dynamic provider selection, file system and command-line integration, and the augmentation of AI provider
+ * functionality via system-level tools. The package is designed to enable flexible, extensible, and safe interaction
+ * with various AI models, including tools for command execution and file management in supported environments.
+ * <p>
+ * <b>Main Components:</b>
+ * <ul>
+ *   <li>{@link GenAIProvider} &ndash; Core interface for all generic AI providers supporting text and file prompts, embeddings, and runtime extensibility.</li>
+ *   <li>{@link GenAIProviderManager} &ndash; Resolves and instantiates provider implementations based on model identifiers.</li>
+ *   <li>{@link FileFunctionTools} &ndash; Provides utility tools for reading, writing, and listing files and directories on disk.</li>
+ *   <li>{@link CommandFunctionTools} &ndash; Enables safe execution of allowed shell commands from supported operating systems.</li>
+ *   <li>{@link SystemFunctionTools} &ndash; Simplifies attachment of file and command tools for providers.</li>
+ * </ul>
+ * <p>
+ * <b>Usage Example:</b>
+ * <pre>
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
+ * provider.prompt("Hello!");
+ * SystemFunctionTools tools = new SystemFunctionTools();
+ * tools.applyTools(provider);
+ * </pre>
+ */
 package org.machanism.machai.ai.manager;
 
 /*-
@@ -11,7 +37,7 @@ package org.machanism.machai.ai.manager;
  * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package�s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the packages overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  *      

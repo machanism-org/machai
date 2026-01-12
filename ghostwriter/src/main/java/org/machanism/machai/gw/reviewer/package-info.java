@@ -1,3 +1,35 @@
+/**
+ * Provides reviewer interfaces and concrete implementations for processing source and documentation files
+ * in various formats, including Java, Python, TypeScript, HTML, Markdown, and text files. Reviewers extract,
+ * analyze, and transform guidance information annotated in project files (such as comments, directives, or
+ * special guidance files) for use in automated documentation workflows.
+ * <p>
+ * Key classes in this package:
+ * <ul>
+ *   <li>{@link Reviewer}: The base interface for file reviewers supporting guidance extraction from project files.</li>
+ *   <li>{@link JavaReviewer}: Processes <code>.java</code> files and extracts guidance from annotated comments, including <code>package-info.java</code>.</li>
+ *   <li>{@link HtmlReviewer}: Extracts guidance blocks from <code>.html</code>, <code>.htm</code>, and <code>.xml</code> files.</li>
+ *   <li>{@link MarkdownReviewer}: Supports <code>.md</code> files and retrieves documented guidance from Markdown content.</li>
+ *   <li>{@link PythonReviewer}: Extracts guidance annotations from <code>.py</code> files using Python comment conventions.</li>
+ *   <li>{@link TypeScriptReviewer}: Processes <code>.ts</code> files and extracts documentation guidance from TypeScript sources.</li>
+ *   <li>{@link TextReviewer}: Handles generic <code>.txt</code> files, including propagation context for documentation.</li>
+ * </ul>
+ * <p>
+ * Reviewers utilize project structure and annotation tags to deliver accurate, context-propagated documentation fragments.
+ * Implementations support extensibility for additional file formats.
+ * <p>
+ * <b>Usage Example:</b>
+ * <pre>
+ * Reviewer reviewer = new JavaReviewer();
+ * String guidance = reviewer.perform(projectRoot, file);
+ * if (guidance != null) {
+ *     // Use the extracted guidance for documentation
+ * }
+ * </pre>
+ * <p>
+ * For details on supported formats and conventions,
+ * refer to individual reviewer class documentation.
+ */
 package org.machanism.machai.gw.reviewer;
 
 /*-
