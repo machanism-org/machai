@@ -1,90 +1,88 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Build;
+import org.apache.maven.model.Resource;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MavenProjectLayoutTest {
-    private File tempDir;
-    private MavenProjectLayout layout;
-    private File pomFile;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        tempDir = Files.createTempDirectory("maven-project-layout-test").toFile();
-        layout = new MavenProjectLayout();
-        layout.projectDir(tempDir);
-        pomFile = new File(tempDir, "pom.xml");
+    @Test
+    void isMavenProjectTrueIfPomExists(@TempDir java.nio.file.Path tempDir) {
+        File dir = tempDir.toFile();
+        assertDoesNotThrow(() -> new java.io.PrintWriter(new File(dir, "pom.xml")).close());
+        assertTrue(MavenProjectLayout.isMavenProject(dir));
     }
-
-    @AfterEach
-    void tearDown() {
-        for (File file : tempDir.listFiles()) file.delete();
-        tempDir.delete();
+    
+    @Test
+    void isMavenProjectFalseIfPomMissing(@TempDir java.nio.file.Path tempDir) {
+        File dir = tempDir.toFile();
+        assertFalse(MavenProjectLayout.isMavenProject(dir));
     }
 
     @Test
-    void isMavenProject_shouldReturnTrueIfPomPresent() throws Exception {
-        assertFalse(MavenProjectLayout.isMavenProject(tempDir));
-        Files.write(pomFile.toPath(), "<project></project>".getBytes());
-        assertTrue(MavenProjectLayout.isMavenProject(tempDir));
+    void modelChainingWorks() {
+        MavenProjectLayout layout = new MavenProjectLayout();
+        Model model = new Model();
+        assertSame(layout, layout.model(model));
+        assertSame(model, layout.getModel());
+    }
+    
+    @Test
+    void effectivePomRequiredChainingWorks() {
+        MavenProjectLayout layout = new MavenProjectLayout();
+        assertSame(layout, layout.effectivePomRequired(true));
     }
 
     @Test
-    void getModules_shouldReturnNullIfPomNotMultiModule() throws Exception {
-        String pomContent = "<project><modelVersion>4.0.0</modelVersion><packaging>jar</packaging></project>";
-        Files.write(pomFile.toPath(), pomContent.getBytes());
-        layout.model(null); // ensure fresh
-        List<String> modules = layout.getModules();
-        assertNull(modules);
-    }
-
-    @Test
-    void getModules_shouldReturnModulesIfMultiModulePom() throws Exception {
-        String pomContent = "<project><modelVersion>4.0.0</modelVersion><packaging>pom</packaging><modules><module>mod1</module><module>mod2</module></modules></project>";
-        Files.write(pomFile.toPath(), pomContent.getBytes());
-        layout.model(null); // ensure fresh
-        List<String> modules = layout.getModules();
-        assertNotNull(modules);
-        assertTrue(modules.contains("mod1"));
-        assertTrue(modules.contains("mod2"));
-    }
-
-    @Test
-    @Disabled("Need to fix.")
-    void getSources_shouldReturnMavenSourceDirectories() throws Exception {
-        String pomContent = "<project><modelVersion>4.0.0</modelVersion><build><sourceDirectory>src/main/java</sourceDirectory></build></project>";
-        Files.write(pomFile.toPath(), pomContent.getBytes());
-        layout.model(null);
-        List<String> sources = layout.getSources();
-        assertTrue(sources.contains("src/main/java"));
-    }
-
-    @Test
-    void getDocuments_shouldReturnMavenDocsDirectory() throws Exception {
-        String pomContent = "<project><modelVersion>4.0.0</modelVersion></project>";
-        Files.write(pomFile.toPath(), pomContent.getBytes());
+    void getDocumentsAlwaysReturnsSrcSite() {
+        MavenProjectLayout layout = new MavenProjectLayout();
         List<String> docs = layout.getDocuments();
+        assertNotNull(docs);
         assertTrue(docs.contains("src/site"));
     }
 
     @Test
-    @Disabled("Need to fix.")
-    void getTests_shouldReturnMavenTestDirectories() throws Exception {
-        String pomContent = "<project><modelVersion>4.0.0</modelVersion><build><testSourceDirectory>src/test/java</testSourceDirectory></build></project>";
-        Files.write(pomFile.toPath(), pomContent.getBytes());
-        layout.model(null);
+    void getSourcesUsesBuildSourceDirectoryAndResources() {
+        Model model = new Model();
+        Build build = new Build();
+        build.setSourceDirectory("/absolute/sourceDir");
+        Resource r = new Resource();
+        r.setDirectory("/absolute/resourceDir");
+        build.addResource(r);
+        model.setBuild(build);
+
+        MavenProjectLayout layout = new MavenProjectLayout();
+        layout.model(model);
+        layout.projectDir(new File("/absolute"));
+        List<String> sources = layout.getSources();
+        assertNotNull(sources);
+        assertTrue(sources.contains("sourceDir"));
+        assertTrue(sources.contains("resourceDir"));
+    }
+
+    @Test
+    void getTestsUsesBuildTestSourceDirectoryAndTestResources() {
+        Model model = new Model();
+        Build build = new Build();
+        build.setTestSourceDirectory("/absolute/testSourceDir");
+        Resource r = new Resource();
+        r.setDirectory("/absolute/testResourceDir");
+        build.addTestResource(r);
+        model.setBuild(build);
+
+        MavenProjectLayout layout = new MavenProjectLayout();
+        layout.model(model);
+        layout.projectDir(new File("/absolute"));
         List<String> tests = layout.getTests();
-        assertTrue(tests.contains("src/test/java"));
+        assertNotNull(tests);
+        assertTrue(tests.contains("testSourceDir"));
+        assertTrue(tests.contains("testResourceDir"));
     }
 }

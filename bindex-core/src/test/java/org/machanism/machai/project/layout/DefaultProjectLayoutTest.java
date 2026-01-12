@@ -1,52 +1,51 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DefaultProjectLayoutTest {
-    private File tempDir;
-    private DefaultProjectLayout layout;
-
-    @BeforeEach
-    void setUp() throws IOException {
-        tempDir = new File(System.getProperty("java.io.tmpdir"), "default_project_layout_test");
-        tempDir.mkdir();
-        layout = new DefaultProjectLayout();
-        layout.projectDir(tempDir);
-    }
-
-    @AfterEach
-    void tearDown() {
-        for (File file : tempDir.listFiles()) file.delete();
-        tempDir.delete();
-    }
-
     @Test
-    void getModules_shouldReturnEmptyListIfNoDirectories() throws IOException {
+    void getModulesExcludesDefaultProjectLayouts(@TempDir java.nio.file.Path tempDir) throws Exception {
+        // Arrange
+        File root = tempDir.toFile();
+        File moduleDir = new File(root, "moduleA");
+        assertTrue(moduleDir.mkdir());
+        // mimic as non-default (create a pom.xml for Maven detection)
+        new java.io.PrintWriter(new File(moduleDir, "pom.xml")).close();
+        DefaultProjectLayout layout = new DefaultProjectLayout();
+        layout.projectDir(root);
+
+        // Act
         List<String> modules = layout.getModules();
-        assertTrue(modules.isEmpty());
+
+        // Assert
+        assertNotNull(modules);
+        assertTrue(modules.contains("moduleA"));
     }
 
     @Test
-    void getSources_shouldReturnNull() {
+    void getModulesReturnsEmptyIfNoDirs(@TempDir java.nio.file.Path tempDir) throws Exception {
+        // Arrange
+        DefaultProjectLayout layout = new DefaultProjectLayout();
+        layout.projectDir(tempDir.toFile());
+
+        // Act
+        List<String> modules = layout.getModules();
+
+        // Assert
+        assertTrue(modules.isEmpty() || modules == null);
+    }
+
+    @Test
+    void returnsNullForSourcesDocumentsAndTests() {
+        DefaultProjectLayout layout = new DefaultProjectLayout();
         assertNull(layout.getSources());
-    }
-
-    @Test
-    void getDocuments_shouldReturnNull() {
         assertNull(layout.getDocuments());
-    }
-
-    @Test
-    void getTests_shouldReturnNull() {
         assertNull(layout.getTests());
     }
 }

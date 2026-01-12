@@ -1,48 +1,58 @@
 /**
- * Provides abstractions and utilities for detecting and processing diverse project layouts
- * across popular build tools and languages, including Java, Node.js, Python, and generic formats.
+ * Provides functionality for managing, detecting, and processing project layouts and structures.
  * <p>
- * This package enables flexible and extensible management of project structures, including:
+ * This package contains classes for:
  * <ul>
- *   <li>Detection of project types and layouts using various indicators</li>
- *   <li>Scanning directories for modules and source code organization</li>
- *   <li>Delegation of processing actions to appropriate layout implementations</li>
+ *   <li>Detecting the type and structure of a project based on its layout and files</li>
+ *   <li>Instantiating specific {@link org.machanism.machai.project.layout.ProjectLayout} implementations
+ *       for different project types (e.g., Maven, Node.js, Python, or generic)</li>
+ *   <li>Processing project directories, modules, and folder layouts, including recursive scanning</li>
+ *   <li>Providing extension points for custom logic via abstract processors</li>
  * </ul>
- * Core classes include:
+ * <p>
+ * The core classes in this package include:
  * <ul>
- *   <li>{@link org.machanism.machai.project.ProjectLayoutManager}: Detects and instantiates layouts such as Maven, Node.js, Python, or a default generic format.</li>
- *   <li>{@link org.machanism.machai.project.ProjectProcessor}: Abstract processor for scanning files, folders, and modules within a project.</li>
+ *   <li>{@link ProjectLayoutManager} – Detects and instantiates project layout representations based on folder contents</li>
+ *   <li>{@link ProjectProcessor} – Abstract processor supporting project structure scanning and custom folder/module processing</li>
  * </ul>
- * <p>Common usage patterns:</p>
- * <pre>
+ * <p>
+ * Example Usage:
+ * <pre>{@code
  *   File dir = new File("/path/to/project");
  *   ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
- *   // Analyze modules, sources, tests, and documents with ProjectLayout methods
- * </pre>
- * <p>
- * The package supports extension for new languages and build tools, enabling custom layout detection and processing strategies. See the Javadoc for individual classes for detailed API usage.
+ *   ProjectProcessor processor = ...; // Your Processor Implementation
+ *   processor.scanFolder(dir);
+ * }</pre>
  *
- * @author Viktor Tovstyi
+ * @author machanism
  * @since 0.0.2
  */
 package org.machanism.machai.project;
 
-/* @guidance:
-*
-* **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!**	
-*
-* - Use Clear and Concise Descriptions:
-*		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
-*		- Avoid vague statements; be specific about functionality and intent.
-* - Update `package-info.java`. It should contains all required description 
-* 		- It should include package-level Javadoc in a `package-info.java` file to describe the package’s purpose and usage.
-* 		- Do not create "Guidance and Best Practices" section in `package-info.java` file.
-* -  Include Usage Examples Where Helpful:
-*		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
-* -  Maintain Consistency and Formatting:
-*		- Follow a consistent style and structure for all Javadoc comments.
-*		- Use proper Markdown or HTML formatting for readability.
-* -  Update Javadoc with Code Changes:
-*		- Revise Javadoc comments whenever code is modified to ensure documentation remains accurate and up to date.
-* -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
-*/
+/*-
+ * @guidance:
+ *
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!**
+ * 
+ * - Use Clear and Concise Descriptions:
+ * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
+ * 		- Avoid vague statements; be specific about functionality and intent.
+ * 
+ * - Update `package-info.java`:
+ *      - Analyze the source code within this package.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
+ *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
+ *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
+ *      
+ * -  Include Usage Examples Where Helpful:
+ * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
+ * 
+ * -  Maintain Consistency and Formatting:
+ * 		- Follow a consistent style and structure for all Javadoc comments.
+ * 		- Use proper Markdown or HTML formatting for readability.
+ * 
+ * -  Update Javadoc with Code Changes:
+ * 		- Revise Javadoc comments whenever code is modified to ensure documentation remains accurate and up to date.
+ * 
+ * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ */

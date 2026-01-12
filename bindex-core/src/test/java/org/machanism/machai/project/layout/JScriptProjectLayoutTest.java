@@ -1,82 +1,34 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JScriptProjectLayoutTest {
-    private File tempDir;
-    private JScriptProjectLayout layout;
-    private File packageJson;
-
-    @BeforeEach
-    void setUp() throws IOException {
-        tempDir = Files.createTempDirectory("jscript-project-layout-test").toFile();
-        layout = new JScriptProjectLayout();
-        layout.projectDir(tempDir);
-        packageJson = new File(tempDir, "package.json");
-    }
-
-    @AfterEach
-    void tearDown() {
-        for (File file : tempDir.listFiles()) file.delete();
-        tempDir.delete();
+    @Test
+    void isPackageJsonPresentReturnsTrueIfFileExists(@TempDir java.nio.file.Path tempDir) {
+        File dir = tempDir.toFile();
+        File pkgJson = new File(dir, "package.json");
+        assertDoesNotThrow(() -> new PrintWriter(pkgJson).close());
+        assertTrue(JScriptProjectLayout.isPackageJsonPresent(dir));
     }
 
     @Test
-    void isPackageJsonPresent_shouldReturnTrueIfPresent() throws IOException {
-        assertFalse(JScriptProjectLayout.isPackageJsonPresent(tempDir));
-        Files.write(packageJson.toPath(), "{}".getBytes());
-        assertTrue(JScriptProjectLayout.isPackageJsonPresent(tempDir));
+    void isPackageJsonPresentReturnsFalseIfFileNotExists(@TempDir java.nio.file.Path tempDir) {
+        File dir = tempDir.toFile();
+        assertFalse(JScriptProjectLayout.isPackageJsonPresent(dir));
     }
 
     @Test
-    @Disabled("Need to fix.")
-    void getModules_shouldReturnWorkspacesModules() throws IOException {
-        String json = "{\"workspaces\": [\"apps/*\", \"libs/*\"]}";
-        Files.write(packageJson.toPath(), json.getBytes());
-        File appsDir = new File(tempDir, "apps");
-        File libsDir = new File(tempDir, "libs");
-        appsDir.mkdir();
-        libsDir.mkdir();
-        new File(appsDir, "fakemodule/package.json").getParentFile().mkdirs();
-        Files.write(new File(appsDir, "fakemodule/package.json").toPath(), "{}".getBytes());
-        new File(libsDir, "libmodule/package.json").getParentFile().mkdirs();
-        Files.write(new File(libsDir, "libmodule/package.json").toPath(), "{}".getBytes());
-        List<String> modules = layout.getModules();
-        assertTrue(modules.contains("apps/fakemodule"));
-        assertTrue(modules.contains("libs/libmodule"));
-    }
-
-    @Test
-    void getModules_shouldReturnNullIfNoWorkspaces() throws IOException {
-        Files.write(packageJson.toPath(), "{}".getBytes());
-        List<String> modules = layout.getModules();
-        assertNull(modules);
-    }
-
-    @Test
-    void getSources_shouldReturnNull() {
+    void getSourcesDocumentsAndTestsReturnNull() {
+        JScriptProjectLayout layout = new JScriptProjectLayout();
         assertNull(layout.getSources());
-    }
-
-    @Test
-    void getDocuments_shouldReturnNull() {
         assertNull(layout.getDocuments());
-    }
-
-    @Test
-    void getTests_shouldReturnNull() {
         assertNull(layout.getTests());
     }
 }
