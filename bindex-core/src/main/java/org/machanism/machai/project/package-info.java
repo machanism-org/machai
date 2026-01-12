@@ -1,24 +1,28 @@
 /**
- * Provides classes and abstractions for detecting and processing project layouts across various build tools and languages.
+ * Provides abstractions and utilities for detecting and processing diverse project layouts
+ * across popular build tools and languages, including Java, Node.js, Python, and generic formats.
  * <p>
- * This package enables management and detection of project structures for Java (Maven), Node.js, Python, and generic project formats.
- * Core functionality includes scanning project directories, identifying module layouts, and delegating processing actions.
- * <p>
- * Main classes include:
+ * This package enables flexible and extensible management of project structures, including:
  * <ul>
- *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} — Detects and instantiates appropriate {@code ProjectLayout} implementations based on directory analysis.</li>
- *   <li>{@link org.machanism.machai.project.ProjectProcessor} — Provides an abstract base for folder and module processing logic.</li>
+ *   <li>Detection of project types and layouts using various indicators</li>
+ *   <li>Scanning directories for modules and source code organization</li>
+ *   <li>Delegation of processing actions to appropriate layout implementations</li>
  * </ul>
- * <p>
- * Usage Example:
+ * Core classes include:
+ * <ul>
+ *   <li>{@link org.machanism.machai.project.ProjectLayoutManager}: Detects and instantiates layouts such as Maven, Node.js, Python, or a default generic format.</li>
+ *   <li>{@link org.machanism.machai.project.ProjectProcessor}: Abstract processor for scanning files, folders, and modules within a project.</li>
+ * </ul>
+ * <p>Common usage patterns:</p>
  * <pre>
  *   File dir = new File("/path/to/project");
  *   ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
+ *   // Analyze modules, sources, tests, and documents with ProjectLayout methods
  * </pre>
  * <p>
- * See individual class Javadocs for specific usage and details.
+ * The package supports extension for new languages and build tools, enabling custom layout detection and processing strategies. See the Javadoc for individual classes for detailed API usage.
  *
- * @author machanism
+ * @author Viktor Tovstyi
  * @since 0.0.2
  */
 package org.machanism.machai.project;

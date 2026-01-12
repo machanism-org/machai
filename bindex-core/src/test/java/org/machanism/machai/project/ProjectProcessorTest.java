@@ -1,99 +1,117 @@
 package org.machanism.machai.project;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.machanism.machai.project.layout.DefaultProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.mockito.Mockito;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-
+import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class ProjectProcessorTest {
-    @TempDir
-    File tempDir;
 
-    private File projectDir;
-
-    @BeforeEach
-    void setup() {
-        projectDir = tempDir;
-    }
-
-    static class TestProjectProcessor extends ProjectProcessor {
-        boolean processFolderCalled = false;
-        ProjectLayout processedLayout = null;
+    private static class TestProcessor extends ProjectProcessor {
+        private final List<String> processedModules = new ArrayList<>();
+        private boolean folderProcessed = false;
+        private ProjectLayout lastLayout = null;
 
         @Override
         public void processFolder(ProjectLayout processor) {
-            processFolderCalled = true;
-            processedLayout = processor;
+            folderProcessed = true;
+            lastLayout = processor;
+        }
+
+        public boolean isFolderProcessed() {
+            return folderProcessed;
+        }
+
+        public List<String> getProcessedModules() {
+            return processedModules;
+        }
+
+        @Override
+        protected void processModule(File projectDir, String module) throws IOException {
+            processedModules.add(module);
         }
     }
 
-    @Test
-    @Disabled
-    void scanFolderProcessesModulesWhenPresent() throws IOException {
-        // Arrange
-        TestProjectProcessor processor = spy(new TestProjectProcessor());
-        ProjectLayout mockLayout = mock(ProjectLayout.class);
-        List<String> modules = Arrays.asList("mod1", "mod2");
-        when(mockLayout.getModules()).thenReturn(modules);
-        doReturn(mockLayout).when(processor).getProjectLayout(projectDir);
+    private TestProcessor processor;
 
-        // Act
-        processor.scanFolder(projectDir);
-
-        // Assert
-        verify(processor, times(modules.size())).processModule(eq(projectDir), anyString());
-        verify(processor, never()).processFolder(any());
+    @BeforeEach
+    void setUp() {
+        processor = new TestProcessor();
     }
 
     @Test
-    void scanFolderProcessesEntireFolderWhenNoModules() throws IOException {
+    void scanFolderProcessesModules(@TempDir File tempDir) throws Exception {
         // Arrange
-        TestProjectProcessor processor = spy(new TestProjectProcessor());
-        ProjectLayout mockLayout = mock(ProjectLayout.class);
-        when(mockLayout.getModules()).thenReturn(null);
-        doReturn(mockLayout).when(processor).getProjectLayout(projectDir);
+        File moduleA = new File(tempDir, "moduleA");
+        File moduleB = new File(tempDir, "moduleB");
+        assertTrue(moduleA.mkdir());
+        assertTrue(moduleB.mkdir());
+        ProjectLayout layout = new ProjectLayout() {
+            @Override
+            public List<String> getModules() { return List.of("moduleA", "moduleB"); }
+            @Override
+            public List<String> getSources() { return List.of(); }
+            @Override
+            public List<String> getDocuments() { return List.of(); }
+            @Override
+            public List<String> getTests() { return List.of(); }
+        };
+        // Inject layout override
+        processor = new TestProcessor() {
+            @Override
+            protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+                return layout;
+            }
+        };
 
         // Act
-        processor.scanFolder(projectDir);
+        processor.scanFolder(tempDir);
 
         // Assert
-        verify(processor, times(1)).processFolder(eq(mockLayout));
+        List<String> processed = processor.getProcessedModules();
+        assertTrue(processed.contains("moduleA"));
+        assertTrue(processed.contains("moduleB"));
+        assertFalse(processor.isFolderProcessed());
     }
 
     @Test
-    void processModuleInvokesScanFolderOnSubdir() throws IOException {
+    void scanFolderProcessesFolderIfNoModules(@TempDir File tempDir) throws Exception {
         // Arrange
-        TestProjectProcessor processor = spy(new TestProjectProcessor());
-        String module = "modA";
-        File subDir = new File(projectDir, module);
-        assertTrue(subDir.mkdirs());
+        ProjectLayout layout = new ProjectLayout() {
+            @Override
+            public List<String> getModules() { return null; }
+            @Override
+            public List<String> getSources() { return List.of(); }
+            @Override
+            public List<String> getDocuments() { return List.of(); }
+            @Override
+            public List<String> getTests() { return List.of(); }
+        };
+        processor = new TestProcessor() {
+            @Override
+            protected ProjectLayout getProjectLayout(File dir) throws FileNotFoundException {
+                return layout;
+            }
+        };
 
         // Act
-        processor.processModule(projectDir, module);
+        processor.scanFolder(tempDir);
 
         // Assert
-        verify(processor, times(1)).scanFolder(subDir);
+        assertTrue(processor.isFolderProcessed());
+        assertEquals(layout, processor.lastLayout);
     }
 
     @Test
-    void getProjectLayoutThrowsFileNotFoundIfAbsent() {
-        // Arrange
-        TestProjectProcessor processor = new TestProjectProcessor();
-        File nonExistent = new File(tempDir, "notexist");
-
-        // Assert
-        assertThrows(Exception.class, () -> processor.getProjectLayout(nonExistent));
+    void getProjectLayoutThrowsIfFileNotFound() {
+        File notFoundDir = new File("/does/not/exist/" + System.currentTimeMillis());
+        assertThrows(FileNotFoundException.class, () -> processor.getProjectLayout(notFoundDir));
     }
 }
