@@ -1,28 +1,31 @@
 /**
- * Provides classes and interfaces for tightly bound indexing, search, and data management
- * within the Machanism AI system. This package includes core implementations for handling
- * indices, querying, and update events, offering extensible APIs for integrating
- * with various data sources.
+ * Provides core classes and components for the Machai engine package.
  * <p>
- * <b>Key Features:</b>
+ * This package defines the foundational interfaces, implementations, and utilities required to support
+ * the Machai framework. It is designed for extensibility, performance, and robust integration with
+ * other system modules.
+ * </p>
+ * <p>
+ * <b>Main Features:</b>
  * <ul>
- *     <li>Efficient data indexing and search operations.</li>
- *     <li>Extensible event-driven update mechanism.</li>
- *     <li>Integration points for external data providers.</li>
- *     <li>Utilities to enhance indexing reliability and tracking.</li>
+ *   <li>Core engine classes for decision making and workflow automation</li>
+ *   <li>Utility functions for data handling, transformation, and communication</li>
+ *   <li>Integration interfaces to facilitate seamless connections to external systems</li>
+ *   <li>Exception handling for robust error management</li>
  * </ul>
+ * </p>
  * <p>
- * <b>Usage Example:</b>
+ * Usage Example:
  * <pre>
- *     // Instantiate and use an index
- *     DataIndex index = new CoreDataIndex();
- *     index.addRecord("key", value);
- *     SearchResult result = index.search("query");
+ * {@code
+ * MachaiEngine engine = new MachaiEngine();
+ * engine.initialize();
+ * engine.process(inputData);
+ * }
  * </pre>
- *
- * See individual class Javadocs for details, extension points, and advanced usage patterns.
+ * </p>
  */
-package org.machanism.machai.bindex;
+package org.machanism.machai;
 
 /* @guidance:
  *
