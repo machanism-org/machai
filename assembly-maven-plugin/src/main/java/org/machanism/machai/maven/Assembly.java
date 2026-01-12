@@ -18,52 +18,17 @@ import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
+import org.machanism.machai.ai.none.NoneProvider;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
 
-/**
- * Mojo for assembling Maven projects using AI-powered library recommendations
- * and code generation.
- * <p>
- * This mojo provides an interactive prompt and automated selection of dependencies
- * using a prompt and AI provider. It can recommend libraries and assemble the project structure
- * based on user input or prompt files. See usage example below for typical invocation.
- *
- * <pre>
- * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
- * </pre>
- *
- * <h2>Parameters</h2>
- * <ul>
- *   <li>assembly.inputs.only: Only input prompt (boolean)</li>
- *   <li>assembly.chatModel: Chat model for assembly (String)</li>
- *   <li>pick.chatModel: Chat model for library picking (String)</li>
- *   <li>assembly.prompt.file: Prompt file name (File)</li>
- *   <li>assembly.score: Score threshold for selection (Double)</li>
- *   <li>basedir: Project directory (File)</li>
- * </ul>
- *
- * <h2>Usage Example</h2>
- * <pre>{@code
- * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
- * }</pre>
- *
- * @author machanism.org
- */
 @Mojo(name = "assembly", requiresProject = false, requiresDependencyCollection = ResolutionScope.NONE)
 public class Assembly extends AbstractMojo {
 
     /** Prompter instance for interactive command-line input. */
     @Component
     protected Prompter prompter;
-
-    /**
-     * Indicates if only the prompt input should be processed and actual assembly
-     * should be skipped.
-     */
-    @Parameter(property = "assembly.inputs.only", defaultValue = "false")
-    protected boolean inputsOnly;
 
     /**
      * Specifies the AI chat model to use for assembly-related tasks.
@@ -102,36 +67,6 @@ public class Assembly extends AbstractMojo {
     @Parameter(defaultValue = "${basedir}", required = true, readonly = true)
     protected File basedir;
 
-    /**
-     * Executes the assembly process.
-     * <p>
-     * Attempts to load a prompt from the file (if it exists), then uses the Picker
-     * to recommend libraries and applies the AI-powered system functions to
-     * generate or update project content. If inputsOnly is false, prompts the user
-     * in a loop for API interaction until they enter "exit".
-     *
-     * <h3>Parameters</h3>
-     * <ul>
-     *   <li>{@code assemblyPromptFile} - The prompt file for assembly</li>
-     *   <li>{@code score} - Score threshold for selection</li>
-     *   <li>{@code pickChatModel} - Model used for library picking</li>
-     *   <li>{@code chatModel} - Model used for assembly tasks</li>
-     *   <li>{@code basedir} - Project directory</li>
-     *   <li>{@code prompter} - Interactive prompt command line tool</li>
-     *   <li>{@code inputsOnly} - Process only prompt or assemble project</li>
-     * </ul>
-     *
-     * @return void
-     * @throws MojoExecutionException if the assembly or prompt interaction fails
-     * @see Picker
-     * @see ApplicationAssembly
-     * @see GenAIProviderManager
-     *
-     * <h3>Usage Example</h3>
-     * <pre>{@code
-     * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
-     * }</pre>
-     */
     @Override
     public void execute() throws MojoExecutionException {
         try {
@@ -162,14 +97,14 @@ public class Assembly extends AbstractMojo {
                         getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
                     }
 
-                    GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(inputsOnly ? null : chatModel);
+                    GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(chatModel);
                     ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider);
 
                     getLog().info("The project directory: " + basedir);
                     assembly.projectDir(basedir);
                     assembly.assembly(query, bindexList);
 
-                    if (!inputsOnly) {
+                    if (!(assemblyProvider instanceof NoneProvider)) {
                         String prompt;
                         while (!StringUtils.equalsIgnoreCase(prompt = prompter.prompt("Prompt"), "exit")) {
                             assemblyProvider.prompt(prompt);

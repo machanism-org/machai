@@ -12,17 +12,6 @@ import java.io.File;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for {@link Assembly} Mojo.
- * <p>
- * Verifies behavior for prompt handling, parameter injection, and error management.
- * </p>
- *
- * <pre>{@code
- * mvn org.machanism.machai.maven:assembly -Dassembly.inputs.only=false
- * }</pre>
- * @author Generated
- */
 public class AssemblyTest {
 
     private Assembly assembly;
@@ -33,7 +22,6 @@ public class AssemblyTest {
         assembly = new Assembly();
         prompter = mock(Prompter.class);
         assembly.prompter = prompter;
-        assembly.inputsOnly = true;
         assembly.chatModel = "OpenAI:gpt-5";
         assembly.pickChatModel = "OpenAI:gpt-5-mini";
         assembly.assemblyPromptFile = new File("test_project.txt");

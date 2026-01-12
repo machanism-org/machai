@@ -52,11 +52,10 @@ The following parameters can be set to customize plugin behavior:
 
 | Parameter                      | Description                                                 | Default        |
 |--------------------------------|-------------------------------------------------------------|----------------|
-| `assembly.inputs.only`         | Restrict processing to debug-essential context only          | `false`        |
-| `assembly.chatModel`           | AI model used for assembly tasks                            | `gpt-5`        |
-| `pick.chatModel`               | Model used for library selection                            | `gpt-5-mini`   |
-| `assembly.prompt.file`         | Path to your project concept file                           | `project.txt`  |
-| `assembly.score`               | Minimum confidence score for library recommendations         | `0.80`         |
+| `assembly.genai`           | AI model used for assembly tasks                           | `OpenAI:gpt-5`        |
+| `pick.genai`               | Model used for library selection                            | `OpenAI:gpt-5-mini`   |
+| `assembly.prompt.file`         | Path to your project concept file                    | `project.txt`  |
+| `assembly.score`               | Minimum confidence score for library recommendations   | `0.80`         |
 
 ### Example Workflow
 
@@ -69,8 +68,7 @@ The following parameters can be set to customize plugin behavior:
    ```bash
    mvn org.machanism.machai:assembly-maven-plugin:assembly \
      -Dassembly.prompt.file=project.txt \
-     -Dassembly.inputs.only=false \
-     -Dassembly.chatModel=gpt-5 \
+     -Dassembly.genai=Opengpt-5 \
      -Dpick.chatModel=gpt-5-mini \
      -Dassembly.score=0.80
    ```
