@@ -19,7 +19,7 @@
 			<Text value="$var{\CONTROL+v}$var{\n}" xpath="//*[@id='app']/div[3]/div[2]/div/main/div/div[2]/div/div/div/div[2]/div/div/div[1]/div[2]/div[1]/p" timeout="5s" /> 
 			<Wait delay="2s" /> 
 			<ElementExists xpath="//button[contains(text(), 'Send')]" timeout="600s" /> 
-			<GetText name="result">
+			<GetText name="result" timeout="1s" exception="ignored">
 				<xpath>//*[@id='app']/div[3]/div[2]/div/main/div/div[2]/div/div/div/div[1]/div/div[2]/div/div[3]/div/p/p</xpath> 
 				<xpath>//*[@id="app"]/div[3]/div[2]/div/main/div/div[2]/div/div/div/div[1]/div/div[2]/div/div[3]/div/div/pre/code</xpath> 
 			</GetText> 
