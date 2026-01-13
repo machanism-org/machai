@@ -5,7 +5,7 @@
 - Scan org/machanism/machai/ai source folder and describe all supported GenAIProvider implementation in separate section.
 -->
 
-GenAI Client provides an advanced abstraction and integration layer for Large Language Model (LLM) and AI inference services in Java. Its modular architecture supports multiple GenAI providers and can be easily extended for future integrations. The project is designed for developers and teams working on AI-driven prompt engineering, code generation, and classic generative AI workloads in enterprise Java applications, tooling platforms, and server environments.
+GenAI Client provides an abstraction and integration layer for Large Language Model (LLM) and AI inference services in Java. Its modular architecture supports multiple `GenAIProvider` implementations and is designed to be extended with additional providers as needed.
 
 ## Supported GenAI Providers
 <!-- 
@@ -17,51 +17,66 @@ and generate the content for this section following net format:
 -->
 
 ### OpenAIProvider
-The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface. 
+The `OpenAIProvider` class integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
 
-Features include:
-- Prompt engineering and response handling with OpenAI Chat models
-- File upload and reference for workflow scenarios
-- Advanced LLM requests (text generation, summarization, Q&A)
-- Vector embedding creation for semantic search and similarity analysis
-- Abstraction over API calls with both synchronous and asynchronous support
-- Custom tool integration for complex prompt flows
+This provider enables a wide range of generative AI capabilities, including:
 
-To use OpenAI functionalities, set the `OPENAI_API_KEY` environment variable.
+- Sending prompts and receiving responses from OpenAI Chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-**Sample Usage:**
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI models efficiently within their applications. It supports synchronous operations and can be configured to accommodate different use cases and model parameters.
+
+Usage example:
+
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 ```
 
-*This implementation is NOT thread-safe.*
+Thread safety: This implementation is NOT thread-safe.
 
 ### NoneProvider
-The `NoneProvider` class is an implementation of `GenAIProvider`, intended for use as a request logger when integration with AI services is not required or available. This class does not interact with any external AI services or large language models (LLMs). Requests are stored in input files located in the `inputsLog` folder, which can be processed later. Operations strictly requiring GenAI will throw exceptions or do nothing if not critical. Useful when AI services are disabled, for testing scenarios, or as a default fallback when no other provider is configured.
+The `NoneProvider` class is an implementation of the `GenAIProvider` interface used to disable generative AI integrations and log input requests locally when an external AI provider is not required or available.
 
-**Key Features:**
-- Logs prompts and instructions to files
-- No operations for actual AI tasks or model selection
-- Fallback for disabled or compliance-restricted environments
-- Maintains interface compatibility even when generative AI is off
+Purpose:
+
+Provides a stub implementation that stores requests in input files (in the `inputsLog` folder). All GenAI operations are non-operative, or throw exceptions where necessary, making this useful for scenarios where generative AI features must be disabled, simulated, or for fallback testing. No calls are made to any external AI services or large language models (LLMs).
+
+Typical use cases:
+
+- Disabling generative AI features for security or compliance.
+- Implementing fallback logic when no provider is configured.
+- Logging requests for manual review or later processing.
+- Testing environments not connected to external services.
+
+Notes:
+
+- Operations requiring GenAI services will throw exceptions when called.
+- All prompts and instructions are cleared after performing.
 
 ### WebProvider
-The `WebProvider` class serves as a gateway for interacting with web-based user interfaces via a web driver when direct access to the GenAI API is not feasible. It automates communication with supported services such as [AI DIAL](https://solutionshub.epam.com/solution/ai-dial) and [EPAM AI/Run CodeMie](https://www.youtube.com/@EPAMAIRunCodeMie), utilizing [Anteater](https://ganteater.com) recipes for sending and receiving information.
+The `WebProvider` class serves as a gateway for interacting with web-based user interfaces via a web driver when direct access to the GenAI API is not feasible.
 
-**Limitations:**
-Configuration and usage may require additional plugins/resource setup, such as clipboard access for CodeMie. Workspace configuration/data must be compatible.
+It automates communication with supported services such as AI DIAL and EPAM AI/Run CodeMie, utilizing recipes from Anteater for sending and receiving information.
 
-**Sample Usage:**
+Limitations:
+
+Configuration and usage of this class may require additional plugins or handling of resources such as the clipboard, especially for platforms like CodeMie. Refer to the target platform instructions prior to use.
+
+Usage example:
+
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
 ```
 
-*This implementation is NOT thread-safe.*
+Thread safety: This implementation is not thread-safe.
 
-**Supported operations:**
-- `perform()`: Executes AE workspace task with current input prompts
-- `setWorkingDir(File workingDir)`: Initializes workspace and environment
-- `model(String configName)`: Loads AE workspace configuration
+Parameters and methods:
+
+- `perform()` - Executes the AE workspace task using input prompts.
+- `setWorkingDir(File workingDir)` - Initializes workspace with configuration and runs setup nodes.
+- `model(String configName)` - Sets the AE workspace configuration name.
 
 <!-- @guidance:
 - Follow the rules described in @guidance tags and do not change or delete `@guidance` related tags in processing.

@@ -15,12 +15,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Unit tests for {@link JavaReviewer}.
- * <p>
- * Tests extracting guidance from Java source and package-info files with proper @guidance tag handling.
- * <pre>
- * Example:
- *   // @guidance: This is guidance for the class
- * </pre>
  */
 class JavaReviewerTest {
 
@@ -66,10 +60,10 @@ class JavaReviewerTest {
         String pkgName = JavaReviewer.extractPackageName(src);
         assertEquals("org.machanism.example", pkgName);
     }
-    
+
     @Test
-    void extractPackageName_returnsNullIfNotFound() {
+    void extractPackageName_returnsDefaultPackage_whenNotFound() {
         String src = "public class Example {}";
-        assertEquals(JavaReviewer.extractPackageName(src), "<default package>");
+        assertEquals("<default package>", JavaReviewer.extractPackageName(src));
     }
 }

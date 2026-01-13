@@ -1,29 +1,31 @@
 /**
- * Provides project layout abstractions and implementations for various build and source structures.
- * <p>
- * This package contains utilities and classes to analyze, describe, and interact with the file
- * layout of software projects. It supports popular build systems and languages, including Maven,
- * JavaScript/TypeScript, Python, and default/custom directory structures. The primary functionality
- * includes module detection, source/document/test directory identification, and project model
- * parsing.
- * <p>
- * <strong>Main Classes:</strong>
+ * Detects and describes a project's on-disk layout.
+ *
+ * <p>This package provides the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and a set
+ * of implementations that infer a project's structure (modules, source roots, test roots, and documentation
+ * roots) based on common conventions and build/configuration files.
+ *
+ * <p>Typical usage is to initialize a layout with a project root directory and then query it for the
+ * relevant relative paths. Implementations that traverse the filesystem generally apply
+ * {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS} to skip generated artifacts and
+ * vendor directories.
+ *
+ * <h2>Provided implementations</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.ProjectLayout}: Abstract base class for defining project layout contracts and utilities.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout}: Handles generic filesystem-based modules and excludes standard build directories.</li>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout}: Detects Maven modules, sources, documents, and tests via <code>pom.xml</code> and effective model parsing.</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout}: Supports JavaScript/TypeScript projects, reading workspace modules from <code>package.json</code> files.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout}: Analyzes Python projects, focusing on <code>pyproject.toml</code> and associated metadata.</li>
- *   <li>{@link org.machanism.machai.project.layout.PomReader}: Utility for parsing Maven <code>pom.xml</code> files and producing model representations.</li>
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Maven single and multi-module projects</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - JavaScript/TypeScript workspaces</li>
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Python projects</li>
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - fallback when no specific layout matches</li>
  * </ul>
- * <strong>Usage Example:</strong>
- * <pre>
+ *
+ * <h2>Example</h2>
+ * <pre>{@code
  * ProjectLayout layout = new MavenProjectLayout().projectDir(new File("/workspace"));
- * List&lt;String&gt; modules = layout.getModules();
- * List&lt;String&gt; sources = layout.getSources();
- * List&lt;String&gt; docs = layout.getDocuments();
- * List&lt;String&gt; tests = layout.getTests();
- * </pre>
+ * List<String> modules = layout.getModules();
+ * List<String> sources = layout.getSources();
+ * List<String> docs = layout.getDocuments();
+ * List<String> tests = layout.getTests();
+ * }</pre>
  */
 package org.machanism.machai.project.layout;
 

@@ -39,59 +39,66 @@ Content:
 - Organize the README for easy navigation and readability.
 -->
 
-# CLI Project
+A CLI Java application for intelligent library management, GenAI-powered document processing, and automation.
 
-A comprehensive CLI Java application for intelligent library management, GenAI-powered document processing, and automation.
+## Overview
+
+Machai CLI provides:
 
 - Modular, guided Java project assembly
 - Bindex file generation for module dependency management
-- Built-in shell for command automation and scripting
-- GenAI document processing and compliance assistance utilities
+- Built-in interactive shell for command automation and scripting
+- GenAI document processing utilities
 
-## Installation Instructions
+## Installation
 
-**Clone & Build:**
-~~~bash
-# Clone the repository
-$ git clone https://github.com/machanism-org/machai.git
-$ cd cli
+### Prerequisites
 
-# Build with Maven
-$ mvn clean install
-~~~
-
-**Prerequisites:**
 - Java 17 or newer
 - Maven 3.8+
 - Git
 
-**Machai CLI Application Jar:**
+### Clone and build
+
+```bash
+git clone https://github.com/machanism-org/machai.git
+cd cli
+mvn clean install
+```
+
+### Download the Machai CLI application jar
 
 [![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)
 
 ## Usage
 
-#### Assembly Command
-- `pick`: Picks libraries based on user request
-- `assembly`: Creates a project via picked library set
-- `prompt`: Is used for request additional GenAI guidances
+Example commands (as shown by `help`):
 
-#### Bindex Command
-- `bindex`: Generates bindex files
-- `register`: Registers bindex file
+### Assemby Command
 
-#### Built-In Commands
+- `pick`: Picks libraries based on user request.
+- `assembly`: Creates a project via picked librariy set.
+- `prompt`: Is used for request additional GenAI guidances.
+
+### Bindex Command
+
+- `bindex`: Generates bindex files.
+- `register`: Registers bindex file.
+
+### Built-In Commands
+
 - `help`: Display help about available commands
-- `stacktrace`: Display the full stacktrace of the last error
-- `clear`: Clear the shell screen
-- `quit`, `exit`: Exit the shell
+- `stacktrace`: Display the full stacktrace of the last error.
+- `clear`: Clear the shell screen.
+- `quit`, `exit`: Exit the shell.
 - `history`: Display or save the history of previously run commands
 - `version`: Show version info
-- `script`: Read and execute commands from a file
+- `script`: Read and execute commands from a file.
 
-#### Docs Command
-- `docs`: GenAI document processing command
+### Docs Command
+
+- `docs`: GenAI document processing command.
 
 ## Reference
 
-Developed as part of [machanism.org](https://machanism.org).
+Part of the parent project and ecosystem: https://machanism.org

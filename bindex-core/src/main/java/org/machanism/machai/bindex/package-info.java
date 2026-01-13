@@ -1,44 +1,36 @@
 /**
- * Provides core classes for AI-powered project indexing, registration, and Bindex document generation.
- * <p>
- * This package contains the main mechanisms and service classes for the Machanism AI Bindex workflow, including:
- * <ul>
- *     <li>Assembly operations for Bindex projects via GenAIProvider and configuration prompts.</li>
- *     <li>Registration and update of Bindex documents with semantic queries and dependency management.</li>
- *     <li>Builder factories and project processors for generating and updating Bindex manifests across 
- *         multiple supported project layouts (Maven, JavaScript/TypeScript/Vue, Python, and generic).</li>
- *     <li>Picker logic for advanced semantic search, embedding, and MongoDB-integrated retrieval of Bindex instances.</li>
- * </ul>
- * <p>
- * Typical usage involves creating a builder or processor, supplying a GenAIProvider and layout, and calling 
- * the relevant assembly or registration methods to automate project analysis and Bindex creation.
- * <p>
- * Example workflow:
- * <pre>
- *     // Assemble Bindex from project and register
- *     GenAIProvider provider = ...;
- *     ProjectLayout layout = ...; // MavenProjectLayout, JScriptProjectLayout, PythonProjectLayout, etc.
- *     BindexCreator creator = new BindexCreator(provider);
- *     creator.processFolder(layout);
- *     try (BindexRegister register = new BindexRegister(provider, dbUrl)) {
- *         register.processFolder(layout);
- *     }
- * </pre>
- * <p>
- * See individual classes for usage and construction of semantic queries, builder chains,
- * prompt integration, and support for advanced project context aggregation.
+ * Provides the core entry points for generating, assembling, and registering a Bindex (project index)
+ * for Machanism-based AI workflows.
  *
- * Classes in this package:
+ * <p>This package contains orchestration and factory types used to:
  * <ul>
- *     <li>{@link org.machanism.machai.bindex.ApplicationAssembly}</li>
- *     <li>{@link org.machanism.machai.bindex.BindexBuilderFactory}</li>
- *     <li>{@link org.machanism.machai.bindex.BindexCreator}</li>
- *     <li>{@link org.machanism.machai.bindex.BindexProjectProcessor}</li>
- *     <li>{@link org.machanism.machai.bindex.BindexRegister}</li>
- *     <li>{@link org.machanism.machai.bindex.Picker}</li>
+ *   <li>Assemble a Bindex for a project folder using a {@code GenAIProvider} and a project layout.</li>
+ *   <li>Create or update Bindex documents and manifests for supported layouts (for example Maven, JS/TS, Python).</li>
+ *   <li>Register Bindex artifacts into a backing store and perform retrieval/search via picker utilities.</li>
  * </ul>
- * <p>
- * For project layout builders and extended context prompts, see {@link org.machanism.machai.bindex.builder}.
+ *
+ * <p>A typical workflow is:
+ * <ol>
+ *   <li>Choose/construct a project layout.</li>
+ *   <li>Run a creator/processor to generate Bindex artifacts for a folder.</li>
+ *   <li>Optionally register the generated artifacts in a database for later semantic retrieval.</li>
+ * </ol>
+ *
+ * <p>Example:
+ * <pre>
+ * GenAIProvider provider = ...;
+ * ProjectLayout layout = ...;
+ *
+ * BindexCreator creator = new BindexCreator(provider);
+ * creator.processFolder(layout);
+ *
+ * try (BindexRegister register = new BindexRegister(provider, dbUrl)) {
+ *     register.processFolder(layout);
+ * }
+ * </pre>
+ *
+ * <p>For layout-specific builders and prompt/context utilities, see
+ * {@link org.machanism.machai.bindex.builder}.
  */
 package org.machanism.machai.bindex;
 

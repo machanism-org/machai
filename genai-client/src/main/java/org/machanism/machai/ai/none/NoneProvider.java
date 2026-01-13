@@ -240,4 +240,8 @@ public class NoneProvider implements GenAIProvider {
         return prompts.toString();
     }
 
+	@Override
+	public void close() {
+	}
+
 }

@@ -454,4 +454,9 @@ public class OpenAIProvider implements GenAIProvider {
 	public void setWorkingDir(File workingDir) {
 		this.workingDir = workingDir;
 	}
+
+	@Override
+	public void close() {
+		client.close();
+	}
 }

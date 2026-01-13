@@ -1,28 +1,26 @@
 /**
- * Provides core management functionality and extensible tools for AI providers in the Machanism AI client framework.
+ * Management layer for resolving and extending {@code GenAIProvider} implementations.
  * <p>
- * The <b>org.machanism.machai.ai.manager</b> package defines interfaces and manager classes for creating,
- * selecting, and extending <code>GenAIProvider</code> implementations. It includes utilities for prompt
- * handling, dynamic provider instantiation, file and command function augmentation, and streamlined resource
- * integration (including external files and secure command-line operations).
+ * This package contains the primary abstractions used by the client to obtain a concrete provider
+ * (for example, OpenAI- or Ollama-backed implementations) and to attach common runtime "tools"
+ * that enable providers to interact with the local system in a controlled way.
  * <p>
- * <b>Main Components:</b>
+ * Typical responsibilities include:
  * <ul>
- *   <li>{@link GenAIProvider} – Unified interface for submitting prompts, managing model state, handling files,
- *       computing embeddings, and runtime tool extension.</li>
- *   <li>{@link GenAIProviderManager} – Dynamic factory/manager offering provider resolution by model identifier
- *       string.</li>
- *   <li>{@link FileFunctionTools} – File system utilities for reading, writing, listing, and recursively
- *       enumerating files and directories.</li>
- *   <li>{@link CommandFunctionTools} – Secure shell command toolset guarded against dangerous operations,
- *       supporting diagnostics and OS compatibility.</li>
- *   <li>{@link SystemFunctionTools} – Convenience wrapper for unified file and command tool attachment.</li>
+ *   <li>Resolving a provider implementation from a model identifier string via
+ *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *   <li>Providing a stable, provider-agnostic interface for prompts and other AI operations via
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
+ *   <li>Attaching file and command tools via {@link org.machanism.machai.ai.manager.FileFunctionTools},
+ *       {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
+ *       {@link org.machanism.machai.ai.manager.SystemFunctionTools}.</li>
  * </ul>
  * <p>
- * <b>Usage Example:</b>
+ * Usage example:
  * <pre>
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
  * provider.prompt("Hello!");
+ *
  * SystemFunctionTools tools = new SystemFunctionTools();
  * tools.applyTools(provider);
  * </pre>

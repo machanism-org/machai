@@ -1,34 +1,29 @@
 /**
- * Provides stub classes and interfaces for disabling generative AI integrations and logging input requests
- * within the Machai framework when an external AI provider is not required or available.
+ * Provides a non-operational ("none") generative AI provider implementation.
  * <p>
- * This package includes the {@link NoneProvider}, a GenAIProvider implementation that stores requests locally
- * and maintains interface compatibility for scenarios where generative AI features are intentionally disabled,
- * simulated, or skipped due to compliance, testing, or fallback requirements.
+ * This package contains {@link org.machanism.machai.ai.none.NoneProvider}, a {@link org.machanism.machai.ai.manager.GenAIProvider}
+ * implementation intended for environments where no external GenAI/LLM integration should be used. The provider can optionally
+ * write the accumulated prompts (and instructions, if supplied) to local files for audit, troubleshooting, or deferred/manual
+ * processing.
  * <p>
- * Classes in this package do not interact with any external AI services or large language models (LLMs).
- * Requests and prompts may be logged locally if configured, and methods that require actual AI functionality
- * will throw exceptions or perform no operations.
- * <p>
- * Typical use cases include:
+ * Behavior overview:
  * <ul>
- *   <li>Disabling generative AI features for security or compliance</li>
- *   <li>Implementing fallback logic when no provider is configured</li>
- *   <li>Logging requests for later review or manual processing</li>
- *   <li>Testing environments not connected to external services</li>
+ *   <li>No network calls are made and no external AI service is contacted.</li>
+ *   <li>{@code prompt(..)} accumulates text; {@code perform()} optionally writes inputs to the configured log files and returns
+ *   {@code null}.</li>
+ *   <li>Operations that require real GenAI capability (for example, embeddings) are not supported and may throw exceptions.</li>
  * </ul>
  * <p>
- * Usage Example:
+ * Example:
  * <pre>
  * {@code
- *   GenAIProvider provider = new NoneProvider();
- *   provider.prompt("Describe the weather.");
- *   provider.perform(); // No AI service is called; input may be logged locally
+ * GenAIProvider provider = new NoneProvider();
+ * provider.inputsLog(new File("./inputsLog/inputs.txt"));
+ * provider.instructions("You are a helpful assistant.");
+ * provider.prompt("Describe the weather.");
+ * provider.perform(); // Writes inputs locally; returns null.
  * }
  * </pre>
- * <p>
- * <b>Note:</b> All classes in this package provide detailed Javadoc describing their purpose
- * and behavior. See individual class documentation for additional details and examples.
  */
 package org.machanism.machai.ai.none;
 

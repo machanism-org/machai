@@ -22,8 +22,8 @@ public class MarkdownReviewer implements Reviewer {
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Returns the file extensions supported by this reviewer.
-	 * This reviewer handles files with the 'md' extension.
+	 * Returns the file extensions supported by this reviewer. This reviewer handles
+	 * files with the 'md' extension.
 	 *
 	 * @return an array of supported file extension strings
 	 */
@@ -44,13 +44,14 @@ public class MarkdownReviewer implements Reviewer {
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String content = Files.readString(guidancesFile.toPath());
 
-		Pattern pattern = Pattern.compile("<!--\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*-->",
+		Pattern pattern = Pattern.compile("<!--.*?" + FileProcessor.GUIDANCE_TAG_NAME + "(.*?)(?:-->|\\Z)",
 				Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(content);
 
 		String result = null;
 		if (matcher.find()) {
-			result = MessageFormat.format(promptBundle.getString("markdown_file"), ProjectLayout.getRelatedPath(projectDir, guidancesFile), content);
+			result = MessageFormat.format(promptBundle.getString("markdown_file"),
+					ProjectLayout.getRelatedPath(projectDir, guidancesFile), content);
 		}
 
 		return result;

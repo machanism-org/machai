@@ -2,75 +2,82 @@ package org.machanism.machai.bindex;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema. Bindex;
 
 class BindexRegisterTest {
-    private GenAIProvider provider;
-    private ProjectLayout layout;
 
-    @BeforeEach
-    void setup() {
-        provider = mock(GenAIProvider.class);
-        layout = mock(ProjectLayout.class);
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void updateReturnsSameInstance() {
+        // Arrange
+        BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost:27017");
+
+        // Act
+        BindexRegister returned = register.update(true);
+
+        // Assert
+        assertSame(register, returned);
     }
 
     @Test
-    @Disabled("Need to fix.")
-    void testProcessProjectRegistersNewOrUpdateBindex() throws Exception {
-        BindexRegister register = spy(new BindexRegister(provider, null));
-        File dir = new File("/tmp/testproject");
-        when(layout.getProjectDir()).thenReturn(dir);
-         Bindex bindex = mock( Bindex.class);
-        doReturn(bindex).when(register).getBindex(dir);
+    void processFolderWrapsReadFailuresIntoIllegalArgumentException() throws Exception {
+        // Arrange
+        BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost:27017");
+
+        ProjectLayout layout = mock(ProjectLayout.class);
+        when(layout.getProjectDir()).thenReturn(tempDir.toFile());
+
+        Files.writeString(tempDir.resolve(BindexProjectProcessor.BINDEX_FILE_NAME), "{invalid");
+
+        // Act + Assert
+        assertThrows(IllegalArgumentException.class, () -> register.processFolder(layout));
+    }
+
+    @Test
+    void closeDelegatesToPickerClose() throws Exception {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        BindexRegister register = new BindexRegister(provider, "mongodb://localhost:27017");
+
         Picker picker = mock(Picker.class);
-        doReturn(null).when(picker).getRegistredId(bindex);
-        doReturn("newid").when(picker).create(bindex);
-        register.update(true);
-        // Use reflection to inject mock Picker if needed
-        register.processFolder(layout); // Should not throw
-    }
+        Field f = BindexRegister.class.getDeclaredField("picker");
+        f.setAccessible(true);
+        f.set(register, picker);
 
-    @Test
-    @Disabled("Need to fix.")
-    void testProcessProjectThrowsOnIOException() {
-        BindexRegister register = new BindexRegister(provider, null);
-        when(layout.getProjectDir()).thenReturn(new File("."));
-        doThrow(new IOException("fail")).when(register).getBindex(any(File.class));
-        assertThrows(IllegalArgumentException.class, () -> {
-            register.processFolder(layout);
-        });
-    }
-
-    @Test
-    void testCloseDelegatesToPickerClose() throws Exception {
-        BindexRegister register = spy(new BindexRegister(provider, null));
-        Picker picker = mock(Picker.class);
-        // Use reflection or other means if needed
-        doNothing().when(picker).close();
+        // Act
         register.close();
-        // Should not throw
+
+        // Assert
+        verify(picker).close();
     }
 
     @Test
-    void testUpdateReturnsSelfAndSetsFlag() {
-        BindexRegister register = new BindexRegister(provider, null);
-        BindexRegister result = register.update(true);
-        assertSame(register, result);
+    void processFolderDoesNothingWhenNoBindexFilePresent() {
+        // Arrange
+        BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost:27017");
+
+        ProjectLayout layout = mock(ProjectLayout.class);
+        File projectDir = tempDir.toFile();
+        when(layout.getProjectDir()).thenReturn(projectDir);
+
+        // Act
+        register.processFolder(layout);
+
+        // Assert
+        // No exception and no external calls are asserted (Picker will not be invoked when bindex is absent).
     }
 }

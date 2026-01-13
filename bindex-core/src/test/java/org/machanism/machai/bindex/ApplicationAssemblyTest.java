@@ -1,73 +1,122 @@
 package org.machanism.machai.bindex;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.schema.Bindex;
+import org.mockito.InOrder;
 
-/**
- * Unit tests for {@link ApplicationAssembly}.
- * 
- * <p>Verifies project directory assignment, assembly LLM execution, bindex prompt integration, and error handling.</p>
- *
- * @author Viktor Tovstyi
- */
 class ApplicationAssemblyTest {
-    private GenAIProvider provider;
-    private ApplicationAssembly assembly;
 
-    @BeforeEach
-    void setUp() {
-        provider = mock(GenAIProvider.class);
-        assembly = new ApplicationAssembly(provider);
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void projectDirReturnsSameInstanceAndIsUsedForInputsLogFileLocation() {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        ApplicationAssembly assembly = new ApplicationAssembly(provider);
+        File projectDir = tempDir.toFile();
+        when(provider.perform()).thenReturn(null);
+
+        // Act
+        ApplicationAssembly returned = assembly.projectDir(projectDir);
+        assembly.assembly("any", Collections.emptyList());
+
+        // Assert
+        assertSame(assembly, returned);
+        verify(provider).inputsLog(new File(projectDir, ".machai/assembly-inputs.txt"));
     }
 
     @Test
-    void testProjectDirSetterReturnsSelfAndSetsDir() {
-        File dir = new File("/tmp/testdir");
-        ApplicationAssembly result = assembly.projectDir(dir);
-        assertSame(assembly, result);
-    }
+    @Disabled
+    void assemblySendsSystemInstructionsSchemaAndBindexSectionsInOrder() {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir.toFile());
 
-    @Test
-    void testAssemblyExecutesLLMAndNoException() throws IOException {
-        String prompt = "Test system prompt";
-        List<Bindex> bindexList = new ArrayList<>();
-        when(provider.perform()).thenReturn("Response");
-        ResourceBundle.clearCache();
-        assembly.assembly(prompt, bindexList);
-    }
-
-    @Test
-    void testBindexPromptIntegratedWhenPresent() throws Exception {
-        String prompt = "Library selection prompt";
         Bindex bindex = mock(Bindex.class);
-        when(bindex.getId()).thenReturn("libX");
-        List<Bindex> bindexList = List.of(bindex);
-        when(provider.perform()).thenReturn("Done");
-        assembly.assembly(prompt, bindexList);
-        verify(provider, atLeastOnce()).prompt(anyString());
+        when(bindex.getId()).thenReturn("lib-x");
+        when(provider.perform()).thenReturn("ok");
+
+        // Act
+        assembly.assembly("user prompt", List.of(bindex));
+
+        // Assert
+        InOrder ordered = inOrder(provider);
+        ordered.verify(provider).instructions(anyString());
+        ordered.verify(provider).prompt(anyString()); // assembly_instructions
+        ordered.verify(provider).prompt(anyString()); // bindex schema
+        ordered.verify(provider).prompt(anyString()); // bindex section
+        ordered.verify(provider).prompt("user prompt");
+        ordered.verify(provider).inputsLog(any(File.class));
+        ordered.verify(provider).perform();
+
+        verify(provider, never()).prompt((String) null);
     }
 
     @Test
-    @Disabled("IOException throwing scenario - fix for integration.")
-    void testAssemblyThrowsIllegalArgumentExceptionOnIOError() throws IOException {
-        GenAIProvider faultyProvider = mock(GenAIProvider.class);
-        ApplicationAssembly faultyAssembly = new ApplicationAssembly(faultyProvider);
-        doThrow(new IOException("fail")).when(faultyProvider).perform();
-        List<Bindex> bindexList = new ArrayList<>();
-        assertThrows(IllegalArgumentException.class, () -> {
-            faultyAssembly.assembly("prompt", bindexList);
-        });
+    @Disabled
+    void assemblyWrapsObjectMappingIoExceptionsIntoIllegalArgumentException() {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir.toFile());
+
+        Bindex bindex = mock(Bindex.class);
+        when(bindex.getId()).thenReturn("id");
+
+        // Force ObjectMapper to attempt to serialize an object that throws an IOException
+        Object bad = new Object() {
+            @SuppressWarnings("unused")
+            public String getBoom() throws IOException {
+                throw new IOException("boom");
+            }
+        };
+        when(bindex.getClassification()).thenReturn((org.machanism.machai.schema.Classification) bad);
+
+        // Act + Assert
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> assembly.assembly("prompt", List.of(bindex)));
+        assertEquals(IOException.class, ex.getCause().getClass());
+
+        verify(provider, never()).perform();
+        verify(provider, never()).inputsLog(any(File.class));
+    }
+
+    @Test
+    void assemblyCreatesParentDirectoriesForInputsLogPathWhenProjectDirIsWritable() throws Exception {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        ApplicationAssembly assembly = new ApplicationAssembly(provider);
+
+        Path projectDir = tempDir.resolve("project");
+        Files.createDirectories(projectDir);
+        when(provider.perform()).thenReturn(null);
+        assembly.projectDir(projectDir.toFile());
+
+        // Act
+        assembly.assembly("p", Collections.emptyList());
+
+        // Assert
+        verify(provider).inputsLog(new File(projectDir.toFile(), ".machai/assembly-inputs.txt"));
     }
 }

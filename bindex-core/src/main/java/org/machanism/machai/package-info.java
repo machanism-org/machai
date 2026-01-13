@@ -1,30 +1,14 @@
 /**
- * Root package for Machanism AI system core functionality. Contains base classes, interfaces,
- * and sub-packages supporting advanced artificial intelligence mechanisms, including tightly-bound indexing,
- * search, and dynamic resource and project management. This package provides essential APIs and extension points
- * for implementing and integrating AI-driven data operations, modular project processing, and resource handling.
- * <p>
- * <b>Sub-packages:</b>
- * <ul>
- *   <li>{@link org.machanism.machai.bindex} - Provides infrastructure for efficient indexing, search, and data management. Enables tight integration and extensibility for diverse resource models.</li>
- *   <li>{@link org.machanism.machai.project} - Supports detection, interpretation, and management of diverse project layouts, organizational models, and processing strategies for scalable resource handling.</li>
- * </ul>
- * <p>
- * <b>Key Features:</b>
- * <ul>
- *   <li>Core algorithms, interfaces, and extension points for AI-driven mechanisms and data modeling.</li>
- *   <li>Flexible and extensible project organization and resource control utilities.</li>
- *   <li>Robust integration points for building, connecting, and orchestrating complex AI workflows across diverse resource types.</li>
- * </ul>
- * <p><b>Usage Example:</b></p>
- * <pre>
- *   // Access indexing and project APIs
- *   BindexRegister indexRegister = ...;
- *   ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(new File("/my/project"));
- *   // Use AI mechanism classes to process, index, and query project resources
- * </pre>
+ * Root package for the Machanism AI core library.
  *
- * See sub-package and class Javadoc for detailed usage, extension points, and implementation guidance.
+ * <p>This package provides common types and shared infrastructure used by the rest of the
+ * {@code org.machanism.machai} codebase.
+ *
+ * <h2>Sub-packages</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.bindex} - Indexing and search infrastructure.</li>
+ *   <li>{@link org.machanism.machai.project} - Project structure detection and management.</li>
+ * </ul>
  */
 package org.machanism.machai;
 
@@ -34,4 +18,3 @@ package org.machanism.machai;
  *
  * - Update `package-info.java` based on summary sub-packages information.
  */
-

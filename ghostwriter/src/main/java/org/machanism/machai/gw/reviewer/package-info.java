@@ -1,34 +1,30 @@
 /**
- * Provides reviewer interfaces and concrete implementations for processing source and documentation files
- * in various formats, including Java, Python, TypeScript, HTML, Markdown, and text files. Reviewers extract,
- * analyze, and transform guidance information annotated in project files (such as comments, directives, or
- * special guidance files) for use in automated documentation workflows.
+ * File reviewers for extracting and normalizing documentation guidance from project sources.
+ *
  * <p>
- * Key classes in this package:
+ * Implementations in this package parse different file types (for example Java sources, Markdown, HTML/XML,
+ * TypeScript, Python, and plain text) and return guidance content that can be propagated into downstream
+ * documentation and automation workflows.
+ *
+ * <p>
+ * Reviewers typically:
  * <ul>
- *   <li>{@link Reviewer}: The base interface for file reviewers supporting guidance extraction from project files.</li>
- *   <li>{@link JavaReviewer}: Processes <code>.java</code> files and extracts guidance from annotated comments, including <code>package-info.java</code>.</li>
- *   <li>{@link HtmlReviewer}: Extracts guidance blocks from <code>.html</code>, <code>.htm</code>, and <code>.xml</code> files.</li>
- *   <li>{@link MarkdownReviewer}: Supports <code>.md</code> files and retrieves documented guidance from Markdown content.</li>
- *   <li>{@link PythonReviewer}: Extracts guidance annotations from <code>.py</code> files using Python comment conventions.</li>
- *   <li>{@link TypeScriptReviewer}: Processes <code>.ts</code> files and extracts documentation guidance from TypeScript sources.</li>
- *   <li>{@link TextReviewer}: Handles generic <code>.txt</code> files, including propagation context for documentation.</li>
+ *   <li>Identify guidance blocks using each language's comment and documentation conventions.</li>
+ *   <li>Extract, normalize, and/or transform the guidance into a consistent textual form.</li>
+ *   <li>Optionally incorporate directory-level or project-level context when available.</li>
  * </ul>
+ *
  * <p>
- * Reviewers utilize project structure and annotation tags to deliver accurate, context-propagated documentation fragments.
- * Implementations support extensibility for additional file formats.
- * <p>
- * <b>Usage Example:</b>
+ * Typical usage selects the appropriate {@link org.machanism.machai.gw.reviewer.Reviewer} based on the file
+ * extension and invokes {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)}.
+ *
  * <pre>
  * Reviewer reviewer = new JavaReviewer();
- * String guidance = reviewer.perform(projectRoot, file);
+ * String guidance = reviewer.perform(projectRoot, sourceFile);
  * if (guidance != null) {
- *     // Use the extracted guidance for documentation
+ *     // Use the extracted guidance for documentation.
  * }
  * </pre>
- * <p>
- * For details on supported formats and conventions,
- * refer to individual reviewer class documentation.
  */
 package org.machanism.machai.gw.reviewer;
 
@@ -43,7 +39,7 @@ package org.machanism.machai.gw.reviewer;
  * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package�s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the packages overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  *      

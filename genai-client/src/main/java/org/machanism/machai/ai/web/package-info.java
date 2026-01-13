@@ -1,29 +1,19 @@
 /**
- * Provides classes for automating interaction with web-based user interfaces,
- * especially when direct GenAI API access is unavailable.
+ * Provides a {@link org.machanism.machai.core.provider.GenAIProvider} implementation that automates
+ * prompt/response interactions with GenAI systems through their web user interfaces.
  * <p>
- * This package enables programmatic communication with third-party web services,
- * such as <a href="https://solutionshub.epam.com/solution/ai-dial">AI DIAL</a>
- * and <a href="https://www.youtube.com/@EPAMAIRunCodeMie">EPAM AI/Run CodeMie</a>,
- * via Anteater workspace and recipe automation tools. It is intended for scenarios
- * where direct GenAI API connectivity is unsupported or limited. Typical usage
- * involves sending prompts, receiving responses, and controlling the GUI workflow
- * of supported web platforms, automating repetitive or complex input/output cycles.
+ * This package is intended for environments where direct GenAI API access is unavailable or restricted.
+ * It integrates with <a href="https://ganteater.com">Anteater</a> to drive browser-like workflows using
+ * AE recipes (workflows) stored in the project resources.
  * <p>
- * Implementation centers around the {@link org.machanism.machai.ai.web.WebProvider}
- * class, which extends {@link org.machanism.machai.ai.none.NoneProvider} and
- * manages workspace integration using AE recipes for flexible, extensible automation.
- * <p>
- * <b>Key Features:</b>
+ * The main entry point is {@link org.machanism.machai.ai.web.WebProvider}, which:
  * <ul>
- *   <li>Automates prompt/response cycle with supported web-based GenAI platforms.</li>
- *   <li>Provides integration with Anteater workspace for recipe-driven task automation.</li>
- *   <li>Supports configuration by project directory and workspace configuration files.</li>
- *   <li>Designed for use in environments without direct API access.</li>
- *   <li>Not guaranteed to be thread-safe.</li>
+ *   <li>loads an AE workspace configuration (see {@code model(String)}),</li>
+ *   <li>initializes the workspace using a project working directory (see {@code setWorkingDir(File)}), and</li>
+ *   <li>runs a recipe (task) to submit prompts and return the resulting text (see {@code perform()}).</li>
  * </ul>
- * <p>
- * <b>Basic Usage Example:</b>
+ *
+ * <h2>Typical Usage</h2>
  * <pre>
  * {@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
@@ -32,12 +22,13 @@
  * String result = provider.perform();
  * }
  * </pre>
- * <p>
- * <b>Limitations:</b> May require additional plugins or clipboard handling on
- * some platforms. Consult target platform and AE documentation for guidance.
- * <p>
- * <b>Extensibility:</b> Extend {@link org.machanism.machai.ai.web.WebProvider} for
- * custom automation or platform-specific integrations as needed.
+ *
+ * <h2>Notes and Limitations</h2>
+ * <ul>
+ *   <li>Automation depends on the availability and correctness of the configured AE recipes.</li>
+ *   <li>This provider is not guaranteed to be thread-safe.</li>
+ *   <li>Some target web platforms may require additional local configuration (for example, clipboard access).</li>
+ * </ul>
  */
 package org.machanism.machai.ai.web;
 
@@ -52,7 +43,7 @@ package org.machanism.machai.ai.web;
  * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package�s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the packages overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  *      

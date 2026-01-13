@@ -140,4 +140,9 @@ public class WebProvider extends NoneProvider {
 		}
 		this.configName = StringUtils.trimToNull(configName);
 	}
+
+	@Override
+	public void close() {
+		workspace.close();
+	}
 }

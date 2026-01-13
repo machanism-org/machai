@@ -1,27 +1,25 @@
 /**
- * Provides functionality for managing, detecting, and processing project layouts and structures.
+ * Provides APIs for detecting a filesystem-backed project layout and for traversing a project
+ * directory (including multi-module projects).
  * <p>
- * This package contains classes for:
+ * The main entry points are:
  * <ul>
- *   <li>Detecting the type and structure of a project based on its layout and files</li>
- *   <li>Instantiating specific {@link org.machanism.machai.project.layout.ProjectLayout} implementations
- *       for different project types (e.g., Maven, Node.js, Python, or generic)</li>
- *   <li>Processing project directories, modules, and folder layouts, including recursive scanning</li>
- *   <li>Providing extension points for custom logic via abstract processors</li>
+ *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} for selecting an appropriate
+ *       {@link org.machanism.machai.project.layout.ProjectLayout} implementation based on the
+ *       files present in a root directory.</li>
+ *   <li>{@link org.machanism.machai.project.ProjectProcessor} for recursively scanning a project
+ *       (and its modules, if any) and delegating the actual handling of a detected
+ *       {@link org.machanism.machai.project.layout.ProjectLayout} to subclasses.</li>
  * </ul>
- * <p>
- * The core classes in this package include:
- * <ul>
- *   <li>{@link ProjectLayoutManager} – Detects and instantiates project layout representations based on folder contents</li>
- *   <li>{@link ProjectProcessor} – Abstract processor supporting project structure scanning and custom folder/module processing</li>
- * </ul>
- * <p>
- * Example Usage:
+ *
+ * <h2>Typical usage</h2>
  * <pre>{@code
- *   File dir = new File("/path/to/project");
- *   ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
- *   ProjectProcessor processor = ...; // Your Processor Implementation
- *   processor.scanFolder(dir);
+ * File projectDir = new File("/path/to/project");
+ *
+ * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
+ *
+ * ProjectProcessor processor = ...; // your processor implementation
+ * processor.scanFolder(projectDir);
  * }</pre>
  *
  * @author machanism

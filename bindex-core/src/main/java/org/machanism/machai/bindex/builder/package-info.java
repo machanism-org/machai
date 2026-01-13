@@ -1,26 +1,32 @@
 /**
- * Provides builders for generating Bindex documents for various programming project layouts.
+ * Builders for producing a {@link org.machanism.machai.schema.Bindex} from a
+ * {@link org.machanism.machai.project.layout.ProjectLayout}.
  * <p>
- * This package includes specialized builder classes for Maven, JavaScript/TypeScript/Vue, and Python projects. Each builder analyzes the project layout and aggregates manifest, source files, and resources to create a comprehensive AI-driven Bindex document.
+ * This package provides a small build pipeline that:
+ * </p>
+ * <ol>
+ *   <li>Extracts project context (such as manifests, sources, and resources) via a {@code ProjectLayout}.</li>
+ *   <li>Optionally incorporates an existing/origin {@code Bindex} to support incremental updates.</li>
+ *   <li>Uses a {@link org.machanism.machai.ai.manager.GenAIProvider}-backed prompt sequence to generate a final
+ *       {@code Bindex} document.</li>
+ * </ol>
  * <p>
- * Typical usage involves constructing an appropriate builder with a project layout, setting a GenAIProvider, and invoking the {@code build()} method to automatically generate a Bindex from the project context.
+ * The main entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}. Concrete implementations
+ * provide layout-specific context for common ecosystems:
+ * </p>
+ * <ul>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} for Maven/Java projects.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} for JavaScript/TypeScript/Vue projects.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} for Python projects.</li>
+ * </ul>
  * <p>
- * Example workflow:
+ * Example:
+ * </p>
  * <pre>
- *     BindexBuilder builder = new MavenBindexBuilder(layout);
+ *     MavenBindexBuilder builder = new MavenBindexBuilder(layout);
  *     builder.genAIProvider(provider);
  *     Bindex bindex = builder.build();
  * </pre>
- * <p>
- * See each builder class for specialized context aggregation and prompts for GenAI.
- *
- * Classes in this package:
- * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.BindexBuilder}</li>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}</li>
- *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder}</li>
- * </ul>
  */
 package org.machanism.machai.bindex.builder;
 

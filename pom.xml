@@ -12,9 +12,7 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>
-		Machai is a modular, AI-driven toolkit for automating software project setup, semantic indexing, build orchestration, and lifecycle management. Powered by GenAI agents (Ghostwriter, semantic search, metadata indexing, and automated code/documentation generation), Machai streamlines project integration and assembly. While it is designed to work seamlessly within the Machanism ecosystem, Machai can also be used independently for a wide range of software automation tasks.
-	</description>
+	<description>Machai is a modular toolkit for GenAI-enabled developer automation, including semantic metadata indexing (bindex), project assembly, and documentation lifecycle management.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -127,27 +125,27 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-plugin-plugin</artifactId>
-						<version>3.15.2</version>
-						<configuration>
-							<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-						</configuration>
-						<executions>
-							<execution>
-								<id>mojo-descriptor</id>
-								<goals>
-									<goal>descriptor</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.machanism.machai</groupId>
-						<artifactId>bindex-maven-plugin</artifactId>
-						<version>0.0.2-SNAPSHOT</version>
-					</plugin>
-				</plugins>
-			</pluginManagement>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>3.15.2</version>
+					<configuration>
+						<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+					</configuration>
+					<executions>
+						<execution>
+							<id>mojo-descriptor</id>
+							<goals>
+								<goal>descriptor</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.machanism.machai</groupId>
+					<artifactId>bindex-maven-plugin</artifactId>
+					<version>0.0.2-SNAPSHOT</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 
 		<plugins>
 			<plugin>

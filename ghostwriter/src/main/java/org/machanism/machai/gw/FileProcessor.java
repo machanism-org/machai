@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 public class FileProcessor extends ProjectProcessor {
 	/** Logger for documentation input processing events. */
-	private static Logger logger = LoggerFactory.getLogger(FileProcessor.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileProcessor.class);
 
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@guidance:";
@@ -33,17 +33,17 @@ public class FileProcessor extends ProjectProcessor {
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Resource bundle supplying prompt templates for generators. */
-	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
+	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/** Provider for AI document generation. */
-	private GenAIProvider provider;
+	private final GenAIProvider provider;
 	/** Function tool utility for environment setup. */
-	private SystemFunctionTools systemFunctionTools;
+	private final SystemFunctionTools systemFunctionTools;
 
 	/** Directory-level guidance mappings. */
-	private Map<String, String> dirGuidanceMap = new HashMap<>();
+	private final Map<String, String> dirGuidanceMap = new HashMap<>();
 	/** Reviewer type associations. */
-	private Map<String, Reviewer> reviewMap = new HashMap<>();
+	private final Map<String, Reviewer> reviewMap = new HashMap<>();
 
 	/** Root scanning directory for the current documentation run. */
 	private File rootDir;
@@ -118,8 +118,6 @@ public class FileProcessor extends ProjectProcessor {
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
 
-		deleteTempFiles(projectDir);
-
 		provider.setWorkingDir(getRootDir(projectDir));
 
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
@@ -160,7 +158,7 @@ public class FileProcessor extends ProjectProcessor {
 	/**
 	 * Processes the selected project directory for documentation guidance
 	 * extraction. Finds files, applies reviewer logic, and logs results.
-	 * 
+	 *
 	 * @param projectLayout layout against which files are processed
 	 * @param scanDir       directory to scan for files
 	 */
@@ -233,8 +231,8 @@ public class FileProcessor extends ProjectProcessor {
 		String projectPath = ProjectLayout.getRelatedPath(rootDir, projectLayout.getProjectDir(), true);
 		int skipNumber = StringUtils.split(projectPath, "/").length;
 
-		String parentsPath = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
-				file.getParentFile(), true);
+		String parentsPath = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file.getParentFile(),
+				true);
 
 		StringBuilder path = new StringBuilder();
 		String[] parents = StringUtils.split(parentsPath, "/");
@@ -322,7 +320,7 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	private String parseFile(File projectDir, File file) throws IOException {
 		String extension = FilenameUtils.getExtension(file.getName()).toLowerCase();
-		Reviewer reviewer = reviewMap.get(extension);
+		Reviewer reviewer = reviewMap.get(StringUtils.lowerCase(extension));
 
 		String result = null;
 		if (reviewer != null) {
@@ -371,7 +369,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	/**
 	 * Returns true if directory guidance inheritance is enabled.
-	 * 
+	 *
 	 * @return inheritance enabled flag
 	 */
 	public boolean isInheritance() {
@@ -380,7 +378,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	/**
 	 * Sets whether directory guidance inheritance is enabled.
-	 * 
+	 *
 	 * @param inheritance true to enable inheritance
 	 */
 	public void setInheritance(boolean inheritance) {
@@ -389,7 +387,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	/**
 	 * Returns true if parent guidances are used in document preparation.
-	 * 
+	 *
 	 * @return parent guidance enabled flag
 	 */
 	public boolean isUseParentsGuidances() {
@@ -398,7 +396,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	/**
 	 * Sets whether parent guidances are included in documentation preparation.
-	 * 
+	 *
 	 * @param useParentsGuidances true to enable use of parent guidances
 	 */
 	public void setUseParentsGuidances(boolean useParentsGuidances) {
@@ -408,7 +406,6 @@ public class FileProcessor extends ProjectProcessor {
 	public static boolean deleteTempFiles(File basedir) {
 		File file = new File(basedir, FileProcessor.MACHAI_TEMP_DIR + "/" + FileProcessor.GW_TEMP_DIR);
 		logger.info("Removing '{}' inputs log file.", file);
-		boolean delete = FileUtils.deleteQuietly(file);
-		return delete;
+		return FileUtils.deleteQuietly(file);
 	}
 }

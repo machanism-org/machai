@@ -1,82 +1,96 @@
 package org.machanism.machai.project;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.machanism.machai.project.layout.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.machanism.machai.project.layout.DefaultProjectLayout;
+import org.machanism.machai.project.layout.JScriptProjectLayout;
+import org.machanism.machai.project.layout.MavenProjectLayout;
+import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.project.layout.PythonProjectLayout;
 
 class ProjectLayoutManagerTest {
 
-    @Test
-    void detectsMavenProjectLayout(@TempDir Path tempDir) throws Exception {
-        // Arrange
-        File projectDir = tempDir.toFile();
-        new PrintWriter(new File(projectDir, "pom.xml"), "UTF-8").close();
+	@Test
+	void detectProjectLayout_whenPomXmlExists_returnsMavenProjectLayoutAndSetsProjectDir(@TempDir Path tempDir)
+			throws Exception {
+		// Arrange
+		File projectDir = tempDir.toFile();
+		Files.write(tempDir.resolve("pom.xml"), "<project/>".getBytes(StandardCharsets.UTF_8));
 
-        // Act
-        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
+		// Act
+		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
 
-        // Assert
-        assertTrue(layout instanceof MavenProjectLayout);
-        assertEquals(projectDir, layout.getProjectDir());
-    }
+		// Assert
+		assertInstanceOf(MavenProjectLayout.class, layout);
+		assertEquals(projectDir, layout.getProjectDir());
+	}
 
-    @Test
-    void detectsJScriptProjectLayout(@TempDir Path tempDir) throws Exception {
-        // Arrange
-        File projectDir = tempDir.toFile();
-        new PrintWriter(new File(projectDir, "package.json"), "UTF-8").close();
+	@Test
+	void detectProjectLayout_whenPackageJsonExists_returnsJScriptProjectLayoutAndSetsProjectDir(@TempDir Path tempDir)
+			throws Exception {
+		// Arrange
+		File projectDir = tempDir.toFile();
+		Files.write(tempDir.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
 
-        // Act
-        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
+		// Act
+		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
 
-        // Assert
-        assertTrue(layout instanceof JScriptProjectLayout);
-        assertEquals(projectDir, layout.getProjectDir());
-    }
+		// Assert
+		assertInstanceOf(JScriptProjectLayout.class, layout);
+		assertEquals(projectDir, layout.getProjectDir());
+	}
 
-    @Test
-    void detectsPythonProjectLayout(@TempDir Path tempDir) throws Exception {
-        // Arrange
-        File projectDir = tempDir.toFile();
-        PrintWriter writer = new PrintWriter(new File(projectDir, "pyproject.toml"), "UTF-8");
-        writer.println("project.name = \"test\"");
-        writer.close();
+	@Test
+	void detectProjectLayout_whenPyProjectTomlIsPublicPythonProject_returnsPythonProjectLayoutAndSetsProjectDir(
+			@TempDir Path tempDir) throws Exception {
+		// Arrange
+		File projectDir = tempDir.toFile();
+		String pyproject = "[project]\nname = \"test\"\n";
+		Files.write(tempDir.resolve("pyproject.toml"), pyproject.getBytes(StandardCharsets.UTF_8));
 
-        // Act
-        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
+		// Act
+		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
 
-        // Assert
-        assertTrue(layout instanceof PythonProjectLayout);
-        assertEquals(projectDir, layout.getProjectDir());
-    }
+		// Assert
+		assertInstanceOf(PythonProjectLayout.class, layout);
+		assertEquals(projectDir, layout.getProjectDir());
+	}
 
-    @Test
-    void usesDefaultLayoutIfNoKnownMarkers(@TempDir Path tempDir) throws Exception {
-        // Arrange
-        File projectDir = tempDir.toFile();
+	@Test
+	void detectProjectLayout_whenNoKnownMarkersExist_returnsDefaultProjectLayoutAndSetsProjectDir(@TempDir Path tempDir)
+			throws Exception {
+		// Arrange
+		File projectDir = tempDir.toFile();
 
-        // Act
-        ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
+		// Act
+		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
 
-        // Assert
-        assertTrue(layout instanceof DefaultProjectLayout);
-        assertEquals(projectDir, layout.getProjectDir());
-    }
+		// Assert
+		assertInstanceOf(DefaultProjectLayout.class, layout);
+		assertEquals(projectDir, layout.getProjectDir());
+	}
 
-    @Test
-    void throwsFileNotFoundIfDirDoesNotExist() {
-        // Arrange
-        File missingDir = new File("/some/invalid/123456dir");
+	@Test
+	void detectProjectLayout_whenProjectDirDoesNotExist_throwsFileNotFoundException(@TempDir Path tempDir)
+			throws IOException {
+		// Arrange
+		Path missingDir = tempDir.resolve("missing");
+		File missingDirFile = missingDir.toFile();
 
-        // Act & Assert
-        assertThrows(java.io.FileNotFoundException.class, () ->
-            ProjectLayoutManager.detectProjectLayout(missingDir));
-    }
+		// Act & Assert
+		assertThrows(FileNotFoundException.class, () -> ProjectLayoutManager.detectProjectLayout(missingDirFile));
+	}
+
 }

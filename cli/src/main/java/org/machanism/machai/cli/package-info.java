@@ -1,31 +1,46 @@
 /**
- * Provides CLI commands for Machai, enabling GenAI-powered operations including application assembly, library picking, bindex file generation, processing project documents, and cleaning temporary directories.
+ * Spring Shell-based command-line interface (CLI) for Machai.
  * <p>
- * <b>Key Features:</b>
+ * This package exposes interactive commands that orchestrate Machai features such as:
  * <ul>
- *     <li>Shell commands for assembling projects and selecting libraries with GenAI assistance.</li>
- *     <li>Bindex management: creation and registration via CLI to integrate project metadata.</li>
- *     <li>Document processing: automated scanning and analysis of source/project files using GenAI models.</li>
- *     <li>Cleanup utilities to remove temporary Machai directories.</li>
+ *   <li>Picking libraries ("bricks") from a bindex register using a natural-language query.</li>
+ *   <li>Assembling a project based on a prompt and the picked libraries.</li>
+ *   <li>Generating and registering bindex metadata.</li>
+ *   <li>Processing project documents/sources with a configured GenAI provider.</li>
+ *   <li>Cleaning temporary or working directories created during CLI runs.</li>
  * </ul>
  * <p>
- * Typical usage involves instantiating MachaiCLI, running shell commands to assemble applications, pick dependencies, process documentation, and maintain pristine working directories.
+ * The primary entry point is {@link org.machanism.machai.cli.MachaiCLI}, and each command is implemented
+ * as a {@code @ShellComponent} in this package.
  * <p>
- * <b>Example:</b>
+ * Example (starting the CLI):
  * <pre>
  * {@code
- * MachaiCLI.main(new String[]{ });
- * // In CLI shell, use commands such as:
- * // assemby pick "My web app requirements"
- * // bindex --dir /path/to/app
- * // process --scan /src/main/java --genai OpenAI:gpt-5.1
- * // clean --dir /tmp/myapp
+ * public class Main {
+ *   public static void main(String[] args) {
+ *     MachaiCLI.main(args);
+ *   }
+ * }
  * }
  * </pre>
  * <p>
- * Each command is implemented as a shell component class in this package, with Javadoc-provided examples and details.
- * <p>
- * See class-level documentation in respective classes for more information and code examples.
+ * Example (typical interactive commands):
+ * <pre>
+ * {@code
+ * # pick libraries for a requirement description
+ * pick "Create a web app"
+ *
+ * # assemble a project into a directory
+ * assembly --dir /path/to/out --genai OpenAI:gpt-5.1
+ *
+ * # generate/register bindex metadata and process sources/documents
+ * bindex --dir /path/to/project
+ * process --scan /path/to/project/src/main/java --genai OpenAI:gpt-5.1
+ *
+ * # clean temporary output
+ * clean --dir /tmp/machai
+ * }
+ * </pre>
  */
 package org.machanism.machai.cli;
 
@@ -40,7 +55,7 @@ package org.machanism.machai.cli;
  * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package�s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the packages overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  *      

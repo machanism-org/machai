@@ -1,28 +1,38 @@
 /**
- * Provides core document scanning, guidance extraction, and AI-driven review automation.
+ * Core document scanning and AI-assisted review automation.
+ *
  * <p>
- * This package contains the main classes responsible for scanning user, source, test, and document directories, extracting guidance and meta-information, and coordinating with AI providers for documentation generation and review processing. Key elements include:
+ * This package provides the entry point and orchestration for scanning a project
+ * directory, extracting {@code @guidance:} directives from supported files via
+ * pluggable reviewers, and assembling prompt context for a configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ *
+ * <h2>Key types</h2>
  * <ul>
- *     <li>{@link Ghostwriter} - The main application entry point for entire scan and review operations.</li>
- *     <li>{@link FileProcessor} - Handles deep scanning of directories/files, guidance parsing and context management, and interfaces with AI provider and reviewers.</li>
+ *   <li>{@link org.machanism.machai.gw.Ghostwriter} – command-line entry point that
+ *       configures a provider and starts a scan.</li>
+ *   <li>{@link org.machanism.machai.gw.FileProcessor} – scans directories, invokes
+ *       reviewers, aggregates guidance (optionally including parent directory
+ *       guidance), and records prompt inputs.</li>
  * </ul>
- * <p>
- * Typical usage involves creating a {@code FileProcessor} instance and running a scan for documentation input and review, optionally customized by project layout and guidance inheritance flags. See examples below:
+ *
+ * <h2>Typical usage</h2>
  * <pre>
  * {@code
- * // Run document scan on default user directory
+ * // Scan the current user directory.
  * Ghostwriter.main(new String[] {});
  *
- * // Scan a specific root folder and obtain review guidance:
+ * // Scan an explicit project root.
  * GenAIProvider provider = GenAIProviderManager.getProvider(null);
  * FileProcessor processor = new FileProcessor(provider);
+ * processor.setUseParentsGuidances(true);
  * processor.scanDocuments(new File("/path/to/project/root"));
  * }
  * </pre>
- * <p>
- * Guidance inheritance and parent context management can be modified via {@code setInheritance(true)} or {@code setUseParentsGuidances(true)} on the FileProcessor. Javadoc comments throughout this package are maintained to reflect code and project changes for clarity, usability, and up-to-date documentation.
  *
- * <p><strong>Note:</strong> This package is designed for extensibility, supporting custom reviewers, prompt bundles, and project analyzer plug-ins.
+ * <p>
+ * Temporary prompt input logs are written under the project directory in
+ * {@code .machai/docs-inputs}.
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -40,7 +50,7 @@ package org.machanism.machai.gw;
  * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package�s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the packages overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  *      

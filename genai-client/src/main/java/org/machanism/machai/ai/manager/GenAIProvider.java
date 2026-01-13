@@ -7,8 +7,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 /**
  * Interface for generic AI providers supplying prompt handling, file operations, embeddings,
  * and dynamic extension via function tools within the Machanism AI client framework.
@@ -129,4 +127,6 @@ public interface GenAIProvider {
      * @param workingDir Root working directory
      */
     void setWorkingDir(File workingDir);
+
+	void close();
 }
