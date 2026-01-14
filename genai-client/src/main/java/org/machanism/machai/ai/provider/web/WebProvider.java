@@ -54,10 +54,10 @@ public class WebProvider extends NoneProvider {
 	private static AEWorkspace workspace = new AEWorkspace();
 
 	/** Root directory for workspace operations. */
-	private File rootDir;
+	private static File rootDir;
 
 	/** Name of the configuration file to be loaded. */
-	private String configName;
+	private static String configName;
 
 	static {
 		// Ensure Java AWT headless mode is appropriately set for AE tasks
@@ -78,7 +78,7 @@ public class WebProvider extends NoneProvider {
 	 *                                  </pre>
 	 */
 	@Override
-	public String perform() {
+	public synchronized String perform() {
 		try {
 			workspace.getSystemVariables().put("INPUTS", super.getPrompts());
 			RecipeRunner runTask = workspace.runTask("Submit Prompt", false);
@@ -121,6 +121,11 @@ public class WebProvider extends NoneProvider {
 				rootDir = null;
 				throw new IllegalArgumentException(e);
 			}
+		} else {
+			if (!StringUtils.equals(rootDir.getAbsolutePath(), workingDir.getAbsolutePath())) {
+				throw new IllegalArgumentException("WorkingDir change detected. Requested: `"
+						+ workingDir.getAbsolutePath() + "`; currently in use: `" + rootDir.getAbsolutePath() + "`");
+			}
 		}
 	}
 
@@ -134,11 +139,11 @@ public class WebProvider extends NoneProvider {
 	 */
 	@Override
 	public void model(String configName) {
-		if (this.configName != null && StringUtils.equals(this.configName, configName)) {
+		if (WebProvider.configName != null && StringUtils.equals(WebProvider.configName, configName)) {
 			throw new IllegalArgumentException("Configuration change detected. Requested: `" + configName
-					+ "`; currently in use: `" + this.configName + "`.");
+					+ "`; currently in use: `" + WebProvider.configName + "`.");
 		}
-		this.configName = StringUtils.trimToNull(configName);
+		WebProvider.configName = StringUtils.trimToNull(configName);
 	}
 
 	@Override

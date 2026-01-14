@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * }</pre>
  * 
  */
-@Mojo(name = "process", threadSafe = false)
+@Mojo(name = "process")
 public class Process extends AbstractMojo {
 
 	/** Logger for this class. */
