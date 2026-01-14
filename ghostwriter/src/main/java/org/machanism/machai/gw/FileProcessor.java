@@ -73,13 +73,19 @@ public class FileProcessor extends ProjectProcessor {
      * @guidance: loadReviewers method must be accurately implemented according to the latest guidelines.
      */
     private void loadReviewers() {
-        ServiceLoader<? extends Reviewer> reviewerServiceLoader = ServiceLoader.load(Reviewer.class);
+        ServiceLoader<Reviewer> reviewerServiceLoader = ServiceLoader.load(Reviewer.class);
 
         for (Reviewer reviewer : reviewerServiceLoader) {
             reviewer.setDirGuidanceMap(dirGuidanceMap);
-            String[] extentions = reviewer.getSupportedFileExtentions();
-            for (String extention : extentions) {
-                reviewMap.put(extention, reviewer);
+            String[] extensions = reviewer.getSupportedFileExtentions();
+            if (extensions == null) {
+                continue;
+            }
+            for (String extension : extensions) {
+                if (StringUtils.isBlank(extension)) {
+                    continue;
+                }
+                reviewMap.put(StringUtils.lowerCase(extension.trim()), reviewer);
             }
         }
     }
@@ -120,7 +126,6 @@ public class FileProcessor extends ProjectProcessor {
      */
     @Override
     public void scanFolder(File projectDir) throws IOException {
-
         provider.setWorkingDir(getRootDir(projectDir));
 
         ProjectLayout projectLayout = getProjectLayout(projectDir);
@@ -350,7 +355,7 @@ public class FileProcessor extends ProjectProcessor {
             File[] files = projectDir.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (!StringUtils.equalsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
+                    if (!StringUtils.equalsAnyIgnoreCase(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
                         if (file.isDirectory()) {
                             result.addAll(findFiles(file));
                         } else {

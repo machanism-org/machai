@@ -18,63 +18,95 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /*@guidance: Generate javadoc with a description all maven plugin parameters and examples of usage. */
 
 /**
- * Mojo to process project files using GenAI provider.
- * 
+ * Maven Mojo that scans and processes project documents using an optional GenAI provider.
+ *
  * <p>
- * This Maven plugin scans documents in the project, facilitated by AI
- * assistance for documentation generation and processing. It allows
- * configuration of the chat model provider and manages document scanning
- * lifecycle.
+ * This goal delegates document scanning and processing to {@link FileProcessor}. If a GenAI provider is
+ * configured via {@link #chatModel}, the processor may use it to assist with document workflows.
  * </p>
  *
  * <h2>Parameters</h2>
- * <ul>
- * <li><b>gw.genai</b> - The chat model to use for AI assistance in
- * documentation generation (e.g., "OpenAI:gpt-5"). Optional, defaults to
- * "None".</li>
- * <li><b>basedir</b> - Project base directory. Set by Maven. Required and
- * readonly.</li>
- * </ul>
+ * <p>
+ * Parameters can be configured via system properties (using {@code -D...}) or within the plugin
+ * configuration in the {@code pom.xml}.
+ * </p>
+ *
+ * <dl>
+ * <dt><b>{@code gw.genai}</b> (configuration: {@code chatModel})</dt>
+ * <dd>
+ * The GenAI chat model identifier used for AI-assisted document processing.
+ * <p>
+ * Value format is provider-specific, typically {@code ProviderName:ModelName}.
+ * </p>
+ * <p>
+ * Example: {@code OpenAI:gpt-5}
+ * </p>
+ * </dd>
+ *
+ * <dt><b>{@code basedir}</b></dt>
+ * <dd>
+ * The Maven project base directory (read-only). Set by Maven to {@code ${basedir}}.
+ * </dd>
+ *
+ * <dt><b>{@code project}</b></dt>
+ * <dd>
+ * The current {@link MavenProject} (read-only). Set by Maven to {@code ${project}}.
+ * </dd>
+ *
+ * <dt><b>{@code session}</b></dt>
+ * <dd>
+ * The current {@link MavenSession} (read-only). Set by Maven to {@code ${session}}.
+ * </dd>
+ * </dl>
  *
  * <h2>Example Usage</h2>
- * 
- * <pre>{@code
- * mvn org.machanism.machai:machai-maven-plugin:process -Dgw.genai=OpenAI:gpt-5
- * }</pre>
- * 
+ *
+ * <h3>Run from the command line</h3>
+ * <pre>
+ * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5
+ * </pre>
+ *
+ * <h3>Configure in {@code pom.xml}</h3>
+ * <pre>
+ * &lt;plugin&gt;
+ *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
+ *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
+ *   &lt;version&gt;${project.version}&lt;/version&gt;
+ *   &lt;configuration&gt;
+ *     &lt;chatModel&gt;OpenAI:gpt-5&lt;/chatModel&gt;
+ *   &lt;/configuration&gt;
+ * &lt;/plugin&gt;
+ * </pre>
  */
 @Mojo(name = "gw", threadSafe = true)
 public class GW extends AbstractMojo {
 
 	/** Logger for this class. */
-	private static Logger logger = LoggerFactory.getLogger(GW.class);
+	private static final Logger logger = LoggerFactory.getLogger(GW.class);
 
 	/**
-	 * The chat model to use for AI assistance in documentation generation. <br>
-	 * Example: "OpenAI:gpt-5"<br>
-	 * Default: "None"
+	 * The GenAI chat model identifier to use for AI assistance.
+	 *
+	 * <p>
+	 * This can be provided as a system property {@code -Dgw.genai=...}.
+	 * </p>
 	 */
 	@Parameter(property = "gw.genai")
 	protected String chatModel;
 
-	/**
-	 * Project base directory. Set by Maven.
-	 */
+	/** Project base directory (read-only), provided by Maven. */
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
 	protected File basedir;
 
-	/**
-	 * The MavenProject instance provided by Maven.
-	 */
+	/** Maven project model (read-only), provided by Maven. */
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
 
-	/**
-	 * The Maven Session object.
-	 */
+	/** Maven session (read-only), provided by Maven. */
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	private MavenSession session;
 
