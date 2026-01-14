@@ -1,32 +1,3 @@
-/**
- * Management layer for resolving and extending {@code GenAIProvider} implementations.
- * <p>
- * This package contains the primary abstractions used by the client to obtain a concrete provider
- * (for example, OpenAI- or Ollama-backed implementations) and to attach common runtime "tools"
- * that enable providers to interact with the local system in a controlled way.
- * <p>
- * Typical responsibilities include:
- * <ul>
- *   <li>Resolving a provider implementation from a model identifier string via
- *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
- *   <li>Providing a stable, provider-agnostic interface for prompts and other AI operations via
- *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
- *   <li>Attaching file and command tools via {@link org.machanism.machai.ai.manager.FileFunctionTools},
- *       {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
- *       {@link org.machanism.machai.ai.manager.SystemFunctionTools}.</li>
- * </ul>
- * <p>
- * Usage example:
- * <pre>
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
- * provider.prompt("Hello!");
- *
- * SystemFunctionTools tools = new SystemFunctionTools();
- * tools.applyTools(provider);
- * </pre>
- */
-package org.machanism.machai.ai.manager;
-
 /*-
  * @guidance:
  *
@@ -57,3 +28,32 @@ package org.machanism.machai.ai.manager;
  * 
  * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */
+
+/**
+ * Management layer for resolving and extending {@code GenAIProvider} implementations.
+ * <p>
+ * This package contains the primary abstractions used by the client to obtain a concrete provider
+ * (for example, OpenAI- or Ollama-backed implementations) and to attach common runtime "tools"
+ * that enable providers to interact with the local system in a controlled way.
+ * <p>
+ * Typical responsibilities include:
+ * <ul>
+ *   <li>Resolving a provider implementation from a model identifier string via
+ *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *   <li>Providing a stable, provider-agnostic interface for prompts and other AI operations via
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
+ *   <li>Attaching file and command tools via {@link org.machanism.machai.ai.manager.FileFunctionTools},
+ *       {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
+ *       {@link org.machanism.machai.ai.manager.SystemFunctionTools}.</li>
+ * </ul>
+ * <p>
+ * Usage example:
+ * <pre>
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
+ * provider.prompt("Hello!");
+ *
+ * SystemFunctionTools tools = new SystemFunctionTools();
+ * tools.applyTools(provider);
+ * </pre>
+ */
+package org.machanism.machai.ai.manager;

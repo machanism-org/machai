@@ -17,7 +17,7 @@
 5. **Contributing:**  
    - Outline guidelines for contributing to the project, including code style, pull request process, and issue reporting.
 6. **License:**  
-   - State the project’s license and provide a link to the license file.
+   - State the project's license and provide a link to the license file.
 7. **Contact and Support:**  
    - Include contact information or links for support and further questions.
 **Formatting Requirements:**
@@ -32,29 +32,31 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Machai is a modular, AI-driven toolkit for automating software project setup, semantic indexing, build orchestration, and documentation lifecycle management. It provides:
+Machai is a modular toolkit for GenAI-enabled developer automation, including semantic metadata indexing (bindex), project assembly, and documentation lifecycle management.
 
-- A Java GenAI provider abstraction (`genai-client`) used across tooling.
-- A metadata and semantic indexing foundation (`bindex-core`) for describing and discovering libraries.
-- Developer-facing automation via a CLI and Maven plugins for generating metadata, assembling projects, and generating/updating documentation.
+Key capabilities:
+
+- GenAI provider abstraction for prompt/response flows, tool/function calling, file context, and embeddings.
+- Bindex metadata plus semantic search to describe, publish, discover, and pick libraries.
+- Automation tooling via a CLI and Maven plugins for generating metadata, assembling projects, and generating or updating documentation.
 
 ## Modules
 
 | Name | Description |
 |---|---|
-| [GenAI Client](genai-client/) | A Java abstraction layer over multiple Generative AI backends through a single `GenAIProvider` interface. It supports LLM workflows (prompt/response), tool/function calling, file-based context, and embeddings, and includes implementations such as `OpenAIProvider`, `NoneProvider` (no-op/logging), and `WebProvider` (UI/driver-based automation). |
-| [Bindex Core](bindex-core/) | Core library for generating and managing *bindex* metadata, including metadata generation, assembly and dependency resolution, and integrations with Maven models and plugin APIs. It underpins library discovery and automated module organization in the Machanism ecosystem. |
-| [Machai CLI](cli/) | A Spring Shell-based command-line tool to generate/update `bindex.json`, register metadata to a database, pick libraries via natural-language semantic search, assemble projects from picked libraries, process documents/files with GenAI, and clean `.machai` temporary folders. |
-| [Bindex Maven Plugin](bindex-maven-plugin/) | A Maven plugin that generates and maintains `bindex.json` for Maven projects, can update existing descriptors, and can optionally register/publish metadata for discovery workflows. It enables metadata-driven automation and (when enabled) GenAI-assisted analysis. |
-| [Assembly Maven Plugin](assembly-maven-plugin/) | A Maven plugin for AI-assisted assembly and initialization of Java projects. It analyzes requirements, recommends libraries via semantic search using bindex metadata, and automates project bootstrapping (dependencies and configuration) with customizable parameters. |
-| [Ghostwriter](ghostwriter/) | A documentation automation and intelligent code/documentation generation engine that scans and assembles documentation using embedded guidance tags and AI-powered synthesis, designed to integrate into Maven-based toolchains. |
-| [GW Maven Plugin](gw-maven-plugin/) | A Maven plugin that runs Ghostwriter as part of the Maven Site lifecycle to scan, analyze, and generate/update documentation based on embedded guidance tags, keeping project documentation consistent and up-to-date. |
+| [GenAI Client](genai-client/) | Java library that provides a single `GenAIProvider` abstraction for integrating with multiple Generative AI backends. It serves as the shared foundation for prompt execution, file-based context, tool/function calling, and embeddings across the Machai toolchain. |
+| [Bindex Core](bindex-core/) | Foundational library for working with bindex metadata: generating metadata from projects, supporting library discovery and selection, and providing core assembly and dependency-resolution capabilities used by the CLI and Maven plugins. |
+| [Machai CLI](cli/) | Spring Shell-based command-line tool for running Machai workflows from the terminal: generate or update `bindex.json`, register metadata to a database, pick libraries via semantic search, assemble projects from picked libraries, process documents or files with GenAI, and clean `.machai` workspace folders. |
+| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and maintains `bindex.json` for Maven projects and can optionally register or publish metadata for discovery workflows, enabling metadata-driven automation (and, when configured, GenAI-assisted analysis). |
+| [Assembly Maven Plugin](assembly-maven-plugin/) | Maven plugin for metadata-driven (and optionally GenAI-assisted) project assembly. It selects libraries using bindex metadata and helps bootstrap a project by wiring dependencies and configuration based on the assembly requirements. |
+| [Ghostwriter](ghostwriter/) | Documentation automation engine that scans project documents for embedded guidance tags and assembles consistent, up-to-date documentation using AI-powered synthesis, designed to integrate into Maven-based toolchains. |
+| [GW Maven Plugin](gw-maven-plugin/) | Maven plugin that runs Ghostwriter (typically as part of the Maven Site lifecycle) to scan, analyze, and generate or update documentation based on embedded guidance tags across modules. |
 
 ## Installation Instructions
 
 ### Prerequisites
 
-- Java 9+ (project default in the root `pom.xml`; some modules may require newer, for example `machai-cli` uses Java 17)
+- Java 9+ (root build defaults to Java 9; some modules require newer, for example the CLI uses Java 17)
 - Maven 3.6+
 
 ### Clone and build
@@ -96,7 +98,7 @@ java -jar cli/target/machai.jar bindex --dir /path/to/project
 Pick libraries from a registry using a prompt:
 
 ```bash
-java -jar cli/target/machai.jar pick "Build a REST API with PostgreSQL and Flyway" --score 0.80
+java -jar cli/target/machai.jar pick "Build a REST API for user login via Commercetools" --score 0.90
 ```
 
 Assemble a project from the picked results:
@@ -107,7 +109,7 @@ java -jar cli/target/machai.jar assembly --dir /path/to/output --score 0.80
 
 ### Using Maven plugins
 
-Add the required plugin to your `pom.xml` and run it by goal, for example:
+Run a plugin goal directly (example):
 
 ```bash
 mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:process
@@ -115,10 +117,10 @@ mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:process
 
 ## Contributing
 
-- Use the existing formatting and naming conventions found in the codebase.
+- Follow existing code style and conventions used in the repository.
 - Keep changes focused and include tests where applicable.
-- Open a pull request with a clear description, rationale, and reproduction steps for fixes.
-- Report bugs and request features via GitHub Issues: <https://github.com/machanism-org/machai/issues>
+- Use GitHub Issues for bug reports and feature requests: <https://github.com/machanism-org/machai/issues>
+- Submit pull requests with a clear description, rationale, and (for fixes) reproduction steps.
 
 ## License
 

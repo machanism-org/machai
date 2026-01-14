@@ -21,10 +21,10 @@
  * <h2>Example</h2>
  * <pre>{@code
  * ProjectLayout layout = new MavenProjectLayout().projectDir(new File("/workspace"));
- * List<String> modules = layout.getModules();
- * List<String> sources = layout.getSources();
- * List<String> docs = layout.getDocuments();
- * List<String> tests = layout.getTests();
+ * List&lt;String&gt; modules = layout.getModules();
+ * List&lt;String&gt; sources = layout.getSources();
+ * List&lt;String&gt; docs = layout.getDocuments();
+ * List&lt;String&gt; tests = layout.getTests();
  * }</pre>
  */
 package org.machanism.machai.project.layout;
