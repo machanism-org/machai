@@ -83,7 +83,7 @@ public class Picker implements Closeable {
 	/** Default minimum similarity score for queries. */
 	public static final String DEFAULT_MIN_SCORE = "0.90";
 
-	private static final OpenAiEmbeddingModelName EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL;
+	private static final String EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL.toString();
 
 	private static Logger logger = LoggerFactory.getLogger(Picker.class);
 
@@ -107,6 +107,8 @@ public class Picker implements Closeable {
 	private GenAIProvider provider;
 
 	private String apiKey;
+	private String baseUrl;
+
 	private Double score = 0.85;
 	private Map<String, Double> scoreMap = new HashMap<>();
 
@@ -134,6 +136,8 @@ public class Picker implements Closeable {
 			if (apiKey == null || apiKey.isEmpty()) {
 				throw new IllegalStateException("OPEN_AI_API_KEY env variable is not set or is empty.");
 			}
+			
+			baseUrl = System.getenv("OPENAI_BASE_URL");
 		}
 
 		mongoClient = MongoClients.create(uri);
@@ -244,7 +248,7 @@ public class Picker implements Closeable {
 	 * @return List of Double values (embedding vector)
 	 */
 	private List<Double> getEmbedding(String text, Integer dimensions) {
-		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder().apiKey(apiKey)
+		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder().apiKey(apiKey).baseUrl(baseUrl)
 				.modelName(EMBEDDING_MODEL_NAME).timeout(java.time.Duration.ofSeconds(60)).dimensions(dimensions)
 				.build();
 

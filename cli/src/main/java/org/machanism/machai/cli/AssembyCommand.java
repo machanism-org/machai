@@ -143,13 +143,8 @@ public class AssembyCommand {
 			@ShellOption(value = "dir", defaultValue = ShellOption.NULL, help = "Path to the directory where the assembled project will be created.") File dir,
 			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.", optOut = true) String registerUrl,
 			@ShellOption(value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE, help = "Minimum similarity threshold for search results.") double score,
-			@ShellOption(value = "genai", defaultValue = "None", help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is not provided or left empty, the default model '"
-					+ Ghostwriter.CHAT_MODEL + "' will be used.") String chatModel)
+			@ShellOption(value = "genai", defaultValue = "None", help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).") String chatModel)
 			throws IOException {
-
-		if (chatModel == null) {
-			chatModel = Ghostwriter.CHAT_MODEL;
-		}
 
 		if (dir == null) {
 			dir = SystemUtils.getUserDir();

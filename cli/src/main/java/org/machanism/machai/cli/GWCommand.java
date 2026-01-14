@@ -36,7 +36,7 @@ import org.springframework.shell.standard.ShellOption;
  * @since 0.0.2
  */
 @ShellComponent
-public class ProcessCommand {
+public class GWCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
 
@@ -54,13 +54,11 @@ public class ProcessCommand {
 	 *                  Ghostwriter.CHAT_MODEL)
 	 * @throws IOException if scan or processing fails
 	 */
-	@ShellMethod("GenAI file processing command.")
-	public void process(
+	@ShellMethod("Processing files using the Ghostwriter command.")
+	public void gw(
 			@ShellOption(help = "The path to the directory to be processed.", value = "--scan", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The path fo the project directory.", value = "--root", defaultValue = ShellOption.NULL, optOut = true) File rootDir,
-			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model '"
-					+ Ghostwriter.CHAT_MODEL
-					+ "' will be used.", value = "genai", defaultValue = "None", optOut = true) String chatModel)
+			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = "genai", defaultValue = "None", optOut = true) String chatModel)
 			throws IOException {
 
 		if (rootDir == null) {

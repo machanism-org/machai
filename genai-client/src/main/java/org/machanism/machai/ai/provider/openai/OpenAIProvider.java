@@ -33,7 +33,6 @@ import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
-import com.openai.models.ChatModel;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.embeddings.EmbeddingModel;
@@ -59,18 +58,18 @@ import com.openai.models.responses.ResponseReasoningItem.Summary;
 import com.openai.models.responses.Tool;
 
 /**
- * The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving
- * as a concrete implementation of the `GenAIProvider` interface.
+ * The {@code OpenAIProvider} class integrates seamlessly with the OpenAI API, serving
+ * as a concrete implementation of the {@code GenAIProvider} interface.
  * 
  * This provider enables a wide range of generative AI capabilities, including:
+ * <ul>
+ *   <li>Sending prompts and receiving responses from OpenAI Chat models.</li>
+ *   <li>Managing files for use in various OpenAI workflows.</li>
+ *   <li>Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.</li>
+ *   <li>Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.</li>
+ * </ul>
  * 
- * - Sending prompts and receiving responses from OpenAI Chat models. - Managing
- * files for use in various OpenAI workflows. - Performing advanced large
- * language model (LLM) requests, such as text generation, summarization, and
- * question answering. - Creating and utilizing vector embeddings for tasks like
- * semantic search and similarity analysis.
- * 
- * By abstracting the complexities of direct API interaction, `OpenAIProvider`
+ * By abstracting the complexities of direct API interaction, {@code OpenAIProvider}
  * allows developers to leverage OpenAI’s powerful models efficiently within
  * their applications. It supports both synchronous and asynchronous operations,
  * and can be easily extended or configured to accommodate different use cases
@@ -79,15 +78,37 @@ import com.openai.models.responses.Tool;
  * This class provides capabilities to send prompts, manage files, perform LLM
  * requests, and create embeddings using OpenAI Chat models.
  * </p>
+ * 
  * <p>
- * Usage example:
+ * <b>Environment Variables:</b><br>
+ * The client automatically reads the following environment variables. You must set at least {@code OPENAI_API_KEY}:
+ * <ul>
+ *   <li>{@code OPENAI_API_KEY} (required)</li>
+ *   <li>{@code OPENAI_ORG_ID} (optional)</li>
+ *   <li>{@code OPENAI_PROJECT_ID} (optional)</li>
+ *   <li>{@code OPENAI_BASE_URL} (optional)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>
+ * <b>Using the CodeMie API:</b><br>
+ * To use the CodeMie API, set the following environment variables:
+ * <ul>
+ *   <li>{@code OPENAI_API_KEY}=eyJhbGciOiJSUzI1NiIsInR5c....</li>
+ *   <li>{@code OPENAI_BASE_URL}=https://codemie.lab.epam.com/code-assistant-api/v1</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>
+ * <b>Usage example:</b>
  * </p>
  * 
  * <pre>
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
  * </pre>
  * 
- * Thread safety: This implementation is NOT thread-safe.
+ * <p>
+ * <b>Thread safety:</b> This implementation is NOT thread-safe.
  * </p>
  * 
  * @author Viktor Tovstyi
@@ -101,7 +122,7 @@ public class OpenAIProvider implements GenAIProvider {
 	/** OpenAI client for API interactions. */
 	private OpenAIClient client;
 	/** Active chat model. */
-	private ChatModel chatModel;
+	private String chatModel;
 
 	/** Maps tools to handler functions. */
 	private Map<Tool, Function<Object[], Object>> toolMap = new HashMap<>();
@@ -110,7 +131,7 @@ public class OpenAIProvider implements GenAIProvider {
 	/** Instructions for the model, if any. */
 	private String instructions;
 	/** ResourceBundle for localized prompt templates. */
-	private ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
+	private ResourceBundle promptBundle;
 
 	/** Optional log file for input data. */
 	private File inputsLog;
@@ -145,8 +166,12 @@ public class OpenAIProvider implements GenAIProvider {
 			String fileData = IOUtils.toString(input, "UTF8");
 			String prompt;
 			if (bundleMessageName != null) {
-				prompt = MessageFormat.format(promptBundle.getString(bundleMessageName), file.getName(), type,
-						fileData);
+				if (promptBundle != null) {
+					prompt = MessageFormat.format(promptBundle.getString(bundleMessageName), file.getName(), type,
+							fileData);
+				} else {
+					prompt = String.format(bundleMessageName, file.getName(), type);
+				}
 			} else {
 				prompt = fileData;
 			}
@@ -166,7 +191,7 @@ public class OpenAIProvider implements GenAIProvider {
 		try (FileInputStream input = new FileInputStream(file)) {
 			FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input))
 					.purpose(FilePurpose.USER_DATA).build();
-			FileObject fileObject = client.files().create(params);
+			FileObject fileObject = getClient().files().create(params);
 
 			com.openai.models.responses.ResponseInputFile.Builder builder = ResponseInputFile.builder()
 					.fileId(fileObject.id());
@@ -211,7 +236,7 @@ public class OpenAIProvider implements GenAIProvider {
 
 		logInputs();
 
-		Response response = client.responses().create(builder.build());
+		Response response = getClient().responses().create(builder.build());
 		result = parseResponse(response, instructions);
 		clear();
 		return result;
@@ -288,7 +313,7 @@ public class OpenAIProvider implements GenAIProvider {
 		if (text != null) {
 			EmbeddingModel embModel = EmbeddingModel.TEXT_EMBEDDING_ADA_002;
 			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(embModel).build();
-			CreateEmbeddingResponse response = client.embeddings().create(params);
+			CreateEmbeddingResponse response = getClient().embeddings().create(params);
 			embedding = response.data().get(0).embedding();
 		}
 		return embedding;
@@ -442,12 +467,7 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public void model(String chatModelName) {
-		chatModel = ChatModel.of(chatModelName);
-		String uri = System.getenv("OPENAI_API_KEY");
-		if (uri == null || uri.isEmpty()) {
-			throw new RuntimeException("OPENAI_API_KEY env variable is not set or is empty.");
-		}
-		client = OpenAIOkHttpClient.builder().fromEnv().build();
+		this.chatModel = chatModelName;
 	}
 
 	@Override
@@ -457,6 +477,17 @@ public class OpenAIProvider implements GenAIProvider {
 
 	@Override
 	public void close() {
-		client.close();
+		getClient().close();
 	}
+
+	protected OpenAIClient getClient() {
+		if (client == null) {
+			com.openai.client.okhttp.OpenAIOkHttpClient.Builder buillder = OpenAIOkHttpClient.builder();
+			buillder.fromEnv();
+			client = buillder.build();
+		}
+
+		return client;
+	}
+
 }
