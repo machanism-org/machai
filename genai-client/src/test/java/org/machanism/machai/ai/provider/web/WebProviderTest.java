@@ -1,7 +1,9 @@
-package org.machanism.machai.ai.web;
+package org.machanism.machai.ai.provider.web;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.provider.web.WebProvider;
+
 import java.io.File;
 import static org.junit.jupiter.api.Assertions.*;
 

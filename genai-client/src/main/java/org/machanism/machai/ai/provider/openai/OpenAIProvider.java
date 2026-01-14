@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.openAI;
+package org.machanism.machai.ai.provider.openai;
 
 import java.io.File;
 import java.io.FileInputStream;

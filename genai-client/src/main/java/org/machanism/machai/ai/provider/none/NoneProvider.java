@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.none;
+package org.machanism.machai.ai.provider.none;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.openAI.OpenAIProvider;
+import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

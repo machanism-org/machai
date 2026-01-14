@@ -1,9 +1,9 @@
-package org.machanism.machai.ai.web;
+package org.machanism.machai.ai.provider.web;
 
 import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
-import org.machanism.machai.ai.none.NoneProvider;
+import org.machanism.machai.ai.provider.none.NoneProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

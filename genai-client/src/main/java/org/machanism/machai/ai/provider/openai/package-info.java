@@ -25,4 +25,4 @@
  *
  * Thread safety: Classes in this package are NOT thread-safe unless explicitly documented otherwise.
  */
-package org.machanism.machai.ai.openAI;
+package org.machanism.machai.ai.provider.openai;

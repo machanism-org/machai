@@ -6,7 +6,7 @@
  * It integrates with <a href="https://ganteater.com">Anteater</a> to drive browser-like workflows using
  * AE recipes (workflows) stored in the project resources.
  * <p>
- * The main entry point is {@link org.machanism.machai.ai.web.WebProvider}, which:
+ * The main entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
  * <ul>
  *   <li>loads an AE workspace configuration (see {@code model(String)}),</li>
  *   <li>initializes the workspace using a project working directory (see {@code setWorkingDir(File)}), and</li>
@@ -30,7 +30,7 @@
  *   <li>Some target web platforms may require additional local configuration (for example, clipboard access).</li>
  * </ul>
  */
-package org.machanism.machai.ai.web;
+package org.machanism.machai.ai.provider.web;
 
 /*-
  * @guidance:

@@ -1,7 +1,7 @@
 /**
  * Provides a non-operational ("none") generative AI provider implementation.
  * <p>
- * This package contains {@link org.machanism.machai.ai.none.NoneProvider}, a {@link org.machanism.machai.ai.manager.GenAIProvider}
+ * This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a {@link org.machanism.machai.ai.manager.GenAIProvider}
  * implementation intended for environments where no external GenAI/LLM integration should be used. The provider can optionally
  * write the accumulated prompts (and instructions, if supplied) to local files for audit, troubleshooting, or deferred/manual
  * processing.
@@ -25,7 +25,7 @@
  * }
  * </pre>
  */
-package org.machanism.machai.ai.none;
+package org.machanism.machai.ai.provider.none;
 
 /*-
  * @guidance:

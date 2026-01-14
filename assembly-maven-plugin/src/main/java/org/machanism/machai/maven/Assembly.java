@@ -18,7 +18,7 @@ import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
-import org.machanism.machai.ai.none.NoneProvider;
+import org.machanism.machai.ai.provider.none.NoneProvider;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;

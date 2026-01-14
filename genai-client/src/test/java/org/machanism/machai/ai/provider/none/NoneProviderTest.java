@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.none;
+package org.machanism.machai.ai.provider.none;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,6 +8,7 @@ import java.io.File;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.provider.none.NoneProvider;
 
 /**
  * Unit tests for {@link NoneProvider}.

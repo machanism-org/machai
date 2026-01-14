@@ -22,7 +22,7 @@ class GenAIProviderManagerTest {
     void returnsOpenAIProviderForValidModel() {
         GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
         assertNotNull(provider);
-        assertTrue(provider instanceof org.machanism.machai.ai.openAI.OpenAIProvider);
+        assertTrue(provider instanceof org.machanism.machai.ai.provider.openai.OpenAIProvider);
     }
 
     /**
@@ -32,7 +32,7 @@ class GenAIProviderManagerTest {
     void infersOpenAIProviderWhenOnlyModelIsGiven() {
         GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
         assertNotNull(provider);
-        assertTrue(provider instanceof org.machanism.machai.ai.openAI.OpenAIProvider);
+        assertTrue(provider instanceof org.machanism.machai.ai.provider.openai.OpenAIProvider);
     }
 
     /**

@@ -1,6 +1,8 @@
-package org.machanism.machai.ai.openAI;
+package org.machanism.machai.ai.provider.openAI;
 
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.provider.openai.OpenAIProvider;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class OpenAIProviderTest {
