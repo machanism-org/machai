@@ -52,12 +52,8 @@ public class JavaReviewer implements Reviewer {
 			Matcher matcher = pattern.matcher(content);
 			if (matcher.find()) {
 				if (StringUtils.equals(guidancesFile.getName(), "package-info.java")) {
-					String group = matcher.group(1);
-					String guidanceText = group.replaceAll("(?m)^\\s*\\*\\s?", "").trim();
-					String relatedDirPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
 					String relatedFilePath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
-					result = MessageFormat.format(promptBundle.getString("java_package_info_file"), relatedFilePath, relatedDirPath,
-							extractPackageName(content), guidanceText);
+					result = MessageFormat.format(promptBundle.getString("java_package_info_file"), relatedFilePath);
 				} else {
 					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
 					String name = guidancesFile.getName();

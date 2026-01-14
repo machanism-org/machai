@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
  * "None".</li>
  * <li><b>basedir</b> - Project base directory. Set by Maven. Required and
  * readonly.</li>
- * <li><b>project</b> - The MavenProject instance. Set by Maven. Readonly.</li>
- * <li><b>session</b> - The Maven Session. Required and readonly.</li>
  * </ul>
  *
  * <h2>Example Usage</h2>
@@ -48,11 +46,11 @@ import org.slf4j.LoggerFactory;
  * }</pre>
  * 
  */
-@Mojo(name = "process")
-public class Process extends AbstractMojo {
+@Mojo(name = "gw", threadSafe = true)
+public class GW extends AbstractMojo {
 
 	/** Logger for this class. */
-	private static Logger logger = LoggerFactory.getLogger(Process.class);
+	private static Logger logger = LoggerFactory.getLogger(GW.class);
 
 	/**
 	 * The chat model to use for AI assistance in documentation generation. <br>

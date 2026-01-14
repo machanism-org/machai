@@ -40,9 +40,6 @@ import org.slf4j.LoggerFactory;
 @Mojo(name = "clean", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.CLEAN)
 public class Clean extends AbstractMojo {
 
-	/** Logger for this class. */
-	private static Logger logger = LoggerFactory.getLogger(Clean.class);
-
 	/**
 	 * The Maven project base directory.
 	 *
