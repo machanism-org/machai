@@ -90,14 +90,14 @@ help
 
 Generate `bindex.json` for a project directory:
 
-```bash
+```
 java -jar machai.jar
         _ . __  __            _           _
     \`"' ' |  \/  | __ _  ___| |__   __ _(_)
    /'`\\\  | |\/| |/ _` |/ __| '_ \ / _` | |
   /<"\ \\\ | |  | | (_| | (__| | | | (_| | |
  /::_.-.  .|_|  |_|\__,_|\___|_| |_|\__,_|_|
- `-\\ / | The Machai CLI 0.0.2-SNAPSHOT
+ `-\\ / | The Machai CLI 0.0.2
     \ `-' www.machanism.org
 
 18:19:29.934 INFO  Starting MachaiCLI using Java 24.0.2 with PID 30920 (C:\projects\machanism.org\machai\cli\target\machai.jar started by ViktorTovstyi in C:\projects\machanism.org\machai\cli\target)
@@ -108,7 +108,7 @@ shell:> bindex --dir /path/to/project
 Pick libraries from a registry using a prompt:
 
 ```bash
-shell:> pick "Build a REST API with PostgreSQL and Flyway" --score 0.80
+shell:> pick "Build a REST API for user login via Commercetools" --score 0.90
 ```
 
 Assemble a project from the picked results:

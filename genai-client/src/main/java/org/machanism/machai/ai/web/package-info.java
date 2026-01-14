@@ -1,5 +1,5 @@
 /**
- * Provides a {@link org.machanism.machai.core.provider.GenAIProvider} implementation that automates
+ * Provides a {@link org.machanism.machai.GenAIProvider.provider.GenAIProvider} implementation that automates
  * prompt/response interactions with GenAI systems through their web user interfaces.
  * <p>
  * This package is intended for environments where direct GenAI API access is unavailable or restricted.
