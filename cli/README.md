@@ -74,25 +74,25 @@ mvn clean install
 
 Example commands (as shown by `help`):
 
-### Assemby Command
+### Assembly Command
 
 - `pick`: Picks libraries based on user request.
-- `assembly`: Creates a project via picked librariy set.
-- `prompt`: Is used for request additional GenAI guidances.
+- `assembly`: Creates a project via picked library set.
+- `prompt`: Used to request additional GenAI guidance.
 
 ### Bindex Command
 
 - `bindex`: Generates bindex files.
-- `register`: Registers bindex file.
+- `register`: Registers a bindex file.
 
 ### Built-In Commands
 
-- `help`: Display help about available commands
+- `help`: Display help about available commands.
 - `stacktrace`: Display the full stacktrace of the last error.
 - `clear`: Clear the shell screen.
 - `quit`, `exit`: Exit the shell.
-- `history`: Display or save the history of previously run commands
-- `version`: Show version info
+- `history`: Display or save the history of previously run commands.
+- `version`: Show version info.
 - `script`: Read and execute commands from a file.
 
 ### Docs Command
@@ -101,4 +101,4 @@ Example commands (as shown by `help`):
 
 ## Reference
 
-Part of the parent project and ecosystem: https://machanism.org
+- Parent project and ecosystem: https://machanism.org

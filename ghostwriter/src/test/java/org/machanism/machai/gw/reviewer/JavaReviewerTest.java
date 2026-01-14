@@ -45,7 +45,7 @@ class JavaReviewerTest {
     @Disabled
     void perform_packageInfo_extraction() throws IOException {
         JavaReviewer reviewer = new JavaReviewer();
-        String content = "/**\n * " + "@guidance: Package-level guidance.\n */\npackage org.machanism.example;";
+        String content = "/**\n * Package-level guidance.\n */\npackage org.machanism.example;";
         File pkgInfo = new File(tempDir, "package-info.java");
         Files.writeString(pkgInfo.toPath(), content);
         String result = reviewer.perform(tempDir, pkgInfo);

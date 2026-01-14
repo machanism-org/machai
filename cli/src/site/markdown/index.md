@@ -15,7 +15,7 @@ The Machai Command Line Interface (CLI) is a Spring Shell-based tool for generat
 - Register generated metadata into a metadata database.
 - Search (“pick”) relevant libraries using a natural-language prompt or a prompt file.
 - Assemble a new project from picked libraries.
-- Process project files/documents using GenAI.
+- Process project files/documents using GenAI (Ghostwriter).
 - Clean `.machai` temporary folders from a workspace.
 
 ## Getting Started
@@ -28,10 +28,10 @@ The Machai Command Line Interface (CLI) is a Spring Shell-based tool for generat
 
 2. **Configure environment variables**
 
-   | Variable Name        | Description |
-   |---------------------|-------------|
-   | `OPENAI_API_KEY`     | API key used by the GenAI provider for AI-powered operations. |
-   | `BINDEX_REG_PASSWORD`| Password for database write access (required for metadata registration). |
+   | Variable Name         | Description |
+   |----------------------|-------------|
+   | `OPENAI_API_KEY`      | API key used by the GenAI provider for AI-powered operations. |
+   | `BINDEX_REG_PASSWORD` | Password for database write access (required for metadata registration). |
 
 3. **Run Machai CLI**
 
@@ -45,27 +45,9 @@ The Machai Command Line Interface (CLI) is a Spring Shell-based tool for generat
 
 The CLI commands are implemented under `org/machanism/machai/cli`.
 
-### `assembly`
-
-Creates a project in an output directory using a picked set of libraries (“bricks”). If a query is provided, it will pick libraries first; otherwise it reuses the previous `pick` results.
-
-**Usage**
-
-```bash
-assembly --query "<prompt>" --dir <output-folder> [--registerUrl <url>] [--score <min-score>] [--genai <provider:model>]
-```
-
-**Options**
-
-- `--query` — Assembly prompt. If omitted, the previous pick query is reused (if available).
-- `--dir` — Output directory (defaults to the current user directory).
-- `--registerUrl` — Metadata database URL (optional).
-- `--score` — Minimum similarity threshold for library search.
-- `--genai` — GenAI provider/model (defaults to `Ghostwriter.CHAT_MODEL` when not provided).
-
 ### `pick`
 
-Searches the metadata database for libraries matching a natural-language prompt. The first argument can be either plain text or a path to a file containing the prompt.
+Picks (searches) libraries in the metadata database that match a natural-language prompt. The argument can be plain text or a path to a file containing the prompt.
 
 **Usage**
 
@@ -77,6 +59,24 @@ pick "<prompt or file path>" [--registerUrl <url>] [--score <min-score>]
 
 - `--registerUrl` — Metadata database URL (optional).
 - `--score` — Minimum similarity threshold for search results.
+
+### `assembly`
+
+Assembles a project in an output directory from a picked set of libraries (“bricks”). If `--query` is provided, it runs a pick first; otherwise it reuses the previous `pick` results.
+
+**Usage**
+
+```bash
+assembly --query "<prompt or file path>" --dir <output-folder> [--registerUrl <url>] [--score <min-score>] [--genai <provider:model>]
+```
+
+**Options**
+
+- `--query` — Assembly prompt (text or a file path). If omitted, the previous pick query/results are reused (if available).
+- `--dir` — Output directory (defaults to the current user directory).
+- `--registerUrl` — Metadata database URL (optional).
+- `--score` — Minimum similarity threshold for library search.
+- `--genai` — GenAI provider/model (e.g., `OpenAI:gpt-5.1`).
 
 ### `prompt`
 
@@ -91,7 +91,7 @@ prompt --prompt "<text>" [--genai <provider:model>]
 **Options**
 
 - `--prompt` — The user prompt to send.
-- `--genai` — GenAI provider/model (defaults to `Ghostwriter.CHAT_MODEL` when not provided).
+- `--genai` — GenAI provider/model.
 
 ### `bindex`
 
@@ -107,11 +107,11 @@ bindex --dir <project-path> [--update=true|false] [--genai <provider:model>]
 
 - `--dir` — Directory to scan (defaults to the current user directory).
 - `--update` — Update mode.
-- `--genai` — GenAI provider/model (defaults to `Ghostwriter.CHAT_MODEL` when not provided).
+- `--genai` — GenAI provider/model.
 
 ### `register`
 
-Registers the generated `bindex.json` to a metadata database.
+Registers generated `bindex.json` data to a metadata database.
 
 **Usage**
 
@@ -125,21 +125,21 @@ register --dir <project-path> [--registerUrl <url>] [--update=true|false]
 - `--registerUrl` — Target metadata database URL (optional).
 - `--update` — Update mode.
 
-### `process`
+### `gw`
 
-Scans and processes documents/files using GenAI. You can optionally provide a root directory to define the project context.
+Scans and processes files/documents using Ghostwriter (GenAI). You can optionally provide a root directory to define the project context.
 
 **Usage**
 
 ```bash
-process --scan <scan-folder> [--root <root-folder>] [--genai <provider:model>]
+gw --scan <scan-folder> [--root <root-folder>] [--genai <provider:model>]
 ```
 
 **Options**
 
 - `--scan` — Directory to scan (defaults to `--root`, or the user directory if `--root` is not provided).
 - `--root` — Root context directory (defaults to the current user directory).
-- `--genai` — GenAI provider/model (defaults to `Ghostwriter.CHAT_MODEL` when not provided).
+- `--genai` — GenAI provider/model.
 
 ### `clean`
 

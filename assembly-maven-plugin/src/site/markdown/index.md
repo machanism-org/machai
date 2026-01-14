@@ -28,9 +28,9 @@ Use the plugin to assemble project structure and configuration from a simple pro
 
 ### Environment Variables
 
-| Variable       | Description    |
-|----------------|----------------|
-| `OPENAI_API_KEY` | OpenAI API key |
+| Variable         | Description                  |
+|------------------|------------------------------|
+| `OPENAI_API_KEY` | OpenAI API key               |
 
 ### Basic Usage
 
@@ -50,12 +50,12 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 
 Common parameters:
 
-| Parameter              | Description                                  | Default              |
-|------------------------|----------------------------------------------|----------------------|
-| `assembly.genai`       | AI model used for assembly tasks             | `OpenAI:gpt-5`       |
-| `pick.genai`           | Model used for library selection             | `OpenAI:gpt-5-mini`  |
-| `assembly.prompt.file` | Path to the project concept file             | `project.txt`        |
-| `assembly.score`       | Minimum confidence score for recommendations | `0.80`               |
+| Parameter              | Description                                  | Default             |
+|------------------------|----------------------------------------------|---------------------|
+| `assembly.genai`       | AI model used for assembly tasks             | `OpenAI:gpt-5`      |
+| `pick.genai`           | Model used for library selection             | `OpenAI:gpt-5-mini` |
+| `assembly.prompt.file` | Path to the project concept file             | `project.txt`       |
+| `assembly.score`       | Minimum confidence score for recommendations | `0.80`              |
 
 ### Example
 

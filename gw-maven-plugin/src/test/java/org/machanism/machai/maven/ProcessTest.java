@@ -13,7 +13,7 @@ import java.io.File;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for {@link Process} Maven Mojo.
+ * Unit tests for {@link GW} Maven Mojo.
  * <p>
  * Verifies initialization of Process Mojo and non-exceptional execution with default settings.
  * Does not invoke downstream AI or file processors.
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class ProcessTest {
 
-    private Process process;
+    private GW process;
 
     @TempDir
     File tempDir;
@@ -29,7 +29,7 @@ public class ProcessTest {
 
     @BeforeEach
     void setup() {
-        process = new Process();
+        process = new GW();
         process.basedir = tempDir;
         Model model = new Model();
         testProject = new MavenProject(model);

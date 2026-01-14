@@ -1,30 +1,31 @@
 /**
  * Detects and describes a project's on-disk layout.
  *
- * <p>This package provides the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and a set
- * of implementations that infer a project's structure (modules, source roots, test roots, and documentation
- * roots) based on common conventions and build/configuration files.
+ * <p>The types in this package provide the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction
+ * and concrete implementations that infer module boundaries and common root directories (sources, tests, and
+ * documentation) from a project root directory.
  *
- * <p>Typical usage is to initialize a layout with a project root directory and then query it for the
- * relevant relative paths. Implementations that traverse the filesystem generally apply
- * {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS} to skip generated artifacts and
- * vendor directories.
- *
- * <h2>Provided implementations</h2>
+ * <p>Layout detection is typically performed by checking for build/configuration files:
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Maven single and multi-module projects</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - JavaScript/TypeScript workspaces</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Python projects</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - fallback when no specific layout matches</li>
+ *   <li>{@code pom.xml} for {@link org.machanism.machai.project.layout.MavenProjectLayout}</li>
+ *   <li>{@code package.json} for {@link org.machanism.machai.project.layout.JScriptProjectLayout}</li>
+ *   <li>{@code pyproject.toml} for {@link org.machanism.machai.project.layout.PythonProjectLayout}</li>
  * </ul>
+ * When none match, {@link org.machanism.machai.project.layout.DefaultProjectLayout} can be used as a fallback
+ * that attempts to identify module directories by scanning immediate children.
+ *
+ * <p>Implementations that traverse the filesystem should exclude common vendor, VCS, and build output directories
+ * using {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  *
  * <h2>Example</h2>
  * <pre>{@code
- * ProjectLayout layout = new MavenProjectLayout().projectDir(new File("/workspace"));
- * List&lt;String&gt; modules = layout.getModules();
- * List&lt;String&gt; sources = layout.getSources();
- * List&lt;String&gt; docs = layout.getDocuments();
- * List&lt;String&gt; tests = layout.getTests();
+ * File projectRoot = new File("/workspace/my-project");
+ *
+ * ProjectLayout layout = new MavenProjectLayout().projectDir(projectRoot);
+ * List<String> modules = layout.getModules();
+ * List<String> sources = layout.getSources();
+ * List<String> tests = layout.getTests();
+ * List<String> docs = layout.getDocuments();
  * }</pre>
  */
 package org.machanism.machai.project.layout;

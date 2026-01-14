@@ -3,7 +3,7 @@
 Analyze the source file and create a Maven Site-style introductory home page for your project.
 Do not use the horizontal rule separator between sections. -->
 
-Welcome to **Bindex Core**, a foundational library for managing *bindex* metadata.
+Welcome to **Bindex Core**, a library for generating and consuming *bindex* metadata.
 
 ## Overview
 
@@ -23,13 +23,17 @@ Bindex Core is available on Maven Central. Add the dependency to your `pom.xml`:
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>bindex-core</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>${bindex-core.version}</version>
 </dependency>
 ```
 
 ## Usage
 
-Use Bindex Core in Machanism-based projects for metadata handling, library discovery, and automated module organization.
+Use Bindex Core to:
+
+- Create bindex metadata as part of your build tooling
+- Read and interpret existing bindex metadata at runtime or during build analysis
+- Integrate metadata generation/consumption with Maven-oriented models and plugins
 
 For related tooling and documentation, see <https://github.com/machanism-org/machai>.
 

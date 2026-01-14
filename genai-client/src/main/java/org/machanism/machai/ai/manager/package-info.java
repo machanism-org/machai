@@ -30,30 +30,28 @@
  */
 
 /**
- * Management layer for resolving and extending {@code GenAIProvider} implementations.
- * <p>
- * This package contains the primary abstractions used by the client to obtain a concrete provider
- * (for example, OpenAI- or Ollama-backed implementations) and to attach common runtime "tools"
- * that enable providers to interact with the local system in a controlled way.
- * <p>
- * Typical responsibilities include:
- * <ul>
- *   <li>Resolving a provider implementation from a model identifier string via
- *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
- *   <li>Providing a stable, provider-agnostic interface for prompts and other AI operations via
- *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
- *   <li>Attaching file and command tools via {@link org.machanism.machai.ai.manager.FileFunctionTools},
- *       {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
- *       {@link org.machanism.machai.ai.manager.SystemFunctionTools}.</li>
- * </ul>
- * <p>
- * Usage example:
- * <pre>
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
- * provider.prompt("Hello!");
+ * Provider management and tool integration for the MachAI GenAI client.
  *
+ * <p>
+ * This package defines the main abstraction for interacting with a concrete GenAI backend
+ * (see {@link org.machanism.machai.ai.manager.GenAIProvider}) and the mechanism for resolving an
+ * appropriate implementation at runtime (see {@link org.machanism.machai.ai.manager.GenAIProviderManager}).
+ *
+ * <p>
+ * In addition, the package supplies optional "function tools" that can be applied to a provider
+ * to expose controlled access to local system capabilities:
+ * {@link org.machanism.machai.ai.manager.FileFunctionTools},
+ * {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
+ * {@link org.machanism.machai.ai.manager.SystemFunctionTools}.
+ *
+ * <h2>Typical usage</h2>
+ * <pre>{@code
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
+ * String response = provider.prompt("Explain the CAP theorem in one paragraph.");
+ *
+ * // Optionally expose additional tools to the provider
  * SystemFunctionTools tools = new SystemFunctionTools();
  * tools.applyTools(provider);
- * </pre>
+ * }</pre>
  */
 package org.machanism.machai.ai.manager;

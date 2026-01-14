@@ -2,18 +2,17 @@
  * Core document scanning and AI-assisted review automation.
  *
  * <p>
- * This package provides the entry point and orchestration for scanning a project
- * directory, extracting {@code @guidance:} directives from supported files via
- * pluggable reviewers, and assembling prompt context for a configured
+ * This package provides the entry point and orchestration for scanning a project directory,
+ * extracting {@code @guidance:} directives from supported files via pluggable reviewers, and
+ * assembling prompt context for a configured
  * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
  * <h2>Key types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.gw.Ghostwriter} – command-line entry point that
- *       configures a provider and starts a scan.</li>
- *   <li>{@link org.machanism.machai.gw.FileProcessor} – scans directories, invokes
- *       reviewers, aggregates guidance (optionally including parent directory
- *       guidance), and records prompt inputs.</li>
+ *   <li>{@link org.machanism.machai.gw.Ghostwriter} – Command-line entry point that configures a provider
+ *       and starts a scan.</li>
+ *   <li>{@link org.machanism.machai.gw.FileProcessor} – Scans directories, invokes reviewers, aggregates
+ *       guidance (optionally including parent directory guidance), and records prompt inputs.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

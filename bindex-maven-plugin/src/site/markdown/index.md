@@ -10,8 +10,8 @@ The **bindex-maven-plugin** generates and maintains a `bindex.json` descriptor f
 ## What it does
 
 - Generates a `bindex.json` file for the current Maven module.
-- Can update an existing descriptor.
-- Optionally registers/publishes the descriptor to a registry (when credentials are provided).
+- Updates an existing descriptor when present.
+- Optionally registers/publishes the descriptor to a registry (when configured).
 
 ## Requirements
 
@@ -26,9 +26,9 @@ Add to your `pom.xml`:
 <build>
   <plugins>
     <plugin>
-      <groupId>org.machanism</groupId>
+      <groupId>org.machanism.machai</groupId>
       <artifactId>bindex-maven-plugin</artifactId>
-      <version>0.0.1</version>
+      <version>${bindex-maven-plugin.version}</version>
     </plugin>
   </plugins>
 </build>
@@ -52,8 +52,8 @@ mvn bindex:register
 
 Common parameters:
 
-| Parameter          | Description                                                                 | Default |
-|-------------------|-----------------------------------------------------------------------------|---------|
+| Parameter            | Description                                                                 | Default |
+|---------------------|-----------------------------------------------------------------------------|---------|
 | `bindex.inputs.only` | Emits additional debug output (LLM inputs/outputs) to `inputs.txt`.         | `false` |
 | `bindex.chatModel`   | AI model used for analysis/descriptor generation (when enabled/available). | `gpt-5` |
 | `update`             | Update an existing `bindex.json` if present.                                | `true`  |
@@ -68,9 +68,9 @@ mvn bindex:bindex -Dbindex.chatModel=gpt-5
 
 Some features require credentials/configuration:
 
-| Variable name         | Description                                                     |
-|----------------------|-----------------------------------------------------------------|
-| `OPENAI_API_KEY`      | Required for GenAI-powered analysis (if enabled).                |
+| Variable name         | Description                                                      |
+|----------------------|------------------------------------------------------------------|
+| `OPENAI_API_KEY`      | Required for GenAI-powered analysis (if enabled).                 |
 | `BINDEX_REG_PASSWORD` | Required only when writing to the registration database/registry. |
 
 ## Links

@@ -1,12 +1,12 @@
 /**
  * Provides a {@link org.machanism.machai.GenAIProvider.provider.GenAIProvider} implementation that automates
  * prompt/response interactions with GenAI systems through their web user interfaces.
- * <p>
- * This package is intended for environments where direct GenAI API access is unavailable or restricted.
- * It integrates with <a href="https://ganteater.com">Anteater</a> to drive browser-like workflows using
+ *
+ * <p>This package is intended for environments where direct GenAI API access is unavailable or restricted.
+ * It integrates with <a href="https://ganteater.com">Anteater</a> to drive browser-based workflows using
  * AE recipes (workflows) stored in the project resources.
- * <p>
- * The main entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
+ *
+ * <p>The main entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
  * <ul>
  *   <li>loads an AE workspace configuration (see {@code model(String)}),</li>
  *   <li>initializes the workspace using a project working directory (see {@code setWorkingDir(File)}), and</li>

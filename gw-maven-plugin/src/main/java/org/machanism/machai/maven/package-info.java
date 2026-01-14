@@ -1,16 +1,24 @@
 /**
- * Provides Maven plugin goals for generative AI-assisted documentation workflows.
+ * Maven plugin goals for generative AI-assisted documentation workflows.
+ *
  * <p>
- * The <code>org.machanism.machai.maven</code> package delivers Maven Mojo implementations designed to automate documentation workflows using generative AI.
- * This package contains Mojos for processing documentation files, cleaning up temporary files, and integrating AI providers for enhanced document generation and management.
- * <br>
- * <strong>Main Mojos:</strong>
+ * The {@code org.machanism.machai.maven} package contains Maven Mojo implementations that integrate the
+ * MachAI document workflow into a Maven build. The goals in this package focus on scanning project
+ * documentation, optionally invoking a configured GenAI provider during processing, and cleaning
+ * temporary workflow artifacts.
+ * </p>
+ *
+ * <h2>Goals</h2>
  * <ul>
- *   <li><strong>Clean:</strong> Removes temporary AI-related files from the project, ensuring a fresh state for each documentation workflow.</li>
- *   <li><strong>Process:</strong> Scans documents and integrates with AI models for automated generation and assistance. Highly configurable with support for various provider options.</li>
+ *   <li>
+ *     {@code gw}: Scans and processes project documents, optionally using a configured GenAI model.
+ *   </li>
+ *   <li>
+ *     {@code clean}: Removes temporary files created by the document workflow.
+ *   </li>
  * </ul>
  *
- * <h2>Example Plugin Usage</h2>
+ * <h2>Example plugin configuration</h2>
  * <pre>
  * &lt;plugin&gt;
  *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
@@ -19,16 +27,13 @@
  *   &lt;executions&gt;
  *     &lt;execution&gt;
  *       &lt;goals&gt;
- *         &lt;goal&gt;process&lt;/goal&gt;
+ *         &lt;goal&gt;gw&lt;/goal&gt;
  *         &lt;goal&gt;clean&lt;/goal&gt;
  *       &lt;/goals&gt;
  *     &lt;/execution&gt;
  *   &lt;/executions&gt;
  * &lt;/plugin&gt;
  * </pre>
- * <p>
- * See individual Mojo documentation for parameter details and advanced usage examples.
- * </p>
  */
 package org.machanism.machai.maven;
 

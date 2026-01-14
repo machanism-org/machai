@@ -1,24 +1,33 @@
 /**
- * Provides APIs for detecting a filesystem-backed project layout and for traversing a project
- * directory (including multi-module projects).
- * <p>
- * The main entry points are:
+ * Provides APIs for detecting a filesystem-backed project layout and for traversing a project directory,
+ * including simple multi-module/workspace projects.
+ *
+ * <p>This package centers around two responsibilities:
  * <ul>
- *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} for selecting an appropriate
- *       {@link org.machanism.machai.project.layout.ProjectLayout} implementation based on the
- *       files present in a root directory.</li>
- *   <li>{@link org.machanism.machai.project.ProjectProcessor} for recursively scanning a project
- *       (and its modules, if any) and delegating the actual handling of a detected
- *       {@link org.machanism.machai.project.layout.ProjectLayout} to subclasses.</li>
+ *   <li><strong>Layout detection</strong>: selecting a {@link org.machanism.machai.project.layout.ProjectLayout}
+ *       implementation based on the presence of well-known build/configuration files in a project root.</li>
+ *   <li><strong>Project traversal</strong>: scanning a project root and, when applicable, recursively scanning
+ *       detected modules while delegating project-specific handling to client code.</li>
+ * </ul>
+ *
+ * <h2>Key types</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} detects a
+ *       {@link org.machanism.machai.project.layout.ProjectLayout} for a given directory.</li>
+ *   <li>{@link org.machanism.machai.project.ProjectProcessor} provides a template method for scanning a project
+ *       and invoking {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
+ *       for each discovered module (or for the root when there are no modules).</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
  * File projectDir = new File("/path/to/project");
  *
+ * // Detect the layout (Maven, JS workspaces, Python, or a default fallback).
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
  *
- * ProjectProcessor processor = ...; // your processor implementation
+ * // Traverse the project; subclasses implement how to handle each detected layout.
+ * ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
  * }</pre>
  *

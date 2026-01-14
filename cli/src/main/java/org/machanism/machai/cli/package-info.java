@@ -1,30 +1,35 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
- * <p>
- * This package exposes interactive commands that orchestrate Machai features such as:
+ *
+ * <p>This package provides interactive commands (typically implemented as Spring Shell
+ * {@code @ShellComponent}s) that orchestrate Machai workflows such as:</p>
+ *
  * <ul>
- *   <li>Picking libraries ("bricks") from a bindex register using a natural-language query.</li>
- *   <li>Assembling a project based on a prompt and the picked libraries.</li>
+ *   <li>Picking libraries ("bricks") from a bindex registry using natural-language queries.</li>
+ *   <li>Assembling a project based on a prompt and selected bricks.</li>
  *   <li>Generating and registering bindex metadata.</li>
  *   <li>Processing project documents/sources with a configured GenAI provider.</li>
  *   <li>Cleaning temporary or working directories created during CLI runs.</li>
  * </ul>
- * <p>
- * The primary entry point is {@link org.machanism.machai.cli.MachaiCLI}, and each command is implemented
- * as a {@code @ShellComponent} in this package.
- * <p>
- * Example (starting the CLI):
+ *
+ * <p>The primary entry point is {@link org.machanism.machai.cli.MachaiCLI}.</p>
+ *
+ * <h2>Usage</h2>
+ *
+ * <p>Programmatic startup:</p>
+ *
  * <pre>
  * {@code
- * public class Main {
+ * public final class Main {
  *   public static void main(String[] args) {
- *     MachaiCLI.main(args);
+ *     org.machanism.machai.cli.MachaiCLI.main(args);
  *   }
  * }
  * }
  * </pre>
- * <p>
- * Example (typical interactive commands):
+ *
+ * <p>Typical interactive commands (examples):</p>
+ *
  * <pre>
  * {@code
  * # pick libraries for a requirement description

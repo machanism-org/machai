@@ -1,35 +1,3 @@
-/**
- * Builders for producing a {@link org.machanism.machai.schema.Bindex} from a
- * {@link org.machanism.machai.project.layout.ProjectLayout}.
- * <p>
- * This package provides a small build pipeline that:
- * </p>
- * <ol>
- *   <li>Extracts project context (such as manifests, sources, and resources) via a {@code ProjectLayout}.</li>
- *   <li>Optionally incorporates an existing/origin {@code Bindex} to support incremental updates.</li>
- *   <li>Uses a {@link org.machanism.machai.ai.manager.GenAIProvider}-backed prompt sequence to generate a final
- *       {@code Bindex} document.</li>
- * </ol>
- * <p>
- * The main entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}. Concrete implementations
- * provide layout-specific context for common ecosystems:
- * </p>
- * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} for Maven/Java projects.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} for JavaScript/TypeScript/Vue projects.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} for Python projects.</li>
- * </ul>
- * <p>
- * Example:
- * </p>
- * <pre>
- *     MavenBindexBuilder builder = new MavenBindexBuilder(layout);
- *     builder.genAIProvider(provider);
- *     Bindex bindex = builder.build();
- * </pre>
- */
-package org.machanism.machai.bindex.builder;
-
 /*-
  * @guidance:
  *
@@ -60,3 +28,36 @@ package org.machanism.machai.bindex.builder;
  * 
  * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */
+
+/**
+ * Builders for producing a {@link org.machanism.machai.schema.Bindex} from a
+ * {@link org.machanism.machai.project.layout.ProjectLayout}.
+ *
+ * <p>This package provides a small build pipeline that:</p>
+ *
+ * <ol>
+ *   <li>Extracts project context (such as manifests, sources, and resources) via a
+ *       {@code ProjectLayout}.</li>
+ *   <li>Optionally incorporates an existing/origin {@code Bindex} to support incremental updates.</li>
+ *   <li>Uses a {@link org.machanism.machai.ai.manager.GenAIProvider}-backed prompt sequence to generate a final
+ *       {@code Bindex} document.</li>
+ * </ol>
+ *
+ * <p>The main entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}. Concrete implementations
+ * provide layout-specific context for common ecosystems:</p>
+ *
+ * <ul>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} for Maven/Java projects.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} for JavaScript/TypeScript/Vue projects.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} for Python projects.</li>
+ * </ul>
+ *
+ * <p>Example:</p>
+ *
+ * <pre>
+ * MavenBindexBuilder builder = new MavenBindexBuilder(layout);
+ * builder.genAIProvider(provider);
+ * Bindex bindex = builder.build();
+ * </pre>
+ */
+package org.machanism.machai.bindex.builder;
