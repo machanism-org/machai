@@ -1,29 +1,40 @@
 /**
- * Maven plugin goals for generative AI-assisted documentation workflows.
+ * Maven plugin goals that integrate the MachAI generative-workflow (GW) document processing into a
+ * Maven build.
  *
  * <p>
- * The {@code org.machanism.machai.maven} package contains Maven Mojo implementations that integrate the
- * MachAI document workflow into a Maven build. The goals in this package focus on scanning project
- * documentation, optionally invoking a configured GenAI provider during processing, and cleaning
- * temporary workflow artifacts.
+ * The Mojos in this package provide two primary build steps:
  * </p>
  *
- * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     {@code gw}: Scans and processes project documents, optionally using a configured GenAI model.
+ *     {@code gw}: scans project documentation sources and runs the MachAI document workflow, optionally using a
+ *     configured GenAI provider.
  *   </li>
  *   <li>
- *     {@code clean}: Removes temporary files created by the document workflow.
+ *     {@code clean}: removes temporary workflow artifacts created during document processing.
  *   </li>
  * </ul>
  *
- * <h2>Example plugin configuration</h2>
+ * <h2>Usage</h2>
+ * <p>
+ * The goals can be executed directly or bound to a lifecycle phase via {@code pom.xml}.
+ * </p>
+ *
+ * <h3>Run from the command line</h3>
+ * <pre>
+ * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5
+ * </pre>
+ *
+ * <h3>Configure in {@code pom.xml}</h3>
  * <pre>
  * &lt;plugin&gt;
  *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
  *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
  *   &lt;version&gt;${project.version}&lt;/version&gt;
+ *   &lt;configuration&gt;
+ *     &lt;chatModel&gt;OpenAI:gpt-5&lt;/chatModel&gt;
+ *   &lt;/configuration&gt;
  *   &lt;executions&gt;
  *     &lt;execution&gt;
  *       &lt;goals&gt;

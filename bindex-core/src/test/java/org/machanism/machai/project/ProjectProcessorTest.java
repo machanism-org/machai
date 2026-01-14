@@ -114,7 +114,6 @@ class ProjectProcessorTest {
 		// Assert
 		assertEquals(2, processor.processModuleCalls);
 		assertEquals(0, processor.processFolderCalls);
-		// Verify last module info recorded
 		assertEquals(projectDir, processor.lastModuleProjectDir);
 		assertEquals("m2", processor.lastModule);
 	}

@@ -18,7 +18,6 @@
  * 
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
  * 
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
@@ -30,28 +29,34 @@
  */
 
 /**
- * Provider management and tool integration for the MachAI GenAI client.
+ * Provider discovery, instantiation, and optional system tool integration for the MachAI GenAI client.
  *
  * <p>
- * This package defines the main abstraction for interacting with a concrete GenAI backend
- * (see {@link org.machanism.machai.ai.manager.GenAIProvider}) and the mechanism for resolving an
- * appropriate implementation at runtime (see {@link org.machanism.machai.ai.manager.GenAIProviderManager}).
+ * The primary abstraction is {@link org.machanism.machai.ai.manager.GenAIProvider}. A provider is typically
+ * obtained using {@link org.machanism.machai.ai.manager.GenAIProviderManager}, which resolves a concrete
+ * implementation from a {@code Provider:Model} identifier (for example, {@code OpenAI:gpt-4o-mini}).
  *
  * <p>
- * In addition, the package supplies optional "function tools" that can be applied to a provider
- * to expose controlled access to local system capabilities:
- * {@link org.machanism.machai.ai.manager.FileFunctionTools},
- * {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
- * {@link org.machanism.machai.ai.manager.SystemFunctionTools}.
+ * This package also offers optional "function tools" that can be attached to a provider to expose controlled
+ * access to local capabilities:
+ * <ul>
+ *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} – read/write/list filesystem content under a working directory</li>
+ *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} – execute shell commands from a working directory</li>
+ *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} – convenience wrapper that installs both tool sets</li>
+ * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
- * String response = provider.prompt("Explain the CAP theorem in one paragraph.");
+ * provider.instructions("Be concise and include sources when available.");
+ * provider.prompt("Explain the CAP theorem in one paragraph.");
  *
  * // Optionally expose additional tools to the provider
  * SystemFunctionTools tools = new SystemFunctionTools();
  * tools.applyTools(provider);
+ *
+ * String response = provider.perform();
+ * provider.close();
  * }</pre>
  */
 package org.machanism.machai.ai.manager;

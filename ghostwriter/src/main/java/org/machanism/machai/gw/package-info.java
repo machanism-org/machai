@@ -1,18 +1,16 @@
 /**
- * Core document scanning and AI-assisted review automation.
+ * Core document scanning and AI-assisted review orchestration.
  *
- * <p>
- * This package provides the entry point and orchestration for scanning a project directory,
- * extracting {@code @guidance:} directives from supported files via pluggable reviewers, and
- * assembling prompt context for a configured
+ * <p>This package provides the command-line entry point and the directory scanning pipeline that:
+ * extracts {@code @guidance:} directives from supported inputs (via pluggable reviewers), aggregates
+ * them into prompt context, and delegates generation/review tasks to a configured
  * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <h2>Key types</h2>
+ * <h2>Key responsibilities</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.gw.Ghostwriter} – Command-line entry point that configures a provider
- *       and starts a scan.</li>
- *   <li>{@link org.machanism.machai.gw.FileProcessor} – Scans directories, invokes reviewers, aggregates
- *       guidance (optionally including parent directory guidance), and records prompt inputs.</li>
+ *   <li>Walk a project root and select eligible files for review.</li>
+ *   <li>Collect and optionally inherit guidance from parent directories.</li>
+ *   <li>Record prompt inputs and submit assembled context to the selected AI provider.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
@@ -29,9 +27,7 @@
  * }
  * </pre>
  *
- * <p>
- * Temporary prompt input logs are written under the project directory in
- * {@code .machai/docs-inputs}.
+ * <p>Prompt input logs are written under the project directory in {@code .machai/docs-inputs}.
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

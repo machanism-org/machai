@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * <dl>
- * <dt><b>{@code gw.genai}</b> (configuration: {@code chatModel})</dt>
+ * <dt><b>{@code chatModel}</b> (property: {@code gw.genai})</dt>
  * <dd>
  * The GenAI chat model identifier used for AI-assisted document processing.
  * <p>
@@ -47,19 +47,19 @@ import org.slf4j.LoggerFactory;
  * </p>
  * </dd>
  *
- * <dt><b>{@code basedir}</b></dt>
+ * <dt><b>{@code basedir}</b> (read-only)</dt>
  * <dd>
- * The Maven project base directory (read-only). Set by Maven to {@code ${basedir}}.
+ * The Maven project base directory. Provided by Maven as {@code ${basedir}}.
  * </dd>
  *
- * <dt><b>{@code project}</b></dt>
+ * <dt><b>{@code project}</b> (read-only)</dt>
  * <dd>
- * The current {@link MavenProject} (read-only). Set by Maven to {@code ${project}}.
+ * The current {@link MavenProject}. Provided by Maven as {@code ${project}}.
  * </dd>
  *
- * <dt><b>{@code session}</b></dt>
+ * <dt><b>{@code session}</b> (read-only)</dt>
  * <dd>
- * The current {@link MavenSession} (read-only). Set by Maven to {@code ${session}}.
+ * The current {@link MavenSession}. Provided by Maven as {@code ${session}}.
  * </dd>
  * </dl>
  *

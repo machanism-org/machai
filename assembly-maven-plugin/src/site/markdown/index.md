@@ -28,9 +28,9 @@ Use the plugin to assemble project structure and configuration from a simple pro
 
 ### Environment Variables
 
-| Variable         | Description                  |
-|------------------|------------------------------|
-| `OPENAI_API_KEY` | OpenAI API key               |
+| Variable         | Description    |
+|------------------|----------------|
+| `OPENAI_API_KEY` | OpenAI API key |
 
 ### Basic Usage
 

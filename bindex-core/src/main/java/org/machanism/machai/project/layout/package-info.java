@@ -1,9 +1,9 @@
 /**
  * Detects and describes a project's on-disk layout.
  *
- * <p>The types in this package provide the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction
- * and concrete implementations that infer module boundaries and common root directories (sources, tests, and
- * documentation) from a project root directory.
+ * <p>This package defines the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction plus concrete
+ * implementations that infer module boundaries and common root directories (sources, tests, and documentation)
+ * from a project root directory.
  *
  * <p>Layout detection is typically performed by checking for build/configuration files:
  * <ul>

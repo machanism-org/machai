@@ -1,19 +1,19 @@
 /**
- * Maven plugin goals and supporting infrastructure for generating, updating, cleaning, and
- * publishing a Bindex index as part of a Maven build.
+ * Maven plugin goals and supporting infrastructure for generating, updating, cleaning, and publishing a Bindex
+ * index as part of a Maven build.
  *
  * <p>
- * This package contains the plugin's Mojo implementations (goals) and shared support code used
- * across those goals. The goals typically operate on the current {@code MavenProject}, derive the
- * effective project layout, and invoke the index creation/update pipeline.
+ * This package contains the plugin's Mojo implementations (goals) and shared support code used across those goals.
+ * The goals typically operate on the current {@code MavenProject}, derive the effective project layout, and invoke
+ * the index creation/update pipeline.
  * </p>
  *
  * <h2>Provided goals</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.maven.Create}  generate a new index for the current project.</li>
- *   <li>{@link org.machanism.machai.maven.Update}  regenerate/update an existing index.</li>
- *   <li>{@link org.machanism.machai.maven.Register}  publish/register the generated index/metadata.</li>
- *   <li>{@link org.machanism.machai.maven.Clean}  remove plugin-generated output.</li>
+ *   <li>{@link org.machanism.machai.maven.Create} &ndash; generate a new index for the current project.</li>
+ *   <li>{@link org.machanism.machai.maven.Update} &ndash; regenerate/update an existing index.</li>
+ *   <li>{@link org.machanism.machai.maven.Register} &ndash; publish/register the generated index/metadata.</li>
+ *   <li>{@link org.machanism.machai.maven.Clean} &ndash; remove plugin-generated output.</li>
  * </ul>
  *
  * <h2>Command-line usage</h2>
@@ -45,7 +45,8 @@ package org.machanism.machai.maven;
  *      
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * 
+ * 		-  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ *
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
  * 		- Use proper Markdown or HTML formatting for readability.
@@ -55,6 +56,4 @@ package org.machanism.machai.maven;
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- * 
- * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */

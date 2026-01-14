@@ -5,16 +5,16 @@ Do not use the horizontal rule separator between sections. -->
 
 ## Overview
 
-**GW Maven Plugin** (Ghostwriter Maven Plugin) helps keep project documentation current by generating Maven Site content from embedded `@guidance:` tags found in source and documentation files.
+**GW Maven Plugin** (Ghostwriter Maven Plugin) generates and updates Maven Site documentation using embedded `@guidance:` comments found across your project.
 
-It integrates with the Maven build so documentation can be refreshed consistently as part of your normal workflow.
+It is designed to keep documentation synchronized with the codebase and requirements by making documentation generation a repeatable part of the build.
 
 ## Features
 
-- Generates/updates Maven Site documentation based on embedded `@guidance:` tags
-- Works with Maven-based Java projects
-- Supports keeping documentation synchronized with code and requirements
-- Runs from the command line or as part of the Maven lifecycle
+- Generates and refreshes Maven Site pages based on embedded `@guidance:` comments
+- Works with Maven-based Java projects and standard Maven Site structure
+- Supports documentation that stays aligned with code, tests, and evolving requirements
+- Can be run from the command line or bound into the Maven lifecycle
 
 ## Getting Started
 
@@ -34,7 +34,7 @@ Run the plugin:
 mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:process -Dgenai=Web:CodeMie
 ```
 
-The generated/updated content is written to your Maven Site output directory.
+The generated and updated content is written to your Maven Site output directory.
 
 ## Requirements
 

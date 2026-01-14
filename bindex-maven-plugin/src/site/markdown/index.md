@@ -52,25 +52,22 @@ mvn bindex:register
 
 Common parameters:
 
-| Parameter            | Description                                                                 | Default |
-|---------------------|-----------------------------------------------------------------------------|---------|
-| `bindex.inputs.only` | Emits additional debug output (LLM inputs/outputs) to `inputs.txt`.         | `false` |
-| `bindex.chatModel`   | AI model used for analysis/descriptor generation (when enabled/available). | `gpt-5` |
-| `update`             | Update an existing `bindex.json` if present.                                | `true`  |
+| Parameter           | Description                                 | Default |
+|--------------------|---------------------------------------------|---------|
+| `update`            | Update an existing `bindex.json` if present. | `true`  |
 
 Example:
 
 ```bash
-mvn bindex:bindex -Dbindex.chatModel=gpt-5
+mvn bindex:bindex -Dupdate=false
 ```
 
 ## Environment variables
 
-Some features require credentials/configuration:
+Some features may require credentials/configuration (depending on how you configure the plugin in your build):
 
 | Variable name         | Description                                                      |
 |----------------------|------------------------------------------------------------------|
-| `OPENAI_API_KEY`      | Required for GenAI-powered analysis (if enabled).                 |
 | `BINDEX_REG_PASSWORD` | Required only when writing to the registration database/registry. |
 
 ## Links

@@ -3,17 +3,28 @@
 Analyze the source file and create a Maven Site-style introductory home page for your project.
 Do not use the horizontal rule separator between sections. -->
 
-Welcome to **Bindex Core**, a library for generating and consuming *bindex* metadata.
+Welcome to **Bindex Core**, the core library for generating and consuming *bindex* metadata.
 
 ## Overview
 
-Bindex Core provides the core APIs and implementations used to generate and consume bindex metadata for Java-based builds and libraries.
+Bindex Core provides the APIs and reference implementations to:
+
+- Generate bindex metadata for Java-based builds and libraries.
+- Read, merge, and analyze bindex metadata produced by other tools.
+- Support integration points commonly used by Maven-oriented models and plugins.
+
+## Key Concepts
+
+Bindex metadata describes Java artifacts in a structured form that build tools can produce and other tools can consume. Typical inputs and outputs include:
+
+- Generated metadata files for an artifact or module.
+- Aggregated metadata assembled across multi-module builds and dependency graphs.
 
 ## Features
 
-- Generate bindex metadata for Java projects
-- Assemble metadata across modules and dependencies
-- Extensible integration points for Maven models and plugin APIs
+- Metadata generation for Java projects.
+- Aggregation across modules and dependencies.
+- Extensible integration points for Maven models and plugin APIs.
 
 ## Getting Started
 
@@ -27,13 +38,13 @@ Bindex Core is available on Maven Central. Add the dependency to your `pom.xml`:
 </dependency>
 ```
 
-## Usage
+## Typical Usage
 
-Use Bindex Core to:
+You can use Bindex Core to:
 
-- Create bindex metadata as part of your build tooling
-- Read and interpret existing bindex metadata at runtime or during build analysis
-- Integrate metadata generation/consumption with Maven-oriented models and plugins
+- Produce bindex metadata as part of build tooling.
+- Consume and interpret existing bindex metadata during build analysis.
+- Assemble metadata from multiple modules and dependency sets.
 
 For related tooling and documentation, see <https://github.com/machanism-org/machai>.
 

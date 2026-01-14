@@ -35,8 +35,7 @@
  * <p>For layout-specific builders and prompt/context utilities, see
  * {@link org.machanism.machai.bindex.builder}.
  */
-
-// Original @guidance comments restored below this line.
+package org.machanism.machai.bindex;
 
 /*-
  * @guidance:
@@ -68,5 +67,3 @@
  *
  * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */
-
-package org.machanism.machai.bindex;

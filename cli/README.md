@@ -102,3 +102,4 @@ Example commands (as shown by `help`):
 ## Reference
 
 - Parent project and ecosystem: https://machanism.org
+- Source and docs: https://machanism.org/cli

@@ -1,31 +1,15 @@
 /**
- * File reviewers for extracting and normalizing documentation guidance from project sources.
+ * File reviewers that extract and normalize {@code @guidance} content from project sources.
  *
  * <p>
- * Reviewers parse supported file types (for example Java, Markdown, HTML/XML, TypeScript, Python, and plain
- * text) and return a normalized guidance representation suitable for downstream documentation and automation
- * workflows.
+ * Implementations typically support one or more file formats (for example Java, Markdown, HTML/XML,
+ * TypeScript, Python, and plain text), locate guidance blocks using the conventions of the target language,
+ * and produce a normalized textual representation suitable for downstream automation.
  *
  * <p>
- * Typical reviewer responsibilities include:
- * <ul>
- *   <li>Identifying guidance blocks using each language's comment and documentation conventions.</li>
- *   <li>Extracting and normalizing guidance into a consistent textual form.</li>
- *   <li>Optionally incorporating directory-level or project-level context when available.</li>
- * </ul>
- *
- * <p>
- * Callers typically select an appropriate {@link org.machanism.machai.gw.reviewer.Reviewer} based on file
- * extension and invoke
+ * Callers generally select an appropriate {@link org.machanism.machai.gw.reviewer.Reviewer} based on file
+ * type and invoke
  * {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)}.
- *
- * <pre>
- * Reviewer reviewer = new JavaReviewer();
- * String guidance = reviewer.perform(projectRoot, sourceFile);
- * if (guidance != null) {
- *     // Use the extracted guidance for documentation.
- * }
- * </pre>
  */
 package org.machanism.machai.gw.reviewer;
 

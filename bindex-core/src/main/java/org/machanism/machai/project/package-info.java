@@ -2,7 +2,7 @@
  * Provides APIs for detecting a filesystem-backed project layout and for traversing a project directory,
  * including simple multi-module/workspace projects.
  *
- * <p>This package centers around two responsibilities:
+ * <p>The package centers around two responsibilities:
  * <ul>
  *   <li><strong>Layout detection</strong>: selecting a {@link org.machanism.machai.project.layout.ProjectLayout}
  *       implementation based on the presence of well-known build/configuration files in a project root.</li>
@@ -15,7 +15,8 @@
  *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} detects a
  *       {@link org.machanism.machai.project.layout.ProjectLayout} for a given directory.</li>
  *   <li>{@link org.machanism.machai.project.ProjectProcessor} provides a template method for scanning a project
- *       and invoking {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
+ *       and invoking
+ *       {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
  *       for each discovered module (or for the root when there are no modules).</li>
  * </ul>
  *

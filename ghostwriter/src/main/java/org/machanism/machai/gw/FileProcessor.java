@@ -130,26 +130,44 @@ public class FileProcessor extends ProjectProcessor {
 
         ProjectLayout projectLayout = getProjectLayout(projectDir);
         List<String> modules = projectLayout.getModules();
-        if (modules != null) {
-            File[] files = projectDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (!StringUtils.equalsAnyIgnoreCase(file.getName(), modules.toArray(new String[] {}))
-                            && !StringUtils.containsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
-                        if (file.isDirectory()) {
-                            processProjectDir(projectLayout, file);
-                        } else {
-                            String result = processFile(projectLayout, file);
-                            if (StringUtils.isNoneBlank(result)) {
-                                logger.info(result);
-                            }
-                        }
-                    }
+
+        // Process the current directory's immediate children that are not modules and not excluded.
+        File[] children = projectDir.listFiles();
+        if (children != null) {
+            for (File child : children) {
+                if (isModuleDir(modules, child) || isExcludedByLayout(child)) {
+                    continue;
+                }
+
+                if (child.isDirectory()) {
+                    processProjectDir(projectLayout, child);
+                } else {
+                    logIfNotBlank(processFile(projectLayout, child));
                 }
             }
         }
 
         super.scanFolder(projectDir);
+    }
+
+    private static boolean isModuleDir(List<String> modules, File dir) {
+        if (modules == null || modules.isEmpty() || dir == null) {
+            return false;
+        }
+        return StringUtils.equalsAnyIgnoreCase(dir.getName(), modules.toArray(new String[0]));
+    }
+
+    private static boolean isExcludedByLayout(File file) {
+        if (file == null) {
+            return false;
+        }
+        return StringUtils.containsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS);
+    }
+
+    private static void logIfNotBlank(String message) {
+        if (StringUtils.isNotBlank(message)) {
+            logger.info(message);
+        }
     }
 
     /**
@@ -176,10 +194,7 @@ public class FileProcessor extends ProjectProcessor {
             List<File> files = findFiles(scanDir);
             if (!files.isEmpty()) {
                 for (File file : files) {
-                    String result = processFile(projectLayout, file);
-                    if (StringUtils.isNoneBlank(result)) {
-                        logger.info(result);
-                    }
+                    logIfNotBlank(processFile(projectLayout, file));
                 }
             }
         } catch (IOException e) {
@@ -201,32 +216,31 @@ public class FileProcessor extends ProjectProcessor {
         File projectDir = projectLayout.getProjectDir();
         String guidance = parseFile(projectDir, file);
 
-        String result = null;
-        if (guidance != null) {
-            provider.instructions(promptBundle.getString("sys_instractions"));
-            provider.prompt(promptBundle.getString("docs_processing_instractions"));
-
-            if (useParentsGuidances) {
-                List<String> parentsGuidances = getParentsGuidances(projectLayout, file);
-                for (String dirGuidance : parentsGuidances) {
-                    provider.prompt(dirGuidance);
-                }
-            }
-
-            String projectInfo = getProjectStructureDescription(projectLayout);
-            provider.prompt(projectInfo);
-            provider.prompt(guidance);
-            provider.prompt(promptBundle.getString("output_format"));
-
-            String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
-            File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
-            File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
-
-            provider.inputsLog(inputsFile);
-            result = provider.perform();
+        if (guidance == null) {
+            return null;
         }
 
-        return result;
+        provider.instructions(promptBundle.getString("sys_instractions"));
+        provider.prompt(promptBundle.getString("docs_processing_instractions"));
+
+        if (useParentsGuidances) {
+            List<String> parentsGuidances = getParentsGuidances(projectLayout, file);
+            for (String dirGuidance : parentsGuidances) {
+                provider.prompt(dirGuidance);
+            }
+        }
+
+        String projectInfo = getProjectStructureDescription(projectLayout);
+        provider.prompt(projectInfo);
+        provider.prompt(guidance);
+        provider.prompt(promptBundle.getString("output_format"));
+
+        String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
+        File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
+        File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
+
+        provider.inputsLog(inputsFile);
+        return provider.perform();
     }
 
     /**
@@ -333,12 +347,11 @@ public class FileProcessor extends ProjectProcessor {
         String extension = FilenameUtils.getExtension(file.getName()).toLowerCase();
         Reviewer reviewer = reviewMap.get(StringUtils.lowerCase(extension));
 
-        String result = null;
-        if (reviewer != null) {
-            result = reviewer.perform(getRootDir(projectDir), file);
+        if (reviewer == null) {
+            return null;
         }
 
-        return result;
+        return reviewer.perform(getRootDir(projectDir), file);
     }
 
     /**

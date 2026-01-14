@@ -5,7 +5,7 @@
 - Scan `org/machanism/machai/cli` source folder and describe all supported Commands.
 -->
 
-The Machai Command Line Interface (CLI) is a Spring Shell-based tool for generating, registering, and managing Machai library metadata and for running GenAI-assisted workflows from your terminal.
+The Machai Command Line Interface (CLI) is a Spring Shell-based tool for generating, registering, and managing Machai library metadata, and for running GenAI-assisted workflows from your terminal.
 
 ![Machai CLI Screenshot](src/site/resources/images/machai-screenshot.png)
 
@@ -13,7 +13,7 @@ The Machai Command Line Interface (CLI) is a Spring Shell-based tool for generat
 
 - Generate or update `bindex.json` metadata for Java projects.
 - Register generated metadata into a metadata database.
-- Search (“pick”) relevant libraries using a natural-language prompt or a prompt file.
+- Pick relevant libraries using a natural-language prompt (or a prompt file).
 - Assemble a new project from picked libraries.
 - Process project files/documents using GenAI (Ghostwriter).
 - Clean `.machai` temporary folders from a workspace.
@@ -67,7 +67,7 @@ Assembles a project in an output directory from a picked set of libraries (“br
 **Usage**
 
 ```bash
-assembly --query "<prompt or file path>" --dir <output-folder> [--registerUrl <url>] [--score <min-score>] [--genai <provider:model>]
+assembly [--query "<prompt or file path>"] [--dir <output-folder>] [--registerUrl <url>] [--score <min-score>] [--genai <provider:model>]
 ```
 
 **Options**
@@ -100,7 +100,7 @@ Generates (or updates) `bindex.json` metadata by scanning a directory.
 **Usage**
 
 ```bash
-bindex --dir <project-path> [--update=true|false] [--genai <provider:model>]
+bindex [--dir <project-path>] [--update true|false] [--genai <provider:model>]
 ```
 
 **Options**
@@ -116,7 +116,7 @@ Registers generated `bindex.json` data to a metadata database.
 **Usage**
 
 ```bash
-register --dir <project-path> [--registerUrl <url>] [--update=true|false]
+register [--dir <project-path>] [--registerUrl <url>] [--update true|false]
 ```
 
 **Options**
@@ -132,7 +132,7 @@ Scans and processes files/documents using Ghostwriter (GenAI). You can optionall
 **Usage**
 
 ```bash
-gw --scan <scan-folder> [--root <root-folder>] [--genai <provider:model>]
+gw [--scan <scan-folder>] [--root <root-folder>] [--genai <provider:model>]
 ```
 
 **Options**

@@ -6,7 +6,7 @@ Do not use the horizontal rule separator between sections. -->
 Welcome to **Ghostwriter**, a platform for document automation and intelligent code generation.
 
 ## Project Overview
-Ghostwriter is a Maven-friendly foundation for building automated documentation and code generation workflows. It’s designed to integrate cleanly into standard developer toolchains and keep generated artifacts consistent and maintainable.
+Ghostwriter provides a Maven-friendly foundation for automated documentation and code generation workflows. It integrates cleanly into standard developer toolchains and helps keep generated artifacts consistent, repeatable, and easy to maintain.
 
 ## Main Features
 - Document creation, conversion, and formatting automation
@@ -24,11 +24,17 @@ Ghostwriter is a Maven-friendly foundation for building automated documentation 
 4. Open the generated site from:
    - `target/site/index.html`
 
-## Typical Workflow
-- Define or update templates and inputs.
+## Usage
+- Add or update templates and inputs.
 - Run the build to generate artifacts.
-- Review output and iterate until results match your desired structure and style.
+- Review outputs and iterate until results match your desired structure and style.
 - Automate generation in CI to keep outputs up to date.
+
+## Project Structure
+- `src/main/java`: application source
+- `src/main/resources`: runtime resources
+- `src/test/java`: test source
+- `src/site`: Maven Site sources (this documentation)
 
 ## Contributing
 Contributions are welcome. Please review existing issues and project documentation before submitting a pull request.
