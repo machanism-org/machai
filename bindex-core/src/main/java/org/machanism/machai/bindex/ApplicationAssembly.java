@@ -6,6 +6,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
@@ -78,7 +79,7 @@ public class ApplicationAssembly {
             File bindexTempDir = new File(projectDir, ASSEMBLY_TEMP_DIR);
             provider.inputsLog(bindexTempDir);
             String response = provider.perform();
-            if (response != null) {
+            if (StringUtils.isNotBlank(response)) {
                 logger.info(response);
             }
 

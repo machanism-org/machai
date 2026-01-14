@@ -79,7 +79,7 @@ public class BindexCreator extends  BindexProjectProcessor {
 
 				if (bindex != null) {
 					new ObjectMapper().writeValue(bindexFile, bindex);
-					logger.info(" Bindex file: {}", bindexFile);
+					logger.info("Bindex file: {}", bindexFile);
 				}
 			}
 

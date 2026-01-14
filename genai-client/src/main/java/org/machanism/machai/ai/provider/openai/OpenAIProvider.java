@@ -58,22 +58,24 @@ import com.openai.models.responses.ResponseReasoningItem.Summary;
 import com.openai.models.responses.Tool;
 
 /**
- * The {@code OpenAIProvider} class integrates seamlessly with the OpenAI API, serving
- * as a concrete implementation of the {@code GenAIProvider} interface.
+ * The {@code OpenAIProvider} class integrates seamlessly with the OpenAI API,
+ * serving as a concrete implementation of the {@code GenAIProvider} interface.
  * 
  * This provider enables a wide range of generative AI capabilities, including:
  * <ul>
- *   <li>Sending prompts and receiving responses from OpenAI Chat models.</li>
- *   <li>Managing files for use in various OpenAI workflows.</li>
- *   <li>Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.</li>
- *   <li>Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.</li>
+ * <li>Sending prompts and receiving responses from OpenAI Chat models.</li>
+ * <li>Managing files for use in various OpenAI workflows.</li>
+ * <li>Performing advanced large language model (LLM) requests, such as text
+ * generation, summarization, and question answering.</li>
+ * <li>Creating and utilizing vector embeddings for tasks like semantic search
+ * and similarity analysis.</li>
  * </ul>
  * 
- * By abstracting the complexities of direct API interaction, {@code OpenAIProvider}
- * allows developers to leverage OpenAI’s powerful models efficiently within
- * their applications. It supports both synchronous and asynchronous operations,
- * and can be easily extended or configured to accommodate different use cases
- * and model parameters.
+ * By abstracting the complexities of direct API interaction,
+ * {@code OpenAIProvider} allows developers to leverage OpenAI’s powerful models
+ * efficiently within their applications. It supports both synchronous and
+ * asynchronous operations, and can be easily extended or configured to
+ * accommodate different use cases and model parameters.
  * <p>
  * This class provides capabilities to send prompts, manage files, perform LLM
  * requests, and create embeddings using OpenAI Chat models.
@@ -81,12 +83,13 @@ import com.openai.models.responses.Tool;
  * 
  * <p>
  * <b>Environment Variables:</b><br>
- * The client automatically reads the following environment variables. You must set at least {@code OPENAI_API_KEY}:
+ * The client automatically reads the following environment variables. You must
+ * set at least {@code OPENAI_API_KEY}:
  * <ul>
- *   <li>{@code OPENAI_API_KEY} (required)</li>
- *   <li>{@code OPENAI_ORG_ID} (optional)</li>
- *   <li>{@code OPENAI_PROJECT_ID} (optional)</li>
- *   <li>{@code OPENAI_BASE_URL} (optional)</li>
+ * <li>{@code OPENAI_API_KEY} (required)</li>
+ * <li>{@code OPENAI_ORG_ID} (optional)</li>
+ * <li>{@code OPENAI_PROJECT_ID} (optional)</li>
+ * <li>{@code OPENAI_BASE_URL} (optional)</li>
  * </ul>
  * </p>
  * 
@@ -94,8 +97,8 @@ import com.openai.models.responses.Tool;
  * <b>Using the CodeMie API:</b><br>
  * To use the CodeMie API, set the following environment variables:
  * <ul>
- *   <li>{@code OPENAI_API_KEY}=eyJhbGciOiJSUzI1NiIsInR5c....</li>
- *   <li>{@code OPENAI_BASE_URL}=https://codemie.lab.epam.com/code-assistant-api/v1</li>
+ * <li>{@code OPENAI_API_KEY}=eyJhbGciOiJSUzI1NiIsInR5c....</li>
+ * <li>{@code OPENAI_BASE_URL}=https://codemie.lab.epam.com/code-assistant-api/v1</li>
  * </ul>
  * </p>
  * 
@@ -286,12 +289,15 @@ public class OpenAIProvider implements GenAIProvider {
 				ResponseReasoningItem reasoningItem = item.asReasoning();
 				asReasoning = ResponseInputItem.ofReasoning(reasoningItem);
 				for (Summary summary : reasoningItem.summary()) {
-					logger.info(summary.text());
+					String txt = summary.text();
+					if (StringUtils.isNotBlank(txt)) {
+						logger.info(txt);
+					}
 				}
 			}
 		}
 		if (fcall) {
-			if (text != null) {
+			if (StringUtils.isNotBlank(text)) {
 				logger.info(text);
 			}
 			result = perform();
@@ -331,7 +337,7 @@ public class OpenAIProvider implements GenAIProvider {
 		Object[] arguments = new Object[2];
 		try {
 			arguments[0] = new ObjectMapper().readTree(functionCall.arguments());
-			arguments[0] = workingDir;
+			arguments[1] = workingDir;
 			Set<Entry<Tool, Function<Object[], Object>>> entrySet = toolMap.entrySet();
 			Object result = null;
 			for (Entry<Tool, Function<Object[], Object>> entry : entrySet) {
