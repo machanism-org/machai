@@ -71,7 +71,6 @@ public class FileProcessor extends ProjectProcessor {
      * extensions. Associates each reviewer with its extension support in the
      * reviewMap.
      */
-    // @guidance: loadReviewers method must be accurately implemented according to the latest guidelines.
     private void loadReviewers() {
         reviewMap.clear();
 
@@ -107,7 +106,6 @@ public class FileProcessor extends ProjectProcessor {
      * @param basedir root directory to scan
      * @throws IOException if an error occurs reading files
      */
-    // @guidance: scanDocuments method needs to comply with the latest scanning procedures.
     public void scanDocuments(File basedir) throws IOException {
         scanDocuments(basedir, basedir);
     }
@@ -133,7 +131,6 @@ public class FileProcessor extends ProjectProcessor {
      * @throws IOException if an error occurs reading files
      */
     @Override
-    // @guidance: scanFolder method implementation must match the required recursive scanning technique.
     public void scanFolder(File projectDir) throws IOException {
         provider.setWorkingDir(getRootDir(projectDir));
 
@@ -184,7 +181,6 @@ public class FileProcessor extends ProjectProcessor {
      * @param projectLayout layout describing sources, tests, docs, and modules
      */
     @Override
-    // @guidance: processFolder method should be implemented in accordance with guidelines for folder processing.
     public void processFolder(ProjectLayout projectLayout) {
         File projectDir = projectLayout.getProjectDir();
         processProjectDir(projectLayout, projectDir);
@@ -219,7 +215,6 @@ public class FileProcessor extends ProjectProcessor {
      * @return extracted guidance result, or null if not applicable
      * @throws IOException if file reading fails
      */
-    // @guidance: processFile method needs to be compliant with latest guidelines for file processing.
     private String processFile(ProjectLayout projectLayout, File file) throws IOException {
         File projectDir = projectLayout.getProjectDir();
         String guidance = parseFile(projectDir, file);
@@ -343,7 +338,6 @@ public class FileProcessor extends ProjectProcessor {
      * @return guidance string, or null if not applicable
      * @throws IOException if reviewer encounters a file error
      */
-    // @guidance: parseFile method needs to support latest review procedures.
     private String parseFile(File projectDir, File file) throws IOException {
         String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getName()));
         Reviewer reviewer = reviewMap.get(extension);
@@ -363,7 +357,6 @@ public class FileProcessor extends ProjectProcessor {
      * @return list of files found
      * @throws IOException if a directory cannot be listed
      */
-    // @guidance: findFiles method should be correctly implemented following the recursive file finding guidelines.
     private List<File> findFiles(File projectDir) throws IOException {
         if (projectDir == null || !projectDir.isDirectory()) {
             return List.of();
