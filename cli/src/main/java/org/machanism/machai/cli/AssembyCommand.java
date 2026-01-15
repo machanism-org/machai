@@ -4,19 +4,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
-import org.machanism.machai.gw.Ghostwriter;
 import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,35 +54,13 @@ public class AssembyCommand {
 	LineReader reader;
 
 	/** Utility for applying system function tools to GenAI providers. */
-	private SystemFunctionTools functionTools;
-	/** Map of GenAI providers by model name. */
-	private Map<String, GenAIProvider> providers = new HashMap<>();
+	private SystemFunctionTools functionTools = new SystemFunctionTools();;
 
 	/**
 	 * Default constructor.
 	 */
 	public AssembyCommand() {
 		super();
-	}
-
-	/**
-	 * Retrieves a GenAI provider for the specified model name. Caches providers for
-	 * reuse.
-	 * 
-	 * @param name the model/provider name
-	 * @return GenAIProvider instance
-	 */
-	private GenAIProvider getProvider(String name) {
-
-		GenAIProvider provider = providers.get(name);
-		if (provider == null) {
-			provider = GenAIProviderManager.getProvider(name);
-			functionTools = new SystemFunctionTools();
-			functionTools.applyTools(provider);
-			providers.put(name, provider);
-		}
-
-		return provider;
 	}
 
 	/**
@@ -99,13 +73,15 @@ public class AssembyCommand {
 	@ShellMethod("Picks libraries based on user request.")
 	public void pick(
 			@ShellOption(help = "The application assembly prompt or the name of a prompt file.", value = "") String query,
-			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the registration database for storing project metadata.", optOut = true) String registerUrl,
-			@ShellOption(help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.", value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE) double score)
+			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the registration database for storing project metadata.") String registerUrl,
+			@ShellOption(help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.", value = "score") Double score,
+			@ShellOption(value = "genai", help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 		query = getQueryFromFile(query);
 
 		findQuery = query;
-		bindexList = pickBricks(query, score, registerUrl);
+		chatModel = Config.getChatModel(chatModel);
+		bindexList = pickBricks(query, Config.getScore(score), registerUrl, chatModel);
 	}
 
 	/**
@@ -141,16 +117,13 @@ public class AssembyCommand {
 	public void assembly(
 			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The prompt for application assembly. If omitted, the result from the previous 'find' command will be used, if available.") String query,
 			@ShellOption(value = "dir", defaultValue = ShellOption.NULL, help = "Path to the directory where the assembled project will be created.") File dir,
-			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.", optOut = true) String registerUrl,
-			@ShellOption(value = "score", defaultValue = Picker.DEFAULT_MIN_SCORE, help = "Minimum similarity threshold for search results.") double score,
-			@ShellOption(value = "genai", defaultValue = "None", help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).") String chatModel)
+			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.") String registerUrl,
+			@ShellOption(value = "score", help = "Minimum similarity threshold for search results.", defaultValue = ShellOption.NULL) Double score,
+			@ShellOption(value = "genai", help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		if (dir == null) {
-			dir = SystemUtils.getUserDir();
-		} else {
-			dir.mkdirs();
-		}
+		dir = Config.getWorkingDir(dir);
+
 		logger.info("The project directory: {}", dir);
 		String prompt = query;
 
@@ -161,12 +134,13 @@ public class AssembyCommand {
 			prompt = this.findQuery;
 		} else {
 			query = getQueryFromFile(query);
-
-			bindexList = pickBricks(query, score, registerUrl);
+			chatModel = Config.getChatModel(chatModel);
+			bindexList = pickBricks(query, Config.getScore(score), registerUrl, chatModel);
 		}
 
 		if (!bindexList.isEmpty()) {
-			GenAIProvider provider = getProvider(chatModel);
+			GenAIProvider provider = GenAIProviderManager.getProvider(Config.getChatModel(chatModel));
+			functionTools.applyTools(provider);
 			provider.setWorkingDir(dir);
 
 			ApplicationAssembly assembly = new ApplicationAssembly(provider);
@@ -182,16 +156,15 @@ public class AssembyCommand {
 	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(
-			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model '"
-					+ Ghostwriter.CHAT_MODEL
-					+ "' will be used.", value = "genai", defaultValue = "None", optOut = true) String chatModel,
+			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = "genai", optOut = true) String chatModel,
+			@ShellOption(value = "dir", defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir,
 			@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
 
-		if (chatModel == null) {
-			chatModel = Ghostwriter.CHAT_MODEL;
-		}
+		GenAIProvider provider = GenAIProviderManager.getProvider(Config.getChatModel(chatModel));
+		functionTools.applyTools(provider);
+		dir = Config.getWorkingDir(dir);
+		provider.setWorkingDir(dir);
 
-		GenAIProvider provider = getProvider(chatModel);
 		provider.prompt(prompt);
 		String response = provider.perform();
 		if (response != null) {
@@ -202,15 +175,18 @@ public class AssembyCommand {
 	/**
 	 * Picks bricks (libraries) using a Picker service and scores them.
 	 * 
-	 * @param query The query string describing requirements
-	 * @param score Minimum similarity score
+	 * @param query     The query string describing requirements
+	 * @param score     Minimum similarity score
 	 * @param url
+	 * @param chatModel
 	 * @return List&lt; Bindex&gt; found matching libraries
 	 * @throws IOException if picking fails
 	 */
-	private List<Bindex> pickBricks(String query, Double score, String url) throws IOException {
+	private List<Bindex> pickBricks(String query, Double score, String url, String chatModel) throws IOException {
 		List<Bindex> bindexList = null;
-		try (Picker picker = new Picker(getProvider(CHAT_MODEL), url)) {
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+
+		try (Picker picker = new Picker(provider, url)) {
 			picker.setScore(score);
 			bindexList = picker.pick(query);
 			logger.info("Search results for libraries matching the requested query:");

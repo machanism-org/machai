@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory;
  * @since 0.0.2
  */
 public final class Ghostwriter {
-    /** Default chat model name constant. */
-    public static final String CHAT_MODEL = "OpenAI:gpt-5-mini";
 
     /** Logger for the ghostwriter application. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
