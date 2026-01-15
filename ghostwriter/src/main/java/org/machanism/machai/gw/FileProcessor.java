@@ -165,7 +165,7 @@ public class FileProcessor extends ProjectProcessor {
 
     private static void logIfNotBlank(String message) {
         if (StringUtils.isNotBlank(message)) {
-            logger.info(message);
+            logger.debug(message);
         }
     }
 
