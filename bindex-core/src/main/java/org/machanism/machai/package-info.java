@@ -12,7 +12,8 @@
  */
 package org.machanism.machai;
 
-/* @guidance:
+/**
+ * @guidance:
  *
  * **IMPORTANT: ADD JAVADOC TO THIS `package-info.java`!**
  *

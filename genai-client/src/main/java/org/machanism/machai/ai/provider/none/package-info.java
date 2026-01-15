@@ -15,6 +15,10 @@
  *       exceptions.</li>
  * </ul>
  *
+ * <h2>Usage</h2>
+ * <p>Create an instance of {@code NoneProvider} and use it as a {@code GenAIProvider} stub in environments where 
+ * integration with external AI services is not desired.</p>
+ * 
  * <h2>Example</h2>
  * <pre>
  * {@code

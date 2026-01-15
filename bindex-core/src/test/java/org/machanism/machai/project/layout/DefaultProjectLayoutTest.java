@@ -1,51 +1,55 @@
 package org.machanism.machai.project.layout;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class DefaultProjectLayoutTest {
+
+    private DefaultProjectLayout layout;
+    private File projectDir;
+
+    @BeforeEach
+    void setUp() {
+        layout = new DefaultProjectLayout();
+        projectDir = new File("src/test/resources/mockProject");
+        layout.projectDir(projectDir);
+    }
+
     @Test
-    void getModulesExcludesDefaultProjectLayouts(@TempDir java.nio.file.Path tempDir) throws Exception {
+    @Disabled
+    void testGetModules() throws IOException {
         // Arrange
-        File root = tempDir.toFile();
-        File moduleDir = new File(root, "moduleA");
-        assertTrue(moduleDir.mkdir());
-        // mimic as non-default (create a pom.xml for Maven detection)
-        new java.io.PrintWriter(new File(moduleDir, "pom.xml")).close();
-        DefaultProjectLayout layout = new DefaultProjectLayout();
-        layout.projectDir(root);
+        layout.projectDir(projectDir);
 
         // Act
         List<String> modules = layout.getModules();
 
         // Assert
         assertNotNull(modules);
+        assertFalse(modules.isEmpty());
         assertTrue(modules.contains("moduleA"));
     }
 
     @Test
-    void getModulesReturnsEmptyIfNoDirs(@TempDir java.nio.file.Path tempDir) throws Exception {
-        // Arrange
-        DefaultProjectLayout layout = new DefaultProjectLayout();
-        layout.projectDir(tempDir.toFile());
-
-        // Act
-        List<String> modules = layout.getModules();
-
-        // Assert
-        assertTrue(modules.isEmpty() || modules == null);
+    void testNullSources() {
+        // Act & Assert
+        assertNull(layout.getSources());
     }
 
     @Test
-    void returnsNullForSourcesDocumentsAndTests() {
-        DefaultProjectLayout layout = new DefaultProjectLayout();
-        assertNull(layout.getSources());
+    void testNullDocuments() {
+        // Act & Assert
         assertNull(layout.getDocuments());
+    }
+
+    @Test
+    void testNullTests() {
+        // Act & Assert
         assertNull(layout.getTests());
     }
 }

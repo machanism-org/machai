@@ -1,0 +1,7 @@
+[project]
+name = "mockPythonProject"
+version = "1.0.0"
+
+[project.classifiers]
+classifier1 = "Public"
+classifier2 = "API"

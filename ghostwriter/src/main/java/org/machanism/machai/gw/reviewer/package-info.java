@@ -1,5 +1,7 @@
 /**
- * File reviewers that extract and normalize {@code @guidance} content from project sources.
+ * Package org.machanism.machai.gw.reviewer.
+ *
+ * This package provides file reviewers that extract and normalize {@code @guidance} content from project sources.
  *
  * <p>
  * Implementations typically support one or more file formats (for example Java, Markdown, HTML/XML,
@@ -16,7 +18,7 @@ package org.machanism.machai.gw.reviewer;
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!**
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!** 
  * 
  * - Use Clear and Concise Descriptions:
  * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
@@ -24,7 +26,7 @@ package org.machanism.machai.gw.reviewer;
  * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the packages overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  *      

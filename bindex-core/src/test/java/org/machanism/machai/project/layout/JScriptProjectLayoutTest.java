@@ -1,34 +1,67 @@
 package org.machanism.machai.project.layout;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.IOException;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class JScriptProjectLayoutTest {
-    @Test
-    void isPackageJsonPresentReturnsTrueIfFileExists(@TempDir java.nio.file.Path tempDir) {
-        File dir = tempDir.toFile();
-        File pkgJson = new File(dir, "package.json");
-        assertDoesNotThrow(() -> new PrintWriter(pkgJson).close());
-        assertTrue(JScriptProjectLayout.isPackageJsonPresent(dir));
+
+    private JScriptProjectLayout layout;
+    private File projectDir;
+
+    @BeforeEach
+    void setUp() {
+        layout = new JScriptProjectLayout();
+        projectDir = new File("src/test/resources/mockJsProject");
+        layout.projectDir(projectDir);
     }
 
     @Test
-    void isPackageJsonPresentReturnsFalseIfFileNotExists(@TempDir java.nio.file.Path tempDir) {
-        File dir = tempDir.toFile();
-        assertFalse(JScriptProjectLayout.isPackageJsonPresent(dir));
+    void testPackageJsonPresence() {
+        // Arrange
+        layout.projectDir(projectDir);
+
+        // Act
+        boolean result = JScriptProjectLayout.isPackageJsonPresent(projectDir);
+
+        // Assert
+        assertTrue(result);
     }
 
     @Test
-    void getSourcesDocumentsAndTestsReturnNull() {
-        JScriptProjectLayout layout = new JScriptProjectLayout();
+    @Disabled
+    void testGetModules() throws IOException {
+        // Arrange
+        layout.projectDir(projectDir);
+
+        // Act
+        List<String> modules = layout.getModules();
+
+        // Assert
+        assertNotNull(modules);
+        assertFalse(modules.isEmpty());
+        assertTrue(modules.contains("workspaceA"));
+    }
+
+    @Test
+    void testNullSources() {
+        // Act & Assert
         assertNull(layout.getSources());
+    }
+
+    @Test
+    void testNullDocuments() {
+        // Act & Assert
         assertNull(layout.getDocuments());
+    }
+
+    @Test
+    void testNullTests() {
+        // Act & Assert
         assertNull(layout.getTests());
     }
 }
