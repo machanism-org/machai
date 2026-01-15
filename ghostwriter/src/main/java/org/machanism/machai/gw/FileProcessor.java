@@ -70,8 +70,8 @@ public class FileProcessor extends ProjectProcessor {
      * Loads file reviewers via the ServiceLoader registry, mapping supported file
      * extensions. Associates each reviewer with its extension support in the
      * reviewMap.
-     * @guidance: loadReviewers method must be accurately implemented according to the latest guidelines.
      */
+    // @guidance: loadReviewers method must be accurately implemented according to the latest guidelines.
     private void loadReviewers() {
         ServiceLoader<Reviewer> reviewerServiceLoader = ServiceLoader.load(Reviewer.class);
 
@@ -97,8 +97,8 @@ public class FileProcessor extends ProjectProcessor {
      *
      * @param basedir root directory to scan
      * @throws IOException if an error occurs reading files
-     * @guidance: scanDocuments method needs to comply with the latest scanning procedures.
      */
+    // @guidance: scanDocuments method needs to comply with the latest scanning procedures.
     public void scanDocuments(File basedir) throws IOException {
         scanDocuments(basedir, basedir);
     }
@@ -119,19 +119,18 @@ public class FileProcessor extends ProjectProcessor {
     /**
      * Recursively scans project folders, processing documentation inputs for all
      * found modules and files.
-     * @guidance: scanFolder method implementation must match the required recursive scanning technique.
      *
      * @param projectDir the directory containing the project/module to be scanned
      * @throws IOException if an error occurs reading files
      */
     @Override
+    // @guidance: scanFolder method implementation must match the required recursive scanning technique.
     public void scanFolder(File projectDir) throws IOException {
         provider.setWorkingDir(getRootDir(projectDir));
 
         ProjectLayout projectLayout = getProjectLayout(projectDir);
         List<String> modules = projectLayout.getModules();
 
-        // Process the current directory's immediate children that are not modules and not excluded.
         File[] children = projectDir.listFiles();
         if (children != null) {
             for (File child : children) {
@@ -172,11 +171,11 @@ public class FileProcessor extends ProjectProcessor {
 
     /**
      * Processes the project layout for documentation gathering.
-     * @guidance: processFolder method should be implemented in accordance with guidelines for folder processing.
      *
      * @param projectLayout layout describing sources, tests, docs, and modules
      */
     @Override
+    // @guidance: processFolder method should be implemented in accordance with guidelines for folder processing.
     public void processFolder(ProjectLayout projectLayout) {
         File projectDir = projectLayout.getProjectDir();
         processProjectDir(projectLayout, projectDir);
@@ -205,13 +204,13 @@ public class FileProcessor extends ProjectProcessor {
     /**
      * Processes the given file using the configured reviewers for documentation
      * input preparation.
-     * @guidance: processFile method needs to be compliant with latest guidelines for file processing.
      *
      * @param projectLayout the project layout instance
      * @param file          the file to process
      * @return extracted guidance result, or null if not applicable
      * @throws IOException if file reading fails
      */
+    // @guidance: processFile method needs to be compliant with latest guidelines for file processing.
     private String processFile(ProjectLayout projectLayout, File file) throws IOException {
         File projectDir = projectLayout.getProjectDir();
         String guidance = parseFile(projectDir, file);
@@ -314,12 +313,10 @@ public class FileProcessor extends ProjectProcessor {
         String line = null;
         if (sources != null && !sources.isEmpty()) {
             List<String> dirs = sources.stream().filter(t -> {
-                boolean exists = false;
-                if (t != null) {
-                    File file = new File(projectDir, t);
-                    exists = file.exists();
+                if (t == null) {
+                    return false;
                 }
-                return exists;
+                return new File(projectDir, t).exists();
             }).map(e -> {
                 String path = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
                 return "`" + path + "`";
@@ -336,16 +333,16 @@ public class FileProcessor extends ProjectProcessor {
     /**
      * Runs the review process for a file using matching reviewer, extracting
      * guidance.
-     * @guidance: parseFile method needs to support latest review procedures.
      *
      * @param projectDir root directory
      * @param file       file to be processed
      * @return guidance string, or null if not applicable
      * @throws IOException if reviewer encounters a file error
      */
+    // @guidance: parseFile method needs to support latest review procedures.
     private String parseFile(File projectDir, File file) throws IOException {
-        String extension = FilenameUtils.getExtension(file.getName()).toLowerCase();
-        Reviewer reviewer = reviewMap.get(StringUtils.lowerCase(extension));
+        String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getName()));
+        Reviewer reviewer = reviewMap.get(extension);
 
         if (reviewer == null) {
             return null;
@@ -357,25 +354,31 @@ public class FileProcessor extends ProjectProcessor {
     /**
      * Recursively finds all files (excluding EXCLUDE_DIRS) in a directory
      * structure.
-     * @guidance: findFiles method should be correctly implemented following the recursive file finding guidelines.
      *
      * @param projectDir directory to search
      * @return list of files found
+     * @throws IOException if a directory cannot be listed
      */
-    private List<File> findFiles(File projectDir) {
+    // @guidance: findFiles method should be correctly implemented following the recursive file finding guidelines.
+    private List<File> findFiles(File projectDir) throws IOException {
+        if (projectDir == null || !projectDir.isDirectory()) {
+            return List.of();
+        }
+
+        File[] files = projectDir.listFiles();
+        if (files == null) {
+            throw new IOException("Unable to list files for directory: " + projectDir.getAbsolutePath());
+        }
+
         List<File> result = new ArrayList<>();
-        if (projectDir != null && projectDir.isDirectory()) {
-            File[] files = projectDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (!StringUtils.equalsAnyIgnoreCase(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
-                        if (file.isDirectory()) {
-                            result.addAll(findFiles(file));
-                        } else {
-                            result.add(file);
-                        }
-                    }
-                }
+        for (File file : files) {
+            if (StringUtils.equalsAnyIgnoreCase(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
+                continue;
+            }
+            if (file.isDirectory()) {
+                result.addAll(findFiles(file));
+            } else {
+                result.add(file);
             }
         }
         return result;

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 class Config {
 
+	private static final String CONF_PROPERTIES_FILE_NAME = "machai.properties";
 	private static final String SCORE_PRP_NAME = "score";
 	private static final String WORKINGDIR_PROP_NAME = "dir";
 	private static final String GENAI_PROP_NAME = "genai";
@@ -66,9 +67,8 @@ class Config {
 
 	private static void save(String name, String value) {
 		properties.put(name, value);
-		File file = new File(".machai/machai.properties");
-		file.getParentFile().mkdirs();
-		try (OutputStream stream = new FileOutputStream(file)) {
+		File conf = getConfFile();
+		try (OutputStream stream = new FileOutputStream(conf)) {
 			properties.store(stream, null);
 		} catch (IOException e) {
 			logger.error("Failed to save the configuration properties file.");
@@ -93,18 +93,23 @@ class Config {
 	}
 
 	private static void loadSystemProperties() throws IOException {
-		String configFIle = System.getProperty("config");
-		File conf;
-		if (configFIle != null) {
-			conf = new File(configFIle);
-		} else {
-			conf = new File(".machai/machai.properties");
-		}
-
+		File conf = getConfFile();
 		if (conf.exists()) {
 			try (FileInputStream propFile = new FileInputStream(conf)) {
 				properties.load(propFile);
 			}
 		}
+	}
+
+	private static File getConfFile() {
+		String configFile = System.getProperty("config");
+		
+		File conf;
+		if (configFile != null) {
+			conf = new File(configFile);
+		} else {
+			conf = new File(CONF_PROPERTIES_FILE_NAME);
+		}
+		return conf;
 	}
 }

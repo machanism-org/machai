@@ -22,48 +22,37 @@ import org.slf4j.LoggerFactory;
 /*@guidance: Generate javadoc with a description all maven plugin parameters and examples of usage. */
 
 /**
- * Maven Mojo that scans and processes project documents using an optional GenAI provider.
+ * Maven goal that scans and processes project documents.
  *
  * <p>
- * This goal delegates document scanning and processing to {@link FileProcessor}. If a GenAI provider is
- * configured via {@link #chatModel}, the processor may use it to assist with document workflows.
+ * The goal delegates document scanning and processing to {@link FileProcessor}. If a GenAI provider is
+ * configured via {@code chatModel}, the processor may use it to assist with document workflows.
  * </p>
  *
  * <h2>Parameters</h2>
- * <p>
- * Parameters can be configured via system properties (using {@code -D...}) or within the plugin
- * configuration in the {@code pom.xml}.
- * </p>
- *
  * <dl>
  * <dt><b>{@code chatModel}</b> (property: {@code gw.genai})</dt>
  * <dd>
- * The GenAI chat model identifier used for AI-assisted document processing.
+ * GenAI provider/model identifier used for AI-assisted document processing.
  * <p>
- * Value format is provider-specific, typically {@code ProviderName:ModelName}.
+ * The value format is provider-specific, commonly {@code ProviderName:ModelName}.
  * </p>
  * <p>
- * Example: {@code OpenAI:gpt-5}
+ * Examples: {@code OpenAI:gpt-5}, {@code AzureOpenAI:gpt-4o-mini}
  * </p>
  * </dd>
  *
- * <dt><b>{@code basedir}</b> (read-only)</dt>
- * <dd>
- * The Maven project base directory. Provided by Maven as {@code ${basedir}}.
- * </dd>
+ * <dt><b>{@code basedir}</b> (read-only; default: {@code ${basedir}})</dt>
+ * <dd>Maven project base directory.</dd>
  *
- * <dt><b>{@code project}</b> (read-only)</dt>
- * <dd>
- * The current {@link MavenProject}. Provided by Maven as {@code ${project}}.
- * </dd>
+ * <dt><b>{@code project}</b> (read-only; default: {@code ${project}})</dt>
+ * <dd>The current {@link MavenProject}.</dd>
  *
- * <dt><b>{@code session}</b> (read-only)</dt>
- * <dd>
- * The current {@link MavenSession}. Provided by Maven as {@code ${session}}.
- * </dd>
+ * <dt><b>{@code session}</b> (read-only; default: {@code ${session}})</dt>
+ * <dd>The current {@link MavenSession}.</dd>
  * </dl>
  *
- * <h2>Example Usage</h2>
+ * <h2>Usage Examples</h2>
  *
  * <h3>Run from the command line</h3>
  * <pre>
@@ -89,40 +78,32 @@ public class GW extends AbstractMojo {
 	private static final Logger logger = LoggerFactory.getLogger(GW.class);
 
 	/**
-	 * The GenAI chat model identifier to use for AI assistance.
+	 * GenAI provider/model identifier to use for AI assistance.
 	 *
 	 * <p>
-	 * This can be provided as a system property {@code -Dgw.genai=...}.
+	 * May be provided as a system property: {@code -Dgw.genai=...}.
 	 * </p>
 	 */
 	@Parameter(property = "gw.genai")
 	protected String chatModel;
 
-	/** Project base directory (read-only), provided by Maven. */
+	/** Maven project base directory (read-only). */
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
 	protected File basedir;
 
-	/** Maven project model (read-only), provided by Maven. */
+	/** Maven project (read-only). */
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
 
-	/** Maven session (read-only), provided by Maven. */
+	/** Maven session (read-only). */
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	private MavenSession session;
 
 	@Override
 	public void execute() throws MojoExecutionException {
-
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 
 		FileProcessor documents = new FileProcessor(provider) {
-			/**
-			 * Provides the Maven-based project layout for document scanning.
-			 *
-			 * @param projectDir the directory where the Maven project is located
-			 * @return layout of Maven project including model
-			 * @throws FileNotFoundException if the project directory is missing
-			 */
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				MavenProjectLayout projectLayout = new MavenProjectLayout();
@@ -132,18 +113,12 @@ public class GW extends AbstractMojo {
 				return projectLayout;
 			}
 
-			/**
-			 * Optional hook for processing project modules. Currently no-op.
-			 *
-			 * @param projectDir the project base directory
-			 * @param module     name of the module to process
-			 * @throws IOException if there is an error accessing files
-			 */
 			@Override
 			protected void processModule(File projectDir, String module) throws IOException {
 				// No-op for this implementation
 			}
 		};
+
 		logger.info("Scanning documents in the root directory: {}", basedir);
 		try {
 			File rootDir = new File(session.getExecutionRootDirectory());

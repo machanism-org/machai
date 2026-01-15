@@ -73,16 +73,6 @@ import dev.langchain4j.model.output.Response;
  * @since 0.0.2
  */
 public class Picker implements Closeable {
-
-	/** Embedding vector dimensions for classification. */
-	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
-	/** MongoDB field name for classification embeddings. */
-	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
-	/** Result limit for vector search operations. */
-	private static final int VECTOR_SEARCH_LIMITS = 50;
-
-	private static final String EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL.toString();
-
 	private static Logger logger = LoggerFactory.getLogger(Picker.class);
 
 	private static final String INSTANCENAME = "machanism";
@@ -93,6 +83,16 @@ public class Picker implements Closeable {
 	private static final String LAYERS_PROPERTY_NAME = "layers";
 	private static final String INTEGRATIONS_PROPERTY_NAME = "integrations";
 
+	/** Embedding vector dimensions for classification. */
+	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
+	/** MongoDB field name for classification embeddings. */
+	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
+	/** Result limit for vector search operations. */
+	private static final int VECTOR_SEARCH_LIMITS = 50;
+
+	private String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+	private String embeddingModelName = "text-embedding-3-small";
+
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
 	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
@@ -100,14 +100,9 @@ public class Picker implements Closeable {
 	private MongoCollection<Document> collection;
 	private MongoClient mongoClient;
 
-	private String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
-
 	private GenAIProvider provider;
 
-	private String apiKey;
-	private String baseUrl;
-
-	private Double score = 0.85;
+	private Double score = 0.9;
 	private Map<String, Double> scoreMap = new HashMap<>();
 
 	/**
@@ -115,7 +110,8 @@ public class Picker implements Closeable {
 	 *
 	 * @param provider GenAIProvider instance used for embedding, schema
 	 *                 classification, etc.
-	 * @param uri database URI. If the value is null, the default value will be used..
+	 * @param uri      database URI. If the value is null, the default value will be
+	 *                 used..
 	 * @throws IllegalStateException If the required environment variables are
 	 *                               missing for DB or OpenAI access
 	 */
@@ -129,13 +125,6 @@ public class Picker implements Closeable {
 			} else {
 				uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
 			}
-
-			apiKey = System.getenv("OPENAI_API_KEY");
-			if (apiKey == null || apiKey.isEmpty()) {
-				throw new IllegalStateException("OPEN_AI_API_KEY env variable is not set or is empty.");
-			}
-
-			baseUrl = System.getenv("OPENAI_BASE_URL");
 		}
 
 		mongoClient = MongoClients.create(uri);
@@ -246,8 +235,18 @@ public class Picker implements Closeable {
 	 * @return List of Double values (embedding vector)
 	 */
 	private List<Double> getEmbedding(String text, Integer dimensions) {
-		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder().apiKey(apiKey).baseUrl(baseUrl)
-				.modelName(EMBEDDING_MODEL_NAME)
+
+		String embeddingApiKey = System.getenv("EMBEDDING_OPENAI_API_KEY");
+		if (embeddingApiKey == null || embeddingApiKey.isEmpty()) {
+			throw new IllegalStateException("EMBEDDING_OPENAI_API_KEY env variable is not set or is empty.");
+		}
+
+		String embeddingBaseUrl = System.getenv("EMBEDDING_OPENAI_BASE_URL");
+
+		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder()
+				.apiKey(embeddingApiKey)
+				.baseUrl(embeddingBaseUrl)
+				.modelName(embeddingModelName)
 				.timeout(java.time.Duration.ofSeconds(60))
 				.dimensions(dimensions)
 				.build();
@@ -481,5 +480,13 @@ public class Picker implements Closeable {
 	 */
 	public Double getScore(String id) {
 		return scoreMap.get(id);
+	}
+
+	public String getEmbeddingModelName() {
+		return embeddingModelName;
+	}
+
+	public void setEmbeddingModelName(String embeddingModelName) {
+		this.embeddingModelName = embeddingModelName;
 	}
 }

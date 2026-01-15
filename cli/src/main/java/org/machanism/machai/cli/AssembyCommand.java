@@ -43,7 +43,6 @@ import org.springframework.shell.standard.ShellOption;
 public class AssembyCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
-	private static final String CHAT_MODEL = "OpenAI:gpt-5.1";
 
 	/** List of picked Bindex objects matching the search query. */
 	private List<Bindex> bindexList;
