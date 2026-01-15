@@ -79,6 +79,11 @@
 										</manifest>
 									</archive>
 									<appendAssemblyId>false</appendAssemblyId>
+									<archive>
+										<manifestEntries>
+											<Class-Path><![CDATA[ae.jar web-ae-plugin.jar]]></Class-Path>
+										</manifestEntries>
+									</archive>
 									<descriptorRefs>
 										<descriptorRef>jar-with-dependencies</descriptorRef>
 									</descriptorRefs>
