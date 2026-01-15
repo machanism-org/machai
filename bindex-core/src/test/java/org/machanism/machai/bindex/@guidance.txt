@@ -8,3 +8,4 @@ The source files are located in `[Project Path]/src/main/java/org/machanism/mach
 - Mock dependencies where appropriate to isolate units under test.
 - Place test files in this directory, mirroring the package structure of the source files.
 - **Use the Java version specified in the project's `pom.xml` for all test code and configuration.**
+- Do not create `package-info.java` file for packages in the `test` folder.
