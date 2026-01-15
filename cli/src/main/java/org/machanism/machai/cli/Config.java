@@ -47,7 +47,7 @@ class Config {
 			Config.chatModel = chatModel;
 			save(GENAI_PROP_NAME, chatModel);
 		} else {
-			logger.info("GenAI: {}", Config.chatModel);
+			logger.info("Default GenAI Service: {}", Config.chatModel);
 		}
 	}
 
@@ -57,7 +57,7 @@ class Config {
 
 	public static void setWorkingDir(File dir) {
 		if (dir == null) {
-			logger.info("Dir: {}", workingDir.getAbsolutePath());
+			logger.info("Working directory path: {}", workingDir.getAbsolutePath());
 		} else {
 			workingDir = dir;
 			save(WORKINGDIR_PROP_NAME, workingDir.getAbsolutePath());
@@ -84,7 +84,7 @@ class Config {
 			save(SCORE_PRP_NAME, String.valueOf(score));
 			Config.score = score;
 		} else {
-			logger.info("Score: {}", Config.score);
+			logger.info("Default minimum score for semantic search: {}", Config.score);
 		}
 	}
 

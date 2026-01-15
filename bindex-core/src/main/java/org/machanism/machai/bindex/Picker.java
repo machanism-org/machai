@@ -51,7 +51,6 @@ import com.mongodb.client.result.InsertOneResult;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
-import dev.langchain4j.model.openai.OpenAiEmbeddingModelName;
 import dev.langchain4j.model.output.Response;
 
 /**
