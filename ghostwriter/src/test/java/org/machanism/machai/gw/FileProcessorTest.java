@@ -20,28 +20,6 @@ class FileProcessorTest {
     }
 
     /**
-     * Tests if setInheritance and isInheritance work correctly.
-     */
-    @Test
-    void testInheritanceFlag() {
-        processor.setInheritance(true);
-        assertTrue(processor.isInheritance());
-        processor.setInheritance(false);
-        assertFalse(processor.isInheritance());
-    }
-
-    /**
-     * Tests if setUseParentsGuidances and isUseParentsGuidances work as expected.
-     */
-    @Test
-    void testParentGuidanceFlag() {
-        processor.setUseParentsGuidances(true);
-        assertTrue(processor.isUseParentsGuidances());
-        processor.setUseParentsGuidances(false);
-        assertFalse(processor.isUseParentsGuidances());
-    }
-
-    /**
      * Tests getRootDir returns correct directory.
      */
     @Test

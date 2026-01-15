@@ -2,7 +2,6 @@ package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Interface for file reviewers that analyze project files
@@ -28,7 +27,5 @@ public interface Reviewer {
      * @return an array of supported file extension strings (without dot)
      */
     String[] getSupportedFileExtentions();
-
-	default void setDirGuidanceMap(Map<String, String> dirGuidanceMap) {};
 
 }

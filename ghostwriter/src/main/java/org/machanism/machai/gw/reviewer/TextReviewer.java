@@ -22,7 +22,6 @@ public class TextReviewer implements Reviewer {
 	private static final String GUIDANCE_FILE_NAME = "@guidance.txt";
 
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
-	private Map<String, String> dirGuidanceMap;
 
 	/**
 	 * Returns the file extensions supported by this reviewer. This reviewer handles
@@ -50,7 +49,6 @@ public class TextReviewer implements Reviewer {
 			if (StringUtils.isNotBlank(guidance)) {
 				String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
 				guidance = MessageFormat.format(promptBundle.getString("guidance_file"), parentsPath, guidance);
-				dirGuidanceMap.put(parentsPath, guidance);
 			}
 		} else {
 			guidance = null;
@@ -59,8 +57,4 @@ public class TextReviewer implements Reviewer {
 		return guidance;
 	}
 
-	@Override
-	public void setDirGuidanceMap(Map<String, String> dirGuidanceMap) {
-		this.dirGuidanceMap = dirGuidanceMap;
-	}
 }
