@@ -7,12 +7,8 @@ import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
-import org.machanism.machai.gw.Ghostwriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
@@ -58,23 +54,14 @@ public class BindexCommand {
 	public void bindex(
 			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update,
-			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`). If `--genai` is empty, the default model '"
-					+ Ghostwriter.CHAT_MODEL
-					+ "' will be used.", value = "genai", defaultValue = "None") String chatModel)
+			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = "genai", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		if (chatModel == null) {
-			chatModel = Ghostwriter.CHAT_MODEL;
-		}
-
-		if (dir == null) {
-			dir = SystemUtils.getUserDir();
-		}
-
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(Config.getChatModel(chatModel));
 		BindexCreator register = new BindexCreator(provider);
 		register.update(update);
-		register.scanFolder(dir);
+		File workingDir = Config.getWorkingDir(dir);
+		register.scanFolder(workingDir);
 	}
 
 	/**

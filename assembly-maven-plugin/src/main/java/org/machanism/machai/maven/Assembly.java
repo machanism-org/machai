@@ -91,7 +91,7 @@ public class Assembly extends AbstractMojo {
      * Score threshold for recommended libraries; only libraries meeting the minimum
      * score will be offered.
      */
-    @Parameter(property = "assembly.score", defaultValue = Picker.DEFAULT_MIN_SCORE)
+    @Parameter(property = "assembly.score", defaultValue = "0.9")
     protected Double score;
 
     /**

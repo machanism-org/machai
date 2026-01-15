@@ -80,8 +80,6 @@ public class Picker implements Closeable {
 	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
 	/** Result limit for vector search operations. */
 	private static final int VECTOR_SEARCH_LIMITS = 50;
-	/** Default minimum similarity score for queries. */
-	public static final String DEFAULT_MIN_SCORE = "0.90";
 
 	private static final String EMBEDDING_MODEL_NAME = OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL.toString();
 
@@ -136,7 +134,7 @@ public class Picker implements Closeable {
 			if (apiKey == null || apiKey.isEmpty()) {
 				throw new IllegalStateException("OPEN_AI_API_KEY env variable is not set or is empty.");
 			}
-			
+
 			baseUrl = System.getenv("OPENAI_BASE_URL");
 		}
 
@@ -249,7 +247,9 @@ public class Picker implements Closeable {
 	 */
 	private List<Double> getEmbedding(String text, Integer dimensions) {
 		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder().apiKey(apiKey).baseUrl(baseUrl)
-				.modelName(EMBEDDING_MODEL_NAME).timeout(java.time.Duration.ofSeconds(60)).dimensions(dimensions)
+				.modelName(EMBEDDING_MODEL_NAME)
+				.timeout(java.time.Duration.ofSeconds(60))
+				.dimensions(dimensions)
 				.build();
 
 		Response<Embedding> response = embeddingModel.embed(text);
@@ -267,7 +267,9 @@ public class Picker implements Closeable {
 	public List<Bindex> pick(String query) throws IOException {
 
 		String classificationStr = getClassification(query);
-
+		if (StringUtils.startsWith(classificationStr, "```json")) {
+			classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
+		}
 		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
 
 		Collection<String> classificatioResults = new HashSet<>();
