@@ -117,7 +117,7 @@ public class Picker implements Closeable {
 	 *
 	 * @param provider GenAIProvider instance used for embedding, schema
 	 *                 classification, etc.
-	 * @param uri
+	 * @param uri database URI. If the value is null, the default value will be used..
 	 * @throws IllegalStateException If the required environment variables are
 	 *                               missing for DB or OpenAI access
 	 */
