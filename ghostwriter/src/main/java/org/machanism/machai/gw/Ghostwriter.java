@@ -57,12 +57,14 @@ public final class Ghostwriter {
 
 		Options options = new Options();
 		Option helpOption = new Option("h", "help", false, "Displays help information for usage.");
+		Option multiThreadOption = new Option("t", "threads", false, "Enable multi-threaded processing.");
 		Option rootDirOpt = new Option("d", "dir", true, "The path fo the project directory.");
 		Option genaiOpt = new Option("g", "genai", true,
 				"Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).");
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
+		options.addOption(multiThreadOption);
 		options.addOption(genaiOpt);
 
 		CommandLineParser parser = new DefaultParser();
@@ -91,11 +93,13 @@ public final class Ghostwriter {
 			}
 
 			LOGGER.info("Root directory: {}", rootDir);
+			boolean multiThread = cmd.hasOption(multiThreadOption);
 
 			for (String scanDir : dirs) {
 				LOGGER.info("Scanning documents: {}", rootDir);
 
 				FileProcessor documents = new FileProcessor(genai);
+				documents.setModuleMultiThread(multiThread);
 
 				documents.scanDocuments(rootDir, new File(scanDir));
 				LOGGER.info("Scanning finished.");

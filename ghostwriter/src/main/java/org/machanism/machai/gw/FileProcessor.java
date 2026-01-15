@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -25,12 +28,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts {@code @guidance:} instructions from supported files, and prepares prompt
- * inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts {@code @guidance:} instructions from
+ * supported files, and prepares prompt inputs for AI-assisted documentation
+ * processing.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to {@link Reviewer} implementations discovered via
- * {@link ServiceLoader}. For every supported file it finds, it builds a prompt using templates from the
+ * This processor delegates file-specific guidance extraction to
+ * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
+ * every supported file it finds, it builds a prompt using templates from the
  * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
  * </p>
  */
@@ -41,40 +46,45 @@ public class FileProcessor extends ProjectProcessor {
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@guidance:";
 
-	/** Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}. */
+	/**
+	 * Temporary directory name for documentation inputs under
+	 * {@link #MACHAI_TEMP_DIR}.
+	 */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/** Utility that installs tool functions (filesystem/command) into the provider when supported. */
+	/**
+	 * Utility that installs tool functions (filesystem/command) into the provider
+	 * when supported.
+	 */
 	private final SystemFunctionTools systemFunctionTools;
 
-	/** Directory-level guidance mappings. Currently unused but reserved for future directory-scoped rules. */
-	@SuppressWarnings("unused")
-	private final Map<String, String> dirGuidanceMap = new HashMap<>();
 	/** Reviewer associations keyed by normalized (lowercase) file extension. */
 	private final Map<String, Reviewer> reviewMap = new HashMap<>();
 
 	/** Root scanning directory for the current documentation run. */
 	private File rootDir;
 
-	private String genai;
+	private final String genai;
+
+	private boolean moduleMultiThread;
 
 	/**
 	 * Constructs a processor.
 	 *
-	 * @param provider the provider to use; must not be {@code null}
+	 * @param genai provider key/name to use
 	 */
 	public FileProcessor(String genai) {
 		this.genai = genai;
-		systemFunctionTools = new SystemFunctionTools();
-
+		this.systemFunctionTools = new SystemFunctionTools();
 		loadReviewers();
 	}
 
 	/**
-	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping supported file extensions to a reviewer.
+	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping
+	 * supported file extensions to a reviewer.
 	 */
 	private void loadReviewers() {
 		reviewMap.clear();
@@ -85,7 +95,7 @@ public class FileProcessor extends ProjectProcessor {
 				continue;
 			}
 
-			String[] extensions = reviewer.getSupportedFileExtentions();
+			String[] extensions = reviewer.getSupportedFileExtensions();
 			if (extensions == null || extensions.length == 0) {
 				continue;
 			}
@@ -102,8 +112,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and prepares inputs for documentation generation. This overload
-	 * defaults the scan start directory to {@code basedir}.
+	 * Scans documents in the given root directory and prepares inputs for
+	 * documentation generation. This overload defaults the scan start directory to
+	 * {@code basedir}.
 	 *
 	 * @param basedir root directory to scan
 	 * @throws IOException if an error occurs reading files
@@ -113,8 +124,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and start subdirectory, preparing inputs for documentation
-	 * generation.
+	 * Scans documents in the given root directory and start subdirectory, preparing
+	 * inputs for documentation generation.
 	 *
 	 * @param rootDir the root directory of the project to scan
 	 * @param dir     the directory to begin scanning
@@ -126,15 +137,51 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Recursively scans project folders, processing documentation inputs for all found modules and files.
+	 * Recursively scans project folders, processing documentation inputs for all
+	 * found modules and files.
 	 *
 	 * @param projectDir the directory containing the project/module to be scanned
 	 * @throws IOException if an error occurs reading files
 	 */
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
+		ProjectLayout projectLayout = getProjectLayout(projectDir);
+		List<String> modules = projectLayout.getModules();
+
+		if (modules != null) {
+			if (isModuleMultiThread()) {
+				ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, modules.size()));
+				for (String module : modules) {
+					executor.submit(() -> {
+						try {
+							processModule(projectDir, module);
+						} catch (IOException e) {
+							logger.error("Module processing failed.", e);
+						}
+					});
+				}
+				executor.shutdown();
+				try {
+					executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					logger.error("Thread interrupted while processing modules", e);
+				}
+			} else {
+				for (String module : modules) {
+					processModule(projectDir, module);
+				}
+			}
+
+		} else {
+			try {
+				processFolder(projectLayout);
+			} catch (Exception e) {
+				logger.error("Project dir: {}", projectDir, e);
+			}
+		}
+
 		processParentFiles(projectDir);
-		super.scanFolder(projectDir);
 	}
 
 	/**
@@ -146,9 +193,9 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	protected void processParentFiles(File projectDir) throws FileNotFoundException, IOException {
 		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
-		systemFunctionTools.applyTools(provider );
+		systemFunctionTools.applyTools(provider);
 		provider.setWorkingDir(getRootDir(projectDir));
-		
+
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		List<String> modules = projectLayout.getModules();
 
@@ -160,9 +207,9 @@ public class FileProcessor extends ProjectProcessor {
 				}
 
 				if (child.isDirectory()) {
-					processProjectDir(projectLayout, child);
+					processProjectDir(projectLayout, child, provider);
 				} else {
-					logIfNotBlank(processFile(projectLayout, child));
+					logIfNotBlank(processFile(projectLayout, child, provider));
 				}
 			}
 		}
@@ -195,48 +242,33 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	@Override
 	public void processFolder(ProjectLayout projectLayout) {
+		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
+		systemFunctionTools.applyTools(provider);
+
 		File projectDir = projectLayout.getProjectDir();
+		provider.setWorkingDir(getRootDir(projectDir));
 		try {
 			List<File> files = findFiles(projectDir);
-			if (!files.isEmpty()) {
-				for (File file : files) {
-					String processFile = processFile(projectLayout, file);
-					logIfNotBlank(processFile);
-				}
+			for (File file : files) {
+				logIfNotBlank(processFile(projectLayout, file, provider));
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	/**
-	 * Processes the selected project directory for documentation guidance extraction.
-	 *
-	 * @param projectLayout layout against which files are processed
-	 * @param scanDir       directory to scan for files
-	 */
-	private void processProjectDir(ProjectLayout projectLayout, File scanDir) {
+	private void processProjectDir(ProjectLayout projectLayout, File scanDir, GenAIProvider provider) {
 		try {
 			List<File> files = findFiles(scanDir);
-			if (!files.isEmpty()) {
-				for (File file : files) {
-					logIfNotBlank(processFile(projectLayout, file));
-				}
+			for (File file : files) {
+				logIfNotBlank(processFile(projectLayout, file, provider));
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	/**
-	 * Processes a single file: extracts guidance and, if applicable, builds and executes an AI prompt.
-	 *
-	 * @param projectLayout the project layout instance
-	 * @param file          the file to process
-	 * @return the provider response (or {@code null} if the file is not supported or contains no guidance)
-	 * @throws IOException if file reading fails
-	 */
-	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
+	private String processFile(ProjectLayout projectLayout, File file, GenAIProvider provider) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
 		String guidance = parseFile(projectDir, file);
 
@@ -244,10 +276,6 @@ public class FileProcessor extends ProjectProcessor {
 			return null;
 		}
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
-		systemFunctionTools.applyTools(provider );
-		provider.setWorkingDir(getRootDir(projectDir));
-		
 		provider.instructions(promptBundle.getString("sys_instractions"));
 		provider.prompt(promptBundle.getString("docs_processing_instractions"));
 
@@ -264,15 +292,8 @@ public class FileProcessor extends ProjectProcessor {
 		return provider.perform();
 	}
 
-	/**
-	 * Returns a textual description of the current project structure using prompt templates.
-	 *
-	 * @param projectLayout the layout to describe
-	 * @return formatted structure description for prompts
-	 * @throws IOException if template resources are unavailable
-	 */
 	private String getProjectStructureDescription(ProjectLayout projectLayout) throws IOException {
-		List<String> content = new ArrayList<String>();
+		List<String> content = new ArrayList<>();
 
 		String path = ProjectLayout.getRelatedPath(rootDir, projectLayout.getProjectDir());
 
@@ -286,17 +307,6 @@ public class FileProcessor extends ProjectProcessor {
 		return MessageFormat.format(promptBundle.getString("project_information"), content.toArray());
 	}
 
-	/**
-	 * Returns a comma-separated string of directories for sources, tests, documents, or modules.
-	 *
-	 * <p>
-	 * Only directories that exist in the file system are listed.
-	 * </p>
-	 *
-	 * @param sources    list of directory names
-	 * @param projectDir base directory
-	 * @return formatted line for prompt or {@code "not defined"} if no entries found
-	 */
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
@@ -313,14 +323,6 @@ public class FileProcessor extends ProjectProcessor {
 		return line;
 	}
 
-	/**
-	 * Extracts file guidance using a matching {@link Reviewer}.
-	 *
-	 * @param projectDir root directory
-	 * @param file       file to be processed
-	 * @return guidance string, or {@code null} if the file is not supported or contains no guidance
-	 * @throws IOException if the reviewer encounters a file error
-	 */
 	private String parseFile(File projectDir, File file) throws IOException {
 		String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getName()));
 		Reviewer reviewer = reviewMap.get(extension);
@@ -332,13 +334,6 @@ public class FileProcessor extends ProjectProcessor {
 		return reviewer.perform(getRootDir(projectDir), file);
 	}
 
-	/**
-	 * Recursively finds all files (excluding {@link ProjectLayout#EXCLUDE_DIRS}) in a directory structure.
-	 *
-	 * @param projectDir directory to search
-	 * @return list of files found
-	 * @throws IOException if a directory cannot be listed
-	 */
 	private List<File> findFiles(File projectDir) throws IOException {
 		if (projectDir == null || !projectDir.isDirectory()) {
 			return List.of();
@@ -363,25 +358,21 @@ public class FileProcessor extends ProjectProcessor {
 		return result;
 	}
 
-	/**
-	 * Returns the root directory for documentation scanning, falling back to the provided directory if unset.
-	 *
-	 * @param projectDir the directory detected as project root
-	 * @return the effective root directory
-	 */
 	public File getRootDir(File projectDir) {
 		return rootDir != null ? rootDir : projectDir;
 	}
 
-	/**
-	 * Deletes generated temporary inputs under {@code ${basedir}/.machai/docs-inputs}.
-	 *
-	 * @param basedir base directory
-	 * @return {@code true} if deletion was successful or the target did not exist
-	 */
 	public static boolean deleteTempFiles(File basedir) {
 		File file = new File(basedir, FileProcessor.MACHAI_TEMP_DIR + "/" + FileProcessor.GW_TEMP_DIR);
 		logger.info("Removing '{}' inputs log file.", file);
 		return FileUtils.deleteQuietly(file);
+	}
+
+	public boolean isModuleMultiThread() {
+		return moduleMultiThread;
+	}
+
+	public void setModuleMultiThread(boolean moduleMultiThread) {
+		this.moduleMultiThread = moduleMultiThread;
 	}
 }

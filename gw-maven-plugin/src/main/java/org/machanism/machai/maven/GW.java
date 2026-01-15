@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
  * Maven goal that scans and processes project documents.
  *
  * <p>
- * The goal delegates document scanning and processing to {@link FileProcessor}. If a GenAI provider is configured
- * via {@link #genai}, the processor may use it to assist with document workflows.
+ * The goal delegates document scanning and processing to {@link FileProcessor}. If a GenAI provider is configured via
+ * {@link #genai}, the processor may use it to assist with document workflows.
  * </p>
  *
  * <h2>Parameters</h2>
@@ -73,13 +73,17 @@ import org.slf4j.LoggerFactory;
 public class GW extends AbstractMojo {
 
 	/** Logger for this class. */
-	private static final Logger logger = LoggerFactory.getLogger(GW.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GW.class);
 
 	/**
-	 * GenAI provider/model identifier to use for AI assistance.
+	 * GenAI provider/model identifier used for AI-assisted document processing.
 	 *
 	 * <p>
 	 * May be provided as a system property: {@code -Dgw.genai=...}.
+	 * </p>
+	 *
+	 * <p>
+	 * Example values: {@code OpenAI:gpt-5}, {@code AzureOpenAI:gpt-4o-mini}
 	 * </p>
 	 */
 	@Parameter(property = "gw.genai")
@@ -99,7 +103,6 @@ public class GW extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-
 		FileProcessor documents = new FileProcessor(genai) {
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
@@ -116,13 +119,13 @@ public class GW extends AbstractMojo {
 			}
 		};
 
-		logger.info("Scanning documents in the root directory: {}", basedir);
+		LOGGER.info("Scanning documents in the root directory: {}", basedir);
 		try {
 			File rootDir = new File(session.getExecutionRootDirectory());
 			documents.scanDocuments(rootDir, basedir);
 		} catch (IOException e) {
 			throw new MojoExecutionException("Document assistance process failed.", e);
 		}
-		logger.info("Scanning finished.");
+		LOGGER.info("Scanning finished.");
 	}
 }
