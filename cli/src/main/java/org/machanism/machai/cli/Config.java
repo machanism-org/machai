@@ -42,8 +42,12 @@ class Config {
 	}
 
 	protected static void setDefaultChatModel(String chatModel) {
-		Config.chatModel = chatModel;
-		save(GENAI_PROP_NAME, chatModel);
+		if (chatModel != null) {
+			Config.chatModel = chatModel;
+			save(GENAI_PROP_NAME, chatModel);
+		} else {
+			logger.info("GenAI: {}", Config.chatModel);
+		}
 	}
 
 	public static String getChatModel(String chatModel) {
@@ -52,7 +56,7 @@ class Config {
 
 	public static void setWorkingDir(File dir) {
 		if (dir == null) {
-			dir = SystemUtils.getUserDir();
+			logger.info("Dir: {}", workingDir.getAbsolutePath());
 		} else {
 			workingDir = dir;
 			save(WORKINGDIR_PROP_NAME, workingDir.getAbsolutePath());
@@ -75,9 +79,13 @@ class Config {
 		return dir != null ? dir : workingDir;
 	}
 
-	public static void setScore(double score) {
-		save(SCORE_PRP_NAME, String.valueOf(score));
-		Config.score = score;
+	public static void setScore(Double score) {
+		if (score != null) {
+			save(SCORE_PRP_NAME, String.valueOf(score));
+			Config.score = score;
+		} else {
+			logger.info("Score: {}", Config.score);
+		}
 	}
 
 	public static double getScore(Double score) {
