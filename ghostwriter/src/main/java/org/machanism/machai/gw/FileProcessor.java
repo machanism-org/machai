@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.project.ProjectProcessor;
@@ -23,6 +24,16 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Scans a project directory, extracts {@code @guidance:} instructions from supported files, and prepares prompt
+ * inputs for AI-assisted documentation processing.
+ *
+ * <p>
+ * This processor delegates file-specific guidance extraction to {@link Reviewer} implementations discovered via
+ * {@link ServiceLoader}. For every supported file it finds, it builds a prompt using templates from the
+ * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
+ * </p>
+ */
 public class FileProcessor extends ProjectProcessor {
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(FileProcessor.class);
@@ -30,43 +41,40 @@ public class FileProcessor extends ProjectProcessor {
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@guidance:";
 
-	/** Temporary directory for documentation inputs. */
+	/** Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}. */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/** Provider for AI document generation. */
-	private final GenAIProvider provider;
-	/** Function tool utility for environment setup. */
+	/** Utility that installs tool functions (filesystem/command) into the provider when supported. */
 	private final SystemFunctionTools systemFunctionTools;
 
-	/** Directory-level guidance mappings. */
+	/** Directory-level guidance mappings. Currently unused but reserved for future directory-scoped rules. */
+	@SuppressWarnings("unused")
 	private final Map<String, String> dirGuidanceMap = new HashMap<>();
-	/** Reviewer type associations. */
+	/** Reviewer associations keyed by normalized (lowercase) file extension. */
 	private final Map<String, Reviewer> reviewMap = new HashMap<>();
 
 	/** Root scanning directory for the current documentation run. */
 	private File rootDir;
 
-	/**
-	 * Constructs a FileProcessor for documentation input preparation.
-	 *
-	 * @param provider the AI provider for document generation
-	 */
-	public FileProcessor(GenAIProvider provider) {
-		this.provider = provider;
+	private String genai;
 
+	/**
+	 * Constructs a processor.
+	 *
+	 * @param provider the provider to use; must not be {@code null}
+	 */
+	public FileProcessor(String genai) {
+		this.genai = genai;
 		systemFunctionTools = new SystemFunctionTools();
-		systemFunctionTools.applyTools(provider);
 
 		loadReviewers();
 	}
 
 	/**
-	 * Loads file reviewers via the ServiceLoader registry, mapping supported file
-	 * extensions. Associates each reviewer with its extension support in the
-	 * reviewMap.
+	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping supported file extensions to a reviewer.
 	 */
 	private void loadReviewers() {
 		reviewMap.clear();
@@ -94,9 +102,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and prepares inputs for
-	 * documentation generation. This overload defaults the scan start directory to
-	 * rootDir.
+	 * Scans documents in the given root directory and prepares inputs for documentation generation. This overload
+	 * defaults the scan start directory to {@code basedir}.
 	 *
 	 * @param basedir root directory to scan
 	 * @throws IOException if an error occurs reading files
@@ -106,8 +113,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and start subdirectory, preparing
-	 * inputs for documentation generation.
+	 * Scans documents in the given root directory and start subdirectory, preparing inputs for documentation
+	 * generation.
 	 *
 	 * @param rootDir the root directory of the project to scan
 	 * @param dir     the directory to begin scanning
@@ -119,20 +126,29 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Recursively scans project folders, processing documentation inputs for all
-	 * found modules and files.
+	 * Recursively scans project folders, processing documentation inputs for all found modules and files.
 	 *
 	 * @param projectDir the directory containing the project/module to be scanned
 	 * @throws IOException if an error occurs reading files
 	 */
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
-		provider.setWorkingDir(getRootDir(projectDir));
 		processParentFiles(projectDir);
 		super.scanFolder(projectDir);
 	}
 
+	/**
+	 * Processes non-module files and directories directly under {@code projectDir}.
+	 *
+	 * @param projectDir directory to scan
+	 * @throws FileNotFoundException if the project layout cannot be created
+	 * @throws IOException           if file reading fails
+	 */
 	protected void processParentFiles(File projectDir) throws FileNotFoundException, IOException {
+		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
+		systemFunctionTools.applyTools(provider );
+		provider.setWorkingDir(getRootDir(projectDir));
+		
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		List<String> modules = projectLayout.getModules();
 
@@ -173,7 +189,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Processes the project layout for documentation gathering.
+	 * Processes a project layout for documentation gathering.
 	 *
 	 * @param projectLayout layout describing sources, tests, docs, and modules
 	 */
@@ -194,8 +210,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Processes the selected project directory for documentation guidance
-	 * extraction. Finds files, applies reviewer logic, and logs results.
+	 * Processes the selected project directory for documentation guidance extraction.
 	 *
 	 * @param projectLayout layout against which files are processed
 	 * @param scanDir       directory to scan for files
@@ -214,12 +229,11 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Processes the given file using the configured reviewers for documentation
-	 * input preparation.
+	 * Processes a single file: extracts guidance and, if applicable, builds and executes an AI prompt.
 	 *
 	 * @param projectLayout the project layout instance
 	 * @param file          the file to process
-	 * @return extracted guidance result, or null if not applicable
+	 * @return the provider response (or {@code null} if the file is not supported or contains no guidance)
 	 * @throws IOException if file reading fails
 	 */
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
@@ -230,6 +244,10 @@ public class FileProcessor extends ProjectProcessor {
 			return null;
 		}
 
+		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
+		systemFunctionTools.applyTools(provider );
+		provider.setWorkingDir(getRootDir(projectDir));
+		
 		provider.instructions(promptBundle.getString("sys_instractions"));
 		provider.prompt(promptBundle.getString("docs_processing_instractions"));
 
@@ -247,8 +265,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Returns a textual description of the current project structure using prompt
-	 * templates.
+	 * Returns a textual description of the current project structure using prompt templates.
 	 *
 	 * @param projectLayout the layout to describe
 	 * @return formatted structure description for prompts
@@ -270,12 +287,15 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Returns a comma-separated string of directories for sources, tests, or
-	 * modules. Only directories that exist in the file system are listed.
+	 * Returns a comma-separated string of directories for sources, tests, documents, or modules.
+	 *
+	 * <p>
+	 * Only directories that exist in the file system are listed.
+	 * </p>
 	 *
 	 * @param sources    list of directory names
 	 * @param projectDir base directory
-	 * @return formatted line for prompt or "not defined" if no entries found
+	 * @return formatted line for prompt or {@code "not defined"} if no entries found
 	 */
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
@@ -294,13 +314,12 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Runs the review process for a file using matching reviewer, extracting
-	 * guidance.
+	 * Extracts file guidance using a matching {@link Reviewer}.
 	 *
 	 * @param projectDir root directory
 	 * @param file       file to be processed
-	 * @return guidance string, or null if not applicable
-	 * @throws IOException if reviewer encounters a file error
+	 * @return guidance string, or {@code null} if the file is not supported or contains no guidance
+	 * @throws IOException if the reviewer encounters a file error
 	 */
 	private String parseFile(File projectDir, File file) throws IOException {
 		String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getName()));
@@ -314,8 +333,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Recursively finds all files (excluding EXCLUDE_DIRS) in a directory
-	 * structure.
+	 * Recursively finds all files (excluding {@link ProjectLayout#EXCLUDE_DIRS}) in a directory structure.
 	 *
 	 * @param projectDir directory to search
 	 * @return list of files found
@@ -346,8 +364,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Returns the root directory for documentation scanning, falling back to input
-	 * if unset.
+	 * Returns the root directory for documentation scanning, falling back to the provided directory if unset.
 	 *
 	 * @param projectDir the directory detected as project root
 	 * @return the effective root directory
@@ -356,6 +373,12 @@ public class FileProcessor extends ProjectProcessor {
 		return rootDir != null ? rootDir : projectDir;
 	}
 
+	/**
+	 * Deletes generated temporary inputs under {@code ${basedir}/.machai/docs-inputs}.
+	 *
+	 * @param basedir base directory
+	 * @return {@code true} if deletion was successful or the target did not exist
+	 */
 	public static boolean deleteTempFiles(File basedir) {
 		File file = new File(basedir, FileProcessor.MACHAI_TEMP_DIR + "/" + FileProcessor.GW_TEMP_DIR);
 		logger.info("Removing '{}' inputs log file.", file);

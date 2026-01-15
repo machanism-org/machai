@@ -34,7 +34,7 @@ public class ProcessTest {
         Model model = new Model();
         testProject = new MavenProject(model);
         process.project = testProject;
-        process.chatModel = null; // default
+        process.genai = null; // default
     }
 
     /**

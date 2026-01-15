@@ -91,12 +91,11 @@ public final class Ghostwriter {
 			}
 
 			LOGGER.info("Root directory: {}", rootDir);
-			
+
 			for (String scanDir : dirs) {
 				LOGGER.info("Scanning documents: {}", rootDir);
-				
-				GenAIProvider provider = GenAIProviderManager.getProvider(genai);
-				FileProcessor documents = new FileProcessor(provider);
+
+				FileProcessor documents = new FileProcessor(genai);
 
 				documents.scanDocuments(rootDir, new File(scanDir));
 				LOGGER.info("Scanning finished.");

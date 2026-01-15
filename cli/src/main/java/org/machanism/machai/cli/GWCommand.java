@@ -70,8 +70,7 @@ public class GWCommand {
 		}
 
 		chatModel = Config.getChatModel(chatModel);
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
-		FileProcessor documents = new FileProcessor(provider);
+		FileProcessor documents = new FileProcessor(chatModel);
 		documents.scanDocuments(dir, scan);
 		logger.info("Scanning finished.");
 	}
