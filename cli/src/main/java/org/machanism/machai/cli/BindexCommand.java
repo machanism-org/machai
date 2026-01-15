@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
+import org.machanism.machai.Config;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;

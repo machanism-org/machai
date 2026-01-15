@@ -3,7 +3,15 @@ package org.machanism.machai.gw;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.SystemUtils;
+import org.machanism.machai.Config;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.slf4j.Logger;
@@ -12,8 +20,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Entry point for document scanning and review automation.
  * <p>
- * Initializes the AI provider, configures the Ghostwriter,
- * and runs document scan over the user directory. Output is logged.
+ * Initializes the AI provider, configures the Ghostwriter, and runs document
+ * scan over the user directory. Output is logged.
  *
  * <p>
  * Example usage:
@@ -32,27 +40,73 @@ import org.slf4j.LoggerFactory;
  */
 public final class Ghostwriter {
 
-    /** Logger for the ghostwriter application. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
+	/** Logger for the ghostwriter application. */
+	private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
 
-    private Ghostwriter() {
-        // Utility class.
-    }
+	private Ghostwriter() {
+		// Utility class.
+	}
 
-    /**
-     * Main entry point for document scanning run.
-     *
-     * @param args command line arguments
-     * @throws IOException if document scanning fails
-     */
-    public static void main(String[] args) throws IOException {
-        File dir = SystemUtils.getUserDir();
+	/**
+	 * Main entry point for document scanning run.
+	 *
+	 * @param args command line arguments
+	 * @throws IOException if document scanning fails
+	 */
+	public static void main(String[] args) throws IOException {
 
-        GenAIProvider provider = GenAIProviderManager.getProvider(null);
-        FileProcessor documents = new FileProcessor(provider);
-        LOGGER.info("Scanning documents in the root directory: {}", dir);
-        documents.scanDocuments(dir);
-        LOGGER.info("Scanning finished.");
-    }
+		Options options = new Options();
+		Option helpOption = new Option("h", "help", false, "Displays help information for usage.");
+		Option rootDirOpt = new Option("d", "dir", true, "The path fo the project directory.");
+		Option genaiOpt = new Option("g", "genai", true,
+				"Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).");
+
+		options.addOption(helpOption);
+		options.addOption(rootDirOpt);
+		options.addOption(genaiOpt);
+
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+			File rootDir = null;
+			if (cmd.hasOption(rootDirOpt)) {
+				rootDir = new File(cmd.getOptionValue(rootDirOpt));
+			}
+
+			String genai = cmd.getOptionValue(genaiOpt);
+			genai = Config.getChatModel(genai);
+
+			rootDir = Config.getWorkingDir(rootDir);
+
+			String[] dirs = cmd.getArgs();
+			if (rootDir == null) {
+				rootDir = SystemUtils.getUserDir();
+				if (dirs.length == 0) {
+					dirs = new String[] { rootDir.getAbsolutePath() };
+				}
+			} else {
+				dirs = new String[] { rootDir.getAbsolutePath() };
+			}
+
+			LOGGER.info("Root directory: {}", rootDir);
+			
+			for (String scanDir : dirs) {
+				LOGGER.info("Scanning documents: {}", rootDir);
+				
+				GenAIProvider provider = GenAIProviderManager.getProvider(genai);
+				FileProcessor documents = new FileProcessor(provider);
+
+				documents.scanDocuments(rootDir, new File(scanDir));
+				LOGGER.info("Scanning finished.");
+			}
+
+		} catch (ParseException e) {
+			System.err.println("Error parsing arguments: " + e.getMessage());
+			formatter.printHelp("java -jar gw.jar", options);
+		}
+
+	}
 
 }

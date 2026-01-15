@@ -1,4 +1,4 @@
-package org.machanism.machai.cli;
+package org.machanism.machai;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +11,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class Config {
+public class Config {
 
 	private static final String CONF_PROPERTIES_FILE_NAME = "machai.properties";
 	private static final String SCORE_PRP_NAME = "score";
@@ -42,7 +42,7 @@ class Config {
 	private Config() {
 	}
 
-	protected static void setDefaultChatModel(String chatModel) {
+	public static void setDefaultChatModel(String chatModel) {
 		if (chatModel != null) {
 			Config.chatModel = chatModel;
 			save(GENAI_PROP_NAME, chatModel);
@@ -103,7 +103,7 @@ class Config {
 
 	private static File getConfFile() {
 		String configFile = System.getProperty("config");
-		
+
 		File conf;
 		if (configFile != null) {
 			conf = new File(configFile);

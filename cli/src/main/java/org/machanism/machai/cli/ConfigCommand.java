@@ -2,6 +2,7 @@ package org.machanism.machai.cli;
 
 import java.io.File;
 
+import org.machanism.machai.Config;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
