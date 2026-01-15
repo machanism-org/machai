@@ -112,7 +112,7 @@ shell:> assembly --dir /path/to/output --score 0.80
 Run a plugin goal directly (example):
 
 ```bash
-mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:process
+mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:gw
 ```
 
 ## Contributing
@@ -124,7 +124,7 @@ mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:process
 
 ## License
 
-Licensed under the Apache License, Version 2.0. See [LICENSE.txt](../../../LICENSE.txt).
+Licensed under the Apache License, Version 2.0. See [LICENSE.txt](LICENSE.txt).
 
 ## Contact and Support
 

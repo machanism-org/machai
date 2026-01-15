@@ -31,7 +31,7 @@ Add the plugin to your `pom.xml`:
 Run the plugin:
 
 ```sh
-mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:process -Dgenai=Web:CodeMie
+mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:gw -Dgenai=Web:CodeMie
 ```
 
 The generated and updated content is written to your Maven Site output directory.
