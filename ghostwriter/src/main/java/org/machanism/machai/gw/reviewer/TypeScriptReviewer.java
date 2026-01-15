@@ -30,7 +30,7 @@ public class TypeScriptReviewer implements Reviewer {
 	 * @return an array of supported file extension strings
 	 */
 	@Override
-	public String[] getSupportedFileExtentions() {
+	public String[] getSupportedFileExtensions() {
 		return new String[] { "ts" };
 	}
 

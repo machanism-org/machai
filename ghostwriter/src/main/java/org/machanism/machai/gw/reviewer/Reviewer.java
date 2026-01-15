@@ -26,6 +26,6 @@ public interface Reviewer {
      *
      * @return an array of supported file extension strings (without dot)
      */
-    String[] getSupportedFileExtentions();
+    String[] getSupportedFileExtensions();
 
 }

@@ -28,7 +28,7 @@ public class HtmlReviewer implements Reviewer {
 	 * @return an array of supported file extensions
 	 */
 	@Override
-	public String[] getSupportedFileExtentions() {
+	public String[] getSupportedFileExtensions() {
 		return new String[] { "html", "htm", "xml" };
 	}
 
