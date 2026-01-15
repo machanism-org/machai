@@ -291,14 +291,14 @@ public class OpenAIProvider implements GenAIProvider {
 				for (Summary summary : reasoningItem.summary()) {
 					String txt = summary.text();
 					if (StringUtils.isNotBlank(txt)) {
-						logger.info(txt);
+						logger.debug("Reasoning: {}", txt);
 					}
 				}
 			}
 		}
 		if (fcall) {
 			if (StringUtils.isNotBlank(text)) {
-				logger.info(text);
+				logger.debug("Response: {}", text);
 			}
 			result = perform();
 		} else {
