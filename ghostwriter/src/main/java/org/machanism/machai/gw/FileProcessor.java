@@ -73,19 +73,28 @@ public class FileProcessor extends ProjectProcessor {
      */
     // @guidance: loadReviewers method must be accurately implemented according to the latest guidelines.
     private void loadReviewers() {
-        ServiceLoader<Reviewer> reviewerServiceLoader = ServiceLoader.load(Reviewer.class);
+        reviewMap.clear();
 
+        ServiceLoader<Reviewer> reviewerServiceLoader = ServiceLoader.load(Reviewer.class);
         for (Reviewer reviewer : reviewerServiceLoader) {
-            reviewer.setDirGuidanceMap(dirGuidanceMap);
-            String[] extensions = reviewer.getSupportedFileExtentions();
-            if (extensions == null) {
+            if (reviewer == null) {
                 continue;
             }
+
+            reviewer.setDirGuidanceMap(dirGuidanceMap);
+
+            String[] extensions = reviewer.getSupportedFileExtentions();
+            if (extensions == null || extensions.length == 0) {
+                continue;
+            }
+
             for (String extension : extensions) {
                 if (StringUtils.isBlank(extension)) {
                     continue;
                 }
-                reviewMap.put(StringUtils.lowerCase(extension.trim()), reviewer);
+
+                String normalizedExtension = StringUtils.lowerCase(StringUtils.trim(extension));
+                reviewMap.putIfAbsent(normalizedExtension, reviewer);
             }
         }
     }
@@ -267,7 +276,7 @@ public class FileProcessor extends ProjectProcessor {
             }
             path.append(parent);
             if (skipNumber-- <= 0 || inheritance) {
-                if (!StringUtils.equals(path, parentsPath)) {
+                if (!StringUtils.equals(path.toString(), parentsPath)) {
                     String dirGuidance = dirGuidanceMap.get(path.toString());
                     if (StringUtils.isNotBlank(dirGuidance)) {
                         guidances.add(dirGuidance);
@@ -312,14 +321,9 @@ public class FileProcessor extends ProjectProcessor {
     private String getDirInfoLine(List<String> sources, File projectDir) {
         String line = null;
         if (sources != null && !sources.isEmpty()) {
-            List<String> dirs = sources.stream().filter(t -> {
-                if (t == null) {
-                    return false;
-                }
-                return new File(projectDir, t).exists();
-            }).map(e -> {
-                String path = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
-                return "`" + path + "`";
+            List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists()).map(e -> {
+                String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
+                return "`" + relatedPath + "`";
             }).collect(Collectors.toList());
             line = StringUtils.join(dirs, ", ");
         }

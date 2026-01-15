@@ -29,16 +29,19 @@
  */
 
 /**
- * Provider discovery, instantiation, and optional system tool integration for the MachAI GenAI client.
+ * Provider discovery, instantiation, and optional system-tool integration for the MachAI GenAI client.
  *
  * <p>
- * The primary abstraction is {@link org.machanism.machai.ai.manager.GenAIProvider}. A provider is typically
- * obtained using {@link org.machanism.machai.ai.manager.GenAIProviderManager}, which resolves a concrete
- * implementation from a {@code Provider:Model} identifier (for example, {@code OpenAI:gpt-4o-mini}).
+ * This package provides the {@link org.machanism.machai.ai.manager.GenAIProvider} SPI and supporting
+ * utilities to:
+ * <ul>
+ *   <li>resolve a concrete provider implementation from a {@code Provider:Model} identifier via
+ *   {@link org.machanism.machai.ai.manager.GenAIProviderManager}</li>
+ *   <li>optionally expose local filesystem and command-execution capabilities to a provider in a controlled way</li>
+ * </ul>
  *
  * <p>
- * This package also offers optional "function tools" that can be attached to a provider to expose controlled
- * access to local capabilities:
+ * Tool integration is opt-in and is provided by:
  * <ul>
  *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} – read/write/list filesystem content under a working directory</li>
  *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} – execute shell commands from a working directory</li>

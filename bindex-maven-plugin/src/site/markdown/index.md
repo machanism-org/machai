@@ -5,20 +5,16 @@ Do not use the horizontal rule separator between sections. -->
 
 [![bindex-maven-plugin](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-The **bindex-maven-plugin** generates and maintains a `bindex.json` descriptor for a Maven project. The descriptor is used by the Machanism/Machai tooling to power metadata management, discovery, and automation workflows.
+The **bindex-maven-plugin** generates and maintains a `bindex.json` descriptor for a Maven project. The descriptor is used by Machanism/Machai tooling to power metadata management, discovery, and automation workflows.
 
-## What it does
+## Getting started
 
-- Generates a `bindex.json` file for the current Maven module.
-- Updates an existing descriptor when present.
-- Optionally registers/publishes the descriptor to a registry (when configured).
-
-## Requirements
+### Requirements
 
 - Java 8+
 - Maven 3.6+
 
-## Add the plugin
+### Add the plugin
 
 Add to your `pom.xml`:
 
@@ -29,12 +25,19 @@ Add to your `pom.xml`:
       <groupId>org.machanism.machai</groupId>
       <artifactId>bindex-maven-plugin</artifactId>
       <version>${bindex-maven-plugin.version}</version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>bindex</goal>
+          </goals>
+        </execution>
+      </executions>
     </plugin>
   </plugins>
 </build>
 ```
 
-## Use the plugin
+### Run the goals
 
 Generate (or update) `bindex.json`:
 
@@ -48,13 +51,21 @@ Register/publish the descriptor (optional):
 mvn bindex:register
 ```
 
+## What it does
+
+- Generates a `bindex.json` file for the current Maven module.
+- Updates an existing descriptor when present.
+- Can register/publish the descriptor to a registry when configured.
+
 ## Configuration
+
+The plugin supports configuring behavior either via standard Maven plugin configuration in your `pom.xml` or via system properties on the command line.
 
 Common parameters:
 
-| Parameter           | Description                                 | Default |
-|--------------------|---------------------------------------------|---------|
-| `update`            | Update an existing `bindex.json` if present. | `true`  |
+| Parameter | Description | Default |
+|---|---|---|
+| `update` | Update an existing `bindex.json` if present. | `true` |
 
 Example:
 
@@ -64,10 +75,10 @@ mvn bindex:bindex -Dupdate=false
 
 ## Environment variables
 
-Some features may require credentials/configuration (depending on how you configure the plugin in your build):
+Some features may require credentials/configuration depending on how you configure registration or publishing.
 
-| Variable name         | Description                                                      |
-|----------------------|------------------------------------------------------------------|
+| Variable name | Description |
+|---|---|
 | `BINDEX_REG_PASSWORD` | Required only when writing to the registration database/registry. |
 
 ## Links

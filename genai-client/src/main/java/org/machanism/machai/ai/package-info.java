@@ -1,25 +1,17 @@
 /**
  * Top-level API and SPI extension points for generative AI providers in the Machanism AI client.
  *
- * <p>This package provides the primary namespace for interacting with generative AI capabilities and for
- * extending the client with additional providers.
+ * <p>This package contains the provider-facing abstractions and acts as the root namespace for plugging in
+ * concrete generative AI implementations.
  *
  * <h2>Sub-packages</h2>
  * <ul>
- *   <li>
- *     {@code org.machanism.machai.ai.manager} – Provider SPI and management infrastructure.
- *   </li>
- *   <li>
- *     {@code org.machanism.machai.ai.openai} – OpenAI provider integration.
- *   </li>
- *   <li>
- *     {@code org.machanism.machai.ai.none} – No-op/stub provider implementations for explicitly disabling
- *     generative AI while preserving compatibility.
- *   </li>
- *   <li>
- *     {@code org.machanism.machai.ai.web} – Adapters for remote/web orchestrators and communication with
- *     external AI services.
- *   </li>
+ *   <li>{@code org.machanism.machai.ai.manager} – Provider SPI and provider lifecycle/management utilities.</li>
+ *   <li>{@code org.machanism.machai.ai.provider.openai} – OpenAI provider integration.</li>
+ *   <li>{@code org.machanism.machai.ai.provider.none} – No-op provider implementation (disables GenAI while
+ *       preserving API compatibility).</li>
+ *   <li>{@code org.machanism.machai.ai.provider.web} – Provider implementation backed by a remote/web
+ *       orchestrator.</li>
  * </ul>
  */
 package org.machanism.machai.ai;

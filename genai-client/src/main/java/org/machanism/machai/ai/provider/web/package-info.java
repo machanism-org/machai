@@ -30,38 +30,35 @@
  */
 
 /**
- * Web UI automation-based GenAI provider implementation.
+ * Web UI automation based GenAI provider.
  *
- * <p>This package provides an {@link org.machanism.machai.ai.provider.GenAIProvider} implementation that
- * executes prompt/response workflows by driving a GenAI system through its web user interface. It is
- * intended for environments where direct API access is unavailable or restricted.
+ * <p>This package provides a {@link org.machanism.machai.ai.manager.GenAIProvider} implementation
+ * that obtains GenAI responses by driving a target service through its web user interface using
+ * <a href="https://ganteater.com">Anteater</a> (AE) workspace recipes.
  *
- * <p>The provider integrates with <a href="https://ganteater.com">Anteater</a> to run browser-based
- * automation workflows (AE recipes) that are packaged with the application as resources.
- *
- * <h2>Key Types</h2>
+ * <p>The primary implementation is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
  * <ul>
- *   <li>{@link org.machanism.machai.ai.provider.web.WebProvider} - Provider entry point that loads an AE
- *   workspace configuration, sets a working directory, and runs a recipe to obtain a text response.</li>
+ *   <li>accepts an AE workspace configuration name via {@code model(String)},</li>
+ *   <li>initializes the AE workspace against a project directory via {@code setWorkingDir(File)}, and</li>
+ *   <li>executes the {@code "Submit Prompt"} recipe via {@code perform()} to produce a text response.</li>
  * </ul>
  *
- * <h2>Typical Usage</h2>
+ * <h2>Typical usage</h2>
  * <pre>
  * {@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
  * provider.model("config.yaml");
  * provider.setWorkingDir(new File("/path/to/project"));
- * String result = provider.perform();
+ * String response = provider.perform();
  * }
  * </pre>
  *
- * <h2>Notes and Limitations</h2>
+ * <h2>Operational notes</h2>
  * <ul>
- *   <li>Automation depends on the availability and correctness of the configured AE recipes and
- *       workspace configuration.</li>
- *   <li>This provider is not guaranteed to be thread-safe.</li>
- *   <li>Some target web platforms may require additional local configuration (for example, clipboard
- *       access or browser profile settings).</li>
+ *   <li>Execution depends on the configured AE recipes and workspace configuration being available and
+ *       compatible with the target web UI.</li>
+ *   <li>The provider maintains static workspace state and is not intended for concurrent use or for switching
+ *       working directories within the same JVM instance.</li>
  * </ul>
  */
 package org.machanism.machai.ai.provider.web;

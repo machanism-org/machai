@@ -1,33 +1,39 @@
 /**
- * Core document scanning and AI-assisted review orchestration.
+ * Command-line entry point and processing pipeline for Ghostwriter document scanning.
  *
- * <p>This package provides the command-line entry point and the directory scanning pipeline that:
- * extracts {@code @guidance:} directives from supported inputs (via pluggable reviewers), aggregates
- * them into prompt context, and delegates generation/review tasks to a configured
- * {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * <p>This package contains the CLI entry point and the orchestration code that scans a project directory,
+ * selects eligible files, extracts {@code @guidance:} directives, and prepares prompt context for a
+ * configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <h2>Key responsibilities</h2>
+ * <h2>Key components</h2>
  * <ul>
- *   <li>Walk a project root and select eligible files for review.</li>
- *   <li>Collect and optionally inherit guidance from parent directories.</li>
- *   <li>Record prompt inputs and submit assembled context to the selected AI provider.</li>
+ *   <li>{@link org.machanism.machai.gw.Ghostwriter} &mdash; CLI entry point that parses arguments, resolves
+ *       the working directory and provider, and triggers the scan.</li>
+ *   <li>{@link org.machanism.machai.gw.FileProcessor} &mdash; scanning/processing orchestrator that walks the
+ *       directory tree, delegates file selection and content extraction to pluggable reviewers, aggregates
+ *       guidance, and writes prompt inputs.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
- * <pre>
- * {@code
- * // Scan the current user directory.
+ * <h2>Scanning behavior</h2>
+ * <ul>
+ *   <li>Directories and files are traversed recursively while honoring exclusions and project boundaries.</li>
+ *   <li>Supported file types are handled by reviewer implementations that extract guidance and build prompt
+ *       content.</li>
+ *   <li>Guidance can be optionally inherited from parent directories to provide additional context.</li>
+ *   <li>Prompt input logs are written under {@code .machai/docs-inputs} in the scanned project directory.</li>
+ * </ul>
+ *
+ * <h2>Programmatic usage</h2>
+ * <pre>{@code
+ * // Default: scan the current user directory.
  * Ghostwriter.main(new String[] {});
  *
- * // Scan an explicit project root.
+ * // Programmatic usage.
  * GenAIProvider provider = GenAIProviderManager.getProvider(null);
  * FileProcessor processor = new FileProcessor(provider);
  * processor.setUseParentsGuidances(true);
  * processor.scanDocuments(new File("/path/to/project/root"));
- * }
- * </pre>
- *
- * <p>Prompt input logs are written under the project directory in {@code .machai/docs-inputs}.
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

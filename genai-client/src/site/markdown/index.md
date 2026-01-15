@@ -5,15 +5,15 @@
 - Scan org/machanism/machai/ai source folder and describe all supported GenAIProvider implementation in separate section.
 -->
 
-GenAI Client is a Java abstraction layer over multiple Generative AI backends exposed via a single provider interface. It is designed for integrating LLM workflows (prompt/response), tool/function calling, file-based context, and embeddings into Java applications, build tooling, and server-side automation.
+GenAI Client is a Java abstraction layer over multiple Generative AI backends exposed via a single provider interface. It is designed for integrating prompt/response flows, tool (function) calling, file-based context, and embeddings into Java applications and automation.
 
-The primary integration point is the `GenAIProvider` interface, with `GenAIProviderManager` used to select and instantiate a concrete provider by name.
+The primary integration point is the `GenAIProvider` interface, with `GenAIProviderManager` used to resolve and instantiate a concrete provider by name.
 
-## Core Concepts
+## Core concepts
 
-- `GenAIProvider` defines the common contract for prompting, adding file context, configuring a model, running a request, and optionally producing embeddings.
+- `GenAIProvider` defines the contract for prompting, adding file context, configuring a model, running a request, and optionally producing embeddings.
 - `GenAIProviderManager` resolves a provider by name (for example `OpenAI:...` or `Web:...`) and returns a ready-to-configure instance.
-- Tool/function calling is supported by registering tools on the provider and letting the model request their execution; tool output is fed back into the model.
+- Tool/function calling is supported by registering tools on the provider; when the model requests a tool invocation, the tool output is fed back into the model.
 
 ## Supported GenAI Providers
 <!-- 
@@ -24,19 +24,48 @@ and generate the content for this section following net format:
 ... FULL DESCRIPTION ...
 -->
 
+### None
+The `NoneProvider` class is an implementation of the `GenAIProvider` interface used to disable generative AI integrations and log input requests locally when an external AI provider is not required or available.
+
+Purpose:
+
+- Provides a stub implementation that stores requests in input files (in the `inputsLog` folder).
+- All GenAI operations are non-operative, or throw exceptions where necessary, making this useful for scenarios where generative AI features must be disabled, simulated, or for fallback testing.
+- No calls are made to any external AI services or large language models (LLMs).
+
+Typical use cases:
+
+- Disabling generative AI features for security or compliance
+- Implementing fallback logic when no provider is configured
+- Logging requests for manual review or later processing
+- Testing environments not connected to external services
+
+Example usage:
+
+```java
+GenAIProvider provider = new NoneProvider();
+provider.prompt("Describe the weather.");
+provider.perform(); // No AI service is called; input may be logged locally
+```
+
+Notes:
+
+- Operations requiring GenAI services will throw exceptions when called.
+- All prompts and instructions are cleared after performing.
+
 ### OpenAI
-The `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
+The `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
 
-It supports:
+This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI chat models
-- Managing files for use in OpenAI workflows
-- Performing advanced LLM requests such as text generation, summarization, and question answering
+- Sending prompts and receiving responses from OpenAI Chat models
+- Managing files for use in various OpenAI workflows
+- Performing advanced large language model (LLM) requests such as text generation, summarization, and question answering
 - Creating and using vector embeddings for tasks like semantic search and similarity analysis
 
-By abstracting direct API interaction, `OpenAIProvider` enables efficient use of OpenAI models within applications and can be extended or configured for different model parameters and use cases.
+It supports both synchronous and asynchronous operations, and can be extended or configured to accommodate different use cases and model parameters.
 
-Environment variables read automatically by the client:
+Environment variables:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -56,42 +85,13 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 Thread safety: this implementation is not thread-safe.
 
-### None
-The `NoneProvider` disables generative AI integrations by providing a stub implementation of `GenAIProvider`.
-
-It is intended for environments where GenAI must be disabled, simulated, or tested without network access. It can also be used as a safe fallback when no provider is configured.
-
-Typical use cases:
-
-- Disabling generative AI features for security or compliance
-- Implementing fallback logic when no provider is configured
-- Logging requests for manual review or later processing
-- Running tests in environments without access to external services
-
-Behavior notes:
-
-- Prompts (and optional instructions) can be logged locally when `inputsLog` is configured
-- No external calls are made to any AI service or LLM
-- Operations that require a real GenAI service (for example embeddings) throw exceptions
-- Prompts and instructions are cleared after `perform()`
-
-Usage example:
-
-```java
-GenAIProvider provider = new NoneProvider();
-provider.prompt("Describe the weather.");
-provider.perform();
-```
-
 ### Web
-The `WebProvider` is a gateway for interacting with web-based GenAI user interfaces via a web driver when direct API access is not feasible.
-
-It automates communication with supported services such as AI DIAL and EPAM AI/Run CodeMie, using recipes from Anteater to send prompts and retrieve results.
+The `WebProvider` class serves as a gateway for interacting with web-based user interfaces via a web driver when direct access to the GenAI API is not feasible. It automates communication with supported services such as AI DIAL and EPAM AI/Run CodeMie, utilizing recipes from Anteater for sending and receiving information.
 
 Limitations:
 
-- Configuration and usage may require additional plugins or handling of resources such as the clipboard, especially for platforms like CodeMie
-- Refer to the target platform instructions prior to use
+- Configuration and usage may require additional plugins or handling of resources such as the clipboard, especially for platforms like CodeMie.
+- Refer to target platform instructions prior to use.
 
 Usage example:
 
@@ -101,8 +101,8 @@ GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
 
 Thread safety: this implementation is not thread-safe.
 
-Key methods:
+Parameters and methods:
 
-- `perform()` executes the AE workspace task using input prompts
-- `setWorkingDir(File workingDir)` initializes the workspace, loads configuration, and runs setup nodes
-- `model(String configName)` sets the AE workspace configuration name
+- `perform()` executes the AE workspace task using input prompts.
+- `setWorkingDir(File workingDir)` initializes the workspace, loads configuration, and runs setup nodes.
+- `model(String configName)` sets the AE workspace configuration name.

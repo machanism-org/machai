@@ -1,4 +1,4 @@
-# assembly-maven-plugin
+# Assembly Maven Plugin
 <!-- @guidance: 
 Analyze the source file and create a Maven Site-style introductory home page for your project.
 Do not use the horizontal rule separator between sections. -->
@@ -9,14 +9,14 @@ The `assembly-maven-plugin` helps bootstrap and evolve Maven-based Java projects
 
 ## Overview
 
-Use the plugin to assemble project structure and configuration from a simple project concept. It is intended to reduce manual setup while keeping all generated changes reviewable and editable.
+Use this plugin to assemble project structure and configuration from a short project concept. It reduces repetitive manual work while keeping generated changes reviewable and editable.
 
 ## Key Features
 
 - **Dependency suggestions:** Recommends libraries based on your goals.
 - **Project bootstrap:** Creates or updates common project files and structure.
 - **Reproducibility support:** Can integrate with Machanism metadata (for example `bindex.json`) to improve assembly control.
-- **Reviewable output:** All changes are made in your project and can be refined as needed.
+- **Reviewable output:** All changes are made directly in your project so you can inspect, adjust, and commit them.
 
 ## Getting Started
 
@@ -42,9 +42,9 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 
 ### Typical Workflow
 
-1. Define your project concept in `project.txt` (or another file you reference).
+1. Describe your project concept in `project.txt` (or another file you reference).
 2. Execute the plugin.
-3. Review the updated `pom.xml` and generated/modified project files.
+3. Review the updated `pom.xml` and any generated/modified project files.
 
 ## Plugin Configuration
 

@@ -12,7 +12,8 @@ It is designed to keep documentation synchronized with the codebase and requirem
 ## Features
 
 - Generates and refreshes Maven Site pages based on embedded `@guidance:` comments
-- Works with Maven-based Java projects and standard Maven Site structure
+- Scans project sources and resources to discover `@guidance:` directives
+- Works with Maven-based projects and standard Maven Site structure
 - Supports documentation that stays aligned with code, tests, and evolving requirements
 - Can be run from the command line or bound into the Maven lifecycle
 
@@ -25,16 +26,23 @@ Add the plugin to your `pom.xml`:
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
   <version>0.0.2-SNAPSHOT</version>
+  <configuration>
+    <genai>Web:CodeMie</genai>
+  </configuration>
 </plugin>
 ```
 
 Run the plugin:
 
 ```sh
-mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:gw -Dgenai=Web:CodeMie
+mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:gw
 ```
 
-The generated and updated content is written to your Maven Site output directory.
+## Usage Notes
+
+- Add `@guidance:` comments close to the code or artifacts they describe.
+- Run the goal during development or bind it to a lifecycle phase (for example, `site`) to keep documentation current.
+- Generated and updated content is written into the Maven Site output directory.
 
 ## Requirements
 

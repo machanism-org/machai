@@ -1,3 +1,11 @@
+/*
+ * @guidance:
+ *
+ * **IMPORTANT: ADD JAVADOC TO THIS `package-info.java`!**
+ *
+ * - Update `package-info.java` based on summary sub-packages information.
+ */
+
 /**
  * Root package for the Machanism AI core library.
  *
@@ -11,11 +19,3 @@
  * </ul>
  */
 package org.machanism.machai;
-
-/**
- * @guidance:
- *
- * **IMPORTANT: ADD JAVADOC TO THIS `package-info.java`!**
- *
- * - Update `package-info.java` based on summary sub-packages information.
- */

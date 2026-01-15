@@ -5,16 +5,18 @@
 - Scan org/machanism/machai/ai source folder and describe all supported GenAIProvider implementation in separate section.
 -->
 
-GenAI Client is a Java library that provides a small abstraction layer for working with generative AI (LLM) services through a common `GenAIProvider` interface.
+GenAI Client is a Java library that provides a small, provider-agnostic API for running generative AI tasks through a single `GenAIProvider` interface.
 
-It helps you:
+It is designed to keep your application code stable while you swap or combine different backends (API-based providers and UI/web-automation providers).
 
-- Select a provider and model using a single identifier (for example, `OpenAI:gpt-5.1`).
-- Submit prompts as plain text or from files.
-- Attach local or remote files (provider-dependent).
-- Generate embeddings (provider-dependent).
-- Extend requests with callable “tools” (provider-dependent).
-- Configure a working directory and optionally log request inputs.
+## Key features
+
+- Provider selection by a single identifier (`Provider:Model`), resolved by `GenAIProviderManager`.
+- Prompt composition from plain text or (provider-dependent) from files.
+- Optional attachment of local or remote files (provider-dependent).
+- Embeddings support (provider-dependent).
+- Tool/function calling support for extending provider behavior (provider-dependent).
+- Working directory support and optional request input logging.
 
 ## Getting started
 
@@ -50,6 +52,8 @@ This provider enables a wide range of generative AI capabilities, including:
 
 By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
 
+This class provides capabilities to send prompts, manage files, perform LLM requests, and create embeddings using OpenAI Chat models.
+
 Environment variables:
 
 - `OPENAI_API_KEY` (required)
@@ -68,7 +72,7 @@ Usage example:
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 ```
 
-Thread safety: this implementation is not thread-safe.
+Thread safety: this implementation is NOT thread-safe.
 
 ### None
 The `NoneProvider` class is an implementation of the `GenAIProvider` interface used to disable generative AI integrations and log input requests locally when an external AI provider is not required or available.
@@ -76,7 +80,7 @@ The `NoneProvider` class is an implementation of the `GenAIProvider` interface u
 Purpose:
 
 - Provides a stub implementation that stores requests in input files (in the `inputsLog` folder).
-- All GenAI operations are non-operative, or throw exceptions where necessary.
+- All GenAI operations are non-operative, or throw exceptions where necessary, making this useful for scenarios where generative AI features must be disabled, simulated, or for fallback testing.
 - No calls are made to any external AI services or large language models (LLMs).
 
 Typical use cases:
@@ -98,16 +102,14 @@ Notes:
 
 - Operations requiring GenAI services will throw exceptions when called.
 - All prompts and instructions are cleared after performing.
+- Refer to `GenAIProvider` interface for compatible methods.
 
 ### Web
-The `WebProvider` class serves as a gateway for interacting with web-based user interfaces via a web driver when direct access to the GenAI API is not feasible.
-
-It automates communication with supported services such as AI DIAL and EPAM AI/Run CodeMie, utilizing recipes from Anteater for sending and receiving information.
+The `WebProvider` class serves as a gateway for interacting with web-based user interfaces via a web driver when direct access to the GenAI API is not feasible. It automates communication with supported services such as AI DIAL and EPAM AI/Run CodeMie, utilizing recipes from Anteater for sending and receiving information.
 
 Limitations:
 
-- Configuration and usage may require additional plugins or handling of resources such as the clipboard, especially for platforms like CodeMie.
-- Refer to the target platform instructions prior to use.
+- Configuration and usage of this class may require additional plugins or handling of resources such as the clipboard, especially for platforms like CodeMie. Please refer to target platform instructions prior to use.
 
 Usage example:
 

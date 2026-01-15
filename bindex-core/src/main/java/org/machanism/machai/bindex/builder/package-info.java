@@ -30,19 +30,25 @@
  */
 
 /**
- * Builds {@link org.machanism.machai.schema.Bindex} documents from a
- * {@link org.machanism.machai.project.layout.ProjectLayout}.
+ * Builders that assemble project context (filesystem layout, dependency manifests, and optional prior output) and
+ * orchestrate GenAI prompting to produce a {@link org.machanism.machai.schema.Bindex} model.
  *
- * <p>This package provides a small orchestration layer that coordinates:</p>
- *
+ * <p>Typical responsibilities in this package include:
  * <ul>
- *   <li>collection of project context via a {@code ProjectLayout} (sources, resources, manifests, etc.);</li>
- *   <li>optional use of an existing/origin {@code Bindex} for incremental regeneration; and</li>
- *   <li>invocation of an LLM provider (via {@link org.machanism.machai.ai.manager.GenAIProvider}) to produce the
- *       final {@code Bindex} model.</li>
+ *   <li>collecting project metadata and manifests (for example {@code pom.xml}, {@code package.json},
+ *       {@code pyproject.toml});</li>
+ *   <li>walking relevant source/resource folders and streaming file contents to a
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider};</li>
+ *   <li>optionally seeding generation from an existing {@code Bindex} to support incremental updates; and</li>
+ *   <li>invoking the provider to obtain and deserialize the final {@code Bindex} document.</li>
  * </ul>
  *
- * <p>The primary entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}, with concrete builders
- * supplying layout- and ecosystem-specific behavior (for example Maven, JavaScript/TypeScript, and Python).</p>
+ * <p>{@link org.machanism.machai.bindex.builder.BindexBuilder} is the main orchestrator. Concrete subclasses add
+ * ecosystem-specific context gathering, such as:
+ * <ul>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} for Maven projects,</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} for JavaScript/TypeScript projects, and</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} for Python projects.</li>
+ * </ul>
  */
 package org.machanism.machai.bindex.builder;

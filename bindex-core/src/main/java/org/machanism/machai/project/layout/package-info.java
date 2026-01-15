@@ -1,21 +1,25 @@
 /**
  * Detects and describes a project's on-disk layout.
  *
- * <p>This package defines the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction plus concrete
- * implementations that infer module boundaries and common root directories (sources, tests, and documentation)
- * from a project root directory.
+ * <p>The package defines {@link org.machanism.machai.project.layout.ProjectLayout} as a common abstraction for
+ * describing where modules, sources, tests, and documentation live relative to a project root directory.
+ * Implementations typically detect a layout by looking for a build or configuration file in a directory and then
+ * deriving module boundaries and well-known root folders.
  *
- * <p>Layout detection is typically performed by checking for build/configuration files:
+ * <h2>Provided layouts</h2>
  * <ul>
- *   <li>{@code pom.xml} for {@link org.machanism.machai.project.layout.MavenProjectLayout}</li>
- *   <li>{@code package.json} for {@link org.machanism.machai.project.layout.JScriptProjectLayout}</li>
- *   <li>{@code pyproject.toml} for {@link org.machanism.machai.project.layout.PythonProjectLayout}</li>
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Maven projects detected via {@code pom.xml}
+ *   (may parse an effective POM via {@link org.machanism.machai.project.layout.PomReader}).</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - JavaScript/TypeScript projects detected via
+ *   {@code package.json} (reads workspace modules).</li>
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Python projects detected via
+ *   {@code pyproject.toml} (basic metadata-based detection).</li>
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - fallback layout that scans direct child
+ *   directories and treats those with a detectable layout as modules.</li>
  * </ul>
- * When none match, {@link org.machanism.machai.project.layout.DefaultProjectLayout} can be used as a fallback
- * that attempts to identify module directories by scanning immediate children.
  *
- * <p>Implementations that traverse the filesystem should exclude common vendor, VCS, and build output directories
- * using {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
+ * <p>Filesystem traversal should ignore common vendor, VCS, and build output directories using
+ * {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  *
  * <h2>Example</h2>
  * <pre>{@code

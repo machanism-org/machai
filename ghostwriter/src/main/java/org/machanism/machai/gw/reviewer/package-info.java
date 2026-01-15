@@ -1,17 +1,20 @@
 /**
- * Package org.machanism.machai.gw.reviewer.
- *
- * This package provides file reviewers that extract and normalize {@code @guidance} content from project sources.
+ * File reviewers that extract and normalize {@code @guidance:} content from project files.
  *
  * <p>
- * Implementations typically support one or more file formats (for example Java, Markdown, HTML/XML,
- * TypeScript, Python, and plain text), locate guidance blocks using the conventions of the target language,
- * and produce a normalized textual representation suitable for downstream automation.
+ * The package contains {@link org.machanism.machai.gw.reviewer.Reviewer} implementations for different
+ * file types (for example Java, Markdown, HTML/XML, TypeScript, Python, and plain text). A reviewer scans
+ * a file for language-appropriate {@code @guidance:} markers and returns a normalized text payload that can
+ * be aggregated and consumed by downstream automation.
  *
- * <p>
- * Callers generally select an appropriate {@link org.machanism.machai.gw.reviewer.Reviewer} based on file
- * type and invoke
- * {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)}.
+ * <h2>Typical usage</h2>
+ * <pre>{@code
+ * Reviewer reviewer = ...; // chosen based on file extension
+ * String extracted = reviewer.perform(projectDir, file);
+ * if (extracted != null) {
+ *     // consume the normalized guidance
+ * }
+ * }</pre>
  */
 package org.machanism.machai.gw.reviewer;
 

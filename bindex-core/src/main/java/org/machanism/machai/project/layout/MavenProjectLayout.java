@@ -173,4 +173,8 @@ public class MavenProjectLayout extends ProjectLayout {
 		return sources;
 	}
 
+	@Override
+	public MavenProjectLayout projectDir(File projectDir) {
+		return (MavenProjectLayout) super.projectDir(projectDir);
+	}
 }

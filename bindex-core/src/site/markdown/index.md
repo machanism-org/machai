@@ -3,32 +3,37 @@
 Analyze the source file and create a Maven Site-style introductory home page for your project.
 Do not use the horizontal rule separator between sections. -->
 
-Welcome to **Bindex Core**, the core library for generating and consuming *bindex* metadata.
+Welcome to **Bindex Core**, the foundational library for producing and consuming *bindex* metadata.
 
 ## Overview
 
-Bindex Core provides the APIs and reference implementations to:
+Bindex Core provides APIs and reference implementations to:
 
-- Generate bindex metadata for Java-based builds and libraries.
-- Read, merge, and analyze bindex metadata produced by other tools.
-- Support integration points commonly used by Maven-oriented models and plugins.
+- Generate bindex metadata for Java-based builds and libraries
+- Read, merge, and analyze bindex metadata produced by other tools
+- Provide integration points commonly used by Maven-oriented models and plugins
 
-## Key Concepts
+## What is bindex metadata?
 
-Bindex metadata describes Java artifacts in a structured form that build tools can produce and other tools can consume. Typical inputs and outputs include:
+*bindex* metadata describes Java artifacts in a structured form so build tools can produce it and other tools can consume it.
 
-- Generated metadata files for an artifact or module.
-- Aggregated metadata assembled across multi-module builds and dependency graphs.
+Common use cases include:
+
+- Producing per-artifact or per-module metadata files
+- Aggregating metadata across multi-module builds
+- Merging metadata across dependency graphs for analysis
 
 ## Features
 
-- Metadata generation for Java projects.
-- Aggregation across modules and dependencies.
-- Extensible integration points for Maven models and plugin APIs.
+- Metadata generation for Java projects
+- Aggregation across modules and dependencies
+- Extensible components suitable for Maven models and plugin APIs
 
 ## Getting Started
 
-Bindex Core is available on Maven Central. Add the dependency to your `pom.xml`:
+Bindex Core is available on Maven Central.
+
+Add it to your `pom.xml`:
 
 ```xml
 <dependency>
@@ -42,9 +47,9 @@ Bindex Core is available on Maven Central. Add the dependency to your `pom.xml`:
 
 You can use Bindex Core to:
 
-- Produce bindex metadata as part of build tooling.
-- Consume and interpret existing bindex metadata during build analysis.
-- Assemble metadata from multiple modules and dependency sets.
+- Produce bindex metadata as part of build tooling
+- Consume and interpret existing bindex metadata during build analysis
+- Assemble and merge metadata from multiple modules and dependency sets
 
 For related tooling and documentation, see <https://github.com/machanism-org/machai>.
 

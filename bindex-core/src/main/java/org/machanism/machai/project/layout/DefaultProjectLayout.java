@@ -103,5 +103,10 @@ public class DefaultProjectLayout extends ProjectLayout {
 	public List<String> getTests() {
 		return null;
 	}
+	
+	@Override
+	public DefaultProjectLayout projectDir(File projectDir) {
+		return (DefaultProjectLayout) super.projectDir(projectDir);
+	}
 
 }

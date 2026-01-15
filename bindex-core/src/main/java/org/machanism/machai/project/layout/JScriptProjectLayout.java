@@ -46,11 +46,11 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * @throws IOException if reading <code>package.json</code> fails
 	 * @see #getPackageJson()
 	 * 
-	 * <pre>
+	 *      <pre>
 	 * Example usage:
 	 * JScriptProjectLayout layout = new JScriptProjectLayout();
 	 * List<String> modules = layout.projectDir(new File("/repo")).getModules();
-	 * </pre>
+	 *      </pre>
 	 */
 	@Override
 	public List<String> getModules() throws IOException {
@@ -148,4 +148,8 @@ public class JScriptProjectLayout extends ProjectLayout {
 		return null;
 	}
 
+	@Override
+	public JScriptProjectLayout projectDir(File projectDir) {
+		return (JScriptProjectLayout) super.projectDir(projectDir);
+	}
 }
