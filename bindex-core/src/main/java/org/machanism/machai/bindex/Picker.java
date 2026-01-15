@@ -237,8 +237,14 @@ public class Picker implements Closeable {
 	private List<Double> getEmbedding(String text, Integer dimensions) {
 
 		String embeddingApiKey = System.getenv("EMBEDDING_OPENAI_API_KEY");
-		if (embeddingApiKey == null || embeddingApiKey.isEmpty()) {
-			throw new IllegalStateException("EMBEDDING_OPENAI_API_KEY env variable is not set or is empty.");
+		if (StringUtils.isBlank(embeddingApiKey)) {
+			embeddingApiKey = System.getenv("OPENAI_API_KEY");
+			if (StringUtils.isNotBlank(embeddingApiKey)) {
+				logger.warn(
+						"EMBEDDING_OPENAI_API_KEY is not defined. The system will use OPENAI_API_KEY for embedding model operations.");
+			} else {
+				throw new IllegalStateException("EMBEDDING_OPENAI_API_KEY env variable is not set or is empty.");
+			}
 		}
 
 		String embeddingBaseUrl = System.getenv("EMBEDDING_OPENAI_BASE_URL");

@@ -80,7 +80,8 @@ public class AssembyCommand {
 
 		findQuery = query;
 		chatModel = Config.getChatModel(chatModel);
-		bindexList = pickBricks(query, Config.getScore(score), registerUrl, chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+		bindexList = pickBricks(provider, query, Config.getScore(score), registerUrl, chatModel);
 	}
 
 	/**
@@ -126,6 +127,12 @@ public class AssembyCommand {
 		logger.info("The project directory: {}", dir);
 		String prompt = query;
 
+		chatModel = Config.getChatModel(chatModel);
+
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+		functionTools.applyTools(provider);
+		provider.setWorkingDir(dir);
+
 		if (query == null) {
 			if (bindexList == null) {
 				throw new IllegalArgumentException("The query is empty.");
@@ -133,14 +140,10 @@ public class AssembyCommand {
 			prompt = this.findQuery;
 		} else {
 			query = getQueryFromFile(query);
-			chatModel = Config.getChatModel(chatModel);
-			bindexList = pickBricks(query, Config.getScore(score), registerUrl, chatModel);
+			bindexList = pickBricks(provider, query, Config.getScore(score), registerUrl, chatModel);
 		}
 
 		if (!bindexList.isEmpty()) {
-			GenAIProvider provider = GenAIProviderManager.getProvider(Config.getChatModel(chatModel));
-			functionTools.applyTools(provider);
-			provider.setWorkingDir(dir);
 
 			ApplicationAssembly assembly = new ApplicationAssembly(provider);
 			assembly.projectDir(dir);
@@ -155,11 +158,13 @@ public class AssembyCommand {
 	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(
+			@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt,
 			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = "genai", optOut = true) String chatModel,
-			@ShellOption(value = "dir", defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir,
-			@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt) {
+			@ShellOption(value = "dir", defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(Config.getChatModel(chatModel));
+		chatModel = Config.getChatModel(chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+
 		functionTools.applyTools(provider);
 		dir = Config.getWorkingDir(dir);
 		provider.setWorkingDir(dir);
@@ -174,17 +179,18 @@ public class AssembyCommand {
 	/**
 	 * Picks bricks (libraries) using a Picker service and scores them.
 	 * 
+	 * @param provider
 	 * @param query     The query string describing requirements
 	 * @param score     Minimum similarity score
 	 * @param url
 	 * @param chatModel
+	 * 
 	 * @return List&lt; Bindex&gt; found matching libraries
 	 * @throws IOException if picking fails
 	 */
-	private List<Bindex> pickBricks(String query, Double score, String url, String chatModel) throws IOException {
+	private List<Bindex> pickBricks(GenAIProvider provider, String query, Double score, String url, String chatModel)
+			throws IOException {
 		List<Bindex> bindexList = null;
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
-
 		try (Picker picker = new Picker(provider, url)) {
 			picker.setScore(score);
 			bindexList = picker.pick(query);
