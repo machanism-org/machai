@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>machai</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.2</version>
 	</parent>
 
 	<artifactId>machai-cli</artifactId>
@@ -45,7 +45,7 @@
 												org.machanism.machai.cli.MachaiCLI</mainClass>
 										</manifest>
 										<manifestEntries>
-											<Class-Path><![CDATA[ae.jar web-ae-plugin.jar]]></Class-Path>
+											<Class-Path><![CDATA[lib/ae.jar lib/web-ae-plugin.jar]]></Class-Path>
 										</manifestEntries>
 									</archive>
 									<appendAssemblyId>false</appendAssemblyId>
@@ -77,19 +77,19 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>bindex-core</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>ghostwriter</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.2</version>
 		</dependency>
 
 		<!-- ae dependencies (provided) -->
 		<dependency>
 			<groupId>com.ganteater</groupId>
 			<artifactId>anteater-cli</artifactId>
-			<version>1.2.9-SNAPSHOT</version>
+			<version>1.2.9</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
@@ -105,7 +105,7 @@
 		<dependency>
 			<groupId>com.ganteater.plugins</groupId>
 			<artifactId>web-ae-plugin</artifactId>
-			<version>1.2.9-SNAPSHOT</version>
+			<version>1.2.9</version>
 			<scope>provided</scope>
 		</dependency>
 

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>machai</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.2</version>
 	</parent>
 
 	<artifactId>ghostwriter</artifactId>
@@ -61,6 +61,15 @@
 			</dependencies>
 
 			<build>
+				<resources>
+					<resource>
+						<directory>../genai-client/src/main/ae</directory>
+					</resource>
+					<resource>
+						<directory>${basedir}/src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
 				<plugins>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
@@ -79,7 +88,7 @@
 												org.machanism.machai.gw.Ghostwriter</mainClass>
 										</manifest>
 										<manifestEntries>
-											<Class-Path><![CDATA[ae.jar web-ae-plugin.jar]]></Class-Path>
+											<Class-Path><![CDATA[lib/ae.jar lib/web-ae-plugin.jar]]></Class-Path>
 										</manifestEntries>
 									</archive>
 									<descriptorRefs>
@@ -109,7 +118,7 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>bindex-core</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.2</version>
 		</dependency>
 
 		<dependency>
