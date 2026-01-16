@@ -72,14 +72,12 @@
 								</goals>
 								<configuration>
 									<finalName>gw</finalName>
+									<appendAssemblyId>false</appendAssemblyId>
 									<archive>
 										<manifest>
 											<mainClass>
 												org.machanism.machai.gw.Ghostwriter</mainClass>
 										</manifest>
-									</archive>
-									<appendAssemblyId>false</appendAssemblyId>
-									<archive>
 										<manifestEntries>
 											<Class-Path><![CDATA[ae.jar web-ae-plugin.jar]]></Class-Path>
 										</manifestEntries>
