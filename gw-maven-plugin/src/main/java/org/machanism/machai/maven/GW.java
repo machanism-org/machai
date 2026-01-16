@@ -11,6 +11,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -23,17 +25,18 @@ import org.slf4j.LoggerFactory;
  * Maven goal that scans and processes project documents.
  *
  * <p>
- * The goal delegates document scanning and processing to {@link FileProcessor}. If a GenAI provider is configured via
- * {@link #genai}, the processor may use it to assist with document workflows.
+ * The goal delegates document scanning and processing to {@link FileProcessor}.
+ * If a GenAI provider is configured via {@link #genai}, the processor may use
+ * it to assist with document workflows.
  * </p>
  *
  * <h2>Parameters</h2>
  * <dl>
  * <dt><b>{@code genai}</b> (property: {@code gw.genai})</dt>
- * <dd>
- * GenAI provider/model identifier used for AI-assisted document processing.
+ * <dd>GenAI provider/model identifier used for AI-assisted document processing.
  * <p>
- * The value format is provider-specific, commonly {@code ProviderName:ModelName}.
+ * The value format is provider-specific, commonly
+ * {@code ProviderName:ModelName}.
  * </p>
  * <p>
  * Examples: {@code OpenAI:gpt-5}, {@code AzureOpenAI:gpt-4o-mini}
@@ -53,11 +56,13 @@ import org.slf4j.LoggerFactory;
  * <h2>Usage Examples</h2>
  *
  * <h3>Run from the command line</h3>
+ * 
  * <pre>
  * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5
  * </pre>
  *
  * <h3>Configure in {@code pom.xml}</h3>
+ * 
  * <pre>
  * &lt;plugin&gt;
  *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
@@ -103,6 +108,7 @@ public class GW extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+
 		FileProcessor documents = new FileProcessor(genai) {
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

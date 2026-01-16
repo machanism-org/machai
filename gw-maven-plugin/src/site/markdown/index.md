@@ -35,7 +35,7 @@ Add the plugin to your `pom.xml`:
 Run the plugin:
 
 ```sh
-mvn org.machanism.machai:gw-maven-plugin:0.0.2-SNAPSHOT:gw
+mvn gw:gw
 ```
 
 ## Usage Notes

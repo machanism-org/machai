@@ -48,6 +48,28 @@
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 
+		<!-- ae dependencies -->
+		<dependency>
+			<groupId>com.ganteater</groupId>
+			<artifactId>anteater-cli</artifactId>
+			<version>1.2.9-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-simple</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.ganteater.plugins</groupId>
+			<artifactId>web-ae-plugin</artifactId>
+			<version>1.2.9-SNAPSHOT</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>

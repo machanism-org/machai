@@ -54,7 +54,7 @@ public class AssembyCommand {
 	LineReader reader;
 
 	/** Utility for applying system function tools to GenAI providers. */
-	private SystemFunctionTools functionTools = new SystemFunctionTools();;
+	private SystemFunctionTools functionTools = new SystemFunctionTools();
 
 	/**
 	 * Default constructor.
@@ -72,10 +72,14 @@ public class AssembyCommand {
 	 */
 	@ShellMethod("Picks libraries based on user request.")
 	public void pick(
-			@ShellOption(help = "The application assembly prompt or the name of a prompt file.", value = "") String query,
-			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the registration database for storing project metadata.") String registerUrl,
-			@ShellOption(help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.", value = "score") Double score,
-			@ShellOption(value = "genai", help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
+			@ShellOption(value = { "-q",
+					"--query" }, help = "The application assembly prompt or the name of a prompt file.") String query,
+			@ShellOption(value = { "-r",
+					"--registerUrl" }, defaultValue = ShellOption.NULL, help = "URL of the registration database for storing project metadata.") String registerUrl,
+			@ShellOption(value = { "-s",
+					"--score" }, help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.") Double score,
+			@ShellOption(value = { "-g",
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 		query = getQueryFromFile(query);
 
@@ -116,11 +120,16 @@ public class AssembyCommand {
 	 */
 	@ShellMethod("Creates a project via picked librariy set.")
 	public void assembly(
-			@ShellOption(value = "query", defaultValue = ShellOption.NULL, help = "The prompt for application assembly. If omitted, the result from the previous 'find' command will be used, if available.") String query,
-			@ShellOption(value = "dir", defaultValue = ShellOption.NULL, help = "Path to the directory where the assembled project will be created.") File dir,
-			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.") String registerUrl,
-			@ShellOption(value = "score", help = "Minimum similarity threshold for search results.", defaultValue = ShellOption.NULL) Double score,
-			@ShellOption(value = "genai", help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
+			@ShellOption(value = { "-q",
+					"--query" }, defaultValue = ShellOption.NULL, help = "The prompt for application assembly. If omitted, the result from the previous 'find' command will be used, if available.") String query,
+			@ShellOption(value = { "-d",
+					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the directory where the assembled project will be created.") File dir,
+			@ShellOption(value = { "-r",
+					"--registerUrl" }, defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.") String registerUrl,
+			@ShellOption(value = { "-s",
+					"--score" }, help = "Minimum similarity threshold for search results.", defaultValue = ShellOption.NULL) Double score,
+			@ShellOption(value = { "-g",
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
 		dir = Config.getWorkingDir(dir);
@@ -155,13 +164,15 @@ public class AssembyCommand {
 	/**
 	 * Sends a user prompt to the GenAI provider for guidance.
 	 * 
-	 * @param prompt The prompt supplied by the user.
+	 * @param query The prompt supplied by the user.
 	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(
-			@ShellOption(value = "prompt", help = "The user prompt to GenAI.") String prompt,
-			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = "genai", optOut = true) String chatModel,
-			@ShellOption(value = "dir", defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
+			@ShellOption(value = { "-q", "--query" }, help = "The user prompt to GenAI.") String query,
+			@ShellOption(value = { "-g",
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).") String chatModel,
+			@ShellOption(value = { "-d",
+					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
 
 		chatModel = Config.getChatModel(chatModel);
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
@@ -170,7 +181,7 @@ public class AssembyCommand {
 		dir = Config.getWorkingDir(dir);
 		provider.setWorkingDir(dir);
 
-		provider.prompt(prompt);
+		provider.prompt(query);
 		String response = provider.perform();
 		if (response != null) {
 			logger.info(response);

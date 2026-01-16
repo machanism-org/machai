@@ -53,9 +53,12 @@ public class BindexCommand {
 	 */
 	@ShellMethod("Generates bindex files.")
 	public void bindex(
-			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update,
-			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = "genai", defaultValue = ShellOption.NULL) String chatModel)
+			@ShellOption(value = { "-d",
+					"--dir" }, help = "The path to the project  directory.", defaultValue = ShellOption.NULL) File dir,
+			@ShellOption(value = { "-u",
+					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "false") boolean update,
+			@ShellOption(value = { "-g",
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(Config.getChatModel(chatModel));
@@ -74,9 +77,12 @@ public class BindexCommand {
 	 */
 	@ShellMethod("Registers bindex file.")
 	public void register(
-			@ShellOption(help = "The path to the project  directory.", value = "dir", defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(value = "registerUrl", defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.", optOut = true) String registerUrl,
-			@ShellOption(help = "The update mode: all saved data will be updated.", value = "update", defaultValue = "true") boolean update)
+			@ShellOption(value = { "-d",
+					"--dir" }, help = "The path to the project  directory.", defaultValue = ShellOption.NULL) File dir,
+			@ShellOption(value = { "-r",
+					"--registerUrl" }, defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.") String registerUrl,
+			@ShellOption(value = { "-u",
+					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "true") boolean update)
 			throws IOException {
 
 		if (dir == null) {

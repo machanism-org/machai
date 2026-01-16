@@ -3,10 +3,7 @@ package org.machanism.machai.cli;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.lang.SystemUtils;
 import org.machanism.machai.Config;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -41,15 +38,20 @@ public class GWCommand {
 	 * Scans and processes documents in the given project directory using the
 	 * specified GenAI chat model.
 	 * 
-	 * @param scan       The root directory to scan
+	 * @param scan      The root directory to scan
 	 * @param chatModel GenAI service provider/model
 	 * @throws IOException if scan or processing fails
 	 */
 	@ShellMethod("Processing files using the Ghostwriter command.")
 	public void gw(
-			@ShellOption(help = "The path to the directory to be processed.", value = "--scan", defaultValue = ShellOption.NULL) File scan,
-			@ShellOption(help = "The path fo the project directory.", value = "--root", defaultValue = ShellOption.NULL, optOut = true) File dir,
-			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = "genai", defaultValue = ShellOption.NULL) String chatModel)
+			@ShellOption(help = "The path fo the project directory.", value = { "-d",
+					"--dir" }, defaultValue = ShellOption.NULL) File dir,
+			@ShellOption(help = "The path to the directory to be processed.", value = { "-s",
+					"--scan" }, defaultValue = ShellOption.NULL) File scan,
+			@ShellOption(help = "Enable multi-threaded processing.", value = { "-t",
+					"--threads" }, defaultValue = "false") boolean threads,
+			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = {
+					"-g", "--genai" }, defaultValue = ShellOption.NULL, arity = 1) String chatModel)
 			throws IOException {
 
 		dir = Config.getWorkingDir(dir);
@@ -71,6 +73,7 @@ public class GWCommand {
 
 		chatModel = Config.getChatModel(chatModel);
 		FileProcessor documents = new FileProcessor(chatModel);
+		documents.setModuleMultiThread(threads);
 		documents.scanDocuments(dir, scan);
 		logger.info("Scanning finished.");
 	}

@@ -82,6 +82,30 @@
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 
+		<!-- ae dependencies (provided) -->
+		<dependency>
+			<groupId>com.ganteater</groupId>
+			<artifactId>anteater-cli</artifactId>
+			<version>1.2.9-SNAPSHOT</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-simple</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.ganteater.plugins</groupId>
+			<artifactId>web-ae-plugin</artifactId>
+			<version>1.2.9-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>

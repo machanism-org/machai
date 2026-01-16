@@ -373,6 +373,11 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	public void setModuleMultiThread(boolean moduleMultiThread) {
+		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
+		if (moduleMultiThread && !provider.isThreadSafe()) {
+			throw new IllegalArgumentException(
+					"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
+		}
 		this.moduleMultiThread = moduleMultiThread;
 	}
 }

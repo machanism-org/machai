@@ -147,6 +147,11 @@ public class WebProvider extends NoneProvider {
 	}
 
 	@Override
+	public boolean isThreadSafe() {
+		return false;
+	}
+
+	@Override
 	public void close() {
 		workspace.close();
 	}
