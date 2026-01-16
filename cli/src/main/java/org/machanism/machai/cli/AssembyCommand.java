@@ -77,7 +77,7 @@ public class AssembyCommand {
 			@ShellOption(value = { "-r",
 					"--registerUrl" }, defaultValue = ShellOption.NULL, help = "URL of the registration database for storing project metadata.") String registerUrl,
 			@ShellOption(value = { "-s",
-					"--score" }, help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.") Double score,
+					"--score" }, help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.", defaultValue = ShellOption.NULL) Double score,
 			@ShellOption(value = { "-g",
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {

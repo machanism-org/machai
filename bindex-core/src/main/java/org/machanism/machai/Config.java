@@ -17,6 +17,9 @@ public class Config {
 	private static final String SCORE_PRP_NAME = "score";
 	private static final String WORKINGDIR_PROP_NAME = "dir";
 	private static final String GENAI_PROP_NAME = "genai";
+	
+	public static final String DEFAULT_SCORE = "0.9";
+	public static final String DEFAULT_GENAI = "OpenAI:gpt-5-mini";
 
 	private static Logger logger = LoggerFactory.getLogger(Config.class);
 
@@ -29,10 +32,10 @@ public class Config {
 	static {
 		try {
 			loadSystemProperties();
-			chatModel = properties.getProperty(GENAI_PROP_NAME, "OpenAI:gpt-5-mini");
+			chatModel = properties.getProperty(GENAI_PROP_NAME, DEFAULT_GENAI);
 			workingDir = new File(
 					properties.getProperty(WORKINGDIR_PROP_NAME, SystemUtils.getUserDir().getAbsolutePath()));
-			score = Double.parseDouble(properties.getProperty(SCORE_PRP_NAME, "0.9"));
+			score = Double.parseDouble(properties.getProperty(SCORE_PRP_NAME, DEFAULT_SCORE));
 
 		} catch (IOException e) {
 			logger.debug("Configuration properties not found.");
