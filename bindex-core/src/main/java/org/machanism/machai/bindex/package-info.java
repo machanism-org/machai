@@ -1,21 +1,21 @@
 /**
- * Core entry points for generating, assembling, and registering a Bindex (project index) for
+ * Core entry points for generating, assembling, and registering a Bindex (project index) used by
  * Machanism-based AI workflows.
  *
- * <p>This package provides orchestration and factory types used to:
+ * <p>This package provides orchestration and factory types to:
  *
  * <ul>
  *   <li>Assemble a Bindex for a project folder using a {@code GenAIProvider} and a {@code ProjectLayout}.</li>
- *   <li>Create or update Bindex documents and manifests for supported layouts (for example Maven, JS/TS, Python).</li>
+ *   <li>Create or update Bindex documents and manifests for supported project layouts.</li>
  *   <li>Register Bindex artifacts into a backing store and perform retrieval/search via picker utilities.</li>
  * </ul>
  *
- * <p>A typical workflow is:
+ * <p>Typical workflow:
  *
  * <ol>
  *   <li>Choose/construct a project layout.</li>
  *   <li>Run a creator/processor to generate Bindex artifacts for a folder.</li>
- *   <li>Optionally register the generated artifacts in a database for later semantic retrieval.</li>
+ *   <li>Optionally register generated artifacts in a database for later retrieval.</li>
  * </ol>
  *
  * <p>Example:

@@ -3,19 +3,19 @@
 Analyze the source file and create a Maven Site-style introductory home page for your project.
 Do not use the horizontal rule separator between sections. -->
 
-Welcome to **Bindex Core**, the foundational library for producing and consuming *bindex* metadata.
+Welcome to **Bindex Core**, the foundational library for producing and consuming **bindex** metadata.
 
 ## Overview
 
-Bindex Core provides APIs and reference implementations to:
+Bindex Core provides core APIs and reference implementations to:
 
-- Generate bindex metadata for Java-based builds and libraries
+- Generate bindex metadata for Java artifacts
 - Read, merge, and analyze bindex metadata produced by other tools
-- Provide integration points commonly used by Maven-oriented models and plugins
+- Integrate with Maven-oriented models and plugins
 
 ## What is bindex metadata?
 
-*bindex* metadata describes Java artifacts in a structured form so build tools can produce it and other tools can consume it.
+**bindex** metadata describes Java artifacts in a structured, tool-friendly form so build tools can produce it and other tools can consume it.
 
 Common use cases include:
 
@@ -37,7 +37,7 @@ Add it to your `pom.xml`:
 
 ```xml
 <dependency>
-  <groupId>org.machanism.machai</groupId>
+  <groupId>org.machanism-org.machai</groupId>
   <artifactId>bindex-core</artifactId>
   <version>${bindex-core.version}</version>
 </dependency>

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -53,7 +54,7 @@ class BindexCreatorTest {
 
 		Path projectDir = tempDir.resolve("project");
 		Files.createDirectories(projectDir);
-		Files.write(projectDir.resolve(BindexProjectProcessor.BINDEX_FILE_NAME), "{invalid-json".getBytes("UTF-8"));
+		Files.write(projectDir.resolve(BindexProjectProcessor.BINDEX_FILE_NAME), "{invalid-json".getBytes(StandardCharsets.UTF_8));
 
 		ProjectLayout layout = mock(ProjectLayout.class);
 		when(layout.getProjectDir()).thenReturn(projectDir.toFile());

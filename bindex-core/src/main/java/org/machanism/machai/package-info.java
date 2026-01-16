@@ -9,7 +9,7 @@
 /**
  * Root package for the Machanism AI core library.
  *
- * <p>This package contains shared types and infrastructure used throughout the
+ * <p>This package provides shared types and infrastructure used across the
  * {@code org.machanism.machai} codebase.</p>
  *
  * <h2>Sub-packages</h2>

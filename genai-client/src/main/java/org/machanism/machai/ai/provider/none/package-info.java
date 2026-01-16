@@ -1,23 +1,18 @@
 /**
- * Provides a non-operational ("none") {@code GenAIProvider} implementation.
+ * Provides a non-operational ("none") generative-AI provider implementation.
  *
  * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
  * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for environments where no external
  * generative AI / LLM integration should be used.
  *
- * <p>The provider acts as a stub:
+ * <p>Behavior summary:
  * <ul>
  *   <li>No network calls are made and no external AI service is contacted.</li>
- *   <li>{@code prompt(..)} accumulates text in memory.</li>
- *   <li>{@code perform()} optionally writes the captured instructions and prompts to local files (if configured via
- *       {@code inputsLog(..)}) and returns {@code null}.</li>
- *   <li>Capabilities that require a real provider (for example, embeddings) are unsupported and may throw
- *       exceptions.</li>
+ *   <li>{@code prompt(String)} accumulates prompt text in memory.</li>
+ *   <li>{@code perform()} optionally writes instructions and prompts to local files when {@code inputsLog(File)} is
+ *       configured, then returns {@code null}.</li>
+ *   <li>Provider capabilities that require a real backend (for example, embeddings) are unsupported.</li>
  * </ul>
- *
- * <h2>Usage</h2>
- * <p>Create an instance of {@code NoneProvider} and use it as a {@code GenAIProvider} stub in environments where
- * integration with external AI services is not desired.</p>
  *
  * <h2>Example</h2>
  * <pre>
@@ -26,7 +21,7 @@
  * provider.inputsLog(new File("./inputsLog/inputs.txt"));
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Describe the weather.");
- * provider.perform(); // Writes inputs locally; returns null.
+ * provider.perform();
  * }
  * </pre>
  */
@@ -52,7 +47,7 @@ package org.machanism.machai.ai.provider.none;
  *
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
+ *		- Use proper Markdown or HTML formatting for readability.
  *
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes,

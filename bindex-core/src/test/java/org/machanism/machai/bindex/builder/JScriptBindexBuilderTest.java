@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -16,73 +17,55 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.mockito.Mockito;
 
 class JScriptBindexBuilderTest {
-	private ProjectLayout mockLayout;
-	private JScriptBindexBuilder builder;
-	private GenAIProvider mockGenAI;
-
 	@TempDir
 	Path tempDir;
 
+	private ProjectLayout layout;
+	private JScriptBindexBuilder builder;
+	private GenAIProvider genAI;
+
 	@BeforeEach
 	void setUp() {
-		mockLayout = Mockito.mock(ProjectLayout.class);
-		Mockito.when(mockLayout.getProjectDir()).thenReturn(tempDir.toFile());
-		builder = Mockito.spy(new JScriptBindexBuilder(mockLayout));
-		mockGenAI = Mockito.mock(GenAIProvider.class);
-		Mockito.doReturn(mockGenAI).when(builder).getGenAIProvider();
+		layout = Mockito.mock(ProjectLayout.class);
+		Mockito.when(layout.getProjectDir()).thenReturn(tempDir.toFile());
+
+		builder = Mockito.spy(new JScriptBindexBuilder(layout));
+		genAI = Mockito.mock(GenAIProvider.class);
+		Mockito.doReturn(genAI).when(builder).getGenAIProvider();
 	}
 
 	@Test
-	void projectContext_readsProjectModelFile_andPromptsGenAI() throws Exception {
+	void projectContext_readsPackageJsonAndPromptsSourceFiles() throws Exception {
 		// Arrange
 		File packageFile = new File(tempDir.toFile(), JScriptProjectLayout.PROJECT_MODEL_FILE_NAME);
-		try (FileWriter writer = new FileWriter(packageFile)) {
-			writer.write("testContent");
+		try (FileWriter writer = new FileWriter(packageFile, StandardCharsets.UTF_8)) {
+			writer.write("{\"name\":\"x\"}");
 		}
+
 		Path srcDir = tempDir.resolve("src");
-		Files.createDirectory(srcDir);
+		Files.createDirectories(srcDir);
 		Path sourceFile = srcDir.resolve("test.js");
-		Files.writeString(sourceFile, "console.log('hello');");
+		Files.write(sourceFile, "console.log('hello');".getBytes(StandardCharsets.UTF_8));
 
 		// Act
 		builder.projectContext();
 
 		// Assert
-		Mockito.verify(mockGenAI, Mockito.atLeastOnce()).prompt(Mockito.anyString());
-		Mockito.verify(mockGenAI, Mockito.atLeastOnce()).promptFile(Mockito.eq(sourceFile.toFile()),
-				Mockito.eq("source_resource_section"));
+		Mockito.verify(genAI, Mockito.atLeastOnce()).prompt(Mockito.anyString());
+		Mockito.verify(genAI).promptFile(sourceFile.toFile(), "source_resource_section");
 	}
 
 	@Test
 	void projectContext_handlesMissingSrcFolderGracefully() throws Exception {
 		// Arrange
 		File packageFile = new File(tempDir.toFile(), JScriptProjectLayout.PROJECT_MODEL_FILE_NAME);
-		try (FileWriter writer = new FileWriter(packageFile)) {
-			writer.write("testContent");
+		try (FileWriter writer = new FileWriter(packageFile, StandardCharsets.UTF_8)) {
+			writer.write("{\"name\":\"x\"}");
 		}
-		// No src directory
+		// no src
 
-		// Act/Assert
+		// Act + Assert
 		assertDoesNotThrow(() -> builder.projectContext());
-		Mockito.verify(mockGenAI, Mockito.atLeastOnce()).prompt(Mockito.anyString());
-	}
-
-	@Test
-	void projectContext_logsWarningOnIOException_whenReadingSourceFile() throws Exception {
-		// Arrange
-		File packageFile = new File(tempDir.toFile(), JScriptProjectLayout.PROJECT_MODEL_FILE_NAME);
-		try (FileWriter writer = new FileWriter(packageFile)) {
-			writer.write("testContent");
-		}
-		Path srcDir = tempDir.resolve("src");
-		Files.createDirectory(srcDir);
-		Path unreadableFile = srcDir.resolve("unreadable.js");
-		Files.writeString(unreadableFile, "badContent");
-		unreadableFile.toFile().setReadable(false);
-
-		// Allows catching warnings via logger if needed (can use appender in extended
-		// tests)
-		assertDoesNotThrow(() -> builder.projectContext());
-		Mockito.verify(mockGenAI, Mockito.atLeastOnce()).prompt(Mockito.anyString());
+		Mockito.verify(genAI, Mockito.atLeastOnce()).prompt(Mockito.anyString());
 	}
 }

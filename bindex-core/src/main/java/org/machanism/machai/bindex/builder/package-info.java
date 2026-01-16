@@ -30,20 +30,20 @@
  */
 
 /**
- * Builders that assemble project context (filesystem layout, dependency manifests, and optional prior output) and
- * orchestrate GenAI prompting to produce a {@link org.machanism.machai.schema.Bindex} model.
+ * Builders that collect project context and orchestrate GenAI prompting to produce a
+ * {@link org.machanism.machai.schema.Bindex} model.
  *
- * <p>Typical responsibilities in this package include:
+ * <p>Builders in this package typically:
  * <ul>
- *   <li>collecting project metadata and manifests (for example {@code pom.xml}, {@code package.json},
+ *   <li>read an ecosystem-specific build/manifest file (for example {@code pom.xml}, {@code package.json},
  *       {@code pyproject.toml});</li>
- *   <li>walking relevant source/resource folders and streaming file contents to a
+ *   <li>walk relevant source/resource folders and submit file contents to a
  *       {@link org.machanism.machai.ai.manager.GenAIProvider};</li>
- *   <li>optionally seeding generation from an existing {@code Bindex} to support incremental updates; and</li>
- *   <li>invoking the provider to obtain and deserialize the final {@code Bindex} document.</li>
+ *   <li>optionally seed generation from an existing {@code Bindex} to support incremental updates; and</li>
+ *   <li>invoke the provider and deserialize the resulting {@code Bindex} document.</li>
  * </ul>
  *
- * <p>{@link org.machanism.machai.bindex.builder.BindexBuilder} is the main orchestrator. Concrete subclasses add
+ * <p>{@link org.machanism.machai.bindex.builder.BindexBuilder} is the base orchestrator. Concrete subclasses add
  * ecosystem-specific context gathering, such as:
  * <ul>
  *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} for Maven projects,</li>

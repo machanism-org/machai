@@ -41,18 +41,15 @@ and generate the content for this section following net format:
 -->
 
 ### OpenAI
-The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
-This provider enables a wide range of generative AI capabilities, including:
+`OpenAIProvider` is a concrete `GenAIProvider` implementation that integrates with the OpenAI API.
 
-- Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+Capabilities:
 
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
-
-This class provides capabilities to send prompts, manage files, perform LLM requests, and create embeddings using OpenAI Chat models.
+- Sends prompts and receives responses from OpenAI chat models.
+- Uploads files and references them in requests.
+- Supports tool/function calling.
+- Supports embeddings generation.
 
 Environment variables:
 
@@ -61,10 +58,10 @@ Environment variables:
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using the CodeMie API:
+CodeMie-compatible OpenAI API example:
 
-- `OPENAI_API_KEY`=eyJhbGciOiJSUzI1NiIsInR5c....
-- `OPENAI_BASE_URL`=`https://codemie.lab.epam.com/code-assistant-api/v1`
+- `OPENAI_API_KEY` = `eyJhbGciOiJSUzI1NiIsInR5c....`
+- `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
 
 Usage example:
 
@@ -72,25 +69,31 @@ Usage example:
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 ```
 
-Thread safety: this implementation is NOT thread-safe.
+Thread safety: this implementation is not thread-safe.
 
 ### None
-The `NoneProvider` class is an implementation of the `GenAIProvider` interface used to disable generative AI integrations and log input requests locally when an external AI provider is not required or available.
+
+`NoneProvider` is a `GenAIProvider` implementation used to disable GenAI integration while optionally logging requests locally.
 
 Purpose:
 
-- Provides a stub implementation that stores requests in input files (in the `inputsLog` folder).
-- All GenAI operations are non-operative, or throw exceptions where necessary, making this useful for scenarios where generative AI features must be disabled, simulated, or for fallback testing.
-- No calls are made to any external AI services or large language models (LLMs).
+- Acts as a stub provider when an external AI backend is not required or not available.
+- Stores requests in input files when `inputsLog` is configured (commonly under an `inputsLog` folder).
+- Does not call any external services.
 
 Typical use cases:
 
-- Disabling generative AI features for security or compliance
-- Implementing fallback logic when no provider is configured
-- Logging requests for manual review or later processing
-- Testing environments not connected to external services
+- Disabling GenAI features for security or compliance.
+- Fallback behavior when no provider is configured.
+- Logging requests for later manual review.
+- Running tests in environments without external connectivity.
 
-Example usage:
+Notes:
+
+- Operations that require GenAI services (for example, embeddings) may throw exceptions.
+- Prompts and instructions are cleared after `perform()`.
+
+Usage example:
 
 ```java
 GenAIProvider provider = new NoneProvider();
@@ -98,18 +101,21 @@ provider.prompt("Describe the weather.");
 provider.perform();
 ```
 
-Notes:
-
-- Operations requiring GenAI services will throw exceptions when called.
-- All prompts and instructions are cleared after performing.
-- Refer to `GenAIProvider` interface for compatible methods.
+Thread safety: no explicit guarantees.
 
 ### Web
-The `WebProvider` class serves as a gateway for interacting with web-based user interfaces via a web driver when direct access to the GenAI API is not feasible. It automates communication with supported services such as AI DIAL and EPAM AI/Run CodeMie, utilizing recipes from Anteater for sending and receiving information.
+
+`WebProvider` is a UI automation-based provider that uses a web driver workflow (via Anteater AE recipes) to interact with web-based GenAI user interfaces when direct API access is not feasible.
+
+Supported targets mentioned by the provider documentation:
+
+- AI DIAL
+- EPAM AI/Run CodeMie
 
 Limitations:
 
-- Configuration and usage of this class may require additional plugins or handling of resources such as the clipboard, especially for platforms like CodeMie. Please refer to target platform instructions prior to use.
+- May require additional plugins and OS resources (for example, clipboard integration), especially for CodeMie.
+- Requires an initialized workspace via `setWorkingDir(File)` and configuration selection via `model(String)`.
 
 Usage example:
 
@@ -118,12 +124,6 @@ GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
 ```
 
 Thread safety: this implementation is not thread-safe.
-
-Parameters and methods:
-
-- `perform()` — executes the AE workspace task using input prompts.
-- `setWorkingDir(File workingDir)` — initializes workspace with configuration and runs setup nodes.
-- `model(String configName)` — sets the AE workspace configuration name.
 
 <!-- @guidance:
 - Follow the rules described in @guidance tags and do not change or delete `@guidance` related tags in processing.

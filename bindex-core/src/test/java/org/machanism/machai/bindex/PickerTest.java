@@ -8,16 +8,19 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Language;
 
 class PickerTest {
 
 	@Test
-	void constructor_throwsWhenUriNullAndOpenAiApiKeyMissing() {
+	void constructor_acceptsNullUri() {
 		// Arrange
 		GenAIProvider provider = mock(GenAIProvider.class);
 
@@ -78,5 +81,68 @@ class PickerTest {
 
 		// Assert
 		assertNull(score);
+	}
+
+	@Test
+	void addDependencies_doesNotRecurseInfinitelyOnCycles() {
+		// Arrange
+		Bindex a = mock(Bindex.class);
+		when(a.getId()).thenReturn("a");
+		when(a.getDependencies()).thenReturn(java.util.List.of("b"));
+
+		Bindex b = mock(Bindex.class);
+		when(b.getId()).thenReturn("b");
+		when(b.getDependencies()).thenReturn(java.util.List.of("a"));
+
+		Picker picker = new Picker(mock(GenAIProvider.class), "mongodb://localhost:27017") {
+			@Override
+			protected Bindex getBindex(String id) {
+				if ("a".equals(id)) {
+					return a;
+				}
+				if ("b".equals(id)) {
+					return b;
+				}
+				return null;
+			}
+		};
+
+		Set<String> deps = new LinkedHashSet<>();
+
+		// Act
+		picker.addDependencies(deps, "a");
+
+		// Assert
+		assertEquals(Set.of("a", "b"), deps);
+	}
+
+	@Test
+	void addDependencies_handlesMissingBindexGracefully() {
+		// Arrange
+		Picker picker = new Picker(mock(GenAIProvider.class), "mongodb://localhost:27017") {
+			@Override
+			protected Bindex getBindex(String id) {
+				return null;
+			}
+		};
+		Set<String> deps = new LinkedHashSet<>();
+
+		// Act
+		picker.addDependencies(deps, "missing");
+
+		// Assert
+		assertEquals(Set.of(), deps);
+	}
+
+	@Test
+	void setEmbeddingModelName_updatesEmbeddingModelName() {
+		// Arrange
+		Picker picker = new Picker(mock(GenAIProvider.class), "mongodb://localhost:27017");
+
+		// Act
+		picker.setEmbeddingModelName("model-x");
+
+		// Assert
+		assertEquals("model-x", picker.getEmbeddingModelName());
 	}
 }

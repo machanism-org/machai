@@ -1,7 +1,7 @@
 /**
  * Detects and describes a project's on-disk layout.
  *
- * <p>The package defines {@link org.machanism.machai.project.layout.ProjectLayout} as a common abstraction for
+ * <p>This package defines {@link org.machanism.machai.project.layout.ProjectLayout} as a common abstraction for
  * describing where modules, sources, tests, and documentation live relative to a project root directory.
  * Implementations typically detect a layout by looking for a build or configuration file in a directory and then
  * deriving module boundaries and well-known root folders.
@@ -26,10 +26,10 @@
  * File projectRoot = new File("/workspace/my-project");
  *
  * ProjectLayout layout = new MavenProjectLayout().projectDir(projectRoot);
- * List<String> modules = layout.getModules();
- * List<String> sources = layout.getSources();
- * List<String> tests = layout.getTests();
- * List<String> docs = layout.getDocuments();
+ * List&lt;String&gt; modules = layout.getModules();
+ * List&lt;String&gt; sources = layout.getSources();
+ * List&lt;String&gt; tests = layout.getTests();
+ * List&lt;String&gt; docs = layout.getDocuments();
  * }</pre>
  */
 package org.machanism.machai.project.layout;

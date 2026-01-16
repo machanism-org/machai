@@ -28,14 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts {@code @guidance:} instructions from
- * supported files, and prepares prompt inputs for AI-assisted documentation
- * processing.
+ * Scans a project directory, extracts {@code @guidance:} instructions from supported files, and prepares prompt inputs
+ * for AI-assisted documentation processing.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to
- * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
- * every supported file it finds, it builds a prompt using templates from the
+ * This processor delegates file-specific guidance extraction to {@link Reviewer} implementations discovered via
+ * {@link ServiceLoader}. For every supported file it finds, it builds a prompt using templates from the
  * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
  * </p>
  */
@@ -46,19 +44,13 @@ public class FileProcessor extends ProjectProcessor {
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@guidance:";
 
-	/**
-	 * Temporary directory name for documentation inputs under
-	 * {@link #MACHAI_TEMP_DIR}.
-	 */
+	/** Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}. */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/**
-	 * Utility that installs tool functions (filesystem/command) into the provider
-	 * when supported.
-	 */
+	/** Utility that installs tool functions (filesystem/command) into the provider when supported. */
 	private final SystemFunctionTools systemFunctionTools;
 
 	/** Reviewer associations keyed by normalized (lowercase) file extension. */
@@ -83,8 +75,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping
-	 * supported file extensions to a reviewer.
+	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping supported file extensions to a reviewer.
 	 */
 	private void loadReviewers() {
 		reviewMap.clear();
@@ -112,9 +103,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and prepares inputs for
-	 * documentation generation. This overload defaults the scan start directory to
-	 * {@code basedir}.
+	 * Scans documents in the given root directory and prepares inputs for documentation generation. This overload
+	 * defaults the scan start directory to {@code basedir}.
 	 *
 	 * @param basedir root directory to scan
 	 * @throws IOException if an error occurs reading files
@@ -124,8 +114,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and start subdirectory, preparing
-	 * inputs for documentation generation.
+	 * Scans documents in the given root directory and start subdirectory, preparing inputs for documentation generation.
 	 *
 	 * @param rootDir the root directory of the project to scan
 	 * @param dir     the directory to begin scanning
@@ -137,8 +126,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Recursively scans project folders, processing documentation inputs for all
-	 * found modules and files.
+	 * Recursively scans project folders, processing documentation inputs for all found modules and files.
 	 *
 	 * @param projectDir the directory containing the project/module to be scanned
 	 * @throws IOException if an error occurs reading files
@@ -226,7 +214,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (file == null) {
 			return false;
 		}
-		return StringUtils.containsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS);
+		return StringUtils.equalsAnyIgnoreCase(file.getName(), ProjectLayout.EXCLUDE_DIRS);
 	}
 
 	private static void logIfNotBlank(String message) {
@@ -310,10 +298,12 @@ public class FileProcessor extends ProjectProcessor {
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists()).map(e -> {
-				String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
-				return "`" + relatedPath + "`";
-			}).collect(Collectors.toList());
+			List<String> dirs = sources.stream()
+					.filter(t -> t != null && new File(projectDir, t).exists())
+					.map(e -> {
+						String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
+						return "`" + relatedPath + "`";
+					}).collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 
@@ -324,6 +314,10 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private String parseFile(File projectDir, File file) throws IOException {
+		if (file == null || !file.isFile()) {
+			return null;
+		}
+
 		String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getName()));
 		Reviewer reviewer = reviewMap.get(extension);
 

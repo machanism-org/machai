@@ -1,61 +1,62 @@
 package org.machanism.machai.project.layout;
 
-import org.apache.maven.model.Model;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.File;
-import java.util.Map;
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.maven.model.Model;
+import org.eclipse.aether.impl.DefaultServiceLocator;
+import org.junit.jupiter.api.Test;
 
 class PomReaderTest {
 
-	private File pomFile;
-
-	@BeforeEach
-	void setUp() {
-		pomFile = new File("src/test/resources/mockPom.xml");
-	}
-
 	@Test
-	@Disabled
-	void testGetProjectModel() {
+	void getProjectModel_whenRawParsing_readsModelAndCollectsProperties() {
 		// Arrange
-		boolean effective = false;
+		File pomFile = new File("src/test/resources/mockMavenProject/pom.xml");
 
 		// Act
-		Model model = PomReader.getProjectModel(pomFile, effective);
+		Model model = PomReader.getProjectModel(pomFile, false);
 
 		// Assert
 		assertNotNull(model);
-		assertEquals("mock-artifact", model.getArtifactId());
+		assertEquals("mock-project", model.getArtifactId());
+		assertEquals("1.0.0-SNAPSHOT", PomReader.getPomProperties().get("project.version"));
 	}
 
 	@Test
-	@Disabled
-	void testGetEffectiveModel() {
+	void printModel_writesXml() throws IOException {
 		// Arrange
-		boolean effective = true;
+		File pomFile = new File("src/test/resources/mockMavenProject/pom.xml");
+		Model model = PomReader.getProjectModel(pomFile, false);
 
 		// Act
-		Model model = PomReader.getProjectModel(pomFile, effective);
+		String xml = PomReader.printModel(model);
 
 		// Assert
-		assertNotNull(model);
-		assertEquals("mock-artifact", model.getArtifactId());
+		assertNotNull(xml);
+		assertEquals(true, xml.contains("<artifactId>mock-project</artifactId>"));
 	}
 
 	@Test
-	@Disabled
-	void testGetPomProperties() {
+	void getProjectModel_whenPomMissing_throwsIllegalArgumentException() {
 		// Arrange
-		PomReader.getProjectModel(pomFile, false);
+		File missing = new File("src/test/resources/mockMavenProject/does-not-exist.xml");
 
-		// Act
-		Map<String, String> properties = PomReader.getPomProperties();
+		// Act + Assert
+		assertThrows(IllegalArgumentException.class, () -> PomReader.getProjectModel(missing, false));
+	}
+
+	@Test
+	void serviceLocator_returnsNonNull() {
+		// Arrange + Act
+		DefaultServiceLocator locator = PomReader.serviceLocator();
 
 		// Assert
-		assertNotNull(properties);
-		assertTrue(properties.containsKey("project.version"));
+		assertNotNull(locator);
 	}
 }

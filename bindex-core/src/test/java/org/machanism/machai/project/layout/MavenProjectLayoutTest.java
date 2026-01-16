@@ -1,96 +1,116 @@
 package org.machanism.machai.project.layout;
 
-import org.apache.maven.model.Model;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+
+import org.apache.maven.model.Model;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 class MavenProjectLayoutTest {
 
-    private MavenProjectLayout layout;
-    private File projectDir;
+	@Test
+	void isMavenProject_whenPomExists_returnsTrue() {
+		// Arrange
+		File projectDir = new File("src/test/resources/mockMavenProject");
 
-    @BeforeEach
-    void setUp() {
-        layout = new MavenProjectLayout();
-        projectDir = new File("src/test/resources/mockMavenProject");
-        layout.projectDir(projectDir);
-    }
+		// Act
+		boolean maven = MavenProjectLayout.isMavenProject(projectDir);
 
-    @Test
-    void testIsMavenProject() {
-        // Arrange
-        layout.projectDir(projectDir);
+		// Assert
+		assertTrue(maven);
+	}
 
-        // Act
-        boolean result = MavenProjectLayout.isMavenProject(projectDir);
+	@Test
+	void getModel_readsPom() {
+		// Arrange
+		File projectDir = new File("src/test/resources/mockMavenProject");
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(projectDir);
 
-        // Assert
-        assertTrue(result);
-    }
+		// Act
+		Model model = layout.getModel();
 
-    @Test
-    @Disabled
-    void testGetModules() {
-        // Arrange
-        layout.projectDir(projectDir);
+		// Assert
+		assertNotNull(model);
+		assertEquals("mock-project", model.getArtifactId());
+	}
 
-        // Act
-        List<String> modules = layout.getModules();
+	@Test
+	void getModules_whenPackagingNotPom_returnsNull() {
+		// Arrange
+		File projectDir = new File("src/test/resources/mockMavenProject");
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(projectDir);
 
-        // Assert
-        assertNotNull(modules);
-        assertTrue(modules.contains("moduleX"));
-    }
+		// Act
+		List<String> modules = layout.getModules();
 
-    @Test
-    @Disabled
-    void testGetSources() {
-        // Arrange
-        layout.projectDir(projectDir);
+		// Assert
+		assertEquals(null, modules);
+	}
 
-        // Act
-        List<String> sources = layout.getSources();
+	@Test
+	@Disabled
+	void getSources_returnsSourceAndResourceDirectoriesAsRelativePaths() {
+		// Arrange
+		File projectDir = new File("src/test/resources/mockMavenProject");
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(projectDir);
 
-        // Assert
-        assertNotNull(sources);
-        assertTrue(sources.contains("src/main/java"));
-    }
+		// Act
+		List<String> sources = layout.getSources();
 
-    @Test
-    void testGetDocuments() {
-        // Act
-        List<String> documents = layout.getDocuments();
+		// Assert
+		assertNotNull(sources);
+		assertEquals(2, sources.size());
+		assertTrue(sources.contains("src/main/java"));
+		assertTrue(sources.contains("src/main/resources"));
+	}
 
-        // Assert
-        assertNotNull(documents);
-        assertTrue(documents.contains("src/site"));
-    }
+	@Test
+	@Disabled
+	void getTests_returnsTestSourceAndTestResourceDirectoriesAsRelativePaths() {
+		// Arrange
+		File projectDir = new File("src/test/resources/mockMavenProject");
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(projectDir);
 
-    @Test
-    @Disabled
-    void testGetTests() {
-        // Arrange
-        layout.projectDir(projectDir);
+		// Act
+		List<String> tests = layout.getTests();
 
-        // Act
-        List<String> tests = layout.getTests();
+		// Assert
+		assertNotNull(tests);
+		assertEquals(2, tests.size());
+		assertTrue(tests.contains("src/test/java"));
+		assertTrue(tests.contains("src/test/resources"));
+	}
 
-        // Assert
-        assertNotNull(tests);
-        assertTrue(tests.contains("src/test/java"));
-    }
+	@Test
+	void getDocuments_returnsSrcSite() {
+		// Arrange
+		MavenProjectLayout layout = new MavenProjectLayout();
 
-    @Test
-    void testModelInitialization() {
-        // Act
-        Model model = layout.getModel();
+		// Act
+		List<String> documents = layout.getDocuments();
 
-        // Assert
-        assertNotNull(model);
-        assertEquals("mock-project", model.getArtifactId());
-    }
+		// Assert
+		assertNotNull(documents);
+		assertEquals(1, documents.size());
+		assertEquals("src/site", documents.get(0));
+	}
+
+	@Test
+	void fluentSetters_returnSameInstance() {
+		// Arrange
+		MavenProjectLayout layout = new MavenProjectLayout();
+
+		// Act
+		MavenProjectLayout afterModel = layout.model(new Model());
+		MavenProjectLayout afterEffective = layout.effectivePomRequired(true);
+
+		// Assert
+		assertEquals(layout, afterModel);
+		assertEquals(layout, afterEffective);
+	}
 }

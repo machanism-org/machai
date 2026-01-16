@@ -1,51 +1,73 @@
 package org.machanism.machai.project.layout;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 class PythonProjectLayoutTest {
 
-    private PythonProjectLayout layout;
-    private File projectDir;
+	@Test
+	void isPythonProject_whenPyprojectHasNameAndNoPrivateClassifier_returnsTrue() {
+		// Arrange
+		File projectDir = new File("src/test/resources/mockPythonProject");
 
-    @BeforeEach
-    void setUp() {
-        layout = new PythonProjectLayout();
-        projectDir = new File("src/test/resources/mockPythonProject");
-        layout.projectDir(projectDir);
-    }
+		// Act
+		boolean python = PythonProjectLayout.isPythonProject(projectDir);
 
-    @Test
-    @Disabled
-    void testIsPythonProject() {
-        // Arrange
-        layout.projectDir(projectDir);
+		// Assert
+		assertTrue(python);
+	}
 
-        // Act
-        boolean result = PythonProjectLayout.isPythonProject(projectDir);
+	@Test
+	void isPythonProject_whenPyprojectMissing_returnsFalse() {
+		// Arrange
+		File projectDir = new File("src/test/resources/mockDefaultProject");
 
-        // Assert
-        assertTrue(result);
-    }
+		// Act
+		boolean python = PythonProjectLayout.isPythonProject(projectDir);
 
-    @Test
-    void testNullSources() {
-        // Act & Assert
-        assertNull(layout.getSources());
-    }
+		// Assert
+		assertFalse(python);
+	}
 
-    @Test
-    void testNullDocuments() {
-        // Act & Assert
-        assertNull(layout.getDocuments());
-    }
+	@Test
+	void getSources_returnsNull() {
+		// Arrange
+		PythonProjectLayout layout = new PythonProjectLayout();
 
-    @Test
-    void testNullTests() {
-        // Act & Assert
-        assertNull(layout.getTests());
-    }
+		// Act
+		List<String> sources = layout.getSources();
+
+		// Assert
+		assertNull(sources);
+	}
+
+	@Test
+	void getDocuments_returnsNull() {
+		// Arrange
+		PythonProjectLayout layout = new PythonProjectLayout();
+
+		// Act
+		List<String> docs = layout.getDocuments();
+
+		// Assert
+		assertNull(docs);
+	}
+
+	@Test
+	void getTests_returnsNull() {
+		// Arrange
+		PythonProjectLayout layout = new PythonProjectLayout();
+
+		// Act
+		List<String> tests = layout.getTests();
+
+		// Assert
+		assertNull(tests);
+	}
 }

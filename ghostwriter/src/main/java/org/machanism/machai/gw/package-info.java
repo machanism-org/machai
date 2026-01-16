@@ -1,17 +1,17 @@
 /**
  * Command-line entry point and processing pipeline for Ghostwriter document scanning.
  *
- * <p>This package contains the CLI entry point and the orchestration code that scans a project directory,
- * selects eligible files, extracts {@code @guidance:} directives, and prepares prompt context for a
- * configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * <p>This package contains the CLI entry point and orchestration code that scans a project directory,
+ * selects eligible files, extracts {@code @guidance:} directives (as plain source comments), and builds
+ * prompt context for a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
  * <h2>Key components</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.gw.Ghostwriter} &mdash; CLI entry point that parses arguments, resolves
- *       the working directory and provider, and triggers the scan.</li>
+ *   <li>{@link org.machanism.machai.gw.Ghostwriter} &mdash; CLI entry point that parses arguments, resolves the
+ *       working directory and provider, and triggers scanning.</li>
  *   <li>{@link org.machanism.machai.gw.FileProcessor} &mdash; scanning/processing orchestrator that walks the
  *       directory tree, delegates file selection and content extraction to pluggable reviewers, aggregates
- *       guidance, and writes prompt inputs.</li>
+ *       extracted guidance, and writes prompt inputs.</li>
  * </ul>
  *
  * <h2>Scanning behavior</h2>
@@ -23,9 +23,9 @@
  *   <li>Prompt input logs are written under {@code .machai/docs-inputs} in the scanned project directory.</li>
  * </ul>
  *
- * <h2>Programmatic usage</h2>
+ * <h2>Usage</h2>
  * <pre>{@code
- * // Default: scan the current user directory.
+ * // Default: scan the current working directory.
  * Ghostwriter.main(new String[] {});
  *
  * // Programmatic usage.

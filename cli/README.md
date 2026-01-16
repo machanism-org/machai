@@ -1,4 +1,4 @@
-# CLI Project
+# Machai CLI
 <!--
 @guidance:
 Content:
@@ -74,11 +74,11 @@ mvn clean install
 
 Example commands (as shown by `help`):
 
-### Assembly Command
+### Assemby Command
 
 - `pick`: Picks libraries based on user request.
-- `assembly`: Creates a project via picked library set.
-- `prompt`: Is used for request additional GenAI guidance.
+- `assembly`: Creates a project via picked librariy set.
+- `prompt`: Is used for request additional GenAI guidances.
 
 ### Bindex Command
 

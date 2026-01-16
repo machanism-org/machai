@@ -1,11 +1,12 @@
 /**
- * File reviewers that extract and normalize {@code @guidance:} content from project files.
+ * File reviewers that extract and normalize guidance content from project files.
  *
- * <p>
- * The package contains {@link org.machanism.machai.gw.reviewer.Reviewer} implementations for different
- * file types (for example Java, Markdown, HTML/XML, TypeScript, Python, and plain text). A reviewer scans
- * a file for language-appropriate {@code @guidance:} markers and returns a normalized text payload that can
- * be aggregated and consumed by downstream automation.
+ * <p>This package provides {@link org.machanism.machai.gw.reviewer.Reviewer} implementations for a variety of
+ * file formats (for example Java, Markdown, HTML/XML, TypeScript, Python, and plain text).
+ *
+ * <p>A reviewer is responsible for scanning an input file for language-appropriate {@code @guidance:} markers and
+ * returning a normalized text payload. The normalized output can then be aggregated and consumed by downstream
+ * automation.
  *
  * <h2>Typical usage</h2>
  * <pre>{@code

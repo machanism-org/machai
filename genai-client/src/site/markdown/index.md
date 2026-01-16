@@ -12,8 +12,38 @@ The primary integration point is the `GenAIProvider` interface, with `GenAIProvi
 ## Core concepts
 
 - `GenAIProvider` defines the contract for prompting, adding file context, configuring a model, running a request, and optionally producing embeddings.
-- `GenAIProviderManager` resolves a provider by name (for example `OpenAI:...` or `Web:...`) and returns a ready-to-configure instance.
+- `GenAIProviderManager` resolves a provider by name and returns a ready-to-configure instance.
 - Tool/function calling is supported by registering tools on the provider; when the model requests a tool invocation, the tool output is fed back into the model.
+- Providers can be configured with a working directory (used by tools and/or provider-specific workflows) and can optionally log model inputs.
+
+## Quick start
+
+### Choose a provider
+
+Resolve a provider by name, then select a model/configuration and run a prompt.
+
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+provider.prompt("Summarize this project in one paragraph.");
+String answer = provider.perform();
+provider.close();
+```
+
+### Tool (function) calling
+
+Register a tool and let the model call it when needed.
+
+```java
+provider.addTool(
+    "read_file",
+    "Read a file from the working directory",
+    args -> {
+        // args[0] is a JsonNode with tool arguments, args[1] is the working directory
+        return "...";
+    },
+    "path:string:required:Relative path to the file"
+);
+```
 
 ## Supported GenAI Providers
 <!-- 
@@ -54,16 +84,16 @@ Notes:
 - All prompts and instructions are cleared after performing.
 
 ### OpenAI
-The `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
 This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI Chat models
-- Managing files for use in various OpenAI workflows
-- Performing advanced large language model (LLM) requests such as text generation, summarization, and question answering
-- Creating and using vector embeddings for tasks like semantic search and similarity analysis
+- Sending prompts and receiving responses from OpenAI Chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-It supports both synchronous and asynchronous operations, and can be extended or configured to accommodate different use cases and model parameters.
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications.
 
 Environment variables:
 
@@ -72,7 +102,7 @@ Environment variables:
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using the CodeMie API (via an OpenAI-compatible endpoint):
+Using the CodeMie API:
 
 - `OPENAI_API_KEY` = `eyJhbGciOiJSUzI1NiIsInR5c....`
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -90,8 +120,7 @@ The `WebProvider` class serves as a gateway for interacting with web-based user 
 
 Limitations:
 
-- Configuration and usage may require additional plugins or handling of resources such as the clipboard, especially for platforms like CodeMie.
-- Refer to target platform instructions prior to use.
+- Configuration and usage of this class may require additional plugins or handling of resources such as the clipboard, especially for platforms like CodeMie. Please refer to target platform instructions prior to use.
 
 Usage example:
 
@@ -104,5 +133,5 @@ Thread safety: this implementation is not thread-safe.
 Parameters and methods:
 
 - `perform()` executes the AE workspace task using input prompts.
-- `setWorkingDir(File workingDir)` initializes the workspace, loads configuration, and runs setup nodes.
+- `setWorkingDir(File workingDir)` initializes workspace with configuration and runs setup nodes.
 - `model(String configName)` sets the AE workspace configuration name.

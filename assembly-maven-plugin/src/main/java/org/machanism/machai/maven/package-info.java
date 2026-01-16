@@ -33,11 +33,11 @@
  * Maven plugin goal implementation for AI-assisted project assembly.
  *
  * <p>
- * This package provides the {@link org.machanism.machai.maven.Assembly} Maven Mojo implementing the
- * {@code assembly} goal. The goal reads a project description prompt (from a configured file or via interactive
- * input), uses a configured generative-AI provider to recommend candidate libraries, optionally filters
- * recommendations by a minimum score threshold, and then applies the selected recommendations to the Maven
- * project in the current base directory.
+ * This package contains the {@link org.machanism.machai.maven.Assembly} Mojo for the {@code assembly} goal.
+ * The goal obtains an assembly prompt (from a configured file or via interactive input), uses a configured
+ * generative-AI provider to recommend candidate libraries, optionally filters recommendations by a minimum
+ * score threshold, and then runs the assembly workflow against the Maven project in the current base
+ * directory.
  * </p>
  *
  * <h2>Usage</h2>

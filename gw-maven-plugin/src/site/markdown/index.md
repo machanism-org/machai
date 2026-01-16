@@ -5,7 +5,7 @@ Do not use the horizontal rule separator between sections. -->
 
 ## Overview
 
-**GW Maven Plugin** (Ghostwriter Maven Plugin) generates and updates Maven Site documentation using embedded `@guidance:` comments found across your project.
+GW Maven Plugin (Ghostwriter Maven Plugin) generates and updates Maven Site documentation using embedded `@guidance:` comments found across your project.
 
 It is designed to keep documentation synchronized with the codebase and requirements by making documentation generation a repeatable part of the build.
 

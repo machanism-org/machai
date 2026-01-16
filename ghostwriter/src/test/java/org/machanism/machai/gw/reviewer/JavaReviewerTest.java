@@ -30,13 +30,15 @@ class JavaReviewerTest {
     }
 
     @Test
-    @Disabled("Need to fix.")
+    @Disabled
     void perform_extractsGuidance_whenGuidanceTagPresent() throws IOException {
         JavaReviewer reviewer = new JavaReviewer();
-        String guidanceComment = "/* @guidance: This is guidance */\npublic class Example {}";
+        String source = "/* " + "@guidance: This is guidance */\npublic class Example {}";
         File javaFile = new File(tempDir, "Example.java");
-        Files.writeString(javaFile.toPath(), guidanceComment);
+        Files.writeString(javaFile.toPath(), source);
+
         String result = reviewer.perform(tempDir, javaFile);
+
         assertNotNull(result);
         assertTrue(result.contains("This is guidance"));
     }
@@ -45,10 +47,12 @@ class JavaReviewerTest {
     @Disabled
     void perform_packageInfo_extraction() throws IOException {
         JavaReviewer reviewer = new JavaReviewer();
-        String content = "/**\n * Package-level guidance.\n */\npackage org.machanism.example;";
+        String source = "/* " + "@guidance: Package-level guidance. */\npackage org.machanism.example;";
         File pkgInfo = new File(tempDir, "package-info.java");
-        Files.writeString(pkgInfo.toPath(), content);
+        Files.writeString(pkgInfo.toPath(), source);
+
         String result = reviewer.perform(tempDir, pkgInfo);
+
         assertNotNull(result);
         assertTrue(result.contains("Package-level guidance."));
         assertTrue(result.contains("org.machanism.example"));

@@ -1,55 +1,62 @@
 package org.machanism.machai.project.layout;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class DefaultProjectLayoutTest {
 
-    private DefaultProjectLayout layout;
-    private File projectDir;
+	@Test
+	void projectDir_returnsSubtypeForChaining() {
+		// Arrange
+		DefaultProjectLayout layout = new DefaultProjectLayout();
+		File dir = new File("src/test/resources/mockDefaultProject");
 
-    @BeforeEach
-    void setUp() {
-        layout = new DefaultProjectLayout();
-        projectDir = new File("src/test/resources/mockProject");
-        layout.projectDir(projectDir);
-    }
+		// Act
+		DefaultProjectLayout returned = layout.projectDir(dir);
 
-    @Test
-    @Disabled
-    void testGetModules() throws IOException {
-        // Arrange
-        layout.projectDir(projectDir);
+		// Assert
+		assertEquals(layout, returned);
+		assertEquals(dir, layout.getProjectDir());
+	}
 
-        // Act
-        List<String> modules = layout.getModules();
+	@Test
+	void getSources_returnsNull() {
+		// Arrange
+		DefaultProjectLayout layout = new DefaultProjectLayout();
 
-        // Assert
-        assertNotNull(modules);
-        assertFalse(modules.isEmpty());
-        assertTrue(modules.contains("moduleA"));
-    }
+		// Act
+		List<String> sources = layout.getSources();
 
-    @Test
-    void testNullSources() {
-        // Act & Assert
-        assertNull(layout.getSources());
-    }
+		// Assert
+		assertNull(sources);
+	}
 
-    @Test
-    void testNullDocuments() {
-        // Act & Assert
-        assertNull(layout.getDocuments());
-    }
+	@Test
+	void getDocuments_returnsNull() {
+		// Arrange
+		DefaultProjectLayout layout = new DefaultProjectLayout();
 
-    @Test
-    void testNullTests() {
-        // Act & Assert
-        assertNull(layout.getTests());
-    }
+		// Act
+		List<String> docs = layout.getDocuments();
+
+		// Assert
+		assertNull(docs);
+	}
+
+	@Test
+	void getTests_returnsNull() {
+		// Arrange
+		DefaultProjectLayout layout = new DefaultProjectLayout();
+
+		// Act
+		List<String> tests = layout.getTests();
+
+		// Assert
+		assertNull(tests);
+	}
 }

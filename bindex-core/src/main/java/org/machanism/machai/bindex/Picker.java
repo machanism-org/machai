@@ -378,7 +378,7 @@ public class Picker implements Closeable {
 	 * @param id String identifier
 	 * @return Bindex object, or null if not present in the DB
 	 */
-	private Bindex getBindex(String id) {
+	protected Bindex getBindex(String id) {
 		Bindex result = null;
 		Document doc = collection.find(com.mongodb.client.model.Filters.eq("id", id)).first();
 		if (doc != null) {
