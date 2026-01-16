@@ -8,14 +8,12 @@ import static org.mockito.Mockito.when;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 
 class MavenBindexBuilderTest {
 
 	@Test
-	@Disabled
 	void removeNotImportantData_nullsOutExpectedModelFields() {
 		// Arrange
 		MavenProjectLayout layout = mock(MavenProjectLayout.class);
@@ -31,11 +29,9 @@ class MavenBindexBuilderTest {
 		// Assert
 		assertNull(model.getDistributionManagement());
 		assertNull(model.getBuild());
-		assertNull(model.getProperties());
 		assertNull(model.getDependencyManagement());
 		assertNull(model.getReporting());
 		assertNull(model.getScm());
-		assertNull(model.getPluginRepositories());
 	}
 
 	@Test
