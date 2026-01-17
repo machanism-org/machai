@@ -12,11 +12,13 @@ Page Structure:
 # Getting Started
    - Prerequisites: List of required software and services.
    - Environment Variables: Table describing necessary environment variables.
-   - Basic Usage: Example command to run the plugin.
+   - Add the Machai CLI application jar download link: [Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/gw.jar/download) to the installation section.
+   - Basic Usage: Example command to run the application.
    - Typical Workflow: Step-by-step outline of how to use the project artifacts.
 # Configuration
-   - Table of common configuration parameters, their descriptions, and default values.
-   - Example: Command-line example showing how to configure and run the plugin with custom parameters.
+   - Analyze /java/org/machanism/machai/gw/Ghostwriter.java java source file and generate cmd options description.
+   - Table of cmd options, their descriptions, and default values.
+   - Example: Command-line example showing how to configure and run the application with custom parameters.
 # Resources
    - List of relevant links (platform, GitHub, Maven).
 -->
@@ -29,73 +31,103 @@ Page Structure:
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. It reduces manual documentation effort, enforces consistent documentation standards, and helps teams keep project docs up to date by extracting, reviewing, and composing documentation from source files.
+Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
+
+It helps teams keep documentation accurate and consistent by applying structured rules (guidance) across Markdown and other documentation artifacts, while preserving `@guidance` markers in-place.
 
 ## Overview
 
-Ghostwriter performs a source-aware scan of a project, applies language- and format-specific reviewers (Java, Markdown, Python, TypeScript, plain text, HTML, etc.), and uses a configured GenAI provider to synthesize improved documentation and recommendations. It is intended for use in local development, CI pipelines, and automated site generation flows to produce higher-quality, consistent documentation artifacts.
+Ghostwriter is a CLI tool that:
+
+- traverses a project directory (or specific directories you pass on the command line)
+- reads documentation and source files
+- uses embedded guidance markers (for example `@guidance` comments) to determine mandatory rules
+- leverages a configured GenAI provider/model to synthesize updates
+- writes updates back to files while preserving guidance markers
 
 ## Key Features
 
-- Automatic recursive scanning of project directories and source files.
-- Pluggable reviewers for multiple languages and formats (Java, Markdown, Python, TypeScript, HTML, text).
-- Integration with GenAI providers and selectable models (via command-line or environment configuration).
-- Optional multi-threaded processing for faster analysis on large codebases.
-- Simple CLI for quick integration into scripts and CI.
-- Extensible design allowing additional reviewers and custom prompts.
+- CLI-based documentation scanning and processing
+- Project-wide traversal with optional directory targeting
+- Pluggable GenAI provider/model selection
+- Optional custom processing instructions (inline or from a file)
+- Optional multi-threaded processing mode
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 11 or later installed (`java` available on your `PATH`).
-- (Optional) Maven 3.x if you need to build the project from source.
-- Credentials for your chosen GenAI provider if you plan to use AI model integration.
+- Java 17+ (recommended)
+- Maven 3.9+ (for building)
+- Network access to your configured GenAI provider (if required by the selected model)
 
 ### Environment Variables
 
-| Name | Description | Example |
-|------|-------------|---------|
-| `OPENAI_API_KEY` | API key for the OpenAI provider (when using OpenAI). | `sk-...` |
-| `OPENAI_BASE_URL` | Custom base URL for OpenAI-compatible services. | `https://api.openai.com` |
+The CLI accepts most configuration via command-line options. Environment variables may be required depending on the GenAI provider you use.
+
+| Variable | Required | Description |
+|---|---:|---|
+| `OPENAI_API_KEY` | No* | API key used by OpenAI-backed models. Required only if you select an OpenAI model/provider. |
+
+\* Provider-specific; set the variables required by your chosen GenAI service.
+
+### Installation
+
+- Build from source (example):
+
+```bash
+mvn -DskipTests package
+```
+
+- Download the CLI jar:
+
+[Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")]((https://sourceforge.net/projects/machanism/files/gw.jar/download))
 
 ### Basic Usage
 
-Assuming you have an assembled artifact named `gw.jar` (assembly output), a typical run looks like:
-
 ```bash
-java -jar gw.jar -g OpenAI:gpt-5.1 -d /path/to/project -t
+java -jar gw.jar -d /path/to/project
 ```
-
-This runs Ghostwriter against the specified project directory using the OpenAI `gpt-5.1` model with multi-threading enabled.
 
 ### Typical Workflow
 
-1. Set your GenAI provider credentials in the environment (for example, `OPENAI_API_KEY`).
-2. Build or obtain the `gw.jar` artifact (or run the main class via your build tool).
-3. Run the scanner against your project directory with the desired model and options.
-4. Inspect logs and generated output; iterate by adjusting prompts, reviewers, or configuration.
-5. Integrate Ghostwriter runs into CI pipelines to keep documentation current.
+1. Choose (or set) a GenAI provider/model.
+2. Point Ghostwriter at a project root directory.
+3. Optionally provide additional instructions (inline or from a file).
+4. Run a scan against the root directory or specific subdirectories.
+5. Review changes produced by the scan and commit updates.
 
 ## Configuration
 
-Common command-line options and defaults:
+Ghostwriter CLI options are defined in `org.machanism.machai.gw.Ghostwriter`.
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `-d, --dir <path>` | Path to the project directory to scan. | Current working directory |
-| `-g, --genai <provider:model>` | GenAI provider and model identifier (for example, `OpenAI:gpt-5.1`). | Not set (use provider defaults or environment) |
-| `-t, --threads` | Enable multi-threaded processing. | Disabled |
-| `-h, --help` | Show help/usage. | N/A |
+### Command-line Options
 
-Example: run with a specific model and project directory
+| Option | Long option | Arg | Default | Description |
+|---|---|---:|---|---|
+| `-h` | `--help` | No | N/A | Displays help information for usage. |
+| `-t` | `--threads` | No | `false` | Enable multi-threaded processing. |
+| `-d` | `--dir` | Yes | `${user.dir}` | Path to the project root directory. |
+| `-g` | `--genai` | Yes | Provider default (resolved by configuration) | GenAI provider and model identifier (for example `OpenAI:gpt-5.1`). |
+| `-i` | `--instructions` | Yes | None | Additional file-processing instructions. Provide either the instruction text directly, or a path to a file containing the instructions. |
+
+Notes:
+
+- Positional arguments: any additional arguments after options are treated as scan directory paths. If none are provided, the scan target defaults to the resolved root directory.
+
+### Example
+
+Run against a project root, enable multi-threading, select a model, and provide extra instructions:
 
 ```bash
-java -jar gw.jar -g OpenAI:gpt-5.1 -d /home/dev/my-project
+java -jar gw.jar \
+  -d /path/to/project \
+  -t \
+  -g OpenAI:gpt-5.1 \
+  -i /path/to/instructions.txt
 ```
 
 ## Resources
 
 - GitHub: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
-- Project site / docs: https://machai.machanism.org

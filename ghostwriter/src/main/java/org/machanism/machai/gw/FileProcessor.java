@@ -29,14 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported
- * files, and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported files,
+ * and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to
- * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
- * every supported file it finds, it builds a prompt using templates from the
- * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
+ * This processor delegates file-specific guidance extraction to {@link Reviewer}
+ * implementations discovered via {@link ServiceLoader}. For every supported file
+ * it finds, it builds a prompt using templates from the {@code document-prompts}
+ * resource bundle and invokes a {@link GenAIProvider}.
  * </p>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -271,7 +271,6 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
-
 		systemFunctionTools.applyTools(provider);
 		provider.setWorkingDir(getRootDir(projectDir));
 
@@ -286,7 +285,7 @@ public class FileProcessor extends ProjectProcessor {
 		provider.prompt(promptBundle.getString("output_format"));
 
 		if (instructions != null) {
-			provider.prompt(this.instructions);
+			provider.prompt(instructions);
 		}
 
 		String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);

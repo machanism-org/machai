@@ -1,20 +1,15 @@
 /**
- * Provides implementations of {@link org.machanism.machai.gw.reviewer.Reviewer} that detect
- * {@code @guidance} markers in project files and convert the relevant content into normalized, prompt-ready text.
+ * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and built-in
+ * implementations used by the Ghostwriter pipeline to locate and extract {@code @guidance} instructions from
+ * project files.
  *
- * <p>Each {@link org.machanism.machai.gw.reviewer.Reviewer} is responsible for identifying guidance markers that are
- * appropriate for a specific file type (for example, HTML comments, Markdown comments, Java block and line comments,
- * and other language-specific conventions). When guidance is present, the reviewer returns a formatted {@link String}
- * that includes the file name/path context and the extracted guidance payload; otherwise it returns {@code null}.
+ * <p>The core abstraction in this package is {@link org.machanism.machai.gw.reviewer.Reviewer}. A reviewer
+ * determines whether it can process a file based on its type and comment conventions, then extracts any guidance
+ * payload and returns a normalized, prompt-ready {@link String} that includes path context.
  *
- * <h2>Usage example</h2>
- * <pre>{@code
- * Reviewer reviewer = new MarkdownReviewer();
- * String extracted = reviewer.perform(projectDir, file);
- * if (extracted != null) {
- *   // aggregate extracted guidance
- * }
- * }</pre>
+ * <p>Concrete reviewers in this package support common source and documentation formats (for example Java,
+ * TypeScript, Python, HTML, Markdown, and plain text) so that guidance can be discovered consistently across a
+ * repository.
  */
 package org.machanism.machai.gw.reviewer;
 

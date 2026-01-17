@@ -1,39 +1,32 @@
 /**
- * Ghostwriter command-line tooling and document-scanning orchestration.
+ * Ghostwriter command-line tooling and orchestration for scanning a workspace and preparing
+ * AI-ready prompt inputs.
  *
- * <p>This package provides the command-line entry point and the core orchestration used to scan a
- * project workspace, discover and process documents and source files, extract embedded guidance
- * directives (as plain source comments), and assemble prompt inputs for a configured
- * {@link org.machanism.machai.ai.manager.GenAIProvider}.
- *
- * <p>Typical responsibilities include:
+ * <p>This package provides the CLI entry point and a processing pipeline that:
  * <ul>
- *   <li>Walking project directories while honoring configured exclusions and boundaries.</li>
- *   <li>Delegating file-type-specific parsing to reviewer implementations.</li>
- *   <li>Aggregating extracted guidance (optionally inheriting from parent directories) and producing
- *       prompt input artifacts for use with an AI provider.</li>
- *   <li>Persisting constructed prompt inputs to a stable location (for example under
- *       {@code .machai/docs-inputs}) to support auditability and repeatable runs.</li>
+ *   <li>Walks a project directory (and optionally its modules) while honoring layout exclusions.</li>
+ *   <li>Delegates file-type-specific extraction to {@code Reviewer} implementations.</li>
+ *   <li>Aggregates extracted {@code @guidance:} directives from supported files and produces
+ *       prompt input artifacts.</li>
+ *   <li>Invokes a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate or
+ *       review documentation content.</li>
  * </ul>
  *
- * <p>Key classes include:
+ * <p>Common entry points:
  * <ul>
- *   <li>{@link org.machanism.machai.gw.Ghostwriter} — CLI entry point that parses arguments,
- *       resolves a provider, and starts scanning.</li>
- *   <li>{@link org.machanism.machai.gw.FileProcessor} — directory walker and processing orchestrator
- *       that delegates to reviewer implementations and aggregates prompt context.</li>
+ *   <li>{@link org.machanism.machai.gw.Ghostwriter} &mdash; CLI entry point.</li>
+ *   <li>{@link org.machanism.machai.gw.FileProcessor} &mdash; scanning/orchestration engine.</li>
  * </ul>
  *
- * <p>Examples:
+ * <p>Example:
  * <pre>{@code
- * // Scan the current working directory from the CLI.
- * Ghostwriter.main(new String[] {});
+ * // From the command line.
+ * // java -jar gw.jar --dir /path/to/project --genai OpenAI:gpt-5.1
  *
  * // Programmatic usage.
- * GenAIProvider provider = GenAIProviderManager.getProvider(null);
- * FileProcessor processor = new FileProcessor(provider);
- * processor.setUseParentsGuidances(true);
- * processor.scanDocuments(new File("/path/to/project/root"));
+ * FileProcessor processor = new FileProcessor("OpenAI:gpt-5.1");
+ * processor.setModuleMultiThread(true);
+ * processor.scanDocuments(new File("/path/to/project"));
  * }</pre>
  *
  * @author Viktor Tovstyi
