@@ -3,6 +3,7 @@ package org.machanism.machai.maven;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
@@ -22,19 +23,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Maven goal that scans and processes project documents.
  *
- * <p>
- * The goal delegates document scanning and processing to {@link FileProcessor}.
- * If a GenAI provider is configured via {@link #genai}, the processor may use it
- * to assist with document workflows.
- * </p>
- *
  * <h2>Parameters</h2>
  * <dl>
  * <dt><b>{@code genai}</b> (property: {@code gw.genai})</dt>
- * <dd>
- * GenAI provider/model identifier used for AI-assisted document processing.
+ * <dd>GenAI provider/model identifier used for AI-assisted document processing.
  * <p>
- * The value format is provider-specific, commonly {@code ProviderName:ModelName}.
+ * The value format is provider-specific, commonly
+ * {@code ProviderName:ModelName}.
  * </p>
  * <p>
  * Examples: {@code OpenAI:gpt-5}, {@code AzureOpenAI:gpt-4o-mini}
@@ -66,6 +61,13 @@ import org.slf4j.LoggerFactory;
  *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
  *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
  *   &lt;version&gt;${project.version}&lt;/version&gt;
+ *   &lt;executions&gt;
+ *     &lt;execution&gt;
+ *       &lt;goals&gt;
+ *         &lt;goal&gt;gw&lt;/goal&gt;
+ *       &lt;/goals&gt;
+ *     &lt;/execution&gt;
+ *   &lt;/executions&gt;
  *   &lt;configuration&gt;
  *     &lt;genai&gt;OpenAI:gpt-5&lt;/genai&gt;
  *   &lt;/configuration&gt;
@@ -92,6 +94,9 @@ public class GW extends AbstractMojo {
 	@Parameter(property = "gw.genai")
 	protected String genai;
 
+	@Parameter(property = "gw.instructions")
+	protected File instructions;
+
 	/** Maven project base directory (read-only). */
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
 	protected File basedir;
@@ -106,7 +111,6 @@ public class GW extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-
 		FileProcessor documents = new FileProcessor(genai) {
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
@@ -122,6 +126,14 @@ public class GW extends AbstractMojo {
 				// No-op for this implementation
 			}
 		};
+
+		if (instructions != null) {
+			try {
+				documents.setInstructions(Files.readString(instructions.toPath()));
+			} catch (IOException e) {
+				LOGGER.info("Failed to read instructions from file: {}", instructions.getAbsolutePath());
+			}
+		}
 
 		LOGGER.info("Scanning documents in the root directory: {}", basedir);
 		try {

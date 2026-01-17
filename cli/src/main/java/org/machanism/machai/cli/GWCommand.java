@@ -2,6 +2,7 @@ package org.machanism.machai.cli;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.machanism.machai.Config;
 import org.machanism.machai.bindex.ApplicationAssembly;
@@ -50,6 +51,9 @@ public class GWCommand {
 					"--scan" }, defaultValue = ShellOption.NULL) File scan,
 			@ShellOption(help = "Enable multi-threaded processing.", value = { "-t",
 					"--threads" }, defaultValue = "false") boolean threads,
+			@ShellOption(help = "Specifies additional file processing instructions. "
+					+ "Provide either the instruction text directly or the path to a file containing the instructions.", value = {
+							"-i", "--instructions" }, defaultValue = ShellOption.NULL, arity = 1) String instructions,
 			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = {
 					"-g", "--genai" }, defaultValue = ShellOption.NULL, arity = 1) String chatModel)
 			throws IOException {
@@ -73,6 +77,20 @@ public class GWCommand {
 
 		chatModel = Config.getChatModel(chatModel);
 		FileProcessor documents = new FileProcessor(chatModel);
+
+		if (instructions != null) {
+			File instructionsFile = new File(instructions);
+			if (instructionsFile.exists()) {
+				try {
+					instructions = Files.readString(instructionsFile.toPath());
+				} catch (IOException e) {
+					logger.info("Failed to read instructions from file: {}", instructions);
+				}
+			}
+		}
+		documents.setInstructions(instructions);
+
+		documents.setInstructions(instructions);
 		documents.setModuleMultiThread(threads);
 		documents.scanDocuments(dir, scan);
 		logger.info("Scanning finished.");
