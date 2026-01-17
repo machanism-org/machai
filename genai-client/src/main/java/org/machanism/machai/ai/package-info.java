@@ -1,8 +1,9 @@
 /**
- * Top-level API and SPI extension points for generative AI providers in the Machanism AI client.
+ * Top-level public API and service provider interface (SPI) for generative AI providers in the Machanism AI
+ * client.
  *
- * <p>This package contains the provider-facing abstractions and serves as the root namespace for plugging in
- * concrete generative AI implementations.
+ * <p>This package is the root namespace for integrating generative AI implementations and includes the core
+ * abstractions that provider integrations build upon.
  *
  * <h2>Sub-packages</h2>
  * <ul>

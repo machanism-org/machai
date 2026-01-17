@@ -1,31 +1,32 @@
 /**
- * Command-line entry point and processing pipeline for Ghostwriter document scanning.
+ * Ghostwriter command-line tooling and document-scanning orchestration.
  *
- * <p>This package contains the CLI entry point and orchestration code that scans a project directory,
- * selects eligible files, extracts {@code @guidance:} directives (as plain source comments), and builds
- * prompt context for a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * <p>This package provides the command-line entry point and the core orchestration used to scan a
+ * project workspace, discover and process documents and source files, extract embedded guidance
+ * directives (as plain source comments), and assemble prompt inputs for a configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <h2>Key components</h2>
+ * <p>Typical responsibilities include:
  * <ul>
- *   <li>{@link org.machanism.machai.gw.Ghostwriter} &mdash; CLI entry point that parses arguments, resolves the
- *       working directory and provider, and triggers scanning.</li>
- *   <li>{@link org.machanism.machai.gw.FileProcessor} &mdash; scanning/processing orchestrator that walks the
- *       directory tree, delegates file selection and content extraction to pluggable reviewers, aggregates
- *       extracted guidance, and writes prompt inputs.</li>
+ *   <li>Walking project directories while honoring configured exclusions and boundaries.</li>
+ *   <li>Delegating file-type-specific parsing to reviewer implementations.</li>
+ *   <li>Aggregating extracted guidance (optionally inheriting from parent directories) and producing
+ *       prompt input artifacts for use with an AI provider.</li>
+ *   <li>Persisting constructed prompt inputs to a stable location (for example under
+ *       {@code .machai/docs-inputs}) to support auditability and repeatable runs.</li>
  * </ul>
  *
- * <h2>Scanning behavior</h2>
+ * <p>Key classes include:
  * <ul>
- *   <li>Directories and files are traversed recursively while honoring exclusions and project boundaries.</li>
- *   <li>Supported file types are handled by reviewer implementations that extract guidance and build prompt
- *       content.</li>
- *   <li>Guidance can be optionally inherited from parent directories to provide additional context.</li>
- *   <li>Prompt input logs are written under {@code .machai/docs-inputs} in the scanned project directory.</li>
+ *   <li>{@link org.machanism.machai.gw.Ghostwriter} — CLI entry point that parses arguments,
+ *       resolves a provider, and starts scanning.</li>
+ *   <li>{@link org.machanism.machai.gw.FileProcessor} — directory walker and processing orchestrator
+ *       that delegates to reviewer implementations and aggregates prompt context.</li>
  * </ul>
  *
- * <h2>Usage</h2>
+ * <p>Examples:
  * <pre>{@code
- * // Default: scan the current working directory.
+ * // Scan the current working directory from the CLI.
  * Ghostwriter.main(new String[] {});
  *
  * // Programmatic usage.

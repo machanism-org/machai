@@ -5,7 +5,7 @@
  * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for environments where no external
  * generative AI / LLM integration should be used.
  *
- * <p>Behavior summary:
+ * <h2>Behavior</h2>
  * <ul>
  *   <li>No network calls are made and no external AI service is contacted.</li>
  *   <li>{@code prompt(String)} accumulates prompt text in memory.</li>

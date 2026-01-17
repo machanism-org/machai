@@ -2,7 +2,7 @@
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
  * <p>This package contains interactive commands (typically implemented as Spring Shell
- * {@code @ShellComponent}s) that orchestrate Machai workflows such as:</p>
+ * {@code @ShellComponent}s) that orchestrate Machai workflows, such as:</p>
  *
  * <ul>
  *   <li>Picking libraries ("bricks") from a bindex registry using natural-language queries.</li>

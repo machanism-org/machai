@@ -1,19 +1,18 @@
 /**
- * File reviewers that extract and normalize guidance content from project files.
+ * Provides implementations of {@link org.machanism.machai.gw.reviewer.Reviewer} that detect
+ * {@code @guidance} markers in project files and convert the relevant content into normalized, prompt-ready text.
  *
- * <p>This package provides {@link org.machanism.machai.gw.reviewer.Reviewer} implementations for a variety of
- * file formats (for example Java, Markdown, HTML/XML, TypeScript, Python, and plain text).
+ * <p>Each {@link org.machanism.machai.gw.reviewer.Reviewer} is responsible for identifying guidance markers that are
+ * appropriate for a specific file type (for example, HTML comments, Markdown comments, Java block and line comments,
+ * and other language-specific conventions). When guidance is present, the reviewer returns a formatted {@link String}
+ * that includes the file name/path context and the extracted guidance payload; otherwise it returns {@code null}.
  *
- * <p>A reviewer is responsible for scanning an input file for language-appropriate {@code @guidance:} markers and
- * returning a normalized text payload. The normalized output can then be aggregated and consumed by downstream
- * automation.
- *
- * <h2>Typical usage</h2>
+ * <h2>Usage example</h2>
  * <pre>{@code
- * Reviewer reviewer = ...; // chosen based on file extension
+ * Reviewer reviewer = new MarkdownReviewer();
  * String extracted = reviewer.perform(projectDir, file);
  * if (extracted != null) {
- *     // consume the normalized guidance
+ *   // aggregate extracted guidance
  * }
  * }</pre>
  */

@@ -1,9 +1,33 @@
-# Bindex Core
-<!-- @guidance: 
-Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the horizontal rule separator between sections. -->
+<!-- @guidance:
+Page Structure: 
+# Header
+   - Project Title: need to use from pom.xml
+   - Maven Central Badge ([![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
+# Introduction
+   - Full description of purpose and benefits.
+# Overview
+   - Explanation of the project function and value proposition.
+# Key Features
+   - Bulleted list highlighting the primary capabilities of the project.
+# Getting Started
+   - Prerequisites: List of required software and services.
+   - Environment Variables: Table describing necessary environment variables.
+   - Basic Usage: Example command to run the plugin.
+   - Typical Workflow: Step-by-step outline of how to use the project artifacts.
+# Configuration
+   - Table of common configuration parameters, their descriptions, and default values.
+   - Example: Command-line example showing how to configure and run the plugin with custom parameters.
+# Resources
+   - List of relevant links (platform, GitHub, Maven).
+-->
 
-Welcome to **Bindex Core**, the foundational library for producing and consuming **bindex** metadata.
+# Bindex Core
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-core.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
+
+## Introduction
+
+Bindex Core is the foundational library for producing and consuming **bindex** metadata. It provides reusable building blocks for generating metadata during builds and for loading, merging, and analyzing metadata emitted by other tools—supporting automated discovery and assembly workflows in the Machanism ecosystem.
 
 ## Overview
 
@@ -13,50 +37,63 @@ Bindex Core provides core APIs and reference implementations to:
 - Read, merge, and analyze bindex metadata produced by other tools
 - Integrate with Maven-oriented models and plugins
 
-## What is bindex metadata?
+## Key Features
 
-**bindex** metadata describes Java artifacts in a structured, tool-friendly form so build tools can produce it and other tools can consume it.
-
-Common use cases include:
-
-- Producing per-artifact or per-module metadata files
-- Aggregating metadata across multi-module builds
-- Merging metadata across dependency graphs for analysis
-
-## Features
-
-- Metadata generation for Java projects
-- Aggregation across modules and dependencies
+- Metadata generation for Java projects and artifacts
+- Aggregation and merging across modules and dependency graphs
 - Extensible components suitable for Maven models and plugin APIs
 
 ## Getting Started
 
-Bindex Core is available on Maven Central.
+### Prerequisites
+
+- Java 9+ (project property: `java.version=9`)
+- Maven 3.x
+
+### Environment Variables
+
+Bindex Core does not require environment variables by default.
+
+| Variable | Required | Description | Default |
+|---|---:|---|---|
+| (none) | No | No environment variables are required for the core library. | N/A |
+
+### Basic Usage
 
 Add it to your `pom.xml`:
 
 ```xml
 <dependency>
-  <groupId>org.machanism-org.machai</groupId>
+  <groupId>org.machanism.machai</groupId>
   <artifactId>bindex-core</artifactId>
   <version>${bindex-core.version}</version>
 </dependency>
 ```
 
-## Typical Usage
+### Typical Workflow
 
-You can use Bindex Core to:
+1. Add `bindex-core` as a dependency to the tool/plugin or application that needs to produce/consume bindex metadata.
+2. Generate bindex metadata during your build (typically from a Maven plugin or build integration).
+3. Load and merge metadata from multiple modules/artifacts.
+4. Analyze the merged metadata to drive discovery/selection/assembly workflows.
 
-- Produce bindex metadata as part of build tooling
-- Consume and interpret existing bindex metadata during build analysis
-- Assemble and merge metadata from multiple modules and dependency sets
+## Configuration
 
-For related tooling and documentation, see <https://github.com/machanism-org/machai>.
+Bindex Core is a library; most configuration is performed through the consuming tool/plugin. The table below lists commonly used, project-relevant settings and their defaults.
 
-## License
+| Parameter | Description | Default |
+|---|---|---|
+| `java.version` | Target Java version used to compile the project. | `9` |
+| `maven.javadoc.skip` | Whether to skip Javadoc generation. | `false` |
 
-Apache License, Version 2.0.
+Example (set project properties when building):
 
-## Contact
+```bash
+mvn -pl bindex-core -Djava.version=11 -Dmaven.javadoc.skip=true clean verify
+```
 
-- Viktor Tovstyi (<viktor.tovstyi@gmail.com>)
+## Resources
+
+- GitHub: <https://github.com/machanism-org/machai>
+- Maven Central: <https://central.sonatype.com/artifact/org.machanism.machai/bindex-core>
+- Issues: <https://github.com/machanism-org/machai/issues>

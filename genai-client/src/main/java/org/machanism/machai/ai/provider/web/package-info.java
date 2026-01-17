@@ -30,19 +30,16 @@
  */
 
 /**
- * Web UI automation based GenAI provider.
+ * Web UI automation based GenAI provider implementations.
  *
- * <p>This package provides a {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that obtains
- * model responses by automating a target GenAI service through its web user interface. Automation is executed
- * via <a href="https://ganteater.com">Anteater</a> workspace recipes.
+ * <p>This package contains {@link org.machanism.machai.ai.manager.GenAIProvider} implementations that obtain
+ * model responses by automating a target GenAI service through its web user interface using
+ * <a href="https://ganteater.com">Anteater</a> workspace recipes.
  *
- * <p>The primary implementation is {@link org.machanism.machai.ai.provider.web.WebProvider}. It:
- * <ul>
- *   <li>selects an Anteater workspace configuration via {@code model(String)},</li>
- *   <li>initializes the workspace for a project directory via {@code setWorkingDir(java.io.File)}, and</li>
- *   <li>runs the {@code "Submit Prompt"} recipe via {@code perform()} to submit the current prompt list and
- *       return the captured result.</li>
- * </ul>
+ * <p>The primary implementation is {@link org.machanism.machai.ai.provider.web.WebProvider}. It loads an
+ * Anteater workspace configuration (via {@code model(String)}), initializes the workspace for a project
+ * directory (via {@code setWorkingDir(java.io.File)}), and submits the accumulated prompt list by executing
+ * the {@code "Submit Prompt"} recipe (via {@code perform()}).
  *
  * <h2>Typical usage</h2>
  * <pre>
@@ -59,7 +56,7 @@
  *   <li>Execution depends on the configured Anteater recipes and workspace configuration being available and
  *       compatible with the target web UI.</li>
  *   <li>The provider maintains static workspace state; it is not thread-safe and does not support switching
- *       working directories within the same JVM instance.</li>
+ *       working directories (or configuration) within the same JVM instance.</li>
  * </ul>
  */
 package org.machanism.machai.ai.provider.web;

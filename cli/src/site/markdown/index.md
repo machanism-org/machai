@@ -1,13 +1,45 @@
-# Machai CLI
-<!-- @guidance: 
-- Analyze the source file and create a Maven Site-style introductory home page for your project.
-- Do not use the horizontal rule separator between sections. 
-- Scan `org/machanism/machai/cli` source folder and describe all supported Commands.
+<!-- @guidance:
+Page Structure: 
+# Header
+   - Project Title: need to use from pom.xml
+   - Maven Central Badge ([![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
+# Introduction
+   - Full description of purpose and benefits.
+# Overview
+   - Explanation of the project function and value proposition.
+# Key Features
+   - Bulleted list highlighting the primary capabilities of the project.
+# Getting Started
+   - Prerequisites: List of required software and services.
+   - Environment Variables: Table describing necessary environment variables.
+   - Basic Usage: Example command to run the plugin.
+   - Typical Workflow: Step-by-step outline of how to use the project artifacts.
+# Configuration
+   - Table of common configuration parameters, their descriptions, and default values.
+   - Example: Command-line example showing how to configure and run the plugin with custom parameters.
+# Resources
+   - List of relevant links (platform, GitHub, Maven).
 -->
 
-The Machai Command Line Interface (CLI) is a Spring Boot + Spring Shell application for generating and registering Machai metadata, picking libraries from a metadata database, assembling projects, and running Ghostwriter (GenAI) file-processing workflows from the terminal.
+# Machai CLI
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai-cli.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai-cli)
+
+## Introduction
+
+Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library discovery and integration.
 
 ![Machai CLI Screenshot](images/machai-screenshot.png)
+
+## Overview
+
+Machai CLI is a Spring Boot + Spring Shell application that helps you:
+
+- Generate and update `bindex.json` metadata for projects.
+- Register metadata into a metadata database for later discovery.
+- Search for libraries ("bricks") using a natural-language prompt.
+- Assemble new projects from previously picked libraries.
+- Run Ghostwriter (GenAI) file-processing workflows from the terminal.
 
 ## Key Features
 
@@ -21,143 +53,81 @@ The Machai Command Line Interface (CLI) is a Spring Boot + Spring Shell applicat
 
 ## Getting Started
 
-1. **Download Machai CLI**
+### Prerequisites
 
-   Download the latest CLI JAR:
+- Java 17+
+- A GenAI provider API key (for example, OpenAI)
+- Network access to the metadata database endpoint used by `pick`/`assembly`/`register`
 
-   [![Download zip](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai.jar/download)
+### Environment Variables
 
-2. **Configure environment variables**
+| Variable Name | Description |
+|---|---|
+| `OPENAI_API_KEY` | API key used by the configured GenAI provider for AI-powered operations. |
+| `BINDEX_REG_PASSWORD` | Password for database write access (required for metadata registration). |
 
-   | Variable Name         | Description |
-   |----------------------|-------------|
-   | `OPENAI_API_KEY`      | API key used by the configured GenAI provider for AI-powered operations. |
-   | `BINDEX_REG_PASSWORD` | Password for database write access (required for metadata registration). |
+### Basic Usage
 
-3. **Run Machai CLI**
+```bash
+java -jar machai.jar
+```
+
+Then enter `help` to see the available commands.
+
+### Typical Workflow
+
+1. Generate (or update) `bindex.json` for a project:
 
    ```bash
-   java -jar machai.jar
+   bindex --dir <project-path> --update true
    ```
 
-   Then enter `help` to see the available commands.
+2. Register the generated metadata in the metadata database:
 
-## Supported Commands
+   ```bash
+   register --dir <project-path> --registerUrl <url>
+   ```
 
-Commands are implemented in `org.machanism.machai.cli`.
+3. Pick libraries by semantic search:
 
-### `pick`
+   ```bash
+   pick --query "<prompt or file path>" --registerUrl <url>
+   ```
 
-Picks (searches) libraries in the metadata database that match a natural-language prompt. The prompt can be provided directly or as a path to a file.
+4. Assemble a new project from the picked libraries:
 
-**Usage**
+   ```bash
+   assembly --dir <output-folder>
+   ```
 
-```bash
-pick --query "<prompt or file path>" [--registerUrl <url>] [--score <min-score>] [--genai <provider:model>]
-```
+5. (Optional) Run Ghostwriter processing:
 
-**Notes**
+   ```bash
+   gw --dir <working-directory>
+   ```
 
-- Results are cached in the current CLI session and can be reused by `assembly` when `--query` is omitted.
+## Configuration
 
-### `assembly`
+### Common Parameters
 
-Assembles a project in a working directory from a picked set of libraries (“bricks”). If `--query` is provided, the command runs a `pick` first; otherwise it reuses the previous `pick` results.
+| Parameter | Description | Default |
+|---|---|---|
+| `--dir` | Working directory used by commands that operate on a project/workspace. | Current directory / configured default |
+| `--registerUrl` | Metadata database endpoint for `pick`/`assembly`/`register`. | (none) |
+| `--genai` | GenAI provider/model (format: `provider:model`). | Configured default |
+| `--score` | Minimum similarity score for matches (used by commands that support it). | Configured default |
+| `--update` | Whether to update existing metadata/registration. | Command-specific |
 
-**Usage**
-
-```bash
-assembly [--query "<prompt or file path>"] [--dir <output-folder>] [--registerUrl <url>] [--score <min-score>] [--genai <provider:model>]
-```
-
-### `prompt`
-
-Sends a prompt directly to the configured GenAI provider/model and prints the response.
-
-**Usage**
-
-```bash
-prompt --query "<text>" --genai <provider:model> [--dir <working-directory>]
-```
-
-### `bindex`
-
-Generates (or updates) `bindex.json` metadata by scanning a project directory.
-
-**Usage**
+### Example: Configure and run with custom parameters
 
 ```bash
-bindex [--dir <project-path>] [--update true|false] [--genai <provider:model>]
+pick --query "Find libraries for a Spring Boot REST API" --registerUrl https://example.com/register --score 0.75 --genai openai:gpt-4o-mini
 ```
 
-### `register`
+## Resources
 
-Registers a generated `bindex.json` file into a metadata database.
-
-**Usage**
-
-```bash
-register [--dir <project-path>] [--registerUrl <url>] [--update true|false]
-```
-
-### `gw`
-
-Runs Ghostwriter file processing for a directory. By default, the scan directory is the working directory.
-
-**Usage**
-
-```bash
-gw [--dir <working-directory>] [--scan <scan-folder>] [--threads true|false] [--genai <provider:model>]
-```
-
-### `clean`
-
-Recursively removes all `.machai` temporary folders under the given directory.
-
-**Usage**
-
-```bash
-clean [--dir <project-root>]
-```
-
-### `genai`
-
-Sets the default GenAI service provider/model used when commands omit `--genai`.
-
-**Usage**
-
-```bash
-genai <provider:model>
-```
-
-### `dir`
-
-Sets the default working directory used when `--dir` is omitted.
-
-**Usage**
-
-```bash
-dir <path>
-```
-
-### `score`
-
-Sets the default minimum similarity score used by commands that support `--score`.
-
-**Usage**
-
-```bash
-score <min-score>
-```
-
-### `conf`
-
-Shows the current configuration properties.
-
-**Usage**
-
-```bash
-conf
-```
+- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/machai-cli
+- Source repository: https://github.com/machanism-org/machai
+- Project site: https://machai.machanism.org
 
 <!-- @guidance: DO NOT REMOVE OR MODIFY GUIDANCE TAG CONTENT. KEEP IT AS IS. -->

@@ -1,22 +1,52 @@
 # Assembly Maven Plugin
-<!-- @guidance: 
-Analyze the source file and create a Maven Site-style introductory home page for your project.
-Do not use the horizontal rule separator between sections. -->
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
 
-The `assembly-maven-plugin` helps bootstrap and evolve Maven-based Java projects by automating common setup tasks and assisting with dependency selection.
+<!-- @guidance:
+Page Structure: 
+# Header
+   - Project Title: need to use from pom.xml
+   - Maven Central Badge ([![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
+# Introduction
+   - Full description of purpose and benefits.
+# Overview
+   - Explanation of the project function and value proposition.
+# Key Features
+   - Bulleted list highlighting the primary capabilities of the project.
+# Getting Started
+   - Prerequisites: List of required software and services.
+   - Environment Variables: Table describing necessary environment variables.
+   - Basic Usage: Example command to run the plugin.
+   - Typical Workflow: Step-by-step outline of how to use the project artifacts.
+# Configuration
+   - Table of common configuration parameters, their descriptions, and default values.
+   - Example: Command-line example showing how to configure and run the plugin with custom parameters.
+# Resources
+   - List of relevant links (platform, GitHub, Maven).
+-->
+
+## Introduction
+
+Assembly Maven Plugin is a Maven plugin that automates project assembly tasks within the Machanism ecosystem.
+
+It helps you go from a short project concept to concrete, reviewable changes in your working tree (for example updates to `pom.xml` and related project files). It can also use Machanism bindex metadata (for example `bindex.json`) to guide dependency selection and streamline setup.
 
 ## Overview
 
-Use this plugin to assemble project structure and configuration from a short project concept. It reduces repetitive manual work while keeping generated changes reviewable and editable.
+Use this plugin when you want to quickly generate or evolve a Maven project by applying structured updates locally, rather than performing repetitive manual setup.
+
+Value proposition:
+
+- **Faster bootstrapping:** reduces time spent on boilerplate project setup.
+- **Better library choices:** can recommend dependencies using metadata and semantic search.
+- **Human-controlled output:** all changes are written to disk so you can inspect, edit, and commit.
 
 ## Key Features
 
-- **Dependency suggestions:** Recommends libraries based on your goals.
-- **Project bootstrap:** Creates or updates common project files and structure.
-- **Reproducibility support:** Can integrate with Machanism metadata (for example `bindex.json`) to improve assembly control.
-- **Reviewable output:** All changes are made directly in your project so you can inspect, adjust, and commit them.
+- **Project bootstrap and evolution:** creates or updates common project files and structure.
+- **Metadata-driven assembly:** can use Machanism bindex metadata (for example `bindex.json`) to guide library selection.
+- **GenAI-assisted search and selection:** supports semantic discovery of candidate libraries.
+- **Reviewable output:** writes changes into your project so you can inspect, adjust, and commit them.
 
 ## Getting Started
 
@@ -28,9 +58,9 @@ Use this plugin to assemble project structure and configuration from a short pro
 
 ### Environment Variables
 
-| Variable         | Description    |
-|------------------|----------------|
-| `OPENAI_API_KEY` | OpenAI API key |
+| Variable         | Description                    |
+|------------------|--------------------------------|
+| `OPENAI_API_KEY` | API key for the OpenAI backend |
 
 ### Basic Usage
 
@@ -42,17 +72,18 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 
 ### Typical Workflow
 
-1. Describe your project concept in `project.txt` (or another file you reference).
-2. Execute the plugin.
+1. Write a short project concept in `project.txt` (or another file you reference).
+2. Run the `assembly` goal.
 3. Review the updated `pom.xml` and any generated/modified project files.
+4. Keep what you want (edit as needed) and commit the changes.
 
-## Plugin Configuration
+## Configuration
 
 Common parameters:
 
 | Parameter              | Description                                  | Default             |
 |------------------------|----------------------------------------------|---------------------|
-| `assembly.genai`       | AI model used for assembly tasks             | `OpenAI:gpt-5`      |
+| `assembly.genai`       | GenAI model used for assembly tasks          | `OpenAI:gpt-5`      |
 | `pick.genai`           | Model used for library selection             | `OpenAI:gpt-5-mini` |
 | `assembly.prompt.file` | Path to the project concept file             | `project.txt`       |
 | `assembly.score`       | Minimum confidence score for recommendations | `0.80`              |
@@ -71,8 +102,5 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly \
 
 - [Machanism Platform](https://machanism.org)
 - [Machai on GitHub](https://github.com/machanism-org/machai)
+- [Maven Central Artifact](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
 - [Maven](https://maven.apache.org)
-
-## License
-
-Licensed under the Apache 2.0 License.

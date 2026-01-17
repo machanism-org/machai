@@ -15,6 +15,7 @@
  *      
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
+ * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * 
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
@@ -33,10 +34,14 @@
  * Maven plugin goal implementation for AI-assisted project assembly.
  *
  * <p>
- * This package contains the {@link org.machanism.machai.maven.Assembly} Mojo for the {@code assembly} goal.
- * The goal obtains an assembly prompt (from a configured file or via interactive input), uses a configured
- * generative-AI provider to recommend candidate libraries, optionally filters recommendations by a minimum
- * score threshold, and then runs the assembly workflow against the Maven project in the current base
+ * This package contains the {@link org.machanism.machai.maven.Assembly} Maven Mojo which implements the
+ * {@code assembly} goal.
+ * </p>
+ *
+ * <p>
+ * The goal reads an assembly prompt (from a configured file or via interactive input), uses a configured
+ * generative-AI provider to recommend candidate libraries, optionally filters those recommendations by a minimum
+ * score threshold, and then runs the assembly workflow against the Maven project located in the current base
  * directory.
  * </p>
  *

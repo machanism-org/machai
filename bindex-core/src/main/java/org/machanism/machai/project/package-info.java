@@ -1,5 +1,5 @@
 /**
- * Provides APIs for detecting a filesystem-backed project layout and for traversing a project directory,
+ * Supports detecting a filesystem-backed project layout and traversing a project directory,
  * including simple multi-module/workspace projects.
  *
  * <p>The package centers around two responsibilities:
@@ -24,7 +24,7 @@
  * <pre>{@code
  * File projectDir = new File("/path/to/project");
  *
- * // Detect the layout (Maven, JS workspaces, Python, or a default fallback).
+ * // Detect the layout (e.g., Maven, JavaScript workspaces, Python, or a default fallback).
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
  *
  * // Traverse the project; subclasses implement how to handle each detected layout.
@@ -54,12 +54,10 @@ package org.machanism.machai.project;
  *      
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * 
- * -  Maintain Consistency and Formatting:
+ * 		-  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
  * 		- Use proper Markdown or HTML formatting for readability.
- * 
- * - Add Javadoc:
+ * 		- Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
