@@ -81,7 +81,7 @@ mvn -DskipTests package
 
 - Download the CLI jar:
 
-[Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")]((https://sourceforge.net/projects/machanism/files/gw.jar/download))
+[[Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")]((https://sourceforge.net/projects/machanism/files/gw.jar/download))
 
 ### Basic Usage
 
