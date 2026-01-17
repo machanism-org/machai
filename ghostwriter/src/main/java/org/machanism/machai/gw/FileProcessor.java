@@ -275,8 +275,7 @@ public class FileProcessor extends ProjectProcessor {
 		systemFunctionTools.applyTools(provider);
 		provider.setWorkingDir(getRootDir(projectDir));
 
-		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
-				StringUtils.defaultIfEmpty(this.instructions, ""));
+		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
 		provider.instructions(effectiveInstructions);
 
 		provider.prompt(promptBundle.getString("docs_processing_instructions"));
@@ -285,6 +284,10 @@ public class FileProcessor extends ProjectProcessor {
 		provider.prompt(projectInfo);
 		provider.prompt(guidance);
 		provider.prompt(promptBundle.getString("output_format"));
+
+		if (instructions != null) {
+			provider.prompt(this.instructions);
+		}
 
 		String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
 		File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
@@ -312,13 +315,10 @@ public class FileProcessor extends ProjectProcessor {
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream()
-					.filter(t -> t != null && new File(projectDir, t).exists())
-					.map(e -> {
-						String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
-						return "`" + relatedPath + "`";
-					})
-					.collect(Collectors.toList());
+			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists()).map(e -> {
+				String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
+				return "`" + relatedPath + "`";
+			}).collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 

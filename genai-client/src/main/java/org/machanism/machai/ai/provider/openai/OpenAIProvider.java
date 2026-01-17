@@ -230,17 +230,18 @@ public class OpenAIProvider implements GenAIProvider {
 	@Override
 	public String perform() {
 		String result = null;
-		Builder builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()))
-				.inputOfResponse(inputs);
+		Builder builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()));
 
 		if (instructions != null) {
 			builder.instructions(instructions);
 		}
 
+		builder.inputOfResponse(inputs);
+
 		logInputs();
 
 		Response response = getClient().responses().create(builder.build());
-		result = parseResponse(response, instructions);
+		result = parseResponse(response);
 		clear();
 		return result;
 	}
@@ -252,7 +253,7 @@ public class OpenAIProvider implements GenAIProvider {
 	 * @param instructions optional instructions
 	 * @return response string, following reasoning and/or tool calls
 	 */
-	private String parseResponse(Response response, String instructions) {
+	private String parseResponse(Response response) {
 		String result = null;
 		List<ResponseOutputItem> output = response.output();
 		boolean fcall = false;
