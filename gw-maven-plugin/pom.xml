@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>machai</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.0.3</version>
 	</parent>
 	<packaging>maven-plugin</packaging>
 
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>ghostwriter</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.3</version>
 		</dependency>
 
 		<dependency>
@@ -97,4 +97,11 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<scm>
+		<connection>scm:git:https://github.com/machanism-org/machai.git</connection>
+		<developerConnection>scm:git:https://github.com/machanism-org/machai.git</developerConnection>
+		<url>https://github.com/machanism-org/machai.git</url>
+	</scm>
+
 </project>
