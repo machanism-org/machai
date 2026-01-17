@@ -12,7 +12,7 @@ Page Structure:
 # Getting Started
    - Prerequisites: List of required software and services.
    - Environment Variables: Table describing necessary environment variables.
-   - Add the Machai CLI application jar download link: [Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/gw.jar/download) to the installation section.
+   - Add the Machai CLI application jar download link: [![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/gw.jar/download) to the installation section.
    - Basic Usage: Example command to run the application.
    - Typical Workflow: Step-by-step outline of how to use the project artifacts.
 # Configuration
@@ -81,7 +81,7 @@ mvn -DskipTests package
 
 - Download the CLI jar:
 
-[[Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")]((https://sourceforge.net/projects/machanism/files/gw.jar/download))
+[![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")]((https://sourceforge.net/projects/machanism/files/gw.jar/download))
 
 ### Basic Usage
 
