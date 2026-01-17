@@ -37,13 +37,17 @@ It is designed for use in local workflows and CI pipelines to keep documentation
 
 ## Overview
 
-Ghostwriter runs as a CLI application. You point it at a project directory (or let it default to the current working directory) and optionally provide:
+Machai Ghostwriter is an AI-powered tool that automates and standardizes project documentation and code annotation. Using guided file processing and `@guidance` annotations, it enables developers to maintain consistent, clear, and up-to-date documentation across multi-module projects in languages such as Java, TypeScript, and Python. Ghostwriter simplifies the embedding, extraction, and management of project guidance, ensuring your codebase and documentation remain synchronized.
 
-- A GenAI provider/model selection.
-- Additional processing instructions (inline or from a file).
-- A list of directories to scan.
+Ghostwriter operates as a CLI application. Simply point it to your project directory (or use the current working directory by default) and optionally specify:
 
-It then traverses the target directories and processes documentation-related files according to the embedded guidance and the provided instructions.
+- A GenAI provider or model,
+- Additional processing instructions (inline or from a file),
+- Directories to include in the scan.
+
+Ghostwriter will then traverse the specified directories, processing documentation-related files according to embedded guidance and your instructions.
+
+Learn more about the Machanism platform and guided file processing at [Guided File Processing](https://machanism.org/guided-file-processing/index.html).
 
 ## Key Features
 
@@ -101,13 +105,21 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 
 ### Command-line Options
 
-| Option | Long | Argument | Description | Default |
-|---|---|---:|---|---|
-| `-h` | `--help` | No | Displays help information for usage. | Off |
-| `-t` | `--threads` | No | Enable multi-threaded processing. | Off |
-| `-d` | `--dir` | Yes | Path to the project directory (project root). | Current working directory (resolved via `Config.getWorkingDir(...)`) |
-| `-g` | `--genai` | Yes | GenAI service provider and model (e.g. `OpenAI:gpt-5.1`). | Resolved by `Config.getChatModel(...)` |
-| `-i` | `--instructions` | Yes | Additional file-processing instructions (either the instruction text directly, or a path to a file containing instructions). | None |
+| Option | Long Option    | Argument | Description                                                                 | Default                      |
+|--------|---------------|:--------:|------------------------------------------------------------------------------|------------------------------|
+| `-h`   | `--help`      | No       | Displays help information and usage instructions.                        | Off                          |
+| `-t`   | `--threads`   | No       | Enables multi-threaded processing.                                       | Off                          |
+| `-d`   | `--dir`       | Yes      | Specifies the path to the project directory (project root).               | Current working directory*   |
+| `-g`   | `--genai`     | Yes      | Sets the GenAI service provider and model.  | `OpenAI:gpt-5-mini`*   |
+| `-i`   | `--instructions` | Yes   | Provides additional file-processing instructions (either as direct text or as a path to a file containing instructions). | None                         |
+
+\* The `dir` and `genai` options can also be defined in a `machai.properties` file located in the current directory. For example:
+
+```properties
+#Fri Jan 16 10:54:55 EET 2026
+dir=C\:\\projects\\machanism.org\\machai
+genai=OpenAI\:gpt-5-2-2025-12-11
+```
 
 **Positional arguments**: one or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
 
