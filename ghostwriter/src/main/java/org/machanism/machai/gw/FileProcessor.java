@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +29,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts {@code @guidance:} instructions from supported files, and prepares prompt inputs
- * for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported
+ * files, and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to {@link Reviewer} implementations discovered via
- * {@link ServiceLoader}. For every supported file it finds, it builds a prompt using templates from the
+ * This processor delegates file-specific guidance extraction to
+ * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
+ * every supported file it finds, it builds a prompt using templates from the
  * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
  * </p>
  */
@@ -44,13 +46,19 @@ public class FileProcessor extends ProjectProcessor {
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@guidance:";
 
-	/** Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}. */
+	/**
+	 * Temporary directory name for documentation inputs under
+	 * {@link #MACHAI_TEMP_DIR}.
+	 */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/** Utility that installs tool functions (filesystem/command) into the provider when supported. */
+	/**
+	 * Utility that installs tool functions (filesystem/command) into the provider
+	 * when supported.
+	 */
 	private final SystemFunctionTools systemFunctionTools;
 
 	/** Reviewer associations keyed by normalized (lowercase) file extension. */
@@ -62,6 +70,8 @@ public class FileProcessor extends ProjectProcessor {
 	private final String genai;
 
 	private boolean moduleMultiThread;
+
+	private String instructions;
 
 	/**
 	 * Constructs a processor.
@@ -75,7 +85,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping supported file extensions to a reviewer.
+	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping
+	 * supported file extensions to a reviewer.
 	 */
 	private void loadReviewers() {
 		reviewMap.clear();
@@ -103,8 +114,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and prepares inputs for documentation generation. This overload
-	 * defaults the scan start directory to {@code basedir}.
+	 * Scans documents in the given root directory and prepares inputs for
+	 * documentation generation. This overload defaults the scan start directory to
+	 * {@code basedir}.
 	 *
 	 * @param basedir root directory to scan
 	 * @throws IOException if an error occurs reading files
@@ -114,7 +126,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and start subdirectory, preparing inputs for documentation generation.
+	 * Scans documents in the given root directory and start subdirectory, preparing
+	 * inputs for documentation generation.
 	 *
 	 * @param rootDir the root directory of the project to scan
 	 * @param dir     the directory to begin scanning
@@ -126,7 +139,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Recursively scans project folders, processing documentation inputs for all found modules and files.
+	 * Recursively scans project folders, processing documentation inputs for all
+	 * found modules and files.
 	 *
 	 * @param projectDir the directory containing the project/module to be scanned
 	 * @throws IOException if an error occurs reading files
@@ -180,25 +194,23 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IOException           if file reading fails
 	 */
 	protected void processParentFiles(File projectDir) throws FileNotFoundException, IOException {
-		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
-		systemFunctionTools.applyTools(provider);
-		provider.setWorkingDir(getRootDir(projectDir));
-
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		List<String> modules = projectLayout.getModules();
 
 		File[] children = projectDir.listFiles();
-		if (children != null) {
-			for (File child : children) {
-				if (isModuleDir(modules, child) || isExcludedByLayout(child)) {
-					continue;
-				}
+		if (children == null) {
+			return;
+		}
 
-				if (child.isDirectory()) {
-					processProjectDir(projectLayout, child, provider);
-				} else {
-					logIfNotBlank(processFile(projectLayout, child, provider));
-				}
+		for (File child : children) {
+			if (isModuleDir(modules, child) || isExcludedByLayout(child)) {
+				continue;
+			}
+
+			if (child.isDirectory()) {
+				processProjectDir(projectLayout, child);
+			} else {
+				logIfNotBlank(processFile(projectLayout, child));
 			}
 		}
 	}
@@ -230,42 +242,44 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	@Override
 	public void processFolder(ProjectLayout projectLayout) {
-		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
-		systemFunctionTools.applyTools(provider);
-
-		File projectDir = projectLayout.getProjectDir();
-		provider.setWorkingDir(getRootDir(projectDir));
 		try {
-			List<File> files = findFiles(projectDir);
+			List<File> files = findFiles(projectLayout.getProjectDir());
 			for (File file : files) {
-				logIfNotBlank(processFile(projectLayout, file, provider));
+				logIfNotBlank(processFile(projectLayout, file));
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	private void processProjectDir(ProjectLayout projectLayout, File scanDir, GenAIProvider provider) {
+	private void processProjectDir(ProjectLayout projectLayout, File scanDir) {
 		try {
 			List<File> files = findFiles(scanDir);
 			for (File file : files) {
-				logIfNotBlank(processFile(projectLayout, file, provider));
+				logIfNotBlank(processFile(projectLayout, file));
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	private String processFile(ProjectLayout projectLayout, File file, GenAIProvider provider) throws IOException {
+	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
 		String guidance = parseFile(projectDir, file);
-
 		if (guidance == null) {
 			return null;
 		}
 
-		provider.instructions(promptBundle.getString("sys_instractions"));
-		provider.prompt(promptBundle.getString("docs_processing_instractions"));
+		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
+
+		systemFunctionTools.applyTools(provider);
+		provider.setWorkingDir(getRootDir(projectDir));
+
+		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
+				StringUtils.defaultIfEmpty(this.instructions, ""));
+		provider.instructions(effectiveInstructions);
+
+		provider.prompt(promptBundle.getString("docs_processing_instructions"));
 
 		String projectInfo = getProjectStructureDescription(projectLayout);
 		provider.prompt(projectInfo);
@@ -303,7 +317,8 @@ public class FileProcessor extends ProjectProcessor {
 					.map(e -> {
 						String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
 						return "`" + relatedPath + "`";
-					}).collect(Collectors.toList());
+					})
+					.collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 
@@ -330,7 +345,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	private List<File> findFiles(File projectDir) throws IOException {
 		if (projectDir == null || !projectDir.isDirectory()) {
-			return List.of();
+			return Collections.emptyList();
 		}
 
 		File[] files = projectDir.listFiles();
@@ -373,5 +388,9 @@ public class FileProcessor extends ProjectProcessor {
 					"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
 		}
 		this.moduleMultiThread = moduleMultiThread;
+	}
+
+	public void setInstructions(String instructions) {
+		this.instructions = instructions;
 	}
 }
