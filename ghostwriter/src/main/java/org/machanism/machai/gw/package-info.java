@@ -1,15 +1,15 @@
 /**
- * Ghostwriter command-line tooling and orchestration for scanning a workspace and preparing
- * AI-ready prompt inputs.
+ * Ghostwriter command-line tooling and orchestration for scanning a workspace and preparing AI-ready
+ * prompt inputs.
  *
- * <p>This package provides the CLI entry point and a processing pipeline that:
+ * <p>This package provides the CLI entry point and a processing pipeline that typically:
  * <ul>
  *   <li>Walks a project directory (and optionally its modules) while honoring layout exclusions.</li>
  *   <li>Delegates file-type-specific extraction to {@code Reviewer} implementations.</li>
- *   <li>Aggregates extracted {@code @guidance:} directives from supported files and produces
- *       prompt input artifacts.</li>
- *   <li>Invokes a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate or
- *       review documentation content.</li>
+ *   <li>Aggregates extracted {@code @guidance:} directives from supported files and produces prompt input
+ *       artifacts.</li>
+ *   <li>Invokes a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate or review
+ *       documentation content.</li>
  * </ul>
  *
  * <p>Common entry points:

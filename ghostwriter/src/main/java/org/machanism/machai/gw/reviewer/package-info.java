@@ -3,13 +3,23 @@
  * implementations used by the Ghostwriter pipeline to locate and extract {@code @guidance} instructions from
  * project files.
  *
- * <p>The core abstraction in this package is {@link org.machanism.machai.gw.reviewer.Reviewer}. A reviewer
- * determines whether it can process a file based on its type and comment conventions, then extracts any guidance
- * payload and returns a normalized, prompt-ready {@link String} that includes path context.
+ * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} inspects a file using the comment conventions of a
+ * particular format (for example, Java block comments, HTML comments, or Python line comments). When guidance is
+ * found, the reviewer returns a normalized, prompt-ready {@link String} that includes path context suitable for
+ * downstream processing.
  *
- * <p>Concrete reviewers in this package support common source and documentation formats (for example Java,
- * TypeScript, Python, HTML, Markdown, and plain text) so that guidance can be discovered consistently across a
- * repository.
+ * <h2>Usage</h2>
+ *
+ * <p>Reviewers are typically discovered and invoked by the Ghostwriter file-processing pipeline to scan a
+ * repository and collect guidance.
+ *
+ * <pre>{@code
+ * Reviewer reviewer = new JavaReviewer();
+ * String promptFragment = reviewer.perform(projectDir, file);
+ * if (promptFragment != null) {
+ *     // Feed into the documentation / prompt pipeline.
+ * }
+ * }</pre>
  */
 package org.machanism.machai.gw.reviewer;
 

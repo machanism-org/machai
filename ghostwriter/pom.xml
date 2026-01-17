@@ -11,6 +11,12 @@
 	<artifactId>ghostwriter</artifactId>
 	<name>Ghostwriter</name>
 
+	<properties>
+		<java.version>9</java.version>
+		<maven.javadoc.skip>false</maven.javadoc.skip>
+		<ae.dir>../genai-client/src/main/ae</ae.dir>
+	</properties>
+
 	<profiles>
 		<profile>
 			<id>pack</id>
@@ -108,11 +114,6 @@
 		scans, analyzes, and assembles project documentation using embedded
 		guidance tags and AI-powered synthesis.
 	</description>
-
-	<properties>
-		<maven.javadoc.skip>false</maven.javadoc.skip>
-		<ae.dir>../genai-client/src/main/ae</ae.dir>
-	</properties>
 
 	<dependencies>
 		<dependency>
