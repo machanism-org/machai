@@ -11,71 +11,60 @@ import com.ganteater.ae.AEWorkspace;
 import com.ganteater.ae.RecipeRunner;
 
 /**
- * The {@code WebProvider} class serves as a gateway for interacting with
- * web-based user interfaces via a web driver when direct access to the GenAI
- * API is not feasible. It automates communication with supported services such
- * as <a href="https://solutionshub.epam.com/solution/ai-dial">AI DIAL</a> and
- * <a href="https://www.youtube.com/@EPAMAIRunCodeMie">EPAM AI/Run CodeMie</a>,
- * utilizing recipes from <a href="https://ganteater.com">Anteater</a> for
- * sending and receiving information.
- * <p>
- * <b>Limitations:</b> Configuration and usage of this class may require
- * additional plugins or handling of resources such as the clipboard, especially
- * for platforms like CodeMie. Please refer to target platform instructions
- * prior to use.
- * </p>
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that obtains model responses by
+ * automating a target GenAI service through its web user interface.
  *
- * <h3>Usage Example</h3>
- * 
- * <pre>
- * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
- * </pre>
+ * <p>Automation is executed via <a href="https://ganteater.com">Anteater</a> workspace recipes. The provider
+ * loads a workspace configuration (see {@link #model(String)}), initializes the workspace with a project
+ * directory (see {@link #setWorkingDir(File)}), and submits the current prompt list by running the
+ * {@code "Submit Prompt"} recipe (see {@link #perform()}).
  *
- * <h4>Thread Safety</h4> This implementation is <b>not</b> thread-safe.
- *
- * <h4>Parameters and Methods</h4>
+ * <h2>Thread safety and lifecycle</h2>
  * <ul>
- * <li><b>perform()</b> - Executes the AE workspace task using input
- * prompts.</li>
- * <li><b>setWorkingDir(File workingDir)</b> - Initializes workspace with
- * configuration and runs setup nodes.</li>
- * <li><b>model(String configName)</b> - Sets the AE workspace configuration
- * name.</li>
+ *   <li>This provider is not thread-safe.</li>
+ *   <li>Workspace state is stored in static fields; the working directory cannot be changed once initialized
+ *       in the current JVM instance.</li>
+ *   <li>{@link #close()} closes the underlying workspace.</li>
  * </ul>
+ *
+ * <h2>Example</h2>
+ * <pre>
+ * {@code
+ * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
+ * provider.model("config.yaml");
+ * provider.setWorkingDir(new File("/path/to/project"));
+ * String response = provider.perform();
+ * }
+ * </pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
 public class WebProvider extends NoneProvider {
 	/** Logger for this class. */
-	private static Logger logger = LoggerFactory.getLogger(WebProvider.class);
+	private static final Logger logger = LoggerFactory.getLogger(WebProvider.class);
 
-	/** AEWorkspace instance used for task execution. */
+	/** Shared AEWorkspace instance used for task execution. */
 	private static AEWorkspace workspace = new AEWorkspace();
 
-	/** Root directory for workspace operations. */
+	/** Root directory for workspace operations (set once per JVM instance). */
 	private static File rootDir;
 
-	/** Name of the configuration file to be loaded. */
+	/** Name of the Anteater configuration to be loaded. */
 	private static String configName;
 
 	static {
-		// Ensure Java AWT headless mode is appropriately set for AE tasks
 		System.setProperty("java.awt.headless", "false");
 	}
 
 	/**
-	 * Executes the AE workspace task using provided input prompts.
+	 * Submits the current prompts to the configured web UI by executing the {@code "Submit Prompt"} recipe.
 	 *
-	 * @return the result string from AE task execution
-	 * @throws IllegalArgumentException if AE task execution fails (wraps any
-	 *                                  Exception)
-	 * 
-	 *                                  <pre>
-	 * &lt;code&gt;
-	 * String result = provider.perform();
-	 * &lt;/code&gt;
-	 *                                  </pre>
+	 * <p>The list of prompts is passed to the workspace as a system variable named {@code INPUTS}. The recipe is
+	 * expected to place the final response text into a variable named {@code result}.
+	 *
+	 * @return the response captured by the automation recipe
+	 * @throws IllegalArgumentException if the underlying automation fails for any reason
 	 */
 	@Override
 	public synchronized String perform() {
@@ -92,11 +81,20 @@ public class WebProvider extends NoneProvider {
 	}
 
 	/**
-	 * Sets the working directory for AE workspace operations, initializes
-	 * configuration and runs setup nodes if not already initialized.
+	 * Initializes the Anteater workspace for the given project directory.
 	 *
-	 * @param workingDir the working directory to be set
-	 * @throws IllegalArgumentException if initialization fails
+	 * <p>This method is intended to be called once per JVM instance. If called again with a different directory,
+	 * it fails fast.
+	 *
+	 * <p>The workspace start directory is determined as follows:
+	 * <ol>
+	 *   <li>Use {@code workingDir} by default.</li>
+	 *   <li>If a directory (or file) exists under {@code workingDir} at the path provided by system property
+	 *       {@code recipes} (default: {@code genai-client/src/main/resources}), that location is used instead.</li>
+	 * </ol>
+	 *
+	 * @param workingDir project root directory used for workspace variables and to resolve recipe locations
+	 * @throws IllegalArgumentException if initialization fails or a different working directory is requested
 	 */
 	@Override
 	public void setWorkingDir(File workingDir) {
@@ -121,36 +119,43 @@ public class WebProvider extends NoneProvider {
 				rootDir = null;
 				throw new IllegalArgumentException(e);
 			}
-		} else {
-			if (!StringUtils.equals(rootDir.getAbsolutePath(), workingDir.getAbsolutePath())) {
-				throw new IllegalArgumentException("WorkingDir change detected. Requested: `"
-						+ workingDir.getAbsolutePath() + "`; currently in use: `" + rootDir.getAbsolutePath() + "`");
-			}
+		} else if (!StringUtils.equals(rootDir.getAbsolutePath(), workingDir.getAbsolutePath())) {
+			throw new IllegalArgumentException("WorkingDir change detected. Requested: `" + workingDir.getAbsolutePath()
+					+ "`; currently in use: `" + rootDir.getAbsolutePath() + "`");
 		}
 	}
 
 	/**
-	 * Sets the AE workspace configuration name, validating change from previous
-	 * value.
+	 * Sets the Anteater workspace configuration name.
 	 *
-	 * @param configName the name of the configuration file
-	 * @throws IllegalArgumentException if configuration change is requested while
-	 *                                  already in use
+	 * <p>This must be invoked before {@link #setWorkingDir(File)} so that the workspace can load the correct
+	 * configuration.
+	 *
+	 * @param configName configuration file name or identifier understood by Anteater
+	 * @throws IllegalArgumentException if a different configuration is requested after one has already been set
 	 */
 	@Override
 	public void model(String configName) {
-		if (WebProvider.configName != null && StringUtils.equals(WebProvider.configName, configName)) {
+		if (WebProvider.configName != null && !StringUtils.equals(WebProvider.configName, configName)) {
 			throw new IllegalArgumentException("Configuration change detected. Requested: `" + configName
 					+ "`; currently in use: `" + WebProvider.configName + "`.");
 		}
 		WebProvider.configName = StringUtils.trimToNull(configName);
 	}
 
+	/**
+	 * Indicates that this provider is not safe for concurrent use.
+	 *
+	 * @return {@code false}
+	 */
 	@Override
 	public boolean isThreadSafe() {
 		return false;
 	}
 
+	/**
+	 * Releases resources held by the underlying Anteater workspace.
+	 */
 	@Override
 	public void close() {
 		workspace.close();
