@@ -5,10 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
-import org.machanism.machai.Config;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
@@ -44,6 +45,9 @@ import org.springframework.shell.standard.ShellOption;
 public class AssembyCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
+
+	private static final double DEFAULT_SCORE_VALUE = 0.90;
+	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
 
 	/** List of picked Bindex objects matching the search query. */
 	private List<Bindex> bindexList;
@@ -84,9 +88,10 @@ public class AssembyCommand {
 		query = getQueryFromFile(query);
 
 		findQuery = query;
-		chatModel = Config.getChatModel(chatModel);
+		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
-		bindexList = pickBricks(provider, query, Config.getScore(score), registerUrl, chatModel);
+		score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", 0.90));
+		bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
 	}
 
 	/**
@@ -119,9 +124,8 @@ public class AssembyCommand {
 	 * @throws IllegalArgumentException if query or bindexList is missing
 	 */
 	@ShellMethod("Creates a project via picked librariy set.")
-	public void assembly(
-			@ShellOption(value = { "-q",
-					"--query" }, defaultValue = ShellOption.NULL, help = "The prompt for application assembly. If omitted, the result from the previous 'find' command will be used, if available.") String query,
+	public void assembly(@ShellOption(value = { "-q",
+			"--query" }, defaultValue = ShellOption.NULL, help = "The prompt for application assembly. If omitted, the result from the previous 'find' command will be used, if available.") String query,
 			@ShellOption(value = { "-d",
 					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the directory where the assembled project will be created.") File dir,
 			@ShellOption(value = { "-r",
@@ -132,17 +136,15 @@ public class AssembyCommand {
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		dir = Config.getWorkingDir(dir);
-
-		logger.info("The project directory: {}", dir);
-		String prompt = query;
-
-		chatModel = Config.getChatModel(chatModel);
-
+		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		functionTools.applyTools(provider);
+
+		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+		logger.info("The project directory: {}", dir);
 		provider.setWorkingDir(dir);
 
+		String prompt = query;
 		if (query == null) {
 			if (bindexList == null) {
 				throw new IllegalArgumentException("The query is empty.");
@@ -150,7 +152,8 @@ public class AssembyCommand {
 			prompt = this.findQuery;
 		} else {
 			query = getQueryFromFile(query);
-			bindexList = pickBricks(provider, query, Config.getScore(score), registerUrl, chatModel);
+			score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", DEFAULT_SCORE_VALUE));
+			bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
 		}
 
 		if (!bindexList.isEmpty()) {
@@ -167,18 +170,17 @@ public class AssembyCommand {
 	 * @param query The prompt supplied by the user.
 	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
-	public void prompt(
-			@ShellOption(value = { "-q", "--query" }, help = "The user prompt to GenAI.") String query,
+	public void prompt(@ShellOption(value = { "-q", "--query" }, help = "The user prompt to GenAI.") String query,
 			@ShellOption(value = { "-g",
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).") String chatModel,
 			@ShellOption(value = { "-d",
 					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
 
-		chatModel = Config.getChatModel(chatModel);
+		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 
 		functionTools.applyTools(provider);
-		dir = Config.getWorkingDir(dir);
+		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 		provider.setWorkingDir(dir);
 
 		provider.prompt(query);

@@ -55,10 +55,11 @@ public class MavenProjectLayout extends ProjectLayout {
 		File pomFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
 		if (model == null) {
 			try {
-				model = PomReader.getProjectModel(pomFile, effectivePomRequired);
+				model = new PomReader().getProjectModel(pomFile, effectivePomRequired);
 			} catch (Exception e) {
 				logger.warn("Effective model building failed: {}",
 						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
+				logger.debug("Effective model building failed.", e);
 			}
 		}
 
@@ -78,7 +79,7 @@ public class MavenProjectLayout extends ProjectLayout {
 	 */
 	public Model getModel() {
 		if (model == null) {
-			model = PomReader.getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
+			model = new PomReader().getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
 		}
 
 		return model;

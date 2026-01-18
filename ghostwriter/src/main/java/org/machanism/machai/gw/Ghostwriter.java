@@ -3,6 +3,7 @@ package org.machanism.machai.gw;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Optional;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -13,7 +14,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.machanism.machai.Config;
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,9 @@ public final class Ghostwriter {
 
 	/** Logger for the ghostwriter application. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
+
+	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
+	private static Configurator config = new PropertiesConfigurator("gw.properties");
 
 	private Ghostwriter() {
 		// Utility class.
@@ -88,9 +93,8 @@ public final class Ghostwriter {
 			}
 
 			String genai = cmd.getOptionValue(genaiOpt);
-			genai = Config.getChatModel(genai);
-
-			rootDir = Config.getWorkingDir(rootDir);
+			genai = Optional.ofNullable(genai).orElse(config.get("genai", DEFAULT_GENAI_VALUE));
+			rootDir = Optional.ofNullable(rootDir).orElse(config.getFile("dir", SystemUtils.getUserDir()));
 
 			String instructions = null;
 			if (cmd.hasOption(instructionsOpt)) {
@@ -149,6 +153,5 @@ public final class Ghostwriter {
 	private static void help(Options options, HelpFormatter formatter) {
 		formatter.printHelp("java -jar gw.jar", options);
 	}
-
 
 }

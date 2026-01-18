@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Optional;
 
 import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
@@ -52,9 +53,7 @@ public class CleanCommand {
 			@ShellOption(value = { "-d",
 					"--dir" }, help = "The path fo the project directory.", defaultValue = ShellOption.NULL) File dir)
 			throws IOException {
-		if (dir == null) {
-			dir = SystemUtils.getUserDir();
-		}
+		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 		logger.info("Starting cleanup: Removing all '{}' temporary folders in {}.", MACHAI_TEMP_DIR, dir);
 		removeAllDirectoriesByName(dir.toPath(), MACHAI_TEMP_DIR);
 		logger.info("Cleanup process finished.");

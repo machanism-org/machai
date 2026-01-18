@@ -53,194 +53,202 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Utility for reading and processing Maven <code>pom.xml</code> files into Maven models.
+ * Utility for reading and processing Maven <code>pom.xml</code> files into
+ * Maven models.
  * <p>
- * Provides model parsing, effective POM calculation, property replacement, license detection, and model serialization.
+ * Provides model parsing, effective POM calculation, property replacement,
+ * license detection, and model serialization.
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
 public class PomReader {
-    private static Logger logger = LoggerFactory.getLogger(PomReader.class);
+	private static Logger logger = LoggerFactory.getLogger(PomReader.class);
 
-    private static Map<String, String> pomProperties = new HashMap<>();
-    private static List<License> defaultLicenses;
+	private Map<String, String> pomProperties = new HashMap<>();
+	private List<License> defaultLicenses;
 
-    /**
-     * Loads and returns the Maven model from a <code>pom.xml</code> file.
-     * Optionally calculates the effective model with plugin resolution.
-     *
-     * @param pomFile pom.xml file to parse
-     * @param effective true for effective model calculation, false for raw parsing
-     * @return Parsed Maven Model
-     * @throws IllegalArgumentException if <code>pom.xml</code> cannot be processed
-     * @see <a href="https://maven.apache.org/pom.html">Maven POM Reference</a>
-     */
-    public static Model getProjectModel(File pomFile, boolean effective) {
-        ModelBuildingRequest request = new DefaultModelBuildingRequest();
-        request.setPomFile(pomFile);
+	/**
+	 * Loads and returns the Maven model from a <code>pom.xml</code> file.
+	 * Optionally calculates the effective model with plugin resolution.
+	 *
+	 * @param pomFile   pom.xml file to parse
+	 * @param effective true for effective model calculation, false for raw parsing
+	 * @return Parsed Maven Model
+	 * @throws IllegalArgumentException if <code>pom.xml</code> cannot be processed
+	 * @see <a href="https://maven.apache.org/pom.html">Maven POM Reference</a>
+	 */
+	public Model getProjectModel(File pomFile, boolean effective) {
+		ModelBuildingRequest request = new DefaultModelBuildingRequest();
+		request.setPomFile(pomFile);
 
-        Model model = null;
-        try {
-            if (effective) {
-                DefaultModelBuilder modelBuilder;
-                modelBuilder = getModelBuilder(request);
-                ModelBuildingResult result = modelBuilder.build(request);
-                model = result.getEffectiveModel();
+		Model model = null;
+		try {
+			if (effective) {
+				DefaultModelBuilder modelBuilder;
+				modelBuilder = getModelBuilder(request);
+				ModelBuildingResult result = modelBuilder.build(request);
+				model = result.getEffectiveModel();
 
-            } else {
-                MavenXpp3Reader reader = new MavenXpp3Reader();
-                FileReader fileReader = new FileReader(pomFile);
-                String pomStr = IOUtils.toString(fileReader);
-                pomStr = replaceProperty(pomStr);
-                model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+			} else {
+				MavenXpp3Reader reader = new MavenXpp3Reader();
+				FileReader fileReader = new FileReader(pomFile);
+				String pomStr = IOUtils.toString(fileReader);
+				pomStr = replaceProperty(pomStr);
+				model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
+			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
 
-        Set<Entry<Object, Object>> propertiesEntries = model.getProperties().entrySet();
-        for (Entry<Object, Object> entry : propertiesEntries) {
-            pomProperties.put((String) entry.getKey(), (String) entry.getValue());
-        }
+		Set<Entry<Object, Object>> propertiesEntries = model.getProperties().entrySet();
+		for (Entry<Object, Object> entry : propertiesEntries) {
+			pomProperties.put((String) entry.getKey(), (String) entry.getValue());
+		}
 
-        if (!effective) {
-            String version = model.getVersion();
-            if (version != null) {
-                pomProperties.put("project.version", version);
-            }
-        }
+		if (!effective) {
+			String version = model.getVersion();
+			if (version != null) {
+				pomProperties.put("project.version", version);
+			}
+		}
 
-        List<License> licenses = model.getLicenses();
-        if (licenses.isEmpty()) {
-            if (defaultLicenses != null) {
-                model.setLicenses(defaultLicenses);
-            }
-        } else if (defaultLicenses == null) {
-            defaultLicenses = licenses;
-        }
+		List<License> licenses = model.getLicenses();
+		if (licenses.isEmpty()) {
+			if (defaultLicenses != null) {
+				model.setLicenses(defaultLicenses);
+			}
+		} else if (defaultLicenses == null) {
+			defaultLicenses = licenses;
+		}
 
-        return model;
-    }
+		return model;
+	}
 
-    /**
-     * Replaces placeholders in a POM string using collected properties.
-     * @param pomStr Raw POM file as string
-     * @return POM string with placeholders replaced
-     */
-    private static String replaceProperty(String pomStr) {
-        if (pomStr != null) {
-            Set<Entry<String, String>> propertiesEntries = pomProperties.entrySet();
-            for (Entry<String, String> entry : propertiesEntries) {
-                String placeholder = "${" + entry.getKey() + "}";
-                String value = entry.getValue();
-                if (value != null) {
-                    pomStr = pomStr.replace(placeholder, value);
-                }
-            }
-        }
-        return pomStr;
-    }
+	/**
+	 * Replaces placeholders in a POM string using collected properties.
+	 * 
+	 * @param pomStr Raw POM file as string
+	 * @return POM string with placeholders replaced
+	 */
+	private String replaceProperty(String pomStr) {
+		if (pomStr != null) {
+			Set<Entry<String, String>> propertiesEntries = pomProperties.entrySet();
+			for (Entry<String, String> entry : propertiesEntries) {
+				String placeholder = "${" + entry.getKey() + "}";
+				String value = entry.getValue();
+				if (value != null) {
+					pomStr = pomStr.replace(placeholder, value);
+				}
+			}
+		}
+		return pomStr;
+	}
 
-    /**
-     * Gets a Maven model builder.
-     * @param request ModelBuildingRequest configured with pom file
-     * @return DefaultModelBuilder for Maven model building
-     * @throws PlexusContainerException if Plexus Container fails
-     * @throws ComponentLookupException if ModelBuilder lookup fails
-     */
-    private static DefaultModelBuilder getModelBuilder(ModelBuildingRequest request)
-            throws PlexusContainerException, ComponentLookupException {
+	/**
+	 * Gets a Maven model builder.
+	 * 
+	 * @param request ModelBuildingRequest configured with pom file
+	 * @return DefaultModelBuilder for Maven model building
+	 * @throws PlexusContainerException if Plexus Container fails
+	 * @throws ComponentLookupException if ModelBuilder lookup fails
+	 */
+	private DefaultModelBuilder getModelBuilder(ModelBuildingRequest request)
+			throws PlexusContainerException, ComponentLookupException {
 
-        DefaultServiceLocator locator = serviceLocator();
-        RepositorySystem system = locator.getService(RepositorySystem.class);
-        LocalRepository localRepo = new LocalRepository(".m2");
+		DefaultServiceLocator locator = serviceLocator();
+		RepositorySystem system = locator.getService(RepositorySystem.class);
+		LocalRepository localRepo = new LocalRepository(".m2");
 
-        DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-        LocalRepositoryManager repManager = system.newLocalRepositoryManager(session, localRepo);
-        session.setLocalRepositoryManager(repManager);
+		DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+		LocalRepositoryManager repManager = system.newLocalRepositoryManager(session, localRepo);
+		session.setLocalRepositoryManager(repManager);
 
-        RequestTrace requestTrace = new RequestTrace(null);
-        DefaultRepositorySystem repositorySystem = new DefaultRepositorySystem();
-        repositorySystem.initService(locator);
+		RequestTrace requestTrace = new RequestTrace(null);
+		DefaultRepositorySystem repositorySystem = new DefaultRepositorySystem();
+		repositorySystem.initService(locator);
 
-        RemoteRepositoryManager remoteRepositoryManager = locator.getService(RemoteRepositoryManager.class);
-        List<RemoteRepository> repos = Arrays.asList(new RemoteRepository.Builder("central", "default",
-                "https://repo.maven.apache.org/maven2/").build());
+		RemoteRepositoryManager remoteRepositoryManager = locator.getService(RemoteRepositoryManager.class);
+		List<RemoteRepository> repos = Arrays.asList(new RemoteRepository.Builder("central", "default",
+				"https://repo.maven.apache.org/maven2/").build());
 
-        ModelResolver modelResolver = new ProjectModelResolver(session, requestTrace,
-                repositorySystem, remoteRepositoryManager, repos,
-                ProjectBuildingRequest.RepositoryMerging.POM_DOMINANT,
-                null);
-        request.setModelResolver(modelResolver);
-        request.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
-        request.setProcessPlugins(false);
-        request.setTwoPhaseBuilding(false);
+		ModelResolver modelResolver = new ProjectModelResolver(session, requestTrace,
+				repositorySystem, remoteRepositoryManager, repos,
+				ProjectBuildingRequest.RepositoryMerging.POM_DOMINANT,
+				null);
+		request.setModelResolver(modelResolver);
+		request.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
+		request.setProcessPlugins(false);
+		request.setTwoPhaseBuilding(false);
 
-        PlexusContainer container = new DefaultPlexusContainer();
-        DefaultModelBuilder modelBuilder = (DefaultModelBuilder) container
-                .lookup(org.apache.maven.model.building.ModelBuilder.class);
+		PlexusContainer container = new DefaultPlexusContainer();
+		DefaultModelBuilder modelBuilder = (DefaultModelBuilder) container
+				.lookup(org.apache.maven.model.building.ModelBuilder.class);
 
-        StringSearchModelInterpolator modelInterpolator = new StringSearchModelInterpolator();
-        modelInterpolator.setPathTranslator(new DefaultPathTranslator());
-        modelInterpolator.setUrlNormalizer(new DefaultUrlNormalizer());
-        modelBuilder.setModelInterpolator(modelInterpolator);
-        return modelBuilder;
-    }
+		StringSearchModelInterpolator modelInterpolator = new StringSearchModelInterpolator();
+		modelInterpolator.setPathTranslator(new DefaultPathTranslator());
+		modelInterpolator.setUrlNormalizer(new DefaultUrlNormalizer());
+		modelBuilder.setModelInterpolator(modelInterpolator);
+		return modelBuilder;
+	}
 
-    /**
-     * Serializes a Maven Model to its string (XML) representation.
-     * @param model Maven Model
-     * @return XML string of the model
-     * @throws IOException if serialization fails
-     */
-    public static String printModel(Model model) throws IOException {
-        MavenXpp3Writer writer = new MavenXpp3Writer();
-        Writer stringWriter = new StringWriter();
-        writer.write(stringWriter, model);
-        return stringWriter.toString();
-    }
+	/**
+	 * Serializes a Maven Model to its string (XML) representation.
+	 * 
+	 * @param model Maven Model
+	 * @return XML string of the model
+	 * @throws IOException if serialization fails
+	 */
+	public static String printModel(Model model) throws IOException {
+		MavenXpp3Writer writer = new MavenXpp3Writer();
+		Writer stringWriter = new StringWriter();
+		writer.write(stringWriter, model);
+		return stringWriter.toString();
+	}
 
-    /**
-     * Configures a Maven ServiceLocator with repository and transporter services.
-     * @return Initialized DefaultServiceLocator
-     */
-    public static DefaultServiceLocator serviceLocator() {
-        DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
-        locator.addService(RepositoryConnectorFactory.class,
-                BasicRepositoryConnectorFactory.class);
-        locator.addService(
-                TransporterFactory.class, FileTransporterFactory.class);
-        locator.addService(TransporterFactory.class,
-                HttpTransporterFactory.class);
-        locator.addService(TransporterFactory.class,
-                WagonTransporterFactory.class);
-        return locator;
-    }
+	/**
+	 * Configures a Maven ServiceLocator with repository and transporter services.
+	 * 
+	 * @return Initialized DefaultServiceLocator
+	 */
+	public DefaultServiceLocator serviceLocator() {
+		DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
+		locator.addService(RepositoryConnectorFactory.class,
+				BasicRepositoryConnectorFactory.class);
+		locator.addService(
+				TransporterFactory.class, FileTransporterFactory.class);
+		locator.addService(TransporterFactory.class,
+				HttpTransporterFactory.class);
+		locator.addService(TransporterFactory.class,
+				WagonTransporterFactory.class);
+		return locator;
+	}
 
-    /**
-     * Returns properties parsed from pom.xml files.
-     * @return Map of POM properties
-     */
-    public static Map<String, String> getPomProperties() {
-        return pomProperties;
-    }
+	/**
+	 * Returns properties parsed from pom.xml files.
+	 * 
+	 * @return Map of POM properties
+	 */
+	public Map<String, String> getPomProperties() {
+		return pomProperties;
+	}
 
-    /**
-     * Loads a Maven model from the given file, preferring the effective model but falling back if unsuccessful.
-     *
-     * @param file The <code>pom.xml</code> file to parse
-     * @return Parsed Maven Model
-     */
-    public static Model getProjectModel(File file) {
-        Model model;
-        try {
-            model = PomReader.getProjectModel(file, true);
-        } catch (Exception e) {
-            logger.debug("Effective pom creation failed: {}", StringUtils.abbreviate(e.getLocalizedMessage(), 80));
-            model = PomReader.getProjectModel(file, false);
-        }
-        return model;
-    }
+	/**
+	 * Loads a Maven model from the given file, preferring the effective model but
+	 * falling back if unsuccessful.
+	 *
+	 * @param file The <code>pom.xml</code> file to parse
+	 * @return Parsed Maven Model
+	 */
+	public Model getProjectModel(File file) {
+		Model model;
+		try {
+			model = getProjectModel(file, true);
+		} catch (Exception e) {
+			logger.debug("Effective pom creation failed: {}", StringUtils.abbreviate(e.getLocalizedMessage(), 80));
+			model = getProjectModel(file, false);
+		}
+		return model;
+	}
 
 }

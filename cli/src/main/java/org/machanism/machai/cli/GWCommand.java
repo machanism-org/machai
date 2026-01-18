@@ -3,8 +3,9 @@ package org.machanism.machai.cli;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Optional;
 
-import org.machanism.machai.Config;
+import org.apache.commons.lang.SystemUtils;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -34,7 +35,8 @@ import org.springframework.shell.standard.ShellOption;
 public class GWCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
-
+	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
+	
 	/**
 	 * Scans and processes documents in the given project directory using the
 	 * specified GenAI chat model.
@@ -58,12 +60,9 @@ public class GWCommand {
 					"-g", "--genai" }, defaultValue = ShellOption.NULL, arity = 1) String chatModel)
 			throws IOException {
 
-		dir = Config.getWorkingDir(dir);
-
-		if (scan == null) {
-			scan = dir;
-		}
-
+		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+		scan = Optional.ofNullable(scan).orElse(dir);
+		
 		String relatedPath = ProjectLayout.getRelatedPath(dir, scan);
 		if (relatedPath == null) {
 			logger.warn(
@@ -75,7 +74,7 @@ public class GWCommand {
 			logger.info("Starting document scan in directory: {}", scan);
 		}
 
-		chatModel = Config.getChatModel(chatModel);
+		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
 		FileProcessor documents = new FileProcessor(chatModel);
 
 		if (instructions != null) {
@@ -88,8 +87,6 @@ public class GWCommand {
 				}
 			}
 		}
-		documents.setInstructions(instructions);
-
 		documents.setInstructions(instructions);
 		documents.setModuleMultiThread(threads);
 		documents.scanDocuments(dir, scan);

@@ -2,10 +2,10 @@ package org.machanism.machai.cli;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
-import org.machanism.machai.Config;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
@@ -35,7 +35,7 @@ import org.springframework.shell.standard.ShellOption;
  */
 @ShellComponent
 public class BindexCommand {
-	private static final String CHAT_MODEL = "OpenAI:gpt-5.1";
+	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
 
 	/** JLine line reader for shell interaction. */
 	@Autowired
@@ -61,11 +61,12 @@ public class BindexCommand {
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(Config.getChatModel(chatModel));
+		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		BindexCreator register = new BindexCreator(provider);
 		register.update(update);
-		File workingDir = Config.getWorkingDir(dir);
-		register.scanFolder(workingDir);
+		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+		register.scanFolder(dir);
 	}
 
 	/**
@@ -82,14 +83,14 @@ public class BindexCommand {
 			@ShellOption(value = { "-r",
 					"--registerUrl" }, defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.") String registerUrl,
 			@ShellOption(value = { "-u",
-					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "true") boolean update)
+					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "true") boolean update,
+			@ShellOption(value = { "-g",
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		if (dir == null) {
-			dir = SystemUtils.getUserDir();
-		}
-
-		GenAIProvider provider = GenAIProviderManager.getProvider(CHAT_MODEL);
+		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
 		try (BindexRegister register = new BindexRegister(provider, registerUrl)) {
 			register.update(update);
 			register.scanFolder(dir);
