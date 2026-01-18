@@ -46,7 +46,15 @@ public final class Ghostwriter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
 
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
-	private static Configurator config = new PropertiesConfigurator("gw.properties");
+	private static PropertiesConfigurator config = new PropertiesConfigurator();
+
+	static {
+		try {
+			config.load("gw.properties");
+		} catch (Exception e) {
+			// configuration file not found.
+		}
+	}
 
 	private Ghostwriter() {
 		// Utility class.
