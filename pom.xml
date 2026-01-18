@@ -6,7 +6,7 @@
 
 	<groupId>org.machanism.machai</groupId>
 	<artifactId>machai</artifactId>
-	<version>0.0.3</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Machai Project</name>
@@ -162,12 +162,12 @@
 				<plugin>
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>bindex-maven-plugin</artifactId>
-					<version>0.0.3</version>
+					<version>0.0.4-SNAPSHOT</version>
 				</plugin>
 				<plugin>
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>gw-maven-plugin</artifactId>
-					<version>0.0.3</version>
+					<version>0.0.4-SNAPSHOT</version>
 					<configuration>
 						<genai>OpenAI:gpt-5-2-2025-12-11</genai>
 					</configuration>
