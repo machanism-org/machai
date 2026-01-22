@@ -490,7 +490,12 @@ public class OpenAIProvider implements GenAIProvider {
 	protected OpenAIClient getClient() {
 		if (client == null) {
 			com.openai.client.okhttp.OpenAIOkHttpClient.Builder buillder = OpenAIOkHttpClient.builder();
-			buillder.fromEnv();
+
+			String privateKey = System.getProperty("OPENAI_API_KEY", System.getenv().get("OPENAI_API_KEY"));
+			buillder.apiKey(privateKey);
+
+			String baseUrl = System.getProperty("OPENAI_BASE_URL", System.getenv().get("OPENAI_BASE_URL"));
+			buillder.baseUrl(baseUrl);
 			client = buillder.build();
 		}
 

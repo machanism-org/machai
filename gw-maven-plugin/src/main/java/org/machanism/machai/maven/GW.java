@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 
+import org.apache.commons.lang3.Strings;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
@@ -12,6 +14,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Server;
+import org.apache.maven.settings.Settings;
 import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -109,8 +113,26 @@ public class GW extends AbstractMojo {
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	private MavenSession session;
 
+	@Parameter(property = "settings", readonly = true)
+	private Settings settings;
+
+	@Parameter(property = "gw.serverId", required = true)
+	private String serverId;
+
 	@Override
 	public void execute() throws MojoExecutionException {
+
+		Server server = settings.getServer(serverId);
+
+		String username = server.getUsername();
+		if (username != null) {
+			System.setProperty("GENAI_USERNAME", username);
+		}
+		String password = server.getPassword();
+		if (password != null) {
+			System.setProperty("GENAI_PASSWORD", password);
+		}
+
 		FileProcessor documents = new FileProcessor(genai) {
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
@@ -144,4 +166,5 @@ public class GW extends AbstractMojo {
 		}
 		LOGGER.info("Scanning finished.");
 	}
+
 }
