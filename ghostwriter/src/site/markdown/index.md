@@ -23,21 +23,13 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-![](images/machai-ghostwriter-logo.png)
-
 # Ghostwriter
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 
-## Introduction
-
-Ghostwriter is an AI-assisted documentation engine for Maven/Java projects. It scans project sources and documentation, interprets embedded guidance tags, and generates or updates documentation artifacts in a consistent, repeatable way.
-
-It is designed for use in local workflows and CI pipelines to keep documentation accurate as the code evolves.
-
-## Overview
-
 Machai Ghostwriter is an AI-powered tool that automates and standardizes project documentation and code annotation. Using guided file processing and `@guidance` annotations, it enables developers to maintain consistent, clear, and up-to-date documentation across multi-module projects in languages such as Java, TypeScript, and Python. Ghostwriter simplifies the embedding, extraction, and management of project guidance, ensuring your codebase and documentation remain synchronized.
+
+<iframe class="youtube" title="Ghostwriter | Machai" src="https://www.youtube.com/embed/Z3jFvJLKS2I"></iframe>
 
 Ghostwriter operates as a CLI application. Simply point it to your project directory (or use the current working directory by default) and optionally specify:
 
