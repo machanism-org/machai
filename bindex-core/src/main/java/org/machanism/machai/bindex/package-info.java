@@ -2,11 +2,11 @@
  * Entry points for generating, assembling, and registering a Bindex (project index) used by
  * Machanism-based AI workflows.
  *
- * <p>This package contains the top-level orchestrators that drive the end-to-end lifecycle of
+ * <p>This package provides the high-level coordinators that drive the end-to-end lifecycle of
  * indexing a project folder:
  *
  * <ul>
- *   <li>Generate or update Bindex artifacts for a {@code org.machanism.machai.project.ProjectLayout}.</li>
+ *   <li>Generate or update Bindex artifacts for a {@code ProjectLayout}.</li>
  *   <li>Assemble manifests and documents describing the indexed project.</li>
  *   <li>Optionally register produced artifacts into a backing store for later retrieval.</li>
  * </ul>
@@ -14,14 +14,14 @@
  * <p>Typical workflow:
  *
  * <ol>
- *   <li>Choose or construct a {@code org.machanism.machai.project.ProjectLayout} describing the project layout.</li>
- *   <li>Run a processor (for example, {@link org.machanism.machai.bindex.BindexCreator}) to produce artifacts.</li>
- *   <li>Optionally register generated artifacts (for example, {@link org.machanism.machai.bindex.BindexRegister}).</li>
+ *   <li>Choose or construct a {@code ProjectLayout} describing the project folder layout.</li>
+ *   <li>Run a creator/processor to produce Bindex artifacts for the folder.</li>
+ *   <li>Optionally register generated artifacts into a database for search and retrieval.</li>
  * </ol>
  *
  * <p>Example:
  *
- * <pre>{@code
+ * <pre>
  * GenAIProvider provider = ...;
  * ProjectLayout layout = ...;
  *
@@ -29,9 +29,9 @@
  * creator.processFolder(layout);
  *
  * try (BindexRegister register = new BindexRegister(provider, dbUrl)) {
- *   register.processFolder(layout);
+ *     register.processFolder(layout);
  * }
- * }</pre>
+ * </pre>
  *
  * <p>For layout-specific builders and prompt/context utilities, see
  * {@link org.machanism.machai.bindex.builder}.
@@ -55,10 +55,11 @@ package org.machanism.machai.bindex;
  *
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
+ *		- Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  *
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
- *		- Use proper Markdown or HTML formatting for readability.
+ * 		- Use proper Markdown or HTML formatting for readability.
  *
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes,

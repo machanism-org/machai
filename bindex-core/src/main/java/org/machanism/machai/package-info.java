@@ -11,8 +11,8 @@
  *
  * <h2>Sub-packages</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.bindex} - Binary indexing and search infrastructure.</li>
- *   <li>{@link org.machanism.machai.project} - Project layout detection and organization.</li>
+ *   <li>{@link org.machanism.machai.bindex} - Indexing and search infrastructure.</li>
+ *   <li>{@link org.machanism.machai.project} - Project structure detection and organization.</li>
  * </ul>
  */
 package org.machanism.machai;

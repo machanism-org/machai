@@ -62,7 +62,7 @@ Machai CLI provides:
 
 ```bash
 git clone https://github.com/machanism-org/machai.git
-cd machai/cli
+cd cli
 mvn clean install
 ```
 
@@ -74,18 +74,18 @@ mvn clean install
 
 Example commands (as shown by `help`):
 
-### Assembly command
+### Assemby Command
 
 - `pick`: Picks libraries based on user request.
 - `assembly`: Creates a project via picked librariy set.
 - `prompt`: Is used for request additional GenAI guidances.
 
-### Bindex command
+### Bindex Command
 
 - `bindex`: Generates bindex files.
 - `register`: Registers bindex file.
 
-### Built-In commands
+### Built-In Commands
 
 - `help`: Display help about available commands
 - `stacktrace`: Display the full stacktrace of the last error.
@@ -95,7 +95,7 @@ Example commands (as shown by `help`):
 - `version`: Show version info
 - `script`: Read and execute commands from a file.
 
-### Docs command
+### Docs Command
 
 - `docs`: GenAI document processing command.
 

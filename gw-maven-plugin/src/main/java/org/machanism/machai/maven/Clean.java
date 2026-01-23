@@ -18,18 +18,18 @@ import org.machanism.machai.gw.FileProcessor;
  *
  * <pre>
  * Example Usage in POM:
- *  <plugin>
- *    <groupId>org.machanism.machai </groupId>
- *    <artifactId>gw-maven-plugin </artifactId>
- *    <version>${project.version} </version>
- *    <executions>
- *      <execution>
- *        <goals>
- *          <goal>clean </goal>
- *        </goals>
- *      </execution>
- *    </executions>
- *  </plugin>
+ * &lt;plugin&gt;
+ *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
+ *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
+ *   &lt;version&gt;${project.version}&lt;/version&gt;
+ *   &lt;executions&gt;
+ *     &lt;execution&gt;
+ *       &lt;goals&gt;
+ *         &lt;goal&gt;clean&lt;/goal&gt;
+ *       &lt;/goals&gt;
+ *     &lt;/execution&gt;
+ *   &lt;/executions&gt;
+ * &lt;/plugin&gt;
  * </pre>
  *
  * @author Viktor Tovstyi

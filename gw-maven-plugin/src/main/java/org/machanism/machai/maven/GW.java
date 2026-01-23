@@ -66,46 +66,44 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * mvn org.machanism.machai:gw-maven-plugin:gw \
  *   -Dgw.genai=OpenAI:gpt-5 \
- *   -Dgw.genai.serverId=genai \
- *   -Dgw.threads=true \
- *   -Dgw.instructions=${project.basedir}/.gw/instructions.md
+ *   -Dgw.genai.serverId=genai
  * </pre>
  *
  * <h3>Configure in {@code pom.xml}</h3>
  * <pre>
- *  <plugin>
- *    <groupId>org.machanism.machai </groupId>
- *    <artifactId>gw-maven-plugin </artifactId>
- *    <version>${project.version} </version>
- *    <executions>
- *      <execution>
- *        <goals>
- *          <goal>gw </goal>
- *        </goals>
- *      </execution>
- *    </executions>
- *    <configuration>
- *      <genai>OpenAI:gpt-5 </genai>
- *      <serverId>genai </serverId>
- *      <threads>true </threads>
- *      <instructions>
- *        <instruction>${project.basedir}/.gw/instructions.md </instruction>
- *      </instructions>
- *    </configuration>
- *  </plugin>
+ * &lt;plugin&gt;
+ *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
+ *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
+ *   &lt;version&gt;${project.version}&lt;/version&gt;
+ *   &lt;executions&gt;
+ *     &lt;execution&gt;
+ *       &lt;goals&gt;
+ *         &lt;goal&gt;gw&lt;/goal&gt;
+ *       &lt;/goals&gt;
+ *     &lt;/execution&gt;
+ *   &lt;/executions&gt;
+ *   &lt;configuration&gt;
+ *     &lt;genai&gt;OpenAI:gpt-5&lt;/genai&gt;
+ *     &lt;serverId&gt;genai&lt;/serverId&gt;
+ *     &lt;threads&gt;true&lt;/threads&gt;
+ *     &lt;instructions&gt;
+ *       &lt;instruction&gt;${project.basedir}/.gw/instructions.md&lt;/instruction&gt;
+ *     &lt;/instructions&gt;
+ *   &lt;/configuration&gt;
+ * &lt;/plugin&gt;
  * </pre>
  *
  * <h3>Required {@code settings.xml} server entry</h3>
  * <pre>
- *  <settings>
- *    <servers>
- *      <server>
- *        <id>genai </id>
- *        <username>... </username>
- *        <password>... </password>
- *      </server>
- *    </servers>
- *  </settings>
+ * &lt;settings&gt;
+ *   &lt;servers&gt;
+ *     &lt;server&gt;
+ *       &lt;id&gt;genai&lt;/id&gt;
+ *       &lt;username&gt;...&lt;/username&gt;
+ *       &lt;password&gt;...&lt;/password&gt;
+ *     &lt;/server&gt;
+ *   &lt;/servers&gt;
+ * &lt;/settings&gt;
  * </pre>
  */
 @Mojo(name = "gw", threadSafe = true, aggregator = true)

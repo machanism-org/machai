@@ -2,12 +2,12 @@
  * Ghostwriter command-line tooling and orchestration for scanning a workspace and preparing AI-ready prompt
  * inputs.
  *
- * <p>This package provides a command-line entry point and processing pipeline that typically:
+ * <p>This package provides a command-line entry point and a processing pipeline that typically:
  *
  * <ul>
  *   <li>Walks a project directory (and optionally its modules) while honoring layout exclusions.</li>
  *   <li>Delegates file-type-specific extraction to reviewer implementations.</li>
- *   <li>Aggregates extracted {@code @guidance:} directives from supported files and produces prompt-input
+ *   <li>Aggregates extracted {@code @guidance:} directives from supported files and produces prompt input
  *       artifacts.</li>
  *   <li>Invokes a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate or review
  *       documentation content.</li>
@@ -64,5 +64,6 @@ package org.machanism.machai.gw;
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- 
+ * 
+ * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */

@@ -15,7 +15,7 @@
  *      
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * 		-  Escape `<` and `>` as ` <` and `>` in `<pre>` content for Javadoc.
+ * 		-  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  *
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
@@ -29,22 +29,22 @@
  */
 
 /**
- * Maven plugin goals and supporting infrastructure for generating, updating, registering, and cleaning a Bindex index
- * as part of a Maven build.
+ * Maven plugin goals and supporting infrastructure for creating, updating, registering, and cleaning a Bindex index
+ * during a Maven build.
  *
  * <p>
- * The package contains Maven {@code Mojo} implementations for the plugin goals and a shared base class:
+ * The classes in this package are Maven {@code Mojo} implementations that integrate Bindex into a project's build
+ * lifecycle:
  * </p>
  * <ul>
- *   <li>{@link org.machanism.machai.maven.Create} generates a fresh index and related resources for the current project.</li>
- *   <li>{@link org.machanism.machai.maven.Update} refreshes an existing index and related resources.</li>
- *   <li>{@link org.machanism.machai.maven.Register} uploads/registers an existing index/metadata using the configured AI provider.</li>
+ *   <li>{@link org.machanism.machai.maven.Create} and {@link org.machanism.machai.maven.Update} generate or refresh the
+ *       index for the current project.</li>
+ *   <li>{@link org.machanism.machai.maven.Register} registers an existing index/metadata using the configured AI provider.</li>
  *   <li>{@link org.machanism.machai.maven.Clean} removes plugin-generated temporary artifacts.</li>
  * </ul>
  *
  * <p>
- * Shared configuration (for example, the AI provider/model selection) and indexing behavior is implemented by
- * {@link org.machanism.machai.maven.AbstractBindexMojo}.
+ * Common behavior shared by the goals is implemented in {@link org.machanism.machai.maven.AbstractBindexMojo}.
  * </p>
  *
  * <h2>Command-line usage</h2>

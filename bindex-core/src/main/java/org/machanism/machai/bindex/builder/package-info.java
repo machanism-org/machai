@@ -25,31 +25,39 @@
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- 
+ * 
+ * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */
 
 /**
- * Generates {@link org.machanism.machai.schema.Bindex} documents by collecting a target project's manifest and
- * relevant source files and then prompting a {@link org.machanism.machai.ai.manager.GenAIProvider} to emit JSON
- * that conforms to the Bindex schema.
+ * Builders that assemble project context and use a {@link org.machanism.machai.ai.manager.GenAIProvider} to
+ * generate {@link org.machanism.machai.schema.Bindex} documents.
  *
- * <p>This package provides a base {@link org.machanism.machai.bindex.builder.BindexBuilder} and concrete builder
- * implementations for different ecosystems. Each builder:
+ * <p>This package provides a small hierarchy centered on {@link org.machanism.machai.bindex.builder.BindexBuilder}.
+ * A builder is configured with a {@link org.machanism.machai.project.layout.ProjectLayout} describing a target
+ * project on disk and a {@link org.machanism.machai.ai.manager.GenAIProvider} responsible for prompt execution.
+ * The builder gathers manifests and selected sources/resources, prompts the provider with the Bindex JSON schema
+ * and project context, and deserializes the provider output into a {@code Bindex} model.
+ *
+ * <h2>Typical flow</h2>
  * <ol>
- *   <li>Configures the provider with schema/system instructions.</li>
- *   <li>Optionally supplies an existing ("origin") Bindex as update context.</li>
- *   <li>Collects project context (manifest plus selected source/resource files) and appends it to the prompt.</li>
- *   <li>Invokes the provider and deserializes the generated JSON into a {@code Bindex} instance.</li>
+ *   <li>Construct a builder for a project layout.</li>
+ *   <li>Configure the {@code GenAIProvider} via
+ *       {@link org.machanism.machai.bindex.builder.BindexBuilder#genAIProvider(org.machanism.machai.ai.manager.GenAIProvider)}.</li>
+ *   <li>Optionally seed the generation via
+ *       {@link org.machanism.machai.bindex.builder.BindexBuilder#origin(org.machanism.machai.schema.Bindex)} to
+ *       request an incremental update.</li>
+ *   <li>Call {@link org.machanism.machai.bindex.builder.BindexBuilder#build()}.</li>
  * </ol>
  *
- * <h2>Builder implementations</h2>
+ * <h2>Builder variants</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: uses {@code pom.xml} and Maven build
- *       directories/resources to provide context.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}: uses {@code package.json} and walks the
- *       {@code src/} tree for {@code .js}, {@code .ts}, and {@code .vue} files.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder}: uses {@code pyproject.toml} and includes
- *       top-level module files from the resolved project package directory.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} prompts {@code pom.xml} and configured
+ *       Maven source/resource/test directories.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} prompts {@code package.json} and walks
+ *       {@code src} for {@code .js}/{@code .ts}/{@code .vue} files.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} prompts {@code pyproject.toml} and
+ *       project sources derived from {@code project.name}.</li>
  * </ul>
  */
 package org.machanism.machai.bindex.builder;

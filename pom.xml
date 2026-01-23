@@ -12,7 +12,7 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a modular toolkit for GenAI-enabled developer automation that combines a Java GenAI provider abstraction (GenAI Client), metadata indexing and semantic search (bindex), metadata-driven project assembly, and documentation lifecycle automation (Ghostwriter).</description>
+	<description>Machai is a modular toolkit for GenAI-enabled developer automation. It combines a Java GenAI provider abstraction (GenAI Client), metadata indexing and semantic search (bindex), metadata-driven project assembly, and documentation lifecycle automation (Ghostwriter).</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>

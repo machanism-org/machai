@@ -1,11 +1,13 @@
 /**
  * Detects and describes a project's on-disk layout.
  *
- * <p>This package provides {@link org.machanism.machai.project.layout.ProjectLayout} implementations that identify a
- * project's root directory, its modules (if any), and well-known root directories such as source code, test code, and
- * documentation. Layout detection is typically based on the presence of build/configuration files (for example
- * {@code pom.xml}, {@code package.json}, or {@code pyproject.toml}), from which module boundaries and standard folder
- * conventions can be derived.
+ * <p>This package defines {@link org.machanism.machai.project.layout.ProjectLayout}, an abstraction that describes
+ * where modules and well-known root directories (sources, tests, and documentation) live relative to a project
+ * root directory.
+ *
+ * <p>Implementations typically detect a layout by checking for a build/configuration file (for example,
+ * {@code pom.xml}, {@code package.json}, or {@code pyproject.toml}) and then deriving module boundaries and
+ * standard root folders.
  *
  * <h2>Provided layouts</h2>
  * <ul>
@@ -62,5 +64,6 @@ package org.machanism.machai.project.layout;
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- 
+ * 
+ * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */

@@ -64,7 +64,7 @@ import dev.langchain4j.model.output.Response;
  * 
  * <pre>
  * try (Picker picker = new Picker(provider)) {
- * 	List <Bindex> results = picker.pick("search query");
+ * 	List&lt;Bindex&gt; results = picker.pick("search query");
  * }
  * </pre>
  *

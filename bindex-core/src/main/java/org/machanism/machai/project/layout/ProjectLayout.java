@@ -20,7 +20,7 @@ import org.machanism.machai.project.ProjectProcessor;
  * 
  * <pre>
  * ProjectLayout layout = new MavenProjectLayout().projectDir(new File("/workspace"));
- * List <String> sources = layout.getSources();
+ * List&lt;String&gt; sources = layout.getSources();
  * </pre>
  *
  * @author Viktor Tovstyi

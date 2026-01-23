@@ -9,7 +9,7 @@
  * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the packages overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  *      
@@ -25,22 +25,22 @@
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- 
+ * 
+ * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */
 
 /**
- * Web UI automation-based GenAI provider implementations.
+ * Web UI automation based GenAI provider.
  *
  * <p>This package provides {@link org.machanism.machai.ai.manager.GenAIProvider} implementations that obtain
  * model responses by automating a target GenAI service through its web user interface using
  * <a href="https://ganteater.com">Anteater</a> workspace recipes.
  *
- * <p>The primary implementation is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
+ * <p>The main entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
  * <ul>
- *   <li>accepts an Anteater workspace configuration name via {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)},</li>
- *   <li>initializes and loads the workspace for a project directory via {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)},</li>
- *   <li>submits the accumulated prompts by executing the {@code "Submit Prompt"} recipe via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}.</li>
+ *   <li>accepts an Anteater workspace configuration name via {@code model(String)},</li>
+ *   <li>initializes and loads the workspace for a given project directory via {@code setWorkingDir(java.io.File)},</li>
+ *   <li>submits the accumulated prompts by executing the {@code "Submit Prompt"} recipe via {@code perform()}.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
