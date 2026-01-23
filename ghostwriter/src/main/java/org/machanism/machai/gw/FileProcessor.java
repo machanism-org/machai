@@ -275,13 +275,14 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
-		logger.info("Processing file: {}", file.getAbsolutePath());
 
 		File projectDir = projectLayout.getProjectDir();
 		String guidance = parseFile(projectDir, file);
 		if (guidance == null) {
 			return null;
 		}
+
+		logger.info("Processing file: {}", file.getAbsolutePath());
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
 		systemFunctionTools.applyTools(provider);
@@ -305,10 +306,16 @@ public class FileProcessor extends ProjectProcessor {
 			String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
 			File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
 			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
+			File parentDir = inputsFile.getParentFile();
+			if (parentDir != null) {
+				Files.createDirectories(parentDir.toPath());
+			}
 			provider.inputsLog(inputsFile);
 		}
 
-		return provider.perform();
+		String perform = provider.perform();
+		logger.info("Finished processing file: {}", file.getAbsolutePath());
+		return perform;
 	}
 
 	private String getProjectStructureDescription(ProjectLayout projectLayout) throws IOException {
