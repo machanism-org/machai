@@ -50,9 +50,9 @@
  *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
  *   &lt;version&gt;${project.version}&lt;/version&gt;
  *   &lt;configuration&gt;
- *     &lt;gwGenai&gt;OpenAI:gpt-5&lt;/gwGenai&gt;
- *     &lt;gwGenaiServerId&gt;genai&lt;/gwGenaiServerId&gt;
- *     &lt;gwThreads&gt;true&lt;/gwThreads&gt;
+ *     &lt;genai&gt;OpenAI:gpt-5&lt;/genai&gt;
+ *     &lt;serverId&gt;genai&lt;/serverId&gt;
+ *     &lt;threads&gt;true&lt;/threads&gt;
  *     &lt;instructions&gt;
  *       &lt;instruction&gt;src/site/machai/instructions.md&lt;/instruction&gt;
  *     &lt;/instructions&gt;
