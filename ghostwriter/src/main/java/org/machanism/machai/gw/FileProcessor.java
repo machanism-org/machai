@@ -33,14 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported files,
- * and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported
+ * files, and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to {@link Reviewer}
- * implementations discovered via {@link ServiceLoader}. For every supported file
- * it finds, it builds a prompt using templates from the {@code document-prompts}
- * resource bundle and invokes a {@link GenAIProvider}.
+ * This processor delegates file-specific guidance extraction to
+ * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
+ * every supported file it finds, it builds a prompt using templates from the
+ * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
  * </p>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -159,16 +159,20 @@ public class FileProcessor extends ProjectProcessor {
 		if (modules != null) {
 			if (isModuleMultiThread()) {
 				ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, modules.size()));
-				for (String module : modules) {
-					executor.submit(() -> {
-						try {
-							processModule(projectDir, module);
-						} catch (IOException e) {
-							logger.error("Module processing failed.", e);
-						}
-					});
+				try {
+					for (String module : modules) {
+						executor.submit(() -> {
+							try {
+								processModule(projectDir, module);
+							} catch (IOException e) {
+								logger.error("Module processing failed.", e);
+							}
+						});
+					}
+				} finally {
+					executor.shutdown();
 				}
-				executor.shutdown();
+
 				try {
 					executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 				} catch (InterruptedException e) {
@@ -271,6 +275,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
+		logger.info("Processing file: {}", file.getAbsolutePath());
+
 		File projectDir = projectLayout.getProjectDir();
 		String guidance = parseFile(projectDir, file);
 		if (guidance == null) {
@@ -396,7 +402,7 @@ public class FileProcessor extends ProjectProcessor {
 					"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
 		}
 		this.moduleMultiThread = moduleMultiThread;
-		logger.info("Multi-threaded processing mode enabled.");
+		logger.info("Multi-threaded processing mode {}.", moduleMultiThread ? "enabled" : "disabled");
 	}
 
 	public void setInstructions(String instructions) {
@@ -429,14 +435,16 @@ public class FileProcessor extends ProjectProcessor {
 						content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 					}
 				} else {
-					content = Files.readString(new File(location).toPath());
+					content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
 				}
 				instructionsText.append(content);
-				instructionsText.append("\r\n\r\n");
+				instructionsText.append(System.lineSeparator());
+				instructionsText.append(System.lineSeparator());
 			} catch (IOException e) {
-				logger.info("Failed to read instructions from file: {}", instruction);
+				logger.info("Failed to read instructions from file: {}", instruction, e);
 			}
 		}
-		setInstructions(instructionsText.toString());
+		String text = StringUtils.trimToNull(instructionsText.toString());
+		setInstructions(text);
 	}
 }
