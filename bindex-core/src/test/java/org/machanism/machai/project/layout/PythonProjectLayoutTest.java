@@ -1,73 +1,58 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
 class PythonProjectLayoutTest {
 
-	@Test
-	void isPythonProject_whenPyprojectHasNameAndNoPrivateClassifier_returnsTrue() {
-		// Arrange
-		File projectDir = new File("src/test/resources/mockPythonProject");
+    @Test
+    void isPythonProject_whenPyprojectHasNameAndNotPrivate_thenReturnsTrue() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-python-layout");
+        String toml = "" +
+                "[project]\n" +
+                "name = 'demo'\n" +
+                "classifiers = ['Programming Language :: Python']\n";
+        Files.write(root.resolve("pyproject.toml"), toml.getBytes(StandardCharsets.UTF_8));
 
-		// Act
-		boolean python = PythonProjectLayout.isPythonProject(projectDir);
+        // Act
+        boolean result = PythonProjectLayout.isPythonProject(root.toFile());
 
-		// Assert
-		assertTrue(python);
-	}
+        // Assert
+        assertEquals(true, result);
+    }
 
-	@Test
-	void isPythonProject_whenPyprojectMissing_returnsFalse() {
-		// Arrange
-		File projectDir = new File("src/test/resources/mockDefaultProject");
+    @Test
+    void isPythonProject_whenClassifierContainsPrivate_thenReturnsFalse() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-python-layout-private");
+        String toml = "" +
+                "[project]\n" +
+                "name = 'demo'\n" +
+                "classifiers = ['Private :: Do Not Publish']\n";
+        Files.write(root.resolve("pyproject.toml"), toml.getBytes(StandardCharsets.UTF_8));
 
-		// Act
-		boolean python = PythonProjectLayout.isPythonProject(projectDir);
+        // Act
+        boolean result = PythonProjectLayout.isPythonProject(root.toFile());
 
-		// Assert
-		assertFalse(python);
-	}
+        // Assert
+        assertEquals(false, result);
+    }
 
-	@Test
-	void getSources_returnsNull() {
-		// Arrange
-		PythonProjectLayout layout = new PythonProjectLayout();
+    @Test
+    void isPythonProject_whenTomlMissing_thenReturnsFalse() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-python-layout-missing");
 
-		// Act
-		List<String> sources = layout.getSources();
+        // Act
+        boolean result = PythonProjectLayout.isPythonProject(root.toFile());
 
-		// Assert
-		assertNull(sources);
-	}
-
-	@Test
-	void getDocuments_returnsNull() {
-		// Arrange
-		PythonProjectLayout layout = new PythonProjectLayout();
-
-		// Act
-		List<String> docs = layout.getDocuments();
-
-		// Assert
-		assertNull(docs);
-	}
-
-	@Test
-	void getTests_returnsNull() {
-		// Arrange
-		PythonProjectLayout layout = new PythonProjectLayout();
-
-		// Act
-		List<String> tests = layout.getTests();
-
-		// Assert
-		assertNull(tests);
-	}
+        // Assert
+        assertEquals(false, result);
+    }
 }

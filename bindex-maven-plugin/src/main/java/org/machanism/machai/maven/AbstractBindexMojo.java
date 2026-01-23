@@ -11,22 +11,12 @@ import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 
 /**
- * Abstract base Mojo for Bindex Maven plugin operations.
- * <p>
- * This class provides common functionality for the core plugin goals (create,
- * update, register) and manages interaction with the Bindex AI provider,
- * resource processing, and Maven project context.
- * <p>
- * Usage example:
- * 
- * <pre>
- * {@code
- * AbstractBindexMojo mojo = new Create();
- * mojo.execute();
- * }
- * </pre>
+ * Base class for the Bindex Maven plugin goals.
  *
- * @author Viktor Tovstyi
+ * <p>
+ * Provides common parameters (project/base directory/model selection) and shared helper methods used by concrete goals
+ * such as {@link Create}, {@link Update}, and {@link Register}.
+ * </p>
  */
 public abstract class AbstractBindexMojo extends AbstractMojo {
 
@@ -37,7 +27,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	protected MavenProject project;
 
 	/**
-	 * The chat model identifier used by Bindex AI provider.
+	 * The AI provider/model identifier used by the plugin (for example {@code OpenAI:gpt-5}).
 	 */
 	@Parameter(property = "bindex.genai", defaultValue = "OpenAI:gpt-5")
 	protected String chatModel;
@@ -49,16 +39,16 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	protected File basedir;
 
 	/**
-	 * Default constructor.
+	 * Creates a new instance.
 	 */
 	public AbstractBindexMojo() {
 		super();
 	}
 
 	/**
-	 * Creates or updates Bindex index and resources for the project folder.
+	 * Creates or updates the Bindex index and related resources for the current project.
 	 *
-	 * @param update true if the update mode should be enabled
+	 * @param update whether to run in update mode (incremental refresh) instead of create mode
 	 */
 	void createBindex(boolean update) {
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
@@ -74,9 +64,13 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	}
 
 	/**
-	 * Returns true if the project packaging type is suitable for Bindex operations.
+	 * Indicates whether the current Maven project should be processed by Bindex.
 	 *
-	 * @return true if packaging is not "pom"
+	 * <p>
+	 * The plugin skips projects with {@code pom} packaging (typically parent/aggregator modules).
+	 * </p>
+	 *
+	 * @return {@code true} if the project packaging is not {@code pom}; otherwise {@code false}
 	 */
 	boolean isBindexed() {
 		return !"pom".equals(project.getPackaging());

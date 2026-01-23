@@ -4,30 +4,29 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Maven Mojo to execute the "update" goal for Bindex.
- * <p>
- * Updates the Bindex index and resources for the Maven project, if applicable.
- * <p>
- * <strong>Usage Example:</strong>
- * <pre>
- * {@code
- * mvn org.machanism.machai:bindex-maven-plugin:update
- * }
- * </pre>
+ * Maven goal that updates (refreshes) an existing Bindex index for the current project.
  *
- * @author Viktor Tovstyi
+ * <p>
+ * The goal is skipped for projects with {@code pom} packaging.
+ * </p>
+ *
+ * <p>
+ * Example:
+ * {@code mvn org.machanism.machai:bindex-maven-plugin:update}
+ * </p>
  */
 @Mojo(name = "update", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.INSTALL)
 public class Update extends AbstractBindexMojo {
-    /**
-     * Executes the update goal, which updates Bindex index and resources.
-     *
-     * @throws MojoExecutionException if an error occurs during Bindex update
-     */
-    @Override
-    public void execute() throws MojoExecutionException {
-        if (isBindexed()) {
-            createBindex(true);
-        }
-    }
+
+	/**
+	 * Runs the {@code update} goal.
+	 *
+	 * @throws MojoExecutionException if Bindex fails to update the index/resources
+	 */
+	@Override
+	public void execute() throws MojoExecutionException {
+		if (isBindexed()) {
+			createBindex(true);
+		}
+	}
 }

@@ -7,20 +7,20 @@ import org.apache.commons.lang.StringUtils;
 import org.machanism.machai.ai.provider.none.NoneProvider;
 
 /**
- * Manager for instantiating and resolving {@link GenAIProvider} implementations
- * by model identifier string.
- * <p>
- * Supports dynamic instantiation of provider implementations through
- * reflection, enabling flexible selection of AI models using provider/model
- * identifiers (e.g., "OpenAI:gpt-3.5-turbo"). Maintains a cache of available
- * provider instances and delegates model selection and configuration.
- * <p>
- * <b>Usage Example:</b>
- * 
- * <pre>
+ * Resolves and instantiates {@link GenAIProvider} implementations from a provider/model identifier.
+ *
+ * <p>The identifier is typically formatted as {@code Provider:Model} (for example
+ * {@code OpenAI:gpt-4o-mini}). If the provider portion is omitted, a default provider is used.
+ *
+ * <p>Providers are instantiated via reflection. A provider can be referenced either by a short provider name
+ * (mapped to the conventional class name {@code org.machanism.machai.ai.provider.<provider>.<Provider>Provider})
+ * or by a fully-qualified class name.
+ *
+ * <h2>Usage</h2>
+ * {@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
  * provider.prompt("Hello!");
- * </pre>
+ * }
  *
  * @author Viktor Tovstyi
  * @see GenAIProvider
@@ -28,14 +28,11 @@ import org.machanism.machai.ai.provider.none.NoneProvider;
 public class GenAIProviderManager {
 
 	/**
-	 * Creates and returns the appropriate GenAIProvider instance based on a
-	 * provider/model string.
+	 * Creates a provider instance for the given provider/model identifier and applies the selected model.
 	 *
-	 * @param chatModel the model string, formatted as "Provider:Model" or just
-	 *                  "Model"
-	 * @return the resolved GenAIProvider
-	 * @throws IllegalArgumentException if the provider cannot be resolved or
-	 *                                  instantiated
+	 * @param chatModel the model identifier formatted as {@code Provider:Model} or just {@code Model}
+	 * @return a new provider instance configured with the requested model
+	 * @throws IllegalArgumentException if the provider cannot be resolved or instantiated
 	 */
 	public static GenAIProvider getProvider(String chatModel) {
 		String providerName = StringUtils.substringBefore(chatModel, ":");

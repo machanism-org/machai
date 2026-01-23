@@ -8,134 +8,127 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Interface for generic AI providers supplying prompt handling, file
- * operations, embeddings, and dynamic extension via function tools within the
- * Machanism AI client framework.
- * <p>
- * Implementations of this interface must provide concrete logic for interacting
- * with different AI models, allowing prompt submission as text or files,
- * managing internal resources, supporting file operations (including remote
- * files via URL), computing embeddings, and adding custom tool functions at
- * runtime.
- * <p>
- * <b>Main Features:</b>
- * <ul>
- * <li>Prompt support for both text and file-based input.</li>
- * <li>Resource management for files and model-specific state.</li>
- * <li>Extensibility through custom tool functions accepting
- * <code>JsonNode</code> arguments.</li>
- * <li>Ability to clear internal state and select model/instructions
- * dynamically.</li>
- * <li>Working directory configuration and input event logging.</li>
- * </ul>
- * <p>
- * <b>Usage Example:</b>
- * 
- * <pre>
+ * Contract for a GenAI provider implementation.
+ *
+ * <p>A {@code GenAIProvider} represents a concrete integration (OpenAI, Gemini, local model, etc.) capable of:
+ * prompting a chat model, attaching local/remote files, computing embeddings, and exposing tool functions.
+ * Implementations may keep session state; callers should use {@link #clear()} when appropriate.
+ *
+ * <h2>Typical usage</h2>
+ * {@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
+ * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Hello!");
- * provider.addFile(new File("some.txt"));
- * List&lt;Float&gt; embedding = provider.embedding("any text");
- * </pre>
+ * String response = provider.perform();
+ * }
  *
  * @author Viktor Tovstyi
  */
 public interface GenAIProvider {
 
 	/**
-	 * Sends a prompt string to the underlying AI provider.
+	 * Adds a user prompt to the current session.
 	 *
-	 * @param text The input prompt string
+	 * @param text the prompt text
 	 */
 	void prompt(String text);
 
 	/**
-	 * Sends a prompt using the contents of a file.
+	 * Adds a user prompt using the contents of a file.
 	 *
-	 * @param file              The input file
-	 * @param bundleMessageName The message identifier or bundle
-	 * @throws IOException If file cannot be read
+	 * @param file the file containing prompt content
+	 * @param bundleMessageName a message identifier associated with the prompt (for example, a resource bundle key)
+	 * @throws IOException if the file cannot be read
 	 */
 	void promptFile(File file, String bundleMessageName) throws IOException;
 
 	/**
-	 * Adds a file resource for AI provider processing.
+	 * Adds a local file resource for provider processing.
 	 *
-	 * @param file File to be added
-	 * @throws IOException           For IO/file errors
-	 * @throws FileNotFoundException If file cannot be found
+	 * @param file the file to add
+	 * @throws IOException for I/O errors
+	 * @throws FileNotFoundException if the file cannot be found
 	 */
 	void addFile(File file) throws IOException, FileNotFoundException;
 
 	/**
-	 * Adds a remote file via URL for processing by the provider.
+	 * Adds a remote file resource for provider processing.
 	 *
-	 * @param fileUrl URL of the file
-	 * @throws IOException           For IO/file errors
-	 * @throws FileNotFoundException If remote file cannot be found
+	 * @param fileUrl the URL of the file
+	 * @throws IOException for I/O errors
+	 * @throws FileNotFoundException if the remote file cannot be found
 	 */
 	void addFile(URL fileUrl) throws IOException, FileNotFoundException;
 
 	/**
-	 * Returns the embedding vector for the supplied string using the underlying
-	 * model.
+	 * Computes an embedding vector for the provided text.
 	 *
-	 * @param text Input string to embed
-	 * @return List of floats representing the embedding
+	 * @param text the input text
+	 * @return the embedding vector
 	 */
 	List<Float> embedding(String text);
 
 	/**
-	 * Clears all stored files and provider state.
+	 * Clears any stored files and session/provider state.
 	 */
 	void clear();
 
 	/**
-	 * Adds a custom function tool to the provider for runtime invocation.
+	 * Registers a custom tool function that the provider may invoke at runtime.
 	 *
-	 * @param name        Tool/function name
-	 * @param description Description of function/tool
-	 * @param function    Function accepting Object arguments and returning a result
-	 * @param paramsDesc  Parameter descriptions
+	 * @param name tool name
+	 * @param description human-readable description of the tool
+	 * @param function function implementation; receives an argument array and returns a result
+	 * @param paramsDesc parameter descriptors (format is provider-specific)
 	 */
 	void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc);
 
 	/**
-	 * Sets usage or setup instructions for the session.
+	 * Sets system/session instructions for the current conversation.
 	 *
-	 * @param instructions Instructions text
+	 * @param instructions instruction text
 	 */
 	void instructions(String instructions);
 
 	/**
-	 * Performs the main provider action (typically triggers model output).
+	 * Executes the provider to produce a response based on the accumulated prompts and state.
 	 *
-	 * @return Output result or response
+	 * @return the provider response
 	 */
 	String perform();
 
 	/**
-	 * Logs input events to a (temporary) directory.
+	 * Enables logging of provider inputs to the given directory.
 	 *
-	 * @param bindexTempDir Directory to write log files
+	 * @param bindexTempDir directory used for writing log files
 	 */
 	void inputsLog(File bindexTempDir);
 
 	/**
 	 * Selects the model name for this provider instance.
 	 *
-	 * @param chatModelName Name of the model to use
+	 * @param chatModelName the model name to use
 	 */
 	void model(String chatModelName);
 
 	/**
-	 * Configures the working directory for file and tool operations.
+	 * Configures the working directory used for file and tool operations.
 	 *
-	 * @param workingDir Root working directory
+	 * @param workingDir the working directory
 	 */
 	void setWorkingDir(File workingDir);
 
+	/**
+	 * Releases any resources held by this provider.
+	 */
 	void close();
 
-	default boolean isThreadSafe() { return true; };
+	/**
+	 * Indicates whether this provider instance is safe for concurrent use.
+	 *
+	 * @return {@code true} if the instance is thread-safe; {@code false} otherwise
+	 */
+	default boolean isThreadSafe() {
+		return true;
+	}
 }

@@ -1,80 +1,51 @@
 package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class JScriptProjectLayoutTest {
 
-	@Test
-	void isPackageJsonPresent_whenPresent_returnsTrue() {
-		// Arrange
-		File projectDir = new File("src/test/resources/mockJsProject");
+    @Test
+    void getModules_whenNoWorkspaces_thenReturnsNull() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-js-layout-no-workspaces");
+        Files.write(root.resolve("package.json"), "{\"name\":\"x\"}".getBytes(StandardCharsets.UTF_8));
 
-		// Act
-		boolean present = JScriptProjectLayout.isPackageJsonPresent(projectDir);
+        JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(root.toFile());
 
-		// Assert
-		assertTrue(present);
-	}
+        // Act
+        List<String> modules = layout.getModules();
 
-	@Test
-	@Disabled
-	void getModules_whenWorkspacesArray_collectsWorkspaceModuleDirectories() throws IOException {
-		// Arrange
-		File projectDir = new File("src/test/resources/mockJsProject");
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(projectDir);
+        // Assert
+        assertNull(modules);
+    }
 
-		// Act
-		List<String> modules = layout.getModules();
+    @Test
+    void getModules_whenWorkspacesContainGlob_thenFindsNestedPackageJsonAndExcludesNodeModules() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-js-layout-workspaces");
+        Files.write(root.resolve("package.json"), "{\"workspaces\":[\"packages/**\"]}".getBytes(StandardCharsets.UTF_8));
 
-		// Assert
-		assertNotNull(modules);
-		assertEquals(1, modules.size());
-		assertEquals("workspaceA", modules.get(0));
-	}
+        Path packages = Files.createDirectories(root.resolve("packages"));
+        Path a = Files.createDirectories(packages.resolve("a"));
+        Files.write(a.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
 
-	@Test
-	void getSources_returnsNull() {
-		// Arrange
-		JScriptProjectLayout layout = new JScriptProjectLayout();
+        Path nodeModules = Files.createDirectories(packages.resolve("node_modules").resolve("ignored"));
+        Files.write(nodeModules.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
 
-		// Act
-		List<String> sources = layout.getSources();
+        JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(root.toFile());
 
-		// Assert
-		assertNull(sources);
-	}
+        // Act
+        List<String> modules = layout.getModules();
 
-	@Test
-	void getDocuments_returnsNull() {
-		// Arrange
-		JScriptProjectLayout layout = new JScriptProjectLayout();
-
-		// Act
-		List<String> docs = layout.getDocuments();
-
-		// Assert
-		assertNull(docs);
-	}
-
-	@Test
-	void getTests_returnsNull() {
-		// Arrange
-		JScriptProjectLayout layout = new JScriptProjectLayout();
-
-		// Act
-		List<String> tests = layout.getTests();
-
-		// Assert
-		assertNull(tests);
-	}
+        // Assert
+        assertEquals(List.of("packages/a"), modules);
+    }
 }

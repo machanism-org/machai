@@ -27,25 +27,31 @@ Page Structure:
 
 ## Introduction
 
-Assembly Maven Plugin is a Maven plugin that automates assembly-style updates to a local Maven project within the Machanism ecosystem.
+Assembly Maven Plugin automates “assembly-style” updates to a local Maven project in the Machanism ecosystem.
 
-It takes a short project concept (for example in `project.txt`) and produces concrete, reviewable changes in your working tree—such as updates to `pom.xml` and related project files. It can also use Machanism bindex metadata (for example `bindex.json`) to guide dependency selection and streamline setup.
+You provide a short project concept (for example, `project.txt`) and run the `assembly` goal. The plugin applies the concept and produces concrete, reviewable changes in your working tree—such as updates to `pom.xml` and related project files.
+
+Benefits:
+
+- Speeds up project bootstrapping and evolution by automating repetitive setup.
+- Can use Machanism bindex metadata (for example, `bindex.json`) to guide dependency selection.
+- Keeps humans in control by writing changes locally for review before commit.
 
 ## Overview
 
-Use this plugin when you want to quickly generate or evolve a Maven project by applying structured updates locally, instead of performing repetitive manual setup.
+Use this plugin when you want to generate or evolve a Maven project by applying structured updates locally, instead of performing repetitive manual configuration.
 
 Value proposition:
 
 - **Faster bootstrapping:** reduces time spent on boilerplate project setup.
-- **Metadata-informed dependency choice:** can recommend dependencies using bindex metadata and semantic search.
+- **Metadata-informed dependency choice:** integrates libraries based on bindex metadata.
 - **Human-controlled output:** changes are written to disk so you can inspect, edit, and commit.
 
 ## Key Features
 
 - **Project bootstrap and evolution:** creates or updates common project files and structure.
-- **Metadata-driven assembly:** can use Machanism bindex metadata (for example `bindex.json`) to guide library selection.
-- **GenAI-assisted discovery:** supports semantic discovery of candidate libraries.
+- **Metadata-driven assembly:** integrates libraries based on bindex metadata (for example, `bindex.json`).
+- **GenAI-assisted discovery:** uses GenAI-powered semantic search to recommend suitable libraries.
 - **Reviewable output:** writes changes into your project so you can inspect, adjust, and commit them.
 
 ## Getting Started
@@ -54,7 +60,7 @@ Value proposition:
 
 - Java 8 or higher
 - Maven 3.6.x or newer
-- Access to a compatible GenAI provider (for example OpenAI)
+- Network access to a compatible GenAI provider (for example, OpenAI)
 
 ### Environment Variables
 
@@ -81,12 +87,12 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 
 Common parameters:
 
-| Parameter              | Description                                  | Default             |
-|------------------------|----------------------------------------------|---------------------|
-| `assembly.genai`       | GenAI model used for assembly tasks          | `OpenAI:gpt-5`      |
-| `pick.genai`           | Model used for library selection             | `OpenAI:gpt-5-mini` |
-| `assembly.prompt.file` | Path to the project concept file             | `project.txt`       |
-| `assembly.score`       | Minimum confidence score for recommendations | `0.80`              |
+| Parameter              | Description                                  | Default       |
+|------------------------|----------------------------------------------|---------------|
+| `assembly.prompt.file` | Path to the project concept file             | `project.txt` |
+| `assembly.genai`       | GenAI model used for assembly tasks          | (plugin value) |
+| `pick.genai`           | Model used for library selection             | (plugin value) |
+| `assembly.score`       | Minimum confidence score for recommendations | `0.80`        |
 
 ### Example
 

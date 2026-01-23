@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-The **Bindex Maven Plugin** enables automated generation and optional registration of `bindex.json` metadata for Maven projects in the Machanism/Machai ecosystem. By producing a consistent, structured descriptor for each module, it improves artifact discovery, integration, and assembly workflows and supports GenAI-powered semantic search scenarios that rely on rich, standardized metadata.
+The **Bindex Maven Plugin** enables automated generation and registration of `bindex.json` metadata for Maven projects in the Machanism ecosystem. By producing a consistent, structured descriptor for each module, it improves artifact discovery, integration, and assembly workflows and supports GenAI-powered semantic search scenarios that rely on rich, standardized metadata.
 
 ## Overview
 
@@ -81,27 +81,6 @@ mvn org.machanism.machai:bindex-maven-plugin:register
 
 ## Configuration
 
-Add the plugin to your `pom.xml`:
-
-```xml
-<build>
-  <plugins>
-    <plugin>
-      <groupId>org.machanism.machai</groupId>
-      <artifactId>bindex-maven-plugin</artifactId>
-      <version>${bindex-maven-plugin.version}</version>
-      <executions>
-        <execution>
-          <goals>
-            <goal>bindex</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
-  </plugins>
-</build>
-```
-
 ### Common Parameters
 
 | Parameter | Description | Default |
@@ -117,5 +96,5 @@ mvn org.machanism.machai:bindex-maven-plugin:bindex -Dupdate=false
 ## Resources
 
 - [Maven Central artifact](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
-- [Machai (GitHub)](https://github.com/machanism-org/machai)
+- [GitHub repository](https://github.com/machanism-org/machai)
 - [Maven](https://maven.apache.org)

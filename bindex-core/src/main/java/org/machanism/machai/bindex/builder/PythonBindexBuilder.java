@@ -13,46 +13,57 @@ import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 
 /**
- * PythonBindexBuilder provides project context and manifest aggregation for Python (pyproject.toml) projects.
- * <p>
- * Reads TOML manifest and main source files; prepares prompts for GenAI  Bindex creation.
- * <p>
- * Usage example:
- * <pre>
- *     PythonBindexBuilder builder = new PythonBindexBuilder(layout);
- *     builder.genAIProvider(provider);
- *      Bindex bindex = builder.build();
- * </pre>
+ * {@link BindexBuilder} specialization for Python projects.
+ *
+ * <p>This builder reads {@code pyproject.toml} from the project root and uses it to discover the project
+ * name (from {@code project.name}). It then prompts the configured GenAI provider with the manifest content
+ * and any regular files found under the inferred source directory.
+ *
+ * <p>Example:
+ * {@code
+ * PythonBindexBuilder builder = new PythonBindexBuilder(layout)
+ *     .genAIProvider(provider);
+ * Bindex bindex = builder.build();
+ * }
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  * @see org.machanism.machai.bindex.BindexBuilderFactory
- * @see org.machanism.machai.project.layout.ProjectLayout
+ * @see ProjectLayout
  */
 public class PythonBindexBuilder extends BindexBuilder {
-    private static ResourceBundle promptBundle = ResourceBundle.getBundle("python_project_prompts");
+
+    private static final ResourceBundle promptBundle = ResourceBundle.getBundle("python_project_prompts");
     private static final String PROJECT_MODEL_FILE_NAME = "pyproject.toml";
 
     /**
-     * Constructs a PythonBindexBuilder for Python projects with pyproject.toml.
-     * @param projectLayout Project layout instance with directory info.
+     * Creates a builder for a Python project.
+     *
+     * @param projectLayout layout describing the project directory and manifest location
      */
     public PythonBindexBuilder(ProjectLayout projectLayout) {
         super(projectLayout);
     }
 
     /**
-     * Provides project manifest and main sources context to GenAIProvider for  Bindex generation.
-     * Reads pyproject.toml and sends Python source files as prompt context.
-     * @throws IOException On file or prompt failure.
+     * Adds Python-specific project context to the provider.
+     *
+     * <p>The implementation:
+     * <ol>
+     *   <li>prompts {@code pyproject.toml},</li>
+     *   <li>infers a source directory from {@code project.name} (dots replaced with slashes),</li>
+     *   <li>prompts all regular files directly under that directory,</li>
+     *   <li>adds additional prompting rules for Python projects.</li>
+     * </ol>
+     *
+     * @throws IOException if reading the manifest fails or prompting fails
      */
     @Override
     public void projectContext() throws IOException {
         File pyprojectTomlFile = new File(getProjectLayout().getProjectDir(), PROJECT_MODEL_FILE_NAME);
 
         try (FileReader reader = new FileReader(pyprojectTomlFile)) {
-            String prompt = MessageFormat.format(promptBundle.getString("project_build_section"),
-                IOUtils.toString(reader));
+            String prompt = MessageFormat.format(promptBundle.getString("project_build_section"), IOUtils.toString(reader));
             getGenAIProvider().prompt(prompt);
         }
 

@@ -28,14 +28,12 @@ import com.ganteater.ae.RecipeRunner;
  * </ul>
  *
  * <h2>Example</h2>
- * <pre>
  * {@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
  * provider.model("config.yaml");
  * provider.setWorkingDir(new File("/path/to/project"));
  * String response = provider.perform();
  * }
- * </pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

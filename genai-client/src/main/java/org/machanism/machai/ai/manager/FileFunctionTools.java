@@ -17,55 +17,56 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Provides file system utility tools for GenAIProvider environments, enabling
- * reading, writing, and recursively listing files and directories on disk.
- * <p>
- * <b>Main Features:</b>
+ * Installs file-system tools into a {@link GenAIProvider}.
+ *
+ * <p>The installed tools operate relative to a working directory supplied by the provider/tool runtime.
+ *
+ * <h2>Installed tools</h2>
  * <ul>
- * <li>Read the contents of a file from the file system.</li>
- * <li>Write changes to a file or create new files on disk.</li>
- * <li>List all files and directories in a specified folder.</li>
- * <li>Recursively list all files, including those in subdirectories.</li>
+ * <li>{@code read_file_from_file_system} – reads a file as UTF-8 text</li>
+ * <li>{@code write_file_to_file_system} – writes a file (creating parent directories as needed)</li>
+ * <li>{@code list_files_in_directory} – lists immediate children of a directory</li>
+ * <li>{@code get_recursive_file_list} – recursively lists all files under a directory</li>
  * </ul>
- * <p>
- * <b>Usage Example:</b>
- * 
- * <pre>
- * FileFunctionTools tools = new FileFunctionTools(new File("/tmp"));
- * tools.applyTools(provider);
- * </pre>
  *
  * @author Viktor Tovstyi
  */
 public class FileFunctionTools {
 
 	private static final int MAXWIDTH = 120;
+
 	/** Logger for file tool operations and diagnostics. */
-	private static Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
 
 	/**
-	 * Installs file read/write/list tools into the provided GenAIProvider.
+	 * Installs file read/write/list tools into the provided provider.
 	 *
-	 * @param provider GenAIProvider instance
+	 * @param provider provider instance
 	 */
 	public void applyTools(GenAIProvider provider) {
-		provider.addTool("read_file_from_file_system", "Read the contents of a file from the disk.", p -> readFile(p),
+		provider.addTool("read_file_from_file_system", "Read the contents of a file from the disk.", this::readFile,
 				"file_path:string:required:The path to the file to be read.");
-		provider.addTool("write_file_to_file_system", "Write changes to a file on the file system.", p -> writeFile(p),
+		provider.addTool("write_file_to_file_system", "Write changes to a file on the file system.", this::writeFile,
 				"file_path:string:required:The path to the file you want to write to or create.",
 				"text:string:required:The content to be written into the file (text, code, etc.).");
-		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
-				p -> listFiles(p), "dir_path:string:optional:The path to the directory to list contents of.");
+		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.", this::listFiles,
+				"dir_path:string:optional:The path to the directory to list contents of.");
 		provider.addTool("get_recursive_file_list",
-				"List files recursively in a directory (includes files in subdirectories).", p -> getRecursiveFiles(p),
+				"List files recursively in a directory (includes files in subdirectories).", this::getRecursiveFiles,
 				"dir_path:string:optional:Path to the folder to list contents recursively.");
 	}
 
 	/**
 	 * Lists files recursively in a directory.
 	 *
-	 * @param params JsonNode containing optional "dir_path" field
-	 * @return String listing file paths or message if none found
+	 * <p>Expected parameters:
+	 * <ol>
+	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
+	 * <li>{@link File} working directory</li>
+	 * </ol>
+	 *
+	 * @param params tool arguments
+	 * @return a newline-separated list of absolute file paths
 	 */
 	private Object getRecursiveFiles(Object[] params) {
 		File workingDir = (File) params[1];
@@ -95,58 +96,47 @@ public class FileFunctionTools {
 	}
 
 	/**
-	 * Helper to collect all files recursively.
-	 *
-	 * @param directory Directory to start with
-	 * @return List of files
-	 */
-	private List<File> listFilesRecursively(File directory) {
-		List<File> allFiles = new ArrayList<>();
-		if (directory.exists() && directory.isDirectory()) {
-			File[] files = directory.listFiles();
-			if (files != null) {
-				for (File file : files) {
-					if (file.isFile()) {
-						allFiles.add(file);
-					} else if (file.isDirectory()) {
-						allFiles.addAll(listFilesRecursively(file));
-					}
-				}
-			}
-		}
-		return allFiles;
-	}
-
-	/**
 	 * Lists files in a directory.
 	 *
-	 * @param params JsonNode with "dir_path" (optional)
-	 * @return String listing file paths
+	 * <p>Expected parameters:
+	 * <ol>
+	 * <li>{@link JsonNode} containing {@code dir_path}</li>
+	 * <li>{@link File} working directory</li>
+	 * </ol>
+	 *
+	 * @param params tool arguments
+	 * @return a newline-separated list of absolute paths for directory children
 	 */
 	private Object listFiles(Object[] params) {
-		String filePath = ((JsonNode) params[0]).get("dir_path").asText();
+		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
+		String filePath = dirNode == null ? null : dirNode.asText();
 		File workingDir = (File) params[1];
 		File directory = new File(workingDir, StringUtils.defaultIfBlank(filePath, "."));
-		String result;
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
 			StringBuilder content = new StringBuilder();
-			for (File file : listFiles) {
-				content.append(file.getAbsolutePath()).append("\n");
+			if (listFiles != null) {
+				for (File file : listFiles) {
+					content.append(file.getAbsolutePath()).append("\n");
+				}
 			}
-			result = content.toString();
-		} else {
-			result = "No files found in directory.";
+			return content.toString();
 		}
-		return result;
+		return "No files found in directory.";
 	}
 
 	/**
 	 * Writes content to a file in the working directory.
 	 *
-	 * @param params JsonNode containing "file_path" and "text"
-	 * @return true if successful
-	 * @throws IllegalArgumentException on IO error
+	 * <p>Expected parameters:
+	 * <ol>
+	 * <li>{@link JsonNode} containing {@code file_path} and {@code text}</li>
+	 * <li>{@link File} working directory</li>
+	 * </ol>
+	 *
+	 * @param params tool arguments
+	 * @return {@code true} if successful
+	 * @throws IllegalArgumentException on I/O error
 	 */
 	private Object writeFile(Object[] params) {
 		String filePath = ((JsonNode) params[0]).get("file_path").asText();
@@ -168,9 +158,15 @@ public class FileFunctionTools {
 	/**
 	 * Reads content from a file in the working directory.
 	 *
-	 * @param params JsonNode containing "file_path"
-	 * @return File content as string
-	 * @throws IllegalArgumentException on IO error
+	 * <p>Expected parameters:
+	 * <ol>
+	 * <li>{@link JsonNode} containing {@code file_path}</li>
+	 * <li>{@link File} working directory</li>
+	 * </ol>
+	 *
+	 * @param params tool arguments
+	 * @return file content as UTF-8 text, or a message if the file does not exist
+	 * @throws IllegalArgumentException on I/O error
 	 */
 	private Object readFile(Object[] params) {
 		String filePath = ((JsonNode) params[0]).get("file_path").asText();
@@ -179,9 +175,32 @@ public class FileFunctionTools {
 		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
 			return IOUtils.toString(io, "UTF8");
 		} catch (FileNotFoundException e) {
-			return  "File not found.";
+			return "File not found.";
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+
+	/**
+	 * Helper to collect all files recursively.
+	 *
+	 * @param directory directory to start with
+	 * @return list of files
+	 */
+	private List<File> listFilesRecursively(File directory) {
+		List<File> allFiles = new ArrayList<>();
+		if (directory.exists() && directory.isDirectory()) {
+			File[] files = directory.listFiles();
+			if (files != null) {
+				for (File file : files) {
+					if (file.isFile()) {
+						allFiles.add(file);
+					} else if (file.isDirectory()) {
+						allFiles.addAll(listFilesRecursively(file));
+					}
+				}
+			}
+		}
+		return allFiles;
 	}
 }

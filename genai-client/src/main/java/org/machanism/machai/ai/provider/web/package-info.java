@@ -1,64 +1,48 @@
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!**
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
  * 
  * - Use Clear and Concise Descriptions:
  * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
  * 		- Avoid vague statements; be specific about functionality and intent.
- * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the packages overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
- *      
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * 
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
  * 		- Use proper Markdown or HTML formatting for readability.
- * 
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- * 
- *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, convert the code content to use the Javadoc `{@code ...}`inline tag instead. Ensure that the code is properly escaped and formatted for Javadoc. Only replace the code inside `<pre>` tags with `{@code ...}`; do not alter other content. `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
+ *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
 
 /**
- * Web UI automation based GenAI provider.
+ * Provides a {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that obtains model responses
+ * by automating a target GenAI service through its web user interface.
  *
- * <p>This package provides {@link org.machanism.machai.ai.manager.GenAIProvider} implementations that obtain
- * model responses by automating a target GenAI service through its web user interface using
- * <a href="https://ganteater.com">Anteater</a> workspace recipes.
+ * <p>Automation is executed via <a href="https://ganteater.com">Anteater</a> workspace recipes. The primary
+ * entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
  *
- * <p>The main entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
  * <ul>
- *   <li>accepts an Anteater workspace configuration name via {@code model(String)},</li>
- *   <li>initializes and loads the workspace for a given project directory via {@code setWorkingDir(java.io.File)},</li>
- *   <li>submits the accumulated prompts by executing the {@code "Submit Prompt"} recipe via {@code perform()}.</li>
+ *   <li>selects an Anteater workspace configuration via
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)},</li>
+ *   <li>initializes the workspace for a project directory via
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}, and</li>
+ *   <li>submits accumulated prompts by executing the {@code "Submit Prompt"} recipe via
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
- * <pre>
- * {@code
- * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
- * provider.model("config.yaml");
- * provider.setWorkingDir(new File("/path/to/project"));
- * String response = provider.perform();
- * }
- * </pre>
- *
- * <h2>Operational notes</h2>
- * <ul>
- *   <li>Execution depends on the configured Anteater recipes and workspace configuration being available and
- *       compatible with the target web UI.</li>
- *   <li>The provider maintains static workspace state; it is not thread-safe and does not support switching
- *       working directories (or configuration) within the same JVM instance.</li>
- * </ul>
+ * <p><strong>Lifecycle note:</strong> the underlying Anteater workspace is stored in static state and is
+ * intended to be initialized once per JVM; attempts to change the working directory or configuration after
+ * initialization result in an error.
  */
 package org.machanism.machai.ai.provider.web;

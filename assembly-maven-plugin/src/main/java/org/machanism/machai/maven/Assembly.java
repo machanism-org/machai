@@ -24,23 +24,50 @@ import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
 
 /**
- * Maven plugin Mojo that implements the {@code assembly} goal.
+ * Maven plugin {@link org.apache.maven.plugin.Mojo} that implements the {@code assembly} goal.
  *
  * <p>
- * The goal drives an AI-assisted project assembly workflow:
+ * This goal drives an AI-assisted project assembly workflow in the current Maven execution context:
  * </p>
+ * <ol>
+ *   <li>Acquire an assembly prompt from {@link #assemblyPromptFile} or interactively via {@link #prompter}.</li>
+ *   <li>Use the {@link #pickChatModel} provider to recommend candidate libraries ({@link Bindex}).</li>
+ *   <li>Filter recommendations using {@link #score} as a minimum threshold.</li>
+ *   <li>Run the assembly workflow using {@link #chatModel} and apply changes to {@link #basedir}.</li>
+ * </ol>
+ *
+ * <h2>Plugin parameters</h2>
  * <ul>
- *   <li>Acquires an assembly prompt (from a configured file or interactively).</li>
- *   <li>Uses a configured generative-AI provider to recommend candidate libraries.</li>
- *   <li>Optionally filters recommendations by a minimum score threshold.</li>
- *   <li>Invokes the project assembly workflow in the Maven base directory.</li>
+ *   <li>
+ *     {@code -Dassembly.genai} (default {@code OpenAI:gpt-5})
+ *     &ndash; Provider id for the assembly phase.
+ *   </li>
+ *   <li>
+ *     {@code -Dpick.genai} (default {@code OpenAI:gpt-5-mini})
+ *     &ndash; Provider id for the library recommendation (picker) phase.
+ *   </li>
+ *   <li>
+ *     {@code -Dassembly.prompt.file} (default {@code project.txt})
+ *     &ndash; File containing the prompt; if absent, the prompt is requested interactively.
+ *   </li>
+ *   <li>
+ *     {@code -Dassembly.score} (default {@code 0.9})
+ *     &ndash; Minimum score required for a recommended library to be listed/used.
+ *   </li>
+ *   <li>
+ *     {@code -Dbindex.register.url} (optional)
+ *     &ndash; Registration/lookup endpoint used by the picker.
+ *   </li>
  * </ul>
  *
- * <p><b>Command-line example:</b></p>
+ * <h2>Usage examples</h2>
+ * <p><b>Command line:</b></p>
  * <pre>
  * mvn org.machanism.machai:assembly-maven-plugin:assembly \
  *   -Dassembly.genai=OpenAI:gpt-5 \
- *   -Dpick.genai=OpenAI:gpt-5-mini
+ *   -Dpick.genai=OpenAI:gpt-5-mini \
+ *   -Dassembly.prompt.file=project.txt \
+ *   -Dassembly.score=0.9
  * </pre>
  */
 @Mojo(name = "assembly", requiresProject = false, requiresDependencyCollection = ResolutionScope.NONE)
@@ -50,11 +77,11 @@ public class Assembly extends AbstractMojo {
     @Component
     protected Prompter prompter;
 
-    /** GenAI provider identifier used for the assembly workflow (e.g., {@code OpenAI:gpt-5}). */
+    /** GenAI provider identifier used for the assembly workflow (for example, {@code OpenAI:gpt-5}). */
     @Parameter(property = "assembly.genai", defaultValue = "OpenAI:gpt-5")
     protected String chatModel;
 
-    /** GenAI provider identifier used for library recommendation/picking (e.g., {@code OpenAI:gpt-5-mini}). */
+    /** GenAI provider identifier used for library recommendation/picking (for example, {@code OpenAI:gpt-5-mini}). */
     @Parameter(property = "pick.genai", defaultValue = "OpenAI:gpt-5-mini")
     protected String pickChatModel;
 
@@ -77,7 +104,19 @@ public class Assembly extends AbstractMojo {
     /**
      * Executes the {@code assembly} goal.
      *
-     * @throws MojoExecutionException if prompt acquisition or the assembly workflow fails
+     * <p>
+     * The execution performs the following steps:
+     * </p>
+     * <ol>
+     *   <li>Reads the prompt from {@link #assemblyPromptFile} when it exists; otherwise prompts the user.</li>
+     *   <li>Initializes the picker GenAI provider and applies standard system function tools.</li>
+     *   <li>Uses {@link Picker} to recommend libraries and logs the recommendations to the Maven build output.</li>
+     *   <li>Runs the {@link ApplicationAssembly} workflow in {@link #basedir} using the assembly GenAI provider.</li>
+     *   <li>Optionally enters an interactive prompt loop (skipped for {@link NoneProvider}).</li>
+     * </ol>
+     *
+     * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly workflow
+     *                               fails
      */
     @Override
     public void execute() throws MojoExecutionException {

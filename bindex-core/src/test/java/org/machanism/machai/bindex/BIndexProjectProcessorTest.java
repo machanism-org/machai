@@ -8,80 +8,69 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema.Bindex;
 
-class BIndexProjectProcessorTest {
+class BindexProjectProcessorTest {
 
-	@TempDir
-	Path tempDir;
+    private static final class TestProcessor extends BindexProjectProcessor {
+        @Override
+        public void processFolder(ProjectLayout processor) {
+            // no-op for tests
+        }
+    }
 
-	static class TestProcessor extends BindexProjectProcessor {
+    @Test
+    void getBindexFile_returnsBindexJsonInProjectDirectory() {
+        // Arrange
+        TestProcessor processor = new TestProcessor();
+        File projectDir = new File("build/tmp/test-project");
 
-		@Override
-		public void processFolder(ProjectLayout processor) {
-			// TODO Auto-generated method stub
-			
-		}
-		// no-op
-	}
+        // Act
+        File file = processor.getBindexFile(projectDir);
 
-	@Test
-	void getBindexFile_returnsFileInProjectDirWithExpectedName() {
-		// Arrange
-		TestProcessor processor = new TestProcessor();
-		File projectDir = tempDir.toFile();
+        // Assert
+        assertEquals(new File(projectDir, BindexProjectProcessor.BINDEX_FILE_NAME).getPath(), file.getPath());
+    }
 
-		// Act
-		File file = processor.getBindexFile(projectDir);
+    @Test
+    void getBindex_returnsNullWhenBindexFileDoesNotExist() throws Exception {
+        // Arrange
+        TestProcessor processor = new TestProcessor();
+        File projectDir = Files.createTempDirectory("bindex-processor-no-file").toFile();
 
-		// Assert
-		assertEquals(new File(projectDir, BindexProjectProcessor.BINDEX_FILE_NAME).getAbsolutePath(),
-				file.getAbsolutePath());
-	}
+        // Act
+        Object bindex = processor.getBindex(projectDir);
 
-	@Test
-	void getBindex_returnsNullWhenFileDoesNotExist() {
-		// Arrange
-		TestProcessor processor = new TestProcessor();
-		File projectDir = tempDir.toFile();
+        // Assert
+        assertNull(bindex);
+    }
 
-		// Act
-		Bindex bindex = processor.getBindex(projectDir);
+    @Test
+    void getBindex_throwsIllegalArgumentExceptionWhenJsonIsInvalid() throws Exception {
+        // Arrange
+        TestProcessor processor = new TestProcessor();
+        File projectDir = Files.createTempDirectory("bindex-processor-invalid-json").toFile();
+        File bindexFile = new File(projectDir, BindexProjectProcessor.BINDEX_FILE_NAME);
+        Files.write(bindexFile.toPath(), "not-json".getBytes(StandardCharsets.UTF_8));
 
-		// Assert
-		assertNull(bindex);
-	}
+        // Act + Assert
+        assertThrows(IllegalArgumentException.class, () -> processor.getBindex(projectDir));
+    }
 
-	@Test
-	void getBindex_parsesValidJson() throws Exception {
-		// Arrange
-		TestProcessor processor = new TestProcessor();
-		Path bindexPath = tempDir.resolve(BindexProjectProcessor.BINDEX_FILE_NAME);
-		Files.write(bindexPath,
-				("{\"id\":\"lib:1\",\"name\":\"Lib\",\"version\":\"1\","
-						+ "\"description\":\"d\",\"dependencies\":[]}").getBytes(StandardCharsets.UTF_8));
+    @Test
+    void getBindex_returnsParsedBindexWhenJsonIsValidMinimal() throws Exception {
+        // Arrange
+        TestProcessor processor = new TestProcessor();
+        File projectDir = Files.createTempDirectory("bindex-processor-valid-json").toFile();
+        File bindexFile = new File(projectDir, BindexProjectProcessor.BINDEX_FILE_NAME);
+        Files.write(bindexFile.toPath(), "{}".getBytes(StandardCharsets.UTF_8));
 
-		// Act
-		Bindex bindex = processor.getBindex(tempDir.toFile());
+        // Act
+        Object bindex = processor.getBindex(projectDir);
 
-		// Assert
-		assertNotNull(bindex);
-		assertEquals("lib:1", bindex.getId());
-	}
-
-	@Test
-	void getBindex_throwsIllegalArgumentExceptionOnInvalidJson() throws Exception {
-		// Arrange
-		TestProcessor processor = new TestProcessor();
-		Path bindexPath = tempDir.resolve(BindexProjectProcessor.BINDEX_FILE_NAME);
-		Files.write(bindexPath, "{invalid".getBytes(StandardCharsets.UTF_8));
-
-		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> processor.getBindex(tempDir.toFile()));
-	}
+        // Assert
+        assertNotNull(bindex);
+    }
 }

@@ -4,77 +4,79 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ProjectLayoutTest {
 
-	@Test
-	void projectDir_setsAndReturnsThis() {
-		// Arrange
-		ProjectLayout layout = new DefaultProjectLayout();
-		File dir = new File("src/test/resources/mockMavenProject");
+    @Test
+    void getRelatedPath_instanceMethod_stripsCurrentPathAndLeadingSlash() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-related-path-instance");
+        Path file = Files.createDirectories(root.resolve("a")).resolve("b.txt");
+        Files.write(file, "x".getBytes());
 
-		// Act
-		ProjectLayout returned = layout.projectDir(dir);
+        ProjectLayout layout = new MavenProjectLayout().projectDir(root.toFile());
+        String current = root.toFile().getAbsolutePath().replace("\\", "/");
 
-		// Assert
-		assertEquals(layout, returned);
-		assertEquals(dir, layout.getProjectDir());
-	}
+        // Act
+        String related = layout.getRelatedPath(current, file.toFile());
 
-	@Test
-	@Disabled
-	void getRelatedPath_instanceMethod_trimsLeadingSlash() {
-		// Arrange
-		ProjectLayout layout = new DefaultProjectLayout();
-		String currentPath = "/tmp/root";
-		File file = new File("/tmp/root/src/main/java");
+        // Assert
+        assertEquals("a/b.txt", related);
+    }
 
-		// Act
-		String relative = layout.getRelatedPath(currentPath, file);
+    @Test
+    void getRelatedPath_static_whenFileIsDir_thenReturnsDot() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-related-path-dot");
 
-		// Assert
-		assertEquals("src/main/java", relative);
-	}
+        // Act
+        String related = ProjectLayout.getRelatedPath(root.toFile(), root.toFile());
 
-	@Test
-	void getRelatedPath_static_whenSameDir_returnsDot() {
-		// Arrange
-		File dir = new File("/tmp/root");
-		File file = new File("/tmp/root");
+        // Assert
+        assertEquals(".", related);
+    }
 
-		// Act
-		String relative = ProjectLayout.getRelatedPath(dir, file);
+    @Test
+    void getRelatedPath_static_whenAddSingleDotAndNotDotPrefixed_thenPrefixesDotSlash() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-related-path-dot-prefix");
+        Path f = Files.write(root.resolve("x.txt"), "x".getBytes());
 
-		// Assert
-		assertEquals(".", relative);
-	}
+        // Act
+        String related = ProjectLayout.getRelatedPath(root.toFile(), f.toFile(), true);
 
-	@Test
-	void getRelatedPath_static_whenDifferentRoot_returnsNull() {
-		// Arrange
-		File dir = new File("/tmp/root");
-		File file = new File("/other/place");
+        // Assert
+        assertEquals("./x.txt", related);
+    }
 
-		// Act
-		String relative = ProjectLayout.getRelatedPath(dir, file);
+    @Test
+    void getRelatedPath_static_whenFileNotUnderDir_thenReturnsNull() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-related-path-outside-root");
+        Path other = Files.createTempDirectory("machai-related-path-outside-other");
+        Path f = Files.write(other.resolve("x.txt"), "x".getBytes());
 
-		// Assert
-		assertNull(relative);
-	}
+        // Act
+        String related = ProjectLayout.getRelatedPath(root.toFile(), f.toFile(), false);
 
-	@Test
-	void getRelatedPath_static_withSingleDotPrefix_addsDotSlash() {
-		// Arrange
-		File dir = new File("/tmp/root");
-		File file = new File("/tmp/root/src");
+        // Assert
+        assertNull(related);
+    }
 
-		// Act
-		String relative = ProjectLayout.getRelatedPath(dir, file, true);
+    @Test
+    void getRelatedPath_static_whenAddSingleDotFalse_thenDoesNotPrefixDotSlash() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-related-path-no-dot-prefix");
+        Path f = Files.write(root.resolve("x.txt"), "x".getBytes());
 
-		// Assert
-		assertEquals("./src", relative);
-	}
+        // Act
+        String related = ProjectLayout.getRelatedPath(root.toFile(), f.toFile(), false);
+
+        // Assert
+        assertEquals("x.txt", related);
+    }
 }

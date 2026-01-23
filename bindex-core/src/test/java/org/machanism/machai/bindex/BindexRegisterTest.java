@@ -18,65 +18,65 @@ import org.machanism.machai.project.layout.ProjectLayout;
 
 class BindexRegisterTest {
 
-	@TempDir
-	Path tempDir;
+    @TempDir
+    Path tempDir;
 
-	@Test
-	void update_returnsSameInstance() {
-		// Arrange
-		BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost:27017");
+    @Test
+    void update_returnsSameInstance() {
+        // Arrange
+        BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost:27017");
 
-		// Act
-		BindexRegister returned = register.update(true);
+        // Act
+        BindexRegister returned = register.update(true);
 
-		// Assert
-		assertSame(register, returned);
-	}
+        // Assert
+        assertSame(register, returned);
+    }
 
-	@Test
-	void processFolder_throwsIllegalArgumentExceptionWhenBindexJsonIsInvalid() throws Exception {
-		// Arrange
-		BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost:27017");
+    @Test
+    void processFolder_throwsIllegalArgumentExceptionWhenBindexJsonIsInvalid() throws Exception {
+        // Arrange
+        BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost:27017");
 
-		ProjectLayout layout = mock(ProjectLayout.class);
-		when(layout.getProjectDir()).thenReturn(tempDir.toFile());
-		Files.write(tempDir.resolve(BindexProjectProcessor.BINDEX_FILE_NAME), "{invalid".getBytes("UTF-8"));
+        ProjectLayout layout = mock(ProjectLayout.class);
+        when(layout.getProjectDir()).thenReturn(tempDir.toFile());
+        Files.write(tempDir.resolve(BindexProjectProcessor.BINDEX_FILE_NAME), "{invalid".getBytes("UTF-8"));
 
-		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> register.processFolder(layout));
-	}
+        // Act + Assert
+        assertThrows(IllegalArgumentException.class, () -> register.processFolder(layout));
+    }
 
-	@Test
-	void processFolder_doesNothingWhenNoBindexFilePresent() {
-		// Arrange
-		BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost:27017");
+    @Test
+    void processFolder_doesNothingWhenNoBindexFilePresent() {
+        // Arrange
+        BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost:27017");
 
-		ProjectLayout layout = mock(ProjectLayout.class);
-		File projectDir = tempDir.toFile();
-		when(layout.getProjectDir()).thenReturn(projectDir);
+        ProjectLayout layout = mock(ProjectLayout.class);
+        File projectDir = tempDir.toFile();
+        when(layout.getProjectDir()).thenReturn(projectDir);
 
-		// Act
-		register.processFolder(layout);
+        // Act
+        register.processFolder(layout);
 
-		// Assert
-		// No exception indicates correct handling of missing bindex.json.
-	}
+        // Assert
+        // No exception indicates correct handling of missing bindex.json.
+    }
 
-	@Test
-	void close_delegatesToPickerClose() throws Exception {
-		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
-		BindexRegister register = new BindexRegister(provider, "mongodb://localhost:27017");
+    @Test
+    void close_delegatesToPickerClose() throws Exception {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        BindexRegister register = new BindexRegister(provider, "mongodb://localhost:27017");
 
-		Picker picker = mock(Picker.class);
-		Field f = BindexRegister.class.getDeclaredField("picker");
-		f.setAccessible(true);
-		f.set(register, picker);
+        Picker picker = mock(Picker.class);
+        Field f = BindexRegister.class.getDeclaredField("picker");
+        f.setAccessible(true);
+        f.set(register, picker);
 
-		// Act
-		register.close();
+        // Act
+        register.close();
 
-		// Assert
-		verify(picker).close();
-	}
+        // Assert
+        verify(picker).close();
+    }
 }

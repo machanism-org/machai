@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.*;
  * of the {@code WebProvider} class.
  * </p>
  * <pre>
- * &lt;code&gt;
+ * <code>
  * WebProvider provider = new WebProvider();
  * provider.model("CodeMie");
  * provider.setWorkingDir(new File("/tmp/test"));
  * String result = provider.perform();
- * &lt;/code&gt;
+ * </code>
  * </pre>
  * @author Viktor Tovstyi
  * @since 0.0.2

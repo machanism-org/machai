@@ -24,11 +24,11 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
 
-## Project Overview
+## Project Title and Overview
 
-GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, reducing documentation drift and keeping docs aligned with the in-repo source of truth.
+GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, keeping docs consistent, current, and aligned with the in-repo source of truth.
 
-## Installation
+## Installation Instructions
 
 ### Prerequisites
 
@@ -59,7 +59,7 @@ Add the plugin to your project `pom.xml`:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>${gw-maven-plugin.version}</version>
+  <version>${project.version}</version>
 </plugin>
 ```
 
@@ -75,7 +75,7 @@ mvn gw:gw
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>${gw-maven-plugin.version}</version>
+  <version>${project.version}</version>
   <configuration>
     <genai>CodeMie:gpt-5-2-2025-12-11</genai>
     <serverId>CodeMie</serverId>

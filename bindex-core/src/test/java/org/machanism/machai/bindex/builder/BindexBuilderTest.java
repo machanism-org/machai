@@ -1,70 +1,59 @@
 package org.machanism.machai.bindex.builder;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.io.IOException;
+import java.io.File;
+import java.nio.file.Files;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema. Bindex;
+import org.machanism.machai.bindex.fixtures.FakeGenAIProvider;
+import org.machanism.machai.bindex.fixtures.ProjectLayouts;
 
 class BindexBuilderTest {
 
-	private ProjectLayout projectLayout;
-	private GenAIProvider genAIProvider;
-	private  Bindex origin;
-	private BindexBuilder bindexBuilder;
+    @Test
+    void genAIProvider_setsSystemInstructions() {
+        // Arrange
+        FakeGenAIProvider provider = new FakeGenAIProvider();
+        BindexBuilder builder = new BindexBuilder(ProjectLayouts.layoutWithDir(new File(".")));
 
-	@BeforeEach
-	void setUp() {
-		projectLayout = mock(ProjectLayout.class);
-		genAIProvider = mock(GenAIProvider.class);
-		origin = mock( Bindex.class);
-		bindexBuilder = new BindexBuilder(projectLayout).genAIProvider(genAIProvider);
-	}
+        // Act
+        builder.genAIProvider(provider);
 
-	@Test
-	void testOriginSetterAndGetter() {
-		BindexBuilder builder = bindexBuilder.origin(origin);
-		assertNotNull(builder);
-		assertEquals(origin, builder.getOrigin());
-	}
+        // Assert
+        assertEquals(1, provider.getInstructions().size());
+    }
 
-	@Test
-	void testGenAIProviderSetterAndGetter() {
-		assertEquals(genAIProvider, bindexBuilder.getGenAIProvider());
-	}
+    @Test
+    void build_returnsNullWhenProviderReturnsNull() throws Exception {
+        // Arrange
+        File projectDir = Files.createTempDirectory("bindex-builder-null").toFile();
+        FakeGenAIProvider provider = new FakeGenAIProvider().respondWith(null);
+        BindexBuilder builder = new BindexBuilder(ProjectLayouts.layoutWithDir(projectDir)).genAIProvider(provider);
 
-	@Test
-	void testProjectLayoutGetter() {
-		assertEquals(projectLayout, bindexBuilder.getProjectLayout());
-	}
+        // Act
+        Object result = builder.build();
 
-	@Test
-	void testBuildReturnsNullOnNullOutput() throws IOException {
-		when(genAIProvider.perform()).thenReturn(null);
-		assertNull(bindexBuilder.build());
-	}
+        // Assert
+        assertNull(result);
+    }
 
-	@Test
-	void testBindexSchemaPrompt() throws IOException {
-		GenAIProvider provider = mock(GenAIProvider.class);
-		BindexBuilder.bindexSchemaPrompt(provider);
-		verify(provider, times(1)).prompt(anyString());
-	}
+    @Test
+    void build_parsesProviderJsonOutput() throws Exception {
+        // Arrange
+        File projectDir = Files.createTempDirectory("bindex-builder-json").toFile();
+        FakeGenAIProvider provider = new FakeGenAIProvider().respondWith("{}");
+        BindexBuilder builder = new BindexBuilder(ProjectLayouts.layoutWithDir(projectDir)).genAIProvider(provider);
 
-	@Test
-	void testProjectContextDoesNotThrow() throws IOException {
-		assertDoesNotThrow(() -> bindexBuilder.projectContext());
-	}
+        // Act
+        Object result = builder.build();
+
+        // Assert
+        assertNotNull(result);
+        // Also asserts temp log location set.
+        assertNotNull(provider.getInputsLogFile());
+        assertEquals(new File(projectDir, BindexBuilder.BINDEX_TEMP_DIR).getPath(), provider.getInputsLogFile().getPath());
+    }
 }

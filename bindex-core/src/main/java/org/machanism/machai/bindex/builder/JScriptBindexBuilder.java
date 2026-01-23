@@ -17,56 +17,63 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * JScriptBindexBuilder provides project context and source file analysis for JavaScript/TypeScript/Vue projects.
- * <p>
- * Reads package.json, walks the src tree, and generates prompts for AI-based  Bindex creation.
- * <p>
- * Usage example:
- * <pre>
- *     JScriptBindexBuilder builder = new JScriptBindexBuilder(layout);
- *     builder.genAIProvider(provider);
- *      Bindex bindex = builder.build();
- * </pre>
+ * {@link BindexBuilder} specialization for JavaScript/TypeScript/Vue projects.
+ *
+ * <p>This builder reads {@code package.json} from the project root and walks the {@code src} directory,
+ * prompting the configured GenAI provider with all discovered source files (extensions: {@code .js},
+ * {@code .ts}, {@code .vue}).
+ *
+ * <p>Example:
+ * {@code
+ * JScriptBindexBuilder builder = new JScriptBindexBuilder(layout)
+ *     .genAIProvider(provider);
+ * Bindex bindex = builder.build();
+ * }
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  * @see org.machanism.machai.bindex.BindexBuilderFactory
- * @see org.machanism.machai.project.layout.JScriptProjectLayout
+ * @see JScriptProjectLayout
  */
 public class JScriptBindexBuilder extends BindexBuilder {
 
+    private static final Logger logger = LoggerFactory.getLogger(JScriptBindexBuilder.class);
+    private static final ResourceBundle promptBundle = ResourceBundle.getBundle("js_project_prompts");
+
     /**
-     * Constructs a JScriptBindexBuilder for a JS/TS/Vue project layout.
-     * @param projectLayout Project layout describing the source and manifest.
+     * Creates a builder for a JavaScript/TypeScript/Vue project.
+     *
+     * @param projectLayout layout describing the project directory and manifest location
      */
     public JScriptBindexBuilder(ProjectLayout projectLayout) {
         super(projectLayout);
     }
 
-    private static Logger logger = LoggerFactory.getLogger(JScriptBindexBuilder.class);
-    private static ResourceBundle promptBundle = ResourceBundle.getBundle("js_project_prompts");
-
     /**
-     * Provides prompts for manifest and sources for GenAI model context.
-     * Reads 'package.json', walks 'src', and prompts files for code context.
-     * @throws IOException When resources cannot be read or prompt fails.
+     * Adds JavaScript project context to the provider.
+     *
+     * <p>The implementation:
+     * <ol>
+     *   <li>prompts the contents of {@code package.json},</li>
+     *   <li>walks the {@code src} tree and prompts each {@code .js}/{@code .ts}/{@code .vue} file,</li>
+     *   <li>adds additional prompting rules for JavaScript projects.</li>
+     * </ol>
+     *
+     * @throws IOException if reading files fails or prompting fails
      */
     @Override
     public void projectContext() throws IOException {
-
         File packageFile = new File(getProjectLayout().getProjectDir(), JScriptProjectLayout.PROJECT_MODEL_FILE_NAME);
         try (FileReader reader = new FileReader(packageFile)) {
-            String prompt = MessageFormat.format(promptBundle.getString("js_resource_section"),
-                IOUtils.toString(reader));
+            String prompt = MessageFormat.format(promptBundle.getString("js_resource_section"), IOUtils.toString(reader));
             getGenAIProvider().prompt(prompt);
         }
 
         Path startPath = Paths.get(new File(getProjectLayout().getProjectDir(), "src").getAbsolutePath());
-
         if (Files.exists(startPath)) {
             Files.walk(startPath)
                 .filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js"))
-                .forEach((f) -> {
+                .forEach(f -> {
                     try {
                         getGenAIProvider().promptFile(f.toFile(), "source_resource_section");
                     } catch (IOException e) {

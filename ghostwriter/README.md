@@ -23,11 +23,17 @@
 
 ## Project Overview
 
-Machai Ghostwriter is an AI-powered CLI tool that scans project directories and processes documentation-related files according to embedded `@guidance` annotations and any additional instructions you provide. It helps keep documentation consistent, clear, and synchronized with the codebase across multi-module projects.
+Ghostwriter is a CLI documentation engine that automates and standardizes project documentation and code annotation. Using guided file processing with embedded `@guidance` blocks, it helps teams keep documentation consistent, reviewable, and up to date across multi-module repositories. It’s designed to work well in scripts and CI so documentation changes can be generated and committed as part of your normal workflow.
 
 ## Introduction
 
-Machai Ghostwriter is an AI-powered tool that automates and standardizes project documentation and code annotation. Using guided file processing and `@guidance` annotations, it enables developers to maintain consistent, clear, and up-to-date documentation across multi-module projects in languages such as Java, TypeScript, and Python. Ghostwriter simplifies the embedding, extraction, and management of project guidance, ensuring your codebase and documentation remain synchronized.
+Machai Ghostwriter scans a project directory and processes documentation-related files according to embedded guidance and any additional instructions you provide.
+
+You can optionally specify:
+
+- A GenAI provider/model (for example, `OpenAI:gpt-5.1`).
+- Additional processing instructions (inline or loaded from a file).
+- One or more directories to include in the scan.
 
 Learn more about guided file processing: https://machanism.org/guided-file-processing/index.html
 
@@ -50,13 +56,13 @@ Download the CLI JAR:
 java -jar gw.jar
 ```
 
-To scan a specific project root directory:
+Scan a specific project root directory:
 
 ```bash
 java -jar gw.jar --dir /path/to/project
 ```
 
-To scan one or more specific directories (positional arguments):
+Scan one or more specific directories (positional arguments):
 
 ```bash
 java -jar gw.jar . docs src

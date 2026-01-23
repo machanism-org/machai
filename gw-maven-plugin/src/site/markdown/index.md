@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-GW Maven Plugin (Ghostwriter Maven Plugin) is an advanced documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, keeping docs consistent, current, and aligned with the in-repo source of truth.
+GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, keeping docs consistent, current, and aligned with the in-repo source of truth.
 
 Benefits:
 
@@ -37,7 +37,7 @@ Benefits:
 
 ## Overview
 
-The plugin discovers `@guidance:` comments in your project sources/resources and synthesizes them into Markdown pages under the Maven Site structure. You can run it on demand during development or bind it into the Maven lifecycle (for example, `site`) so documentation is refreshed whenever you build the site.
+Ghostwriter Maven Plugin automates Maven Site documentation for Java projects by scanning the repository for embedded `@guidance:` directives and using them to assemble/update Markdown pages. This helps keep documentation consistent across modules and aligned with what’s in the codebase.
 
 ## Key Features
 
@@ -70,7 +70,7 @@ Add the plugin to your `pom.xml`:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>${gw-maven-plugin.version}</version>
+  <version>${project.version}</version>
 </plugin>
 ```
 
@@ -102,7 +102,7 @@ Example configuration:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>${gw-maven-plugin.version}</version>
+  <version>${project.version}</version>
   <configuration>
     <genai>CodeMie:gpt-5-2-2025-12-11</genai>
     <serverId>CodeMie</serverId>
@@ -120,4 +120,5 @@ mvn gw:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin
 - GitHub: https://github.com/machanism-org/machai
-- Maven Site: https://maven.apache.org/plugins/maven-site-plugin/
+- Maven Plugin Development: https://maven.apache.org/guides/plugin/guide-java-plugin-development.html
+- Maven Site Plugin: https://maven.apache.org/plugins/maven-site-plugin/

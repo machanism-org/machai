@@ -10,51 +10,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Mojo for cleaning up the Bindex plugin's temporary files.
+ * Maven goal that removes Bindex/Machai plugin temporary artifacts.
+ *
  * <p>
- * Removes the log file containing Bindex inputs generated during the build process.
- * This helps keep the workspace clean, especially before new builds.
+ * Currently deletes the Bindex inputs log file created under the {@value #MACHAI_TEMP_DIR} directory.
+ * </p>
  *
- * <strong>Example Usage:</strong>
- * <pre>
- * {@code
- * mvn bindex:clean
- * }
- * </pre>
- *
- * @author Viktor Tovstyi
+ * <p>
+ * Example:
+ * {@code mvn org.machanism.machai:bindex-maven-plugin:clean}
+ * </p>
  */
 @Mojo(name = "clean", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.CLEAN)
 public class Clean extends AbstractMojo {
 
-    /**
-     * Logger for this class.
-     */
-    private static final Logger logger = LoggerFactory.getLogger(Clean.class);
+	/**
+	 * Logger for this class.
+	 */
+	private static final Logger logger = LoggerFactory.getLogger(Clean.class);
 
-    /**
-     * Name of the temporary directory used by Machai/Bindex.
-     */
-    public static final String MACHAI_TEMP_DIR = ".machai";
+	/**
+	 * Name of the temporary directory used by Machai/Bindex.
+	 */
+	public static final String MACHAI_TEMP_DIR = ".machai";
 
-    /**
-     * Project base directory. Set by Maven.
-     */
-    @Parameter(defaultValue = "${basedir}", required = true, readonly = true)
-    protected File basedir;
+	/**
+	 * Project base directory (injected by Maven).
+	 */
+	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
+	protected File basedir;
 
-    /**
-     * Deletes the Bindex inputs log file inside the temporary directory.
-     *
-     * @throws MojoExecutionException if an exception occurs while cleaning up files
-     */
-    @Override
-    public void execute() throws MojoExecutionException {
-        File file = new File(basedir, MACHAI_TEMP_DIR + "/bindex-inputs.txt");
-        logger.info("Removing '{}' inputs log file.", file);
-        boolean delete = file.delete();
-        if (delete) {
-            logger.info("Cleanup process finished.");
-        }
-    }
+	/**
+	 * Executes the goal by attempting to delete the inputs log file.
+	 *
+	 * @throws MojoExecutionException if an unexpected error occurs while executing the goal
+	 */
+	@Override
+	public void execute() throws MojoExecutionException {
+		File file = new File(basedir, MACHAI_TEMP_DIR + "/bindex-inputs.txt");
+		logger.info("Removing '{}' inputs log file.", file);
+		boolean deleted = file.delete();
+		if (deleted) {
+			logger.info("Cleanup process finished.");
+		}
+	}
 }

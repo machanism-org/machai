@@ -1,12 +1,14 @@
 package org.machanism.machai.bindex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.bindex.builder.BindexBuilder;
@@ -18,70 +20,114 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.project.layout.PythonProjectLayout;
 
-/**
- * Unit tests for {@link BindexBuilderFactory}.
- * 
- * <p>Verifies builder creation logic for different {@link ProjectLayout} implementations and error conditions.</p>
- *
- * @author Viktor Tovstyi
- */
 class BindexBuilderFactoryTest {
-    /**
-     * Verifies creation of {@link MavenBindexBuilder} for Maven layout.
-     */
+
     @Test
-    void createReturnsMavenBindexBuilderForMavenProjectLayout() throws Exception {
-        MavenProjectLayout layout = mock(MavenProjectLayout.class);
-        when(layout.getProjectDir()).thenReturn(new File("."));
+    void create_returnsMavenBindexBuilderForMavenLayout() throws Exception {
+        // Arrange
+        MavenProjectLayout layout = new MavenProjectLayout();
+        File dir = Files.createTempDirectory("maven-layout").toFile();
+        layout.projectDir(dir);
+
+        // Act
         BindexBuilder builder = BindexBuilderFactory.create(layout);
-        assertTrue(builder instanceof MavenBindexBuilder);
+
+        // Assert
+        assertInstanceOf(MavenBindexBuilder.class, builder);
+        assertEquals(dir.getAbsolutePath(), builder.getProjectLayout().getProjectDir().getAbsolutePath());
     }
 
-    /**
-     * Verifies creation of {@link JScriptBindexBuilder} for JScript layout.
-     */
     @Test
-    void createReturnsJScriptBindexBuilderForJScriptProjectLayout() throws Exception {
-        JScriptProjectLayout layout = mock(JScriptProjectLayout.class);
-        when(layout.getProjectDir()).thenReturn(new File("."));
+    void create_returnsJScriptBindexBuilderForJScriptLayout() throws Exception {
+        // Arrange
+        JScriptProjectLayout layout = new JScriptProjectLayout();
+        File dir = Files.createTempDirectory("js-layout").toFile();
+        layout.projectDir(dir);
+
+        // Act
         BindexBuilder builder = BindexBuilderFactory.create(layout);
-        assertTrue(builder instanceof JScriptBindexBuilder);
+
+        // Assert
+        assertInstanceOf(JScriptBindexBuilder.class, builder);
     }
 
-    /**
-     * Verifies creation of {@link PythonBindexBuilder} for Python layout.
-     */
     @Test
-    void createReturnsPythonBindexBuilderForPythonProjectLayout() throws Exception {
-        PythonProjectLayout layout = mock(PythonProjectLayout.class);
-        when(layout.getProjectDir()).thenReturn(new File("."));
+    void create_returnsPythonBindexBuilderForPythonLayout() throws Exception {
+        // Arrange
+        PythonProjectLayout layout = new PythonProjectLayout();
+        File dir = Files.createTempDirectory("py-layout").toFile();
+        layout.projectDir(dir);
+
+        // Act
         BindexBuilder builder = BindexBuilderFactory.create(layout);
-        assertTrue(builder instanceof PythonBindexBuilder);
+
+        // Assert
+        assertInstanceOf(PythonBindexBuilder.class, builder);
     }
 
-    /**
-     * Verifies creation of generic {@link BindexBuilder} for layouts with existing directory.
-     */
     @Test
-    void createReturnsGenericBindexBuilderWhenProjectDirExists() throws Exception {
-        ProjectLayout layout = mock(ProjectLayout.class);
-        File dir = new File(".");
-        when(layout.getProjectDir()).thenReturn(dir);
+    void create_returnsGenericBindexBuilderWhenDirExistsAndLayoutIsGeneric() throws Exception {
+        // Arrange
+        ProjectLayout layout = new ProjectLayout() {
+            private final File dir = Files.createTempDirectory("generic-layout").toFile();
+
+            @Override
+            public File getProjectDir() {
+                return dir;
+            }
+
+            @Override
+            public List<String> getSources() {
+                return null;
+            }
+
+            @Override
+            public List<String> getDocuments() {
+                return null;
+            }
+
+            @Override
+            public List<String> getTests() {
+                return null;
+            }
+        };
+
+        // Act
         BindexBuilder builder = BindexBuilderFactory.create(layout);
-        assertTrue(builder instanceof BindexBuilder);
+
+        // Assert
+        assertInstanceOf(BindexBuilder.class, builder);
+        assertNull(builder.getOrigin());
     }
 
-    /**
-     * Verifies exception thrown if the project directory does not exist.
-     */
     @Test
-    void createThrowsFileNotFoundExceptionIfDirDoesNotExist() {
-        ProjectLayout layout = mock(ProjectLayout.class);
-        File file = mock(File.class);
-        when(layout.getProjectDir()).thenReturn(file);
-        when(file.exists()).thenReturn(false);
-        assertThrows(FileNotFoundException.class, () -> {
-            BindexBuilderFactory.create(layout);
-        });
+    void create_throwsFileNotFoundExceptionWhenDirDoesNotExist() {
+        // Arrange
+        File notExists = new File("build/tmp/does-not-exist-" + System.nanoTime());
+        ProjectLayout layout = new ProjectLayout() {
+            @Override
+            public File getProjectDir() {
+                return notExists;
+            }
+
+            @Override
+            public List<String> getSources() {
+                return null;
+            }
+
+            @Override
+            public List<String> getDocuments() {
+                return null;
+            }
+
+            @Override
+            public List<String> getTests() {
+                return null;
+            }
+        };
+
+        // Act + Assert
+        FileNotFoundException ex = assertThrows(FileNotFoundException.class, () -> BindexBuilderFactory.create(layout));
+        assertEquals(notExists.getAbsolutePath(), ex.getMessage());
     }
 }

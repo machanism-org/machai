@@ -1,32 +1,20 @@
 /**
- * Filesystem-backed project layout detection and traversal.
+ * Filesystem-backed project layout detection and project traversal utilities.
  *
- * <p>This package provides:
+ * <p>The types in this package support:
  * <ul>
- *   <li><strong>Layout detection</strong>: determining a {@link org.machanism.machai.project.layout.ProjectLayout}
- *       implementation for a given directory by inspecting the presence of well-known build/configuration files.</li>
- *   <li><strong>Project traversal</strong>: scanning a project root and, when applicable, recursively scanning
- *       detected modules while delegating project-specific handling to client code.</li>
- * </ul>
- *
- * <h2>Key types</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} detects a
- *       {@link org.machanism.machai.project.layout.ProjectLayout} for a given directory.</li>
- *   <li>{@link org.machanism.machai.project.ProjectProcessor} provides a template method for scanning a project
- *       and invoking
- *       {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
- *       for each discovered module (or for the root when there are no modules).</li>
+ *   <li><strong>Layout detection</strong>: determine a suitable {@link org.machanism.machai.project.layout.ProjectLayout}
+ *       implementation for a project directory (for example Maven, Node.js, or Python) by inspecting marker files and
+ *       directory structure.</li>
+ *   <li><strong>Traversal/processing</strong>: recursively scan a project root and, when applicable, process discovered
+ *       modules/subprojects using a {@link org.machanism.machai.project.ProjectProcessor} implementation.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
  * File projectDir = new File("/path/to/project");
- *
- * // Detect the layout (e.g., Maven, JavaScript workspaces, Python, or a default fallback).
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
  *
- * // Traverse the project; subclasses implement how to handle each detected layout.
  * ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
  * }</pre>
@@ -39,28 +27,26 @@ package org.machanism.machai.project;
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE PACKAGE AND THIS `package-info.java`!**
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
  * 
  * - Use Clear and Concise Descriptions:
  * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
  * 		- Avoid vague statements; be specific about functionality and intent.
- * 
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
  *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
- *      
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * 		-  Maintain Consistency and Formatting:
+ * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
  * 		- Use proper Markdown or HTML formatting for readability.
- * 		- Add Javadoc:
+ * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- * 
- *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, convert the code content to use the Javadoc `{@code ...}`inline tag instead. Ensure that the code is properly escaped and formatted for Javadoc. Only replace the code inside `<pre>` tags with `{@code ...}`; do not alter other content. `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
+ *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */

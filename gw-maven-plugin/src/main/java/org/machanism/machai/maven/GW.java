@@ -15,123 +15,78 @@ import org.machanism.machai.gw.FileProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*@guidance: Generate javadoc with a description all maven plugin parameters and examples of usage. */
-
 /**
- * Maven goal that scans and processes project documents.
- *
- * <h2>Parameters</h2>
- * <dl>
- * <dt><b>{@code genai}</b> (property: {@code gw.genai})</dt>
- * <dd>
- * GenAI provider/model identifier used for AI-assisted document processing.
- * The format is provider-specific (often {@code ProviderName:ModelName}).
- * <p>
- * Examples: {@code OpenAI:gpt-5}, {@code AzureOpenAI:gpt-4o-mini}
- * </p>
- * </dd>
- *
- * <dt><b>{@code instructions}</b> (property: {@code gw.instructions})</dt>
- * <dd>
- * Optional list of instruction file locations to guide processing.
+ * Maven goal that runs the MachAI generative-workflow (GW) document processing over the current module's base directory.
  *
  * <p>
- * Example value: {@code ${project.basedir}/.gw/instructions.md}
+ * This mojo reads GenAI credentials from Maven {@code settings.xml} using a configured {@code <server>} entry and exposes
+ * them to the running process as system properties expected by the underlying workflow:
  * </p>
- * </dd>
+ * <ul>
+ *   <li>{@code GENAI_USERNAME}</li>
+ *   <li>{@code GENAI_PASSWORD}</li>
+ * </ul>
  *
- * <dt><b>{@code serverId}</b> (property: {@code gw.genai.serverId}; required)</dt>
- * <dd>
- * Maven {@code settings.xml} server id that provides GenAI credentials.
- * If the resolved server contains a username/password, they are exposed to the runtime as
- * system properties {@code GENAI_USERNAME} and {@code GENAI_PASSWORD}.
- * </dd>
- *
- * <dt><b>{@code threads}</b> (property: {@code gw.threads}; default: {@code true})</dt>
- * <dd>Enable multi-threaded processing.</dd>
- *
- * <dt><b>{@code basedir}</b> (read-only; default: {@code ${basedir}})</dt>
- * <dd>Maven project base directory.</dd>
- *
- * <dt><b>{@code project}</b> (read-only; default: {@code ${project}})</dt>
- * <dd>The current {@link MavenProject} (injected by Maven; not used directly by this goal).</dd>
- *
- * <dt><b>{@code settings}</b> (read-only; default: {@code ${settings}})</dt>
- * <dd>The current Maven {@link Settings}, used to resolve {@code serverId} credentials.</dd>
- * </dl>
- *
- * <h2>Usage Examples</h2>
- *
- * <h3>Run from the command line</h3>
- * <pre>
- * mvn org.machanism.machai:gw-maven-plugin:gw \
- *   -Dgw.genai=OpenAI:gpt-5 \
- *   -Dgw.genai.serverId=genai
- * </pre>
- *
- * <h3>Configure in {@code pom.xml}</h3>
- * <pre>
- * &lt;plugin&gt;
- *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
- *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
- *   &lt;version&gt;${project.version}&lt;/version&gt;
- *   &lt;executions&gt;
- *     &lt;execution&gt;
- *       &lt;goals&gt;
- *         &lt;goal&gt;gw&lt;/goal&gt;
- *       &lt;/goals&gt;
- *     &lt;/execution&gt;
- *   &lt;/executions&gt;
- *   &lt;configuration&gt;
- *     &lt;genai&gt;OpenAI:gpt-5&lt;/genai&gt;
- *     &lt;serverId&gt;genai&lt;/serverId&gt;
- *     &lt;threads&gt;true&lt;/threads&gt;
- *     &lt;instructions&gt;
- *       &lt;instruction&gt;${project.basedir}/.gw/instructions.md&lt;/instruction&gt;
- *     &lt;/instructions&gt;
- *   &lt;/configuration&gt;
- * &lt;/plugin&gt;
- * </pre>
- *
- * <h3>Required {@code settings.xml} server entry</h3>
- * <pre>
- * &lt;settings&gt;
- *   &lt;servers&gt;
- *     &lt;server&gt;
- *       &lt;id&gt;genai&lt;/id&gt;
- *       &lt;username&gt;...&lt;/username&gt;
- *       &lt;password&gt;...&lt;/password&gt;
- *     &lt;/server&gt;
- *   &lt;/servers&gt;
- * &lt;/settings&gt;
- * </pre>
+ * <h2>Configuration</h2>
+ * <ul>
+ *   <li><b>{@code gw.genai}</b> (optional): GenAI provider/model identifier forwarded to {@link FileProcessor}.
+ *       Example: {@code OpenAI:gpt-5}.</li>
+ *   <li><b>{@code gw.instructions}</b> (optional): One or more instruction location strings consumed by the workflow.</li>
+ *   <li><b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} server id containing credentials.</li>
+ *   <li><b>{@code gw.threads}</b> (optional, default {@code true}): Enables/disables multi-threaded processing.</li>
+ * </ul>
  */
 @Mojo(name = "gw", threadSafe = true, aggregator = true)
 public class GW extends AbstractMojo {
 
 	private static final Logger logger = LoggerFactory.getLogger(GW.class);
 
-	@Parameter(property = "gw.genai")
-	protected String genai;
+	/**
+	 * Optional GenAI provider/model identifier to pass to the workflow (for example {@code OpenAI:gpt-5}).
+	 */
+	@Parameter(property = "gw.genai") String genai;
 
+	/**
+	 * Optional instruction locations to pass to the workflow.
+	 */
 	@Parameter(property = "gw.instructions", required = false, readonly = false, name = "instructions")
 	private String[] instructions;
 
-	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
-	protected File basedir;
+	/**
+	 * The Maven module base directory to scan for documentation sources.
+	 */
+	@Parameter(defaultValue = "${basedir}", required = true, readonly = true) File basedir;
 
+	/**
+	 * The Maven project (injected by Maven). This plugin does not currently use it directly, but Maven requires the
+	 * injection point for certain build contexts.
+	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
-	protected MavenProject project;
+	@SuppressWarnings("unused") MavenProject project;
 
+	/**
+	 * The Maven settings (injected by Maven) used to resolve credentials from {@code settings.xml}.
+	 */
 	@Parameter(readonly = true, defaultValue = "${settings}")
 	private Settings settings;
 
+	/**
+	 * Required server id used to read credentials from Maven {@code settings.xml}.
+	 */
 	@Parameter(property = "gw.genai.serverId", required = true)
 	private String serverId;
 
+	/**
+	 * Enables/disables multi-threaded document processing.
+	 */
 	@Parameter(property = "gw.threads", defaultValue = "true", required = false)
 	private boolean threads;
 
+	/**
+	 * Executes the {@code gw} goal by configuring credentials and delegating the scan to {@link FileProcessor}.
+	 *
+	 * @throws MojoExecutionException if required Maven settings/credentials are missing or the document scan fails
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		if (settings == null) {

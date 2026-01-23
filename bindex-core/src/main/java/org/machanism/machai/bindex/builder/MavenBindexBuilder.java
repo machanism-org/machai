@@ -18,34 +18,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * MavenBindexBuilder provides project context and source manifest aggregation for Maven projects.
- * <p>
- * Reads pom.xml, source and resource directories, removes unimportant model properties,
- * and prepares prompts for GenAI  Bindex creation.
- * <p>
- * Usage example:
- * <pre>
- *     MavenBindexBuilder builder = new MavenBindexBuilder(layout);
- *     builder.genAIProvider(provider);
- *      Bindex bindex = builder.build();
- * </pre>
+ * {@link BindexBuilder} specialization for Maven projects.
+ *
+ * <p>This builder reads the effective Maven model from {@code pom.xml} (via the provided
+ * {@link MavenProjectLayout}), collects relevant source and resource files, and prompts the configured
+ * GenAI provider with:
+ * <ul>
+ *   <li>source and resource file contents, and</li>
+ *   <li>a sanitized POM representation with non-essential sections removed.</li>
+ * </ul>
+ *
+ * <p>Example:
+ * {@code
+ * MavenBindexBuilder builder = new MavenBindexBuilder(layout)
+ *     .genAIProvider(provider);
+ * Bindex bindex = builder.build();
+ * }
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  * @see org.machanism.machai.bindex.BindexBuilderFactory
- * @see org.machanism.machai.project.layout.MavenProjectLayout
+ * @see MavenProjectLayout
  */
 public class MavenBindexBuilder extends BindexBuilder {
 
-    private static Logger logger = LoggerFactory.getLogger(MavenBindexBuilder.class);
-    private static ResourceBundle promptBundle = ResourceBundle.getBundle("maven_project_prompts");
+    private static final Logger logger = LoggerFactory.getLogger(MavenBindexBuilder.class);
+    private static final ResourceBundle promptBundle = ResourceBundle.getBundle("maven_project_prompts");
 
-    /** Maven project layout (pom model, directories, etc.). */
-    private MavenProjectLayout projectLayout;
+    /** Maven project layout (POM model and directory configuration). */
+    private final MavenProjectLayout projectLayout;
 
     /**
-     * Constructs a MavenBindexBuilder for a Maven-based layout.
-     * @param projectLayout Maven project model holder and directory info.
+     * Creates a builder for a Maven project.
+     *
+     * @param projectLayout Maven project layout describing the POM and directory structure
      */
     public MavenBindexBuilder(MavenProjectLayout projectLayout) {
         super(projectLayout);
@@ -53,15 +59,26 @@ public class MavenBindexBuilder extends BindexBuilder {
     }
 
     /**
-     * Provides prompts for Maven project sources and manifest to GenAI context.
-     * Aggregates source, resources, test sources, cleans pom, and prompts GenAIProvider.
-     * @throws IOException On file or prompt operation failures.
+     * Adds Maven-specific project context to the provider.
+     *
+     * <p>The implementation:
+     * <ol>
+     *   <li>adds all files from source/resources/test directories configured in the POM build section,</li>
+     *   <li>removes non-essential sections from the Maven {@link Model},</li>
+     *   <li>prompts the cleaned POM text,</li>
+     *   <li>adds any additional Maven-specific prompting rules.</li>
+     * </ol>
+     *
+     * @throws IOException if source/resource files cannot be read or prompting fails
      */
     @Override
     public void projectContext() throws IOException {
         Build build = projectLayout.getModel().getBuild();
-        String sourceDirectory = build.getSourceDirectory();
-        addResources(sourceDirectory);
+        if (build == null) {
+            return;
+        }
+
+        addResources(build.getSourceDirectory());
 
         List<Resource> resourcesDirectory = build.getResources();
         if (resourcesDirectory != null) {
@@ -77,8 +94,7 @@ public class MavenBindexBuilder extends BindexBuilder {
             }
         }
 
-        String testSourceDirectory = build.getTestSourceDirectory();
-        addResources(testSourceDirectory);
+        addResources(build.getTestSourceDirectory());
 
         Model model = projectLayout.getModel();
         removeNotImportantData(model);
@@ -92,29 +108,36 @@ public class MavenBindexBuilder extends BindexBuilder {
     }
 
     /**
-     * Adds all regular files in the specified directory for GenAI prompt context.
-     * @param sourceDirectory Directory path as string.
-     * @throws IOException On file operations or prompt failures.
+     * Prompts the provider with all regular files in the provided directory.
+     *
+     * @param directory directory path (as configured in the POM) to scan; ignored if blank or missing
+     * @throws IOException if walking the directory fails
      */
-    private void addResources(String sourceDirectory) throws IOException {
-        if (StringUtils.isNotBlank(sourceDirectory)) {
-            Path startPath = Paths.get(sourceDirectory);
-
-            if (Files.exists(startPath)) {
-                Files.walk(startPath).filter(Files::isRegularFile).forEach((f) -> {
-                    try {
-                        getGenAIProvider().promptFile(f.toFile(), "source_resource_section");
-                    } catch (IOException e) {
-                        logger.warn("File: {} adding failed.", f);
-                    }
-                });
-            }
+    private void addResources(String directory) throws IOException {
+        if (StringUtils.isBlank(directory)) {
+            return;
         }
+
+        Path startPath = Paths.get(directory);
+        if (!Files.exists(startPath)) {
+            return;
+        }
+
+        Files.walk(startPath)
+            .filter(Files::isRegularFile)
+            .forEach(f -> {
+                try {
+                    getGenAIProvider().promptFile(f.toFile(), "source_resource_section");
+                } catch (IOException e) {
+                    logger.warn("File: {} adding failed.", f);
+                }
+            });
     }
 
     /**
-     * Removes unimportant fields from a Maven Model before sending as context to GenAIProvider.
-     * @param model Maven Model to be cleaned.
+     * Removes sections from the Maven model that are typically not useful for documentation-oriented indexing.
+     *
+     * @param model Maven model to mutate before serialization
      */
     void removeNotImportantData(Model model) {
         model.setDistributionManagement(null);

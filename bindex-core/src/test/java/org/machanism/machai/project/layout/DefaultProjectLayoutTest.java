@@ -1,62 +1,64 @@
 package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 class DefaultProjectLayoutTest {
 
-	@Test
-	void projectDir_returnsSubtypeForChaining() {
-		// Arrange
-		DefaultProjectLayout layout = new DefaultProjectLayout();
-		File dir = new File("src/test/resources/mockDefaultProject");
+    @Test
+    void getModules_whenNoChildProjects_thenReturnsEmptyListAndCachesResult() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-default-layout-empty");
+        Files.createDirectories(root.resolve("target"));
+        Files.createDirectories(root.resolve(".git"));
 
-		// Act
-		DefaultProjectLayout returned = layout.projectDir(dir);
+        DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(root.toFile());
 
-		// Assert
-		assertEquals(layout, returned);
-		assertEquals(dir, layout.getProjectDir());
-	}
+        // Act
+        List<String> modules1 = layout.getModules();
+        List<String> modules2 = layout.getModules();
 
-	@Test
-	void getSources_returnsNull() {
-		// Arrange
-		DefaultProjectLayout layout = new DefaultProjectLayout();
+        // Assert
+        assertNotNull(modules1);
+        assertEquals(0, modules1.size());
+        assertEquals(modules1, modules2, "Expected module list to be cached");
+    }
 
-		// Act
-		List<String> sources = layout.getSources();
+    @Test
+    void getModules_whenContainsNonDefaultChildLayout_thenIncludesChildDirectoryAsModule() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-default-layout-modules");
+        Files.createDirectories(root.resolve("module-a"));
+        Files.write(root.resolve("module-a").resolve("pom.xml"), "<project/>".getBytes());
 
-		// Assert
-		assertNull(sources);
-	}
+        DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(root.toFile());
 
-	@Test
-	void getDocuments_returnsNull() {
-		// Arrange
-		DefaultProjectLayout layout = new DefaultProjectLayout();
+        // Act
+        List<String> modules = layout.getModules();
 
-		// Act
-		List<String> docs = layout.getDocuments();
+        // Assert
+        assertEquals(List.of("module-a"), modules);
+    }
 
-		// Assert
-		assertNull(docs);
-	}
+    @Test
+    void getModules_whenChildDirectoryIsExcluded_thenDoesNotIncludeExcludedDirectory() throws Exception {
+        // Arrange
+        Path root = Files.createTempDirectory("machai-default-layout-excluded");
+        Files.createDirectories(root.resolve("target"));
+        Files.write(root.resolve("target").resolve("pom.xml"), "<project/>".getBytes());
 
-	@Test
-	void getTests_returnsNull() {
-		// Arrange
-		DefaultProjectLayout layout = new DefaultProjectLayout();
+        DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(root.toFile());
 
-		// Act
-		List<String> tests = layout.getTests();
+        // Act
+        List<String> modules = layout.getModules();
 
-		// Assert
-		assertNull(tests);
-	}
+        // Assert
+        assertEquals(0, modules.size());
+    }
 }
