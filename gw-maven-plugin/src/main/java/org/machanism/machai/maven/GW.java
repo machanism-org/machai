@@ -3,10 +3,8 @@ package org.machanism.machai.maven;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.List;
 
-import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
@@ -98,8 +96,11 @@ public class GW extends AbstractMojo {
 	@Parameter(property = "gw.genai")
 	protected String genai;
 
-	@Parameter(property = "gw.instructions")
-	protected File instructions;
+	/**
+	 * Array of instruction files to be processed by the plugin.
+	 */
+	@Parameter(property = "gw.instructions", required = false, readonly = false, name = "instructions")
+	private String[] instructions;
 
 	/** Maven project base directory (read-only). */
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
@@ -116,7 +117,7 @@ public class GW extends AbstractMojo {
 	@Parameter(property = "settings", readonly = true)
 	private Settings settings;
 
-	@Parameter(property = "gw.serverId", required = true)
+	@Parameter(property = "gw.genai.serverId", required = true)
 	private String serverId;
 
 	@Override
@@ -149,12 +150,8 @@ public class GW extends AbstractMojo {
 			}
 		};
 
-		if (instructions != null) {
-			try {
-				documents.setInstructions(Files.readString(instructions.toPath()));
-			} catch (IOException e) {
-				LOGGER.info("Failed to read instructions from file: {}", instructions.getAbsolutePath());
-			}
+		if (ArrayUtils.isNotEmpty(instructions)) {
+			documents.setInstructionLocations(instructions);
 		}
 
 		LOGGER.info("Scanning documents in the root directory: {}", basedir);

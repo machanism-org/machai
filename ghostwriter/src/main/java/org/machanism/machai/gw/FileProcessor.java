@@ -3,6 +3,10 @@ package org.machanism.machai.gw;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,14 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported files,
- * and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported
+ * files, and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to {@link Reviewer}
- * implementations discovered via {@link ServiceLoader}. For every supported file
- * it finds, it builds a prompt using templates from the {@code document-prompts}
- * resource bundle and invokes a {@link GenAIProvider}.
+ * This processor delegates file-specific guidance extraction to
+ * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
+ * every supported file it finds, it builds a prompt using templates from the
+ * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
  * </p>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -72,6 +76,8 @@ public class FileProcessor extends ProjectProcessor {
 	private boolean moduleMultiThread;
 
 	private String instructions;
+
+	private boolean logInputs = true;
 
 	/**
 	 * Constructs a processor.
@@ -288,11 +294,13 @@ public class FileProcessor extends ProjectProcessor {
 			provider.prompt(instructions);
 		}
 
-		String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
-		File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
-		File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
+		if (isLogInputs()) {
+			String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
+			File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
+			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
+			provider.inputsLog(inputsFile);
+		}
 
-		provider.inputsLog(inputsFile);
 		return provider.perform();
 	}
 
@@ -391,5 +399,34 @@ public class FileProcessor extends ProjectProcessor {
 
 	public void setInstructions(String instructions) {
 		this.instructions = instructions;
+	}
+
+	public boolean isLogInputs() {
+		return logInputs;
+	}
+
+	public void setLogInputs(boolean logInputs) {
+		this.logInputs = logInputs;
+	}
+
+	public void setInstructionLocations(String[] instructions) {
+		StringBuilder instructionsText = new StringBuilder();
+		for (String instruction : instructions) {
+			try {
+				String content;
+				if (instruction.startsWith("http://") || instruction.startsWith("https://")) {
+					try (InputStream in = new URL(instruction).openStream()) {
+						content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+					}
+				} else {
+					content = Files.readString(new File(instruction).toPath());
+				}
+				instructionsText.append(content);
+				instructionsText.append("\r\n\r\n");
+			} catch (IOException e) {
+				logger.info("Failed to read instructions from file: {}", instruction);
+			}
+		}
+		setInstructions(instructionsText.toString());
 	}
 }

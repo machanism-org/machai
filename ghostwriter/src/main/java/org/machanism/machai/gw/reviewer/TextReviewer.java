@@ -4,11 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
-import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
