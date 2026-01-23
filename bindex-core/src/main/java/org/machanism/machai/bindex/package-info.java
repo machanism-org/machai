@@ -55,8 +55,7 @@ package org.machanism.machai.bindex;
  *
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- *		- Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
- *
+ *		- When generating Javadoc, if you encounter code blocks inside `<pre>` tags, convert the code content to use the Javadoc `{@code ...}`inline tag instead. Ensure that the code is properly escaped and formatted for Javadoc. Only replace the code inside `<pre>` tags with `{@code ...}`; do not alter other content. *
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
  * 		- Use proper Markdown or HTML formatting for readability.
