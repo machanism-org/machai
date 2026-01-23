@@ -413,15 +413,23 @@ public class FileProcessor extends ProjectProcessor {
 
 	public void setInstructionLocations(String[] instructions) {
 		StringBuilder instructionsText = new StringBuilder();
+		if (instructions == null || instructions.length == 0) {
+			setInstructions(null);
+			return;
+		}
 		for (String instruction : instructions) {
+			if (StringUtils.isBlank(instruction)) {
+				continue;
+			}
 			try {
 				String content;
-				if (instruction.startsWith("http://") || instruction.startsWith("https://")) {
-					try (InputStream in = new URL(instruction).openStream()) {
+				String location = StringUtils.trim(instruction);
+				if (location.startsWith("http://") || location.startsWith("https://")) {
+					try (InputStream in = new URL(location).openStream()) {
 						content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 					}
 				} else {
-					content = Files.readString(new File(instruction).toPath());
+					content = Files.readString(new File(location).toPath());
 				}
 				instructionsText.append(content);
 				instructionsText.append("\r\n\r\n");

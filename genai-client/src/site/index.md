@@ -42,25 +42,24 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+`OpenAIProvider` is a `GenAIProvider` implementation backed by the OpenAI API.
 
-This provider enables a wide range of generative AI capabilities, including:
+Capabilities:
 
-- Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests (for example, text generation, summarization, and question answering).
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+- Sends prompts and receives responses from OpenAI chat/response models.
+- Uploads local files and attaches them to requests; also supports attaching remote files by URL.
+- Supports function/tool calling by registering tools and handling tool calls.
+- Generates embeddings (using `text-embedding-ada-002`).
+- Optional logging of request inputs to a file.
 
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports synchronous operations, and can be configured for different use cases and model parameters.
-
-Environment variables:
+Environment variables / system properties:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using the CodeMie API:
+OpenAI-compatible endpoints (example: CodeMie API):
 
 - `OPENAI_API_KEY` = `eyJhbGciOiJSUzI1NiIsInR5c....`
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -73,27 +72,42 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 Thread safety: this implementation is NOT thread-safe.
 
-### None
+### CodeMie
 
-`NoneProvider` is an implementation of the `GenAIProvider` interface used to disable generative AI integrations and optionally log input requests locally when an external AI provider is not required or available.
+`CodeMieProvider` is an `OpenAIProvider` specialization preconfigured for the CodeMie OpenAI-compatible endpoint.
 
-Purpose:
+It uses the Keycloak token endpoint to obtain an access token via the Resource Owner Password flow, then configures the OpenAI client via system properties:
 
-- Provides a stub implementation that stores requests in input files (via `inputsLog`).
-- Performs no external calls to any AI services or LLMs.
-- Useful for scenarios where GenAI features must be disabled, simulated, or used for fallback testing.
+- `OPENAI_API_KEY` is set to the retrieved access token
+- `OPENAI_BASE_URL` is set to `https://codemie.lab.epam.com/code-assistant-api/v1`
 
-Typical use cases:
+Configuration (required Java system properties):
 
-- Disabling GenAI features for security or compliance.
-- Implementing fallback logic when no provider is configured.
-- Logging requests for manual review or later processing.
-- Running tests in environments without external connectivity.
+- `GENAI_USERNAME`
+- `GENAI_PASSWORD`
 
 Notes:
 
-- Operations requiring GenAI services (for example, embeddings) throw exceptions.
+- Token retrieval uses `client_id=codemie-sdk` against the configured Keycloak token URL.
+- Thread safety follows `OpenAIProvider` (not thread-safe).
+
+### None
+
+`NoneProvider` is a stub `GenAIProvider` intended to disable GenAI integrations while optionally logging request inputs locally.
+
+Behavior:
+
+- Accumulates prompts and can write them to the configured `inputsLog` file.
+- Makes no external calls to any AI services.
+- `embedding(...)` is not supported and throws an exception.
 - Prompts and instructions are cleared after `perform()`.
+
+Typical use cases:
+
+- Disabling generative AI features for security or compliance.
+- Fallback when no provider is configured.
+- Logging prompts for manual review.
+- Testing environments without external connectivity.
 
 Usage example:
 
@@ -105,9 +119,13 @@ provider.perform();
 
 ### Web
 
-`WebProvider` obtains model responses by automating a target GenAI service through its web user interface.
+`WebProvider` obtains model responses by automating a target GenAI service through its web UI using Anteater workspace recipes.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `Submit Prompt` recipe (via `perform()`).
+How it works:
+
+- `model(String)` sets the Anteater configuration name that will be loaded.
+- `setWorkingDir(File)` initializes the shared workspace, sets `PROJECT_DIR`, and loads/runs setup recipes.
+- `perform()` runs the `Submit Prompt` recipe, passing prompts as a system variable `INPUTS`, and returns the captured `result` variable.
 
 Thread safety and lifecycle:
 

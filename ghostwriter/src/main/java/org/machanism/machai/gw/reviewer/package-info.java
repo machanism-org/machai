@@ -1,23 +1,20 @@
 /**
- * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and built-in
- * implementations used by the Ghostwriter pipeline to locate and extract {@code @guidance} instructions from
- * project files.
+ * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and
+ * implementations that extract {@code @guidance} instructions from project files.
  *
- * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} inspects a file using the comment conventions of a
- * particular format (for example, Java block comments, HTML comments, or Python line comments). When guidance is
- * found, the reviewer returns a normalized, prompt-ready {@link String} that includes path context suitable for
- * downstream processing.
+ * <p>Each {@link org.machanism.machai.gw.reviewer.Reviewer} supports one or more file types and understands that
+ * format's comment conventions in order to locate guidance. When guidance is present, the reviewer produces a
+ * normalized, prompt-ready {@link String} that includes path context for downstream processing.
  *
- * <h2>Usage</h2>
+ * <h2>Typical use</h2>
  *
- * <p>Reviewers are typically discovered and invoked by the Ghostwriter file-processing pipeline to scan a
- * repository and collect guidance.
+ * <p>Reviewers are typically selected by file extension and invoked by the Ghostwriter pipeline.
  *
  * <pre>{@code
  * Reviewer reviewer = new JavaReviewer();
  * String promptFragment = reviewer.perform(projectDir, file);
  * if (promptFragment != null) {
- *     // Feed into the documentation / prompt pipeline.
+ *     // Feed into downstream processing.
  * }
  * }</pre>
  */

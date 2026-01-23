@@ -29,30 +29,27 @@
  */
 
 /**
- * Provider discovery, instantiation, and optional system-tool integration for the MachAI GenAI client.
+ * Provider selection, instantiation, and optional system tool integration for MachAI GenAI clients.
  *
  * <p>
- * This package defines the {@link org.machanism.machai.ai.manager.GenAIProvider} service-provider interface (SPI)
- * and supporting utilities to:
- * <ul>
- *   <li>resolve and configure a concrete provider implementation from a {@code Provider:Model} identifier via
- *   {@link org.machanism.machai.ai.manager.GenAIProviderManager}</li>
- *   <li>optionally install controlled access to local system functions (filesystem and command execution) that a
- *   provider may use while servicing prompts</li>
- * </ul>
+ * The central entry point is {@link org.machanism.machai.ai.manager.GenAIProviderManager}, which resolves a
+ * concrete {@link org.machanism.machai.ai.manager.GenAIProvider} implementation from a string identifier.
+ * Identifiers are typically of the form {@code Provider:Model} (for example {@code OpenAI:gpt-4o-mini}).
+ * If the provider portion is omitted, the manager falls back to a default provider.
  *
  * <p>
- * System function integration is opt-in and is provided by:
+ * This package also provides optional, opt-in integration points for exposing controlled access to local system
+ * capabilities as provider "tools" (for example, filesystem access or command execution) via:
  * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} – read/write/list filesystem content under a working directory</li>
- *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} – execute shell commands from a working directory</li>
- *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} – convenience wrapper that installs both tool sets</li>
+ *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} for reading, writing, and listing filesystem content</li>
+ *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} for executing shell commands from a working directory</li>
+ *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} as a convenience wrapper that installs both tool sets</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
- * provider.instructions("Be concise and include sources when available.");
+ * provider.instructions("Be concise.");
  * provider.prompt("Explain the CAP theorem in one paragraph.");
  *
  * // Optionally expose additional tools to the provider
@@ -61,6 +58,7 @@
  *
  * String response = provider.perform();
  * provider.close();
- * }</pre>
+ * }
+ * </pre>
  */
 package org.machanism.machai.ai.manager;

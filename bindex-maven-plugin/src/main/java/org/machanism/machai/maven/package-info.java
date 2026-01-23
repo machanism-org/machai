@@ -29,20 +29,23 @@
  */
 
 /**
- * Maven plugin goals and supporting infrastructure for creating and maintaining a Bindex index during a Maven build.
+ * Maven plugin goals and supporting infrastructure for creating, updating, registering, and cleaning a Bindex index
+ * during a Maven build.
  *
  * <p>
- * This package contains the Maven {@code Mojo} implementations and shared support code used to generate, update,
- * register, and clean Bindex output as part of a project's build lifecycle.
+ * The classes in this package are Maven {@code Mojo} implementations that integrate Bindex into a project's build
+ * lifecycle:
  * </p>
- *
- * <h2>Provided goals</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.maven.Create} - Generate a new index for the current project.</li>
- *   <li>{@link org.machanism.machai.maven.Update} - Regenerate/update an existing index.</li>
- *   <li>{@link org.machanism.machai.maven.Register} - Publish/register the generated index/metadata.</li>
- *   <li>{@link org.machanism.machai.maven.Clean} - Remove plugin-generated output.</li>
+ *   <li>{@link org.machanism.machai.maven.Create} and {@link org.machanism.machai.maven.Update} generate or refresh the
+ *       index for the current project.</li>
+ *   <li>{@link org.machanism.machai.maven.Register} registers an existing index/metadata using the configured AI provider.</li>
+ *   <li>{@link org.machanism.machai.maven.Clean} removes plugin-generated temporary artifacts.</li>
  * </ul>
+ *
+ * <p>
+ * Common behavior shared by the goals is implemented in {@link org.machanism.machai.maven.AbstractBindexMojo}.
+ * </p>
  *
  * <h2>Command-line usage</h2>
  * <pre>

@@ -27,25 +27,25 @@ Page Structure:
 
 ## Introduction
 
-Assembly Maven Plugin is a Maven plugin that automates project assembly tasks within the Machanism ecosystem.
+Assembly Maven Plugin is a Maven plugin that automates assembly-style updates to a local Maven project within the Machanism ecosystem.
 
-It helps you go from a short project concept to concrete, reviewable changes in your working tree (for example updates to `pom.xml` and related project files). It can also use Machanism bindex metadata (for example `bindex.json`) to guide dependency selection and streamline setup.
+It takes a short project concept (for example in `project.txt`) and produces concrete, reviewable changes in your working tree—such as updates to `pom.xml` and related project files. It can also use Machanism bindex metadata (for example `bindex.json`) to guide dependency selection and streamline setup.
 
 ## Overview
 
-Use this plugin when you want to quickly generate or evolve a Maven project by applying structured updates locally, rather than performing repetitive manual setup.
+Use this plugin when you want to quickly generate or evolve a Maven project by applying structured updates locally, instead of performing repetitive manual setup.
 
 Value proposition:
 
 - **Faster bootstrapping:** reduces time spent on boilerplate project setup.
-- **Better library choices:** can recommend dependencies using metadata and semantic search.
-- **Human-controlled output:** all changes are written to disk so you can inspect, edit, and commit.
+- **Metadata-informed dependency choice:** can recommend dependencies using bindex metadata and semantic search.
+- **Human-controlled output:** changes are written to disk so you can inspect, edit, and commit.
 
 ## Key Features
 
 - **Project bootstrap and evolution:** creates or updates common project files and structure.
 - **Metadata-driven assembly:** can use Machanism bindex metadata (for example `bindex.json`) to guide library selection.
-- **GenAI-assisted search and selection:** supports semantic discovery of candidate libraries.
+- **GenAI-assisted discovery:** supports semantic discovery of candidate libraries.
 - **Reviewable output:** writes changes into your project so you can inspect, adjust, and commit them.
 
 ## Getting Started

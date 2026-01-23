@@ -1,11 +1,12 @@
 /**
- * Ghostwriter command-line tooling and orchestration for scanning a workspace and preparing AI-ready
- * prompt inputs.
+ * Ghostwriter command-line tooling and orchestration for scanning a workspace and preparing AI-ready prompt
+ * inputs.
  *
- * <p>This package provides the CLI entry point and a processing pipeline that typically:
+ * <p>This package provides a command-line entry point and a processing pipeline that typically:
+ *
  * <ul>
  *   <li>Walks a project directory (and optionally its modules) while honoring layout exclusions.</li>
- *   <li>Delegates file-type-specific extraction to {@code Reviewer} implementations.</li>
+ *   <li>Delegates file-type-specific extraction to reviewer implementations.</li>
  *   <li>Aggregates extracted {@code @guidance:} directives from supported files and produces prompt input
  *       artifacts.</li>
  *   <li>Invokes a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate or review
@@ -13,12 +14,14 @@
  * </ul>
  *
  * <p>Common entry points:
+ *
  * <ul>
  *   <li>{@link org.machanism.machai.gw.Ghostwriter} &mdash; CLI entry point.</li>
  *   <li>{@link org.machanism.machai.gw.FileProcessor} &mdash; scanning/orchestration engine.</li>
  * </ul>
  *
  * <p>Example:
+ *
  * <pre>{@code
  * // From the command line.
  * // java -jar gw.jar --dir /path/to/project --genai OpenAI:gpt-5.1

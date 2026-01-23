@@ -23,29 +23,25 @@ import org.slf4j.LoggerFactory;
  * <h2>Parameters</h2>
  * <dl>
  * <dt><b>{@code genai}</b> (property: {@code gw.genai})</dt>
- * <dd>GenAI provider/model identifier used for AI-assisted document processing.
- * <p>
- * The value format is provider-specific, commonly {@code ProviderName:ModelName}.
- * </p>
+ * <dd>
+ * GenAI provider/model identifier used for AI-assisted document processing.
+ * The format is provider-specific (often {@code ProviderName:ModelName}).
  * <p>
  * Examples: {@code OpenAI:gpt-5}, {@code AzureOpenAI:gpt-4o-mini}
  * </p>
  * </dd>
  *
  * <dt><b>{@code instructions}</b> (property: {@code gw.instructions})</dt>
- * <dd>Optional list of instruction file locations to guide processing.
- * <p>
- * This parameter may be provided multiple times on the command line depending on your shell,
- * or configured as a list in {@code pom.xml}.
- * </p>
+ * <dd>
+ * Optional list of instruction file locations to guide processing.
+ * Configure as a list in {@code pom.xml}.
  * </dd>
  *
  * <dt><b>{@code serverId}</b> (property: {@code gw.genai.serverId}; required)</dt>
- * <dd>Maven {@code settings.xml} server id that provides GenAI credentials.
- * <p>
+ * <dd>
+ * Maven {@code settings.xml} server id that provides GenAI credentials.
  * If the resolved server contains a username/password, they are exposed to the runtime as
  * {@code GENAI_USERNAME} and {@code GENAI_PASSWORD} system properties.
- * </p>
  * </dd>
  *
  * <dt><b>{@code threads}</b> (property: {@code gw.threads}; default: {@code true})</dt>
@@ -64,7 +60,6 @@ import org.slf4j.LoggerFactory;
  * <h2>Usage Examples</h2>
  *
  * <h3>Run from the command line</h3>
- *
  * <pre>
  * mvn org.machanism.machai:gw-maven-plugin:gw \
  *   -Dgw.genai=OpenAI:gpt-5 \
@@ -72,7 +67,6 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * <h3>Configure in {@code pom.xml}</h3>
- *
  * <pre>
  * &lt;plugin&gt;
  *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
@@ -97,7 +91,6 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * <h3>Required {@code settings.xml} server entry</h3>
- *
  * <pre>
  * &lt;settings&gt;
  *   &lt;servers&gt;

@@ -26,6 +26,7 @@ class JavaReviewerTest {
         JavaReviewer reviewer = new JavaReviewer();
         File javaFile = new File(tempDir, "Example.java");
         Files.writeString(javaFile.toPath(), "public class Example {}");
+
         assertNull(reviewer.perform(tempDir, javaFile));
     }
 
@@ -33,7 +34,7 @@ class JavaReviewerTest {
     @Disabled
     void perform_extractsGuidance_whenGuidanceTagPresent() throws IOException {
         JavaReviewer reviewer = new JavaReviewer();
-        String source = "/* " + "@guidance: This is guidance */\npublic class Example {}";
+        String source = "/* @guidance: This is guidance */\npublic class Example {}";
         File javaFile = new File(tempDir, "Example.java");
         Files.writeString(javaFile.toPath(), source);
 
@@ -47,7 +48,7 @@ class JavaReviewerTest {
     @Disabled
     void perform_packageInfo_extraction() throws IOException {
         JavaReviewer reviewer = new JavaReviewer();
-        String source = "/* " + "@guidance: Package-level guidance. */\npackage org.machanism.example;";
+        String source = "/* @guidance: Package-level guidance. */\npackage org.machanism.example;";
         File pkgInfo = new File(tempDir, "package-info.java");
         Files.writeString(pkgInfo.toPath(), source);
 
@@ -61,13 +62,16 @@ class JavaReviewerTest {
     @Test
     void extractPackageName_findsPackageName() {
         String src = "package org.machanism.example;";
+
         String pkgName = JavaReviewer.extractPackageName(src);
+
         assertEquals("org.machanism.example", pkgName);
     }
 
     @Test
     void extractPackageName_returnsDefaultPackage_whenNotFound() {
         String src = "public class Example {}";
+
         assertEquals("<default package>", JavaReviewer.extractPackageName(src));
     }
 }

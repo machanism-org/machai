@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library discovery and integration.
+Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It uses GenAI-assisted workflows to automate project assembly and enable semantic search for faster library discovery and integration.
 
 ![Machai CLI Screenshot](images/machai-screenshot.png)
 
@@ -69,7 +69,7 @@ Machai CLI is a Spring Boot + Spring Shell application that helps you:
 ### Basic Usage
 
 ```bash
-java -jar machai.jar
+java -jar machai-cli.jar
 ```
 
 Then enter `help` to see the available commands.

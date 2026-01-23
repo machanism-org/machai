@@ -30,16 +30,18 @@
  */
 
 /**
- * Web UI automation based GenAI provider implementations.
+ * Web UI automation based GenAI provider.
  *
- * <p>This package contains {@link org.machanism.machai.ai.manager.GenAIProvider} implementations that obtain
+ * <p>This package provides {@link org.machanism.machai.ai.manager.GenAIProvider} implementations that obtain
  * model responses by automating a target GenAI service through its web user interface using
  * <a href="https://ganteater.com">Anteater</a> workspace recipes.
  *
- * <p>The primary implementation is {@link org.machanism.machai.ai.provider.web.WebProvider}. It loads an
- * Anteater workspace configuration (via {@code model(String)}), initializes the workspace for a project
- * directory (via {@code setWorkingDir(java.io.File)}), and submits the accumulated prompt list by executing
- * the {@code "Submit Prompt"} recipe (via {@code perform()}).
+ * <p>The main entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
+ * <ul>
+ *   <li>accepts an Anteater workspace configuration name via {@code model(String)},</li>
+ *   <li>initializes and loads the workspace for a given project directory via {@code setWorkingDir(java.io.File)},</li>
+ *   <li>submits the accumulated prompts by executing the {@code "Submit Prompt"} recipe via {@code perform()}.</li>
+ * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>

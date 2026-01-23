@@ -2,8 +2,9 @@
  * Top-level public API and service provider interface (SPI) for generative AI providers in the Machanism AI
  * client.
  *
- * <p>This package is the root namespace for integrating generative AI implementations and includes the core
- * abstractions that provider integrations build upon.
+ * <p>This package contains the core abstractions used to integrate and use generative AI implementations.
+ * Provider integrations typically implement SPI types (in {@code org.machanism.machai.ai.manager}) and expose
+ * provider-specific modules under {@code org.machanism.machai.ai.provider.*}.
  *
  * <h2>Sub-packages</h2>
  * <ul>
@@ -17,7 +18,7 @@
  */
 package org.machanism.machai.ai;
 
-/*- 
+/*-
  * @guidance:
  * **IMPORTANT: ADD JAVADOC TO THIS `package-info.java`!**
  *

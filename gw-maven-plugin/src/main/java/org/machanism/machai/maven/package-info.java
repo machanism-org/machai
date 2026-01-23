@@ -2,14 +2,14 @@
  * Maven plugin goals for integrating MachAI generative-workflow (GW) document processing into a Maven build.
  *
  * <p>
- * This package provides Maven mojos that can be invoked from the command line or bound to Maven lifecycle phases to
- * process documentation sources (for example, {@code src/site}) and to clean workflow artifacts.
+ * This package contains Maven mojos that can be invoked from the command line or bound to Maven lifecycle phases.
+ * They process documentation sources by running the MachAI document workflow and can also clean workflow artifacts.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
- *   <li><b>{@code gw}</b> – scans project documentation sources and runs the MachAI document workflow, optionally using a
- *   configured GenAI provider/model.</li>
+ *   <li><b>{@code gw}</b> – scans configured documentation sources and runs the MachAI document workflow, optionally
+ *   using a configured GenAI provider/model.</li>
  *   <li><b>{@code clean}</b> – deletes temporary workflow artifacts generated during document processing.</li>
  * </ul>
  *
@@ -22,22 +22,22 @@
  *
  * <h3>Configure in {@code pom.xml}</h3>
  * <pre>
- * &lt;plugin&gt;
- *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
- *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
- *   &lt;version&gt;${project.version}&lt;/version&gt;
- *   &lt;configuration&gt;
- *     &lt;chatModel&gt;OpenAI:gpt-5&lt;/chatModel&gt;
- *   &lt;/configuration&gt;
- *   &lt;executions&gt;
- *     &lt;execution&gt;
- *       &lt;goals&gt;
- *         &lt;goal&gt;gw&lt;/goal&gt;
- *         &lt;goal&gt;clean&lt;/goal&gt;
- *       &lt;/goals&gt;
- *     &lt;/execution&gt;
- *   &lt;/executions&gt;
- * &lt;/plugin&gt;
+ * &amp;lt;plugin&amp;gt;
+ *   &amp;lt;groupId&amp;gt;org.machanism.machai&amp;lt;/groupId&amp;gt;
+ *   &amp;lt;artifactId&amp;gt;gw-maven-plugin&amp;lt;/artifactId&amp;gt;
+ *   &amp;lt;version&amp;gt;${project.version}&amp;lt;/version&amp;gt;
+ *   &amp;lt;configuration&amp;gt;
+ *     &amp;lt;chatModel&amp;gt;OpenAI:gpt-5&amp;lt;/chatModel&amp;gt;
+ *   &amp;lt;/configuration&amp;gt;
+ *   &amp;lt;executions&amp;gt;
+ *     &amp;lt;execution&amp;gt;
+ *       &amp;lt;goals&amp;gt;
+ *         &amp;lt;goal&amp;gt;gw&amp;lt;/goal&amp;gt;
+ *         &amp;lt;goal&amp;gt;clean&amp;lt;/goal&amp;gt;
+ *       &amp;lt;/goals&amp;gt;
+ *     &amp;lt;/execution&amp;gt;
+ *   &amp;lt;/executions&amp;gt;
+ * &amp;lt;/plugin&amp;gt;
  * </pre>
  */
 package org.machanism.machai.maven;

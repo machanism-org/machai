@@ -62,10 +62,12 @@ This design enables:
 
 | Variable | Required | Used by | Description |
 |---|---:|---|---|
-| `OPENAI_API_KEY` | Yes | OpenAI | API key used to authenticate requests. |
+| `OPENAI_API_KEY` | Yes | OpenAI, CodeMie | API key used to authenticate requests. |
 | `OPENAI_ORG_ID` | No | OpenAI | Optional organization identifier. |
 | `OPENAI_PROJECT_ID` | No | OpenAI | Optional project identifier. |
-| `OPENAI_BASE_URL` | No | OpenAI | Override API base URL (useful for OpenAI-compatible gateways). |
+| `OPENAI_BASE_URL` | No | OpenAI, CodeMie | Override API base URL (useful for OpenAI-compatible gateways). |
+| `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (when using `CodeMieProvider`). |
+| `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (when using `CodeMieProvider`). |
 
 ### Basic Usage
 
@@ -151,18 +153,22 @@ provider.close();
 
 Notes:
 
-- Operations requiring GenAI services may throw exceptions when called.
-- Prompts and instructions may be cleared after performing (provider-dependent behavior).
+- Operations requiring GenAI services will throw exceptions when called.
+- All prompts and instructions are cleared after performing.
+- Refer to `GenAIProvider` interface for compatible methods.
 
 ### OpenAI
 
-The `OpenAIProvider` class integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
-Capabilities typically include:
+This provider enables a wide range of generative AI capabilities, including:
 
 - Sending prompts and receiving responses from OpenAI chat models.
-- Tool calling (when configured by the client and supported by the selected model).
+- Managing files for use in OpenAI workflows.
+- Performing advanced large language model (LLM) requests such as text generation, summarization, and Q&A.
 - Creating and using vector embeddings for tasks like semantic search and similarity analysis.
+
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI models efficiently within their applications.
 
 Environment variables:
 
@@ -186,6 +192,25 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 Thread safety: this implementation is not thread-safe.
 
+### CodeMie
+
+The `CodeMieProvider` class extends `OpenAIProvider` to authenticate against the CodeMie service and then call it via an OpenAI-compatible API.
+
+Key points:
+
+- Obtains an access token from a Keycloak endpoint using the Resource Owner Password Credentials flow.
+- Sets `OPENAI_API_KEY` to the retrieved token and `OPENAI_BASE_URL` to the CodeMie API base URL before delegating to `OpenAIProvider`.
+
+Configuration:
+
+- System properties:
+  - `GENAI_USERNAME` (required)
+  - `GENAI_PASSWORD` (required)
+
+Notes:
+
+- Because it uses the OpenAI-compatible client underneath, usage follows the same API as `OpenAIProvider`.
+
 ### Web
 
 The `WebProvider` class is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
@@ -195,7 +220,7 @@ Automation is executed via Anteater workspace recipes. The provider loads a work
 Thread safety and lifecycle:
 
 - This provider is not thread-safe.
-- Workspace state may be stored in static fields; the working directory may not be changeable once initialized in the current JVM instance.
+- Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 
 Usage example:
@@ -215,4 +240,5 @@ provider.close();
 ## Resources
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/genai-client
-- API badge: https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg
+- Badge: https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg
+- GitHub: https://github.com/machanism-org/machai

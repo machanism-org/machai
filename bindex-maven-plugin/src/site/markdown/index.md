@@ -63,21 +63,21 @@ Registration/publishing may require credentials depending on your registry confi
 Generate (or update) `bindex.json`:
 
 ```bash
-mvn bindex:bindex
+mvn org.machanism.machai:bindex-maven-plugin:bindex
 ```
 
 Register/publish the descriptor (optional):
 
 ```bash
-mvn bindex:register
+mvn org.machanism.machai:bindex-maven-plugin:register
 ```
 
 ### Typical Workflow
 
 1. Configure the plugin in your project `pom.xml` (optionally bind it to a lifecycle phase).
-2. Run `mvn bindex:bindex` to generate or update `bindex.json`.
+2. Run `mvn org.machanism.machai:bindex-maven-plugin:bindex` to generate or update `bindex.json`.
 3. Commit `bindex.json` if your repository policy expects generated metadata to be versioned.
-4. If you use a registry, configure credentials/settings and run `mvn bindex:register` (or run it in CI).
+4. If you use a registry, configure credentials/settings and run `mvn org.machanism.machai:bindex-maven-plugin:register` (or run it in CI).
 
 ## Configuration
 
@@ -106,12 +106,12 @@ Add the plugin to your `pom.xml`:
 
 | Parameter | Description | Default |
 |---|---|---|
-| `update` | Update an existing `bindex.json` if present; if `false`, generation may fail/skip when a descriptor already exists depending on plugin behavior. | `true` |
+| `update` | Whether to update an existing `bindex.json` if present. | `true` |
 
 Example (system property):
 
 ```bash
-mvn bindex:bindex -Dupdate=false
+mvn org.machanism.machai:bindex-maven-plugin:bindex -Dupdate=false
 ```
 
 ## Resources

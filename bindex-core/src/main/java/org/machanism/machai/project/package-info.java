@@ -1,11 +1,10 @@
 /**
- * Supports detecting a filesystem-backed project layout and traversing a project directory,
- * including simple multi-module/workspace projects.
+ * Filesystem-backed project layout detection and traversal.
  *
- * <p>The package centers around two responsibilities:
+ * <p>This package provides:
  * <ul>
- *   <li><strong>Layout detection</strong>: selecting a {@link org.machanism.machai.project.layout.ProjectLayout}
- *       implementation based on the presence of well-known build/configuration files in a project root.</li>
+ *   <li><strong>Layout detection</strong>: determining a {@link org.machanism.machai.project.layout.ProjectLayout}
+ *       implementation for a given directory by inspecting the presence of well-known build/configuration files.</li>
  *   <li><strong>Project traversal</strong>: scanning a project root and, when applicable, recursively scanning
  *       detected modules while delegating project-specific handling to client code.</li>
  * </ul>

@@ -27,11 +27,11 @@ Page Structure:
 
 ## Introduction
 
-Bindex Core is the foundational library for producing and consuming **bindex** metadata. It provides reusable building blocks for generating metadata during builds and for loading, merging, and analyzing metadata emitted by other tools—supporting automated discovery and assembly workflows in the Machanism ecosystem.
+Bindex Core is the foundational Java library for producing and consuming **bindex** metadata. It provides the building blocks for metadata generation, registration, library selection, and project assembly—enabling automated discovery, integration, and assembly workflows within the Machanism ecosystem.
 
 ## Overview
 
-Bindex Core provides core APIs and reference implementations to:
+Bindex Core provides APIs and reference implementations to:
 
 - Generate bindex metadata for Java artifacts
 - Read, merge, and analyze bindex metadata produced by other tools
@@ -40,7 +40,9 @@ Bindex Core provides core APIs and reference implementations to:
 ## Key Features
 
 - Metadata generation for Java projects and artifacts
+- Registration and indexing of produced metadata
 - Aggregation and merging across modules and dependency graphs
+- Library selection utilities to support automated assembly workflows
 - Extensible components suitable for Maven models and plugin APIs
 
 ## Getting Started
@@ -70,12 +72,19 @@ Add it to your `pom.xml`:
 </dependency>
 ```
 
+Build the module:
+
+```bash
+mvn -pl bindex-core clean verify
+```
+
 ### Typical Workflow
 
 1. Add `bindex-core` as a dependency to the tool/plugin or application that needs to produce/consume bindex metadata.
-2. Generate bindex metadata during your build (typically from a Maven plugin or build integration).
-3. Load and merge metadata from multiple modules/artifacts.
-4. Analyze the merged metadata to drive discovery/selection/assembly workflows.
+2. Generate bindex metadata during your build (typically via a Maven plugin or build integration).
+3. Register and publish produced metadata so it can be discovered by downstream tools.
+4. Load and merge metadata from multiple modules/artifacts.
+5. Apply selection/assembly logic using the merged metadata.
 
 ## Configuration
 

@@ -23,13 +23,13 @@
 
 ## Project Overview
 
-Ghostwriter is an AI-assisted documentation engine for Maven/Java projects. It scans your project sources and documentation, interprets embedded guidance tags, and generates or updates documentation artifacts in a consistent, repeatable way.
+Machai Ghostwriter is an AI-powered CLI tool that scans project directories and processes documentation-related files according to embedded `@guidance` annotations and any additional instructions you provide. It helps keep documentation consistent, clear, and synchronized with the codebase across multi-module projects.
 
 ## Introduction
 
-Ghostwriter is an AI-assisted documentation engine for Maven/Java projects. It scans your project sources and documentation, interprets embedded guidance tags, and generates or updates documentation artifacts in a consistent, repeatable way.
+Machai Ghostwriter is an AI-powered tool that automates and standardizes project documentation and code annotation. Using guided file processing and `@guidance` annotations, it enables developers to maintain consistent, clear, and up-to-date documentation across multi-module projects in languages such as Java, TypeScript, and Python. Ghostwriter simplifies the embedding, extraction, and management of project guidance, ensuring your codebase and documentation remain synchronized.
 
-It is designed for use in local workflows and CI pipelines to keep documentation accurate as the code evolves.
+Learn more about guided file processing: https://machanism.org/guided-file-processing/index.html
 
 ## Usage
 
@@ -50,44 +50,29 @@ Download the CLI JAR:
 java -jar gw.jar
 ```
 
-To scan specific directories (relative to the working directory), pass them as trailing arguments:
+To scan a specific project root directory:
 
 ```bash
-java -jar gw.jar src/site src/main
+java -jar gw.jar --dir /path/to/project
+```
+
+To scan one or more specific directories (positional arguments):
+
+```bash
+java -jar gw.jar . docs src
 ```
 
 ### Typical Workflow
 
 1. Build or download `gw.jar`.
-2. Choose a working directory (the project root) and optionally the directories to scan.
-3. (Optional) Provide additional instructions (inline or as a file path).
+2. Choose the project root (`--dir`) and the directories to scan (positional args).
+3. (Optional) Provide additional instructions (inline or via `--instructions /path/to/file`).
 4. Run Ghostwriter.
 5. Review and commit generated/updated documentation.
 
-### Configuration (command-line options)
-
-| Option | Long | Argument | Description | Default |
-|---|---|---:|---|---|
-| `-h` | `--help` | No | Displays help information for usage. | Off |
-| `-t` | `--threads` | No | Enable multi-threaded processing. | Off |
-| `-d` | `--dir` | Yes | Path to the project root directory. | Current user directory (working dir) |
-| `-g` | `--genai` | Yes | GenAI service provider and model (e.g. `OpenAI:gpt-5.1`). | Provider/model resolved by `Config.getChatModel(...)` |
-| `-i` | `--instructions` | Yes | Additional file-processing instructions. Provide either the instruction text directly or a path to a file containing the instructions. | None |
-
-**Positional arguments**: one or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
-
-Example:
-
-```bash
-java -jar gw.jar \
-  --threads \
-  --genai OpenAI:gpt-5.1 \
-  --instructions ./ghostwriter-instructions.txt \
-  .
-```
-
 ## Resources
 
+- Platform: https://machanism.org/guided-file-processing/index.html
 - GitHub: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
 - Download CLI JAR: https://sourceforge.net/projects/machanism/files/gw.jar/download

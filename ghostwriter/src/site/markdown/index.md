@@ -27,27 +27,31 @@ Page Structure:
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 
+## Introduction
+
 Machai Ghostwriter is an AI-powered tool that automates and standardizes project documentation and code annotation. Using guided file processing and `@guidance` annotations, it enables developers to maintain consistent, clear, and up-to-date documentation across multi-module projects in languages such as Java, TypeScript, and Python. Ghostwriter simplifies the embedding, extraction, and management of project guidance, ensuring your codebase and documentation remain synchronized.
 
 <iframe class="youtube" title="Ghostwriter | Machai" src="https://www.youtube.com/embed/Z3jFvJLKS2I"></iframe>
 
-Ghostwriter operates as a CLI application. Simply point it to your project directory (or use the current working directory by default) and optionally specify:
+## Overview
 
-- A GenAI provider or model,
-- Additional processing instructions (inline or from a file),
-- Directories to include in the scan.
+Ghostwriter runs as a CLI application that scans a project directory and processes documentation-related files according to embedded guidance and any additional instructions you provide.
 
-Ghostwriter will then traverse the specified directories, processing documentation-related files according to embedded guidance and your instructions.
+You can optionally specify:
 
-Learn more about the Machanism platform and guided file processing at [Guided File Processing](https://machanism.org/guided-file-processing/index.html).
+- A GenAI provider/model (for example, `OpenAI:gpt-5.1`).
+- Additional processing instructions (inline or loaded from a file).
+- One or more directories to include in the scan.
+
+Learn more about guided file processing: https://machanism.org/guided-file-processing/index.html
 
 ## Key Features
 
-- Scans project directories and processes documentation artifacts.
+- Scans project directories and processes documentation artifacts according to embedded guidance.
 - Supports pluggable GenAI provider/model selection.
 - Accepts additional instruction input (inline text or via file path).
 - Optional multi-threaded processing.
-- Works well in scripts and CI as a single runnable JAR.
+- Runs as a single runnable JAR for scripts and CI.
 
 ## Getting Started
 
@@ -77,17 +81,23 @@ Download the CLI JAR:
 java -jar gw.jar
 ```
 
-To scan specific directories (relative to the working directory), pass them as trailing arguments:
+To scan a specific project root directory:
 
 ```bash
-java -jar gw.jar /path/to/project
+java -jar gw.jar --dir /path/to/project
+```
+
+To scan one or more specific directories (positional arguments):
+
+```bash
+java -jar gw.jar . docs src
 ```
 
 ### Typical Workflow
 
 1. Build or download `gw.jar`.
-2. Choose a working directory (the project root) and optionally the directories to scan.
-3. (Optional) Provide additional instructions (inline or as a file path).
+2. Choose the project root (`--dir`) and the directories to scan (positional args).
+3. (Optional) Provide additional instructions (inline or via `--instructions /path/to/file`).
 4. Run Ghostwriter.
 5. Review and commit generated/updated documentation.
 
@@ -97,23 +107,15 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 
 ### Command-line Options
 
-| Option | Long Option    | Argument | Description                                                                 | Default                      |
-|--------|---------------|:--------:|------------------------------------------------------------------------------|------------------------------|
-| `-h`   | `--help`      | No       | Displays help information and usage instructions.                        | Off                          |
-| `-t`   | `--threads`   | No       | Enables multi-threaded processing.                                       | Off                          |
-| `-d`   | `--dir`       | Yes      | Specifies the path to the project directory (project root).               | Current working directory*   |
-| `-g`   | `--genai`     | Yes      | Sets the GenAI service provider and model.  | `OpenAI:gpt-5-mini`*   |
-| `-i`   | `--instructions` | Yes   | Provides additional file-processing instructions (either as direct text or as a path to a file containing instructions). | None                         |
+| Option | Long Option | Argument | Description | Default |
+|--------|------------|:--------:|-------------|---------|
+| `-h` | `--help` | No | Displays help information for usage. | Off |
+| `-t` | `--threads` | No | Enable multi-threaded processing. | Off |
+| `-d` | `--dir` | Yes | Path to the project directory (project root). | Current working directory, or `dir` from `gw.properties` |
+| `-g` | `--genai` | Yes | Specifies the GenAI service provider and model (e.g. `OpenAI:gpt-5.1`). | `OpenAI:gpt-5-mini`, or `genai` from `gw.properties` |
+| `-i` | `--instructions` | Yes | Additional file processing instructions. Provide either the instruction text directly or a path to a file containing the instructions. If the value is an existing file path, its contents are used. | None |
 
-\* The `dir` and `genai` options can also be defined in a `machai.properties` file located in the current directory. For example:
-
-```properties
-#Fri Jan 16 10:54:55 EET 2026
-dir=C\:\\projects\\machanism.org\\machai
-genai=OpenAI\:gpt-5-2-2025-12-11
-```
-
-**Positional arguments**: one or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
+**Positional arguments**: zero or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
 
 ### Example
 
@@ -129,6 +131,7 @@ java -jar gw.jar \
 
 ## Resources
 
+- Platform: https://machanism.org/guided-file-processing/index.html
 - GitHub: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
 - Download CLI JAR: https://sourceforge.net/projects/machanism/files/gw.jar/download

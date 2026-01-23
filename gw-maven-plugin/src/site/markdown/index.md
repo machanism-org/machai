@@ -70,7 +70,7 @@ Add the plugin to your `pom.xml`:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>0.0.2</version>
+  <version>${gw-maven-plugin.version}</version>
 </plugin>
 ```
 
@@ -101,9 +101,10 @@ Example configuration:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>0.0.2</version>
+  <version>${gw-maven-plugin.version}</version>
   <configuration>
-    <genai>Web:CodeMie</genai>
+    <genai>CodeMie:gpt-5-2-2025-12-11</genai>
+    <serverId>CodeMie</serverId>
   </configuration>
 </plugin>
 ```
@@ -111,10 +112,10 @@ Example configuration:
 Example command line with custom parameters:
 
 ```sh
-mvn gw:gw -Dgw.genai=Web:CodeMie
+mvn gw:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11
 ```
 
 ## Resources
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin
-- Shields.io badge: https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg
+- GitHub: https://github.com/machanism-org/machai
