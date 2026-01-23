@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin for Maven-based Java projects. It scans your codebase for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, keeping your docs consistent, current, and aligned with the source of truth in the repository.
+GW Maven Plugin (Ghostwriter Maven Plugin) is an advanced documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, keeping docs consistent, current, and aligned with the in-repo source of truth.
 
 Benefits:
 
@@ -51,7 +51,7 @@ The plugin discovers `@guidance:` comments in your project sources/resources and
 
 ### Prerequisites
 
-- Java 8+
+- Java 9+
 - Maven 3+
 
 ### Environment Variables
@@ -94,6 +94,7 @@ Common configuration parameters are set under the plugin `<configuration>` block
 | Parameter | Description | Default |
 | --- | --- | --- |
 | `genai` | Selects the GenAI backend/provider configuration used by Ghostwriter. | (implementation-defined) |
+| `serverId` | Maven `settings.xml` server id used to resolve provider credentials/config. | (implementation-defined) |
 
 Example configuration:
 
@@ -119,3 +120,4 @@ mvn gw:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin
 - GitHub: https://github.com/machanism-org/machai
+- Maven Site: https://maven.apache.org/plugins/maven-site-plugin/

@@ -2,8 +2,9 @@
  * Maven plugin goals for integrating MachAI generative-workflow (GW) document processing into a Maven build.
  *
  * <p>
- * This package contains Maven mojos that can be invoked from the command line or bound to Maven lifecycle phases.
- * They process documentation sources by running the MachAI document workflow and can also clean workflow artifacts.
+ * This package provides Maven Mojos that can be invoked from the command line or bound to Maven lifecycle phases.
+ * The goals run the MachAI documentation workflow over configured documentation sources and can also remove
+ * workflow artifacts produced during processing.
  * </p>
  *
  * <h2>Goals</h2>

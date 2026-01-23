@@ -34,14 +34,17 @@ import org.slf4j.LoggerFactory;
  * <dt><b>{@code instructions}</b> (property: {@code gw.instructions})</dt>
  * <dd>
  * Optional list of instruction file locations to guide processing.
- * Configure as a list in {@code pom.xml}.
+ *
+ * <p>
+ * Example value: {@code ${project.basedir}/.gw/instructions.md}
+ * </p>
  * </dd>
  *
  * <dt><b>{@code serverId}</b> (property: {@code gw.genai.serverId}; required)</dt>
  * <dd>
  * Maven {@code settings.xml} server id that provides GenAI credentials.
  * If the resolved server contains a username/password, they are exposed to the runtime as
- * {@code GENAI_USERNAME} and {@code GENAI_PASSWORD} system properties.
+ * system properties {@code GENAI_USERNAME} and {@code GENAI_PASSWORD}.
  * </dd>
  *
  * <dt><b>{@code threads}</b> (property: {@code gw.threads}; default: {@code true})</dt>
@@ -51,10 +54,10 @@ import org.slf4j.LoggerFactory;
  * <dd>Maven project base directory.</dd>
  *
  * <dt><b>{@code project}</b> (read-only; default: {@code ${project}})</dt>
- * <dd>The current {@link MavenProject}.</dd>
+ * <dd>The current {@link MavenProject} (injected by Maven; not used directly by this goal).</dd>
  *
  * <dt><b>{@code settings}</b> (read-only; default: {@code ${settings}})</dt>
- * <dd>The current Maven {@link Settings}.</dd>
+ * <dd>The current Maven {@link Settings}, used to resolve {@code serverId} credentials.</dd>
  * </dl>
  *
  * <h2>Usage Examples</h2>
@@ -106,46 +109,26 @@ import org.slf4j.LoggerFactory;
 @Mojo(name = "gw", threadSafe = true, aggregator = true)
 public class GW extends AbstractMojo {
 
-	/** Logger for this class. */
 	private static final Logger logger = LoggerFactory.getLogger(GW.class);
 
-	/**
-	 * GenAI provider/model identifier used for AI-assisted document processing.
-	 *
-	 * <p>
-	 * May be provided as a system property: {@code -Dgw.genai=...}.
-	 * </p>
-	 */
 	@Parameter(property = "gw.genai")
 	protected String genai;
 
-	/**
-	 * Array of instruction file locations to guide processing.
-	 */
 	@Parameter(property = "gw.instructions", required = false, readonly = false, name = "instructions")
 	private String[] instructions;
 
-	/** Maven project base directory (read-only). */
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
 	protected File basedir;
 
-	/** Maven project (read-only). */
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
 
-	/** Maven settings (read-only). */
-	@Parameter(property = "settings", readonly = true, defaultValue = "${settings}")
+	@Parameter(readonly = true, defaultValue = "${settings}")
 	private Settings settings;
 
-	/**
-	 * Maven {@code settings.xml} server id containing GenAI credentials.
-	 */
 	@Parameter(property = "gw.genai.serverId", required = true)
 	private String serverId;
 
-	/**
-	 * Enable multi-threaded processing.
-	 */
 	@Parameter(property = "gw.threads", defaultValue = "true", required = false)
 	private boolean threads;
 
@@ -164,11 +147,11 @@ public class GW extends AbstractMojo {
 		}
 
 		String username = server.getUsername();
-		if (username != null) {
+		if (username != null && !username.isBlank()) {
 			System.setProperty("GENAI_USERNAME", username);
 		}
 		String password = server.getPassword();
-		if (password != null) {
+		if (password != null && !password.isBlank()) {
 			System.setProperty("GENAI_PASSWORD", password);
 		}
 
