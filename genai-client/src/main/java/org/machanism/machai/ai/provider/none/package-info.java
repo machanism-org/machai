@@ -1,17 +1,19 @@
 /**
- * Provides a non-operational ("none") generative-AI provider implementation.
+ * Provides a no-op ("none") {@code GenAIProvider} implementation.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for environments where no external
- * generative AI / LLM integration should be used.
+ * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a stub implementation used when
+ * generative AI integrations must be disabled (for example, due to security/compliance constraints, offline execution,
+ * or when running tests without access to external services).
  *
  * <h2>Behavior</h2>
  * <ul>
- *   <li>No network calls are made and no external AI service is contacted.</li>
- *   <li>{@code prompt(String)} accumulates prompt text in memory.</li>
- *   <li>{@code perform()} optionally writes instructions and prompts to local files when {@code inputsLog(File)} is
- *       configured, then returns {@code null}.</li>
- *   <li>Provider capabilities that require a real backend (for example, embeddings) are unsupported.</li>
+ *   <li>No network calls are performed and no external AI backend is contacted.</li>
+ *   <li>{@code prompt(String)} appends prompt text to an in-memory buffer.</li>
+ *   <li>{@code instructions(String)} stores instruction text; when logging is enabled, it is written to
+ *       {@code instructions.txt} alongside the prompt log.</li>
+ *   <li>{@code perform()} optionally writes the accumulated prompts to the configured log file, clears internal state,
+ *       and returns {@code null}.</li>
+ *   <li>Features that require a real provider (for example embeddings) are unsupported and may throw exceptions.</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -55,5 +57,5 @@ package org.machanism.machai.ai.provider.none;
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *
- * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ * -  Escape `<` and `>` as ` <` and `>` in `<pre>` content for Javadoc.
  */

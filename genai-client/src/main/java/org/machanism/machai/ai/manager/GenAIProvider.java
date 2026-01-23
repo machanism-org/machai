@@ -35,7 +35,7 @@ import java.util.function.Function;
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
  * provider.prompt("Hello!");
  * provider.addFile(new File("some.txt"));
- * List&lt;Float&gt; embedding = provider.embedding("any text");
+ * List <Float> embedding = provider.embedding("any text");
  * </pre>
  *
  * @author Viktor Tovstyi

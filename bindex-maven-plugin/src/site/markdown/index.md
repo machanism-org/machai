@@ -47,7 +47,7 @@ This plugin runs during your Maven build (or on-demand) to create or maintain a 
 
 ### Prerequisites
 
-- Java 8+
+- Java 9+
 - Maven 3.6+
 
 ### Environment Variables

@@ -199,7 +199,7 @@ public class AssembyCommand {
 	 * @param url
 	 * @param chatModel
 	 * 
-	 * @return List&lt; Bindex&gt; found matching libraries
+	 * @return List < Bindex> found matching libraries
 	 * @throws IOException if picking fails
 	 */
 	private List<Bindex> pickBricks(GenAIProvider provider, String query, Double score, String url, String chatModel)

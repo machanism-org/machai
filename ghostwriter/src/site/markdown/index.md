@@ -29,13 +29,13 @@ Page Structure:
 
 ## Introduction
 
-Machai Ghostwriter is an AI-powered tool that automates and standardizes project documentation and code annotation. Using guided file processing and `@guidance` annotations, it enables developers to maintain consistent, clear, and up-to-date documentation across multi-module projects in languages such as Java, TypeScript, and Python. Ghostwriter simplifies the embedding, extraction, and management of project guidance, ensuring your codebase and documentation remain synchronized.
+Machai Ghostwriter is an AI-powered tool that automates and standardizes project documentation and code annotation. Using guided file processing and `@guidance` annotations, it helps teams keep documentation consistent, clear, and up to date across multi-module codebases. Ghostwriter streamlines embedding, extracting, and applying project guidance so your code and documentation stay synchronized.
 
 <iframe class="youtube" title="Ghostwriter | Machai" src="https://www.youtube.com/embed/Z3jFvJLKS2I"></iframe>
 
 ## Overview
 
-Ghostwriter runs as a CLI application that scans a project directory and processes documentation-related files according to embedded guidance and any additional instructions you provide.
+Ghostwriter is a CLI application that scans a project directory and processes documentation-related files according to embedded guidance and any additional instructions you provide.
 
 You can optionally specify:
 
@@ -111,9 +111,9 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 |--------|------------|:--------:|-------------|---------|
 | `-h` | `--help` | No | Displays help information for usage. | Off |
 | `-t` | `--threads` | No | Enable multi-threaded processing. | Off |
-| `-d` | `--dir` | Yes | Path to the project directory (project root). | Current working directory, or `dir` from `gw.properties` |
+| `-d` | `--dir` | Yes | The path fo the project directory. | Current working directory, or `dir` from `gw.properties` |
 | `-g` | `--genai` | Yes | Specifies the GenAI service provider and model (e.g. `OpenAI:gpt-5.1`). | `OpenAI:gpt-5-mini`, or `genai` from `gw.properties` |
-| `-i` | `--instructions` | Yes | Additional file processing instructions. Provide either the instruction text directly or a path to a file containing the instructions. If the value is an existing file path, its contents are used. | None |
+| `-i` | `--instructions` | Yes | Specifies additional file processing instructions. Provide either the instruction text directly or the path to a file containing the instructions. If the value is an existing file path, its contents are used. | None |
 
 **Positional arguments**: zero or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
 

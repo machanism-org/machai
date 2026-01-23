@@ -15,7 +15,8 @@
  *      
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
+ * 
+		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * 
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
@@ -26,47 +27,31 @@
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- * 
- * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
  */
 
 /**
- * Maven plugin goal implementations for AI-assisted project assembly.
+ * Maven plugin goals for AI-assisted project assembly.
  *
  * <p>
- * This package contains the Maven {@code Mojo} entry points (goals) that integrate the MachAI assembly workflow
- * into a Maven build. The primary goal coordinates:
+ * This package provides the Maven {@code Mojo} entry points that integrate the MachAI assembly workflow into a
+ * Maven build. The main goal reads or prompts for an assembly description, obtains library recommendations from a
+ * configured generative-AI provider, and then applies the selected assembly steps to the current project directory.
  * </p>
  *
+ * <h2>Typical flow</h2>
  * <ol>
- *   <li>Loading the assembly prompt (from a configured file or user input).</li>
- *   <li>Invoking a configured generative-AI provider to propose candidate libraries and changes.</li>
- *   <li>Optionally filtering proposals using a minimum score threshold.</li>
- *   <li>Executing the assembly workflow against the current project directory.</li>
+ *   <li>Load an assembly prompt from {@code assembly.prompt.file} (default {@code project.txt}) or prompt the user.</li>
+ *   <li>Run the picker model ({@code pick.genai}) to recommend candidate libraries (optionally filtered by score).</li>
+ *   <li>Run the assembly model ({@code assembly.genai}) to update the project in {@code ${basedir}}.</li>
  * </ol>
  *
  * <h2>Usage</h2>
- *
- * <p><b>Command line:</b></p>
+ * <p><strong>Command line:</strong></p>
  * <pre>
  * mvn org.machanism.machai:assembly-maven-plugin:assembly \
  *   -Dassembly.genai=OpenAI:gpt-5 \
- *   -Dpick.genai=OpenAI:gpt-5-mini
- * </pre>
- *
- * <p><b>Plugin configuration:</b></p>
- * <pre>
- * &lt;plugin&gt;
- *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
- *   &lt;artifactId&gt;assembly-maven-plugin&lt;/artifactId&gt;
- *   &lt;configuration&gt;
- *     &lt;assembly.genai&gt;OpenAI:gpt-5&lt;/assembly.genai&gt;
- *     &lt;pick.genai&gt;OpenAI:gpt-5-mini&lt;/pick.genai&gt;
- *     &lt;assembly.prompt.file&gt;project.txt&lt;/assembly.prompt.file&gt;
- *     &lt;assembly.score&gt;0.8&lt;/assembly.score&gt;
- *     &lt;bindex.register.url&gt;https://register.project.example&lt;/bindex.register.url&gt;
- *   &lt;/configuration&gt;
- * &lt;/plugin&gt;
+ *   -Dpick.genai=OpenAI:gpt-5-mini \
+ *   -Dassembly.prompt.file=project.txt
  * </pre>
  */
 package org.machanism.machai.maven;

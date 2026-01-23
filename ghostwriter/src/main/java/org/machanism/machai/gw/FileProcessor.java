@@ -429,7 +429,7 @@ public class FileProcessor extends ProjectProcessor {
 						content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 					}
 				} else {
-					content = Files.readString(new File(location).toPath());
+					content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
 				}
 				instructionsText.append(content);
 				instructionsText.append("\r\n\r\n");

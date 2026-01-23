@@ -1,33 +1,29 @@
 /**
  * Filesystem-backed project layout detection and traversal.
  *
- * <p>This package provides:
+ * <p>This package provides APIs to:
  * <ul>
- *   <li><strong>Layout detection</strong>: determining a {@link org.machanism.machai.project.layout.ProjectLayout}
- *       implementation for a given directory by inspecting the presence of well-known build/configuration files.</li>
- *   <li><strong>Project traversal</strong>: scanning a project root and, when applicable, recursively scanning
- *       detected modules while delegating project-specific handling to client code.</li>
+ *   <li><strong>Detect a project layout</strong> for a directory by inspecting recognizable build/configuration
+ *       files and selecting an appropriate {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
+ *   <li><strong>Traverse a project root</strong> and, when supported by the detected layout, discover and scan
+ *       modules/subprojects while delegating per-module handling to client code.</li>
  * </ul>
  *
  * <h2>Key types</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} detects a
- *       {@link org.machanism.machai.project.layout.ProjectLayout} for a given directory.</li>
- *   <li>{@link org.machanism.machai.project.ProjectProcessor} provides a template method for scanning a project
- *       and invoking
+ *       {@link org.machanism.machai.project.layout.ProjectLayout} for a directory.</li>
+ *   <li>{@link org.machanism.machai.project.ProjectProcessor} scans a project tree and invokes
  *       {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
- *       for each discovered module (or for the root when there are no modules).</li>
+ *       for each discovered module (or for the root when no modules are present).</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Example</h2>
  * <pre>{@code
  * File projectDir = new File("/path/to/project");
- *
- * // Detect the layout (e.g., Maven, JavaScript workspaces, Python, or a default fallback).
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
  *
- * // Traverse the project; subclasses implement how to handle each detected layout.
- * ProjectProcessor processor = ...;
+ * ProjectProcessor processor = ...; // implement how each layout/module is handled
  * processor.scanFolder(projectDir);
  * }</pre>
  *
@@ -61,6 +57,5 @@ package org.machanism.machai.project;
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- * 
- * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ 
  */

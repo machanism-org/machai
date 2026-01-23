@@ -1,16 +1,16 @@
 /**
- * Maven plugin goals for integrating MachAI generative-workflow (GW) document processing into a Maven build.
+ * Maven plugin goals for running the MachAI generative-workflow (GW) document processing as part of a Maven build.
  *
  * <p>
- * This package provides Maven Mojos that can be invoked from the command line or bound to Maven lifecycle phases.
- * The goals run the MachAI documentation workflow over configured documentation sources and can also remove
- * workflow artifacts produced during processing.
+ * This package provides Mojos that can be executed from the command line or bound to Maven lifecycle phases.
+ * The {@code gw} goal scans documentation sources under the project base directory and runs the MachAI workflow,
+ * optionally using a configured GenAI provider/model. The {@code clean} goal removes temporary workflow artifacts
+ * produced during processing.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
- *   <li><b>{@code gw}</b> – scans configured documentation sources and runs the MachAI document workflow, optionally
- *   using a configured GenAI provider/model.</li>
+ *   <li><b>{@code gw}</b> – scans configured documentation sources and runs the MachAI document workflow.</li>
  *   <li><b>{@code clean}</b> – deletes temporary workflow artifacts generated during document processing.</li>
  * </ul>
  *
@@ -18,27 +18,28 @@
  *
  * <h3>Run from the command line</h3>
  * <pre>
- * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5
+ * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai
  * </pre>
  *
  * <h3>Configure in {@code pom.xml}</h3>
  * <pre>
- * &amp;lt;plugin&amp;gt;
- *   &amp;lt;groupId&amp;gt;org.machanism.machai&amp;lt;/groupId&amp;gt;
- *   &amp;lt;artifactId&amp;gt;gw-maven-plugin&amp;lt;/artifactId&amp;gt;
- *   &amp;lt;version&amp;gt;${project.version}&amp;lt;/version&amp;gt;
- *   &amp;lt;configuration&amp;gt;
- *     &amp;lt;chatModel&amp;gt;OpenAI:gpt-5&amp;lt;/chatModel&amp;gt;
- *   &amp;lt;/configuration&amp;gt;
- *   &amp;lt;executions&amp;gt;
- *     &amp;lt;execution&amp;gt;
- *       &amp;lt;goals&amp;gt;
- *         &amp;lt;goal&amp;gt;gw&amp;lt;/goal&amp;gt;
- *         &amp;lt;goal&amp;gt;clean&amp;lt;/goal&amp;gt;
- *       &amp;lt;/goals&amp;gt;
- *     &amp;lt;/execution&amp;gt;
- *   &amp;lt;/executions&amp;gt;
- * &amp;lt;/plugin&amp;gt;
+ *  <plugin>
+ *    <groupId>org.machanism.machai </groupId>
+ *    <artifactId>gw-maven-plugin </artifactId>
+ *    <version>${project.version} </version>
+ *    <configuration>
+ *      <genai>OpenAI:gpt-5 </genai>
+ *      <serverId>genai </serverId>
+ *    </configuration>
+ *    <executions>
+ *      <execution>
+ *        <goals>
+ *          <goal>gw </goal>
+ *          <goal>clean </goal>
+ *        </goals>
+ *      </execution>
+ *    </executions>
+ *  </plugin>
  * </pre>
  */
 package org.machanism.machai.maven;
@@ -70,6 +71,5 @@ package org.machanism.machai.maven;
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- * 
- * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ 
  */

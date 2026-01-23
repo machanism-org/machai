@@ -27,24 +27,28 @@ Page Structure:
 
 ## Introduction
 
-Assembly Maven Plugin is a Maven plugin that automates assembly-style updates to a local Maven project within the Machanism ecosystem.
+Assembly Maven Plugin automates assembly-style updates to a local Maven project within the Machanism ecosystem. It applies concrete, reviewable changes to your working tree—such as updating `pom.xml` and related project files—based on a short project concept (for example `project.txt`). When available, it can also use Machanism bindex metadata (for example `bindex.json`) and GenAI-assisted semantic search to recommend and integrate dependencies.
 
-It takes a short project concept (for example in `project.txt`) and produces concrete, reviewable changes in your working tree—such as updates to `pom.xml` and related project files. It can also use Machanism bindex metadata (for example `bindex.json`) to guide dependency selection and streamline setup.
+Benefits:
+
+- **Faster bootstrapping:** reduces time spent on boilerplate Maven setup.
+- **Metadata-informed dependency choice:** uses bindex metadata to recommend libraries that fit your needs.
+- **Human-controlled output:** writes changes to disk so you can inspect, edit, and commit.
 
 ## Overview
 
-Use this plugin when you want to quickly generate or evolve a Maven project by applying structured updates locally, instead of performing repetitive manual setup.
+Use this plugin to generate or evolve a Maven project by applying structured updates locally, instead of performing repetitive manual setup.
 
 Value proposition:
 
-- **Faster bootstrapping:** reduces time spent on boilerplate project setup.
-- **Metadata-informed dependency choice:** can recommend dependencies using bindex metadata and semantic search.
-- **Human-controlled output:** changes are written to disk so you can inspect, edit, and commit.
+- **Project evolution via local changes:** updates your working tree so results are transparent and reviewable.
+- **Smarter dependency selection:** combines bindex metadata with semantic search to propose relevant dependencies.
+- **Repeatable workflow:** run the goal as your concept evolves and keep only the changes you want.
 
 ## Key Features
 
 - **Project bootstrap and evolution:** creates or updates common project files and structure.
-- **Metadata-driven assembly:** can use Machanism bindex metadata (for example `bindex.json`) to guide library selection.
+- **Metadata-driven assembly:** uses Machanism bindex metadata (for example `bindex.json`) to guide library selection.
 - **GenAI-assisted discovery:** supports semantic discovery of candidate libraries.
 - **Reviewable output:** writes changes into your project so you can inspect, adjust, and commit them.
 
@@ -54,7 +58,7 @@ Value proposition:
 
 - Java 8 or higher
 - Maven 3.6.x or newer
-- Access to a compatible GenAI provider (for example OpenAI)
+- Access to a compatible GenAI provider (for example OpenAI), if GenAI-based steps are enabled
 
 ### Environment Variables
 
@@ -73,9 +77,10 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 ### Typical Workflow
 
 1. Write a short project concept in `project.txt` (or another file you reference).
-2. Run the `assembly` goal.
-3. Review the updated `pom.xml` and any generated/modified project files.
-4. Keep what you want (edit as needed) and commit the changes.
+2. (Optional) Provide bindex metadata such as `bindex.json`.
+3. Run the `assembly` goal.
+4. Review the updated `pom.xml` and any generated/modified project files.
+5. Keep what you want (edit as needed) and commit the changes.
 
 ## Configuration
 

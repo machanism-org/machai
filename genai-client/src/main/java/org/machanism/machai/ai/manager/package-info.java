@@ -24,37 +24,47 @@
  *          methods, and fields, adhering to established best practices.
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
- * 
- * -  Escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc.
+ 
  */
 
 /**
- * Provider selection, instantiation, and optional system tool integration for MachAI GenAI clients.
+ * Provider discovery and tool integration for MachAI GenAI clients.
  *
  * <p>
- * The central entry point is {@link org.machanism.machai.ai.manager.GenAIProviderManager}, which resolves a
- * concrete {@link org.machanism.machai.ai.manager.GenAIProvider} implementation from a string identifier.
- * Identifiers are typically of the form {@code Provider:Model} (for example {@code OpenAI:gpt-4o-mini}).
- * If the provider portion is omitted, the manager falls back to a default provider.
- *
- * <p>
- * This package also provides optional, opt-in integration points for exposing controlled access to local system
- * capabilities as provider "tools" (for example, filesystem access or command execution) via:
+ * This package defines the {@link org.machanism.machai.ai.manager.GenAIProvider} abstraction and helper utilities
+ * for:
  * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} for reading, writing, and listing filesystem content</li>
- *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} for executing shell commands from a working directory</li>
- *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} as a convenience wrapper that installs both tool sets</li>
+ *   <li>resolving a concrete provider implementation from a {@code Provider:Model} identifier string</li>
+ *   <li>optionally augmenting providers with tool functions for controlled local file-system access and command execution</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Provider resolution</h2>
+ * {@link org.machanism.machai.ai.manager.GenAIProviderManager#getProvider(String)} resolves the provider portion
+ * of an identifier in one of two ways:
+ * <ul>
+ *   <li>If the provider string contains a dot ({@code .}), it is treated as a fully qualified class name and loaded directly.</li>
+ *   <li>Otherwise, it is mapped to {@code org.machanism.machai.ai.provider.<provider-lowercase>.<Provider>Provider}.</li>
+ * </ul>
+ * After instantiation, the resolved provider receives the model portion via
+ * {@link org.machanism.machai.ai.manager.GenAIProvider#model(String)}.
+ *
+ * <h2>Tool functions</h2>
+ * Tool installers in this package register runtime functions using
+ * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}:
+ * <ul>
+ *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools}: read/write files and list directories relative to the provider working directory</li>
+ *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools}: execute shell commands in the provider working directory</li>
+ *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools}: convenience wrapper that installs both tool sets</li>
+ * </ul>
+ *
+ * <h2>Example</h2>
  * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
  * provider.instructions("Be concise.");
  * provider.prompt("Explain the CAP theorem in one paragraph.");
  *
- * // Optionally expose additional tools to the provider
- * SystemFunctionTools tools = new SystemFunctionTools();
- * tools.applyTools(provider);
+ * // Optional: expose local tools to the provider
+ * new SystemFunctionTools().applyTools(provider);
  *
  * String response = provider.perform();
  * provider.close();
