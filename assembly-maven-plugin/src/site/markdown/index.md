@@ -27,19 +27,19 @@ Page Structure:
 
 ## Introduction
 
-Assembly Maven Plugin automates “assembly-style” updates to a local Maven project in the Machanism ecosystem.
+Assembly Maven Plugin applies “assembly-style” updates to a local Maven project in the Machanism ecosystem.
 
-You provide a short project concept (for example, `project.txt`) and run the `assembly` goal. The plugin applies the concept and produces concrete, reviewable changes in your working tree—such as updates to `pom.xml` and related project files.
+Write a short project concept (for example, `project.txt`) and run the `assembly` goal. The plugin uses the concept (and optionally Machanism bindex metadata such as `bindex.json`) to propose and apply concrete, reviewable changes to your working tree—such as updates to `pom.xml` and related project files.
 
 Benefits:
 
 - Speeds up project bootstrapping and evolution by automating repetitive setup.
-- Can use Machanism bindex metadata (for example, `bindex.json`) to guide dependency selection.
+- Can use bindex metadata to guide dependency selection.
 - Keeps humans in control by writing changes locally for review before commit.
 
 ## Overview
 
-Use this plugin when you want to generate or evolve a Maven project by applying structured updates locally, instead of performing repetitive manual configuration.
+Use this plugin to generate or evolve a Maven project by applying structured updates locally, instead of doing repetitive manual configuration.
 
 Value proposition:
 
@@ -87,12 +87,12 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 
 Common parameters:
 
-| Parameter              | Description                                  | Default       |
-|------------------------|----------------------------------------------|---------------|
-| `assembly.prompt.file` | Path to the project concept file             | `project.txt` |
-| `assembly.genai`       | GenAI model used for assembly tasks          | (plugin value) |
-| `pick.genai`           | Model used for library selection             | (plugin value) |
-| `assembly.score`       | Minimum confidence score for recommendations | `0.80`        |
+| Parameter              | Description                                  | Default        |
+|------------------------|----------------------------------------------|----------------|
+| `assembly.prompt.file` | Path to the project concept file             | `project.txt`  |
+| `assembly.genai`       | GenAI model used for assembly tasks          | plugin-defined |
+| `pick.genai`           | Model used for library selection             | plugin-defined |
+| `assembly.score`       | Minimum confidence score for recommendations | `0.80`         |
 
 ### Example
 

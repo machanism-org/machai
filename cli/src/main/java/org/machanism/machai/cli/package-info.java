@@ -1,11 +1,10 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package provides {@code @ShellComponent}-annotated command classes that expose Machai functionality
- * through an interactive shell and through non-interactive invocation.
- * Commands coordinate GenAI providers and Machai services to perform project-centric tasks such as selecting
- * libraries ("bricks"), assembling projects, generating and registering bindex metadata, scanning
- * sources/documents, and cleaning temporary output.
+ * <p>This package contains {@code @ShellComponent}-annotated command classes that expose Machai functionality
+ * through an interactive shell as well as non-interactive invocation. Commands coordinate GenAI providers and
+ * Machai services to perform project-centric tasks such as selecting libraries ("bricks"), assembling projects,
+ * generating and registering bindex metadata, scanning sources/documents, and cleaning temporary output.
  *
  * <h2>Command groups</h2>
  * <ul>
@@ -78,5 +77,5 @@ package org.machanism.machai.cli;
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */

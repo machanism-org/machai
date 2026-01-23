@@ -21,17 +21,22 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# Bindex Core
+# bindex-core
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-core.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
 
 ## Introduction
 
-Bindex Core provides core functionality for **bindex** metadata management, including generation, registration, library selection, and project assembly. It enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.
+Bindex Core is the foundational library for producing and consuming **bindex** metadata in the Machanism ecosystem. It provides a consistent model and utility APIs to generate, publish, discover, and assemble metadata so build tools and integrations can automate library discovery and assembly decisions.
 
 ## Overview
 
-Bindex Core is the foundational library for producing and consuming **bindex** metadata in the Machanism ecosystem. It provides a consistent model and utilities so tools and build integrations can automate library discovery, metadata publication, and assembly decisions.
+Bindex Core supplies the core data model and supporting utilities used by other Machanism components to work with bindex metadata. It is typically used indirectly (via plugins/tools) or directly by applications that need to:
+
+- generate bindex metadata for artifacts,
+- register and publish that metadata for downstream discovery,
+- read, validate, and merge metadata from multiple modules and dependencies,
+- drive library selection and assembly workflows.
 
 ## Key Features
 
@@ -53,7 +58,7 @@ Bindex Core is the foundational library for producing and consuming **bindex** m
 Bindex Core does not require environment variables by default.
 
 | Variable | Required | Description | Default |
-|---|---:|---|---|
+|---|:---:|---|---|
 | (none) | No | No environment variables are required for the core library. | N/A |
 
 ### Basic Usage

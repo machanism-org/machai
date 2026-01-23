@@ -113,7 +113,7 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 | `-t` | `--threads` | No | Enable multi-threaded processing. | Off |
 | `-d` | `--dir` | Yes | Path to the project directory (project root). | `dir` from `gw.properties`, otherwise current working directory |
 | `-g` | `--genai` | Yes | GenAI service provider and model (for example, `OpenAI:gpt-5.1`). | `genai` from `gw.properties`, otherwise `OpenAI:gpt-5-mini` |
-| `-i` | `--instructions` | Yes | Additional file processing instructions (inline text or a path to a file containing the instructions). If the value is an existing file path, its contents are used. | None |
+| `-i` | `--instructions` | Yes | Additional file processing instructions. Provide either instruction text directly or a path to an existing file containing the instructions (file contents will be used). | None |
 
 **Positional arguments**: zero or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
 

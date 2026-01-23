@@ -1,16 +1,19 @@
 /**
  * Provides a non-operational ({@code none}) implementation of the generative-AI provider SPI.
  *
- * <p>The primary type in this package is {@link org.machanism.machai.ai.provider.none.NoneProvider}, an
+ * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
  * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for environments where no external
  * LLM integration should be used (for example, security/compliance restrictions, offline execution, or tests).
  *
- * <h2>Key characteristics</h2>
+ * <h2>Behavior</h2>
  * <ul>
  *   <li>No network calls are performed and no external AI service is contacted.</li>
- *   <li>Prompt text passed to {@code prompt(String)} is accumulated in memory.</li>
- *   <li>{@code perform()} optionally writes instructions and prompts to local files when
- *       {@code inputsLog(File)} has been configured, then returns {@code null}.</li>
+ *   <li>Prompt text passed to {@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} is accumulated
+ *       in memory.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} optionally writes the configured
+ *       instructions and accumulated prompts to local files when
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider#inputsLog(java.io.File)} has been set; it then clears
+ *       the internal buffer and returns {@code null}.</li>
  *   <li>Capabilities that require a real backend (for example, embeddings) are unsupported and will throw an
  *       exception when invoked.</li>
  * </ul>

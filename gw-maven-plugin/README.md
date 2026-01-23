@@ -6,7 +6,6 @@
    - Use `src/site/markdown/index.md` as the primary source of information for generating the project description. Summarize and adapt its content as needed for clarity and conciseness.
    - Add `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])` after the title as a new paragraph. [groupId] and [artifactId] need to use from pom.xml.
 2. **Installation Instructions:**  
-   - The project uses SVN repository.	
    - Describe how to checkout the repository and build the project using Maven.
    - Include prerequisites such as Java version and build tools.
 3. **Usage:**  
@@ -26,7 +25,7 @@
 
 ## Project Title and Overview
 
-GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, keeping docs consistent, current, and aligned with the in-repo source of truth.
+GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to assemble, generate, and update Maven Site Markdown pages, keeping documentation consistent and aligned with the codebase.
 
 ## Installation Instructions
 
@@ -34,13 +33,12 @@ GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin 
 
 - Java 9+
 - Maven 3+
-- SVN client (`svn`) for repository checkout
 
-### Checkout (SVN)
+### Checkout
 
 ```sh
-svn checkout <svn-repo-url> gw-maven-plugin
-cd gw-maven-plugin
+git clone https://github.com/machanism-org/machai.git
+cd machai/gw-maven-plugin
 ```
 
 ### Build

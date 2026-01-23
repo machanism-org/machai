@@ -28,29 +28,23 @@
 /**
  * Provider resolution and tool-function wiring for GenAI integrations.
  *
- * <p>This package defines:
- * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider}, the core abstraction for chat-model providers
- *       that can accept prompts/instructions, attach files, compute embeddings, register tool functions, and
- *       execute a request via {@link org.machanism.machai.ai.manager.GenAIProvider#perform()}.</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProviderManager}, a reflection-based factory that resolves
- *       and instantiates a provider from an identifier typically formatted as {@code Provider:Model}, then
- *       applies the selected model.</li>
- * </ul>
+ * <p>This package defines the provider SPI ({@link org.machanism.machai.ai.manager.GenAIProvider}) and a
+ * reflection-based resolver/factory ({@link org.machanism.machai.ai.manager.GenAIProviderManager}) that
+ * instantiates a provider from a {@code Provider:Model} identifier.
  *
- * <p>The package also provides opt-in tool installers that register host-controlled local capabilities with a
- * provider via
+ * <p>It also supplies a small set of host-side tools that can be registered with a provider via
  * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}:
+ *
  * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} for reading, writing, and listing files
- *       relative to the provider working directory</li>
- *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} for executing shell commands from the
- *       working directory</li>
- *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} as a convenience wrapper that installs both
- *       file and command tools</li>
+ *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} for reading/writing/listing files relative to a
+ *       provider-controlled working directory</li>
+ *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} for executing shell commands in the working
+ *       directory (subject to the caller/provider’s safety policy)</li>
+ *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} as a convenience installer for both file and
+ *       command tools</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Example</h2>
  * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
  * new SystemFunctionTools().applyTools(provider);

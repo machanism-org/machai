@@ -2,28 +2,30 @@
  * Entry points for generating, assembling, and registering a Bindex (project index) used by Machanism-based AI
  * workflows.
  *
- * <p>This package coordinates the end-to-end lifecycle of producing a {@code bindex.json} document for a project and
- * (optionally) registering that document in a backing store for later semantic retrieval.
+ * <p>The {@code org.machanism.machai.bindex} package coordinates the end-to-end lifecycle of producing a
+ * {@code bindex.json} document for a project and (optionally) registering that document in a backing store for later
+ * semantic retrieval.
  *
- * <h2>Responsibilities</h2>
+ * <h2>Key types</h2>
  * <ul>
- *   <li><strong>Build</strong>: choose an appropriate {@link org.machanism.machai.bindex.builder.BindexBuilder}
- *       implementation for a {@link org.machanism.machai.project.layout.ProjectLayout} via
- *       {@link org.machanism.machai.bindex.BindexBuilderFactory}.</li>
- *   <li><strong>Create/update</strong>: generate or update {@code bindex.json} on disk via
- *       {@link org.machanism.machai.bindex.BindexCreator}.</li>
- *   <li><strong>Assemble prompts/inputs</strong>: compose LLM inputs that incorporate one or more Bindex documents via
- *       {@link org.machanism.machai.bindex.ApplicationAssembly}.</li>
- *   <li><strong>Register/pick</strong>: register Bindex documents and perform semantic lookup via
- *       {@link org.machanism.machai.bindex.BindexRegister} and {@link org.machanism.machai.bindex.Picker}.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexBuilderFactory}: selects a
+ *       {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation appropriate for a
+ *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexCreator}: generates or updates {@code bindex.json} on disk for a
+ *       project folder.</li>
+ *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: composes LLM inputs that incorporate one or more
+ *       Bindex documents.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers Bindex documents in a vector store or similar
+ *       backing service for later semantic lookup.</li>
+ *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic selection of relevant Bindex documents.</li>
  * </ul>
  *
  * <h2>Typical workflow</h2>
  * <ol>
- *   <li>Create or choose a {@link org.machanism.machai.project.layout.ProjectLayout} describing the project.</li>
+ *   <li>Create or obtain a {@link org.machanism.machai.project.layout.ProjectLayout} describing the target project.</li>
  *   <li>Generate or update {@code bindex.json} with {@link org.machanism.machai.bindex.BindexCreator}.</li>
  *   <li>Optionally register the resulting Bindex with {@link org.machanism.machai.bindex.BindexRegister}.</li>
- *   <li>Optionally run semantic selection of relevant Bindexes with {@link org.machanism.machai.bindex.Picker}.</li>
+ *   <li>Optionally run semantic selection with {@link org.machanism.machai.bindex.Picker}.</li>
  * </ol>
  *
  * <h2>Example</h2>
@@ -68,5 +70,5 @@ package org.machanism.machai.bindex;
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */

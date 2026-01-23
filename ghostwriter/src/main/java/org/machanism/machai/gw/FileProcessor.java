@@ -33,8 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported
- * files, and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported files,
+ * and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
  * This processor delegates file-specific guidance extraction to
@@ -275,7 +275,6 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
-
 		File projectDir = projectLayout.getProjectDir();
 		String guidance = parseFile(projectDir, file);
 		if (guidance == null) {
@@ -290,7 +289,6 @@ public class FileProcessor extends ProjectProcessor {
 
 		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
 		provider.instructions(effectiveInstructions);
-
 		provider.prompt(promptBundle.getString("docs_processing_instructions"));
 
 		String projectInfo = getProjectStructureDescription(projectLayout);
@@ -298,8 +296,9 @@ public class FileProcessor extends ProjectProcessor {
 		provider.prompt(guidance);
 		provider.prompt(promptBundle.getString("output_format"));
 
-		if (instructions != null) {
-			provider.prompt(instructions);
+		String extraInstructions = StringUtils.trimToNull(this.instructions);
+		if (extraInstructions != null) {
+			provider.prompt(extraInstructions);
 		}
 
 		if (isLogInputs()) {
@@ -330,7 +329,7 @@ public class FileProcessor extends ProjectProcessor {
 		content.add(getDirInfoLine(projectLayout.getDocuments(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getModules(), projectDir));
 
-		return MessageFormat.format(promptBundle.getString("project_information"), content.toArray());
+		return MessageFormat.format(promptBundle.getString("project_information"), content.toArray(new String[0]));
 	}
 
 	private String getDirInfoLine(List<String> sources, File projectDir) {

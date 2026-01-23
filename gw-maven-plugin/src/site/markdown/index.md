@@ -70,7 +70,7 @@ Add the plugin to your `pom.xml`:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>${project.version}</version>
+  <version>REPLACE_WITH_LATEST_VERSION</version>
 </plugin>
 ```
 
@@ -102,7 +102,7 @@ Example configuration:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>${project.version}</version>
+  <version>REPLACE_WITH_LATEST_VERSION</version>
   <configuration>
     <genai>CodeMie:gpt-5-2-2025-12-11</genai>
     <serverId>CodeMie</serverId>
@@ -113,7 +113,7 @@ Example configuration:
 Example command line with custom parameters:
 
 ```sh
-mvn gw:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11
+mvn gw:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
 ```
 
 ## Resources

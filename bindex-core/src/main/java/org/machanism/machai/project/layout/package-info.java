@@ -1,28 +1,29 @@
 /**
  * Detects and describes a project's on-disk structure.
  *
- * <p>This package defines the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and concrete
- * implementations that infer a project's directory layout (sources, tests, documents, and optional modules) from a
- * project root.
+ * <p>The types in this package provide a {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and a
+ * set of concrete implementations that infer a project's directory layout (sources, tests, documents, and optional
+ * modules) from a project root directory.
  *
- * <p>Typical usage starts by selecting an implementation based on the project's build or configuration descriptor
- * (for example {@code pom.xml}, {@code package.json}, or {@code pyproject.toml}) and then asking the layout for
- * well-known directory groups.
- *
- * <h2>Implementations</h2>
+ * <p>Layout detection is typically driven by a build/configuration descriptor found in the project root:
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Maven projects detected by {@code pom.xml}.
- *       Uses {@link org.machanism.machai.project.layout.PomReader} when POM parsing is needed.</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - JavaScript/TypeScript projects detected by
- *       {@code package.json}; can discover workspace modules.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Python projects detected by
- *       {@code pyproject.toml} and basic project conventions.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - Fallback strategy that scans direct child
- *       directories and treats those with a detectable non-default layout as modules.</li>
+ *   <li>Maven projects via {@code pom.xml} ({@link org.machanism.machai.project.layout.MavenProjectLayout})</li>
+ *   <li>JavaScript/TypeScript projects via {@code package.json}
+ *       ({@link org.machanism.machai.project.layout.JScriptProjectLayout})</li>
+ *   <li>Python projects via {@code pyproject.toml}
+ *       ({@link org.machanism.machai.project.layout.PythonProjectLayout})</li>
+ *   <li>Fallback scanning when no known descriptor is found
+ *       ({@link org.machanism.machai.project.layout.DefaultProjectLayout})</li>
  * </ul>
  *
+ * <h2>Modules</h2>
+ * <p>Some layouts can represent a multi-module/workspace project. For example, Maven modules can be obtained from the
+ * POM model, while JavaScript/TypeScript workspaces can be discovered from the {@code workspaces} key in
+ * {@code package.json}.
+ *
  * <h2>Filesystem traversal</h2>
- * <p>When scanning directories, implementations should exclude common VCS, vendor, and build output directories via
+ * <p>When scanning the filesystem (for example, to locate workspace modules), implementations should avoid traversing
+ * common VCS, vendor, and build-output directories using
  * {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  *
  * <h2>Example</h2>

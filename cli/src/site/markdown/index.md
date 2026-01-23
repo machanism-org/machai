@@ -66,6 +66,8 @@ Machai CLI is a Spring Boot + Spring Shell application that helps you:
 
 ### Basic Usage
 
+Run the packaged CLI:
+
 ```bash
 java -jar machai-cli.jar
 ```

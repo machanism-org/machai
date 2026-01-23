@@ -1,22 +1,20 @@
 /**
- * Ghostwriter command-line tooling and orchestration for scanning a workspace and preparing AI-ready prompt inputs.
+ * Command-line tooling and orchestration for scanning a workspace and preparing AI-ready prompt inputs.
  *
- * <p>This package provides the command-line entry point and a processing pipeline that typically:
+ * <p>This package contains the CLI entry point and the scanning/processing pipeline used to:
  *
  * <ul>
- *   <li>Walks a project directory (and optionally its modules) while honoring layout exclusions.</li>
- *   <li>Delegates file-type-specific extraction to reviewer implementations.</li>
- *   <li>Aggregates extracted directives (for example, blocks marked with {@code @guidance:}) from supported files and
- *       produces prompt-input artifacts.</li>
- *   <li>Invokes a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate or review documentation
- *       content.</li>
+ *   <li>Walk a project directory (and optionally its modules) while honoring configured exclusions.</li>
+ *   <li>Delegate file-type-specific extraction to reviewers/processors.</li>
+ *   <li>Aggregate extracted directives from supported files and generate prompt-input artifacts.</li>
+ *   <li>Invoke a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate or review content.</li>
  * </ul>
  *
  * <p>Common entry points:
  *
  * <ul>
- *   <li>{@link org.machanism.machai.gw.Ghostwriter} CLI entry point.</li>
- *   <li>{@link org.machanism.machai.gw.FileProcessor} scanning/orchestration engine.</li>
+ *   <li>{@link org.machanism.machai.gw.Ghostwriter} – CLI entry point.</li>
+ *   <li>{@link org.machanism.machai.gw.FileProcessor} – scanning/orchestration engine.</li>
  * </ul>
  *
  * <p>Example:
@@ -60,5 +58,5 @@ package org.machanism.machai.gw;
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */

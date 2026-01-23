@@ -70,6 +70,7 @@ This design provides:
 | `OPENAI_BASE_URL` | No | OpenAI | Override API base URL (useful for OpenAI-compatible gateways). |
 | `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (when using `CodeMieProvider`). |
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (when using `CodeMieProvider`). |
+| `recipes` | No | Web | Path (relative to `workingDir`) to Anteater recipes/config; defaults to `genai-client/src/main/resources`. |
 
 ### Basic Usage
 
@@ -126,29 +127,36 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
+`OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
-Capabilities include:
+It supports:
 
-- Sending prompts and receiving responses using OpenAI chat/response models.
-- Managing files for use in OpenAI workflows.
-- Performing LLM tasks such as text generation, summarization, and question answering.
-- Creating and using vector embeddings for semantic search and similarity analysis.
-- Optional request input logging via `inputsLog(File)`.
+- Sending prompts and receiving responses from OpenAI response/chat models.
+- Uploading files and attaching them as input context.
+- Tool (function) calling via registered Java handlers.
+- Generating vector embeddings.
 
-Configuration is read from environment variables and/or Java system properties:
+**Environment variables**
+
+The client reads configuration from environment variables (or corresponding Java system properties). You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using the CodeMie OpenAI-compatible endpoint via this provider:
+**Using the CodeMie API via OpenAI-compatible endpoint**
 
 - Set `OPENAI_API_KEY` to an access token.
 - Set `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
-Thread safety: this implementation is NOT thread-safe.
+**Usage example**
+
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+```
+
+**Thread safety**: this implementation is NOT thread-safe.
 
 ### CodeMie
 
@@ -161,41 +169,55 @@ How it works:
   - `OPENAI_API_KEY` is set to the retrieved token.
   - `OPENAI_BASE_URL` is set to the CodeMie API base URL.
 
-Configuration:
+**Configuration**
 
-- `GENAI_USERNAME` (required; Java system property)
-- `GENAI_PASSWORD` (required; Java system property)
+This provider reads credentials from Java system properties:
+
+- `GENAI_USERNAME` (required; system property)
+- `GENAI_PASSWORD` (required; system property)
 
 Thread safety follows `OpenAIProvider`.
 
 ### None
 
-`NoneProvider` is a `GenAIProvider` implementation used to disable generative AI integrations and optionally log input requests locally when an external provider is not required or available.
+`NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and optionally log input requests locally when an external provider is not required or available.
 
-Purpose and typical use cases:
+**Purpose**
 
-- Disabling GenAI features for security/compliance.
-- Providing fallback behavior when no provider is configured.
+Provides a stub implementation that stores requests in input files (when `inputsLog(...)` is configured). No calls are made to external AI services or large language models.
+
+**Typical use cases**
+
+- Disabling GenAI features for security or compliance.
+- Implementing fallback behavior when no provider is configured.
 - Logging requests for manual review or later processing.
-- Supporting test environments without external connectivity.
+- Running tests without external connectivity.
 
-Behavior notes:
+**Notes**
 
-- No calls are made to external AI services.
-- When `inputsLog(...)` is configured, `perform()` writes accumulated prompts to the configured file and, if instructions were set, writes them to `instructions.txt` in the same directory.
-- Operations that require a real provider (for example, embeddings generation) throw an exception.
+- Operations requiring a real GenAI service (for example, embeddings generation) throw an exception.
 - Prompts and instructions are cleared after `perform()`.
 
 ### Web
 
 `WebProvider` obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `Submit Prompt` recipe (via `perform()`).
+Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider:
 
-Thread safety and lifecycle:
+- Stores prompts locally (inherited from `NoneProvider`).
+- Loads an Anteater workspace configuration via `model(String)`.
+- Initializes the workspace for a given project directory via `setWorkingDir(File)`.
+- Submits prompts by running the `Submit Prompt` recipe via `perform()`.
+
+**Configuration**
+
+- `model(String)` must be called before `setWorkingDir(File)`.
+- The `recipes` system property can override the recipes/config location (default: `genai-client/src/main/resources`).
+
+**Thread safety and lifecycle**
 
 - This provider is not thread-safe.
-- Workspace state is stored in static fields; the working directory and configuration cannot be changed once initialized in the current JVM instance.
+- Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 
 ## Resources

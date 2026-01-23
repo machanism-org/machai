@@ -81,8 +81,6 @@ mvn org.machanism.machai:bindex-maven-plugin:register
 
 ## Configuration
 
-### Common Parameters
-
 | Parameter | Description | Default |
 |---|---|---|
 | `update` | Whether to update an existing `bindex.json` if present. | `true` |

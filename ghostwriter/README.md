@@ -19,7 +19,7 @@
 
 # Ghostwriter
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
 ## Project Overview
 
@@ -27,15 +27,7 @@ Ghostwriter is a CLI documentation engine that automates and standardizes projec
 
 ## Introduction
 
-Machai Ghostwriter scans a project directory and processes documentation-related files according to embedded guidance and any additional instructions you provide.
-
-You can optionally specify:
-
-- A GenAI provider/model (for example, `OpenAI:gpt-5.1`).
-- Additional processing instructions (inline or loaded from a file).
-- One or more directories to include in the scan.
-
-Learn more about guided file processing: https://machanism.org/guided-file-processing/index.html
+Machai Ghostwriter is a CLI documentation engine that automates and standardizes project documentation and code annotation. Using guided file processing with embedded `@guidance` blocks, it helps teams keep documentation consistent, reviewable, and up to date across multi-module repositories. It’s designed to work well in scripts and CI so documentation changes can be generated and committed as part of your normal workflow.
 
 ## Usage
 

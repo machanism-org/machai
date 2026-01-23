@@ -43,10 +43,6 @@
  *   <li>{@link org.machanism.machai.maven.Clean} removes plugin-generated temporary artifacts.</li>
  * </ul>
  *
- * <p>
- * Common behavior shared by the goals is implemented in {@link org.machanism.machai.maven.AbstractBindexMojo}.
- * </p>
- *
  * <h2>Command-line usage</h2>
  * <pre>
  * mvn org.machanism.machai:bindex-maven-plugin:create

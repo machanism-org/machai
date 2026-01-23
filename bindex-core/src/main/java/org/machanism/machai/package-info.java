@@ -26,9 +26,10 @@
  */
 
 /**
- * Root package for the Machanism AI core library.
+ * Top-level API package for the Machai core library.
  *
- * <p>This package defines the top-level namespace for the Machai core API. It contains the primary
- * abstractions and entry points that other {@code org.machanism.machai.*} packages build upon.
+ * <p>This package is the root namespace for the Machai core modules. It typically contains
+ * foundational types and shared abstractions that are consumed by subpackages under
+ * {@code org.machanism.machai}.
  */
 package org.machanism.machai;

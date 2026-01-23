@@ -22,27 +22,33 @@
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
+ *          and `&gt;` as `&lt;` 
  *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
 
 /**
- * Provides a {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that obtains model responses
- * by automating a target GenAI service through its web user interface.
+ * Web-automation backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementation.
  *
- * <p>Automation is executed via <a href="https://ganteater.com">Anteater</a> workspace recipes. The primary
- * entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
+ * <p>This package integrates with <a href="https://ganteater.com">Anteater</a> to drive a target GenAI service
+ * via its web UI. Automation is expressed as Anteater workspace recipes and executed by
+ * {@link org.machanism.machai.ai.provider.web.WebProvider}.
  *
+ * <h2>Typical workflow</h2>
+ * <ol>
+ *   <li>Select an Anteater configuration using {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
+ *   <li>Initialize the workspace with a project directory using
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}.</li>
+ *   <li>Accumulate prompts using the inherited prompt API and submit them by calling
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}, which executes the
+ *       {@code "Submit Prompt"} recipe.</li>
+ * </ol>
+ *
+ * <h2>Lifecycle and constraints</h2>
  * <ul>
- *   <li>selects an Anteater workspace configuration via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)},</li>
- *   <li>initializes the workspace for a project directory via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}, and</li>
- *   <li>submits accumulated prompts by executing the {@code "Submit Prompt"} recipe via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}.</li>
+ *   <li>Workspace state is stored in static fields; configuration and working directory are intended to be set
+ *       once per JVM.</li>
+ *   <li>Changing the configuration or working directory after initialization results in an error.</li>
+ *   <li>Call {@link org.machanism.machai.ai.provider.web.WebProvider#close()} to release workspace resources.</li>
  * </ul>
- *
- * <p><strong>Lifecycle note:</strong> the underlying Anteater workspace is stored in static state and is
- * intended to be initialized once per JVM; attempts to change the working directory or configuration after
- * initialization result in an error.
  */
 package org.machanism.machai.ai.provider.web;

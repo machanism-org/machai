@@ -1,25 +1,31 @@
 /**
- * Top-level public API for the Machanism AI generative AI client.
+ * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
- * <p>This package contains provider-agnostic abstractions for configuring and interacting with one or more
- * generative AI providers. Application code should generally depend on types in this package, while
- * provider-specific details are isolated to sub-packages.
+ * <p>This package contains the stable abstractions that application code should depend on when configuring and
+ * using the Machanism GenAI client. Provider-specific integrations (for example, OpenAI or a remote/web
+ * orchestrator) live in sub-packages so implementations can evolve independently of the core API.
  *
- * <h2>Key concepts</h2>
+ * <h2>How to use this package</h2>
+ * <p>Applications typically:
+ * <ol>
+ *   <li>Select or configure a provider implementation (often via {@code org.machanism.machai.ai.manager}).</li>
+ *   <li>Interact with provider-neutral types defined in this package and its immediate sub-packages.</li>
+ *   <li>Swap providers without changing application logic.</li>
+ * </ol>
+ *
+ * <h2>Design principles</h2>
  * <ul>
- *   <li><b>Provider selection</b> – choose a concrete provider implementation (for example, OpenAI, a remote web
- *       orchestrator, or a no-op provider) that backs the client API.</li>
- *   <li><b>Provider-agnostic API</b> – keep application integrations stable while swapping provider implementations.</li>
+ *   <li><b>Provider neutrality</b>: keep application integrations stable while changing provider implementations.</li>
+ *   <li><b>Separation of concerns</b>: isolate authentication, transport, and provider configuration details.</li>
+ *   <li><b>Composability</b>: support multiple providers and a no-op provider for disabled environments.</li>
  * </ul>
  *
- * <h2>Sub-packages</h2>
+ * <h2>Related sub-packages</h2>
  * <ul>
- *   <li>{@code org.machanism.machai.ai.manager} – Service provider interface (SPI) for provider implementations and
- *       provider lifecycle/management utilities.</li>
- *   <li>{@code org.machanism.machai.ai.provider.none} – No-op provider implementation (disables GenAI while
- *       preserving API compatibility).</li>
+ *   <li>{@code org.machanism.machai.ai.manager} – provider discovery, lifecycle, and management utilities.</li>
+ *   <li>{@code org.machanism.machai.ai.provider.none} – no-op provider (disables GenAI while preserving API compatibility).</li>
  *   <li>{@code org.machanism.machai.ai.provider.openai} – OpenAI provider integration.</li>
- *   <li>{@code org.machanism.machai.ai.provider.web} – Provider implementation backed by a remote/web orchestrator.</li>
+ *   <li>{@code org.machanism.machai.ai.provider.web} – provider backed by a remote/web orchestrator.</li>
  * </ul>
  */
 package org.machanism.machai.ai;

@@ -42,24 +42,18 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API and serves as a concrete implementation of `GenAIProvider`.
+`OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
-Capabilities include:
+It supports sending prompts and receiving responses from OpenAI chat models, managing files for use in OpenAI workflows, performing common LLM tasks (text generation, summarization, Q&A), and creating vector embeddings for semantic search and similarity analysis.
 
-- Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in OpenAI workflows.
-- Common LLM tasks such as text generation, summarization, and question answering.
-- Creating and using vector embeddings for semantic search and similarity analysis.
-- Tool/function calling, where registered tools are executed locally and the outputs are fed back into the model.
-
-Configuration is read from environment variables and/or Java system properties:
+Environment variables (read automatically by the OpenAI client; you must set at least `OPENAI_API_KEY`):
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using the CodeMie OpenAI-compatible endpoint via this provider:
+Using an OpenAI-compatible endpoint (for example, CodeMie) with this provider:
 
 - Set `OPENAI_API_KEY` to an access token.
 - Set `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`.
@@ -76,7 +70,7 @@ Thread safety: this implementation is NOT thread-safe.
 
 `CodeMieProvider` is an `OpenAIProvider` specialization that targets the CodeMie OpenAI-compatible endpoint.
 
-Before creating the underlying OpenAI client it authenticates against a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the OpenAI client via Java system properties:
+Before creating the underlying OpenAI client, it authenticates against a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the OpenAI client via Java system properties:
 
 - `OPENAI_API_KEY` is set to the retrieved access token
 - `OPENAI_BASE_URL` is set to `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -92,34 +86,31 @@ Thread safety follows `OpenAIProvider`.
 
 `NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and optionally log input requests locally when an external AI provider is not required or available.
 
-Purpose and typical use cases:
+It provides a stub implementation that stores requests in input files (when `inputsLog(...)` is configured). No calls are made to any external AI services or LLMs.
 
-- Disabling GenAI features for security/compliance.
-- Providing fallback behavior when no provider is configured.
+Typical use cases:
+
+- Disabling generative AI features for security or compliance.
+- Implementing fallback logic when no provider is configured.
 - Logging requests for manual review or later processing.
-- Supporting test environments without external connectivity.
+- Running tests/environments without external connectivity.
 
 Behavior notes:
 
-- No calls are made to external AI services.
-- When `inputsLog(...)` is configured, `perform()` writes accumulated prompts to the configured file and, if instructions were set, writes them to `instructions.txt` in the same directory.
-- Operations that require a real provider (for example, embeddings generation) throw an exception.
-- Prompts and instructions are cleared after `perform()`.
+- Operations requiring GenAI services (for example, embeddings generation) throw an exception.
+- All prompts and instructions are cleared after `perform()`.
+- If instructions were set and `inputsLog(...)` is configured, `perform()` writes them to `instructions.txt` alongside the input log.
 
 ### Web
 
 `WebProvider` obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes:
-
-- `model(String)` sets the Anteater configuration name to load (must be set before `setWorkingDir(...)`).
-- `setWorkingDir(File)` initializes the workspace for a given project directory. It is intended to be called once per JVM instance; changing the directory later is rejected.
-- `perform()` runs the `"Submit Prompt"` recipe, passing prompts via the `INPUTS` variable and returning the recipe-produced `result`.
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (`model(String)`), initializes the workspace with a project directory (`setWorkingDir(File)`), then submits the current prompt list by running the `"Submit Prompt"` recipe (`perform()`).
 
 Thread safety and lifecycle:
 
 - This provider is not thread-safe.
-- Workspace state is stored in static fields; the working directory and configuration cannot be changed once initialized in the current JVM instance.
+- Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 
 <!-- @guidance:
