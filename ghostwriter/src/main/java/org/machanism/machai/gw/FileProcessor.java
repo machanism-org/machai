@@ -33,14 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported
- * files, and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported files,
+ * and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to
- * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
- * every supported file it finds, it builds a prompt using templates from the
- * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
+ * This processor delegates file-specific guidance extraction to {@link Reviewer}
+ * implementations discovered via {@link ServiceLoader}. For every supported file
+ * it finds, it builds a prompt using templates from the {@code document-prompts}
+ * resource bundle and invokes a {@link GenAIProvider}.
  * </p>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -214,7 +214,7 @@ public class FileProcessor extends ProjectProcessor {
 			}
 
 			if (child.isDirectory()) {
-				processProjectDir(projectLayout, child);
+				processProjectDir(child);
 			} else {
 				logIfNotBlank(processFile(projectLayout, child));
 			}
@@ -258,11 +258,12 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
-	private void processProjectDir(ProjectLayout projectLayout, File scanDir) {
+	private void processProjectDir(File scanDir) {
 		try {
 			List<File> files = findFiles(scanDir);
+			ProjectLayout layout = getProjectLayout(scanDir);
 			for (File file : files) {
-				logIfNotBlank(processFile(projectLayout, file));
+				logIfNotBlank(processFile(layout, file));
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
@@ -395,6 +396,7 @@ public class FileProcessor extends ProjectProcessor {
 					"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
 		}
 		this.moduleMultiThread = moduleMultiThread;
+		logger.info("Multi-threaded processing mode enabled.");
 	}
 
 	public void setInstructions(String instructions) {

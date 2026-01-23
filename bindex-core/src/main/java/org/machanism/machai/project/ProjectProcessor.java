@@ -67,7 +67,10 @@ public abstract class ProjectProcessor {
 	 * @throws IOException If an error occurs during processing.
 	 */
 	protected void processModule(File projectDir, String module) throws IOException {
-		scanFolder(new File(projectDir, module));
+		logger.info("Starting processing of module: '{}'", module);
+		File moduleDir = new File(projectDir, module);
+		scanFolder(moduleDir);
+		logger.info("Processing of module '{}' completed successfully.", module);
 	}
 
 	/**
