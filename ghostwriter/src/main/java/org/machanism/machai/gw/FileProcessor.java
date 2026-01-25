@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -34,8 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported files,
- * and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported
+ * files, and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
  * This processor delegates file-specific guidance extraction to
@@ -208,7 +209,8 @@ public class FileProcessor extends ProjectProcessor {
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		List<String> modules = projectLayout.getModules();
 
-		File[] children = projectDir.listFiles();
+		List<File> children = findFiles(projectDir);
+
 		if (children == null) {
 			return;
 		}
@@ -255,8 +257,6 @@ public class FileProcessor extends ProjectProcessor {
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
 			List<File> files = findFiles(projectLayout.getProjectDir());
-			files.sort(Comparator.comparing(File::getName).reversed());
-			
 			for (File file : files) {
 				logIfNotBlank(processFile(projectLayout, file));
 			}
@@ -388,6 +388,11 @@ public class FileProcessor extends ProjectProcessor {
 				result.add(file);
 			}
 		}
+
+		result.sort(Comparator.comparingInt((File f) -> {
+			String path = f.getPath().replace("\\", "/");
+			return path.split("/").length;
+		}).reversed());
 		return result;
 	}
 

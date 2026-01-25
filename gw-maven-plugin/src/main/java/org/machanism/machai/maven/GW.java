@@ -145,16 +145,20 @@ public class GW extends AbstractMojo {
 			 */
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
-				MavenProjectLayout projectLayout = new MavenProjectLayout();
+				ProjectLayout projectLayout = super.getProjectLayout(projectDir);
 				projectLayout.projectDir(projectDir);
 
-				projectLayout.effectivePomRequired(false);
-				Model model = projectLayout.getModel();
-				List<MavenProject> projects = session.getAllProjects();
-				for (MavenProject mavenProject : projects) {
-					if (StringUtils.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
-						projectLayout.model(mavenProject.getModel());
-						break;
+				if (projectLayout instanceof MavenProjectLayout) {
+					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
+
+					mavenProjectLayout.effectivePomRequired(false);
+					Model model = mavenProjectLayout.getModel();
+					List<MavenProject> projects = session.getAllProjects();
+					for (MavenProject mavenProject : projects) {
+						if (StringUtils.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
+							mavenProjectLayout.model(mavenProject.getModel());
+							break;
+						}
 					}
 				}
 

@@ -19,14 +19,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 /**
  * Installs file-system tools into a {@link GenAIProvider}.
  *
- * <p>The installed tools operate relative to a working directory supplied by the provider/tool runtime.
+ * <p>
+ * The installed tools operate relative to a working directory supplied by the
+ * provider/tool runtime.
  *
  * <h2>Installed tools</h2>
  * <ul>
  * <li>{@code read_file_from_file_system} – reads a file as UTF-8 text</li>
- * <li>{@code write_file_to_file_system} – writes a file (creating parent directories as needed)</li>
- * <li>{@code list_files_in_directory} – lists immediate children of a directory</li>
- * <li>{@code get_recursive_file_list} – recursively lists all files under a directory</li>
+ * <li>{@code write_file_to_file_system} – writes a file (creating parent
+ * directories as needed)</li>
+ * <li>{@code list_files_in_directory} – lists immediate children of a
+ * directory</li>
+ * <li>{@code get_recursive_file_list} – recursively lists all files under a
+ * directory</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -49,7 +54,8 @@ public class FileFunctionTools {
 		provider.addTool("write_file_to_file_system", "Write changes to a file on the file system.", this::writeFile,
 				"file_path:string:required:The path to the file you want to write to or create.",
 				"text:string:required:The content to be written into the file (text, code, etc.).");
-		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.", this::listFiles,
+		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
+				this::listFiles,
 				"dir_path:string:optional:The path to the directory to list contents of.");
 		provider.addTool("get_recursive_file_list",
 				"List files recursively in a directory (includes files in subdirectories).", this::getRecursiveFiles,
@@ -59,7 +65,8 @@ public class FileFunctionTools {
 	/**
 	 * Lists files recursively in a directory.
 	 *
-	 * <p>Expected parameters:
+	 * <p>
+	 * Expected parameters:
 	 * <ol>
 	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
 	 * <li>{@link File} working directory</li>
@@ -87,7 +94,8 @@ public class FileFunctionTools {
 		StringBuilder content = new StringBuilder();
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
-				content.append(file.getAbsolutePath()).append("\n");
+				String relatedPath = getRelatedPath(workingDir, file, false);
+				content.append(relatedPath).append("\n");
 			}
 		} else {
 			content.append("No files found in directory.");
@@ -98,7 +106,8 @@ public class FileFunctionTools {
 	/**
 	 * Lists files in a directory.
 	 *
-	 * <p>Expected parameters:
+	 * <p>
+	 * Expected parameters:
 	 * <ol>
 	 * <li>{@link JsonNode} containing {@code dir_path}</li>
 	 * <li>{@link File} working directory</li>
@@ -117,7 +126,8 @@ public class FileFunctionTools {
 			StringBuilder content = new StringBuilder();
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					content.append(file.getAbsolutePath()).append("\n");
+					String relatedPath = getRelatedPath(workingDir, file, false);
+					content.append(relatedPath).append("\n");
 				}
 			}
 			return content.toString();
@@ -128,7 +138,8 @@ public class FileFunctionTools {
 	/**
 	 * Writes content to a file in the working directory.
 	 *
-	 * <p>Expected parameters:
+	 * <p>
+	 * Expected parameters:
 	 * <ol>
 	 * <li>{@link JsonNode} containing {@code file_path} and {@code text}</li>
 	 * <li>{@link File} working directory</li>
@@ -158,7 +169,8 @@ public class FileFunctionTools {
 	/**
 	 * Reads content from a file in the working directory.
 	 *
-	 * <p>Expected parameters:
+	 * <p>
+	 * Expected parameters:
 	 * <ol>
 	 * <li>{@link JsonNode} containing {@code file_path}</li>
 	 * <li>{@link File} working directory</li>
@@ -172,13 +184,15 @@ public class FileFunctionTools {
 		String filePath = ((JsonNode) params[0]).get("file_path").asText();
 		logger.info("Read file: {}", params[0]);
 		File workingDir = (File) params[1];
+		String result;
 		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
-			return IOUtils.toString(io, "UTF8");
+			result = IOUtils.toString(io, "UTF8");
 		} catch (FileNotFoundException e) {
-			return "File not found.";
+			result = "File not found.";
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
+		return result;
 	}
 
 	/**
@@ -202,5 +216,26 @@ public class FileFunctionTools {
 			}
 		}
 		return allFiles;
+	}
+
+	/* TODO: should be move to separate module. */
+	public static String getRelatedPath(File dir, File file, boolean addSingleDot) {
+		String currentPath = dir.getAbsolutePath().replace("\\", "/");
+		String fileStr = file.getAbsolutePath().replace("\\", "/");
+		String relativePath = fileStr.replace(currentPath, "");
+		if (StringUtils.startsWith(relativePath, "/")) {
+			relativePath = StringUtils.substring(relativePath, 1);
+		}
+		String result = StringUtils.defaultIfBlank(relativePath, ".");
+		if (StringUtils.isBlank(result)) {
+			result = ".";
+		} else if (!StringUtils.startsWith(result, ".") && addSingleDot) {
+			result = "./" + result;
+		}
+
+		if (StringUtils.equals(fileStr, result)) {
+			result = null;
+		}
+		return result;
 	}
 }

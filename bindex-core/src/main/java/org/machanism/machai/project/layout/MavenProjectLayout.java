@@ -79,7 +79,8 @@ public class MavenProjectLayout extends ProjectLayout {
 	 */
 	public Model getModel() {
 		if (model == null) {
-			File file = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
+			File projectDir = getProjectDir();
+			File file = new File(projectDir, PROJECT_MODEL_FILE_NAME);
 			model = new PomReader().getProjectModel(file, effectivePomRequired);
 		}
 
