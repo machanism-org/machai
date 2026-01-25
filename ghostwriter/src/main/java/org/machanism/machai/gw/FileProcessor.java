@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -254,6 +255,8 @@ public class FileProcessor extends ProjectProcessor {
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
 			List<File> files = findFiles(projectLayout.getProjectDir());
+			files.sort(Comparator.comparing(File::getName).reversed());
+			
 			for (File file : files) {
 				logIfNotBlank(processFile(projectLayout, file));
 			}
@@ -329,7 +332,8 @@ public class FileProcessor extends ProjectProcessor {
 		content.add(getDirInfoLine(projectLayout.getDocuments(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getModules(), projectDir));
 
-		return MessageFormat.format(promptBundle.getString("project_information"), content.toArray(new String[0]));
+		Object[] array = content.toArray(new String[0]);
+		return MessageFormat.format(promptBundle.getString("project_information"), array);
 	}
 
 	private String getDirInfoLine(List<String> sources, File projectDir) {

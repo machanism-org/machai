@@ -79,14 +79,15 @@ public class MavenProjectLayout extends ProjectLayout {
 	 */
 	public Model getModel() {
 		if (model == null) {
-			model = new PomReader().getProjectModel(new File(getProjectDir(), PROJECT_MODEL_FILE_NAME));
+			File file = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
+			model = new PomReader().getProjectModel(file, effectivePomRequired);
 		}
 
 		return model;
 	}
 
 	/**
-	 * Sets the Maven Model for chaining configuration.
+	 * Sets the Maven Model for chaining configuration.`
 	 * 
 	 * @param model The model to set
 	 * @return this object (for method chaining)

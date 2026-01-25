@@ -1,9 +1,16 @@
 package org.machanism.machai.maven;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -12,28 +19,35 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.machanism.machai.gw.FileProcessor;
+import org.machanism.machai.project.layout.MavenProjectLayout;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Maven goal that runs the MachAI generative-workflow (GW) document processing over the current module's base directory.
+ * Maven goal that runs the MachAI generative-workflow (GW) document processing
+ * over the current module's base directory.
  *
  * <p>
- * This mojo reads GenAI credentials from Maven {@code settings.xml} using a configured {@code <server>} entry and exposes
- * them to the running process as system properties expected by the underlying workflow:
+ * This mojo reads GenAI credentials from Maven {@code settings.xml} using a
+ * configured {@code <server>} entry and exposes them to the running process as
+ * system properties expected by the underlying workflow:
  * </p>
  * <ul>
- *   <li>{@code GENAI_USERNAME}</li>
- *   <li>{@code GENAI_PASSWORD}</li>
+ * <li>{@code GENAI_USERNAME}</li>
+ * <li>{@code GENAI_PASSWORD}</li>
  * </ul>
  *
  * <h2>Configuration</h2>
  * <ul>
- *   <li><b>{@code gw.genai}</b> (optional): GenAI provider/model identifier forwarded to {@link FileProcessor}.
- *       Example: {@code OpenAI:gpt-5}.</li>
- *   <li><b>{@code gw.instructions}</b> (optional): One or more instruction location strings consumed by the workflow.</li>
- *   <li><b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} server id containing credentials.</li>
- *   <li><b>{@code gw.threads}</b> (optional, default {@code true}): Enables/disables multi-threaded processing.</li>
+ * <li><b>{@code gw.genai}</b> (optional): GenAI provider/model identifier
+ * forwarded to {@link FileProcessor}. Example: {@code OpenAI:gpt-5}.</li>
+ * <li><b>{@code gw.instructions}</b> (optional): One or more instruction
+ * location strings consumed by the workflow.</li>
+ * <li><b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml}
+ * server id containing credentials.</li>
+ * <li><b>{@code gw.threads}</b> (optional, default {@code true}):
+ * Enables/disables multi-threaded processing.</li>
  * </ul>
  */
 @Mojo(name = "gw", threadSafe = true, aggregator = true)
@@ -42,9 +56,11 @@ public class GW extends AbstractMojo {
 	private static final Logger logger = LoggerFactory.getLogger(GW.class);
 
 	/**
-	 * Optional GenAI provider/model identifier to pass to the workflow (for example {@code OpenAI:gpt-5}).
+	 * Optional GenAI provider/model identifier to pass to the workflow (for example
+	 * {@code OpenAI:gpt-5}).
 	 */
-	@Parameter(property = "gw.genai") String genai;
+	@Parameter(property = "gw.genai")
+	String genai;
 
 	/**
 	 * Optional instruction locations to pass to the workflow.
@@ -55,17 +71,26 @@ public class GW extends AbstractMojo {
 	/**
 	 * The Maven module base directory to scan for documentation sources.
 	 */
-	@Parameter(defaultValue = "${basedir}", required = true, readonly = true) File basedir;
+	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
+	File basedir;
 
 	/**
-	 * The Maven project (injected by Maven). This plugin does not currently use it directly, but Maven requires the
-	 * injection point for certain build contexts.
+	 * The Maven project (injected by Maven). This plugin does not currently use it
+	 * directly, but Maven requires the injection point for certain build contexts.
 	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
-	@SuppressWarnings("unused") MavenProject project;
+	@SuppressWarnings("unused")
+	MavenProject project;
 
 	/**
-	 * The Maven settings (injected by Maven) used to resolve credentials from {@code settings.xml}.
+	 * The Maven Session object.
+	 */
+	@Parameter(defaultValue = "${session}", readonly = true, required = true)
+	private MavenSession session;
+
+	/**
+	 * The Maven settings (injected by Maven) used to resolve credentials from
+	 * {@code settings.xml}.
 	 */
 	@Parameter(readonly = true, defaultValue = "${settings}")
 	private Settings settings;
@@ -83,9 +108,11 @@ public class GW extends AbstractMojo {
 	private boolean threads;
 
 	/**
-	 * Executes the {@code gw} goal by configuring credentials and delegating the scan to {@link FileProcessor}.
+	 * Executes the {@code gw} goal by configuring credentials and delegating the
+	 * scan to {@link FileProcessor}.
 	 *
-	 * @throws MojoExecutionException if required Maven settings/credentials are missing or the document scan fails
+	 * @throws MojoExecutionException if required Maven settings/credentials are
+	 *                                missing or the document scan fails
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -110,7 +137,32 @@ public class GW extends AbstractMojo {
 			System.setProperty("GENAI_PASSWORD", password);
 		}
 
-		FileProcessor documents = new FileProcessor(genai);
+		FileProcessor documents = new FileProcessor(genai) {
+			/**
+			 * Provides the Maven-based project layout for document scanning.
+			 *
+			 * @param projectDir the directory where the Maven project is located
+			 * @return layout of Maven project including model
+			 * @throws FileNotFoundException if the project directory is missing
+			 */
+			@Override
+			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+				MavenProjectLayout projectLayout = new MavenProjectLayout();
+				projectLayout.projectDir(projectDir);
+
+				projectLayout.effectivePomRequired(false);
+				Model model = projectLayout.getModel();
+				List<MavenProject> projects = session.getAllProjects();
+				for (MavenProject mavenProject : projects) {
+					if (StringUtils.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
+						projectLayout.model(mavenProject.getModel());
+						break;
+					}
+				}
+
+				return projectLayout;
+			}
+		};
 
 		if (ArrayUtils.isNotEmpty(instructions)) {
 			documents.setInstructionLocations(instructions);
