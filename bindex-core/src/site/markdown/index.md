@@ -27,24 +27,24 @@ Page Structure:
 
 ## Introduction
 
-Bindex Core is the foundational library for producing and consuming **bindex** metadata in the Machanism ecosystem. It provides a stable data model and supporting utility APIs to generate, publish, discover, validate, and assemble metadata so build tools and integrations can automate dependency discovery and library assembly decisions.
+Bindex Core is the foundational library for bindex metadata management in the Machanism ecosystem. It provides core APIs and a stable data model for generating, registering, validating, and consuming bindex metadata so tools and integrations can automate library discovery, selection, and assembly.
 
 ## Overview
 
-Bindex Core provides the core representation and utility APIs used by Machanism components to work with bindex metadata. It is typically consumed indirectly (via plugins/tools) or directly by applications that need to:
+Bindex Core defines the core representation and supporting utilities used by Machanism components to work with bindex metadata. It is typically used by build plugins/tools (and can also be used directly by applications) to:
 
 - generate bindex metadata for artifacts,
-- register and publish that metadata for downstream discovery,
+- register and publish metadata for downstream discovery,
 - read, validate, and merge metadata from multiple modules and dependencies,
-- drive library selection and assembly workflows.
+- drive library selection and project assembly workflows.
 
 ## Key Features
 
-- Generate bindex metadata for Java artifacts during builds
-- Register and publish metadata for downstream discovery
-- Read, validate, and analyze bindex metadata
-- Merge/aggregate metadata across modules and dependencies
-- APIs that support library selection and project assembly workflows
+- Core model and utilities for bindex metadata generation and consumption
+- Metadata registration/publishing support for downstream discovery workflows
+- Validation and analysis utilities for bindex metadata
+- Merge/aggregation utilities across modules and dependencies
+- APIs that support library selection and project assembly decisions
 
 ## Getting Started
 
@@ -73,7 +73,7 @@ Add it to your `pom.xml`:
 </dependency>
 ```
 
-Build and run the bindex-related checks/processing in your build (via the consuming plugin/tool), or simply build this module:
+Build this module:
 
 ```bash
 mvn -pl bindex-core clean verify
@@ -89,7 +89,7 @@ mvn -pl bindex-core clean verify
 
 ## Configuration
 
-Bindex Core is a library; most runtime configuration is performed by the consuming tool/plugin. The table below lists commonly relevant build settings and their defaults.
+Bindex Core is a library; most runtime configuration is performed by the consuming tool/plugin. The table below lists commonly relevant build properties and their defaults.
 
 | Parameter | Description | Default |
 |---|---|---|

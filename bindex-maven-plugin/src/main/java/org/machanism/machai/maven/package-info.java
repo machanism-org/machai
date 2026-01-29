@@ -30,8 +30,8 @@
  * during a Maven build.
  *
  * <p>
- * The classes in this package provide Maven {@code Mojo} implementations that integrate Bindex operations into a
- * project's build lifecycle.
+ * This package contains Maven {@code Mojo} implementations that integrate Bindex operations into a project's build
+ * lifecycle.
  * </p>
  *
  * <h2>Goals</h2>

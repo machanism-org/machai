@@ -1,5 +1,5 @@
 /**
- * Provides a non-operational ({@code none}) implementation of the generative-AI provider SPI.
+ * Provides the {@code none} implementation of the generative-AI provider SPI.
  *
  * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
  * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for environments where no external
@@ -18,7 +18,7 @@
  *       exception when invoked.</li>
  * </ul>
  *
- * <h2>Example</h2>
+ * <h2>Usage example</h2>
  * <pre>{@code
  * GenAIProvider provider = new NoneProvider();
  * provider.inputsLog(new File("./inputsLog/inputs.txt"));

@@ -1,10 +1,9 @@
 /**
  * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
- * <p>This package defines the stable, provider-neutral abstractions that application code should depend on when
- * configuring and using the Machanism GenAI client. Concrete provider integrations (for example, OpenAI or a
- * remote/web orchestrator) live in sub-packages so provider implementations can evolve independently of the
- * core API.
+ * <p>This package contains the stable, provider-neutral abstractions that application code should depend on when
+ * configuring and using the Machanism GenAI client. Provider-specific implementations live in sub-packages so
+ * provider integrations can evolve independently of the core API.
  *
  * <h2>Typical usage</h2>
  * <ol>

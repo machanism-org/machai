@@ -1,5 +1,5 @@
 /**
- * Maven plugin goals for integrating the MachAI generative-workflow (GW) document-processing pipeline into a Maven build.
+ * Maven plugin goals that integrate the MachAI generative-workflow (GW) document-processing pipeline into a Maven build.
  *
  * <p>
  * This package provides two Mojos:
@@ -17,11 +17,14 @@
  *
  * <h2>Goals and configuration</h2>
  *
+ * <p>
+ * Goals may be configured either via plugin configuration in {@code pom.xml} or via Java system properties passed on the
+ * Maven command line.
+ * </p>
+ *
  * <h3>{@code gw}</h3>
  * <p>
- * The {@code gw} goal delegates discovery and processing to {@link org.machanism.machai.gw.FileProcessor}. The goal can be
- * configured either via plugin configuration in {@code pom.xml} or via Java system properties passed on the Maven command
- * line.
+ * The {@code gw} goal delegates discovery and processing to {@link org.machanism.machai.gw.FileProcessor}.
  * </p>
  *
  * <h4>Parameters</h4>
@@ -35,7 +38,7 @@
  *     consumed by the workflow.
  *   </li>
  *   <li>
- *     <b>{@code serverId}</b> / {@code -Dgw.genai.serverId=...} (required): Maven {@code settings.xml} {@code <server>}
+ *     <b>{@code serverId}</b> / {@code -Dgw.genai.serverId=...} (required): Maven {@code settings.xml} {@code &lt;server&gt;}
  *     id used to read credentials for the GenAI provider. If present, the server's {@code username} and {@code password}
  *     are exposed to the workflow via the {@code GENAI_USERNAME} and {@code GENAI_PASSWORD} system properties.
  *   </li>

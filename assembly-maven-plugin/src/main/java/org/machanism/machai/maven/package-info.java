@@ -25,14 +25,16 @@
 */
 
 /**
- * Maven plugin entry points for AI-assisted project assembly.
+ * Maven plugin goal implementation for AI-assisted project assembly.
  *
  * <p>
- * This package provides the implementation of the {@code assembly} Maven goal via
- * {@link org.machanism.machai.maven.Assembly}. The goal reads a prompt describing the desired changes, uses a
- * picker model to recommend relevant libraries, and then runs an assembly workflow that can modify the Maven
- * project located at the current execution {@code basedir}.
+ * The package contains the {@code assembly} goal implementation ({@link org.machanism.machai.maven.Assembly}) that:
  * </p>
+ * <ol>
+ *   <li>Acquires an assembly prompt (from a file or interactively).</li>
+ *   <li>Uses a picker model to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).</li>
+ *   <li>Runs an application assembly workflow that applies changes to the current Maven execution base directory.</li>
+ * </ol>
  *
  * <h2>Goal</h2>
  * <ul>
@@ -41,13 +43,13 @@
  *
  * <h2>Parameters</h2>
  * <p>
- * Parameters may be provided using Maven system properties (for example, {@code -Dassembly.genai=...}) or through
- * standard plugin configuration in the POM.
+ * Parameters can be provided via system properties (for example, {@code -Dassembly.genai=...}) or plugin
+ * configuration in the POM.
  * </p>
  * <ul>
  *   <li>{@code assembly.genai} &ndash; GenAI provider id for the assembly phase (default {@code OpenAI:gpt-5}).</li>
  *   <li>{@code pick.genai} &ndash; GenAI provider id for the recommendation/picker phase (default {@code OpenAI:gpt-5-mini}).</li>
- *   <li>{@code assembly.prompt.file} &ndash; Prompt file path (default {@code project.txt}); if missing, the prompt is read interactively.</li>
+ *   <li>{@code assembly.prompt.file} &ndash; Prompt file path (default {@code project.txt}); if missing, the prompt is requested interactively.</li>
  *   <li>{@code assembly.score} &ndash; Minimum score threshold for recommended libraries (default {@code 0.9}).</li>
  *   <li>{@code bindex.register.url} &ndash; Optional registration/lookup endpoint used by the picker.</li>
  * </ul>

@@ -21,7 +21,7 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# gw-maven-plugin
+# GW Maven Plugin
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
 

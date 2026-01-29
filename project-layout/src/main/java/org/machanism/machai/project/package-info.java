@@ -1,24 +1,30 @@
 /**
- * Defines the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and built-in
- * implementations used by Ghostwriter to extract {@code @guidance} instructions from source and documentation files.
+ * Filesystem-backed project inspection, layout detection, and traversal utilities.
  *
- * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} understands the comment conventions of a specific file format,
- * locates guidance blocks, and produces a normalized prompt fragment (including path context) for downstream
- * processing.
+ * <p>This package provides the core APIs for working with a project rooted at a directory on disk:
  *
- * <p>Reviewers are typically selected by file extension and invoked by the Ghostwriter pipeline.
- *
- * <h2>Included reviewers</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer} - Java sources (including {@code package-info.java})</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer} - Markdown files</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer} - HTML/XML files</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer} - Python sources</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer} - TypeScript sources</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} - directory-scoped {@code @guidance.txt} files</li>
+ *   <li>detecting an appropriate {@link org.machanism.machai.project.layout.ProjectLayout} by inspecting
+ *       build marker files and directory structure,</li>
+ *   <li>coordinating scans of a project root and its modules/subprojects (when supported by the detected layout),
+ *       and</li>
+ *   <li>delegating discovered files/folders to a {@link org.machanism.machai.project.ProjectProcessor}.
+ *   </li>
  * </ul>
+ *
+ * <h2>Typical usage</h2>
+ * <pre>{@code
+ * File projectDir = new File("/path/to/project");
+ * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
+ *
+ * ProjectProcessor processor = ...;
+ * processor.scanFolder(projectDir);
+ * }</pre>
+ *
+ * @author machanism
+ * @since 0.0.2
  */
-package org.machanism.machai.gw.reviewer;
+package org.machanism.machai.project;
 
 /*-
  * @guidance:
@@ -44,5 +50,5 @@ package org.machanism.machai.gw.reviewer;
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */

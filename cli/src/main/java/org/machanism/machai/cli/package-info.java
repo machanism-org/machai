@@ -1,54 +1,49 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package provides {@code @ShellComponent}-annotated command classes for interactive and non-interactive
- * execution. Commands orchestrate GenAI providers and Machai services to perform project-centric tasks such as:
- * selecting libraries ("bricks"), assembling projects, generating and registering bindex metadata, scanning
- * sources/documents, and cleaning temporary output.
+ * <p>This package contains {@code @ShellComponent}-annotated commands that expose Machai features via an interactive
+ * shell as well as non-interactive invocation.
  *
- * <h2>Command groups</h2>
+ * <p>Responsibilities typically include:
  * <ul>
- *   <li><b>pick / assembly / prompt</b> ({@link org.machanism.machai.cli.AssemblyCommand}) – Pick bricks from a bindex
- *       registry and assemble a project.</li>
- *   <li><b>bindex / register</b> ({@link org.machanism.machai.cli.BindexCommand}) – Generate and register bindex
- *       metadata.</li>
- *   <li><b>gw</b> ({@link org.machanism.machai.cli.GWCommand}) – Scan and process files with a configured GenAI model.
- *   </li>
- *   <li><b>clean</b> ({@link org.machanism.machai.cli.CleanCommand}) – Remove Machai temporary folders.</li>
- *   <li><b>genai / dir / score / conf</b> ({@link org.machanism.machai.cli.ConfigCommand}) – Configure defaults used by
- *       other commands.</li>
+ *   <li>Picking libraries ("bricks") and assembling projects.</li>
+ *   <li>Generating and registering bindex metadata.</li>
+ *   <li>Scanning sources/documents and processing them with a configured GenAI model.</li>
+ *   <li>Cleaning Machai temporary output folders.</li>
+ *   <li>Managing configuration defaults used by other commands.</li>
+ * </ul>
+ *
+ * <h2>Commands</h2>
+ * <ul>
+ *   <li><b>pick / assembly / prompt</b> ({@link org.machanism.machai.cli.AssemblyCommand})</li>
+ *   <li><b>bindex / register</b> ({@link org.machanism.machai.cli.BindexCommand})</li>
+ *   <li><b>gw</b> ({@link org.machanism.machai.cli.GWCommand})</li>
+ *   <li><b>clean</b> ({@link org.machanism.machai.cli.CleanCommand})</li>
+ *   <li><b>genai / dir / score / conf</b> ({@link org.machanism.machai.cli.ConfigCommand})</li>
  * </ul>
  *
  * <p>The application entry point is {@link org.machanism.machai.cli.MachaiCLI}.
  *
  * <h2>Usage</h2>
- * <p>Programmatic startup:</p>
  * <pre>{@code
  * public final class Main {
  *   public static void main(String[] args) throws Exception {
  *     org.machanism.machai.cli.MachaiCLI.main(args);
  *   }
  * }
- * }</pre>
+ * }
+ * </pre>
  *
- * <p>Typical commands (examples):</p>
+ * <p>Example commands:</p>
  * <pre>{@code
- * # pick libraries for a requirement description
  * pick --query "Create a web app" --score 0.9
- *
- * # assemble a project into a directory
  * assembly --dir /path/to/out --genai OpenAI:gpt-5.1
- *
- * # generate and/or register bindex metadata
  * bindex --dir /path/to/project --update false
  * register --dir /path/to/project --registerUrl http://localhost:8080
- *
- * # process sources/documents
  * gw --dir /path/to/project --scan /path/to/project/src/main/java --genai OpenAI:gpt-5.1
- *
- * # clean temporary output folders
  * clean --dir /tmp/machai
- * }</pre>
+ * }
+ * </pre>
  */
 package org.machanism.machai.cli;
 

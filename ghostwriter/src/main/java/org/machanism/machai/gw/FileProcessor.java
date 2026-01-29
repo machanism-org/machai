@@ -290,9 +290,9 @@ public class FileProcessor extends ProjectProcessor {
 
 				String projectInfo = getProjectStructureDescription(projectLayout);
 				provider.prompt(projectInfo);
-				
+
 				provider.prompt(guidance);
-				
+
 				provider.prompt(promptBundle.getString("output_format"));
 
 				String additionalInstructions = StringUtils.trimToNull(this.instructions);
@@ -339,12 +339,10 @@ public class FileProcessor extends ProjectProcessor {
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream()
-					.filter(t -> t != null && new File(projectDir, t).exists())
-					.map(e -> {
-						String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
-						return "`" + relatedPath + "`";
-					}).collect(Collectors.toList());
+			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists()).map(e -> {
+				String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
+				return "`" + relatedPath + "`";
+			}).collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 
@@ -426,15 +424,20 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	public void setModuleMultiThread(boolean moduleMultiThread) {
+		if (!moduleMultiThread) {
+			this.moduleMultiThread = false;
+			logger.info("Multi-threaded processing mode disabled.");
+			return;
+		}
+
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
-			if (moduleMultiThread && !provider.isThreadSafe()) {
+			if (!provider.isThreadSafe()) {
 				throw new IllegalArgumentException(
-						"The provider '" + genai
-								+ "' is not thread-safe and cannot be used in a multi-threaded context.");
+						"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
 			}
 		}
-		this.moduleMultiThread = moduleMultiThread;
-		logger.info("Multi-threaded processing mode {}.", moduleMultiThread ? "enabled" : "disabled");
+		this.moduleMultiThread = true;
+		logger.info("Multi-threaded processing mode enabled.");
 	}
 
 	public void setInstructions(String instructions) {

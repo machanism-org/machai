@@ -26,15 +26,15 @@
  */
 
 /**
- * GenAI provider management and host tool integration.
+ * GenAI provider management and host-side tool integration.
  *
- * <p>This package provides the service-provider interface (SPI) for GenAI backends
- * ({@link org.machanism.machai.ai.manager.GenAIProvider}) along with utilities to resolve and instantiate
- * a concrete provider ({@link org.machanism.machai.ai.manager.GenAIProviderManager}). Providers are typically
- * selected via a {@code Provider:Model} identifier.
+ * <p>This package defines the service-provider interface (SPI) for GenAI backends
+ * ({@link org.machanism.machai.ai.manager.GenAIProvider}) and utilities for resolving and instantiating concrete
+ * implementations ({@link org.machanism.machai.ai.manager.GenAIProviderManager}). Providers are typically identified
+ * using a {@code Provider:Model} string.
  *
- * <p>The package also contains host-side "tool" implementations that can be registered with a provider (for example,
- * to allow file access or command execution) through
+ * <p>The package also includes host-side "tool" implementations that can be registered with a provider, enabling the
+ * model to request controlled access to local capabilities such as file I/O and command execution via
  * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
  *
  * <ul>

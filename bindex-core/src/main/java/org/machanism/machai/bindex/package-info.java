@@ -1,44 +1,52 @@
 /**
- * Entry points for generating, assembling, and registering a Bindex (project index) used by Machanism-based AI
- * workflows.
+ * Provides the public entry points for generating, assembling, selecting, and registering a Bindex (a project index)
+ * used by Machanism-based AI workflows.
  *
- * <p>The {@code org.machanism.machai.bindex} package coordinates the end-to-end lifecycle of producing a
- * {@code bindex.json} document for a project and (optionally) registering that document in a backing store for later
- * semantic retrieval.
- *
- * <h2>Key types</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.bindex.BindexBuilderFactory}: selects a
- *       {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation appropriate for a
- *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
- *   <li>{@link org.machanism.machai.bindex.BindexCreator}: generates or updates {@code bindex.json} on disk for a
- *       project folder.</li>
- *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: composes LLM inputs that incorporate one or more
- *       Bindex documents.</li>
- *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers Bindex documents in a vector store or similar
- *       backing service for later semantic lookup.</li>
- *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic selection of relevant Bindex documents.</li>
- * </ul>
- *
- * <h2>Typical workflow</h2>
+ * <p>This package coordinates an end-to-end lifecycle:
  * <ol>
- *   <li>Create or obtain a {@link org.machanism.machai.project.layout.ProjectLayout} describing the target project.</li>
- *   <li>Generate or update {@code bindex.json} with {@link org.machanism.machai.bindex.BindexCreator}.</li>
- *   <li>Optionally register the resulting Bindex with {@link org.machanism.machai.bindex.BindexRegister}.</li>
- *   <li>Optionally run semantic selection with {@link org.machanism.machai.bindex.Picker}.</li>
+ *   <li>Build or update a {@code bindex.json} file for a project directory.</li>
+ *   <li>Optionally register that Bindex document in a backing store (e.g., a vector database) for semantic lookup.</li>
+ *   <li>Optionally perform semantic selection to retrieve relevant Bindex documents.</li>
+ *   <li>Assemble one or more Bindexes into LLM prompt inputs.</li>
  * </ol>
  *
- * <h2>Example</h2>
+ * <h2>Main entry points</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.bindex.BindexCreator}: generates or updates {@code bindex.json} on disk for a
+ *       project.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers Bindex documents in a backing store for later
+ *       semantic retrieval.</li>
+ *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search and selection of Bindex documents.</li>
+ *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: assembles LLM inputs (prompts) that incorporate one or
+ *       more Bindex documents.</li>
+ * </ul>
+ *
+ * <h2>Builder selection</h2>
+ * <p>{@link org.machanism.machai.bindex.BindexBuilderFactory} chooses a
+ * {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation based on the provided
+ * {@link org.machanism.machai.project.layout.ProjectLayout}.
+ *
+ * <h2>Typical workflow</h2>
  * <pre>{@code
  * GenAIProvider provider = ...;
  * ProjectLayout layout = ...;
  *
+ * // 1) Create/update bindex.json
  * new BindexCreator(provider)
  *     .update(true)
  *     .processFolder(layout);
  *
+ * // 2) Optionally register the Bindex for semantic lookup
  * try (BindexRegister register = new BindexRegister(provider, dbUrl)) {
  *     register.update(true).processFolder(layout);
+ * }
+ *
+ * // 3) Optionally select relevant Bindexes and assemble prompts
+ * try (Picker picker = new Picker(provider, dbUrl)) {
+ *     List<Bindex> relevant = picker.pick("how to configure logging?");
+ *     new ApplicationAssembly(provider)
+ *         .projectDir(layout.getProjectDir())
+ *         .assembly("Create a config example", relevant);
  * }
  * }</pre>
  *

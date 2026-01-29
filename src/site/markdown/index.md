@@ -83,7 +83,7 @@ mvn -pl genai-client clean install
 Build and run the packaged CLI:
 
 ```bash
-cd cli
+cd machai-cli
 mvn -Ppack package
 java -jar target/machai.jar
 ```

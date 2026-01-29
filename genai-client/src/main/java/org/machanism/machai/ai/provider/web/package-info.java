@@ -29,25 +29,26 @@
 /**
  * Web-automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementation(s).
  *
- * <p>This package provides GenAI provider implementations that drive a target service through its web UI using
- * <a href="https://ganteater.com">Anteater</a>. Automation is defined as Anteater workspace recipes and executed by
+ * <p>This package contains GenAI provider implementations that interact with a target GenAI service via its web UI.
+ * Automation is executed using <a href="https://ganteater.com">Anteater</a> workspaces/recipes and orchestrated by
  * {@link org.machanism.machai.ai.provider.web.WebProvider}.
  *
- * <h2>Typical workflow</h2>
+ * <h2>Typical usage</h2>
  * <ol>
  *   <li>Select an Anteater configuration using {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
- *   <li>Initialize the workspace with a project directory using
+ *   <li>Set the workspace project directory with
  *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}.</li>
- *   <li>Accumulate prompts using the inherited prompt API and submit them by calling
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}, which executes the
+ *   <li>Build the prompt using the provider prompt API and submit it with
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}, which runs the
  *       {@code "Submit Prompt"} recipe.</li>
  * </ol>
  *
  * <h2>Lifecycle and constraints</h2>
  * <ul>
- *   <li>Workspace state is stored in static fields; configuration and working directory are intended to be set
- *       once per JVM.</li>
- *   <li>Changing the configuration or working directory after initialization results in an error.</li>
+ *   <li>The underlying Anteater workspace is held in static state; configuration and working directory are intended
+ *       to be set once per JVM.</li>
+ *   <li>Changing the configuration or working directory after initialization is not supported and results in an
+ *       error.</li>
  *   <li>Call {@link org.machanism.machai.ai.provider.web.WebProvider#close()} to release workspace resources.</li>
  * </ul>
  */

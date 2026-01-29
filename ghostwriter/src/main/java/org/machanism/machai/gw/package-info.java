@@ -1,11 +1,12 @@
 /**
  * Command-line tooling and orchestration for scanning a workspace and preparing GenAI-ready prompt inputs.
  *
- * <p>This package contains the Ghostwriter CLI entry point and the scanning/processing pipeline that can:
+ * <p>This package provides the Ghostwriter CLI entry point and the scanning/processing pipeline.
+ * Implementations in this package can:
  *
  * <ul>
  *   <li>Traverse a project directory (and optionally its modules) while honoring configured exclusions.</li>
- *   <li>Apply file-type-specific reviewers/processors to extract relevant directives and content.</li>
+ *   <li>Apply file-type-specific reviewers/processors to extract directives and content.</li>
  *   <li>Aggregate extracted data and generate prompt-input artifacts for downstream processing.</li>
  *   <li>Invoke a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate or review output.</li>
  * </ul>

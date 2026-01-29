@@ -26,26 +26,25 @@
  */
 
 /**
- * Builds {@link org.machanism.machai.schema.Bindex} documents for a project by collecting relevant manifests and
- * files and invoking a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Builders for generating {@link org.machanism.machai.schema.Bindex} documents from a projects on-disk structure and
+ * build or packaging manifests.
  *
- * <p>The primary entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}, which defines a common
- * generation pipeline:
- * <ol>
- *   <li>define the expected {@code Bindex} output shape (prompt/schema),</li>
- *   <li>optionally provide an existing {@code Bindex} for incremental updates,</li>
- *   <li>assemble project context (manifests plus discovered source/resource/test files),</li>
- *   <li>submit the request and deserialize the response into a {@code Bindex}.</li>
- * </ol>
+ * <p>This package provides the common {@link org.machanism.machai.bindex.builder.BindexBuilder} pipeline as well as
+ * ecosystem-specific implementations that discover relevant inputs (for example, {@code pom.xml}, {@code package.json},
+ * or {@code pyproject.toml}), collect source/resource/test files, and submit a request to a configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}. The providers response is deserialized into a {@code Bindex}
+ * instance.
  *
- * <p>Concrete builders specialize context discovery for particular ecosystems, for example:
+ * <p>Typical usage starts by selecting an implementation and invoking its build operation (see
+ * {@link org.machanism.machai.bindex.builder.BindexBuilder}). Concrete builders specialize project context discovery,
+ * for example:
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} uses an effective Maven model to gather the POM
- *       and the builds configured source/resource/test directories.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} uses the effective Maven model to locate the POM
+ *       and the builds configured directories.</li>
  *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} uses {@code package.json} and common
- *       JavaScript/TypeScript project layouts to discover relevant files.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} uses {@code pyproject.toml} and an inferred
- *       source directory to discover relevant files.</li>
+ *       JavaScript/TypeScript layouts.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} uses {@code pyproject.toml} and inferred source
+ *       locations.</li>
  * </ul>
  *
  * <p>To support an additional project type, subclass {@link org.machanism.machai.bindex.builder.BindexBuilder} and

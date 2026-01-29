@@ -2,7 +2,7 @@
 @guidance:
 **ADD FOLLOWING SECTIONS TO THIS README FILE:**
 1. **Project Title and Overview:**  
-   - Provide the project name and a brief description based on `src\site\markdown\index.md` content summary.
+   - Provide the project name and a brief description based on `src\\site\\markdown\\index.md` content summary.
    - Add `![](src/site/resources/images/machai-ghostwriter-logo.png)` before the title.
    - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)` after the title as a new paragraph.
 3. **Introduction**
@@ -23,11 +23,11 @@
 
 ## Project Overview
 
-Ghostwriter is a documentation automation engine (also available as a runnable CLI JAR) that scans a project for embedded guidance and applies language- and format-specific reviewers (Java, Markdown, Python, TypeScript, HTML, text) to synthesize improved documentation with a configured GenAI provider. It supports local and CI usage, optional multi-threaded processing, and repeatable, script-friendly execution.
+Ghostwriter is a CLI documentation engine (also available as a runnable JAR) that scans a project directory and updates documentation artifacts according to embedded guidance blocks and any additional instructions you provide.
 
 ## Introduction
 
-Machai Ghostwriter is a CLI documentation engine that automates and standardizes project documentation and code annotation. Using guided file processing with embedded `@guidance` blocks, it helps teams keep documentation consistent, reviewable, and up to date across multi-module repositories. It’s designed to work well in scripts and CI so documentation changes can be generated and committed as part of your normal workflow.
+Machai Ghostwriter automates and standardizes project documentation and code annotation. Using guided file processing with embedded `@guidance` blocks, it helps teams keep documentation consistent, reviewable, and up to date across repositories. It’s designed to work well in scripts and CI so documentation changes can be generated and committed as part of your normal workflow.
 
 ## Usage
 

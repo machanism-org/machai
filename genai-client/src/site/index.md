@@ -24,6 +24,7 @@ The typical entry point is `GenAIProviderManager`, which resolves a provider imp
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+provider.instructions("You are a helpful assistant.");
 provider.prompt("Summarize the following text...");
 String answer = provider.perform();
 provider.close();
@@ -44,13 +45,14 @@ and generate the content for this section following net format:
 
 `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
 
-It enables:
+It supports:
 
 - Sending prompts and receiving responses from OpenAI chat models.
 - Managing files for use in OpenAI workflows.
 - Common LLM tasks such as text generation, summarization, and question answering.
 - Creating and using vector embeddings for semantic search and similarity analysis.
-- Tool/function calling via registered tools (`addTool(...)`).
+
+It also supports tool/function calling via registered tools (`addTool(...)`) and can be extended or configured to accommodate different use cases and model parameters.
 
 Environment variables (read automatically by the OpenAI client; you must set at least `OPENAI_API_KEY`):
 
@@ -92,7 +94,7 @@ Thread safety: follows `OpenAIProvider` (NOT thread-safe).
 
 `NoneProvider` implements `GenAIProvider` to disable generative AI integrations and optionally log request inputs locally.
 
-It provides a stub implementation that stores prompts (and optional instructions) in files when `inputsLog(...)` is configured. No calls are made to external AI services or LLMs.
+It provides a stub implementation that stores requests in input files (in the `inputsLog` location) when input logging is configured. No calls are made to external AI services or LLMs.
 
 Typical use cases:
 
@@ -111,7 +113,7 @@ Notes:
 
 `WebProvider` obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (`model(String)`), initializes the workspace with a project directory (`setWorkingDir(File)`), then submits the current prompt list by running the `"Submit Prompt"` recipe (`perform()`). The recipe is expected to place the final response text into a variable named `result`.
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (`model(String)`), initializes the workspace with a project directory (`setWorkingDir(File)`), then submits the current prompt list by running the `Submit Prompt` recipe (`perform()`). The recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle:
 
