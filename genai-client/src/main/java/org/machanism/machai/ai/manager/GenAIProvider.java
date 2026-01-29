@@ -1,5 +1,6 @@
 package org.machanism.machai.ai.manager;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,7 +25,7 @@ import java.util.function.Function;
  *
  * @author Viktor Tovstyi
  */
-public interface GenAIProvider {
+public interface GenAIProvider extends Closeable{
 
 	/**
 	 * Adds a user prompt to the current session.

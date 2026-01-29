@@ -24,7 +24,7 @@
 	<properties>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<ae.dir>../genai-client/src/main/ae</ae.dir>
-		<java.version>9</java.version>
+		<maven.compiler.release>11</maven.compiler.release>
 	</properties>
 
 	<dependencies>

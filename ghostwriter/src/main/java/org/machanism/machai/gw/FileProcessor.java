@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -186,7 +185,7 @@ public class FileProcessor extends ProjectProcessor {
 					processModule(projectDir, module);
 				}
 			}
-		} 
+		}
 
 		processParentFiles(projectDir);
 	}
@@ -202,9 +201,9 @@ public class FileProcessor extends ProjectProcessor {
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		List<String> modules = projectLayout.getModules();
 
-		List<File> children = findFiles(projectDir);
+		List<File> children = listFiles(projectDir);
 
-		if (children == null) {
+		if (children.isEmpty()) {
 			return;
 		}
 
@@ -260,8 +259,8 @@ public class FileProcessor extends ProjectProcessor {
 
 	private void processProjectDir(File scanDir) {
 		try {
-			List<File> files = findFiles(scanDir);
 			ProjectLayout layout = getProjectLayout(scanDir);
+			List<File> files = findFiles(scanDir);
 			for (File file : files) {
 				logIfNotBlank(processFile(layout, file));
 			}
@@ -277,36 +276,38 @@ public class FileProcessor extends ProjectProcessor {
 		if (guidance != null) {
 			logger.info("Processing file: {}", file.getAbsolutePath());
 
-			GenAIProvider provider = GenAIProviderManager.getProvider(genai);
-			systemFunctionTools.applyTools(provider);
-			provider.setWorkingDir(getRootDir(projectDir));
+			try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
+				systemFunctionTools.applyTools(provider);
+				provider.setWorkingDir(getRootDir(projectDir));
 
-			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
-			provider.instructions(effectiveInstructions);
-			provider.prompt(promptBundle.getString("docs_processing_instructions"));
+				String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
+				provider.instructions(effectiveInstructions);
+				provider.prompt(promptBundle.getString("docs_processing_instructions"));
 
-			String projectInfo = getProjectStructureDescription(projectLayout);
-			provider.prompt(projectInfo);
-			provider.prompt(guidance);
-			provider.prompt(promptBundle.getString("output_format"));
+				String projectInfo = getProjectStructureDescription(projectLayout);
+				provider.prompt(projectInfo);
+				provider.prompt(guidance);
+				provider.prompt(promptBundle.getString("output_format"));
 
-			String extraInstructions = StringUtils.trimToNull(this.instructions);
-			if (extraInstructions != null) {
-				provider.prompt(extraInstructions);
-			}
-
-			if (isLogInputs()) {
-				String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
-				File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
-				File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
-				File parentDir = inputsFile.getParentFile();
-				if (parentDir != null) {
-					Files.createDirectories(parentDir.toPath());
+				String extraInstructions = StringUtils.trimToNull(this.instructions);
+				if (extraInstructions != null) {
+					provider.prompt(extraInstructions);
 				}
-				provider.inputsLog(inputsFile);
+
+				if (isLogInputs()) {
+					String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
+					File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
+					File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
+					File parentDir = inputsFile.getParentFile();
+					if (parentDir != null) {
+						Files.createDirectories(parentDir.toPath());
+					}
+					provider.inputsLog(inputsFile);
+				}
+
+				perform = provider.perform();
 			}
 
-			perform = provider.perform();
 			logger.info("Finished processing file: {}", file.getAbsolutePath());
 		}
 		return perform;
@@ -324,6 +325,8 @@ public class FileProcessor extends ProjectProcessor {
 		content.add(getDirInfoLine(projectLayout.getDocuments(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getModules(), projectDir));
 
+		content.add(System.getProperty("os.name"));
+
 		Object[] array = content.toArray(new String[0]);
 		return MessageFormat.format(promptBundle.getString("project_information"), array);
 	}
@@ -331,10 +334,12 @@ public class FileProcessor extends ProjectProcessor {
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists()).map(e -> {
-				String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
-				return "`" + relatedPath + "`";
-			}).collect(Collectors.toList());
+			List<String> dirs = sources.stream()
+					.filter(t -> t != null && new File(projectDir, t).exists())
+					.map(e -> {
+						String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
+						return "`" + relatedPath + "`";
+					}).collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 
@@ -357,6 +362,19 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		return reviewer.perform(getRootDir(projectDir), file);
+	}
+
+	private static List<File> listFiles(File dir) throws IOException {
+		if (dir == null || !dir.isDirectory()) {
+			return Collections.emptyList();
+		}
+		File[] files = dir.listFiles();
+		if (files == null) {
+			throw new IOException("Unable to list files for directory: " + dir.getAbsolutePath());
+		}
+		List<File> result = new ArrayList<>();
+		Collections.addAll(result, files);
+		return result;
 	}
 
 	private List<File> findFiles(File projectDir) throws IOException {
@@ -403,10 +421,11 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	public void setModuleMultiThread(boolean moduleMultiThread) {
-		GenAIProvider provider = GenAIProviderManager.getProvider(genai);
-		if (moduleMultiThread && !provider.isThreadSafe()) {
-			throw new IllegalArgumentException(
-					"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
+		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
+			if (moduleMultiThread && !provider.isThreadSafe()) {
+				throw new IllegalArgumentException(
+						"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
+			}
 		}
 		this.moduleMultiThread = moduleMultiThread;
 		logger.info("Multi-threaded processing mode {}.", moduleMultiThread ? "enabled" : "disabled");
@@ -424,7 +443,7 @@ public class FileProcessor extends ProjectProcessor {
 		this.logInputs = logInputs;
 	}
 
-	public void setInstructionLocations(String[] instructions) {
+	public void setInstructionLocations(String[] instructions) throws IOException {
 		StringBuilder instructionsText = new StringBuilder();
 		if (instructions == null || instructions.length == 0) {
 			setInstructions(null);
@@ -434,22 +453,18 @@ public class FileProcessor extends ProjectProcessor {
 			if (StringUtils.isBlank(instruction)) {
 				continue;
 			}
-			try {
-				String content;
-				String location = StringUtils.trim(instruction);
-				if (location.startsWith("http://") || location.startsWith("https://")) {
-					try (InputStream in = new URL(location).openStream()) {
-						content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-					}
-				} else {
-					content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
+			String content;
+			String location = StringUtils.trim(instruction);
+			if (location.startsWith("http://") || location.startsWith("https://")) {
+				try (InputStream in = new URL(location).openStream()) {
+					content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 				}
-				instructionsText.append(content);
-				instructionsText.append(System.lineSeparator());
-				instructionsText.append(System.lineSeparator());
-			} catch (IOException e) {
-				logger.info("Failed to read instructions from file: {}", instruction, e);
+			} else {
+				content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
 			}
+			instructionsText.append(content);
+			instructionsText.append(System.lineSeparator());
+			instructionsText.append(System.lineSeparator());
 		}
 		String text = StringUtils.trimToNull(instructionsText.toString());
 		setInstructions(text);

@@ -23,7 +23,7 @@
 
 ## Project Overview
 
-Ghostwriter is a CLI documentation engine that automates and standardizes project documentation and code annotation. Using guided file processing with embedded `@guidance` blocks, it helps teams keep documentation consistent, reviewable, and up to date across multi-module repositories. It’s designed to work well in scripts and CI so documentation changes can be generated and committed as part of your normal workflow.
+Ghostwriter is a documentation automation engine (also available as a runnable CLI JAR) that scans a project for embedded guidance and applies language- and format-specific reviewers (Java, Markdown, Python, TypeScript, HTML, text) to synthesize improved documentation with a configured GenAI provider. It supports local and CI usage, optional multi-threaded processing, and repeatable, script-friendly execution.
 
 ## Introduction
 
@@ -33,7 +33,7 @@ Machai Ghostwriter is a CLI documentation engine that automates and standardizes
 
 ### Prerequisites
 
-- Java 9+ runtime.
+- Java 11+ runtime.
 - Network access to your selected GenAI provider (if applicable).
 
 ### Installation

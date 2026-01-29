@@ -1,13 +1,12 @@
 /**
- * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and concrete
- * implementations that extract {@code @guidance} instructions from project files.
+ * Defines the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and built-in
+ * implementations used by Ghostwriter to extract {@code @guidance} instructions from source and documentation files.
  *
- * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} inspects a file using that format's comment conventions and,
- * when guidance is present, returns a normalized, prompt-ready {@link String} that includes path context for
- * downstream processing.
+ * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} is responsible for understanding the comment conventions of a
+ * specific file format, locating guidance blocks, and producing a normalized prompt fragment (including path context)
+ * for downstream processing.
  *
  * <h2>Included reviewers</h2>
- *
  * <ul>
  *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer} - Java sources (including {@code package-info.java})</li>
  *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer} - Markdown files</li>

@@ -27,14 +27,14 @@ Page Structure:
 
 ## Introduction
 
-Assembly Maven Plugin applies “assembly-style” updates to a local Maven project in the Machanism ecosystem.
+Assembly Maven Plugin automates “assembly-style” updates to local Maven projects in the Machanism ecosystem. It can use Machanism bindex metadata (for example, `bindex.json`) and GenAI-powered semantic search to help choose and integrate libraries.
 
-Write a short project concept (for example, `project.txt`) and run the `assembly` goal. The plugin uses the concept (and optionally Machanism bindex metadata such as `bindex.json`) to propose and apply concrete, reviewable changes to your working tree—such as updates to `pom.xml` and related project files.
+You provide a short project concept (for example, `project.txt`) and run the `assembly` goal. The plugin proposes and applies concrete, reviewable changes to your working tree—such as updates to `pom.xml` and related project files.
 
 Benefits:
 
 - Speeds up project bootstrapping and evolution by automating repetitive setup.
-- Can use bindex metadata to guide dependency selection.
+- Uses bindex metadata and (optionally) GenAI semantic search to guide library selection.
 - Keeps humans in control by writing changes locally for review before commit.
 
 ## Overview
@@ -51,22 +51,22 @@ Value proposition:
 
 - **Project bootstrap and evolution:** creates or updates common project files and structure.
 - **Metadata-driven assembly:** integrates libraries based on bindex metadata (for example, `bindex.json`).
-- **GenAI-assisted discovery:** uses GenAI-powered semantic search to recommend suitable libraries.
+- **GenAI-assisted discovery:** can use GenAI-powered semantic search to recommend suitable libraries.
 - **Reviewable output:** writes changes into your project so you can inspect, adjust, and commit them.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 8 or higher
+- Java 11 or higher
 - Maven 3.6.x or newer
-- Network access to a compatible GenAI provider (for example, OpenAI)
+- Network access to a compatible GenAI provider (for example, OpenAI), if you enable GenAI-backed features
 
 ### Environment Variables
 
-| Variable         | Description                    |
-|------------------|--------------------------------|
-| `OPENAI_API_KEY` | API key for the OpenAI backend |
+| Variable         | Description                           |
+|------------------|---------------------------------------|
+| `OPENAI_API_KEY` | API key for the OpenAI-compatible API |
 
 ### Basic Usage
 
@@ -79,9 +79,10 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 ### Typical Workflow
 
 1. Write a short project concept in `project.txt` (or another file you reference).
-2. Run the `assembly` goal.
-3. Review the updated `pom.xml` and any generated/modified project files.
-4. Keep what you want (edit as needed) and commit the changes.
+2. (Optional) Provide bindex metadata such as `bindex.json`.
+3. Run the `assembly` goal.
+4. Review the updated `pom.xml` and any generated/modified project files.
+5. Keep what you want (edit as needed) and commit the changes.
 
 ## Configuration
 

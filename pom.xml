@@ -17,7 +17,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>9</java.version>
 		<maven.version>3.6.0</maven.version>
 		<stagingDirectory>${env.MACHAI_SITE}</stagingDirectory>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
@@ -182,8 +181,6 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.14.1</version>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
 					<excludes>
 						<exclude>**/@guidance.txt</exclude>
 					</excludes>

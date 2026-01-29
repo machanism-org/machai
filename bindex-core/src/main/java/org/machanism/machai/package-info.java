@@ -26,10 +26,13 @@
  */
 
 /**
- * Top-level API package for the Machai core library.
+ * Root namespace for the Machai core library.
  *
- * <p>This package is the root namespace for the Machai core modules. It typically contains
- * foundational types and shared abstractions that are consumed by subpackages under
- * {@code org.machanism.machai}.
+ * <p>This package exists primarily as an organizational root for the Machai APIs and
+ * implementations.
+ *
+ * <p>Most functionality is provided by subpackages (for example, bindexing and project-related
+ * models). Types placed directly in {@code org.machanism.machai} should be stable, broadly
+ * reusable entry points and should avoid unnecessary dependencies on higher-level modules.
  */
 package org.machanism.machai;

@@ -76,6 +76,7 @@ public class FileFunctionTools {
 	 * @return a newline-separated list of absolute file paths
 	 */
 	private Object getRecursiveFiles(Object[] params) {
+		String result;
 		File workingDir = (File) params[1];
 		JsonNode jsonNode = ((JsonNode) params[0]).get("dir_path");
 		File directory;
@@ -89,18 +90,20 @@ public class FileFunctionTools {
 		} else {
 			directory = workingDir;
 		}
-		logger.info("List files recursively: {}", params);
 		List<File> listFiles = listFilesRecursively(directory);
 		StringBuilder content = new StringBuilder();
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
-				String relatedPath = getRelatedPath(workingDir, file, false);
+				String relatedPath = getRelatedPath(workingDir, file, true);
 				content.append(relatedPath).append("\n");
 			}
 		} else {
 			content.append("No files found in directory.");
 		}
-		return content.toString();
+		result = content.toString();
+		logger.info("List files recursively: {}, Result: {}", params,
+				StringUtils.abbreviate(result, 60).replace("\n", ""));
+		return result;
 	}
 
 	/**
@@ -129,9 +132,11 @@ public class FileFunctionTools {
 					String relatedPath = getRelatedPath(workingDir, file, false);
 					content.append(relatedPath).append("\n");
 				}
+
+				return content.toString();
 			}
-			return content.toString();
 		}
+
 		return "No files found in directory.";
 	}
 

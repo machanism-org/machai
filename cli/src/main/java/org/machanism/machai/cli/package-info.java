@@ -1,23 +1,22 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains {@code @ShellComponent}-annotated command classes that expose Machai functionality
- * through an interactive shell as well as non-interactive invocation. Commands coordinate GenAI providers and
- * Machai services to perform project-centric tasks such as selecting libraries ("bricks"), assembling projects,
- * generating and registering bindex metadata, scanning sources/documents, and cleaning temporary output.
+ * <p>This package provides {@code @ShellComponent}-annotated command classes for interactive and non-interactive
+ * execution. Commands orchestrate GenAI providers and Machai services to perform project-centric tasks such as:
+ * selecting libraries ("bricks"), assembling projects, generating and registering bindex metadata, scanning
+ * sources/documents, and cleaning temporary output.
  *
  * <h2>Command groups</h2>
  * <ul>
- *   <li><b>pick / assembly / prompt</b> ({@link org.machanism.machai.cli.AssemblyCommand}) –
- *       Pick bricks from a bindex registry and assemble a project.</li>
- *   <li><b>bindex / register</b> ({@link org.machanism.machai.cli.BindexCommand}) –
- *       Generate and register bindex metadata.</li>
- *   <li><b>gw</b> ({@link org.machanism.machai.cli.GWCommand}) –
- *       Scan and process files with a configured GenAI model.</li>
- *   <li><b>clean</b> ({@link org.machanism.machai.cli.CleanCommand}) –
- *       Remove Machai temporary folders.</li>
- *   <li><b>genai / dir / score / conf</b> ({@link org.machanism.machai.cli.ConfigCommand}) –
- *       Configure defaults used by other commands.</li>
+ *   <li><b>pick / assembly / prompt</b> ({@link org.machanism.machai.cli.AssemblyCommand}) – Pick bricks from a bindex
+ *       registry and assemble a project.</li>
+ *   <li><b>bindex / register</b> ({@link org.machanism.machai.cli.BindexCommand}) – Generate and register bindex
+ *       metadata.</li>
+ *   <li><b>gw</b> ({@link org.machanism.machai.cli.GWCommand}) – Scan and process files with a configured GenAI model.
+ *   </li>
+ *   <li><b>clean</b> ({@link org.machanism.machai.cli.CleanCommand}) – Remove Machai temporary folders.</li>
+ *   <li><b>genai / dir / score / conf</b> ({@link org.machanism.machai.cli.ConfigCommand}) – Configure defaults used by
+ *       other commands.</li>
  * </ul>
  *
  * <p>The application entry point is {@link org.machanism.machai.cli.MachaiCLI}.

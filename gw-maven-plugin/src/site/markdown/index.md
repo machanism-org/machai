@@ -21,13 +21,13 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# GW Maven Plugin
+# gw-maven-plugin
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
 
 ## Introduction
 
-GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, keeping docs consistent, current, and aligned with the in-repo source of truth.
+GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, helping keep docs consistent, current, and aligned with the in-repo source of truth.
 
 Benefits:
 
@@ -37,7 +37,7 @@ Benefits:
 
 ## Overview
 
-Ghostwriter Maven Plugin automates Maven Site documentation for Java projects by scanning the repository for embedded `@guidance:` directives and using them to assemble/update Markdown pages. This helps keep documentation consistent across modules and aligned with what’s in the codebase.
+The Ghostwriter Maven Plugin automates Maven Site documentation by scanning the repository for embedded `@guidance:` directives and using them to assemble and update Markdown pages. This keeps documentation consistent across modules and aligned with what’s in the codebase.
 
 ## Key Features
 
@@ -51,12 +51,10 @@ Ghostwriter Maven Plugin automates Maven Site documentation for Java projects by
 
 ### Prerequisites
 
-- Java 9+
+- Java 11+
 - Maven 3+
 
 ### Environment Variables
-
-No environment variables are required by default.
 
 | Name | Required | Description | Default |
 | --- | --- | --- | --- |
@@ -83,7 +81,7 @@ mvn gw:gw
 ### Typical Workflow
 
 1. Add `@guidance:` comments close to the code or artifacts they describe.
-2. Run `mvn gw:gw` to (re)generate/update the Maven Site Markdown pages.
+2. Run `mvn gw:gw` to (re)generate or update the Maven Site Markdown pages.
 3. Run `mvn site` to render the site and review the generated documentation.
 4. Iterate: update code and `@guidance:` comments as requirements evolve, then re-run the goals.
 

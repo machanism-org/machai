@@ -11,6 +11,7 @@ import java.nio.file.Files;
 
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.schema.Bindex;
 
 class BindexProjectProcessorTest {
 
@@ -41,7 +42,7 @@ class BindexProjectProcessorTest {
         File projectDir = Files.createTempDirectory("bindex-processor-no-file").toFile();
 
         // Act
-        Object bindex = processor.getBindex(projectDir);
+        Bindex bindex = processor.getBindex(projectDir);
 
         // Assert
         assertNull(bindex);
@@ -68,7 +69,7 @@ class BindexProjectProcessorTest {
         Files.write(bindexFile.toPath(), "{}".getBytes(StandardCharsets.UTF_8));
 
         // Act
-        Object bindex = processor.getBindex(projectDir);
+        Bindex bindex = processor.getBindex(projectDir);
 
         // Assert
         assertNotNull(bindex);

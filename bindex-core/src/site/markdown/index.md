@@ -21,17 +21,17 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# bindex-core
+# Bindex Core
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-core.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
 
 ## Introduction
 
-Bindex Core is the foundational library for producing and consuming **bindex** metadata in the Machanism ecosystem. It provides a consistent model and utility APIs to generate, publish, discover, and assemble metadata so build tools and integrations can automate library discovery and assembly decisions.
+Bindex Core is the foundational library for producing and consuming **bindex** metadata in the Machanism ecosystem. It provides a stable data model and supporting utility APIs to generate, publish, discover, validate, and assemble metadata so build tools and integrations can automate dependency discovery and library assembly decisions.
 
 ## Overview
 
-Bindex Core supplies the core data model and supporting utilities used by other Machanism components to work with bindex metadata. It is typically used indirectly (via plugins/tools) or directly by applications that need to:
+Bindex Core provides the core representation and utility APIs used by Machanism components to work with bindex metadata. It is typically consumed indirectly (via plugins/tools) or directly by applications that need to:
 
 - generate bindex metadata for artifacts,
 - register and publish that metadata for downstream discovery,
@@ -44,14 +44,14 @@ Bindex Core supplies the core data model and supporting utilities used by other 
 - Register and publish metadata for downstream discovery
 - Read, validate, and analyze bindex metadata
 - Merge/aggregate metadata across modules and dependencies
-- Utilities that support library selection and project assembly workflows
+- APIs that support library selection and project assembly workflows
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 9+
-- Maven 3.x
+- Java 11+
+- Maven 3.9+
 
 ### Environment Variables
 
@@ -73,7 +73,7 @@ Add it to your `pom.xml`:
 </dependency>
 ```
 
-Build the module:
+Build and run the bindex-related checks/processing in your build (via the consuming plugin/tool), or simply build this module:
 
 ```bash
 mvn -pl bindex-core clean verify
@@ -89,17 +89,17 @@ mvn -pl bindex-core clean verify
 
 ## Configuration
 
-Bindex Core is a library; most configuration is performed by the consuming tool/plugin. The table below lists commonly used, project-relevant settings and their defaults.
+Bindex Core is a library; most runtime configuration is performed by the consuming tool/plugin. The table below lists commonly relevant build settings and their defaults.
 
 | Parameter | Description | Default |
 |---|---|---|
-| `java.version` | Target Java version used to compile the project. | `9` |
+| `maven.compiler.release` | Java release target used to compile the project. | `11` |
 | `maven.javadoc.skip` | Whether to skip Javadoc generation. | `false` |
 
-Example (set project properties when building):
+Example (override build properties):
 
 ```bash
-mvn -pl bindex-core -Djava.version=11 -Dmaven.javadoc.skip=true clean verify
+mvn -pl bindex-core -Dmaven.compiler.release=17 -Dmaven.javadoc.skip=true clean verify
 ```
 
 ## Resources

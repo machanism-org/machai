@@ -1,23 +1,24 @@
 /**
  * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
- * <p>This package contains the stable abstractions that application code should depend on when configuring and
- * using the Machanism GenAI client. Provider-specific integrations (for example, OpenAI or a remote/web
- * orchestrator) live in sub-packages so implementations can evolve independently of the core API.
+ * <p>This package defines the stable, provider-neutral abstractions that application code should depend on when
+ * configuring and using the Machanism GenAI client. Concrete provider integrations (for example, OpenAI or a
+ * remote/web orchestrator) live in sub-packages so provider implementations can evolve independently of the
+ * core API.
  *
- * <h2>How to use this package</h2>
- * <p>Applications typically:
+ * <h2>Typical usage</h2>
  * <ol>
- *   <li>Select or configure a provider implementation (often via {@code org.machanism.machai.ai.manager}).</li>
- *   <li>Interact with provider-neutral types defined in this package and its immediate sub-packages.</li>
+ *   <li>Choose and configure a provider implementation (commonly via utilities in
+ *       {@code org.machanism.machai.ai.manager}).</li>
+ *   <li>Interact with provider-neutral types from this package and its immediate sub-packages.</li>
  *   <li>Swap providers without changing application logic.</li>
  * </ol>
  *
- * <h2>Design principles</h2>
+ * <h2>Design goals</h2>
  * <ul>
  *   <li><b>Provider neutrality</b>: keep application integrations stable while changing provider implementations.</li>
  *   <li><b>Separation of concerns</b>: isolate authentication, transport, and provider configuration details.</li>
- *   <li><b>Composability</b>: support multiple providers and a no-op provider for disabled environments.</li>
+ *   <li><b>Composability</b>: support multiple providers, including a no-op provider for disabled environments.</li>
  * </ul>
  *
  * <h2>Related sub-packages</h2>

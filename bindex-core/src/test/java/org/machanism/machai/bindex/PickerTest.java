@@ -22,38 +22,26 @@ class PickerTest {
     }
 
     @Test
-    void getScore_returnsNullWhenNoScoreWasRecorded() {
+    void getScore_returnsNullWhenNoScoreWasRecorded() throws Exception {
         // Arrange
-        Picker picker = new Picker(null, "mongodb://localhost:27017");
-        try {
-            // Act
-            Double score = picker.getScore("any");
+        Picker picker = TestPickers.newPickerWithoutMongo();
 
-            // Assert
-            assertNull(score);
-        } finally {
-            try {
-                picker.close();
-            } catch (Exception ignored) {
-            }
-        }
+        // Act
+        Double score = picker.getScore("any");
+
+        // Assert
+        assertNull(score);
     }
 
     @Test
-    void setEmbeddingModelName_roundTripsViaGetter() {
+    void setEmbeddingModelName_roundTripsViaGetter() throws Exception {
         // Arrange
-        Picker picker = new Picker(null, "mongodb://localhost:27017");
-        try {
-            // Act
-            picker.setEmbeddingModelName("model-x");
+        Picker picker = TestPickers.newPickerWithoutMongo();
 
-            // Assert
-            assertEquals("model-x", picker.getEmbeddingModelName());
-        } finally {
-            try {
-                picker.close();
-            } catch (Exception ignored) {
-            }
-        }
+        // Act
+        picker.setEmbeddingModelName("model-x");
+
+        // Assert
+        assertEquals("model-x", picker.getEmbeddingModelName());
     }
 }

@@ -57,7 +57,7 @@ Learn more about guided file processing: https://machanism.org/guided-file-proce
 
 ### Prerequisites
 
-- Java 9+ runtime.
+- Java 11+ runtime.
 - Network access to your selected GenAI provider (if applicable).
 
 ### Environment Variables
@@ -111,11 +111,11 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 |--------|------------|:--------:|-------------|---------|
 | `-h` | `--help` | No | Displays help information for usage. | Off |
 | `-t` | `--threads` | No | Enable multi-threaded processing. | Off |
-| `-d` | `--dir` | Yes | Path to the project directory (project root). | `dir` from `gw.properties`, otherwise current working directory |
-| `-g` | `--genai` | Yes | GenAI service provider and model (for example, `OpenAI:gpt-5.1`). | `genai` from `gw.properties`, otherwise `OpenAI:gpt-5-mini` |
-| `-i` | `--instructions` | Yes | Additional file processing instructions. Provide either instruction text directly or a path to an existing file containing the instructions (file contents will be used). | None |
+| `-d` | `--dir` | Yes | The path to the project directory (project root). | Value from `gw.properties` key `dir`; otherwise the current working directory |
+| `-g` | `--genai` | Yes | Specifies the GenAI service provider and model (for example, `OpenAI:gpt-5.1`). | Value from `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
+| `-i` | `--instructions` | Yes | Additional file processing instructions. Provide either the instruction text directly or the path to a file containing the instructions; if the provided value is an existing file, its contents are used. | None |
 
-**Positional arguments**: zero or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
+**Positional arguments**: Zero or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
 
 ### Example
 

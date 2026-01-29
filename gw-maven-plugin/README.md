@@ -25,26 +25,27 @@
 
 ## Project Title and Overview
 
-GW Maven Plugin (Ghostwriter Maven Plugin) is a documentation automation plugin for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to assemble, generate, and update Maven Site Markdown pages, keeping documentation consistent and aligned with the codebase.
+GW Maven Plugin integrates Ghostwriter into Maven builds to generate and update Maven Site Markdown documentation from embedded `@guidance:` directives. It helps reduce documentation drift by making documentation generation repeatable as part of standard Maven workflows.
 
 ## Installation Instructions
 
 ### Prerequisites
 
-- Java 9+
-- Maven 3+
+- Git
+- Java 11+
+- Maven 3.6.0+
 
 ### Checkout
 
 ```sh
 git clone https://github.com/machanism-org/machai.git
-cd machai/gw-maven-plugin
+cd machai
 ```
 
 ### Build
 
 ```sh
-mvn clean install
+mvn -U clean install
 ```
 
 ## Usage
@@ -57,14 +58,22 @@ Add the plugin to your project `pom.xml`:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>${project.version}</version>
+  <version>REPLACE_WITH_LATEST_VERSION</version>
 </plugin>
 ```
 
 ### Run the plugin
 
+Run the goal from a module where the plugin is configured:
+
 ```sh
 mvn gw:gw
+```
+
+Or run it directly by coordinates:
+
+```sh
+mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw
 ```
 
 ### Configuration example
@@ -73,7 +82,7 @@ mvn gw:gw
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>${project.version}</version>
+  <version>REPLACE_WITH_LATEST_VERSION</version>
   <configuration>
     <genai>CodeMie:gpt-5-2-2025-12-11</genai>
     <serverId>CodeMie</serverId>
@@ -84,12 +93,11 @@ mvn gw:gw
 Command-line override example:
 
 ```sh
-mvn gw:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11
+mvn gw:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
 ```
 
 ### Typical workflow
 
 1. Add `@guidance:` comments close to the code or artifacts they describe.
-2. Run `mvn gw:gw` to (re)generate/update the Maven Site Markdown pages.
-3. Run `mvn site` to render the site and review the generated documentation.
-4. Iterate: update code and `@guidance:` comments as requirements evolve, then re-run the goals.
+2. Run `mvn gw:gw` to generate or update the Maven Site Markdown pages.
+3. Run `mvn site` (or `mvn site site:stage`) to render and review the site.

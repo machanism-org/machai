@@ -1,12 +1,13 @@
 /**
  * Filesystem-backed project inspection, layout detection, and traversal utilities.
  *
- * <p>This package focuses on detecting a project's build/layout conventions from a root directory and then
- * traversing the project structure using that layout.
+ * <p>This package supports inspecting a project rooted at a directory, determining the most appropriate
+ * {@link org.machanism.machai.project.layout.ProjectLayout} based on well-known build markers and structure,
+ * and traversing the resulting layout.
  *
  * <h2>Key responsibilities</h2>
  * <ul>
- *   <li><strong>Layout detection</strong>: chooses an appropriate
+ *   <li><strong>Layout detection</strong>: selects an appropriate
  *     {@link org.machanism.machai.project.layout.ProjectLayout} by inspecting marker files and directory
  *     structure (for example, Maven {@code pom.xml}, Node.js {@code package.json}, or Python
  *     {@code pyproject.toml}).</li>

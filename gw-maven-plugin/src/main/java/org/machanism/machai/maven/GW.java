@@ -166,12 +166,12 @@ public class GW extends AbstractMojo {
 			}
 		};
 
-		if (ArrayUtils.isNotEmpty(instructions)) {
-			documents.setInstructionLocations(instructions);
-		}
-
-		logger.info("Scanning documents in the root directory: {}", basedir);
 		try {
+			if (ArrayUtils.isNotEmpty(instructions)) {
+				documents.setInstructionLocations(instructions);
+			}
+
+			logger.info("Scanning documents in the root directory: {}", basedir);
 			documents.setModuleMultiThread(threads);
 			documents.scanDocuments(basedir);
 		} catch (IOException e) {

@@ -25,18 +25,14 @@
 */
 
 /**
- * Maven plugin goal for AI-assisted project assembly.
+ * Maven plugin entry points for AI-assisted project assembly.
  *
  * <p>
- * This package provides the {@code assembly} Maven goal implemented by {@link org.machanism.machai.maven.Assembly}.
- * The goal performs an AI-driven workflow during a build:
+ * This package provides the implementation of the {@code assembly} Maven goal via
+ * {@link org.machanism.machai.maven.Assembly}. The goal reads a prompt describing the desired changes, uses a
+ * picker model to recommend relevant libraries, and then runs an assembly workflow that can modify the Maven
+ * project located at the current execution {@code basedir}.
  * </p>
- * <ol>
- *   <li>Obtain an assembly prompt (from a file or interactively).</li>
- *   <li>Use a GenAI provider to recommend candidate libraries ({@code Bindex} entries) relevant to the prompt.</li>
- *   <li>Apply a minimum score threshold to filter recommendations.</li>
- *   <li>Run an application assembly workflow that applies changes to the Maven project directory.</li>
- * </ol>
  *
  * <h2>Goal</h2>
  * <ul>
@@ -45,13 +41,13 @@
  *
  * <h2>Parameters</h2>
  * <p>
- * Parameters can be provided via Maven system properties (for example, {@code -Dassembly.genai=...}) or via plugin
- * configuration in the POM.
+ * Parameters may be provided using Maven system properties (for example, {@code -Dassembly.genai=...}) or through
+ * standard plugin configuration in the POM.
  * </p>
  * <ul>
- *   <li>{@code assembly.genai} &ndash; GenAI provider id used for the assembly phase (default {@code OpenAI:gpt-5}).</li>
- *   <li>{@code pick.genai} &ndash; GenAI provider id used for the recommendation/picker phase (default {@code OpenAI:gpt-5-mini}).</li>
- *   <li>{@code assembly.prompt.file} &ndash; Prompt file path (default {@code project.txt}). If missing, the prompt is read from the console.</li>
+ *   <li>{@code assembly.genai} &ndash; GenAI provider id for the assembly phase (default {@code OpenAI:gpt-5}).</li>
+ *   <li>{@code pick.genai} &ndash; GenAI provider id for the recommendation/picker phase (default {@code OpenAI:gpt-5-mini}).</li>
+ *   <li>{@code assembly.prompt.file} &ndash; Prompt file path (default {@code project.txt}); if missing, the prompt is read interactively.</li>
  *   <li>{@code assembly.score} &ndash; Minimum score threshold for recommended libraries (default {@code 0.9}).</li>
  *   <li>{@code bindex.register.url} &ndash; Optional registration/lookup endpoint used by the picker.</li>
  * </ul>

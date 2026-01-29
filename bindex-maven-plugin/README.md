@@ -24,22 +24,22 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-The **Bindex Maven Plugin** generates and optionally registers/publishes `bindex.json` metadata for Maven modules in the Machanism ecosystem. By producing a consistent, structured descriptor per module, it improves artifact discovery, integration, and assembly workflows, and supports GenAI-powered semantic search scenarios that rely on rich, standardized metadata.
+The **Bindex Maven Plugin** generates and maintains a `bindex.json` descriptor for a Maven module and can optionally register or publish that metadata. This keeps structured library metadata in sync with the build so it can be used for artifact discovery, GenAI-powered semantic search, and downstream assembly workflows in the Machanism ecosystem.
 
 ## Installation Instructions
 
 ### Prerequisites
 
-- Java 8+
-- Maven 3.6+
 - Git
+- Maven 3.6.0 or later
+- Java 11 or later
 
 ### Checkout and build
 
 ```bash
 git clone https://github.com/machanism-org/machai.git
-cd machai/bindex-maven-plugin
-mvn -DskipTests package
+cd machai
+mvn -pl bindex-maven-plugin -am clean install
 ```
 
 ## Usage
@@ -58,20 +58,35 @@ Register/publish the descriptor (optional):
 mvn org.machanism.machai:bindex-maven-plugin:register
 ```
 
-### Typical workflow
+### Configure the plugin
 
-1. Configure the plugin in your project `pom.xml` (optionally bind it to a lifecycle phase).
-2. Run `mvn org.machanism.machai:bindex-maven-plugin:bindex` to generate or update `bindex.json`.
-3. Commit `bindex.json` if your repository policy expects generated metadata to be versioned.
-4. If you use a registry, configure credentials/settings and run `mvn org.machanism.machai:bindex-maven-plugin:register` (or run it in CI).
+Add the plugin to your project `pom.xml` and (optionally) bind goals to lifecycle phases.
+
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.machanism.machai</groupId>
+      <artifactId>bindex-maven-plugin</artifactId>
+      <version>${machai.version}</version>
+      <executions>
+        <execution>
+          <id>generate-bindex</id>
+          <phase>package</phase>
+          <goals>
+            <goal>bindex</goal>
+          </goals>
+          <configuration>
+            <update>true</update>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
 
 ### Configuration
-
-Registration/publishing may require credentials depending on your registry configuration.
-
-| Environment variable | Description |
-|---|---|
-| `BINDEX_REG_PASSWORD` | Password/token used when writing to the registration database/registry (only required if registration is enabled). |
 
 Common parameters:
 
@@ -84,3 +99,11 @@ Example (disable updates):
 ```bash
 mvn org.machanism.machai:bindex-maven-plugin:bindex -Dupdate=false
 ```
+
+### Registration credentials
+
+Registration/publishing may require credentials depending on your registry configuration.
+
+| Environment variable | Description |
+|---|---|
+| `BINDEX_REG_PASSWORD` | Password/token used when writing to the registration database/registry (only required if registration is enabled). |

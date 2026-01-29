@@ -42,9 +42,15 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
 
-It supports sending prompts and receiving responses from OpenAI chat models, managing files for use in OpenAI workflows, performing common LLM tasks (text generation, summarization, Q&A), and creating vector embeddings for semantic search and similarity analysis.
+It enables:
+
+- Sending prompts and receiving responses from OpenAI chat models.
+- Managing files for use in OpenAI workflows.
+- Common LLM tasks such as text generation, summarization, and question answering.
+- Creating and using vector embeddings for semantic search and similarity analysis.
+- Tool/function calling via registered tools (`addTool(...)`).
 
 Environment variables (read automatically by the OpenAI client; you must set at least `OPENAI_API_KEY`):
 
@@ -72,40 +78,40 @@ Thread safety: this implementation is NOT thread-safe.
 
 Before creating the underlying OpenAI client, it authenticates against a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the OpenAI client via Java system properties:
 
-- `OPENAI_API_KEY` is set to the retrieved access token
-- `OPENAI_BASE_URL` is set to `https://codemie.lab.epam.com/code-assistant-api/v1`
+- `OPENAI_API_KEY` is set to the retrieved access token.
+- `OPENAI_BASE_URL` is set to `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
 Required Java system properties:
 
 - `GENAI_USERNAME`
 - `GENAI_PASSWORD`
 
-Thread safety follows `OpenAIProvider`.
+Thread safety: follows `OpenAIProvider` (NOT thread-safe).
 
 ### None
 
-`NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and optionally log input requests locally when an external AI provider is not required or available.
+`NoneProvider` implements `GenAIProvider` to disable generative AI integrations and optionally log request inputs locally.
 
-It provides a stub implementation that stores requests in input files (when `inputsLog(...)` is configured). No calls are made to any external AI services or LLMs.
+It provides a stub implementation that stores prompts (and optional instructions) in files when `inputsLog(...)` is configured. No calls are made to external AI services or LLMs.
 
 Typical use cases:
 
 - Disabling generative AI features for security or compliance.
-- Implementing fallback logic when no provider is configured.
+- Fallback behavior when no provider is configured.
 - Logging requests for manual review or later processing.
-- Running tests/environments without external connectivity.
+- Running in test environments without external connectivity.
 
-Behavior notes:
+Notes:
 
-- Operations requiring GenAI services (for example, embeddings generation) throw an exception.
+- Operations requiring GenAI services (for example, embeddings) throw an exception.
 - All prompts and instructions are cleared after `perform()`.
-- If instructions were set and `inputsLog(...)` is configured, `perform()` writes them to `instructions.txt` alongside the input log.
+- When instructions are set and `inputsLog(...)` is configured, `perform()` writes them to `instructions.txt` alongside the input log.
 
 ### Web
 
 `WebProvider` obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (`model(String)`), initializes the workspace with a project directory (`setWorkingDir(File)`), then submits the current prompt list by running the `"Submit Prompt"` recipe (`perform()`).
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (`model(String)`), initializes the workspace with a project directory (`setWorkingDir(File)`), then submits the current prompt list by running the `"Submit Prompt"` recipe (`perform()`). The recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle:
 

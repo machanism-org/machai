@@ -1,25 +1,25 @@
 /**
- * Detects and describes a project's on-disk structure.
+ * Detects and describes a project's on-disk layout.
  *
- * <p>The types in this package provide a {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and a
- * set of concrete implementations that infer a project's directory layout (sources, tests, documents, and optional
- * modules) from a project root directory.
+ * <p>This package provides the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and
+ * implementations that infer a project's directory structure (modules, sources, tests, and documentation)
+ * from a project root directory.
  *
- * <p>Layout detection is typically driven by a build/configuration descriptor found in the project root:
+ * <h2>Layout detection</h2>
+ * <p>Implementations generally use a build/configuration descriptor located in the project root:
  * <ul>
  *   <li>Maven projects via {@code pom.xml} ({@link org.machanism.machai.project.layout.MavenProjectLayout})</li>
  *   <li>JavaScript/TypeScript projects via {@code package.json}
  *       ({@link org.machanism.machai.project.layout.JScriptProjectLayout})</li>
- *   <li>Python projects via {@code pyproject.toml}
- *       ({@link org.machanism.machai.project.layout.PythonProjectLayout})</li>
+ *   <li>Python projects via {@code pyproject.toml} ({@link org.machanism.machai.project.layout.PythonProjectLayout})</li>
  *   <li>Fallback scanning when no known descriptor is found
  *       ({@link org.machanism.machai.project.layout.DefaultProjectLayout})</li>
  * </ul>
  *
  * <h2>Modules</h2>
- * <p>Some layouts can represent a multi-module/workspace project. For example, Maven modules can be obtained from the
- * POM model, while JavaScript/TypeScript workspaces can be discovered from the {@code workspaces} key in
- * {@code package.json}.
+ * <p>Some layouts represent multi-module or workspace projects. For example, Maven modules can be obtained from the
+ * {@code <modules>} section of the POM (when packaging is {@code pom}), while JavaScript/TypeScript workspaces can be
+ * discovered from the {@code workspaces} key in {@code package.json}.
  *
  * <h2>Filesystem traversal</h2>
  * <p>When scanning the filesystem (for example, to locate workspace modules), implementations should avoid traversing

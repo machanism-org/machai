@@ -21,6 +21,7 @@
 	</description>
 
 	<properties>
+		<maven.compiler.release>11</maven.compiler.release>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<ae.dir>src/main/ae</ae.dir>
 	</properties>

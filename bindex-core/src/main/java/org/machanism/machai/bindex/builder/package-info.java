@@ -26,28 +26,30 @@
  */
 
 /**
- * Builders that generate {@link org.machanism.machai.schema.Bindex} documents by assembling project context
- * and prompting a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Builds {@link org.machanism.machai.schema.Bindex} documents for a project by collecting relevant manifests and
+ * files and invoking a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <p>The base {@link org.machanism.machai.bindex.builder.BindexBuilder} implements the common pipeline:
+ * <p>The primary entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}, which defines a common
+ * generation pipeline:
  * <ol>
- *   <li>prompt the Bindex JSON schema,</li>
- *   <li>optionally include an origin {@code Bindex} to request an incremental update,</li>
- *   <li>collect project context (manifests and source/resource files),</li>
- *   <li>perform the generation request and deserialize the response.</li>
+ *   <li>define the expected {@code Bindex} output shape (prompt/schema),</li>
+ *   <li>optionally provide an existing {@code Bindex} for incremental updates,</li>
+ *   <li>assemble project context (manifests plus discovered source/resource/test files),</li>
+ *   <li>submit the request and deserialize the response into a {@code Bindex}.</li>
  * </ol>
  *
- * <p>Concrete builders tailor context collection for specific ecosystems:
+ * <p>Concrete builders specialize context discovery for particular ecosystems, for example:
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} reads an effective Maven model,
- *       prompts a sanitized POM, and adds source/resource/test directories from the Maven build configuration.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} prompts {@code package.json} and
- *       adds JavaScript/TypeScript/Vue sources from {@code src}.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} prompts {@code pyproject.toml} and
- *       adds files from an inferred source directory based on {@code project.name}.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} uses an effective Maven model to gather the POM
+ *       and the builds configured source/resource/test directories.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} uses {@code package.json} and common
+ *       JavaScript/TypeScript project layouts to discover relevant files.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} uses {@code pyproject.toml} and an inferred
+ *       source directory to discover relevant files.</li>
  * </ul>
  *
- * <p>To add support for a new project type, subclass {@code BindexBuilder} and override
- * {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()}.
+ * <p>To support an additional project type, subclass {@link org.machanism.machai.bindex.builder.BindexBuilder} and
+ * override {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()} to contribute the appropriate
+ * files and metadata.
  */
 package org.machanism.machai.bindex.builder;

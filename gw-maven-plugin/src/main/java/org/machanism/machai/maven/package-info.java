@@ -1,8 +1,8 @@
 /**
- * Maven plugin goals for integrating the MachAI generative-workflow (GW) document processing into a Maven build.
+ * Maven plugin goals for integrating the MachAI generative-workflow (GW) document-processing pipeline into a Maven build.
  *
  * <p>
- * The package provides two Mojos:
+ * This package provides two Mojos:
  * </p>
  * <ul>
  *   <li>
@@ -10,7 +10,8 @@
  *     directory (typically {@code ${basedir}}) and runs the workflow via {@link org.machanism.machai.gw.FileProcessor}.
  *   </li>
  *   <li>
- *     {@code clean} ({@link org.machanism.machai.maven.Clean}) deletes temporary artifacts created by prior workflow runs.
+ *     {@code clean} ({@link org.machanism.machai.maven.Clean}) deletes temporary artifacts created by prior workflow runs
+ *     (typically as part of the Maven {@code clean} phase).
  *   </li>
  * </ul>
  *
@@ -18,9 +19,12 @@
  *
  * <h3>{@code gw}</h3>
  * <p>
- * The {@code gw} goal delegates document discovery and processing to {@link org.machanism.machai.gw.FileProcessor}.
- * Configuration may be supplied either via plugin configuration in {@code pom.xml} or via Java system properties.
+ * The {@code gw} goal delegates discovery and processing to {@link org.machanism.machai.gw.FileProcessor}. The goal can be
+ * configured either via plugin configuration in {@code pom.xml} or via Java system properties passed on the Maven command
+ * line.
  * </p>
+ *
+ * <h4>Parameters</h4>
  * <ul>
  *   <li>
  *     <b>{@code genai}</b> / {@code -Dgw.genai=...} (optional): GenAI provider/model identifier forwarded to the workflow
@@ -41,20 +45,14 @@
  *   </li>
  * </ul>
  *
- * <h3>{@code clean}</h3>
- * <p>
- * The {@code clean} goal deletes temporary files created by earlier workflow runs. This goal has no user-configurable
- * parameters.
- * </p>
+ * <h4>Usage examples</h4>
  *
- * <h2>Usage examples</h2>
+ * <p>Run from the command line:</p>
+ * <pre>
+ * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai
+ * </pre>
  *
- * <h3>Run from the command line</h3>
- * <p>
- * {@code mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai}
- * </p>
- *
- * <h3>Configure in {@code pom.xml}</h3>
+ * <p>Configure in {@code pom.xml}:</p>
  * <pre>
  * &lt;plugin&gt;
  *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
@@ -78,6 +76,13 @@
  *   &lt;/executions&gt;
  * &lt;/plugin&gt;
  * </pre>
+ *
+ * <h3>{@code clean}</h3>
+ * <p>
+ * The {@code clean} goal deletes temporary files created by earlier workflow runs (see
+ * {@link org.machanism.machai.gw.FileProcessor#deleteTempFiles(java.io.File)}). This goal has no user-configurable
+ * parameters.
+ * </p>
  */
 package org.machanism.machai.maven;
 
