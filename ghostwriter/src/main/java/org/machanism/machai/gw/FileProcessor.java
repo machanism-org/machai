@@ -282,20 +282,27 @@ public class FileProcessor extends ProjectProcessor {
 
 				String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
 				provider.instructions(effectiveInstructions);
-				provider.prompt(promptBundle.getString("docs_processing_instructions"));
+
+				String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
+				String osName = System.getProperty("os.name");
+				docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
+				provider.prompt(docsProcessingInstructions);
 
 				String projectInfo = getProjectStructureDescription(projectLayout);
 				provider.prompt(projectInfo);
+				
 				provider.prompt(guidance);
+				
 				provider.prompt(promptBundle.getString("output_format"));
 
-				String extraInstructions = StringUtils.trimToNull(this.instructions);
-				if (extraInstructions != null) {
-					provider.prompt(extraInstructions);
+				String additionalInstructions = StringUtils.trimToNull(this.instructions);
+				if (additionalInstructions != null) {
+					provider.prompt(additionalInstructions);
 				}
 
 				if (isLogInputs()) {
-					String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
+					String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
+							file);
 					File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
 					File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 					File parentDir = inputsFile.getParentFile();
@@ -324,8 +331,6 @@ public class FileProcessor extends ProjectProcessor {
 		content.add(getDirInfoLine(projectLayout.getTests(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getDocuments(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getModules(), projectDir));
-
-		content.add(System.getProperty("os.name"));
 
 		Object[] array = content.toArray(new String[0]);
 		return MessageFormat.format(promptBundle.getString("project_information"), array);
@@ -424,7 +429,8 @@ public class FileProcessor extends ProjectProcessor {
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
 			if (moduleMultiThread && !provider.isThreadSafe()) {
 				throw new IllegalArgumentException(
-						"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
+						"The provider '" + genai
+								+ "' is not thread-safe and cannot be used in a multi-threaded context.");
 			}
 		}
 		this.moduleMultiThread = moduleMultiThread;
