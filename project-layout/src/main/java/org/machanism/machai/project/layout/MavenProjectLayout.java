@@ -27,7 +27,7 @@ public class MavenProjectLayout extends ProjectLayout {
 	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
 	private Model model;
-	private boolean effectivePomRequired;
+	private boolean effectivePomRequired = true;
 
 	/**
 	 * Checks if the given directory is a Maven project by looking for

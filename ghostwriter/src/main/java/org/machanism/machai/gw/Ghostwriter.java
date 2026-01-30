@@ -1,9 +1,13 @@
 package org.machanism.machai.gw;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -46,10 +50,14 @@ public final class Ghostwriter {
 
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
 	private static PropertiesConfigurator config = new PropertiesConfigurator();
+	private static File execDir;
 
 	static {
 		try {
-			config.load("gw.properties");
+			execDir = new File(Ghostwriter.class.getProtectionDomain().getCodeSource().getLocation()
+					.toURI());
+			File configFile = new File(execDir, "gw.properties");
+			config.load(configFile.getAbsolutePath());
 		} catch (Exception e) {
 			// configuration file not found.
 		}
@@ -74,8 +82,7 @@ public final class Ghostwriter {
 		Option genaiOpt = new Option("g", "genai", true,
 				"Specifies the GenAI service provider and model (e.g. `OpenAI:gpt-5.1`).");
 		Option instructionsOpt = new Option("i", "instructions", true,
-				"Specifies additional file processing instructions. "
-						+ "Provide either the instruction text directly or the path to a file containing the instructions.");
+				"Specifies a file name containing additional file processing instructions.");
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
@@ -100,17 +107,20 @@ public final class Ghostwriter {
 			}
 
 			String genai = cmd.getOptionValue(genaiOpt);
-			genai = Optional.ofNullable(genai).orElse(config.get("genai", DEFAULT_GENAI_VALUE));
-			rootDir = Optional.ofNullable(rootDir).orElse(config.getFile("dir", SystemUtils.getUserDir()));
+			String defaultGenai = config.get("genai", DEFAULT_GENAI_VALUE);
+			genai = Optional.ofNullable(genai).orElse(defaultGenai);
+
+			File defaultRootDir = config.getFile("dir", SystemUtils.getUserDir());
+			rootDir = Optional.ofNullable(rootDir).orElse(defaultRootDir);
 
 			String instructions = null;
 			if (cmd.hasOption(instructionsOpt)) {
 				instructions = cmd.getOptionValue(instructionsOpt);
-				String instractionFromFile = getInstractionsFromFile(instructions);
-				if (instractionFromFile != null) {
-					instructions = instractionFromFile;
-				}
+			} else {
+				instructions = config.get("instructions");
 			}
+
+			instructions = getInstractionsFromFile(instructions, true);
 
 			String[] dirs = cmd.getArgs();
 			if (rootDir == null) {
@@ -120,12 +130,14 @@ public final class Ghostwriter {
 				}
 			} else {
 				if (dirs.length == 0) {
-					dirs = new String[] { rootDir.getAbsolutePath() };
+					dirs = new String[] { SystemUtils.getUserDir().getPath() };
 				}
 			}
-
+			
 			LOGGER.info("Root directory: {}", rootDir);
 			boolean multiThread = cmd.hasOption(multiThreadOption);
+
+			String defaultGuidance = getInstractionsFromFile("@guidance.txt", false);
 
 			for (String scanDir : dirs) {
 				LOGGER.info("Scanning documents: {}", scanDir);
@@ -133,6 +145,7 @@ public final class Ghostwriter {
 				FileProcessor documents = new FileProcessor(genai);
 				documents.setInstructions(instructions);
 				documents.setModuleMultiThread(multiThread);
+				documents.setDefaultGuidance(defaultGuidance);
 
 				documents.scanDocuments(rootDir, new File(scanDir));
 				LOGGER.info("Scanning finished.");
@@ -144,14 +157,18 @@ public final class Ghostwriter {
 		}
 	}
 
-	private static String getInstractionsFromFile(String instructionsFile) {
-		File file = new File(instructionsFile);
+	private static String getInstractionsFromFile(String instructionsFile, boolean showWarning) {
 		String instructions = null;
-		if (file.exists()) {
-			try (FileReader reader = new FileReader(file)) {
-				instructions = IOUtils.toString(reader);
-			} catch (IOException e) {
-				LOGGER.info("Failed to read instructions from file: {}", file);
+		if (instructionsFile != null) {
+			File file = new File(execDir, instructionsFile);
+			if (file.exists()) {
+				try (FileReader reader = new FileReader(file)) {
+					instructions = IOUtils.toString(reader);
+				} catch (IOException e) {
+					LOGGER.error("Failed to read instructions from file: {}", file);
+				}
+			} else if (showWarning) {
+				LOGGER.warn("Instruction file not found: {}", file);
 			}
 		}
 		return instructions;

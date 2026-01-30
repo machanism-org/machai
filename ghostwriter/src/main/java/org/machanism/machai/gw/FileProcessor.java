@@ -29,6 +29,7 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.project.ProjectProcessor;
+import org.machanism.machai.project.layout.DefaultProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +82,10 @@ public class FileProcessor extends ProjectProcessor {
 	private boolean logInputs = true;
 
 	private boolean nonRecursive;
+
+	private String defaultGuidance;
+
+	private File defaultProcessingDir;
 
 	/**
 	 * Constructs a processor.
@@ -144,7 +149,17 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	public void scanDocuments(File rootDir, File dir) throws IOException {
 		this.rootDir = rootDir;
-		scanFolder(dir);
+
+		File scanDir = dir;
+		if (defaultGuidance != null) {
+			ProjectLayout projectLayout = getProjectLayout(dir);
+			if (projectLayout instanceof DefaultProjectLayout) {
+				defaultProcessingDir = dir;
+				scanDir = rootDir;
+			}
+		}
+
+		scanFolder(scanDir);
 	}
 
 	/**
@@ -206,24 +221,28 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	protected void processParentFiles(File projectDir) throws FileNotFoundException, IOException {
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
-		List<String> modules = projectLayout.getModules();
+		if (defaultProcessingDir == null) {
+			List<String> modules = projectLayout.getModules();
 
-		List<File> children = listFiles(projectDir);
+			List<File> children = listFiles(projectDir);
 
-		if (children.isEmpty()) {
-			return;
-		}
-
-		for (File child : children) {
-			if (isModuleDir(modules, child) || isExcludedByLayout(child)) {
-				continue;
+			if (children.isEmpty()) {
+				return;
 			}
 
-			if (child.isDirectory()) {
-				processProjectDir(child);
-			} else {
-				logIfNotBlank(processFile(projectLayout, child));
+			for (File child : children) {
+				if (isModuleDir(modules, child) || isExcludedByLayout(child)) {
+					continue;
+				}
+
+				if (child.isDirectory()) {
+					processProjectDir(child);
+				} else {
+					logIfNotBlank(processFile(projectLayout, child));
+				}
 			}
+		} else {
+			process(projectLayout, defaultProcessingDir, projectDir, defaultGuidance);
 		}
 	}
 
@@ -282,48 +301,59 @@ public class FileProcessor extends ProjectProcessor {
 		String guidance = parseFile(projectDir, file);
 		if (guidance != null) {
 			logger.info("Processing file: {}", file.getAbsolutePath());
+			perform = process(projectLayout, file, projectDir, guidance);
+		}
+		return perform;
+	}
 
-			try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
-				systemFunctionTools.applyTools(provider);
-				provider.setWorkingDir(getRootDir(projectDir));
+	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance)
+			throws IOException {
+		String perform;
 
-				String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
-				provider.instructions(effectiveInstructions);
+		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
+			systemFunctionTools.applyTools(provider);
+			provider.setWorkingDir(getRootDir(projectDir));
 
-				String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
-				String osName = System.getProperty("os.name");
-				docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
-				provider.prompt(docsProcessingInstructions);
+			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
+			provider.instructions(effectiveInstructions);
 
-				String projectInfo = getProjectStructureDescription(projectLayout);
-				provider.prompt(projectInfo);
+			String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
+			String osName = System.getProperty("os.name");
+			docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
+			provider.prompt(docsProcessingInstructions);
 
-				provider.prompt(guidance);
+			String projectInfo = getProjectStructureDescription(projectLayout);
+			provider.prompt(projectInfo);
 
-				provider.prompt(promptBundle.getString("output_format"));
+			String currentFile = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
+					file);
+			String guidancePrompt = MessageFormat.format(promptBundle.getString("guidance_file"), currentFile,
+					guidance);
+			provider.prompt(guidancePrompt);
 
-				String additionalInstructions = StringUtils.trimToNull(this.instructions);
-				if (additionalInstructions != null) {
-					provider.prompt(additionalInstructions);
-				}
+			provider.prompt(promptBundle.getString("output_format"));
 
-				if (isLogInputs()) {
-					String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
-							file);
-					File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
-					File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
-					File parentDir = inputsFile.getParentFile();
-					if (parentDir != null) {
-						Files.createDirectories(parentDir.toPath());
-					}
-					provider.inputsLog(inputsFile);
-				}
-
-				perform = provider.perform();
+			String additionalInstructions = StringUtils.trimToNull(this.instructions);
+			if (additionalInstructions != null) {
+				provider.prompt(additionalInstructions);
 			}
 
-			logger.info("Finished processing file: {}", file.getAbsolutePath());
+			if (isLogInputs()) {
+				String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
+						file);
+				File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
+				File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
+				File parentDir = inputsFile.getParentFile();
+				if (parentDir != null) {
+					Files.createDirectories(parentDir.toPath());
+				}
+				provider.inputsLog(inputsFile);
+			}
+
+			perform = provider.perform();
 		}
+
+		logger.info("Finished processing file: {}", file.getAbsolutePath());
 		return perform;
 	}
 
@@ -433,7 +463,6 @@ public class FileProcessor extends ProjectProcessor {
 	public void setModuleMultiThread(boolean moduleMultiThread) {
 		if (!moduleMultiThread) {
 			this.moduleMultiThread = false;
-			logger.info("Multi-threaded processing mode disabled.");
 			return;
 		}
 
@@ -492,5 +521,9 @@ public class FileProcessor extends ProjectProcessor {
 
 	public void setNonRecursive(boolean nonRecursive) {
 		this.nonRecursive = nonRecursive;
+	}
+
+	public void setDefaultGuidance(String defaultGuidance) {
+		this.defaultGuidance = defaultGuidance;
 	}
 }

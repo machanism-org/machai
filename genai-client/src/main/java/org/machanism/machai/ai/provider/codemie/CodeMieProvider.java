@@ -19,8 +19,11 @@ public class CodeMieProvider extends OpenAIProvider {
 	public static String baseUrl = "https://codemie.lab.epam.com/code-assistant-api/v1";
 
 	protected OpenAIClient getClient() {
-		String username = System.getProperty("GENAI_USERNAME");
-		String password = System.getProperty("GENAI_PASSWORD");
+		String username = System.getenv("GENAI_USERNAME");
+		username = System.getProperty("GENAI_USERNAME", username);
+
+		String password = System.getenv("GENAI_PASSWORD");
+		password = System.getProperty("GENAI_PASSWORD", password);
 		try {
 			String token = getToken(username, password);
 			System.setProperty("OPENAI_API_KEY", token);
