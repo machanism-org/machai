@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
@@ -157,9 +158,13 @@ public class FileProcessor extends ProjectProcessor {
 				defaultProcessingDir = dir;
 				scanDir = rootDir;
 			}
-		}
 
-		scanFolder(scanDir);
+			scanFolder(scanDir);
+			process(projectLayout, defaultProcessingDir, scanDir, defaultGuidance);
+
+		} else {
+			scanFolder(scanDir);
+		}
 	}
 
 	/**
@@ -221,28 +226,24 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	protected void processParentFiles(File projectDir) throws FileNotFoundException, IOException {
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
-		if (defaultProcessingDir == null) {
-			List<String> modules = projectLayout.getModules();
+		List<String> modules = projectLayout.getModules();
 
-			List<File> children = listFiles(projectDir);
+		List<File> children = listFiles(projectDir);
 
-			if (children.isEmpty()) {
-				return;
+		if (children.isEmpty()) {
+			return;
+		}
+
+		for (File child : children) {
+			if (isModuleDir(modules, child) || isExcludedByLayout(child)) {
+				continue;
 			}
 
-			for (File child : children) {
-				if (isModuleDir(modules, child) || isExcludedByLayout(child)) {
-					continue;
-				}
-
-				if (child.isDirectory()) {
-					processProjectDir(child);
-				} else {
-					logIfNotBlank(processFile(projectLayout, child));
-				}
+			if (child.isDirectory()) {
+				processProjectDir(child);
+			} else {
+				logIfNotBlank(processFile(projectLayout, child));
 			}
-		} else {
-			process(projectLayout, defaultProcessingDir, projectDir, defaultGuidance);
 		}
 	}
 
@@ -250,14 +251,14 @@ public class FileProcessor extends ProjectProcessor {
 		if (modules == null || modules.isEmpty() || dir == null) {
 			return false;
 		}
-		return StringUtils.equalsAnyIgnoreCase(dir.getName(), modules.toArray(new String[0]));
+		return Strings.CI.equalsAny(dir.getName(), modules.toArray(new String[0]));
 	}
 
 	private static boolean isExcludedByLayout(File file) {
 		if (file == null) {
 			return false;
 		}
-		return StringUtils.equalsAnyIgnoreCase(file.getName(), ProjectLayout.EXCLUDE_DIRS);
+		return Strings.CI.equalsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS);
 	}
 
 	private static void logIfNotBlank(String message) {
@@ -297,11 +298,17 @@ public class FileProcessor extends ProjectProcessor {
 
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
-		File projectDir = projectLayout.getProjectDir();
-		String guidance = parseFile(projectDir, file);
-		if (guidance != null) {
-			logger.info("Processing file: {}", file.getAbsolutePath());
-			perform = process(projectLayout, file, projectDir, guidance);
+
+		if (defaultProcessingDir == null
+				|| Strings.CS.startsWith(file.getPath(), defaultProcessingDir.getPath())) {
+
+			File projectDir = projectLayout.getProjectDir();
+			String guidance = parseFile(projectDir, file);
+
+			if (guidance != null) {
+				logger.info("Processing file: {}", file.getAbsolutePath());
+				perform = process(projectLayout, file, projectDir, guidance);
+			}
 		}
 		return perform;
 	}

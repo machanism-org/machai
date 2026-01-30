@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.model.License;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.building.DefaultModelBuilder;
@@ -158,7 +159,8 @@ public class PomReader {
 
 		DefaultServiceLocator locator = serviceLocator();
 		RepositorySystem system = locator.getService(RepositorySystem.class);
-		LocalRepository localRepo = new LocalRepository(".m2");
+		File repoDir = new File(SystemUtils.getUserHome(), ".m2/repository");
+		LocalRepository localRepo = new LocalRepository(repoDir);
 
 		DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
 		LocalRepositoryManager repManager = system.newLocalRepositoryManager(session, localRepo);
