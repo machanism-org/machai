@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -135,6 +136,9 @@ public class GW extends AbstractMojo {
 			System.setProperty("GENAI_PASSWORD", password);
 		}
 
+		List<MavenProject> modules = session.getAllProjects();
+		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
+
 		FileProcessor documents = new FileProcessor(genai) {
 			/**
 			 * Provides the Maven-based project layout for document scanning.
@@ -166,6 +170,8 @@ public class GW extends AbstractMojo {
 			}
 		};
 
+		documents.setNonRecursive(nonRecursive);
+		
 		try {
 			if (ArrayUtils.isNotEmpty(instructions)) {
 				documents.setInstructionLocations(instructions);

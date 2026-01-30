@@ -80,6 +80,8 @@ public class FileProcessor extends ProjectProcessor {
 
 	private boolean logInputs = true;
 
+	private boolean nonRecursive;
+
 	/**
 	 * Constructs a processor.
 	 *
@@ -154,35 +156,40 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
-		ProjectLayout projectLayout = getProjectLayout(projectDir);
-		List<String> modules = projectLayout.getModules();
 
-		if (modules != null) {
-			if (isModuleMultiThread()) {
-				ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, modules.size()));
-				try {
-					for (String module : modules) {
-						executor.submit(() -> {
-							try {
-								processModule(projectDir, module);
-							} catch (IOException e) {
-								logger.error("Module processing failed.", e);
-							}
-						});
+		if (!isNonRecursive()) {
+			ProjectLayout projectLayout = getProjectLayout(projectDir);
+			List<String> modules = projectLayout.getModules();
+
+			if (modules != null) {
+				if (isModuleMultiThread()) {
+					logger.info("Multi-threaded processing mode enabled.");
+
+					ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, modules.size()));
+					try {
+						for (String module : modules) {
+							executor.submit(() -> {
+								try {
+									processModule(projectDir, module);
+								} catch (IOException e) {
+									logger.error("Module processing failed.", e);
+								}
+							});
+						}
+					} finally {
+						executor.shutdown();
 					}
-				} finally {
-					executor.shutdown();
-				}
 
-				try {
-					executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					logger.error("Thread interrupted while processing modules", e);
-				}
-			} else {
-				for (String module : modules) {
-					processModule(projectDir, module);
+					try {
+						executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						logger.error("Thread interrupted while processing modules", e);
+					}
+				} else {
+					for (String module : modules) {
+						processModule(projectDir, module);
+					}
 				}
 			}
 		}
@@ -433,11 +440,11 @@ public class FileProcessor extends ProjectProcessor {
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
 			if (!provider.isThreadSafe()) {
 				throw new IllegalArgumentException(
-						"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
+						"The provider '" + genai
+								+ "' is not thread-safe and cannot be used in a multi-threaded context.");
 			}
 		}
 		this.moduleMultiThread = true;
-		logger.info("Multi-threaded processing mode enabled.");
 	}
 
 	public void setInstructions(String instructions) {
@@ -477,5 +484,13 @@ public class FileProcessor extends ProjectProcessor {
 		}
 		String text = StringUtils.trimToNull(instructionsText.toString());
 		setInstructions(text);
+	}
+
+	public boolean isNonRecursive() {
+		return nonRecursive;
+	}
+
+	public void setNonRecursive(boolean nonRecursive) {
+		this.nonRecursive = nonRecursive;
 	}
 }
