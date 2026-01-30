@@ -23,11 +23,11 @@
 
 ## Project Overview
 
-Ghostwriter is a CLI documentation engine (also available as a runnable JAR) that scans a project directory and updates documentation artifacts according to embedded guidance blocks and any additional instructions you provide.
+Ghostwriter is a CLI documentation engine (also available as a runnable JAR) that scans a project directory and processes documentation-related files according to embedded guidance and any additional instructions you provide.
 
 ## Introduction
 
-Machai Ghostwriter automates and standardizes project documentation and code annotation. Using guided file processing with embedded `@guidance` blocks, it helps teams keep documentation consistent, reviewable, and up to date across repositories. It’s designed to work well in scripts and CI so documentation changes can be generated and committed as part of your normal workflow.
+Machai Ghostwriter is a CLI documentation engine that automates and standardizes project documentation and code annotation. Using guided file processing with embedded `@guidance` blocks, it helps teams keep documentation consistent, reviewable, and up to date across multi-module repositories. It’s designed to work well in scripts and CI so documentation changes can be generated and committed as part of your normal workflow.
 
 ## Usage
 

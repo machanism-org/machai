@@ -25,15 +25,20 @@
 */
 
 /**
- * Maven plugin goal implementation for AI-assisted project assembly.
+ * Maven plugin goal implementation package for AI-assisted project assembly.
  *
  * <p>
- * The package contains the {@code assembly} goal implementation ({@link org.machanism.machai.maven.Assembly}) that:
+ * The primary entry point is {@link org.machanism.machai.maven.Assembly}, which implements the {@code assembly}
+ * goal.
+ * </p>
+ *
+ * <p>
+ * At execution time, the goal:
  * </p>
  * <ol>
- *   <li>Acquires an assembly prompt (from a file or interactively).</li>
- *   <li>Uses a picker model to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).</li>
- *   <li>Runs an application assembly workflow that applies changes to the current Maven execution base directory.</li>
+ *   <li>Obtains a prompt from a file or interactive input.</li>
+ *   <li>Uses a "picker" model to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).</li>
+ *   <li>Runs an assembly workflow that applies changes to the Maven execution base directory.</li>
  * </ol>
  *
  * <h2>Goal</h2>
@@ -41,9 +46,9 @@
  *   <li>{@code assembly} &ndash; recommends libraries and applies an assembly workflow driven by a prompt.</li>
  * </ul>
  *
- * <h2>Parameters</h2>
+ * <h2>Configuration parameters</h2>
  * <p>
- * Parameters can be provided via system properties (for example, {@code -Dassembly.genai=...}) or plugin
+ * Parameters can be provided as system properties (for example, {@code -Dassembly.genai=...}) or via plugin
  * configuration in the POM.
  * </p>
  * <ul>

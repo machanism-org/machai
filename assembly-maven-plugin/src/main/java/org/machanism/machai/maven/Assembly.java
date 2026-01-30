@@ -95,7 +95,7 @@ public class Assembly extends AbstractMojo {
      * Prompt file for the assembly workflow.
      *
      * <p>
-     * If the file exists it is read as UTF-8 text and used as the prompt; otherwise the prompt is requested
+     * If the file exists, it is read as UTF-8 text and used as the prompt; otherwise the prompt is requested
      * interactively.
      * </p>
      */
@@ -161,28 +161,28 @@ public class Assembly extends AbstractMojo {
                 picker.setScore(score);
                 List<Bindex> bindexList = picker.pick(query);
 
-                if (!bindexList.isEmpty()) {
-                    int i = 1;
-                    getLog().info("Recommended libraries:");
-                    for (Bindex bindex : bindexList) {
-                        String scoreStr = picker.getScore(bindex.getId()) != null
-                                ? picker.getScore(bindex.getId()).toString()
-                                : "";
-                        getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
-                    }
+                if (bindexList.isEmpty()) {
+                    return;
+                }
 
-                    GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(chatModel);
-                    ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider);
+                int i = 1;
+                getLog().info("Recommended libraries:");
+                for (Bindex bindex : bindexList) {
+                    String scoreStr = picker.getScore(bindex.getId()) != null ? picker.getScore(bindex.getId()).toString() : "";
+                    getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
+                }
 
-                    getLog().info("The project directory: " + basedir);
-                    assembly.projectDir(basedir);
-                    assembly.assembly(query, bindexList);
+                GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(chatModel);
+                ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider);
 
-                    if (!(assemblyProvider instanceof NoneProvider)) {
-                        String prompt;
-                        while (!StringUtils.equalsIgnoreCase(prompt = prompter.prompt("Prompt"), "exit")) {
-                            assemblyProvider.prompt(prompt);
-                        }
+                getLog().info("The project directory: " + basedir);
+                assembly.projectDir(basedir);
+                assembly.assembly(query, bindexList);
+
+                if (!(assemblyProvider instanceof NoneProvider)) {
+                    String prompt;
+                    while (!StringUtils.equalsIgnoreCase(prompt = prompter.prompt("Prompt"), "exit")) {
+                        assemblyProvider.prompt(prompt);
                     }
                 }
             }

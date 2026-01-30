@@ -4,27 +4,29 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Interface for file reviewers that analyze project files
- * to extract or process guidance for documentation generation.
+ * Service-provider interface (SPI) for components that scan project files and extract {@code @guidance}
+ * instructions for downstream processing.
+ *
+ * <p>Implementations typically target a specific file format (for example, Java, Markdown, or HTML), understand
+ * that format's comment conventions, and produce a normalized prompt fragment that includes path context.
  */
 public interface Reviewer {
 
     /**
-     * Analyzes and extracts guidance information from the specified file
-     * to aid documentation generation.
+     * Reviews a file and returns a formatted fragment (often including file content and/or extracted guidance)
+     * for use by the Ghostwriter pipeline.
      *
-     * @param projectDir the root directory of the project for context
-     * @param file the file to be reviewed and analyzed
-     * @return the extracted guidance or documentation fragment, or {@code null} if none found
+     * @param projectDir the project root directory used to compute related paths for context
+     * @param file the file to analyze
+     * @return a formatted prompt fragment, or {@code null} when no relevant guidance is present
      * @throws IOException if an error occurs reading the file
      */
     String perform(File projectDir, File file) throws IOException;
 
     /**
-     * Returns an array of supported file extensions for this reviewer.
-     * These extensions determine which files the reviewer is capable of processing.
+     * Returns the file extensions (without the dot) that this reviewer can process.
      *
-     * @return an array of supported file extension strings (without dot)
+     * @return supported file extensions
      */
     String[] getSupportedFileExtensions();
 

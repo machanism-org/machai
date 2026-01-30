@@ -111,9 +111,9 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 |--------|------------|:--------:|-------------|---------|
 | `-h` | `--help` | No | Displays help information for usage. | Off |
 | `-t` | `--threads` | No | Enable multi-threaded processing. | Off |
-| `-d` | `--dir` | Yes | The path to the project directory (project root). | Value from `gw.properties` key `dir`; otherwise the current working directory |
-| `-g` | `--genai` | Yes | Specifies the GenAI service provider and model (for example, `OpenAI:gpt-5.1`). | Value from `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
-| `-i` | `--instructions` | Yes | Additional file processing instructions. Provide either the instruction text directly or the path to a file containing the instructions; if the provided value is an existing file, its contents are used. | None |
+| `-d` | `--dir` | Yes | Path to the project directory (project root). | From `gw.properties` key `dir`; otherwise the current working directory |
+| `-g` | `--genai` | Yes | GenAI service provider and model (e.g. `OpenAI:gpt-5.1`). | From `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
+| `-i` | `--instructions` | Yes | Additional file-processing instructions. If the provided value is an existing file path, Ghostwriter reads and uses the file contents; otherwise it uses the value as inline instruction text. | None |
 
 **Positional arguments**: Zero or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
 

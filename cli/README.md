@@ -80,12 +80,12 @@ Example commands (as shown by `help`):
 
 - `pick`: Picks libraries based on user request.
 - `assembly`: Creates a project via picked library set.
-- `prompt`: Used to request additional GenAI guidance.
+- `prompt`: Is used for request additional GenAI guidances.
 
 ### Bindex commands
 
 - `bindex`: Generates bindex files.
-- `register`: Registers a bindex file.
+- `register`: Registers bindex file.
 
 ### Built-in commands
 

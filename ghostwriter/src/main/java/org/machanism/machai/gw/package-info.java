@@ -1,30 +1,27 @@
 /**
  * Command-line tooling and orchestration for scanning a workspace and preparing GenAI-ready prompt inputs.
  *
- * <p>This package provides the Ghostwriter CLI entry point and the scanning/processing pipeline.
- * Implementations in this package can:
+ * <p>This package provides the {@link org.machanism.machai.gw.Ghostwriter} CLI and the
+ * {@link org.machanism.machai.gw.FileProcessor} pipeline used to:
  *
  * <ul>
- *   <li>Traverse a project directory (and optionally its modules) while honoring configured exclusions.</li>
- *   <li>Apply file-type-specific reviewers/processors to extract directives and content.</li>
- *   <li>Aggregate extracted data and generate prompt-input artifacts for downstream processing.</li>
- *   <li>Invoke a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate or review output.</li>
+ *   <li>Detect project/module layouts and traverse directories while honoring common exclusions.</li>
+ *   <li>Delegate file-type-specific guidance extraction to {@link org.machanism.machai.gw.reviewer.Reviewer}
+ *       implementations discovered via {@link java.util.ServiceLoader}.</li>
+ *   <li>Assemble prompt inputs from bundled templates and optional user instructions.</li>
+ *   <li>Invoke a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to perform the requested
+ *       processing and optionally log the generated prompt inputs under a temporary folder.</li>
  * </ul>
  *
- * <p>Common entry points:
- *
- * <ul>
- *   <li>{@link org.machanism.machai.gw.Ghostwriter} – CLI entry point.</li>
- *   <li>{@link org.machanism.machai.gw.FileProcessor} – scanning/orchestration engine.</li>
- * </ul>
- *
- * <p>Example:
+ * <p>Typical usage is via the CLI:
  *
  * <pre>{@code
- * // From the command line:
  * // java -jar gw.jar --dir /path/to/project --genai OpenAI:gpt-5.1
+ * }</pre>
  *
- * // Programmatic usage:
+ * <p>Programmatic usage is also supported:
+ *
+ * <pre>{@code
  * FileProcessor processor = new FileProcessor("OpenAI:gpt-5.1");
  * processor.setModuleMultiThread(true);
  * processor.scanDocuments(new File("/path/to/project"));

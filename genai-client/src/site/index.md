@@ -24,6 +24,7 @@ The typical entry point is `GenAIProviderManager`, which resolves a provider imp
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+provider.model("gpt-5.1");
 provider.instructions("You are a helpful assistant.");
 provider.prompt("Summarize the following text...");
 String answer = provider.perform();
@@ -43,16 +44,15 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
+`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
 
-It supports:
+Capabilities include:
 
 - Sending prompts and receiving responses from OpenAI chat models.
 - Managing files for use in OpenAI workflows.
-- Common LLM tasks such as text generation, summarization, and question answering.
+- Performing LLM requests such as text generation, summarization, and question answering.
 - Creating and using vector embeddings for semantic search and similarity analysis.
-
-It also supports tool/function calling via registered tools (`addTool(...)`) and can be extended or configured to accommodate different use cases and model parameters.
+- Tool/function calling via registered tools.
 
 Environment variables (read automatically by the OpenAI client; you must set at least `OPENAI_API_KEY`):
 
@@ -61,15 +61,16 @@ Environment variables (read automatically by the OpenAI client; you must set at 
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using an OpenAI-compatible endpoint (for example, CodeMie) with this provider:
+Using the CodeMie API via an OpenAI-compatible endpoint:
 
 - Set `OPENAI_API_KEY` to an access token.
 - Set `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
-Example:
+Usage example:
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+provider.model("gpt-5.1");
 ```
 
 Thread safety: this implementation is NOT thread-safe.
@@ -88,32 +89,32 @@ Required Java system properties:
 - `GENAI_USERNAME`
 - `GENAI_PASSWORD`
 
-Thread safety: follows `OpenAIProvider` (NOT thread-safe).
-
 ### None
 
-`NoneProvider` implements `GenAIProvider` to disable generative AI integrations and optionally log request inputs locally.
+`NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and optionally log input requests locally.
 
-It provides a stub implementation that stores requests in input files (in the `inputsLog` location) when input logging is configured. No calls are made to external AI services or LLMs.
+Purpose:
+
+- Provides a stub implementation that stores requests in input files (in the `inputsLog` folder).
+- No calls are made to any external AI services or LLMs.
 
 Typical use cases:
 
 - Disabling generative AI features for security or compliance.
-- Fallback behavior when no provider is configured.
+- Implementing fallback logic when no provider is configured.
 - Logging requests for manual review or later processing.
-- Running in test environments without external connectivity.
+- Testing environments not connected to external services.
 
 Notes:
 
-- Operations requiring GenAI services (for example, embeddings) throw an exception.
-- All prompts and instructions are cleared after `perform()`.
-- When instructions are set and `inputsLog(...)` is configured, `perform()` writes them to `instructions.txt` alongside the input log.
+- Operations requiring GenAI services throw exceptions when called (for example, embeddings).
+- Prompts and instructions are cleared after performing.
 
 ### Web
 
-`WebProvider` obtains model responses by automating a target GenAI service through its web user interface.
+`WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (`model(String)`), initializes the workspace with a project directory (`setWorkingDir(File)`), then submits the current prompt list by running the `Submit Prompt` recipe (`perform()`). The recipe is expected to place the final response text into a variable named `result`.
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `Submit Prompt` recipe (via `perform()`). The recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle:
 

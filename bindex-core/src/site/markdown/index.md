@@ -33,10 +33,10 @@ Bindex Core is the foundational library for bindex metadata management in the Ma
 
 Bindex Core defines the core representation and supporting utilities used by Machanism components to work with bindex metadata. It is typically used by build plugins/tools (and can also be used directly by applications) to:
 
-- generate bindex metadata for artifacts,
-- register and publish metadata for downstream discovery,
-- read, validate, and merge metadata from multiple modules and dependencies,
-- drive library selection and project assembly workflows.
+- Generate bindex metadata for artifacts.
+- Register and publish metadata for downstream discovery.
+- Read, validate, and merge metadata from multiple modules and dependencies.
+- Drive library selection and project assembly workflows.
 
 ## Key Features
 

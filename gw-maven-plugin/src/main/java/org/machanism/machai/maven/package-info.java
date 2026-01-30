@@ -1,55 +1,52 @@
 /**
- * Maven plugin goals that integrate the MachAI generative-workflow (GW) document-processing pipeline into a Maven build.
+ * Maven plugin mojos that integrate the MachAI generative-workflow (GW) document-processing pipeline into a Maven
+ * build.
  *
  * <p>
- * This package provides two Mojos:
+ * The package provides two goals:
  * </p>
  * <ul>
  *   <li>
- *     {@code gw} ({@link org.machanism.machai.maven.GW}) scans documentation sources under the current module base
- *     directory (typically {@code ${basedir}}) and runs the workflow via {@link org.machanism.machai.gw.FileProcessor}.
+ *     {@code gw} ({@link org.machanism.machai.maven.GW}): scans the current module's base directory (typically
+ *     {@code ${basedir}}) for documentation sources and runs the GW workflow.
  *   </li>
  *   <li>
- *     {@code clean} ({@link org.machanism.machai.maven.Clean}) deletes temporary artifacts created by prior workflow runs
- *     (typically as part of the Maven {@code clean} phase).
+ *     {@code clean} ({@link org.machanism.machai.maven.Clean}): deletes temporary artifacts created by prior workflow
+ *     runs.
  *   </li>
  * </ul>
  *
- * <h2>Goals and configuration</h2>
- *
+ * <h2>Goal: {@code gw}</h2>
  * <p>
- * Goals may be configured either via plugin configuration in {@code pom.xml} or via Java system properties passed on the
- * Maven command line.
+ * The {@code gw} goal reads GenAI credentials from Maven {@code settings.xml} using the configured
+ * {@code &lt;server&gt;} entry and exposes them to the workflow via system properties:
  * </p>
+ * <ul>
+ *   <li>{@code GENAI_USERNAME}</li>
+ *   <li>{@code GENAI_PASSWORD}</li>
+ * </ul>
  *
- * <h3>{@code gw}</h3>
- * <p>
- * The {@code gw} goal delegates discovery and processing to {@link org.machanism.machai.gw.FileProcessor}.
- * </p>
- *
- * <h4>Parameters</h4>
+ * <h3>Configuration parameters</h3>
  * <ul>
  *   <li>
- *     <b>{@code genai}</b> / {@code -Dgw.genai=...} (optional): GenAI provider/model identifier forwarded to the workflow
- *     (for example {@code OpenAI:gpt-5}).
+ *     <b>{@code genai}</b> / {@code -Dgw.genai=...} (optional): GenAI provider/model identifier forwarded to the
+ *     workflow (for example {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
  *     <b>{@code instructions}</b> / {@code -Dgw.instructions=...} (optional): One or more instruction location strings
  *     consumed by the workflow.
  *   </li>
  *   <li>
- *     <b>{@code serverId}</b> / {@code -Dgw.genai.serverId=...} (required): Maven {@code settings.xml} {@code &lt;server&gt;}
- *     id used to read credentials for the GenAI provider. If present, the server's {@code username} and {@code password}
- *     are exposed to the workflow via the {@code GENAI_USERNAME} and {@code GENAI_PASSWORD} system properties.
+ *     <b>{@code serverId}</b> / {@code -Dgw.genai.serverId=...} (required): Maven {@code settings.xml}
+ *     {@code &lt;server&gt;} id used to read credentials for the GenAI provider.
  *   </li>
  *   <li>
- *     <b>{@code threads}</b> / {@code -Dgw.threads=true|false} (optional, default {@code true}): Enables/disables
+ *     <b>{@code threads}</b> / {@code -Dgw.threads=true|false} (optional, default {@code true}): Enables or disables
  *     multi-threaded document processing.
  *   </li>
  * </ul>
  *
- * <h4>Usage examples</h4>
- *
+ * <h3>Usage examples</h3>
  * <p>Run from the command line:</p>
  * <pre>
  * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai
@@ -69,18 +66,10 @@
  *       &lt;instruction&gt;src/site/machai/instructions.md&lt;/instruction&gt;
  *     &lt;/instructions&gt;
  *   &lt;/configuration&gt;
- *   &lt;executions&gt;
- *     &lt;execution&gt;
- *       &lt;goals&gt;
- *         &lt;goal&gt;gw&lt;/goal&gt;
- *         &lt;goal&gt;clean&lt;/goal&gt;
- *       &lt;/goals&gt;
- *     &lt;/execution&gt;
- *   &lt;/executions&gt;
  * &lt;/plugin&gt;
  * </pre>
  *
- * <h3>{@code clean}</h3>
+ * <h2>Goal: {@code clean}</h2>
  * <p>
  * The {@code clean} goal deletes temporary files created by earlier workflow runs (see
  * {@link org.machanism.machai.gw.FileProcessor#deleteTempFiles(java.io.File)}). This goal has no user-configurable

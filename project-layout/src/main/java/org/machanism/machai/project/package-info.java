@@ -1,18 +1,21 @@
 /**
- * Filesystem-backed project inspection, layout detection, and traversal utilities.
+ * Filesystem-backed APIs for inspecting a project directory, detecting an appropriate
+ * {@link org.machanism.machai.project.layout.ProjectLayout}, and traversing the project structure.
  *
- * <p>This package provides the core APIs for working with a project rooted at a directory on disk:
+ * <p>This package is intended for tooling that needs to understand how a repository is laid out on disk (for
+ * example, locating sources/resources, determining whether the project is multi-module, and walking the
+ * directory tree to process files).
+ *
+ * <p>The primary entry points are:
  *
  * <ul>
- *   <li>detecting an appropriate {@link org.machanism.machai.project.layout.ProjectLayout} by inspecting
- *       build marker files and directory structure,</li>
- *   <li>coordinating scans of a project root and its modules/subprojects (when supported by the detected layout),
- *       and</li>
- *   <li>delegating discovered files/folders to a {@link org.machanism.machai.project.ProjectProcessor}.
- *   </li>
+ *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} for layout detection and related helpers,</li>
+ *   <li>{@link org.machanism.machai.project.ProjectProcessor} for scanning a root folder and processing files,
+ *       optionally recursing into modules/subprojects when supported by the detected layout.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Example</h2>
+ *
  * <pre>{@code
  * File projectDir = new File("/path/to/project");
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);

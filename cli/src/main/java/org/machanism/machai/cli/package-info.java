@@ -1,19 +1,19 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains {@code @ShellComponent}-annotated commands that expose Machai features via an interactive
- * shell as well as non-interactive invocation.
+ * <p>This package contains Spring Shell {@code @ShellComponent} command classes that expose Machai functionality via
+ * an interactive shell and direct command invocation.
  *
- * <p>Responsibilities typically include:
+ * <h2>Responsibilities</h2>
  * <ul>
- *   <li>Picking libraries ("bricks") and assembling projects.</li>
+ *   <li>Searching and selecting libraries ("bricks") and assembling projects.</li>
  *   <li>Generating and registering bindex metadata.</li>
- *   <li>Scanning sources/documents and processing them with a configured GenAI model.</li>
- *   <li>Cleaning Machai temporary output folders.</li>
+ *   <li>Scanning source trees and documents and processing them with a configured GenAI model.</li>
+ *   <li>Cleaning Machai temporary/output folders.</li>
  *   <li>Managing configuration defaults used by other commands.</li>
  * </ul>
  *
- * <h2>Commands</h2>
+ * <h2>Command groups</h2>
  * <ul>
  *   <li><b>pick / assembly / prompt</b> ({@link org.machanism.machai.cli.AssemblyCommand})</li>
  *   <li><b>bindex / register</b> ({@link org.machanism.machai.cli.BindexCommand})</li>
@@ -25,24 +25,22 @@
  * <p>The application entry point is {@link org.machanism.machai.cli.MachaiCLI}.
  *
  * <h2>Usage</h2>
- * <pre>{@code
+ * <pre>
  * public final class Main {
  *   public static void main(String[] args) throws Exception {
  *     org.machanism.machai.cli.MachaiCLI.main(args);
  *   }
  * }
- * }
  * </pre>
  *
  * <p>Example commands:</p>
- * <pre>{@code
+ * <pre>
  * pick --query "Create a web app" --score 0.9
  * assembly --dir /path/to/out --genai OpenAI:gpt-5.1
  * bindex --dir /path/to/project --update false
  * register --dir /path/to/project --registerUrl http://localhost:8080
  * gw --dir /path/to/project --scan /path/to/project/src/main/java --genai OpenAI:gpt-5.1
  * clean --dir /tmp/machai
- * }
  * </pre>
  */
 package org.machanism.machai.cli;

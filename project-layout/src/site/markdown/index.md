@@ -21,13 +21,13 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# Project Layout
+# project-layout
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/project-layout.svg)](https://central.sonatype.com/artifact/org.machanism.machai/project-layout)
 
 ## Introduction
 
-Project Layout provides a small, focused API for detecting and describing a software project’s on-disk structure (source roots, test roots, resources, and multi-module/workspace layouts). It helps tooling avoid hard-coded conventions by giving a consistent way to infer a project’s layout from the files present.
+Project Layout is a small, focused Java API for detecting and describing a software project’s on-disk structure (main/test source roots, resource roots, and multi-module/workspace layouts). It helps tooling avoid hard-coded conventions by providing a consistent way to infer a project layout from the files present.
 
 ## Overview
 
@@ -50,7 +50,7 @@ This module models “project layout” as a set of directories and conventions 
 ### Prerequisites
 
 - Java 8+ (library usage)
-- Maven/Gradle (to build from source)
+- Maven or Gradle (to build from source)
 
 ### Environment Variables
 
@@ -97,4 +97,4 @@ machai analyze --projectRoot . --layout auto
 ## Resources
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/project-layout
-- Source: https://github.com/machanism/machai
+- Source: https://github.com/machanism-org/machai

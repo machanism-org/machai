@@ -5,7 +5,8 @@
  * <p>This package coordinates an end-to-end lifecycle:
  * <ol>
  *   <li>Build or update a {@code bindex.json} file for a project directory.</li>
- *   <li>Optionally register that Bindex document in a backing store (e.g., a vector database) for semantic lookup.</li>
+ *   <li>Optionally register that Bindex document in a backing store (for example, a vector database) for semantic
+ *       lookup.</li>
  *   <li>Optionally perform semantic selection to retrieve relevant Bindex documents.</li>
  *   <li>Assemble one or more Bindexes into LLM prompt inputs.</li>
  * </ol>

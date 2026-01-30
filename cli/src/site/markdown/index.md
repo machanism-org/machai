@@ -27,11 +27,11 @@ Page Structure:
 
 ## Introduction
 
-Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library discovery and integration.
+`machai-cli` is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library discovery and integration.
 
 ## Overview
 
-Machai CLI is a Spring Boot + Spring Shell application that helps you:
+`machai-cli` is a Spring Boot + Spring Shell application that helps you:
 
 - Generate and update `bindex.json` metadata for projects.
 - Register metadata into a metadata database for later discovery.
@@ -55,7 +55,7 @@ Machai CLI is a Spring Boot + Spring Shell application that helps you:
 
 - Java 17+
 - A GenAI provider API key (for example, OpenAI)
-- Network access to the metadata database endpoint used by `pick`/`assembly`/`register`
+- Network access to the metadata database endpoint used by `pick` / `assembly` / `register`
 
 ### Environment Variables
 
@@ -113,7 +113,7 @@ Then enter `help` to see the available commands.
 | Parameter | Description | Default |
 |---|---|---|
 | `--dir` | Working directory used by commands that operate on a project/workspace. | Current directory / configured default |
-| `--registerUrl` | Metadata database endpoint for `pick`/`assembly`/`register`. | (none) |
+| `--registerUrl` | Metadata database endpoint for `pick` / `assembly` / `register`. | (none) |
 | `--genai` | GenAI provider/model (format: `provider:model`). | Configured default |
 | `--score` | Minimum similarity score for matches (used by commands that support it). | Configured default |
 | `--update` | Whether to update existing metadata/registration. | Command-specific |

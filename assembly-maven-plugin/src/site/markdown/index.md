@@ -27,9 +27,9 @@ Page Structure:
 
 ## Introduction
 
-Assembly Maven Plugin automates “assembly-style” updates to local Maven projects in the Machanism ecosystem. It can use Machanism bindex metadata (for example, `bindex.json`) and GenAI-powered semantic search to help choose and integrate libraries.
+Assembly Maven Plugin automates assembly-style updates to local Maven projects in the Machanism ecosystem. It integrates libraries using Machanism bindex metadata (for example, `bindex.json`) and can optionally use GenAI-powered semantic search to help choose and wire dependencies.
 
-You provide a short project concept (for example, `project.txt`) and run the `assembly` goal. The plugin proposes and applies concrete, reviewable changes to your working tree—such as updates to `pom.xml` and related project files.
+You provide a short project concept (for example, `project.txt`) and run the `assembly` goal. The plugin then proposes and applies concrete, reviewable changes to your working tree—such as updates to `pom.xml` and related project files.
 
 Benefits:
 
@@ -64,9 +64,9 @@ Value proposition:
 
 ### Environment Variables
 
-| Variable         | Description                           |
-|------------------|---------------------------------------|
-| `OPENAI_API_KEY` | API key for the OpenAI-compatible API |
+| Variable         | Description                                        |
+|------------------|----------------------------------------------------|
+| `OPENAI_API_KEY` | API key for the OpenAI-compatible API (if enabled) |
 
 ### Basic Usage
 

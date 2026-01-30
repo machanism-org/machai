@@ -1,22 +1,12 @@
 /**
- * Defines the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and built-in
- * implementations used by Ghostwriter to extract {@code @guidance} instructions from source and documentation files.
+ * Provides the Ghostwriter reviewer service-provider interface (SPI) and built-in implementations for
+ * discovering and extracting {@code @guidance} instruction blocks from supported file formats.
  *
- * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} understands the comment conventions of a specific file format,
- * locates guidance blocks, and produces a normalized prompt fragment (including path context) for downstream
- * processing.
+ * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} implementation understands the comment conventions of a
+ * particular format, locates {@code @guidance} blocks, and returns a normalized prompt fragment (including path
+ * context) for downstream processing.
  *
- * <p>Reviewers are typically selected by file extension and invoked by the Ghostwriter pipeline.
- *
- * <h2>Included reviewers</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer} - Java sources (including {@code package-info.java})</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer} - Markdown files</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer} - HTML/XML files</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer} - Python sources</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer} - TypeScript sources</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} - directory-scoped {@code @guidance.txt} files</li>
- * </ul>
+ * <p>Reviewers are typically selected by file extension and invoked as part of the Ghostwriter pipeline.
  */
 package org.machanism.machai.gw.reviewer;
 

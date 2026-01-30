@@ -129,30 +129,26 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` class integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` class integrates with OpenAI-compatible chat/completions APIs as a concrete implementation of `GenAIProvider`.
 
-This provider enables a wide range of generative AI capabilities, including:
+Capabilities include:
 
-- Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+- Sending prompts/instructions and receiving model responses.
+- Optional attachment of local/remote files (provider-dependent).
+- Optional tool/function calling through registered Java tools (provider-dependent).
+- Optional text embeddings (provider-dependent).
 
 **Environment variables**
-
-The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using the CodeMie API**
+**Using the CodeMie API (OpenAI-compatible gateway)**
 
-To use the CodeMie API, set the following environment variables:
-
-- `OPENAI_API_KEY` to an access token.
-- `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`.
+- Set `OPENAI_API_KEY` to an access token.
+- Set `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
 **Usage example**
 
@@ -160,7 +156,7 @@ To use the CodeMie API, set the following environment variables:
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 ```
 
-**Thread safety**: this implementation is NOT thread-safe.
+**Thread safety:** NOT thread-safe.
 
 ### CodeMie
 
@@ -180,41 +176,33 @@ This provider reads credentials from Java system properties:
 - `GENAI_USERNAME` (required)
 - `GENAI_PASSWORD` (required)
 
-Thread safety follows `OpenAIProvider` (NOT thread-safe).
+**Thread safety:** NOT thread-safe (inherits behavior from `OpenAIProvider`).
 
 ### None
 
-The `NoneProvider` class is an implementation of the `GenAIProvider` interface used to disable generative AI integrations and log input requests locally when an external AI provider is not required or available.
+`NoneProvider` is an implementation of `GenAIProvider` intended for disabling external GenAI usage while optionally logging requests locally.
 
-**Purpose**
+It is useful when GenAI functionality must be turned off (e.g., compliance, offline runs) but you still want to capture prompts/inputs for later review.
 
-Provides a stub implementation that stores requests in input files (in the `inputsLog` folder). All GenAI operations are non-operative, or throw exceptions where necessary, making this useful for scenarios where generative AI features must be disabled, simulated, or for fallback testing. No calls are made to any external AI services or large language models (LLMs).
+Behavior:
 
-**Typical use cases**
-
-- Disabling generative AI features for security or compliance.
-- Implementing fallback logic when no provider is configured.
-- Logging requests for manual review or later processing.
-- Testing environments not connected to external services.
-
-**Notes**
-
-- Operations requiring GenAI services will throw exceptions when called.
-- All prompts and instructions are cleared after performing.
+- No external API calls are performed.
+- Requests can be written to the configured `inputsLog` location.
+- Operations that require a real GenAI backend may be implemented as no-ops or throw exceptions (depending on the operation).
 
 ### Web
 
-`WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
+A `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
 Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
 
 **Thread safety and lifecycle**
 
-- This provider is not thread-safe.
+- Not thread-safe.
 - Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 
-**Example**
+**Usage example**
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
