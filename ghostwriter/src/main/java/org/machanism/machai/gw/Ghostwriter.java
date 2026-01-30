@@ -1,13 +1,9 @@
 package org.machanism.machai.gw;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.Optional;
-import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -17,8 +13,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +54,10 @@ public final class Ghostwriter {
 		try {
 			execDir = new File(Ghostwriter.class.getProtectionDomain().getCodeSource().getLocation()
 					.toURI());
+			if (execDir.isFile()) {
+				execDir = execDir.getParentFile();
+			}
+			LOGGER.info("Executing in directory: {}", execDir);
 			File configFile = new File(execDir, "gw.properties");
 			config.load(configFile.getAbsolutePath());
 		} catch (Exception e) {
@@ -76,19 +78,28 @@ public final class Ghostwriter {
 	public static void main(String[] args) throws IOException {
 
 		Options options = new Options();
-		Option helpOption = new Option("h", "help", false, "Displays help information for usage.");
-		Option multiThreadOption = new Option("t", "threads", false, "Enable multi-threaded processing.");
-		Option rootDirOpt = new Option("d", "dir", true, "The path fo the project directory.");
+
+		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
+		Option multiThreadOption = new Option("t", "threads", false,
+				"Enable multi-threaded processing for improved performance.");
+		Option rootDirOpt = new Option("d", "dir", true, "Specify the path to the project directory.");
 		Option genaiOpt = new Option("g", "genai", true,
-				"Specifies the GenAI service provider and model (e.g. `OpenAI:gpt-5.1`).");
+				"Set the GenAI service provider and model (e.g., 'OpenAI:gpt-5.1').");
 		Option instructionsOpt = new Option("i", "instructions", true,
-				"Specifies a file name containing additional file processing instructions.");
+				"Provide the file name containing additional processing instructions.");
+		Option guidanceOpt = Option.builder("u")
+				.longOpt("guidance")
+				.desc("Specify the default guidance file to apply as a final step for the current directory.")
+				.hasArg(true)
+				.optionalArg(true)
+				.build();
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
 		options.addOption(multiThreadOption);
 		options.addOption(genaiOpt);
 		options.addOption(instructionsOpt);
+		options.addOption(guidanceOpt);
 
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -110,17 +121,23 @@ public final class Ghostwriter {
 			String defaultGenai = config.get("genai", DEFAULT_GENAI_VALUE);
 			genai = Optional.ofNullable(genai).orElse(defaultGenai);
 
-			File defaultRootDir = config.getFile("dir", SystemUtils.getUserDir());
+			File defaultRootDir = config.getFile("dir");
 			rootDir = Optional.ofNullable(rootDir).orElse(defaultRootDir);
 
-			String instructions = null;
+			String instructionsFileName = null;
 			if (cmd.hasOption(instructionsOpt)) {
-				instructions = cmd.getOptionValue(instructionsOpt);
+				instructionsFileName = cmd.getOptionValue(instructionsOpt);
 			} else {
-				instructions = config.get("instructions");
+				instructionsFileName = config.get("instructions");
 			}
 
-			instructions = getInstractionsFromFile(instructions, true);
+			String instructions = null;
+			if (instructionsFileName != null) {
+				instructions = getInstractionsFromFile(instructionsFileName);
+				if (instructions == null) {
+					LOGGER.warn("Guidance file not found: {}", instructionsFileName);
+				}
+			}
 
 			String[] dirs = cmd.getArgs();
 			if (rootDir == null) {
@@ -133,22 +150,34 @@ public final class Ghostwriter {
 					dirs = new String[] { SystemUtils.getUserDir().getPath() };
 				}
 			}
-			
+
 			LOGGER.info("Root directory: {}", rootDir);
 			boolean multiThread = cmd.hasOption(multiThreadOption);
 
-			String defaultGuidance = getInstractionsFromFile("@guidance.txt", false);
+			String defaultGuidance = null;
+			if (cmd.hasOption(guidanceOpt)) {
+				String guidanceFileName = cmd.getOptionValue(guidanceOpt);
+				guidanceFileName = StringUtils.defaultIfBlank(guidanceFileName, "@guidance.txt");
+				defaultGuidance = getInstractionsFromFile(guidanceFileName);
+			}
 
 			for (String scanDir : dirs) {
-				LOGGER.info("Scanning documents: {}", scanDir);
+				LOGGER.info("Starting scan of directory: {}", scanDir);
 
-				FileProcessor documents = new FileProcessor(genai);
-				documents.setInstructions(instructions);
-				documents.setModuleMultiThread(multiThread);
-				documents.setDefaultGuidance(defaultGuidance);
+				String currentFile = ProjectLayout.getRelatedPath(rootDir, new File(scanDir));
+				if (currentFile != null) {
 
-				documents.scanDocuments(rootDir, new File(scanDir));
-				LOGGER.info("Scanning finished.");
+					FileProcessor documents = new FileProcessor(genai);
+					documents.setInstructions(instructions);
+					documents.setModuleMultiThread(multiThread);
+					documents.setDefaultGuidance(defaultGuidance);
+
+					documents.scanDocuments(rootDir, new File(scanDir));
+					LOGGER.info("Scan completed for directory: {}", scanDir);
+				} else {
+					LOGGER.error("The directory '{}' must be located within the root directory '{}'.", scanDir,
+							rootDir);
+				}
 			}
 
 		} catch (ParseException e) {
@@ -157,7 +186,7 @@ public final class Ghostwriter {
 		}
 	}
 
-	private static String getInstractionsFromFile(String instructionsFile, boolean showWarning) {
+	private static String getInstractionsFromFile(String instructionsFile) {
 		String instructions = null;
 		if (instructionsFile != null) {
 			File file = new File(execDir, instructionsFile);
@@ -165,10 +194,8 @@ public final class Ghostwriter {
 				try (FileReader reader = new FileReader(file)) {
 					instructions = IOUtils.toString(reader);
 				} catch (IOException e) {
-					LOGGER.error("Failed to read instructions from file: {}", file);
+					LOGGER.error("Failed to read file: {}", file);
 				}
-			} else if (showWarning) {
-				LOGGER.warn("Instruction file not found: {}", file);
 			}
 		}
 		return instructions;

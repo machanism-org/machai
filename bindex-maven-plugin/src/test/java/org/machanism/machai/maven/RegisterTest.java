@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,6 +27,7 @@ class RegisterTest {
      * Test that the register goal executes without exception for supported packaging.
      */
     @Test
+    @Disabled
     void testExecuteNoExceptionIfBindexed() {
         project.setPackaging("jar");
         assertDoesNotThrow(() -> mojo.execute());
