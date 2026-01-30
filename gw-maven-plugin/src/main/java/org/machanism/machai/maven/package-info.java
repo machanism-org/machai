@@ -3,7 +3,7 @@
  * build.
  *
  * <p>
- * The package provides two goals:
+ * This package provides two goals:
  * </p>
  * <ul>
  *   <li>

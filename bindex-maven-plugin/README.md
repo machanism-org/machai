@@ -24,7 +24,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-The **bindex-maven-plugin** generates and maintains a `bindex.json` descriptor for a Maven module. The descriptor provides consistent, structured metadata consumed by the Machanism ecosystem for artifact discovery, integration, and assembly workflows, and it supports downstream semantic/GenAI search scenarios that benefit from standardized module metadata.
+The **Bindex Maven Plugin** enables automated generation of a `bindex.json` descriptor for Maven modules within the Machanism ecosystem. This structured metadata supports consistent library discovery, integration, and assembly workflows, and can also be leveraged for GenAI-powered semantic search scenarios that benefit from standardized module descriptors.
 
 ## Installation Instructions
 
@@ -44,7 +44,7 @@ mvn -pl bindex-maven-plugin -am clean install
 
 ## Usage
 
-### Run goals directly
+### Run the plugin
 
 Generate (or update) `bindex.json`:
 
@@ -52,15 +52,9 @@ Generate (or update) `bindex.json`:
 mvn org.machanism.machai:bindex-maven-plugin:bindex
 ```
 
-Register/publish the descriptor (optional):
-
-```bash
-mvn org.machanism.machai:bindex-maven-plugin:register
-```
-
 ### Configure the plugin
 
-Add the plugin to your project `pom.xml` and (optionally) bind goals to lifecycle phases.
+Add the plugin to your project `pom.xml` and (optionally) bind the goal to a lifecycle phase.
 
 ```xml
 <build>
@@ -98,10 +92,10 @@ Example (system property):
 mvn org.machanism.machai:bindex-maven-plugin:bindex -Dupdate=false
 ```
 
-### Registration credentials
+### Environment variables
 
-Registration/publishing may require credentials depending on your registry configuration.
+Local generation does not require environment variables. If your workflow includes publishing/registration automation, credentials may be required by your target system.
 
-| Environment variable | Description |
+| Variable name | Description |
 |---|---|
-| `BINDEX_REG_PASSWORD` | Password/token used when writing to the registration database/registry (only required if registration is enabled). |
+| `BINDEX_REG_PASSWORD` | Password/token used by downstream automation that publishes/registers the descriptor (only required if your workflow includes such a step). |

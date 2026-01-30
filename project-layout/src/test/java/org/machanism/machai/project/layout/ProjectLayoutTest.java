@@ -61,4 +61,17 @@ class ProjectLayoutTest {
 		// Assert
 		assertNull(related);
 	}
+
+	@Test
+	void getRelatedPath_static_whenFileArgumentAlreadyRelative_returnsNullBecauseEqualsFileStr() {
+		// Arrange
+		File dir = new File("C:/repo");		// project dir is irrelevant here because file is already relative
+		File file = new File("src/main/java");
+
+		// Act
+		String related = ProjectLayout.getRelatedPath(dir, file, false);
+
+		// Assert
+		assertNull(related);
+	}
 }

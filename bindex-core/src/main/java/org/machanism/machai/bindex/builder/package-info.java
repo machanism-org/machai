@@ -26,29 +26,26 @@
  */
 
 /**
- * Builders for generating {@link org.machanism.machai.schema.Bindex} documents by inspecting an on-disk project and
+ * Builders that generate {@link org.machanism.machai.schema.Bindex} documents by inspecting a project on disk and
  * prompting a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <p>The package provides a base {@link org.machanism.machai.bindex.builder.BindexBuilder} that:
- * <ul>
- *   <li>prompts the Bindex JSON schema,</li>
- *   <li>optionally requests an incremental update from an existing (origin) Bindex,</li>
- *   <li>delegates project-specific discovery to {@code projectContext()}, and</li>
- *   <li>deserializes the provider output back into a {@code Bindex}.</li>
- * </ul>
+ * <p>The core entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}, which prompts the Bindex JSON
+ * schema, optionally includes an origin Bindex for incremental updates, delegates project discovery to
+ * {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()}, and deserializes the provider output into a
+ * {@code Bindex} instance.
  *
- * <p>Concrete builders supply ecosystem-specific context:
+ * <p>Concrete builders provide ecosystem-specific context:
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} reads a Maven {@code pom.xml}, collects the
- *       configured sources/resources/tests, and prompts a sanitized POM representation.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} reads {@code package.json} and prompts all
- *       {@code .js}, {@code .ts}, and {@code .vue} files under {@code src}.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} reads {@code pyproject.toml}, infers a source
- *       directory from {@code project.name}, and prompts regular files in that directory.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: reads a Maven {@code pom.xml} model, prompts a
+ *       sanitized POM representation, and prompts files from the configured build/source/resource/test directories.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}: prompts {@code package.json} and prompts all
+ *       {@code .js}, {@code .ts}, and {@code .vue} files under the {@code src} directory.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder}: prompts {@code pyproject.toml}, infers a source
+ *       directory from {@code project.name}, and prompts files located directly under that directory.</li>
  * </ul>
  *
  * <p>To add support for another ecosystem, extend {@link org.machanism.machai.bindex.builder.BindexBuilder} and override
- * {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()} to prompt the relevant manifests and
- * project files.
+ * {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()} to prompt the relevant manifests and source
+ * files.
  */
 package org.machanism.machai.bindex.builder;

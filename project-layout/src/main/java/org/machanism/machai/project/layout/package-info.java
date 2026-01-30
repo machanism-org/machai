@@ -1,16 +1,19 @@
 /**
  * Detects and models the on-disk layout of a software project.
  *
- * <p>The types in this package identify common project roots (sources, tests, resources, documentation) and, when
- * applicable, discover module/workspace subprojects under a single repository root. Layout detection is generally
- * driven by ecosystem-specific descriptor files (for example {@code pom.xml} for Maven, {@code package.json} for
- * JavaScript/TypeScript, and {@code pyproject.toml} for Python), with a fallback implementation that scans the
- * filesystem.
+ * <p>This package provides a {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and
+ * ecosystem-specific implementations that infer a repository's structure (project root, module/workspace
+ * subprojects, and conventional directories such as sources, tests, resources, and documentation).
+ *
+ * <p>Detection is typically driven by well-known descriptor files for an ecosystem (for example
+ * {@code pom.xml} for Maven, {@code package.json} for JavaScript/TypeScript workspaces, and
+ * {@code pyproject.toml} for Python). Where no descriptor is available (or detection is ambiguous), a
+ * default implementation may fall back to filesystem heuristics.
  *
  * <h2>Key types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} – base abstraction; provides the project root and
- *       path utilities as well as a shared directory exclusion list.</li>
+ *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} – base abstraction; provides the project root,
+ *       common directory queries, and a shared directory exclusion list used during traversal.</li>
  *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} – Maven layout derived from {@code pom.xml}.</li>
  *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} – workspace/module discovery from
  *       {@code package.json}.</li>
@@ -28,8 +31,8 @@
  * </pre>
  *
  * <h2>Filesystem traversal</h2>
- * <p>When scanning directories, implementations should avoid walking into common VCS, vendor, and build-output
- * folders using {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
+ * <p>Implementations that scan the filesystem should avoid walking into common VCS, vendor, and build-output
+ * directories by honoring {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  */
 package org.machanism.machai.project.layout;
 

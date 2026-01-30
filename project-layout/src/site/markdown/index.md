@@ -21,19 +21,19 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# project-layout
+# Project Layout
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/project-layout.svg)](https://central.sonatype.com/artifact/org.machanism.machai/project-layout)
 
 ## Introduction
 
-Project Layout is a small, focused Java API for detecting and describing a software project’s on-disk structure (main/test source roots, resource roots, and multi-module/workspace layouts). It helps tooling avoid hard-coded conventions by providing a consistent way to infer a project layout from the files present.
+Project Layout is a small, focused Java API for detecting and describing a software project’s on-disk structure (main/test source roots, resource roots, and multi-module/workspace layouts). It enables tools to avoid hard-coded conventions by offering a consistent way to infer a project layout from the files present.
 
 ## Overview
 
 This module models “project layout” as a set of directories and conventions that vary by ecosystem (for example Maven, Node workspaces, or Python projects). A `ProjectLayout` implementation can:
 
-- Determine which directories contain main sources, tests, and resources.
+- Identify directories that contain main sources, tests, and resources.
 - Detect subprojects/modules/workspaces.
 - Provide a normalized view that higher-level tooling can consume.
 

@@ -1,14 +1,16 @@
 /**
- * Provides the public entry points for generating, assembling, selecting, and registering a Bindex (a project index)
- * used by Machanism-based AI workflows.
+ * Public entry points for creating, persisting, selecting, and assembling a <em>Bindex</em> (a machine-consumable
+ * index of a project) used by Machanism-based AI workflows.
  *
- * <p>This package coordinates an end-to-end lifecycle:
+ * <p>This package provides an end-to-end lifecycle around a {@code bindex.json} document:
+ *
  * <ol>
- *   <li>Build or update a {@code bindex.json} file for a project directory.</li>
- *   <li>Optionally register that Bindex document in a backing store (for example, a vector database) for semantic
- *       lookup.</li>
- *   <li>Optionally perform semantic selection to retrieve relevant Bindex documents.</li>
- *   <li>Assemble one or more Bindexes into LLM prompt inputs.</li>
+ *   <li><strong>Create/update</strong> a Bindex for a {@link org.machanism.machai.project.layout.ProjectLayout} by
+ *       scanning the project and producing/updating {@code bindex.json}.</li>
+ *   <li><strong>Register</strong> the Bindex in a backing store (for example, a vector database) so it can be
+ *       retrieved later via semantic lookup.</li>
+ *   <li><strong>Pick</strong> relevant Bindex documents using semantic search for a user question or task.</li>
+ *   <li><strong>Assemble</strong> one or more selected Bindexes into LLM prompt inputs.</li>
  * </ol>
  *
  * <h2>Main entry points</h2>
@@ -18,12 +20,12 @@
  *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers Bindex documents in a backing store for later
  *       semantic retrieval.</li>
  *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search and selection of Bindex documents.</li>
- *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: assembles LLM inputs (prompts) that incorporate one or
- *       more Bindex documents.</li>
+ *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: assembles LLM inputs (prompts) that incorporate one
+ *       or more Bindex documents.</li>
  * </ul>
  *
  * <h2>Builder selection</h2>
- * <p>{@link org.machanism.machai.bindex.BindexBuilderFactory} chooses a
+ * <p>{@link org.machanism.machai.bindex.BindexBuilderFactory} selects an appropriate
  * {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation based on the provided
  * {@link org.machanism.machai.project.layout.ProjectLayout}.
  *

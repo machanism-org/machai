@@ -1,6 +1,6 @@
 /**
- * Provides the Ghostwriter reviewer service-provider interface (SPI) and built-in implementations for
- * discovering and extracting {@code @guidance} instruction blocks from supported file formats.
+ * Provides the Ghostwriter reviewer service-provider interface (SPI) and built-in implementations for discovering
+ * and extracting {@code @guidance} instruction blocks from supported file formats.
  *
  * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} implementation understands the comment conventions of a
  * particular format, locates {@code @guidance} blocks, and returns a normalized prompt fragment (including path

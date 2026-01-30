@@ -1,17 +1,17 @@
 /**
  * Command-line tooling and orchestration for scanning a workspace and preparing GenAI-ready prompt inputs.
  *
- * <p>This package provides the {@link org.machanism.machai.gw.Ghostwriter} CLI and the
- * {@link org.machanism.machai.gw.FileProcessor} pipeline used to:
+ * <p>This package contains the {@link org.machanism.machai.gw.Ghostwriter} CLI entry point and the
+ * {@link org.machanism.machai.gw.FileProcessor} pipeline for scanning one or more modules, extracting
+ * file-type-specific guidance via {@link org.machanism.machai.gw.reviewer.Reviewer} implementations
+ * (loaded using {@link java.util.ServiceLoader}), and assembling prompt inputs from bundled templates and
+ * optional user instructions.
  *
- * <ul>
- *   <li>Detect project/module layouts and traverse directories while honoring common exclusions.</li>
- *   <li>Delegate file-type-specific guidance extraction to {@link org.machanism.machai.gw.reviewer.Reviewer}
- *       implementations discovered via {@link java.util.ServiceLoader}.</li>
- *   <li>Assemble prompt inputs from bundled templates and optional user instructions.</li>
- *   <li>Invoke a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to perform the requested
- *       processing and optionally log the generated prompt inputs under a temporary folder.</li>
- * </ul>
+ * <p>The processor can invoke a configured {@link org.machanism.machai.ai.manager.GenAIProvider} to perform
+ * the requested processing and can optionally persist the generated prompt inputs for inspection under a
+ * temporary folder.
+ *
+ * <h2>Usage</h2>
  *
  * <p>Typical usage is via the CLI:
  *

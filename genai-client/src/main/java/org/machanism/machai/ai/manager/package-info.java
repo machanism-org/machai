@@ -25,15 +25,17 @@
  *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
 
+package org.machanism.machai.ai.manager;
+
 /**
  * GenAI provider management and host-side tool integration.
  *
- * <p>This package defines the service-provider interface (SPI) for GenAI backends
- * ({@link org.machanism.machai.ai.manager.GenAIProvider}) and utilities for resolving and instantiating concrete
- * implementations ({@link org.machanism.machai.ai.manager.GenAIProviderManager}). Providers are typically identified
- * using a {@code Provider:Model} string.
+ * <p>This package defines the service-provider interface (SPI) for GenAI backends (for example,
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}) and utilities for resolving and instantiating concrete
+ * implementations (for example, {@link org.machanism.machai.ai.manager.GenAIProviderManager}). Providers are typically
+ * addressed using a {@code Provider:Model} identifier.
  *
- * <p>The package also includes host-side "tool" implementations that can be registered with a provider, enabling the
+ * <p>The package also includes host-side &quot;tool&quot; implementations that can be registered with a provider, enabling the
  * model to request controlled access to local capabilities such as file I/O and command execution via
  * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
  *
@@ -58,4 +60,3 @@
  * String response = provider.perform();
  * }</pre>
  */
-package org.machanism.machai.ai.manager;

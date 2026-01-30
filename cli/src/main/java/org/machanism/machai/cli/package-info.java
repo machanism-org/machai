@@ -1,8 +1,8 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains Spring Shell {@code @ShellComponent} command classes that expose Machai functionality via
- * an interactive shell and direct command invocation.
+ * <p>This package provides Spring Shell {@code @ShellComponent} command classes that expose Machai features via an
+ * interactive shell and non-interactive command invocation.
  *
  * <h2>Responsibilities</h2>
  * <ul>

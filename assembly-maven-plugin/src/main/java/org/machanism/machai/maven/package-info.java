@@ -28,17 +28,12 @@
  * Maven plugin goal implementation package for AI-assisted project assembly.
  *
  * <p>
- * The primary entry point is {@link org.machanism.machai.maven.Assembly}, which implements the {@code assembly}
- * goal.
- * </p>
- *
- * <p>
- * At execution time, the goal:
+ * This package contains the {@link org.machanism.machai.maven.Assembly} goal implementation, which:
  * </p>
  * <ol>
- *   <li>Obtains a prompt from a file or interactive input.</li>
- *   <li>Uses a "picker" model to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).</li>
- *   <li>Runs an assembly workflow that applies changes to the Maven execution base directory.</li>
+ *   <li>Reads a user-provided prompt from a file or requests it interactively.</li>
+ *   <li>Uses a "picker" model to recommend libraries (returned as {@link org.machanism.machai.schema.Bindex} entries).</li>
+ *   <li>Runs an assembly workflow that applies changes in the Maven execution base directory.</li>
  * </ol>
  *
  * <h2>Goal</h2>

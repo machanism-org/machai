@@ -44,15 +44,16 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
+`OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
-Capabilities include:
+This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in OpenAI workflows.
-- Performing LLM requests such as text generation, summarization, and question answering.
-- Creating and using vector embeddings for semantic search and similarity analysis.
-- Tool/function calling via registered tools.
+- Sending prompts and receiving responses from OpenAI Chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s models efficiently within their applications.
 
 Environment variables (read automatically by the OpenAI client; you must set at least `OPENAI_API_KEY`):
 
@@ -61,7 +62,7 @@ Environment variables (read automatically by the OpenAI client; you must set at 
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using the CodeMie API via an OpenAI-compatible endpoint:
+Using the CodeMie API:
 
 - Set `OPENAI_API_KEY` to an access token.
 - Set `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`.
@@ -70,7 +71,6 @@ Usage example:
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
-provider.model("gpt-5.1");
 ```
 
 Thread safety: this implementation is NOT thread-safe.
@@ -91,12 +91,13 @@ Required Java system properties:
 
 ### None
 
-`NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and optionally log input requests locally.
+`NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and log input requests locally when an external AI provider is not required or available.
 
 Purpose:
 
 - Provides a stub implementation that stores requests in input files (in the `inputsLog` folder).
-- No calls are made to any external AI services or LLMs.
+- All GenAI operations are non-operative, or throw exceptions where necessary.
+- No calls are made to any external AI services or large language models (LLMs).
 
 Typical use cases:
 
@@ -105,16 +106,24 @@ Typical use cases:
 - Logging requests for manual review or later processing.
 - Testing environments not connected to external services.
 
+Example usage:
+
+```java
+GenAIProvider provider = new NoneProvider();
+provider.prompt("Describe the weather.");
+provider.perform();
+```
+
 Notes:
 
-- Operations requiring GenAI services throw exceptions when called (for example, embeddings).
-- Prompts and instructions are cleared after performing.
+- Operations requiring GenAI services will throw exceptions when called.
+- All prompts and instructions are cleared after performing.
 
 ### Web
 
 `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `Submit Prompt` recipe (via `perform()`). The recipe is expected to place the final response text into a variable named `result`.
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`). The list of prompts is passed to the workspace as a system variable named `INPUTS`. The recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle:
 

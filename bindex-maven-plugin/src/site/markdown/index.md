@@ -27,11 +27,11 @@ Page Structure:
 
 ## Introduction
 
-The **Bindex Maven Plugin** enables automated generation of `bindex.json` metadata for Maven projects within the Machanism ecosystem. This structured descriptor supports consistent library discovery, integration, and assembly workflows, and can be leveraged for GenAI-powered semantic search scenarios that benefit from standardized module metadata.
+The **Bindex Maven Plugin** generates and maintains a `bindex.json` metadata descriptor for Maven modules. The descriptor is intended to provide standardized, machine-readable module metadata to support consistent library discovery, integration, assembly workflows, and downstream automation (including semantic search/indexing use cases).
 
 ## Overview
 
-This plugin runs as part of your Maven build (or on-demand) to create or update the `bindex.json` descriptor for the current module:
+Run the plugin as part of your Maven build (bound to a lifecycle phase) or on-demand to create or update the `bindex.json` descriptor for the current module:
 
 - If `bindex.json` does not exist, it is generated.
 - If it already exists, it can be updated in-place to keep metadata synchronized with the project.
@@ -40,7 +40,7 @@ This plugin runs as part of your Maven build (or on-demand) to create or update 
 
 - Generates a `bindex.json` descriptor for the current Maven module.
 - Updates an existing descriptor to keep metadata synchronized with the project.
-- Supports workflows that rely on standardized metadata for discovery and semantic search.
+- Enables standardized metadata workflows for discovery, automation, and indexing.
 
 ## Getting Started
 
@@ -51,11 +51,11 @@ This plugin runs as part of your Maven build (or on-demand) to create or update 
 
 ### Environment Variables
 
-The plugin does not require environment variables for local generation. If you incorporate the generated descriptor into external publishing/registration automation, you may need to provide credentials required by your target system.
+The plugin does not require any environment variables.
 
 | Variable name | Description |
 |---|---|
-| `BINDEX_REG_PASSWORD` | Password/token used by downstream automation that publishes/registers the descriptor (only required if your workflow includes such a step). |
+| _None_ | _Not required._ |
 
 ### Basic Usage
 
@@ -70,6 +70,7 @@ mvn org.machanism.machai:bindex-maven-plugin:bindex
 1. Add/configure the plugin in your project `pom.xml` (optionally bind it to a lifecycle phase).
 2. Run `mvn org.machanism.machai:bindex-maven-plugin:bindex` to generate or update `bindex.json`.
 3. Commit `bindex.json` if your repository policy expects generated metadata to be versioned.
+4. Use the generated descriptor in any downstream tooling that consumes `bindex.json`.
 
 ## Configuration
 
