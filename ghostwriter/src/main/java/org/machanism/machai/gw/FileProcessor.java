@@ -340,7 +340,7 @@ public class FileProcessor extends ProjectProcessor {
 			String projectInfo = getProjectStructureDescription(projectLayout);
 			provider.prompt(projectInfo);
 
-			if (defaultGuidance == guidance) {
+			if (defaultGuidance != null && defaultGuidance.equals(guidance)) {
 				TextReviewer textReviewer = new TextReviewer();
 				guidance = textReviewer.getPrompt(projectDir, file, defaultGuidance);
 			}
