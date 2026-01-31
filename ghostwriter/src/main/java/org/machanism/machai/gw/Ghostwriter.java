@@ -98,11 +98,9 @@ public final class Ghostwriter {
 
 		Option instructionsOpt = new Option("i", "instructions", true,
 				"Specify additional instructions by URL or file path. Use a comma (`,`) to separate multiple locations.");
-		instructionsOpt.setArgs(Option.UNLIMITED_VALUES);
 
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a list of directories to exclude from processing. You can provide multiple directories separated by commas or by repeating the option.");
-		excludesOpt.setArgs(Option.UNLIMITED_VALUES);
 
 		Option guidanceOpt = Option.builder("g")
 				.longOpt("guidance")
