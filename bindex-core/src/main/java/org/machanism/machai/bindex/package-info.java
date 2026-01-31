@@ -2,11 +2,11 @@
  * Public API for creating, persisting, selecting, and assembling a <em>Bindex</em>: a machine-consumable index of a
  * project used by Machanism-based AI workflows.
  *
- * <p>The package centers on the {@code bindex.json} document and supports the typical lifecycle:
+ * <p>The package centers on the {@code bindex.json} document and supports a typical lifecycle:
  *
  * <ol>
  *   <li><strong>Create/update</strong> a Bindex for a {@link org.machanism.machai.project.layout.ProjectLayout} by
- *       scanning sources/resources and producing/updating {@code bindex.json}.</li>
+ *       scanning sources/resources and producing or updating {@code bindex.json}.</li>
  *   <li><strong>Register</strong> the Bindex in a backing store (for example, a vector database) so it can be
  *       retrieved later via semantic lookup.</li>
  *   <li><strong>Pick</strong> relevant Bindex documents using semantic search for a user question or task.</li>

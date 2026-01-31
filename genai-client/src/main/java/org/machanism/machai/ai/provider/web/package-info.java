@@ -29,18 +29,18 @@
 /**
  * Web-automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>This package contains providers that interact with a target GenAI service through its web UI. Automation is
- * executed via <a href="https://ganteater.com">Anteater</a> workspaces/recipes and is orchestrated by
- * {@link org.machanism.machai.ai.provider.web.WebProvider}.
+ * <p>This package provides GenAI providers that drive a target service through its web UI, using
+ * <a href="https://ganteater.com">Anteater</a> workspaces/recipes for browser automation. The central entry point
+ * is {@link org.machanism.machai.ai.provider.web.WebProvider}, which manages a shared Anteater workspace and
+ * exposes the provider prompt API.
  *
  * <h2>Typical usage</h2>
  * <ol>
- *   <li>Select an Anteater configuration using {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
- *   <li>Set the workspace project directory with
+ *   <li>Select a model/recipe configuration with {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
+ *   <li>Set the Anteater workspace project directory with
  *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}.</li>
- *   <li>Build the prompt using the provider prompt API and submit it with
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}, which runs the {@code "Submit Prompt"}
- *       recipe.</li>
+ *   <li>Build the prompt and submit it with {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}, which
+ *       runs the {@code "Submit Prompt"} recipe.</li>
  * </ol>
  *
  * <h2>Lifecycle and constraints</h2>

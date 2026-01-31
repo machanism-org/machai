@@ -26,23 +26,26 @@
  */
 
 /**
- * Builders that generate {@link org.machanism.machai.schema.Bindex} documents for a project on disk by collecting
- * repository context (manifest and source files) and prompting a configured
- * {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Generates {@link org.machanism.machai.schema.Bindex} documents for a project on disk by collecting build-manifest and
+ * source context and prompting a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <p>The primary abstraction is {@link org.machanism.machai.bindex.builder.BindexBuilder}. Implementations typically
- * provide:
+ * <p>The central abstraction is {@link org.machanism.machai.bindex.builder.BindexBuilder}, which orchestrates a build by:
+ * <ol>
+ *   <li>prompting the Bindex JSON schema,</li>
+ *   <li>optionally including an existing (origin) Bindex for incremental updates,</li>
+ *   <li>adding project context (implemented by subclasses), and</li>
+ *   <li>performing generation and deserializing the provider output to a {@code Bindex}.</li>
+ * </ol>
+ *
+ * <p>Concrete builders included here add ecosystem-specific context:
  * <ul>
- *   <li>a project-specific {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()} prompt (e.g., build
- *       manifest(s) and relevant sources), and</li>
- *   <li>a {@link org.machanism.machai.bindex.builder.BindexBuilder#build()} operation that orchestrates the prompt and
- *       deserializes the provider output into a {@code Bindex}.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} (reads {@code pom.xml} and Maven source/resources),</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} (reads {@code package.json} and {@code src} tree),</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} (reads {@code pyproject.toml} and inferred sources).</li>
  * </ul>
  *
- * <p>This package includes concrete builders for common ecosystems such as Maven, JavaScript/TypeScript, and Python.
- *
- * <p>To support another build ecosystem, extend {@link org.machanism.machai.bindex.builder.BindexBuilder} and override
- * {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()} to add the appropriate manifest(s) and source
- * content.
+ * <p>To support another ecosystem, extend {@link org.machanism.machai.bindex.builder.BindexBuilder} and override
+ * {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()} to prompt the relevant manifest(s) and file
+ * contents.
  */
 package org.machanism.machai.bindex.builder;

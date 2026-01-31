@@ -1,18 +1,17 @@
 /**
- * Maven plugin goals (mojos) that integrate the MachAI generative-workflow (GW) document-processing pipeline into a Maven
- * build.
+ * Maven plugin goals (mojos) that integrate the MachAI generative-workflow (GW) document-processing pipeline into a
+ * Maven build.
  *
  * <p>
- * This package provides Maven plugin goals that can be executed from the command line or configured in a
- * {@code pom.xml}. The goals scan the current module (or a multi-module reactor) for documentation sources and then
- * execute the MachAI GW workflow.
+ * The goals in this package scan a module base directory (typically {@code ${basedir}}) for documentation sources and
+ * execute the MachAI GW workflow. The {@code gw} goal is an aggregator mojo and can operate across a multi-module
+ * reactor.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     <b>{@code gw}</b> ({@link org.machanism.machai.maven.GW}): scans a module base directory (typically
- *     {@code ${basedir}}) for documentation sources and runs the workflow.
+ *     <b>{@code gw}</b> ({@link org.machanism.machai.maven.GW}): scans documentation sources and runs the workflow.
  *   </li>
  *   <li>
  *     <b>{@code clean}</b> ({@link org.machanism.machai.maven.Clean}): deletes temporary artifacts created by prior

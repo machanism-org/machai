@@ -81,8 +81,6 @@ var layout = manager.detect(Path.of("."));
 
 ## Configuration
 
-The library is primarily convention-driven; most users only choose the root directory and optionally select/force a specific layout detector (if your integration exposes that option).
-
 | Parameter | Description | Default |
 |---|---|---|
 | `projectRoot` | Repository or module root directory to inspect. | `.` |

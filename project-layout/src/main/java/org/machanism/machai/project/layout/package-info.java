@@ -1,9 +1,9 @@
 /**
  * Detects and models the on-disk layout of a software project.
  *
- * <p>This package provides the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and concrete
- * implementations that infer repository structure from build descriptors.
- * Implementations can:
+ * <p>This package defines the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction along with
+ * implementations that infer repository structure from common build descriptors. Implementations can:
+ *
  * <ul>
  *   <li>detect whether a directory is a supported project type (for example Maven, JS/TS, or Python),</li>
  *   <li>discover workspace/module structure in monorepos and multi-module builds, and</li>
@@ -24,6 +24,7 @@
  * </ul>
  *
  * <h2>Typical usage</h2>
+ *
  * <pre>
  * ProjectLayout layout = new MavenProjectLayout().projectDir(new java.io.File("/repo"));
  * java.util.List&lt;String&gt; modules = layout.getModules();

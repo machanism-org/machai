@@ -1,6 +1,6 @@
 /**
- * Command-line tooling for scanning a workspace/module tree and preparing inputs for GenAI-assisted code review
- * and generation workflows.
+ * Command-line tooling for scanning a workspace/module tree and preparing inputs for GenAI-assisted code review and
+ * generation workflows.
  *
  * <p>This package provides the {@link org.machanism.machai.gw.Ghostwriter} CLI entry point and the
  * {@link org.machanism.machai.gw.FileProcessor} orchestration that:

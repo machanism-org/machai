@@ -70,8 +70,8 @@ This design provides:
 | `OPENAI_ORG_ID` | No | OpenAI | Optional organization identifier. |
 | `OPENAI_PROJECT_ID` | No | OpenAI | Optional project identifier. |
 | `OPENAI_BASE_URL` | No | OpenAI | Override API base URL (useful for OpenAI-compatible gateways). |
-| `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (set as a Java system property). |
-| `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (set as a Java system property). |
+| `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (can be set as an env var or Java system property). |
+| `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (can be set as an env var or Java system property). |
 | `recipes` | No | Web | Java system property to override the recipes/config location (relative to `workingDir`); defaults to `genai-client/src/main/resources`. |
 
 ### Basic Usage
@@ -223,6 +223,7 @@ GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
 provider.model("config.yaml");
 provider.setWorkingDir(new File("/path/to/project"));
 String response = provider.perform();
+provider.close();
 ```
 
 ## Resources

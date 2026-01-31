@@ -1,18 +1,27 @@
 /**
- * Provider-agnostic API root for the Machanism generative AI (GenAI) client.
+ * Provider-agnostic entry point for the Machanism generative AI (GenAI) client.
  *
- * <p>This package defines the stable, provider-neutral surface that application code should depend on. Provider
- * selection, initialization, and access are handled by the manager APIs in {@code org.machanism.machai.ai.manager},
- * while concrete provider implementations live under {@code org.machanism.machai.ai.provider}.
+ * <p>This package defines the provider-neutral API surface that application code should compile against.
+ * Concrete integrations (for example, OpenAI or other backends) live under {@code org.machanism.machai.ai.provider},
+ * while provider selection and lifecycle are handled by the manager APIs in
+ * {@code org.machanism.machai.ai.manager}.
  *
- * <h2>Typical usage</h2>
+ * <h2>How to use</h2>
  * <ol>
- *   <li>Configure the desired provider for the current environment.</li>
- *   <li>Initialize and obtain the active provider via
+ *   <li>Obtain a {@link org.machanism.machai.ai.manager.GenAIProvider} via
  *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
- *   <li>Invoke provider-neutral operations through
- *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
+ *   <li>Accumulate prompts, instructions, files, and tools on the provider instance.</li>
+ *   <li>Execute the request using {@link org.machanism.machai.ai.manager.GenAIProvider#perform()}.</li>
  * </ol>
+ *
+ * <h2>Example</h2>
+ * <pre>{@code
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
+ * provider.instructions("You are a helpful assistant.");
+ * provider.prompt("Summarize this text.");
+ * String response = provider.perform();
+ * }
+ * </pre>
  */
 package org.machanism.machai.ai;
 

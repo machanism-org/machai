@@ -28,22 +28,30 @@
 /**
  * GenAI provider management and host-side tool integration.
  *
- * <p>This package defines the service-provider interface (SPI) for GenAI backends (for example,
- * {@link org.machanism.machai.ai.manager.GenAIProvider}) and utilities for resolving and instantiating concrete
- * implementations (for example, {@link org.machanism.machai.ai.manager.GenAIProviderManager}). Providers are typically
- * addressed using a {@code Provider:Model} identifier.
+ * <p>This package provides the service-provider interface (SPI) used to integrate concrete Generative-AI backends and the
+ * utilities to resolve, create, and configure provider instances.
  *
- * <p>The package also includes host-side &quot;tool&quot; implementations that can be registered with a provider, enabling the
- * model to request controlled access to local capabilities such as file I/O and command execution via
- * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
+ * <p>At a high level, callers obtain a {@link org.machanism.machai.ai.manager.GenAIProvider} via
+ * {@link org.machanism.machai.ai.manager.GenAIProviderManager} and then configure it with:
  *
  * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} provides basic file read/write and directory listing
- *       operations rooted at a provider-controlled working directory.</li>
- *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} exposes command execution within that working
- *       directory (subject to the caller/provider safety policy).</li>
- *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} is a convenience installer for both file and
- *       command tools.</li>
+ *   <li>Model selection (often using a {@code Provider:Model} identifier).</li>
+ *   <li>System instructions and user prompts.</li>
+ *   <li>Optional host-side &quot;tools&quot; (functions) that the model can request to execute.</li>
+ * </ul>
+ *
+ * <p>The tool helpers in this package register controlled capabilities such as file I/O and command execution through
+ * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
+ * Implementations typically scope these capabilities to a provider-controlled working directory and apply additional
+ * safety policy.
+ *
+ * <h2>Typical components</h2>
+ *
+ * <ul>
+ *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} - file read/write and directory listing operations.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} - command execution within the working directory.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} - convenience installer for both file and command
+ *       tools.</li>
  * </ul>
  *
  * <h2>Example</h2>
