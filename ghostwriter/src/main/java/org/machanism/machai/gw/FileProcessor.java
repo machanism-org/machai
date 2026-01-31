@@ -180,8 +180,8 @@ public class FileProcessor extends ProjectProcessor {
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
 
+		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		if (!isNonRecursive()) {
-			ProjectLayout projectLayout = getProjectLayout(projectDir);
 			List<String> modules = projectLayout.getModules();
 
 			if (modules != null) {
@@ -215,7 +215,7 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		processParentFiles(projectDir);
+		processParentFiles(projectDir, projectLayout);
 	}
 
 	@Override
@@ -229,12 +229,13 @@ public class FileProcessor extends ProjectProcessor {
 	/**
 	 * Processes non-module files and directories directly under {@code projectDir}.
 	 *
-	 * @param projectDir directory to scan
+	 * @param projectDir    directory to scan
+	 * @param projectLayout
 	 * @throws FileNotFoundException if the project layout cannot be created
 	 * @throws IOException           if file reading fails
 	 */
-	protected void processParentFiles(File projectDir) throws FileNotFoundException, IOException {
-		ProjectLayout projectLayout = getProjectLayout(projectDir);
+	protected void processParentFiles(File projectDir, ProjectLayout projectLayout)
+			throws FileNotFoundException, IOException {
 		List<String> modules = projectLayout.getModules();
 
 		List<File> children = listFiles(projectDir);
@@ -249,7 +250,7 @@ public class FileProcessor extends ProjectProcessor {
 			}
 
 			if (child.isDirectory()) {
-				processProjectDir(child);
+				processProjectDir(child, projectLayout);
 			} else {
 				logIfNotBlank(processFile(projectLayout, child));
 			}
@@ -293,9 +294,8 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
-	private void processProjectDir(File scanDir) {
+	private void processProjectDir(File scanDir, ProjectLayout layout) {
 		try {
-			ProjectLayout layout = getProjectLayout(scanDir);
 			List<File> files = findFiles(scanDir);
 			for (File file : files) {
 				logIfNotBlank(processFile(layout, file));
@@ -321,7 +321,8 @@ public class FileProcessor extends ProjectProcessor {
 		return perform;
 	}
 
-	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance) throws IOException {
+	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance)
+			throws IOException {
 		String perform;
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
@@ -355,7 +356,7 @@ public class FileProcessor extends ProjectProcessor {
 
 			if (isLogInputs()) {
 				String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
-				File docsTempDir = new File(rootDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
+				File docsTempDir = new File(rootDir, MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
 				File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 				File parentDir = inputsFile.getParentFile();
 				if (parentDir != null) {
@@ -374,10 +375,10 @@ public class FileProcessor extends ProjectProcessor {
 	private String getProjectStructureDescription(ProjectLayout projectLayout) throws IOException {
 		List<String> content = new ArrayList<>();
 
-		String path = ProjectLayout.getRelatedPath(rootDir, projectLayout.getProjectDir());
+		File projectDir = projectLayout.getProjectDir();
+		String path = ProjectLayout.getRelatedPath(rootDir, projectDir);
 
 		content.add(path);
-		File projectDir = projectLayout.getProjectDir();
 		content.add(getDirInfoLine(projectLayout.getSources(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getTests(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getDocuments(), projectDir));
@@ -473,7 +474,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	public static boolean deleteTempFiles(File basedir) {
-		File file = new File(basedir, FileProcessor.MACHAI_TEMP_DIR + "/" + FileProcessor.GW_TEMP_DIR);
+		File file = new File(basedir, FileProcessor.MACHAI_TEMP_DIR + File.separator + FileProcessor.GW_TEMP_DIR);
 		logger.info("Removing '{}' inputs log file.", file);
 		return FileUtils.deleteQuietly(file);
 	}
