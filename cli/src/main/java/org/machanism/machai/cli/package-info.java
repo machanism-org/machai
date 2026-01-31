@@ -1,17 +1,17 @@
 /**
- * Spring Shell-based command-line interface (CLI) package for Machai.
+ * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package provides interactive and non-interactive command entry points implemented as Spring Shell
- * {@code @ShellComponent}s. The commands orchestrate Machai use-cases such as selecting and assembling
- * libraries ("bricks"), maintaining bindex metadata, scanning code/document trees, and applying a configured
- * GenAI model.
+ * <p>This package contains the Spring Shell components and application entry point that expose Machai
+ * functionality through an interactive or non-interactive command-line experience. Commands orchestrate
+ * use-cases such as selecting and assembling libraries ("bricks"), generating and registering bindex metadata,
+ * scanning source/document trees, and applying a configured GenAI model.
  *
  * <h2>Responsibilities</h2>
  * <ul>
- *   <li>Search/select bricks and assemble projects.</li>
+ *   <li>Search and select bricks, then assemble projects or prompts.</li>
  *   <li>Generate and register bindex metadata.</li>
- *   <li>Scan source/document trees and process them with a configured GenAI model.</li>
- *   <li>Clean Machai temporary/output folders.</li>
+ *   <li>Scan directories, score content, and run GenAI processing based on configuration.</li>
+ *   <li>Clean Machai temporary and output folders.</li>
  *   <li>Manage configuration defaults used by other commands.</li>
  * </ul>
  *

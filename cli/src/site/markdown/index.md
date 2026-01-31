@@ -12,6 +12,7 @@ Page Structure:
 # Getting Started
    - Prerequisites: List of required software and services.
    - Environment Variables: Table describing necessary environment variables.
+   - Add the Machai CLI application jar download link: [![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai/machai.jar/download) to the installation section.
    - Basic Usage: Example command to run the plugin.
    - Typical Workflow: Step-by-step outline of how to use the project artifacts.
 # Configuration
@@ -57,6 +58,18 @@ Page Structure:
 - A GenAI provider API key (for example, OpenAI)
 - Network access to the metadata database endpoint used by `pick` / `assembly` / `register`
 
+### Installation
+
+[![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai/machai.jar/download)
+
+Run the packaged CLI:
+
+```bash
+java -jar machai.jar
+```
+
+Then enter `help` to see the available commands.
+
 ### Environment Variables
 
 | Variable Name | Description |
@@ -65,8 +78,6 @@ Page Structure:
 | `BINDEX_REG_PASSWORD` | Password for database write access (required for metadata registration). |
 
 ### Basic Usage
-
-Run the packaged CLI:
 
 ```bash
 java -jar machai.jar
