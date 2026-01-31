@@ -3,8 +3,11 @@
  * Maven build.
  *
  * <p>
- * This package provides two goals:
+ * This package contains the mojos that expose the MachAI GW workflow as Maven goals. These goals are intended for use
+ * in multi-module (reactor) builds as well as single-module projects.
  * </p>
+ *
+ * <h2>Goals</h2>
  * <ul>
  *   <li>
  *     <b>{@code gw}</b> ({@link org.machanism.machai.maven.GW}): scans documentation sources and runs the workflow.
@@ -23,7 +26,7 @@
  *
  * <h3>Credentials</h3>
  * <p>
- * The {@code gw} goal reads GenAI credentials from Maven {@code settings.xml} using the configured {@code <server>}
+ * The {@code gw} goal reads GenAI credentials from Maven {@code settings.xml} using the configured {@code &lt;server&gt;}
  * entry identified by the required parameter {@code gw.genai.serverId}. If present, the credentials are exposed to the
  * workflow via system properties:
  * </p>
@@ -42,7 +45,7 @@
  *     <b>{@code gw.instructions}</b> (optional): One or more instruction location strings consumed by the workflow.
  *   </li>
  *   <li>
- *     <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} {@code <server>} id used to read
+ *     <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} {@code &lt;server&gt;} id used to read
  *     credentials.
  *   </li>
  *   <li>

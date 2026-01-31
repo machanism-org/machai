@@ -44,16 +44,18 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
+`OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
 
-Capabilities:
+This provider enables a wide range of generative AI capabilities, including:
 
-- Sends prompts and receives responses from OpenAI chat models.
-- Manages file inputs for OpenAI workflows.
-- Performs common LLM tasks (text generation, summarization, Q&A).
-- Creates vector embeddings for semantic search and similarity.
+- Sending prompts and receiving responses from OpenAI chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-Configuration via environment variables (you must set at least `OPENAI_API_KEY`; system properties with the same names take precedence):
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI models efficiently within their applications. It supports synchronous operations and is designed to be extensible/configurable for different use cases and model parameters.
+
+Environment variables (system properties with the same names take precedence; you must set at least `OPENAI_API_KEY`):
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -89,9 +91,9 @@ Required Java system properties or environment variables:
 
 ### None
 
-`NoneProvider` is a no-op implementation of `GenAIProvider` intended for environments where no external LLM integration should be used.
+`NoneProvider` is a no-op implementation of `GenAIProvider`.
 
-It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(...)` has been configured.
+This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(...)` has been configured.
 
 Key characteristics:
 
@@ -113,7 +115,7 @@ provider.perform();
 
 `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompts by running the `"Submit Prompt"` recipe (via `perform()`). The recipe is expected to place the final response text into a variable named `result`.
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`). The recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle:
 

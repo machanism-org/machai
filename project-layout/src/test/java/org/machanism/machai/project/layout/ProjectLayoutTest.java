@@ -94,6 +94,19 @@ class ProjectLayoutTest {
 	}
 
 	@Test
+	void getRelatedPath_static_whenRelativePathIsBlankAndAddSingleDotTrue_shouldReturnDot() {
+		// Arrange
+		File dir = new File("/repo");
+		File file = new File("/repo");
+
+		// Act
+		String related = ProjectLayout.getRelatedPath(dir, file, true);
+
+		// Assert
+		assertEquals(".", related);
+	}
+
+	@Test
 	void getRelatedPath_static_whenFileNotUnderDir_shouldReturnNull() {
 		// Arrange
 		File dir = new File("/repo");

@@ -1,9 +1,6 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -59,7 +56,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListWhenWorkspaceScanDoesNotMatchDueToExcludeLogic() throws Exception {
+	void getModules_shouldReturnEmptyListDueToExcludeLogicUsingFileAbsolutePath() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-workspaces");
 		assertTrue(dir.mkdirs() || dir.isDirectory());
@@ -79,5 +76,35 @@ class JScriptProjectLayoutTest {
 		// Assert
 		assertNotNull(modules);
 		assertTrue(modules.isEmpty());
+	}
+
+	@Test
+	void getSources_documents_tests_shouldReturnNull() {
+		// Arrange
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(new File("target/test-tmp/js-nulls"));
+
+		// Act
+		List<String> sources = layout.getSources();
+		List<String> docs = layout.getDocuments();
+		List<String> tests = layout.getTests();
+
+		// Assert
+		assertNull(sources);
+		assertNull(docs);
+		assertNull(tests);
+	}
+
+	@Test
+	void projectDir_shouldReturnConcreteTypeForChaining() {
+		// Arrange
+		JScriptProjectLayout layout = new JScriptProjectLayout();
+		File dir = new File("target/test-tmp/js-chain");
+
+		// Act
+		JScriptProjectLayout returned = layout.projectDir(dir);
+
+		// Assert
+		assertSame(layout, returned);
+		assertSame(dir, layout.getProjectDir());
 	}
 }

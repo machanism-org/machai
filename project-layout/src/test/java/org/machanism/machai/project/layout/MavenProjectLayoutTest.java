@@ -134,6 +134,21 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
+	void getTests_shouldReturnEmptyWhenBuildNull() {
+		// Arrange
+		Model model = new Model();
+		model.setBuild(null);
+		MavenProjectLayout layout = new MavenProjectLayout().model(model).projectDir(new File("/repo"));
+
+		// Act
+		List<String> tests = layout.getTests();
+
+		// Assert
+		assertNotNull(tests);
+		assertTrue(tests.isEmpty());
+	}
+
+	@Test
 	void getDocuments_shouldReturnDefaultSiteFolder() {
 		// Arrange
 		MavenProjectLayout layout = new MavenProjectLayout().model(new Model()).projectDir(new File("/repo"));
@@ -143,5 +158,19 @@ class MavenProjectLayoutTest {
 
 		// Assert
 		assertEquals(Collections.singletonList("src/site"), docs);
+	}
+
+	@Test
+	void projectDir_shouldReturnConcreteTypeForChaining() {
+		// Arrange
+		MavenProjectLayout layout = new MavenProjectLayout();
+		File dir = new File("target/test-tmp/maven-chain");
+
+		// Act
+		MavenProjectLayout returned = layout.projectDir(dir);
+
+		// Assert
+		assertSame(layout, returned);
+		assertSame(dir, layout.getProjectDir());
 	}
 }

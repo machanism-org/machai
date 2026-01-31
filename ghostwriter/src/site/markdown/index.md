@@ -53,6 +53,7 @@ Learn more about guided file processing: https://machanism.org/guided-file-proce
 - Accepts additional instruction input (loaded from `--instructions` and/or `gw.properties`).
 - Optional multi-threaded processing.
 - Optional final default guidance step via `--guidance`.
+- Supports excluding directories via `--excludes`.
 - Runs as a single runnable JAR for scripts and CI.
 
 ## Getting Started
@@ -68,21 +69,20 @@ Ghostwriter itself does not require environment variables, but your chosen GenAI
 
 #### For OpenAI-Compatible Services
 
-| Variable Name         | Description                                                                                   |
-|----------------------|-----------------------------------------------------------------------------------------------|
-| `OPENAI_API_KEY`     | API key for authenticating requests to the configured GenAI provider (e.g., OpenAI, Azure OpenAI). |
-| `BINDEX_REG_PASSWORD`| Password required for database write access, specifically for metadata registration operations. |
+| Variable Name     | Description |
+|------------------|-------------|
+| `OPENAI_API_KEY` | API key for authenticating requests to the configured GenAI provider (e.g., OpenAI, Azure OpenAI). |
 
 #### For CodeMie Integration
 
-| Variable Name     | Description                                  |
-|-------------------|----------------------------------------------|
-| `GENAI_USERNAME`  | Username for authenticating with CodeMie.    |
-| `GENAI_PASSWORD`  | Password for authenticating with CodeMie.    |
+| Variable Name    | Description |
+|-----------------|-------------|
+| `GENAI_USERNAME` | Username for authenticating with CodeMie. |
+| `GENAI_PASSWORD` | Password for authenticating with CodeMie. |
 
-**Note:**  
-- Only set the variables relevant to your selected provider.  
-- Ensure all credentials are kept secure and never committed to version control.  
+**Note:**
+- Only set the variables relevant to your selected provider.
+- Ensure all credentials are kept secure and never committed to version control.
 - For additional configuration details, refer to the provider’s documentation.
 
 ### Installation
@@ -114,9 +114,10 @@ java -jar gw.jar --root /path/to/project docs src
 1. Build or download `gw.jar`.
 2. Choose the project root (`--root`) and the directories to scan (positional args).
 3. (Optional) Provide additional instructions via `--instructions` or `gw.properties`.
-4. (Optional) Provide a default final guidance file via `--guidance`.
-5. Run Ghostwriter.
-6. Review and commit generated/updated documentation.
+4. (Optional) Exclude directories via `--excludes`.
+5. (Optional) Provide a default final guidance file via `--guidance`.
+6. Run Ghostwriter.
+7. Review and commit generated/updated documentation.
 
 ## Configuration
 
@@ -127,11 +128,12 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 | Short | Long | Arg | Description | Default |
 |------:|------|:---:|-------------|---------|
 | `-h` | `--help` | No | Show help message and exit. | Off |
-| `-t` | `--threads` | Optional (`true`/`false`) | Enable multi-threaded processing to improve performance. If present without a value, defaults to `true`. | `true` |
-| `-r` | `--root` | Yes (path) | Path to the root directory for file processing. Scanned directories must be located within this root. | `gw.properties` key `root`; otherwise current user directory |
-| `-a` | `--genai` | Yes (`provider:model`) | GenAI provider and model (e.g., `OpenAI:gpt-5.1`). | `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
-| `-i` | `--instructions` | Yes (URL/path[,URL/path...]) | Additional instruction locations (URL or file path). Separate multiple locations with commas. | `gw.properties` key `instructions`; otherwise none |
+| `-t` | `--threads` | Optional (`true`/`false`) | Enable multi-threaded processing. If present without a value, defaults to `true`. | `true` |
+| `-r` | `--root` | Yes (path) | Root directory that bounds scanning. All scanned directories must be located within this root. | From `gw.properties` key `root`; otherwise current user directory |
+| `-a` | `--genai` | Yes (`provider:model`) | GenAI provider and model (e.g., `OpenAI:gpt-5.1`). | From `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
+| `-i` | `--instructions` | Yes (URL/path[,URL/path...]) | Additional instruction locations (URL or file path). Provide multiple values by repeating the option or by passing multiple values. | From `gw.properties` key `instructions` (comma-separated); otherwise none |
 | `-g` | `--guidance` | Optional (path) | Default guidance file applied as a final step for each scanned directory. If present without a value, uses `@guidance.txt` resolved relative to the executable directory (the directory containing `gw.jar`). | Off (not applied) |
+| `-e` | `--excludes` | Yes (dir[,dir...]) | Directories to exclude from processing. Provide multiple values by repeating the option or by passing multiple values; values may also be comma-separated. | From `gw.properties` key `excludes` (comma-separated); otherwise none |
 
 **Positional arguments**: Zero or more directories to scan.
 
@@ -141,7 +143,7 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 
 ### Example
 
-Scan a project with multi-threaded processing, specify a GenAI provider/model, load extra instructions from a file, and apply a default guidance file:
+Scan a project with multi-threaded processing, specify a GenAI provider/model, load extra instructions from a file, exclude build output, and apply a default guidance file:
 
 ```bash
 java -jar gw.jar \
@@ -149,6 +151,7 @@ java -jar gw.jar \
   --root . \
   --genai OpenAI:gpt-5.1 \
   --instructions ghostwriter-instructions.txt \
+  --excludes target,.git \
   --guidance @guidance.txt \
   src docs
 ```

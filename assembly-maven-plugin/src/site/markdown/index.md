@@ -58,7 +58,7 @@ Value proposition:
 
 - Java 11 or higher
 - Maven 3.6.x or newer
-- Network access to a compatible GenAI provider (for example, OpenAI), if you enable GenAI-backed features
+- Network access to an OpenAI-compatible GenAI provider, if you enable GenAI-backed features
 
 ### Environment Variables
 
