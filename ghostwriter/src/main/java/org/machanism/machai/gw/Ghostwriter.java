@@ -21,6 +21,11 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.util.StatusPrinter;
+
 /**
  * Entry point for document scanning and review automation.
  * <p>
@@ -45,7 +50,7 @@ import org.slf4j.LoggerFactory;
 public final class Ghostwriter {
 
 	/** Logger for the ghostwriter application. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
+	private static Logger LOGGER;
 
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
 	private static PropertiesConfigurator config = new PropertiesConfigurator();
@@ -58,7 +63,11 @@ public final class Ghostwriter {
 			if (execDir.isFile()) {
 				execDir = execDir.getParentFile();
 			}
+
+			org.machanism.machai.log.FileAppender.setExecutionDir(execDir);
+			LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
 			LOGGER.info("Executing in directory: {}", execDir);
+
 			File configFile = new File(execDir, "gw.properties");
 			config.load(configFile.getAbsolutePath());
 		} catch (Exception e) {
@@ -124,14 +133,13 @@ public final class Ghostwriter {
 			File rootDir = null;
 			if (cmd.hasOption(rootDirOpt)) {
 				rootDir = new File(cmd.getOptionValue(rootDirOpt));
+			} else {
+				rootDir = config.getFile("root");
 			}
 
 			String genai = cmd.getOptionValue(genaiOpt);
 			String defaultGenai = config.get("genai", DEFAULT_GENAI_VALUE);
 			genai = Optional.ofNullable(genai).orElse(defaultGenai);
-
-			File defaultRootDir = config.getFile("dir");
-			rootDir = Optional.ofNullable(rootDir).orElse(defaultRootDir);
 
 			String instructionsFileName = null;
 			if (cmd.hasOption(instructionsOpt)) {
