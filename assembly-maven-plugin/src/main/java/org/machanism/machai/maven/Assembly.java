@@ -27,7 +27,7 @@ import org.machanism.machai.schema.Bindex;
  * Maven plugin {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly} goal.
  *
  * <p>
- * The goal orchestrates an AI-assisted project assembly workflow:
+ * This goal orchestrates an AI-assisted project assembly workflow:
  * </p>
  * <ol>
  *   <li>Read an assembly prompt from {@link #assemblyPromptFile} (when present) or ask for it interactively.</li>
@@ -173,6 +173,9 @@ public class Assembly extends AbstractMojo {
                 }
 
                 GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(chatModel);
+                assemblyProvider.setWorkingDir(basedir);
+                new SystemFunctionTools().applyTools(assemblyProvider);
+
                 ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider);
 
                 getLog().info("The project directory: " + basedir);
