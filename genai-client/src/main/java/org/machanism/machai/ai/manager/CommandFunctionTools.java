@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -66,7 +66,7 @@ public class CommandFunctionTools {
 	 * @throws IllegalArgumentException if execution fails
 	 */
 	private String executeCommand(Object[] params) {
-		logger.info("Run shell command: {}", params);
+		logger.info("Run shell command: {}", Arrays.toString(params));
 
 		String command = ((JsonNode) params[0]).get("command").asText();
 		StringBuilder output = new StringBuilder();

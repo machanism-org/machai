@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -101,7 +102,7 @@ public class FileFunctionTools {
 			content.append("No files found in directory.");
 		}
 		result = content.toString();
-		logger.info("List files recursively: {}, Result: {}", params,
+		logger.info("List files recursively: {}, Result: {}", Arrays.toString(params),
 				StringUtils.abbreviate(result, 60).replace("\n", ""));
 		return result;
 	}
@@ -157,7 +158,7 @@ public class FileFunctionTools {
 	private Object writeFile(Object[] params) {
 		String filePath = ((JsonNode) params[0]).get("file_path").asText();
 		String text = ((JsonNode) params[0]).get("text").asText();
-		logger.info("Write file: {}", StringUtils.abbreviate(params[0].toString(), MAXWIDTH));
+		logger.info("Write file: {}", StringUtils.abbreviate(Arrays.toString(params), MAXWIDTH));
 		File workingDir = (File) params[1];
 		File file = new File(workingDir, filePath);
 		if (file.getParentFile() != null) {
@@ -187,7 +188,7 @@ public class FileFunctionTools {
 	 */
 	private Object readFile(Object[] params) {
 		String filePath = ((JsonNode) params[0]).get("file_path").asText();
-		logger.info("Read file: {}", params[0]);
+		logger.info("Read file: {}", Arrays.toString(params));
 		File workingDir = (File) params[1];
 		String result;
 		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
