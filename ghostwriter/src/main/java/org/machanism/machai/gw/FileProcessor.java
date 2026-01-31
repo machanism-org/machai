@@ -463,8 +463,7 @@ public class FileProcessor extends ProjectProcessor {
 		for (File file : files) {
 			String name = file.getName();
 			String absolutePath = file.getAbsolutePath();
-			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS)
-					|| Strings.CI.containsAny(absolutePath, excludes)) {
+			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludeAbsolutePath(absolutePath)) {
 				continue;
 			}
 			if (file.isDirectory()) {
@@ -476,6 +475,23 @@ public class FileProcessor extends ProjectProcessor {
 
 		result.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 		return result;
+	}
+
+	private boolean shouldExcludeAbsolutePath(String absolutePath) {
+		if (StringUtils.isBlank(absolutePath) || excludes == null || excludes.length == 0) {
+			return false;
+		}
+		List<String> tokens = new ArrayList<>();
+		for (String exclude : excludes) {
+			String token = StringUtils.trimToNull(exclude);
+			if (token != null) {
+				tokens.add(token);
+			}
+		}
+		if (tokens.isEmpty()) {
+			return false;
+		}
+		return Strings.CI.containsAny(absolutePath, tokens.toArray(new String[0]));
 	}
 
 	private static int pathDepth(String path) {

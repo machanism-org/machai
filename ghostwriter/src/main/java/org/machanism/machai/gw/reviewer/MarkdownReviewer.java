@@ -50,8 +50,9 @@ public class MarkdownReviewer implements Reviewer {
 
 		String result = null;
 		if (matcher.find()) {
+			String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
 			result = MessageFormat.format(promptBundle.getString("markdown_file"),
-					ProjectLayout.getRelatedPath(projectDir, guidancesFile), content);
+					relatedPath, content);
 		}
 
 		return result;

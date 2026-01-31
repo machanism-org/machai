@@ -11,10 +11,10 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Reviewer implementation for generic text files (.txt).
- * <p>
- * Detects guidance in text files and prepares it for documentation workflows,
- * including context propagation by directory.
+ * Reviewer implementation for generic guidance text files.
+ *
+ * <p>This reviewer only processes files named {@code @guidance.txt}. When such a file is found, its full contents
+ * are returned formatted as a prompt fragment with directory context for downstream processing.
  */
 public class TextReviewer implements Reviewer {
 
@@ -23,10 +23,9 @@ public class TextReviewer implements Reviewer {
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Returns the file extensions supported by this reviewer. This reviewer handles
-	 * files with the 'txt' extension.
+	 * Returns the file extensions supported by this reviewer.
 	 *
-	 * @return an array of supported file extension strings
+	 * @return an array containing {@code "txt"}
 	 */
 	@Override
 	public String[] getSupportedFileExtensions() {
@@ -34,12 +33,11 @@ public class TextReviewer implements Reviewer {
 	}
 
 	/**
-	 * Analyzes a text file for documentation guidance and, if present, updates the
-	 * context map.
+	 * Reads and formats the guidance file if the provided file is named {@code @guidance.txt}.
 	 *
-	 * @param projectDir    the project context root directory
-	 * @param guidancesFile the text file to review
-	 * @return extracted or formatted guidance, or {@code null} if not applicable
+	 * @param projectDir the project root directory used to compute related paths for context
+	 * @param guidancesFile the file to analyze
+	 * @return the formatted guidance prompt, or {@code null} when the file is not a guidance file
 	 * @throws IOException if an error occurs reading the file
 	 */
 	public String perform(File projectDir, File guidancesFile) throws IOException {
@@ -54,6 +52,14 @@ public class TextReviewer implements Reviewer {
 		return guidance;
 	}
 
+	/**
+	 * Formats the raw guidance content into a prompt fragment.
+	 *
+	 * @param projectDir the project root directory used to compute related paths for context
+	 * @param guidancesFile the guidance file (used to compute the parent directory context)
+	 * @param guidance the raw guidance content
+	 * @return the formatted prompt fragment, or the original guidance content if blank
+	 */
 	public String getPrompt(File projectDir, File guidancesFile, String guidance) {
 		if (StringUtils.isNotBlank(guidance)) {
 			String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
