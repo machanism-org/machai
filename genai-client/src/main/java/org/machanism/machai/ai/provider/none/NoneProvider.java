@@ -11,73 +11,59 @@ import java.util.function.Function;
 
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@code NoneProvider} class is an implementation of the {@link GenAIProvider} interface used to disable generative AI integrations
- * and log input requests locally when an external AI provider is not required or available.
- * <p>
- * <b>Purpose:</b>
- * Provides a stub implementation that stores requests in input files (in the {@code inputsLog} folder).
- * All GenAI operations are non-operative, or throw exceptions where necessary, making this useful for scenarios
- * where generative AI features must be disabled, simulated, or for fallback testing.
- * No calls are made to any external AI services or large language models (LLMs).
- * <p>
- * <b>Typical Use Cases:</b>
+ * No-op implementation of {@link GenAIProvider}.
+ *
+ * <p>This provider is intended for environments where no external LLM integration should be used. It accumulates
+ * prompt text in memory and can optionally write instructions and prompts to local files when
+ * {@link #inputsLog(File)} has been configured.
+ *
+ * <h2>Key characteristics</h2>
  * <ul>
- *   <li>Disabling generative AI features for security or compliance</li>
- *   <li>Implementing fallback logic when no provider is configured</li>
- *   <li>Logging requests for manual review or later processing</li>
- *   <li>Testing environments not connected to external services</li>
- * </ul>
- * <p>
- * <b>Example Usage:</b>
- * <pre>
- * {@code
- *   GenAIProvider provider = new NoneProvider();
- *   provider.prompt("Describe the weather.");
- *   provider.perform(); // No AI service is called; input may be logged locally
- * }
- * </pre>
- * <p>
- * <b>Notes:</b>
- * <ul>
- *   <li>Operations requiring GenAI services will throw exceptions when called.</li>
- *   <li>All prompts and instructions are cleared after performing.</li>
- *   <li>Refer to {@link GenAIProvider} interface for compatible methods.</li>
+ *   <li>No network calls are performed.</li>
+ *   <li>{@link #perform()} always returns {@code null}.</li>
+ *   <li>Unsupported capabilities (for example, {@link #embedding(String)}) throw an exception.</li>
  * </ul>
  *
- * @author Viktor Tovstyi
+ * <h2>Example</h2>
+ * <pre>{@code
+ * GenAIProvider provider = new NoneProvider();
+ * provider.inputsLog(new File("./inputsLog/inputs.txt"));
+ * provider.instructions("You are a helpful assistant.");
+ * provider.prompt("Describe the weather.");
+ * provider.perform();
+ * }</pre>
  */
 public class NoneProvider implements GenAIProvider {
     /**
-     * The name identifying this provider.
+     * Provider name used for identification in configuration.
      */
     public static final String NAME = "None";
 
-    private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(NoneProvider.class);
 
     /**
-     * Accumulates AI prompts as a single string.
+     * Buffer holding prompt text appended via {@link #prompt(String)}.
      */
     private StringBuilder prompts = new StringBuilder();
-    
+
     /**
-     * Instruction text (optional).
+     * Optional instructions text written to {@code instructions.txt} when {@link #perform()} is executed.
      */
     private String instructions;
-    
+
     /**
-     * File for storing input logs.
+     * Optional log file; when set, {@link #perform()} writes prompts to this file.
      */
     private File inputsLog;
 
     /**
      * Appends the given text to the prompt buffer.
      *
-     * @param text the prompt text to add
+     * @param text prompt text to append
      */
     @Override
     public void prompt(String text) {
@@ -86,11 +72,11 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * Placeholder for adding a prompt from a file. No operation in this implementation.
+     * No-op.
      *
-     * @param file the file containing prompt text
+     * @param file file containing prompt text
      * @param bundleMessageName unused, present for interface compatibility
-     * @throws IOException never thrown in this implementation
+     * @throws IOException never thrown by this implementation
      */
     @Override
     public void promptFile(File file, String bundleMessageName) throws IOException {
@@ -98,11 +84,11 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * No operation for adding a file input in this implementation.
+     * No-op.
      *
-     * @param file the file to add
-     * @throws IOException never thrown in this implementation
-     * @throws FileNotFoundException never thrown in this implementation
+     * @param file ignored
+     * @throws IOException never thrown by this implementation
+     * @throws FileNotFoundException never thrown by this implementation
      */
     @Override
     public void addFile(File file) throws IOException, FileNotFoundException {
@@ -110,11 +96,11 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * No operation for adding a file via URL in this implementation.
+     * No-op.
      *
-     * @param fileUrl the URL to add
-     * @throws IOException never thrown in this implementation
-     * @throws FileNotFoundException never thrown in this implementation
+     * @param fileUrl ignored
+     * @throws IOException never thrown by this implementation
+     * @throws FileNotFoundException never thrown by this implementation
      */
     @Override
     public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
@@ -122,19 +108,19 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * Not supported for NoneProvider.
+     * Unsupported by this provider.
      *
-     * @param text Input for embedding
+     * @param text input text
      * @return never returns normally
-     * @throws IllegalArgumentException always thrown for this provider
+     * @throws UnsupportedOperationException always thrown
      */
     @Override
     public List<Float> embedding(String text) {
-        throw new IllegalArgumentException("NoneProvider doesn't support embedding generation.");
+        throw new UnsupportedOperationException("NoneProvider doesn't support embedding generation.");
     }
 
     /**
-     * Clears all accumulated prompts.
+     * Clears accumulated prompts.
      */
     @Override
     public void clear() {
@@ -142,11 +128,11 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * No-op for adding tools in this stub provider.
+     * No-op.
      *
      * @param name tool name
      * @param description tool description
-     * @param function tool function implementation
+     * @param function tool implementation
      * @param paramsDesc optional parameter descriptions
      */
     @Override
@@ -155,9 +141,9 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * Stores the instructions to be used by the provider (if any).
+     * Sets instructions to be written during {@link #perform()} (when {@link #inputsLog(File)} is set).
      *
-     * @param instructions the instruction text
+     * @param instructions instruction text
      */
     @Override
     public void instructions(String instructions) {
@@ -165,10 +151,15 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * Writes the prompts and instructions (if present) to files if inputsLog is set.
-     * Always returns {@code null}.
+     * Writes instructions (when set) and accumulated prompts to local files when {@link #inputsLog(File)} is set.
      *
-     * @return {@code null} (No actual AI operation performed)
+     * <p>If the configured {@code inputsLog} has a parent folder, it is created when missing. If the configured
+     * {@code inputsLog} has no parent, the user directory is used as the target folder for writing
+     * {@code instructions.txt}.
+     *
+     * <p>After writing, the internal prompt buffer is cleared.
+     *
+     * @return {@code null}
      */
     @Override
     public String perform() {
@@ -188,7 +179,7 @@ public class NoneProvider implements GenAIProvider {
                     streamWriter.write(instructions);
                     logger.debug("LLM Instruction: {}", file);
                 } catch (IOException e) {
-                    logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
+                    logger.error("Failed to save LLM instructions to file: {}", file, e);
                 }
             }
 
@@ -204,9 +195,9 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * Sets the file to log inputs.
+     * Configures the file used for logging prompts.
      *
-     * @param inputsLog the file used for logging
+     * @param inputsLog log file to write during {@link #perform()}
      */
     @Override
     public void inputsLog(File inputsLog) {
@@ -214,9 +205,9 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * No operation for choosing a model in NoneProvider.
+     * No-op.
      *
-     * @param chatModelName the model name (ignored)
+     * @param chatModelName ignored
      */
     @Override
     public void model(String chatModelName) {
@@ -224,8 +215,9 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * Sets the working directory. No operation for NoneProvider.
-     * @param workingDir working directory
+     * No-op.
+     *
+     * @param workingDir ignored
      */
     @Override
     public void setWorkingDir(File workingDir) {
@@ -233,15 +225,20 @@ public class NoneProvider implements GenAIProvider {
     }
 
     /**
-     * Gets all accumulated prompts as a string.
-     * @return the prompt text
+     * Returns the accumulated prompt text.
+     *
+     * @return prompt text
      */
     public String getPrompts() {
         return prompts.toString();
     }
 
-	@Override
-	public void close() {
-	}
+    /**
+     * Releases resources held by this provider.
+     */
+    @Override
+    public void close() {
+        // No-op
+    }
 
 }

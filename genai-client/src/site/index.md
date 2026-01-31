@@ -44,17 +44,16 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
+`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
 
-This provider supports:
+Capabilities:
 
-- Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in OpenAI workflows (uploading local files or referencing remote URLs).
-- Common LLM requests (text generation, summarization, question answering).
-- Vector embeddings (via OpenAI embeddings endpoint).
-- Tool/function calling by registering tools via `addTool(...)`.
+- Sends prompts and receives responses from OpenAI chat models.
+- Manages file inputs for OpenAI workflows.
+- Performs common LLM tasks (text generation, summarization, Q&A).
+- Creates vector embeddings for semantic search and similarity.
 
-Environment variables read by the OpenAI client (you must set at least `OPENAI_API_KEY`):
+Configuration via environment variables (you must set at least `OPENAI_API_KEY`; system properties with the same names take precedence):
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -90,26 +89,22 @@ Required Java system properties or environment variables:
 
 ### None
 
-The `NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and optionally log input requests locally.
+`NoneProvider` is a no-op implementation of `GenAIProvider` intended for environments where no external LLM integration should be used.
 
-Purpose and behavior:
+It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(...)` has been configured.
 
-- Stub provider that stores requests in input files when `inputsLog(...)` is configured.
-- No external API calls are made.
-- Operations that require a backend (for example, embeddings) throw an exception.
-- Prompts and instructions are cleared after `perform()`.
+Key characteristics:
 
-Typical use cases:
+- No network calls are performed.
+- `perform()` always returns `null`.
+- Unsupported capabilities (for example, `embedding(...)`) throw an exception.
 
-- Disabling GenAI features for security/compliance.
-- Implementing fallback logic when no provider is configured.
-- Logging requests for manual review or later processing.
-- Testing in environments without network access.
-
-Example usage:
+Example:
 
 ```java
 GenAIProvider provider = new NoneProvider();
+provider.inputsLog(new File("./inputsLog/inputs.txt"));
+provider.instructions("You are a helpful assistant.");
 provider.prompt("Describe the weather.");
 provider.perform();
 ```
@@ -118,7 +113,7 @@ provider.perform();
 
 `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`). The recipe is expected to place the final response text into a variable named `result`.
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompts by running the `"Submit Prompt"` recipe (via `perform()`). The recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle:
 

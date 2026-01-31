@@ -26,24 +26,24 @@
  */
 
 /**
- * Builders for generating {@link org.machanism.machai.schema.Bindex} documents from projects on disk.
+ * Builders that generate {@link org.machanism.machai.schema.Bindex} documents for projects on disk.
  *
- * <p>This package contains implementations of {@link org.machanism.machai.bindex.builder.BindexBuilder} that assemble
- * build-manifest and source context for a target project and then delegate to a configured
+ * <p>This package provides implementations of {@link org.machanism.machai.bindex.builder.BindexBuilder} that collect
+ * project context (manifests and source structure/content), then delegate to a configured
  * {@link org.machanism.machai.ai.manager.GenAIProvider} to generate a {@code Bindex} document.
  *
- * <p>Builders typically:
+ * <p>A builder typically:
  * <ol>
- *   <li>prompt the Bindex JSON schema,</li>
- *   <li>optionally include an existing (origin) Bindex for incremental updates,</li>
- *   <li>add project-specific context such as manifest contents and source file summaries, and</li>
- *   <li>invoke generation and deserialize the provider output into a {@code Bindex} instance.</li>
+ *   <li>creates a prompt that includes the Bindex JSON schema,</li>
+ *   <li>optionally includes an existing (origin) Bindex for incremental updates,</li>
+ *   <li>adds project-specific context such as manifest contents and source file summaries, and</li>
+ *   <li>invokes the provider and deserializes the result into a {@code Bindex} instance.</li>
  * </ol>
  *
- * <p>Concrete builders provided here add ecosystem-specific context:
+ * <p>Concrete builders add ecosystem-specific context, for example:
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} (reads {@code pom.xml} and Maven source/resources),</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} (reads {@code package.json} and a {@code src} tree),</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} (reads {@code pom.xml} and Maven layout),</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} (reads {@code package.json} and a JavaScript/TypeScript source tree),</li>
  *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} (reads {@code pyproject.toml} and inferred sources).</li>
  * </ul>
  *

@@ -129,16 +129,16 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` class integrates seamlessly with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
 This provider enables a wide range of generative AI capabilities, including:
 
 - Sending prompts and receiving responses from OpenAI Chat models.
 - Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests such as text generation, summarization, and question answering.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
 - Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications.
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
 
 **Environment variables**
 
@@ -186,23 +186,15 @@ This provider reads credentials from environment variables and/or Java system pr
 
 ### None
 
-The `NoneProvider` class is an implementation of the `GenAIProvider` interface used to disable generative AI integrations and log input requests locally when an external AI provider is not required or available.
+No-op implementation of `GenAIProvider`.
 
-**Purpose**
+This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
-Provides a stub implementation that stores requests in input files (in the `inputsLog` folder). All GenAI operations are non-operative (or throw exceptions where necessary), making this useful for scenarios where generative AI features must be disabled, simulated, or used for fallback testing. No calls are made to any external AI services or large language models (LLMs).
+**Key characteristics**
 
-**Typical use cases**
-
-- Disabling generative AI features for security or compliance.
-- Implementing fallback logic when no provider is configured.
-- Logging requests for manual review or later processing.
-- Testing environments not connected to external services.
-
-**Notes**
-
-- Operations requiring GenAI services will throw exceptions when called.
-- All prompts and instructions are cleared after performing.
+- No network calls are performed.
+- `perform()` always returns `null`.
+- Unsupported capabilities (for example, `embedding(String)`) throw an exception.
 
 ### Web
 

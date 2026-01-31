@@ -27,24 +27,20 @@ Generate a content:
 
 # Machai Project
 
-Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, command line tools, and Maven plugins to:
-
-- Integrate with multiple GenAI providers through a single Java abstraction.
-- Generate, register, and search structured library metadata (bindex) for discovery and reuse.
-- Assemble Maven-based projects using metadata-driven, reviewable updates.
-- Automate documentation updates from embedded guidance using Ghostwriter.
+Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins to integrate multiple GenAI providers through a single abstraction, generate and consume bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate documentation updates from embedded guidance using Ghostwriter.
 
 ## Modules
 
 | Name | Description |
-|---|---|
-| [GenAI Client](genai-client/) | Java library for integrating with Generative AI providers through a provider-agnostic API. It supports prompt and instruction management, optional file context, tool/function calling, and embeddings (provider-dependent), enabling AI-powered workflows such as semantic search, automated content generation, and intelligent project assembly while avoiding hard coupling to a single vendor. |
-| [Bindex Core](bindex-core/) | Foundational library for producing and consuming bindex metadata in the Machanism ecosystem. It provides a stable data model and supporting utility APIs to generate, publish, discover, validate, and assemble metadata so build tools and integrations can automate dependency discovery and library assembly decisions. |
-| [Machai CLI](machai-cli/) | Spring Boot + Spring Shell command line tool for end-to-end metadata and automation workflows. It can generate and update `bindex.json`, register metadata in a database, pick libraries using natural-language semantic search, assemble projects from picked results, run Ghostwriter file-processing workflows, and clean `.machai` workspace folders. |
-| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and maintains a `bindex.json` descriptor for a Maven module and can optionally register or publish that metadata. It keeps structured library metadata in sync with the build so it can be used later for discovery, GenAI-powered semantic search, and downstream assembly workflows. |
-| [Assembly Maven Plugin](assembly-maven-plugin/) | Maven plugin that applies structured, reviewable updates to a local Maven project to help bootstrap or evolve it. It can use bindex metadata (for example, `bindex.json`) and GenAI-assisted semantic discovery to recommend and integrate dependencies, accelerating setup while keeping changes inspectable and reproducible. |
-| [Ghostwriter](ghostwriter/) | Documentation automation engine (also available as a runnable CLI JAR) that scans a project for embedded guidance and applies language- and format-specific reviewers (Java, Markdown, Python, TypeScript, HTML, text) to synthesize improved documentation with a configured GenAI provider. It supports local and CI usage, optional multi-threaded processing, and repeatable, script-friendly execution. |
-| [GW Maven Plugin](gw-maven-plugin/) | Maven plugin that integrates Ghostwriter into Maven builds to generate and update Maven Site documentation from embedded `@guidance:` directives. It enables repeatable documentation generation as part of the Maven lifecycle (for example, `site`), reducing documentation drift and keeping module documentation aligned with code and requirements. |
+| --- | --- |
+| [Project Layout](project-layout/) | Java API for detecting and describing a repository on-disk layout across ecosystems (Maven, Node workspaces, Python), including main/test/resources roots and child-module discovery, so higher-level tools can avoid hard-coded conventions. |
+| [GenAI Client](genai-client/) | Java provider abstraction for interacting with multiple Generative AI backends via a single small API. Supports prompt composition, optional file context and tool calling, provider selection through a manager, and provider-dependent embeddings and logging for use across Machai modules. |
+| [Bindex Core](bindex-core/) | Core library for bindex metadata: canonical model, generation, validation, and merge/aggregation utilities used by plugins and tooling. Enables metadata-driven discovery, selection, and assembly workflows across multi-module and dependency scenarios. |
+| [Machai CLI](machai-cli/) | Spring Shell-based command line tool to generate and update bindex.json, register metadata, pick libraries using natural-language prompts and semantic search, assemble projects from picked results, and run Ghostwriter file-processing workflows from the terminal. |
+| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and maintains bindex.json for the current module (and optionally updates it), producing standardized metadata for downstream discovery and automation workflows. |
+| [Assembly Maven Plugin](assembly-maven-plugin/) | Maven plugin that assembles and evolves projects by applying local, reviewable updates driven by bindex metadata (and optionally GenAI semantic search), speeding project bootstrapping while keeping changes under developer control. |
+| [Ghostwriter](ghostwriter/) | CLI documentation engine that scans a project and updates documentation artifacts based on embedded @guidance blocks, with optional GenAI provider selection and multi-threaded processing for repeatable documentation maintenance in scripts and CI. |
+| [GW Maven Plugin](gw-maven-plugin/) | Maven plugin wrapper around Ghostwriter-style documentation automation: scans for embedded @guidance directives and generates or refreshes Maven Site Markdown pages as part of the build, keeping docs consistent and aligned with the codebase. |
 
 ## Installation Instructions
 
@@ -52,7 +48,7 @@ Machai is a modular toolkit for GenAI-enabled developer automation. It provides 
 
 - Git
 - Maven 3.6.0 or later
-- Java 11 or later for most modules; the `machai-cli` module requires Java 17
+- Java 17 (recommended for building all modules; Machai CLI requires Java 17)
 
 ### Clone and build
 
@@ -70,9 +66,7 @@ mvn clean install site site:stage
 
 ## Usage
 
-### Build specific modules
-
-Build a single module:
+### Build a specific module
 
 ```bash
 mvn -pl genai-client clean install
@@ -80,10 +74,8 @@ mvn -pl genai-client clean install
 
 ### Run the CLI
 
-Build and run the packaged CLI:
-
 ```bash
-cd machai-cli
+cd cli
 mvn -Ppack package
 java -jar target/machai.jar
 ```
@@ -96,7 +88,7 @@ help
 
 ### Typical workflows
 
-Generate `bindex.json` for a project directory:
+Generate bindex metadata for a project directory:
 
 ```text
 shell:> bindex --dir /path/to/project

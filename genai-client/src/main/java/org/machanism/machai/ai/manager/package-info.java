@@ -26,37 +26,27 @@
  */
 
 /**
- * GenAI provider management and host-side tool integration.
+ * Provider resolution, interaction, and host-side tool wiring for Generative AI integrations.
  *
- * <p>This package defines the API used to obtain and interact with concrete Generative-AI provider implementations
- * ({@link org.machanism.machai.ai.manager.GenAIProvider}) and includes a small set of built-in &quot;tools&quot; that expose
- * controlled host capabilities (file access and command execution) to a provider.
- *
- * <h2>Key responsibilities</h2>
+ * <p>This package contains:
  * <ul>
- *   <li><strong>Provider resolution and instantiation</strong> via
- *       {@link org.machanism.machai.ai.manager.GenAIProviderManager} using a {@code Provider:Model} identifier.</li>
- *   <li><strong>Provider interaction</strong> through prompts, instructions, file attachments, embeddings, and response
- *       generation via {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
- *   <li><strong>Tool registration</strong> by installing host-side functions with
- *       {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
- *       Tools are executed in a provider-supplied working directory and are expected to be further restricted by the
- *       hosting application as needed.</li>
+ *   <li>A provider SPI ({@link org.machanism.machai.ai.manager.GenAIProvider}) for submitting prompts, attaching files,
+ *       computing embeddings, registering host-implemented tools, and executing a request.</li>
+ *   <li>A reflection-based resolver ({@link org.machanism.machai.ai.manager.GenAIProviderManager}) that creates provider
+ *       instances from a {@code Provider:Model} identifier.</li>
+ *   <li>Optional tool installers ({@link org.machanism.machai.ai.manager.FileFunctionTools},
+ *       {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
+ *       {@link org.machanism.machai.ai.manager.SystemFunctionTools}) that register common host capabilities (file I/O and
+ *       command execution) with a provider via {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.</li>
  * </ul>
  *
- * <h2>Built-in tool installers</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} - provides file read/write and directory listing
- *       functions.</li>
- *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} - provides command execution.</li>
- *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} - convenience installer that applies both file and
- *       command tools.</li>
- * </ul>
+ * <p><strong>Security note:</strong> tool functions run on the hosting machine. Applications should constrain the working
+ * directory, permissible paths/commands, and execution timeouts according to their security requirements.
  *
  * <h2>Example</h2>
- *
  * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
+ * provider.setWorkingDir(new File("."));
  * new SystemFunctionTools().applyTools(provider);
  *
  * provider.instructions("You are a helpful assistant.");

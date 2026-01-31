@@ -30,38 +30,41 @@ import org.machanism.machai.schema.Bindex;
  * This goal orchestrates an AI-assisted project assembly workflow:
  * </p>
  * <ol>
- *   <li>Read an assembly prompt from {@link #assemblyPromptFile} (when present) or ask for it interactively.</li>
- *   <li>Use {@link #pickChatModel} to recommend candidate libraries ({@link Bindex} entries).</li>
- *   <li>Filter recommendations by {@link #score}.</li>
- *   <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
+ * <li>Read an assembly prompt from {@link #assemblyPromptFile} (when present) or ask for it interactively.</li>
+ * <li>Use {@link #pickChatModel} to recommend candidate libraries ({@link Bindex} entries).</li>
+ * <li>Filter recommendations by {@link #score}.</li>
+ * <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
  * </ol>
  *
  * <h2>Plugin parameters</h2>
  * <ul>
- *   <li>
- *     {@code -Dassembly.genai} (default {@code OpenAI:gpt-5})
- *     &ndash; Provider id for the assembly phase.
- *   </li>
- *   <li>
- *     {@code -Dpick.genai} (default {@code OpenAI:gpt-5-mini})
- *     &ndash; Provider id for the library recommendation (picker) phase.
- *   </li>
- *   <li>
- *     {@code -Dassembly.prompt.file} (default {@code project.txt})
- *     &ndash; File containing the prompt; if absent, the prompt is requested interactively.
- *   </li>
- *   <li>
- *     {@code -Dassembly.score} (default {@code 0.9})
- *     &ndash; Minimum score required for a recommended library to be listed/used.
- *   </li>
- *   <li>
- *     {@code -Dbindex.register.url} (optional)
- *     &ndash; Registration/lookup endpoint used by the picker.
- *   </li>
+ * <li>
+ * {@code -Dassembly.genai} (default {@code OpenAI:gpt-5})
+ * &ndash; Provider id for the assembly phase.
+ * </li>
+ * <li>
+ * {@code -Dpick.genai} (default {@code OpenAI:gpt-5-mini})
+ * &ndash; Provider id for the library recommendation (picker) phase.
+ * </li>
+ * <li>
+ * {@code -Dassembly.prompt.file} (default {@code project.txt})
+ * &ndash; File containing the prompt; if absent, the prompt is requested interactively.
+ * </li>
+ * <li>
+ * {@code -Dassembly.score} (default {@code 0.9})
+ * &ndash; Minimum score required for a recommended library to be listed/used.
+ * </li>
+ * <li>
+ * {@code -Dbindex.register.url} (optional)
+ * &ndash; Registration/lookup endpoint used by the picker.
+ * </li>
  * </ul>
  *
  * <h2>Usage examples</h2>
- * <p><b>Command line:</b></p>
+ * <p>
+ * <b>Command line:</b>
+ * </p>
+ *
  * <pre>
  * mvn org.machanism.machai:assembly-maven-plugin:assembly \
  *   -Dassembly.genai=OpenAI:gpt-5 \
@@ -74,19 +77,27 @@ import org.machanism.machai.schema.Bindex;
 public class Assembly extends AbstractMojo {
 
     /**
-     * Prompter used to request interactive input when a prompt file is not present.
+     * Interactive prompter used when no prompt file is available.
      */
     @Component
     protected Prompter prompter;
 
     /**
-     * GenAI provider identifier used for the assembly workflow (for example, {@code OpenAI:gpt-5}).
+     * GenAI provider identifier used for the assembly workflow.
+     *
+     * <p>
+     * The value is resolved by {@link GenAIProviderManager} (for example, {@code OpenAI:gpt-5}).
+     * </p>
      */
     @Parameter(property = "assembly.genai", defaultValue = "OpenAI:gpt-5")
     protected String chatModel;
 
     /**
-     * GenAI provider identifier used for library recommendation/picking (for example, {@code OpenAI:gpt-5-mini}).
+     * GenAI provider identifier used for library recommendation/picking.
+     *
+     * <p>
+     * The value is resolved by {@link GenAIProviderManager} (for example, {@code OpenAI:gpt-5-mini}).
+     * </p>
      */
     @Parameter(property = "pick.genai", defaultValue = "OpenAI:gpt-5-mini")
     protected String pickChatModel;
@@ -103,11 +114,7 @@ public class Assembly extends AbstractMojo {
     protected File assemblyPromptFile;
 
     /**
-     * Minimum score threshold.
-     *
-     * <p>
-     * Only libraries meeting or exceeding this score will be offered/used.
-     * </p>
+     * Minimum score threshold for recommended libraries.
      */
     @Parameter(property = "assembly.score", defaultValue = "0.9")
     protected Double score;
@@ -131,11 +138,11 @@ public class Assembly extends AbstractMojo {
      * The execution performs the following steps:
      * </p>
      * <ol>
-     *   <li>Read the prompt from {@link #assemblyPromptFile} when it exists; otherwise prompt the user.</li>
-     *   <li>Initialize the picker GenAI provider and apply standard system function tools.</li>
-     *   <li>Use {@link Picker} to recommend libraries and log recommendations to the build output.</li>
-     *   <li>Run the {@link ApplicationAssembly} workflow in {@link #basedir} using the assembly GenAI provider.</li>
-     *   <li>Optionally enter an interactive prompt loop (skipped for {@link NoneProvider}).</li>
+     * <li>Read the prompt from {@link #assemblyPromptFile} when it exists; otherwise prompt the user.</li>
+     * <li>Initialize the picker GenAI provider and apply standard system function tools.</li>
+     * <li>Use {@link Picker} to recommend libraries and log recommendations to the build output.</li>
+     * <li>Run the {@link ApplicationAssembly} workflow in {@link #basedir} using the assembly GenAI provider.</li>
+     * <li>Optionally enter an interactive prompt loop (skipped for {@link NoneProvider}).</li>
      * </ol>
      *
      * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly

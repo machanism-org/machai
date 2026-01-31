@@ -1,18 +1,16 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains the Spring Shell application entry point and command components that expose Machai
- * capabilities through an interactive or non-interactive command-line experience. Commands orchestrate common
- * workflows such as selecting and assembling libraries ("bricks"), generating and registering bindex metadata,
- * scanning source/document trees, and applying a configured GenAI model.
+ * <p>This package provides the Spring Shell application entry point and command components that expose Machai
+ * capabilities via interactive and non-interactive command-line workflows.
  *
- * <h2>Responsibilities</h2>
+ * <h2>Primary responsibilities</h2>
  * <ul>
- *   <li>Search and select bricks, then assemble projects or prompts.</li>
- *   <li>Generate and register bindex metadata.</li>
- *   <li>Scan directories, score content, and run GenAI processing based on configuration.</li>
- *   <li>Clean Machai temporary and output folders.</li>
- *   <li>Manage configuration defaults used by other commands.</li>
+ *   <li>Discover, select, and assemble "bricks" into outputs such as projects or prompts.</li>
+ *   <li>Generate and register bindex metadata used for discovery and reuse.</li>
+ *   <li>Run directory scanning, scoring, and GenAI processing based on configuration.</li>
+ *   <li>Clean Machai temporary/output folders.</li>
+ *   <li>Manage configuration defaults consumed by other commands.</li>
  * </ul>
  *
  * <h2>Command groups</h2>
@@ -28,6 +26,7 @@
  * <p>The application entry point is {@link org.machanism.machai.cli.MachaiCLI}.</p>
  *
  * <h2>Usage</h2>
+ * <p>Programmatic startup:</p>
  * <pre>
  * public final class Main {
  *   public static void main(String[] args) throws Exception {

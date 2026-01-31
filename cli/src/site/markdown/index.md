@@ -83,8 +83,6 @@ Then enter `help` to see the available commands.
 java -jar machai.jar
 ```
 
-Then enter `help` to see the available commands.
-
 ### Typical Workflow
 
 1. Generate (or update) `bindex.json` for a project:

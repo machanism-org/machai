@@ -27,20 +27,22 @@ Page Structure:
 
 ## Introduction
 
-The **Bindex Maven Plugin** enables automated generation and registration of `bindex` metadata for Maven projects. It facilitates library discovery, integration, and assembly by leveraging structured metadata and GenAI-powered semantic search within the Machanism ecosystem.
+The **Bindex Maven Plugin** enables automated generation and registration of `bindex` metadata for Maven projects. It creates and maintains a `bindex.json` descriptor for the current module so downstream tools can reliably discover, index, and assemble artifacts using structured metadata (including semantic-search workflows within the Machanism ecosystem).
 
 ## Overview
 
-Run the plugin as part of your Maven build (for example, bound to a lifecycle phase) or on-demand to create or update the `bindex.json` descriptor for the current module:
+This plugin is typically run during a Maven build (optionally bound to a lifecycle phase) or executed on-demand.
 
-- If `bindex.json` does not exist, it is generated.
-- If it already exists, it can be updated in-place to keep metadata synchronized with the project.
+At execution time it will:
+
+- Generate `bindex.json` when it does not exist.
+- Update an existing `bindex.json` (when enabled) to keep metadata aligned with the module.
 
 ## Key Features
 
 - Generates a `bindex.json` descriptor for the current Maven module.
-- Updates an existing descriptor to keep metadata synchronized with the project.
-- Enables standardized metadata workflows for discovery, automation, and indexing.
+- Updates an existing descriptor to keep metadata synchronized with project changes.
+- Standardizes metadata for discovery, automation, and indexing workflows.
 
 ## Getting Started
 
@@ -70,7 +72,7 @@ mvn org.machanism.machai:bindex-maven-plugin:bindex
 1. Add/configure the plugin in your project `pom.xml` (optionally bind it to a lifecycle phase).
 2. Run `mvn org.machanism.machai:bindex-maven-plugin:bindex` to generate or update `bindex.json`.
 3. Commit `bindex.json` if your repository policy expects generated metadata to be versioned.
-4. Use the generated descriptor in any downstream tooling that consumes `bindex.json`.
+4. Use the generated descriptor with any downstream tooling that consumes `bindex.json`.
 
 ## Configuration
 

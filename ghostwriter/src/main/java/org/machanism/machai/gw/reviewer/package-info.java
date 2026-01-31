@@ -1,13 +1,18 @@
 /**
- * Provides a small service-provider interface (SPI) and a set of built-in implementations for discovering and
- * extracting {@code @guidance} instructions from project files.
+ * Provides the reviewer subsystem responsible for finding and extracting {@code @guidance} instruction blocks from
+ * project files.
  *
- * <p>The primary contract is {@link org.machanism.machai.gw.reviewer.Reviewer}. Each {@code Reviewer}
- * implementation targets one or more file extensions and scans files using the comment conventions of that
- * format to locate {@code @guidance} blocks.
+ * <p>The central abstraction is {@link org.machanism.machai.gw.reviewer.Reviewer}. A reviewer implementation
+ * typically:
+ * <ul>
+ *   <li>declares which file extensions it supports,</li>
+ *   <li>parses file contents using the target format's comment conventions, and</li>
+ *   <li>returns the discovered {@code @guidance} blocks for downstream processing.</li>
+ * </ul>
  *
- * <p>Built-in reviewers include support for Java sources (including {@code package-info.java}), TypeScript,
- * Python, Markdown, HTML/XML, and {@code @guidance.txt} plain-text guidance files.
+ * <p>This package includes built-in {@code Reviewer} implementations for common formats such as Java source files
+ * (including {@code package-info.java}), TypeScript, Python, Markdown, HTML/XML, and plain-text
+ * {@code @guidance.txt} files.
  */
 package org.machanism.machai.gw.reviewer;
 
@@ -28,7 +33,6 @@ package org.machanism.machai.gw.reviewer;
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.

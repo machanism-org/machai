@@ -40,7 +40,8 @@ Ghostwriter scans a project directory and processes documentation-related files 
 You can optionally specify:
 
 - A GenAI provider/model (for example, `OpenAI:gpt-5.1`).
-- Additional processing instructions (inline or loaded from a file).
+- Additional processing instructions (loaded from `--instructions` or `gw.properties`).
+- A root directory that bounds scanning (`--root`).
 - One or more directories to include in the scan (positional arguments).
 
 Learn more about guided file processing: https://machanism.org/guided-file-processing/index.html
@@ -49,7 +50,7 @@ Learn more about guided file processing: https://machanism.org/guided-file-proce
 
 - Scans directories and updates documentation artifacts according to embedded guidance.
 - Supports pluggable GenAI provider/model selection.
-- Accepts additional instruction input (loaded from `--instructions` file; also supports `gw.properties`).
+- Accepts additional instruction input (loaded from `--instructions` and/or `gw.properties`).
 - Optional multi-threaded processing.
 - Optional final default guidance step via `--guidance`.
 - Runs as a single runnable JAR for scripts and CI.
@@ -109,16 +110,20 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 
 ### Command-line Options
 
-| Option | Long Option | Argument | Description | Default |
-|--------|------------|:--------:|-------------|---------|
+| Short | Long | Arg | Description | Default |
+|------:|------|:---:|-------------|---------|
 | `-h` | `--help` | No | Show help message and exit. | Off |
-| `-t` | `--threads` | Optional | Enable multi-threaded processing to improve performance. If present with no value, treated as `true`; otherwise accepts `true`/`false`. | `true` |
-| `-r` | `--root` | Yes | Specify the path to the root directory for file processing. Scanned directories must be located within this root. | From `gw.properties` key `dir`; otherwise the current user directory |
-| `-a` | `--genai` | Yes | Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`). | From `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
-| `-i` | `--instructions` | Yes | Specify additional instructions by URL or file path. Use a comma (`,`) to separate multiple locations. | From `gw.properties` key `instructions`; otherwise none |
-| `-g` | `--guidance` | Optional | Set the default guidance file to apply as a final step for each scanned directory. If present with no value, uses `@guidance.txt` (resolved relative to the executable directory). | Off (not applied) |
+| `-t` | `--threads` | Optional (`true`/`false`) | Enable multi-threaded processing to improve performance. If present without a value, defaults to `true`. | `true` |
+| `-r` | `--root` | Yes (path) | Path to the root directory for file processing. Scanned directories must be located within this root. | `gw.properties` key `root`; otherwise current user directory |
+| `-a` | `--genai` | Yes (`provider:model`) | GenAI provider and model (e.g., `OpenAI:gpt-5.1`). | `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
+| `-i` | `--instructions` | Yes (URL/path[,URL/path...]) | Additional instruction locations (URL or file path). Separate multiple locations with commas. | `gw.properties` key `instructions`; otherwise none |
+| `-g` | `--guidance` | Optional (path) | Default guidance file applied as a final step for each scanned directory. If present without a value, uses `@guidance.txt` resolved relative to the executable directory (the directory containing `gw.jar`). | Off (not applied) |
 
-**Positional arguments**: Zero or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
+**Positional arguments**: Zero or more directories to scan.
+
+- If no directories are provided:
+  - When `--root` is not set (and no `root` in `gw.properties`), the root defaults to the current user directory and that directory is scanned.
+  - When `--root` is set (or configured), the directory scanned defaults to the current user directory.
 
 ### Example
 

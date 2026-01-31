@@ -14,17 +14,17 @@
  *
  * <h2>Key types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} - base abstraction and shared path utilities.</li>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - reads Maven models to resolve modules and
- *       build directories.</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - inspects {@code package.json} workspaces to
+ *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} - Base abstraction and shared path utilities.</li>
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Reads Maven models to resolve modules and build
+ *       directories.</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - Inspects {@code package.json} workspaces to
  *       discover JS/TS modules.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - inspects {@code pyproject.toml} metadata to
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Inspects {@code pyproject.toml} metadata to
  *       detect Python projects.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - fallback that scans immediate subdirectories
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - Fallback that scans immediate subdirectories
  *       and excludes common VCS, dependency, and build-output directories via
  *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
- *   <li>{@link org.machanism.machai.project.layout.PomReader} - helper for parsing and building effective Maven POM
+ *   <li>{@link org.machanism.machai.project.layout.PomReader} - Helper for parsing and building effective Maven POM
  *       models.</li>
  * </ul>
  *

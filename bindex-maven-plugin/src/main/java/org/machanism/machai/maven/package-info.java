@@ -14,8 +14,8 @@
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * -  Maintain Consistency and Formatting:
- * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
+ *      - Follow a consistent style and structure for all Javadoc comments.
+ *      - Use proper Markdown or HTML formatting for readability.
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.

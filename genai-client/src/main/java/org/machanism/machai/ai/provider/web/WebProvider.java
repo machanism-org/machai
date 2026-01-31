@@ -28,12 +28,12 @@ import com.ganteater.ae.RecipeRunner;
  * </ul>
  *
  * <h2>Example</h2>
- * {@code
+ * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
  * provider.model("config.yaml");
  * provider.setWorkingDir(new File("/path/to/project"));
  * String response = provider.perform();
- * }
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -42,15 +42,24 @@ public class WebProvider extends NoneProvider {
 	/** Logger for this class. */
 	private static final Logger logger = LoggerFactory.getLogger(WebProvider.class);
 
-	/** Shared AEWorkspace instance used for task execution. */
+	/**
+	 * Shared Anteater workspace instance used for automation task execution.
+	 */
 	private static AEWorkspace workspace = new AEWorkspace();
 
-	/** Root directory for workspace operations (set once per JVM instance). */
+	/**
+	 * Root directory for workspace operations (set once per JVM instance).
+	 */
 	private static File rootDir;
 
-	/** Name of the Anteater configuration to be loaded. */
+	/**
+	 * Name of the Anteater configuration to be loaded.
+	 */
 	private static String configName;
 
+	/**
+	 * Disables headless mode to allow UI automation in environments that require a visible browser.
+	 */
 	static {
 		System.setProperty("java.awt.headless", "false");
 	}
@@ -142,9 +151,9 @@ public class WebProvider extends NoneProvider {
 	}
 
 	/**
-	 * Indicates that this provider is not safe for concurrent use.
+	 * Indicates whether this provider can be used concurrently by multiple threads.
 	 *
-	 * @return {@code false}
+	 * @return {@code false} because this provider keeps shared static workspace state
 	 */
 	@Override
 	public boolean isThreadSafe() {

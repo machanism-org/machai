@@ -79,7 +79,7 @@ Example commands (as shown by `help`):
 ### Assembly commands
 
 - `pick`: Picks libraries based on user request.
-- `assembly`: Creates a project via picked library set.
+- `assembly`: Creates a project via picked librariy set.
 - `prompt`: Is used for request additional GenAI guidances.
 
 ### Bindex commands

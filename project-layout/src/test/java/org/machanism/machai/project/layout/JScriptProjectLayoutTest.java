@@ -1,6 +1,9 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +43,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnNullWhenNoWorkspaces() throws Exception {
+	void getModules_shouldReturnNullWhenNoWorkspacesKey() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-no-workspaces");
 		assertTrue(dir.mkdirs() || dir.isDirectory());

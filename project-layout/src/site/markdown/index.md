@@ -21,7 +21,7 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# project-layout
+# Project Layout
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/project-layout.svg)](https://central.sonatype.com/artifact/org.machanism.machai/project-layout)
 
@@ -66,7 +66,7 @@ This project does not require any environment variables.
 import java.nio.file.Path;
 import org.machanism.machai.project.ProjectLayoutManager;
 
-var manager = new ProjectLayoutManager();
+ProjectLayoutManager manager = new ProjectLayoutManager();
 var layout = manager.detect(Path.of("."));
 
 // Use layout to find source/test/resource directories and child projects
@@ -89,7 +89,7 @@ var layout = manager.detect(Path.of("."));
 Example:
 
 ```java
-var manager = new ProjectLayoutManager();
+ProjectLayoutManager manager = new ProjectLayoutManager();
 var layout = manager.detect(Path.of("."));
 ```
 

@@ -3,12 +3,8 @@
  * Maven build.
  *
  * <p>
- * The goals in this package scan a module base directory (typically {@code ${basedir}}) for documentation sources and
- * execute the MachAI GW workflow. The {@code gw} goal is an aggregator mojo and can operate across a multi-module
- * reactor.
+ * This package provides two goals:
  * </p>
- *
- * <h2>Goals</h2>
  * <ul>
  *   <li>
  *     <b>{@code gw}</b> ({@link org.machanism.machai.maven.GW}): scans documentation sources and runs the workflow.
@@ -20,12 +16,16 @@
  * </ul>
  *
  * <h2>Goal: {@code gw}</h2>
+ * <p>
+ * The {@code gw} goal is an aggregator mojo (runs once per reactor) and typically scans a module base directory (for
+ * example {@code ${basedir}}) for documentation sources, then executes the MachAI GW workflow.
+ * </p>
  *
  * <h3>Credentials</h3>
  * <p>
  * The {@code gw} goal reads GenAI credentials from Maven {@code settings.xml} using the configured {@code <server>}
- * entry identified by {@code gw.genai.serverId}. If present, the credentials are exposed to the workflow via system
- * properties:
+ * entry identified by the required parameter {@code gw.genai.serverId}. If present, the credentials are exposed to the
+ * workflow via system properties:
  * </p>
  * <ul>
  *   <li>{@code GENAI_USERNAME}</li>

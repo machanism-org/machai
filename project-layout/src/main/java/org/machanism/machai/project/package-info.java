@@ -1,23 +1,26 @@
 /**
- * Filesystem-backed APIs for inspecting and processing on-disk project structures.
+ * Filesystem-backed APIs for inspecting on-disk project structures, detecting the
+ * appropriate {@link org.machanism.machai.project.layout.ProjectLayout}, and applying
+ * processing logic across a project root and its modules.
  *
- * <p>This package provides two main entry points:
+ * <p>The primary responsibilities of this package are:
  *
  * <ul>
- *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} detects the most appropriate
- *       {@link org.machanism.machai.project.layout.ProjectLayout} implementation for a given project root directory
- *       (for example, Maven, Node/JavaScript, Python, or a default layout).</li>
- *   <li>{@link org.machanism.machai.project.ProjectProcessor} defines a small framework for scanning a project root.
- *       If the detected layout exposes modules/subprojects, each module is processed recursively; otherwise the root
- *       folder is processed directly.</li>
+ *   <li>Detecting a suitable {@link org.machanism.machai.project.layout.ProjectLayout}
+ *       implementation for a project directory via {@link org.machanism.machai.project.ProjectLayoutManager}.</li>
+ *   <li>Providing a recursive, module-aware scanning workflow via
+ *       {@link org.machanism.machai.project.ProjectProcessor}.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  *
  * <pre>{@code
  * File projectDir = new File("/path/to/project");
+ *
+ * // Detect a layout (Maven / Node / Python / default).
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
  *
+ * // Scan and process the project, recursing into modules if the layout provides them.
  * ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
  * }</pre>
