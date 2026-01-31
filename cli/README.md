@@ -1,16 +1,12 @@
-# Machai CLI
 <!--
 @guidance:
 Content:
-
 1. **Project Title and Overview:**  
    - Provide the project name and a brief description of its purpose and main features.
-
 2. **Installation Instructions:**  
    - Describe how to clone the repository and build the project (e.g., using Maven or Gradle).
    - Include prerequisites such as Java version and build tools.
    - Add the Machai CLI application jar download link: [Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai/machai.jar/download) to the installation section.
-
 3. **Usage:**  
    - Provide example commands by help:
 		Assemby Command
@@ -30,14 +26,14 @@ Content:
 		       script: Read and execute commands from a file.
 		Docs Command
 		       docs: GenAI document processing command.
-
 7. **Reference to the parent project and machanism.org**
-
 **Formatting Requirements:**
 - Use Markdown syntax for headings, lists, code blocks, and links.
 - Ensure clarity and conciseness in each section.
 - Organize the README for easy navigation and readability.
 -->
+
+# Machai CLI
 
 A Java CLI application for intelligent library management, GenAI-powered document processing, and automation.
 

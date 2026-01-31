@@ -72,10 +72,26 @@ Then enter `help` to see the available commands.
 
 ### Environment Variables
 
-| Variable Name | Description |
-|---|---|
-| `OPENAI_API_KEY` | API key used by the configured GenAI provider for AI-powered operations. |
-| `BINDEX_REG_PASSWORD` | Password for database write access (required for metadata registration). |
+Set the following environment variables according to your chosen GenAI provider:
+
+#### For OpenAI-Compatible Services
+
+| Variable Name         | Description                                                                                   |
+|----------------------|-----------------------------------------------------------------------------------------------|
+| `OPENAI_API_KEY`     | API key for authenticating requests to the configured GenAI provider (e.g., OpenAI, Azure OpenAI). |
+| `BINDEX_REG_PASSWORD`| Password required for database write access, specifically for metadata registration operations. |
+
+#### For CodeMie Integration
+
+| Variable Name     | Description                                  |
+|-------------------|----------------------------------------------|
+| `GENAI_USERNAME`  | Username for authenticating with CodeMie.    |
+| `GENAI_PASSWORD`  | Password for authenticating with CodeMie.    |
+
+**Note:**  
+- Only set the variables relevant to your selected provider.  
+- Ensure all credentials are kept secure and never committed to version control.  
+- For additional configuration details, refer to the provider’s documentation.
 
 ### Basic Usage
 
@@ -112,26 +128,8 @@ java -jar machai.jar
 5. (Optional) Run Ghostwriter processing:
 
    ```bash
-   gw --dir <working-directory>
+   gw --root <working-directory>
    ```
-
-## Configuration
-
-### Common Parameters
-
-| Parameter | Description | Default |
-|---|---|---|
-| `--dir` | Working directory used by commands that operate on a project/workspace. | Current directory / configured default |
-| `--registerUrl` | Metadata database endpoint for `pick` / `assembly` / `register`. | (none) |
-| `--genai` | GenAI provider/model (format: `provider:model`). | Configured default |
-| `--score` | Minimum similarity score for matches (used by commands that support it). | Configured default |
-| `--update` | Whether to update existing metadata/registration. | Command-specific |
-
-### Example: Configure and run with custom parameters
-
-```bash
-pick --query "Find libraries for a Spring Boot REST API" --registerUrl https://example.com/register --score 0.75 --genai openai:gpt-4o-mini
-```
 
 ## Resources
 

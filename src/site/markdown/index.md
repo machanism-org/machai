@@ -91,7 +91,7 @@ help
 Generate bindex metadata for a project directory:
 
 ```text
-shell:> bindex --dir /path/to/project
+shell:> bindex --root /path/to/project
 ```
 
 Pick libraries from a registry using a prompt:
@@ -103,7 +103,7 @@ shell:> pick "Build a REST API for user login" --score 0.90
 Assemble a project from the picked results:
 
 ```text
-shell:> assembly --dir /path/to/output --score 0.80
+shell:> assembly --root /path/to/output --score 0.80
 ```
 
 ### Using Maven plugins

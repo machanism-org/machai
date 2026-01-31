@@ -66,10 +66,24 @@ Learn more about guided file processing: https://machanism.org/guided-file-proce
 
 Ghostwriter itself does not require environment variables, but your chosen GenAI provider may.
 
-| Name | Description | Example |
-|------|-------------|---------|
-| `OPENAI_API_KEY` | API key for OpenAI provider (if using OpenAI). | `sk-...` |
-| `OPENAI_BASE_URL` | Custom base URL for OpenAI-compatible services. | `https://api.openai.com` |
+#### For OpenAI-Compatible Services
+
+| Variable Name         | Description                                                                                   |
+|----------------------|-----------------------------------------------------------------------------------------------|
+| `OPENAI_API_KEY`     | API key for authenticating requests to the configured GenAI provider (e.g., OpenAI, Azure OpenAI). |
+| `BINDEX_REG_PASSWORD`| Password required for database write access, specifically for metadata registration operations. |
+
+#### For CodeMie Integration
+
+| Variable Name     | Description                                  |
+|-------------------|----------------------------------------------|
+| `GENAI_USERNAME`  | Username for authenticating with CodeMie.    |
+| `GENAI_PASSWORD`  | Password for authenticating with CodeMie.    |
+
+**Note:**  
+- Only set the variables relevant to your selected provider.  
+- Ensure all credentials are kept secure and never committed to version control.  
+- For additional configuration details, refer to the provider’s documentation.
 
 ### Installation
 
