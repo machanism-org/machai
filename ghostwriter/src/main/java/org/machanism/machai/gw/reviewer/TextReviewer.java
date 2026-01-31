@@ -7,6 +7,7 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
@@ -42,16 +43,22 @@ public class TextReviewer implements Reviewer {
 	 * @throws IOException if an error occurs reading the file
 	 */
 	public String perform(File projectDir, File guidancesFile) throws IOException {
-		String guidance = Files.readString(guidancesFile.toPath());
-		if (StringUtils.equals(guidancesFile.getName(), GUIDANCE_FILE_NAME)) {
-			if (StringUtils.isNotBlank(guidance)) {
-				String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
-				guidance = MessageFormat.format(promptBundle.getString("guidance_file"), parentsPath, guidance);
-			}
+		String guidance;
+		if (Strings.CS.equals(guidancesFile.getName(), GUIDANCE_FILE_NAME)) {
+			guidance = Files.readString(guidancesFile.toPath());
+			guidance = getPrompt(projectDir, guidancesFile, guidance);
 		} else {
 			guidance = null;
 		}
 
+		return guidance;
+	}
+
+	public String getPrompt(File projectDir, File guidancesFile, String guidance) {
+		if (StringUtils.isNotBlank(guidance)) {
+			String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
+			guidance = MessageFormat.format(promptBundle.getString("guidance_file"), parentsPath, guidance);
+		}
 		return guidance;
 	}
 

@@ -1,6 +1,7 @@
 package org.machanism.machai.gw;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Optional;
@@ -164,6 +165,10 @@ public final class Ghostwriter {
 				String guidanceFileName = cmd.getOptionValue(guidanceOpt);
 				guidanceFileName = StringUtils.defaultIfBlank(guidanceFileName, "@guidance.txt");
 				defaultGuidance = getInstractionsFromFile(guidanceFileName);
+				if (defaultGuidance == null) {
+					throw new FileNotFoundException("Guidance file '" + guidanceFileName +
+							"' not found. Please verify that the file exists at the expected location and is accessible.");
+				}
 			}
 
 			for (String scanDir : dirs) {

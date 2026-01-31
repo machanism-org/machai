@@ -29,6 +29,7 @@ import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.gw.reviewer.Reviewer;
+import org.machanism.machai.gw.reviewer.TextReviewer;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.DefaultProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -36,8 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported files,
- * and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported
+ * files, and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
  * This processor delegates file-specific guidance extraction to
@@ -149,6 +150,9 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File rootDir, File dir) throws IOException {
+		if (!moduleMultiThread) {
+			logger.info("Multi-threaded processing mode disabled.");
+		}
 		this.rootDir = rootDir;
 
 		File scanDir = dir;
@@ -182,8 +186,6 @@ public class FileProcessor extends ProjectProcessor {
 
 			if (modules != null) {
 				if (isModuleMultiThread()) {
-					logger.info("Multi-threaded processing mode enabled.");
-
 					ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, modules.size()));
 					try {
 						for (String module : modules) {
@@ -214,6 +216,14 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		processParentFiles(projectDir);
+	}
+
+	@Override
+	protected void processModule(File projectDir, String module) throws IOException {
+		if (defaultProcessingDir == null
+				|| Strings.CS.startsWith(projectDir.getPath(), defaultProcessingDir.getPath())) {
+			super.processModule(projectDir, module);
+		}
 	}
 
 	/**
@@ -311,7 +321,8 @@ public class FileProcessor extends ProjectProcessor {
 		return perform;
 	}
 
-	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance) throws IOException {
+	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance)
+			throws IOException {
 		String perform;
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
@@ -329,9 +340,11 @@ public class FileProcessor extends ProjectProcessor {
 			String projectInfo = getProjectStructureDescription(projectLayout);
 			provider.prompt(projectInfo);
 
-			String currentFile = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
-			String guidancePrompt = MessageFormat.format(promptBundle.getString("guidance_file"), currentFile, guidance);
-			provider.prompt(guidancePrompt);
+			if (defaultGuidance == guidance) {
+				TextReviewer textReviewer = new TextReviewer();
+				guidance = textReviewer.getPrompt(projectDir, file, defaultGuidance);
+			}
+			provider.prompt(guidance);
 
 			provider.prompt(promptBundle.getString("output_format"));
 
@@ -430,7 +443,7 @@ public class FileProcessor extends ProjectProcessor {
 
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
-			if (StringUtils.equalsAnyIgnoreCase(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
+			if (Strings.CI.equalsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
 				continue;
 			}
 			if (file.isDirectory()) {
@@ -475,7 +488,8 @@ public class FileProcessor extends ProjectProcessor {
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
 			if (!provider.isThreadSafe()) {
 				throw new IllegalArgumentException(
-						"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
+						"The provider '" + genai
+								+ "' is not thread-safe and cannot be used in a multi-threaded context.");
 			}
 		}
 		this.moduleMultiThread = true;
