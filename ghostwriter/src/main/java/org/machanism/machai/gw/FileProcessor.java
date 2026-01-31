@@ -152,8 +152,8 @@ public class FileProcessor extends ProjectProcessor {
 		this.rootDir = rootDir;
 
 		File scanDir = dir;
+		ProjectLayout projectLayout = getProjectLayout(dir);
 		if (defaultGuidance != null) {
-			ProjectLayout projectLayout = getProjectLayout(dir);
 			if (projectLayout instanceof DefaultProjectLayout) {
 				defaultProcessingDir = dir;
 				scanDir = rootDir;

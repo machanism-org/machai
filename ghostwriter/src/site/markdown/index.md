@@ -112,11 +112,11 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 | Option | Long Option | Argument | Description | Default |
 |--------|------------|:--------:|-------------|---------|
 | `-h` | `--help` | No | Show help message and exit. | Off |
-| `-t` | `--threads` | Optional | Enable multi-threaded processing. Accepts `true`/`false`; if provided with no value, defaults to `true`. | `true` |
+| `-t` | `--threads` | Optional | Enable multi-threaded processing. If provided with no value, it is treated as `true`; otherwise accepts `true`/`false`. | `true` |
 | `-r` | `--root` | Yes | Path to the root directory for file processing. Scanned directories must be located within this root. | From `gw.properties` key `dir`; otherwise the current user directory |
 | `-a` | `--genai` | Yes | GenAI provider and model (e.g., `OpenAI:gpt-5.1`). | From `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
-| `-i` | `--instructions` | Yes | File name (resolved relative to the executable directory) containing additional file-processing instructions. | From `gw.properties` key `instructions`; otherwise none |
-| `-g` | `--guidance` | Optional | Default guidance file applied as a final step for each scanned directory. If provided with no value, uses `@guidance.txt` (resolved relative to the executable directory). | Off (not applied) |
+| `-i` | `--instructions` | Yes | Additional instructions locations by URL or file path. Use a comma (`,`) to separate multiple locations. | From `gw.properties` key `instructions`; otherwise none |
+| `-g` | `--guidance` | Optional | Default guidance file content applied as a final step per scanned directory. If provided with no value, uses `@guidance.txt` (resolved relative to the executable directory). | Off (not applied) |
 
 **Positional arguments**: Zero or more directories to scan. If none are provided, Ghostwriter scans the resolved root directory.
 

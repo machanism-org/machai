@@ -1,11 +1,13 @@
 /**
- * Service-provider interfaces (SPI) and built-in implementations for reviewing supported file formats.
+ * Service-provider interfaces (SPI) and built-in implementations for extracting {@code @guidance} instructions
+ * from supported file formats.
  *
- * <p>This package centers around {@link org.machanism.machai.gw.reviewer.Reviewer} implementations that understand
- * a file's comment conventions, locate {@code @guidance} instruction blocks, and extract them into a normalized
- * representation for downstream processing.
+ * <p>The central contract is {@link org.machanism.machai.gw.reviewer.Reviewer}, which inspects a file, detects
+ * the presence of {@code @guidance} blocks using the file format's comment conventions, and returns a
+ * formatted prompt fragment for the Ghostwriter pipeline.
  *
- * <p>Reviewers are typically selected by file extension and invoked as part of the Ghostwriter pipeline.
+ * <p>This package provides reviewers for common source and documentation formats, including Java, TypeScript,
+ * Python, Markdown, HTML/XML, and plain-text guidance files.
  */
 package org.machanism.machai.gw.reviewer;
 
