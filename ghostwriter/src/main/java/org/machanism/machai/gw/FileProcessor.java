@@ -327,8 +327,7 @@ public class FileProcessor extends ProjectProcessor {
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
 			systemFunctionTools.applyTools(provider);
-			File rootDir = getRootDir(projectDir);
-			provider.setWorkingDir(rootDir);
+			provider.setWorkingDir(projectDir);
 
 			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
 			provider.instructions(effectiveInstructions);
@@ -356,7 +355,7 @@ public class FileProcessor extends ProjectProcessor {
 
 			if (isLogInputs()) {
 				String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
-				File docsTempDir = new File(rootDir, MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
+				File docsTempDir = new File(getRootDir(projectDir), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
 				File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 				File parentDir = inputsFile.getParentFile();
 				if (parentDir != null) {

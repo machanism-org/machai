@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Optional;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -20,11 +19,6 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.core.FileAppender;
-import ch.qos.logback.core.util.StatusPrinter;
 
 /**
  * Entry point for document scanning and review automation.
@@ -50,7 +44,7 @@ import ch.qos.logback.core.util.StatusPrinter;
 public final class Ghostwriter {
 
 	/** Logger for the ghostwriter application. */
-	private static Logger LOGGER;
+	private static Logger logger;
 
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
 	private static PropertiesConfigurator config = new PropertiesConfigurator();
@@ -65,8 +59,8 @@ public final class Ghostwriter {
 			}
 
 			org.machanism.machai.log.FileAppender.setExecutionDir(execDir);
-			LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
-			LOGGER.info("Executing in directory: {}", execDir);
+			logger = LoggerFactory.getLogger(Ghostwriter.class);
+			logger.info("Executing in directory: {}", execDir);
 
 			File configFile = new File(execDir, "gw.properties");
 			config.load(configFile.getAbsolutePath());
@@ -130,22 +124,19 @@ public final class Ghostwriter {
 				return;
 			}
 
-			File rootDir = null;
+			File rootDir = config.getFile("root");
 			if (cmd.hasOption(rootDirOpt)) {
 				rootDir = new File(cmd.getOptionValue(rootDirOpt));
-			} else {
-				rootDir = config.getFile("root");
 			}
 
-			String genai = cmd.getOptionValue(genaiOpt);
-			String defaultGenai = config.get("genai", DEFAULT_GENAI_VALUE);
-			genai = Optional.ofNullable(genai).orElse(defaultGenai);
+			String genai = config.get("genai", DEFAULT_GENAI_VALUE);
+			if (cmd.hasOption(genaiOpt)) {
+				genai = cmd.getOptionValue(genaiOpt);
+			}
 
-			String instructionsFileName = null;
+			String instructionsFileName = config.get("instructions");
 			if (cmd.hasOption(instructionsOpt)) {
 				instructionsFileName = cmd.getOptionValue(instructionsOpt);
-			} else {
-				instructionsFileName = config.get("instructions");
 			}
 
 			String instructions[] = null;
@@ -165,7 +156,7 @@ public final class Ghostwriter {
 				}
 			}
 
-			LOGGER.info("Root directory: {}", rootDir);
+			logger.info("Root directory: {}", rootDir);
 			boolean multiThread = Boolean.parseBoolean(cmd.getOptionValue(multiThreadOption, "true"));
 
 			String defaultGuidance = null;
@@ -180,7 +171,7 @@ public final class Ghostwriter {
 			}
 
 			for (String scanDir : dirs) {
-				LOGGER.info("Starting scan of directory: {}", scanDir);
+				logger.info("Starting scan of directory: {}", scanDir);
 
 				String currentFile = ProjectLayout.getRelatedPath(rootDir, new File(scanDir));
 				if (currentFile != null) {
@@ -191,9 +182,9 @@ public final class Ghostwriter {
 					documents.setDefaultGuidance(defaultGuidance);
 
 					documents.scanDocuments(rootDir, new File(scanDir));
-					LOGGER.info("Scan completed for directory: {}", scanDir);
+					logger.info("Scan completed for directory: {}", scanDir);
 				} else {
-					LOGGER.error("The directory '{}' must be located within the root directory '{}'.", scanDir,
+					logger.error("The directory '{}' must be located within the root directory '{}'.", scanDir,
 							rootDir);
 				}
 			}
@@ -212,7 +203,7 @@ public final class Ghostwriter {
 				try (FileReader reader = new FileReader(file)) {
 					instructions = IOUtils.toString(reader);
 				} catch (IOException e) {
-					LOGGER.error("Failed to read file: {}", file);
+					logger.error("Failed to read file: {}", file);
 				}
 			}
 		}

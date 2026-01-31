@@ -2,13 +2,14 @@ package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -44,22 +45,28 @@ public class JavaReviewer implements Reviewer {
 	 * @throws IOException if an error occurs reading the file
 	 */
 	public String perform(File projectDir, File guidancesFile) throws IOException {
-		String content = Files.readString(guidancesFile.toPath());
 		String result = null;
-		if (StringUtils.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
-			Pattern pattern = Pattern.compile("(?:/\\*.*?" + FileProcessor.GUIDANCE_TAG_NAME
-					+ "\\s*(.*?)\\s*\\*/)|(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))", Pattern.DOTALL);
-			Matcher matcher = pattern.matcher(content);
-			if (matcher.find()) {
-				if (StringUtils.equals(guidancesFile.getName(), "package-info.java")) {
-					String relatedFilePath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
-					result = MessageFormat.format(promptBundle.getString("java_package_info_file"), relatedFilePath);
-				} else {
-					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
-					String name = guidancesFile.getName();
-					result = MessageFormat.format(promptBundle.getString("java_file"), name, relatedPath, content);
+		try {
+			String content = Files.readString(guidancesFile.toPath());
+			if (Strings.CS.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
+				Pattern pattern = Pattern.compile("(?:/\\*.*?" + FileProcessor.GUIDANCE_TAG_NAME
+						+ "\\s*(.*?)\\s*\\*/)|(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))",
+						Pattern.DOTALL);
+				Matcher matcher = pattern.matcher(content);
+				if (matcher.find()) {
+					if (Strings.CS.equals(guidancesFile.getName(), "package-info.java")) {
+						String relatedFilePath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
+						result = MessageFormat.format(promptBundle.getString("java_package_info_file"),
+								relatedFilePath);
+					} else {
+						String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
+						String name = guidancesFile.getName();
+						result = MessageFormat.format(promptBundle.getString("java_file"), name, relatedPath, content);
+					}
 				}
 			}
+		} catch (MalformedInputException e) {
+			throw new IllegalArgumentException("File: " + guidancesFile.getAbsolutePath(), e);
 		}
 		return result;
 	}

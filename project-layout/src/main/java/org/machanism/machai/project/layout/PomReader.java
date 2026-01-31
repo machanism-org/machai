@@ -99,7 +99,7 @@ public class PomReader {
 				model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
 			}
 		} catch (Exception e) {
-			throw new IllegalArgumentException(e);
+			throw new IllegalArgumentException("POM file: " + pomFile, e);
 		}
 
 		Set<Entry<Object, Object>> propertiesEntries = model.getProperties().entrySet();

@@ -52,7 +52,8 @@ public class MavenProjectLayout extends ProjectLayout {
 	public List<String> getModules() {
 		List<String> modules = null;
 
-		File pomFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
+		File projectDir = getProjectDir();
+		File pomFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
 		if (model == null) {
 			try {
 				model = new PomReader().getProjectModel(pomFile, effectivePomRequired);
@@ -81,7 +82,15 @@ public class MavenProjectLayout extends ProjectLayout {
 		if (model == null) {
 			File projectDir = getProjectDir();
 			File file = new File(projectDir, PROJECT_MODEL_FILE_NAME);
-			model = new PomReader().getProjectModel(file, effectivePomRequired);
+			try {
+				model = new PomReader().getProjectModel(file, effectivePomRequired);
+			} catch (Exception e) {
+				if (effectivePomRequired) {
+					model = new PomReader().getProjectModel(file, false);
+				} else {
+					throw e;
+				}
+			}
 		}
 
 		return model;

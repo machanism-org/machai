@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.machai.project.ProjectLayoutManager;
 
 /**
@@ -43,18 +44,12 @@ public class DefaultProjectLayout extends ProjectLayout {
 	public List<String> getModules() throws IOException {
 		if (modules == null) {
 			modules = new ArrayList<>();
-			File[] listFiles = getProjectDir().listFiles(new FileFilter() {
+			
+			File projectDir = getProjectDir();
+			File[] listFiles = projectDir.listFiles(new FileFilter() {
 				@Override
 				public boolean accept(File pathname) {
-					if (pathname.isDirectory() && !StringUtils.startsWithAny(pathname.getName(), EXCLUDE_DIRS)) {
-						try {
-							ProjectLayout detectProjectLayout = ProjectLayoutManager.detectProjectLayout(pathname);
-							return !(detectProjectLayout instanceof DefaultProjectLayout);
-						} catch (FileNotFoundException e) {
-							throw new IllegalArgumentException(e);
-						}
-					}
-					return false;
+					return (pathname.isDirectory() && !Strings.CS.startsWithAny(pathname.getName(), EXCLUDE_DIRS));
 				}
 			});
 
@@ -103,7 +98,7 @@ public class DefaultProjectLayout extends ProjectLayout {
 	public List<String> getTests() {
 		return null;
 	}
-	
+
 	@Override
 	public DefaultProjectLayout projectDir(File projectDir) {
 		return (DefaultProjectLayout) super.projectDir(projectDir);
