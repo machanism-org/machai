@@ -98,6 +98,11 @@ public final class Ghostwriter {
 
 		Option instructionsOpt = new Option("i", "instructions", true,
 				"Specify additional instructions by URL or file path. Use a comma (`,`) to separate multiple locations.");
+		instructionsOpt.setArgs(Option.UNLIMITED_VALUES);
+
+		Option excludesOpt = new Option("e", "excludes", true,
+				"Specify a list of directories to exclude from processing. You can provide multiple directories separated by commas or by repeating the option.");
+		excludesOpt.setArgs(Option.UNLIMITED_VALUES);
 
 		Option guidanceOpt = Option.builder("g")
 				.longOpt("guidance")
@@ -112,6 +117,7 @@ public final class Ghostwriter {
 		options.addOption(genaiOpt);
 		options.addOption(instructionsOpt);
 		options.addOption(guidanceOpt);
+		options.addOption(excludesOpt);
 
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -134,14 +140,9 @@ public final class Ghostwriter {
 				genai = cmd.getOptionValue(genaiOpt);
 			}
 
-			String instructionsFileName = config.get("instructions");
+			String[] instructions = StringUtils.split(config.get("instructions"), ",");
 			if (cmd.hasOption(instructionsOpt)) {
-				instructionsFileName = cmd.getOptionValue(instructionsOpt);
-			}
-
-			String instructions[] = null;
-			if (instructionsFileName != null) {
-				instructions = StringUtils.split(instructionsFileName, ",");
+				instructions = cmd.getOptionValues(instructionsOpt);
 			}
 
 			String[] dirs = cmd.getArgs();
@@ -154,6 +155,11 @@ public final class Ghostwriter {
 				if (dirs.length == 0) {
 					dirs = new String[] { SystemUtils.getUserDir().getPath() };
 				}
+			}
+
+			String[] excludes = StringUtils.split(config.get("excludes"), ",");
+			if (cmd.hasOption(excludesOpt)) {
+				excludes = cmd.getOptionValues(excludesOpt);
 			}
 
 			logger.info("Root directory: {}", rootDir);
@@ -176,12 +182,14 @@ public final class Ghostwriter {
 				String currentFile = ProjectLayout.getRelatedPath(rootDir, new File(scanDir));
 				if (currentFile != null) {
 
-					FileProcessor documents = new FileProcessor(genai);
-					documents.setInstructionLocations(instructions);
-					documents.setModuleMultiThread(multiThread);
-					documents.setDefaultGuidance(defaultGuidance);
+					FileProcessor processor = new FileProcessor(genai);
 
-					documents.scanDocuments(rootDir, new File(scanDir));
+					processor.setExcludes(excludes);
+					processor.setInstructionLocations(instructions);
+					processor.setModuleMultiThread(multiThread);
+					processor.setDefaultGuidance(defaultGuidance);
+
+					processor.scanDocuments(rootDir, new File(scanDir));
 					logger.info("Scan completed for directory: {}", scanDir);
 				} else {
 					logger.error("The directory '{}' must be located within the root directory '{}'.", scanDir,

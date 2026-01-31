@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -88,6 +90,8 @@ public class FileProcessor extends ProjectProcessor {
 	private String defaultGuidance;
 
 	private File defaultProcessingDir;
+
+	private String[] excludes;
 
 	/**
 	 * Constructs a processor.
@@ -179,34 +183,13 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
-
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		if (!isNonRecursive()) {
 			List<String> modules = projectLayout.getModules();
 
-			if (modules != null) {
+			if (modules != null && !modules.isEmpty()) {
 				if (isModuleMultiThread()) {
-					ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, modules.size()));
-					try {
-						for (String module : modules) {
-							executor.submit(() -> {
-								try {
-									processModule(projectDir, module);
-								} catch (IOException e) {
-									logger.error("Module processing failed.", e);
-								}
-							});
-						}
-					} finally {
-						executor.shutdown();
-					}
-
-					try {
-						executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						logger.error("Thread interrupted while processing modules", e);
-					}
+					processModulesMultiThreaded(projectDir, modules);
 				} else {
 					for (String module : modules) {
 						processModule(projectDir, module);
@@ -216,6 +199,42 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		processParentFiles(projectDir, projectLayout);
+	}
+
+	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
+		ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, modules.size()));
+		try {
+			List<Future<Void>> futures = new ArrayList<>();
+			for (String module : modules) {
+				futures.add(executor.submit(() -> {
+					processModule(projectDir, module);
+					return null;
+				}));
+			}
+
+			for (Future<Void> future : futures) {
+				try {
+					future.get();
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new IllegalStateException("Thread interrupted while processing modules", e);
+				} catch (ExecutionException e) {
+					Throwable cause = e.getCause();
+					if (cause instanceof RuntimeException) {
+						throw (RuntimeException) cause;
+					}
+					throw new IllegalStateException("Module processing failed.", cause);
+				}
+			}
+		} finally {
+			executor.shutdown();
+			try {
+				executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new IllegalStateException("Thread interrupted while awaiting module termination", e);
+			}
+		}
 	}
 
 	@Override
@@ -391,9 +410,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (sources != null && !sources.isEmpty()) {
 			List<String> dirs = sources.stream()
 					.filter(t -> t != null && new File(projectDir, t).exists())
-					.map(e -> {
-						return "`" + e + "`";
-					})
+					.map(e -> "`" + e + "`")
 					.collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
@@ -444,7 +461,10 @@ public class FileProcessor extends ProjectProcessor {
 
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
-			if (Strings.CI.equalsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS)) {
+			String name = file.getName();
+			String absolutePath = file.getAbsolutePath();
+			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS)
+					|| Strings.CI.containsAny(absolutePath, excludes)) {
 				continue;
 			}
 			if (file.isDirectory()) {
@@ -546,4 +566,13 @@ public class FileProcessor extends ProjectProcessor {
 	public void setDefaultGuidance(String defaultGuidance) {
 		this.defaultGuidance = defaultGuidance;
 	}
+
+	public String[] getExcludes() {
+		return excludes;
+	}
+
+	public void setExcludes(String[] excludes) {
+		this.excludes = excludes;
+	}
+
 }
