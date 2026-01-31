@@ -142,7 +142,7 @@ public final class Ghostwriter {
 
 			String[] instructions = StringUtils.split(config.get("instructions"), ",");
 			if (cmd.hasOption(instructionsOpt)) {
-				instructions = cmd.getOptionValues(instructionsOpt);
+				instructions = StringUtils.split(cmd.getOptionValue(instructionsOpt), ",");
 			}
 
 			String[] dirs = cmd.getArgs();
@@ -159,7 +159,7 @@ public final class Ghostwriter {
 
 			String[] excludes = StringUtils.split(config.get("excludes"), ",");
 			if (cmd.hasOption(excludesOpt)) {
-				excludes = cmd.getOptionValues(excludesOpt);
+				excludes = StringUtils.split(cmd.getOptionValue(excludesOpt), ",");
 			}
 
 			logger.info("Root directory: {}", rootDir);
