@@ -354,8 +354,8 @@ public class FileProcessor extends ProjectProcessor {
 			}
 
 			if (isLogInputs()) {
-				String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
-				File docsTempDir = new File(getRootDir(projectDir), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
+				String inputsFileName = ProjectLayout.getRelatedPath(rootDir, file);
+				File docsTempDir = new File(rootDir, MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
 				File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 				File parentDir = inputsFile.getParentFile();
 				if (parentDir != null) {
@@ -375,9 +375,8 @@ public class FileProcessor extends ProjectProcessor {
 		List<String> content = new ArrayList<>();
 
 		File projectDir = projectLayout.getProjectDir();
-		String path = ProjectLayout.getRelatedPath(rootDir, projectDir);
 
-		content.add(path);
+		content.add(".");
 		content.add(getDirInfoLine(projectLayout.getSources(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getTests(), projectDir));
 		content.add(getDirInfoLine(projectLayout.getDocuments(), projectDir));
@@ -393,8 +392,7 @@ public class FileProcessor extends ProjectProcessor {
 			List<String> dirs = sources.stream()
 					.filter(t -> t != null && new File(projectDir, t).exists())
 					.map(e -> {
-						String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
-						return "`" + relatedPath + "`";
+						return "`" + e + "`";
 					})
 					.collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
@@ -418,7 +416,7 @@ public class FileProcessor extends ProjectProcessor {
 			return null;
 		}
 
-		return reviewer.perform(getRootDir(projectDir), file);
+		return reviewer.perform(projectDir, file);
 	}
 
 	private static List<File> listFiles(File dir) throws IOException {
@@ -468,8 +466,8 @@ public class FileProcessor extends ProjectProcessor {
 		return normalized.split("/").length;
 	}
 
-	public File getRootDir(File projectDir) {
-		return rootDir != null ? rootDir : projectDir;
+	public File getRootDir() {
+		return rootDir;
 	}
 
 	public static boolean deleteTempFiles(File basedir) {
