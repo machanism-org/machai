@@ -1,17 +1,17 @@
 /**
- * Command-line tooling and orchestration for scanning a workspace and preparing GenAI-ready prompt inputs.
+ * Command-line tooling for scanning a workspace/module tree and preparing inputs for GenAI-assisted processing.
  *
  * <p>This package provides the {@link org.machanism.machai.gw.Ghostwriter} CLI entry point and the
- * {@link org.machanism.machai.gw.FileProcessor} pipeline.
+ * {@link org.machanism.machai.gw.FileProcessor} orchestration pipeline.
  *
- * <p>The processor scans one or more modules, extracts file-type-specific guidance via
- * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (loaded using
- * {@link java.util.ServiceLoader}), and assembles prompt inputs using bundled templates plus optional user
- * instructions.
+ * <p>At a high level, the pipeline traverses one or more modules, selects file-type-specific
+ * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (typically discovered via
+ * {@link java.util.ServiceLoader}), and combines extracted guidance with bundled templates and optional user
+ * instructions to build prompt inputs.
  *
- * <p>Depending on configuration, the pipeline can invoke a selected
- * {@link org.machanism.machai.ai.manager.GenAIProvider} to perform the requested processing and may persist
- * the generated prompt inputs to a temporary folder for inspection.
+ * <p>Depending on configuration, processing can be executed via a selected
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}, and prompt inputs may be persisted to a temporary
+ * folder for inspection.
  *
  * <h2>Usage</h2>
  *

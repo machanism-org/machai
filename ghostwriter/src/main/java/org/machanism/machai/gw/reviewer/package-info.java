@@ -1,11 +1,9 @@
 /**
- * Provides the Ghostwriter reviewer service-provider interfaces (SPI) and built-in implementations for locating
- * and extracting {@code @guidance} instruction blocks from supported file formats.
+ * Service-provider interfaces (SPI) and built-in implementations for reviewing supported file formats.
  *
- * <p>The primary abstraction in this package is {@link org.machanism.machai.gw.reviewer.Reviewer}. A
- * {@code Reviewer} understands the comment conventions of a specific source format (for example, Java or
- * Markdown), scans a file for {@code @guidance} blocks, and produces a normalized prompt fragment that includes
- * any required path or file context for downstream processing.
+ * <p>This package centers around {@link org.machanism.machai.gw.reviewer.Reviewer} implementations that understand
+ * a file's comment conventions, locate {@code @guidance} instruction blocks, and extract them into a normalized
+ * representation for downstream processing.
  *
  * <p>Reviewers are typically selected by file extension and invoked as part of the Ghostwriter pipeline.
  */
@@ -21,7 +19,7 @@ package org.machanism.machai.gw.reviewer;
  * 		- Avoid vague statements; be specific about functionality and intent.
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the packages overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  * -  Include Usage Examples Where Helpful:

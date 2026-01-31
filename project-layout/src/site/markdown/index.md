@@ -21,7 +21,7 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# Project Layout
+# project-layout
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/project-layout.svg)](https://central.sonatype.com/artifact/org.machanism.machai/project-layout)
 

@@ -154,17 +154,7 @@ class ProjectProcessorTest {
 		@Override
 		public void scanFolder(File projectDir) throws IOException {
 			scanFolderInvocationCount++;
-			try {
-				super.scanFolder(projectDir);
-			} catch (RuntimeException e) {
-				if (throwFromProcessFolder) {
-					// In the test scenario we override scanFolder to count invocations;
-					// the superclass is expected to swallow the exception thrown by processFolder.
-					// If this happens, that is a test failure; rethrow.
-					throw e;
-				}
-				throw e;
-			}
+			super.scanFolder(projectDir);
 		}
 
 		@Override

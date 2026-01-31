@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-`machai-cli` is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It uses GenAI to automate project assembly, run guided file-processing workflows, and enable semantic search for efficient library discovery and integration.
+`machai-cli` is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly, run guided file-processing workflows, and enable semantic search for efficient library discovery and integration.
 
 ## Overview
 

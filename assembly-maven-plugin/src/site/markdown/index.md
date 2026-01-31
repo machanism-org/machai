@@ -74,8 +74,8 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 
 ### Typical Workflow
 
-1. Write a short project concept in `project.txt` (or another file you reference).
-2. (Optional) Provide bindex metadata such as `bindex.json`.
+1. Create a short project concept file (for example, `project.txt`).
+2. (Optional) Provide bindex metadata (for example, `bindex.json`).
 3. Run the `assembly` goal.
 4. Review the updated `pom.xml` and any generated/modified project files.
 5. Keep what you want (edit as needed) and commit the changes.

@@ -1,24 +1,17 @@
 /**
- * Provider-agnostic public API root for the Machanism generative AI (GenAI) client.
+ * Provider-agnostic API root for the Machanism generative AI (GenAI) client.
  *
- * <p>This package defines the stable, provider-neutral surface that application code should depend on.
- * Concrete integrations (for example, OpenAI or a remote web/orchestrator-backed provider) are exposed through
- * implementations located in sub-packages, and are selected and managed via the provider manager APIs.
- *
- * <h2>Architecture</h2>
- * <ul>
- *   <li><b>Provider management</b> – {@code org.machanism.machai.ai.manager} contains the SPI-facing interfaces and
- *       utilities used to discover, initialize, and access a chosen provider.</li>
- *   <li><b>Providers</b> – {@code org.machanism.machai.ai.provider} contains concrete provider implementations.</li>
- * </ul>
+ * <p>This package defines the stable, provider-neutral surface that application code should depend on. Provider
+ * selection, initialization, and access are handled by the manager APIs in {@code org.machanism.machai.ai.manager},
+ * while concrete provider implementations live under {@code org.machanism.machai.ai.provider}.
  *
  * <h2>Typical usage</h2>
  * <ol>
  *   <li>Configure the desired provider for the current environment.</li>
- *   <li>Initialize and retrieve the active provider via
+ *   <li>Initialize and obtain the active provider via
  *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
- *   <li>Invoke provider-neutral operations through the
- *       {@link org.machanism.machai.ai.manager.GenAIProvider} interface.</li>
+ *   <li>Invoke provider-neutral operations through
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
  * </ol>
  */
 package org.machanism.machai.ai;

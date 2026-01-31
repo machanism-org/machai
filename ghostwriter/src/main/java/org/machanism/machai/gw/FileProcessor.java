@@ -161,7 +161,6 @@ public class FileProcessor extends ProjectProcessor {
 
 			scanFolder(scanDir);
 			process(projectLayout, defaultProcessingDir, scanDir, defaultGuidance);
-
 		} else {
 			scanFolder(scanDir);
 		}

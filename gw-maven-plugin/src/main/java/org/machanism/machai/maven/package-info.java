@@ -1,25 +1,32 @@
 /**
- * Maven plugin goals (mojos) that integrate the MachAI generative-workflow (GW) document-processing pipeline into a
- * Maven build.
+ * Maven plugin goals (mojos) that integrate the MachAI generative-workflow (GW) document-processing pipeline into a Maven
+ * build.
  *
  * <p>
- * The package provides two goals:
+ * This package provides Maven plugin goals that can be executed from the command line or configured in a
+ * {@code pom.xml}. The goals scan the current module (or a multi-module reactor) for documentation sources and then
+ * execute the MachAI GW workflow.
  * </p>
+ *
+ * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     {@code gw} ({@link org.machanism.machai.maven.GW}): scans a module base directory (typically
- *     {@code ${basedir}}) for documentation sources and runs the GW workflow.
+ *     <b>{@code gw}</b> ({@link org.machanism.machai.maven.GW}): scans a module base directory (typically
+ *     {@code ${basedir}}) for documentation sources and runs the workflow.
  *   </li>
  *   <li>
- *     {@code clean} ({@link org.machanism.machai.maven.Clean}): deletes temporary artifacts created by prior workflow
- *     runs.
+ *     <b>{@code clean}</b> ({@link org.machanism.machai.maven.Clean}): deletes temporary artifacts created by prior
+ *     workflow runs.
  *   </li>
  * </ul>
  *
  * <h2>Goal: {@code gw}</h2>
+ *
+ * <h3>Credentials</h3>
  * <p>
- * The {@code gw} goal reads GenAI credentials from Maven {@code settings.xml} using the configured
- * {@code &lt;server&gt;} entry and exposes them to the workflow via system properties:
+ * The {@code gw} goal reads GenAI credentials from Maven {@code settings.xml} using the configured {@code <server>}
+ * entry identified by {@code gw.genai.serverId}. If present, the credentials are exposed to the workflow via system
+ * properties:
  * </p>
  * <ul>
  *   <li>{@code GENAI_USERNAME}</li>
@@ -29,20 +36,19 @@
  * <h3>Parameters</h3>
  * <ul>
  *   <li>
- *     <b>{@code genai}</b> / {@code -Dgw.genai=...} (optional): GenAI provider/model identifier forwarded to the workflow
- *     (for example {@code OpenAI:gpt-5}).
+ *     <b>{@code gw.genai}</b> (optional): GenAI provider/model identifier forwarded to the workflow (for example
+ *     {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
- *     <b>{@code instructions}</b> / {@code -Dgw.instructions=...} (optional): One or more instruction location strings
- *     consumed by the workflow.
+ *     <b>{@code gw.instructions}</b> (optional): One or more instruction location strings consumed by the workflow.
  *   </li>
  *   <li>
- *     <b>{@code serverId}</b> / {@code -Dgw.genai.serverId=...} (required): Maven {@code settings.xml}
- *     {@code &lt;server&gt;} id used to read credentials for the GenAI provider.
+ *     <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} {@code <server>} id used to read
+ *     credentials.
  *   </li>
  *   <li>
- *     <b>{@code threads}</b> / {@code -Dgw.threads=true|false} (optional, default {@code true}): Enables or disables
- *     multi-threaded document processing.
+ *     <b>{@code gw.threads}</b> (optional, default {@code true}): Enables or disables multi-threaded document
+ *     processing.
  *   </li>
  * </ul>
  *

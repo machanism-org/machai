@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-Ghostwriter Maven Plugin is an advanced documentation automation tool for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, helping keep docs consistent, current, and aligned with the in-repo source of truth.
+Ghostwriter Maven Plugin is a documentation automation tool for Maven-based Java projects. It scans your repository for embedded `@guidance:` directives and uses them to generate and update Maven Site documentation, helping keep docs consistent, current, and aligned with the in-repo source of truth.
 
 Benefits:
 

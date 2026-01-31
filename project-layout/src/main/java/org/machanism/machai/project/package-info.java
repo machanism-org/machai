@@ -1,13 +1,15 @@
 /**
  * Filesystem-backed APIs for inspecting and processing on-disk project structures.
  *
- * <p>This package provides:
+ * <p>This package provides two main entry points:
  *
  * <ul>
- *   <li>{@link org.machanism.machai.project.ProjectLayoutManager}, which detects an appropriate
- *       {@link org.machanism.machai.project.layout.ProjectLayout} implementation for a project root directory.</li>
- *   <li>{@link org.machanism.machai.project.ProjectProcessor}, an extensible framework for scanning a project root and
- *       processing either the root directory or its discovered modules/subprojects.</li>
+ *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} detects the most appropriate
+ *       {@link org.machanism.machai.project.layout.ProjectLayout} implementation for a given project root directory
+ *       (for example, Maven, Node/JavaScript, Python, or a default layout).</li>
+ *   <li>{@link org.machanism.machai.project.ProjectProcessor} defines a small framework for scanning a project root.
+ *       If the detected layout exposes modules/subprojects, each module is processed recursively; otherwise the root
+ *       folder is processed directly.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

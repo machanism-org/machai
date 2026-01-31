@@ -21,17 +21,17 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# bindex-core
+# Bindex Core
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-core.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
 
 ## Introduction
 
-Bindex Core provides the foundational types and utilities for working with *bindex* metadata in the Machanism ecosystem. It enables tools and applications to generate, publish, discover, validate, and aggregate metadata so that libraries can be selected and assembled consistently across modules and builds.
+Bindex Core provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly. It enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.
 
 ## Overview
 
-Bindex Core defines the core representation of bindex metadata and the supporting utilities used by other Machanism components. It is commonly consumed by build tools (for example, Maven plugins) and can also be used directly in applications to:
+Bindex Core defines the core representation of bindex metadata and supporting utilities used by other Machanism components. It is commonly consumed by build tools (for example, Maven plugins) and can also be used directly in applications to:
 
 - Generate bindex metadata for produced artifacts.
 - Register/publish metadata so it can be discovered by downstream tooling.
