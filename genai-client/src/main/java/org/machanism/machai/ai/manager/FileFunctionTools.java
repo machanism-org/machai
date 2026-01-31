@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +96,7 @@ public class FileFunctionTools {
 		StringBuilder content = new StringBuilder();
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
-				String relatedPath = getRelatedPath(workingDir, file, true);
+				String relatedPath = ProjectLayout.getRelatedPath(workingDir, file, true);
 				content.append(relatedPath).append("\n");
 			}
 		} else {
@@ -130,7 +131,7 @@ public class FileFunctionTools {
 			StringBuilder content = new StringBuilder();
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					String relatedPath = getRelatedPath(workingDir, file, false);
+					String relatedPath = ProjectLayout.getRelatedPath(workingDir, file, false);
 					content.append(relatedPath).append("\n");
 				}
 
@@ -224,24 +225,4 @@ public class FileFunctionTools {
 		return allFiles;
 	}
 
-	/* TODO: should be move to separate module. */
-	public static String getRelatedPath(File dir, File file, boolean addSingleDot) {
-		String currentPath = dir.getAbsolutePath().replace("\\", "/");
-		String fileStr = file.getAbsolutePath().replace("\\", "/");
-		String relativePath = fileStr.replace(currentPath, "");
-		if (StringUtils.startsWith(relativePath, "/")) {
-			relativePath = StringUtils.substring(relativePath, 1);
-		}
-		String result = StringUtils.defaultIfBlank(relativePath, ".");
-		if (StringUtils.isBlank(result)) {
-			result = ".";
-		} else if (!StringUtils.startsWith(result, ".") && addSingleDot) {
-			result = "./" + result;
-		}
-
-		if (StringUtils.equals(fileStr, result)) {
-			result = null;
-		}
-		return result;
-	}
 }
