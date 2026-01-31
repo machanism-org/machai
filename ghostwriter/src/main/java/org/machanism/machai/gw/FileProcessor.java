@@ -36,8 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported
- * files, and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported files,
+ * and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
  * This processor delegates file-specific guidance extraction to
@@ -299,8 +299,7 @@ public class FileProcessor extends ProjectProcessor {
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
-		if (defaultProcessingDir == null
-				|| Strings.CS.startsWith(file.getPath(), defaultProcessingDir.getPath())) {
+		if (defaultProcessingDir == null || Strings.CS.startsWith(file.getPath(), defaultProcessingDir.getPath())) {
 
 			File projectDir = projectLayout.getProjectDir();
 			String guidance = parseFile(projectDir, file);
@@ -313,8 +312,7 @@ public class FileProcessor extends ProjectProcessor {
 		return perform;
 	}
 
-	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance)
-			throws IOException {
+	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance) throws IOException {
 		String perform;
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
@@ -332,10 +330,8 @@ public class FileProcessor extends ProjectProcessor {
 			String projectInfo = getProjectStructureDescription(projectLayout);
 			provider.prompt(projectInfo);
 
-			String currentFile = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
-					file);
-			String guidancePrompt = MessageFormat.format(promptBundle.getString("guidance_file"), currentFile,
-					guidance);
+			String currentFile = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
+			String guidancePrompt = MessageFormat.format(promptBundle.getString("guidance_file"), currentFile, guidance);
 			provider.prompt(guidancePrompt);
 
 			provider.prompt(promptBundle.getString("output_format"));
@@ -346,8 +342,7 @@ public class FileProcessor extends ProjectProcessor {
 			}
 
 			if (isLogInputs()) {
-				String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()),
-						file);
+				String inputsFileName = ProjectLayout.getRelatedPath(getRootDir(projectLayout.getProjectDir()), file);
 				File docsTempDir = new File(projectDir, MACHAI_TEMP_DIR + "/" + GW_TEMP_DIR);
 				File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 				File parentDir = inputsFile.getParentFile();
@@ -446,11 +441,16 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		result.sort(Comparator.comparingInt((File f) -> {
-			String path = f.getPath().replace("\\", "/");
-			return path.split("/").length;
-		}).reversed());
+		result.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 		return result;
+	}
+
+	private static int pathDepth(String path) {
+		if (path == null || path.isBlank()) {
+			return 0;
+		}
+		String normalized = path.replace("\\", "/");
+		return normalized.split("/").length;
 	}
 
 	public File getRootDir(File projectDir) {
@@ -476,8 +476,7 @@ public class FileProcessor extends ProjectProcessor {
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
 			if (!provider.isThreadSafe()) {
 				throw new IllegalArgumentException(
-						"The provider '" + genai
-								+ "' is not thread-safe and cannot be used in a multi-threaded context.");
+						"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
 			}
 		}
 		this.moduleMultiThread = true;

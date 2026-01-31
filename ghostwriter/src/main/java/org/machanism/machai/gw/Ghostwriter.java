@@ -80,22 +80,26 @@ public final class Ghostwriter {
 		Options options = new Options();
 
 		Option helpOption = new Option("h", "help", false,
-			    "Show this help message and exit.");
-			Option multiThreadOption = new Option("t", "threads", false,
-			    "Enable multi-threaded processing to improve performance.");
-			Option rootDirOpt = new Option("r", "root", true,
-			    "Specify the path to the root directory for file processing.");
-			Option genaiOpt = new Option("a", "genai", true,
-			    "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
-			Option instructionsOpt = new Option("i", "instructions", true,
-			    "Specify a file with additional file processing instructions.");
-			Option guidanceOpt = Option.builder("g")
-			    .longOpt("guidance")
-			    .desc("Set the default guidance file to apply as a final step for the current directory (default: @guidance.txt).")
-			    .hasArg(true)
-			    .optionalArg(true)
-			    .build();
-		
+				"Show this help message and exit.");
+		Option multiThreadOption = Option.builder("t")
+				.longOpt("threads")
+				.desc("Enable multi-threaded processing to improve performance (default: true).")
+				.hasArg(true)
+				.optionalArg(true)
+				.build();
+		Option rootDirOpt = new Option("r", "root", true,
+				"Specify the path to the root directory for file processing.");
+		Option genaiOpt = new Option("a", "genai", true,
+				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
+		Option instructionsOpt = new Option("i", "instructions", true,
+				"Specify a file with additional file processing instructions.");
+		Option guidanceOpt = Option.builder("g")
+				.longOpt("guidance")
+				.desc("Set the default guidance file to apply as a final step for the current directory (default: @guidance.txt).")
+				.hasArg(true)
+				.optionalArg(true)
+				.build();
+
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
 		options.addOption(multiThreadOption);
@@ -154,7 +158,7 @@ public final class Ghostwriter {
 			}
 
 			LOGGER.info("Root directory: {}", rootDir);
-			boolean multiThread = cmd.hasOption(multiThreadOption);
+			boolean multiThread = Boolean.parseBoolean(cmd.getOptionValue(multiThreadOption, "true"));
 
 			String defaultGuidance = null;
 			if (cmd.hasOption(guidanceOpt)) {
