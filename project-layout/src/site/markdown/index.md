@@ -86,10 +86,11 @@ var layout = manager.detect(Path.of("."));
 | `projectRoot` | Repository or module root directory to inspect. | `.` |
 | `layout` | Layout strategy (auto-detect vs. specific). | `auto` |
 
-Example (pseudo CLI):
+Example:
 
-```bash
-machai analyze --projectRoot . --layout auto
+```java
+var manager = new ProjectLayoutManager();
+var layout = manager.detect(Path.of("."));
 ```
 
 ## Resources

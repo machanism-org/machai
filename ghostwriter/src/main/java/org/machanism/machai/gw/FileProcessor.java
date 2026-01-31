@@ -321,8 +321,7 @@ public class FileProcessor extends ProjectProcessor {
 		return perform;
 	}
 
-	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance)
-			throws IOException {
+	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance) throws IOException {
 		String perform;
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
@@ -391,10 +390,13 @@ public class FileProcessor extends ProjectProcessor {
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists()).map(e -> {
-				String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
-				return "`" + relatedPath + "`";
-			}).collect(Collectors.toList());
+			List<String> dirs = sources.stream()
+					.filter(t -> t != null && new File(projectDir, t).exists())
+					.map(e -> {
+						String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(projectDir, e));
+						return "`" + relatedPath + "`";
+					})
+					.collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 

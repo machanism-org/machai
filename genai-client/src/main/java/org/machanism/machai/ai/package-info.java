@@ -2,16 +2,17 @@
  * Provider-agnostic entry point for the Machanism generative AI (GenAI) client.
  *
  * <p>This package defines the provider-neutral API surface that application code should compile against.
- * Concrete integrations (for example, OpenAI or other backends) live under {@code org.machanism.machai.ai.provider},
- * while provider selection and lifecycle are handled by the manager APIs in
- * {@code org.machanism.machai.ai.manager}.
+ * Concrete integrations (for example, OpenAI or other backends) live under
+ * {@code org.machanism.machai.ai.provider}, while provider selection and lifecycle are handled by the manager APIs
+ * in {@code org.machanism.machai.ai.manager}.
  *
- * <h2>How to use</h2>
+ * <h2>Typical flow</h2>
  * <ol>
- *   <li>Obtain a {@link org.machanism.machai.ai.manager.GenAIProvider} via
+ *   <li>Resolve a {@link org.machanism.machai.ai.manager.GenAIProvider} using
  *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
- *   <li>Accumulate prompts, instructions, files, and tools on the provider instance.</li>
- *   <li>Execute the request using {@link org.machanism.machai.ai.manager.GenAIProvider#perform()}.</li>
+ *   <li>Configure the request by supplying instructions, prompts, files, tools, and other provider inputs.</li>
+ *   <li>Execute the request using {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and consume the
+ *       provider result.</li>
  * </ol>
  *
  * <h2>Example</h2>

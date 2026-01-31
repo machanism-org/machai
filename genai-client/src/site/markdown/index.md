@@ -27,19 +27,19 @@ Page Structure:
 
 ## Introduction
 
-GenAI Client is a Java library that provides a small, provider-agnostic API for running generative AI tasks through a single `GenAIProvider` interface.
+GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers foundational prompt management and (provider-dependent) embeddings, tools/function calling, and file context to enable AI-powered features across applications.
 
-It is designed to keep your application code stable while you swap or combine different backends (API-based providers and UI/web-automation providers). The library supports prompt and instruction management, optional file context (provider-dependent), tool/function calling, and embeddings (provider-dependent), enabling AI-powered workflows such as semantic search, automated content generation, and intelligent project assembly without hard coupling to a single vendor.
+The primary benefit is a stable, small API (`GenAIProvider`) that lets you swap or combine different backends (API-based providers and UI/web-automation providers) without hard-coupling your code to a single vendor.
 
 ## Overview
 
-GenAI Client exposes an API centered on the `GenAIProvider` interface. Provider implementations are resolved by name through `GenAIProviderManager`, configured with a model and optional working directory, and executed via `perform()`.
+GenAI Client exposes an API centered on the `GenAIProvider` interface. Provider implementations are resolved by name through `GenAIProviderManager`, configured with a model (or provider-specific configuration), and executed via `perform()`.
 
 This design provides:
 
 - A consistent API across different GenAI backends.
 - Centralized provider selection and configuration.
-- Optional tool calling where models can request execution of registered Java functions and use their outputs in the response.
+- Optional tool calling where models can request execution of registered Java functions and use their outputs in the response (provider-dependent).
 
 ## Key Features
 
@@ -57,10 +57,10 @@ This design provides:
 
 - Java 11+.
 - Maven.
-- Provider credentials/configuration:
-  - For OpenAI-compatible providers: an API key/token and (optionally) a base URL override.
-  - For CodeMie provider: credentials for token acquisition.
-  - For Web provider: Anteater workspace recipes/configuration and a supported web UI environment.
+- Provider credentials/configuration (depending on the provider you use):
+  - OpenAI-compatible providers: API key/token and (optionally) a base URL override.
+  - CodeMie provider: credentials for token acquisition.
+  - Web provider: Anteater workspace recipes/configuration and a supported web UI environment.
 
 ### Environment Variables
 
@@ -206,7 +206,7 @@ Provides a stub implementation that stores requests in input files (in the `inpu
 
 ### Web
 
-`GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
+`WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
 Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `Submit Prompt` recipe (see `perform()`).
 

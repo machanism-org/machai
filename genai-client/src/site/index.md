@@ -44,24 +44,24 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates with the OpenAI API and is a concrete implementation of `GenAIProvider`.
+The `OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
 
-This provider enables a wide range of generative AI capabilities, including:
+This provider supports:
 
 - Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing common LLM requests such as text generation, summarization, and question answering.
-- Creating and using vector embeddings for tasks like semantic search and similarity analysis.
-- Tool/function calling support via `addTool(...)`.
+- Managing files for use in OpenAI workflows (uploading local files or referencing remote URLs).
+- Common LLM requests (text generation, summarization, question answering).
+- Vector embeddings (via OpenAI embeddings endpoint).
+- Tool/function calling by registering tools via `addTool(...)`.
 
-Environment variables (read automatically by the OpenAI client; you must set at least `OPENAI_API_KEY`):
+Environment variables read by the OpenAI client (you must set at least `OPENAI_API_KEY`):
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using the CodeMie OpenAI-compatible endpoint by environment variables:
+Using the CodeMie OpenAI-compatible endpoint via environment variables:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -90,13 +90,13 @@ Required Java system properties or environment variables:
 
 ### None
 
-The `NoneProvider` disables generative AI integrations and can log input requests locally when an external AI provider is not required or available.
+The `NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and optionally log input requests locally.
 
 Purpose and behavior:
 
-- Stub implementation that stores requests in input files (in the configured `inputsLog` location).
+- Stub provider that stores requests in input files when `inputsLog(...)` is configured.
 - No external API calls are made.
-- Operations that inherently require an AI backend (for example, embeddings) throw an exception.
+- Operations that require a backend (for example, embeddings) throw an exception.
 - Prompts and instructions are cleared after `perform()`.
 
 Typical use cases:
@@ -118,7 +118,7 @@ provider.perform();
 
 `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`).
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`). The recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle:
 

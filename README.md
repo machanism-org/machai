@@ -43,7 +43,7 @@ Machai is a modular toolkit for GenAI-enabled developer automation. It provides 
 
 | Name | Description |
 |---|---|
-| [Project Layout](project-layout/) | Shared build and project-layout conventions used across the multi-module repository to keep module structure consistent and maintainable. |
+| [Project Layout](project-layout/) | Shared build and repository conventions (parent POM and common configuration) used across the multi-module build to keep module structure consistent and maintainable. |
 | [GenAI Client](genai-client/) | Java library for integrating with Generative AI providers through a provider-agnostic API. It supports prompt and instruction management, optional file context, tool/function calling, and embeddings (provider-dependent), enabling AI-powered workflows such as semantic search, automated content generation, and intelligent project assembly while avoiding hard coupling to a single vendor. |
 | [Bindex Core](bindex-core/) | Foundational library for producing and consuming bindex metadata in the Machanism ecosystem. It provides a stable data model and supporting utility APIs to generate, publish, discover, validate, and assemble metadata so build tools and integrations can automate dependency discovery and library assembly decisions. |
 | [CLI](cli/) | Spring Boot + Spring Shell command line tool for end-to-end metadata and automation workflows. It can generate and update `bindex.json`, register metadata in a database, pick libraries using natural-language semantic search, assemble projects from picked results, run Ghostwriter file-processing workflows, and clean `.machai` workspace folders. |

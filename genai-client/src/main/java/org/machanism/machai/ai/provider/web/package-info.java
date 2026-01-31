@@ -29,10 +29,10 @@
 /**
  * Web-automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>This package provides GenAI providers that drive a target service through its web UI, using
- * <a href="https://ganteater.com">Anteater</a> workspaces/recipes for browser automation. The central entry point
- * is {@link org.machanism.machai.ai.provider.web.WebProvider}, which manages a shared Anteater workspace and
- * exposes the provider prompt API.
+ * <p>This package contains GenAI providers that interact with a target service via its web UI, using
+ * <a href="https://ganteater.com">Anteater</a> workspaces/recipes for browser automation. The primary entry point is
+ * {@link org.machanism.machai.ai.provider.web.WebProvider}, which manages a shared Anteater workspace and exposes the
+ * provider prompt API.
  *
  * <h2>Typical usage</h2>
  * <ol>

@@ -28,30 +28,29 @@
 /**
  * GenAI provider management and host-side tool integration.
  *
- * <p>This package provides the service-provider interface (SPI) used to integrate concrete Generative-AI backends and the
- * utilities to resolve, create, and configure provider instances.
+ * <p>This package defines the API used to obtain and interact with concrete Generative-AI provider implementations
+ * ({@link org.machanism.machai.ai.manager.GenAIProvider}) and includes a small set of built-in &quot;tools&quot; that expose
+ * controlled host capabilities (file access and command execution) to a provider.
  *
- * <p>At a high level, callers obtain a {@link org.machanism.machai.ai.manager.GenAIProvider} via
- * {@link org.machanism.machai.ai.manager.GenAIProviderManager} and then configure it with:
- *
+ * <h2>Key responsibilities</h2>
  * <ul>
- *   <li>Model selection (often using a {@code Provider:Model} identifier).</li>
- *   <li>System instructions and user prompts.</li>
- *   <li>Optional host-side &quot;tools&quot; (functions) that the model can request to execute.</li>
+ *   <li><strong>Provider resolution and instantiation</strong> via
+ *       {@link org.machanism.machai.ai.manager.GenAIProviderManager} using a {@code Provider:Model} identifier.</li>
+ *   <li><strong>Provider interaction</strong> through prompts, instructions, file attachments, embeddings, and response
+ *       generation via {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
+ *   <li><strong>Tool registration</strong> by installing host-side functions with
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
+ *       Tools are executed in a provider-supplied working directory and are expected to be further restricted by the
+ *       hosting application as needed.</li>
  * </ul>
  *
- * <p>The tool helpers in this package register controlled capabilities such as file I/O and command execution through
- * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
- * Implementations typically scope these capabilities to a provider-controlled working directory and apply additional
- * safety policy.
- *
- * <h2>Typical components</h2>
- *
+ * <h2>Built-in tool installers</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} - file read/write and directory listing operations.</li>
- *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} - command execution within the working directory.</li>
- *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} - convenience installer for both file and command
- *       tools.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.FileFunctionTools} - provides file read/write and directory listing
+ *       functions.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.CommandFunctionTools} - provides command execution.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.SystemFunctionTools} - convenience installer that applies both file and
+ *       command tools.</li>
  * </ul>
  *
  * <h2>Example</h2>

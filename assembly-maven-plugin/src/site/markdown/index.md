@@ -62,9 +62,10 @@ Value proposition:
 
 ### Environment Variables
 
-| Variable         | Description                                        |
-|------------------|----------------------------------------------------|
-| `OPENAI_API_KEY` | API key for the OpenAI-compatible API (if enabled) |
+| Variable | Description |
+|---|---|
+| *(none required by default)* | The plugin can run without environment variables when GenAI-backed features are disabled. |
+| `OPENAI_API_KEY` | API key for an OpenAI-compatible API (only required when GenAI-backed features are enabled). |
 
 ### Basic Usage
 
@@ -84,12 +85,12 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 
 Common parameters:
 
-| Parameter              | Description                                  | Default        |
-|------------------------|----------------------------------------------|----------------|
-| `assembly.prompt.file` | Path to the project concept file             | `project.txt`  |
-| `assembly.genai`       | GenAI model used for assembly tasks          | plugin-defined |
-| `pick.genai`           | Model used for library selection             | plugin-defined |
-| `assembly.score`       | Minimum confidence score for recommendations | `0.80`         |
+| Parameter | Description | Default |
+|---|---|---|
+| `assembly.prompt.file` | Path to the project concept file. | `project.txt` |
+| `assembly.genai` | GenAI model used for assembly tasks (when enabled). | plugin-defined |
+| `pick.genai` | Model used for library selection (when enabled). | plugin-defined |
+| `assembly.score` | Minimum confidence score for recommendations. | `0.80` |
 
 ### Example
 
