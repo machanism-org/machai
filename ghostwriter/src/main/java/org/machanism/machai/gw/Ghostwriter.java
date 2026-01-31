@@ -79,21 +79,23 @@ public final class Ghostwriter {
 
 		Options options = new Options();
 
-		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
-		Option multiThreadOption = new Option("t", "threads", false,
-				"Enable multi-threaded processing for improved performance.");
-		Option rootDirOpt = new Option("d", "dir", true, "Specify the path to the project directory.");
-		Option genaiOpt = new Option("g", "genai", true,
-				"Set the GenAI service provider and model (e.g., 'OpenAI:gpt-5.1').");
-		Option instructionsOpt = new Option("i", "instructions", true,
-				"Provide the file name containing additional processing instructions.");
-		Option guidanceOpt = Option.builder("u")
-				.longOpt("guidance")
-				.desc("Specify the default guidance file to apply as a final step for the current directory.")
-				.hasArg(true)
-				.optionalArg(true)
-				.build();
-
+		Option helpOption = new Option("h", "help", false,
+			    "Show this help message and exit.");
+			Option multiThreadOption = new Option("t", "threads", false,
+			    "Enable multi-threaded processing to improve performance.");
+			Option rootDirOpt = new Option("r", "root", true,
+			    "Specify the path to the root directory for file processing.");
+			Option genaiOpt = new Option("a", "genai", true,
+			    "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
+			Option instructionsOpt = new Option("i", "instructions", true,
+			    "Specify a file with additional file processing instructions.");
+			Option guidanceOpt = Option.builder("g")
+			    .longOpt("guidance")
+			    .desc("Set the default guidance file to apply as a final step for the current directory (default: @guidance.txt).")
+			    .hasArg(true)
+			    .optionalArg(true)
+			    .build();
+		
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
 		options.addOption(multiThreadOption);
