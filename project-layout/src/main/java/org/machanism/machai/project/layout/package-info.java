@@ -1,27 +1,25 @@
 /**
  * Detects and models the on-disk layout of a software project.
  *
- * <p>This package provides a {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and
- * ecosystem-specific implementations that infer a repository's structure (project root, module/workspace
- * subprojects, and conventional directories such as sources, tests, resources, and documentation).
- *
- * <p>Detection is typically driven by well-known descriptor files for an ecosystem (for example
- * {@code pom.xml} for Maven, {@code package.json} for JavaScript/TypeScript workspaces, and
- * {@code pyproject.toml} for Python). Where no descriptor is available (or detection is ambiguous), a
- * default implementation may fall back to filesystem heuristics.
- *
- * <h2>Key types</h2>
+ * <p>This package defines the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and
+ * related implementations used to discover a repository's structure, including:
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} – base abstraction; provides the project root,
- *       common directory queries, and a shared directory exclusion list used during traversal.</li>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} – Maven layout derived from {@code pom.xml}.</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} – workspace/module discovery from
- *       {@code package.json}.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} – Python project detection via
- *       {@code pyproject.toml}.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} – fallback layout that attempts to infer
- *       modules by scanning the filesystem.</li>
+ *   <li>the project root directory,</li>
+ *   <li>module/workspace structure (for multi-module repositories), and</li>
+ *   <li>conventional directories for sources, tests, and documentation.</li>
  * </ul>
+ *
+ * <p>Layout implementations are ecosystem-specific where possible and typically inspect descriptor files such as:
+ * <ul>
+ *   <li>Maven: {@code pom.xml} (see {@link org.machanism.machai.project.layout.MavenProjectLayout})</li>
+ *   <li>JavaScript/TypeScript: {@code package.json} workspaces
+ *       (see {@link org.machanism.machai.project.layout.JScriptProjectLayout})</li>
+ *   <li>Python: {@code pyproject.toml} (see {@link org.machanism.machai.project.layout.PythonProjectLayout})</li>
+ * </ul>
+ *
+ * <p>When descriptors are absent or ambiguous, {@link org.machanism.machai.project.layout.DefaultProjectLayout}
+ * can be used as a fallback that infers modules by scanning the filesystem while excluding common VCS,
+ * dependency, and build-output directories via {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  *
  * <h2>Typical usage</h2>
  * <pre>
@@ -29,10 +27,6 @@
  * java.util.List&lt;String&gt; modules = layout.getModules();
  * java.util.List&lt;String&gt; sources = layout.getSources();
  * </pre>
- *
- * <h2>Filesystem traversal</h2>
- * <p>Implementations that scan the filesystem should avoid walking into common VCS, vendor, and build-output
- * directories by honoring {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  */
 package org.machanism.machai.project.layout;
 
@@ -60,5 +54,5 @@ package org.machanism.machai.project.layout;
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *          and `&gt;` as `&amp;gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
