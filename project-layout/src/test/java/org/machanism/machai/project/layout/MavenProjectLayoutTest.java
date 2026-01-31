@@ -1,11 +1,10 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.model.Build;
@@ -16,42 +15,59 @@ import org.junit.jupiter.api.Test;
 class MavenProjectLayoutTest {
 
 	@Test
-	void isMavenProject_whenPomExists_returnsTrue() {
+	void isMavenProject_shouldReturnTrueWhenPomXmlExists() throws Exception {
 		// Arrange
-		File projectDir = new File("src/test/resources/mockMavenProject");
+		File dir = new File("target/test-tmp/maven-project");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+		File pom = new File(dir, "pom.xml");
+		assertTrue(pom.createNewFile() || pom.isFile());
 
 		// Act
-		boolean maven = MavenProjectLayout.isMavenProject(projectDir);
+		boolean result = MavenProjectLayout.isMavenProject(dir);
 
 		// Assert
-		assertTrue(maven);
+		assertTrue(result);
 	}
 
 	@Test
-	void getModules_whenPackagingIsPom_returnsModules() {
+	void isMavenProject_shouldReturnFalseWhenPomXmlMissing() {
+		// Arrange
+		File dir = new File("target/test-tmp/not-maven-project");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		// Act
+		boolean result = MavenProjectLayout.isMavenProject(dir);
+
+		// Assert
+		assertFalse(result);
+	}
+
+	@Test
+	void getModules_shouldReturnModulesWhenPackagingIsPom() {
 		// Arrange
 		Model model = new Model();
 		model.setPackaging("pom");
-		model.addModule("module-a");
-		model.addModule("module-b");
+		model.setModules(Arrays.asList("module-a", "module-b"));
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(new File("/repo")).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().model(model).effectivePomRequired(false)
+				.projectDir(new File("/repo"));
 
 		// Act
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertEquals(2, modules.size());
-		assertEquals("module-a", modules.get(0));
+		assertEquals(Arrays.asList("module-a", "module-b"), modules);
 	}
 
 	@Test
-	void getModules_whenPackagingNotPom_returnsNull() {
+	void getModules_shouldReturnNullWhenPackagingNotPom() {
 		// Arrange
 		Model model = new Model();
 		model.setPackaging("jar");
+		model.setModules(Arrays.asList("module-a"));
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(new File("/repo")).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().model(model).effectivePomRequired(false)
+				.projectDir(new File("/repo"));
 
 		// Act
 		List<String> modules = layout.getModules();
@@ -61,78 +77,71 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
-	void getSources_whenBuildHasSourceDirectoryAndResources_returnsRelatedPaths() {
+	void getSources_shouldIncludeSourceDirectoryAndResources() {
 		// Arrange
-		File projectDir = new File("C:/repo");
-		Model model = new Model();
 		Build build = new Build();
-		build.setSourceDirectory("C:/repo/src/main/java");
-		Resource r1 = new Resource();
-		r1.setDirectory("C:/repo/src/main/resources");
-		build.setResources(java.util.Arrays.asList(r1));
+		build.setSourceDirectory("/repo/src/main/java");
+		Resource res = new Resource();
+		res.setDirectory("/repo/src/main/resources");
+		build.setResources(Collections.singletonList(res));
+
+		Model model = new Model();
 		model.setBuild(build);
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(projectDir).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().model(model).projectDir(new File("/repo"));
 
 		// Act
 		List<String> sources = layout.getSources();
 
 		// Assert
-		assertNotNull(sources);
-		assertEquals(2, sources.size());
-		assertEquals("src/main/java", sources.get(0));
-		assertEquals("src/main/resources", sources.get(1));
+		assertEquals(Arrays.asList("src/main/java", "src/main/resources"), sources);
 	}
 
 	@Test
-	void getSources_whenBuildIsNull_returnsEmptyList() {
+	void getSources_shouldReturnEmptyWhenBuildNull() {
 		// Arrange
 		Model model = new Model();
 		model.setBuild(null);
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(new File("/repo")).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().model(model).projectDir(new File("/repo"));
 
 		// Act
 		List<String> sources = layout.getSources();
 
 		// Assert
 		assertNotNull(sources);
-		assertEquals(0, sources.size());
+		assertTrue(sources.isEmpty());
 	}
 
 	@Test
-	void getTests_whenBuildHasTestDirsAndResources_returnsRelatedPaths() {
+	void getTests_shouldIncludeTestSourceDirectoryAndTestResources() {
 		// Arrange
-		File projectDir = new File("C:/repo");
-		Model model = new Model();
 		Build build = new Build();
-		build.setTestSourceDirectory("C:/repo/src/test/java");
-		Resource r1 = new Resource();
-		r1.setDirectory("C:/repo/src/test/resources");
-		build.setTestResources(java.util.Arrays.asList(r1));
+		build.setTestSourceDirectory("/repo/src/test/java");
+		Resource res = new Resource();
+		res.setDirectory("/repo/src/test/resources");
+		build.setTestResources(Collections.singletonList(res));
+
+		Model model = new Model();
 		model.setBuild(build);
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(projectDir).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().model(model).projectDir(new File("/repo"));
 
 		// Act
 		List<String> tests = layout.getTests();
 
 		// Assert
-		assertNotNull(tests);
-		assertEquals(2, tests.size());
-		assertEquals("src/test/java", tests.get(0));
-		assertEquals("src/test/resources", tests.get(1));
+		assertEquals(Arrays.asList("src/test/java", "src/test/resources"), tests);
 	}
 
 	@Test
-	void getDocuments_returnsDefaultSrcSite() {
+	void getDocuments_shouldReturnDefaultSiteFolder() {
 		// Arrange
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(new File("/repo")).model(new Model());
+		MavenProjectLayout layout = new MavenProjectLayout().model(new Model()).projectDir(new File("/repo"));
 
 		// Act
 		List<String> docs = layout.getDocuments();
 
 		// Assert
-		assertEquals(1, docs.size());
-		assertEquals("src/site", docs.get(0));
+		assertEquals(Collections.singletonList("src/site"), docs);
 	}
 }

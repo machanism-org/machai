@@ -1,72 +1,76 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
 class PythonProjectLayoutTest {
 
 	@Test
-	void isPythonProject_whenPyprojectHasNameAndNotPrivate_returnsTrue() throws Exception {
+	void isPythonProject_shouldReturnTrueWhenPyprojectHasNameAndNotPrivate() throws Exception {
 		// Arrange
-		Path tempDir = Files.createTempDirectory("py-layout-");
-		writeFile(tempDir.resolve("pyproject.toml"), "[project]\nname = 'mypkg'\n");
+		File dir = new File("target/test-tmp/python-project-public");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		String pyproject = "[project]\n" +
+				"name = \"demo\"\n" +
+				"classifiers = [\"Programming Language :: Python\"]\n";
+		Files.write(new File(dir, "pyproject.toml").toPath(), pyproject.getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean isPython = PythonProjectLayout.isPythonProject(tempDir.toFile());
+		boolean result = PythonProjectLayout.isPythonProject(dir);
 
 		// Assert
-		assertTrue(isPython);
+		assertTrue(result);
 	}
 
 	@Test
-	void isPythonProject_whenClassifiersContainPrivate_returnsFalse() throws Exception {
+	void isPythonProject_shouldReturnFalseWhenClassifierContainsPrivate() throws Exception {
 		// Arrange
-		Path tempDir = Files.createTempDirectory("py-layout-private-");
-		writeFile(tempDir.resolve("pyproject.toml"), "[project]\nname = 'mypkg'\nclassifiers = ['Private :: Do Not Publish']\n");
+		File dir = new File("target/test-tmp/python-project-private");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		String pyproject = "[project]\n" +
+				"name = \"demo\"\n" +
+				"classifiers = [\"Private :: Do Not Publish\"]\n";
+		Files.write(new File(dir, "pyproject.toml").toPath(), pyproject.getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean isPython = PythonProjectLayout.isPythonProject(tempDir.toFile());
+		boolean result = PythonProjectLayout.isPythonProject(dir);
 
 		// Assert
-		assertFalse(isPython);
+		assertFalse(result);
 	}
 
 	@Test
-	void isPythonProject_whenPyprojectMissing_returnsFalse() throws Exception {
+	void isPythonProject_shouldReturnFalseWhenPyprojectMissing() {
 		// Arrange
-		Path tempDir = Files.createTempDirectory("py-layout-missing-");
+		File dir = new File("target/test-tmp/python-project-missing");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
 
 		// Act
-		boolean isPython = PythonProjectLayout.isPythonProject(tempDir.toFile());
+		boolean result = PythonProjectLayout.isPythonProject(dir);
 
 		// Assert
-		assertFalse(isPython);
+		assertFalse(result);
 	}
 
 	@Test
-	void isPythonProject_whenPyprojectIsInvalidToml_returnsFalse() throws Exception {
+	void isPythonProject_shouldReturnFalseWhenPyprojectInvalidToml() throws Exception {
 		// Arrange
-		Path tempDir = Files.createTempDirectory("py-layout-invalid-");
-		writeFile(tempDir.resolve("pyproject.toml"), "not toml at all = =");
+		File dir = new File("target/test-tmp/python-project-invalid");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		Files.write(new File(dir, "pyproject.toml").toPath(), "not-toml".getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean isPython = PythonProjectLayout.isPythonProject(tempDir.toFile());
+		boolean result = PythonProjectLayout.isPythonProject(dir);
 
 		// Assert
-		assertFalse(isPython);
-	}
-
-	private static void writeFile(Path path, String content) throws IOException {
-		try (FileOutputStream fos = new FileOutputStream(path.toFile())) {
-			fos.write(content.getBytes(StandardCharsets.UTF_8));
-		}
+		assertFalse(result);
 	}
 }

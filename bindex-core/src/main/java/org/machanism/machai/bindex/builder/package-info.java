@@ -26,26 +26,31 @@
  */
 
 /**
- * Builders that generate {@link org.machanism.machai.schema.Bindex} documents by inspecting a project on disk and
- * prompting a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Builder implementations that generate {@link org.machanism.machai.schema.Bindex} documents for a project on disk by
+ * collecting repository context (manifests and source files) and prompting a configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <p>The core entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}, which prompts the Bindex JSON
- * schema, optionally includes an origin Bindex for incremental updates, delegates project discovery to
- * {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()}, and deserializes the provider output into a
- * {@code Bindex} instance.
+ * <p>The main abstraction is {@link org.machanism.machai.bindex.builder.BindexBuilder}. Its
+ * {@link org.machanism.machai.bindex.builder.BindexBuilder#build()} method prompts:
+ * <ol>
+ *   <li>the Bindex JSON schema,</li>
+ *   <li>an optional origin Bindex (for incremental updates),</li>
+ *   <li>project-specific context contributed by {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()},</li>
+ *   <li>a generation instruction, then deserializes the provider output into a {@code Bindex}.</li>
+ * </ol>
  *
- * <p>Concrete builders provide ecosystem-specific context:
+ * <p>This package contains concrete builders for common ecosystems:
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: reads a Maven {@code pom.xml} model, prompts a
- *       sanitized POM representation, and prompts files from the configured build/source/resource/test directories.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}: prompts {@code package.json} and prompts all
- *       {@code .js}, {@code .ts}, and {@code .vue} files under the {@code src} directory.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: reads and sanitizes a Maven {@code pom.xml} model
+ *       and prompts files from Maven build/source/resource/test directories.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}: prompts {@code package.json} and prompts
+ *       JavaScript/TypeScript/Vue source files under {@code src}.</li>
  *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder}: prompts {@code pyproject.toml}, infers a source
- *       directory from {@code project.name}, and prompts files located directly under that directory.</li>
+ *       directory from {@code project.name}, and prompts regular files from that directory.</li>
  * </ul>
  *
- * <p>To add support for another ecosystem, extend {@link org.machanism.machai.bindex.builder.BindexBuilder} and override
- * {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()} to prompt the relevant manifests and source
- * files.
+ * <p>To support another build ecosystem, extend {@link org.machanism.machai.bindex.builder.BindexBuilder} and override
+ * {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()} to add the appropriate manifest(s) and source
+ * content via the provider.
  */
 package org.machanism.machai.bindex.builder;

@@ -21,27 +21,27 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# Bindex Core
+# bindex-core
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-core.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
 
 ## Introduction
 
-Bindex Core provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly. It enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.
+Bindex Core provides the foundational types and utilities for working with *bindex* metadata in the Machanism ecosystem. It enables tools and applications to generate, publish, discover, validate, and aggregate metadata so that libraries can be selected and assembled consistently across modules and builds.
 
 ## Overview
 
-Bindex Core defines the core representation and supporting utilities used by Machanism components to work with bindex metadata. It is typically used by build plugins/tools (and can also be used directly by applications) to:
+Bindex Core defines the core representation of bindex metadata and the supporting utilities used by other Machanism components. It is commonly consumed by build tools (for example, Maven plugins) and can also be used directly in applications to:
 
-- Generate bindex metadata for artifacts.
-- Register and publish metadata for downstream discovery.
+- Generate bindex metadata for produced artifacts.
+- Register/publish metadata so it can be discovered by downstream tooling.
 - Read, validate, and merge metadata from multiple modules and dependencies.
-- Drive library selection and project assembly workflows.
+- Support library selection and project assembly workflows.
 
 ## Key Features
 
-- Core model and utilities for bindex metadata generation and consumption.
-- Metadata registration/publishing support for downstream discovery workflows.
+- Core model and utilities for generating and consuming bindex metadata.
+- Metadata registration/publishing support for downstream discovery.
 - Validation and analysis utilities for bindex metadata.
 - Merge/aggregation utilities across modules and dependencies.
 - APIs that support library selection and project assembly decisions.
@@ -82,14 +82,14 @@ mvn -pl bindex-core clean verify
 ### Typical Workflow
 
 1. Add `bindex-core` as a dependency to the tool/plugin or application that needs to produce or consume bindex metadata.
-2. Generate and/or register bindex metadata during your build (typically via a Maven plugin or other build integration).
+2. Produce bindex metadata during your build (typically via a Maven plugin or other build integration).
 3. Publish produced metadata so it can be discovered and used by downstream tooling.
 4. Load, validate, and merge metadata from multiple modules/artifacts.
 5. Apply selection and assembly logic using the resulting metadata.
 
 ## Configuration
 
-Bindex Core is a library; most runtime configuration is performed by the consuming tool/plugin. The table below lists commonly relevant build properties and their defaults.
+Bindex Core is a library; most configuration is performed by the consuming tool/plugin. The table below lists commonly relevant Maven build properties and their typical defaults.
 
 | Parameter | Description | Default |
 |---|---|---|

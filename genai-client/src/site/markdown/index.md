@@ -129,32 +129,30 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
+The `OpenAIProvider` class integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
 
-This provider enables a wide range of generative AI capabilities, including:
+It supports:
 
-- Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
-
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+- Sending prompts and receiving responses from OpenAI chat models.
+- Provider-specific file workflows.
+- Embeddings, where supported by the configured API.
+- Tool/function calling, where supported by the configured model/API.
 
 **Environment variables**
 
-The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
+The provider reads the following environment variables. You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using the CodeMie API**
+**OpenAI-compatible gateways (example: CodeMie API)**
 
-To use the CodeMie API, set the following:
+To use an OpenAI-compatible endpoint, set:
 
-- `OPENAI_API_KEY` to an access token
-- `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
+- `OPENAI_API_KEY` to the access token/key
+- `OPENAI_BASE_URL` to the gateway base URL
 
 **Usage example**
 
@@ -162,7 +160,7 @@ To use the CodeMie API, set the following:
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 ```
 
-**Thread safety:** NOT thread-safe.
+**Thread safety:** Not thread-safe.
 
 ### CodeMie
 
@@ -182,29 +180,24 @@ This provider reads credentials from Java system properties:
 - `GENAI_USERNAME` (required)
 - `GENAI_PASSWORD` (required)
 
-**Thread safety:** NOT thread-safe (inherits behavior from `OpenAIProvider`).
+**Thread safety:** Not thread-safe (inherits behavior from `OpenAIProvider`).
 
 ### None
 
-The `NoneProvider` class is an implementation of `GenAIProvider` used to disable generative AI integrations and (optionally) log input requests locally when an external AI provider is not required or available.
+The `NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and (optionally) log input requests locally when an external AI provider is not required or available.
 
-**Purpose**
+It can be used to:
 
-Provides a stub implementation that stores requests in input files (in the `inputsLog` folder). All GenAI operations are non-operative, or throw exceptions where necessary, making this useful for scenarios where generative AI features must be disabled, simulated, or for fallback testing. No calls are made to any external AI services or large language models (LLMs).
+- Disable generative AI features for security/compliance.
+- Implement fallback logic when no provider is configured.
+- Log requests for manual review or later processing.
 
-**Typical use cases**
+Notes:
 
-- Disabling generative AI features for security or compliance.
-- Implementing fallback logic when no provider is configured.
-- Logging requests for manual review or later processing.
-- Testing environments not connected to external services.
+- Operations requiring GenAI services may throw exceptions.
+- Prompts and instructions are cleared after performing.
 
-**Notes**
-
-- Operations requiring GenAI services will throw exceptions when called.
-- All prompts and instructions are cleared after performing.
-
-**Thread safety:** Provider performs no remote calls and does not claim thread-safety.
+**Thread safety:** No remote calls; not thread-safe.
 
 ### Web
 
@@ -214,7 +207,7 @@ Automation is executed via [Anteater](https://ganteater.com) workspace recipes. 
 
 **Thread safety and lifecycle**
 
-- This provider is not thread-safe.
+- Not thread-safe.
 - Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 

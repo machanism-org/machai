@@ -27,11 +27,13 @@ Page Structure:
 
 ## Introduction
 
-The **Bindex Maven Plugin** generates and maintains a `bindex.json` metadata descriptor for Maven modules. The descriptor is intended to provide standardized, machine-readable module metadata to support consistent library discovery, integration, assembly workflows, and downstream automation (including semantic search/indexing use cases).
+The **Bindex Maven Plugin** generates and maintains a `bindex.json` metadata descriptor for Maven modules.
+
+Using a standardized, machine-readable metadata file supports consistent library discovery, integration and assembly workflows, and downstream automation (including semantic search/indexing use cases).
 
 ## Overview
 
-Run the plugin as part of your Maven build (bound to a lifecycle phase) or on-demand to create or update the `bindex.json` descriptor for the current module:
+Run the plugin as part of your Maven build (for example, bound to a lifecycle phase) or on-demand to create or update the `bindex.json` descriptor for the current module:
 
 - If `bindex.json` does not exist, it is generated.
 - If it already exists, it can be updated in-place to keep metadata synchronized with the project.

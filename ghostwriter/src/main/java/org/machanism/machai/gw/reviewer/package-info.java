@@ -1,10 +1,11 @@
 /**
- * Provides the Ghostwriter reviewer service-provider interface (SPI) and built-in implementations for discovering
+ * Provides the Ghostwriter reviewer service-provider interfaces (SPI) and built-in implementations for locating
  * and extracting {@code @guidance} instruction blocks from supported file formats.
  *
- * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} implementation understands the comment conventions of a
- * particular format, locates {@code @guidance} blocks, and returns a normalized prompt fragment (including path
- * context) for downstream processing.
+ * <p>The primary abstraction in this package is {@link org.machanism.machai.gw.reviewer.Reviewer}. A
+ * {@code Reviewer} understands the comment conventions of a specific source format (for example, Java or
+ * Markdown), scans a file for {@code @guidance} blocks, and produces a normalized prompt fragment that includes
+ * any required path or file context for downstream processing.
  *
  * <p>Reviewers are typically selected by file extension and invoked as part of the Ghostwriter pipeline.
  */
@@ -34,5 +35,5 @@ package org.machanism.machai.gw.reviewer;
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */

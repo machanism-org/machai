@@ -95,7 +95,7 @@ public class Assembly extends AbstractMojo {
      * Prompt file for the assembly workflow.
      *
      * <p>
-     * If the file exists, it is read as UTF-8 text and used as the prompt; otherwise the prompt is requested
+     * If the file exists, it is read as text and used as the prompt; otherwise the prompt is requested
      * interactively.
      * </p>
      */

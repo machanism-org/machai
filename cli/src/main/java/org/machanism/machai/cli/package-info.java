@@ -1,8 +1,8 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package provides Spring Shell {@code @ShellComponent} command classes that expose Machai features via an
- * interactive shell and non-interactive command invocation.
+ * <p>This package contains Spring Shell {@code @ShellComponent} command classes that expose Machai capabilities
+ * through an interactive shell and non-interactive command invocation.
  *
  * <h2>Responsibilities</h2>
  * <ul>
@@ -22,7 +22,8 @@
  *   <li><b>genai / dir / score / conf</b> ({@link org.machanism.machai.cli.ConfigCommand})</li>
  * </ul>
  *
- * <p>The application entry point is {@link org.machanism.machai.cli.MachaiCLI}.
+ * <h2>Entry point</h2>
+ * <p>The application entry point is {@link org.machanism.machai.cli.MachaiCLI}.</p>
  *
  * <h2>Usage</h2>
  * <pre>

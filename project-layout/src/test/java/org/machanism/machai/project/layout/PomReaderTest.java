@@ -1,15 +1,10 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 import org.apache.maven.model.Model;
 import org.junit.jupiter.api.Test;
@@ -17,11 +12,54 @@ import org.junit.jupiter.api.Test;
 class PomReaderTest {
 
 	@Test
-	void getProjectModel_whenPomIsInvalid_throwsIllegalArgumentException() throws Exception {
+	void getProjectModel_whenEffectiveFalse_shouldParsePomAndReplacePropertiesFromPreviousRuns() throws Exception {
 		// Arrange
-		Path tempDir = Files.createTempDirectory("pom-reader-invalid-");
-		File pom = tempDir.resolve("pom.xml").toFile();
-		writeFile(pom.toPath(), "<not-a-pom>");
+		File dir = new File("target/test-tmp/pomreader");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		File pom1 = new File(dir, "pom1.xml");
+		String pom1Str = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
+				"  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+				"  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+				"  <modelVersion>4.0.0</modelVersion>\n" +
+				"  <groupId>g</groupId>\n" +
+				"  <artifactId>a</artifactId>\n" +
+				"  <version>1.0</version>\n" +
+				"  <properties><myProp>myValue</myProp></properties>\n" +
+				"</project>\n";
+		Files.write(pom1.toPath(), pom1Str.getBytes(StandardCharsets.UTF_8));
+
+		File pom2 = new File(dir, "pom2.xml");
+		String pom2Str = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
+				"  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+				"  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+				"  <modelVersion>4.0.0</modelVersion>\n" +
+				"  <groupId>g</groupId>\n" +
+				"  <artifactId>b</artifactId>\n" +
+				"  <version>${myProp}</version>\n" +
+				"</project>\n";
+		Files.write(pom2.toPath(), pom2Str.getBytes(StandardCharsets.UTF_8));
+
+		PomReader reader = new PomReader();
+
+		// Act
+		Model model1 = reader.getProjectModel(pom1, false);
+		Model model2 = reader.getProjectModel(pom2, false);
+
+		// Assert
+		assertEquals("a", model1.getArtifactId());
+		assertEquals("myValue", model2.getVersion());
+		assertEquals("myValue", reader.getPomProperties().get("myProp"));
+		assertEquals("myValue", reader.getPomProperties().get("project.version"));
+	}
+
+	@Test
+	void getProjectModel_whenPomIsInvalid_shouldThrowIllegalArgumentException() throws Exception {
+		// Arrange
+		File dir = new File("target/test-tmp/pomreader-invalid");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+		File pom = new File(dir, "pom.xml");
+		Files.write(pom.toPath(), "not xml".getBytes(StandardCharsets.UTF_8));
 
 		PomReader reader = new PomReader();
 
@@ -30,33 +68,7 @@ class PomReaderTest {
 	}
 
 	@Test
-	void getProjectModel_whenRawPomHasPropertiesAndProjectVersion_populatesPomProperties() throws Exception {
-		// Arrange
-		Path tempDir = Files.createTempDirectory("pom-reader-props-");
-		File pom = tempDir.resolve("pom.xml").toFile();
-
-		String pomXml = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" "
-				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-				+ "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">"
-				+ "<modelVersion>4.0.0</modelVersion>"
-				+ "<groupId>g</groupId><artifactId>a</artifactId><version>1.0.0</version>"
-				+ "<properties><prop1>v1</prop1></properties>"
-				+ "</project>";
-		writeFile(pom.toPath(), pomXml);
-
-		PomReader reader = new PomReader();
-
-		// Act
-		Model model = reader.getProjectModel(pom, false);
-
-		// Assert
-		assertNotNull(model);
-		assertEquals("v1", reader.getPomProperties().get("prop1"));
-		assertEquals("1.0.0", reader.getPomProperties().get("project.version"));
-	}
-
-	@Test
-	void printModel_whenModelProvided_serializesToXmlContainingCoordinates() throws Exception {
+	void printModel_shouldProduceXmlContainingArtifactId() throws Exception {
 		// Arrange
 		Model model = new Model();
 		model.setModelVersion("4.0.0");
@@ -68,13 +80,7 @@ class PomReaderTest {
 		String xml = PomReader.printModel(model);
 
 		// Assert
-		org.junit.jupiter.api.Assertions.assertTrue(xml.contains("<groupId>g</groupId>"));
-		org.junit.jupiter.api.Assertions.assertTrue(xml.contains("<artifactId>a</artifactId>"));
-	}
-
-	private static void writeFile(Path path, String content) throws IOException {
-		try (FileOutputStream fos = new FileOutputStream(path.toFile())) {
-			fos.write(content.getBytes(StandardCharsets.UTF_8));
-		}
+		assertNotNull(xml);
+		assertTrue(xml.contains("<artifactId>a</artifactId>"));
 	}
 }

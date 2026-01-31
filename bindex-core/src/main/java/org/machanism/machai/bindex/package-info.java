@@ -1,16 +1,16 @@
 /**
- * Public entry points for creating, persisting, selecting, and assembling a <em>Bindex</em> (a machine-consumable
- * index of a project) used by Machanism-based AI workflows.
+ * Public API for creating, persisting, selecting, and assembling a <em>Bindex</em>: a machine-consumable index of a
+ * project that can be used by Machanism-based AI workflows.
  *
- * <p>This package provides an end-to-end lifecycle around a {@code bindex.json} document:
+ * <p>This package centers on the {@code bindex.json} document and supports the typical lifecycle:
  *
  * <ol>
  *   <li><strong>Create/update</strong> a Bindex for a {@link org.machanism.machai.project.layout.ProjectLayout} by
- *       scanning the project and producing/updating {@code bindex.json}.</li>
+ *       scanning sources/resources and producing/updating {@code bindex.json}.</li>
  *   <li><strong>Register</strong> the Bindex in a backing store (for example, a vector database) so it can be
  *       retrieved later via semantic lookup.</li>
  *   <li><strong>Pick</strong> relevant Bindex documents using semantic search for a user question or task.</li>
- *   <li><strong>Assemble</strong> one or more selected Bindexes into LLM prompt inputs.</li>
+ *   <li><strong>Assemble</strong> one or more selected Bindexes into LLM inputs (prompts) for downstream execution.</li>
  * </ol>
  *
  * <h2>Main entry points</h2>

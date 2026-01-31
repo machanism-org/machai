@@ -27,9 +27,7 @@ Page Structure:
 
 ## Introduction
 
-Assembly Maven Plugin is a Maven plugin for bootstrapping and evolving local Maven projects in the Machanism ecosystem. It applies assembly-style updates (such as dependency and configuration changes) driven by Machanism bindex metadata (for example, `bindex.json`) and can optionally use GenAI-powered semantic search to help choose appropriate libraries.
-
-You provide a short project concept (for example, `project.txt`) and run the `assembly` goal. The plugin then proposes and applies concrete, reviewable changes to your working tree—such as updates to `pom.xml` and related project files.
+Assembly Maven Plugin is a Maven plugin that assembles and evolves local Maven projects in the Machanism ecosystem by applying assembly-style updates driven by bindex metadata (for example, `bindex.json`). Optionally, it can use GenAI-powered semantic search to help identify and select suitable libraries.
 
 Benefits:
 
@@ -39,7 +37,7 @@ Benefits:
 
 ## Overview
 
-Use this plugin to generate or evolve a Maven project by applying structured updates locally, instead of doing repetitive manual configuration.
+Use this plugin to generate or evolve a Maven project by applying structured updates to your working tree, rather than performing repetitive manual configuration.
 
 Value proposition:
 
@@ -51,7 +49,7 @@ Value proposition:
 
 - **Project bootstrap and evolution:** creates or updates common project files and structure.
 - **Metadata-driven assembly:** integrates libraries based on bindex metadata (for example, `bindex.json`).
-- **GenAI-assisted discovery:** can use GenAI-powered semantic search to recommend suitable libraries.
+- **GenAI-assisted discovery (optional):** uses semantic search to recommend suitable libraries.
 - **Reviewable output:** writes changes into your project so you can inspect, adjust, and commit them.
 
 ## Getting Started
@@ -69,8 +67,6 @@ Value proposition:
 | `OPENAI_API_KEY` | API key for the OpenAI-compatible API (if enabled) |
 
 ### Basic Usage
-
-Run the plugin goal:
 
 ```bash
 mvn org.machanism.machai:assembly-maven-plugin:assembly

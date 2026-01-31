@@ -25,8 +25,6 @@
  *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
 
-package org.machanism.machai.ai.manager;
-
 /**
  * GenAI provider management and host-side tool integration.
  *
@@ -60,3 +58,4 @@ package org.machanism.machai.ai.manager;
  * String response = provider.perform();
  * }</pre>
  */
+package org.machanism.machai.ai.manager;

@@ -1,13 +1,13 @@
 /**
- * Maven plugin mojos that integrate the MachAI generative-workflow (GW) document-processing pipeline into a Maven
- * build.
+ * Maven plugin goals (mojos) that integrate the MachAI generative-workflow (GW) document-processing pipeline into a
+ * Maven build.
  *
  * <p>
- * This package provides two goals:
+ * The package provides two goals:
  * </p>
  * <ul>
  *   <li>
- *     {@code gw} ({@link org.machanism.machai.maven.GW}): scans the current module's base directory (typically
+ *     {@code gw} ({@link org.machanism.machai.maven.GW}): scans a module base directory (typically
  *     {@code ${basedir}}) for documentation sources and runs the GW workflow.
  *   </li>
  *   <li>
@@ -26,11 +26,11 @@
  *   <li>{@code GENAI_PASSWORD}</li>
  * </ul>
  *
- * <h3>Configuration parameters</h3>
+ * <h3>Parameters</h3>
  * <ul>
  *   <li>
- *     <b>{@code genai}</b> / {@code -Dgw.genai=...} (optional): GenAI provider/model identifier forwarded to the
- *     workflow (for example {@code OpenAI:gpt-5}).
+ *     <b>{@code genai}</b> / {@code -Dgw.genai=...} (optional): GenAI provider/model identifier forwarded to the workflow
+ *     (for example {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
  *     <b>{@code instructions}</b> / {@code -Dgw.instructions=...} (optional): One or more instruction location strings
@@ -72,8 +72,7 @@
  * <h2>Goal: {@code clean}</h2>
  * <p>
  * The {@code clean} goal deletes temporary files created by earlier workflow runs (see
- * {@link org.machanism.machai.gw.FileProcessor#deleteTempFiles(java.io.File)}). This goal has no user-configurable
- * parameters.
+ * {@link org.machanism.machai.gw.FileProcessor#deleteTempFiles(java.io.File)}).
  * </p>
  */
 package org.machanism.machai.maven;

@@ -48,25 +48,26 @@ Download the CLI JAR:
 java -jar gw.jar
 ```
 
-Scan a specific project root directory:
+Scan a specific root directory:
 
 ```bash
-java -jar gw.jar --dir /path/to/project
+java -jar gw.jar --root /path/to/project
 ```
 
-Scan one or more specific directories (positional arguments):
+Scan one or more directories (positional arguments):
 
 ```bash
-java -jar gw.jar . docs src
+java -jar gw.jar --root /path/to/project docs src
 ```
 
 ### Typical Workflow
 
 1. Build or download `gw.jar`.
-2. Choose the project root (`--dir`) and the directories to scan (positional args).
-3. (Optional) Provide additional instructions (inline or via `--instructions /path/to/file`).
-4. Run Ghostwriter.
-5. Review and commit generated/updated documentation.
+2. Choose the project root (`--root`) and the directories to scan (positional args).
+3. (Optional) Provide additional instructions via `--instructions` or `gw.properties`.
+4. (Optional) Provide a default final guidance file via `--guidance`.
+5. Run Ghostwriter.
+6. Review and commit generated/updated documentation.
 
 ## Resources
 

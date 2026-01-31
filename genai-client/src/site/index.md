@@ -44,7 +44,7 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
 This provider enables a wide range of generative AI capabilities, including:
 
@@ -53,7 +53,7 @@ This provider enables a wide range of generative AI capabilities, including:
 - Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
 - Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s models efficiently within their applications.
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
 
 Environment variables (read automatically by the OpenAI client; you must set at least `OPENAI_API_KEY`):
 
@@ -84,19 +84,19 @@ Before creating the underlying OpenAI client, it authenticates against a Keycloa
 - `OPENAI_API_KEY` is set to the retrieved access token.
 - `OPENAI_BASE_URL` is set to `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
-Required Java system properties:
+Required Java system properties or environment variables:
 
 - `GENAI_USERNAME`
 - `GENAI_PASSWORD`
 
 ### None
 
-`NoneProvider` is an implementation of `GenAIProvider` used to disable generative AI integrations and log input requests locally when an external AI provider is not required or available.
+The `NoneProvider` class is an implementation of the `GenAIProvider` interface used to disable generative AI integrations and log input requests locally when an external AI provider is not required or available.
 
 Purpose:
 
 - Provides a stub implementation that stores requests in input files (in the `inputsLog` folder).
-- All GenAI operations are non-operative, or throw exceptions where necessary.
+- All GenAI operations are non-operative, or throw exceptions where necessary, making this useful for scenarios where generative AI features must be disabled, simulated, or for fallback testing.
 - No calls are made to any external AI services or large language models (LLMs).
 
 Typical use cases:
@@ -123,7 +123,9 @@ Notes:
 
 `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`). The list of prompts is passed to the workspace as a system variable named `INPUTS`. The recipe is expected to place the final response text into a variable named `result`.
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`).
+
+The list of prompts is passed to the workspace as a system variable named `INPUTS`. The recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle:
 
