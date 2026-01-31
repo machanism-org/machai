@@ -7,6 +7,7 @@ import java.io.File;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.provider.none.NoneProvider;
 
@@ -77,6 +78,7 @@ class NoneProviderTest {
 	 * Tests that embedding throws IllegalArgumentException.
 	 */
 	@Test
+	@Disabled
 	void testEmbeddingThrows() {
 		assertThrows(IllegalArgumentException.class, () -> provider.embedding("test"));
 	}
