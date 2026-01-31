@@ -91,8 +91,10 @@ public final class Ghostwriter {
 				"Specify the path to the root directory for file processing.");
 		Option genaiOpt = new Option("a", "genai", true,
 				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
+
 		Option instructionsOpt = new Option("i", "instructions", true,
-				"Specify a file with additional file processing instructions.");
+				"Specify additional instructions by URL or file path. Use a comma (`,`) to separate multiple locations.");
+
 		Option guidanceOpt = Option.builder("g")
 				.longOpt("guidance")
 				.desc("Set the default guidance file to apply as a final step for the current directory (default: @guidance.txt).")
@@ -137,12 +139,9 @@ public final class Ghostwriter {
 				instructionsFileName = config.get("instructions");
 			}
 
-			String instructions = null;
+			String instructions[] = null;
 			if (instructionsFileName != null) {
-				instructions = getInstractionsFromFile(instructionsFileName);
-				if (instructions == null) {
-					LOGGER.warn("Guidance file not found: {}", instructionsFileName);
-				}
+				instructions = StringUtils.split(instructionsFileName, ",");
 			}
 
 			String[] dirs = cmd.getArgs();
@@ -174,7 +173,7 @@ public final class Ghostwriter {
 				if (currentFile != null) {
 
 					FileProcessor documents = new FileProcessor(genai);
-					documents.setInstructions(instructions);
+					documents.setInstructionLocations(instructions);
 					documents.setModuleMultiThread(multiThread);
 					documents.setDefaultGuidance(defaultGuidance);
 
