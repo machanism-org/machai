@@ -24,6 +24,16 @@ public class CodeMieProvider extends OpenAIProvider {
 
 		String password = System.getenv("GENAI_PASSWORD");
 		password = System.getProperty("GENAI_PASSWORD", password);
+
+		if (username == null || username.isEmpty()) {
+			throw new IllegalArgumentException(
+					"GENAI_USERNAME is required but was not provided as an environment variable or system property.");
+		}
+		if (password == null || password.isEmpty()) {
+			throw new IllegalArgumentException(
+					"GENAI_PASSWORD is required but was not provided as an environment variable or system property.");
+		}
+
 		try {
 			String token = getToken(username, password);
 			System.setProperty("OPENAI_API_KEY", token);

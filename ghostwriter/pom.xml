@@ -79,27 +79,50 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
+						<configuration>
+							<finalName>gw</finalName>
+							<archive>
+								<manifest>
+									<mainClass>
+										org.machanism.machai.gw.Ghostwriter</mainClass>
+								</manifest>
+								<manifestEntries>
+									<Class-Path><![CDATA[lib/ae.jar lib/web-ae-plugin.jar]]></Class-Path>
+								</manifestEntries>
+							</archive>
+						</configuration>
 						<executions>
 							<execution>
+								<id>build-artifact</id>
 								<phase>install</phase>
 								<goals>
 									<goal>single</goal>
 								</goals>
 								<configuration>
-									<finalName>gw</finalName>
 									<appendAssemblyId>false</appendAssemblyId>
 									<archive>
-										<manifest>
-											<mainClass>
-												org.machanism.machai.gw.Ghostwriter</mainClass>
-										</manifest>
 										<manifestEntries>
-											<Class-Path><![CDATA[lib/ae.jar lib/web-ae-plugin.jar]]></Class-Path>
+											<Class-Path>${plugins-class-path}</Class-Path>
 										</manifestEntries>
 									</archive>
 									<descriptorRefs>
 										<descriptorRef>jar-with-dependencies</descriptorRef>
 									</descriptorRefs>
+								</configuration>
+							</execution>
+							<execution>
+								<id>delivery-pack</id>
+								<phase>install</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>
+										${env.MACHANISM_PACK_DIR}/machai</outputDirectory>
+									<appendAssemblyId>false</appendAssemblyId>
+									<descriptors>
+										<descriptor>src/assembly/assembly.xml</descriptor>
+									</descriptors>
 								</configuration>
 							</execution>
 						</executions>
