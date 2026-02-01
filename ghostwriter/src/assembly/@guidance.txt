@@ -1,0 +1,31 @@
+**Create a file named `README.txt` in the `./files` folder. The content should include:**
+
+1. **Application Overview**
+   - Provide a clear and concise description of the Ghostwriter CLI application.
+   - Explain its main purpose, features, and typical use cases.
+   - Mention supported GenAI providers (e.g., CodeMie, OpenAI-compatible services).
+
+2. **Installation Instructions**
+   - Describe prerequisites (e.g., Java version, environment variables, configuration files).
+   - Include steps for downloading or building the application if relevant.
+
+3. **How to Run**
+   - Provide command-line usage examples for running the application.
+   - Explain how to set environment variables or Java system properties for configuration.
+   - Show how to pass options such as instructions, excludes, and root directory.
+   - Include example commands for both Windows (`.bat`) and Unix (`.sh`) environments.
+
+4. **Configuration**
+   - Describe the purpose and usage of the `gw.properties` file.
+   - List and explain all configurable properties (e.g., GenAI provider, credentials, instructions, excludes).
+   - Show how properties can be set via environment variables or Java parameters.
+
+5. **Examples**
+   - Provide sample commands and configuration snippets for common scenarios.
+
+6. **Troubleshooting & Support**
+   - Include tips for resolving common issues (e.g., authentication errors, missing files).
+   - Mention where to find logs and how to enable debug output.
+
+7. **Contact & Documentation**
+   - Point to further documentation or support channels if available.

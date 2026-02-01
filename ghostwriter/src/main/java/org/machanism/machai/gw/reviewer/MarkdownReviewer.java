@@ -2,12 +2,14 @@ package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -42,7 +44,7 @@ public class MarkdownReviewer implements Reviewer {
 	 * @throws IOException if an error occurs reading the file
 	 */
 	public String perform(File projectDir, File guidancesFile) throws IOException {
-		String content = Files.readString(guidancesFile.toPath());
+		String content = IOUtils.toString(guidancesFile.toURI(), "utf-8");
 
 		Pattern pattern = Pattern.compile("<!--.*?" + FileProcessor.GUIDANCE_TAG_NAME + "(.*?)(?:-->|\\Z)",
 				Pattern.DOTALL);

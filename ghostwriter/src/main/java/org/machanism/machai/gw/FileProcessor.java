@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -40,14 +41,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported files,
- * and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported
+ * files, and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to {@link Reviewer}
- * implementations discovered via {@link ServiceLoader}. For every supported file
- * it finds, it builds a prompt using templates from the {@code document-prompts}
- * resource bundle and invokes a {@link GenAIProvider}.
+ * This processor delegates file-specific guidance extraction to
+ * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
+ * every supported file it finds, it builds a prompt using templates from the
+ * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
  * </p>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -459,7 +460,7 @@ public class FileProcessor extends ProjectProcessor {
 		return reviewer.perform(projectDir, file);
 	}
 
-	private static List<File> listFiles(File dir) throws IOException {
+	private List<File> listFiles(File dir) throws IOException {
 		if (dir == null || !dir.isDirectory()) {
 			return Collections.emptyList();
 		}
@@ -467,8 +468,28 @@ public class FileProcessor extends ProjectProcessor {
 		if (files == null) {
 			throw new IOException("Unable to list files for directory: " + dir.getAbsolutePath());
 		}
-		List<File> result = new ArrayList<>();
-		Collections.addAll(result, files);
+
+		Arrays.sort(files, (f1, f2) -> {
+			if (f1.isDirectory() && !f2.isDirectory()) {
+				return -1;
+			} else if (!f1.isDirectory() && f2.isDirectory()) {
+				return 1;
+			} else {
+				return f1.getName().compareToIgnoreCase(f2.getName());
+			}
+		});
+
+		List<File> result;
+		if (excludes == null) {
+			result = new ArrayList<>();
+			Collections.addAll(result, files);
+
+		} else {
+			result = Arrays.stream(files)
+					.filter(file -> Arrays.stream(excludes).noneMatch(exclude -> file.getName().equals(exclude)))
+					.collect(Collectors.toList());
+		}
+
 		return result;
 	}
 
@@ -486,8 +507,7 @@ public class FileProcessor extends ProjectProcessor {
 		for (File file : files) {
 			String name = file.getName();
 			String absolutePath = file.getAbsolutePath();
-			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS)
-					|| shouldExcludeAbsolutePath(absolutePath)) {
+			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludeAbsolutePath(absolutePath)) {
 				continue;
 			}
 			if (file.isDirectory()) {
@@ -505,6 +525,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (StringUtils.isBlank(absolutePath) || excludes == null || excludes.length == 0) {
 			return false;
 		}
+
 		List<String> tokens = new ArrayList<>();
 		for (String exclude : excludes) {
 			String token = StringUtils.trimToNull(exclude);
@@ -522,7 +543,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (path == null || path.isBlank()) {
 			return 0;
 		}
-		String normalized = path.replace("\\", "/");
+		String normalized = path.replace("\\\\", "/");
 		return normalized.split("/").length;
 	}
 
