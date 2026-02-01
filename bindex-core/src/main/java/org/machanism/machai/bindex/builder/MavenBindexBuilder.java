@@ -29,11 +29,11 @@ import org.slf4j.LoggerFactory;
  * </ul>
  *
  * <p>Example:
- * {@code
- * MavenBindexBuilder builder = new MavenBindexBuilder(layout)
- *     .genAIProvider(provider);
- * Bindex bindex = builder.build();
- * }
+ * <pre>{@code
+ * Bindex bindex = new MavenBindexBuilder(layout)
+ *     .genAIProvider(provider)
+ *     .build();
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

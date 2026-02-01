@@ -219,7 +219,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
-		ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, modules.size()));
+		ExecutorService executor = Executors.newFixedThreadPool(Math.min(modules.size(),
+				Math.max(1, Runtime.getRuntime().availableProcessors())));
 		try {
 			List<Future<Void>> futures = new ArrayList<>();
 			for (String module : modules) {
@@ -237,8 +238,8 @@ public class FileProcessor extends ProjectProcessor {
 					throw new IllegalStateException("Thread interrupted while processing modules", e);
 				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
-					if (cause instanceof RuntimeException) {
-						throw (RuntimeException) cause;
+					if (cause instanceof RuntimeException runtimeException) {
+						throw runtimeException;
 					}
 					throw new IllegalStateException("Module processing failed.", cause);
 				}
@@ -246,8 +247,11 @@ public class FileProcessor extends ProjectProcessor {
 		} finally {
 			executor.shutdown();
 			try {
-				executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+				if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
+					executor.shutdownNow();
+				}
 			} catch (InterruptedException e) {
+				executor.shutdownNow();
 				Thread.currentThread().interrupt();
 				throw new IllegalStateException("Thread interrupted while awaiting module termination", e);
 			}
@@ -484,7 +488,8 @@ public class FileProcessor extends ProjectProcessor {
 
 		} else {
 			result = Arrays.stream(files)
-					.filter(file -> Arrays.stream(excludes).noneMatch(exclude -> file.getName().equals(exclude)))
+					.filter(file -> Arrays.stream(excludes)
+							.noneMatch(exclude -> file.getName().equals(exclude)))
 					.collect(Collectors.toList());
 		}
 

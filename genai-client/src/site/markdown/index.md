@@ -66,10 +66,10 @@ This design provides:
 
 | Variable | Required | Used by | Description |
 |---|---:|---|---|
-| `OPENAI_API_KEY` | Yes | OpenAI | API key (or access token) used to authenticate requests. |
+| `OPENAI_API_KEY` | Yes | OpenAI / CodeMie (via OpenAI gateway) | API key (or access token) used to authenticate requests. |
 | `OPENAI_ORG_ID` | No | OpenAI | Optional organization identifier. |
 | `OPENAI_PROJECT_ID` | No | OpenAI | Optional project identifier. |
-| `OPENAI_BASE_URL` | No | OpenAI | Override API base URL (useful for OpenAI-compatible gateways). |
+| `OPENAI_BASE_URL` | No | OpenAI / CodeMie (via OpenAI gateway) | Override API base URL (useful for OpenAI-compatible gateways). |
 | `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (can be set as an env var or Java system property). |
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (can be set as an env var or Java system property). |
 | `recipes` | No | Web | Java system property to override the recipes/config location (relative to `workingDir`); defaults to `genai-client/src/main/resources`. |
@@ -129,7 +129,7 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates with the OpenAI API as a concrete `GenAIProvider` implementation.
+`OpenAIProvider` integrates with the OpenAI API as a concrete `GenAIProvider` implementation.
 
 It supports:
 
@@ -138,21 +138,12 @@ It supports:
 - Advanced LLM requests (text generation, summarization, question answering).
 - Vector embeddings for semantic search and similarity use cases.
 
-**Environment Variables**
-
-The client reads the following environment variables; at minimum, set `OPENAI_API_KEY`:
+**Authentication / configuration**
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
-
-**Using the CodeMie API via OpenAI provider**
-
-To call CodeMie through the OpenAI-compatible gateway, set:
-
-- `OPENAI_API_KEY` to the access token/key
-- `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
 
 **Usage example**
 
@@ -172,9 +163,10 @@ How it works:
 - Uses that token as the API key when creating the OpenAI client.
 - Sets the OpenAI-compatible base URL to the CodeMie gateway (`https://codemie.lab.epam.com/code-assistant-api/v1`).
 
-**Configuration**
+**Authentication / configuration**
 
-This provider reads credentials from configuration keys `GENAI_USERNAME` and `GENAI_PASSWORD`.
+- `GENAI_USERNAME` and `GENAI_PASSWORD` (provided via environment variables or Java system properties)
+- `OPENAI_BASE_URL` can be set explicitly to `https://codemie.lab.epam.com/code-assistant-api/v1` when using the OpenAI provider directly.
 
 **Thread safety:** NOT thread-safe (inherits behavior from `OpenAIProvider`).
 
@@ -215,5 +207,5 @@ provider.close();
 ## Resources
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/genai-client
-- Badge: https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg
+- Badge: https://img.shields.io/maven-central/v/org.machananism.machai/genai-client.svg
 - GitHub: https://github.com/machanism-org/machai

@@ -1,19 +1,18 @@
 /**
- * Filesystem-backed APIs for discovering, describing, and processing on-disk project structures.
+ * Project discovery and processing entry points.
  *
- * <p>This package provides the core abstractions used to:
+ * <p>This package defines the high-level API used to:
  *
  * <ul>
- *   <li><b>Detect a layout</b> for a given project root via
- *       {@link org.machanism.machai.project.ProjectLayoutManager} and
- *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
- *   <li><b>Traverse a project</b> to enumerate relevant sources/resources and other metadata (optionally
- *       including discovered modules).</li>
- *   <li><b>Process a project</b> by delegating layout-specific behavior to an implementation of
- *       {@link org.machanism.machai.project.ProjectProcessor}.</li>
+ *   <li><b>Detect</b> the appropriate on-disk project layout for a given root directory via
+ *       {@link org.machanism.machai.project.ProjectLayoutManager}.</li>
+ *   <li><b>Scan</b> a project root (and any discovered modules) and delegate layout-specific handling
+ *       to an implementation of {@link org.machanism.machai.project.ProjectProcessor}.</li>
  * </ul>
  *
- * <p>When the directory exists but no specific layout is detected, a default layout may be selected.
+ * <p>Layout detection selects between known layouts (for example Maven, JavaScript/Node, Python),
+ * falling back to a default layout when the directory exists but no specific layout is detected.
+ * Layout implementations live in {@code org.machanism.machai.project.layout}.
  *
  * <h2>Typical usage</h2>
  *

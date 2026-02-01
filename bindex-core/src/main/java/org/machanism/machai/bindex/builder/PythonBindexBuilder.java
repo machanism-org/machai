@@ -20,11 +20,11 @@ import org.tomlj.TomlParseResult;
  * and any regular files found under the inferred source directory.
  *
  * <p>Example:
- * {@code
- * PythonBindexBuilder builder = new PythonBindexBuilder(layout)
- *     .genAIProvider(provider);
- * Bindex bindex = builder.build();
- * }
+ * <pre>{@code
+ * Bindex bindex = new PythonBindexBuilder(layout)
+ *     .genAIProvider(provider)
+ *     .build();
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

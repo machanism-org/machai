@@ -2,17 +2,25 @@
  * Provides the reviewer subsystem for discovering and extracting {@code @guidance} instruction blocks from project
  * files.
  *
- * <p>The primary entry point is {@link org.machanism.machai.gw.reviewer.Reviewer}, whose implementations typically:
+ * <p>The primary entry point is {@link org.machanism.machai.gw.reviewer.Reviewer}. Implementations typically:
  *
  * <ul>
- *   <li>declare which file names and/or extensions they support,</li>
- *   <li>scan file contents using the target format's comment rules, and</li>
- *   <li>return any discovered {@code @guidance} blocks for downstream processing.</li>
+ *   <li>declare the file extensions they support via {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()},</li>
+ *   <li>scan file contents using the target format's comment rules to locate {@code @guidance} markers, and</li>
+ *   <li>return a formatted prompt fragment (including path context and, where applicable, file content) for downstream
+ *       processing.</li>
  * </ul>
  *
- * <p>This package contains built-in {@code Reviewer} implementations for multiple common formats, including Java
- * (including {@code package-info.java}), TypeScript, Python, Markdown, HTML/XML, and plain-text
- * {@code @guidance.txt} files.
+ * <p>This package contains built-in {@code Reviewer} implementations for multiple common formats, including:
+ *
+ * <ul>
+ *   <li>Java source files (including {@code package-info.java}),</li>
+ *   <li>TypeScript ({@code .ts}),</li>
+ *   <li>Python ({@code .py}),</li>
+ *   <li>Markdown ({@code .md}),</li>
+ *   <li>HTML/XML ({@code .html}, {@code .htm}, {@code .xml}), and</li>
+ *   <li>plain-text guidance files ({@code @guidance.txt}).</li>
+ * </ul>
  */
 package org.machanism.machai.gw.reviewer;
 

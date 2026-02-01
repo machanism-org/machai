@@ -51,12 +51,12 @@ and generate the content for this section following net format:
 
 `OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
 
-Capabilities
+This provider enables:
 
-- Sends prompts and receives responses from OpenAI chat/response models.
-- Uploads and references files in requests.
-- Supports tool/function calling (`addTool(...)`) and can automatically execute registered Java handlers when the model requests a tool call.
-- Can create vector embeddings (`embedding(...)`) for semantic search and similarity use cases.
+- Sending prompts and receiving responses from OpenAI Chat/Responses models.
+- Managing files for use in OpenAI workflows.
+- Performing common LLM requests such as text generation, summarization, and question answering.
+- Creating and using vector embeddings for tasks like semantic search and similarity analysis.
 
 Environment variables
 
@@ -74,7 +74,7 @@ To use the CodeMie OpenAI-compatible endpoint with `OpenAIProvider`, set:
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
 
-Example
+Usage example
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1", conf);
@@ -101,7 +101,7 @@ Built-in endpoints
 - Token URL: `https://keycloak.eks-core.aws.main.edp.projects.epam.com/auth/realms/codemie-prod/protocol/openid-connect/token`
 - Base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`
 
-Example
+Usage example
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1", conf);
@@ -120,7 +120,7 @@ Key characteristics
 - `perform()` always returns `null`.
 - Unsupported capabilities (for example, `embedding(...)`) throw an exception.
 
-Example
+Usage example
 
 ```java
 GenAIProvider provider = new NoneProvider();
@@ -132,7 +132,7 @@ provider.perform();
 
 ### Web
 
-`WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
+`WebProvider` obtains model responses by automating a target GenAI service through its web user interface.
 
 Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`).
 
@@ -144,7 +144,7 @@ Thread safety and lifecycle
 - Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 
-Example
+Usage example
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie", conf);

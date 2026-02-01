@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-Assembly Maven Plugin is a Maven plugin that helps you assemble and evolve Maven projects in the Machanism ecosystem by applying structured updates to your local working tree.
+Assembly Maven Plugin is a Maven plugin for assembling and evolving Maven projects in the Machanism ecosystem by applying structured updates directly to your local working tree.
 
 It can incorporate library choices informed by bindex metadata (for example, `bindex.json`). Optionally, it can use GenAI-powered semantic search to help identify and select suitable libraries.
 

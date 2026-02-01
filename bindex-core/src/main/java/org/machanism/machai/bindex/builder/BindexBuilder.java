@@ -21,16 +21,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *   <li>optional prior (origin) {@code Bindex} content for incremental updates.</li>
  * </ul>
  *
- * <p>Subclasses are expected to override {@link #projectContext()} to provide manifest and source/resource
- * content to the provider via {@link GenAIProvider#prompt(String)} and/or
- * {@link GenAIProvider#promptFile(File, String)}.
+ * <p>Subclasses override {@link #projectContext()} to contribute context by calling
+ * {@link GenAIProvider#prompt(String)} and/or {@link GenAIProvider#promptFile(File, String)}.
  *
  * <p>Example:
- * {@code
- * BindexBuilder builder = new BindexBuilder(layout)
- *     .genAIProvider(provider);
- * Bindex bindex = builder.build();
- * }
+ * <pre>{@code
+ * Bindex bindex = new MavenBindexBuilder(layout)
+ *     .genAIProvider(provider)
+ *     .build();
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

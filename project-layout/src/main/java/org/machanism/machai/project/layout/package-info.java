@@ -1,31 +1,33 @@
 /**
  * Detects and models the on-disk layout of a software project.
  *
- * <p>The types in this package identify a project's root directory, modules (if any), and conventional
- * subdirectories such as source, test, and documentation trees. Implementations infer this structure from
- * build descriptors (for example {@code pom.xml}, {@code package.json}, or {@code pyproject.toml}) or by
- * applying sensible defaults when no descriptor is available.
+ * <p>This package provides a small set of {@code ProjectLayout} implementations that describe where a project’s
+ * sources, tests, and documentation typically live on disk. Layouts are discovered from build descriptors when
+ * available (for example {@code pom.xml}, {@code package.json}, or {@code pyproject.toml}) and fall back to sensible
+ * conventional defaults when no descriptor is present.
  *
- * <h2>Core abstraction</h2>
+ * <p>A {@link org.machanism.machai.project.layout.ProjectLayout} generally:
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} represents a discovered layout for a project root.
- *       It exposes the root, module list, conventional directories, and a shared set of exclusion directories
- *       ({@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}) used when scanning the filesystem.</li>
+ *   <li>Identifies a project root directory.</li>
+ *   <li>Discovers modules (if the build tool supports multi-module/workspace layouts).</li>
+ *   <li>Exposes conventional directories (for example source, test, and documentation trees).</li>
+ *   <li>Provides a shared set of directories to exclude while scanning the filesystem via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
  * </ul>
  *
- * <h2>Provided implementations</h2>
+ * <h2>Implementations</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Maven layouts derived from {@code pom.xml}
- *       (including module discovery and configured source/test directories).</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - JavaScript/TypeScript layouts derived from
- *       {@code package.json} and workspace conventions.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Python layouts derived from
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - derives layout information from
+ *       {@code pom.xml} (including module discovery and configured source/test directories).</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - derives layout information from
+ *       {@code package.json} and common workspace conventions.</li>
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - derives layout information from
  *       {@code pyproject.toml} and related metadata.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - Fallback layout that infers modules from
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - fallback that infers modules from
  *       immediate subdirectories while honoring {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Example</h2>
  * <pre>
  * ProjectLayout layout = new MavenProjectLayout().projectDir(new java.io.File("/repo"));
  * java.util.List&lt;String&gt; modules = layout.getModules();
@@ -58,5 +60,5 @@ package org.machanism.machai.project.layout;
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` as `&amp;gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *          and `&gt;` as `&amp;gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */

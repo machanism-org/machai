@@ -28,38 +28,33 @@
 /**
  * Provider resolution, interaction, and host-side tool wiring for generative AI integrations.
  *
- * <p>This package defines the core abstractions used to integrate one or more generative AI backends into the host
- * application. It provides a provider service-provider interface (SPI), a manager for resolving providers by name,
- * and optional installers for wiring host-executed tools (e.g., filesystem and command execution) into a provider's
- * tool/function registry.
+ * <p>This package contains the core abstractions and utilities used to integrate one or more generative AI
+ * backends into the host application:
  *
- * <h2>Key responsibilities</h2>
  * <ul>
- *   <li><strong>Provider SPI</strong> – {@link org.machanism.machai.ai.manager.GenAIProvider} defines how to build and
- *       execute provider requests and how the host registers callable tools/functions.</li>
- *   <li><strong>Provider resolution</strong> – {@link org.machanism.machai.ai.manager.GenAIProviderManager} maps a
- *       {@code Provider:Model} identifier to an implementation and routes calls accordingly.</li>
- *   <li><strong>Host tool wiring</strong> – installers such as
- *       {@link org.machanism.machai.ai.manager.FileFunctionTools},
- *       {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
- *       {@link org.machanism.machai.ai.manager.SystemFunctionTools} register commonly needed host capabilities with a
- *       provider in a consistent way.</li>
+ *   <li><strong>Provider contract</strong> – {@link org.machanism.machai.ai.manager.GenAIProvider} defines the
+ *       common operations for prompting, attaching files, computing embeddings, and registering callable tools.</li>
+ *   <li><strong>Provider resolution</strong> – {@link org.machanism.machai.ai.manager.GenAIProviderManager}
+ *       resolves a {@code Provider:Model} identifier to an implementation and configures the chosen model.</li>
+ *   <li><strong>Tool installation</strong> – {@link org.machanism.machai.ai.manager.FileFunctionTools} and
+ *       {@link org.machanism.machai.ai.manager.CommandFunctionTools} register host-executed tools; 
+ *       {@link org.machanism.machai.ai.manager.SystemFunctionTools} is a convenience installer for both.</li>
  * </ul>
  *
  * <h2>Usage</h2>
  * <pre>{@code
- * GenAIProviderManager manager = ...;
- * GenAIProvider provider = manager.get("OpenAI:gpt-4.1");
+ * Configurator conf = ...;
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  *
- * // Optionally register host tools for the provider.
- * new FileFunctionTools().install(provider);
- * new CommandFunctionTools().install(provider);
+ * // Optionally expose host tools to the provider.
+ * new SystemFunctionTools().applyTools(provider);
  *
- * // Use the provider to build/execute requests.
- * // (Exact request/response types depend on the provider implementation.)
+ * provider.instructions("You are a helpful assistant.");
+ * provider.prompt("Summarize this project.");
+ * String response = provider.perform();
  * }</pre>
  *
- * <p><strong>Security note:</strong> tools execute on the hosting machine. Applications should restrict allowable paths,
- * commands, working directories, and timeouts according to their security requirements.
+ * <p><strong>Security note:</strong> tools execute on the hosting machine. Restrict allowed paths, commands,
+ * working directories, and timeouts according to your security requirements.
  */
 package org.machanism.machai.ai.manager;

@@ -22,14 +22,15 @@
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
+ *          and `&gt;` as `&lt;` 
  *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
 
 /**
- * Maven plugin goals for running Machai/Bindex operations as part of a Maven build.
+ * Maven plugin goals (Mojos) for running Machai/Bindex operations as part of a Maven build.
  *
- * <p>This package contains Maven {@code Mojo} implementations that can be bound to build phases or executed
- * directly to manage a module's Bindex metadata and related artifacts:</p>
+ * <p>This package provides Maven {@code Mojo} implementations that can be bound to build phases or executed
+ * directly from the command line to manage a module's Bindex metadata and related artifacts:</p>
  *
  * <ul>
  *   <li>{@link org.machanism.machai.maven.Create} - creates a new Bindex index for the current module.</li>

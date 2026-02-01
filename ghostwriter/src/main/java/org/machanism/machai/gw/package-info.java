@@ -7,7 +7,6 @@
  * of file reviewers, workspace traversal, guidance/template assembly, and prompt creation.
  *
  * <h2>Core responsibilities</h2>
- *
  * <ul>
  *   <li>Discover file-type-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (typically via
  *       {@link java.util.ServiceLoader}).</li>

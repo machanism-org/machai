@@ -24,11 +24,11 @@ import org.slf4j.LoggerFactory;
  * {@code .ts}, {@code .vue}).
  *
  * <p>Example:
- * {@code
- * JScriptBindexBuilder builder = new JScriptBindexBuilder(layout)
- *     .genAIProvider(provider);
- * Bindex bindex = builder.build();
- * }
+ * <pre>{@code
+ * Bindex bindex = new JScriptBindexBuilder(layout)
+ *     .genAIProvider(provider)
+ *     .build();
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

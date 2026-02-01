@@ -96,10 +96,15 @@ public class WebProvider extends NoneProvider {
 	 * </ol>
 	 *
 	 * @param workingDir project root directory used for workspace variables and to resolve recipe locations
-	 * @throws IllegalArgumentException if initialization fails or a different working directory is requested
+	 * @throws IllegalArgumentException if {@code workingDir} is {@code null}, initialization fails, or a different
+	 *                                  working directory is requested
 	 */
 	@Override
 	public void setWorkingDir(File workingDir) {
+		if (workingDir == null) {
+			throw new IllegalArgumentException("workingDir must not be null");
+		}
+
 		if (rootDir == null) {
 			rootDir = workingDir;
 

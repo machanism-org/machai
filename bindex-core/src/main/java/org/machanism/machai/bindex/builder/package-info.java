@@ -26,17 +26,17 @@
  */
 
 /**
- * Builders that generate {@link org.machanism.machai.schema.Bindex} documents by prompting a configured
+ * Builders for generating {@link org.machanism.machai.schema.Bindex} documents by prompting a configured
  * {@link org.machanism.machai.ai.manager.GenAIProvider} with the Bindex JSON schema plus project-specific
  * context (such as manifest files and source/resource contents).
  *
- * <p>The package centers around {@link org.machanism.machai.bindex.builder.BindexBuilder}, which defines the
- * common generation workflow:
+ * <p>The package centers around {@link org.machanism.machai.bindex.builder.BindexBuilder}, which defines a
+ * common workflow:
  * <ol>
- *   <li>prompt the Bindex JSON schema,</li>
- *   <li>optionally provide an origin {@code Bindex} to request an incremental update,</li>
- *   <li>add project context via a {@code projectContext()} implementation,</li>
- *   <li>perform the generation request and deserialize the response into a {@code Bindex} instance.</li>
+ *   <li>Prompt the Bindex JSON schema.</li>
+ *   <li>Optionally provide an origin {@code Bindex} to request an incremental update.</li>
+ *   <li>Add project context via a {@code projectContext()} implementation.</li>
+ *   <li>Perform the generation request and deserialize the response into a {@code Bindex} instance.</li>
  * </ol>
  *
  * <p>Specialized builders contribute ecosystem-specific context:

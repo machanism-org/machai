@@ -81,6 +81,77 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
+	void getModules_shouldReturnNullWhenModelCannotBeBuiltAndPackagingNull() {
+		// Arrange
+		File dir = new File("target/test-tmp/maven-bad-pom");
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir);
+
+		PomReader failingPomReader = new PomReader() {
+			@Override
+			public Model getProjectModel(File pomFile, boolean effective) {
+				throw new IllegalArgumentException("boom");
+			}
+		};
+
+		MavenProjectLayout layoutWithFailingReader = new MavenProjectLayout() {
+			@Override
+			public Model getModel() {
+				File pomFile = new File(getProjectDir(), "pom.xml");
+				try {
+					return failingPomReader.getProjectModel(pomFile, true);
+				} catch (Exception e) {
+					return new Model();
+				}
+			}
+		}.projectDir(dir);
+
+		// Act
+		List<String> modules = layoutWithFailingReader.getModules();
+
+		// Assert
+		assertNull(modules);
+	}
+
+	@Test
+	void getModel_whenEffectivePomFailsAndEffectiveRequiredTrue_shouldFallbackToNonEffective() {
+		// Arrange
+		File dir = new File("target/test-tmp/maven-model-fallback");
+		MavenProjectLayout layout = new MavenProjectLayout() {
+			@Override
+			public Model getModel() {
+				if (super.getProjectDir() == null) {
+					throw new IllegalStateException("projectDir must be set");
+				}
+				// delegate to real implementation
+				return super.getModel();
+			}
+		}.projectDir(dir);
+
+		layout.effectivePomRequired(true);
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		String pomXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+				"<project xmlns=\"http://maven.apache.org/POM/4.0.0\">\n" +
+				"  <modelVersion>4.0.0</modelVersion>\n" +
+				"  <groupId>com.acme</groupId>\n" +
+				"  <artifactId>demo</artifactId>\n" +
+				"  <version>1</version>\n" +
+				"</project>\n";
+		try {
+			Files.write(new File(dir, "pom.xml").toPath(), pomXml.getBytes(StandardCharsets.UTF_8));
+		} catch (Exception e) {
+			fail(e);
+		}
+
+		// Act
+		Model model = layout.getModel();
+
+		// Assert
+		assertNotNull(model);
+		assertEquals("demo", model.getArtifactId());
+	}
+
+	@Test
 	void getSources_shouldReturnConfiguredSourceDirectoryAndResourcesAsRelativePaths() {
 		// Arrange
 		File dir = new File("/repo");

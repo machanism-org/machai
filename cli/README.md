@@ -24,7 +24,7 @@ Content:
 		       history: Display or save the history of previously run commands
 		       version: Show version info
 		       script: Read and execute commands from a file.
-		Docs Command
+		       Docs Command
 		       docs: GenAI document processing command.
 7. **Reference to the parent project and machanism.org**
 **Formatting Requirements:**
@@ -76,7 +76,7 @@ Example commands (as shown by `help`):
 
 - `pick`: Picks libraries based on user request.
 - `assembly`: Creates a project via picked library set.
-- `prompt`: Used to request additional GenAI guidance.
+- `prompt`: Is used for request additional GenAI guidances.
 
 ### Bindex commands
 
@@ -85,12 +85,12 @@ Example commands (as shown by `help`):
 
 ### Built-in commands
 
-- `help`: Display help about available commands.
+- `help`: Display help about available commands
 - `stacktrace`: Display the full stacktrace of the last error.
 - `clear`: Clear the shell screen.
 - `quit`, `exit`: Exit the shell.
-- `history`: Display or save the history of previously run commands.
-- `version`: Show version info.
+- `history`: Display or save the history of previously run commands
+- `version`: Show version info
 - `script`: Read and execute commands from a file.
 
 ### Docs commands

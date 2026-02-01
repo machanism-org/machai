@@ -2,6 +2,7 @@ package org.machanism.machai.bindex.builder;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -11,11 +12,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.machai.ai.manager.GenAIProvider;
@@ -50,17 +53,12 @@ class MavenBindexBuilderTest {
         assertNull(model.getReporting());
         assertNull(model.getScm());
 
-        // Some Maven Model getters may normalize null to empty values; ensure "not meaningful".
+        // Maven Model may normalize these to empty values.
         if (model.getProperties() != null) {
-            assertNull(model.getProperties().getProperty("k"));
-        } else {
-            assertNull(model.getProperties());
+            org.junit.jupiter.api.Assertions.assertTrue(model.getProperties().isEmpty());
         }
-
         if (model.getPluginRepositories() != null) {
             org.junit.jupiter.api.Assertions.assertTrue(model.getPluginRepositories().isEmpty());
-        } else {
-            assertNull(model.getPluginRepositories());
         }
     }
 
@@ -71,6 +69,10 @@ class MavenBindexBuilderTest {
 
         Model model = new Model();
         model.setBuild(null);
+        model.setModelVersion("4.0.0");
+        model.setGroupId("g");
+        model.setArtifactId("a");
+        model.setVersion("1");
         layout.model(model);
 
         GenAIProvider provider = mock(GenAIProvider.class);
@@ -87,18 +89,17 @@ class MavenBindexBuilderTest {
     }
 
     @Test
-    void projectContext_whenPromptFileThrows_isSwallowedAndContinues() throws Exception {
+    void projectContext_whenDirectoriesBlankOrMissing_doesNotWalkAndStillPromptsPomAndAdditionalRules() throws Exception {
         // Arrange
-        File srcMainJava = new File(tempDir, "src/main/java");
-        Files.createDirectories(srcMainJava.toPath());
-        File javaFile = new File(srcMainJava, "A.java");
-        Files.writeString(javaFile.toPath(), "class A {}", StandardCharsets.UTF_8);
-
         MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir);
 
-        Model model = new Model();
         Build build = new Build();
-        build.setSourceDirectory(srcMainJava.getAbsolutePath());
+        build.setSourceDirectory(" ");
+        build.setTestSourceDirectory(null);
+        build.setResources(null);
+        build.setTestResources(null);
+
+        Model model = new Model();
         model.setBuild(build);
         model.setModelVersion("4.0.0");
         model.setGroupId("g");
@@ -107,13 +108,83 @@ class MavenBindexBuilderTest {
         layout.model(model);
 
         GenAIProvider provider = mock(GenAIProvider.class);
-        doThrow(new java.io.IOException("fail")).when(provider).promptFile(any(File.class), anyString());
+
+        MavenBindexBuilder builder = new MavenBindexBuilder(layout);
+        builder.genAIProvider(provider);
+
+        // Act
+        assertDoesNotThrow(builder::projectContext);
+
+        // Assert
+        verify(provider, atLeastOnce()).prompt(anyString());
+        verify(provider, never()).promptFile(any(File.class), anyString());
+    }
+
+    @Test
+    void projectContext_whenPromptFileThrows_isSwallowedAndContextContinues() throws Exception {
+        // Arrange
+        File srcMainJava = new File(tempDir, "src/main/java");
+        Files.createDirectories(srcMainJava.toPath());
+        File javaFile = new File(srcMainJava, "A.java");
+        Files.writeString(javaFile.toPath(), "class A {}", StandardCharsets.UTF_8);
+
+        File resourcesDir = new File(tempDir, "src/main/resources");
+        Files.createDirectories(resourcesDir.toPath());
+        Files.writeString(new File(resourcesDir, "a.txt").toPath(), "x", StandardCharsets.UTF_8);
+
+        MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir);
+
+        Build build = new Build();
+        build.setSourceDirectory(srcMainJava.getAbsolutePath());
+        Resource r = new Resource();
+        r.setDirectory(resourcesDir.getAbsolutePath());
+        build.setResources(java.util.List.of(r));
+
+        Model model = new Model();
+        model.setBuild(build);
+        model.setModelVersion("4.0.0");
+        model.setGroupId("g");
+        model.setArtifactId("a");
+        model.setVersion("1");
+        layout.model(model);
+
+        GenAIProvider provider = mock(GenAIProvider.class);
+        doThrow(new IOException("fail")).when(provider).promptFile(any(File.class), anyString());
+
+        MavenBindexBuilder builder = new MavenBindexBuilder(layout);
+        builder.genAIProvider(provider);
+
+        // Act
+        assertDoesNotThrow(builder::projectContext);
+
+        // Assert
+        verify(provider, atLeastOnce()).prompt(anyString());
+        verify(provider, atLeastOnce()).promptFile(any(File.class), anyString());
+    }
+
+    @Test
+    void projectContext_whenPromptForPomFails_propagatesRuntimeException() throws Exception {
+        // Arrange
+        MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir);
+
+        Build build = new Build();
+        build.setSourceDirectory(new File(tempDir, "missing").getAbsolutePath());
+
+        Model model = new Model();
+        model.setBuild(build);
+        model.setModelVersion("4.0.0");
+        model.setGroupId("g");
+        model.setArtifactId("a");
+        model.setVersion("1");
+        layout.model(model);
+
+        GenAIProvider provider = mock(GenAIProvider.class);
+        doThrow(new RuntimeException("prompt failed")).when(provider).prompt(anyString());
 
         MavenBindexBuilder builder = new MavenBindexBuilder(layout);
         builder.genAIProvider(provider);
 
         // Act / Assert
-        assertDoesNotThrow(builder::projectContext);
-        verify(provider, atLeastOnce()).prompt(anyString());
+        assertThrows(RuntimeException.class, builder::projectContext);
     }
 }
