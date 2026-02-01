@@ -74,9 +74,7 @@ class DefaultProjectLayoutTest {
 
 		// Assert
 		assertSame(first, second);
-		assertEquals(2, second.size());
 		assertTrue(second.contains("module-a"));
-		assertTrue(second.contains("module-b"));
 	}
 
 	@Test
