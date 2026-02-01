@@ -63,7 +63,7 @@ public final class Ghostwriter {
 			logger.info("Executing in directory: {}", execDir);
 
 			try {
-				File configFile = new File(execDir, "gw.properties");
+				File configFile = new File(execDir, System.getProperty("gw.config", "gw.properties"));
 				config.setConfiguration(configFile.getAbsolutePath());
 			} catch (IOException e) {
 				// the property file is not defined, ignore.
