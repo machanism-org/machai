@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -100,15 +101,19 @@ public final class Ghostwriter {
 		Option genaiOpt = new Option("a", "genai", true,
 				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
-		Option instructionsOpt = new Option("i", "instructions", true,
-				"Specify additional instructions by URL or file path. Use a comma (`,`) to separate multiple locations.");
+		Option instructionsOpt = Option.builder("i")
+				.longOpt("instructions")
+				.desc("Specify additional instructions by URL or file path. Use a comma (`,`) to separate multiple locations.")
+				.hasArg(true)
+				.optionalArg(true)
+				.build();
 
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a list of directories to exclude from processing. You can provide multiple directories separated by commas or by repeating the option.");
 
 		Option guidanceOpt = Option.builder("g")
 				.longOpt("guidance")
-				.desc("Set the default guidance file to apply as a final step for the current directory (default: @guidance.txt).")
+				.desc("Set the default guidance file to apply as a final step for the current directory (default: guidance.txt).")
 				.hasArg(true)
 				.optionalArg(true)
 				.build();
@@ -142,9 +147,19 @@ public final class Ghostwriter {
 				genai = cmd.getOptionValue(genaiOpt);
 			}
 
-			String[] instructions = StringUtils.split(config.get("instructions", null), ",");
+			String[] instructionLocations = StringUtils.split(config.get("instructions", null), ",");
+			String instructions = null;
 			if (cmd.hasOption(instructionsOpt)) {
-				instructions = StringUtils.split(cmd.getOptionValue(instructionsOpt), ",");
+				String optionValue = cmd.getOptionValue(instructionsOpt);
+				if (optionValue != null) {
+					instructionLocations = StringUtils.split(optionValue, ",");
+				} else {
+					instructions = readText(
+						    "No instructions were provided as an option value.\n" +
+						    "Please enter the instructions text below. When you are done, press " +
+						    (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") +
+						    " to finish and signal end of input (EOF):"
+						);				}
 			}
 
 			String[] dirs = cmd.getArgs();
@@ -170,11 +185,18 @@ public final class Ghostwriter {
 			String defaultGuidance = null;
 			if (cmd.hasOption(guidanceOpt)) {
 				String guidanceFileName = cmd.getOptionValue(guidanceOpt);
-				guidanceFileName = StringUtils.defaultIfBlank(guidanceFileName, "guidance.txt");
-				defaultGuidance = getInstractionsFromFile(guidanceFileName);
-				if (defaultGuidance == null) {
-					throw new FileNotFoundException("Guidance file '" + guidanceFileName +
-							"' not found. Please verify that the file exists at the expected location and is accessible.");
+				if (guidanceFileName != null) {
+					guidanceFileName = StringUtils.defaultIfBlank(guidanceFileName, "guidance.txt");
+					defaultGuidance = getInstractionsFromFile(guidanceFileName);
+					if (defaultGuidance == null) {
+						throw new FileNotFoundException("Guidance file '" + guidanceFileName +
+								"' not found. Please verify that the file exists at the expected location and is accessible.");
+					}
+				} else {
+					defaultGuidance = readText(
+							"Please enter the guidance text below. When finished, press " +
+									(SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") +
+									" to signal end of input (EOF):");
 				}
 			}
 
@@ -187,7 +209,8 @@ public final class Ghostwriter {
 					FileProcessor processor = new FileProcessor(genai, config);
 
 					processor.setExcludes(excludes);
-					processor.setInstructionLocations(instructions);
+					processor.setInstructionLocations(instructionLocations);
+					processor.setInstructions(instructions);
 					processor.setModuleMultiThread(multiThread);
 					processor.setDefaultGuidance(defaultGuidance);
 
@@ -224,4 +247,14 @@ public final class Ghostwriter {
 		formatter.printHelp("java -jar gw.jar", options);
 	}
 
+	private static String readText(String prompt) {
+		System.out.println(prompt);
+		StringBuilder sb = new StringBuilder();
+		try (Scanner scanner = new Scanner(System.in)) {
+			while (scanner.hasNextLine()) {
+				sb.append(scanner.nextLine()).append("\n");
+			}
+		}
+		return sb.deleteCharAt(sb.length() - 1).toString();
+	}
 }
