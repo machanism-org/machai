@@ -37,7 +37,7 @@ Benefits:
 
 ## Overview
 
-The plugin automates Maven Site documentation by scanning the repository for embedded `@guidance:` directives and using them to assemble and update Markdown pages. This keeps documentation consistent across modules and aligned with what’s in the codebase.
+The plugin automates Maven Site documentation by scanning the repository for embedded `@guidance:` directives and using them to assemble and update Markdown pages. This keeps documentation consistent across modules and aligned with whats in the codebase.
 
 ## Key Features
 

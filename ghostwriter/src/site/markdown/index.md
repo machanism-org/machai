@@ -131,9 +131,9 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 | `-t` | `--threads` | Optional (`true`/`false`) | Enable multi-threaded processing. If present without a value, defaults to `true`. | `true` |
 | `-r` | `--root` | Yes (path) | Root directory that bounds scanning. All scanned directories must be located within this root. | From `gw.properties` key `root`; otherwise current user directory |
 | `-a` | `--genai` | Yes (`provider:model`) | GenAI provider and model (e.g., `OpenAI:gpt-5.1`). | From `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
-| `-i` | `--instructions` | Yes (URL/path[,URL/path...]) | Additional instruction locations (URL or file path). Provide multiple values by repeating the option or by passing multiple values. | From `gw.properties` key `instructions` (comma-separated); otherwise none |
-| `-g` | `--guidance` | Optional (path) | Default guidance file applied as a final step for each scanned directory. If present without a value, uses `@guidance.txt` resolved relative to the executable directory (the directory containing `gw.jar`). | Off (not applied) |
-| `-e` | `--excludes` | Yes (dir[,dir...]) | Directories to exclude from processing. Provide multiple values by repeating the option or by passing multiple values; values may also be comma-separated. | From `gw.properties` key `excludes` (comma-separated); otherwise none |
+| `-i` | `--instructions` | Yes (URL/path[,URL/path...]) | Additional instruction locations (URL or file path). Multiple locations may be comma-separated. | From `gw.properties` key `instructions` (comma-separated); otherwise none |
+| `-g` | `--guidance` | Optional (path) | Default guidance file applied as a final step. If present without a value, uses `@guidance.txt` resolved relative to the executable directory (the directory containing `gw.jar`). | Off (not applied) |
+| `-e` | `--excludes` | Yes (dir[,dir...]) | Directories to exclude from processing. Multiple values may be provided by repeating the option; values may also be comma-separated. | From `gw.properties` key `excludes` (comma-separated); otherwise none |
 
 **Positional arguments**: Zero or more directories to scan.
 

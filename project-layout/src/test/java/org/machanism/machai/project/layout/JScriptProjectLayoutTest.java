@@ -56,7 +56,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListDueToExcludeLogicUsingFileAbsolutePath() throws Exception {
+	void getModules_shouldReturnEmptyListBecauseMatcherSearchesForExcludedDirNamesInAbsolutePath() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-workspaces");
 		assertTrue(dir.mkdirs() || dir.isDirectory());
@@ -76,6 +76,47 @@ class JScriptProjectLayoutTest {
 		// Assert
 		assertNotNull(modules);
 		assertTrue(modules.isEmpty());
+	}
+
+	@Test
+	void getModules_shouldIgnoreExcludedDirectoriesWhenResolvingWorkspaces() throws Exception {
+		// Arrange
+		File dir = new File("target/test-tmp/js-workspaces-excluded");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		String packageJson = "{\"name\":\"root\",\"workspaces\":[\"packages/**\"]}";
+		Files.write(new File(dir, "package.json").toPath(), packageJson.getBytes(StandardCharsets.UTF_8));
+
+		File excluded = new File(dir, "packages/node_modules/module-a");
+		assertTrue(excluded.mkdirs() || excluded.isDirectory());
+		Files.write(new File(excluded, "package.json").toPath(), "{\"name\":\"a\"}".getBytes(StandardCharsets.UTF_8));
+
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
+
+		// Act
+		List<String> modules = layout.getModules();
+
+		// Assert
+		assertNotNull(modules);
+		assertTrue(modules.isEmpty());
+	}
+
+	@Test
+	void getModules_shouldReturnNullWhenWorkspacesIsNotArray() throws Exception {
+		// Arrange
+		File dir = new File("target/test-tmp/js-workspaces-not-array");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		String packageJson = "{\"name\":\"root\",\"workspaces\":{\"packages\":[\"packages/*\"]}}";
+		Files.write(new File(dir, "package.json").toPath(), packageJson.getBytes(StandardCharsets.UTF_8));
+
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
+
+		// Act
+		List<String> modules = layout.getModules();
+
+		// Assert
+		assertNull(modules);
 	}
 
 	@Test

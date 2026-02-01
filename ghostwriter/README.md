@@ -23,7 +23,7 @@
 
 ## Project Overview
 
-Machai Ghostwriter is a CLI documentation engine (also available as a runnable JAR) that scans a project directory and processes documentation-related files according to embedded guidance and any additional instructions you provide.
+Ghostwriter is a CLI documentation engine (also available as a runnable JAR) that scans a project directory and processes documentation-related files according to embedded guidance and any additional instructions you provide.
 
 ## Introduction
 

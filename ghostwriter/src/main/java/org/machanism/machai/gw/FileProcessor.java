@@ -40,14 +40,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported
- * files, and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported files,
+ * and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to
- * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
- * every supported file it finds, it builds a prompt using templates from the
- * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
+ * This processor delegates file-specific guidance extraction to {@link Reviewer}
+ * implementations discovered via {@link ServiceLoader}. For every supported file
+ * it finds, it builds a prompt using templates from the {@code document-prompts}
+ * resource bundle and invokes a {@link GenAIProvider}.
  * </p>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -94,12 +94,13 @@ public class FileProcessor extends ProjectProcessor {
 
 	private String[] excludes;
 
-	private Configurator configurator;
+	private final Configurator configurator;
 
 	/**
 	 * Constructs a processor.
 	 *
-	 * @param genai provider key/name to use
+	 * @param genai        provider key/name to use
+	 * @param configurator configuration source
 	 */
 	public FileProcessor(String genai, Configurator configurator) {
 		this.genai = genai;
@@ -253,7 +254,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * Processes non-module files and directories directly under {@code projectDir}.
 	 *
 	 * @param projectDir    directory to scan
-	 * @param projectLayout
+	 * @param projectLayout project layout
 	 * @throws FileNotFoundException if the project layout cannot be created
 	 * @throws IOException           if file reading fails
 	 */
@@ -331,7 +332,8 @@ public class FileProcessor extends ProjectProcessor {
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
-		if (defaultProcessingDir == null || Strings.CS.startsWith(file.getPath(), defaultProcessingDir.getPath())) {
+		if (defaultProcessingDir == null
+				|| Strings.CS.startsWith(file.getPath(), defaultProcessingDir.getPath())) {
 
 			File projectDir = projectLayout.getProjectDir();
 			String guidance = parseFile(projectDir, file);
@@ -467,7 +469,8 @@ public class FileProcessor extends ProjectProcessor {
 		for (File file : files) {
 			String name = file.getName();
 			String absolutePath = file.getAbsolutePath();
-			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludeAbsolutePath(absolutePath)) {
+			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS)
+					|| shouldExcludeAbsolutePath(absolutePath)) {
 				continue;
 			}
 			if (file.isDirectory()) {

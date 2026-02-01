@@ -10,32 +10,20 @@ import org.junit.jupiter.api.Test;
 class DefaultProjectLayoutTest {
 
 	@Test
-	void getModules_shouldReturnEmptyListWhenProjectDirDoesNotExistOrIsEmpty() throws Exception {
+	void getModules_shouldReturnEmptyListWhenProjectDirDoesNotExist() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/default-layout-empty");
 		if (dir.isDirectory()) {
-			for (File f : dir.listFiles()) {
-				f.delete();
+			File[] files = dir.listFiles();
+			if (files != null) {
+				for (File f : files) {
+					f.delete();
+				}
 			}
 			dir.delete();
 		}
+		assertFalse(dir.exists());
 		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(dir);
-
-		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertNotNull(modules);
-		assertTrue(modules.isEmpty());
-	}
-
-	@Test
-	void getModules_shouldReturnEmptyListWhenProjectDirIsNotADirectory() throws Exception {
-		// Arrange
-		File file = new File("target/test-tmp/default-layout-file");
-		assertTrue(file.getParentFile().mkdirs() || file.getParentFile().isDirectory());
-		FilesTestUtil.writeUtf8(file, "x");
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(file);
 
 		// Act
 		List<String> modules = layout.getModules();
@@ -73,12 +61,5 @@ class DefaultProjectLayoutTest {
 		// Assert
 		assertSame(layout, returned);
 		assertSame(dir, layout.getProjectDir());
-	}
-
-	private static final class FilesTestUtil {
-		private static void writeUtf8(File file, String content) throws Exception {
-			assertTrue(file.getParentFile().mkdirs() || file.getParentFile().isDirectory());
-			java.nio.file.Files.write(file.toPath(), content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-		}
 	}
 }

@@ -171,9 +171,8 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 How it works:
 
 - Obtains an access token from a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`).
-- Sets Java system properties used by `OpenAIProvider`:
-  - `OPENAI_API_KEY` is set to the retrieved token.
-  - `OPENAI_BASE_URL` is set to the CodeMie API base URL.
+- Uses that token as the API key when creating the OpenAI client.
+- Sets the OpenAI-compatible base URL to the CodeMie gateway (`https://codemie.lab.epam.com/code-assistant-api/v1`).
 
 **Configuration**
 

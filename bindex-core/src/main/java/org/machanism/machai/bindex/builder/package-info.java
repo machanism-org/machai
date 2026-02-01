@@ -28,9 +28,9 @@
 /**
  * Builders that generate {@link org.machanism.machai.schema.Bindex} documents for projects on disk.
  *
- * <p>This package provides implementations of {@link org.machanism.machai.bindex.builder.BindexBuilder} that collect
- * project context (for example, build manifests and source structure/content), then delegate to a configured
- * {@link org.machanism.machai.ai.manager.GenAIProvider} to produce a {@code Bindex} document.
+ * <p>This package provides implementations of {@link org.machanism.machai.bindex.builder.BindexBuilder} that gather
+ * project context (for example, build manifests and source structure/content) and delegate to a configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} to produce a {@code Bindex} instance.
  *
  * <p>A builder typically:
  * <ol>

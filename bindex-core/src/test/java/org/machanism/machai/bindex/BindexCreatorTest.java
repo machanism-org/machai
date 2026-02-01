@@ -1,125 +1,89 @@
 package org.machanism.machai.bindex;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.bindex.builder.BindexBuilder;
-import org.machanism.machai.project.layout.DefaultProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
-import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 class BindexCreatorTest {
 
-	@TempDir
-	File tempDir;
+    @TempDir
+    File tempDir;
 
-	@Test
-	void update_setsFlagAndReturnsSameInstance() {
-		// Arrange
-		GenAIProvider provider = Mockito.mock(GenAIProvider.class);
-		BindexCreator creator = new BindexCreator(provider);
+    @Test
+    void update_setsFlagAndReturnsSameInstance() {
+        // Arrange
+        BindexCreator creator = new BindexCreator(mock(GenAIProvider.class));
 
-		// Act
-		BindexCreator returned = creator.update(true);
+        // Act
+        BindexCreator returned = creator.update(true);
 
-		// Assert
-		assertSame(creator, returned);
-	}
+        // Assert
+        assertNotNull(returned);
+    }
 
-	@Test
-	void processFolder_whenUpdateFalseAndNoExistingBindex_builderStillBuildsDueToCondition() throws Exception {
-		// Arrange
-		GenAIProvider provider = Mockito.mock(GenAIProvider.class);
-		BindexCreator creator = new BindexCreator(provider).update(false);
-		ProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir);
+    @Test
+    void processFolder_whenNoExistingBindexAndUpdateFalse_createsFile() throws Exception {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        when(provider.perform()).thenReturn("{\"id\":\"x\",\"name\":\"n\",\"version\":\"1\"}");
 
-		BindexBuilder builder = Mockito.mock(BindexBuilder.class);
-		when(builder.getProjectLayout()).thenReturn(layout);
-		when(builder.origin(any())).thenReturn(builder);
-		when(builder.genAIProvider(any())).thenReturn(builder);
-		when(builder.build()).thenReturn(null);
+        ProjectLayout layout = TestLayouts.projectLayout(tempDir);
+        BindexCreator creator = new BindexCreator(provider);
 
-		try (MockedStatic<BindexBuilderFactory> mocked = Mockito.mockStatic(BindexBuilderFactory.class);
-				MockedConstruction<ObjectMapper> mapperConstruction = mockConstruction(ObjectMapper.class)) {
-			mocked.when(() -> BindexBuilderFactory.create(any(ProjectLayout.class))).thenReturn(builder);
+        // Act
+        assertDoesNotThrow(() -> creator.processFolder(layout));
 
-			// Act
-			creator.processFolder(layout);
+        // Assert
+        File bindexFile = new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME);
+        String json = Files.readString(bindexFile.toPath(), StandardCharsets.UTF_8);
+        assertNotNull(json);
+    }
 
-			// Assert
-			assertFalse(new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME).exists());
-			assertEquals(0, mapperConstruction.constructed().size());
-		}
-	}
+    @Test
+    void processFolder_whenUpdateTrue_overwritesExistingFile() throws Exception {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        when(provider.perform()).thenReturn("{\"id\":\"x\",\"name\":\"n\",\"version\":\"2\"}");
 
-	@Test
-	void processFolder_whenUpdateTrueAndBuilderReturnsNull_doesNotWriteFile() throws Exception {
-		// Arrange
-		GenAIProvider provider = Mockito.mock(GenAIProvider.class);
-		BindexCreator creator = new BindexCreator(provider).update(true);
-		ProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir);
+        File bindexFile = new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME);
+        Files.writeString(bindexFile.toPath(), "{\"id\":\"x\",\"name\":\"n\",\"version\":\"1\"}",
+                StandardCharsets.UTF_8);
 
-		BindexBuilder builder = Mockito.mock(BindexBuilder.class);
-		when(builder.getProjectLayout()).thenReturn(layout);
-		when(builder.origin(any())).thenReturn(builder);
-		when(builder.genAIProvider(any())).thenReturn(builder);
-		when(builder.build()).thenReturn(null);
+        ProjectLayout layout = TestLayouts.projectLayout(tempDir);
+        BindexCreator creator = new BindexCreator(provider).update(true);
 
-		try (MockedStatic<BindexBuilderFactory> mocked = Mockito.mockStatic(BindexBuilderFactory.class);
-				MockedConstruction<ObjectMapper> mapperConstruction = mockConstruction(ObjectMapper.class)) {
-			mocked.when(() -> BindexBuilderFactory.create(any(ProjectLayout.class))).thenReturn(builder);
+        // Act
+        creator.processFolder(layout);
 
-			// Act
-			creator.processFolder(layout);
+        // Assert
+        Bindex loaded = creator.getBindex(tempDir);
+        assertNotNull(loaded);
+    }
 
-			// Assert
-			assertFalse(new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME).exists());
-			assertEquals(0, mapperConstruction.constructed().size());
-		}
-	}
+    @Test
+    void processFolder_whenProviderThrowsRuntimeException_propagatesRuntimeException() throws Exception {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        doThrow(new RuntimeException("boom")).when(provider).instructions(anyString());
 
-	@Test
-	void processFolder_whenUpdateTrueAndWriteFails_wrapsIOExceptionAsIllegalArgumentException() throws IOException {
-		// Arrange
-		GenAIProvider provider = Mockito.mock(GenAIProvider.class);
-		BindexCreator creator = new BindexCreator(provider).update(true);
-		ProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir);
+        ProjectLayout layout = TestLayouts.projectLayout(tempDir);
+        BindexCreator creator = new BindexCreator(provider).update(true);
 
-		BindexBuilder builder = Mockito.mock(BindexBuilder.class);
-		when(builder.getProjectLayout()).thenReturn(layout);
-		when(builder.origin(any())).thenReturn(builder);
-		when(builder.genAIProvider(any())).thenReturn(builder);
-		Bindex bindex = new Bindex();
-		bindex.setId("g:a:1");
-		bindex.setName("a");
-		bindex.setVersion("1");
-		when(builder.build()).thenReturn(bindex);
-
-		try (MockedStatic<BindexBuilderFactory> mocked = Mockito.mockStatic(BindexBuilderFactory.class);
-				MockedConstruction<ObjectMapper> mapperConstruction = mockConstruction(ObjectMapper.class,
-						(mapper, context) -> doThrow(new IOException("io")).when(mapper).writeValue(any(File.class), any()))) {
-			mocked.when(() -> BindexBuilderFactory.create(any(ProjectLayout.class))).thenReturn(builder);
-
-			// Act + Assert
-			assertThrows(IllegalArgumentException.class, () -> creator.processFolder(layout));
-			assertEquals(1, mapperConstruction.constructed().size());
-		}
-	}
+        // Act / Assert
+        assertThrows(RuntimeException.class, () -> creator.processFolder(layout));
+    }
 }

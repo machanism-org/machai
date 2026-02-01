@@ -1,8 +1,9 @@
 /**
- * Provides the reviewer subsystem responsible for locating and extracting {@code @guidance} instruction blocks from
- * project files.
+ * Provides the {@code org.machanism.machai.gw.reviewer} package, which defines the reviewer subsystem responsible for
+ * locating and extracting {@code @guidance} instruction blocks from project files.
  *
  * <p>The central abstraction is {@link org.machanism.machai.gw.reviewer.Reviewer}. Implementations typically:
+ *
  * <ul>
  *   <li>declare which file extensions they support,</li>
  *   <li>parse file contents according to the target format's comment conventions, and</li>

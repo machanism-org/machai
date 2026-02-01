@@ -46,16 +46,16 @@ and generate the content for this section following net format:
 
 `OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
 
-This provider enables a wide range of generative AI capabilities, including:
+This provider supports:
 
 - Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+- Managing files for use in OpenAI workflows.
+- Tool/function calling via the OpenAI Responses API.
+- Creating embeddings for semantic search and similarity analysis.
 
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI models efficiently within their applications. It supports synchronous operations and is designed to be extensible/configurable for different use cases and model parameters.
+Configuration
 
-Environment variables (system properties with the same names take precedence; you must set at least `OPENAI_API_KEY`):
+The client reads configuration from environment variables (or system properties with the same names; you must set at least `OPENAI_API_KEY`):
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -67,7 +67,7 @@ Using the CodeMie OpenAI-compatible endpoint via environment variables:
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
 
-Usage example:
+Example
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
@@ -79,12 +79,12 @@ Thread safety: this implementation is NOT thread-safe.
 
 `CodeMieProvider` is an `OpenAIProvider` specialization for the CodeMie OpenAI-compatible endpoint.
 
-Before creating the underlying OpenAI client, it authenticates against a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the OpenAI client via Java system properties:
+Before creating the underlying OpenAI client, it authenticates against a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the OpenAI client with:
 
-- `OPENAI_API_KEY` is set to the retrieved access token.
-- `OPENAI_BASE_URL` is set to `https://codemie.lab.epam.com/code-assistant-api/v1`.
+- `OPENAI_API_KEY` set to the retrieved access token.
+- `OPENAI_BASE_URL` set to `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
-Required Java system properties or environment variables:
+Required configuration:
 
 - `GENAI_USERNAME`
 - `GENAI_PASSWORD`
@@ -101,7 +101,7 @@ Key characteristics:
 - `perform()` always returns `null`.
 - Unsupported capabilities (for example, `embedding(...)`) throw an exception.
 
-Example:
+Example
 
 ```java
 GenAIProvider provider = new NoneProvider();
@@ -117,13 +117,13 @@ provider.perform();
 
 Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`). The recipe is expected to place the final response text into a variable named `result`.
 
-Thread safety and lifecycle:
+Thread safety and lifecycle
 
 - This provider is not thread-safe.
 - Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 
-Example:
+Example
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");

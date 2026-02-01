@@ -1,30 +1,31 @@
 /**
  * Detects and models the on-disk layout of a software project.
  *
- * <p>This package provides the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction and concrete
- * strategies that infer repository structure from common build descriptors (for example, Maven {@code pom.xml},
- * JS/TS {@code package.json} workspaces, or Python {@code pyproject.toml}).
- *
- * <p>Implementations typically:
+ * <p>This package centers around {@link org.machanism.machai.project.layout.ProjectLayout}, which represents a project
+ * root directory and provides a uniform way to:
  * <ul>
- *   <li>determine whether a directory represents a supported project type,</li>
- *   <li>discover workspace/module structure for monorepos and multi-module builds,</li>
- *   <li>report conventional source, test, and documentation directories when available.</li>
+ *   <li>identify modules/subprojects (for monorepos and multi-module builds),</li>
+ *   <li>report conventional source/test/documentation directories when present,</li>
+ *   <li>exclude common non-source directories (VCS metadata, dependency caches, build output) from scans.</li>
+ * </ul>
+ *
+ * <p>Concrete implementations infer structure from common build descriptors:
+ * <ul>
+ *   <li>Maven via {@code pom.xml} (multi-module resolution, build directories),</li>
+ *   <li>JavaScript/TypeScript via {@code package.json} workspaces,
+ *   <li>Python via {@code pyproject.toml}.</li>
  * </ul>
  *
  * <h2>Key types</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} - Base abstraction and shared path utilities.</li>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Reads Maven models to resolve modules and build
- *       directories.</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - Inspects {@code package.json} workspaces to
- *       discover JS/TS modules.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Inspects {@code pyproject.toml} metadata to
- *       detect Python projects.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - Fallback that scans immediate subdirectories
- *       and excludes common VCS, dependency, and build-output directories via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
- *   <li>{@link org.machanism.machai.project.layout.PomReader} - Helper for parsing and building effective Maven POM
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Resolves Maven modules and conventional paths.</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - Discovers JS/TS workspaces and modules.</li>
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Detects Python projects from
+ *       {@code pyproject.toml}.</li>
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - Fallback that performs directory scanning and
+ *       applies {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
+ *   <li>{@link org.machanism.machai.project.layout.PomReader} - Helper for parsing and resolving effective Maven POM
  *       models.</li>
  * </ul>
  *

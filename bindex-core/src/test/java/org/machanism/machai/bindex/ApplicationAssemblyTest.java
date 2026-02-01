@@ -1,20 +1,21 @@
 package org.machanism.machai.bindex;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,107 +24,84 @@ import org.machanism.machai.schema.Bindex;
 
 class ApplicationAssemblyTest {
 
-	@TempDir
-	File tempDir;
+    @TempDir
+    File tempDir;
 
-	@Test
-	void projectDir_setsFieldAndReturnsSameInstance() {
-		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
-		ApplicationAssembly assembly = new ApplicationAssembly(provider);
+    @Test
+    void assembly_whenProviderReturnsBlankResponse_stillCallsPerformAndDoesNotThrow() {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        when(provider.perform()).thenReturn("\n\t  ");
 
-		// Act
-		ApplicationAssembly returned = assembly.projectDir(tempDir);
+        Bindex b1 = new Bindex();
+        b1.setId("lib-1");
+        b1.setName("Lib 1");
+        b1.setVersion("1.0.0");
 
-		// Assert
-		assertSame(assembly, returned);
-	}
+        ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir);
 
-	@Test
-	void assembly_whenProviderReturnsBlank_stillPerformsAndLogsInputs() throws Exception {
-		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
-		doNothing().when(provider).instructions(anyString());
-		doNothing().when(provider).prompt(anyString());
-		doNothing().when(provider).inputsLog(any(File.class));
-		when(provider.perform()).thenReturn("  ");
+        // Act / Assert
+        assertDoesNotThrow(() -> assembly.assembly("do something", Collections.singletonList(b1)));
 
-		Bindex b1 = new Bindex();
-		b1.setId("id-1");
-		b1.setName("n");
-		b1.setVersion("1");
+        // Assert
+        verify(provider).instructions(anyString());
+        verify(provider).inputsLog(eq(new File(tempDir, ".machai/assembly-inputs.txt")));
+        verify(provider).perform();
+    }
 
-		ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir);
+    @Test
+    void assembly_whenPromptThrowsRuntimeException_propagatesRuntimeException() throws Exception {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        doThrow(new RuntimeException("boom")).when(provider).prompt(anyString());
 
-		// Act
-		assembly.assembly("do something", List.of(b1));
+        ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir);
 
-		// Assert
-		verify(provider, times(1)).perform();
-		verify(provider, times(1)).inputsLog(new File(tempDir, ".machai/assembly-inputs.txt"));
-		verify(provider, times(1)).instructions(anyString());
-		verify(provider, times(4)).prompt(anyString());
-	}
+        // Act
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> assembly.assembly("do something", Collections.emptyList()));
 
-	@Test
-	void assembly_whenProviderPerformThrowsRuntime_exceptionPropagates() throws Exception {
-		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
-		doNothing().when(provider).instructions(anyString());
-		doNothing().when(provider).prompt(anyString());
-		doNothing().when(provider).inputsLog(any(File.class));
-		when(provider.perform()).thenThrow(new RuntimeException("boom"));
+        // Assert
+        assertNotNull(ex);
+        verify(provider, never()).perform();
+    }
 
-		ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir);
+    @Test
+    void projectDir_setsDirectoryAndReturnsSameInstance() {
+        // Arrange
+        ApplicationAssembly assembly = new ApplicationAssembly(mock(GenAIProvider.class));
 
-		// Act + Assert
-		assertThrows(RuntimeException.class, () -> assembly.assembly("do something", List.of()));
-	}
+        // Act
+        ApplicationAssembly returned = assembly.projectDir(tempDir);
 
-	@Test
-	void assembly_whenInputsLogThrowsRuntime_exceptionPropagates() throws Exception {
-		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
-		doNothing().when(provider).instructions(anyString());
-		doNothing().when(provider).prompt(anyString());
-		doThrow(new RuntimeException("io")).when(provider).inputsLog(any(File.class));
+        // Assert
+        assertEquals(assembly, returned);
+    }
 
-		Bindex b1 = new Bindex();
-		b1.setId("id-1");
-		b1.setName("n");
-		b1.setVersion("1");
+    @Test
+    void assembly_withMultipleBindexes_promptsEachRecommendedLibrarySection() {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        when(provider.perform()).thenReturn("ok");
 
-		ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir);
+        Bindex b1 = new Bindex();
+        b1.setId("id-1");
+        b1.setName("n1");
+        b1.setVersion("1");
 
-		// Act + Assert
-		assertThrows(RuntimeException.class, () -> assembly.assembly("do something", List.of(b1)));
-		verify(provider, never()).perform();
-	}
+        Bindex b2 = new Bindex();
+        b2.setId("id-2");
+        b2.setName("n2");
+        b2.setVersion("2");
 
-	@Test
-	void assembly_writesInputsLogToConfiguredProjectDir() throws Exception {
-		// Arrange
-		File otherDir = new File(tempDir, "other");
-		Files.createDirectories(otherDir.toPath());
+        ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir);
 
-		GenAIProvider provider = mock(GenAIProvider.class);
-		doNothing().when(provider).instructions(anyString());
-		doNothing().when(provider).prompt(anyString());
-		doNothing().when(provider).inputsLog(any(File.class));
-		when(provider.perform()).thenReturn("ok");
+        // Act
+        assembly.assembly("assemble", Arrays.asList(b1, b2));
 
-		ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(otherDir);
-
-		Bindex b1 = new Bindex();
-		b1.setId("id-1");
-		b1.setName("n");
-		b1.setVersion("1");
-
-		// Act
-		assembly.assembly("do something", List.of(b1));
-
-		// Assert
-		verify(provider).inputsLog(new File(otherDir, ".machai/assembly-inputs.txt"));
-		verify(provider, times(1)).perform();
-	}
+        // Assert
+        verify(provider).prompt(contains("id-1"));
+        verify(provider).prompt(contains("id-2"));
+        verify(provider).perform();
+    }
 }

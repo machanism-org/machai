@@ -1,33 +1,32 @@
 /**
- * Maven plugin goals (mojos) that integrate the MachAI generative-workflow (GW) document-processing pipeline into a
- * Maven build.
+ * Maven plugin goals (mojos) that integrate the MachAI generative-workflow (GW)
+ * document-processing pipeline into a Maven build.
  *
  * <p>
- * This package contains the mojos that expose the MachAI GW workflow as Maven goals. These goals are intended for use
- * in multi-module (reactor) builds as well as single-module projects.
+ * This package provides two mojos:
  * </p>
- *
- * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     <b>{@code gw}</b> ({@link org.machanism.machai.maven.GW}): scans documentation sources and runs the workflow.
+ *     {@code gw} ({@link org.machanism.machai.maven.GW}) scans documentation sources and runs the MachAI GW workflow.
+ *     The goal is an aggregator mojo and executes once per reactor build.
  *   </li>
  *   <li>
- *     <b>{@code clean}</b> ({@link org.machanism.machai.maven.Clean}): deletes temporary artifacts created by prior
- *     workflow runs.
+ *     {@code clean} ({@link org.machanism.machai.maven.Clean}) deletes temporary artifacts created by prior workflow
+ *     runs.
  *   </li>
  * </ul>
  *
  * <h2>Goal: {@code gw}</h2>
  * <p>
- * The {@code gw} goal is an aggregator mojo (runs once per reactor) and typically scans a module base directory (for
- * example {@code ${basedir}}) for documentation sources, then executes the MachAI GW workflow.
+ * The {@code gw} goal typically starts at the current module base directory (for example {@code ${basedir}}), scans for
+ * documentation content supported by the workflow, and delegates processing to
+ * {@link org.machanism.machai.gw.FileProcessor}.
  * </p>
  *
  * <h3>Credentials</h3>
  * <p>
  * The {@code gw} goal reads GenAI credentials from Maven {@code settings.xml} using the configured {@code &lt;server&gt;}
- * entry identified by the required parameter {@code gw.genai.serverId}. If present, the credentials are exposed to the
+ * entry identified by the required parameter {@code gw.genai.serverId}. When present, credentials are exposed to the
  * workflow via system properties:
  * </p>
  * <ul>
@@ -45,12 +44,14 @@
  *     <b>{@code gw.instructions}</b> (optional): One or more instruction location strings consumed by the workflow.
  *   </li>
  *   <li>
+ *     <b>{@code gw.excludes}</b> (optional): One or more exclude patterns/paths that are skipped during scanning.
+ *   </li>
+ *   <li>
  *     <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} {@code &lt;server&gt;} id used to read
  *     credentials.
  *   </li>
  *   <li>
- *     <b>{@code gw.threads}</b> (optional, default {@code true}): Enables or disables multi-threaded document
- *     processing.
+ *     <b>{@code gw.threads}</b> (optional, default {@code true}): Enables/disables multi-threaded document processing.
  *   </li>
  * </ul>
  *
