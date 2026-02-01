@@ -170,7 +170,7 @@ public final class Ghostwriter {
 			String defaultGuidance = null;
 			if (cmd.hasOption(guidanceOpt)) {
 				String guidanceFileName = cmd.getOptionValue(guidanceOpt);
-				guidanceFileName = StringUtils.defaultIfBlank(guidanceFileName, "@guidance.txt");
+				guidanceFileName = StringUtils.defaultIfBlank(guidanceFileName, "guidance.txt");
 				defaultGuidance = getInstractionsFromFile(guidanceFileName);
 				if (defaultGuidance == null) {
 					throw new FileNotFoundException("Guidance file '" + guidanceFileName +

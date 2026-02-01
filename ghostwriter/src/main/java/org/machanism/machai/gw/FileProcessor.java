@@ -35,7 +35,6 @@ import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.gw.reviewer.TextReviewer;
 import org.machanism.machai.project.ProjectProcessor;
-import org.machanism.machai.project.layout.DefaultProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,18 +177,17 @@ public class FileProcessor extends ProjectProcessor {
 
 		this.rootDir = rootDir;
 
-		File scanDir = dir;
-		ProjectLayout projectLayout = getProjectLayout(dir);
-		if (defaultGuidance != null) {
-			if (projectLayout instanceof DefaultProjectLayout) {
-				defaultProcessingDir = dir;
-				scanDir = rootDir;
-			}
-
-			scanFolder(scanDir);
-			process(projectLayout, defaultProcessingDir, scanDir, defaultGuidance);
+		if (rootDir == dir) {
+			scanFolder(rootDir);
 		} else {
-			scanFolder(scanDir);
+			ProjectLayout projectLayout = getProjectLayout(rootDir);
+			defaultProcessingDir = dir;
+
+			if (defaultGuidance != null) {
+				process(projectLayout, defaultProcessingDir, defaultGuidance);
+			} else {
+				processProjectDir(projectLayout, dir);
+			}
 		}
 	}
 
@@ -288,7 +286,7 @@ public class FileProcessor extends ProjectProcessor {
 			}
 
 			if (child.isDirectory()) {
-				processProjectDir(child, projectLayout);
+				processProjectDir(projectLayout, child);
 			} else {
 				logIfNotBlank(processFile(projectLayout, child));
 			}
@@ -332,7 +330,7 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
-	private void processProjectDir(File scanDir, ProjectLayout layout) {
+	public void processProjectDir(ProjectLayout layout, File scanDir) {
 		try {
 			List<File> files = findFiles(scanDir);
 			for (File file : files) {
@@ -354,18 +352,19 @@ public class FileProcessor extends ProjectProcessor {
 
 			if (guidance != null) {
 				logger.info("Processing file: {}", file.getAbsolutePath());
-				perform = process(projectLayout, file, projectDir, guidance);
+				perform = process(projectLayout, file, guidance);
 			}
 		}
 		return perform;
 	}
 
-	private String process(ProjectLayout projectLayout, File file, File projectDir, String guidance)
+	private String process(ProjectLayout projectLayout, File file, String guidance)
 			throws IOException {
 		String perform;
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
 			systemFunctionTools.applyTools(provider);
+			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
 
 			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
