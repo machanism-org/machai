@@ -28,25 +28,21 @@
  * Maven plugin goal implementations for AI-assisted project assembly.
  *
  * <p>
- * This package provides the {@code assembly} goal, implemented by {@link org.machanism.machai.maven.Assembly},
- * which orchestrates a workflow that:
+ * This package contains the {@code assembly} goal implementation, {@link org.machanism.machai.maven.Assembly}.
+ * The goal reads (or interactively requests) an assembly prompt, asks an AI-backed picker to recommend candidate
+ * libraries, and then runs an assembly workflow that applies changes to the current Maven execution base
+ * directory.
  * </p>
- * <ol>
- *   <li>obtains a user prompt (from a configured file or via interactive input),</li>
- *   <li>uses an AI-backed picker to recommend candidate libraries (as {@link org.machanism.machai.schema.Bindex} entries),</li>
- *   <li>filters recommendations by score, and</li>
- *   <li>runs an assembly step that applies the resulting changes to the current Maven execution base directory.</li>
- * </ol>
  *
- * <h2>Goals</h2>
+ * <h2>Goal</h2>
  * <ul>
  *   <li>{@code assembly} &ndash; recommends libraries and applies an assembly workflow driven by a prompt.</li>
  * </ul>
  *
  * <h2>Configuration parameters</h2>
  * <p>
- * Parameters may be supplied as system properties (for example, {@code -Dassembly.genai=...}) and/or as plugin
- * configuration in a POM.
+ * Parameters can be provided either as system properties (for example, {@code -Dassembly.genai=...}) and/or via
+ * plugin configuration.
  * </p>
  * <ul>
  *   <li>{@code assembly.genai} &ndash; GenAI provider id for the assembly phase (default {@code OpenAI:gpt-5}).</li>

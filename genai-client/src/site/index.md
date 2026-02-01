@@ -23,6 +23,7 @@ It keeps your application code stable while you swap or combine different backen
 The typical entry point is `GenAIProviderManager`, which resolves a provider implementation by a `Provider:Model` string.
 
 ```java
+Configurator conf = ...;
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1", conf);
 provider.instructions("You are a helpful assistant.");
 provider.prompt("Summarize the following text...");
@@ -49,23 +50,25 @@ and generate the content for this section following net format:
 
 `OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
 
-It supports:
+This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in OpenAI workflows.
-- Tool/function calling through the OpenAI Responses API.
-- Creating embeddings for semantic search and similarity analysis.
+- Sending prompts and receiving responses from OpenAI Chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
 Environment variables
 
-The client reads configuration from environment variables (or system properties with the same names). You must set at least `OPENAI_API_KEY`:
+The client automatically reads the following environment variables (or system properties with the same names). You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using the CodeMie OpenAI-compatible endpoint via environment variables:
+Using the CodeMie API via OpenAI-compatible settings
+
+To use the CodeMie OpenAI-compatible endpoint with `OpenAIProvider`, set:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -76,23 +79,31 @@ Example
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1", conf);
 ```
 
-Thread safety: this implementation is NOT thread-safe.
+Thread safety
+
+This implementation is NOT thread-safe.
 
 ### CodeMie
 
 `CodeMieProvider` is an `OpenAIProvider` specialization that targets the CodeMie OpenAI-compatible endpoint.
 
-On initialization it authenticates against a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the underlying OpenAI client with the retrieved access token as the API key and uses the CodeMie base URL.
+On initialization, it authenticates against a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the underlying OpenAI client with the retrieved access token and uses the CodeMie base URL.
 
 Required configuration
 
 - `GENAI_USERNAME`
 - `GENAI_PASSWORD`
 
-Endpoint details (built-in defaults)
+Built-in endpoints
 
 - Token URL: `https://keycloak.eks-core.aws.main.edp.projects.epam.com/auth/realms/codemie-prod/protocol/openid-connect/token`
 - Base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`
+
+Example
+
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1", conf);
+```
 
 ### None
 
@@ -120,7 +131,9 @@ provider.perform();
 
 `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`). The recipe is expected to place the final response text into a variable named `result`.
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`).
+
+The list of prompts is passed to the workspace as a system variable named `INPUTS`, and the recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle
 

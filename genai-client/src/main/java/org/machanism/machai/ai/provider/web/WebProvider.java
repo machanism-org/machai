@@ -3,6 +3,7 @@ package org.machanism.machai.ai.provider.web;
 import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.provider.none.NoneProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,19 +12,19 @@ import com.ganteater.ae.AEWorkspace;
 import com.ganteater.ae.RecipeRunner;
 
 /**
- * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that obtains model responses by
- * automating a target GenAI service through its web user interface.
+ * {@link GenAIProvider} implementation that obtains model responses by automating a target GenAI service through its
+ * web user interface.
  *
- * <p>Automation is executed via <a href="https://ganteater.com">Anteater</a> workspace recipes. The provider
- * loads a workspace configuration (see {@link #model(String)}), initializes the workspace with a project
- * directory (see {@link #setWorkingDir(File)}), and submits the current prompt list by running the
- * {@code "Submit Prompt"} recipe (see {@link #perform()}).
+ * <p>Automation is executed via <a href="https://ganteater.com">Anteater</a> workspace recipes. The provider loads a
+ * workspace configuration (see {@link #model(String)}), initializes the workspace with a project directory (see
+ * {@link #setWorkingDir(File)}), and submits the current prompt list by running the {@code "Submit Prompt"} recipe (see
+ * {@link #perform()}).
  *
  * <h2>Thread safety and lifecycle</h2>
  * <ul>
  *   <li>This provider is not thread-safe.</li>
- *   <li>Workspace state is stored in static fields; the working directory cannot be changed once initialized
- *       in the current JVM instance.</li>
+ *   <li>Workspace state is stored in static fields; the working directory cannot be changed once initialized in the
+ *       current JVM instance.</li>
  *   <li>{@link #close()} closes the underlying workspace.</li>
  * </ul>
  *
@@ -42,19 +43,13 @@ public class WebProvider extends NoneProvider {
 	/** Logger for this class. */
 	private static final Logger logger = LoggerFactory.getLogger(WebProvider.class);
 
-	/**
-	 * Shared Anteater workspace instance used for automation task execution.
-	 */
+	/** Shared Anteater workspace instance used for automation task execution. */
 	private static AEWorkspace workspace = new AEWorkspace();
 
-	/**
-	 * Root directory for workspace operations (set once per JVM instance).
-	 */
+	/** Root directory for workspace operations (set once per JVM instance). */
 	private static File rootDir;
 
-	/**
-	 * Name of the Anteater configuration to be loaded.
-	 */
+	/** Name of the Anteater configuration to be loaded. */
 	private static String configName;
 
 	/**
@@ -67,8 +62,8 @@ public class WebProvider extends NoneProvider {
 	/**
 	 * Submits the current prompts to the configured web UI by executing the {@code "Submit Prompt"} recipe.
 	 *
-	 * <p>The list of prompts is passed to the workspace as a system variable named {@code INPUTS}. The recipe is
-	 * expected to place the final response text into a variable named {@code result}.
+	 * <p>The list of prompts is passed to the workspace as a system variable named {@code INPUTS}. The recipe is expected
+	 * to place the final response text into a variable named {@code result}.
 	 *
 	 * @return the response captured by the automation recipe
 	 * @throws IllegalArgumentException if the underlying automation fails for any reason
@@ -90,8 +85,8 @@ public class WebProvider extends NoneProvider {
 	/**
 	 * Initializes the Anteater workspace for the given project directory.
 	 *
-	 * <p>This method is intended to be called once per JVM instance. If called again with a different directory,
-	 * it fails fast.
+	 * <p>This method is intended to be called once per JVM instance. If called again with a different directory, it fails
+	 * fast.
 	 *
 	 * <p>The workspace start directory is determined as follows:
 	 * <ol>

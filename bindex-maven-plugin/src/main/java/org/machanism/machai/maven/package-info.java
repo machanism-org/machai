@@ -26,28 +26,29 @@
  */
 
 /**
- * Maven plugin goals and supporting infrastructure for creating, updating, registering, and cleaning a Bindex index
- * during a Maven build.
+ * Maven plugin goals for running Bindex/Machai operations as part of a Maven build.
  *
- * <p>This package contains Maven {@code Mojo} implementations that integrate Bindex operations into a project's
- * lifecycle. Typical usage is to bind a goal to a build phase or execute it directly from the command line.</p>
+ * <p>This package provides {@code Mojo} implementations that can be bound to build phases or executed directly
+ * to manage a project's Bindex metadata and associated artifacts:</p>
  *
- * <p>Provided goals:</p>
  * <ul>
- *   <li>{@link org.machanism.machai.maven.Create} creates a new index for the current project.</li>
- *   <li>{@link org.machanism.machai.maven.Update} refreshes an existing index.</li>
- *   <li>{@link org.machanism.machai.maven.Register} publishes project metadata to a configured registry endpoint.</li>
- *   <li>{@link org.machanism.machai.maven.Clean} removes plugin-generated temporary artifacts.</li>
+ *   <li>{@link org.machanism.machai.maven.Create} - creates a new Bindex index for the current module.</li>
+ *   <li>{@link org.machanism.machai.maven.Update} - refreshes an existing index.</li>
+ *   <li>{@link org.machanism.machai.maven.Register} - scans a module and registers its metadata to a configured
+ *       registry endpoint.</li>
+ *   <li>{@link org.machanism.machai.maven.Clean} - removes plugin-generated temporary artifacts under the
+ *       {@code .machai} directory.</li>
  * </ul>
  *
- * <p>Shared configuration and behavior are implemented in
- * {@link org.machanism.machai.maven.AbstractBindexMojo}.</p>
+ * <p>Most goals share common parameters and helper logic provided by
+ * {@link org.machanism.machai.maven.AbstractBindexMojo}, including project/base directory access and selection
+ * of the configured GenAI provider/model.</p>
  *
  * <h2>Command-line usage</h2>
  * <pre>
  * mvn org.machanism.machai:bindex-maven-plugin:create
  * mvn org.machanism.machai:bindex-maven-plugin:update
- * mvn org.machanism.machai:bindex-maven-plugin:register
+ * mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.register.url=http://localhost:8080
  * mvn org.machanism.machai:bindex-maven-plugin:clean
  * </pre>
  */

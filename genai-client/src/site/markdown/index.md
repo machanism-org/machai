@@ -134,11 +134,13 @@ The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as
 This provider enables a wide range of generative AI capabilities, including:
 
 - Sending prompts and receiving responses from OpenAI Chat models.
-- Uploading local files or referencing remote files by URL for use as request context.
-- Tool (function) calling via registered Java handlers.
-- Creating vector embeddings for tasks like semantic search and similarity analysis.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-**Environment variables**
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+
+**Environment Variables**
 
 The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
 
@@ -147,12 +149,12 @@ The client automatically reads the following environment variables. You must set
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using an OpenAI-compatible endpoint**
+**Using the CodeMie API**
 
-To use an OpenAI-compatible endpoint (for example, CodeMie), set:
+To use the CodeMie API, set:
 
 - `OPENAI_API_KEY` to the access token/key
-- `OPENAI_BASE_URL` to the gateway base URL
+- `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
 
 **Usage example**
 

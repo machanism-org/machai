@@ -28,17 +28,35 @@
 /**
  * Provider resolution, interaction, and host-side tool wiring for generative AI integrations.
  *
- * <p>This package provides:
+ * <p>This package defines the core abstractions used to integrate one or more generative AI backends into the host
+ * application.
+ *
+ * <p>Key responsibilities include:
  * <ul>
- *   <li>A provider SPI ({@link org.machanism.machai.ai.manager.GenAIProvider}) for building and executing requests,
- *       including prompts, file attachments, embeddings, and host-implemented tool registration.</li>
- *   <li>A resolver ({@link org.machanism.machai.ai.manager.GenAIProviderManager}) that maps a {@code Provider:Model}
- *       identifier to a concrete provider instance.</li>
- *   <li>Optional tool installers ({@link org.machanism.machai.ai.manager.FileFunctionTools},
+ *   <li><strong>Provider SPI</strong> – {@link org.machanism.machai.ai.manager.GenAIProvider} defines how to build and
+ *       execute requests (chat/completions, embeddings, file attachments) and how the host registers tool functions.</li>
+ *   <li><strong>Provider resolution</strong> – {@link org.machanism.machai.ai.manager.GenAIProviderManager} maps a
+ *       {@code Provider:Model} identifier to an implementation and routes calls accordingly.</li>
+ *   <li><strong>Host tool wiring</strong> – optional installers such as
+ *       {@link org.machanism.machai.ai.manager.FileFunctionTools},
  *       {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
- *       {@link org.machanism.machai.ai.manager.SystemFunctionTools}) that register common host capabilities
- *       (filesystem and command execution) with a provider.</li>
+ *       {@link org.machanism.machai.ai.manager.SystemFunctionTools} register commonly needed host capabilities
+ *       (filesystem and command execution) with a provider in a consistent way.</li>
  * </ul>
+ *
+ * <h2>Usage</h2>
+ *
+ * <pre>{@code
+ * GenAIProviderManager manager = ...;
+ * GenAIProvider provider = manager.get("OpenAI:gpt-4.1");
+ *
+ * // Optionally register host tools for the provider.
+ * new FileFunctionTools().install(provider);
+ * new CommandFunctionTools().install(provider);
+ *
+ * // Use the provider to build/execute requests.
+ * // (Exact request/response types depend on the provider implementation.)
+ * }</pre>
  *
  * <p><strong>Security note:</strong> tools execute on the hosting machine. Applications should restrict allowable paths,
  * commands, working directories, and timeouts according to their security requirements.

@@ -26,29 +26,32 @@
  */
 
 /**
- * Builders for generating {@link org.machanism.machai.schema.Bindex} documents from projects on disk.
+ * Builders that assemble a {@link org.machanism.machai.schema.Bindex} by prompting a configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} with a JSON schema and project-specific context.
  *
- * <p>The central entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}, which orchestrates
- * the prompt flow for a configured {@link org.machanism.machai.ai.manager.GenAIProvider}:
+ * <p>The primary workflow is implemented by {@link org.machanism.machai.bindex.builder.BindexBuilder}:
  * <ol>
  *   <li>prompt the Bindex JSON schema,</li>
- *   <li>optionally prompt an existing (origin) Bindex for incremental updates,</li>
- *   <li>prompt project context supplied by the builder implementation,</li>
- *   <li>trigger generation and parse the provider output into a {@code Bindex}.</li>
+ *   <li>optionally include an origin {@code Bindex} for incremental updates,</li>
+ *   <li>add project context (manifests and source/resource files),</li>
+ *   <li>execute generation and deserialize the provider output into a {@code Bindex}.</li>
  * </ol>
  *
- * <p>Concrete builders enrich the prompt with ecosystem-specific context:
+ * <p>Specialized builders provide ecosystem-specific context:
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: reads the effective Maven model
- *       from {@code pom.xml}, prompts source/resources/test files based on the POM build configuration, and
- *       prompts a sanitized POM representation.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}: prompts {@code package.json} and
- *       source files under {@code src} for JavaScript/TypeScript/Vue projects.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder}: prompts {@code pyproject.toml} and
- *       source files inferred from {@code project.name}.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder} for Maven projects (POM model and
+ *       files configured in the Maven build section),</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder} for JavaScript/TypeScript/Vue
+ *       projects (reads {@code package.json} and prompts sources under {@code src}),</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder} for Python projects (reads
+ *       {@code pyproject.toml} and prompts inferred sources).</li>
  * </ul>
  *
- * <p>Builders are typically created by a factory and configured with a provider before calling
- * {@link org.machanism.machai.bindex.builder.BindexBuilder#build()}.
+ * <p>Typical usage:
+ * <pre>{@code
+ * Bindex bindex = new MavenBindexBuilder(layout)
+ *     .genAIProvider(provider)
+ *     .build();
+ * }</pre>
  */
 package org.machanism.machai.bindex.builder;

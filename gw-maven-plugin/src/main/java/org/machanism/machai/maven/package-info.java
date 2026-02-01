@@ -1,9 +1,9 @@
 /**
- * Maven plugin goals (mojos) that integrate the MachAI generative-workflow (GW)
- * document-processing pipeline into a Maven build.
+ * Maven plugin mojos for integrating the MachAI generative-workflow (GW) document-processing pipeline into a Maven
+ * build.
  *
  * <p>
- * The package provides two goals:
+ * This package provides two goals:
  * </p>
  * <ul>
  *   <li>
@@ -18,15 +18,16 @@
  *
  * <h2>Goal: {@code gw}</h2>
  * <p>
- * The {@code gw} goal typically starts at the current module base directory (for example {@code ${basedir}}), scans for
- * documentation content supported by the workflow, and delegates processing to
- * {@link org.machanism.machai.gw.FileProcessor}.
+ * The {@code gw} goal starts at the module base directory (typically {@code ${basedir}}), scans for documentation
+ * content supported by the workflow, and delegates processing to
+ * {@link org.machanism.machai.gw.FileProcessor}. When executed in a multi-module build, it is declared as an
+ * aggregator mojo and coordinates processing across the reactor.
  * </p>
  *
  * <h3>Credentials</h3>
  * <p>
- * The {@code gw} goal reads GenAI credentials from Maven {@code settings.xml} using the configured {@code &lt;server&gt;}
- * entry identified by the required parameter {@code gw.genai.serverId}. When present, credentials are exposed to the
+ * The {@code gw} goal reads GenAI credentials from Maven {@code settings.xml} using a {@code &lt;server&gt;} entry
+ * identified by the required parameter {@code gw.genai.serverId}. When present, credentials are exposed to the
  * workflow via system properties:
  * </p>
  * <ul>
@@ -63,22 +64,22 @@
  *
  * <p>Configure in {@code pom.xml}:</p>
  * <pre>
- * &lt;plugin&gt;
- *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
- *   &lt;artifactId&gt;gw-maven-plugin&lt;/artifactId&gt;
- *   &lt;version&gt;${project.version}&lt;/version&gt;
- *   &lt;configuration&gt;
- *     &lt;genai&gt;OpenAI:gpt-5&lt;/genai&gt;
- *     &lt;serverId&gt;genai&lt;/serverId&gt;
- *     &lt;threads&gt;true&lt;/threads&gt;
- *     &lt;instructions&gt;
- *       &lt;instruction&gt;src/site/machai/instructions.md&lt;/instruction&gt;
- *     &lt;/instructions&gt;
- *     &lt;excludes&gt;
- *       &lt;exclude&gt;node_modules&lt;/exclude&gt;
- *     &lt;/excludes&gt;
- *   &lt;/configuration&gt;
- * &lt;/plugin&gt;
+ * &amp;lt;plugin&amp;gt;
+ *   &amp;lt;groupId&amp;gt;org.machanism.machai&amp;lt;/groupId&amp;gt;
+ *   &amp;lt;artifactId&amp;gt;gw-maven-plugin&amp;lt;/artifactId&amp;gt;
+ *   &amp;lt;version&amp;gt;${project.version}&amp;lt;/version&amp;gt;
+ *   &amp;lt;configuration&amp;gt;
+ *     &amp;lt;genai&amp;gt;OpenAI:gpt-5&amp;lt;/genai&amp;gt;
+ *     &amp;lt;serverId&amp;gt;genai&amp;lt;/serverId&amp;gt;
+ *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;gt;
+ *     &amp;lt;instructions&amp;gt;
+ *       &amp;lt;instruction&amp;gt;src/site/machai/instructions.md&amp;lt;/instruction&amp;gt;
+ *     &amp;lt;/instructions&amp;gt;
+ *     &amp;lt;excludes&amp;gt;
+ *       &amp;lt;exclude&amp;gt;node_modules&amp;lt;/exclude&amp;gt;
+ *     &amp;lt;/excludes&amp;gt;
+ *   &amp;lt;/configuration&amp;gt;
+ * &amp;lt;/plugin&amp;gt;
  * </pre>
  *
  * <h2>Goal: {@code clean}</h2>

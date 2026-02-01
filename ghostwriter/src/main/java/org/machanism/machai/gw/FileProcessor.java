@@ -40,8 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported
- * files, and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported files,
+ * and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
  * This processor delegates file-specific guidance extraction to
@@ -257,7 +257,7 @@ public class FileProcessor extends ProjectProcessor {
 	@Override
 	protected void processModule(File projectDir, String module) throws IOException {
 		if (defaultProcessingDir == null
-				|| Strings.CS.startsWith(projectDir.getPath(), defaultProcessingDir.getPath())) {
+				|| isPathUnderDirectory(projectDir.getPath(), defaultProcessingDir.getPath())) {
 			super.processModule(projectDir, module);
 		}
 	}
@@ -345,7 +345,7 @@ public class FileProcessor extends ProjectProcessor {
 		String perform = null;
 
 		if (defaultProcessingDir == null
-				|| Strings.CS.startsWith(file.getPath(), defaultProcessingDir.getPath())) {
+				|| isPathUnderDirectory(file.getPath(), defaultProcessingDir.getPath())) {
 
 			File projectDir = projectLayout.getProjectDir();
 			String guidance = parseFile(projectDir, file);
@@ -358,8 +358,7 @@ public class FileProcessor extends ProjectProcessor {
 		return perform;
 	}
 
-	private String process(ProjectLayout projectLayout, File file, String guidance)
-			throws IOException {
+	private String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
 		String perform;
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
@@ -544,6 +543,30 @@ public class FileProcessor extends ProjectProcessor {
 		}
 		String normalized = path.replace("\\\\", "/");
 		return normalized.split("/").length;
+	}
+
+	private static boolean isPathUnderDirectory(String childPath, String parentPath) {
+		String child = normalizePathForPrefixCheck(childPath);
+		String parent = normalizePathForPrefixCheck(parentPath);
+		if (child == null || parent == null) {
+			return false;
+		}
+		if (!parent.endsWith("/")) {
+			parent = parent + "/";
+		}
+		return child.equals(parent.substring(0, parent.length() - 1)) || child.startsWith(parent);
+	}
+
+	private static String normalizePathForPrefixCheck(String path) {
+		String value = StringUtils.trimToNull(path);
+		if (value == null) {
+			return null;
+		}
+		value = value.replace('\\', '/');
+		while (value.endsWith("/")) {
+			value = value.substring(0, value.length() - 1);
+		}
+		return value;
 	}
 
 	public File getRootDir() {
