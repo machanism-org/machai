@@ -1,242 +1,255 @@
-Ghostwriter CLI (ghostwriter-cli)
-===============================
+Ghostwriter CLI (Ghostwriter)
+==========================
 
 1) Application Overview
 -----------------------
-Ghostwriter CLI is a command-line application that helps automate source-code and documentation changes using Generative AI (GenAI). It is designed for developer workflows where you want to:
+Ghostwriter is a command-line application that generates and updates documentation and other text artifacts for a codebase using a GenAI provider.
 
-- Apply change requests across a codebase (create/update files, refactor, add docs).
-- Keep changes consistent with project conventions.
-- Exclude files/folders that must not be modified.
-- Run repeatable transformations using a configuration file and command-line options.
+Main purpose
+- Turn a local project/repository into a structured “context” for a GenAI model and produce consistent, repeatable outputs (e.g., READMEs, summaries, migration notes) based on configurable instructions.
 
-Typical use cases:
-- Implementing small-to-medium feature requests across multiple files.
-- Generating or updating README / docs for a project.
-- Applying formatting or standards updates to a repository.
-- Assisting with repetitive changes while retaining human review.
+Key features
+- CLI-first workflow suitable for automation (local runs, CI jobs).
+- Configurable instructions/prompts for consistent output.
+- File and directory include/exclude controls to limit what is scanned.
+- Support for multiple GenAI providers via a provider setting.
+- Works with OpenAI-compatible HTTP APIs.
+
+Typical use cases
+- Generate a project README or module docs.
+- Update existing docs to match a standard template.
+- Create release notes / change summaries from a repository snapshot.
+- Produce documentation for specific directories while excluding vendor/build output.
 
 Supported GenAI providers
 - CodeMie
-- OpenAI-compatible services (any provider exposing an OpenAI-compatible REST API)
+- OpenAI-compatible services (any provider exposing an OpenAI-style API endpoint)
 
 
 2) Installation Instructions
 ----------------------------
 Prerequisites
-- Java: A recent LTS JDK is recommended (Java 17+).
-- Network access to your GenAI provider endpoint.
-- Credentials for the selected provider (API key / token).
-- A configuration file (typically gw.properties) OR environment variables / Java system properties.
+- Java: a modern JDK/JRE (Java 17+ recommended unless your build specifies otherwise).
+- Network access to the configured GenAI provider endpoint.
+- Credentials for your chosen provider (API key/token and, if required, organization/project identifiers).
+- A configuration file (gw.properties) OR environment variables/system properties providing the same settings.
 
-Obtain / build
-- If you received a distribution ZIP/TAR:
-  - Extract it.
-  - Use the provided launcher scripts (.bat for Windows, .sh for Unix).
+Install / build options (depending on your distribution)
+A) Use a packaged distribution
+- Download the Ghostwriter CLI distribution archive for your platform.
+- Extract it to a directory of your choice.
+- Ensure the scripts are executable (Unix/macOS):
+  chmod +x bin/gw.sh
 
-- If building from source (typical Maven build):
-  - From the project root:
-    - mvn -DskipTests package
-  - Run using the produced artifact (JAR) or the generated scripts (if included in your distribution).
+B) Build from source (typical Maven build)
+- From the repository root:
+  mvn -DskipTests package
+- Locate the built distribution/artifacts produced by the build.
+
+Environment variables (common)
+- GW_PROVIDER: provider id (e.g., codemie, openai)
+- GW_API_KEY: API key/token for the provider
+- GW_BASE_URL: base URL for OpenAI-compatible services (if applicable)
+- GW_MODEL: model name/id
 
 
 3) How to Run
 -------------
-The application can be executed via provided scripts or by running the JAR with Java. Configuration can be supplied through:
-- gw.properties (recommended)
-- Environment variables
-- Java system properties (-D...)
-- Command-line options
+Ghostwriter is typically started via the provided platform scripts.
 
-Common options (names may vary by distribution)
-- --root <path>        Root directory to operate on
-- --instructions <txt> High-level instructions / request
-- --exclude <pattern>  Exclude glob(s)/path(s); repeatable or comma-separated
-- --config <path>      Path to gw.properties
-- --debug              Enable verbose/debug logging
+Windows (.bat)
+- Basic run:
+  bin\gw.bat
 
-Windows examples (.bat)
-- Using a launcher script (if provided):
-  - ghostwriter.bat --root . --instructions "Update README" --exclude "**/target/**"
+- Run with a specific project root and instructions:
+  bin\gw.bat --root "C:\work\my-repo" --instructions "Generate a high-level README for this repository."
 
-- Running a JAR directly:
-  - set GW_CONFIG=%CD%\gw.properties
-  - set GW_PROVIDER=codemie
-  - set GW_API_KEY=YOUR_KEY_HERE
-  - java -Dgw.config=%GW_CONFIG% -jar ghostwriter-cli.jar --root . --instructions "Fix failing tests" --exclude "**/target/**"
+- Run with excludes:
+  bin\gw.bat --root "C:\work\my-repo" --excludes "**/target/**,**/node_modules/**,**/.git/**"
 
-Unix examples (.sh)
-- Using a launcher script (if provided):
-  - ./ghostwriter.sh --root . --instructions "Update README" --exclude "**/target/**"
+Unix/macOS (.sh)
+- Basic run:
+  ./bin/gw.sh
 
-- Running a JAR directly:
-  - export GW_CONFIG="$PWD/gw.properties"
-  - export GW_PROVIDER=codemie
-  - export GW_API_KEY="YOUR_KEY_HERE"
-  - java -Dgw.config="$GW_CONFIG" -jar ghostwriter-cli.jar --root . --instructions "Fix failing tests" --exclude "**/target/**"
+- Run with a specific project root and instructions:
+  ./bin/gw.sh --root /home/me/my-repo --instructions "Generate a high-level README for this repository."
 
-Passing configuration via environment variables / Java system properties
-- Environment variables are useful for secrets (API keys) and CI.
-- Java system properties are useful for overriding values at runtime:
-  - java -Dgw.provider=openai -Dgw.apiKey=... -jar ghostwriter-cli.jar ...
+- Run with excludes:
+  ./bin/gw.sh --root /home/me/my-repo --excludes "**/target/**,**/node_modules/**,**/.git/**"
 
-Notes
-- Prefer quoting instructions to preserve spaces.
-- For large instruction text, place it in a file and reference it if your build supports it (e.g., --instructions-file path), or store it in gw.properties.
+Configuration via environment variables
+- Windows (PowerShell):
+  setx GW_PROVIDER "openai"
+  setx GW_API_KEY "<your-api-key>"
+  setx GW_BASE_URL "https://api.example.com/v1"
+  setx GW_MODEL "gpt-4o-mini"
+
+- Unix/macOS:
+  export GW_PROVIDER=openai
+  export GW_API_KEY="<your-api-key>"
+  export GW_BASE_URL="https://api.example.com/v1"
+  export GW_MODEL="gpt-4o-mini"
+
+Configuration via Java system properties
+If you run the CLI as a Java process, you can pass -D properties. Example:
+- Windows:
+  java -Dgw.provider=openai -Dgw.apiKey=<your-api-key> -Dgw.baseUrl=https://api.example.com/v1 -Dgw.model=gpt-4o-mini -jar ghostwriter-cli.jar
+
+- Unix/macOS:
+  java -Dgw.provider=openai -Dgw.apiKey=<your-api-key> -Dgw.baseUrl=https://api.example.com/v1 -Dgw.model=gpt-4o-mini -jar ghostwriter-cli.jar
+
+Common CLI options (names may vary by distribution)
+- --root <dir>           Root directory to scan.
+- --instructions <text>  Instructions/prompt for the generation.
+- --instructionsFile <f> Read instructions from a file.
+- --excludes <patterns>  Comma-separated glob patterns to exclude.
+- --includes <patterns>  Comma-separated glob patterns to include.
+- --config <file>        Path to gw.properties.
+- --dryRun               Show what would be processed without calling GenAI.
+- --debug                Enable verbose/debug output.
 
 
 4) Configuration
 ----------------
-The gw.properties file
-- Purpose: Central place to define provider settings, credentials (optionally), defaults for instructions, excludes, and runtime behavior.
-- Location:
-  - Default: project root (recommended)
-  - Override via:
-    - Command-line: --config <path> (if supported)
-    - Java property: -Dgw.config=<path>
-    - Environment variable: GW_CONFIG=<path>
+gw.properties
+The gw.properties file is the primary configuration mechanism for Ghostwriter. It lets you:
+- Select a GenAI provider.
+- Provide credentials and endpoint configuration.
+- Define default instructions and scanning rules (includes/excludes).
+- Set defaults so CI/local runs are consistent.
+
+Location
+- By default, place gw.properties in the working directory (or the project root), or pass its path via --config.
 
 Configurable properties
-The following properties are commonly supported in Ghostwriter CLI distributions.
-If your build includes additional settings, they can be added to gw.properties as needed.
+Note: Property keys can be set using the gw.properties file, Java system properties (-D...), or environment variables.
 
 Provider selection
 - gw.provider
-  - Values: codemie | openai | openai-compatible
-  - Chooses the GenAI backend.
-
-OpenAI-compatible endpoint configuration
-- gw.baseUrl
-  - Base URL for OpenAI-compatible API (e.g., https://api.openai.com/v1 or a self-hosted gateway).
-- gw.model
-  - Model name (e.g., gpt-4.1-mini, gpt-4o-mini, or provider-specific).
+  Purpose: Selects the GenAI provider implementation.
+  Examples: codemie, openai
+  Env: GW_PROVIDER
+  Java: -Dgw.provider=...
 
 Credentials
 - gw.apiKey
-  - API key/token.
-  - Recommended: set via environment variable or secret manager.
+  Purpose: API key/token.
+  Env: GW_API_KEY
+  Java: -Dgw.apiKey=...
 
-Request / behavior defaults
+OpenAI-compatible endpoint settings (when using an OpenAI-style API)
+- gw.baseUrl
+  Purpose: Base URL for the API (e.g., https://api.example.com/v1).
+  Env: GW_BASE_URL
+  Java: -Dgw.baseUrl=...
+
+- gw.model
+  Purpose: Model identifier.
+  Env: GW_MODEL
+  Java: -Dgw.model=...
+
+Generation defaults
 - gw.instructions
-  - Default instructions when --instructions is not supplied.
-- gw.root
-  - Default root directory.
+  Purpose: Default instructions/prompt used when --instructions is not provided.
+  Env: GW_INSTRUCTIONS
+  Java: -Dgw.instructions=...
+
+- gw.instructionsFile
+  Purpose: Path to a file containing the instructions.
+  Env: GW_INSTRUCTIONS_FILE
+  Java: -Dgw.instructionsFile=...
+
+Scanning rules
+- gw.rootDir
+  Purpose: Default root directory to scan.
+  Env: GW_ROOT_DIR
+  Java: -Dgw.rootDir=...
+
 - gw.excludes
-  - Default exclude patterns (comma-separated).
-  - Examples: **/target/**,**/.git/**,**/node_modules/**
+  Purpose: Comma-separated glob patterns to exclude from scanning.
+  Example: **/target/**,**/node_modules/**,**/.git/**
+  Env: GW_EXCLUDES
+  Java: -Dgw.excludes=...
 
-Logging / diagnostics
-- gw.logLevel
-  - Examples: INFO, DEBUG
+- gw.includes
+  Purpose: Optional comma-separated glob patterns to include.
+  Env: GW_INCLUDES
+  Java: -Dgw.includes=...
+
+Runtime/diagnostics
 - gw.debug
-  - true/false; enables verbose output.
+  Purpose: Enables debug logging.
+  Env: GW_DEBUG
+  Java: -Dgw.debug=true
 
-How to override properties
-- Environment variables (typical mapping):
-  - GW_PROVIDER            -> gw.provider
-  - GW_BASE_URL            -> gw.baseUrl
-  - GW_MODEL               -> gw.model
-  - GW_API_KEY             -> gw.apiKey
-  - GW_INSTRUCTIONS        -> gw.instructions
-  - GW_ROOT                -> gw.root
-  - GW_EXCLUDES            -> gw.excludes
-  - GW_LOG_LEVEL           -> gw.logLevel
-  - GW_DEBUG               -> gw.debug
-
-- Java system properties override gw.properties values:
-  - -Dgw.provider=...
-  - -Dgw.apiKey=...
-  - -Dgw.excludes="**/target/**,**/.git/**"
-
-- Command-line options override all defaults:
-  - ghostwriter ... --root ... --instructions ... --exclude ...
-
-Example gw.properties
----------------------
-# Provider
-# codemie | openai | openai-compatible
-#gw.provider=codemie
-
-# OpenAI-compatible
-#gw.baseUrl=https://api.openai.com/v1
-#gw.model=gpt-4o-mini
-
-# Credentials (prefer env var GW_API_KEY)
-#gw.apiKey=YOUR_KEY_HERE
-
-# Defaults
-#gw.root=.
-#gw.excludes=**/target/**,**/.git/**,**/node_modules/**
-#gw.instructions=Update documentation and keep formatting consistent.
-
-# Logging
-#gw.logLevel=INFO
-#gw.debug=false
+Configuration precedence (typical)
+1. CLI options
+2. Java system properties (-D...)
+3. Environment variables
+4. gw.properties
 
 
 5) Examples
 -----------
-A) Run with CodeMie using environment variables
-Windows:
-  set GW_PROVIDER=codemie
-  set GW_API_KEY=YOUR_KEY
-  ghostwriter.bat --root . --instructions "Add a CONTRIBUTING.md" --exclude "**/target/**"
+Example gw.properties (OpenAI-compatible)
+----------------------------------------
+# Provider
+gw.provider=openai
 
-Unix:
-  export GW_PROVIDER=codemie
-  export GW_API_KEY="YOUR_KEY"
-  ./ghostwriter.sh --root . --instructions "Add a CONTRIBUTING.md" --exclude "**/target/**"
+# Auth
+gw.apiKey=${GW_API_KEY}
 
-B) Run with OpenAI-compatible endpoint
-  export GW_PROVIDER=openai-compatible
-  export GW_BASE_URL="https://api.openai.com/v1"
-  export GW_MODEL="gpt-4o-mini"
-  export GW_API_KEY="YOUR_KEY"
-  ./ghostwriter.sh --root . --instructions "Refactor package names" --exclude "**/target/**"
+# Endpoint/model
+gw.baseUrl=https://api.example.com/v1
+gw.model=gpt-4o-mini
 
-C) Store defaults in gw.properties and only pass task text
-  # gw.properties
-  gw.provider=openai-compatible
-  gw.baseUrl=https://api.openai.com/v1
-  gw.model=gpt-4o-mini
-  gw.excludes=**/target/**,**/.git/**
+# Defaults
+gw.rootDir=.
+gw.excludes=**/target/**,**/node_modules/**,**/.git/**
+gw.instructions=Generate concise documentation for this repository.
 
-  # command
-  ./ghostwriter.sh --root . --instructions "Update README to include installation steps."
+Example: generate docs for a repository (Windows)
+------------------------------------------------
+bin\gw.bat --root "C:\work\repo" --instructionsFile "C:\work\repo\docs\instructions.txt" --excludes "**/target/**,**/.git/**"
 
-D) Override excludes at runtime
-  ./ghostwriter.sh --root . --instructions "Update licenses" --exclude "**/target/**" --exclude "**/dist/**"
+Example: generate docs for a repository (Unix/macOS)
+---------------------------------------------------
+./bin/gw.sh --root /home/me/repo --instructionsFile /home/me/repo/docs/instructions.txt --excludes "**/target/**,**/.git/**"
+
+Example: use environment variables for auth
+------------------------------------------
+- Windows (PowerShell):
+  setx GW_API_KEY "<your-api-key>"
+  bin\gw.bat --root "C:\work\repo" --instructions "Create a README.md overview."
+
+- Unix/macOS:
+  export GW_API_KEY="<your-api-key>"
+  ./bin/gw.sh --root /home/me/repo --instructions "Create a README.md overview."
 
 
 6) Troubleshooting & Support
 ----------------------------
-Common issues
-- Authentication errors (401/403)
-  - Verify GW_API_KEY (or gw.apiKey) is set and valid.
-  - Confirm you are targeting the correct endpoint (gw.baseUrl).
+Authentication errors (401/403)
+- Verify gw.apiKey / GW_API_KEY is set and not expired.
+- Confirm the provider (gw.provider) matches the credentials you are using.
+- For OpenAI-compatible services, ensure gw.baseUrl is correct and includes the expected /v1 path if required.
 
-- Connection / timeout issues
-  - Check network access, proxy settings, and firewall.
-  - Reduce request size or split instructions.
+Connection/timeouts
+- Check network/proxy settings.
+- Confirm the endpoint is reachable from your environment.
 
-- Missing files / unexpected changes
-  - Ensure --root points to the correct directory.
-  - Review gw.excludes patterns; add **/.git/**, **/target/**, **/node_modules/** as needed.
-
-- Model not found / invalid model
-  - Verify gw.model is supported by the configured provider.
+Missing files / unexpected output
+- Ensure --root (or gw.rootDir) points to the intended directory.
+- Review gw.excludes and gw.includes patterns; overly broad excludes can remove needed context.
+- Run with --dryRun (if available) to see what would be scanned.
 
 Logs and debug output
-- Run with --debug (if available) or set:
-  - GW_DEBUG=true
-  - or -Dgw.debug=true
-- Increase verbosity:
-  - GW_LOG_LEVEL=DEBUG
-  - or -Dgw.logLevel=DEBUG
-- If your distribution writes log files, check the working directory or configured log location (if provided by your build).
+- Enable debug with --debug, GW_DEBUG=true, or -Dgw.debug=true.
+- Logs are typically written to stdout/stderr unless your distribution configures a log file.
+  If a log file is configured, check the distribution’s log directory (often ./logs) or your working directory.
 
 
 7) Contact & Documentation
 --------------------------
-- Check your project repository documentation (e.g., root README, docs site under src/site) for detailed usage.
-- If this CLI was provided as part of an internal platform, use your organization’s standard support channel (issue tracker, chat, or service desk).
+- Repository documentation: see src/site (if present) and any published project site.
+- For issues/requests: use your organization’s standard support channel (e.g., GitHub Issues in the project repository) if available.

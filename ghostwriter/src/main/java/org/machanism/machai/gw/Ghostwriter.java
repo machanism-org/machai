@@ -132,7 +132,7 @@ public final class Ghostwriter {
 				return;
 			}
 
-			File rootDir = config.getFile("root");
+			File rootDir = config.getFile("root", null);
 			if (cmd.hasOption(rootDirOpt)) {
 				rootDir = new File(cmd.getOptionValue(rootDirOpt));
 			}
@@ -142,7 +142,7 @@ public final class Ghostwriter {
 				genai = cmd.getOptionValue(genaiOpt);
 			}
 
-			String[] instructions = StringUtils.split(config.get("instructions"), ",");
+			String[] instructions = StringUtils.split(config.get("instructions", null), ",");
 			if (cmd.hasOption(instructionsOpt)) {
 				instructions = StringUtils.split(cmd.getOptionValue(instructionsOpt), ",");
 			}
@@ -159,7 +159,7 @@ public final class Ghostwriter {
 				}
 			}
 
-			String[] excludes = StringUtils.split(config.get("excludes"), ",");
+			String[] excludes = StringUtils.split(config.get("excludes", null), ",");
 			if (cmd.hasOption(excludesOpt)) {
 				excludes = StringUtils.split(cmd.getOptionValue(excludesOpt), ",");
 			}
