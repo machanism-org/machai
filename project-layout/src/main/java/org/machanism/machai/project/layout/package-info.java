@@ -1,35 +1,39 @@
 /**
- * Detects and models the on-disk layout of a software project.
+ * Detects and models a repository's on-disk layout for downstream processing.
  *
- * <p>This package provides a small set of {@code ProjectLayout} implementations that describe where a project’s
- * sources, tests, and documentation typically live on disk. Layouts are discovered from build descriptors when
- * available (for example {@code pom.xml}, {@code package.json}, or {@code pyproject.toml}) and fall back to sensible
- * conventional defaults when no descriptor is present.
+ * <p>The classes in this package describe where to find a project's modules/workspaces and its conventional
+ * directories (sources, tests, resources, documentation). Callers typically select an implementation based on
+ * build metadata present at the repository root and then query the returned directory/module lists.
  *
- * <p>A {@link org.machanism.machai.project.layout.ProjectLayout} generally:
+ * <h2>Key concepts</h2>
  * <ul>
- *   <li>Identifies a project root directory.</li>
- *   <li>Discovers modules (if the build tool supports multi-module/workspace layouts).</li>
- *   <li>Exposes conventional directories (for example source, test, and documentation trees).</li>
- *   <li>Provides a shared set of directories to exclude while scanning the filesystem via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
+ *   <li><b>Project root</b>: a {@link java.io.File} set via {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.
+ *   </li>
+ *   <li><b>Modules/workspaces</b>: optional subprojects discovered from build descriptors (for example Maven modules or
+ *       JS workspaces).
+ *   </li>
+ *   <li><b>Directory sets</b>: implementation-specific lists returned by {@link org.machanism.machai.project.layout.ProjectLayout#getSources()},
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getTests()}, and
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getDocuments()}.
+ *   </li>
+ *   <li><b>Exclusions</b>: shared directory names that should be skipped during filesystem walks via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
+ *   </li>
  * </ul>
  *
- * <h2>Implementations</h2>
+ * <h2>Provided implementations</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - derives layout information from
- *       {@code pom.xml} (including module discovery and configured source/test directories).</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - derives layout information from
- *       {@code package.json} and common workspace conventions.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - derives layout information from
- *       {@code pyproject.toml} and related metadata.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - fallback that infers modules from
- *       immediate subdirectories while honoring {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - parses {@code pom.xml} and can discover Maven modules.</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - parses {@code package.json} and can discover workspace modules.</li>
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - identifies Python projects via {@code pyproject.toml} and related metadata.</li>
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - convention-based fallback for repositories without a recognized descriptor.</li>
  * </ul>
  *
- * <h2>Example</h2>
+ * <h2>Typical usage</h2>
  * <pre>
- * ProjectLayout layout = new MavenProjectLayout().projectDir(new java.io.File("/repo"));
+ * ProjectLayout layout = new MavenProjectLayout()
+ * 		.projectDir(new java.io.File("/repo"));
+ *
  * java.util.List&lt;String&gt; modules = layout.getModules();
  * java.util.List&lt;String&gt; sources = layout.getSources();
  * </pre>

@@ -1,18 +1,28 @@
 /**
  * Project discovery and processing entry points.
  *
- * <p>This package defines the high-level API used to:
+ * <p>This package contains the public API and core types used to:
  *
  * <ul>
- *   <li><b>Detect</b> the appropriate on-disk project layout for a given root directory via
- *       {@link org.machanism.machai.project.ProjectLayoutManager}.</li>
- *   <li><b>Scan</b> a project root (and any discovered modules) and delegate layout-specific handling
- *       to an implementation of {@link org.machanism.machai.project.ProjectProcessor}.</li>
+ *   <li>detect a project's layout from a root directory,</li>
+ *   <li>represent the discovered project and its folders/modules, and</li>
+ *   <li>scan/process the project using layout-specific behavior.</li>
  * </ul>
  *
- * <p>Layout detection selects between known layouts (for example Maven, JavaScript/Node, Python),
- * falling back to a default layout when the directory exists but no specific layout is detected.
- * Layout implementations live in {@code org.machanism.machai.project.layout}.
+ * <h2>Key concepts</h2>
+ *
+ * <ul>
+ *   <li><b>Layout detection</b>: {@link org.machanism.machai.project.ProjectLayoutManager} inspects a
+ *       root directory and selects an appropriate {@code ProjectLayout} (for example Maven, Node,
+ *       Python), with a default/fallback when no specific layout matches.</li>
+ *   <li><b>Project representation</b>: types such as {@link org.machanism.machai.project.Project} and
+ *       {@link org.machanism.machai.project.ProjectFolder} model the discovered structure and provide
+ *       access to relevant paths and metadata.</li>
+ *   <li><b>Processing/scanning</b>: {@link org.machanism.machai.project.ProjectProcessor}
+ *       implementations traverse a project root and delegate to layout-specific handling.</li>
+ *   <li><b>Layout implementations</b>: concrete layouts reside in
+ *       {@code org.machanism.machai.project.layout}.</li>
+ * </ul>
  *
  * <h2>Typical usage</h2>
  *

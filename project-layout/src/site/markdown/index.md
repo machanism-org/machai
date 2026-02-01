@@ -11,12 +11,8 @@ Page Structure:
    - Bulleted list highlighting the primary capabilities of the project.
 # Getting Started
    - Prerequisites: List of required software and services.
-   - Environment Variables: Table describing necessary environment variables.
    - Basic Usage: Example command to run the plugin.
    - Typical Workflow: Step-by-step outline of how to use the project artifacts.
-# Configuration
-   - Table of common configuration parameters, their descriptions, and default values.
-   - Example: Command-line example showing how to configure and run the plugin with custom parameters.
 # Resources
    - List of relevant links (platform, GitHub, Maven).
 -->
@@ -27,73 +23,45 @@ Page Structure:
 
 ## Introduction
 
-Project Layout is a small, focused Java API for detecting and describing a software project’s on-disk structure (main/test source roots, resource roots, and multi-module/workspace layouts). It enables tools such as build tooling, code generation, analyzers, and IDE integrations to avoid hard-coded conventions by providing a consistent way to infer a project layout from the files present.
+Project Layout is a small utility library that helps you describe, load, and use a conventional project directory layout (sources, resources, tests, docs, etc.) in a consistent way. It is intended for build tooling and plugins that need to locate well-known folders reliably across different projects.
 
 ## Overview
 
-This module models “project layout” as a set of directories and conventions that vary by ecosystem (for example Maven, JavaScript workspaces, or Python projects). A `ProjectLayout` implementation can:
-
-- Identify directories that contain main sources, tests, and resources.
-- Detect subprojects/modules/workspaces.
-- Provide a normalized view that higher-level tooling can consume.
+The library provides a simple model for a project layout (e.g., `src/main/java`, `src/test/resources`, `src/site`) and utilities to resolve these paths relative to a project base directory. Using a single, centralized definition of the layout reduces duplicated path logic, makes tooling more predictable, and improves maintainability.
 
 ## Key Features
 
-- Maven layout detection (including `pom.xml` build source/resource configuration)
-- JavaScript/Node workspace detection (via `package.json`)
-- Python project layout detection (via `pyproject.toml`)
-- Default/fallback layout when no known build descriptor is present
-- API to enumerate child projects/modules
+- Standardized representation of common Maven-style project folders
+- Resolve layout paths relative to a given project directory
+- Designed to be embedded in other tools/plugins that need consistent path conventions
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 8+ (library usage)
-- Maven or Gradle (to build from source)
-
-### Environment Variables
-
-This project does not require any environment variables.
-
-| Name | Required | Description | Default |
-|---|---:|---|---|
-| _None_ |  |  |  |
+- Java 8+
+- Maven 3.x
 
 ### Basic Usage
 
-```java
-import java.nio.file.Path;
-import org.machanism.machai.project.ProjectLayoutManager;
+Add the dependency:
 
-ProjectLayoutManager manager = new ProjectLayoutManager();
-var layout = manager.detect(Path.of("."));
-
-// Use layout to find source/test/resource directories and child projects
+```xml
+<dependency>
+  <groupId>org.machanism.machai</groupId>
+  <artifactId>project-layout</artifactId>
+  <version>${project-layout.version}</version>
+</dependency>
 ```
 
 ### Typical Workflow
 
-1. Point the detector at a repository root (a `Path`).
-2. Detect the layout (Maven/JS/Python/default).
-3. Read main/test/resource roots from the resulting `ProjectLayout`.
-4. If present, iterate child projects/modules and repeat.
-
-## Configuration
-
-| Parameter | Description | Default |
-|---|---|---|
-| `projectRoot` | Repository or module root directory to inspect. | `.` |
-| `layout` | Layout strategy (auto-detect vs. specific). | `auto` |
-
-Example:
-
-```java
-ProjectLayoutManager manager = new ProjectLayoutManager();
-var layout = manager.detect(Path.of("."));
-```
+1. Define or load the project layout configuration (use the defaults or your own conventions).
+2. Resolve the directories you need (main sources, test sources, resources, docs) against the project base directory.
+3. Pass the resolved paths to the rest of your build/tooling logic (scanners, generators, compilers, packagers).
 
 ## Resources
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/project-layout
-- Source: https://github.com/machanism-org/machai
+- SCM: https://github.com/machanism-org/machai
+- Issues: https://github.com/machanism-org/machai/issues

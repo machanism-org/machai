@@ -58,7 +58,6 @@ class MavenProjectLayoutTest {
 
 		// Assert
 		assertNotNull(modules);
-		assertEquals(2, modules.size());
 		assertEquals(Arrays.asList("module-a", "module-b"), modules);
 	}
 
@@ -81,67 +80,38 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnNullWhenModelCannotBeBuiltAndPackagingNull() {
+	void getModules_whenModelCannotBeBuilt_shouldThrowIllegalArgumentException() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/maven-bad-pom");
+		Files.createDirectories(dir.toPath());
+		Files.write(new File(dir, "pom.xml").toPath(), "<not-xml".getBytes(StandardCharsets.UTF_8));
+
 		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir);
 
-		PomReader failingPomReader = new PomReader() {
-			@Override
-			public Model getProjectModel(File pomFile, boolean effective) {
-				throw new IllegalArgumentException("boom");
-			}
-		};
-
-		MavenProjectLayout layoutWithFailingReader = new MavenProjectLayout() {
-			@Override
-			public Model getModel() {
-				File pomFile = new File(getProjectDir(), "pom.xml");
-				try {
-					return failingPomReader.getProjectModel(pomFile, true);
-				} catch (Exception e) {
-					return new Model();
-				}
-			}
-		}.projectDir(dir);
-
 		// Act
-		List<String> modules = layoutWithFailingReader.getModules();
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, layout::getModules);
 
 		// Assert
-		assertNull(modules);
+		assertTrue(ex.getMessage().contains("POM file"));
 	}
 
 	@Test
-	void getModel_whenEffectivePomFailsAndEffectiveRequiredTrue_shouldFallbackToNonEffective() {
+	void getModel_whenEffectivePomFailsAndEffectiveRequiredTrue_shouldFallbackToNonEffective() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/maven-model-fallback");
-		MavenProjectLayout layout = new MavenProjectLayout() {
-			@Override
-			public Model getModel() {
-				if (super.getProjectDir() == null) {
-					throw new IllegalStateException("projectDir must be set");
-				}
-				// delegate to real implementation
-				return super.getModel();
-			}
-		}.projectDir(dir);
-
-		layout.effectivePomRequired(true);
-		assertTrue(dir.mkdirs() || dir.isDirectory());
+		Files.createDirectories(dir.toPath());
 
 		String pomXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-				"<project xmlns=\"http://maven.apache.org/POM/4.0.0\">\n" +
+				"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+				"  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
 				"  <modelVersion>4.0.0</modelVersion>\n" +
 				"  <groupId>com.acme</groupId>\n" +
 				"  <artifactId>demo</artifactId>\n" +
 				"  <version>1</version>\n" +
 				"</project>\n";
-		try {
-			Files.write(new File(dir, "pom.xml").toPath(), pomXml.getBytes(StandardCharsets.UTF_8));
-		} catch (Exception e) {
-			fail(e);
-		}
+		Files.write(new File(dir, "pom.xml").toPath(), pomXml.getBytes(StandardCharsets.UTF_8));
+
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir).effectivePomRequired(true);
 
 		// Act
 		Model model = layout.getModel();
@@ -149,6 +119,20 @@ class MavenProjectLayoutTest {
 		// Assert
 		assertNotNull(model);
 		assertEquals("demo", model.getArtifactId());
+	}
+
+	@Test
+	void getModel_whenEffectiveRequiredFalseAndPomMissing_shouldThrowIllegalArgumentException() {
+		// Arrange
+		File dir = new File("target/test-tmp/maven-model-missing");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir).effectivePomRequired(false);
+
+		// Act
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, layout::getModel);
+
+		// Assert
+		assertTrue(ex.getMessage().contains("POM file"));
 	}
 
 	@Test
