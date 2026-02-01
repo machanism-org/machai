@@ -179,10 +179,10 @@ public class FileProcessor extends ProjectProcessor {
 			ProjectLayout projectLayout = getProjectLayout(rootDir);
 			defaultProcessingDir = dir;
 
+			processProjectDir(projectLayout, dir);
+
 			if (defaultGuidance != null) {
 				process(projectLayout, defaultProcessingDir, defaultGuidance);
-			} else {
-				processProjectDir(projectLayout, dir);
 			}
 		}
 	}
