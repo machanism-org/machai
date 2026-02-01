@@ -40,7 +40,7 @@ Machai Ghostwriter is a CLI documentation engine that automates and standardizes
 
 Download the CLI JAR:
 
-[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/zip.jar/download)
+[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
 
 ### Basic Usage
 
@@ -65,13 +65,14 @@ java -jar gw.jar --root /path/to/project docs src
 1. Build or download `gw.jar`.
 2. Choose the project root (`--root`) and the directories to scan (positional args).
 3. (Optional) Provide additional instructions via `--instructions` or `gw.properties`.
-4. (Optional) Provide a default final guidance file via `--guidance`.
-5. Run Ghostwriter.
-6. Review and commit generated/updated documentation.
+4. (Optional) Exclude directories via `--excludes`.
+5. (Optional) Provide a default final guidance file via `--guidance`.
+6. Run Ghostwriter.
+7. Review and commit generated/updated documentation.
 
 ## Resources
 
 - Platform: https://machanism.org/guided-file-processing/index.html
 - GitHub: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
-- Download Ghostwriter CLI: https://sourceforge.net/projects/machanism/files/machai/gw.jar/download
+- Download Ghostwriter CLI: https://sourceforge.net/projects/machanism/files/machai/gw.zip/download

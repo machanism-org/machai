@@ -26,33 +26,30 @@
  *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
 
-package org.machanism.machai.ai.provider.web;
-
 /**
  * Web-automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>This package provides {@link org.machanism.machai.ai.manager.GenAIProvider} implementations that interact with a
- * target generative-AI service through its web UI, driven by <a href="https://ganteater.com">Anteater</a>
- * workspaces/recipes.
+ * <p>This package contains provider implementations that drive a generative-AI service via its web UI using
+ * <a href="https://ganteater.com">Anteater</a> workspaces and recipes.
  *
- * <p>The primary entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which manages a shared
- * Anteater workspace and exposes a prompt/response API.
+ * <p>The main entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which manages a shared Anteater
+ * workspace and exposes a prompt/response API.
  *
  * <h2>Typical usage</h2>
  * <ol>
  *   <li>Select a model/recipe configuration with {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
  *   <li>Set the Anteater workspace project directory with
  *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}.</li>
- *   <li>Build the prompt and submit it with {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}, which
- *       runs the {@code "Submit Prompt"} recipe.</li>
+ *   <li>Submit the prompt with {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}, which runs the
+ *       {@code "Submit Prompt"} recipe.</li>
  * </ol>
  *
  * <h2>Lifecycle and constraints</h2>
  * <ul>
- *   <li>The underlying Anteater workspace is held in static state; configuration and working directory are expected
+ *   <li>The underlying Anteater workspace is stored in static state; configuration and working directory are intended
  *       to be set once per JVM.</li>
- *   <li>Changing the configuration or working directory after initialization is not supported and results in an
- *       error.</li>
+ *   <li>Changing the configuration or working directory after initialization is not supported and results in an error.</li>
  *   <li>Call {@link org.machanism.machai.ai.provider.web.WebProvider#close()} to release workspace resources.</li>
  * </ul>
  */
+package org.machanism.machai.ai.provider.web;

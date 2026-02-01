@@ -134,11 +134,9 @@ The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as
 This provider enables a wide range of generative AI capabilities, including:
 
 - Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
-
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+- Uploading local files or referencing remote files by URL for use as request context.
+- Tool (function) calling via registered Java handlers.
+- Creating vector embeddings for tasks like semantic search and similarity analysis.
 
 **Environment variables**
 
@@ -149,9 +147,9 @@ The client automatically reads the following environment variables. You must set
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using the CodeMie API (OpenAI-compatible endpoint)**
+**Using an OpenAI-compatible endpoint**
 
-To use a CodeMie/OpenAI-compatible endpoint, set:
+To use an OpenAI-compatible endpoint (for example, CodeMie), set:
 
 - `OPENAI_API_KEY` to the access token/key
 - `OPENAI_BASE_URL` to the gateway base URL
@@ -166,7 +164,7 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-`CodeMieProvider` extends `OpenAIProvider` and configures it to authenticate against CodeMie and call it via an OpenAI-compatible API.
+`CodeMieProvider` extends `OpenAIProvider` and configures it to authenticate against CodeMie and call it via an OpenAI-compatible API endpoint.
 
 How it works:
 
@@ -176,10 +174,7 @@ How it works:
 
 **Configuration**
 
-This provider reads credentials from environment variables and/or Java system properties:
-
-- `GENAI_USERNAME` (required)
-- `GENAI_PASSWORD` (required)
+This provider reads credentials from configuration keys `GENAI_USERNAME` and `GENAI_PASSWORD`.
 
 **Thread safety:** NOT thread-safe (inherits behavior from `OpenAIProvider`).
 

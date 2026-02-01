@@ -27,16 +27,16 @@ Page Structure:
 
 ## Introduction
 
-The **Bindex Maven Plugin** enables automated generation and registration of `bindex` metadata for Maven projects. It facilitates library discovery, integration, and assembly by leveraging structured metadata and GenAI-powered semantic search within the Machanism ecosystem.
+The **Bindex Maven Plugin** enables automated generation and registration of `bindex` metadata for Maven projects. It generates and maintains a `bindex.json` descriptor for the current module, supporting library discovery, integration, and assembly workflows by providing structured metadata that can be indexed and searched within the Machanism ecosystem.
 
 ## Overview
 
-The plugin is typically run during a Maven build (optionally bound to a lifecycle phase) or executed on-demand.
+The plugin can be executed on-demand or bound to a Maven lifecycle phase.
 
-At execution time it will:
+During execution it will:
 
 - Generate `bindex.json` when it does not exist.
-- Update an existing `bindex.json` (when enabled) to keep metadata aligned with the module.
+- Optionally update an existing `bindex.json` (when enabled) to keep metadata aligned with the module.
 
 ## Key Features
 

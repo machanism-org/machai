@@ -7,7 +7,7 @@
 
 GenAI Client is a Java library that provides a small, provider-agnostic API for running generative AI tasks through a single `GenAIProvider` interface.
 
-It is designed to keep your application code stable while you swap or combine different backends (API-based providers and UI/web-automation providers).
+It keeps your application code stable while you swap or combine different backends (API-based providers and UI/web-automation providers).
 
 ## Key features
 
@@ -23,15 +23,18 @@ It is designed to keep your application code stable while you swap or combine di
 The typical entry point is `GenAIProviderManager`, which resolves a provider implementation by a `Provider:Model` string.
 
 ```java
-GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
-provider.model("gpt-5.1");
+GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1", conf);
 provider.instructions("You are a helpful assistant.");
 provider.prompt("Summarize the following text...");
 String answer = provider.perform();
 provider.close();
 ```
 
-If the provider part is omitted or blank, the manager falls back to the `None` provider.
+If the provider part is omitted or blank, the manager falls back to the `None` provider:
+
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("gpt-5.1", conf); // uses None provider
+```
 
 ## Supported GenAI Providers
 <!-- 
@@ -46,16 +49,16 @@ and generate the content for this section following net format:
 
 `OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
 
-This provider supports:
+It supports:
 
 - Sending prompts and receiving responses from OpenAI chat models.
 - Managing files for use in OpenAI workflows.
-- Tool/function calling via the OpenAI Responses API.
+- Tool/function calling through the OpenAI Responses API.
 - Creating embeddings for semantic search and similarity analysis.
 
-Configuration
+Environment variables
 
-The client reads configuration from environment variables (or system properties with the same names; you must set at least `OPENAI_API_KEY`):
+The client reads configuration from environment variables (or system properties with the same names). You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -70,24 +73,26 @@ Using the CodeMie OpenAI-compatible endpoint via environment variables:
 Example
 
 ```java
-GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1", conf);
 ```
 
 Thread safety: this implementation is NOT thread-safe.
 
 ### CodeMie
 
-`CodeMieProvider` is an `OpenAIProvider` specialization for the CodeMie OpenAI-compatible endpoint.
+`CodeMieProvider` is an `OpenAIProvider` specialization that targets the CodeMie OpenAI-compatible endpoint.
 
-Before creating the underlying OpenAI client, it authenticates against a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the OpenAI client with:
+On initialization it authenticates against a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the underlying OpenAI client with the retrieved access token as the API key and uses the CodeMie base URL.
 
-- `OPENAI_API_KEY` set to the retrieved access token.
-- `OPENAI_BASE_URL` set to `https://codemie.lab.epam.com/code-assistant-api/v1`.
-
-Required configuration:
+Required configuration
 
 - `GENAI_USERNAME`
 - `GENAI_PASSWORD`
+
+Endpoint details (built-in defaults)
+
+- Token URL: `https://keycloak.eks-core.aws.main.edp.projects.epam.com/auth/realms/codemie-prod/protocol/openid-connect/token`
+- Base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`
 
 ### None
 
@@ -95,7 +100,7 @@ Required configuration:
 
 This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(...)` has been configured.
 
-Key characteristics:
+Key characteristics
 
 - No network calls are performed.
 - `perform()` always returns `null`.
@@ -126,7 +131,7 @@ Thread safety and lifecycle
 Example
 
 ```java
-GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
+GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie", conf);
 provider.model("config.yaml");
 provider.setWorkingDir(new File("/path/to/project"));
 String response = provider.perform();

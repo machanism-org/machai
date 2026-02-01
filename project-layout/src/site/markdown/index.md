@@ -27,11 +27,11 @@ Page Structure:
 
 ## Introduction
 
-Project Layout is a small, focused Java API for detecting and describing a software project’s on-disk structure (main/test source roots, resource roots, and multi-module/workspace layouts). It enables tools to avoid hard-coded conventions by offering a consistent way to infer a project layout from the files present.
+Project Layout is a small, focused Java API for detecting and describing a software project’s on-disk structure (main/test source roots, resource roots, and multi-module/workspace layouts). It enables tools such as build tooling, code generation, analyzers, and IDE integrations to avoid hard-coded conventions by providing a consistent way to infer a project layout from the files present.
 
 ## Overview
 
-This module models “project layout” as a set of directories and conventions that vary by ecosystem (for example Maven, Node workspaces, or Python projects). A `ProjectLayout` implementation can:
+This module models “project layout” as a set of directories and conventions that vary by ecosystem (for example Maven, JavaScript workspaces, or Python projects). A `ProjectLayout` implementation can:
 
 - Identify directories that contain main sources, tests, and resources.
 - Detect subprojects/modules/workspaces.

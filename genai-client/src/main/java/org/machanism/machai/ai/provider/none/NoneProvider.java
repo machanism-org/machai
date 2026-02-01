@@ -242,8 +242,16 @@ public class NoneProvider implements GenAIProvider {
         // No-op
     }
 
-	@Override
-	public void init(Configurator conf) {
-	}
+    /**
+     * Initializes this provider from configuration.
+     *
+     * <p>This implementation performs no initialization and exists only for interface compatibility.
+     *
+     * @param conf configuration source (ignored)
+     */
+    @Override
+    public void init(Configurator conf) {
+        // No-op
+    }
 
 }

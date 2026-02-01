@@ -1,39 +1,47 @@
 /**
  * Detects and models the on-disk layout of a software project.
  *
- * <p>This package centers around {@link org.machanism.machai.project.layout.ProjectLayout}, which represents a project
- * root directory and provides a uniform way to:
+ * <p>This package provides {@link org.machanism.machai.project.layout.ProjectLayout} and several concrete
+ * implementations that infer a project's structure (modules and conventional directories) from common build
+ * descriptors.
+ *
+ * <h2>What a layout provides</h2>
  * <ul>
- *   <li>identify modules/subprojects (for monorepos and multi-module builds),</li>
- *   <li>report conventional source/test/documentation directories when present,</li>
- *   <li>exclude common non-source directories (VCS metadata, dependency caches, build output) from scans.</li>
+ *   <li><strong>Project root:</strong> {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}
+ *       sets the directory used as the base for all lookups.</li>
+ *   <li><strong>Modules/subprojects:</strong> {@link org.machanism.machai.project.layout.ProjectLayout#getModules()}
+ *       returns module paths when the project type supports it (for example Maven multi-module builds or JS/TS
+ *       workspaces).</li>
+ *   <li><strong>Conventional directories:</strong> {@link org.machanism.machai.project.layout.ProjectLayout#getSources()},
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getTests()}, and
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getDocuments()} return paths relative to the project
+ *       root when implementations can determine them.</li>
+ *   <li><strong>Scan exclusions:</strong> {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS} defines
+ *       directories that should be ignored by directory-based discovery (VCS metadata, dependency caches, IDE
+ *       directories, build output, etc.).</li>
  * </ul>
  *
- * <p>Concrete implementations infer structure from common build descriptors:
+ * <h2>Implementations</h2>
  * <ul>
- *   <li>Maven via {@code pom.xml} (multi-module resolution, build directories),</li>
- *   <li>JavaScript/TypeScript via {@code package.json} workspaces,
- *   <li>Python via {@code pyproject.toml}.</li>
- * </ul>
- *
- * <h2>Key types</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} - Base abstraction and shared path utilities.</li>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Resolves Maven modules and conventional paths.</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - Discovers JS/TS workspaces and modules.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Detects Python projects from
- *       {@code pyproject.toml}.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - Fallback that performs directory scanning and
- *       applies {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
- *   <li>{@link org.machanism.machai.project.layout.PomReader} - Helper for parsing and resolving effective Maven POM
- *       models.</li>
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - Reads {@code pom.xml} (optionally building an
+ *       effective model) to resolve modules and to extract source/test/resource directories from the Maven build
+ *       section.</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - Reads {@code package.json} and discovers
+ *       workspace modules by scanning for nested {@code package.json} files while excluding
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - Detects Python projects via
+ *       {@code pyproject.toml} and related metadata.</li>
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - Fallback that lists immediate
+ *       subdirectories as modules, excluding {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
+ *   <li>{@link org.machanism.machai.project.layout.PomReader} - Helper that parses and optionally computes effective
+ *       Maven models.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>
  * ProjectLayout layout = new MavenProjectLayout().projectDir(new java.io.File("/repo"));
- * java.util.List&lt;String&gt; modules = layout.getModules();
- * java.util.List&lt;String&gt; sources = layout.getSources();
+ * java.util.List&amp;lt;String&amp;gt; modules = layout.getModules();
+ * java.util.List&amp;lt;String&amp;gt; sources = layout.getSources();
  * </pre>
  */
 package org.machanism.machai.project.layout;

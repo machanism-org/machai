@@ -1,9 +1,10 @@
 package org.machanism.machai.gw.reviewer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,8 +28,7 @@ class JavaReviewerTest {
 		String[] extensions = reviewer.getSupportedFileExtensions();
 
 		// Assert
-		assertEquals(1, extensions.length);
-		assertEquals("java", extensions[0]);
+		assertArrayEquals(new String[] { "java" }, extensions);
 	}
 
 	@Test
@@ -58,9 +58,9 @@ class JavaReviewerTest {
 
 		// Assert
 		assertNotNull(result);
-		assertEquals(true, result.contains("Example.java"));
-		assertEquals(true, result.contains("please document this"));
-		assertEquals(true, result.contains(content));
+		assertTrue(result.contains("Example.java"));
+		assertTrue(result.contains("please document this"));
+		assertTrue(result.contains(content));
 	}
 
 	@Test
@@ -68,16 +68,17 @@ class JavaReviewerTest {
 		// Arrange
 		JavaReviewer reviewer = new JavaReviewer();
 		File javaFile = new File(tempDir, "Example.java");
-		Files.writeString(javaFile.toPath(), "/* @guidance: block */\npublic class Example {}\n",
-				StandardCharsets.UTF_8);
+		String content = "/* @guidance: block */\npublic class Example {}\n";
+		Files.writeString(javaFile.toPath(), content, StandardCharsets.UTF_8);
 
 		// Act
 		String result = reviewer.perform(tempDir, javaFile);
 
 		// Assert
 		assertNotNull(result);
-		assertEquals(true, result.contains("Example.java"));
-		assertEquals(true, result.contains("block"));
+		assertTrue(result.contains("Example.java"));
+		assertTrue(result.contains("block"));
+		assertTrue(result.contains(content));
 	}
 
 	@Test
@@ -85,14 +86,17 @@ class JavaReviewerTest {
 		// Arrange
 		JavaReviewer reviewer = new JavaReviewer();
 		File pkg = new File(tempDir, "package-info.java");
-		Files.writeString(pkg.toPath(), "/** @guidance: pkg */\npackage a;\n", StandardCharsets.UTF_8);
+		String content = "/** @guidance: pkg */\npackage a;\n";
+		Files.writeString(pkg.toPath(), content, StandardCharsets.UTF_8);
 
 		// Act
 		String result = reviewer.perform(tempDir, pkg);
 
 		// Assert
 		assertNotNull(result);
-		assertEquals(true, result.contains("package-info.java"));
+		assertTrue(result.contains("package-info.java"));
+		assertTrue(result.contains("pkg"));
+		assertTrue(result.contains(content));
 	}
 
 	@Test
@@ -115,7 +119,7 @@ class JavaReviewerTest {
 		String pkgName = JavaReviewer.extractPackageName(src);
 
 		// Assert
-		assertEquals("org.machanism.example", pkgName);
+		org.junit.jupiter.api.Assertions.assertEquals("org.machanism.example", pkgName);
 	}
 
 	@Test
@@ -127,6 +131,6 @@ class JavaReviewerTest {
 		String pkgName = JavaReviewer.extractPackageName(src);
 
 		// Assert
-		assertEquals("<default package>", pkgName);
+		org.junit.jupiter.api.Assertions.assertEquals("<default package>", pkgName);
 	}
 }

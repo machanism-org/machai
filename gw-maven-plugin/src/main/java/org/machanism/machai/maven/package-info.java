@@ -3,12 +3,12 @@
  * document-processing pipeline into a Maven build.
  *
  * <p>
- * This package provides two mojos:
+ * The package provides two goals:
  * </p>
  * <ul>
  *   <li>
  *     {@code gw} ({@link org.machanism.machai.maven.GW}) scans documentation sources and runs the MachAI GW workflow.
- *     The goal is an aggregator mojo and executes once per reactor build.
+ *     This goal is an aggregator mojo and executes once per reactor build.
  *   </li>
  *   <li>
  *     {@code clean} ({@link org.machanism.machai.maven.Clean}) deletes temporary artifacts created by prior workflow
@@ -74,6 +74,9 @@
  *     &lt;instructions&gt;
  *       &lt;instruction&gt;src/site/machai/instructions.md&lt;/instruction&gt;
  *     &lt;/instructions&gt;
+ *     &lt;excludes&gt;
+ *       &lt;exclude&gt;node_modules&lt;/exclude&gt;
+ *     &lt;/excludes&gt;
  *   &lt;/configuration&gt;
  * &lt;/plugin&gt;
  * </pre>

@@ -128,14 +128,24 @@ public class FileProcessor extends ProjectProcessor {
 			}
 
 			for (String extension : extensions) {
-				if (StringUtils.isBlank(extension)) {
+				String normalizedExtension = normalizeExtension(extension);
+				if (normalizedExtension == null) {
 					continue;
 				}
-
-				String normalizedExtension = StringUtils.lowerCase(StringUtils.trim(extension));
 				reviewMap.putIfAbsent(normalizedExtension, reviewer);
 			}
 		}
+	}
+
+	private static String normalizeExtension(String extension) {
+		String normalizedExtension = StringUtils.lowerCase(StringUtils.trimToNull(extension));
+		if (normalizedExtension == null) {
+			return null;
+		}
+		if (normalizedExtension.startsWith(".")) {
+			normalizedExtension = normalizedExtension.substring(1);
+		}
+		return StringUtils.trimToNull(normalizedExtension);
 	}
 
 	/**
@@ -159,9 +169,12 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File rootDir, File dir) throws IOException {
-		if (!moduleMultiThread) {
+		if (moduleMultiThread) {
+			logger.info("Multi-threaded processing mode enabled.");
+		} else {
 			logger.info("Multi-threaded processing mode disabled.");
 		}
+
 		this.rootDir = rootDir;
 
 		File scanDir = dir;
@@ -434,6 +447,10 @@ public class FileProcessor extends ProjectProcessor {
 
 		String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getName()));
 		Reviewer reviewer = reviewMap.get(extension);
+
+		if (reviewer == null) {
+			reviewer = reviewMap.get(normalizeExtension(extension));
+		}
 
 		if (reviewer == null) {
 			return null;

@@ -1,37 +1,18 @@
 /**
- * Command-line tooling for scanning a workspace (single-module or multi-module) and preparing inputs for GenAI-assisted
- * code review and code generation workflows.
+ * Command-line tooling for scanning a workspace (single-module or multi-module) and preparing inputs for
+ * GenAI-assisted code review and code generation workflows.
  *
- * <p>The package provides the main CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and orchestration
- * components (for example, {@link org.machanism.machai.gw.FileProcessor}) responsible for:
+ * <p>This package contains the main CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and orchestration
+ * components (for example, {@link org.machanism.machai.gw.FileProcessor}) that:
  *
  * <ul>
- *   <li>discovering file-type-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (typically via
+ *   <li>discover file-type-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (typically via
  *       {@link java.util.ServiceLoader});</li>
- *   <li>traversing one or more modules and selecting candidate files for processing;</li>
- *   <li>extracting and merging guidance with bundled templates and optional user instructions; and</li>
- *   <li>building prompt inputs which can be persisted for inspection or sent to a configured
+ *   <li>traverse one or more modules and select candidate files for processing;</li>
+ *   <li>extract and merge guidance with bundled templates and optional user instructions; and</li>
+ *   <li>build prompt inputs which can be persisted for inspection or sent to a configured
  *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
  * </ul>
- *
- * <h2>Usage</h2>
- *
- * <p>Typical usage is via the CLI:
- *
- * <pre>{@code
- * // java -jar gw.jar --dir /path/to/project --genai OpenAI:gpt-5.1
- * }</pre>
- *
- * <p>Programmatic usage is also supported:
- *
- * <pre>{@code
- * FileProcessor processor = new FileProcessor("OpenAI:gpt-5.1");
- * processor.setModuleMultiThread(true);
- * processor.scanDocuments(new File("/path/to/project"));
- * }</pre>
- *
- * @author Viktor Tovstyi
- * @since 0.0.2
  */
 package org.machanism.machai.gw;
 

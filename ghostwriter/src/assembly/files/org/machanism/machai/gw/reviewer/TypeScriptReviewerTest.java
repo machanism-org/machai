@@ -1,8 +1,9 @@
 package org.machanism.machai.gw.reviewer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +27,7 @@ class TypeScriptReviewerTest {
 		String[] extensions = reviewer.getSupportedFileExtensions();
 
 		// Assert
-		assertEquals(1, extensions.length);
-		assertEquals("ts", extensions[0]);
+		assertArrayEquals(new String[] { "ts" }, extensions);
 	}
 
 	@Test
@@ -56,8 +56,8 @@ class TypeScriptReviewerTest {
 
 		// Assert
 		assertNotNull(result);
-		assertEquals(true, result.contains("do it"));
-		assertEquals(true, result.contains("a.ts"));
+		assertTrue(result.contains("do it"));
+		assertTrue(result.contains("a.ts"));
 	}
 
 	@Test
@@ -72,6 +72,6 @@ class TypeScriptReviewerTest {
 
 		// Assert
 		assertNotNull(result);
-		assertEquals(true, result.contains("block"));
+		assertTrue(result.contains("block"));
 	}
 }

@@ -1,25 +1,25 @@
 /**
- * Spring Shell-based command-line interface (CLI) for Machai.
+ * Spring Shell-based command-line interface (CLI) package for Machai.
  *
- * <p>This package contains the Spring Shell entry point and command components that expose Machai capabilities via
- * interactive and non-interactive command-line workflows.
+ * <p>This package contains the application entry point and Spring Shell command components that expose Machai
+ * capabilities via interactive and non-interactive command-line workflows.
  *
- * <h2>Primary responsibilities</h2>
+ * <h2>Responsibilities</h2>
  * <ul>
- *   <li>Discover, select, and assemble "bricks" into outputs such as projects or prompts.</li>
+ *   <li>Discover and select reusable "bricks" and assemble them into outputs such as projects or prompts.</li>
  *   <li>Generate and register bindex metadata used for discovery and reuse.</li>
- *   <li>Run directory scanning, scoring, and GenAI processing based on configuration.</li>
- *   <li>Clean Machai temporary/output folders.</li>
+ *   <li>Run directory scanning, scoring, and GenAI-backed processing based on configuration.</li>
+ *   <li>Clean Machai temporary and output folders.</li>
  *   <li>Manage configuration defaults consumed by other commands.</li>
  * </ul>
  *
- * <h2>Command groups</h2>
+ * <h2>Command components</h2>
  * <ul>
- *   <li><b>pick / assembly / prompt</b> ({@link org.machanism.machai.cli.AssemblyCommand})</li>
- *   <li><b>bindex / register</b> ({@link org.machanism.machai.cli.BindexCommand})</li>
- *   <li><b>gw</b> ({@link org.machanism.machai.cli.GWCommand})</li>
- *   <li><b>clean</b> ({@link org.machanism.machai.cli.CleanCommand})</li>
- *   <li><b>genai / dir / score / conf</b> ({@link org.machanism.machai.cli.ConfigCommand})</li>
+ *   <li>{@link org.machanism.machai.cli.AssemblyCommand} (pick / assembly / prompt)</li>
+ *   <li>{@link org.machanism.machai.cli.BindexCommand} (bindex / register)</li>
+ *   <li>{@link org.machanism.machai.cli.GWCommand} (gw)</li>
+ *   <li>{@link org.machanism.machai.cli.CleanCommand} (clean)</li>
+ *   <li>{@link org.machanism.machai.cli.ConfigCommand} (genai / dir / score / conf)</li>
  * </ul>
  *
  * <h2>Entry point</h2>

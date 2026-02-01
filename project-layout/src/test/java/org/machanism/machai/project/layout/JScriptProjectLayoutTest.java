@@ -56,7 +56,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListBecauseMatcherSearchesForExcludedDirNamesInAbsolutePath() throws Exception {
+	void getModules_shouldReturnEmptyListBecauseImplementationFiltersByAbsolutePathContainingExcludedDirStrings() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-workspaces");
 		assertTrue(dir.mkdirs() || dir.isDirectory());
@@ -67,6 +67,10 @@ class JScriptProjectLayoutTest {
 		File moduleA = new File(dir, "packages/module-a");
 		assertTrue(moduleA.mkdirs() || moduleA.isDirectory());
 		Files.write(new File(moduleA, "package.json").toPath(), "{\"name\":\"a\"}".getBytes(StandardCharsets.UTF_8));
+
+		File moduleB = new File(dir, "packages/module-b");
+		assertTrue(moduleB.mkdirs() || moduleB.isDirectory());
+		Files.write(new File(moduleB, "package.json").toPath(), "{\"name\":\"b\"}".getBytes(StandardCharsets.UTF_8));
 
 		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
 

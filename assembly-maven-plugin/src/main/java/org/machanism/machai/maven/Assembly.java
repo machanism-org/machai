@@ -26,41 +26,32 @@ import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
 
 /**
- * Maven plugin {@link org.apache.maven.plugin.Mojo} that implements the
- * {@code assembly} goal.
+ * Maven plugin {@link org.apache.maven.plugin.Mojo} that implements the {@code assembly} goal.
  *
  * <p>
  * This goal orchestrates an AI-assisted project assembly workflow:
  * </p>
  * <ol>
- * <li>Read an assembly prompt from {@link #assemblyPromptFile} (when present)
- * or ask for it interactively.</li>
- * <li>Use {@link #pickChatModel} to recommend candidate libraries
- * ({@link Bindex} entries).</li>
- * <li>Filter recommendations by {@link #score}.</li>
- * <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes
- * in {@link #basedir}.</li>
+ *   <li>Read an assembly prompt from {@link #assemblyPromptFile} (when present) or ask for it interactively.</li>
+ *   <li>Use {@link #pickChatModel} to recommend candidate libraries ({@link Bindex} entries).</li>
+ *   <li>Filter recommendations by {@link #score}.</li>
+ *   <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
  * </ol>
  *
  * <h2>Plugin parameters</h2>
  * <ul>
- * <li>{@code -Dassembly.genai} (default {@code OpenAI:gpt-5}) &ndash; Provider
- * id for the assembly phase.</li>
- * <li>{@code -Dpick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider
- * id for the library recommendation (picker) phase.</li>
- * <li>{@code -Dassembly.prompt.file} (default {@code project.txt}) &ndash; File
- * containing the prompt; if absent, the prompt is requested interactively.</li>
- * <li>{@code -Dassembly.score} (default {@code 0.9}) &ndash; Minimum score
- * required for a recommended library to be listed/used.</li>
- * <li>{@code -Dbindex.register.url} (optional) &ndash; Registration/lookup
- * endpoint used by the picker.</li>
+ *   <li>{@code -Dassembly.genai} (default {@code OpenAI:gpt-5}) &ndash; Provider id for the assembly phase.</li>
+ *   <li>{@code -Dpick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider id for the library
+ *   recommendation (picker) phase.</li>
+ *   <li>{@code -Dassembly.prompt.file} (default {@code project.txt}) &ndash; File containing the prompt; if absent,
+ *   the prompt is requested interactively.</li>
+ *   <li>{@code -Dassembly.score} (default {@code 0.9}) &ndash; Minimum score required for a recommended library to be
+ *   listed/used.</li>
+ *   <li>{@code -Dbindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
  * </ul>
  *
  * <h2>Usage examples</h2>
- * <p>
- * <b>Command line:</b>
- * </p>
- * 
+ * <p><b>Command line:</b></p>
  * <pre>
  * mvn org.machanism.machai:assembly-maven-plugin:assembly \
  *   -Dassembly.genai=OpenAI:gpt-5 \
@@ -73,7 +64,7 @@ import org.machanism.machai.schema.Bindex;
 public class Assembly extends AbstractMojo {
 
 	/**
-	 * Interactive prompter used when no prompt file is available.
+	 * Interactive prompter used when {@link #assemblyPromptFile} does not exist.
 	 */
 	@Component
 	protected Prompter prompter;
@@ -82,8 +73,7 @@ public class Assembly extends AbstractMojo {
 	 * GenAI provider identifier used for the assembly workflow.
 	 *
 	 * <p>
-	 * The value is resolved by {@link GenAIProviderManager} (for example,
-	 * {@code OpenAI:gpt-5}).
+	 * The value is resolved by {@link GenAIProviderManager} (for example, {@code OpenAI:gpt-5}).
 	 * </p>
 	 */
 	@Parameter(property = "assembly.genai", defaultValue = "OpenAI:gpt-5")
@@ -93,8 +83,7 @@ public class Assembly extends AbstractMojo {
 	 * GenAI provider identifier used for library recommendation/picking.
 	 *
 	 * <p>
-	 * The value is resolved by {@link GenAIProviderManager} (for example,
-	 * {@code OpenAI:gpt-5-mini}).
+	 * The value is resolved by {@link GenAIProviderManager} (for example, {@code OpenAI:gpt-5-mini}).
 	 * </p>
 	 */
 	@Parameter(property = "pick.genai", defaultValue = "OpenAI:gpt-5-mini")
@@ -104,8 +93,8 @@ public class Assembly extends AbstractMojo {
 	 * Prompt file for the assembly workflow.
 	 *
 	 * <p>
-	 * If the file exists, it is read as text and used as the prompt; otherwise the
-	 * prompt is requested interactively.
+	 * If the file exists, it is read as text and used as the prompt; otherwise the prompt is requested
+	 * interactively.
 	 * </p>
 	 */
 	@Parameter(property = "assembly.prompt.file", defaultValue = "project.txt")
@@ -118,8 +107,7 @@ public class Assembly extends AbstractMojo {
 	protected Double score;
 
 	/**
-	 * Optional registration URL used by the picker for metadata
-	 * lookups/registration.
+	 * Optional registration URL used by the picker for metadata lookups/registration.
 	 */
 	@Parameter(property = "bindex.register.url")
 	protected String registerUrl;
@@ -137,21 +125,15 @@ public class Assembly extends AbstractMojo {
 	 * The execution performs the following steps:
 	 * </p>
 	 * <ol>
-	 * <li>Read the prompt from {@link #assemblyPromptFile} when it exists;
-	 * otherwise prompt the user.</li>
-	 * <li>Initialize the picker GenAI provider and apply standard system function
-	 * tools.</li>
-	 * <li>Use {@link Picker} to recommend libraries and log recommendations to the
-	 * build output.</li>
-	 * <li>Run the {@link ApplicationAssembly} workflow in {@link #basedir} using
-	 * the assembly GenAI provider.</li>
-	 * <li>Optionally enter an interactive prompt loop (skipped for
-	 * {@link NoneProvider}).</li>
+	 *   <li>Read the prompt from {@link #assemblyPromptFile} when it exists; otherwise prompt the user.</li>
+	 *   <li>Initialize the picker GenAI provider and apply standard system function tools.</li>
+	 *   <li>Use {@link Picker} to recommend libraries and log recommendations to the build output.</li>
+	 *   <li>Run the {@link ApplicationAssembly} workflow in {@link #basedir} using the assembly GenAI provider.</li>
+	 *   <li>Optionally enter an interactive prompt loop (skipped for {@link NoneProvider}).</li>
 	 * </ol>
 	 *
-	 * @throws MojoExecutionException if prompt acquisition fails, provider
-	 *                                interaction fails, or the assembly workflow
-	 *                                fails
+	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly
+	 *                                workflow fails
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -182,8 +164,7 @@ public class Assembly extends AbstractMojo {
 				int i = 1;
 				getLog().info("Recommended libraries:");
 				for (Bindex bindex : bindexList) {
-					String scoreStr = picker.getScore(bindex.getId()) != null
-							? picker.getScore(bindex.getId()).toString()
+					String scoreStr = picker.getScore(bindex.getId()) != null ? picker.getScore(bindex.getId()).toString()
 							: "";
 					getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
 				}

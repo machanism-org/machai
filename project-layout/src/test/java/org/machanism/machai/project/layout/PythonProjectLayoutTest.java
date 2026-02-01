@@ -16,9 +16,7 @@ class PythonProjectLayoutTest {
 		File dir = new File("target/test-tmp/python-project-public");
 		assertTrue(dir.mkdirs() || dir.isDirectory());
 
-		String pyproject = "[project]\n" +
-				"name = \"demo\"\n" +
-				"classifiers = [\"Programming Language :: Python\"]\n";
+		String pyproject = "[project]\n" + "name = \"demo\"\n" + "classifiers = [\"Programming Language :: Python\"]\n";
 		Files.write(new File(dir, "pyproject.toml").toPath(), pyproject.getBytes(StandardCharsets.UTF_8));
 
 		// Act
@@ -29,14 +27,44 @@ class PythonProjectLayoutTest {
 	}
 
 	@Test
-	void isPythonProject_shouldReturnFalseWhenClassifierContainsPrivate() throws Exception {
+	void isPythonProject_shouldReturnTrueWhenNoClassifiersProvidedButNamePresent() throws Exception {
+		// Arrange
+		File dir = new File("target/test-tmp/python-project-no-classifiers");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		String pyproject = "[project]\n" + "name = \"demo\"\n";
+		Files.write(new File(dir, "pyproject.toml").toPath(), pyproject.getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		boolean result = PythonProjectLayout.isPythonProject(dir);
+
+		// Assert
+		assertTrue(result);
+	}
+
+	@Test
+	void isPythonProject_shouldReturnFalseWhenProjectNameMissing() throws Exception {
+		// Arrange
+		File dir = new File("target/test-tmp/python-project-no-name");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		String pyproject = "[project]\n" + "classifiers = [\"Programming Language :: Python\"]\n";
+		Files.write(new File(dir, "pyproject.toml").toPath(), pyproject.getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		boolean result = PythonProjectLayout.isPythonProject(dir);
+
+		// Assert
+		assertFalse(result);
+	}
+
+	@Test
+	void isPythonProject_shouldReturnFalseWhenClassifierContainsPrivate_caseInsensitive() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/python-project-private");
 		assertTrue(dir.mkdirs() || dir.isDirectory());
 
-		String pyproject = "[project]\n" +
-				"name = \"demo\"\n" +
-				"classifiers = [\"Private :: Do Not Publish\"]\n";
+		String pyproject = "[project]\n" + "name = \"demo\"\n" + "classifiers = [\"pRiVaTe :: Do Not Publish\"]\n";
 		Files.write(new File(dir, "pyproject.toml").toPath(), pyproject.getBytes(StandardCharsets.UTF_8));
 
 		// Act
@@ -72,5 +100,16 @@ class PythonProjectLayoutTest {
 
 		// Assert
 		assertFalse(result);
+	}
+
+	@Test
+	void getSources_documents_tests_shouldReturnNull() {
+		// Arrange
+		PythonProjectLayout layout = (PythonProjectLayout) new PythonProjectLayout().projectDir(new File("target/test-tmp/python-nulls"));
+
+		// Act
+		assertNull(layout.getSources());
+		assertNull(layout.getDocuments());
+		assertNull(layout.getTests());
 	}
 }

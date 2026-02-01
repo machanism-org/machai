@@ -1,26 +1,26 @@
 /**
- * Filesystem-backed APIs for inspecting and processing on-disk project structures.
+ * Filesystem-backed APIs for discovering, describing, and processing on-disk project structures.
  *
- * <p>This package provides a coordination layer for:
+ * <p>The types in this package focus on three related concerns:
  * <ul>
- *   <li>Detecting a suitable {@link org.machanism.machai.project.layout.ProjectLayout} for a given
- *       project directory via {@link org.machanism.machai.project.ProjectLayoutManager}.</li>
- *   <li>Recursively scanning a project (and any discovered modules) and delegating layout-specific
- *       behavior to implementations of {@link org.machanism.machai.project.ProjectProcessor}.</li>
+ *   <li><b>Layout detection</b> — determining which {@link org.machanism.machai.project.layout.ProjectLayout}
+ *       best matches a given root directory.</li>
+ *   <li><b>Traversal</b> — scanning a project directory tree (optionally including discovered modules)
+ *       to enumerate relevant source/resources and metadata.</li>
+ *   <li><b>Processing</b> — delegating layout-specific behavior to implementations of
+ *       {@link org.machanism.machai.project.ProjectProcessor}.</li>
  * </ul>
  *
- * <p>Detection supports multiple layout families (for example Maven, JavaScript/Node, and Python)
- * and falls back to a default layout when the directory exists but no specific layout is detected.
+ * <p>Layouts are typically detected via {@link org.machanism.machai.project.ProjectLayoutManager}.
+ * When the directory exists but no specific layout is detected, a default layout may be selected.
  *
  * <h2>Typical usage</h2>
  *
  * <pre>{@code
  * File projectDir = new File("/path/to/project");
  *
- * // Detect a layout (Maven / Node / Python / default).
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
  *
- * // Scan and process the project, recursing into modules if the layout provides them.
  * ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
  * }</pre>
