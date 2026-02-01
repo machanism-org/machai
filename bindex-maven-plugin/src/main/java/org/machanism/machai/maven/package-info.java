@@ -26,10 +26,10 @@
  */
 
 /**
- * Maven plugin goals for running Bindex/Machai operations as part of a Maven build.
+ * Maven plugin goals for running Machai/Bindex operations as part of a Maven build.
  *
- * <p>This package provides {@code Mojo} implementations that can be bound to build phases or executed directly
- * to manage a project's Bindex metadata and associated artifacts:</p>
+ * <p>This package contains Maven {@code Mojo} implementations that can be bound to build phases or executed
+ * directly to manage a module's Bindex metadata and related artifacts:</p>
  *
  * <ul>
  *   <li>{@link org.machanism.machai.maven.Create} - creates a new Bindex index for the current module.</li>
@@ -40,9 +40,9 @@
  *       {@code .machai} directory.</li>
  * </ul>
  *
- * <p>Most goals share common parameters and helper logic provided by
- * {@link org.machanism.machai.maven.AbstractBindexMojo}, including project/base directory access and selection
- * of the configured GenAI provider/model.</p>
+ * <p>Most goals share common configuration parameters and helper logic provided by
+ * {@link org.machanism.machai.maven.AbstractBindexMojo}, such as access to the Maven project/base directory and
+ * selection of the configured GenAI provider and model.</p>
  *
  * <h2>Command-line usage</h2>
  * <pre>

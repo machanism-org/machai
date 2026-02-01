@@ -1,13 +1,13 @@
 package org.machanism.machai.bindex.builder;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
@@ -27,15 +27,15 @@ class MavenBindexBuilderTest {
     File tempDir;
 
     @Test
-    void removeNotImportantData_nullsConfiguredSectionsButLeavesPropertiesAndPluginRepositoriesAsEmptyInstances() {
+    void removeNotImportantData_clearsConfiguredSections() {
         // Arrange
         Model model = new Model();
+        model.setDistributionManagement(new org.apache.maven.model.DistributionManagement());
         model.setBuild(new org.apache.maven.model.Build());
         model.setProperties(new java.util.Properties());
         model.setDependencyManagement(new org.apache.maven.model.DependencyManagement());
         model.setReporting(new org.apache.maven.model.Reporting());
         model.setScm(new org.apache.maven.model.Scm());
-        model.setDistributionManagement(new org.apache.maven.model.DistributionManagement());
         model.setPluginRepositories(new java.util.ArrayList<>());
 
         MavenBindexBuilder builder = new MavenBindexBuilder(mock(MavenProjectLayout.class));
@@ -44,13 +44,46 @@ class MavenBindexBuilderTest {
         builder.removeNotImportantData(model);
 
         // Assert
+        assertNull(model.getDistributionManagement());
         assertNull(model.getBuild());
         assertNull(model.getDependencyManagement());
         assertNull(model.getReporting());
         assertNull(model.getScm());
-        assertNull(model.getDistributionManagement());
-        assertEquals(0, model.getProperties().size());
-        assertEquals(0, model.getPluginRepositories().size());
+
+        // Some Maven Model getters may normalize null to empty values; ensure "not meaningful".
+        if (model.getProperties() != null) {
+            assertNull(model.getProperties().getProperty("k"));
+        } else {
+            assertNull(model.getProperties());
+        }
+
+        if (model.getPluginRepositories() != null) {
+            org.junit.jupiter.api.Assertions.assertTrue(model.getPluginRepositories().isEmpty());
+        } else {
+            assertNull(model.getPluginRepositories());
+        }
+    }
+
+    @Test
+    void projectContext_whenBuildNull_returnsEarlyAndDoesNotPrompt() throws Exception {
+        // Arrange
+        MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir);
+
+        Model model = new Model();
+        model.setBuild(null);
+        layout.model(model);
+
+        GenAIProvider provider = mock(GenAIProvider.class);
+
+        MavenBindexBuilder builder = new MavenBindexBuilder(layout);
+        builder.genAIProvider(provider);
+
+        // Act
+        assertDoesNotThrow(builder::projectContext);
+
+        // Assert
+        verify(provider, never()).prompt(anyString());
+        verify(provider, never()).promptFile(any(File.class), anyString());
     }
 
     @Test

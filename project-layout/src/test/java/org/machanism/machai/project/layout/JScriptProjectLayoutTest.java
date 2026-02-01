@@ -56,7 +56,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListBecauseImplementationFiltersByAbsolutePathContainingExcludedDirStrings() throws Exception {
+	void getModules_shouldReturnEmptyListDueToOverlyBroadExcludedDirMatchingOnAbsolutePath() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-workspaces");
 		assertTrue(dir.mkdirs() || dir.isDirectory());
@@ -83,7 +83,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldIgnoreExcludedDirectoriesWhenResolvingWorkspaces() throws Exception {
+	void getModules_shouldIgnoreModulesInExcludedDirectories() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-workspaces-excluded");
 		assertTrue(dir.mkdirs() || dir.isDirectory());

@@ -129,29 +129,27 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` integrates with the OpenAI API as a concrete `GenAIProvider` implementation.
 
-This provider enables a wide range of generative AI capabilities, including:
+It supports:
 
-- Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
-
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+- Sending prompts and receiving responses from OpenAI chat/response models.
+- Managing files for use in OpenAI workflows.
+- Advanced LLM requests (text generation, summarization, question answering).
+- Vector embeddings for semantic search and similarity use cases.
 
 **Environment Variables**
 
-The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
+The client reads the following environment variables; at minimum, set `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using the CodeMie API**
+**Using the CodeMie API via OpenAI provider**
 
-To use the CodeMie API, set:
+To call CodeMie through the OpenAI-compatible gateway, set:
 
 - `OPENAI_API_KEY` to the access token/key
 - `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -182,9 +180,9 @@ This provider reads credentials from configuration keys `GENAI_USERNAME` and `GE
 
 ### None
 
-No-op implementation of `GenAIProvider`.
+`NoneProvider` is a no-op implementation of `GenAIProvider`.
 
-This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
+It is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
 **Key characteristics**
 

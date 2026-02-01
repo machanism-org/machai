@@ -541,7 +541,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (path == null || path.isBlank()) {
 			return 0;
 		}
-		String normalized = path.replace("\\\\", "/");
+		String normalized = path.replace("\\", "/");
 		return normalized.split("/").length;
 	}
 

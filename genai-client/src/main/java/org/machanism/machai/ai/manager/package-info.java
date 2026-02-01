@@ -29,23 +29,24 @@
  * Provider resolution, interaction, and host-side tool wiring for generative AI integrations.
  *
  * <p>This package defines the core abstractions used to integrate one or more generative AI backends into the host
- * application.
+ * application. It provides a provider service-provider interface (SPI), a manager for resolving providers by name,
+ * and optional installers for wiring host-executed tools (e.g., filesystem and command execution) into a provider's
+ * tool/function registry.
  *
- * <p>Key responsibilities include:
+ * <h2>Key responsibilities</h2>
  * <ul>
  *   <li><strong>Provider SPI</strong> – {@link org.machanism.machai.ai.manager.GenAIProvider} defines how to build and
- *       execute requests (chat/completions, embeddings, file attachments) and how the host registers tool functions.</li>
+ *       execute provider requests and how the host registers callable tools/functions.</li>
  *   <li><strong>Provider resolution</strong> – {@link org.machanism.machai.ai.manager.GenAIProviderManager} maps a
  *       {@code Provider:Model} identifier to an implementation and routes calls accordingly.</li>
- *   <li><strong>Host tool wiring</strong> – optional installers such as
+ *   <li><strong>Host tool wiring</strong> – installers such as
  *       {@link org.machanism.machai.ai.manager.FileFunctionTools},
  *       {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
- *       {@link org.machanism.machai.ai.manager.SystemFunctionTools} register commonly needed host capabilities
- *       (filesystem and command execution) with a provider in a consistent way.</li>
+ *       {@link org.machanism.machai.ai.manager.SystemFunctionTools} register commonly needed host capabilities with a
+ *       provider in a consistent way.</li>
  * </ul>
  *
  * <h2>Usage</h2>
- *
  * <pre>{@code
  * GenAIProviderManager manager = ...;
  * GenAIProvider provider = manager.get("OpenAI:gpt-4.1");

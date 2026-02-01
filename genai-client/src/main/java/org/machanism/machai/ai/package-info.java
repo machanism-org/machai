@@ -1,7 +1,7 @@
 /**
  * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
- * <p>This package defines provider-neutral abstractions that application code should compile against. Concrete
+ * <p>This package defines the provider-neutral abstractions that application code should compile against. Concrete
  * provider integrations live under {@code org.machanism.machai.ai.provider}, while provider discovery/selection and
  * lifecycle are coordinated by the manager APIs in {@code org.machanism.machai.ai.manager}.
  *
@@ -20,7 +20,8 @@
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Summarize this text.");
  * String response = provider.perform();
- * }</n * </pre>
+ * }
+ * </pre>
  */
 package org.machanism.machai.ai;
 

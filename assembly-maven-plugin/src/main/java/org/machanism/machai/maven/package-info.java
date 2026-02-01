@@ -25,14 +25,18 @@
 */
 
 /**
- * Maven plugin goal implementations for AI-assisted project assembly.
+ * Maven plugin goal(s) for AI-assisted project assembly.
  *
  * <p>
- * This package contains the {@code assembly} goal implementation, {@link org.machanism.machai.maven.Assembly}.
- * The goal reads (or interactively requests) an assembly prompt, asks an AI-backed picker to recommend candidate
- * libraries, and then runs an assembly workflow that applies changes to the current Maven execution base
- * directory.
+ * This package contains the {@code assembly} goal implementation, {@link org.machanism.machai.maven.Assembly},
+ * which orchestrates an AI-assisted workflow that:
  * </p>
+ * <ol>
+ *   <li>Obtains an assembly prompt from a file or by interactive input.</li>
+ *   <li>Uses an AI-backed picker to recommend candidate libraries ({@link org.machanism.machai.schema.Bindex}).</li>
+ *   <li>Filters recommendations by a minimum score threshold.</li>
+ *   <li>Runs an assembly workflow that applies changes in the current Maven execution base directory.</li>
+ * </ol>
  *
  * <h2>Goal</h2>
  * <ul>
@@ -41,13 +45,15 @@
  *
  * <h2>Configuration parameters</h2>
  * <p>
- * Parameters can be provided either as system properties (for example, {@code -Dassembly.genai=...}) and/or via
- * plugin configuration.
+ * Parameters can be provided via system properties (for example, {@code -Dassembly.genai=...}) and/or via plugin
+ * configuration.
  * </p>
  * <ul>
  *   <li>{@code assembly.genai} &ndash; GenAI provider id for the assembly phase (default {@code OpenAI:gpt-5}).</li>
- *   <li>{@code pick.genai} &ndash; GenAI provider id for the recommendation/picker phase (default {@code OpenAI:gpt-5-mini}).</li>
- *   <li>{@code assembly.prompt.file} &ndash; Prompt file path (default {@code project.txt}); if missing, the prompt is requested interactively.</li>
+ *   <li>{@code pick.genai} &ndash; GenAI provider id for the recommendation/picker phase (default
+ *   {@code OpenAI:gpt-5-mini}).</li>
+ *   <li>{@code assembly.prompt.file} &ndash; Prompt file path (default {@code project.txt}); if the file does not
+ *   exist, the prompt is requested interactively.</li>
  *   <li>{@code assembly.score} &ndash; Minimum score threshold for recommended libraries (default {@code 0.9}).</li>
  *   <li>{@code bindex.register.url} &ndash; Optional registration/lookup endpoint used by the picker.</li>
  * </ul>

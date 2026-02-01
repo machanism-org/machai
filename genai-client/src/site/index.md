@@ -25,6 +25,7 @@ The typical entry point is `GenAIProviderManager`, which resolves a provider imp
 ```java
 Configurator conf = ...;
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1", conf);
+provider.model("gpt-5.1");
 provider.instructions("You are a helpful assistant.");
 provider.prompt("Summarize the following text...");
 String answer = provider.perform();
@@ -50,12 +51,12 @@ and generate the content for this section following net format:
 
 `OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
 
-This provider enables a wide range of generative AI capabilities, including:
+Capabilities
 
-- Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+- Sends prompts and receives responses from OpenAI chat/response models.
+- Uploads and references files in requests.
+- Supports tool/function calling (`addTool(...)`) and can automatically execute registered Java handlers when the model requests a tool call.
+- Can create vector embeddings (`embedding(...)`) for semantic search and similarity use cases.
 
 Environment variables
 
@@ -77,6 +78,7 @@ Example
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1", conf);
+provider.model("gpt-5.1");
 ```
 
 Thread safety
@@ -103,6 +105,7 @@ Example
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1", conf);
+provider.model("gpt-5.1");
 ```
 
 ### None

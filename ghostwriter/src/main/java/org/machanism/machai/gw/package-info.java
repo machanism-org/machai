@@ -2,15 +2,18 @@
  * Command-line tooling for scanning a workspace (single-module or multi-module) and preparing inputs for
  * GenAI-assisted code review and code generation workflows.
  *
- * <p>This package contains the main CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and orchestration
- * components (for example, {@link org.machanism.machai.gw.FileProcessor}) that:
+ * <p>This package provides the CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and supporting
+ * orchestration components (for example, {@link org.machanism.machai.gw.FileProcessor}) that coordinate discovery
+ * of file reviewers, workspace traversal, guidance/template assembly, and prompt creation.
+ *
+ * <h2>Core responsibilities</h2>
  *
  * <ul>
- *   <li>discover file-type-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (typically via
- *       {@link java.util.ServiceLoader});</li>
- *   <li>traverse one or more modules and select candidate files for processing;</li>
- *   <li>extract and merge guidance with bundled templates and optional user instructions; and</li>
- *   <li>build prompt inputs which can be persisted for inspection or sent to a configured
+ *   <li>Discover file-type-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (typically via
+ *       {@link java.util.ServiceLoader}).</li>
+ *   <li>Traverse one or more modules and select candidate files for processing.</li>
+ *   <li>Extract and merge guidance with bundled templates and optional user instructions.</li>
+ *   <li>Build prompt inputs which can be persisted for inspection or sent to a configured
  *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
  * </ul>
  */

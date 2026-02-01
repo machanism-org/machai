@@ -94,7 +94,7 @@ class ProjectLayoutTest {
 	}
 
 	@Test
-	void getRelatedPath_static_whenRelativePathIsBlankAndAddSingleDotTrue_shouldReturnDot() {
+	void getRelatedPath_static_whenRelativePathEmpty_shouldReturnDotEvenIfAddSingleDotTrue() {
 		// Arrange
 		File dir = new File("/repo");
 		File file = new File("/repo");
@@ -117,5 +117,19 @@ class ProjectLayoutTest {
 
 		// Assert
 		assertNull(related);
+	}
+
+	@Test
+	void getRelatedPath_instance_shouldReturnEmptyStringWhenFileEqualsCurrentPath() {
+		// Arrange
+		ProjectLayout layout = new TestLayout();
+		String currentPath = "C:/repo";
+		File file = new File("C:/repo");
+
+		// Act
+		String related = layout.getRelatedPath(currentPath, file);
+
+		// Assert
+		assertEquals("", related);
 	}
 }
