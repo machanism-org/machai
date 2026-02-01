@@ -6,6 +6,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexRegister;
@@ -47,7 +48,7 @@ public class Register extends AbstractBindexMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (isBindexed()) {
-			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, new PropertiesConfigurator("bindex.properties"));
 			try (BindexRegister register = new BindexRegister(provider, registerUrl)) {
 				register.update(update);
 				register.scanFolder(project.getBasedir());

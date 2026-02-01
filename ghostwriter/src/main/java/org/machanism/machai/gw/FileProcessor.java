@@ -27,6 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
@@ -93,13 +94,16 @@ public class FileProcessor extends ProjectProcessor {
 
 	private String[] excludes;
 
+	private Configurator configurator;
+
 	/**
 	 * Constructs a processor.
 	 *
 	 * @param genai provider key/name to use
 	 */
-	public FileProcessor(String genai) {
+	public FileProcessor(String genai, Configurator configurator) {
 		this.genai = genai;
+		this.configurator = configurator;
 		this.systemFunctionTools = new SystemFunctionTools();
 		loadReviewers();
 	}
@@ -344,7 +348,7 @@ public class FileProcessor extends ProjectProcessor {
 			throws IOException {
 		String perform;
 
-		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
+		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
 			systemFunctionTools.applyTools(provider);
 			provider.setWorkingDir(projectDir);
 
@@ -522,7 +526,7 @@ public class FileProcessor extends ProjectProcessor {
 			return;
 		}
 
-		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai)) {
+		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
 			if (!provider.isThreadSafe()) {
 				throw new IllegalArgumentException(
 						"The provider '" + genai

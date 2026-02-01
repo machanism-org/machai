@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.apache.commons.lang.SystemUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -240,5 +241,9 @@ public class NoneProvider implements GenAIProvider {
     public void close() {
         // No-op
     }
+
+	@Override
+	public void init(Configurator conf) {
+	}
 
 }

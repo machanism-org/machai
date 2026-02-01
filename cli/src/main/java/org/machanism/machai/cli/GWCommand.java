@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.Optional;
 
 import org.apache.commons.lang.SystemUtils;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -36,7 +37,9 @@ public class GWCommand {
 
 	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
-	
+
+	private PropertiesConfigurator config;
+
 	/**
 	 * Scans and processes documents in the given project directory using the
 	 * specified GenAI chat model.
@@ -62,7 +65,7 @@ public class GWCommand {
 
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 		scan = Optional.ofNullable(scan).orElse(dir);
-		
+
 		String relatedPath = ProjectLayout.getRelatedPath(dir, scan);
 		if (relatedPath == null) {
 			logger.warn(
@@ -75,7 +78,7 @@ public class GWCommand {
 		}
 
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
-		FileProcessor documents = new FileProcessor(chatModel);
+		FileProcessor documents = new FileProcessor(chatModel, config);
 
 		if (instructions != null) {
 			File instructionsFile = new File(instructions);

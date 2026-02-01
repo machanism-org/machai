@@ -16,6 +16,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -142,19 +144,22 @@ public class GW extends AbstractMojo {
 			throw new MojoExecutionException("No <server> with id '" + serverId + "' found in Maven settings.xml.");
 		}
 
+		PropertiesConfigurator config = new PropertiesConfigurator();
+
 		String username = server.getUsername();
 		if (username != null && !username.isBlank()) {
-			System.setProperty("GENAI_USERNAME", username);
+			config.set("GENAI_USERNAME", username);
 		}
 		String password = server.getPassword();
 		if (password != null && !password.isBlank()) {
-			System.setProperty("GENAI_PASSWORD", password);
+			config.set("GENAI_PASSWORD", password);
 		}
 
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 
-		FileProcessor processor = new FileProcessor(genai) {
+
+		FileProcessor processor = new FileProcessor(genai, config) {
 			/**
 			 * Creates a project layout for a Maven module, enriching it with the reactor
 			 * model when available.

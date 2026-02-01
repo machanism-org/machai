@@ -84,11 +84,6 @@
 			<artifactId>ghostwriter</artifactId>
 			<version>0.0.7-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>org.machanism.macha.core.commons</groupId>
-			<artifactId>configurator</artifactId>
-			<version>0.0.4</version>
-		</dependency>
 
 		<!-- ae dependencies (provided) -->
 		<dependency>

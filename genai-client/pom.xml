@@ -32,6 +32,11 @@
 			<artifactId>project-layout</artifactId>
 			<version>0.0.7-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.machanism.macha.core.commons</groupId>
+			<artifactId>configurator</artifactId>
+			<version>0.0.5-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.openai</groupId>

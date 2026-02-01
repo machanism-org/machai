@@ -21,6 +21,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,6 +141,23 @@ public class OpenAIProvider implements GenAIProvider {
 	private File inputsLog;
 
 	private File workingDir;
+
+	@Override
+	public void init(Configurator config) {
+		String baseUrl = config.get("OPENAI_BASE_URL");
+		String privateKey = config.get("OPENAI_API_KEY");
+
+		createClient(baseUrl, privateKey);
+	}
+
+	protected void createClient(String baseUrl, String privateKey) {
+		com.openai.client.okhttp.OpenAIOkHttpClient.Builder buillder = OpenAIOkHttpClient.builder();
+		buillder.apiKey(privateKey);
+		if (baseUrl != null) {
+			buillder.baseUrl(baseUrl);
+		}
+		client = buillder.build();
+	}
 
 	/**
 	 * Adds a text prompt to the current conversation.
@@ -488,17 +506,6 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	protected OpenAIClient getClient() {
-		if (client == null) {
-			com.openai.client.okhttp.OpenAIOkHttpClient.Builder buillder = OpenAIOkHttpClient.builder();
-
-			String privateKey = System.getProperty("OPENAI_API_KEY", System.getenv().get("OPENAI_API_KEY"));
-			buillder.apiKey(privateKey);
-
-			String baseUrl = System.getProperty("OPENAI_BASE_URL", System.getenv().get("OPENAI_BASE_URL"));
-			buillder.baseUrl(baseUrl);
-			client = buillder.build();
-		}
-
 		return client;
 	}
 

@@ -62,8 +62,12 @@ public final class Ghostwriter {
 			logger = LoggerFactory.getLogger(Ghostwriter.class);
 			logger.info("Executing in directory: {}", execDir);
 
-			File configFile = new File(execDir, "gw.properties");
-			config.load(configFile.getAbsolutePath());
+			try {
+				File configFile = new File(execDir, "gw.properties");
+				config.setConfiguration(configFile.getAbsolutePath());
+			} catch (IOException e) {
+				// the property file is not defined, ignore.
+			}
 		} catch (Exception e) {
 			// configuration file not found.
 		}
@@ -180,7 +184,7 @@ public final class Ghostwriter {
 				String currentFile = ProjectLayout.getRelatedPath(rootDir, new File(scanDir));
 				if (currentFile != null) {
 
-					FileProcessor processor = new FileProcessor(genai);
+					FileProcessor processor = new FileProcessor(genai, config);
 
 					processor.setExcludes(excludes);
 					processor.setInstructionLocations(instructions);

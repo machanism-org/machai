@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.lang.StringUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.none.NoneProvider;
 
 /**
@@ -34,7 +35,7 @@ public class GenAIProviderManager {
 	 * @return a new provider instance configured with the requested model
 	 * @throws IllegalArgumentException if the provider cannot be resolved or instantiated
 	 */
-	public static GenAIProvider getProvider(String chatModel) {
+	public static GenAIProvider getProvider(String chatModel, Configurator conf) {
 		String providerName = StringUtils.substringBefore(chatModel, ":");
 		String chatModelName = StringUtils.substringAfter(chatModel, ":");
 
@@ -54,6 +55,7 @@ public class GenAIProviderManager {
 			Class<? extends GenAIProvider> providerClass = (Class<? extends GenAIProvider>) Class.forName(className);
 			Constructor<? extends GenAIProvider> constructor = providerClass.getConstructor();
 			GenAIProvider provider = constructor.newInstance();
+			provider.init(conf);
 			provider.model(chatModelName);
 
 			return provider;

@@ -5,6 +5,8 @@ import java.io.File;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
@@ -14,8 +16,9 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
  * Base class for the Bindex Maven plugin goals.
  *
  * <p>
- * Provides common parameters (project/base directory/model selection) and shared helper methods used by concrete goals
- * such as {@link Create}, {@link Update}, and {@link Register}.
+ * Provides common parameters (project/base directory/model selection) and
+ * shared helper methods used by concrete goals such as {@link Create},
+ * {@link Update}, and {@link Register}.
  * </p>
  */
 public abstract class AbstractBindexMojo extends AbstractMojo {
@@ -27,7 +30,8 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	protected MavenProject project;
 
 	/**
-	 * The AI provider/model identifier used by the plugin (for example {@code OpenAI:gpt-5}).
+	 * The AI provider/model identifier used by the plugin (for example
+	 * {@code OpenAI:gpt-5}).
 	 */
 	@Parameter(property = "bindex.genai", defaultValue = "OpenAI:gpt-5")
 	protected String chatModel;
@@ -38,20 +42,26 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
 	protected File basedir;
 
+	private Configurator configurator;
+
 	/**
 	 * Creates a new instance.
 	 */
 	public AbstractBindexMojo() {
 		super();
+		configurator = new PropertiesConfigurator("bindex.properties");
 	}
 
 	/**
-	 * Creates or updates the Bindex index and related resources for the current project.
+	 * Creates or updates the Bindex index and related resources for the current
+	 * project.
 	 *
-	 * @param update whether to run in update mode (incremental refresh) instead of create mode
+	 * @param update whether to run in update mode (incremental refresh) instead of
+	 *               create mode
+	 * @param conf
 	 */
 	void createBindex(boolean update) {
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, configurator);
 
 		BindexCreator creator = new BindexCreator(provider);
 		creator.update(update);
@@ -67,12 +77,18 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 * Indicates whether the current Maven project should be processed by Bindex.
 	 *
 	 * <p>
-	 * The plugin skips projects with {@code pom} packaging (typically parent/aggregator modules).
+	 * The plugin skips projects with {@code pom} packaging (typically
+	 * parent/aggregator modules).
 	 * </p>
 	 *
-	 * @return {@code true} if the project packaging is not {@code pom}; otherwise {@code false}
+	 * @return {@code true} if the project packaging is not {@code pom}; otherwise
+	 *         {@code false}
 	 */
 	boolean isBindexed() {
 		return !"pom".equals(project.getPackaging());
+	}
+
+	public Configurator getConfigurator() {
+		return configurator;
 	}
 }

@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
@@ -42,6 +43,8 @@ public class BindexCommand {
 	@Lazy
 	LineReader reader;
 
+	private PropertiesConfigurator config;
+
 	/**
 	 * Generates bindex files for the given directory using GenAI provider.
 	 * 
@@ -62,7 +65,7 @@ public class BindexCommand {
 			throws IOException {
 
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		BindexCreator register = new BindexCreator(provider);
 		register.update(update);
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
@@ -90,7 +93,7 @@ public class BindexCommand {
 
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		try (BindexRegister register = new BindexRegister(provider, registerUrl)) {
 			register.update(update);
 			register.scanFolder(dir);

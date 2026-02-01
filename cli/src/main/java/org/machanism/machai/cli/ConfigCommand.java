@@ -17,7 +17,7 @@ public class ConfigCommand {
 
 	static {
 		try {
-			config.load("machai.properties");
+			config.setConfiguration("machai.properties");
 		} catch (Exception e) {
 			// configuration file not found.
 		}

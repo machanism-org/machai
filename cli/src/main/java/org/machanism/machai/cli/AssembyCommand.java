@@ -10,6 +10,8 @@ import java.util.Optional;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
@@ -60,11 +62,14 @@ public class AssembyCommand {
 	/** Utility for applying system function tools to GenAI providers. */
 	private SystemFunctionTools functionTools = new SystemFunctionTools();
 
+	private PropertiesConfigurator config;
+
 	/**
 	 * Default constructor.
 	 */
 	public AssembyCommand() {
 		super();
+		config = new PropertiesConfigurator("machai.properties");
 	}
 
 	/**
@@ -89,7 +94,7 @@ public class AssembyCommand {
 
 		findQuery = query;
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", 0.90));
 		bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
 	}
@@ -137,7 +142,7 @@ public class AssembyCommand {
 			throws IOException {
 
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		functionTools.applyTools(provider);
 
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
@@ -177,7 +182,7 @@ public class AssembyCommand {
 					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
 
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel);
+		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 
 		functionTools.applyTools(provider);
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
