@@ -40,8 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported files,
- * and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported
+ * files, and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
  * This processor delegates file-specific guidance extraction to
@@ -238,8 +238,8 @@ public class FileProcessor extends ProjectProcessor {
 					throw new IllegalStateException("Thread interrupted while processing modules", e);
 				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
-					if (cause instanceof RuntimeException runtimeException) {
-						throw runtimeException;
+					if (cause instanceof RuntimeException) {
+						throw (RuntimeException) cause;
 					}
 					throw new IllegalStateException("Module processing failed.", cause);
 				}
