@@ -1,30 +1,27 @@
 /**
- * Project discovery and processing entry points.
+ * Project discovery, representation, and processing.
  *
- * <p>This package contains the public API and core types used to:
- *
- * <ul>
- *   <li>detect a project's layout from a root directory,</li>
- *   <li>represent the discovered project and its folders/modules, and</li>
- *   <li>scan/process the project using layout-specific behavior.</li>
- * </ul>
- *
- * <h2>Key concepts</h2>
+ * <p>This package contains the core API for working with a source-code project rooted at a filesystem
+ * directory. It focuses on:
  *
  * <ul>
- *   <li><b>Layout detection</b>: {@link org.machanism.machai.project.ProjectLayoutManager} inspects a
- *       root directory and selects an appropriate {@code ProjectLayout} (for example Maven, Node,
- *       Python), with a default/fallback when no specific layout matches.</li>
- *   <li><b>Project representation</b>: types such as {@link org.machanism.machai.project.Project} and
- *       {@link org.machanism.machai.project.ProjectFolder} model the discovered structure and provide
- *       access to relevant paths and metadata.</li>
- *   <li><b>Processing/scanning</b>: {@link org.machanism.machai.project.ProjectProcessor}
- *       implementations traverse a project root and delegate to layout-specific handling.</li>
- *   <li><b>Layout implementations</b>: concrete layouts reside in
- *       {@code org.machanism.machai.project.layout}.</li>
+ *   <li><b>Layout detection</b>: determining what kind of project a directory represents (for example,
+ *       Maven, Node, Python) and selecting a matching {@code ProjectLayout}.</li>
+ *   <li><b>Project modeling</b>: representing a discovered project and its important folders as typed
+ *       structures.</li>
+ *   <li><b>Scanning and processing</b>: traversing a project root and applying layout-aware processing
+ *       rules.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Typical flow</h2>
+ *
+ * <ol>
+ *   <li>Detect the layout for a root directory.</li>
+ *   <li>Create and run a processor to scan the directory tree.</li>
+ *   <li>Consume the resulting {@code Project} structure and metadata.</li>
+ * </ol>
+ *
+ * <h2>Example</h2>
  *
  * <pre>{@code
  * File projectDir = new File("/path/to/project");
@@ -35,7 +32,6 @@
  * processor.scanFolder(projectDir);
  * }</pre>
  *
- * @author machanism
  * @since 0.0.2
  */
 package org.machanism.machai.project;

@@ -169,11 +169,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File rootDir, File dir) throws IOException {
-		if (moduleMultiThread) {
-			logger.info("Multi-threaded processing mode enabled.");
-		} else {
-			logger.info("Multi-threaded processing mode disabled.");
-		}
+		logger.info("Multi-threaded processing mode {}.", moduleMultiThread ? "enabled" : "disabled");
 
 		this.rootDir = rootDir;
 
@@ -219,8 +215,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
-		ExecutorService executor = Executors.newFixedThreadPool(Math.min(modules.size(),
-				Math.max(1, Runtime.getRuntime().availableProcessors())));
+		ExecutorService executor = Executors.newFixedThreadPool(
+				Math.min(modules.size(), Math.max(1, Runtime.getRuntime().availableProcessors())));
 		try {
 			List<Future<Void>> futures = new ArrayList<>();
 			for (String module : modules) {
@@ -261,7 +257,7 @@ public class FileProcessor extends ProjectProcessor {
 	@Override
 	protected void processModule(File projectDir, String module) throws IOException {
 		if (defaultProcessingDir == null
-				|| isPathUnderDirectory(projectDir.getPath(), defaultProcessingDir.getPath())) {
+				|| isPathUnderDirectory(new File(projectDir, module).getPath(), defaultProcessingDir.getPath())) {
 			super.processModule(projectDir, module);
 		}
 	}
@@ -348,9 +344,7 @@ public class FileProcessor extends ProjectProcessor {
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
-		if (defaultProcessingDir == null
-				|| isPathUnderDirectory(file.getPath(), defaultProcessingDir.getPath())) {
-
+		if (defaultProcessingDir == null || isPathUnderDirectory(file.getPath(), defaultProcessingDir.getPath())) {
 			File projectDir = projectLayout.getProjectDir();
 			String guidance = parseFile(projectDir, file);
 
@@ -430,10 +424,8 @@ public class FileProcessor extends ProjectProcessor {
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream()
-					.filter(t -> t != null && new File(projectDir, t).exists())
-					.map(e -> "`" + e + "`")
-					.collect(Collectors.toList());
+			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())
+					.map(e -> "`" + e + "`").collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 
@@ -476,24 +468,19 @@ public class FileProcessor extends ProjectProcessor {
 				return -1;
 			} else if (!f1.isDirectory() && f2.isDirectory()) {
 				return 1;
-			} else {
-				return f1.getName().compareToIgnoreCase(f2.getName());
 			}
+			return f1.getName().compareToIgnoreCase(f2.getName());
 		});
 
-		List<File> result;
 		if (excludes == null) {
-			result = new ArrayList<>();
+			List<File> result = new ArrayList<>();
 			Collections.addAll(result, files);
-
-		} else {
-			result = Arrays.stream(files)
-					.filter(file -> Arrays.stream(excludes)
-							.noneMatch(exclude -> file.getName().equals(exclude)))
-					.collect(Collectors.toList());
+			return result;
 		}
 
-		return result;
+		return Arrays.stream(files)
+				.filter(file -> Arrays.stream(excludes).noneMatch(exclude -> file.getName().equals(exclude)))
+				.collect(Collectors.toList());
 	}
 
 	private List<File> findFiles(File projectDir) throws IOException {
@@ -596,9 +583,8 @@ public class FileProcessor extends ProjectProcessor {
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
 			if (!provider.isThreadSafe()) {
-				throw new IllegalArgumentException(
-						"The provider '" + genai
-								+ "' is not thread-safe and cannot be used in a multi-threaded context.");
+				throw new IllegalArgumentException("The provider '" + genai
+						+ "' is not thread-safe and cannot be used in a multi-threaded context.");
 			}
 		}
 		this.moduleMultiThread = true;

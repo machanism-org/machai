@@ -1,24 +1,26 @@
 /**
- * Provides a no-op ("none") implementation of the generative-AI provider SPI.
+ * Provides the {@code none} (no-op) implementation of the generative-AI provider SPI.
  *
  * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, an implementation of
  * {@link org.machanism.machai.ai.manager.GenAIProvider} intended for environments where no external LLM integration
- * should be used (for example, security/compliance restrictions, offline execution, or tests).
+ * should be used (for example, offline execution, security/compliance constraints, or unit/integration tests).
  *
  * <h2>Behavior</h2>
  * <ul>
  *   <li>No network calls are performed and no external AI service is contacted.</li>
- *   <li>Prompt text passed to {@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} is accumulated
- *       in memory.</li>
+ *   <li>Calls to {@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} append text to an in-memory
+ *       buffer.</li>
  *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} optionally writes the configured
- *       instructions and accumulated prompts to local files when
- *       {@link org.machanism.machai.ai.manager.GenAIProvider#inputsLog(java.io.File)} has been set; it then clears
- *       the internal buffer and returns {@code null}.</li>
- *   <li>Capabilities that require a real backend (for example, embeddings) are unsupported and will throw an
- *       exception when invoked.</li>
+ *       instructions to {@code instructions.txt} (in the same directory as the configured inputs log, or the user
+ *       directory when none is available) and writes the accumulated prompts to the configured inputs log file when
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider#inputsLog(java.io.File)} has been set. It then clears the
+ *       internal buffer and returns {@code null}.</li>
+ *   <li>Capabilities that require a real backend (for example,
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider#embedding(String)}) are unsupported and throw
+ *       {@link java.lang.UnsupportedOperationException}.</li>
  * </ul>
  *
- * <h2>Example</h2>
+ * <h2>Typical usage</h2>
  * <pre>{@code
  * GenAIProvider provider = new NoneProvider();
  * provider.inputsLog(new File("./inputsLog/inputs.txt"));

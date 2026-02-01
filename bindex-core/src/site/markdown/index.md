@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-Bindex Core (`bindex-core`) provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly. It enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.
+Bindex Core (`bindex-core`) provides core functionality for managing **bindex metadata**—including generation, registration, library selection, and project assembly. It helps standardize how library metadata is produced and consumed so tools can reliably discover compatible components, integrate them, and assemble projects within the Machanism ecosystem.
 
 ## Overview
 

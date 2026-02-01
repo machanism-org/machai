@@ -1,42 +1,40 @@
 /**
- * Maven mojos that integrate the MachAI Generative Workflow (GW) document-processing pipeline into a Maven build.
+ * Maven plugin mojos that integrate the MachAI Generative Workflow (GW) document-processing pipeline into a Maven
+ * build.
  *
  * <p>
- * This package contains the {@code gw-maven-plugin} goals:
+ * The mojos in this package provide:
  * </p>
  * <ul>
  *   <li>
- *     <b>{@code gw}</b> ({@link org.machanism.machai.maven.GW}) scans documentation sources starting at the module base
- *     directory (typically {@code ${basedir}}) and runs the GW pipeline via
- *     {@link org.machanism.machai.gw.FileProcessor}. This goal is an <em>aggregator</em> mojo and coordinates
- *     processing across the reactor.
+ *     A {@code gw} goal that scans documentation sources for one or more reactor modules and invokes the GW pipeline
+ *     via {@link org.machanism.machai.gw.FileProcessor}.
  *   </li>
  *   <li>
- *     <b>{@code clean}</b> ({@link org.machanism.machai.maven.Clean}) deletes temporary artifacts produced by prior GW
+ *     A {@code clean} goal that removes temporary files produced by prior GW runs.
+ *   </li>
+ * </ul>
+ *
+ * <h2>Goals</h2>
+ * <ul>
+ *   <li>
+ *     <b>{@code gw}</b> ({@link org.machanism.machai.maven.GW}): Scans documentation sources starting at the module base
+ *     directory (typically {@code ${basedir}}) and runs the GW pipeline. This goal is an <em>aggregator</em> mojo and can
+ *     coordinate processing across the Maven reactor.
+ *   </li>
+ *   <li>
+ *     <b>{@code clean}</b> ({@link org.machanism.machai.maven.Clean}): Deletes temporary artifacts produced by prior GW
  *     runs.
  *   </li>
  * </ul>
  *
- * <h2>Goal: {@code gw}</h2>
+ * <h2>Configuration and parameters</h2>
  * <p>
- * The {@code gw} goal configures the workflow, resolves credentials from Maven {@code settings.xml}, and scans
- * documentation content for processing.
+ * The {@code gw} goal configures the workflow and supplies parameters to the underlying GW pipeline.
  * </p>
- *
- * <h3>Credentials</h3>
- * <p>
- * Credentials are read from Maven {@code settings.xml} using a {@code &lt;server&gt;} entry whose id is provided by
- * {@code gw.genai.serverId}. When present, they are exposed to the workflow as configuration properties:
- * </p>
- * <ul>
- *   <li>{@code GENAI_USERNAME}</li>
- *   <li>{@code GENAI_PASSWORD}</li>
- * </ul>
- *
- * <h3>Parameters</h3>
  * <ul>
  *   <li>
- *     <b>{@code gw.genai}</b> (optional): GenAI provider/model identifier forwarded to the workflow (for example
+ *     <b>{@code gw.genai}</b> (optional): GenAI provider/model identifier forwarded to the workflow (for example,
  *     {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
@@ -54,7 +52,17 @@
  *   </li>
  * </ul>
  *
- * <h3>Usage examples</h3>
+ * <h3>Credentials</h3>
+ * <p>
+ * Credentials are read from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry whose id is provided by
+ * {@code gw.genai.serverId}. When present, they are exposed to the workflow as configuration properties:
+ * </p>
+ * <ul>
+ *   <li>{@code GENAI_USERNAME}</li>
+ *   <li>{@code GENAI_PASSWORD}</li>
+ * </ul>
+ *
+ * <h2>Usage</h2>
  * <p>Run from the command line:</p>
  * <pre>
  * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai
@@ -80,7 +88,7 @@
  * &amp;lt;/plugin&amp;gt;
  * </pre>
  *
- * <h2>Goal: {@code clean}</h2>
+ * <h2>Cleaning</h2>
  * <p>
  * The {@code clean} goal deletes temporary files created by earlier workflow runs (see
  * {@link org.machanism.machai.gw.FileProcessor#deleteTempFiles(java.io.File)}).

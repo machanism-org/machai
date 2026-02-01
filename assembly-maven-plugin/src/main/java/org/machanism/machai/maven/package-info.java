@@ -25,38 +25,39 @@
 */
 
 /**
- * Maven plugin goal(s) that drive AI-assisted project assembly.
+ * Maven {@code org.apache.maven.plugin.Mojo} implementation for AI-assisted project assembly.
  *
  * <p>
- * This package contains the {@code assembly} goal implementation, {@link org.machanism.machai.maven.Assembly},
- * which coordinates reading an assembly prompt, recommending candidate libraries, and running an assembly
- * workflow that applies changes to a target project directory.
+ * The package contains the {@link org.machanism.machai.maven.Assembly} goal ({@code assembly}), which reads an
+ * assembly prompt, requests library recommendations from a "picker" model, and then runs an assembly workflow
+ * that applies changes to the Maven execution base directory.
  * </p>
  *
  * <h2>Goal</h2>
  * <ul>
- *   <li>{@code assembly} &ndash; Recommends libraries and applies an assembly workflow driven by a prompt.</li>
+ *   <li>{@code assembly} &ndash; Recommend libraries and run an AI-driven assembly process against a project folder.</li>
  * </ul>
  *
- * <h2>How it works</h2>
+ * <h2>Process overview</h2>
  * <ol>
- *   <li>Read the prompt from a file (or request it interactively).</li>
- *   <li>Use the picker provider to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).</li>
- *   <li>Filter recommendations by a minimum score threshold.</li>
- *   <li>Run the assembly workflow in the Maven execution base directory.</li>
+ *   <li>Acquire the prompt from {@code assembly.prompt.file} (or interactively if the file is missing).</li>
+ *   <li>Use the picker GenAI provider to produce a list of {@link org.machanism.machai.schema.Bindex}
+ *   recommendations.</li>
+ *   <li>Filter recommendations using a minimum score threshold.</li>
+ *   <li>Invoke {@link org.machanism.machai.bindex.ApplicationAssembly} to apply changes in the project directory.</li>
  * </ol>
  *
- * <h2>Configuration parameters</h2>
+ * <h2>Plugin parameters</h2>
  * <p>
- * Parameters can be supplied as system properties (for example, {@code -Dassembly.genai=...}) and/or via plugin
- * configuration.
+ * Parameters may be supplied using system properties (for example, {@code -Dassembly.genai=...}) and/or via Maven
+ * plugin configuration.
  * </p>
  * <ul>
  *   <li>{@code assembly.genai} &ndash; GenAI provider id for the assembly phase (default {@code OpenAI:gpt-5}).</li>
  *   <li>{@code pick.genai} &ndash; GenAI provider id for the recommendation (picker) phase (default
  *   {@code OpenAI:gpt-5-mini}).</li>
- *   <li>{@code assembly.prompt.file} &ndash; Prompt file path (default {@code project.txt}); if the file does not
- *   exist, the prompt is requested interactively.</li>
+ *   <li>{@code assembly.prompt.file} &ndash; Prompt file path (default {@code project.txt}); if missing, the prompt is
+ *   requested interactively.</li>
  *   <li>{@code assembly.score} &ndash; Minimum score threshold for recommended libraries (default {@code 0.9}).</li>
  *   <li>{@code bindex.register.url} &ndash; Optional registration/lookup endpoint used by the picker.</li>
  * </ul>

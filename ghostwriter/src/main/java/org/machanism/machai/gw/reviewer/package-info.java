@@ -5,10 +5,11 @@
  * <p>The primary entry point is {@link org.machanism.machai.gw.reviewer.Reviewer}. Implementations typically:
  *
  * <ul>
- *   <li>declare the file extensions they support via {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()},</li>
+ *   <li>declare the file extensions they support via
+ *       {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()},</li>
  *   <li>scan file contents using the target format's comment rules to locate {@code @guidance} markers, and</li>
- *   <li>return a formatted prompt fragment (including path context and, where applicable, file content) for downstream
- *       processing.</li>
+ *   <li>return an extracted guidance representation (including path context and, where applicable, file content) for
+ *       downstream processing.</li>
  * </ul>
  *
  * <p>This package contains built-in {@code Reviewer} implementations for multiple common formats, including:

@@ -23,11 +23,11 @@ Page Structure:
 
 ## Introduction
 
-Project Layout is a small utility library that helps you describe, load, and use a conventional project directory layout (sources, resources, tests, docs, etc.) in a consistent way. It is intended for build tooling and plugins that need to locate well-known folders reliably across different projects.
+Project Layout is a small utility library for describing and working with a conventional project directory layout (sources, resources, tests, docs, etc.) in a consistent way. It is intended for build tooling and plugins that need to locate well-known folders reliably across different projects.
 
 ## Overview
 
-The library provides a simple model for a project layout (e.g., `src/main/java`, `src/test/resources`, `src/site`) and utilities to resolve these paths relative to a project base directory. Using a single, centralized definition of the layout reduces duplicated path logic, makes tooling more predictable, and improves maintainability.
+The library provides a simple model for a project layout (for example, `src/main/java`, `src/test/resources`, `src/site`) and utilities to resolve these paths relative to a project base directory. Using a single, centralized definition of the layout reduces duplicated path logic, makes tooling more predictable, and improves maintainability.
 
 ## Key Features
 
@@ -63,5 +63,5 @@ Add the dependency:
 ## Resources
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/project-layout
-- SCM: https://github.com/machanism-org/machai
+- GitHub: https://github.com/machanism-org/machai
 - Issues: https://github.com/machanism-org/machai/issues

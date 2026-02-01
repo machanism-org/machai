@@ -129,16 +129,20 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API as a concrete `GenAIProvider` implementation.
+`OpenAIProvider` integrates seamlessly with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
 
-It supports:
+This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI chat/response models.
-- Managing files for use in OpenAI workflows.
-- Advanced LLM requests (text generation, summarization, question answering).
-- Vector embeddings for semantic search and similarity use cases.
+- Sending prompts and receiving responses from OpenAI chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-**Authentication / configuration**
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications.
+
+**Environment variables**
+
+You must set at least `OPENAI_API_KEY`.
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -155,18 +159,17 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-`CodeMieProvider` extends `OpenAIProvider` and configures it to authenticate against CodeMie and call it via an OpenAI-compatible API endpoint.
+`CodeMieProvider` extends `OpenAIProvider` and authenticates against CodeMie to call it via an OpenAI-compatible API endpoint.
 
 How it works:
 
 - Obtains an access token from a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`).
-- Uses that token as the API key when creating the OpenAI client.
-- Sets the OpenAI-compatible base URL to the CodeMie gateway (`https://codemie.lab.epam.com/code-assistant-api/v1`).
+- Uses the token as the API key when creating the OpenAI client.
+- Uses the CodeMie OpenAI-compatible base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
 **Authentication / configuration**
 
-- `GENAI_USERNAME` and `GENAI_PASSWORD` (provided via environment variables or Java system properties)
-- `OPENAI_BASE_URL` can be set explicitly to `https://codemie.lab.epam.com/code-assistant-api/v1` when using the OpenAI provider directly.
+- `GENAI_USERNAME` and `GENAI_PASSWORD` must be provided via environment variables or Java system properties.
 
 **Thread safety:** NOT thread-safe (inherits behavior from `OpenAIProvider`).
 
@@ -207,5 +210,5 @@ provider.close();
 ## Resources
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/genai-client
-- Badge: https://img.shields.io/maven-central/v/org.machananism.machai/genai-client.svg
+- Badge: https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg
 - GitHub: https://github.com/machanism-org/machai

@@ -132,7 +132,7 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 | `-r` | `--root` | Yes (path) | Root directory that bounds scanning. Each scanned directory must be located within this root. | `gw.properties` key `root`; otherwise user directory (`user.dir`) |
 | `-a` | `--genai` | Yes (`provider:model`) | GenAI provider and model (e.g., `OpenAI:gpt-5.1`). | `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
 | `-i` | `--instructions` | Optional (URL/path[,URL/path...]) | Additional instruction locations (URL or file path). Multiple locations may be comma-separated. If provided without a value, prompts for instruction text via stdin. | `gw.properties` key `instructions` (comma-separated); otherwise none |
-| `-e` | `--excludes` | Yes (dir[,dir...]) | Directories to exclude from processing. Comma-separated list. (Despite the help text, repeated options are not accumulated; the last wins.) | `gw.properties` key `excludes` (comma-separated); otherwise none |
+| `-e` | `--excludes` | Yes (dir[,dir...]) | Directories to exclude from processing. Comma-separated list. | `gw.properties` key `excludes` (comma-separated); otherwise none |
 | `-g` | `--guidance` | Optional (path) | Default guidance applied as a final step. If provided with a value, reads that file relative to the executable directory (directory containing `gw.jar`). If provided without a value, prompts for guidance text via stdin. | Off (not applied) |
 
 **Positional arguments**: Zero or more directories to scan.

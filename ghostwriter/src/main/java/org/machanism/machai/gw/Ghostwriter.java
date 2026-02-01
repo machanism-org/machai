@@ -103,7 +103,9 @@ public final class Ghostwriter {
 
 		Option instructionsOpt = Option.builder("i")
 				.longOpt("instructions")
-				.desc("Specify additional instructions by URL or file path. Use a comma (`,`) to separate multiple locations.")
+				.desc("Specify additional instructions by URL or file path. "
+						+ "To provide multiple locations, separate them with a comma (`,`). "
+						+ "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
 				.hasArg(true)
 				.optionalArg(true)
 				.build();
@@ -113,7 +115,8 @@ public final class Ghostwriter {
 
 		Option guidanceOpt = Option.builder("g")
 				.longOpt("guidance")
-				.desc("Set the default guidance file to apply as a final step for the current directory (default: guidance.txt).")
+				.desc("Specify the default guidance file to apply as a final step for the current directory. "
+						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
 				.hasArg(true)
 				.optionalArg(true)
 				.build();
@@ -155,11 +158,11 @@ public final class Ghostwriter {
 					instructionLocations = StringUtils.split(optionValue, ",");
 				} else {
 					instructions = readText(
-						    "No instructions were provided as an option value.\n" +
-						    "Please enter the instructions text below. When you are done, press " +
-						    (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") +
-						    " to finish and signal end of input (EOF):"
-						);				}
+							"No instructions were provided as an option value.\n" +
+									"Please enter the instructions text below. When you are done, press " +
+									(SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") +
+									" to finish and signal end of input (EOF):");
+				}
 			}
 
 			String[] dirs = cmd.getArgs();
@@ -255,6 +258,6 @@ public final class Ghostwriter {
 				sb.append(scanner.nextLine()).append("\n");
 			}
 		}
-		return sb.deleteCharAt(sb.length() - 1).toString();
+		return sb.length() > 0 ? sb.deleteCharAt(sb.length() - 1).toString() : null;
 	}
 }

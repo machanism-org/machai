@@ -27,23 +27,29 @@
  */
 
 /**
- * Maven plugin goals (Mojos) for running Machai/Bindex operations as part of a Maven build.
+ * Maven plugin goals (Mojos) that integrate Machai/Bindex operations into a Maven build.
  *
- * <p>This package provides Maven {@code Mojo} implementations that can be bound to build phases or executed
- * directly from the command line to manage a module's Bindex metadata and related artifacts:</p>
+ * <p>
+ * The goals in this package run during standard Maven lifecycle phases and operate on the current
+ * {@link org.apache.maven.project.MavenProject}. For multi-module builds, the goals typically skip aggregator/parent
+ * modules by not executing when the project uses {@code pom} packaging.
+ * </p>
  *
+ * <h2>Provided goals</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.maven.Create} - creates a new Bindex index for the current module.</li>
- *   <li>{@link org.machanism.machai.maven.Update} - refreshes an existing index.</li>
- *   <li>{@link org.machanism.machai.maven.Register} - scans a module and registers its metadata to a configured
+ *   <li>{@link org.machanism.machai.maven.Create} - create a new Bindex index for the current module.</li>
+ *   <li>{@link org.machanism.machai.maven.Update} - update (refresh) an existing index for the current module.</li>
+ *   <li>{@link org.machanism.machai.maven.Register} - scan the module and register/publish its metadata to a
  *       registry endpoint.</li>
- *   <li>{@link org.machanism.machai.maven.Clean} - removes plugin-generated temporary artifacts under the
- *       {@code .machai} directory.</li>
+ *   <li>{@link org.machanism.machai.maven.Clean} - remove plugin-generated temporary artifacts.</li>
  * </ul>
  *
- * <p>Most goals share common configuration parameters and helper logic provided by
- * {@link org.machanism.machai.maven.AbstractBindexMojo}, such as access to the Maven project/base directory and
- * selection of the configured GenAI provider and model.</p>
+ * <h2>Common configuration</h2>
+ * <p>
+ * Provider/model selection is controlled via {@code -Dbindex.genai=Provider:Model} (for example,
+ * {@code -Dbindex.genai=OpenAI:gpt-5}). Shared parameters and helper logic are implemented by
+ * {@link org.machanism.machai.maven.AbstractBindexMojo}.
+ * </p>
  *
  * <h2>Command-line usage</h2>
  * <pre>

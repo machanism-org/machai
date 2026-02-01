@@ -2,7 +2,7 @@
  * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
  * <p>This package contains provider-neutral abstractions intended to be used directly by application code.
- * Implementations for specific providers live under {@code org.machanism.machai.ai.provider}. Provider discovery,
+ * Provider-specific implementations live under {@code org.machanism.machai.ai.provider}. Provider discovery,
  * selection, and lifecycle are coordinated by the manager APIs in {@code org.machanism.machai.ai.manager}.
  *
  * <h2>Typical flow</h2>

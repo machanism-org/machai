@@ -49,14 +49,16 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
+`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
 
-This provider enables:
+This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI Chat/Responses models.
-- Managing files for use in OpenAI workflows.
-- Performing common LLM requests such as text generation, summarization, and question answering.
-- Creating and using vector embeddings for tasks like semantic search and similarity analysis.
+- Sending prompts and receiving responses from OpenAI Chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+
+By abstracting the complexities of direct API interaction, `OpenAIProvider` lets you leverage OpenAI models efficiently within your applications.
 
 Environment variables
 
@@ -110,9 +112,9 @@ provider.model("gpt-5.1");
 
 ### None
 
-`NoneProvider` is a no-op implementation of `GenAIProvider`.
+`NoneProvider` is a no-op implementation of `GenAIProvider` intended for environments where no external LLM integration should be used.
 
-This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(...)` has been configured.
+It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(...)` has been configured.
 
 Key characteristics
 

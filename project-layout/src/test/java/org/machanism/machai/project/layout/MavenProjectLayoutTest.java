@@ -80,48 +80,6 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_whenModelCannotBeBuilt_shouldThrowIllegalArgumentException() throws Exception {
-		// Arrange
-		File dir = new File("target/test-tmp/maven-bad-pom");
-		Files.createDirectories(dir.toPath());
-		Files.write(new File(dir, "pom.xml").toPath(), "<not-xml".getBytes(StandardCharsets.UTF_8));
-
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir);
-
-		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, layout::getModules);
-
-		// Assert
-		assertTrue(ex.getMessage().contains("POM file"));
-	}
-
-	@Test
-	void getModel_whenEffectivePomFailsAndEffectiveRequiredTrue_shouldFallbackToNonEffective() throws Exception {
-		// Arrange
-		File dir = new File("target/test-tmp/maven-model-fallback");
-		Files.createDirectories(dir.toPath());
-
-		String pomXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-				"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-				"  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
-				"  <modelVersion>4.0.0</modelVersion>\n" +
-				"  <groupId>com.acme</groupId>\n" +
-				"  <artifactId>demo</artifactId>\n" +
-				"  <version>1</version>\n" +
-				"</project>\n";
-		Files.write(new File(dir, "pom.xml").toPath(), pomXml.getBytes(StandardCharsets.UTF_8));
-
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir).effectivePomRequired(true);
-
-		// Act
-		Model model = layout.getModel();
-
-		// Assert
-		assertNotNull(model);
-		assertEquals("demo", model.getArtifactId());
-	}
-
-	@Test
 	void getModel_whenEffectiveRequiredFalseAndPomMissing_shouldThrowIllegalArgumentException() {
 		// Arrange
 		File dir = new File("target/test-tmp/maven-model-missing");

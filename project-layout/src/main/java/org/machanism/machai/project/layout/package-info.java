@@ -1,24 +1,24 @@
 /**
  * Detects and models a repository's on-disk layout for downstream processing.
  *
- * <p>The classes in this package describe where to find a project's modules/workspaces and its conventional
- * directories (sources, tests, resources, documentation). Callers typically select an implementation based on
- * build metadata present at the repository root and then query the returned directory/module lists.
+ * <p>This package provides abstractions and implementations that determine where a repository stores its modules
+ * (if any) and its conventional directories (sources, tests, resources, documentation). Callers choose an
+ * implementation based on the build metadata available at the repository root (for example {@code pom.xml} for
+ * Maven or {@code package.json} for JavaScript workspaces) and then query the layout for paths to scan.
  *
  * <h2>Key concepts</h2>
  * <ul>
- *   <li><b>Project root</b>: a {@link java.io.File} set via {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.
- *   </li>
- *   <li><b>Modules/workspaces</b>: optional subprojects discovered from build descriptors (for example Maven modules or
- *       JS workspaces).
- *   </li>
- *   <li><b>Directory sets</b>: implementation-specific lists returned by {@link org.machanism.machai.project.layout.ProjectLayout#getSources()},
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getTests()}, and
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getDocuments()}.
- *   </li>
+ *   <li><b>Project root</b>: the repository directory configured via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.</li>
+ *   <li><b>Modules/workspaces</b>: optional subprojects discovered from build descriptors (for example Maven modules
+ *       or JavaScript workspaces).</li>
+ *   <li><b>Directory sets</b>: the conventional paths returned by
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getSources()},
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getTests()},
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getResources()} and
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getDocuments()}.</li>
  *   <li><b>Exclusions</b>: shared directory names that should be skipped during filesystem walks via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
- *   </li>
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
  * </ul>
  *
  * <h2>Provided implementations</h2>

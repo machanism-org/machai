@@ -26,19 +26,22 @@
  */
 
 /**
- * Provider resolution, interaction, and host-side tool wiring for generative AI integrations.
+ * Provider discovery and host-side tool wiring for generative AI integrations.
  *
- * <p>This package contains the core abstractions and utilities used to integrate one or more generative AI
- * backends into the host application:
+ * <p>This package defines the core service provider contract, resolves provider implementations from a
+ * {@code Provider:Model} identifier, and exposes host-executed tools (file system access and command execution)
+ * to providers that support tool calling.
  *
+ * <h2>Key types</h2>
  * <ul>
  *   <li><strong>Provider contract</strong> – {@link org.machanism.machai.ai.manager.GenAIProvider} defines the
- *       common operations for prompting, attaching files, computing embeddings, and registering callable tools.</li>
+ *       operations for prompting, attaching files, computing embeddings, and registering callable tools.</li>
  *   <li><strong>Provider resolution</strong> – {@link org.machanism.machai.ai.manager.GenAIProviderManager}
- *       resolves a {@code Provider:Model} identifier to an implementation and configures the chosen model.</li>
+ *       loads a provider implementation (by short name or fully-qualified class name), initializes it from a
+ *       {@link org.machanism.macha.core.commons.configurator.Configurator}, and applies the selected model.</li>
  *   <li><strong>Tool installation</strong> – {@link org.machanism.machai.ai.manager.FileFunctionTools} and
- *       {@link org.machanism.machai.ai.manager.CommandFunctionTools} register host-executed tools; 
- *       {@link org.machanism.machai.ai.manager.SystemFunctionTools} is a convenience installer for both.</li>
+ *       {@link org.machanism.machai.ai.manager.CommandFunctionTools} register host tools; 
+ *       {@link org.machanism.machai.ai.manager.SystemFunctionTools} installs both.</li>
  * </ul>
  *
  * <h2>Usage</h2>
