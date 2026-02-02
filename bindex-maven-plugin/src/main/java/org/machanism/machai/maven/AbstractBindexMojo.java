@@ -1,6 +1,7 @@
 package org.machanism.machai.maven;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -50,7 +51,13 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 */
 	public AbstractBindexMojo() {
 		super();
-		this.configurator = new PropertiesConfigurator("bindex.properties");
+		PropertiesConfigurator configurator = new PropertiesConfigurator();
+		try {
+			configurator.setConfiguration("bindex.properties");
+		} catch (IOException e) {
+			getLog().warn("Configuration file `bindex.properties` not found.");
+		}
+		this.configurator = configurator;
 	}
 
 	/**
