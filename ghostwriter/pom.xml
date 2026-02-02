@@ -99,8 +99,6 @@
 									<goal>single</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>
-										${env.MACHANISM_PACK_DIR}/machai</outputDirectory>
 									<appendAssemblyId>false</appendAssemblyId>
 									<descriptors>
 										<descriptor>src/assembly/assembly.xml</descriptor>
