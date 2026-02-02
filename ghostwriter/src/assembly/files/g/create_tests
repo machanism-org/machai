@@ -1,0 +1,29 @@
+**Task:**  
+Create high-quality unit tests in this folder for all public and package-private classes and methods located in the required source folder.
+
+**Details & Requirements:**
+
+1. **Source Folder Location:**  
+   - The required source folder is: `[Project Path]/src/main/java/[Package Path]`
+   - The `Package Path` corresponds to the current folder path, with the prefix `src/test/java` removed.
+
+2. **Test Coverage:**  
+   - Ensure that the overall test coverage for the required source folder is at least **90%**.
+
+3. **Test Quality:**  
+   - Cover all core logic, edge cases, and error handling scenarios.
+   - Use descriptive test method names and meaningful assertions.
+   - Follow the Arrange-Act-Assert (AAA) structure in each test method.
+   - Mock dependencies where appropriate to isolate the units under test.
+
+4. **Test Organization:**  
+   - Place test files in this directory, mirroring the package structure of the source files.
+
+5. **Java Version:**  
+   - Use the Java version specified in the project's `pom.xml` for all test code and configuration.
+
+**Additional Instructions:**
+
+- Document any non-trivial test scenarios or special considerations in comments within the test files.
+- Ensure tests are maintainable, readable, and easy to extend.
+- If any classes or methods cannot be tested, provide a brief explanation in a comment.

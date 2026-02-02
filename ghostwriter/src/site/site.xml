@@ -31,7 +31,7 @@
 		<![CDATA[
 			<meta name="author" content="Viktor Tovstyi">
 			<meta property="og:title" content="${title}">
-			<meta property="og:image" content="https://machai.machanism.org/images/machai-social.png" />
+			<meta property="og:image" content="http://machai.machanism.org/ghostwriter/images/machai-ghostwriter-logo.png" />
 			<meta property="og:description" content="Machai is an advanced ecosystem for automated library metadata management, semantic search, and intelligent project assembly. Empower your development workflow with GenAI-powered tools for seamless discovery, integration, and documentation." />
 			<meta property="og:url" content="https://machai.machanism.org" />
 			<meta property="og:image:width" content="1280" />

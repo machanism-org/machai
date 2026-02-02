@@ -12,7 +12,7 @@
 			<outputDirectory>/</outputDirectory>
 			<directory>src/assembly/files</directory>
 			<includes>
-				<include>**/*.*</include>
+				<include>**</include>
 			</includes>
 		</fileSet>
 		<fileSet>

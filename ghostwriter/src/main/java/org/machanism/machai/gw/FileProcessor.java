@@ -614,16 +614,22 @@ public class FileProcessor extends ProjectProcessor {
 			}
 			String content;
 			String location = StringUtils.trim(instruction);
-			if (location.startsWith("http://") || location.startsWith("https://")) {
-				try (InputStream in = new URL(location).openStream()) {
-					content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+
+			try {
+				if (location.startsWith("http://") || location.startsWith("https://")) {
+					try (InputStream in = new URL(location).openStream()) {
+						content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+					}
+				} else {
+					content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
 				}
-			} else {
-				content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
+				instructionsText.append(content);
+				instructionsText.append(System.lineSeparator());
+				instructionsText.append(System.lineSeparator());
+			} catch (Exception e) {
+	            throw new IOException("Failed to load instructions from location: '" + location + "'. " +
+                        "Please verify that the path or URL is correct and accessible.", e);
 			}
-			instructionsText.append(content);
-			instructionsText.append(System.lineSeparator());
-			instructionsText.append(System.lineSeparator());
 		}
 		String text = StringUtils.trimToNull(instructionsText.toString());
 		setInstructions(text);

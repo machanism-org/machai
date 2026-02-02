@@ -1,0 +1,30 @@
+**Task:**  
+Please review and migrate the following Java codebase from Java 17 to Java 21.
+
+**Migration Requirements:**
+
+1. **Language Features & Syntax:**  
+   - Update the code to utilize new language features, syntax improvements, and enhancements introduced in Java 21 where appropriate.
+
+2. **API Refactoring:**  
+   - Identify and refactor any usage of deprecated APIs, replacing them with recommended Java 21 alternatives.
+
+3. **Compatibility:**  
+   - Ensure full compatibility with the Java 21 runtime and standard libraries.
+
+4. **Build & Configuration:**  
+   - Update build scripts (e.g., Maven/Gradle), dependencies, and configuration files to support Java 21.
+
+5. **Documentation:**  
+   - Clearly document all changes and migration steps, including any manual interventions or special considerations, for future reference.
+
+6. **Testing:**  
+   - Run all existing tests and add new ones if necessary to verify that the codebase functions correctly after migration.
+
+7. **Summary & Highlights:**  
+   - In the changed files, add comments summarizing key changes and highlighting any areas that required special attention or non-trivial modifications during the migration.
+
+**Deliverables:**  
+- Updated codebase compatible with Java 21.
+- Comments in changed files summarizing important changes and migration notes.
+- A summary document (if applicable) outlining the migration process and any challenges encountered.

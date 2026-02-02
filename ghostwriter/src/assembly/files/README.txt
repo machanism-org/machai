@@ -61,44 +61,29 @@ Basic usage examples
 
 Configuration via environment variables
 - Windows (PowerShell):
-  - $env:GW_PROVIDER = "openai"
-  - $env:GW_API_KEY = "<your-key>"
-  - gw.bat --root . --instructions "Generate docs"
+  - $env:GENAI_USERNAME=<your-username>
+  - $env:GENAI_PASSWORD=<your-password>
+  - gw.bat 
 
 - Windows (CMD):
-  - set GW_PROVIDER=openai
-  - set GW_API_KEY=<your-key>
-  - gw.bat --root . --instructions "Generate docs"
+  - set GENAI_USERNAME=<your-username>
+  - set GENAI_PASSWORD=<your-password>
+  - gw.bat 
 
 - Unix:
-  - export GW_PROVIDER=openai
-  - export GW_API_KEY="<your-key>"
-  - ./gw.sh --root . --instructions "Generate docs"
-
-Configuration via Java system properties
-- Windows:
-  - gw.bat -Dgw.provider=openai -Dgw.apiKey=<your-key> --root . --instructions "Generate docs"
-
-- Unix:
-  - ./gw.sh -Dgw.provider=openai -Dgw.apiKey=<your-key> --root . --instructions "Generate docs"
+  - export GENAI_USERNAME=<your-username>
+  - export GENAI_PASSWORD=<your-password>
+  - ./gw.sh 
 
 Passing options: instructions, excludes, root directory
 - Root directory (where Ghostwriter reads/writes):
   - --root <path>
 
 - Instructions (what you want the tool to do):
-  - --instructions "<text>"
+  - --instructions "<path/url>"
 
 - Excludes (repeatable or comma-separated, depending on your CLI build):
-  - --exclude "target/**" --exclude ".git/**" --exclude "node_modules/**"
-
-Examples
-- Windows:
-  - gw.bat --root C:\work\my-repo --instructions "Create a CONTRIBUTING guide" --exclude "target/**" --exclude ".git/**"
-
-- Unix:
-  - ./gw.sh --root /home/me/my-repo --instructions "Create a CONTRIBUTING guide" --exclude "target/**" --exclude ".git/**"
-
+  - --exclude "target,logs" 
 
 4) Configuration
 ----------------
@@ -118,39 +103,6 @@ Ghostwriter can be configured using a gw.properties file, environment variables,
 4.2 Configurable properties
 The exact set of properties may vary by version/build, but typical properties include:
 
-Provider selection
-- gw.provider
-  - Values: codemie | openai (and other OpenAI-compatible providers)
-  - Selects the GenAI backend.
-
-OpenAI-compatible settings
-- gw.openai.baseUrl
-  - Base URL of the OpenAI-compatible endpoint (optional if using the default).
-- gw.openai.apiKey
-  - API key used for authentication.
-- gw.openai.model
-  - Model identifier (e.g., gpt-4.1-mini, gpt-4o-mini, etc.), depending on your provider.
-
-CodeMie settings
-- gw.codemie.baseUrl
-  - Base URL for CodeMie.
-- gw.codemie.apiKey
-  - API key/token for CodeMie authentication.
-- gw.codemie.model
-  - Model identifier supported by CodeMie.
-
-General behavior
-- gw.root
-  - Default root directory.
-- gw.instructions
-  - Default instructions (can be overridden per run).
-- gw.excludes
-  - Default exclude patterns (comma-separated).
-- gw.debug
-  - true/false to enable debug logging.
-- gw.timeoutSeconds
-  - Request timeout to the provider.
-
 4.3 Precedence (recommended)
 When the same setting is provided in multiple places, a common precedence order is:
 1) Command-line options
@@ -160,58 +112,19 @@ When the same setting is provided in multiple places, a common precedence order 
 
 4.4 Environment variable mapping
 If your build supports environment variables, common mappings are:
-- GW_PROVIDER -> gw.provider
 - GW_ROOT -> gw.root
 - GW_INSTRUCTIONS -> gw.instructions
 - GW_EXCLUDES -> gw.excludes
-- GW_DEBUG -> gw.debug
-- GW_API_KEY -> provider API key (commonly mapped to gw.openai.apiKey or gw.codemie.apiKey depending on provider)
-- GW_BASE_URL -> provider base URL (commonly mapped to gw.openai.baseUrl or gw.codemie.baseUrl)
-- GW_MODEL -> provider model (commonly mapped to gw.openai.model or gw.codemie.model)
+...
 
 4.5 Java system property examples
-- -Dgw.provider=openai
-- -Dgw.openai.apiKey=...
-- -Dgw.openai.baseUrl=https://api.example.com/v1
-- -Dgw.openai.model=gpt-4o-mini
+- -Dgenai=...
+- -Droot=...
 - -Dgw.excludes=target/**,.git/**
-- -Dgw.debug=true
+...
 
 
-5) Examples
------------
-Example A: Use OpenAI-compatible provider with gw.properties
-- gw.properties:
-  - gw.provider=openai
-  - gw.openai.apiKey=${GW_API_KEY}
-  - gw.openai.baseUrl=https://api.example.com/v1
-  - gw.openai.model=gpt-4o-mini
-  - gw.excludes=target/**,.git/**,node_modules/**
-
-- Run (Windows):
-  - set GW_API_KEY=<your-key>
-  - gw.bat --root . --instructions "Generate a developer guide in docs/"
-
-- Run (Unix):
-  - export GW_API_KEY="<your-key>"
-  - ./gw.sh --root . --instructions "Generate a developer guide in docs/"
-
-Example B: One-off run with explicit system properties (no gw.properties)
-- Windows:
-  - gw.bat -Dgw.provider=openai -Dgw.openai.apiKey=<key> -Dgw.openai.model=gpt-4o-mini --root . --instructions "Draft release notes"
-
-- Unix:
-  - ./gw.sh -Dgw.provider=openai -Dgw.openai.apiKey=<key> -Dgw.openai.model=gpt-4o-mini --root . --instructions "Draft release notes"
-
-Example C: Excluding common folders
-- Windows:
-  - gw.bat --root . --instructions "Update documentation" --exclude "target/**" --exclude ".git/**" --exclude "node_modules/**"
-
-- Unix:
-  - ./gw.sh --root . --instructions "Update documentation" --exclude "target/**" --exclude ".git/**" --exclude "node_modules/**"
-
-
-6) Troubleshooting & Support
+5) Troubleshooting & Support
 ----------------------------
 Common issues
 - Authentication errors (401/403)
@@ -230,15 +143,7 @@ Common issues
 - Provider/model errors
   - Verify the configured model exists and is accessible for your account.
 
-Logs and debug output
-- Enable debug logging:
-  - gw.properties: gw.debug=true
-  - or environment: GW_DEBUG=true
-  - or Java system property: -Dgw.debug=true
-- Where logs appear depends on your packaging; typically they are printed to stdout/stderr. If your distribution writes to a log file, check the application’s working directory and any configured logging settings.
-
-
-7) Contact & Documentation
+6) Contact & Documentation
 --------------------------
-- Refer to your project’s main documentation site (often under src/site or a published docs site) if available.
+- Refer to your project’s main documentation site (often under src/site or a published docs site): http://machai.machanism.org/ghostwriter/index.html
 - If this project is maintained internally, follow your organization’s standard support channels (issue tracker, internal chat, or service desk).

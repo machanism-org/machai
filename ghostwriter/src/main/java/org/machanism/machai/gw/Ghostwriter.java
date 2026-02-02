@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
@@ -165,6 +166,19 @@ public final class Ghostwriter {
 				}
 			}
 
+			if (instructionLocations != null && instructionLocations.length > 0) {
+				instructionLocations = Arrays.stream(instructionLocations)
+						.map(StringUtils::trimToNull)
+						.map(location -> {
+							if (location != null && !location.startsWith("http://") && !location.startsWith("https://")
+									&& !(new File(location).isAbsolute())) {
+								return new File(execDir, location).getAbsolutePath();
+							}
+							return location;
+						})
+						.toArray(String[]::new);
+			}
+
 			String[] dirs = cmd.getArgs();
 			if (rootDir == null) {
 				rootDir = SystemUtils.getUserDir();
@@ -189,7 +203,6 @@ public final class Ghostwriter {
 			if (cmd.hasOption(guidanceOpt)) {
 				String guidanceFileName = cmd.getOptionValue(guidanceOpt);
 				if (guidanceFileName != null) {
-					guidanceFileName = StringUtils.defaultIfBlank(guidanceFileName, "guidance.txt");
 					defaultGuidance = getInstractionsFromFile(guidanceFileName);
 					if (defaultGuidance == null) {
 						throw new FileNotFoundException("Guidance file '" + guidanceFileName +
