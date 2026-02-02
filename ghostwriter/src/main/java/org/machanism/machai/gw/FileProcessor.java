@@ -98,7 +98,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	private int maxModuleThreads = Math.max(1, Runtime.getRuntime().availableProcessors());
 
-	private long moduleThreadTimeoutMinutes = 5;
+	private long moduleThreadTimeoutMinutes = 20;
 
 	/**
 	 * Constructs a processor.
@@ -273,7 +273,8 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws FileNotFoundException if the project layout cannot be created
 	 * @throws IOException           if file reading fails
 	 */
-	protected void processParentFiles(File projectDir, ProjectLayout projectLayout) throws FileNotFoundException, IOException {
+	protected void processParentFiles(File projectDir, ProjectLayout projectLayout)
+			throws FileNotFoundException, IOException {
 		List<String> modules = projectLayout.getModules();
 
 		List<File> children = listFiles(projectDir);
@@ -426,7 +427,8 @@ public class FileProcessor extends ProjectProcessor {
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists()).map(e -> "`" + e + "`")
+			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())
+					.map(e -> "`" + e + "`")
 					.collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
@@ -480,7 +482,8 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		return Arrays.stream(files).filter(file -> Arrays.stream(excludes).filter(StringUtils::isNotBlank)
-				.noneMatch(exclude -> Strings.CI.equals(file.getName(), StringUtils.trim(exclude)))).collect(Collectors.toList());
+				.noneMatch(exclude -> Strings.CI.equals(file.getName(), StringUtils.trim(exclude))))
+				.collect(Collectors.toList());
 	}
 
 	private List<File> findFiles(File projectDir) throws IOException {
