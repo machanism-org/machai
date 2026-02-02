@@ -1,34 +1,39 @@
-**Create a file named `[Current File]/files/README.txt`. The content should include:**
+**Task:**  
+Generate the content for a file named `[Current File]/files/README.txt`.  
+The content must be based on the information from `/src/site/markdown/index.md` and the files present in `[Current File]/files`.
+
+**Instructions:**
+
+- **Create `README.txt` as specified.**
+- Carefully analyze `/src/site/markdown/index.md` for the application’s description, features, and usage details.
+- Review all files in `[Current File]/files` for additional configuration, scripts, or examples to include or reference in the README.
+
+**README.txt Content Requirements:**
 
 1. **Application Overview**
-   - Provide a clear and concise description of the Ghostwriter CLI application.
-   - Explain its main purpose, key features, and typical use cases.
-   - Mention supported GenAI providers (e.g., CodeMie, OpenAI-compatible services).
+   - Provide a clear, concise description of the Ghostwriter CLI application.
+   - Summarize its main purpose, key features, and typical use cases.
+   - List supported GenAI providers (e.g., CodeMie, OpenAI-compatible services).
 
 2. **Installation Instructions**
-   - List prerequisites (e.g., required Java version, necessary environment variables, configuration files).
-   - Include steps for downloading, installing, or building the application if applicable.
+   - List all prerequisites (e.g., required Java version, environment variables, configuration files).
+   - Include step-by-step instructions for downloading, installing, or building the application, if applicable.
 
 3. **How to Run**
    - Provide command-line usage examples for running the application.
    - Explain how to set environment variables or Java system properties for configuration.
-   - Show how to pass options such as instructions, excludes, and root directory.
+   - Demonstrate how to use options such as `instructions`, `excludes`, and `root` directory.
    - Include example commands for both Windows (`.bat`) and Unix (`.sh`) environments.
 
-4. **Configuration**
-   - Describe the purpose and usage of the `gw.properties` file.
-   - List and explain all configurable properties (e.g., GenAI provider, credentials, instructions, excludes).
-   - Show how properties can be set via environment variables or Java parameters.
+4. **Troubleshooting & Support**
+   - Offer tips for resolving common issues (e.g., authentication errors, missing files).
+   - Indicate where to find logs and how to enable debug output.
 
-5. **Examples**
-   - Provide sample commands and configuration snippets for common scenarios.
+5. **Contact & Documentation**
+   - Reference further documentation or support channels, if available.
 
-6. **Troubleshooting & Support**
-   - Include tips for resolving common issues (e.g., authentication errors, missing files).
-   - Mention where to find logs and how to enable debug output.
-
-7. **Contact & Documentation**
-   - Point to further documentation or support channels if available.
-
-**Important:**  
-Do **not** create any files in this directory or its subdirectories. Only generate the content for `README.txt` as specified above.
+**Formatting Guidelines:**
+- Use clear section headings and bullet points for readability.
+- Ensure all code blocks and command examples are properly formatted.
+- Be concise but thorough in each section.
+- Only include information relevant to the Ghostwriter CLI and its usage.
