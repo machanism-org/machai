@@ -96,6 +96,10 @@ public class FileProcessor extends ProjectProcessor {
 
 	private final Configurator configurator;
 
+	private int maxModuleThreads = Math.max(1, Runtime.getRuntime().availableProcessors());
+
+	private long moduleThreadTimeoutMinutes = 5;
+
 	/**
 	 * Constructs a processor.
 	 *
@@ -215,8 +219,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
-		ExecutorService executor = Executors.newFixedThreadPool(
-				Math.min(modules.size(), Math.max(1, Runtime.getRuntime().availableProcessors())));
+		ExecutorService executor = Executors.newFixedThreadPool(Math.min(modules.size(), getMaxModuleThreads()));
 		try {
 			List<Future<Void>> futures = new ArrayList<>();
 			for (String module : modules) {
@@ -243,7 +246,7 @@ public class FileProcessor extends ProjectProcessor {
 		} finally {
 			executor.shutdown();
 			try {
-				if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
+				if (!executor.awaitTermination(getModuleThreadTimeoutMinutes(), TimeUnit.MINUTES)) {
 					executor.shutdownNow();
 				}
 			} catch (InterruptedException e) {
@@ -270,8 +273,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws FileNotFoundException if the project layout cannot be created
 	 * @throws IOException           if file reading fails
 	 */
-	protected void processParentFiles(File projectDir, ProjectLayout projectLayout)
-			throws FileNotFoundException, IOException {
+	protected void processParentFiles(File projectDir, ProjectLayout projectLayout) throws FileNotFoundException, IOException {
 		List<String> modules = projectLayout.getModules();
 
 		List<File> children = listFiles(projectDir);
@@ -424,8 +426,8 @@ public class FileProcessor extends ProjectProcessor {
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())
-					.map(e -> "`" + e + "`").collect(Collectors.toList());
+			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists()).map(e -> "`" + e + "`")
+					.collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 
@@ -440,13 +442,12 @@ public class FileProcessor extends ProjectProcessor {
 			return null;
 		}
 
-		String extension = StringUtils.lowerCase(FilenameUtils.getExtension(file.getName()));
-		Reviewer reviewer = reviewMap.get(extension);
-
-		if (reviewer == null) {
-			reviewer = reviewMap.get(normalizeExtension(extension));
+		String extension = normalizeExtension(FilenameUtils.getExtension(file.getName()));
+		if (extension == null) {
+			return null;
 		}
 
+		Reviewer reviewer = reviewMap.get(extension);
 		if (reviewer == null) {
 			return null;
 		}
@@ -472,15 +473,14 @@ public class FileProcessor extends ProjectProcessor {
 			return f1.getName().compareToIgnoreCase(f2.getName());
 		});
 
-		if (excludes == null) {
+		if (excludes == null || excludes.length == 0) {
 			List<File> result = new ArrayList<>();
 			Collections.addAll(result, files);
 			return result;
 		}
 
-		return Arrays.stream(files)
-				.filter(file -> Arrays.stream(excludes).noneMatch(exclude -> file.getName().equals(exclude)))
-				.collect(Collectors.toList());
+		return Arrays.stream(files).filter(file -> Arrays.stream(excludes).filter(StringUtils::isNotBlank)
+				.noneMatch(exclude -> Strings.CI.equals(file.getName(), StringUtils.trim(exclude)))).collect(Collectors.toList());
 	}
 
 	private List<File> findFiles(File projectDir) throws IOException {
@@ -627,8 +627,8 @@ public class FileProcessor extends ProjectProcessor {
 				instructionsText.append(System.lineSeparator());
 				instructionsText.append(System.lineSeparator());
 			} catch (Exception e) {
-	            throw new IOException("Failed to load instructions from location: '" + location + "'. " +
-                        "Please verify that the path or URL is correct and accessible.", e);
+				throw new IOException("Failed to load instructions from location: '" + location + "'. "
+						+ "Please verify that the path or URL is correct and accessible.", e);
 			}
 		}
 		String text = StringUtils.trimToNull(instructionsText.toString());
@@ -653,6 +653,22 @@ public class FileProcessor extends ProjectProcessor {
 
 	public void setExcludes(String[] excludes) {
 		this.excludes = excludes;
+	}
+
+	public int getMaxModuleThreads() {
+		return maxModuleThreads;
+	}
+
+	public void setMaxModuleThreads(int maxModuleThreads) {
+		this.maxModuleThreads = maxModuleThreads;
+	}
+
+	public long getModuleThreadTimeoutMinutes() {
+		return moduleThreadTimeoutMinutes;
+	}
+
+	public void setModuleThreadTimeoutMinutes(long moduleThreadTimeoutMinutes) {
+		this.moduleThreadTimeoutMinutes = moduleThreadTimeoutMinutes;
 	}
 
 }

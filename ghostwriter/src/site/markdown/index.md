@@ -128,18 +128,18 @@ Ghostwriter supports the following command-line options (from `org.machanism.mac
 | Short | Long | Arg | Description | Default |
 |------:|------|:---:|-------------|---------|
 | `-h` | `--help` | No | Show help message and exit. | Off |
-| `-t` | `--threads` | Optional (`true`/`false`) | Enable multi-threaded processing. If present without a value, defaults to `true`. Parsed with `Boolean.parseBoolean(...)`. | `true` |
-| `-r` | `--root` | Yes (path) | Root directory that bounds scanning. Each scanned directory must be located within this root. | `gw.properties` key `root`; otherwise user directory (`user.dir`) |
+| `-t` | `--threads` | Optional (`true`/`false`) | Enable multi-threaded processing. If present without a value, `Boolean.parseBoolean(null)` results in `false`. | `true` |
+| `-r` | `--root` | Yes (path) | Root directory that bounds scanning. Each scanned directory must be located within this root. | `gw.properties` key `root`; otherwise `user.dir` |
 | `-a` | `--genai` | Yes (`provider:model`) | GenAI provider and model (e.g., `OpenAI:gpt-5.1`). | `gw.properties` key `genai`; otherwise `OpenAI:gpt-5-mini` |
-| `-i` | `--instructions` | Optional (URL/path[,URL/path...]) | Additional instruction locations (URL or file path). Multiple locations may be comma-separated. If provided without a value, prompts for instruction text via stdin. | `gw.properties` key `instructions` (comma-separated); otherwise none |
+| `-i` | `--instructions` | Optional (URL/path[,URL/path...]) | Additional instruction locations (URL or file path). Multiple locations may be comma-separated. If provided without a value, prompts for instruction text via stdin. Relative file paths are resolved against the executable directory (directory containing `gw.jar`). | `gw.properties` key `instructions` (comma-separated); otherwise none |
 | `-e` | `--excludes` | Yes (dir[,dir...]) | Directories to exclude from processing. Comma-separated list. | `gw.properties` key `excludes` (comma-separated); otherwise none |
 | `-g` | `--guidance` | Optional (path) | Default guidance applied as a final step. If provided with a value, reads that file relative to the executable directory (directory containing `gw.jar`). If provided without a value, prompts for guidance text via stdin. | Off (not applied) |
 
 **Positional arguments**: Zero or more directories to scan.
 
 - If no directories are provided:
-  - When `--root` is not set (and no `root` in `gw.properties`), the root defaults to the user directory (`user.dir`) and that directory is scanned.
-  - When `--root` is set (or configured), the directory scanned defaults to the user directory (`user.dir`).
+  - When `root` is not set (and no `root` in `gw.properties`), the root defaults to `user.dir` and that directory is scanned.
+  - When `root` is set (via `--root` or `gw.properties`), the directory scanned defaults to `user.dir`.
 
 ### Example
 
@@ -147,7 +147,7 @@ Scan a project with multi-threaded processing, specify a GenAI provider/model, l
 
 ```bash
 java -jar gw.jar \
-  --threads \
+  --threads true \
   --root . \
   --genai OpenAI:gpt-5.1 \
   --instructions ghostwriter-instructions.txt \

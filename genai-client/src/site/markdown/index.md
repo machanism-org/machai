@@ -129,20 +129,20 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates seamlessly with the OpenAI API, serving as a concrete implementation of `GenAIProvider`.
+`OpenAIProvider` integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
 This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI chat models.
+- Sending prompts and receiving responses from OpenAI Chat models.
 - Managing files for use in various OpenAI workflows.
 - Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
 - Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications.
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
 
 **Environment variables**
 
-You must set at least `OPENAI_API_KEY`.
+You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -159,12 +159,12 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-`CodeMieProvider` extends `OpenAIProvider` and authenticates against CodeMie to call it via an OpenAI-compatible API endpoint.
+`CodeMieProvider` is an `OpenAIProvider` variant that authenticates against CodeMie and then calls it via an OpenAI-compatible API endpoint.
 
 How it works:
 
 - Obtains an access token from a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`).
-- Uses the token as the API key when creating the OpenAI client.
+- Uses that token as the API key when creating the OpenAI client.
 - Uses the CodeMie OpenAI-compatible base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
 **Authentication / configuration**

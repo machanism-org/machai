@@ -1,38 +1,30 @@
 /**
- * Detects and models a repository's on-disk layout for downstream processing.
+ * Detects and models a repository's on-disk layout so callers can consistently locate
+ * source, test, resource, and documentation directories, and optionally discover modules/workspaces.
  *
- * <p>This package provides abstractions and implementations that determine where a repository stores its modules
- * (if any) and its conventional directories (sources, tests, resources, documentation). Callers choose an
- * implementation based on the build metadata available at the repository root (for example {@code pom.xml} for
- * Maven or {@code package.json} for JavaScript workspaces) and then query the layout for paths to scan.
+ * <p>The central abstraction is {@link org.machanism.machai.project.layout.ProjectLayout}. A caller selects an
+ * implementation based on build metadata present at the repository root (for example {@code pom.xml} for Maven,
+ * {@code package.json} for JavaScript workspaces, or {@code pyproject.toml} for Python projects), sets the project
+ * directory, and then queries the layout for directories to scan.
  *
  * <h2>Key concepts</h2>
  * <ul>
  *   <li><b>Project root</b>: the repository directory configured via
  *       {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.</li>
- *   <li><b>Modules/workspaces</b>: optional subprojects discovered from build descriptors (for example Maven modules
- *       or JavaScript workspaces).</li>
- *   <li><b>Directory sets</b>: the conventional paths returned by
+ *   <li><b>Modules/workspaces</b>: optional subprojects discovered from build descriptors via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getModules()}.</li>
+ *   <li><b>Directory sets</b>: conventional paths returned by
  *       {@link org.machanism.machai.project.layout.ProjectLayout#getSources()},
  *       {@link org.machanism.machai.project.layout.ProjectLayout#getTests()},
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getResources()} and
  *       {@link org.machanism.machai.project.layout.ProjectLayout#getDocuments()}.</li>
  *   <li><b>Exclusions</b>: shared directory names that should be skipped during filesystem walks via
  *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
  * </ul>
  *
- * <h2>Provided implementations</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} - parses {@code pom.xml} and can discover Maven modules.</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} - parses {@code package.json} and can discover workspace modules.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} - identifies Python projects via {@code pyproject.toml} and related metadata.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} - convention-based fallback for repositories without a recognized descriptor.</li>
- * </ul>
- *
  * <h2>Typical usage</h2>
  * <pre>
  * ProjectLayout layout = new MavenProjectLayout()
- * 		.projectDir(new java.io.File("/repo"));
+ *         .projectDir(new java.io.File("/repo"));
  *
  * java.util.List&lt;String&gt; modules = layout.getModules();
  * java.util.List&lt;String&gt; sources = layout.getSources();

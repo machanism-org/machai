@@ -29,7 +29,7 @@
 /**
  * Web-automation-backed implementations of {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <p>This package contains providers that automate a generative-AI service through its web UI using
+ * <p>This package contains providers that automate a generative AI service through its web UI using
  * <a href="https://ganteater.com">Anteater</a> workspaces and recipes.
  *
  * <p>The primary entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which manages a shared

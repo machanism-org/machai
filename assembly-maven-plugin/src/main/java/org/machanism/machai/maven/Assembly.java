@@ -32,7 +32,7 @@ import org.machanism.machai.schema.Bindex;
  * This goal orchestrates an AI-assisted project assembly workflow:
  * </p>
  * <ol>
- *   <li>Read an assembly prompt from {@link #assemblyPromptFile} (when present) or ask for it interactively.</li>
+ *   <li>Acquire a prompt from {@link #assemblyPromptFile} (if present) or request it interactively.</li>
  *   <li>Use {@link #pickChatModel} to recommend candidate libraries ({@link Bindex} entries).</li>
  *   <li>Filter recommendations by {@link #score}.</li>
  *   <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
@@ -64,7 +64,7 @@ import org.machanism.machai.schema.Bindex;
 public class Assembly extends AbstractMojo {
 
 	/**
-	 * Interactive prompter used when {@link #assemblyPromptFile} does not exist.
+	 * Interactive prompter used to collect the prompt when {@link #assemblyPromptFile} does not exist.
 	 */
 	@Component
 	protected Prompter prompter;
@@ -113,7 +113,7 @@ public class Assembly extends AbstractMojo {
 	protected String registerUrl;
 
 	/**
-	 * Maven project base directory where changes are applied.
+	 * Maven execution base directory where changes are applied.
 	 */
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
 	protected File basedir;

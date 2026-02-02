@@ -111,7 +111,7 @@ public class CommandFunctionTools {
 
 		} catch (IOException | CommandLineException | InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new IllegalArgumentException(e);
+			result = e.getMessage();
 		} finally {
 			result = output.toString();
 		}

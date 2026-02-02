@@ -53,25 +53,25 @@ and generate the content for this section following net format:
 
 This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI Chat models.
+- Sending prompts and receiving responses from OpenAI chat models.
 - Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests such as text generation, summarization, and question answering.
+- Performing advanced LLM requests, such as text generation, summarization, and question answering.
 - Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-By abstracting the complexities of direct API interaction, `OpenAIProvider` lets you leverage OpenAI models efficiently within your applications.
+It also supports tool/function calling by registering tools via `addTool(...)`.
 
 Environment variables
 
-The client automatically reads the following environment variables (or system properties with the same names). You must set at least `OPENAI_API_KEY`:
+The client automatically reads the following environment variables (or equivalent system properties). You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-Using the CodeMie API via OpenAI-compatible settings
+Using the CodeMie API
 
-To use the CodeMie OpenAI-compatible endpoint with `OpenAIProvider`, set:
+To use the CodeMie API via OpenAI-compatible settings, set:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -114,15 +114,15 @@ provider.model("gpt-5.1");
 
 `NoneProvider` is a no-op implementation of `GenAIProvider` intended for environments where no external LLM integration should be used.
 
-It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(...)` has been configured.
+It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
 Key characteristics
 
 - No network calls are performed.
 - `perform()` always returns `null`.
-- Unsupported capabilities (for example, `embedding(...)`) throw an exception.
+- Unsupported capabilities (for example, `embedding(String)`) throw an exception.
 
-Usage example
+Example
 
 ```java
 GenAIProvider provider = new NoneProvider();
@@ -134,11 +134,14 @@ provider.perform();
 
 ### Web
 
-`WebProvider` obtains model responses by automating a target GenAI service through its web user interface.
+`WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
 Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`).
 
-The list of prompts is passed to the workspace as a system variable named `INPUTS`, and the recipe is expected to place the final response text into a variable named `result`.
+Data contract with recipes
+
+- The provider passes prompts to the workspace in a system variable named `INPUTS`.
+- The recipe is expected to place the final response text into a variable named `result`.
 
 Thread safety and lifecycle
 
@@ -146,7 +149,7 @@ Thread safety and lifecycle
 - Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 
-Usage example
+Example
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie", conf);

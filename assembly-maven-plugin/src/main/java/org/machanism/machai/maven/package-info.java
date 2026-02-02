@@ -25,12 +25,13 @@
 */
 
 /**
- * Maven {@code org.apache.maven.plugin.Mojo} implementation for AI-assisted project assembly.
+ * Maven plugin entry points for running an AI-assisted “assembly” workflow on a target project directory.
  *
  * <p>
- * The package contains the {@link org.machanism.machai.maven.Assembly} goal ({@code assembly}), which reads an
- * assembly prompt, requests library recommendations from a "picker" model, and then runs an assembly workflow
- * that applies changes to the Maven execution base directory.
+ * This package contains the {@link org.machanism.machai.maven.Assembly} {@code Mojo} that implements the
+ * {@code assembly} goal. The goal reads an assembly prompt, asks a “picker” model to recommend relevant
+ * libraries (as {@link org.machanism.machai.schema.Bindex} entries), and then runs an assembly workflow that
+ * applies changes to the Maven execution base directory.
  * </p>
  *
  * <h2>Goal</h2>
@@ -41,8 +42,7 @@
  * <h2>Process overview</h2>
  * <ol>
  *   <li>Acquire the prompt from {@code assembly.prompt.file} (or interactively if the file is missing).</li>
- *   <li>Use the picker GenAI provider to produce a list of {@link org.machanism.machai.schema.Bindex}
- *   recommendations.</li>
+ *   <li>Use the picker GenAI provider to produce recommendations.</li>
  *   <li>Filter recommendations using a minimum score threshold.</li>
  *   <li>Invoke {@link org.machanism.machai.bindex.ApplicationAssembly} to apply changes in the project directory.</li>
  * </ol>

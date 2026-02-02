@@ -54,7 +54,7 @@ class ProjectLayoutTest {
 	}
 
 	@Test
-	void getRelatedPath_instance_shouldStripCurrentPathAndLeadingSlash() {
+	void getRelatedPath_instance_shouldStripCurrentPath_andLeadingSlash() {
 		// Arrange
 		ProjectLayout layout = new TestLayout();
 		String currentPath = "C:/repo";
@@ -65,6 +65,20 @@ class ProjectLayoutTest {
 
 		// Assert
 		assertEquals("src/main/java", related);
+	}
+
+	@Test
+	void getRelatedPath_instance_shouldReturnEmptyStringWhenFileEqualsCurrentPath() {
+		// Arrange
+		ProjectLayout layout = new TestLayout();
+		String currentPath = "C:/repo";
+		File file = new File("C:/repo");
+
+		// Act
+		String related = layout.getRelatedPath(currentPath, file);
+
+		// Assert
+		assertEquals("", related);
 	}
 
 	@Test
@@ -117,19 +131,5 @@ class ProjectLayoutTest {
 
 		// Assert
 		assertNull(related);
-	}
-
-	@Test
-	void getRelatedPath_instance_shouldReturnEmptyStringWhenFileEqualsCurrentPath() {
-		// Arrange
-		ProjectLayout layout = new TestLayout();
-		String currentPath = "C:/repo";
-		File file = new File("C:/repo");
-
-		// Act
-		String related = layout.getRelatedPath(currentPath, file);
-
-		// Assert
-		assertEquals("", related);
 	}
 }

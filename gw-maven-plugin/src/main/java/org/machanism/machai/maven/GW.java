@@ -24,36 +24,51 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Maven goal ({@code gw}) that runs the MachAI generative-workflow (GW)
- * document-processing pipeline for the current module.
+ * Maven goal ({@code gw}) that runs the MachAI generative-workflow (GW) document-processing pipeline.
  *
  * <p>
- * The goal scans the module base directory (typically {@code ${basedir}}) for
- * documentation sources and delegates the processing to {@link FileProcessor}.
+ * The mojo scans documentation sources starting at the current module base directory (typically {@code ${basedir}})
+ * and delegates processing to {@link FileProcessor}.
  * </p>
- *
- * <h2>Credentials</h2>
- * <p>
- * GenAI credentials are read from Maven {@code settings.xml} using the
- * configured {@code &lt;server&gt;} entry identified by {@link #serverId}. If
- * present, they are exposed to the workflow via system properties:
- * </p>
- * <ul>
- * <li>{@code GENAI_USERNAME}</li>
- * <li>{@code GENAI_PASSWORD}</li>
- * </ul>
  *
  * <h2>Parameters</h2>
  * <ul>
- * <li>{@code gw.genai} ({@link #genai}, optional): GenAI provider/model
- * identifier forwarded to the workflow (for example {@code OpenAI:gpt-5}).</li>
- * <li>{@code gw.instructions} ({@link #instructions}, optional): One or more
- * instruction location strings consumed by the workflow.</li>
- * <li>{@code gw.genai.serverId} ({@link #serverId}, required): Maven
- * {@code settings.xml} {@code &lt;server&gt;} id used to read credentials.</li>
- * <li>{@code gw.threads} ({@link #threads}, optional, default {@code true}):
- * Enables/disables multi-threaded document processing.</li>
+ *   <li>
+ *     <b>{@code gw.genai}</b> ({@link #genai}, optional): GenAI provider/model identifier forwarded to the workflow
+ *     (for example {@code OpenAI:gpt-5}).
+ *   </li>
+ *   <li>
+ *     <b>{@code gw.instructions}</b> ({@link #instructions}, optional): One or more instruction location strings
+ *     consumed by the workflow.
+ *   </li>
+ *   <li>
+ *     <b>{@code gw.excludes}</b> ({@link #excludes}, optional): Exclude patterns/paths to skip during scanning.
+ *   </li>
+ *   <li>
+ *     <b>{@code gw.genai.serverId}</b> ({@link #serverId}, required): Maven {@code settings.xml} {@code &lt;server&gt;} id
+ *     used to resolve GenAI credentials.
+ *   </li>
+ *   <li>
+ *     <b>{@code gw.threads}</b> ({@link #threads}, optional, default {@code true}): Enables/disables multi-threaded
+ *     processing.
+ *   </li>
  * </ul>
+ *
+ * <h2>Credentials</h2>
+ * <p>
+ * GenAI credentials are read from Maven {@code settings.xml} using the configured {@code &lt;server&gt;} entry identified by
+ * {@link #serverId}. When present, they are exposed to the workflow as configuration properties:
+ * </p>
+ * <ul>
+ *   <li>{@code GENAI_USERNAME}</li>
+ *   <li>{@code GENAI_PASSWORD}</li>
+ * </ul>
+ *
+ * <h2>Usage</h2>
+ * <p>Run from the command line:</p>
+ * <pre>
+ * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai
+ * </pre>
  */
 @Mojo(name = "gw", threadSafe = true, aggregator = true)
 public class GW extends AbstractMojo {
@@ -61,25 +76,25 @@ public class GW extends AbstractMojo {
 	private static final Logger logger = LoggerFactory.getLogger(GW.class);
 
 	/**
-	 * Optional GenAI provider/model identifier to pass to the workflow.
+	 * GenAI provider/model identifier to pass to the workflow.
 	 */
 	@Parameter(property = "gw.genai")
 	String genai;
 
 	/**
-	 * Optional instruction locations to pass to the workflow.
+	 * Instruction locations (for example, file paths or classpath locations) consumed by the workflow.
 	 */
 	@Parameter(property = "gw.instructions", required = false, readonly = false, name = "instructions")
 	private String[] instructions;
 
 	/**
-	 * Optional instruction locations to pass to the workflow.
+	 * Exclude patterns/paths that should be skipped when scanning documentation sources.
 	 */
 	@Parameter(property = "gw.excludes", required = false, readonly = false, name = "excludes")
 	private String[] excludes;
 
 	/**
-	 * The Maven module base directory to scan for documentation sources.
+	 * The Maven module base directory used as the scan root.
 	 */
 	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
 	File basedir;
@@ -88,9 +103,8 @@ public class GW extends AbstractMojo {
 	 * The current Maven project.
 	 *
 	 * <p>
-	 * This mojo primarily operates on the filesystem and the session project list;
-	 * however, Maven injects the project instance and it is used to derive the
-	 * non-recursive behavior.
+	 * Used to derive whether the invocation is effectively non-recursive (for example, when running against a parent POM
+	 * without building the full reactor).
 	 * </p>
 	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
@@ -98,7 +112,7 @@ public class GW extends AbstractMojo {
 	MavenProject project;
 
 	/**
-	 * The Maven session used to access the reactor projects.
+	 * The Maven session used to access reactor projects.
 	 */
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	private MavenSession session;
@@ -110,8 +124,7 @@ public class GW extends AbstractMojo {
 	private Settings settings;
 
 	/**
-	 * Required {@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
-	 * credentials.
+	 * {@code settings.xml} {@code &lt;server&gt;} id used to read GenAI credentials.
 	 */
 	@Parameter(property = "gw.genai.serverId", required = true)
 	private String serverId;
@@ -123,11 +136,9 @@ public class GW extends AbstractMojo {
 	private boolean threads;
 
 	/**
-	 * Configures credentials and runs document scanning/processing for the current
-	 * module.
+	 * Configures credentials and runs document scanning/processing starting from {@link #basedir}.
 	 *
-	 * @throws MojoExecutionException if Maven settings/credentials are missing or
-	 *                                document processing fails
+	 * @throws MojoExecutionException if required Maven settings/credentials are missing or if document processing fails
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -157,11 +168,9 @@ public class GW extends AbstractMojo {
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 
-
 		FileProcessor processor = new FileProcessor(genai, config) {
 			/**
-			 * Creates a project layout for a Maven module, enriching it with the reactor
-			 * model when available.
+			 * Creates a project layout for a Maven module, enriching it with the reactor model when available.
 			 *
 			 * @param projectDir directory containing the Maven project
 			 * @return the resolved project layout

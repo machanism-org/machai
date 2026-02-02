@@ -1,24 +1,28 @@
 /**
  * Project discovery, representation, and processing.
  *
- * <p>This package contains the core API for working with a source-code project rooted at a filesystem
- * directory. It focuses on:
+ * <p>This package contains the core API used to work with a source-code project rooted at a filesystem
+ * directory. It is responsible for identifying the type of project present (its {@code ProjectLayout}),
+ * representing the discovered project structure (as a {@code Project}), and providing layout-aware
+ * scanning/processing utilities.
+ *
+ * <h2>Responsibilities</h2>
  *
  * <ul>
- *   <li><b>Layout detection</b>: determining what kind of project a directory represents (for example,
- *       Maven, Node, Python) and selecting a matching {@code ProjectLayout}.</li>
- *   <li><b>Project modeling</b>: representing a discovered project and its important folders as typed
+ *   <li><b>Layout detection</b>: determine what kind of project a directory represents (for example,
+ *       Maven, Node, or Python) and select a matching {@code ProjectLayout}.</li>
+ *   <li><b>Project modeling</b>: represent a discovered project and its important folders as typed
  *       structures.</li>
- *   <li><b>Scanning and processing</b>: traversing a project root and applying layout-aware processing
+ *   <li><b>Scanning and processing</b>: traverse a project root and apply layout-aware processing
  *       rules.</li>
  * </ul>
  *
  * <h2>Typical flow</h2>
  *
  * <ol>
- *   <li>Detect the layout for a root directory.</li>
+ *   <li>Detect a {@code ProjectLayout} for a root directory.</li>
  *   <li>Create and run a processor to scan the directory tree.</li>
- *   <li>Consume the resulting {@code Project} structure and metadata.</li>
+ *   <li>Consume the resulting {@code Project} structure and any associated metadata.</li>
  * </ol>
  *
  * <h2>Example</h2>

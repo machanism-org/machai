@@ -73,10 +73,10 @@ public class WebProvider extends NoneProvider {
 		try {
 			workspace.getSystemVariables().put("INPUTS", super.getPrompts());
 			RecipeRunner runTask = workspace.runTask("Submit Prompt", false);
-			String result = (String) runTask.getProcessor().variables.get("result");
+			Object result = runTask.getProcessor().variables.get("result");
 
 			clear();
-			return result;
+			return result == null ? null : String.valueOf(result);
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}

@@ -78,7 +78,7 @@ mvn org.machanism.machai:bindex-maven-plugin:bindex
 
 | Parameter | Description | Default |
 |---|---|---|
-| `update` | Whether to update an existing `bindex.json` if present. | `true` |
+| `update` | Whether to update an existing `bindex.json` if present. | `false` |
 
 Example (system property):
 

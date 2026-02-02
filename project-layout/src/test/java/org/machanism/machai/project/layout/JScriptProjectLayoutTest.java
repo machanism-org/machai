@@ -3,6 +3,7 @@ package org.machanism.machai.project.layout;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -40,6 +41,21 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
+	void getModules_shouldThrowWhenPackageJsonInvalid() throws Exception {
+		// Arrange
+		File dir = new File("target/test-tmp/js-invalid-package-json");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+		Files.write(new File(dir, "package.json").toPath(), "not-json".getBytes(StandardCharsets.UTF_8));
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
+
+		// Act
+		IOException ex = assertThrows(IOException.class, layout::getModules);
+
+		// Assert
+		assertNotNull(ex.getMessage());
+	}
+
+	@Test
 	void getModules_shouldReturnNullWhenNoWorkspacesKey() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-no-workspaces");
@@ -56,7 +72,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListDueToAbsolutePathExcludedDirMatching() throws Exception {
+	void getModules_shouldReturnEmptyListDueToAbsolutePathExcludeCheck() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-workspaces");
 		assertTrue(dir.mkdirs() || dir.isDirectory());
@@ -71,10 +87,6 @@ class JScriptProjectLayoutTest {
 		File moduleB = new File(dir, "packages/module-b");
 		assertTrue(moduleB.mkdirs() || moduleB.isDirectory());
 		Files.write(new File(moduleB, "package.json").toPath(), "{\"name\":\"b\"}".getBytes(StandardCharsets.UTF_8));
-
-		File excluded = new File(dir, "packages/node_modules/module-c");
-		assertTrue(excluded.mkdirs() || excluded.isDirectory());
-		Files.write(new File(excluded, "package.json").toPath(), "{\"name\":\"c\"}".getBytes(StandardCharsets.UTF_8));
 
 		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
 

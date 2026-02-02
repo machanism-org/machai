@@ -11,25 +11,41 @@ import java.util.function.Function;
 import org.machanism.macha.core.commons.configurator.Configurator;
 
 /**
- * Contract for a GenAI provider implementation.
+ * Contract for a generative-AI provider implementation.
  *
- * <p>
- * A {@code GenAIProvider} represents a concrete integration (OpenAI, Gemini,
- * local model, etc.) capable of: prompting a chat model, attaching local/remote
- * files, computing embeddings, and exposing tool functions. Implementations may
- * keep session state; callers should use {@link #clear()} when appropriate.
+ * <p>A {@code GenAIProvider} represents a concrete integration (for example OpenAI, Gemini, local model, etc.)
+ * capable of:
+ * <ul>
+ *   <li>collecting prompts and system instructions for a conversation,</li>
+ *   <li>attaching local or remote files for provider-side processing,</li>
+ *   <li>computing embedding vectors,</li>
+ *   <li>registering tool functions that may be invoked during a run.</li>
+ * </ul>
  *
- * <h2>Typical usage</h2> {@code
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-3.5-turbo");
+ * <p>Implementations may keep session state between calls. Use {@link #clear()} to reset conversation state.
+ *
+ * <h2>Typical usage</h2>
+ * <pre>{@code
+ * Configurator conf = ...;
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
+ *
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Hello!");
  * String response = provider.perform();
- * }
+ *
+ * provider.clear();
+ * provider.close();
+ * }</pre>
  *
  * @author Viktor Tovstyi
  */
 public interface GenAIProvider extends Closeable {
 
+	/**
+	 * Initializes the provider with application configuration.
+	 *
+	 * @param conf configuration source
+	 */
 	void init(Configurator conf);
 
 	/**
@@ -43,8 +59,7 @@ public interface GenAIProvider extends Closeable {
 	 * Adds a user prompt using the contents of a file.
 	 *
 	 * @param file              the file containing prompt content
-	 * @param bundleMessageName a message identifier associated with the prompt (for
-	 *                          example, a resource bundle key)
+	 * @param bundleMessageName a message identifier associated with the prompt (for example, a resource bundle key)
 	 * @throws IOException if the file cannot be read
 	 */
 	void promptFile(File file, String bundleMessageName) throws IOException;
@@ -83,10 +98,11 @@ public interface GenAIProvider extends Closeable {
 	/**
 	 * Registers a custom tool function that the provider may invoke at runtime.
 	 *
-	 * @param name        tool name
+	 * <p>The expected argument structure passed to {@code function} is provider-specific.
+	 *
+	 * @param name        tool name (unique per provider instance)
 	 * @param description human-readable description of the tool
-	 * @param function    function implementation; receives an argument array and
-	 *                    returns a result
+	 * @param function    function implementation; receives an argument array and returns a result
 	 * @param paramsDesc  parameter descriptors (format is provider-specific)
 	 */
 	void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc);
@@ -99,8 +115,7 @@ public interface GenAIProvider extends Closeable {
 	void instructions(String instructions);
 
 	/**
-	 * Executes the provider to produce a response based on the accumulated prompts
-	 * and state.
+	 * Executes the provider to produce a response based on the accumulated prompts and state.
 	 *
 	 * @return the provider response
 	 */
@@ -130,6 +145,7 @@ public interface GenAIProvider extends Closeable {
 	/**
 	 * Releases any resources held by this provider.
 	 */
+	@Override
 	void close();
 
 	/**

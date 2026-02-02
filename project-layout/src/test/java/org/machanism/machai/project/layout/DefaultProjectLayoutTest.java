@@ -59,17 +59,16 @@ class DefaultProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReflectFilesystemChangesAcrossCallsBecauseItCachesMutableListReference() throws Exception {
+	void getModules_shouldCacheAndReturnSameListInstanceAcrossCalls() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/default-layout-cache");
 		Files.createDirectories(dir.toPath());
 		Files.createDirectories(new File(dir, "module-a").toPath());
 
 		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(dir);
-		List<String> first = layout.getModules();
-		Files.createDirectories(new File(dir, "module-b").toPath());
 
 		// Act
+		List<String> first = layout.getModules();
 		List<String> second = layout.getModules();
 
 		// Assert

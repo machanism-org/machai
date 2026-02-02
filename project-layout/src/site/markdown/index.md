@@ -23,7 +23,7 @@ Page Structure:
 
 ## Introduction
 
-Project Layout is a small utility library for describing and working with a conventional project directory layout (sources, resources, tests, docs, etc.) in a consistent way. It is intended for build tooling and plugins that need to locate well-known folders reliably across different projects.
+Project Layout is a small utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, etc.) in a consistent way. It is intended for build tooling and plugins that need to locate well-known folders reliably across different projects.
 
 ## Overview
 
@@ -50,15 +50,15 @@ Add the dependency:
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>project-layout</artifactId>
-  <version>${project-layout.version}</version>
+  <version>${project.version}</version>
 </dependency>
 ```
 
 ### Typical Workflow
 
-1. Define or load the project layout configuration (use the defaults or your own conventions).
+1. Use the default Maven-style layout or configure your own conventions.
 2. Resolve the directories you need (main sources, test sources, resources, docs) against the project base directory.
-3. Pass the resolved paths to the rest of your build/tooling logic (scanners, generators, compilers, packagers).
+3. Use the resolved paths in your build/tooling logic (scanners, generators, compilers, packagers).
 
 ## Resources
 

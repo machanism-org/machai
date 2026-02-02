@@ -1,36 +1,24 @@
 /**
- * Maven plugin mojos that integrate the MachAI Generative Workflow (GW) document-processing pipeline into a Maven
- * build.
+ * Maven plugin goals (mojos) for running and cleaning the MachAI Generative Workflow (GW) documentation pipeline as
+ * part of a Maven build.
  *
  * <p>
- * The mojos in this package provide:
+ * This package contains two mojos:
  * </p>
  * <ul>
  *   <li>
- *     A {@code gw} goal that scans documentation sources for one or more reactor modules and invokes the GW pipeline
- *     via {@link org.machanism.machai.gw.FileProcessor}.
+ *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources (for example under
+ *     {@code src/site}) and invokes the GW processing pipeline via {@link org.machanism.machai.gw.FileProcessor}.
  *   </li>
  *   <li>
- *     A {@code clean} goal that removes temporary files produced by prior GW runs.
- *   </li>
- * </ul>
- *
- * <h2>Goals</h2>
- * <ul>
- *   <li>
- *     <b>{@code gw}</b> ({@link org.machanism.machai.maven.GW}): Scans documentation sources starting at the module base
- *     directory (typically {@code ${basedir}}) and runs the GW pipeline. This goal is an <em>aggregator</em> mojo and can
- *     coordinate processing across the Maven reactor.
- *   </li>
- *   <li>
- *     <b>{@code clean}</b> ({@link org.machanism.machai.maven.Clean}): Deletes temporary artifacts produced by prior GW
+ *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; deletes temporary artifacts created by prior GW
  *     runs.
  *   </li>
  * </ul>
  *
- * <h2>Configuration and parameters</h2>
+ * <h2>Plugin parameters</h2>
  * <p>
- * The {@code gw} goal configures the workflow and supplies parameters to the underlying GW pipeline.
+ * The {@code gw} goal supports the following parameters (also available as system properties).
  * </p>
  * <ul>
  *   <li>
@@ -38,13 +26,14 @@
  *     {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
- *     <b>{@code gw.instructions}</b> (optional): One or more instruction location strings consumed by the workflow.
+ *     <b>{@code gw.instructions}</b> (optional): One or more instruction location strings consumed by the workflow
+ *     (for example, file paths under {@code src/site}).
  *   </li>
  *   <li>
- *     <b>{@code gw.excludes}</b> (optional): One or more exclude patterns/paths that are skipped during scanning.
+ *     <b>{@code gw.excludes}</b> (optional): One or more exclude patterns/paths skipped during documentation scanning.
  *   </li>
  *   <li>
- *     <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
+ *     <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} {@code &lt;server&gt;} id used to load GenAI
  *     credentials.
  *   </li>
  *   <li>
@@ -52,9 +41,9 @@
  *   </li>
  * </ul>
  *
- * <h3>Credentials</h3>
+ * <h2>Credentials</h2>
  * <p>
- * Credentials are read from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry whose id is provided by
+ * GenAI credentials are read from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry whose id is provided by
  * {@code gw.genai.serverId}. When present, they are exposed to the workflow as configuration properties:
  * </p>
  * <ul>
