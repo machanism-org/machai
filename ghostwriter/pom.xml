@@ -93,24 +93,6 @@
 						</configuration>
 						<executions>
 							<execution>
-								<id>build-artifact</id>
-								<phase>install</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<appendAssemblyId>false</appendAssemblyId>
-									<archive>
-										<manifestEntries>
-											<Class-Path>${plugins-class-path}</Class-Path>
-										</manifestEntries>
-									</archive>
-									<descriptorRefs>
-										<descriptorRef>jar-with-dependencies</descriptorRef>
-									</descriptorRefs>
-								</configuration>
-							</execution>
-							<execution>
 								<id>delivery-pack</id>
 								<phase>install</phase>
 								<goals>

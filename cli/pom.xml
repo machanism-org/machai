@@ -31,30 +31,24 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>install</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<finalName>machai</finalName>
-									<archive>
-										<manifest>
-											<mainClass>
-												org.machanism.machai.cli.MachaiCLI</mainClass>
-										</manifest>
-										<manifestEntries>
-											<Class-Path><![CDATA[lib/ae.jar lib/web-ae-plugin.jar]]></Class-Path>
-										</manifestEntries>
-									</archive>
-									<appendAssemblyId>false</appendAssemblyId>
-									<descriptorRefs>
-										<descriptorRef>jar-with-dependencies</descriptorRef>
-									</descriptorRefs>
-								</configuration>
-							</execution>
-						</executions>
+						<configuration>
+							<finalName>machai</finalName>
+							<outputDirectory>
+								${env.MACHANISM_PACK_DIR}/machai</outputDirectory>
+							<archive>
+								<manifest>
+									<mainClass>
+										org.machanism.machai.cli.MachaiCLI</mainClass>
+								</manifest>
+								<manifestEntries>
+									<Class-Path><![CDATA[lib/ae.jar lib/web-ae-plugin.jar]]></Class-Path>
+								</manifestEntries>
+							</archive>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
