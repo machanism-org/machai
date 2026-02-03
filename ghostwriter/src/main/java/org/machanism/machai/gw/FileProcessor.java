@@ -178,8 +178,6 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File rootDir, String pattern) throws IOException {
-		logger.info("Multi-threaded processing mode {}.", moduleMultiThread ? "enabled" : "disabled");
-
 		this.rootDir = rootDir;
 
 		if (ObjectUtils.equals(rootDir.getAbsolutePath(), pattern)) {
@@ -208,6 +206,7 @@ public class FileProcessor extends ProjectProcessor {
 				if (isModuleMultiThread()) {
 					processModulesMultiThreaded(projectDir, modules);
 				} else {
+					logger.info("Multi-threaded processing mode disabled.");
 					for (String module : modules) {
 						processModule(projectDir, module);
 					}
@@ -347,7 +346,9 @@ public class FileProcessor extends ProjectProcessor {
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
-		if (processFilePattern == null || isPathUnderDirectory(file.getPath(), processFilePattern)) {
+		boolean pathUnderDirectory = isPathUnderDirectory(file.getPath(), processFilePattern);
+
+		if (processFilePattern == null || pathUnderDirectory) {
 			File projectDir = projectLayout.getProjectDir();
 			String guidance = parseFile(projectDir, file);
 
@@ -501,21 +502,19 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		@SuppressWarnings("unchecked")
-		List<File> files = (List<File>) FileUtils.listFiles(dir, TrueFileFilter.INSTANCE,
+		List<File> files = (List<File>) FileUtils.listFilesAndDirs(dir, TrueFileFilter.INSTANCE,
 				DirectoryFileFilter.DIRECTORY);
-
 		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 
 		for (File file : files) {
 			String name = file.getName();
 			String absolutePath = file.getAbsolutePath();
 
-			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludeAbsolutePath(absolutePath)) {
-				continue;
-			}
-
-			if (matcher == null || matcher.matches(file.toPath())) {
-				result.add(file);
+			if (!Strings.CI.containsAny(absolutePath, ProjectLayout.EXCLUDE_DIRS)
+					&& !shouldExcludeAbsolutePath(absolutePath)) {
+				if (matcher == null || matcher.matches(file.toPath())) {
+					result.add(file);
+				}
 			}
 		}
 		return result;
@@ -576,6 +575,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private boolean isPathUnderDirectory(String name, String parentPath) {
+
 		String pattern = StringUtils.trimToNull(processFilePattern);
 		if (pattern != null) {
 			PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
@@ -584,15 +584,19 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		String child = normalizePathForPrefixCheck(name);
-		String parent = normalizePathForPrefixCheck(parentPath);
-		if (child == null || parent == null) {
-			return false;
+		if (new File(parentPath).isAbsolute()) {
+			String child = normalizePathForPrefixCheck(name);
+			String parent = normalizePathForPrefixCheck(parentPath);
+			if (child == null || parent == null) {
+				return false;
+			}
+			if (!parent.endsWith("/")) {
+				parent = parent + "/";
+			}
+			return child.equals(parent.substring(0, parent.length() - 1)) || child.startsWith(parent);
 		}
-		if (!parent.endsWith("/")) {
-			parent = parent + "/";
-		}
-		return child.equals(parent.substring(0, parent.length() - 1)) || child.startsWith(parent);
+
+		return true;
 	}
 
 	private static String normalizePathForPrefixCheck(String path) {

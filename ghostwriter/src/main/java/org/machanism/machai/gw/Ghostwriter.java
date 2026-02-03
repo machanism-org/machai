@@ -89,9 +89,12 @@ public final class Ghostwriter {
 		Options options = new Options();
 
 		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
+		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
+
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
 				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
 				.optionalArg(true).build();
+
 		Option rootDirOpt = new Option("r", "root", true,
 				"Specify the path to the root directory for file processing.");
 		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
@@ -117,6 +120,7 @@ public final class Ghostwriter {
 		options.addOption(instructionsOpt);
 		options.addOption(guidanceOpt);
 		options.addOption(excludesOpt);
+		options.addOption(logInputsOption);
 
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -200,6 +204,8 @@ public final class Ghostwriter {
 				}
 			}
 
+			boolean logInputs = cmd.hasOption(logInputsOption);
+
 			for (String scanDir : dirs) {
 				logger.info("Starting scan of directory: {}", scanDir);
 
@@ -213,9 +219,11 @@ public final class Ghostwriter {
 					processor.setInstructions(instructions);
 					processor.setModuleMultiThread(multiThread);
 					processor.setDefaultGuidance(defaultGuidance);
+					processor.setLogInputs(logInputs);
 
 					processor.scanDocuments(rootDir, scanDir);
-					logger.info("Scan completed for directory: {}", scanDir);
+					logger.info("Finished scanning directory: {}", scanDir);
+
 				} else {
 					logger.error("The directory '{}' must be located within the root directory '{}'.", scanDir,
 							rootDir);
@@ -252,15 +260,12 @@ public final class Ghostwriter {
 	}
 
 	private static void help(Options options, HelpFormatter formatter) {
-	    String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n"
-	                  + "Usage:\n"
-	                  + "  java -jar gw.jar <scanDir | glob_path_pattern> [options]\n\n"
-	                  + "Options:";
-	    String footer = "\nExamples:\n"
-                + "  java -jar gw.jar C:\\projects\\project\n"
-                + "  java -r C:\\projects\\project -jar gw.jar src/project\n"
-	            + "  java -r C:\\projects\\project -jar gw.jar \"**/*.java\"\n";
-	    formatter.printHelp("java -jar gw.jar <scanDir | glob_path_pattern>", header, options, footer, true);
+		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n" + "Usage:\n"
+				+ "  java -jar gw.jar <scanDir | glob_path_pattern> [options]\n\n" + "Options:";
+		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\projects\\project\n"
+				+ "  java -r C:\\projects\\project -jar gw.jar src/project\n"
+				+ "  java -r C:\\projects\\project -jar gw.jar \"**/*.java\"\n";
+		formatter.printHelp("java -jar gw.jar <scanDir | glob_path_pattern>", header, options, footer, true);
 	}
 
 	private static String readText(String prompt) {
