@@ -507,7 +507,6 @@ public class FileProcessor extends ProjectProcessor {
 		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 
 		for (File file : files) {
-			String name = file.getName();
 			String absolutePath = file.getAbsolutePath();
 
 			if (!Strings.CI.containsAny(absolutePath, ProjectLayout.EXCLUDE_DIRS)
@@ -575,6 +574,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private boolean isPathUnderDirectory(String name, String parentPath) {
+		if (processFilePattern == null) {
+			return true;
+		}
 
 		String pattern = StringUtils.trimToNull(processFilePattern);
 		if (pattern != null) {
@@ -584,19 +586,40 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		if (new File(parentPath).isAbsolute()) {
-			String child = normalizePathForPrefixCheck(name);
-			String parent = normalizePathForPrefixCheck(parentPath);
-			if (child == null || parent == null) {
-				return false;
-			}
-			if (!parent.endsWith("/")) {
-				parent = parent + "/";
-			}
-			return child.equals(parent.substring(0, parent.length() - 1)) || child.startsWith(parent);
+		if (StringUtils.isBlank(parentPath)) {
+			return true;
 		}
 
-		return true;
+		File parent = new File(parentPath);
+		if (parent.isAbsolute()) {
+			String childNormalized = normalizePathForPrefixCheck(name);
+			String parentNormalized = normalizePathForPrefixCheck(parentPath);
+			if (childNormalized == null || parentNormalized == null) {
+				return false;
+			}
+			if (!parentNormalized.endsWith("/")) {
+				parentNormalized = parentNormalized + "/";
+			}
+			return childNormalized.equals(parentNormalized.substring(0, parentNormalized.length() - 1))
+					|| childNormalized.startsWith(parentNormalized);
+		}
+
+		File root = rootDir;
+		if (root == null) {
+			return true;
+		}
+
+		File dir = new File(root, parentPath);
+		String parentNormalized = normalizePathForPrefixCheck(dir.getPath());
+		String childNormalized = normalizePathForPrefixCheck(new File(root, name).getPath());
+		if (parentNormalized == null || childNormalized == null) {
+			return false;
+		}
+		if (!parentNormalized.endsWith("/")) {
+			parentNormalized = parentNormalized + "/";
+		}
+		return childNormalized.equals(parentNormalized.substring(0, parentNormalized.length() - 1))
+				|| childNormalized.startsWith(parentNormalized);
 	}
 
 	private static String normalizePathForPrefixCheck(String path) {
