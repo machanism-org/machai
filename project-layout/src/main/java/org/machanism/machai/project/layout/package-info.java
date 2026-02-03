@@ -2,18 +2,19 @@
  * Detects and models a repository's on-disk layout so callers can consistently locate source, test, resource, and
  * documentation directories, and optionally discover modules/workspaces.
  *
- * <p>The central abstraction is {@link org.machanism.machai.project.layout.ProjectLayout}. Implementations encapsulate
- * the conventions of a particular ecosystem (for example Maven, JavaScript/TypeScript workspaces, or Python) and expose
+ * <p>The primary abstraction is {@link org.machanism.machai.project.layout.ProjectLayout}. Concrete implementations
+ * encapsulate ecosystem-specific conventions (for example Maven, JavaScript/TypeScript workspaces, or Python) and expose
  * a uniform API for directory discovery.
  *
- * <h2>Responsibilities</h2>
+ * <h2>Key concepts</h2>
  * <ul>
- *   <li>Determine whether a repository matches a given build ecosystem (for example via {@code pom.xml} or
- *       {@code package.json}).</li>
- *   <li>Discover modules/workspaces, when supported by the ecosystem.</li>
- *   <li>Expose conventional directory sets for sources, tests, and documentation.</li>
- *   <li>Provide shared path utilities and a common list of excluded directories to avoid scanning build output and
- *       tooling folders.</li>
+ *   <li><strong>Project root</strong>: configured via {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.</li>
+ *   <li><strong>Modules/workspaces</strong>: optional discovery of nested projects (for example Maven multi-module projects or
+ *       JS/TS workspaces).</li>
+ *   <li><strong>Directory sets</strong>: conventional locations for sources, tests, and documentation.
+ *       Implementations may consult build metadata files such as {@code pom.xml} or {@code package.json}.</li>
+ *   <li><strong>Exclusions</strong>: a shared list of directories to ignore during scans (see
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}).</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

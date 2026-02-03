@@ -1,37 +1,24 @@
 /**
- * Project discovery, representation, and processing.
+ * Facilities for discovering and working with a source-code project rooted at a filesystem
+ * directory.
  *
- * <p>This package contains the core API for working with a source-code project rooted at a filesystem
- * directory. It is responsible for identifying the type of project present (via {@code ProjectLayout}),
- * representing the discovered project structure (as a {@code Project}), and providing layout-aware
- * scanning/processing utilities.
- *
- * <h2>Key responsibilities</h2>
+ * <p>This package provides the entry points that:
  *
  * <ul>
- *   <li><b>Layout detection</b>: determine what kind of project a directory represents (for example,
- *       Maven, Node, or Python) and select a matching {@code ProjectLayout}.</li>
- *   <li><b>Project modeling</b>: capture a discovered project and its important folders as typed
- *       structures.</li>
- *   <li><b>Scanning and processing</b>: traverse a project root and apply layout-aware processing
- *       rules.</li>
+ *   <li>detect an appropriate {@code ProjectLayout} for a given project root (for example Maven,
+ *       JavaScript/Node, Python, or a default/fallback layout), and</li>
+ *   <li>scan and process the project using a {@code ProjectProcessor} implementation.</li>
  * </ul>
  *
- * <h2>Typical flow</h2>
- *
- * <ol>
- *   <li>Detect a {@code ProjectLayout} for a root directory.</li>
- *   <li>Instantiate and run a processor to scan the directory tree.</li>
- *   <li>Consume the resulting {@code Project} structure and any associated metadata.</li>
- * </ol>
- *
- * <h2>Example</h2>
+ * <h2>Typical usage</h2>
  *
  * <pre>{@code
  * File projectDir = new File("/path/to/project");
  *
+ * // Detect the layout based on the project directory contents.
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
  *
+ * // Process the project using a custom processor.
  * ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
  * }</pre>

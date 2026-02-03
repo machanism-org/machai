@@ -26,39 +26,46 @@
  */
 
 /**
- * Public API for creating, persisting, registering, and selecting a <em>Bindex</em>: a machine-consumable JSON index
- * of a software project used by MachAI workflows.
+ * Provides the Bindex subsystem: creation, persistence, registration, and retrieval of a machine-consumable index
+ * ({@code bindex.json}) for a software project used by MachAI workflows.
  *
- * <p>The package provides:
+ * <p>This package centers around producing an on-disk {@code bindex.json} file for a
+ * {@link org.machanism.machai.project.layout.ProjectLayout}, and then optionally registering that file in a backing
+ * store (MongoDB with vector search) so that relevant projects can be retrieved via semantic search.
+ *
+ * <h2>Key responsibilities</h2>
  * <ul>
- *   <li><strong>Creation</strong> of an on-disk {@code bindex.json} file for a {@link org.machanism.machai.project.layout.ProjectLayout}</li>
- *   <li><strong>Registration</strong> of Bindex documents into a MongoDB-backed store that supports vector search</li>
- *   <li><strong>Semantic retrieval</strong> ("picking") of relevant Bindexes for a user query, including dependency expansion</li>
- *   <li><strong>Assembly</strong> of selected Bindexes into LLM inputs for downstream prompt execution</li>
+ *   <li><strong>Create/update</strong> a project's {@code bindex.json} representation.</li>
+ *   <li><strong>Locate/load</strong> a {@link org.machanism.machai.schema.Bindex} from disk during project processing.</li>
+ *   <li><strong>Register</strong> an on-disk Bindex into a searchable store.</li>
+ *   <li><strong>Pick</strong> relevant Bindexes for a user query and expand dependencies.</li>
+ *   <li><strong>Assemble</strong> selected Bindex content into LLM prompt inputs.</li>
  * </ul>
  *
  * <h2>Main types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.BindexCreator}: creates or updates {@code bindex.json} for a project directory.</li>
- *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers an on-disk Bindex in the backing store.</li>
- *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search, fetches matched Bindex documents, and expands dependencies.</li>
- *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: composes prompts that include selected Bindex content.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexCreator}: creates or updates {@code bindex.json} for a project.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexProjectProcessor}: shared utilities for locating and loading
+ *       {@code bindex.json} during project processing.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers an on-disk Bindex with the backing store.</li>
+ *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search and dependency expansion to select Bindexes.</li>
+ *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: assembles selected Bindexes into inputs for prompt execution.</li>
  *   <li>{@link org.machanism.machai.bindex.BindexBuilderFactory}: selects a suitable
- *       {@link org.machanism.machai.bindex.builder.BindexBuilder} for a given project layout.</li>
+ *       {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation for a given project layout.</li>
  * </ul>
  *
  * <h2>Typical workflow</h2>
  * <pre>{@code
  * GenAIProvider provider = ...;
  * ProjectLayout layout = ...;
- * String dbUri = ...; // MongoDB connection string, optional depending on environment
+ * String dbUri = ...; // MongoDB connection string (optional depending on environment)
  *
- * // 1) Create/update bindex.json
+ * // 1) Create or update bindex.json
  * new BindexCreator(provider)
  *     .update(true)
  *     .processFolder(layout);
  *
- * // 2) Register bindex.json for semantic search
+ * // 2) Register bindex.json for semantic retrieval
  * try (BindexRegister register = new BindexRegister(provider, dbUri)) {
  *     register.update(true).processFolder(layout);
  * }

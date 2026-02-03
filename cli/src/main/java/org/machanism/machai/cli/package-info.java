@@ -1,11 +1,12 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains the application entry point and the Spring Shell command components that expose Machai
- * capabilities via an interactive shell or direct invocation from scripts/build tooling.
+ * <p>This package provides the application entry point and the Spring Shell command components that expose Machai
+ * capabilities via an interactive shell or direct invocation from scripts and build tooling.
  *
- * <h2>How to use</h2>
- * <p>Start the CLI by invoking the main class:</p>
+ * <h2>Usage</h2>
+ * <p>Start the CLI by invoking the entry point:</p>
+ *
  * <pre>
  * public final class Main {
  *   public static void main(String[] args) {
@@ -14,9 +15,8 @@
  * }
  * </pre>
  *
- * <p>Within the shell, commands are provided by Spring Shell components in this package (for example, assembly, bindex,
- * configuration, and cleanup commands). Commands can also be executed non-interactively by passing arguments to the
- * entry point.</p>
+ * <p>Once started, commands are contributed by Spring Shell components in this package. Commands may be executed
+ * interactively (REPL) or non-interactively by passing arguments to the entry point.</p>
  */
 package org.machanism.machai.cli;
 

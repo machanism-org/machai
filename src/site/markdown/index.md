@@ -35,7 +35,7 @@ Machai is a modular toolkit for GenAI-enabled developer automation. It provides 
 | --- | --- |
 | [Project Layout](project-layout/) | Project Layout is a small utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, etc.) in a consistent way. It provides a standardized representation of common Maven-style folders and utilities to resolve these paths relative to a project base directory, reducing duplicated path logic and improving maintainability for build tools and plugins. |
 | [GenAI Client](genai-client/) | GenAI Client is a Java library designed for seamless integration with Generative AI providers. It provides a stable `GenAIProvider` abstraction with provider resolution via `GenAIProviderManager`, supporting prompt composition from text and files, optional file context attachment, tool (function) calling, provider-dependent embeddings, optional input logging, and working-directory aware execution so applications can switch providers without vendor lock-in. |
-| [Bindex Core](bindex-core/) | Bindex Core provides core functionality for bindex metadata management, including generation, validation, merging, registration, and consumption of bindex descriptors. It defines the canonical representation of bindex metadata and shared APIs used by downstream tools (Maven plugins, CLI) to discover compatible components, select libraries, and drive metadata-based project assembly workflows. |
+| [Bindex Core](bindex-core/) | Bindex Core defines the canonical representation of bindex metadata and provides APIs and utilities to generate, read, validate, merge, and consume bindex descriptors. It is used by downstream tools (Maven plugins and CLI) to discover compatible components, select libraries, register metadata, and drive metadata-based project assembly workflows. |
 | [Machai CLI](machai-cli/) | Machai CLI is a Spring Boot and Spring Shell command line application for bindex and Ghostwriter workflows. It can generate and update `bindex.json`, register metadata into a database, perform semantic search to pick libraries, assemble projects from picks, run Ghostwriter guided file-processing tasks, and clean local workspace artifacts. |
 | [Bindex Maven Plugin](bindex-maven-plugin/) | Bindex Maven Plugin generates and maintains `bindex.json` for the current Maven module. It can be run on demand or bound to the Maven lifecycle to keep metadata aligned with the module, standardizing bindex metadata production for discovery, indexing, and automation tooling. |
 | [Assembly Maven Plugin](assembly-maven-plugin/) | Assembly Maven Plugin automates assembling and evolving local Maven projects by applying reviewable, metadata-driven updates to your working tree. It integrates libraries based on bindex metadata (for example, `bindex.json`) and can optionally use GenAI-powered semantic search to recommend suitable libraries while keeping changes local for inspection and commit. |
@@ -99,7 +99,7 @@ java -jar target/gw.jar --root ..
 Run a plugin goal directly (example):
 
 ```bash
-mvn org.machanism.machai:gw-maven-plugin:0.0.7-SNAPSHOT:gw
+mvn org.machanism.machai:gw-maven-plugin:0.0.8-SNAPSHOT:gw
 ```
 
 ## Contributing

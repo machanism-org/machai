@@ -23,7 +23,8 @@
  *
  * <h2>Plugin parameters</h2>
  * <p>
- * The {@code gw} goal supports the following configuration parameters and equivalent system properties.
+ * The {@code gw} goal supports the following configuration parameters (typically configured in {@code pom.xml}) and the
+ * equivalent system properties.
  * </p>
  * <ul>
  *   <li>

@@ -29,14 +29,14 @@
  *
  * <p>
  * This package contains the {@link org.machanism.machai.maven.Assembly} {@code Mojo}, which implements the
- * {@code assembly} goal. The goal:
+ * {@code assembly} goal.
  * </p>
+ *
+ * <h2>Workflow</h2>
  * <ol>
- *   <li>Obtains an assembly prompt from a text file or interactively.</li>
- *   <li>Uses a "picker" model to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).
- *   </li>
- *   <li>Runs {@link org.machanism.machai.bindex.ApplicationAssembly} to apply changes in the Maven execution base
- *   directory.</li>
+ *   <li>Read the assembly prompt from a text file or request it interactively.</li>
+ *   <li>Use a picker model to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).</li>
+ *   <li>Apply recommendations and run an AI-driven assembly process in the Maven execution base directory.</li>
  * </ol>
  *
  * <h2>Goal</h2>
@@ -47,16 +47,16 @@
  *
  * <h2>Plugin parameters</h2>
  * <p>
- * Parameters may be supplied using system properties (for example, {@code -Dassembly.genai=...}) and/or via Maven
+ * Parameters may be supplied via system properties (for example, {@code -Dassembly.genai=...}) and/or via Maven
  * plugin configuration.
  * </p>
  * <ul>
- *   <li>{@code assembly.genai} &ndash; GenAI provider id for the assembly phase (default {@code OpenAI:gpt-5}).</li>
- *   <li>{@code pick.genai} &ndash; GenAI provider id for the recommendation (picker) phase (default
- *   {@code OpenAI:gpt-5-mini}).</li>
- *   <li>{@code assembly.prompt.file} &ndash; Prompt file path (default {@code project.txt}); if missing, the prompt
- *   is requested interactively.</li>
- *   <li>{@code assembly.score} &ndash; Minimum score threshold for recommended libraries (default {@code 0.9}).</li>
+ *   <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; GenAI provider id for the assembly phase.</li>
+ *   <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; GenAI provider id for the recommendation
+ *   (picker) phase.</li>
+ *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; Prompt file path; if missing, the prompt is
+ *   requested interactively.</li>
+ *   <li>{@code assembly.score} (default {@code 0.9}) &ndash; Minimum score threshold for recommended libraries.</li>
  *   <li>{@code bindex.register.url} &ndash; Optional registration/lookup endpoint used by the picker.</li>
  * </ul>
  *

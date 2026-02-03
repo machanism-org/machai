@@ -30,16 +30,16 @@
  *
  * <p>This package defines the {@link org.machanism.machai.ai.manager.GenAIProvider} contract and utilities to:
  * <ul>
- *   <li>resolve and instantiate providers from a {@code Provider:Model} identifier,
- *   <li>configure providers from a {@link org.machanism.macha.core.commons.configurator.Configurator},
+ *   <li>resolve and instantiate providers from a {@code Provider:Model} identifier,</li>
+ *   <li>configure providers from a {@link org.machanism.macha.core.commons.configurator.Configurator},</li>
  *   <li>optionally install host-executed tools (file system access and command execution) for providers that
  *       support tool calling.</li>
  * </ul>
  *
  * <h2>Key types</h2>
  * <ul>
- *   <li><strong>Provider contract</strong> – {@link org.machanism.machai.ai.manager.GenAIProvider} defines the
- *       API for prompting, file attachment, embeddings, and tool registration.</li>
+ *   <li><strong>Provider contract</strong> – {@link org.machanism.machai.ai.manager.GenAIProvider} defines the API
+ *       for prompting, file attachment, embeddings, and tool registration.</li>
  *   <li><strong>Provider resolution</strong> – {@link org.machanism.machai.ai.manager.GenAIProviderManager}
  *       instantiates an implementation by conventional short name (for example {@code OpenAI}) or a
  *       fully-qualified class name.</li>

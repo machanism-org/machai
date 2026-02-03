@@ -96,13 +96,13 @@ class MavenProjectLayoutTest {
 	@Test
 	void getSources_shouldReturnConfiguredSourceDirectoryAndResourcesAsRelativePaths() {
 		// Arrange
-		File dir = new File("/repo");
+		File dir = new File("repo");
 		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir);
 
 		Build build = new Build();
-		build.setSourceDirectory("/repo/src/main/java");
+		build.setSourceDirectory(new File(dir, "src/main/java").getPath());
 		Resource resource = new Resource();
-		resource.setDirectory("/repo/src/main/resources");
+		resource.setDirectory(new File(dir, "src/main/resources").getPath());
 		build.setResources(Arrays.asList(resource));
 
 		Model model = new Model();
@@ -121,7 +121,7 @@ class MavenProjectLayoutTest {
 	@Test
 	void getSources_shouldReturnEmptyListWhenBuildAbsentOrHasNoSources() {
 		// Arrange
-		File dir = new File("/repo");
+		File dir = new File("repo");
 		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir);
 		layout.model(new Model());
 
@@ -136,7 +136,7 @@ class MavenProjectLayoutTest {
 	@Test
 	void getDocuments_shouldReturnSrcSiteByDefault() {
 		// Arrange
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(new File("/repo"));
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(new File("repo"));
 		layout.model(new Model());
 
 		// Act
@@ -150,13 +150,13 @@ class MavenProjectLayoutTest {
 	@Test
 	void getTests_shouldReturnConfiguredTestSourceDirectoryAndTestResourcesAsRelativePaths() {
 		// Arrange
-		File dir = new File("/repo");
+		File dir = new File("repo");
 		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir);
 
 		Build build = new Build();
-		build.setTestSourceDirectory("/repo/src/test/java");
+		build.setTestSourceDirectory(new File(dir, "src/test/java").getPath());
 		Resource testResource = new Resource();
-		testResource.setDirectory("/repo/src/test/resources");
+		testResource.setDirectory(new File(dir, "src/test/resources").getPath());
 		build.setTestResources(Arrays.asList(testResource));
 
 		Model model = new Model();
@@ -175,7 +175,7 @@ class MavenProjectLayoutTest {
 	@Test
 	void getTests_shouldReturnEmptyListWhenBuildAbsentOrHasNoTests() {
 		// Arrange
-		File dir = new File("/repo");
+		File dir = new File("repo");
 		MavenProjectLayout layout = new MavenProjectLayout().projectDir(dir);
 		layout.model(new Model());
 

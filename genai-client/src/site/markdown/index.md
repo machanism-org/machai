@@ -129,16 +129,14 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
 
-This provider enables a wide range of generative AI capabilities, including:
+It supports:
 
-- Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
-
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+- Sending prompts and receiving responses from OpenAI chat models.
+- Uploading local files (and referencing remote files) as request input.
+- Optional tool/function calling via registered Java callbacks.
+- Creating text embeddings.
 
 **Environment variables**
 
@@ -159,7 +157,7 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-`CodeMieProvider` is an `OpenAIProvider` variant that authenticates against CodeMie and then calls it via an OpenAI-compatible API endpoint.
+The `CodeMieProvider` is an `OpenAIProvider` variant that authenticates against CodeMie and then calls it via an OpenAI-compatible API endpoint.
 
 How it works:
 
@@ -169,13 +167,13 @@ How it works:
 
 **Authentication / configuration**
 
-- `GENAI_USERNAME` and `GENAI_PASSWORD` must be provided via environment variables or Java system properties.
+- `GENAI_USERNAME` and `GENAI_PASSWORD` must be provided via environment variables.
 
 **Thread safety:** NOT thread-safe (inherits behavior from `OpenAIProvider`).
 
 ### None
 
-`NoneProvider` is a no-op implementation of `GenAIProvider`.
+The `NoneProvider` is a no-op implementation of `GenAIProvider`.
 
 It is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
@@ -187,7 +185,7 @@ It is intended for environments where no external LLM integration should be used
 
 ### Web
 
-`WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
+The `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
 Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `Submit Prompt` recipe (see `perform()`).
 

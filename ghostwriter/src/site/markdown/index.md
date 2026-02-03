@@ -30,26 +30,27 @@ Page Structure:
 ## Introduction
 
 Ghostwriter is an AI-assisted documentation engine that scans a project workspace, extracts embedded `@guidance` instructions from files, and assembles consistent, review-ready documentation.
-It is designed to be used locally or in CI to keep project documentation aligned with evolving code and requirements.
+It can be run locally or in CI to keep documentation aligned with the codebase and project requirements.
 
 ## Overview
 
-Ghostwriter operates as a CLI that:
+Ghostwriter is a CLI tool that:
 
-- Walks one or more directories (or glob patterns) under a chosen root.
-- Applies optional instruction sources (URLs/files/stdin) to guide generation.
+- Scans one or more directories or glob patterns under a chosen root.
+- Loads optional instruction sources (URL/file/stdin) to guide generation.
 - Optionally applies a default guidance text as a final pass.
-- Produces output through its processing pipeline (logging progress and results).
+- Logs progress and results for traceability.
 
 ## Key Features
 
-- CLI-driven scans of directories and glob patterns.
+- CLI-driven scanning of directories and glob patterns.
 - Embedded `@guidance` discovery and application during documentation processing.
-- Optional external instructions via URL(s) or file path(s) or stdin.
+- Optional external instructions via URL(s), file path(s), or stdin.
 - Optional default guidance applied as a final step.
 - Configurable GenAI provider/model selection.
 - Optional multi-threaded processing.
 - Directory exclusion support.
+- Optional logging of LLM request inputs.
 
 ## Getting Started
 
@@ -57,11 +58,11 @@ Ghostwriter operates as a CLI that:
 
 - Java 11+
 - Network access to your chosen GenAI provider (if required by your configuration)
-- (Optional) A `gw.properties` file to provide defaults
+- (Optional) A `gw.properties` file to provide defaults (see option defaults below)
 
 ### Environment Variables
 
-Ghostwriter itself is configured primarily via CLI options and `gw.properties`. Your GenAI provider may require additional environment variables (for example API keys). Configure those according to the provider you select.
+Ghostwriter itself is configured primarily via CLI options and `gw.properties`. Your GenAI provider may require additional environment variables (for example, API keys). Configure those according to the provider you select.
 
 | Variable | Required | Description |
 |---|---:|---|
@@ -79,7 +80,7 @@ Ghostwriter itself is configured primarily via CLI options and `gw.properties`. 
 java -jar gw.jar <scanDir | glob_path_pattern>
 ```
 
-Examples:
+Examples (Windows):
 
 ```bash
 # scan a directory
@@ -97,7 +98,7 @@ java -jar gw.jar -r C:\projects\project "**/*.java"
 1. Choose a root directory (or let it default to the current user directory).
 2. Run Ghostwriter against one or more scan targets (directories or glob patterns).
 3. Provide additional instructions (optional) via `--instructions` (URL/file) or via stdin.
-4. Provide a default guidance (optional) via `--guidance` (file) or via stdin.
+4. Provide default guidance (optional) via `--guidance` (file) or via stdin.
 5. Review the produced/updated documentation and logs.
 
 ## Configuration
@@ -107,12 +108,13 @@ Ghostwriter supports the following command-line options (see `org.machanism.mach
 | Option | Long | Arg | Default | Description |
 |---|---|---:|---|---|
 | `-h` | `--help` | No | — | Show help and exit. |
-| `-r` | `--root` | Yes | From `gw.properties` (`root`); otherwise user directory | Root directory used to validate scan targets and compute related paths. |
+| `-l` | `--logInputs` | No | `false` | Log LLM request inputs to dedicated log files. |
+| `-r` | `--root` | Yes | From `gw.properties` (`root`); otherwise the current user directory | Root directory used to validate scan targets and compute related paths. |
 | `-t` | `--threads` | Yes (optional) | `true` | Enable/disable multi-threaded processing. If provided without a value, defaults to `true`. |
-| `-a` | `--genai` | Yes | `OpenAI:gpt-5-mini` | GenAI provider and model selector (format: `Provider:Model`). |
+| `-a` | `--genai` | Yes | From `gw.properties` (`genai`); otherwise `OpenAI:gpt-5-mini` | GenAI provider and model selector (format: `Provider:Model`). |
 | `-i` | `--instructions` | Yes (optional) | From `gw.properties` (`instructions`) | Additional instructions source(s). Provide a comma-separated list of URLs/file paths, or pass the option without a value to enter instruction text via stdin. Relative file paths are resolved from the executable directory. |
-| `-g` | `--guidance` | Yes (optional) | — | Default guidance applied as a final step. Provide a file path, or pass the option without a value to enter guidance text via stdin. Relative file paths are resolved from the executable directory. |
-| `-e` | `--excludes` | Yes | From `gw.properties` (`excludes`) | Comma-separated list of directories to exclude from processing. |
+| `-g` | `--guidance` | Yes (optional) | — | Default guidance applied as a final step for the current directory. Provide a file path, or pass the option without a value to enter guidance text via stdin. Relative file paths are resolved from the executable directory. |
+| `-e` | `--excludes` | Yes | From `gw.properties` (`excludes`) | Directories to exclude from processing. Provide a comma-separated list. |
 
 Command-line example with custom parameters:
 
@@ -123,7 +125,8 @@ java -jar gw.jar C:\projects\project \
   -t true \
   -i https://example.com/instructions.md,local-instructions.md \
   -g default-guidance.md \
-  -e target,.git,node_modules
+  -e target,.git,node_modules \
+  -l
 ```
 
 ## Resources

@@ -2,24 +2,26 @@
  * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
  * <p>This package contains provider-neutral abstractions intended for application code that builds requests and
- * consumes responses without coupling to a specific GenAI provider implementation.
+ * consumes responses without coupling to a specific provider implementation.
  *
- * <h2>Key concepts</h2>
+ * <h2>Responsibilities</h2>
  * <ul>
- *   <li><strong>Provider-neutral API (this package)</strong> – shared request/response concepts and stable
- *       abstractions.</li>
- *   <li><strong>Providers</strong> – concrete integrations under {@code org.machanism.machai.ai.provider}.</li>
- *   <li><strong>Management</strong> – provider discovery, selection, and lifecycle orchestration under
- *       {@code org.machanism.machai.ai.manager}.</li>
+ *   <li>Define stable request/response concepts shared across providers.</li>
+ *   <li>Expose interfaces and types that application code can depend on without importing provider-specific
+ *       modules.</li>
+ * </ul>
+ *
+ * <h2>Related packages</h2>
+ * <ul>
+ *   <li><strong>Providers</strong>: concrete integrations under {@code org.machanism.machai.ai.provider}.</li>
+ *   <li><strong>Management</strong>: provider discovery/selection under {@code org.machanism.machai.ai.manager}.</li>
  * </ul>
  *
  * <h2>Typical flow</h2>
  * <ol>
- *   <li>Resolve a {@link org.machanism.machai.ai.manager.GenAIProvider} through
- *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *   <li>Resolve a provider through {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
  *   <li>Configure the request (instructions, prompt, tools, and other supported inputs).</li>
- *   <li>Execute the request via {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and process the
- *       result.</li>
+ *   <li>Execute the request and process the result.</li>
  * </ol>
  *
  * <h2>Example</h2>

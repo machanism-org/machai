@@ -1,19 +1,18 @@
 /**
- * Command-line tooling for scanning a workspace (single-module or multi-module) and preparing inputs for
- * GenAI-assisted code review and code generation workflows.
+ * Command-line tooling for scanning a project workspace and preparing inputs for GenAI-assisted code review and
+ * code generation workflows.
  *
- * <p>This package provides the CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and supporting
- * orchestration components (for example, {@link org.machanism.machai.gw.FileProcessor}) that coordinate discovery
- * of file reviewers, workspace traversal, guidance/template assembly, and prompt creation.
+ * <p>
+ * The package centers around a CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and a coordinator
+ * ({@link org.machanism.machai.gw.FileProcessor}) that:
+ * </p>
  *
- * <h2>Core responsibilities</h2>
  * <ul>
- *   <li>Discover file-type-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (typically via
+ *   <li>Discovers file-type-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (typically via
  *       {@link java.util.ServiceLoader}).</li>
- *   <li>Traverse one or more modules and select candidate files for processing.</li>
- *   <li>Extract and merge guidance with bundled templates and optional user instructions.</li>
- *   <li>Build prompt inputs which can be persisted for inspection or sent to a configured
- *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
+ *   <li>Traverses a single-module or multi-module workspace and selects candidate files and directories.</li>
+ *   <li>Extracts per-file guidance blocks and merges them with bundled templates and optional user instructions.</li>
+ *   <li>Builds provider prompts and (optionally) persists the full inputs for inspection.</li>
  * </ul>
  */
 package org.machanism.machai.gw;

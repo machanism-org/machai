@@ -27,11 +27,19 @@ Page Structure:
 
 ## Introduction
 
-The **Bindex Maven Plugin** enables automated generation and registration of `bindex` metadata for Maven projects. It facilitates library discovery, integration, and assembly by leveraging structured metadata and GenAI-powered semantic search within the Machanism ecosystem.
+The **Bindex Maven Plugin** enables automated generation and registration of `bindex` metadata for Maven projects.
+
+It helps:
+
+- Produce a consistent, machine-readable descriptor (`bindex.json`) for each Maven module.
+- Keep that descriptor aligned with the module as it evolves.
+- Improve downstream discovery, indexing, and assembly workflows that rely on structured metadata (including GenAI-assisted semantic search within the Machanism ecosystem).
 
 ## Overview
 
-The plugin can be executed on-demand or bound to a Maven lifecycle phase.
+The plugin generates and maintains `bindex` metadata for the current Maven module.
+
+It can be run on-demand or bound to a Maven lifecycle phase (for example, `generate-resources`) so that metadata is always produced as part of a build.
 
 During execution it will:
 
@@ -42,6 +50,7 @@ During execution it will:
 
 - Generates a `bindex.json` descriptor for the current Maven module.
 - Updates an existing descriptor to keep metadata synchronized with project changes.
+- Designed to be run manually or bound to a lifecycle phase.
 - Standardizes metadata for discovery, automation, and indexing workflows.
 
 ## Getting Started
@@ -70,9 +79,9 @@ mvn org.machanism.machai:bindex-maven-plugin:bindex
 ### Typical Workflow
 
 1. Add/configure the plugin in your project `pom.xml` (optionally bind it to a lifecycle phase).
-2. Run `mvn org.machanism.machai:bindex-maven-plugin:bindex` to generate or update `bindex.json`.
+2. Run the plugin to generate `bindex.json` for the module.
 3. Commit `bindex.json` if your repository policy expects generated metadata to be versioned.
-4. Use the generated descriptor with downstream tooling that consumes `bindex.json`.
+4. Use `bindex.json` with downstream tooling that consumes `bindex` descriptors.
 
 ## Configuration
 

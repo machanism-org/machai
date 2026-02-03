@@ -52,7 +52,7 @@ Add the dependency:
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>project-layout</artifactId>
-  <version>${project.version}</version>
+  <version>0.0.8-SNAPSHOT</version>
 </dependency>
 ```
 

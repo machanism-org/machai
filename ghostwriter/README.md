@@ -28,7 +28,7 @@ Ghostwriter is an AI-assisted documentation engine that scans a project workspac
 ## Introduction
 
 Ghostwriter is an AI-assisted documentation engine that scans a project workspace, extracts embedded `@guidance` instructions from files, and assembles consistent, review-ready documentation.
-It is designed to be used locally or in CI to keep project documentation aligned with evolving code and requirements.
+It can be run locally or in CI to keep documentation aligned with the codebase and project requirements.
 
 ## Usage
 
@@ -50,30 +50,29 @@ It is designed to be used locally or in CI to keep project documentation aligned
 java -jar gw.jar <scanDir | glob_path_pattern>
 ```
 
-Examples:
+Examples (Windows):
 
 ```bash
 # scan a directory
 java -jar gw.jar C:\projects\project
 
 # specify root explicitly
-java -r C:\projects\project -jar gw.jar src/project
+java -jar gw.jar -r C:\projects\project src\project
 
 # scan with a glob pattern
-java -r C:\projects\project -jar gw.jar "**/*.java"
+java -jar gw.jar -r C:\projects\project "**/*.java"
 ```
 
 ### Typical Workflow
 
-1. Choose a `root` directory (or let it default to the current user directory).
+1. Choose a root directory (or let it default to the current user directory).
 2. Run Ghostwriter against one or more scan targets (directories or glob patterns).
 3. Provide additional instructions (optional) via `--instructions` (URL/file) or via stdin.
-4. Provide a default guidance (optional) via `--guidance` (file) or via stdin.
+4. Provide default guidance (optional) via `--guidance` (file) or via stdin.
 5. Review the produced/updated documentation and logs.
 
 ## Resources
 
-- Platform: https://machanism.org/guided-file-processing/index.html
 - GitHub: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
-- Download Ghostwriter CLI: https://sourceforge.net/projects/machanism/files/machai/gw.zip/download
+- CLI download: https://sourceforge.net/projects/machanism/files/machai/gw.zip/download

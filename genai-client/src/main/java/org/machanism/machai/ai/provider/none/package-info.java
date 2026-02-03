@@ -27,7 +27,7 @@
  */
 
 /**
- * Provides a {@code none} (no-op) implementation of the generative-AI provider SPI.
+ * No-op ("none") implementation of the generative-AI provider SPI.
  *
  * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, an implementation of
  * {@link org.machanism.machai.ai.manager.GenAIProvider} intended for environments where no external LLM integration
@@ -36,13 +36,15 @@
  * <h2>Behavior</h2>
  * <ul>
  *   <li>No network calls are performed and no external AI service is contacted.</li>
- *   <li>Calls to {@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} append text to an in-memory
- *       buffer.</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} writes the configured instructions (when set)
- *       to {@code instructions.txt} and writes the accumulated prompts to the configured inputs log file when
- *       {@link org.machanism.machai.ai.manager.GenAIProvider#inputsLog(java.io.File)} has been set. It then clears the
- *       internal buffer and returns {@code null}.</li>
- *   <li>Capabilities that require a real backend (for example,
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} appends text to an in-memory buffer.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} optionally writes:
+ *     <ul>
+ *       <li>{@code instructions.txt} (when instructions are set), and</li>
+ *       <li>the accumulated prompts to the configured inputs log file (when
+ *           {@link org.machanism.machai.ai.manager.GenAIProvider#inputsLog(java.io.File)} is set).</li>
+ *     </ul>
+ *     It then clears the internal buffer and returns {@code null}.</li>
+ *   <li>Capabilities requiring a real backend (for example,
  *       {@link org.machanism.machai.ai.manager.GenAIProvider#embedding(String)}) are unsupported and throw
  *       {@link java.lang.UnsupportedOperationException}.</li>
  * </ul>
