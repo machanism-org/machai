@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>machai</artifactId>
-		<version>0.0.7</version>
+		<version>0.0.8-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>genai-client</artifactId>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>project-layout</artifactId>
-			<version>0.0.7</version>
+			<version>0.0.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.machanism.macha.core.commons</groupId>
