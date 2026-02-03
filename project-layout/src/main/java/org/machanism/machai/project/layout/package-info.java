@@ -1,24 +1,19 @@
 /**
- * Detects and models a repository's on-disk layout so callers can consistently locate
- * source, test, resource, and documentation directories, and optionally discover modules/workspaces.
+ * Detects and models a repository's on-disk layout so callers can consistently locate source, test, resource, and
+ * documentation directories, and optionally discover modules/workspaces.
  *
- * <p>The central abstraction is {@link org.machanism.machai.project.layout.ProjectLayout}. A caller selects an
- * implementation based on build metadata present at the repository root (for example {@code pom.xml} for Maven,
- * {@code package.json} for JavaScript workspaces, or {@code pyproject.toml} for Python projects), sets the project
- * directory, and then queries the layout for directories to scan.
+ * <p>The central abstraction is {@link org.machanism.machai.project.layout.ProjectLayout}. Implementations encapsulate
+ * the conventions of a particular ecosystem (for example Maven, JavaScript/TypeScript workspaces, or Python) and expose
+ * a uniform API for directory discovery.
  *
- * <h2>Key concepts</h2>
+ * <h2>Responsibilities</h2>
  * <ul>
- *   <li><b>Project root</b>: the repository directory configured via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.</li>
- *   <li><b>Modules/workspaces</b>: optional subprojects discovered from build descriptors via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getModules()}.</li>
- *   <li><b>Directory sets</b>: conventional paths returned by
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getSources()},
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getTests()},
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getDocuments()}.</li>
- *   <li><b>Exclusions</b>: shared directory names that should be skipped during filesystem walks via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
+ *   <li>Determine whether a repository matches a given build ecosystem (for example via {@code pom.xml} or
+ *       {@code package.json}).</li>
+ *   <li>Discover modules/workspaces, when supported by the ecosystem.</li>
+ *   <li>Expose conventional directory sets for sources, tests, and documentation.</li>
+ *   <li>Provide shared path utilities and a common list of excluded directories to avoid scanning build output and
+ *       tooling folders.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

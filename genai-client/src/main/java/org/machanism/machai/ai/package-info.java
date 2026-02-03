@@ -1,26 +1,25 @@
 /**
  * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
- * <p>This package contains the provider-neutral abstractions used by application code to construct and execute
- * requests against supported GenAI providers.
+ * <p>This package contains provider-neutral abstractions intended for application code that builds requests and
+ * consumes responses without coupling to a specific GenAI provider implementation.
  *
- * <h2>Architecture</h2>
+ * <h2>Key concepts</h2>
  * <ul>
- *   <li><strong>Provider-neutral API (this package)</strong> – request/response abstractions and common concepts
- *       intended to remain stable across providers.</li>
- *   <li><strong>Providers</strong> – concrete provider integrations under
- *       {@code org.machanism.machai.ai.provider}.</li>
+ *   <li><strong>Provider-neutral API (this package)</strong> – shared request/response concepts and stable
+ *       abstractions.</li>
+ *   <li><strong>Providers</strong> – concrete integrations under {@code org.machanism.machai.ai.provider}.</li>
  *   <li><strong>Management</strong> – provider discovery, selection, and lifecycle orchestration under
  *       {@code org.machanism.machai.ai.manager}.</li>
  * </ul>
  *
  * <h2>Typical flow</h2>
  * <ol>
- *   <li>Resolve a {@link org.machanism.machai.ai.manager.GenAIProvider} via
+ *   <li>Resolve a {@link org.machanism.machai.ai.manager.GenAIProvider} through
  *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
- *   <li>Configure the request (instructions, prompts, tools, and any other supported inputs).</li>
- *   <li>Execute the request using {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and consume the
- *       returned result.</li>
+ *   <li>Configure the request (instructions, prompt, tools, and other supported inputs).</li>
+ *   <li>Execute the request via {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and process the
+ *       result.</li>
  * </ol>
  *
  * <h2>Example</h2>

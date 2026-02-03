@@ -8,10 +8,11 @@ package org.machanism.machai.ai.manager;
  * instance via {@link GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
  *
  * <h2>Usage</h2>
- * {@code
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
+ * <pre>{@code
+ * Configurator conf = ...;
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  * new SystemFunctionTools().applyTools(provider);
- * }
+ * }</pre>
  *
  * @author Viktor Tovstyi
  */

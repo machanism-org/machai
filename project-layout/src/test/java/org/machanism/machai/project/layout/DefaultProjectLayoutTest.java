@@ -3,6 +3,7 @@ package org.machanism.machai.project.layout;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -43,7 +44,8 @@ class DefaultProjectLayoutTest {
 		Files.createDirectories(new File(dir, "module-a").toPath());
 		Files.createDirectories(new File(dir, "module-b").toPath());
 		Files.createDirectories(new File(dir, "target").toPath());
-		Files.write(new File(dir, "not-a-dir.txt").toPath(), "x".getBytes());
+		Files.createDirectories(new File(dir, "target-custom").toPath());
+		Files.write(new File(dir, "not-a-dir.txt").toPath(), "x".getBytes(StandardCharsets.UTF_8));
 
 		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(dir);
 
@@ -56,6 +58,7 @@ class DefaultProjectLayoutTest {
 		assertTrue(modules.contains("module-a"));
 		assertTrue(modules.contains("module-b"));
 		assertFalse(modules.contains("target"));
+		assertFalse(modules.contains("target-custom"));
 	}
 
 	@Test

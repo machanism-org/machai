@@ -72,7 +72,7 @@ mvn org.machanism.machai:bindex-maven-plugin:bindex
 1. Add/configure the plugin in your project `pom.xml` (optionally bind it to a lifecycle phase).
 2. Run `mvn org.machanism.machai:bindex-maven-plugin:bindex` to generate or update `bindex.json`.
 3. Commit `bindex.json` if your repository policy expects generated metadata to be versioned.
-4. Use the generated descriptor with any downstream tooling that consumes `bindex.json`.
+4. Use the generated descriptor with downstream tooling that consumes `bindex.json`.
 
 ## Configuration
 

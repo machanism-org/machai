@@ -26,21 +26,25 @@
  */
 
 /**
- * Provider discovery and host-side tool wiring for generative AI integrations.
+ * Provider discovery, configuration, and host-side tool wiring for generative AI integrations.
  *
- * <p>This package defines the core service provider contract, resolves provider implementations from a
- * {@code Provider:Model} identifier, and exposes host-executed tools (file system access and command execution)
- * to providers that support tool calling.
+ * <p>This package defines the {@link org.machanism.machai.ai.manager.GenAIProvider} contract and utilities to:
+ * <ul>
+ *   <li>resolve and instantiate providers from a {@code Provider:Model} identifier,
+ *   <li>configure providers from a {@link org.machanism.macha.core.commons.configurator.Configurator},
+ *   <li>optionally install host-executed tools (file system access and command execution) for providers that
+ *       support tool calling.</li>
+ * </ul>
  *
  * <h2>Key types</h2>
  * <ul>
  *   <li><strong>Provider contract</strong> – {@link org.machanism.machai.ai.manager.GenAIProvider} defines the
- *       operations for prompting, attaching files, computing embeddings, and registering callable tools.</li>
+ *       API for prompting, file attachment, embeddings, and tool registration.</li>
  *   <li><strong>Provider resolution</strong> – {@link org.machanism.machai.ai.manager.GenAIProviderManager}
- *       loads a provider implementation (by short name or fully-qualified class name), initializes it from a
- *       {@link org.machanism.macha.core.commons.configurator.Configurator}, and applies the selected model.</li>
+ *       instantiates an implementation by conventional short name (for example {@code OpenAI}) or a
+ *       fully-qualified class name.</li>
  *   <li><strong>Tool installation</strong> – {@link org.machanism.machai.ai.manager.FileFunctionTools} and
- *       {@link org.machanism.machai.ai.manager.CommandFunctionTools} register host tools; 
+ *       {@link org.machanism.machai.ai.manager.CommandFunctionTools} register host tools;
  *       {@link org.machanism.machai.ai.manager.SystemFunctionTools} installs both.</li>
  * </ul>
  *

@@ -3,8 +3,13 @@
  * part of a Maven build.
  *
  * <p>
- * This package contains two mojos:
+ * This package provides Maven mojos that integrate the MachAI GW documentation processing pipeline into a Maven
+ * lifecycle. It is intended for projects that keep documentation sources under {@code src/site} and want to run the
+ * workflow as part of a build to produce generated/updated documentation artifacts, and to clean up temporary files
+ * produced by prior runs.
  * </p>
+ *
+ * <h2>Goals</h2>
  * <ul>
  *   <li>
  *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources (for example under
@@ -18,26 +23,28 @@
  *
  * <h2>Plugin parameters</h2>
  * <p>
- * The {@code gw} goal supports the following parameters (also available as system properties).
+ * The {@code gw} goal supports the following configuration parameters and equivalent system properties.
  * </p>
  * <ul>
  *   <li>
- *     <b>{@code gw.genai}</b> (optional): GenAI provider/model identifier forwarded to the workflow (for example,
- *     {@code OpenAI:gpt-5}).
+ *     <b>{@code genai}</b> / <b>{@code gw.genai}</b> (optional): GenAI provider/model identifier forwarded to the workflow
+ *     (for example, {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
- *     <b>{@code gw.instructions}</b> (optional): One or more instruction location strings consumed by the workflow
- *     (for example, file paths under {@code src/site}).
+ *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): One or more instruction location strings
+ *     consumed by the workflow (for example, file paths under {@code src/site}).
  *   </li>
  *   <li>
- *     <b>{@code gw.excludes}</b> (optional): One or more exclude patterns/paths skipped during documentation scanning.
+ *     <b>{@code excludes}</b> / <b>{@code gw.excludes}</b> (optional): One or more exclude patterns/paths skipped during
+ *     documentation scanning.
  *   </li>
  *   <li>
- *     <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} {@code &lt;server&gt;} id used to load GenAI
- *     credentials.
+ *     <b>{@code serverId}</b> / <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml}
+ *     {@code &lt;server&gt;} id used to load GenAI credentials.
  *   </li>
  *   <li>
- *     <b>{@code gw.threads}</b> (optional, default {@code true}): Enables/disables multi-threaded document processing.
+ *     <b>{@code threads}</b> / <b>{@code gw.threads}</b> (optional, default {@code true}): Enables/disables multi-threaded
+ *     document processing.
  *   </li>
  * </ul>
  *

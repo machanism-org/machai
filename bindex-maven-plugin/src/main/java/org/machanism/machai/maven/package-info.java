@@ -27,13 +27,13 @@
  */
 
 /**
- * Maven plugin goals (Mojos) for integrating Machai/Bindex operations into a Maven build.
+ * Maven plugin goals (Mojos) that integrate Machai/Bindex operations into a Maven build.
  *
  * <p>
- * The goals in this package execute within the context of the current
+ * The goals in this package run in the context of the current
  * {@link org.apache.maven.project.MavenProject} and are typically bound to standard lifecycle phases.
- * To avoid doing work at the aggregator level in multi-module builds, the Mojos commonly skip execution for projects
- * using {@code pom} packaging.
+ * In multi-module builds, the mojos commonly skip execution for aggregator projects (those using {@code pom}
+ * packaging) to avoid performing module-specific work at the root.
  * </p>
  *
  * <h2>Provided goals</h2>

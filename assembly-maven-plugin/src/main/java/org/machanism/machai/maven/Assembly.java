@@ -26,14 +26,14 @@ import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
 
 /**
- * Maven plugin {@link org.apache.maven.plugin.Mojo} that implements the {@code assembly} goal.
+ * Maven plugin {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly} goal.
  *
  * <p>
- * This goal orchestrates an AI-assisted project assembly workflow:
+ * The goal orchestrates an AI-assisted project “assembly” workflow:
  * </p>
  * <ol>
  *   <li>Acquire a prompt from {@link #assemblyPromptFile} (if present) or request it interactively.</li>
- *   <li>Use {@link #pickChatModel} to recommend candidate libraries ({@link Bindex} entries).</li>
+ *   <li>Use {@link #pickChatModel} to recommend candidate libraries (as {@link Bindex} entries).</li>
  *   <li>Filter recommendations by {@link #score}.</li>
  *   <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
  * </ol>
@@ -41,8 +41,8 @@ import org.machanism.machai.schema.Bindex;
  * <h2>Plugin parameters</h2>
  * <ul>
  *   <li>{@code -Dassembly.genai} (default {@code OpenAI:gpt-5}) &ndash; Provider id for the assembly phase.</li>
- *   <li>{@code -Dpick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider id for the library
- *   recommendation (picker) phase.</li>
+ *   <li>{@code -Dpick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider id for the library recommendation
+ *   (picker) phase.</li>
  *   <li>{@code -Dassembly.prompt.file} (default {@code project.txt}) &ndash; File containing the prompt; if absent,
  *   the prompt is requested interactively.</li>
  *   <li>{@code -Dassembly.score} (default {@code 0.9}) &ndash; Minimum score required for a recommended library to be
@@ -158,6 +158,7 @@ public class Assembly extends AbstractMojo {
 				List<Bindex> bindexList = picker.pick(query);
 
 				if (bindexList.isEmpty()) {
+					getLog().info("No libraries were recommended by the picker.");
 					return;
 				}
 

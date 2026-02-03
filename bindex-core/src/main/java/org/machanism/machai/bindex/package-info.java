@@ -15,7 +15,7 @@
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
+ *      - Use {@code {@literal <}} and {@code {@literal >}} to escape angle brackets in Javadoc.
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.
@@ -26,24 +26,22 @@
  */
 
 /**
- * Public API for generating, persisting, registering, and selecting a <em>Bindex</em>: a machine-consumable JSON
- * index of a software project used by MachAI workflows.
+ * Public API for creating, persisting, registering, and selecting a <em>Bindex</em>: a machine-consumable JSON index
+ * of a software project used by MachAI workflows.
  *
- * <p>The package defines a small pipeline:
- * <ol>
- *   <li><strong>Create/update</strong> a {@code bindex.json} file for a project directory.</li>
- *   <li><strong>Register</strong> the Bindex in a backing store (MongoDB with vector search) to enable semantic lookup.</li>
- *   <li><strong>Pick</strong> relevant Bindexes using semantic search.</li>
- *   <li><strong>Assemble</strong> one or more selected Bindexes into LLM inputs for downstream execution.</li>
- * </ol>
+ * <p>The package provides:
+ * <ul>
+ *   <li><strong>Creation</strong> of an on-disk {@code bindex.json} file for a {@link org.machanism.machai.project.layout.ProjectLayout}</li>
+ *   <li><strong>Registration</strong> of Bindex documents into a MongoDB-backed store that supports vector search</li>
+ *   <li><strong>Semantic retrieval</strong> ("picking") of relevant Bindexes for a user query, including dependency expansion</li>
+ *   <li><strong>Assembly</strong> of selected Bindexes into LLM inputs for downstream prompt execution</li>
+ * </ul>
  *
  * <h2>Main types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.BindexCreator}: creates or updates {@code bindex.json} for a
- *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
- *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers an on-disk Bindex in the vector-backed store.</li>
- *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search, fetches matched Bindex documents, and
- *       expands transitive dependencies.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexCreator}: creates or updates {@code bindex.json} for a project directory.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers an on-disk Bindex in the backing store.</li>
+ *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search, fetches matched Bindex documents, and expands dependencies.</li>
  *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: composes prompts that include selected Bindex content.</li>
  *   <li>{@link org.machanism.machai.bindex.BindexBuilderFactory}: selects a suitable
  *       {@link org.machanism.machai.bindex.builder.BindexBuilder} for a given project layout.</li>

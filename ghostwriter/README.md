@@ -21,63 +21,55 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-## Project Overview
+## Project Title and Overview
 
-Ghostwriter is a CLI documentation engine (also available as a runnable JAR) that scans a project directory and processes documentation-related files according to embedded guidance and any additional instructions you provide.
-
-You can optionally specify:
-
-- A GenAI provider/model (for example, `OpenAI:gpt-5.1`).
-- Additional processing instructions (loaded from `--instructions` or `gw.properties`).
-- A root directory that bounds scanning (`--root`).
-- One or more directories to include in the scan (positional arguments).
+Ghostwriter is an AI-assisted documentation engine that scans a project workspace, extracts embedded `@guidance` instructions from files, and assembles consistent, review-ready documentation.
 
 ## Introduction
 
-Machai Ghostwriter is a CLI documentation engine that automates and standardizes project documentation and code annotation. Using guided file processing with embedded `@guidance` blocks, it helps teams keep documentation consistent, reviewable, and up to date across repositories. It’s designed to work well in scripts and CI so documentation changes can be generated and committed as part of your normal workflow.
-
-Learn more about guided file processing: https://machanism.org/guided-file-processing/index.html
+Ghostwriter is an AI-assisted documentation engine that scans a project workspace, extracts embedded `@guidance` instructions from files, and assembles consistent, review-ready documentation.
+It is designed to be used locally or in CI to keep project documentation aligned with evolving code and requirements.
 
 ## Usage
 
 ### Prerequisites
 
-- Java 11+ runtime.
-- Network access to your selected GenAI provider (if applicable).
+- Java 11+
+- Network access to your chosen GenAI provider (if required by your configuration)
+- (Optional) A `gw.properties` file to provide defaults
 
 ### Installation
 
-Download the CLI JAR:
+- Download the Ghostwriter CLI distribution:
 
-[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
+  [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
 
 ### Basic Usage
 
 ```bash
-java -jar gw.jar
+java -jar gw.jar <scanDir | glob_path_pattern>
 ```
 
-Scan a specific root directory:
+Examples:
 
 ```bash
-java -jar gw.jar --root /path/to/project
-```
+# scan a directory
+java -jar gw.jar C:\projects\project
 
-Scan one or more directories (positional arguments):
+# specify root explicitly
+java -r C:\projects\project -jar gw.jar src/project
 
-```bash
-java -jar gw.jar --root /path/to/project docs src
+# scan with a glob pattern
+java -r C:\projects\project -jar gw.jar "**/*.java"
 ```
 
 ### Typical Workflow
 
-1. Build or download `gw.jar`.
-2. Choose the project root (`--root`) and the directories to scan (positional args).
-3. (Optional) Provide additional instructions via `--instructions` or `gw.properties`.
-4. (Optional) Exclude directories via `--excludes`.
-5. (Optional) Provide a default final guidance file via `--guidance`.
-6. Run Ghostwriter.
-7. Review and commit generated/updated documentation.
+1. Choose a `root` directory (or let it default to the current user directory).
+2. Run Ghostwriter against one or more scan targets (directories or glob patterns).
+3. Provide additional instructions (optional) via `--instructions` (URL/file) or via stdin.
+4. Provide a default guidance (optional) via `--guidance` (file) or via stdin.
+5. Review the produced/updated documentation and logs.
 
 ## Resources
 
