@@ -185,7 +185,11 @@ public class FileProcessor extends ProjectProcessor {
 		this.rootDir = rootDir;
 
 		File dir = new File(pattern);
-		if (ObjectUtils.equals(dir.getAbsolutePath(), pattern) || dir.exists()) {
+		if (!dir.isAbsolute()) {
+			dir = new File(rootDir, pattern);
+		}
+
+		if (ObjectUtils.equals(rootDir.getAbsolutePath(), pattern)) {
 			scanFolder(rootDir);
 
 		} else {
@@ -493,10 +497,23 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private List<File> findFiles(String pattern) throws IOException {
-		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
-		List<File> result = new ArrayList<>();
 
-		List<File> files = (List<File>) FileUtils.listFiles(rootDir, TrueFileFilter.INSTANCE,
+		List<File> result = new ArrayList<>();
+		File dir = new File(pattern);
+		PathMatcher matcher = null;
+
+		if (!dir.isAbsolute()) {
+			dir = new File(rootDir, pattern);
+			if (!dir.exists()) {
+				dir = rootDir;
+				matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+			}
+		} else {
+			dir = rootDir;
+			matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+		}
+
+		List<File> files = (List<File>) FileUtils.listFiles(dir, TrueFileFilter.INSTANCE,
 				DirectoryFileFilter.DIRECTORY);
 
 		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
@@ -509,7 +526,7 @@ public class FileProcessor extends ProjectProcessor {
 				continue;
 			}
 
-			if (matcher.matches(file.toPath())) {
+			if (matcher == null || matcher.matches(file.toPath())) {
 				result.add(file);
 			}
 		}

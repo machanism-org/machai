@@ -92,7 +92,7 @@ public class GWCommand {
 		}
 		documents.setInstructions(instructions);
 		documents.setModuleMultiThread(threads);
-		documents.scanDocuments(dir, scan);
+		documents.scanDocuments(dir, scan.getAbsolutePath());
 		logger.info("Scanning finished.");
 	}
 

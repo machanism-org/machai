@@ -13,10 +13,8 @@
 
 	<artifactId>project-layout</artifactId>
 	<name>Project Layout</name>
-	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
-	section and put this conten to the `description` tag.  -->
 	<description>
-		Project Layout is a small utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, etc.) in a consistent way.
+		Project Layout is a small utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, etc.) in a consistent way. It is intended for build tooling and plugins that need to locate well-known folders reliably across different projects.
 	</description>
 
 	<properties>

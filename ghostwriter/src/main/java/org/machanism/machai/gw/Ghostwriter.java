@@ -165,6 +165,7 @@ public final class Ghostwriter {
 			}
 
 			String[] dirs = cmd.getArgs();
+
 			if (rootDir == null) {
 				rootDir = SystemUtils.getUserDir();
 				if (dirs.length == 0) {
@@ -251,7 +252,15 @@ public final class Ghostwriter {
 	}
 
 	private static void help(Options options, HelpFormatter formatter) {
-		formatter.printHelp("java -jar gw.jar", options);
+	    String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n"
+	                  + "Usage:\n"
+	                  + "  java -jar gw.jar <scanDir | glob_path_pattern> [options]\n\n"
+	                  + "Options:";
+	    String footer = "\nExamples:\n"
+                + "  java -jar gw.jar C:\\projects\\project\n"
+                + "  java -r C:\\projects\\project -jar gw.jar src/project\n"
+	            + "  java -r C:\\projects\\project -jar gw.jar \"**/*.java\"\n";
+	    formatter.printHelp("java -jar gw.jar <scanDir | glob_path_pattern>", header, options, footer, true);
 	}
 
 	private static String readText(String prompt) {

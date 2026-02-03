@@ -59,8 +59,7 @@ public class FileFunctionTools {
 		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
 				this::listFiles, "dir_path:string:optional:The path to the directory to list contents of.");
 		provider.addTool("get_recursive_file_list",
-				"List files recursively in a directory (includes files in subdirectories).",
-				this::getRecursiveFiles,
+				"List files recursively in a directory (includes files in subdirectories).", this::getRecursiveFiles,
 				"dir_path:string:optional:Path to the folder to list contents recursively.");
 	}
 
@@ -157,6 +156,7 @@ public class FileFunctionTools {
 	 * @throws IllegalArgumentException on I/O error
 	 */
 	private Object writeFile(Object[] params) {
+		String result;
 		String filePath = ((JsonNode) params[0]).get("file_path").asText();
 		String text = ((JsonNode) params[0]).get("text").asText();
 		logger.info("Write file: {}", StringUtils.abbreviate(Arrays.toString(params), MAXWIDTH));
@@ -167,10 +167,11 @@ public class FileFunctionTools {
 		}
 		try (Writer writer = new FileWriter(file)) {
 			IOUtils.write(text, writer);
+			return "File written successfully: " + filePath;
 		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
+			result = e.getMessage();
 		}
-		return true;
+		return result;
 	}
 
 	/**
