@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -40,7 +39,6 @@ import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.SystemFunctionTools;
 import org.machanism.machai.gw.reviewer.Reviewer;
-import org.machanism.machai.gw.reviewer.TextReviewer;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -97,7 +95,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	private String defaultGuidance;
 
-	private String procesFilePattern;
+	private String processFilePattern;
 
 	private String[] excludes;
 
@@ -176,7 +174,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * inputs for documentation generation.
 	 *
 	 * @param rootDir the root directory of the project to scan
-	 * @param dir     the directory to begin scanning
+	 * @param pattern the file glob pattern or start directory
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File rootDir, String pattern) throws IOException {
@@ -184,17 +182,11 @@ public class FileProcessor extends ProjectProcessor {
 
 		this.rootDir = rootDir;
 
-		File dir = new File(pattern);
-		if (!dir.isAbsolute()) {
-			dir = new File(rootDir, pattern);
-		}
-
 		if (ObjectUtils.equals(rootDir.getAbsolutePath(), pattern)) {
 			scanFolder(rootDir);
-
 		} else {
 			ProjectLayout projectLayout = getProjectLayout(rootDir);
-			procesFilePattern = pattern;
+			processFilePattern = pattern;
 			processProjectDir(projectLayout, pattern);
 		}
 	}
@@ -267,8 +259,8 @@ public class FileProcessor extends ProjectProcessor {
 
 	@Override
 	protected void processModule(File projectDir, String module) throws IOException {
-		if (procesFilePattern == null
-				|| isPathUnderDirectory(new File(projectDir, module).getPath(), procesFilePattern)) {
+		if (processFilePattern == null
+				|| isPathUnderDirectory(new File(projectDir, module).getPath(), processFilePattern)) {
 			super.processModule(projectDir, module);
 		}
 	}
@@ -347,7 +339,6 @@ public class FileProcessor extends ProjectProcessor {
 			for (File file : files) {
 				logIfNotBlank(processFile(layout, file));
 			}
-
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -356,7 +347,7 @@ public class FileProcessor extends ProjectProcessor {
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
-		if (procesFilePattern == null || isPathUnderDirectory(file.getPath(), procesFilePattern)) {
+		if (processFilePattern == null || isPathUnderDirectory(file.getPath(), processFilePattern)) {
 			File projectDir = projectLayout.getProjectDir();
 			String guidance = parseFile(projectDir, file);
 
@@ -365,9 +356,9 @@ public class FileProcessor extends ProjectProcessor {
 				perform = process(projectLayout, file, guidance);
 			}
 			if (defaultGuidance != null) {
-				String default_guidance = MessageFormat.format(promptBundle.getString("default_guidance"), file,
+				String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), file,
 						defaultGuidance);
-				perform = process(projectLayout, file, default_guidance);
+				perform = process(projectLayout, file, defaultGuidanceText);
 			}
 		}
 		return perform;
@@ -497,7 +488,6 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private List<File> findFiles(String pattern) throws IOException {
-
 		List<File> result = new ArrayList<>();
 		File dir = new File(pattern);
 		PathMatcher matcher = null;
@@ -508,11 +498,9 @@ public class FileProcessor extends ProjectProcessor {
 				dir = rootDir;
 				matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
 			}
-		} else {
-			dir = rootDir;
-			matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
 		}
 
+		@SuppressWarnings("unchecked")
 		List<File> files = (List<File>) FileUtils.listFiles(dir, TrueFileFilter.INSTANCE,
 				DirectoryFileFilter.DIRECTORY);
 
@@ -588,10 +576,12 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private boolean isPathUnderDirectory(String name, String parentPath) {
-
-		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + procesFilePattern);
-		if (matcher.matches(Paths.get(name))) {
-			return true;
+		String pattern = StringUtils.trimToNull(processFilePattern);
+		if (pattern != null) {
+			PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+			if (matcher.matches(Paths.get(name))) {
+				return true;
+			}
 		}
 
 		String child = normalizePathForPrefixCheck(name);
@@ -726,5 +716,4 @@ public class FileProcessor extends ProjectProcessor {
 	public void setModuleThreadTimeoutMinutes(long moduleThreadTimeoutMinutes) {
 		this.moduleThreadTimeoutMinutes = moduleThreadTimeoutMinutes;
 	}
-
 }

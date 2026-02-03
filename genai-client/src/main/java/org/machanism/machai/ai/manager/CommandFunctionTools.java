@@ -93,7 +93,7 @@ public class CommandFunctionTools {
 				String line;
 				while ((line = reader.readLine()) != null) {
 					output.append(line).append("\n");
-					logger.info("Output: {}", line);
+					logger.info("[CMD] {}", line);
 				}
 			}
 
