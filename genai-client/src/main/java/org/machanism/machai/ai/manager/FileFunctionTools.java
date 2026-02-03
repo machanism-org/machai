@@ -57,10 +57,10 @@ public class FileFunctionTools {
 				"file_path:string:required:The path to the file you want to write to or create.",
 				"text:string:required:The content to be written into the file (text, code, etc.).");
 		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
-				this::listFiles,
-				"dir_path:string:optional:The path to the directory to list contents of.");
+				this::listFiles, "dir_path:string:optional:The path to the directory to list contents of.");
 		provider.addTool("get_recursive_file_list",
-				"List files recursively in a directory (includes files in subdirectories).", this::getRecursiveFiles,
+				"List files recursively in a directory (includes files in subdirectories).",
+				this::getRecursiveFiles,
 				"dir_path:string:optional:Path to the folder to list contents recursively.");
 	}
 
@@ -128,14 +128,14 @@ public class FileFunctionTools {
 		File directory = new File(workingDir, StringUtils.defaultIfBlank(filePath, "."));
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
-			StringBuilder content = new StringBuilder();
+			List<String> result = new ArrayList<>();
 			if (listFiles != null) {
 				for (File file : listFiles) {
 					String relatedPath = ProjectLayout.getRelatedPath(workingDir, file, false);
-					content.append(relatedPath).append("\n");
+					result.add(relatedPath);
 				}
 
-				return content.toString();
+				return StringUtils.join(result, ",");
 			}
 		}
 

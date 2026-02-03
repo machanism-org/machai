@@ -54,8 +54,7 @@ public final class Ghostwriter {
 
 	static {
 		try {
-			execDir = new File(Ghostwriter.class.getProtectionDomain().getCodeSource().getLocation()
-					.toURI());
+			execDir = new File(Ghostwriter.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 			if (execDir.isFile()) {
 				execDir = execDir.getParentFile();
 			}
@@ -89,38 +88,27 @@ public final class Ghostwriter {
 
 		Options options = new Options();
 
-		Option helpOption = new Option("h", "help", false,
-				"Show this help message and exit.");
-		Option multiThreadOption = Option.builder("t")
-				.longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: true).")
-				.hasArg(true)
-				.optionalArg(true)
-				.build();
+		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
+		Option multiThreadOption = Option.builder("t").longOpt("threads")
+				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
+				.optionalArg(true).build();
 		Option rootDirOpt = new Option("r", "root", true,
 				"Specify the path to the root directory for file processing.");
-		Option genaiOpt = new Option("a", "genai", true,
-				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
+		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
-		Option instructionsOpt = Option.builder("i")
-				.longOpt("instructions")
+		Option instructionsOpt = Option.builder("i").longOpt("instructions")
 				.desc("Specify additional instructions by URL or file path. "
 						+ "To provide multiple locations, separate them with a comma (`,`). "
 						+ "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
-				.hasArg(true)
-				.optionalArg(true)
-				.build();
+				.hasArg(true).optionalArg(true).build();
 
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a list of directories to exclude from processing. You can provide multiple directories separated by commas or by repeating the option.");
 
-		Option guidanceOpt = Option.builder("g")
-				.longOpt("guidance")
+		Option guidanceOpt = Option.builder("g").longOpt("guidance")
 				.desc("Specify the default guidance file to apply as a final step for the current directory. "
 						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
-				.hasArg(true)
-				.optionalArg(true)
-				.build();
+				.hasArg(true).optionalArg(true).build();
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
@@ -158,25 +146,22 @@ public final class Ghostwriter {
 				if (optionValue != null) {
 					instructionLocations = StringUtils.split(optionValue, ",");
 				} else {
-					instructions = readText(
-							"No instructions were provided as an option value.\n" +
-									"Please enter the instructions text below. When you are done, press " +
-									(SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") +
-									" to finish and signal end of input (EOF):");
+					instructions = readText("No instructions were provided as an option value.\n"
+							+ "Please enter the instructions text below. When you are done, press "
+							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
+							+ " to finish and signal end of input (EOF):");
 				}
 			}
 
 			if (instructionLocations != null && instructionLocations.length > 0) {
-				instructionLocations = Arrays.stream(instructionLocations)
-						.map(StringUtils::trimToNull)
+				instructionLocations = Arrays.stream(instructionLocations).map(StringUtils::trimToNull)
 						.map(location -> {
 							if (location != null && !location.startsWith("http://") && !location.startsWith("https://")
 									&& !(new File(location).isAbsolute())) {
 								return new File(execDir, location).getAbsolutePath();
 							}
 							return location;
-						})
-						.toArray(String[]::new);
+						}).toArray(String[]::new);
 			}
 
 			String[] dirs = cmd.getArgs();
@@ -203,16 +188,14 @@ public final class Ghostwriter {
 			if (cmd.hasOption(guidanceOpt)) {
 				String guidanceFileName = cmd.getOptionValue(guidanceOpt);
 				if (guidanceFileName != null) {
-					defaultGuidance = getInstractionsFromFile(guidanceFileName);
+					defaultGuidance = getInstructionsFromFile(guidanceFileName);
 					if (defaultGuidance == null) {
-						throw new FileNotFoundException("Guidance file '" + guidanceFileName +
-								"' not found. Please verify that the file exists at the expected location and is accessible.");
+						throw new FileNotFoundException("Guidance file '" + guidanceFileName
+								+ "' not found. Please verify that the file exists at the expected location and is accessible.");
 					}
 				} else {
-					defaultGuidance = readText(
-							"Please enter the guidance text below. When finished, press " +
-									(SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") +
-									" to signal end of input (EOF):");
+					defaultGuidance = readText("Please enter the guidance text below. When finished, press "
+							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") + " to signal end of input (EOF):");
 				}
 			}
 
@@ -230,7 +213,7 @@ public final class Ghostwriter {
 					processor.setModuleMultiThread(multiThread);
 					processor.setDefaultGuidance(defaultGuidance);
 
-					processor.scanDocuments(rootDir, new File(scanDir));
+					processor.scanDocuments(rootDir, scanDir);
 					logger.info("Scan completed for directory: {}", scanDir);
 				} else {
 					logger.error("The directory '{}' must be located within the root directory '{}'.", scanDir,
@@ -244,19 +227,27 @@ public final class Ghostwriter {
 		}
 	}
 
-	private static String getInstractionsFromFile(String instructionsFile) {
-		String instructions = null;
+	private static String getInstructionsFromFile(String instructionsFile) {
+		String result = null;
 		if (instructionsFile != null) {
-			File file = new File(execDir, instructionsFile);
+			File file = new File(instructionsFile);
+
+			if (!file.isAbsolute()) {
+				file = new File(execDir, instructionsFile);
+			}
+
 			if (file.exists()) {
+				logger.info("Instructions file: {}", file.getAbsolutePath());
+
 				try (FileReader reader = new FileReader(file)) {
-					instructions = IOUtils.toString(reader);
+					result = IOUtils.toString(reader);
+
 				} catch (IOException e) {
-					logger.error("Failed to read file: {}", file);
+					logger.error("Failed to read instructions file: {}", file.getAbsolutePath(), e);
 				}
 			}
 		}
-		return instructions;
+		return result;
 	}
 
 	private static void help(Options options, HelpFormatter formatter) {

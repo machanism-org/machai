@@ -6,10 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,6 +30,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -90,7 +97,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	private String defaultGuidance;
 
-	private File defaultProcessingDir;
+	private String procesFilePattern;
 
 	private String[] excludes;
 
@@ -161,7 +168,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File basedir) throws IOException {
-		scanDocuments(basedir, basedir);
+		scanDocuments(basedir, basedir.getAbsolutePath());
 	}
 
 	/**
@@ -172,22 +179,19 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param dir     the directory to begin scanning
 	 * @throws IOException if an error occurs reading files
 	 */
-	public void scanDocuments(File rootDir, File dir) throws IOException {
+	public void scanDocuments(File rootDir, String pattern) throws IOException {
 		logger.info("Multi-threaded processing mode {}.", moduleMultiThread ? "enabled" : "disabled");
 
 		this.rootDir = rootDir;
 
-		if (rootDir == dir) {
+		File dir = new File(pattern);
+		if (ObjectUtils.equals(dir.getAbsolutePath(), pattern) || dir.exists()) {
 			scanFolder(rootDir);
+
 		} else {
 			ProjectLayout projectLayout = getProjectLayout(rootDir);
-			defaultProcessingDir = dir;
-
-			processProjectDir(projectLayout, dir);
-
-			if (defaultGuidance != null) {
-				process(projectLayout, defaultProcessingDir, defaultGuidance);
-			}
+			procesFilePattern = pattern;
+			processProjectDir(projectLayout, pattern);
 		}
 	}
 
@@ -259,8 +263,8 @@ public class FileProcessor extends ProjectProcessor {
 
 	@Override
 	protected void processModule(File projectDir, String module) throws IOException {
-		if (defaultProcessingDir == null
-				|| isPathUnderDirectory(new File(projectDir, module).getPath(), defaultProcessingDir.getPath())) {
+		if (procesFilePattern == null
+				|| isPathUnderDirectory(new File(projectDir, module).getPath(), procesFilePattern)) {
 			super.processModule(projectDir, module);
 		}
 	}
@@ -289,7 +293,7 @@ public class FileProcessor extends ProjectProcessor {
 			}
 
 			if (child.isDirectory()) {
-				processProjectDir(projectLayout, child);
+				processProjectDir(projectLayout, child.getAbsolutePath());
 			} else {
 				logIfNotBlank(processFile(projectLayout, child));
 			}
@@ -333,12 +337,13 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
-	public void processProjectDir(ProjectLayout layout, File scanDir) {
+	public void processProjectDir(ProjectLayout layout, String filePattern) {
 		try {
-			List<File> files = findFiles(scanDir);
+			List<File> files = findFiles(filePattern);
 			for (File file : files) {
 				logIfNotBlank(processFile(layout, file));
 			}
+
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -347,13 +352,18 @@ public class FileProcessor extends ProjectProcessor {
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
-		if (defaultProcessingDir == null || isPathUnderDirectory(file.getPath(), defaultProcessingDir.getPath())) {
+		if (procesFilePattern == null || isPathUnderDirectory(file.getPath(), procesFilePattern)) {
 			File projectDir = projectLayout.getProjectDir();
 			String guidance = parseFile(projectDir, file);
 
 			if (guidance != null) {
 				logger.info("Processing file: {}", file.getAbsolutePath());
 				perform = process(projectLayout, file, guidance);
+			}
+			if (defaultGuidance != null) {
+				String default_guidance = MessageFormat.format(promptBundle.getString("default_guidance"), file,
+						defaultGuidance);
+				perform = process(projectLayout, file, default_guidance);
 			}
 		}
 		return perform;
@@ -378,10 +388,6 @@ public class FileProcessor extends ProjectProcessor {
 			String projectInfo = getProjectStructureDescription(projectLayout);
 			provider.prompt(projectInfo);
 
-			if (defaultGuidance != null && defaultGuidance.equals(guidance)) {
-				TextReviewer textReviewer = new TextReviewer();
-				guidance = textReviewer.getPrompt(projectDir, file, defaultGuidance);
-			}
 			provider.prompt(guidance);
 
 			provider.prompt(promptBundle.getString("output_format"));
@@ -428,8 +434,7 @@ public class FileProcessor extends ProjectProcessor {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
 			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())
-					.map(e -> "`" + e + "`")
-					.collect(Collectors.toList());
+					.map(e -> "`" + e + "`").collect(Collectors.toList());
 			line = StringUtils.join(dirs, ", ");
 		}
 
@@ -481,9 +486,34 @@ public class FileProcessor extends ProjectProcessor {
 			return result;
 		}
 
-		return Arrays.stream(files).filter(file -> Arrays.stream(excludes).filter(StringUtils::isNotBlank)
-				.noneMatch(exclude -> Strings.CI.equals(file.getName(), StringUtils.trim(exclude))))
+		return Arrays.stream(files)
+				.filter(file -> Arrays.stream(excludes).filter(StringUtils::isNotBlank)
+						.noneMatch(exclude -> Strings.CI.equals(file.getName(), StringUtils.trim(exclude))))
 				.collect(Collectors.toList());
+	}
+
+	private List<File> findFiles(String pattern) throws IOException {
+		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+		List<File> result = new ArrayList<>();
+
+		List<File> files = (List<File>) FileUtils.listFiles(rootDir, TrueFileFilter.INSTANCE,
+				DirectoryFileFilter.DIRECTORY);
+
+		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
+
+		for (File file : files) {
+			String name = file.getName();
+			String absolutePath = file.getAbsolutePath();
+
+			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludeAbsolutePath(absolutePath)) {
+				continue;
+			}
+
+			if (matcher.matches(file.toPath())) {
+				result.add(file);
+			}
+		}
+		return result;
 	}
 
 	private List<File> findFiles(File projectDir) throws IOException {
@@ -540,8 +570,14 @@ public class FileProcessor extends ProjectProcessor {
 		return normalized.split("/").length;
 	}
 
-	private static boolean isPathUnderDirectory(String childPath, String parentPath) {
-		String child = normalizePathForPrefixCheck(childPath);
+	private boolean isPathUnderDirectory(String name, String parentPath) {
+
+		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + procesFilePattern);
+		if (matcher.matches(Paths.get(name))) {
+			return true;
+		}
+
+		String child = normalizePathForPrefixCheck(name);
 		String parent = normalizePathForPrefixCheck(parentPath);
 		if (child == null || parent == null) {
 			return false;
