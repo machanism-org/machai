@@ -72,7 +72,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListWhenWorkspaceModulesAreIgnoredDueToExcludedDirCheck() throws Exception {
+	void getModules_shouldReturnEmptyListDueToSubstringBeforeDoubleStarBug() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-workspaces");
 		assertTrue(dir.mkdirs() || dir.isDirectory());

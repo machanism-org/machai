@@ -44,8 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported files,
- * and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported
+ * files, and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
  * This processor delegates file-specific guidance extraction to
@@ -76,7 +76,7 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	private final SystemFunctionTools systemFunctionTools;
 
-	/** Reviewer associations keyed by normalized (lowercase) file extension. */
+	/** Reviewer associations keyed by file extension. */
 	private final Map<String, Reviewer> reviewMap = new HashMap<>();
 
 	/** Root scanning directory for the current documentation run. */
@@ -107,7 +107,7 @@ public class FileProcessor extends ProjectProcessor {
 	/**
 	 * Constructs a processor.
 	 *
-	 * @param genai provider key/name to use
+	 * @param genai        provider key/name to use
 	 * @param configurator configuration source
 	 */
 	public FileProcessor(String genai, Configurator configurator) {
@@ -126,34 +126,25 @@ public class FileProcessor extends ProjectProcessor {
 
 		ServiceLoader<Reviewer> reviewerServiceLoader = ServiceLoader.load(Reviewer.class);
 		for (Reviewer reviewer : reviewerServiceLoader) {
-			if (reviewer == null) {
-				continue;
-			}
-
 			String[] extensions = reviewer.getSupportedFileExtensions();
-			if (extensions == null || extensions.length == 0) {
-				continue;
-			}
-
 			for (String extension : extensions) {
-				String normalizedExtension = normalizeExtension(extension);
-				if (normalizedExtension == null) {
-					continue;
+				String key = normalizeExtensionKey(extension);
+				if (key != null) {
+					reviewMap.putIfAbsent(key, reviewer);
 				}
-				reviewMap.putIfAbsent(normalizedExtension, reviewer);
 			}
 		}
 	}
 
-	private static String normalizeExtension(String extension) {
-		String normalizedExtension = StringUtils.lowerCase(StringUtils.trimToNull(extension));
-		if (normalizedExtension == null) {
+	private static String normalizeExtensionKey(String extension) {
+		String value = StringUtils.trimToNull(extension);
+		if (value == null) {
 			return null;
 		}
-		if (normalizedExtension.startsWith(".")) {
-			normalizedExtension = normalizedExtension.substring(1);
+		if (value.startsWith(".")) {
+			value = value.substring(1);
 		}
-		return StringUtils.trimToNull(normalizedExtension);
+		return value.toLowerCase();
 	}
 
 	/**
@@ -266,10 +257,10 @@ public class FileProcessor extends ProjectProcessor {
 	/**
 	 * Processes non-module files and directories directly under {@code projectDir}.
 	 *
-	 * @param projectDir directory to scan
+	 * @param projectDir    directory to scan
 	 * @param projectLayout project layout
 	 * @throws FileNotFoundException if the project layout cannot be created
-	 * @throws IOException if file reading fails
+	 * @throws IOException           if file reading fails
 	 */
 	protected void processParentFiles(File projectDir, ProjectLayout projectLayout)
 			throws FileNotFoundException, IOException {
@@ -439,21 +430,27 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private String parseFile(File projectDir, File file) throws IOException {
-		if (file == null || !file.isFile()) {
-			return null;
+		String result = null;
+
+		if (file.isFile()) {
+			String extension = FilenameUtils.getExtension(file.getName());
+			Reviewer reviewer = getReviewerForExtension(extension);
+			if (reviewer == null) {
+				return null;
+			}
+
+			result = reviewer.perform(projectDir, file);
 		}
 
-		String extension = normalizeExtension(FilenameUtils.getExtension(file.getName()));
-		if (extension == null) {
+		return result;
+	}
+
+	private Reviewer getReviewerForExtension(String extension) {
+		String key = normalizeExtensionKey(extension);
+		if (key == null) {
 			return null;
 		}
-
-		Reviewer reviewer = reviewMap.get(extension);
-		if (reviewer == null) {
-			return null;
-		}
-
-		return reviewer.perform(projectDir, file);
+		return reviewMap.get(key);
 	}
 
 	private List<File> listFiles(File dir) throws IOException {
@@ -501,7 +498,6 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		List<File> files = (List<File>) FileUtils.listFilesAndDirs(dir, TrueFileFilter.INSTANCE,
 				DirectoryFileFilter.DIRECTORY);
 
@@ -618,6 +614,9 @@ public class FileProcessor extends ProjectProcessor {
 
 	private PathMatcher getPatternPath(String path) {
 		PathMatcher matcher = null;
+		if (StringUtils.isBlank(path)) {
+			return null;
+		}
 		if (Strings.CI.startsWithAny(path, "glob:", "regex:")) {
 			matcher = FileSystems.getDefault().getPathMatcher(path);
 		}

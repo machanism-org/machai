@@ -28,27 +28,14 @@
 /**
  * Provider discovery, configuration, and host-side tool wiring for generative AI integrations.
  *
- * <p>This package defines the {@link org.machanism.machai.ai.manager.GenAIProvider} contract and utilities to:
- * <ul>
- *   <li>resolve and instantiate providers from a {@code Provider:Model} identifier,</li>
- *   <li>configure providers from a {@link org.machanism.macha.core.commons.configurator.Configurator},</li>
- *   <li>optionally install host-executed tools (file system access and command execution) for providers that
- *       support tool calling.</li>
- * </ul>
+ * <p>This package contains the {@link org.machanism.machai.ai.manager.GenAIProvider} abstraction and the
+ * {@link org.machanism.machai.ai.manager.GenAIProviderManager} used to resolve a provider from a
+ * {@code Provider:Model} identifier (or a fully-qualified class name) and apply configuration.
  *
- * <h2>Key types</h2>
- * <ul>
- *   <li><strong>Provider contract</strong> – {@link org.machanism.machai.ai.manager.GenAIProvider} defines the API
- *       for prompting, file attachment, embeddings, and tool registration.</li>
- *   <li><strong>Provider resolution</strong> – {@link org.machanism.machai.ai.manager.GenAIProviderManager}
- *       instantiates an implementation by conventional short name (for example {@code OpenAI}) or a
- *       fully-qualified class name.</li>
- *   <li><strong>Tool installation</strong> – {@link org.machanism.machai.ai.manager.FileFunctionTools} and
- *       {@link org.machanism.machai.ai.manager.CommandFunctionTools} register host tools;
- *       {@link org.machanism.machai.ai.manager.SystemFunctionTools} installs both.</li>
- * </ul>
+ * <p>It also provides optional host-executed tool adapters (for example, file and command execution) that can be
+ * registered with providers supporting tool/function calling.
  *
- * <h2>Usage</h2>
+ * <h2>Typical usage</h2>
  * <pre>{@code
  * Configurator conf = ...;
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);

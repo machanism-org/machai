@@ -1,11 +1,11 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains the application entry point and the Spring Shell command components that expose Machai
- * capabilities through an interactive shell (REPL) or non-interactive invocation suitable for scripts and build
- * tooling.
+ * <p>This package contains the CLI application entry point and the Spring Shell command components that expose
+ * Machai capabilities through either an interactive shell (REPL) or non-interactive invocation suitable for
+ * scripts and build tooling.
  *
- * <h2>Usage</h2>
+ * <h2>Typical usage</h2>
  * <p>Start the CLI by invoking the entry point:</p>
  *
  * <pre>

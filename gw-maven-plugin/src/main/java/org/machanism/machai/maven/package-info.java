@@ -1,29 +1,28 @@
 /**
- * Maven plugin goals (mojos) that integrate the MachAI Generative Workflow (GW) documentation pipeline into a Maven
+ * Maven plugin goals (mojos) for integrating the MachAI Generative Workflow (GW) documentation pipeline into a Maven
  * build.
  *
  * <p>
- * The primary entry points are the {@link org.machanism.machai.maven.GW} mojo (goal {@code gw}), which scans
- * documentation sources (typically under {@code src/site}) and invokes the GW processing pipeline via
- * {@link org.machanism.machai.gw.FileProcessor}, and the {@link org.machanism.machai.maven.Clean} mojo (goal
- * {@code clean}), which removes temporary artifacts created by prior workflow runs.
+ * The mojos in this package support running the GW pipeline against documentation sources (typically under
+ * {@code src/site}) and cleaning temporary artifacts produced by workflow runs.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources under the current module
- *     base directory (usually {@code ${basedir}}) and runs the GW document-processing pipeline.
+ *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources and invokes
+ *     {@link org.machanism.machai.gw.FileProcessor} to process inputs for the current Maven module.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; deletes workflow temporary files under the
- *     current module base directory.
+ *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; removes workflow temporary files for the current
+ *     Maven module.
  *   </li>
  * </ul>
  *
- * <h2>Plugin parameters (goal {@code gw})</h2>
+ * <h2>Goal {@code gw} configuration</h2>
  * <p>
- * The {@code gw} goal supports the following parameters (configurable in {@code pom.xml} or via system properties).
+ * Parameters can be configured via {@code pom.xml} (plugin configuration) and/or via system properties. The system
+ * property names are shown alongside each parameter.
  * </p>
  * <ul>
  *   <li>
@@ -31,16 +30,16 @@
  *     (for example {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
- *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): One or more instruction location strings
+ *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): One or more instruction-location strings
  *     consumed by the workflow.
  *   </li>
  *   <li>
- *     <b>{@code excludes}</b> / <b>{@code gw.excludes}</b> (optional): One or more exclude patterns/paths skipped during
+ *     <b>{@code excludes}</b> / <b>{@code gw.excludes}</b> (optional): One or more exclude patterns/paths to skip during
  *     documentation scanning.
  *   </li>
  *   <li>
- *     <b>{@code serverId}</b> / <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml}
- *     {@code &lt;server&gt;} id used to load GenAI credentials.
+ *     <b>{@code serverId}</b> / <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml} {@code <server>} id
+ *     used to load GenAI credentials.
  *   </li>
  *   <li>
  *     <b>{@code threads}</b> / <b>{@code gw.threads}</b> (optional, default {@code true}): Enables/disables multi-threaded
@@ -50,15 +49,15 @@
  *
  * <h2>Credentials</h2>
  * <p>
- * GenAI credentials are read from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry whose id is provided by
- * {@code gw.genai.serverId}. When present, they are exposed to the workflow as configuration properties:
+ * GenAI credentials are loaded from Maven {@code settings.xml} using the {@code <server>} entry whose id is provided by
+ * {@code gw.genai.serverId}. When present, credentials are exposed to the workflow as configuration properties:
  * </p>
  * <ul>
  *   <li>{@code GENAI_USERNAME}</li>
  *   <li>{@code GENAI_PASSWORD}</li>
  * </ul>
  *
- * <h2>Usage</h2>
+ * <h2>Usage examples</h2>
  * <p>Run from the command line:</p>
  * <pre>
  * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai

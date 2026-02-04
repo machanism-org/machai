@@ -7,7 +7,7 @@
 
 GenAI Client is a Java library that provides a small, provider-agnostic API for running generative AI tasks through a single `GenAIProvider` interface.
 
-It keeps your application code stable while you swap or combine different backends (API-based providers and UI/web-automation providers).
+It helps keep application code stable while you swap or combine different backends (API-based providers and UI/web-automation providers) through a unified programming model.
 
 ## Key features
 
@@ -51,12 +51,12 @@ and generate the content for this section following net format:
 
 `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
 
-It enables:
+This provider supports:
 
-- Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in OpenAI workflows.
-- Performing common LLM tasks such as text generation, summarization, and question answering.
-- Creating and using vector embeddings for semantic search and similarity analysis.
+- Sending prompts and receiving responses from OpenAI chat/response models.
+- Uploading local files to OpenAI and attaching file references to requests (`addFile(File)`), or attaching remote files by URL (`addFile(URL)`).
+- Tool/function calling via `addTool(...)`, with automatic dispatch of tool calls returned by the model.
+- Embeddings generation via `embedding(String)`.
 
 Environment variables
 
@@ -112,17 +112,37 @@ Key characteristics
 - `perform()` always returns `null`.
 - Unsupported capabilities (for example, `embedding(String)`) throw an exception.
 
+Example
+
+```java
+GenAIProvider provider = new NoneProvider();
+provider.inputsLog(new File("./inputsLog/inputs.txt"));
+provider.instructions("You are a helpful assistant.");
+provider.prompt("Describe the weather.");
+provider.perform();
+```
+
 ### Web
 
 `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`).
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`). The prompt list is passed as a system variable named `INPUTS`, and the recipe is expected to store the final response in a variable named `result`.
 
 Thread safety and lifecycle
 
 - This provider is not thread-safe.
 - Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
+
+Example
+
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
+provider.model("config.yaml");
+provider.setWorkingDir(new File("/path/to/project"));
+String response = provider.perform();
+provider.close();
+```
 
 <!-- @guidance:
 - Follow the rules described in @guidance tags and do not change or delete `@guidance` related tags in processing.

@@ -29,11 +29,11 @@ Page Structure:
 
 The **Bindex Maven Plugin** enables automated generation and registration of `bindex` metadata for Maven projects.
 
-It helps:
+It helps you:
 
 - Produce a consistent, machine-readable descriptor (`bindex.json`) for each Maven module.
 - Keep that descriptor aligned with the module as it evolves.
-- Improve downstream discovery, indexing, and assembly workflows that rely on structured metadata (including GenAI-assisted semantic search within the Machanism ecosystem).
+- Improve downstream discovery, indexing, and assembly workflows that rely on structured metadata.
 
 ## Overview
 

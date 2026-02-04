@@ -31,13 +31,13 @@ Bindex Core (`bindex-core`) provides core functionality for bindex metadata mana
 
 ## Overview
 
-Bindex Core defines the canonical representation of bindex metadata and exposes supporting APIs used by other Machanism components (for example, Maven plugins and build integrations). It is intended for tools that need to:
+Bindex Core defines the canonical representation of bindex metadata and provides APIs intended for other Machanism components (for example, Maven plugins and build integrations). Typical uses include:
 
-- Generate bindex metadata for produced artifacts.
-- Read and validate metadata from modules and dependencies.
-- Merge and aggregate metadata across multi-module builds.
-- Drive library selection and project assembly decisions based on metadata.
-- Support publishing/registration so metadata can be discovered by downstream tooling.
+- Generating bindex metadata for produced artifacts.
+- Reading and validating metadata from modules and dependencies.
+- Merging and aggregating metadata across multi-module builds.
+- Driving library selection and project assembly decisions based on metadata.
+- Supporting publishing/registration so metadata can be discovered by downstream tooling.
 
 ## Key Features
 

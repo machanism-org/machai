@@ -8,7 +8,7 @@
  * 		- Avoid vague statements; be specific about functionality and intent.
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the package's overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  * - Maintain Consistency and Formatting:
@@ -28,8 +28,9 @@
  * Maven plugin goal for running an AI-assisted project assembly workflow.
  *
  * <p>
- * This package contains the {@link org.machanism.machai.maven.Assembly} {@code Mojo}, which implements the
- * {@code assembly} goal.
+ * This package contains the {@link org.machanism.machai.maven.Assembly} Maven {@code Mojo}, which implements the
+ * {@code assembly} goal. The goal reads (or prompts for) a project description, uses an AI-powered picker to
+ * recommend libraries, and then runs an AI-driven assembly process against the Maven execution base directory.
  * </p>
  *
  * <h2>Workflow</h2>

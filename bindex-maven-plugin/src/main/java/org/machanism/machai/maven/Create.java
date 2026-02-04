@@ -2,7 +2,6 @@ package org.machanism.machai.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 
 /**
  * Maven goal that creates a new Bindex index for the current project.

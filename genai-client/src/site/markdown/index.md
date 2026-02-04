@@ -129,16 +129,18 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
-It supports:
+This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI chat models.
+- Sending prompts and receiving responses from OpenAI Chat models.
 - Managing files for use in various OpenAI workflows.
-- Performing LLM requests (text generation, summarization, and question answering).
-- Creating and using vector embeddings for tasks like semantic search and similarity analysis.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-**Environment variables**
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+
+**Environment Variables**
 
 The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
 
@@ -147,9 +149,9 @@ The client automatically reads the following environment variables. You must set
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using the CodeMie API via OpenAIProvider**
+**Using the CodeMie API**
 
-To call CodeMie through an OpenAI-compatible endpoint, configure:
+To use the CodeMie API, set the following environment variables:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -168,7 +170,7 @@ The `CodeMieProvider` extends `OpenAIProvider` and authenticates against CodeMie
 
 How it works:
 
-- Obtains an access token from a Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`).
+- Obtains an access token from the CodeMie Keycloak token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`).
 - Uses that token as the API key when creating the OpenAI client.
 - Uses the CodeMie OpenAI-compatible base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
@@ -180,9 +182,9 @@ How it works:
 
 ### None
 
-The `NoneProvider` is a no-op implementation of `GenAIProvider`.
+No-op implementation of `GenAIProvider`.
 
-It is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
+This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
 **Key characteristics**
 
@@ -192,13 +194,13 @@ It is intended for environments where no external LLM integration should be used
 
 ### Web
 
-The `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
+`GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
 Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
 
 **Thread safety and lifecycle**
 
-- Not thread-safe.
+- This provider is not thread-safe.
 - Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 

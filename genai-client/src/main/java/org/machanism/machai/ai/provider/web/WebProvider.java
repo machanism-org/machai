@@ -161,8 +161,7 @@ public class WebProvider extends NoneProvider {
 	/**
 	 * Releases resources held by the underlying Anteater workspace.
 	 *
-	 * <p>If the provider is re-used after {@code close()}, calls to {@link #perform()} may fail because the workspace has
-	 * been shut down.
+	 * <p>This method is idempotent.
 	 */
 	@Override
 	public void close() {

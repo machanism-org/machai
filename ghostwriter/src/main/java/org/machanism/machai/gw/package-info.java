@@ -1,18 +1,24 @@
 /**
- * Command-line tooling for scanning a project workspace and preparing inputs for GenAI-assisted code review and code
- * generation workflows.
+ * Command-line tooling for scanning a project workspace and preparing prompt inputs for GenAI-assisted code review and
+ * code generation workflows.
  *
  * <p>
- * This package provides the CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the core orchestration
- * ({@link org.machanism.machai.gw.FileProcessor}) used to:
+ * The {@link org.machanism.machai.gw.Ghostwriter} CLI drives a scan of one or more directories (or a glob/regex pattern)
+ * within a project root. The {@link org.machanism.machai.gw.FileProcessor} walks the project layout (including
+ * multi-module builds), discovers file-type-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations
+ * via {@link java.util.ServiceLoader}, extracts per-file {@code @guidance:} blocks, and orchestrates prompt assembly and
+ * invocation of the configured GenAI provider.
+ * </p>
+ *
+ * <p>
+ * Primary responsibilities include:
  * </p>
  *
  * <ul>
- *   <li>Discover file-type-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations (typically via
- *       {@link java.util.ServiceLoader}).</li>
- *   <li>Traverse a single-module or multi-module workspace to select candidate files and directories.</li>
- *   <li>Extract per-file guidance blocks and merge them with bundled templates and optional user instructions.</li>
- *   <li>Build provider prompts and, optionally, persist the full prompt inputs for inspection.</li>
+ *   <li>Discovering and selecting reviewers based on file extension.</li>
+ *   <li>Traversing a project layout (sources/tests/docs/modules) and applying excludes and patterns.</li>
+ *   <li>Extracting guidance blocks and combining them with bundled prompt templates and optional user instructions.</li>
+ *   <li>Optionally persisting prompt inputs to a temporary directory for inspection and debugging.</li>
  * </ul>
  */
 package org.machanism.machai.gw;
@@ -42,4 +48,7 @@ package org.machanism.machai.gw;
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
  *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ * - Use the Java Version Defined in `pom.xml`:
+ *     - All code improvements and Javadoc updates must be compatible with the Java version specified in the project's `pom.xml`.
+ *     - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
  */
