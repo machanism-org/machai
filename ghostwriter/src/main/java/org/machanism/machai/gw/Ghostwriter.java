@@ -189,7 +189,7 @@ public final class Ghostwriter {
 			logger.info("Root directory: {}", rootDir);
 			boolean multiThread = Boolean.parseBoolean(cmd.getOptionValue(multiThreadOption, "true"));
 
-			String defaultGuidance = null;
+			String defaultGuidance = config.get("guidance", null);
 			if (cmd.hasOption(guidanceOpt)) {
 				String guidanceFileName = cmd.getOptionValue(guidanceOpt);
 				if (guidanceFileName != null) {
@@ -213,12 +213,29 @@ public final class Ghostwriter {
 				if (currentFile != null) {
 
 					FileProcessor processor = new FileProcessor(genai, config);
+					if (excludes != null) {
+						logger.info("Excludes: {}", Arrays.toString(excludes));
+						processor.setExcludes(excludes);
+					}
 
-					processor.setExcludes(excludes);
-					processor.setInstructionLocations(instructionLocations);
-					processor.setInstructions(instructions);
+					if (instructionLocations != null) {
+						logger.info("Instruction locations: {}", Arrays.toString(instructionLocations));
+						processor.setInstructionLocations(instructionLocations);
+					}
+
+					if (instructions != null) {
+						logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
+						processor.setInstructions(instructions);
+					}
+
 					processor.setModuleMultiThread(multiThread);
-					processor.setDefaultGuidance(defaultGuidance);
+
+					if (defaultGuidance != null) {
+						logger.info("Default guidance: {}", StringUtils.abbreviate(defaultGuidance, 60));
+						processor.setDefaultGuidance(defaultGuidance);
+					}
+
+					logger.info("Inputs: {}", logInputs);
 					processor.setLogInputs(logInputs);
 
 					processor.scanDocuments(rootDir, scanDir);
