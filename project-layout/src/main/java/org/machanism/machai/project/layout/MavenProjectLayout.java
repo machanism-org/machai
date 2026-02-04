@@ -91,6 +91,9 @@ public class MavenProjectLayout extends ProjectLayout {
 				if (effectivePomRequired) {
 					model = new PomReader().getProjectModel(file, false);
 					Build build = model.getBuild();
+					if (build == null) {
+						model.setBuild(new Build());
+					}
 					if (build.getSourceDirectory() == null) {
 						build.setSourceDirectory("src/main/java");
 					}
