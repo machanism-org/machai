@@ -34,20 +34,20 @@ It helps you keep documentation consistent and up to date across large codebases
 
 ## Overview
 
-Ghostwriter runs as a CLI that scans directories (or patterns) under a chosen root directory, applies optional instructions and default guidance, and produces updates while logging its work.
+Ghostwriter is a CLI that processes one or more scan targets (directory paths or path patterns) under a root directory. It applies optional instructions and optional default guidance, then produces updates while logging its work.
 
-It is designed for use both locally and in CI pipelines where you want deterministic, scriptable documentation review and regeneration.
+It is designed for both local use and CI pipelines where you want deterministic, scriptable documentation review and regeneration.
 
 ## Key Features
 
-- Scans project directories (and supports path patterns) to process documentation and source files.
+- Scans project directories and supports path patterns (e.g., `glob:` and `regex:` targets).
 - Uses embedded guidance tags to drive consistent documentation output.
 - Supports configurable GenAI provider/model selection.
 - Accepts external instructions via URL(s) or file path(s), or via interactive stdin.
 - Optional default guidance that can be applied as a final step per directory.
 - Excludes directories from processing.
-- Optional multi-threaded processing for faster runs.
-- Can log LLM request inputs to dedicated log files for audit/debug.
+- Optional multi-threaded processing.
+- Optional logging of LLM request inputs to dedicated log files for audit/debug.
 
 ## Getting Started
 
@@ -93,12 +93,12 @@ Ghostwriter is configured via command-line options and (optionally) a properties
 | Option | Args | Default | Description |
 |---|---:|---|---|
 | `-h`, `--help` | no | — | Show help and exit. |
-| `-r`, `--root` | yes | From `gw.properties` key `root`; otherwise: current user directory (`user.dir`). | Root directory used to compute and validate scan targets. Scan targets must be within this root. |
-| `-t`, `--threads[=true|false]` | optional | `true` | Enable or disable multi-threaded processing. If omitted: enabled. Use `--threads=false` to disable. |
-| `-a`, `--genai` | yes | From `gw.properties` key `genai`; otherwise: `OpenAI:gpt-5-mini`. | Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`). |
-| `-i`, `--instructions[=<url|file>[,<url|file>...]]` | optional | From `gw.properties` key `instructions` (comma-separated); otherwise: none. | Additional instructions locations (URL or file path). Provide multiple values separated by commas. If used without a value, Ghostwriter reads instruction text from stdin (EOF-terminated). Relative file paths are resolved against the execution directory. |
-| `-g`, `--guidance[=<file>]` | optional | From `gw.properties` key `guidance`; otherwise: none. | Default guidance applied as a final step for the current directory. If specified with a value, it is treated as a guidance file path (relative paths resolved against the execution directory). If specified without a value, Ghostwriter reads guidance text from stdin (EOF-terminated). |
-| `-e`, `--excludes` | yes | From `gw.properties` key `excludes` (comma-separated); otherwise: none. | Comma-separated list of directories to exclude from processing. |
+| `-r`, `--root <path>` | yes | From `gw.properties` key `root`; otherwise: current user directory (`user.dir`). | Root directory used to compute and validate scan targets. Scan targets must be within this root. |
+| `-t`, `--threads[=true|false]` | optional | `true` | Enable/disable multi-threaded processing. If provided without a value, it is treated as enabled. Use `--threads=false` to disable. |
+| `-a`, `--genai <provider:model>` | yes | From `gw.properties` key `genai`; otherwise: `OpenAI:gpt-5-mini`. | Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`). |
+| `-i`, `--instructions[=<url|file>[,<url|file>...]]` | optional | From `gw.properties` key `instructions` (comma-separated); otherwise: none. | Additional instruction locations (URL or file path). Multiple values are comma-separated. If used without a value, Ghostwriter reads instruction text from stdin (EOF-terminated). Relative file paths are resolved against the execution directory. |
+| `-g`, `--guidance[=<file>]` | optional | From `gw.properties` key `guidance`; otherwise: none. | Default guidance applied as a final step per directory. If provided with a value, it is treated as a guidance file path (relative paths resolved against the execution directory). If used without a value, Ghostwriter reads guidance text from stdin (EOF-terminated). |
+| `-e`, `--excludes <dir[,dir...]>` | yes | From `gw.properties` key `excludes` (comma-separated); otherwise: none. | Comma-separated list of directories to exclude from processing. |
 | `-l`, `--logInputs` | no | `false` | Log LLM request inputs to dedicated log files. |
 
 ### Example
@@ -118,3 +118,4 @@ java -jar gw.jar "glob:**/*.md" \
 
 - GitHub: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
+- Download: https://sourceforge.net/projects/machanism/files/machai/gw.zip/download

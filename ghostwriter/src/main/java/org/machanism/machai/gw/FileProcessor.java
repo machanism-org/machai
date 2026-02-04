@@ -43,27 +43,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported
- * files, and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project workspace, extracts {@code @guidance:} blocks, and submits
+ * per-file review requests to a configured GenAI provider.
  *
  * <p>
- * This processor delegates file-specific guidance extraction to
- * {@link Reviewer} implementations discovered via {@link ServiceLoader}. For
- * every supported file it finds, it builds a prompt using templates from the
- * {@code document-prompts} resource bundle and invokes a {@link GenAIProvider}.
+ * The processor discovers file-type specific {@link Reviewer} implementations
+ * using {@link ServiceLoader}. Each reviewer knows how to parse its
+ * corresponding file format and produce a prompt fragment that includes the
+ * original file contents and any embedded guidance comments.
  * </p>
+ *
+ * <h2>High-level flow</h2>
+ * <ol>
+ *   <li>Discover modules (if any) using {@link ProjectLayout}.</li>
+ *   <li>Traverse files (optionally filtered by pattern and excludes).</li>
+ *   <li>For each supported file, use a {@link Reviewer} to extract guidance.</li>
+ *   <li>Compose a prompt (project info + guidance + output format) and execute
+ *       {@link GenAIProvider#perform()}.</li>
+ * </ol>
  */
 public class FileProcessor extends ProjectProcessor {
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(FileProcessor.class);
 
 	/** Tag name for guidance comments. */
-	public static final String GUIDANCE_TAG_NAME = "@guidance:";
+	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
 
-	/**
-	 * Temporary directory name for documentation inputs under
-	 * {@link #MACHAI_TEMP_DIR}.
-	 */
+	/** Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}. */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Resource bundle supplying prompt templates for generators. */
@@ -81,26 +87,37 @@ public class FileProcessor extends ProjectProcessor {
 	/** Root scanning directory for the current documentation run. */
 	private File rootDir;
 
+	/** Provider key/name (including model) used when creating GenAI providers. */
 	private final String genai;
 
+	/** Whether module processing is executed concurrently. */
 	private boolean moduleMultiThread;
 
+	/** Optional additional instructions appended to each prompt. */
 	private String instructions;
 
-	private boolean logInputs = true;
+	/** Whether to persist the composed inputs to a per-file log. */
+	private boolean logInputs;
 
+	/** Whether module discovery/recursion is disabled for the current run. */
 	private boolean nonRecursive;
 
+	/** Default guidance applied when a file does not contain embedded guidance. */
 	private String defaultGuidance;
 
+	/** Optional matcher used to limit module/file processing to a subset. */
 	private PathMatcher pathMatcher;
 
+	/** Optional list of path patterns or exact paths to exclude. */
 	private String[] excludes;
 
+	/** Configuration source used to initialize providers. */
 	private final Configurator configurator;
 
+	/** Maximum number of threads used for module processing. */
 	private int maxModuleThreads = Math.max(1, Runtime.getRuntime().availableProcessors());
 
+	/** Timeout for module processing worker pool shutdown. */
 	private long moduleThreadTimeoutMinutes = 20;
 
 	/**
@@ -163,8 +180,13 @@ public class FileProcessor extends ProjectProcessor {
 	 * Scans documents in the given root directory and start subdirectory, preparing
 	 * inputs for documentation generation.
 	 *
-	 * @param rootDir the root directory of the project to scan
-	 * @param pattern the file glob pattern or start directory
+	 * <p>
+	 * Note: callers may pass a raw directory (e.g. {@code src}) or a {@code glob:}
+	 * / {@code regex:} pattern supported by {@link FileSystems#getPathMatcher(String)}.
+	 * </p>
+	 *
+	 * @param rootDir  the root directory of the project to scan
+	 * @param pattern  file glob/regex pattern or start directory
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File rootDir, String pattern) throws IOException {
@@ -320,6 +342,13 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
+	/**
+	 * Processes files in a project directory matching a provided pattern or
+	 * directory.
+	 *
+	 * @param layout       project layout
+	 * @param filePattern  directory path, {@code glob:}, or {@code regex:} pattern
+	 */
 	public void processProjectDir(ProjectLayout layout, String filePattern) {
 		try {
 			List<File> files = findFiles(layout.getProjectDir(), filePattern);
@@ -553,20 +582,44 @@ public class FileProcessor extends ProjectProcessor {
 		return matcher;
 	}
 
+	/**
+	 * @return root directory used as a base for relative paths
+	 */
 	public File getRootDir() {
 		return rootDir;
 	}
 
+	/**
+	 * Deletes the input-log temporary directory.
+	 *
+	 * @param basedir project base directory
+	 * @return {@code true} if the directory was deleted, otherwise {@code false}
+	 */
 	public static boolean deleteTempFiles(File basedir) {
 		File file = new File(basedir, FileProcessor.MACHAI_TEMP_DIR + File.separator + FileProcessor.GW_TEMP_DIR);
 		logger.info("Removing '{}' inputs log file.", file);
 		return FileUtils.deleteQuietly(file);
 	}
 
+	/**
+	 * @return whether module processing is executed concurrently
+	 */
 	public boolean isModuleMultiThread() {
 		return moduleMultiThread;
 	}
 
+	/**
+	 * Enables or disables multi-threaded module processing.
+	 *
+	 * <p>
+	 * When enabling, this method verifies that the configured provider is
+	 * thread-safe.
+	 * </p>
+	 *
+	 * @param moduleMultiThread {@code true} to enable, {@code false} to disable
+	 * @throws IllegalArgumentException if enabling is requested but the provider is
+	 *                                  not thread-safe
+	 */
 	public void setModuleMultiThread(boolean moduleMultiThread) {
 		if (!moduleMultiThread) {
 			this.moduleMultiThread = false;
@@ -582,18 +635,46 @@ public class FileProcessor extends ProjectProcessor {
 		this.moduleMultiThread = true;
 	}
 
+	/**
+	 * Sets additional instructions appended to each GenAI request.
+	 *
+	 * @param instructions free-form instruction text
+	 */
 	public void setInstructions(String instructions) {
 		this.instructions = instructions;
 	}
 
+	/**
+	 * @return whether composed prompt inputs are logged to files
+	 */
 	public boolean isLogInputs() {
 		return logInputs;
 	}
 
+	/**
+	 * Enables or disables logging of composed prompt inputs.
+	 *
+	 * @param logInputs {@code true} to log inputs, otherwise {@code false}
+	 */
 	public void setLogInputs(boolean logInputs) {
 		this.logInputs = logInputs;
 	}
 
+	/**
+	 * Loads instruction text from multiple locations.
+	 *
+	 * <p>
+	 * Each item may be:
+	 * </p>
+	 * <ul>
+	 *   <li>a URL ({@code http://} or {@code https://})</li>
+	 *   <li>a file path</li>
+	 *   <li>raw instruction text (fallback if location cannot be read)</li>
+	 * </ul>
+	 *
+	 * @param instructions locations or raw strings
+	 * @throws IOException if reading from a file location fails
+	 */
 	public void setInstructions(String[] instructions) throws IOException {
 		StringBuilder instructionsText = new StringBuilder();
 		if (instructions != null && instructions.length > 0) {
@@ -621,38 +702,85 @@ public class FileProcessor extends ProjectProcessor {
 		this.instructions = StringUtils.trimToNull(instructionsText.toString());
 	}
 
+	/**
+	 * @return whether recursion into modules/subdirectories is disabled
+	 */
 	public boolean isNonRecursive() {
 		return nonRecursive;
 	}
 
+	/**
+	 * Sets whether scanning is restricted to the current directory only.
+	 *
+	 * @param nonRecursive {@code true} to disable module recursion
+	 */
 	public void setNonRecursive(boolean nonRecursive) {
 		this.nonRecursive = nonRecursive;
 	}
 
+	/**
+	 * Sets the default guidance that is used when a file contains no embedded
+	 * guidance.
+	 *
+	 * @param defaultGuidance guidance text to apply by default
+	 */
 	public void setDefaultGuidance(String defaultGuidance) {
 		this.defaultGuidance = defaultGuidance;
 	}
 
+	/**
+	 * @return excludes configured for this processor
+	 */
 	public String[] getExcludes() {
 		return excludes;
 	}
 
+	/**
+	 * Sets exclude patterns/paths.
+	 *
+	 * <p>
+	 * Each entry may be:
+	 * </p>
+	 * <ul>
+	 *   <li>a {@code glob:} or {@code regex:} matcher expression</li>
+	 *   <li>an exact relative path (compared using {@link Strings#CS})</li>
+	 * </ul>
+	 *
+	 * @param excludes exclude list
+	 */
 	public void setExcludes(String[] excludes) {
 		this.excludes = excludes;
 	}
 
+	/**
+	 * @return maximum number of worker threads used for module processing
+	 */
 	public int getMaxModuleThreads() {
 		return maxModuleThreads;
 	}
 
+	/**
+	 * Sets the maximum number of worker threads used for module processing.
+	 *
+	 * @param maxModuleThreads maximum thread count (values &lt;= 0 are not allowed)
+	 */
 	public void setMaxModuleThreads(int maxModuleThreads) {
 		this.maxModuleThreads = maxModuleThreads;
 	}
 
+	/**
+	 * @return timeout (in minutes) to wait for module processing completion during
+	 *         shutdown
+	 */
 	public long getModuleThreadTimeoutMinutes() {
 		return moduleThreadTimeoutMinutes;
 	}
 
+	/**
+	 * Sets the module processing shutdown timeout.
+	 *
+	 * @param moduleThreadTimeoutMinutes timeout in minutes
+	 */
 	public void setModuleThreadTimeoutMinutes(long moduleThreadTimeoutMinutes) {
 		this.moduleThreadTimeoutMinutes = moduleThreadTimeoutMinutes;
 	}

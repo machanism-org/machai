@@ -135,6 +135,9 @@ public class GW extends AbstractMojo {
 	@Parameter(property = "gw.threads", defaultValue = "true", required = false)
 	private boolean threads;
 
+	@Parameter(property = "gw.logInputs", defaultValue = "false", required = false)
+	private boolean logInputs;
+
 	/**
 	 * Configures credentials and runs document scanning/processing starting from
 	 * {@link #basedir}.
@@ -210,6 +213,7 @@ public class GW extends AbstractMojo {
 
 			logger.info("Scanning documents in the root directory: {}", basedir);
 			processor.setModuleMultiThread(threads);
+			processor.setLogInputs(logInputs);
 			processor.scanDocuments(basedir);
 		} catch (IOException e) {
 			throw new MojoExecutionException("Document assistance process failed.", e);
