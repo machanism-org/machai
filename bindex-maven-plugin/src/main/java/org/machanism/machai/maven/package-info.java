@@ -31,7 +31,7 @@
  *
  * <p>
  * The goals in this package run in the context of the current
- * {@link org.apache.maven.project.MavenProject} and are typically bound to standard lifecycle phases.
+ * {@link org.apache.maven.project.MavenProject} and can be bound to standard lifecycle phases.
  * In multi-module builds, the mojos commonly skip execution for aggregator projects (those using {@code pom}
  * packaging) to avoid performing module-specific work at the root.
  * </p>

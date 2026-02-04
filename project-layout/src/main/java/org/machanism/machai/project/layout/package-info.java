@@ -8,7 +8,8 @@
  *
  * <h2>Key concepts</h2>
  * <ul>
- *   <li><strong>Project root</strong>: configured via {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.</li>
+ *   <li><strong>Project root</strong>: configured via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.</li>
  *   <li><strong>Modules/workspaces</strong>: optional discovery of nested projects (for example Maven multi-module projects or
  *       JS/TS workspaces).</li>
  *   <li><strong>Directory sets</strong>: conventional locations for sources, tests, and documentation.

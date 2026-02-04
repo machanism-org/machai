@@ -21,16 +21,14 @@ import com.google.common.collect.Lists;
 /**
  * Installs a command-execution tool into a {@link GenAIProvider}.
  *
- * <p>
- * The installed tool is intended to execute shell commands from a controlled
- * working directory. The actual allow/deny policy is provider- or
- * caller-defined; this class focuses on wiring the tool and running the
+ * <p>The installed tool is intended to execute shell commands from a controlled working directory. The actual
+ * allow/deny policy is provider- or caller-defined; this class focuses on wiring the tool and running the
  * process.
  *
  * <h2>Installed tool</h2>
  * <ul>
- * <li>{@code run_command_line_tool} – executes a shell command and returns
- * stdout (and a non-zero exit code note when applicable).</li>
+ * <li>{@code run_command_line_tool} – executes a shell command and returns stdout (and a non-zero exit code note
+ * when applicable).</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -54,16 +52,14 @@ public class CommandFunctionTools {
 	/**
 	 * Executes the supplied shell command and returns its output.
 	 *
-	 * <p>
-	 * Expected parameters:
+	 * <p>Expected parameters:
 	 * <ol>
 	 * <li>{@link JsonNode} containing {@code command}</li>
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return command output
-	 * @throws IllegalArgumentException if execution fails
+	 * @return command output (stdout and, on failure, stderr)
 	 */
 	private String executeCommand(Object[] params) {
 		logger.info("Run shell command: {}", Arrays.toString(params));
@@ -71,8 +67,6 @@ public class CommandFunctionTools {
 		String command = ((JsonNode) params[0]).get("command").asText();
 		StringBuilder output = new StringBuilder();
 		String os = System.getProperty("os.name").toLowerCase();
-		ProcessBuilder processBuilder;
-		String result;
 		try {
 			List<String> argList;
 			if (os.contains("win")) {
@@ -80,8 +74,8 @@ public class CommandFunctionTools {
 			} else {
 				argList = Lists.asList("sh", "-c", CommandLineUtils.translateCommandline(command));
 			}
-			processBuilder = new ProcessBuilder(argList);
 
+			ProcessBuilder processBuilder = new ProcessBuilder(argList);
 			File workingDir = (File) params[1];
 			processBuilder.directory(workingDir);
 
@@ -109,14 +103,18 @@ public class CommandFunctionTools {
 				}
 			}
 
-		} catch (IOException | CommandLineException | InterruptedException e) {
+			String result = output.toString();
+			logger.debug(result);
+			return result;
+		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			result = e.getMessage();
-		} finally {
-			result = output.toString();
+			String result = output.toString();
+			logger.debug(result, e);
+			return result;
+		} catch (IOException | CommandLineException e) {
+			String result = output.toString();
+			logger.debug(result, e);
+			return result;
 		}
-
-		logger.debug(result);
-		return result;
 	}
 }

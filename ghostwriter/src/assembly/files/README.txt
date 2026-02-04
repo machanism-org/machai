@@ -1,216 +1,194 @@
-Ghostwriter CLI - README
+Ghostwriter CLI (Distribution Files)
 
-1. Application Overview
+1) Application Overview
 
-Ghostwriter is an AI-assisted documentation engine that scans a project workspace, extracts embedded `@guidance` instructions from files, and assembles consistent, review-ready documentation.
-It can be run locally or in CI to keep documentation aligned with the codebase and project requirements.
+Ghostwriter is an AI-assisted documentation engine that scans a project workspace, extracts embedded "@guidance" instructions from files, and assembles consistent, review-ready documentation. It can be run locally or in CI to keep documentation aligned with the codebase and project requirements.
+
+Typical use cases:
+- Generate or update documentation based on in-repo guidance.
+- Apply additional run-time instructions (from URL/file/stdin) during documentation processing.
+- Standardize documentation output across multiple modules/projects under a single root.
 
 Key features:
 - CLI-driven scanning of directories and glob patterns.
-- Embedded `@guidance` discovery and application during documentation processing.
+- Embedded "@guidance" discovery and application.
 - Optional external instructions via URL(s), file path(s), or stdin.
-- Optional default guidance applied as a final step.
+- Optional default guidance applied as a final pass.
 - Configurable GenAI provider/model selection.
 - Optional multi-threaded processing.
 - Directory exclusion support.
 - Optional logging of LLM request inputs.
 
-Typical use cases:
-- Keep docs aligned with code changes by embedding `@guidance` requirements in the repo.
-- Run repeatable documentation updates in scripts or CI.
-- Process large repositories while excluding build/output folders.
-
 Supported GenAI providers:
 - CodeMie
-- OpenAI and OpenAI-compatible services
+- OpenAI-compatible services (including OpenAI when used with OpenAI-compatible settings)
 
 
-2. Installation Instructions
+2) Installation Instructions
 
 Prerequisites:
-- Java 11+
-- Network access to your chosen GenAI provider (as required)
-- (Optional) A `gw.properties` file to provide defaults (see option defaults below)
+- Java 11+ installed and available on PATH.
+- Network access to your chosen GenAI provider endpoint (as required).
+- (Optional) A gw.properties file for defaults (included in this distribution).
 
-Provider credentials/configuration (as required by provider):
-- CodeMie (example): `GENAI_USERNAME`, `GENAI_PASSWORD`
-- OpenAI-compatible providers (example): `OPENAI_API_KEY` (optional: `OPENAI_BASE_URL`)
-
-Download/install:
-- Download the Ghostwriter CLI distribution:
+Install / obtain the CLI:
+- Download the Ghostwriter CLI distribution (zip):
   https://sourceforge.net/projects/machanism/files/machai/gw.zip/download
 
-This distribution folder typically contains:
-- `gw.jar` (the CLI application; placed next to these scripts when packaged)
-- `gw.properties` (example/default configuration)
-- `gw.sh` (Unix launcher)
-- `gw.bat` (Windows launcher)
-- `g/` (helper prompt templates you can feed into Ghostwriter via `--instructions`)
-  - `g/create_tests`: prompt template for generating unit tests in a target folder
-  - `g/to_java21`: prompt template for migrating a Java codebase to Java 21
+What’s in this folder:
+- gw.jar               (the application JAR; referenced by the scripts)
+- gw.properties        (default configuration template)
+- gw.bat               (Windows launcher)
+- gw.sh                (Unix/macOS launcher)
+- g/                   (example instruction templates)
+  - g/create_tests     (template instructions for generating unit tests)
+  - g/to_java21        (template instructions for migrating Java 17 -> Java 21)
 
-Build from source (to produce the jar):
+Provider configuration:
+- Most configuration is via CLI options and/or gw.properties.
+- Credentials are provider-specific. The included gw.properties shows example keys for:
+  - CodeMie: GENAI_USERNAME / GENAI_PASSWORD
+  - OpenAI-compatible: OPENAI_API_KEY / OPENAI_BASE_URL
 
-```bash
-mvn -U clean install
-```
 
+3) How to Run
 
-3. How to Run
+Basic usage (run the JAR directly):
 
-Basic usage:
+  java -jar gw.jar <scanDir | glob_path_pattern>
 
-```bash
-java -jar gw.jar <scanDir | glob_path_pattern>
-```
+Recommended usage (via the scripts in this folder):
+
+Windows (.bat):
+
+  gw.bat <scanDir | glob_path_pattern>
+
+Unix/macOS (.sh):
+
+  ./gw.sh <scanDir | glob_path_pattern>
 
 Examples (Windows):
 
-```bash
-# scan a directory
-java -jar gw.jar C:\projects\project
+  REM scan a directory
+  gw.bat C:\projects\project
 
-# specify root explicitly
-java -jar gw.jar -r C:\projects\project src\project
+  REM specify root explicitly and scan a subpath
+  gw.bat -r C:\projects\project src\project
 
-# scan with a glob pattern
-java -jar gw.jar -r C:\projects\project "**/*.java"
-```
+  REM scan with a glob pattern (quote the pattern)
+  gw.bat -r C:\projects\project "**/*.java"
 
-Using the provided launchers:
+Examples (Unix/macOS):
 
-Windows (`gw.bat`):
+  # scan a directory
+  ./gw.sh /home/me/project
 
-```bat
-gw.bat <scanDir|glob> [options]
-```
+  # specify root explicitly and scan a subpath
+  ./gw.sh -r /home/me/project src/project
 
-Unix (`gw.sh`):
+  # scan with a glob pattern (quote the pattern)
+  ./gw.sh -r /home/me/project "**/*.java"
 
-```sh
-./gw.sh <scanDir|glob> [options]
-```
+Command-line options (from the project documentation):
+- -h, --help
+  Show help and exit.
 
-Configuration via `gw.properties`:
-- Place `gw.properties` next to `gw.jar` to provide defaults.
-- The provided example sets the default GenAI provider/model:
-  - `genai=CodeMie:gpt-5-2-2025-12-11`
+- -l, --logInputs
+  Log LLM request inputs to dedicated log files.
 
-Configuration via environment variables:
-- You can define any property from `gw.properties` as an environment variable.
+- -r, --root <path>
+  Root directory used to validate scan targets and compute related paths.
+  Default: from gw.properties (root); otherwise the current user directory.
 
-Windows example:
+- -t, --threads [true|false]
+  Enable/disable multi-threaded processing. If provided without a value, defaults to true.
 
-```bat
-set GENAI_USERNAME=your_codemie_username
-set GENAI_PASSWORD=your_codemie_password
-gw.bat C:\projects\project -r C:\projects\project
-```
+- -a, --genai <Provider:Model>
+  GenAI provider and model selector.
+  Default: from gw.properties (genai); otherwise OpenAI:gpt-5-mini
 
-Unix example:
+- -i, --instructions [urlOrFile1,urlOrFile2,...]
+  Additional instructions sources.
+  - Provide a comma-separated list of URLs/file paths, OR
+  - pass the option without a value to enter instruction text via stdin.
+  Default: from gw.properties (instructions)
+  Note: Relative file paths are resolved from the executable directory.
 
-```sh
-export GENAI_USERNAME=your_codemie_username
-export GENAI_PASSWORD=your_codemie_password
-./gw.sh /path/to/project -r /path/to/project
-```
+- -g, --guidance [filePath]
+  Default guidance applied as a final step for the current directory.
+  - Provide a file path, OR
+  - pass the option without a value to enter guidance text via stdin.
+  Note: Relative file paths are resolved from the executable directory.
 
-Configuration via Java system properties (-D):
+- -e, --excludes <name1,name2,...>
+  Directories to exclude from processing.
+  Default: from gw.properties (excludes)
 
-Windows example:
+Using environment variables and Java system properties:
+- The launcher scripts (gw.bat / gw.sh) show two common patterns:
+  1) Set env vars before running (used by providers/config as applicable):
+     - Windows:
+       SET GENAI_USERNAME=your_codemie_username
+       SET GENAI_PASSWORD=your_codemie_password
+     - Unix/macOS:
+       export GENAI_USERNAME=your_codemie_username
+       export GENAI_PASSWORD=your_codemie_password
 
-```bat
-java -DGENAI_USERNAME=your_codemie_username -DGENAI_PASSWORD=your_codemie_password -jar %~dp0\gw.jar C:\projects\project -r C:\projects\project
-```
+  2) Pass values as Java system properties (-D...):
+     - Windows:
+       java -DGENAI_USERNAME=... -DGENAI_PASSWORD=... -jar gw.jar ...
+     - Unix/macOS:
+       java -DGENAI_USERNAME=... -DGENAI_PASSWORD=... -jar gw.jar ...
 
-Unix example:
+Using included instruction templates:
+- The g/ directory contains ready-to-use instruction text files.
+- Example (Windows):
 
-```sh
-java -DGENAI_USERNAME=your_codemie_username -DGENAI_PASSWORD=your_codemie_password -jar "$(dirname "$0")/gw.jar" /path/to/project -r /path/to/project
-```
+  gw.bat -r C:\projects\project "**/*.java" -i g\create_tests
 
-Common CLI options:
-- `-h`, `--help`
-  - Show help and exit.
-- `-l`, `--logInputs`
-  - Log LLM request inputs to dedicated log files.
-  - Default: `false`.
-- `-r`, `--root <path>`
-  - Root directory used to validate scan targets and compute related paths.
-  - Default: from `gw.properties` (`root`); otherwise the current user directory.
-- `-t`, `--threads [true|false]`
-  - Enable/disable multi-threaded processing.
-  - Default: `true` (if provided without a value, defaults to `true`).
-- `-a`, `--genai <Provider:Model>`
-  - GenAI provider and model selector (format: `Provider:Model`).
-  - Default: from `gw.properties` (`genai`); otherwise `OpenAI:gpt-5-mini`.
-- `-i`, `--instructions [url-or-file[,url-or-file...]]`
-  - Additional instruction source(s): comma-separated URLs/file paths, or pass the option without a value to enter instruction text via stdin.
-  - Default: from `gw.properties` (`instructions`).
-- `-g`, `--guidance [file]`
-  - Default guidance applied as a final step for the current directory; provide a file path or pass without a value to enter guidance via stdin.
-- `-e`, `--excludes <dir[,dir...]>`
-  - Comma-separated list of directories to exclude.
-  - Default: from `gw.properties` (`excludes`).
+- Example (Unix/macOS):
 
-Notes:
-- For `--instructions` and `--guidance`, relative file paths are resolved from the executable directory (the folder containing `gw.jar`).
+  ./gw.sh -r /home/me/project "**/*.java" -i g/create_tests
 
-Examples using `--instructions`, `--excludes`, and `--root`:
+Example: run with custom parameters:
 
-Windows:
-
-```bat
-REM use a local instruction template shipped in this distribution
-REM (paths are resolved relative to the folder containing gw.jar)
-gw.bat C:\projects\project -r C:\projects\project -i g\create_tests -e target,.git,node_modules
-```
-
-Unix:
-
-```sh
-# use a local instruction template shipped in this distribution
-./gw.sh /path/to/project -r /path/to/project -i g/create_tests -e target,.git,node_modules
-```
-
-End-to-end example (direct Java invocation):
-
-```bash
-java -jar gw.jar C:\projects\project \
-  -r C:\projects\project \
-  -a OpenAI:gpt-5-mini \
-  -t true \
-  -i https://example.com/instructions.md,local-instructions.md \
-  -g default-guidance.md \
-  -e target,.git,node_modules \
-  -l
-```
+  java -jar gw.jar C:\projects\project \
+    -r C:\projects\project \
+    -a OpenAI:gpt-5-mini \
+    -t true \
+    -i https://example.com/instructions.md,local-instructions.md \
+    -g default-guidance.md \
+    -e target,.git,node_modules \
+    -l
 
 
-4. Troubleshooting & Support
+4) Troubleshooting & Support
 
 Common issues:
-- Authentication failures
-  - Verify the required credentials are set for your selected provider:
-    - CodeMie: `GENAI_USERNAME` / `GENAI_PASSWORD`
-    - OpenAI-compatible: `OPENAI_API_KEY` (and `OPENAI_BASE_URL` if applicable)
-- No files updated / missing expected output
-  - Ensure target files contain embedded `@guidance` blocks.
-  - Ensure `--root` points to the intended workspace.
-  - Ensure `--excludes` is not filtering relevant directories.
-- Instructions/guidance file not found
-  - If using relative paths for `--instructions`/`--guidance`, place the referenced files next to `gw.jar` or pass absolute paths.
+- Authentication/401/403 errors:
+  - Verify provider credentials (e.g., GENAI_USERNAME/GENAI_PASSWORD for CodeMie, or OPENAI_API_KEY for OpenAI-compatible).
+  - If using an OpenAI-compatible endpoint, confirm OPENAI_BASE_URL is correct.
+
+- Network/timeouts:
+  - Confirm outbound network access from your machine/CI environment.
+  - Check proxy/VPN settings if applicable.
+
+- “Missing file” for instructions/guidance:
+  - Remember: relative paths for -i/--instructions and -g/--guidance are resolved from the executable directory (this folder).
+  - Use absolute paths if calling the JAR from elsewhere.
+
+- Unexpected files processed:
+  - Use -r/--root to set a stable root, and -e/--excludes to skip directories such as: target,.git,node_modules
 
 Logs and debug:
-- Run from a terminal and capture stdout/stderr.
-- To record the LLM prompt payloads sent to the provider, run with `--logInputs`.
-
-Support:
-- Issue tracker: https://github.com/machanism-org/machai/issues
+- Progress and results are logged by the application.
+- If you need to capture more detail of what was sent to the provider, enable:
+  - -l / --logInputs
 
 
-5. Contact & Documentation
+5) Contact & Documentation
 
+Further documentation and resources:
 - GitHub: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
 - CLI download: https://sourceforge.net/projects/machanism/files/machai/gw.zip/download

@@ -34,15 +34,15 @@
  *
  * <h2>Workflow</h2>
  * <ol>
- *   <li>Read the assembly prompt from a text file or request it interactively.</li>
+ *   <li>Acquire an assembly prompt from {@code project.txt} (by default) or request it interactively.</li>
  *   <li>Use a picker model to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).</li>
- *   <li>Apply recommendations and run an AI-driven assembly process in the Maven execution base directory.</li>
+ *   <li>Filter recommendations by score threshold.</li>
+ *   <li>Run the application assembly workflow against the Maven execution base directory.</li>
  * </ol>
  *
  * <h2>Goal</h2>
  * <ul>
- *   <li>{@code assembly} &ndash; Recommend libraries and run an AI-driven assembly process against a project folder.
- *   </li>
+ *   <li>{@code assembly} &ndash; Recommend libraries and run an AI-driven assembly process against a project folder.</li>
  * </ul>
  *
  * <h2>Plugin parameters</h2>

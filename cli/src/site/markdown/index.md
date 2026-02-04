@@ -28,9 +28,9 @@ Page Structure:
 
 ## Introduction
 
-Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly, run guided file-processing workflows, and enable semantic search for efficient library discovery and integration.
+Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate metadata generation, project assembly, guided file-processing workflows, and semantic search for faster library discovery and integration.
 
-Beyond metadata automation, the CLI supports interactive workflows to pick libraries by intent, scaffold new projects from curated building blocks, and run guided document/file processing from your terminal.
+Use it to keep project metadata up to date, publish it to a registry for team-wide reuse, and interactively discover and assemble “bricks” (libraries) by intent.
 
 ## Overview
 
@@ -82,11 +82,6 @@ Set the following environment variables according to your chosen GenAI provider:
 | `BINDEX_REG_PASSWORD` | Password required for database write access, specifically for metadata registration operations. |
 | `GENAI_USERNAME` | Username for authenticating with CodeMie (when using the CodeMie integration). |
 | `GENAI_PASSWORD` | Password for authenticating with CodeMie (when using the CodeMie integration). |
-
-**Notes**
-
-- Only set the variables relevant to your selected provider.
-- Keep credentials secure and never commit them to version control.
 
 ### Basic Usage
 

@@ -72,7 +72,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListDueToAbsolutePathExcludeCheck() throws Exception {
+	void getModules_shouldReturnEmptyListWhenWorkspaceModulesAreIgnoredDueToExcludedDirCheck() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-workspaces");
 		assertTrue(dir.mkdirs() || dir.isDirectory());
@@ -87,6 +87,29 @@ class JScriptProjectLayoutTest {
 		File moduleB = new File(dir, "packages/module-b");
 		assertTrue(moduleB.mkdirs() || moduleB.isDirectory());
 		Files.write(new File(moduleB, "package.json").toPath(), "{\"name\":\"b\"}".getBytes(StandardCharsets.UTF_8));
+
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
+
+		// Act
+		List<String> modules = layout.getModules();
+
+		// Assert
+		assertNotNull(modules);
+		assertTrue(modules.isEmpty());
+	}
+
+	@Test
+	void getModules_shouldExcludePathsContainingExcludedDirNames() throws Exception {
+		// Arrange
+		File dir = new File("target/test-tmp/js-workspaces-excluded");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		String packageJson = "{\"name\":\"root\",\"workspaces\":[\"packages/**\"]}";
+		Files.write(new File(dir, "package.json").toPath(), packageJson.getBytes(StandardCharsets.UTF_8));
+
+		File excluded = new File(dir, "packages/target/module-x");
+		assertTrue(excluded.mkdirs() || excluded.isDirectory());
+		Files.write(new File(excluded, "package.json").toPath(), "{\"name\":\"x\"}".getBytes(StandardCharsets.UTF_8));
 
 		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
 

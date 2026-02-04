@@ -1,14 +1,14 @@
 /**
  * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
- * <p>This package contains provider-neutral abstractions intended for application code that builds requests and
- * consumes responses without coupling to a specific provider implementation.
+ * <p>This package defines provider-neutral abstractions intended for application code that builds requests and
+ * consumes responses without coupling to a specific vendor SDK.
  *
- * <h2>Responsibilities</h2>
+ * <h2>Scope</h2>
  * <ul>
- *   <li>Define stable request/response concepts shared across providers.</li>
- *   <li>Expose interfaces and types that application code can depend on without importing provider-specific
- *       modules.</li>
+ *   <li>Core request/response concepts shared across supported providers.</li>
+ *   <li>Stable interfaces and value types that applications can depend on.</li>
+ *   <li>Entry points used by provider managers to execute model requests.</li>
  * </ul>
  *
  * <h2>Related packages</h2>
@@ -17,11 +17,11 @@
  *   <li><strong>Management</strong>: provider discovery/selection under {@code org.machanism.machai.ai.manager}.</li>
  * </ul>
  *
- * <h2>Typical flow</h2>
+ * <h2>Typical usage</h2>
  * <ol>
- *   <li>Resolve a provider through {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
- *   <li>Configure the request (instructions, prompt, tools, and other supported inputs).</li>
- *   <li>Execute the request and process the result.</li>
+ *   <li>Select a provider and model via the provider manager.</li>
+ *   <li>Configure request inputs such as instructions, prompts, and optional tool invocations.</li>
+ *   <li>Execute the request and consume the result.</li>
  * </ol>
  *
  * <h2>Example</h2>
@@ -52,7 +52,6 @@ package org.machanism.machai.ai;
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.

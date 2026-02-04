@@ -1,19 +1,16 @@
 /**
- * Provides the reviewer subsystem for the Ghostwriter pipeline.
+ * Provides the reviewer subsystem used by the Ghostwriter pipeline to discover and collect
+ * author instructions embedded in project files.
  *
- * <p>This package defines the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI)
- * and built-in implementations that scan project files and extract guidance instruction blocks marked with the
- * {@code @guidance} tag.
+ * <p>The central contract is {@link org.machanism.machai.gw.reviewer.Reviewer}, a service-provider
+ * interface (SPI) implemented by format-specific reviewers (for example Java, Markdown, HTML,
+ * Python, and TypeScript). Each implementation declares the file extensions it supports and can
+ * scan a file to detect occurrences of {@code @guidance} and return a normalized prompt fragment
+ * that includes the file's related path for downstream processing.
  *
- * <p>Reviewers typically:
- *
- * <ul>
- *   <li>declare supported file extensions via
- *       {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()},</li>
- *   <li>parse file contents according to the source format's comment conventions,</li>
- *   <li>detect occurrences of {@code @guidance} tags, and</li>
- *   <li>return extracted guidance blocks (optionally with surrounding context) for downstream processing.</li>
- * </ul>
+ * <p>This package also includes a reviewer for dedicated guidance files (for example
+ * {@code @guidance.txt}) and helpers used by the pipeline to interpret guidance embedded in
+ * different comment syntaxes.
  */
 package org.machanism.machai.gw.reviewer;
 

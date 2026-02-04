@@ -52,9 +52,7 @@ public class WebProvider extends NoneProvider {
 	/** Name of the Anteater configuration to be loaded. */
 	private static String configName;
 
-	/**
-	 * Disables headless mode to allow UI automation in environments that require a visible browser.
-	 */
+	/** Disables headless mode to allow UI automation in environments that require a visible browser. */
 	static {
 		System.setProperty("java.awt.headless", "false");
 	}

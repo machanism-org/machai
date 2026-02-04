@@ -261,7 +261,7 @@ public final class Ghostwriter {
 
 	private static void help(Options options, HelpFormatter formatter) {
 		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n" + "Usage:\n"
-				+ "  java -jar gw.jar <scanDir | glob_path_pattern> [options]\n\n" + "Options:";
+				+ "  java -jar gw.jar <path | path_pattern> [options]\n\n" + "Options:";
 		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\projects\\project\n"
 				+ "  java -r C:\\projects\\project -jar gw.jar src/project\n"
 				+ "  java -r C:\\projects\\project -jar gw.jar \"glob:**/*.java\"\n"

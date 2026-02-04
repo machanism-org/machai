@@ -44,8 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project directory, extracts guidance instructions from supported
- * files, and prepares prompt inputs for AI-assisted documentation processing.
+ * Scans a project directory, extracts guidance instructions from supported files,
+ * and prepares prompt inputs for AI-assisted documentation processing.
  *
  * <p>
  * This processor delegates file-specific guidance extraction to
@@ -107,7 +107,7 @@ public class FileProcessor extends ProjectProcessor {
 	/**
 	 * Constructs a processor.
 	 *
-	 * @param genai        provider key/name to use
+	 * @param genai provider key/name to use
 	 * @param configurator configuration source
 	 */
 	public FileProcessor(String genai, Configurator configurator) {
@@ -266,10 +266,10 @@ public class FileProcessor extends ProjectProcessor {
 	/**
 	 * Processes non-module files and directories directly under {@code projectDir}.
 	 *
-	 * @param projectDir    directory to scan
+	 * @param projectDir directory to scan
 	 * @param projectLayout project layout
 	 * @throws FileNotFoundException if the project layout cannot be created
-	 * @throws IOException           if file reading fails
+	 * @throws IOException if file reading fails
 	 */
 	protected void processParentFiles(File projectDir, ProjectLayout projectLayout)
 			throws FileNotFoundException, IOException {
@@ -354,8 +354,7 @@ public class FileProcessor extends ProjectProcessor {
 			if (guidance != null) {
 				logger.info("Processing file: {}", file.getAbsolutePath());
 				perform = process(projectLayout, file, guidance);
-			}
-			if (defaultGuidance != null) {
+			} else if (defaultGuidance != null) {
 				String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), file,
 						defaultGuidance);
 				perform = process(projectLayout, file, defaultGuidanceText);

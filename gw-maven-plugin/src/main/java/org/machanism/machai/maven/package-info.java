@@ -1,39 +1,38 @@
 /**
- * Maven plugin goals (mojos) for running and cleaning the MachAI Generative Workflow (GW) documentation pipeline as
- * part of a Maven build.
+ * Maven plugin goals (mojos) that integrate the MachAI Generative Workflow (GW) documentation pipeline into a Maven
+ * build.
  *
  * <p>
- * This package provides Maven mojos that integrate the MachAI GW documentation processing pipeline into a Maven
- * lifecycle. It is intended for projects that keep documentation sources under {@code src/site} and want to run the
- * workflow as part of a build to produce generated/updated documentation artifacts, and to clean up temporary files
- * produced by prior runs.
+ * The primary entry points are the {@link org.machanism.machai.maven.GW} mojo (goal {@code gw}), which scans
+ * documentation sources (typically under {@code src/site}) and invokes the GW processing pipeline via
+ * {@link org.machanism.machai.gw.FileProcessor}, and the {@link org.machanism.machai.maven.Clean} mojo (goal
+ * {@code clean}), which removes temporary artifacts created by prior workflow runs.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources (for example under
- *     {@code src/site}) and invokes the GW processing pipeline via {@link org.machanism.machai.gw.FileProcessor}.
+ *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources under the current module
+ *     base directory (usually {@code ${basedir}}) and runs the GW document-processing pipeline.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; deletes temporary artifacts created by prior GW
- *     runs.
+ *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; deletes workflow temporary files under the
+ *     current module base directory.
  *   </li>
  * </ul>
  *
- * <h2>Plugin parameters</h2>
+ * <h2>Plugin parameters (goal {@code gw})</h2>
  * <p>
- * The {@code gw} goal supports the following configuration parameters (typically configured in {@code pom.xml}) and the
- * equivalent system properties.
+ * The {@code gw} goal supports the following parameters (configurable in {@code pom.xml} or via system properties).
  * </p>
  * <ul>
  *   <li>
  *     <b>{@code genai}</b> / <b>{@code gw.genai}</b> (optional): GenAI provider/model identifier forwarded to the workflow
- *     (for example, {@code OpenAI:gpt-5}).
+ *     (for example {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
  *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): One or more instruction location strings
- *     consumed by the workflow (for example, file paths under {@code src/site}).
+ *     consumed by the workflow.
  *   </li>
  *   <li>
  *     <b>{@code excludes}</b> / <b>{@code gw.excludes}</b> (optional): One or more exclude patterns/paths skipped during
@@ -84,12 +83,6 @@
  *   &amp;lt;/configuration&amp;gt;
  * &amp;lt;/plugin&amp;gt;
  * </pre>
- *
- * <h2>Cleaning</h2>
- * <p>
- * The {@code clean} goal deletes temporary files created by earlier workflow runs (see
- * {@link org.machanism.machai.gw.FileProcessor#deleteTempFiles(java.io.File)}).
- * </p>
  */
 package org.machanism.machai.maven;
 

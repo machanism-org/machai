@@ -49,15 +49,14 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
+`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
 
-It supports:
+It enables:
 
 - Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in OpenAI workflows (uploading local files or referencing remote files by URL).
-- Common LLM tasks such as text generation, summarization, and question answering.
-- Creating vector embeddings for semantic search and similarity analysis.
-- Tool/function calling by registering tools (`addTool(...)`) and handling function calls returned by the model.
+- Managing files for use in OpenAI workflows.
+- Performing common LLM tasks such as text generation, summarization, and question answering.
+- Creating and using vector embeddings for semantic search and similarity analysis.
 
 Environment variables
 
@@ -74,6 +73,12 @@ To use the CodeMie API through the OpenAI-compatible client, set:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
+
+Usage example
+
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+```
 
 Thread safety
 

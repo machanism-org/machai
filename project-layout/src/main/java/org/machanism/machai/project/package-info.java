@@ -1,8 +1,7 @@
 /**
- * Facilities for discovering and working with a source-code project rooted at a filesystem
- * directory.
+ * Facilities for discovering and working with a source-code project rooted at a filesystem directory.
  *
- * <p>This package provides the entry points that:
+ * <p>This package contains the core abstractions used to:
  *
  * <ul>
  *   <li>detect an appropriate {@code ProjectLayout} for a given project root (for example Maven,

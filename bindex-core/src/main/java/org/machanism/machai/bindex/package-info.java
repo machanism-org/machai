@@ -29,18 +29,9 @@
  * Provides the Bindex subsystem: creation, persistence, registration, and retrieval of a machine-consumable index
  * ({@code bindex.json}) for a software project used by MachAI workflows.
  *
- * <p>This package centers around producing an on-disk {@code bindex.json} file for a
- * {@link org.machanism.machai.project.layout.ProjectLayout}, and then optionally registering that file in a backing
- * store (MongoDB with vector search) so that relevant projects can be retrieved via semantic search.
- *
- * <h2>Key responsibilities</h2>
- * <ul>
- *   <li><strong>Create/update</strong> a project's {@code bindex.json} representation.</li>
- *   <li><strong>Locate/load</strong> a {@link org.machanism.machai.schema.Bindex} from disk during project processing.</li>
- *   <li><strong>Register</strong> an on-disk Bindex into a searchable store.</li>
- *   <li><strong>Pick</strong> relevant Bindexes for a user query and expand dependencies.</li>
- *   <li><strong>Assemble</strong> selected Bindex content into LLM prompt inputs.</li>
- * </ul>
+ * <p>This package produces an on-disk {@code bindex.json} file for a
+ * {@link org.machanism.machai.project.layout.ProjectLayout}. It can also register that file in a backing store
+ * (MongoDB with vector search) so that relevant projects can be retrieved via semantic search.
  *
  * <h2>Main types</h2>
  * <ul>
@@ -53,32 +44,5 @@
  *   <li>{@link org.machanism.machai.bindex.BindexBuilderFactory}: selects a suitable
  *       {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation for a given project layout.</li>
  * </ul>
- *
- * <h2>Typical workflow</h2>
- * <pre>{@code
- * GenAIProvider provider = ...;
- * ProjectLayout layout = ...;
- * String dbUri = ...; // MongoDB connection string (optional depending on environment)
- *
- * // 1) Create or update bindex.json
- * new BindexCreator(provider)
- *     .update(true)
- *     .processFolder(layout);
- *
- * // 2) Register bindex.json for semantic retrieval
- * try (BindexRegister register = new BindexRegister(provider, dbUri)) {
- *     register.update(true).processFolder(layout);
- * }
- *
- * // 3) Pick relevant Bindexes and assemble prompt inputs
- * try (Picker picker = new Picker(provider, dbUri)) {
- *     List<Bindex> relevant = picker.pick("How do I configure logging?");
- *     new ApplicationAssembly(provider)
- *         .projectDir(layout.getProjectDir())
- *         .assembly("Generate a logging configuration example", relevant);
- * }
- * }</pre>
- *
- * <p>For builder implementations, see {@link org.machanism.machai.bindex.builder}.
  */
 package org.machanism.machai.bindex;
