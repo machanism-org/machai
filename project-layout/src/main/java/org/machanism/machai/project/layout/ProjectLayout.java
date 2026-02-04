@@ -1,10 +1,10 @@
 package org.machanism.machai.project.layout;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.machai.project.ProjectProcessor;
 
 /**
@@ -61,10 +61,8 @@ public abstract class ProjectLayout {
 	 * Gets a list of project modules.
 	 * 
 	 * @return list of module names or paths
-	 * @throws IOException when directory scan fails (for implementations that
-	 *                     require IO)
 	 */
-	public List<String> getModules() throws IOException {
+	public List<String> getModules() {
 		return null;
 	};
 
@@ -77,7 +75,7 @@ public abstract class ProjectLayout {
 	 */
 	public String getRelatedPath(String currentPath, File file) {
 		String relativePath = file.getAbsolutePath().replace("\\", "/").replace(currentPath, "");
-		if (StringUtils.startsWith(relativePath, "/")) {
+		if (Strings.CS.startsWith(relativePath, "/")) {
 			relativePath = StringUtils.substring(relativePath, 1);
 		}
 		return relativePath;
@@ -121,17 +119,17 @@ public abstract class ProjectLayout {
 		String currentPath = dir.getAbsolutePath().replace("\\", "/");
 		String fileStr = file.getAbsolutePath().replace("\\", "/");
 		String relativePath = fileStr.replace(currentPath, "");
-		if (StringUtils.startsWith(relativePath, "/")) {
+		if (Strings.CS.startsWith(relativePath, "/")) {
 			relativePath = StringUtils.substring(relativePath, 1);
 		}
 		String result = StringUtils.defaultIfBlank(relativePath, ".");
 		if (StringUtils.isBlank(result)) {
 			result = ".";
-		} else if (!StringUtils.startsWith(result, ".") && addSingleDot) {
+		} else if (!Strings.CS.startsWith(result, ".") && addSingleDot) {
 			result = "./" + result;
 		}
 
-		if (StringUtils.equals(fileStr, result)) {
+		if (Strings.CS.equals(fileStr, result)) {
 			result = null;
 		}
 		return result;

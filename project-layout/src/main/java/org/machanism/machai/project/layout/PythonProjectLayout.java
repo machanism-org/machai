@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.tomlj.Toml;
 import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
@@ -44,7 +44,7 @@ public class PythonProjectLayout extends ProjectLayout {
                 if (classifiers != null) {
                     List<Object> classifierList = classifiers.toList();
                     for (Object classifier : classifierList) {
-                        if (StringUtils.containsIgnoreCase((String) classifier, "Private")) {
+                        if (Strings.CI.contains((String) classifier, "Private")) {
                             privateProject = true;
                             break;
                         }

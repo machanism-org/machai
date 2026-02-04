@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,7 +54,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 *      </pre>
 	 */
 	@Override
-	public List<String> getModules() throws IOException {
+	public List<String> getModules() {
 		List<String> result = null;
 
 		JsonNode packageJson = getPackageJson();
@@ -72,8 +73,8 @@ public class JScriptProjectLayout extends ProjectLayout {
 					try (Stream<Path> stream = Files.walk(dirToScan.toPath())) {
 						stream.filter(p -> {
 							File file = p.toFile();
-							boolean containsAny = StringUtils.containsAny(file.getAbsolutePath(), EXCLUDE_DIRS);
-							boolean isProjectBuildFile = StringUtils.equals(file.getName(), PROJECT_MODEL_FILE_NAME);
+							boolean containsAny = Strings.CS.containsAny(file.getAbsolutePath(), EXCLUDE_DIRS);
+							boolean isProjectBuildFile = Strings.CS.equals(file.getName(), PROJECT_MODEL_FILE_NAME);
 							if (isProjectBuildFile) {
 								if (!containsAny) {
 									return true;
@@ -85,6 +86,8 @@ public class JScriptProjectLayout extends ProjectLayout {
 							String relativePath = ProjectLayout.getRelatedPath(getProjectDir(), dir);
 							modules.add(relativePath);
 						});
+					} catch (IOException e) {
+						throw new IllegalArgumentException(e);
 					}
 				}
 				result = modules;
@@ -100,9 +103,14 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * @return JsonNode root of <code>package.json</code>
 	 * @throws IOException if read/parse fails
 	 */
-	private JsonNode getPackageJson() throws IOException {
+	private JsonNode getPackageJson() {
 		File packageFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
-		JsonNode packageJson = new ObjectMapper().readTree(packageFile);
+		JsonNode packageJson;
+		try {
+			packageJson = new ObjectMapper().readTree(packageFile);
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
 		return packageJson;
 	}
 

@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -94,7 +94,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	private String defaultGuidance;
 
-	private String processFilePattern;
+	private PathMatcher pathMatcher;
 
 	private String[] excludes;
 
@@ -156,7 +156,8 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File basedir) throws IOException {
-		scanDocuments(basedir, basedir.getAbsolutePath());
+		rootDir = basedir;
+		scanFolder(basedir);
 	}
 
 	/**
@@ -168,15 +169,9 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File rootDir, String pattern) throws IOException {
+		this.pathMatcher = FileSystems.getDefault().getPathMatcher(pattern);
 		this.rootDir = rootDir;
-
-		if (ObjectUtils.equals(rootDir.getAbsolutePath(), pattern)) {
-			scanFolder(rootDir);
-		} else {
-			ProjectLayout projectLayout = getProjectLayout(rootDir);
-			processFilePattern = pattern;
-			processProjectDir(projectLayout, pattern);
-		}
+		scanFolder(rootDir);
 	}
 
 	/**
@@ -204,7 +199,7 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		processParentFiles(projectDir, projectLayout);
+		processParentFiles(projectLayout);
 	}
 
 	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
@@ -248,55 +243,61 @@ public class FileProcessor extends ProjectProcessor {
 
 	@Override
 	protected void processModule(File projectDir, String module) throws IOException {
-		if (processFilePattern == null
-				|| isPathUnderDirectory(new File(projectDir, module).getPath(), processFilePattern)) {
+		if (match(new File(projectDir, module))) {
 			super.processModule(projectDir, module);
 		}
 	}
 
+	private boolean match(File projectDir) {
+		boolean result = true;
+		String path = ProjectLayout.getRelatedPath(rootDir, projectDir);
+		if (Strings.CI.containsAny(projectDir.getAbsolutePath(), ProjectLayout.EXCLUDE_DIRS)) {
+			result = false;
+		} else if (pathMatcher != null) {
+			result = pathMatcher.matches(Path.of(path));
+		}
+		return result;
+	}
+
 	/**
 	 * Processes non-module files and directories directly under {@code projectDir}.
-	 *
-	 * @param projectDir    directory to scan
+	 * 
 	 * @param projectLayout project layout
+	 * @param projectDir    directory to scan
+	 *
 	 * @throws FileNotFoundException if the project layout cannot be created
 	 * @throws IOException           if file reading fails
 	 */
-	protected void processParentFiles(File projectDir, ProjectLayout projectLayout)
-			throws FileNotFoundException, IOException {
-		List<String> modules = projectLayout.getModules();
+	protected void processParentFiles(ProjectLayout projectLayout) throws FileNotFoundException, IOException {
+		File projectDir = projectLayout.getProjectDir();
+		List<File> children = findFiles(projectDir);
 
-		List<File> children = listFiles(projectDir);
-
-		if (children.isEmpty()) {
-			return;
-		}
+		children.removeIf(child -> !(!isModuleDir(projectLayout, child) && match(child)));
 
 		for (File child : children) {
-			if (isModuleDir(modules, child) || isExcludedByLayout(child)) {
-				continue;
-			}
-
 			if (child.isDirectory()) {
 				processProjectDir(projectLayout, child.getAbsolutePath());
 			} else {
 				logIfNotBlank(processFile(projectLayout, child));
 			}
 		}
+
+		if (children.isEmpty() && defaultGuidance != null) {
+			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), projectDir,
+					defaultGuidance);
+			process(projectLayout, projectLayout.getProjectDir(), defaultGuidanceText);
+		}
 	}
 
-	private static boolean isModuleDir(List<String> modules, File dir) {
+	private static boolean isModuleDir(ProjectLayout projectLayout, File dir) {
+		List<String> modules = projectLayout.getModules();
 		if (modules == null || modules.isEmpty() || dir == null) {
 			return false;
 		}
-		return Strings.CI.equalsAny(dir.getName(), modules.toArray(new String[0]));
-	}
 
-	private static boolean isExcludedByLayout(File file) {
-		if (file == null) {
-			return false;
-		}
-		return Strings.CI.equalsAny(file.getName(), ProjectLayout.EXCLUDE_DIRS);
+		String relatedPath = ProjectLayout.getRelatedPath(projectLayout.getProjectDir(), dir);
+
+		return Strings.CI.startsWithAny(relatedPath, modules.toArray(new String[0]));
 	}
 
 	private static void logIfNotBlank(String message) {
@@ -336,9 +337,7 @@ public class FileProcessor extends ProjectProcessor {
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
-		boolean pathUnderDirectory = isPathUnderDirectory(file.getPath(), processFilePattern);
-
-		if (processFilePattern == null || pathUnderDirectory) {
+		if (match(file)) {
 			File projectDir = projectLayout.getProjectDir();
 			String guidance = parseFile(projectDir, file);
 
@@ -453,36 +452,6 @@ public class FileProcessor extends ProjectProcessor {
 		return reviewMap.get(key);
 	}
 
-	private List<File> listFiles(File dir) throws IOException {
-		if (dir == null || !dir.isDirectory()) {
-			return Collections.emptyList();
-		}
-		File[] files = dir.listFiles();
-		if (files == null) {
-			throw new IOException("Unable to list files for directory: " + dir.getAbsolutePath());
-		}
-
-		Arrays.sort(files, (f1, f2) -> {
-			if (f1.isDirectory() && !f2.isDirectory()) {
-				return -1;
-			} else if (!f1.isDirectory() && f2.isDirectory()) {
-				return 1;
-			}
-			return f1.getName().compareToIgnoreCase(f2.getName());
-		});
-
-		if (excludes == null || excludes.length == 0) {
-			List<File> result = new ArrayList<>();
-			Collections.addAll(result, files);
-			return result;
-		}
-
-		return Arrays.stream(files)
-				.filter(file -> Arrays.stream(excludes).filter(StringUtils::isNotBlank)
-						.noneMatch(exclude -> Strings.CI.equals(file.getName(), StringUtils.trim(exclude))))
-				.collect(Collectors.toList());
-	}
-
 	private List<File> findFiles(File projectDir, String pattern) throws IOException {
 		List<File> result = new ArrayList<>();
 		File dir = new File(pattern);
@@ -574,44 +543,6 @@ public class FileProcessor extends ProjectProcessor {
 		return normalized.split("/").length;
 	}
 
-	private boolean isPathUnderDirectory(String name, String parentPath) {
-		if (processFilePattern == null || getPatternPath(parentPath) != null || StringUtils.isBlank(parentPath)) {
-			return true;
-		}
-
-		File parent = new File(parentPath);
-		if (parent.isAbsolute()) {
-			String childNormalized = normalizePathForPrefixCheck(name);
-			String parentNormalized = normalizePathForPrefixCheck(parentPath);
-			if (childNormalized == null || parentNormalized == null) {
-				return false;
-			}
-			if (!parentNormalized.endsWith("/")) {
-				parentNormalized = parentNormalized + "/";
-			}
-			return childNormalized.equals(parentNormalized.substring(0, parentNormalized.length() - 1))
-					|| childNormalized.startsWith(parentNormalized);
-		}
-
-		File root = rootDir;
-		if (root == null) {
-			return true;
-		}
-
-		File dir = new File(root, parentPath);
-		String parentNormalized = normalizePathForPrefixCheck(dir.getPath());
-		String childNormalized = normalizePathForPrefixCheck(new File(root, name).getPath());
-		if (parentNormalized == null || childNormalized == null) {
-			return false;
-		}
-		if (!parentNormalized.endsWith("/")) {
-			parentNormalized = parentNormalized + "/";
-		}
-
-		return childNormalized.equals(parentNormalized.substring(0, parentNormalized.length() - 1))
-				|| childNormalized.startsWith(parentNormalized);
-	}
-
 	private PathMatcher getPatternPath(String path) {
 		PathMatcher matcher = null;
 		if (StringUtils.isBlank(path)) {
@@ -622,18 +553,6 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		return matcher;
-	}
-
-	private static String normalizePathForPrefixCheck(String path) {
-		String value = StringUtils.trimToNull(path);
-		if (value == null) {
-			return null;
-		}
-		value = value.replace('\\', '/');
-		while (value.endsWith("/")) {
-			value = value.substring(0, value.length() - 1);
-		}
-		return value;
 	}
 
 	public File getRootDir() {
@@ -677,33 +596,30 @@ public class FileProcessor extends ProjectProcessor {
 		this.logInputs = logInputs;
 	}
 
-	public void setInstructionLocations(String[] instructions) throws IOException {
+	public void setInstructionLocations(String[] locations) throws IOException {
 		StringBuilder instructionsText = new StringBuilder();
-		if (instructions == null || instructions.length == 0) {
+		if (locations == null || locations.length == 0) {
 			setInstructions(null);
 			return;
 		}
-		for (String instruction : instructions) {
-			if (StringUtils.isBlank(instruction)) {
-				continue;
-			}
-			String content;
-			String location = StringUtils.trim(instruction);
-
-			try {
-				if (location.startsWith("http://") || location.startsWith("https://")) {
-					try (InputStream in = new URL(location).openStream()) {
-						content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+		for (String location : locations) {
+			if (!StringUtils.isBlank(location)) {
+				String content;
+				try {
+					if (location.startsWith("http://") || location.startsWith("https://")) {
+						try (InputStream in = new URL(location).openStream()) {
+							content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+						}
+					} else {
+						content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
 					}
-				} else {
-					content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
+				} catch (Exception e) {
+					content = location;
 				}
+
 				instructionsText.append(content);
 				instructionsText.append(System.lineSeparator());
 				instructionsText.append(System.lineSeparator());
-			} catch (Exception e) {
-				throw new IOException("Failed to load instructions from location: '" + location + "'. "
-						+ "Please verify that the path or URL is correct and accessible.", e);
 			}
 		}
 		String text = StringUtils.trimToNull(instructionsText.toString());

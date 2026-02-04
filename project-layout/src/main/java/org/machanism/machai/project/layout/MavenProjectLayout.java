@@ -8,11 +8,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
 
 /**
  * A Maven-specific implementation for project layout.
@@ -92,7 +89,8 @@ public class MavenProjectLayout extends ProjectLayout {
 					model = new PomReader().getProjectModel(file, false);
 					Build build = model.getBuild();
 					if (build == null) {
-						model.setBuild(new Build());
+						build = new Build();
+						model.setBuild(build);
 					}
 					if (build.getSourceDirectory() == null) {
 						build.setSourceDirectory("src/main/java");

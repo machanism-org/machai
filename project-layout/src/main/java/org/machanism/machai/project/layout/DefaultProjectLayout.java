@@ -2,14 +2,11 @@ package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
-import org.machanism.machai.project.ProjectLayoutManager;
 
 /**
  * Provides a default implementation for project layout handling.
@@ -41,7 +38,7 @@ public class DefaultProjectLayout extends ProjectLayout {
 	 *      </pre>
 	 */
 	@Override
-	public List<String> getModules() throws IOException {
+	public List<String> getModules() {
 		if (modules == null) {
 			modules = new ArrayList<>();
 			
