@@ -220,11 +220,6 @@ public final class Ghostwriter {
 						processor.setExcludes(excludes);
 					}
 
-					if (instructionLocations != null) {
-						logger.info("Instruction locations: {}", Arrays.toString(instructionLocations));
-						processor.setInstructionLocations(instructionLocations);
-					}
-
 					if (instructions != null) {
 						logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
 						processor.setInstructions(instructions);

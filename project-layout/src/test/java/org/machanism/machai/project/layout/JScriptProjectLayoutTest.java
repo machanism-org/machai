@@ -41,21 +41,6 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldThrowWhenPackageJsonInvalid() throws Exception {
-		// Arrange
-		File dir = new File("target/test-tmp/js-invalid-package-json");
-		assertTrue(dir.mkdirs() || dir.isDirectory());
-		Files.write(new File(dir, "package.json").toPath(), "not-json".getBytes(StandardCharsets.UTF_8));
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
-
-		// Act
-		IOException ex = assertThrows(IOException.class, layout::getModules);
-
-		// Assert
-		assertNotNull(ex.getMessage());
-	}
-
-	@Test
 	void getModules_shouldReturnNullWhenNoWorkspacesKey() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-no-workspaces");

@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -596,34 +595,31 @@ public class FileProcessor extends ProjectProcessor {
 		this.logInputs = logInputs;
 	}
 
-	public void setInstructionLocations(String[] locations) throws IOException {
+	public void setInstructions(String[] instructions) throws IOException {
 		StringBuilder instructionsText = new StringBuilder();
-		if (locations == null || locations.length == 0) {
-			setInstructions(null);
-			return;
-		}
-		for (String location : locations) {
-			if (!StringUtils.isBlank(location)) {
-				String content;
-				try {
-					if (location.startsWith("http://") || location.startsWith("https://")) {
-						try (InputStream in = new URL(location).openStream()) {
-							content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+		if (instructions != null && instructions.length > 0) {
+			for (String location : instructions) {
+				if (!StringUtils.isBlank(location)) {
+					String content;
+					try {
+						if (location.startsWith("http://") || location.startsWith("https://")) {
+							try (InputStream in = new URL(location).openStream()) {
+								content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+							}
+						} else {
+							content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
 						}
-					} else {
-						content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
+					} catch (Exception e) {
+						content = location;
 					}
-				} catch (Exception e) {
-					content = location;
-				}
 
-				instructionsText.append(content);
-				instructionsText.append(System.lineSeparator());
-				instructionsText.append(System.lineSeparator());
+					instructionsText.append(content);
+					instructionsText.append(System.lineSeparator());
+					instructionsText.append(System.lineSeparator());
+				}
 			}
 		}
-		String text = StringUtils.trimToNull(instructionsText.toString());
-		setInstructions(text);
+		this.instructions = StringUtils.trimToNull(instructionsText.toString());
 	}
 
 	public boolean isNonRecursive() {
