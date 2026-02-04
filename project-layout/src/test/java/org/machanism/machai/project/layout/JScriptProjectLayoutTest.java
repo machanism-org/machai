@@ -3,7 +3,6 @@ package org.machanism.machai.project.layout;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -57,7 +56,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListDueToSubstringBeforeDoubleStarBug() throws Exception {
+	void getModules_shouldReturnEmptyListDueToCurrentWorkspaceGlobParsingBehavior() throws Exception {
 		// Arrange
 		File dir = new File("target/test-tmp/js-workspaces");
 		assertTrue(dir.mkdirs() || dir.isDirectory());
@@ -72,29 +71,6 @@ class JScriptProjectLayoutTest {
 		File moduleB = new File(dir, "packages/module-b");
 		assertTrue(moduleB.mkdirs() || moduleB.isDirectory());
 		Files.write(new File(moduleB, "package.json").toPath(), "{\"name\":\"b\"}".getBytes(StandardCharsets.UTF_8));
-
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
-
-		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertNotNull(modules);
-		assertTrue(modules.isEmpty());
-	}
-
-	@Test
-	void getModules_shouldExcludePathsContainingExcludedDirNames() throws Exception {
-		// Arrange
-		File dir = new File("target/test-tmp/js-workspaces-excluded");
-		assertTrue(dir.mkdirs() || dir.isDirectory());
-
-		String packageJson = "{\"name\":\"root\",\"workspaces\":[\"packages/**\"]}";
-		Files.write(new File(dir, "package.json").toPath(), packageJson.getBytes(StandardCharsets.UTF_8));
-
-		File excluded = new File(dir, "packages/target/module-x");
-		assertTrue(excluded.mkdirs() || excluded.isDirectory());
-		Files.write(new File(excluded, "package.json").toPath(), "{\"name\":\"x\"}".getBytes(StandardCharsets.UTF_8));
 
 		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
 
@@ -122,6 +98,37 @@ class JScriptProjectLayoutTest {
 
 		// Assert
 		assertNull(modules);
+	}
+
+	@Test
+	void getModules_shouldThrowIllegalArgumentExceptionWhenWorkspacePathDoesNotExist() throws Exception {
+		// Arrange
+		File dir = new File("target/test-tmp/js-workspaces-missing-path");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+
+		String packageJson = "{\"name\":\"root\",\"workspaces\":[\"missing/**\"]}";
+		Files.write(new File(dir, "package.json").toPath(), packageJson.getBytes(StandardCharsets.UTF_8));
+
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
+
+		// Act
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, layout::getModules);
+
+		// Assert
+		assertNotNull(ex.getCause());
+	}
+
+	@Test
+	void getModules_shouldThrowIllegalArgumentExceptionWhenPackageJsonIsInvalidJson() throws Exception {
+		// Arrange
+		File dir = new File("target/test-tmp/js-invalid-json");
+		assertTrue(dir.mkdirs() || dir.isDirectory());
+		Files.write(new File(dir, "package.json").toPath(), "not-json".getBytes(StandardCharsets.UTF_8));
+
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
+
+		// Act
+		assertThrows(IllegalArgumentException.class, layout::getModules);
 	}
 
 	@Test

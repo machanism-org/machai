@@ -94,6 +94,20 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
+	void model_shouldSetModelForChaining() {
+		// Arrange
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(new File("target/test-tmp/maven-model-chain"));
+		Model model = new Model();
+
+		// Act
+		MavenProjectLayout returned = layout.model(model);
+
+		// Assert
+		assertSame(layout, returned);
+		assertSame(model, layout.getModel());
+	}
+
+	@Test
 	void getSources_shouldReturnConfiguredSourceDirectoryAndResourcesAsRelativePaths() {
 		// Arrange
 		File dir = new File("repo");

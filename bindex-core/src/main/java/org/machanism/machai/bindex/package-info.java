@@ -25,15 +25,18 @@
  *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
 
-package org.machanism.machai.bindex;
-
 /**
- * Provides the Bindex subsystem: creation, persistence, registration, and retrieval of a machine-consumable index
- * ({@code bindex.json}) for a software project used by MachAI workflows.
+ * Provides the Bindex subsystem used by MachAI workflows to create, persist, register, and query a
+ * machine-consumable project index ({@code bindex.json}).
  *
- * <p>This package produces an on-disk {@code bindex.json} file for a
- * {@link org.machanism.machai.project.layout.ProjectLayout}. It can also register that file in a backing store
- * (MongoDB with vector search) so that relevant projects can be retrieved via semantic search.
+ * <p>The types in this package are responsible for:
+ * <ul>
+ *   <li>building an on-disk {@code bindex.json} for a
+ *       {@link org.machanism.machai.project.layout.ProjectLayout},</li>
+ *   <li>registering that index with a backing store (for example, MongoDB with vector search), and</li>
+ *   <li>selecting relevant registered indexes via semantic search and dependency expansion so they can be assembled
+ *       into inputs for prompt execution.</li>
+ * </ul>
  *
  * <h2>Main types</h2>
  * <ul>
@@ -47,3 +50,4 @@ package org.machanism.machai.bindex;
  *       {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation for a given project layout.</li>
  * </ul>
  */
+package org.machanism.machai.bindex;

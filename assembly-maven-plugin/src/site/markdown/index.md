@@ -27,9 +27,9 @@ Page Structure:
 
 ## Introduction
 
-The Assembly Maven Plugin automates creating and evolving Maven projects in the Machanism ecosystem by applying structured updates directly to your local working tree.
+Assembly Maven Plugin automates the assembly and evolution of Maven projects in the Machanism ecosystem by applying structured, reviewable updates directly to your local working tree.
 
-It can incorporate library choices informed by bindex metadata (for example, `bindex.json`). Optionally, it can use GenAI-powered semantic search to help identify and select suitable libraries.
+It can integrate libraries using bindex metadata (for example, `bindex.json`) and, when enabled, use GenAI-powered semantic search to help identify and select suitable libraries.
 
 Benefits:
 

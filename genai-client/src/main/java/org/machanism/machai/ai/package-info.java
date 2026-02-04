@@ -1,40 +1,3 @@
-/**
- * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
- *
- * <p>This package defines provider-neutral abstractions intended for application code that builds requests and
- * consumes responses without coupling to a specific vendor SDK.
- *
- * <h2>Scope</h2>
- * <ul>
- *   <li>Core request/response concepts shared across supported providers.</li>
- *   <li>Stable interfaces and value types that applications can depend on.</li>
- *   <li>Entry points used by provider managers to execute model requests.</li>
- * </ul>
- *
- * <h2>Related packages</h2>
- * <ul>
- *   <li><strong>Providers</strong>: concrete integrations under {@code org.machanism.machai.ai.provider}.</li>
- *   <li><strong>Management</strong>: provider discovery/selection under {@code org.machanism.machai.ai.manager}.</li>
- * </ul>
- *
- * <h2>Typical usage</h2>
- * <ol>
- *   <li>Select a provider and model via the provider manager.</li>
- *   <li>Configure request inputs such as instructions, prompts, and optional tool invocations.</li>
- *   <li>Execute the request and consume the result.</li>
- * </ol>
- *
- * <h2>Example</h2>
- * <pre>{@code
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
- * provider.instructions("You are a helpful assistant.");
- * provider.prompt("Summarize this text.");
- * String response = provider.perform();
- * }
- * </pre>
- */
-package org.machanism.machai.ai;
-
 /*-
  * @guidance:
  *
@@ -60,3 +23,40 @@ package org.machanism.machai.ai;
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
  *          and `&gt;` as `&amp;gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
+
+/**
+ * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
+ *
+ * <p>This package contains provider-neutral abstractions intended for application code that builds requests and
+ * consumes responses without coupling to a specific vendor SDK.
+ *
+ * <h2>Responsibilities</h2>
+ * <ul>
+ *   <li>Defines the core request/response concepts shared across supported providers.</li>
+ *   <li>Provides stable interfaces and value types that applications can depend on.</li>
+ *   <li>Exposes entry points used by provider managers to execute model requests.</li>
+ * </ul>
+ *
+ * <h2>Related packages</h2>
+ * <ul>
+ *   <li><strong>Providers</strong>: concrete integrations under {@code org.machanism.machai.ai.provider}.</li>
+ *   <li><strong>Management</strong>: provider discovery/selection under {@code org.machanism.machai.ai.manager}.</li>
+ * </ul>
+ *
+ * <h2>Typical usage</h2>
+ * <ol>
+ *   <li>Select a provider and model via the provider manager.</li>
+ *   <li>Configure request inputs such as instructions, prompts, and optional tool invocations.</li>
+ *   <li>Execute the request and consume the result.</li>
+ * </ol>
+ *
+ * <h2>Example</h2>
+ * <pre>{@code
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
+ * provider.instructions("You are a helpful assistant.");
+ * provider.prompt("Summarize this text.");
+ * String response = provider.perform();
+ * }
+ * </pre>
+ */
+package org.machanism.machai.ai;

@@ -49,18 +49,20 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
+The `OpenAIProvider` class integrates with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
-This provider supports:
+This provider enables a wide range of generative AI capabilities, including:
 
-- Sending prompts and receiving responses from OpenAI chat/response models.
-- Uploading local files to OpenAI and attaching file references to requests (`addFile(File)`), or attaching remote files by URL (`addFile(URL)`).
-- Tool/function calling via `addTool(...)`, with automatic dispatch of tool calls returned by the model.
-- Embeddings generation via `embedding(String)`.
+- Sending prompts and receiving responses from OpenAI Chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
 
 Environment variables
 
-The client reads the following environment variables; you must set at least `OPENAI_API_KEY`:
+The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -69,7 +71,7 @@ The client reads the following environment variables; you must set at least `OPE
 
 Using the CodeMie API
 
-To use the CodeMie API through the OpenAI-compatible client, set:
+To use the CodeMie API, set the following environment variables:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -82,7 +84,7 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 Thread safety
 
-This implementation is not thread-safe.
+This implementation is NOT thread-safe.
 
 ### CodeMie
 
@@ -102,7 +104,7 @@ Built-in endpoints
 
 ### None
 
-`NoneProvider` is a no-op implementation of `GenAIProvider`.
+No-op implementation of `GenAIProvider`.
 
 This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
@@ -126,7 +128,7 @@ provider.perform();
 
 `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (via `model(String)`), initializes the workspace with a project directory (via `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (via `perform()`). The prompt list is passed as a system variable named `INPUTS`, and the recipe is expected to store the final response in a variable named `result`.
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
 
 Thread safety and lifecycle
 
@@ -141,7 +143,6 @@ GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
 provider.model("config.yaml");
 provider.setWorkingDir(new File("/path/to/project"));
 String response = provider.perform();
-provider.close();
 ```
 
 <!-- @guidance:

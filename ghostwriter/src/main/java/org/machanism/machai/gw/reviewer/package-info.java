@@ -2,14 +2,21 @@
  * Provides the Ghostwriter reviewer subsystem.
  *
  * <p>This package defines the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI)
- * and concrete implementations for scanning project files and extracting embedded {@code @guidance} instructions.
- * These instructions are then formatted into normalized prompt fragments for downstream pipeline stages.
+ * and a set of format-specific reviewer implementations. A reviewer scans a project file, detects embedded
+ * {@code @guidance} instructions using the target format's commenting conventions, and emits a normalized prompt
+ * fragment for downstream pipeline stages.
  *
- * <p>Each {@code Reviewer} typically targets a specific file type and understands that format's commenting
- * conventions (for example, {@code //} and {@code /* ... *\/} in Java, or {@code <!-- ... -->} in Markdown/HTML).
- * When guidance is found, the reviewer includes project-relative path context (via
- * {@code org.machanism.machai.project.layout.ProjectLayout}) so later stages can relate instructions to the
- * originating file or directory.
+ * <h2>Key responsibilities</h2>
+ * <ul>
+ *   <li>Identify whether a file contains {@code @guidance} instructions.</li>
+ *   <li>Extract relevant guidance and/or file content (implementation dependent).</li>
+ *   <li>Include project-relative path context via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout} so later stages can trace the originating file
+ *       or directory.</li>
+ * </ul>
+ *
+ * <p>Supported formats are represented by concrete {@code Reviewer} implementations (for example, Java,
+ * Markdown, HTML, TypeScript, Python, and plain text guidance files).
  */
 package org.machanism.machai.gw.reviewer;
 

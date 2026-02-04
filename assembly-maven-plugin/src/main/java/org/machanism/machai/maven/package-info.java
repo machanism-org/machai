@@ -29,8 +29,7 @@
  *
  * <p>
  * This package contains the {@link org.machanism.machai.maven.Assembly} Maven {@code Mojo}, which implements the
- * {@code assembly} goal. The goal reads (or prompts for) a project description, uses an AI-powered picker to
- * recommend libraries, and then runs an AI-driven assembly process against the Maven execution base directory.
+ * {@code assembly} goal.
  * </p>
  *
  * <h2>Workflow</h2>

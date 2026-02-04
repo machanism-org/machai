@@ -94,10 +94,10 @@ Ghostwriter is configured via command-line options and (optionally) a properties
 |---|---:|---|---|
 | `-h`, `--help` | no | — | Show help and exit. |
 | `-r`, `--root` | yes | From `gw.properties` key `root`; otherwise: current user directory (`user.dir`). | Root directory used to compute and validate scan targets. Scan targets must be within this root. |
-| `-t`, `--threads` | optional | `true` | Enable multi-threaded processing. If omitted: enabled. Use `--threads=false` to disable. |
+| `-t`, `--threads[=true|false]` | optional | `true` | Enable or disable multi-threaded processing. If omitted: enabled. Use `--threads=false` to disable. |
 | `-a`, `--genai` | yes | From `gw.properties` key `genai`; otherwise: `OpenAI:gpt-5-mini`. | Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`). |
-| `-i`, `--instructions` | optional | From `gw.properties` key `instructions` (comma-separated); otherwise: none. | Additional instructions locations (URL or file path). Provide multiple values separated by commas. If used without a value, Ghostwriter reads instruction text from stdin (EOF-terminated). Relative file paths are resolved against the execution directory. |
-| `-g`, `--guidance` | optional | none | Default guidance applied as a final step for the current directory. If specified with a value, it is treated as a guidance file path (relative paths resolved against the execution directory). If specified without a value, Ghostwriter reads guidance text from stdin (EOF-terminated). |
+| `-i`, `--instructions[=<url|file>[,<url|file>...]]` | optional | From `gw.properties` key `instructions` (comma-separated); otherwise: none. | Additional instructions locations (URL or file path). Provide multiple values separated by commas. If used without a value, Ghostwriter reads instruction text from stdin (EOF-terminated). Relative file paths are resolved against the execution directory. |
+| `-g`, `--guidance[=<file>]` | optional | From `gw.properties` key `guidance`; otherwise: none. | Default guidance applied as a final step for the current directory. If specified with a value, it is treated as a guidance file path (relative paths resolved against the execution directory). If specified without a value, Ghostwriter reads guidance text from stdin (EOF-terminated). |
 | `-e`, `--excludes` | yes | From `gw.properties` key `excludes` (comma-separated); otherwise: none. | Comma-separated list of directories to exclude from processing. |
 | `-l`, `--logInputs` | no | `false` | Log LLM request inputs to dedicated log files. |
 

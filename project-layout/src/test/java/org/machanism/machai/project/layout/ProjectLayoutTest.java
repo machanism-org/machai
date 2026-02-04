@@ -42,7 +42,7 @@ class ProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_defaultImplementation_shouldReturnNull() throws Exception {
+	void getModules_defaultImplementation_shouldReturnNull() {
 		// Arrange
 		ProjectLayout layout = new TestLayout();
 
@@ -131,5 +131,16 @@ class ProjectLayoutTest {
 
 		// Assert
 		assertNull(related);
+	}
+
+	@Test
+	void excludeDirs_shouldContainCommonBuildAndVcsDirectories() {
+		// Arrange
+		List<String> exclude = Arrays.asList(ProjectLayout.EXCLUDE_DIRS);
+
+		// Act + Assert
+		assertTrue(exclude.contains("node_modules"));
+		assertTrue(exclude.contains(".git"));
+		assertTrue(exclude.contains("target"));
 	}
 }

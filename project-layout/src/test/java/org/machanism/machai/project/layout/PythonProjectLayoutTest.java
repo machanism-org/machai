@@ -105,9 +105,10 @@ class PythonProjectLayoutTest {
 	@Test
 	void getSources_documents_tests_shouldReturnNull() {
 		// Arrange
-		PythonProjectLayout layout = (PythonProjectLayout) new PythonProjectLayout().projectDir(new File("target/test-tmp/python-nulls"));
+		PythonProjectLayout layout = (PythonProjectLayout) new PythonProjectLayout()
+				.projectDir(new File("target/test-tmp/python-nulls"));
 
-		// Act
+		// Act + Assert
 		assertNull(layout.getSources());
 		assertNull(layout.getDocuments());
 		assertNull(layout.getTests());

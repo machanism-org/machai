@@ -1,7 +1,7 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>This package provides a small abstraction over a project's on-disk structure:
+ * <p>This package provides a small abstraction over a project's on-disk structure and a workflow for scanning it:
  *
  * <ul>
  *   <li>{@link org.machanism.machai.project.ProjectLayout} models the layout of a project (for example Maven,

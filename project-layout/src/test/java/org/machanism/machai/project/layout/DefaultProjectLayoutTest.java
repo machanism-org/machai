@@ -12,13 +12,14 @@ import org.junit.jupiter.api.Test;
 class DefaultProjectLayoutTest {
 
 	@Test
-	void getModules_shouldReturnEmptyListWhenProjectDirDoesNotExist() throws Exception {
+	void getModules_shouldReturnEmptyListWhenProjectDirDoesNotExist() {
 		// Arrange
 		File dir = new File("target/test-tmp/default-layout-empty");
 		if (dir.isDirectory()) {
 			File[] files = dir.listFiles();
 			if (files != null) {
 				for (File f : files) {
+					// best-effort cleanup
 					f.delete();
 				}
 			}
@@ -82,7 +83,8 @@ class DefaultProjectLayoutTest {
 	@Test
 	void getSources_documents_tests_shouldReturnNull() {
 		// Arrange
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(new File("target/test-tmp/default-layout-nulls"));
+		DefaultProjectLayout layout = new DefaultProjectLayout()
+				.projectDir(new File("target/test-tmp/default-layout-nulls"));
 
 		// Act
 		List<String> sources = layout.getSources();

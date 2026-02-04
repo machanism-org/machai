@@ -66,10 +66,10 @@ This design provides:
 
 | Variable | Required | Used by | Description |
 |---|---:|---|---|
-| `OPENAI_API_KEY` | Yes | OpenAI / CodeMie (via OpenAI gateway) | API key (or access token) used to authenticate requests. |
+| `OPENAI_API_KEY` | Yes | OpenAI | API key (or access token) used to authenticate requests. |
 | `OPENAI_ORG_ID` | No | OpenAI | Optional organization identifier. |
 | `OPENAI_PROJECT_ID` | No | OpenAI | Optional project identifier. |
-| `OPENAI_BASE_URL` | No | OpenAI / CodeMie (via OpenAI gateway) | Override API base URL (useful for OpenAI-compatible gateways). |
+| `OPENAI_BASE_URL` | No | OpenAI / CodeMie | Override API base URL (useful for OpenAI-compatible gateways). |
 | `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token. |
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token. |
 | `recipes` | No | Web | Java system property to override the recipes/config location (relative to `workingDir`); defaults to `genai-client/src/main/resources`. |
@@ -129,20 +129,18 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of `GenAIProvider`.
 
-This provider enables a wide range of generative AI capabilities, including:
+It supports:
 
-- Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
-
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+- Sending prompts and receiving responses from OpenAI chat models.
+- Uploading local files or referencing remote files by URL (provider-dependent on OpenAI API capabilities).
+- Tool (function) calling with registered Java functions.
+- Creating text embeddings.
 
 **Environment Variables**
 
-The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
+You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -151,7 +149,7 @@ The client automatically reads the following environment variables. You must set
 
 **Using the CodeMie API**
 
-To use the CodeMie API, set the following environment variables:
+To route requests through the CodeMie OpenAI-compatible API, configure:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -166,7 +164,7 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-The `CodeMieProvider` extends `OpenAIProvider` and authenticates against CodeMie before sending requests to CodeMie through its OpenAI-compatible API endpoint.
+The `CodeMieProvider` extends `OpenAIProvider` and authenticates against CodeMie before sending requests to CodeMie via its OpenAI-compatible endpoint.
 
 How it works:
 
@@ -182,7 +180,7 @@ How it works:
 
 ### None
 
-No-op implementation of `GenAIProvider`.
+The `NoneProvider` is a no-op implementation of `GenAIProvider`.
 
 This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
@@ -194,7 +192,7 @@ This provider is intended for environments where no external LLM integration sho
 
 ### Web
 
-`GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
+The `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
 Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
 

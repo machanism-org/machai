@@ -260,10 +260,8 @@ public class FileProcessor extends ProjectProcessor {
 
 	/**
 	 * Processes non-module files and directories directly under {@code projectDir}.
-	 * 
-	 * @param projectLayout project layout
-	 * @param projectDir    directory to scan
 	 *
+	 * @param projectLayout project layout
 	 * @throws FileNotFoundException if the project layout cannot be created
 	 * @throws IOException           if file reading fails
 	 */
@@ -271,7 +269,7 @@ public class FileProcessor extends ProjectProcessor {
 		File projectDir = projectLayout.getProjectDir();
 		List<File> children = findFiles(projectDir);
 
-		children.removeIf(child -> !(!isModuleDir(projectLayout, child) && match(child)));
+		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child));
 
 		for (File child : children) {
 			if (child.isDirectory()) {
@@ -466,8 +464,9 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		List<File> files = (List<File>) FileUtils.listFilesAndDirs(dir, TrueFileFilter.INSTANCE,
-				DirectoryFileFilter.DIRECTORY);
+		@SuppressWarnings("unchecked")
+		List<File> files = new ArrayList<>((List<File>) FileUtils.listFilesAndDirs(dir, TrueFileFilter.INSTANCE,
+				DirectoryFileFilter.DIRECTORY));
 
 		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 
