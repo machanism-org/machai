@@ -198,6 +198,8 @@ public final class Ghostwriter {
 						throw new FileNotFoundException("Guidance file '" + guidanceFileName
 								+ "' not found. Please verify that the file exists at the expected location and is accessible.");
 					}
+					logger.info("Default guidance: {}", guidanceFileName);
+
 				} else {
 					defaultGuidance = readText("Please enter the guidance text below. When finished, press "
 							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") + " to signal end of input (EOF):");
@@ -231,11 +233,9 @@ public final class Ghostwriter {
 					processor.setModuleMultiThread(multiThread);
 
 					if (defaultGuidance != null) {
-						logger.info("Default guidance: {}", StringUtils.abbreviate(defaultGuidance, 60));
 						processor.setDefaultGuidance(defaultGuidance);
 					}
 
-					logger.info("Inputs: {}", logInputs);
 					processor.setLogInputs(logInputs);
 
 					processor.scanDocuments(rootDir, scanDir);
@@ -263,8 +263,6 @@ public final class Ghostwriter {
 			}
 
 			if (file.exists()) {
-				logger.info("Instructions file: {}", file.getAbsolutePath());
-
 				try (FileReader reader = new FileReader(file)) {
 					result = IOUtils.toString(reader);
 
