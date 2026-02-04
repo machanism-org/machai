@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
@@ -109,7 +108,6 @@ public class GW extends AbstractMojo {
 	 * </p>
 	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
-	@SuppressWarnings("unused")
 	MavenProject project;
 
 	/**
