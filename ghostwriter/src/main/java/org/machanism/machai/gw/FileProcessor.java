@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -334,7 +333,7 @@ public class FileProcessor extends ProjectProcessor {
 
 	public void processProjectDir(ProjectLayout layout, String filePattern) {
 		try {
-			List<File> files = findFiles(filePattern);
+			List<File> files = findFiles(layout.getProjectDir(), filePattern);
 			for (File file : files) {
 				logIfNotBlank(processFile(layout, file));
 			}
@@ -488,34 +487,39 @@ public class FileProcessor extends ProjectProcessor {
 				.collect(Collectors.toList());
 	}
 
-	private List<File> findFiles(String pattern) throws IOException {
+	private List<File> findFiles(File projectDir, String pattern) throws IOException {
 		List<File> result = new ArrayList<>();
 		File dir = new File(pattern);
 		PathMatcher matcher = null;
 
-		if (!dir.isAbsolute()) {
-			dir = new File(rootDir, pattern);
-			if (!dir.exists()) {
-				dir = rootDir;
-				matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+		if (Strings.CI.startsWithAny(pattern, "glob:", "regex:")) {
+			matcher = FileSystems.getDefault().getPathMatcher(pattern);
+			dir = projectDir;
+
+		} else {
+			if (!dir.isAbsolute()) {
+				dir = new File(projectDir, pattern);
 			}
 		}
 
 		@SuppressWarnings("unchecked")
 		List<File> files = (List<File>) FileUtils.listFilesAndDirs(dir, TrueFileFilter.INSTANCE,
 				DirectoryFileFilter.DIRECTORY);
+
 		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 
 		for (File file : files) {
-			String absolutePath = file.getAbsolutePath();
+			String path = ProjectLayout.getRelatedPath(projectDir, file);
 
-			if (!Strings.CI.containsAny(absolutePath, ProjectLayout.EXCLUDE_DIRS)
-					&& !shouldExcludeAbsolutePath(absolutePath)) {
-				if (matcher == null || matcher.matches(file.toPath())) {
-					result.add(file);
-				}
+			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(new File(path))) {
+				continue;
+			}
+
+			if (matcher == null || matcher.matches(file.toPath())) {
+				result.add(file);
 			}
 		}
+
 		return result;
 	}
 
@@ -532,8 +536,9 @@ public class FileProcessor extends ProjectProcessor {
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
 			String name = file.getName();
-			String absolutePath = file.getAbsolutePath();
-			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludeAbsolutePath(absolutePath)) {
+			File relatedPath = new File(ProjectLayout.getRelatedPath(rootDir, file));
+
+			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(relatedPath)) {
 				continue;
 			}
 			if (file.isDirectory()) {
@@ -547,22 +552,23 @@ public class FileProcessor extends ProjectProcessor {
 		return result;
 	}
 
-	private boolean shouldExcludeAbsolutePath(String absolutePath) {
-		if (StringUtils.isBlank(absolutePath) || excludes == null || excludes.length == 0) {
-			return false;
-		}
-
-		List<String> tokens = new ArrayList<>();
-		for (String exclude : excludes) {
-			String token = StringUtils.trimToNull(exclude);
-			if (token != null) {
-				tokens.add(token);
+	private boolean shouldExcludePath(File path) {
+		if (excludes != null) {
+			for (String exclude : excludes) {
+				PathMatcher matcher = getPatternPath(exclude);
+				if (matcher != null) {
+					if (matcher.matches(path.toPath())) {
+						return true;
+					}
+				} else {
+					if (Strings.CS.equals(path.getPath(), exclude)) {
+						return true;
+					}
+				}
 			}
 		}
-		if (tokens.isEmpty()) {
-			return false;
-		}
-		return Strings.CI.containsAny(absolutePath, tokens.toArray(new String[0]));
+
+		return false;
 	}
 
 	private static int pathDepth(String path) {
@@ -574,19 +580,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private boolean isPathUnderDirectory(String name, String parentPath) {
-		if (processFilePattern == null) {
-			return true;
-		}
-
-		String pattern = StringUtils.trimToNull(processFilePattern);
-		if (pattern != null) {
-			PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
-			if (matcher.matches(Paths.get(name))) {
-				return true;
-			}
-		}
-
-		if (StringUtils.isBlank(parentPath)) {
+		if (processFilePattern == null || getPatternPath(parentPath) != null || StringUtils.isBlank(parentPath)) {
 			return true;
 		}
 
@@ -618,8 +612,18 @@ public class FileProcessor extends ProjectProcessor {
 		if (!parentNormalized.endsWith("/")) {
 			parentNormalized = parentNormalized + "/";
 		}
+
 		return childNormalized.equals(parentNormalized.substring(0, parentNormalized.length() - 1))
 				|| childNormalized.startsWith(parentNormalized);
+	}
+
+	private PathMatcher getPatternPath(String path) {
+		PathMatcher matcher = null;
+		if (Strings.CI.startsWithAny(path, "glob:", "regex:")) {
+			matcher = FileSystems.getDefault().getPathMatcher(path);
+		}
+
+		return matcher;
 	}
 
 	private static String normalizePathForPrefixCheck(String path) {

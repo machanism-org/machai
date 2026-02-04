@@ -264,7 +264,8 @@ public final class Ghostwriter {
 				+ "  java -jar gw.jar <scanDir | glob_path_pattern> [options]\n\n" + "Options:";
 		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\projects\\project\n"
 				+ "  java -r C:\\projects\\project -jar gw.jar src/project\n"
-				+ "  java -r C:\\projects\\project -jar gw.jar \"**/*.java\"\n";
+				+ "  java -r C:\\projects\\project -jar gw.jar \"glob:**/*.java\"\n"
+				+ "  java -r C:\\projects\\project -jar gw.jar \"regex:^.*\\/[^\\/]+\\.java$\"\n";
 		formatter.printHelp("java -jar gw.jar <scanDir | glob_path_pattern>", header, options, footer, true);
 	}
 
