@@ -2,9 +2,11 @@ package org.machanism.machai.gw;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
@@ -326,8 +329,8 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		if (children.isEmpty() && defaultGuidance != null) {
-			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), projectDir,
+		if (match(projectDir) && children.isEmpty() && defaultGuidance != null) {
+			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"),
 					defaultGuidance);
 			process(projectLayout, projectLayout.getProjectDir(), defaultGuidanceText);
 		}
@@ -453,11 +456,16 @@ public class FileProcessor extends ProjectProcessor {
 
 		File projectDir = projectLayout.getProjectDir();
 
+		List<String> sources = projectLayout.getSources();
+		List<String> tests = projectLayout.getTests();
+		List<String> documents = projectLayout.getDocuments();
+		List<String> modules = projectLayout.getModules();
+
 		content.add(".");
-		content.add(getDirInfoLine(projectLayout.getSources(), projectDir));
-		content.add(getDirInfoLine(projectLayout.getTests(), projectDir));
-		content.add(getDirInfoLine(projectLayout.getDocuments(), projectDir));
-		content.add(getDirInfoLine(projectLayout.getModules(), projectDir));
+		content.add(getDirInfoLine(sources, projectDir));
+		content.add(getDirInfoLine(tests, projectDir));
+		content.add(getDirInfoLine(documents, projectDir));
+		content.add(getDirInfoLine(modules, projectDir));
 
 		Object[] array = content.toArray(new String[0]);
 		return MessageFormat.format(promptBundle.getString("project_information"), array);
@@ -668,7 +676,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param instructions free-form instruction text
 	 */
 	public void setInstructions(String instructions) {
-		this.instructions = instructions;
+		this.instructions = tryToGetInstructionsFromFile(instructions);
 	}
 
 	/**
@@ -685,48 +693,6 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	public void setLogInputs(boolean logInputs) {
 		this.logInputs = logInputs;
-	}
-
-	/**
-	 * Loads instruction text from multiple locations.
-	 *
-	 * <p>
-	 * Each item may be:
-	 * </p>
-	 * <ul>
-	 * <li>a URL ({@code http://} or {@code https://})</li>
-	 * <li>a file path</li>
-	 * <li>raw instruction text (fallback if location cannot be read)</li>
-	 * </ul>
-	 *
-	 * @param instructions locations or raw strings
-	 * @throws IOException if reading from a file location fails
-	 */
-	public void setInstructions(String[] instructions) throws IOException {
-		StringBuilder instructionsText = new StringBuilder();
-		if (instructions != null && instructions.length > 0) {
-			for (String location : instructions) {
-				if (!StringUtils.isBlank(location)) {
-					String content;
-					try {
-						if (location.startsWith("http://") || location.startsWith("https://")) {
-							try (InputStream in = new URL(location).openStream()) {
-								content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-							}
-						} else {
-							content = Files.readString(new File(location).toPath(), StandardCharsets.UTF_8);
-						}
-					} catch (Exception e) {
-						content = location;
-					}
-
-					instructionsText.append(content);
-					instructionsText.append(System.lineSeparator());
-					instructionsText.append(System.lineSeparator());
-				}
-			}
-		}
-		this.instructions = StringUtils.trimToNull(instructionsText.toString());
 	}
 
 	/**
@@ -752,7 +718,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param defaultGuidance guidance text to apply by default
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
-		this.defaultGuidance = defaultGuidance;
+		this.defaultGuidance = tryToGetInstructionsFromFile(defaultGuidance);
 	}
 
 	/**
@@ -816,5 +782,47 @@ public class FileProcessor extends ProjectProcessor {
 			throw new IllegalArgumentException("moduleThreadTimeoutMinutes must be > 0");
 		}
 		this.moduleThreadTimeoutMinutes = moduleThreadTimeoutMinutes;
+	}
+
+	private static String tryToGetInstructionsFromFile(String data) {
+		String result = null;
+
+		if (data != null) {
+			if (data.startsWith("http://") || data.startsWith("https://")) {
+				try (InputStream in = new URL(data).openStream()) {
+					result = IOUtils.toString(in, StandardCharsets.UTF_8);
+				} catch (IOException e) {
+					String basicToken = StringUtils.substringBetween(data, "//", "@");
+					if (basicToken != null) {
+						try {
+							String url2 = Strings.CS.replace(data, basicToken + "@", "");
+							URL url = new URL(url2);
+							URLConnection connection = url.openConnection();
+							connection.setRequestProperty("Authorization", "Basic " + basicToken);
+							try (InputStream in = connection.getInputStream()) {
+								result = IOUtils.toString(in, StandardCharsets.UTF_8);
+							}
+						} catch (IOException ex) {
+							throw new IllegalArgumentException("Invalid basic auth token in URL: " + data, e);
+						}
+					} else {
+						throw new IllegalArgumentException("Invalid basic auth token in URL: " + data, e);
+					}
+				}
+			}
+		} else {
+			File file = new File(data);
+			if (file.exists()) {
+				try (FileReader reader = new FileReader(file)) {
+					result = IOUtils.toString(reader);
+				} catch (IOException e) {
+					throw new IllegalArgumentException("Failed to read instructions file: " + file.getAbsolutePath(),
+							e);
+				}
+			} else {
+				result = data;
+			}
+		}
+		return result;
 	}
 }
