@@ -155,29 +155,16 @@ public final class Ghostwriter {
 				genai = cmd.getOptionValue(genaiOpt);
 			}
 
-			String[] instructionLocations = StringUtils.split(config.get("instructions", null), ",");
-			String instructions = null;
+			String instructions = config.get("instructions", null);
 			if (cmd.hasOption(instructionsOpt)) {
-				String optionValue = cmd.getOptionValue(instructionsOpt);
-				if (optionValue != null) {
-					instructionLocations = StringUtils.split(optionValue, ",");
-				} else {
+				instructions = cmd.getOptionValue(instructionsOpt);
+
+				if (instructions == null) {
 					instructions = readText("No instructions were provided as an option value.\n"
 							+ "Please enter the instructions text below. When you are done, press "
 							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
 							+ " to finish and signal end of input (EOF):");
 				}
-			}
-
-			if (instructionLocations != null && instructionLocations.length > 0) {
-				instructionLocations = Arrays.stream(instructionLocations).map(StringUtils::trimToNull)
-						.map(location -> {
-							if (location != null && !location.startsWith("http://") && !location.startsWith("https://")
-									&& !(new File(location).isAbsolute())) {
-								return new File(execDir, location).getAbsolutePath();
-							}
-							return location;
-						}).toArray(String[]::new);
 			}
 
 			String[] dirs = cmd.getArgs();
@@ -203,16 +190,8 @@ public final class Ghostwriter {
 
 			String defaultGuidance = config.get("guidance", null);
 			if (cmd.hasOption(guidanceOpt)) {
-				String guidanceFileName = cmd.getOptionValue(guidanceOpt);
-				if (guidanceFileName != null) {
-					defaultGuidance = getInstructionsFromFile(guidanceFileName);
-					if (defaultGuidance == null) {
-						throw new FileNotFoundException("Guidance file '" + guidanceFileName
-								+ "' not found. Please verify that the file exists at the expected location and is accessible.");
-					}
-					logger.info("Default guidance: {}", guidanceFileName);
-
-				} else {
+				defaultGuidance = cmd.getOptionValue(guidanceOpt);
+				if (defaultGuidance == null) {
 					defaultGuidance = readText("Please enter the guidance text below. When finished, press "
 							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") + " to signal end of input (EOF):");
 				}
@@ -223,35 +202,28 @@ public final class Ghostwriter {
 			for (String scanDir : dirs) {
 				logger.info("Starting scan of directory: {}", scanDir);
 
-				String currentFile = ProjectLayout.getRelatedPath(rootDir, new File(scanDir));
-				if (currentFile != null) {
-
-					FileProcessor processor = new FileProcessor(genai, config);
-					if (excludes != null) {
-						logger.info("Excludes: {}", Arrays.toString(excludes));
-						processor.setExcludes(excludes);
-					}
-
-					if (instructions != null) {
-						logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
-						processor.setInstructions(instructions);
-					}
-
-					processor.setModuleMultiThread(multiThread);
-
-					if (defaultGuidance != null) {
-						processor.setDefaultGuidance(defaultGuidance);
-					}
-
-					processor.setLogInputs(logInputs);
-
-					processor.scanDocuments(rootDir, scanDir);
-					logger.info("Finished scanning directory: {}", scanDir);
-
-				} else {
-					logger.error("The directory '{}' must be located within the root directory '{}'.", scanDir,
-							rootDir);
+				FileProcessor processor = new FileProcessor(genai, config);
+				if (excludes != null) {
+					logger.info("Excludes: {}", Arrays.toString(excludes));
+					processor.setExcludes(excludes);
 				}
+
+				if (instructions != null) {
+					logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
+					processor.setInstructions(instructions);
+				}
+
+				processor.setModuleMultiThread(multiThread);
+
+				if (defaultGuidance != null) {
+					logger.info("Default Guidance: {}", StringUtils.abbreviate(instructions, 60));
+					processor.setDefaultGuidance(defaultGuidance);
+				}
+
+				processor.setLogInputs(logInputs);
+
+				processor.scanDocuments(rootDir, scanDir);
+				logger.info("Finished scanning directory: {}", scanDir);
 			}
 
 		} catch (ParseException e) {
@@ -260,27 +232,6 @@ public final class Ghostwriter {
 		} finally {
 			logger.info("Finished processing files.");
 		}
-	}
-
-	private static String getInstructionsFromFile(String instructionsFile) {
-		String result = null;
-		if (instructionsFile != null) {
-			File file = new File(instructionsFile);
-
-			if (!file.isAbsolute()) {
-				file = new File(execDir, instructionsFile);
-			}
-
-			if (file.exists()) {
-				try (FileReader reader = new FileReader(file)) {
-					result = IOUtils.toString(reader);
-
-				} catch (IOException e) {
-					logger.error("Failed to read instructions file: {}", file.getAbsolutePath(), e);
-				}
-			}
-		}
-		return result;
 	}
 
 	private static void help(Options options, HelpFormatter formatter) {

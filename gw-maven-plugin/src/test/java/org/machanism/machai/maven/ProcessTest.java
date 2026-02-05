@@ -29,7 +29,7 @@ public class ProcessTest {
     @BeforeEach
     void setup() {
         process = new GW();
-        process.basedir = tempDir;
+        process.rootDir = tempDir;
         Model model = new Model();
         testProject = new MavenProject(model);
         process.project = testProject;

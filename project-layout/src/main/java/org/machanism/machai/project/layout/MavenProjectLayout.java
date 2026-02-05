@@ -1,6 +1,7 @@
 package org.machanism.machai.project.layout;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -93,10 +94,10 @@ public class MavenProjectLayout extends ProjectLayout {
 						model.setBuild(build);
 					}
 					if (build.getSourceDirectory() == null) {
-						build.setSourceDirectory("src/main/java");
+						build.setSourceDirectory(new File(getProjectDir(), "src/main/java").getAbsolutePath());
 					}
 					if (build.getTestSourceDirectory() == null) {
-						build.setTestSourceDirectory("src/test/java");
+						build.setTestSourceDirectory(new File(getProjectDir(), "src/test/java").getAbsolutePath());
 					}
 				} else {
 					throw e;

@@ -79,11 +79,23 @@ public class GW extends AbstractMojo {
 	String genai;
 
 	/**
+	 * The Maven module base directory used as the scan root.
+	 */
+	@Parameter(defaultValue = "${basedir}", required = true, readonly = false)
+	File rootDir;
+
+	@Parameter(required = false, readonly = false)
+	String scanDir;
+
+	/**
 	 * Instruction locations (for example, file paths or classpath locations)
 	 * consumed by the workflow.
 	 */
 	@Parameter(property = "gw.instructions", required = false, readonly = false, name = "instructions")
-	private String[] instructions;
+	private String instructions;
+
+	@Parameter(property = "gw.guidance", required = false, readonly = false, name = "guidance")
+	private String guidance;
 
 	/**
 	 * Exclude patterns/paths that should be skipped when scanning documentation
@@ -91,12 +103,6 @@ public class GW extends AbstractMojo {
 	 */
 	@Parameter(property = "gw.excludes", required = false, readonly = false, name = "excludes")
 	private String[] excludes;
-
-	/**
-	 * The Maven module base directory used as the scan root.
-	 */
-	@Parameter(defaultValue = "${basedir}", required = true, readonly = true)
-	File basedir;
 
 	/**
 	 * The current Maven project.
@@ -140,7 +146,7 @@ public class GW extends AbstractMojo {
 
 	/**
 	 * Configures credentials and runs document scanning/processing starting from
-	 * {@link #basedir}.
+	 * {@link #rootDir}.
 	 *
 	 * @throws MojoExecutionException if required Maven settings/credentials are
 	 *                                missing or if document processing fails
@@ -209,12 +215,25 @@ public class GW extends AbstractMojo {
 		processor.setNonRecursive(nonRecursive);
 
 		try {
-			processor.setInstructions(instructions);
+			if (instructions != null) {
+				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
+				processor.setInstructions(instructions);
+			}
 
-			logger.info("Scanning documents in the root directory: {}", basedir);
+			if (guidance != null) {
+				logger.info("Default Guidance: {}", StringUtils.abbreviate(guidance, 60));
+				processor.setDefaultGuidance(guidance);
+			}
+
+			logger.info("Scanning documents in the root directory: {}", rootDir);
 			processor.setModuleMultiThread(threads);
 			processor.setLogInputs(logInputs);
-			processor.scanDocuments(basedir);
+
+			if (scanDir == null) {
+				scanDir = rootDir.getAbsolutePath();
+			}
+
+			processor.scanDocuments(rootDir, scanDir);
 		} catch (IOException e) {
 			throw new MojoExecutionException("Document assistance process failed.", e);
 		}
