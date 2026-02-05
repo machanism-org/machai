@@ -145,7 +145,7 @@ public class OpenAIProvider implements GenAIProvider {
 
 	private File workingDir;
 
-	private long timeout = 60;
+	private long timeout = 120;
 
 	@Override
 	public void init(Configurator config) {

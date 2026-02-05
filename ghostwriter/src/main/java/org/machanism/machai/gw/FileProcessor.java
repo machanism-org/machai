@@ -676,7 +676,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param instructions free-form instruction text
 	 */
 	public void setInstructions(String instructions) {
-		this.instructions = tryToGetInstructionsFromFile(instructions);
+		this.instructions = parseLines(instructions);
 	}
 
 	/**
@@ -718,7 +718,17 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param defaultGuidance guidance text to apply by default
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
-		this.defaultGuidance = tryToGetInstructionsFromFile(defaultGuidance);
+		this.defaultGuidance = parseLines(defaultGuidance);
+	}
+
+	private String parseLines(String data) {
+		StringBuilder sb = new StringBuilder();
+		String content = tryToGetInstructionsFromFile(data);
+		content.lines().forEach(line -> {
+			sb.append(tryToGetInstructionsFromFile(line));
+		});
+
+		return sb.toString();
 	}
 
 	/**
@@ -809,18 +819,21 @@ public class FileProcessor extends ProjectProcessor {
 						throw new IllegalArgumentException("Invalid basic auth token in URL: " + data, e);
 					}
 				}
-			}
-		} else {
-			File file = new File(data);
-			if (file.exists()) {
-				try (FileReader reader = new FileReader(file)) {
-					result = IOUtils.toString(reader);
-				} catch (IOException e) {
-					throw new IllegalArgumentException("Failed to read instructions file: " + file.getAbsolutePath(),
-							e);
-				}
 			} else {
-				result = data;
+				if (Strings.CS.startsWith(data.trim(), "file:")) {
+					data = StringUtils.substringAfter(data, "file:");
+					File file = new File(data);
+					if (file.exists()) {
+						try (FileReader reader = new FileReader(file)) {
+							result = IOUtils.toString(reader);
+						} catch (IOException e) {
+							throw new IllegalArgumentException(
+									"Failed to read instructions file: " + file.getAbsolutePath(), e);
+						}
+					}
+				} else {
+					result = data;
+				}
 			}
 		}
 		return result;
