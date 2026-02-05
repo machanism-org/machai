@@ -34,6 +34,7 @@ import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
+import com.openai.core.Timeout;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.embeddings.EmbeddingModel;
@@ -57,6 +58,8 @@ import com.openai.models.responses.ResponseOutputMessage.Content;
 import com.openai.models.responses.ResponseReasoningItem;
 import com.openai.models.responses.ResponseReasoningItem.Summary;
 import com.openai.models.responses.Tool;
+
+import ch.qos.logback.core.util.Duration;
 
 /**
  * The {@code OpenAIProvider} class integrates seamlessly with the OpenAI API,
@@ -142,6 +145,8 @@ public class OpenAIProvider implements GenAIProvider {
 
 	private File workingDir;
 
+	private long timeout = 60;
+
 	@Override
 	public void init(Configurator config) {
 		String baseUrl = config.get("OPENAI_BASE_URL");
@@ -156,6 +161,7 @@ public class OpenAIProvider implements GenAIProvider {
 		if (baseUrl != null) {
 			buillder.baseUrl(baseUrl);
 		}
+		buillder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(getTimeout())).build());
 		client = buillder.build();
 	}
 
@@ -257,8 +263,10 @@ public class OpenAIProvider implements GenAIProvider {
 		builder.inputOfResponse(inputs);
 
 		logInputs();
-
+		logger.debug("Sending request to LLM service.");
 		Response response = getClient().responses().create(builder.build());
+		logger.debug("Received response from LLM service.");
+
 		result = parseResponse(response);
 		clear();
 		return result;
@@ -381,6 +389,8 @@ public class OpenAIProvider implements GenAIProvider {
 				parentFile.mkdirs();
 			}
 			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
+				streamWriter.write(instructions);
+
 				for (ResponseInputItem responseInputItem : inputs) {
 					String inputText = "";
 					if (responseInputItem.isMessage()) {
@@ -507,6 +517,14 @@ public class OpenAIProvider implements GenAIProvider {
 
 	protected OpenAIClient getClient() {
 		return client;
+	}
+
+	public long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
 	}
 
 }
