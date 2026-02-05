@@ -33,20 +33,23 @@
  *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
  */
 /**
- * Command-line entry point and orchestration for the Ghostwriter document scanner.
+ * Command-line interface (CLI) orchestration for the Ghostwriter document scanning tool.
  *
  * <p>
- * The classes in this package wire together:
+ * The package provides the CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the workspace
+ * processor ({@link org.machanism.machai.gw.FileProcessor}) responsible for traversing a project, extracting
+ * embedded {@code @guidance:} blocks, and submitting per-file prompts to a configured GenAI provider.
+ * </p>
+ *
+ * <p>
+ * At a high level, these components:
  * </p>
  * <ul>
- *   <li>CLI parsing and runtime configuration ({@link org.machanism.machai.gw.Ghostwriter})</li>
- *   <li>Workspace/module traversal and per-file processing ({@link org.machanism.machai.gw.FileProcessor})</li>
+ *   <li>parse runtime parameters (scan roots/patterns, excludes, provider/model, instructions and guidance)</li>
+ *   <li>discover modules and traverse the project workspace</li>
+ *   <li>delegate file parsing to {@code Reviewer} implementations loaded via {@code ServiceLoader}</li>
+ *   <li>compose prompts from project layout, embedded guidance, and output requirements</li>
+ *   <li>execute requests against the configured GenAI provider</li>
  * </ul>
- *
- * <p>
- * A typical run scans a root directory, finds supported files, extracts embedded
- * {@code @guidance:} blocks, and sends composed prompts (project structure,
- * guidance, and required output format) to a configured GenAI provider.
- * </p>
  */
 package org.machanism.machai.gw;

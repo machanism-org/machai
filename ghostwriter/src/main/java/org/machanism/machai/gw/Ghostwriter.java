@@ -23,33 +23,44 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Entry point for document scanning and review automation.
+ * Command-line entry point for the Ghostwriter document scanning tool.
+ *
  * <p>
- * Initializes the AI provider, configures the Ghostwriter, and runs document
- * scan over the user directory. Output is logged.
+ * This class:
+ * </p>
+ * <ul>
+ * <li>parses CLI options</li>
+ * <li>loads configuration from {@code gw.properties} (or
+ * {@code -Dgw.config})</li>
+ * <li>configures and runs {@link FileProcessor} over one or more scan
+ * roots</li>
+ * </ul>
  *
  * <p>
  * Example usage:
+ * </p>
  *
  * <pre>
  * {@code
- * java org.machanism.machai.gw.Ghostwriter
+ * java -jar gw.jar C:\projects\my-project
  * }
  * </pre>
- *
- * <p>
- * Usage is typically direct from command line or script/CI runner.
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
 public final class Ghostwriter {
 
-	/** Logger for the ghostwriter application. */
+	/** Logger for the Ghostwriter application. */
 	private static Logger logger;
 
+	/** Default provider/model identifier used when none is configured. */
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
+
+	/** Properties-based configuration used by the CLI. */
 	private static PropertiesConfigurator config = new PropertiesConfigurator();
+
+	/** Directory used as the execution base for relative configuration files. */
 	private static File execDir;
 
 	static {
@@ -67,10 +78,11 @@ public final class Ghostwriter {
 				File configFile = new File(execDir, System.getProperty("gw.config", "gw.properties"));
 				config.setConfiguration(configFile.getAbsolutePath());
 			} catch (IOException e) {
-				// the property file is not defined, ignore.
+				// The property file is not defined, ignore.
 			}
 		} catch (Exception e) {
-			// Configuration file not found. An alternative configuration method will be used.
+			// Configuration file not found. An alternative configuration method will be
+			// used.
 		}
 	}
 
@@ -79,10 +91,10 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Main entry point for document scanning run.
+	 * Main entry point.
 	 *
 	 * @param args command line arguments
-	 * @throws IOException if document scanning fails
+	 * @throws IOException if scanning fails while reading files
 	 */
 	public static void main(String[] args) throws IOException {
 
@@ -245,6 +257,8 @@ public final class Ghostwriter {
 		} catch (ParseException e) {
 			System.err.println("Error parsing arguments: " + e.getMessage());
 			help(options, formatter);
+		} finally {
+			logger.info("Finished processing files.");
 		}
 	}
 
