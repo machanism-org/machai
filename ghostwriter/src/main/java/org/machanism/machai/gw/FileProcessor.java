@@ -123,6 +123,8 @@ public class FileProcessor extends ProjectProcessor {
 	/** Timeout for module processing worker pool shutdown. */
 	private long moduleThreadTimeoutMinutes = 20;
 
+	private File scanDir;
+
 	/**
 	 * Constructs a processor.
 	 *
@@ -190,11 +192,20 @@ public class FileProcessor extends ProjectProcessor {
 	 * </p>
 	 *
 	 * @param rootDir the root directory of the project to scan
-	 * @param pattern file glob/regex pattern or start directory
+	 * @param scanDir file glob/regex pattern or start directory
 	 * @throws IOException if an error occurs reading files
 	 */
-	public void scanDocuments(File rootDir, String pattern) throws IOException {
-		this.pathMatcher = FileSystems.getDefault().getPathMatcher(pattern);
+	public void scanDocuments(File rootDir, String scanDir) throws IOException {
+
+		if (!isPathPattern(scanDir)) {
+			this.scanDir = new File(scanDir);
+			String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(scanDir));
+
+			scanDir = "glob:" + relatedPath + "{,/**}";
+		}
+
+		this.pathMatcher = FileSystems.getDefault().getPathMatcher(scanDir);
+
 		this.rootDir = rootDir;
 		scanFolder(rootDir);
 	}
@@ -273,13 +284,23 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
-	private boolean match(File projectDir) {
+	private boolean match(File file) {
 		boolean result = true;
-		String path = ProjectLayout.getRelatedPath(rootDir, projectDir);
-		if (Strings.CI.containsAny(projectDir.getAbsolutePath(), ProjectLayout.EXCLUDE_DIRS)) {
+		String path = ProjectLayout.getRelatedPath(rootDir, file);
+		if (Strings.CI.containsAny(file.getAbsolutePath(), ProjectLayout.EXCLUDE_DIRS)) {
 			result = false;
 		} else if (pathMatcher != null) {
 			result = pathMatcher.matches(Path.of(path));
+
+			if (!result) {
+				String relatedPath = ProjectLayout.getRelatedPath(file, scanDir);
+				if (relatedPath != null) {
+					String normalizedFileAbsolutePath = file.getAbsolutePath().replace("\\", "/");
+					String scanPath = normalizedFileAbsolutePath + "/" + relatedPath;
+					String relatedToRoot = ProjectLayout.getRelatedPath(rootDir, new File(scanPath));
+					result = pathMatcher.matches(Path.of(relatedToRoot));
+				}
+			}
 		}
 		return result;
 	}
@@ -483,7 +504,7 @@ public class FileProcessor extends ProjectProcessor {
 		File dir = new File(pattern);
 		PathMatcher matcher = null;
 
-		if (Strings.CI.startsWithAny(pattern, "glob:", "regex:")) {
+		if (isPathPattern(pattern)) {
 			matcher = FileSystems.getDefault().getPathMatcher(pattern);
 			dir = projectDir;
 
@@ -511,6 +532,10 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		return result;
+	}
+
+	private boolean isPathPattern(String pattern) {
+		return Strings.CI.startsWithAny(pattern, "glob:", "regex:");
 	}
 
 	private List<File> findFiles(File projectDir) throws IOException {
@@ -544,14 +569,15 @@ public class FileProcessor extends ProjectProcessor {
 
 	private boolean shouldExcludePath(File path) {
 		if (excludes != null) {
+			Path pathToMatch = path == null ? null : path.toPath();
 			for (String exclude : excludes) {
 				PathMatcher matcher = getPatternPath(exclude);
 				if (matcher != null) {
-					if (matcher.matches(path.toPath())) {
+					if (pathToMatch != null && matcher.matches(pathToMatch)) {
 						return true;
 					}
 				} else {
-					if (Strings.CS.equals(path.getPath(), exclude)) {
+					if (path != null && Strings.CS.equals(path.getPath(), exclude)) {
 						return true;
 					}
 				}
@@ -574,7 +600,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (StringUtils.isBlank(path)) {
 			return null;
 		}
-		if (Strings.CI.startsWithAny(path, "glob:", "regex:")) {
+		if (isPathPattern(path)) {
 			matcher = FileSystems.getDefault().getPathMatcher(path);
 		}
 
@@ -761,9 +787,12 @@ public class FileProcessor extends ProjectProcessor {
 	/**
 	 * Sets the maximum number of worker threads used for module processing.
 	 *
-	 * @param maxModuleThreads maximum thread count (values &lt;= 0 are not allowed)
+	 * @param maxModuleThreads maximum thread count (values <= 0 are not allowed)
 	 */
 	public void setMaxModuleThreads(int maxModuleThreads) {
+		if (maxModuleThreads <= 0) {
+			throw new IllegalArgumentException("maxModuleThreads must be > 0");
+		}
 		this.maxModuleThreads = maxModuleThreads;
 	}
 
@@ -781,6 +810,9 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param moduleThreadTimeoutMinutes timeout in minutes
 	 */
 	public void setModuleThreadTimeoutMinutes(long moduleThreadTimeoutMinutes) {
+		if (moduleThreadTimeoutMinutes <= 0) {
+			throw new IllegalArgumentException("moduleThreadTimeoutMinutes must be > 0");
+		}
 		this.moduleThreadTimeoutMinutes = moduleThreadTimeoutMinutes;
 	}
 }
