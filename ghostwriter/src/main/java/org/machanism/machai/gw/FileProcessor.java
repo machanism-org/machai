@@ -292,7 +292,7 @@ public class FileProcessor extends ProjectProcessor {
 		} else if (pathMatcher != null) {
 			result = pathMatcher.matches(Path.of(path));
 
-			if (!result) {
+			if (!result && scanDir != null) {
 				String relatedPath = ProjectLayout.getRelatedPath(file, scanDir);
 				if (relatedPath != null) {
 					String normalizedFileAbsolutePath = file.getAbsolutePath().replace("\\", "/");
@@ -406,6 +406,8 @@ public class FileProcessor extends ProjectProcessor {
 
 	private String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
 		String perform;
+
+		logger.info("Processing file: '{}'", file);
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
 			systemFunctionTools.applyTools(provider);

@@ -159,8 +159,8 @@ public class FileFunctionTools {
 		String result;
 		String filePath = ((JsonNode) params[0]).get("file_path").asText();
 		String text = ((JsonNode) params[0]).get("text").asText();
-		logger.info("Write file: {}", StringUtils.abbreviate(Arrays.toString(params), MAXWIDTH));
 		File workingDir = (File) params[1];
+		logger.info("Write file: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
 		File file = new File(workingDir, filePath);
 		if (file.getParentFile() != null) {
 			file.getParentFile().mkdirs();
