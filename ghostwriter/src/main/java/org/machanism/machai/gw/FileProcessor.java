@@ -55,11 +55,11 @@ import org.slf4j.LoggerFactory;
  *
  * <h2>High-level flow</h2>
  * <ol>
- *   <li>Discover modules (if any) using {@link ProjectLayout}.</li>
- *   <li>Traverse files (optionally filtered by pattern and excludes).</li>
- *   <li>For each supported file, use a {@link Reviewer} to extract guidance.</li>
- *   <li>Compose a prompt (project info + guidance + output format) and execute
- *       {@link GenAIProvider#perform()}.</li>
+ * <li>Discover modules (if any) using {@link ProjectLayout}.</li>
+ * <li>Traverse files (optionally filtered by pattern and excludes).</li>
+ * <li>For each supported file, use a {@link Reviewer} to extract guidance.</li>
+ * <li>Compose a prompt (project info + guidance + output format) and execute
+ * {@link GenAIProvider#perform()}.</li>
  * </ol>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -69,7 +69,10 @@ public class FileProcessor extends ProjectProcessor {
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
 
-	/** Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}. */
+	/**
+	 * Temporary directory name for documentation inputs under
+	 * {@link #MACHAI_TEMP_DIR}.
+	 */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Resource bundle supplying prompt templates for generators. */
@@ -94,7 +97,7 @@ public class FileProcessor extends ProjectProcessor {
 	private boolean moduleMultiThread;
 
 	/** Optional additional instructions appended to each prompt. */
-	private String instructions;
+	private String instructions = StringUtils.EMPTY;
 
 	/** Whether to persist the composed inputs to a per-file log. */
 	private boolean logInputs;
@@ -182,11 +185,12 @@ public class FileProcessor extends ProjectProcessor {
 	 *
 	 * <p>
 	 * Note: callers may pass a raw directory (e.g. {@code src}) or a {@code glob:}
-	 * / {@code regex:} pattern supported by {@link FileSystems#getPathMatcher(String)}.
+	 * / {@code regex:} pattern supported by
+	 * {@link FileSystems#getPathMatcher(String)}.
 	 * </p>
 	 *
-	 * @param rootDir  the root directory of the project to scan
-	 * @param pattern  file glob/regex pattern or start directory
+	 * @param rootDir the root directory of the project to scan
+	 * @param pattern file glob/regex pattern or start directory
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File rootDir, String pattern) throws IOException {
@@ -346,8 +350,8 @@ public class FileProcessor extends ProjectProcessor {
 	 * Processes files in a project directory matching a provided pattern or
 	 * directory.
 	 *
-	 * @param layout       project layout
-	 * @param filePattern  directory path, {@code glob:}, or {@code regex:} pattern
+	 * @param layout      project layout
+	 * @param filePattern directory path, {@code glob:}, or {@code regex:} pattern
 	 */
 	public void processProjectDir(ProjectLayout layout, String filePattern) {
 		try {
@@ -387,7 +391,8 @@ public class FileProcessor extends ProjectProcessor {
 			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
 
-			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), "");
+			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
+					instructions);
 			provider.instructions(effectiveInstructions);
 
 			String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
@@ -401,11 +406,6 @@ public class FileProcessor extends ProjectProcessor {
 			provider.prompt(guidance);
 
 			provider.prompt(promptBundle.getString("output_format"));
-
-			String additionalInstructions = StringUtils.trimToNull(this.instructions);
-			if (additionalInstructions != null) {
-				provider.prompt(additionalInstructions);
-			}
 
 			if (isLogInputs()) {
 				String inputsFileName = ProjectLayout.getRelatedPath(rootDir, file);
@@ -493,9 +493,8 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
-		List<File> files = new ArrayList<>((List<File>) FileUtils.listFilesAndDirs(dir, TrueFileFilter.INSTANCE,
-				DirectoryFileFilter.DIRECTORY));
+		List<File> files = new ArrayList<>(
+				(List<File>) FileUtils.listFilesAndDirs(dir, TrueFileFilter.INSTANCE, DirectoryFileFilter.DIRECTORY));
 
 		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 
@@ -667,9 +666,9 @@ public class FileProcessor extends ProjectProcessor {
 	 * Each item may be:
 	 * </p>
 	 * <ul>
-	 *   <li>a URL ({@code http://} or {@code https://})</li>
-	 *   <li>a file path</li>
-	 *   <li>raw instruction text (fallback if location cannot be read)</li>
+	 * <li>a URL ({@code http://} or {@code https://})</li>
+	 * <li>a file path</li>
+	 * <li>raw instruction text (fallback if location cannot be read)</li>
 	 * </ul>
 	 *
 	 * @param instructions locations or raw strings
@@ -742,8 +741,8 @@ public class FileProcessor extends ProjectProcessor {
 	 * Each entry may be:
 	 * </p>
 	 * <ul>
-	 *   <li>a {@code glob:} or {@code regex:} matcher expression</li>
-	 *   <li>an exact relative path (compared using {@link Strings#CS})</li>
+	 * <li>a {@code glob:} or {@code regex:} matcher expression</li>
+	 * <li>an exact relative path (compared using {@link Strings#CS})</li>
 	 * </ul>
 	 *
 	 * @param excludes exclude list

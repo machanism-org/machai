@@ -70,7 +70,7 @@ public final class Ghostwriter {
 				// the property file is not defined, ignore.
 			}
 		} catch (Exception e) {
-			// configuration file not found.
+			// Configuration file not found. An alternative configuration method will be used.
 		}
 	}
 
