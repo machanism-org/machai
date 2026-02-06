@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
@@ -60,59 +62,81 @@ public class CommandFunctionTools {
 	 * @return command output (stdout and, on non-zero exit, stderr)
 	 */
 	private String executeCommand(Object[] params) {
-		logger.info("Run shell command: {}", Arrays.toString(params));
+
+		String commandId = Integer.toHexString(new Random().nextInt());
+
+		logger.info("Run shell command [{}]: {}", commandId, Arrays.toString(params));
 
 		String command = ((JsonNode) params[0]).get("command").asText();
 		File workingDir = (File) params[1];
 
-		StringBuilder output = new StringBuilder();
-		StringBuilder errorOutput = new StringBuilder();
-
 		// Prepare shell command
 		String shellCommand;
 		if (SystemUtils.IS_OS_WINDOWS) {
-			shellCommand = "cmd /c" + command;
+			shellCommand = "cmd /c " + command;
 		} else {
-			shellCommand = "sh -c" + command;
+			shellCommand = "sh -c " + command;
 		}
 
+		StringBuilder output = new StringBuilder();
+		StringBuilder errorOutput = new StringBuilder();
+
 		try {
-			Process process = Runtime.getRuntime().exec(shellCommand, null, workingDir);
+			Map<String, String> envMap = System.getenv();
+			String[] envArray = envMap.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
+					.toArray(String[]::new);
 
-			// Read standard output
-			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					output.append(line).append(System.lineSeparator());
-					logger.info("[CMD] {}", line);
+			Process process = Runtime.getRuntime().exec(shellCommand, envArray, workingDir);
+
+			Thread stdoutThread = new Thread(() -> {
+				try (BufferedReader reader = new BufferedReader(
+						new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+					String line;
+					while ((line = reader.readLine()) != null) {
+						output.append(line).append(System.lineSeparator());
+						logger.info("[CMD {}] {}", commandId, line);
+					}
+				} catch (IOException e) {
+					logger.error("[CMD {}] Error reading stdout", commandId, e);
 				}
-			}
+			});
 
-			// Read error output
-			try (BufferedReader errorReader = new BufferedReader(
-					new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
-				String line;
-				while ((line = errorReader.readLine()) != null) {
-					errorOutput.append(line).append(System.lineSeparator());
-					logger.error("[CMD] Error output: {}", line);
+			Thread stderrThread = new Thread(() -> {
+				try (BufferedReader errorReader = new BufferedReader(
+						new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
+					String line;
+					while ((line = errorReader.readLine()) != null) {
+						errorOutput.append(line).append(System.lineSeparator());
+						logger.error("[CMD {}] Error output: {}", commandId, line);
+					}
+				} catch (IOException e) {
+					logger.error("[CMD {}] Error reading stderr", commandId, e);
 				}
-			}
+			});
 
+			// Start both threads
+			stdoutThread.start();
+			stderrThread.start();
+
+			// Wait for both threads to finish
+			stdoutThread.join();
+			stderrThread.join();
+
+			// Wait for the process to finish
 			int exitCode = process.waitFor();
 			output.append("Command exited with code: ").append(exitCode).append(System.lineSeparator());
-
 			if (errorOutput.length() > 0) {
 				output.append("Error output: ").append(errorOutput);
 			}
 
 			return output.toString();
+
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			logger.error("Command execution interrupted", e);
+			logger.error("[CMD " + commandId + "] Command execution interrupted", e);
 			return output.append("Interrupted: ").append(e.getMessage()).toString();
 		} catch (IOException e) {
-			logger.error("IO error during command execution", e);
+			logger.error("[CMD " + commandId + "] IO error during command execution", e);
 			return output.append("IO Error: ").append(e.getMessage()).toString();
 		}
 	}

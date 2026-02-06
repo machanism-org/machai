@@ -408,7 +408,6 @@ public class FileProcessor extends ProjectProcessor {
 			String guidance = parseFile(projectDir, file);
 
 			if (guidance != null) {
-				logger.info("Processing file: {}", file.getAbsolutePath());
 				perform = process(projectLayout, file, guidance);
 			} else if (defaultGuidance != null) {
 				String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), file,
@@ -536,8 +535,8 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		List<File> files = new ArrayList<>(
-				(List<File>) FileUtils.listFilesAndDirs(dir, TrueFileFilter.INSTANCE, DirectoryFileFilter.DIRECTORY));
+		List<File> files = new ArrayList<>(FileUtils.listFilesAndDirs(dir, TrueFileFilter.INSTANCE,
+				DirectoryFileFilter.DIRECTORY));
 
 		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 
