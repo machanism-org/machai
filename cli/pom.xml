@@ -21,7 +21,6 @@
 	<properties>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<maven.compiler.release>17</maven.compiler.release>
-		<ae.dir>../genai-client/src/main/ae</ae.dir>
 	</properties>
 
 	<profiles>
@@ -83,30 +82,6 @@
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>ghostwriter</artifactId>
 			<version>0.0.8-SNAPSHOT</version>
-		</dependency>
-
-		<!-- ae dependencies (provided) -->
-		<dependency>
-			<groupId>com.ganteater</groupId>
-			<artifactId>anteater-cli</artifactId>
-			<version>1.2.9</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-simple</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.ganteater.plugins</groupId>
-			<artifactId>web-ae-plugin</artifactId>
-			<version>1.2.9</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>

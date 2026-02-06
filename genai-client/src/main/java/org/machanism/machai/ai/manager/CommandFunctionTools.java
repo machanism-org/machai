@@ -21,14 +21,16 @@ import com.google.common.collect.Lists;
 /**
  * Installs a command-execution tool into a {@link GenAIProvider}.
  *
- * <p>The installed tool is intended to execute shell commands from a controlled working directory. The actual
- * allow/deny policy is provider- or caller-defined; this class focuses on wiring the tool and running the
+ * <p>
+ * The installed tool is intended to execute shell commands from a controlled
+ * working directory. The actual allow/deny policy is provider- or
+ * caller-defined; this class focuses on wiring the tool and running the
  * process.
  *
  * <h2>Installed tool</h2>
  * <ul>
- * <li>{@code run_command_line_tool} – executes a shell command and returns stdout (and a non-zero exit code note
- * when applicable).</li>
+ * <li>{@code run_command_line_tool} – executes a shell command and returns
+ * stdout (and a non-zero exit code note when applicable).</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -52,7 +54,8 @@ public class CommandFunctionTools {
 	/**
 	 * Executes the supplied shell command and returns its output.
 	 *
-	 * <p>Expected parameters:
+	 * <p>
+	 * Expected parameters:
 	 * <ol>
 	 * <li>{@link JsonNode} containing {@code command}</li>
 	 * <li>{@link File} working directory</li>
@@ -65,21 +68,11 @@ public class CommandFunctionTools {
 		logger.info("Run shell command: {}", Arrays.toString(params));
 
 		String command = ((JsonNode) params[0]).get("command").asText();
+		File workingDir = (File) params[1];
+
 		StringBuilder output = new StringBuilder();
-		String os = System.getProperty("os.name").toLowerCase();
 		try {
-			List<String> argList;
-			if (os.contains("win")) {
-				argList = Lists.asList("cmd", "/c", CommandLineUtils.translateCommandline(command));
-			} else {
-				argList = Lists.asList("sh", "-c", CommandLineUtils.translateCommandline(command));
-			}
-
-			ProcessBuilder processBuilder = new ProcessBuilder(argList);
-			File workingDir = (File) params[1];
-			processBuilder.directory(workingDir);
-
-			Process process = processBuilder.start();
+			Process process = Runtime.getRuntime().exec("cmd /c " + command, null, workingDir);
 
 			try (InputStream inputStream = process.getInputStream();
 					InputStreamReader in = new InputStreamReader(inputStream);
@@ -100,18 +93,18 @@ public class CommandFunctionTools {
 				output.append("Command exited with code: ").append(exitCode);
 				if (StringUtils.isNotBlank(errorString)) {
 					output.append("\r\nError output: ").append(errorString);
+					logger.info("[CMD] Error output: {}", errorString);
 				}
 			}
 
 			String result = output.toString();
-			logger.debug(result);
 			return result;
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			String result = output.toString();
 			logger.debug(result, e);
 			return result;
-		} catch (IOException | CommandLineException e) {
+		} catch (IOException e) {
 			String result = output.toString();
 			logger.debug(result, e);
 			return result;

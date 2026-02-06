@@ -20,7 +20,6 @@
 		<maven.version>3.6.0</maven.version>
 		<stagingDirectory>${env.MACHAI_SITE}</stagingDirectory>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
-		<ae.dir>genai-client/src/main/ae</ae.dir>
 	</properties>
 
 	<profiles>
@@ -49,7 +48,7 @@
 							<doclint>none</doclint>
 							<show>package</show>
 							<useStandardDocletOptions>true</useStandardDocletOptions>
-							<bottom><![CDATA[&copy;2025 Machanism.org. All Rights Reserved.]]></bottom>
+							<bottom><![CDATA[&copy;2025-2026 Machanism.org. All Rights Reserved.]]></bottom>
 							<header><![CDATA[<h1><a href="${project.url}">${project.name}<a></h1>]]></header>
 						</configuration>
 						<executions>

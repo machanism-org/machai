@@ -14,7 +14,6 @@
 	<properties>
 		<maven.compiler.release>11</maven.compiler.release>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
-		<ae.dir>../genai-client/src/main/ae</ae.dir>
 	</properties>
 
 	<profiles>

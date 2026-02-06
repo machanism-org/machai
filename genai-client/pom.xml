@@ -23,7 +23,6 @@
 	<properties>
 		<maven.compiler.release>11</maven.compiler.release>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
-		<ae.dir>src/main/ae</ae.dir>
 	</properties>
 
 	<dependencies>
@@ -59,12 +58,6 @@
 					<artifactId>commons-logging</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.ganteater.plugins</groupId>
-			<artifactId>web-ae-plugin</artifactId>
-			<version>1.2.9</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
