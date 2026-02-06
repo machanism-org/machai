@@ -1,8 +1,6 @@
 package org.machanism.machai.gw;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -14,11 +12,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,26 +100,37 @@ public final class Ghostwriter {
 		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
-				.optionalArg(true).build();
+		        .desc("Enable multi-threaded processing to improve performance (default: true).")
+		        .hasArg(true)
+		        .optionalArg(true)
+		        .build();
 
 		Option rootDirOpt = new Option("r", "root", true,
-				"Specify the path to the root directory for file processing.");
+		        "Specify the path to the root directory for file processing.");
+
 		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt("instructions")
-				.desc("Specify additional instructions by URL or file path. "
-						+ "To provide multiple locations, separate them with a comma (`,`). "
-						+ "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
-				.hasArg(true).optionalArg(true).build();
+		        .desc("Specify additional instructions as plain text, by URL, or by file path. "
+		            + "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
+		            + "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
+		            + "To provide multiple locations, separate them with a comma (`,`). "
+		            + "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
+		        .hasArg(true)
+		        .optionalArg(true)
+		        .build();
 
 		Option excludesOpt = new Option("e", "excludes", true,
-				"Specify a list of directories to exclude from processing. You can provide multiple directories separated by commas or by repeating the option.");
+		        "Specify a list of directories to exclude from processing. You can provide multiple directories separated by commas or by repeating the option.");
 
 		Option guidanceOpt = Option.builder("g").longOpt("guidance")
-				.desc("Specify the default guidance file to apply as a final step for the current directory. "
-						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
-				.hasArg(true).optionalArg(true).build();
+		        .desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
+		            + "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
+		            + "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
+		            + "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
+		        .hasArg(true)
+		        .optionalArg(true)
+		        .build();
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
