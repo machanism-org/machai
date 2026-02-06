@@ -79,7 +79,6 @@ public class CommandFunctionTools {
 		}
 
 		StringBuilder output = new StringBuilder();
-		StringBuilder errorOutput = new StringBuilder();
 
 		try {
 			Map<String, String> envMap = System.getenv();
@@ -94,7 +93,7 @@ public class CommandFunctionTools {
 					String line;
 					while ((line = reader.readLine()) != null) {
 						output.append(line).append(System.lineSeparator());
-						logger.info("[CMD {}] {}", commandId, line);
+						logger.info("[CMD {}] [OUTPUT] {}", commandId, line);
 					}
 				} catch (IOException e) {
 					logger.error("[CMD {}] Error reading stdout", commandId, e);
@@ -106,8 +105,8 @@ public class CommandFunctionTools {
 						new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
 					String line;
 					while ((line = errorReader.readLine()) != null) {
-						errorOutput.append(line).append(System.lineSeparator());
-						logger.error("[CMD {}] Error output: {}", commandId, line);
+						output.append(line).append(System.lineSeparator());
+						logger.error("[CMD {}] [ERROR] {}", commandId, line);
 					}
 				} catch (IOException e) {
 					logger.error("[CMD {}] Error reading stderr", commandId, e);
@@ -125,10 +124,6 @@ public class CommandFunctionTools {
 			// Wait for the process to finish
 			int exitCode = process.waitFor();
 			output.append("Command exited with code: ").append(exitCode).append(System.lineSeparator());
-			if (errorOutput.length() > 0) {
-				output.append("Error output: ").append(errorOutput);
-			}
-
 			return output.toString();
 
 		} catch (InterruptedException e) {
