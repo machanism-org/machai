@@ -1,12 +1,12 @@
 package org.machanism.machai.project.layout;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.slf4j.Logger;
@@ -88,17 +88,6 @@ public class MavenProjectLayout extends ProjectLayout {
 			} catch (Exception e) {
 				if (effectivePomRequired) {
 					model = new PomReader().getProjectModel(file, false);
-					Build build = model.getBuild();
-					if (build == null) {
-						build = new Build();
-						model.setBuild(build);
-					}
-					if (build.getSourceDirectory() == null) {
-						build.setSourceDirectory(new File(getProjectDir(), "src/main/java").getAbsolutePath());
-					}
-					if (build.getTestSourceDirectory() == null) {
-						build.setTestSourceDirectory(new File(getProjectDir(), "src/test/java").getAbsolutePath());
-					}
 				} else {
 					throw e;
 				}
@@ -147,16 +136,26 @@ public class MavenProjectLayout extends ProjectLayout {
 
 		Model model = getModel();
 		Build build = model.getBuild();
-		if (build != null) {
-			String sourceDirectory = build.getSourceDirectory();
-			if (sourceDirectory != null) {
-				sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(sourceDirectory)));
-			}
-			if (build.getResources() != null) {
-				sources.addAll(build.getResources().stream().map(r -> r.getDirectory())
-						.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p)))
-						.collect(Collectors.toList()));
-			}
+		if (build == null) {
+			build = new Build();
+			model.setBuild(build);
+		}
+
+		if (build.getSourceDirectory() == null) {
+			build.setSourceDirectory(new File(getProjectDir(), "src/main/java").getAbsolutePath());
+		}
+		if (build.getTestSourceDirectory() == null) {
+			build.setTestSourceDirectory(new File(getProjectDir(), "src/test/java").getAbsolutePath());
+		}
+
+		String sourceDirectory = build.getSourceDirectory();
+		if (sourceDirectory != null) {
+			sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(sourceDirectory)));
+		}
+		if (build.getResources() != null) {
+			sources.addAll(build.getResources().stream().map(r -> r.getDirectory())
+					.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p)))
+					.collect(Collectors.toList()));
 		}
 		return sources;
 	}
@@ -200,5 +199,17 @@ public class MavenProjectLayout extends ProjectLayout {
 	@Override
 	public MavenProjectLayout projectDir(File projectDir) {
 		return (MavenProjectLayout) super.projectDir(projectDir);
+	}
+
+	@Override
+	public String getProjectId() {
+		Model model = getModel();
+		return StringUtils.defaultString(model.getGroupId()) + ":" + StringUtils.defaultString(model.getArtifactId())
+				+ ":" + StringUtils.defaultString(model.getVersion());
+	}
+
+	@Override
+	public String getProjectName() {
+		return getModel().getName();
 	}
 }

@@ -135,4 +135,12 @@ public abstract class ProjectLayout {
 		return result;
 	}
 
+	public String getProjectName() {
+		return null;
+	}
+
+	public String getProjectId() {
+		return null;
+	}
+
 }
