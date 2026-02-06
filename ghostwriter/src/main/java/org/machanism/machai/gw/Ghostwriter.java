@@ -111,26 +111,25 @@ public final class Ghostwriter {
 		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt("instructions")
-		        .desc("Specify additional instructions as plain text, by URL, or by file path. "
-		            + "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
-		            + "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
-		            + "To provide multiple locations, separate them with a comma (`,`). "
-		            + "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
-		        .hasArg(true)
-		        .optionalArg(true)
-		        .build();
+			    .desc("Specify additional instructions as plain text, by URL, or by file path. "
+			        + "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
+			        + "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
+			        + "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
+			    .hasArg(true)
+			    .optionalArg(true)
+			    .build();
 
-		Option excludesOpt = new Option("e", "excludes", true,
-		        "Specify a list of directories to exclude from processing. You can provide multiple directories separated by commas or by repeating the option.");
+			Option excludesOpt = new Option("e", "excludes", true,
+			    "Specify a list of directories to exclude from processing. You can provide multiple directories by repeating the option.");
 
-		Option guidanceOpt = Option.builder("g").longOpt("guidance")
-		        .desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
-		            + "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
-		            + "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
-		            + "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
-		        .hasArg(true)
-		        .optionalArg(true)
-		        .build();
+			Option guidanceOpt = Option.builder("g").longOpt("guidance")
+			    .desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
+			        + "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
+			        + "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
+			        + "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
+			    .hasArg(true)
+			    .optionalArg(true)
+			    .build();
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
