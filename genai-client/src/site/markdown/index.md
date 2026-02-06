@@ -27,13 +27,17 @@ Page Structure:
 
 ## Introduction
 
-GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers foundational prompt management and (provider-dependent) embeddings, tools/function calling, and file context to enable AI-powered features across applications.
+GenAI Client is a Java library for integrating with Generative AI providers through a small, stable API (`GenAIProvider`). It provides foundational prompt management and (provider-dependent) support for embeddings, tool/function calling, and file context so you can add AI-powered features without hard-coupling your code to a single vendor.
 
-The primary benefit is a stable, small API (`GenAIProvider`) that lets you swap or combine different backends (API-based providers and UI/web-automation providers) without hard-coupling your code to a single vendor.
+The main benefit is provider portability: you can swap or combine backends (API-based providers like OpenAI-compatible endpoints, and UI/web-automation providers) by changing configuration rather than application code.
 
 ## Overview
 
-GenAI Client exposes an API centered on the `GenAIProvider` interface. Provider implementations are resolved by name through `GenAIProviderManager`, configured with a model (or provider-specific configuration), and executed via `perform()`.
+GenAI Client is centered around the `GenAIProvider` interface.
+
+- Provider implementations are resolved by name using `GenAIProviderManager`.
+- You configure a provider with a model (or provider-specific configuration) and optional session settings.
+- You execute a request via `perform()`.
 
 This design provides:
 
@@ -66,13 +70,14 @@ This design provides:
 
 | Variable | Required | Used by | Description |
 |---|---:|---|---|
-| `OPENAI_API_KEY` | Yes | OpenAI | API key (or access token) used to authenticate requests. |
+| `OPENAI_API_KEY` | Conditional | OpenAI / OpenAI-compatible | API key (or access token) used to authenticate requests. |
 | `OPENAI_ORG_ID` | No | OpenAI | Optional organization identifier. |
 | `OPENAI_PROJECT_ID` | No | OpenAI | Optional project identifier. |
-| `OPENAI_BASE_URL` | No | OpenAI / CodeMie | Override API base URL (useful for OpenAI-compatible gateways). |
+| `OPENAI_BASE_URL` | No | OpenAI / OpenAI-compatible | Override API base URL (useful for OpenAI-compatible gateways). |
 | `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token. |
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token. |
-| `recipes` | No | Web | Java system property to override the recipes/config location (relative to `workingDir`); defaults to `genai-client/src/main/resources`. |
+
+> Note: The Web provider uses Anteater recipes and is typically configured via `model(...)` and JVM system properties (for example, `-Drecipes=...`) rather than environment variables.
 
 ### Basic Usage
 
@@ -134,9 +139,9 @@ The `OpenAIProvider` integrates with the OpenAI API as a concrete implementation
 It supports:
 
 - Sending prompts and receiving responses from OpenAI chat models.
-- Uploading local files or referencing remote files by URL (provider-dependent on OpenAI API capabilities).
+- Managing files for use in OpenAI workflows (upload local files or reference remote files by URL).
 - Tool (function) calling with registered Java functions.
-- Creating text embeddings.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
 **Environment Variables**
 

@@ -2,16 +2,12 @@
  * Provides file-format-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations used by the
  * Ghostwriter {@code review} step.
  *
- * <p>The {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) is responsible for
- * scanning project files, detecting embedded {@code @guidance} instructions (according to each file format's
- * comment conventions), and producing a normalized prompt fragment for downstream pipeline stages.
+ * <p>Types in this package read project files, detect embedded {@code @guidance} instructions using each format's
+ * comment conventions, and produce normalized prompt fragments for downstream pipeline stages.
  *
- * <p>Reviewers typically include enough context for later steps to act deterministically, such as the
- * project-relative path (via {@link org.machanism.machai.project.layout.ProjectLayout}) and either the full file
- * content or the extracted guidance text.
- *
- * <p>Typical supported formats in this package include Java source (including {@code package-info.java}),
- * Markdown, HTML/XML, Python, TypeScript, and dedicated plain-text guidance files.
+ * <p>Reviewers generally include enough context for later steps to act deterministically, such as the
+ * project-relative path (via {@link org.machanism.machai.project.layout.ProjectLayout}) and, depending on the
+ * format, either the full file contents or only the extracted guidance block.
  */
 package org.machanism.machai.gw.reviewer;
 

@@ -26,15 +26,15 @@
  */
 
 /**
- * Provides the Bindex subsystem used by MachAI workflows to create, persist, register, and query a
- * machine-consumable project index ({@code bindex.json}).
+ * Provides the Bindex subsystem used by MachAI workflows to build, persist, register, and query
+ * project indexes ({@code bindex.json}).
  *
- * <p>The types in this package are responsible for:
+ * <p>The types in this package typically:
  * <ul>
- *   <li>building an on-disk {@code bindex.json} for a
+ *   <li>build and update an on-disk {@code bindex.json} for a
  *       {@link org.machanism.machai.project.layout.ProjectLayout},</li>
- *   <li>registering that index with a backing store (for example, MongoDB with vector search), and</li>
- *   <li>selecting relevant registered indexes via semantic search and dependency expansion so they can be assembled
+ *   <li>register that index with a backing store (for example, MongoDB with vector search), and</li>
+ *   <li>select relevant registered indexes via semantic search and dependency expansion so they can be assembled
  *       into inputs for prompt execution.</li>
  * </ul>
  *

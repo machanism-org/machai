@@ -25,25 +25,26 @@
 */
 
 /**
- * Maven plugin goal for running an AI-assisted project assembly workflow.
+ * Maven Mojo implementations for running an AI-assisted project assembly workflow.
  *
  * <p>
- * This package contains the {@link org.machanism.machai.maven.Assembly} Maven {@code Mojo}, which implements the
- * {@code assembly} goal.
+ * This package provides the Maven plugin entry points (Mojo goals) that integrate the MachAI assembly workflow into a
+ * Maven build. The primary goal reads or requests an assembly prompt, optionally performs a library recommendation
+ * step, and then executes an assembly process against the Maven project base directory.
  * </p>
+ *
+ * <h2>Goals</h2>
+ * <ul>
+ *   <li>{@code assembly} &ndash; Recommend libraries and run an AI-driven assembly process against a project folder.</li>
+ * </ul>
  *
  * <h2>Workflow</h2>
  * <ol>
  *   <li>Acquire an assembly prompt from {@code project.txt} (by default) or request it interactively.</li>
- *   <li>Use a picker model to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).</li>
- *   <li>Filter recommendations by score threshold.</li>
+ *   <li>Optionally use a picker model to recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries).</li>
+ *   <li>Filter recommendations by a score threshold.</li>
  *   <li>Run the application assembly workflow against the Maven execution base directory.</li>
  * </ol>
- *
- * <h2>Goal</h2>
- * <ul>
- *   <li>{@code assembly} &ndash; Recommend libraries and run an AI-driven assembly process against a project folder.</li>
- * </ul>
  *
  * <h2>Plugin parameters</h2>
  * <p>

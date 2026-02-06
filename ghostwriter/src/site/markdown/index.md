@@ -71,9 +71,9 @@ Examples (Windows):
 
 ```bat
 java -jar gw.jar C:\projects\project
-java -r C:\projects\project -jar gw.jar src/project
-java -r C:\projects\project -jar gw.jar "glob:**/*.java"
-java -r C:\projects\project -jar gw.jar "regex:^.*\/[^\/]+\.java$"
+java -jar gw.jar -r C:\projects\project src\project
+java -jar gw.jar -r C:\projects\project "glob:**/*.java"
+java -jar gw.jar -r C:\projects\project "regex:^.*\/[^\/]+\.java$"
 ```
 
 ### Typical Workflow

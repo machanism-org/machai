@@ -33,23 +33,22 @@
  *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
  */
 /**
- * Command-line interface (CLI) orchestration for the Ghostwriter document scanning tool.
+ * Command-line orchestration for the Ghostwriter workspace scanner.
  *
  * <p>
- * The package provides the CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the workspace
- * processor ({@link org.machanism.machai.gw.FileProcessor}) responsible for traversing a project, extracting
- * embedded {@code @guidance:} blocks, and submitting per-file prompts to a configured GenAI provider.
+ * This package contains the CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the core
+ * processing engine ({@link org.machanism.machai.gw.FileProcessor}) used to traverse a project workspace,
+ * extract embedded {@code @guidance:} blocks from supported files, and submit per-file prompts to a
+ * configured GenAI provider.
  * </p>
  *
- * <p>
- * At a high level, these components:
- * </p>
+ * <h2>Responsibilities</h2>
  * <ul>
- *   <li>parse runtime parameters (scan roots/patterns, excludes, provider/model, instructions and guidance)</li>
- *   <li>discover modules and traverse the project workspace</li>
- *   <li>delegate file parsing to {@code Reviewer} implementations loaded via {@code ServiceLoader}</li>
- *   <li>compose prompts from project layout, embedded guidance, and output requirements</li>
- *   <li>execute requests against the configured GenAI provider</li>
+ *   <li>Parse runtime parameters (root directory, scan patterns, excludes, provider/model, instructions).</li>
+ *   <li>Discover modules via {@code ProjectLayout} and scan modules and non-module files.</li>
+ *   <li>Delegate file parsing to {@code Reviewer} implementations loaded via {@code ServiceLoader}.</li>
+ *   <li>Compose provider inputs (system instructions, OS and project layout context, file guidance, output format).</li>
+ *   <li>Optionally log the composed provider inputs for traceability.</li>
  * </ul>
  */
 package org.machanism.machai.gw;

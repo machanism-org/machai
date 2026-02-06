@@ -141,11 +141,12 @@ public class WebProvider extends NoneProvider {
 	 */
 	@Override
 	public void model(String configName) {
-		if (WebProvider.configName != null && !StringUtils.equals(WebProvider.configName, configName)) {
-			throw new IllegalArgumentException("Configuration change detected. Requested: `" + configName
+		String trimmedConfigName = StringUtils.trimToNull(configName);
+		if (WebProvider.configName != null && !StringUtils.equals(WebProvider.configName, trimmedConfigName)) {
+			throw new IllegalArgumentException("Configuration change detected. Requested: `" + trimmedConfigName
 					+ "`; currently in use: `" + WebProvider.configName + "`.");
 		}
-		WebProvider.configName = StringUtils.trimToNull(configName);
+		WebProvider.configName = trimmedConfigName;
 	}
 
 	/**

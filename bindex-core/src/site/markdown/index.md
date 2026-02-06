@@ -27,9 +27,9 @@ Page Structure:
 
 ## Introduction
 
-Bindex Core (`bindex-core`) is a Java library that provides core functionality for bindex metadata management—generation, registration, library selection, and project assembly.
+Bindex Core (`bindex-core`) provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly.
 
-It helps tooling in the Machanism ecosystem automate how library metadata is produced and consumed, enabling more reliable discovery, integration, and assembly workflows across modules and dependencies.
+It enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.
 
 ## Overview
 

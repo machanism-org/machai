@@ -11,7 +11,7 @@ Typical use cases:
 - Apply repeatable team guidance and ad-hoc instructions to produce consistent doc updates.
 
 Key features:
-- Scans directories and supports path patterns (e.g., "glob:" and "regex:" targets).
+- Scans project directories and supports path patterns (e.g., "glob:" and "regex:" targets).
 - Uses embedded guidance tags to drive consistent documentation output.
 - Supports configurable GenAI provider/model selection.
 - Accepts external instructions via URL(s) or file path(s), or via interactive stdin.

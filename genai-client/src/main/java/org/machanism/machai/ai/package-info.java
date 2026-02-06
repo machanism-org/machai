@@ -27,8 +27,8 @@
 /**
  * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
- * <p>This package contains provider-neutral abstractions intended for application code that builds requests and
- * consumes responses without coupling to a specific vendor SDK.
+ * <p>This package defines provider-neutral abstractions that application code can use to build requests and
+ * consume responses without coupling to a specific vendor SDK.
  *
  * <h2>Responsibilities</h2>
  * <ul>

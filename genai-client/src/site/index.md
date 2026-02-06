@@ -49,7 +49,7 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` class integrates with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
 This provider enables a wide range of generative AI capabilities, including:
 
@@ -60,7 +60,7 @@ This provider enables a wide range of generative AI capabilities, including:
 
 By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
 
-Environment variables
+Environment Variables
 
 The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
 

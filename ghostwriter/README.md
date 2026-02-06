@@ -21,13 +21,13 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is a CLI documentation engine that scans directories (or `glob:`/`regex:` path patterns) under a chosen root directory, applies embedded guidance tags plus optional instructions/default guidance, and produces documentation updates while logging its work.
+Ghostwriter is a CLI documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. It processes one or more scan targets (directory paths or `glob:`/`regex:` path patterns) under a chosen root directory, applies optional instructions and optional default guidance, then produces documentation updates while logging its work.
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
+Ghostwriter is an advanced documentation engine that helps you keep documentation consistent and up to date across large codebases by turning structured, in-repo guidance into repeatable, automatable documentation updates.
 
-It helps you keep documentation consistent and up to date across large codebases by turning structured, in-repo guidance into repeatable, automatable documentation updates.
+It is designed for both local use and CI pipelines where you want deterministic, scriptable documentation review and regeneration.
 
 ## Usage
 
@@ -41,9 +41,9 @@ Examples (Windows):
 
 ```bat
 java -jar gw.jar C:\projects\project
-java -r C:\projects\project -jar gw.jar src/project
-java -r C:\projects\project -jar gw.jar "glob:**/*.java"
-java -r C:\projects\project -jar gw.jar "regex:^.*\/[^\/]+\.java$"
+java -jar gw.jar -r C:\projects\project src\project
+java -jar gw.jar -r C:\projects\project "glob:**/*.java"
+java -jar gw.jar -r C:\projects\project "regex:^.*\/[^\/]+\.java$"
 ```
 
 ### Typical Workflow

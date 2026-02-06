@@ -292,23 +292,31 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private boolean match(File file) {
-		boolean result = true;
+		if (file == null) {
+			return false;
+		}
+
 		String path = ProjectLayout.getRelatedPath(rootDir, file);
 		if (Strings.CI.containsAny(file.getAbsolutePath(), ProjectLayout.EXCLUDE_DIRS)) {
-			result = false;
-		} else if (pathMatcher != null) {
-			result = pathMatcher.matches(Path.of(path));
+			return false;
+		}
 
-			if (!result && scanDir != null) {
-				String relatedPath = ProjectLayout.getRelatedPath(file, scanDir);
-				if (relatedPath != null) {
-					String normalizedFileAbsolutePath = file.getAbsolutePath().replace("\\", "/");
-					String scanPath = normalizedFileAbsolutePath + "/" + relatedPath;
-					String relatedToRoot = ProjectLayout.getRelatedPath(rootDir, new File(scanPath));
-					result = pathMatcher.matches(Path.of(relatedToRoot));
-				}
+		if (pathMatcher == null) {
+			return true;
+		}
+
+		boolean result = pathMatcher.matches(Path.of(path));
+
+		if (!result && scanDir != null) {
+			String relatedPath = ProjectLayout.getRelatedPath(file, scanDir);
+			if (relatedPath != null) {
+				String normalizedFileAbsolutePath = file.getAbsolutePath().replace("\\", "/");
+				String scanPath = normalizedFileAbsolutePath + "/" + relatedPath;
+				String relatedToRoot = ProjectLayout.getRelatedPath(rootDir, new File(scanPath));
+				result = pathMatcher.matches(Path.of(relatedToRoot));
 			}
 		}
+
 		return result;
 	}
 
@@ -492,19 +500,17 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private String parseFile(File projectDir, File file) throws IOException {
-		String result = null;
-
-		if (file.isFile()) {
-			String extension = FilenameUtils.getExtension(file.getName());
-			Reviewer reviewer = getReviewerForExtension(extension);
-			if (reviewer == null) {
-				return null;
-			}
-
-			result = reviewer.perform(projectDir, file);
+		if (!file.isFile()) {
+			return null;
 		}
 
-		return result;
+		String extension = FilenameUtils.getExtension(file.getName());
+		Reviewer reviewer = getReviewerForExtension(extension);
+		if (reviewer == null) {
+			return null;
+		}
+
+		return reviewer.perform(projectDir, file);
 	}
 
 	private Reviewer getReviewerForExtension(String extension) {
