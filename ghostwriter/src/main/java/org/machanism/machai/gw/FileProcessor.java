@@ -544,7 +544,7 @@ public class FileProcessor extends ProjectProcessor {
 		for (File file : files) {
 			String path = ProjectLayout.getRelatedPath(projectDir, file);
 
-			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(new File(path))) {
+			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(Path.of(path))) {
 				continue;
 			}
 
@@ -573,7 +573,7 @@ public class FileProcessor extends ProjectProcessor {
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
 			String name = file.getName();
-			File relatedPath = new File(ProjectLayout.getRelatedPath(rootDir, file));
+			Path relatedPath = Path.of(ProjectLayout.getRelatedPath(rootDir, file));
 
 			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(relatedPath)) {
 				continue;
@@ -589,20 +589,22 @@ public class FileProcessor extends ProjectProcessor {
 		return result;
 	}
 
-	private boolean shouldExcludePath(File path) {
-		if (excludes != null) {
-			Path pathToMatch = path == null ? null : path.toPath();
-			for (String exclude : excludes) {
-				PathMatcher matcher = getPatternPath(exclude);
-				if (matcher != null) {
-					if (pathToMatch != null && matcher.matches(pathToMatch)) {
-						return true;
-					}
-				} else {
-					if (path != null && Strings.CS.equals(path.getPath(), exclude)) {
-						return true;
-					}
+	private boolean shouldExcludePath(Path path) {
+		if (excludes == null || excludes.length == 0) {
+			return false;
+		}
+
+		for (String exclude : excludes) {
+			PathMatcher matcher = getPatternPath(exclude);
+			if (matcher != null) {
+				if (path != null && matcher.matches(path)) {
+					return true;
 				}
+				continue;
+			}
+
+			if (path != null && Strings.CS.equals(path.toString(), exclude)) {
+				return true;
 			}
 		}
 
@@ -618,15 +620,14 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private PathMatcher getPatternPath(String path) {
-		PathMatcher matcher = null;
 		if (StringUtils.isBlank(path)) {
 			return null;
 		}
 		if (isPathPattern(path)) {
-			matcher = FileSystems.getDefault().getPathMatcher(path);
+			return FileSystems.getDefault().getPathMatcher(path);
 		}
 
-		return matcher;
+		return null;
 	}
 
 	/**
@@ -683,31 +684,24 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Sets the instructions for this object by processing the provided input string.
-	 * <p>
-	 * The input {@code instructions} string is parsed line by line using the {@link #parseLines(String)} method:
-	 * <ul>
-	 *   <li>If the input is {@code null}, the instructions are set to an empty string.</li>
-	 *   <li>For each line in the input:
-	 *     <ul>
-	 *       <li>If the line is blank or contains only whitespace, a line break is appended to the result.</li>
-	 *       <li>If the line contains content, {@code tryToGetInstructionsFromFile} is called to extract instructions:
-	 *         <ul>
-	 *           <li>If the line starts with {@code "http://"} or {@code "https://"}, content is read from the specified HTTP URL.</li>
-	 *           <li>If the line starts with {@code "file:"}, the file path is extracted and content is read from the specified file.</li>
-	 *           <li>Otherwise, the line itself is used as the instruction.</li>
-	 *         </ul>
-	 *         If instructions are found, they are appended to the result, followed by a line break.
-	 *       </li>
-	 *     </ul>
-	 *   </li>
-	 * </ul>
-	 * The final processed instructions string, which may include content from URLs, files, or plain text, is stored in this object.
+	 * Sets the instructions string used by this processor.
 	 *
-	 * @param instructions the input string containing instructions, which may include plain text, URLs, or file paths
+	 * <p>
+	 * The provided input is parsed line-by-line:
+	 * </p>
+	 * <ul>
+	 * <li>Blank lines are preserved as line breaks.</li>
+	 * <li>Lines starting with {@code http://} or {@code https://} are treated as
+	 * URLs and the referenced content is included.</li>
+	 * <li>Lines starting with {@code file:} are treated as file references and the
+	 * referenced content is included.</li>
+	 * <li>All other lines are included as-is.</li>
+	 * </ul>
+	 *
+	 * @param instructions instructions input (plain text, URL, or {@code file:})
 	 */
 	public void setInstructions(String instructions) {
-	    this.instructions = parseLines(instructions);
+		this.instructions = parseLines(instructions);
 	}
 
 	/**
@@ -743,50 +737,33 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Sets the default guidance for this object by processing the provided input string.
-	 * <p>
-	 * The input {@code defaultGuidance} string is parsed line by line using the {@link #parseLines(String)} method:
-	 * <ul>
-	 *   <li>If the input is {@code null}, the default guidance is set to an empty string.</li>
-	 *   <li>For each line in the input:
-	 *     <ul>
-	 *       <li>If the line is blank or contains only whitespace, a line break is appended to the result.</li>
-	 *       <li>If the line contains content, {@code tryToGetInstructionsFromFile} is called to extract guidance:
-	 *         <ul>
-	 *           <li>If the line starts with {@code "http://"} or {@code "https://"}, content is read from the specified HTTP URL.</li>
-	 *           <li>If the line starts with {@code "file:"}, the file path is extracted and content is read from the specified file.</li>
-	 *           <li>Otherwise, the line itself is used as the guidance.</li>
-	 *         </ul>
-	 *         If guidance is found, it is appended to the result, followed by a line break.
-	 *       </li>
-	 *     </ul>
-	 *   </li>
-	 * </ul>
-	 * The final processed guidance string, which may include content from URLs, files, or plain text, is stored in this object.
+	 * Sets the default guidance applied when a file contains no embedded guidance.
 	 *
-	 * @param defaultGuidance the input string containing default guidance, which may include plain text, URLs, or file paths
+	 * <p>
+	 * The provided input is parsed line-by-line:
+	 * </p>
+	 * <ul>
+	 * <li>Blank lines are preserved as line breaks.</li>
+	 * <li>Lines starting with {@code http://} or {@code https://} are treated as
+	 * URLs and the referenced content is included.</li>
+	 * <li>Lines starting with {@code file:} are treated as file references and the
+	 * referenced content is included.</li>
+	 * <li>All other lines are included as-is.</li>
+	 * </ul>
+	 *
+	 * @param defaultGuidance default guidance input (plain text, URL, or
+	 *                        {@code file:})
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
 		this.defaultGuidance = parseLines(defaultGuidance);
 	}
 
 	/**
-	 * Parses the input string line by line, normalizes each line, and attempts to
-	 * extract instructions from each line.
-	 * <p>
-	 * For each line in the input:
-	 * <ul>
-	 * <li>If the line is blank or contains only whitespace, a line break is
-	 * appended to the result.</li>
-	 * <li>If the line contains content, {@code tryToGetInstructionsFromFile} is
-	 * called to extract instructions. If instructions are found, they are appended
-	 * to the result, followed by a line break.</li>
-	 * </ul>
-	 * If the input {@code data} is {@code null}, an empty string is returned.
+	 * Parses input line-by-line and expands any {@code http(s)://} or {@code file:}
+	 * references.
 	 *
-	 * @param data the input string to be parsed, potentially containing multiple
-	 *             lines
-	 * @return a string containing the processed instructions and line breaks
+	 * @param data raw input
+	 * @return expanded content with preserved line breaks
 	 */
 	private String parseLines(String data) {
 		if (data == null) {
@@ -876,24 +853,17 @@ public class FileProcessor extends ProjectProcessor {
 
 	/**
 	 * Attempts to retrieve instructions from the given data string.
-	 * <p>
-	 * The method processes the input as follows:
-	 * <ul>
-	 * <li>If {@code data} is {@code null}, returns {@code null}.</li>
-	 * <li>If {@code data} starts with {@code "http://"} or {@code "https://"},
-	 * reads content from the specified HTTP URL.</li>
-	 * <li>If {@code data} starts with {@code "file:"}, extracts the file path and
-	 * reads content from the specified file.</li>
-	 * <li>Otherwise, returns the input {@code data} as is.</li>
-	 * </ul>
-	 * <p>
-	 * If the input is an invalid URL, an {@link IllegalArgumentException} is
-	 * thrown.
 	 *
-	 * @param data the input string, which may be a URL, a file path, or plain text
-	 * @return the instructions read from the URL or file, or the original data if
-	 *         not a URL or file path; {@code null} if input is {@code null}
-	 * @throws IllegalArgumentException if the input is an invalid URL
+	 * <ul>
+	 * <li>If {@code data} starts with {@code http://} or {@code https://}, reads
+	 * content from the specified URL.</li>
+	 * <li>If {@code data} starts with {@code file:}, reads content from the
+	 * specified file path.</li>
+	 * <li>Otherwise, returns {@code data}.</li>
+	 * </ul>
+	 *
+	 * @param data input string (URL, {@code file:} reference, or plain text)
+	 * @return content read from the URL/file, or the original input
 	 */
 	private static String tryToGetInstructionsFromFile(String data) {
 		if (data == null) {

@@ -21,13 +21,13 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is a CLI documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. It processes one or more scan targets (directory paths or `glob:`/`regex:` path patterns) under a chosen root directory, applies optional instructions and optional default guidance, then produces documentation updates while logging its work.
+Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
+
+It is a CLI that processes one or more scan targets (directory paths or path patterns) under a root directory. It applies optional instructions and optional default guidance, then produces documentation updates while logging its work. It is designed for both local use and CI pipelines where you want deterministic, scriptable documentation review and regeneration.
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine that helps you keep documentation consistent and up to date across large codebases by turning structured, in-repo guidance into repeatable, automatable documentation updates.
-
-It is designed for both local use and CI pipelines where you want deterministic, scriptable documentation review and regeneration.
+Ghostwriter helps you keep documentation consistent and up to date across large codebases by turning structured, in-repo guidance into repeatable, automatable documentation updates.
 
 ## Usage
 

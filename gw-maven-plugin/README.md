@@ -30,7 +30,7 @@ Ghostwriter Maven Plugin (GW Maven Plugin) is an advanced documentation automati
 Key features:
 
 - Generates and refreshes Maven Site pages from embedded `@guidance:` comments
-- Scans sources and resources to discover `@guidance:` directives
+- Scans project sources and resources to discover `@guidance:` directives
 - Integrates with standard Maven Site workflows to keep documentation aligned with the code
 
 ## Installation Instructions
@@ -38,7 +38,7 @@ Key features:
 ### Prerequisites
 
 - Git
-- Java 11+ (project is built with `maven.compiler.release=11`)
+- Java 11+ (the project builds with `maven.compiler.release=11`)
 - Maven 3+
 
 ### Checkout

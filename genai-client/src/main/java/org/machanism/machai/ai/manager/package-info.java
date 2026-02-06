@@ -28,16 +28,15 @@
 /**
  * Provider discovery, configuration, and host-side tool wiring for generative AI integrations.
  *
- * <p>This package defines the {@link org.machanism.machai.ai.manager.GenAIProvider} contract and the
- * {@link org.machanism.machai.ai.manager.GenAIProviderManager} entry point used to resolve a provider from a
- * {@code Provider:Model} identifier (or a fully-qualified class name), instantiate it, and apply the selected
- * model.
+ * <p>This package contains the {@link org.machanism.machai.ai.manager.GenAIProvider} SPI and the
+ * {@link org.machanism.machai.ai.manager.GenAIProviderManager} factory that resolves a provider from a
+ * {@code Provider:Model} identifier (or a fully qualified class name), instantiates it, initializes it from a
+ * {@link org.machanism.macha.core.commons.configurator.Configurator}, and applies the chosen model.
  *
- * <p>It also contains optional host-executed tool installers ({@link org.machanism.machai.ai.manager.FileFunctionTools},
+ * <p>It also provides optional host-executed tool installers ({@link org.machanism.machai.ai.manager.FileFunctionTools},
  * {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
  * {@link org.machanism.machai.ai.manager.SystemFunctionTools}) that register functions via
  * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
- * These tools are executed by the hosting JVM and are intended to be exposed only in controlled environments.
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
@@ -52,7 +51,7 @@
  * String response = provider.perform();
  * }</pre>
  *
- * <p><strong>Security note:</strong> tool functions execute on the hosting machine. Restrict allowed paths,
- * working directories, and commands according to your security requirements.
+ * <p><strong>Security note:</strong> tool functions execute on the hosting machine. Expose them only in
+ * trusted environments and enforce appropriate allow/deny policies for paths and commands.
  */
 package org.machanism.machai.ai.manager;

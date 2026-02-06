@@ -1,16 +1,13 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>This package provides:
+ * <p>This package centers on {@link org.machanism.machai.project.ProjectLayout}, a model of a project's on-disk
+ * structure (for example Maven, JavaScript/Node, Python, or a default/fallback layout). A
+ * {@link org.machanism.machai.project.ProjectLayoutManager} can inspect a candidate project root directory and
+ * select an appropriate {@link org.machanism.machai.project.ProjectLayout} implementation.
  *
- * <ul>
- *   <li>A {@link org.machanism.machai.project.ProjectLayout} abstraction for describing the on-disk structure of a
- *       project (for example Maven, JavaScript/Node, Python, or a default/fallback layout).</li>
- *   <li>A {@link org.machanism.machai.project.ProjectLayoutManager} for detecting an appropriate
- *       {@link org.machanism.machai.project.ProjectLayout} for a given project root directory.</li>
- *   <li>A {@link org.machanism.machai.project.ProjectProcessor} for scanning and processing a project using the
- *       detected layout.</li>
- * </ul>
+ * <p>Once a layout has been chosen, {@link org.machanism.machai.project.ProjectProcessor} can scan a project using
+ * that layout and perform processing work over the discovered sources and resources.
  *
  * <h2>Typical usage</h2>
  *

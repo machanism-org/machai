@@ -27,28 +27,36 @@
  */
 
 /**
- * Web-automation-backed implementations of {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Web-automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>This package contains providers that automate a generative AI service through its web UI using
- * <a href="https://ganteater.com">Anteater</a> workspaces and recipes.
+ * <p>Types in this package integrate with <a href="https://ganteater.com">Anteater</a> to automate a target
+ * generative-AI service via its web user interface. Automation logic lives in Anteater recipes; this package bridges the
+ * {@code GenAIProvider} API to those recipes.
  *
- * <p>The primary entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which manages a shared
- * Anteater workspace and exposes a prompt/response API.
+ * <h2>Key concepts</h2>
+ * <ul>
+ *   <li><strong>Configuration/model</strong>: an Anteater workspace configuration name set via
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
+ *   <li><strong>Workspace start directory</strong>: derived from the working directory passed to
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)} and the optional system
+ *       property {@code recipes} (default: {@code genai-client/src/main/resources}).</li>
+ *   <li><strong>Recipe execution</strong>: prompts are submitted by running the {@code "Submit Prompt"} recipe via
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}.</li>
+ * </ul>
  *
  * <h2>Typical usage</h2>
- * <ol>
- *   <li>Select a model/recipe configuration with {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
- *   <li>Set the Anteater workspace project directory with
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}.</li>
- *   <li>Submit the prompt with {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}, which runs the
- *       {@code "Submit Prompt"} recipe.</li>
- * </ol>
+ * <pre>{@code
+ * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
+ * provider.model("config.yaml");
+ * provider.setWorkingDir(new File("/path/to/project"));
+ * String response = provider.perform();
+ * }</pre>
  *
  * <h2>Lifecycle and constraints</h2>
  * <ul>
- *   <li>The underlying Anteater workspace is stored in static state; configuration and working directory are intended
- *       to be set once per JVM.</li>
- *   <li>Changing the configuration or working directory after initialization is not supported and results in an error.</li>
+ *   <li>The underlying Anteater workspace is held in static state and is intended to be initialized once per JVM.</li>
+ *   <li>Changing the model/configuration or working directory after initialization is not supported and results in an
+ *       {@link java.lang.IllegalArgumentException}.</li>
  *   <li>Call {@link org.machanism.machai.ai.provider.web.WebProvider#close()} to release workspace resources.</li>
  * </ul>
  */

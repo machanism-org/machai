@@ -96,7 +96,7 @@ Ghostwriter is configured via command-line options and (optionally) a properties
 | `-r`, `--root <path>` | yes | From `gw.properties` key `root`; otherwise: current user directory (`user.dir`). | Root directory used to compute and validate scan targets. Scan targets must be within this root. |
 | `-t`, `--threads[=true|false]` | optional | `true` | Enable/disable multi-threaded processing. If provided without a value, it is treated as enabled. Use `--threads=false` to disable. |
 | `-a`, `--genai <provider:model>` | yes | From `gw.properties` key `genai`; otherwise: `OpenAI:gpt-5-mini`. | Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`). |
-| `-i`, `--instructions[=<url|file>[,<url|file>...]]` | optional | From `gw.properties` key `instructions` (comma-separated); otherwise: none. | Additional instruction locations (URL or file path). Multiple values are comma-separated. If used without a value, Ghostwriter reads instruction text from stdin (EOF-terminated). Relative file paths are resolved against the execution directory. |
+| `-i`, `--instructions[=<url|file>]` | optional | From `gw.properties` key `instructions`; otherwise: none. | Additional instruction location(s) (URL or file path). If the option is present without a value, Ghostwriter reads instruction text from stdin (EOF-terminated). |
 | `-g`, `--guidance[=<file>]` | optional | From `gw.properties` key `guidance`; otherwise: none. | Default guidance applied as a final step per directory. If provided with a value, it is treated as a guidance file path (relative paths resolved against the execution directory). If used without a value, Ghostwriter reads guidance text from stdin (EOF-terminated). |
 | `-e`, `--excludes <dir[,dir...]>` | yes | From `gw.properties` key `excludes` (comma-separated); otherwise: none. | Comma-separated list of directories to exclude from processing. |
 | `-l`, `--logInputs` | no | `false` | Log LLM request inputs to dedicated log files. |
@@ -107,7 +107,7 @@ Ghostwriter is configured via command-line options and (optionally) a properties
 java -jar gw.jar "glob:**/*.md" \
   --root "/path/to/repo" \
   --genai "OpenAI:gpt-5.1" \
-  --instructions "https://example.com/team-guidelines.md,docs/extra-instructions.md" \
+  --instructions "https://example.com/team-guidelines.md" \
   --guidance docs/default-guidance.md \
   --excludes "target,node_modules" \
   --threads=false \

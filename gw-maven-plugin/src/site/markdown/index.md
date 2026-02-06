@@ -68,7 +68,7 @@ Add the plugin to your `pom.xml`:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>REPLACE_WITH_LATEST_VERSION</version>
+  <version>0.0.8-SNAPSHOT</version>
 </plugin>
 ```
 
@@ -100,7 +100,7 @@ Example configuration:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>REPLACE_WITH_LATEST_VERSION</version>
+  <version>0.0.8-SNAPSHOT</version>
   <configuration>
     <genai>CodeMie:gpt-5-2-2025-12-11</genai>
     <serverId>CodeMie</serverId>

@@ -72,7 +72,7 @@ Value proposition:
 ### Basic Usage
 
 ```bash
-mvn org.machanism.machai:assembly-maven-plugin:0.0.8-SNAPSHOT:assembly
+mvn org.machanism.machai:assembly-maven-plugin:assembly
 ```
 
 ### Typical Workflow
@@ -97,7 +97,7 @@ Common parameters:
 ### Example
 
 ```bash
-mvn org.machanism.machai:assembly-maven-plugin:0.0.8-SNAPSHOT:assembly \
+mvn org.machanism.machai:assembly-maven-plugin:assembly \
   -Dassembly.prompt.file=project.txt \
   -Dassembly.genai=OpenAI:gpt-5 \
   -Dpick.genai=OpenAI:gpt-5-mini \

@@ -28,7 +28,7 @@ Page Structure:
 
 ## Introduction
 
-Machai CLI is a command-line application for generating, registering, and managing library metadata within the Machanism ecosystem. It uses GenAI-assisted workflows to automate metadata generation, guided file processing, and semantic search so teams can discover and integrate reusable libraries (“bricks”) faster.
+Machai CLI is a command-line application for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI-assisted workflows to automate metadata generation, guided file processing, and semantic search so teams can discover and integrate reusable libraries ("bricks") faster.
 
 Use it to keep project metadata up to date, publish it to a shared registry for reuse, and interactively discover and assemble libraries by intent.
 
@@ -78,7 +78,7 @@ Set the following environment variables according to your chosen GenAI provider:
 
 | Variable Name | Description |
 |---|---|
-| `OPENAI_API_KEY` | API key for authenticating requests to the configured GenAI provider (e.g., OpenAI, Azure OpenAI, etc.). |
+| `OPENAI_API_KEY` | API key for authenticating requests to the configured GenAI provider (for example, OpenAI, Azure OpenAI, etc.). |
 | `BINDEX_REG_PASSWORD` | Password required for database write access, specifically for metadata registration operations. |
 | `GENAI_USERNAME` | Username for authenticating with CodeMie (when using the CodeMie integration). |
 | `GENAI_PASSWORD` | Password for authenticating with CodeMie (when using the CodeMie integration). |
@@ -125,7 +125,7 @@ java -jar machai.jar
 
 | Parameter | Description | Default |
 |---|---|---|
-| `--dir` | Working directory used by commands that operate on a project/workspace (e.g., `bindex`, `register`, `assembly`). | Current directory |
+| `--dir` | Working directory used by commands that operate on a project/workspace (for example, `bindex`, `register`, `assembly`). | Current directory |
 | `--registerUrl` | Base URL of the metadata database used for `register`, `pick`, and related operations. | (none) |
 | `--update` | When `true`, updates existing `bindex.json` instead of generating from scratch. | `false` |
 | `--query` | Natural-language query string or a prompt file path used by `pick`. | (none) |

@@ -1,24 +1,34 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains the CLI entry point and the Spring Shell command components that expose Machai
- * capabilities through either an interactive shell (REPL) or non-interactive invocation suitable for scripts
- * and build tooling.
+ * <p>This package contains the Spring Boot entry point and Spring Shell command components that expose
+ * Machai features through an interactive REPL or non-interactive command execution.
  *
- * <h2>Entry point</h2>
- * <p>Launch the CLI from your own {@code main} method or directly from the provided entry point:</p>
+ * <h2>Key components</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.cli.MachaiCLI} – application entry point that boots Spring Boot and loads
+ *       optional system properties from {@code machai.properties}.</li>
+ *   <li>{@link org.machanism.machai.cli.ConfigCommand} – reads/writes persistent CLI defaults such as the
+ *       working directory, GenAI provider/model, and semantic-search score threshold.</li>
+ *   <li>{@link org.machanism.machai.cli.AssembyCommand} – picks libraries (Bindexes) from a prompt and assembles
+ *       a project using a GenAI provider.</li>
+ *   <li>{@link org.machanism.machai.cli.BindexCommand} – generates and registers bindex metadata for projects.</li>
+ *   <li>{@link org.machanism.machai.cli.GWCommand} – processes documents/files with the Ghostwriter pipeline.</li>
+ *   <li>{@link org.machanism.machai.cli.CleanCommand} – removes Machai temporary directories (e.g. {@code .machai}).</li>
+ * </ul>
+ *
+ * <h2>Typical usage</h2>
+ * <p>The CLI is usually started via the {@code MachaiCLI} main class and then commands are invoked within the
+ * Spring Shell environment:</p>
  *
  * <pre>
- * public final class Main {
- *   public static void main(String[] args) {
- *     org.machanism.machai.cli.MachaiCLI.main(args);
- *   }
- * }
+ * config genai OpenAI:gpt-5.1
+ * bindex --dir ./my-project
+ * pick --query "Create a web app" --score 0.9
+ * assembly --dir ./out
+ * gw --dir ./my-project --scan ./my-project/docs
+ * clean --dir ./my-project
  * </pre>
- *
- * <h2>Commands</h2>
- * <p>Once started, commands are contributed by Spring Shell components in this package. Commands may be executed
- * interactively (REPL) or non-interactively by passing arguments to the entry point.</p>
  */
 package org.machanism.machai.cli;
 
