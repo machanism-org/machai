@@ -683,12 +683,31 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Sets additional instructions appended to each GenAI request.
+	 * Sets the instructions for this object by processing the provided input string.
+	 * <p>
+	 * The input {@code instructions} string is parsed line by line using the {@link #parseLines(String)} method:
+	 * <ul>
+	 *   <li>If the input is {@code null}, the instructions are set to an empty string.</li>
+	 *   <li>For each line in the input:
+	 *     <ul>
+	 *       <li>If the line is blank or contains only whitespace, a line break is appended to the result.</li>
+	 *       <li>If the line contains content, {@code tryToGetInstructionsFromFile} is called to extract instructions:
+	 *         <ul>
+	 *           <li>If the line starts with {@code "http://"} or {@code "https://"}, content is read from the specified HTTP URL.</li>
+	 *           <li>If the line starts with {@code "file:"}, the file path is extracted and content is read from the specified file.</li>
+	 *           <li>Otherwise, the line itself is used as the instruction.</li>
+	 *         </ul>
+	 *         If instructions are found, they are appended to the result, followed by a line break.
+	 *       </li>
+	 *     </ul>
+	 *   </li>
+	 * </ul>
+	 * The final processed instructions string, which may include content from URLs, files, or plain text, is stored in this object.
 	 *
-	 * @param instructions free-form instruction text
+	 * @param instructions the input string containing instructions, which may include plain text, URLs, or file paths
 	 */
 	public void setInstructions(String instructions) {
-		this.instructions = parseLines(instructions);
+	    this.instructions = parseLines(instructions);
 	}
 
 	/**
@@ -724,15 +743,51 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Sets the default guidance that is used when a file contains no embedded
-	 * guidance.
+	 * Sets the default guidance for this object by processing the provided input string.
+	 * <p>
+	 * The input {@code defaultGuidance} string is parsed line by line using the {@link #parseLines(String)} method:
+	 * <ul>
+	 *   <li>If the input is {@code null}, the default guidance is set to an empty string.</li>
+	 *   <li>For each line in the input:
+	 *     <ul>
+	 *       <li>If the line is blank or contains only whitespace, a line break is appended to the result.</li>
+	 *       <li>If the line contains content, {@code tryToGetInstructionsFromFile} is called to extract guidance:
+	 *         <ul>
+	 *           <li>If the line starts with {@code "http://"} or {@code "https://"}, content is read from the specified HTTP URL.</li>
+	 *           <li>If the line starts with {@code "file:"}, the file path is extracted and content is read from the specified file.</li>
+	 *           <li>Otherwise, the line itself is used as the guidance.</li>
+	 *         </ul>
+	 *         If guidance is found, it is appended to the result, followed by a line break.
+	 *       </li>
+	 *     </ul>
+	 *   </li>
+	 * </ul>
+	 * The final processed guidance string, which may include content from URLs, files, or plain text, is stored in this object.
 	 *
-	 * @param defaultGuidance guidance text to apply by default
+	 * @param defaultGuidance the input string containing default guidance, which may include plain text, URLs, or file paths
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
 		this.defaultGuidance = parseLines(defaultGuidance);
 	}
 
+	/**
+	 * Parses the input string line by line, normalizes each line, and attempts to
+	 * extract instructions from each line.
+	 * <p>
+	 * For each line in the input:
+	 * <ul>
+	 * <li>If the line is blank or contains only whitespace, a line break is
+	 * appended to the result.</li>
+	 * <li>If the line contains content, {@code tryToGetInstructionsFromFile} is
+	 * called to extract instructions. If instructions are found, they are appended
+	 * to the result, followed by a line break.</li>
+	 * </ul>
+	 * If the input {@code data} is {@code null}, an empty string is returned.
+	 *
+	 * @param data the input string to be parsed, potentially containing multiple
+	 *             lines
+	 * @return a string containing the processed instructions and line breaks
+	 */
 	private String parseLines(String data) {
 		if (data == null) {
 			return StringUtils.EMPTY;
@@ -819,6 +874,27 @@ public class FileProcessor extends ProjectProcessor {
 		this.moduleThreadTimeoutMinutes = moduleThreadTimeoutMinutes;
 	}
 
+	/**
+	 * Attempts to retrieve instructions from the given data string.
+	 * <p>
+	 * The method processes the input as follows:
+	 * <ul>
+	 * <li>If {@code data} is {@code null}, returns {@code null}.</li>
+	 * <li>If {@code data} starts with {@code "http://"} or {@code "https://"},
+	 * reads content from the specified HTTP URL.</li>
+	 * <li>If {@code data} starts with {@code "file:"}, extracts the file path and
+	 * reads content from the specified file.</li>
+	 * <li>Otherwise, returns the input {@code data} as is.</li>
+	 * </ul>
+	 * <p>
+	 * If the input is an invalid URL, an {@link IllegalArgumentException} is
+	 * thrown.
+	 *
+	 * @param data the input string, which may be a URL, a file path, or plain text
+	 * @return the instructions read from the URL or file, or the original data if
+	 *         not a URL or file path; {@code null} if input is {@code null}
+	 * @throws IllegalArgumentException if the input is an invalid URL
+	 */
 	private static String tryToGetInstructionsFromFile(String data) {
 		if (data == null) {
 			return null;

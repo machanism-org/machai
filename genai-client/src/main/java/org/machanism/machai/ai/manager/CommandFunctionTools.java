@@ -65,60 +65,55 @@ public class CommandFunctionTools {
 		String command = ((JsonNode) params[0]).get("command").asText();
 		File workingDir = (File) params[1];
 
-	    StringBuilder output = new StringBuilder();
-	    StringBuilder errorOutput = new StringBuilder();
+		StringBuilder output = new StringBuilder();
+		StringBuilder errorOutput = new StringBuilder();
 
-	    // Prepare shell command
-	    String shellCommand;
-	    if (SystemUtils.IS_OS_WINDOWS) {
-	        shellCommand = "cmd /c" + command;
-	    } else {
-	        shellCommand = "sh -c" + command;
-	    }
+		// Prepare shell command
+		String shellCommand;
+		if (SystemUtils.IS_OS_WINDOWS) {
+			shellCommand = "cmd /c" + command;
+		} else {
+			shellCommand = "sh -c" + command;
+		}
 
-	try
+		try {
+			Process process = Runtime.getRuntime().exec(shellCommand, null, workingDir);
 
-	{
-		Process process = Runtime.getRuntime().exec(shellCommand, null, workingDir);
-
-		// Read standard output
-		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				output.append(line).append(System.lineSeparator());
-				logger.info("[CMD] {}", line);
+			// Read standard output
+			try (BufferedReader reader = new BufferedReader(
+					new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					output.append(line).append(System.lineSeparator());
+					logger.info("[CMD] {}", line);
+				}
 			}
-		}
 
-		// Read error output
-		try (BufferedReader errorReader = new BufferedReader(
-				new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
-			String line;
-			while ((line = errorReader.readLine()) != null) {
-				errorOutput.append(line).append(System.lineSeparator());
-				logger.error("[CMD] Error output: {}", line);
+			// Read error output
+			try (BufferedReader errorReader = new BufferedReader(
+					new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
+				String line;
+				while ((line = errorReader.readLine()) != null) {
+					errorOutput.append(line).append(System.lineSeparator());
+					logger.error("[CMD] Error output: {}", line);
+				}
 			}
+
+			int exitCode = process.waitFor();
+			output.append("Command exited with code: ").append(exitCode).append(System.lineSeparator());
+
+			if (errorOutput.length() > 0) {
+				output.append("Error output: ").append(errorOutput);
+			}
+
+			return output.toString();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			logger.error("Command execution interrupted", e);
+			return output.append("Interrupted: ").append(e.getMessage()).toString();
+		} catch (IOException e) {
+			logger.error("IO error during command execution", e);
+			return output.append("IO Error: ").append(e.getMessage()).toString();
 		}
-
-		int exitCode = process.waitFor();
-		output.append("Command exited with code: ").append(exitCode).append(System.lineSeparator());
-
-		if (errorOutput.length() > 0) {
-			output.append("Error output: ").append(errorOutput);
-		}
-
-		return output.toString();
-	}catch(
-	InterruptedException e)
-	{
-		Thread.currentThread().interrupt();
-		logger.error("Command execution interrupted", e);
-		return output.append("Interrupted: ").append(e.getMessage()).toString();
-	}catch(
-	IOException e)
-	{
-		logger.error("IO error during command execution", e);
-		return output.append("IO Error: ").append(e.getMessage()).toString();
 	}
-}}
+}
