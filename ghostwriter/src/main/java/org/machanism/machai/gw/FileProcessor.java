@@ -202,14 +202,16 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	public void scanDocuments(File rootDir, String scanDir) throws IOException {
 
-		if (!isPathPattern(scanDir)) {
-			this.scanDir = new File(scanDir);
-			String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(scanDir));
+		if (!Strings.CS.equals(rootDir.getAbsolutePath(), scanDir)) {
+			if (!isPathPattern(scanDir)) {
+				this.scanDir = new File(scanDir);
+				String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(scanDir));
 
-			scanDir = "glob:" + relatedPath + "{,/**}";
+				scanDir = "glob:" + relatedPath + "{,/**}";
+			}
+
+			this.pathMatcher = FileSystems.getDefault().getPathMatcher(scanDir);
 		}
-
-		this.pathMatcher = FileSystems.getDefault().getPathMatcher(scanDir);
 
 		this.rootDir = rootDir;
 		scanFolder(rootDir);
