@@ -728,9 +728,22 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private String parseLines(String data) {
+		if (data == null) {
+			return StringUtils.EMPTY;
+		}
+
 		StringBuilder sb = new StringBuilder();
 		data.lines().forEach(line -> {
-			sb.append(tryToGetInstructionsFromFile(line));
+			String normalizedLine = StringUtils.stripToNull(line);
+			if (normalizedLine == null) {
+				sb.append("\r\n");
+				return;
+			}
+
+			String content = tryToGetInstructionsFromFile(normalizedLine);
+			if (content != null) {
+				sb.append(content);
+			}
 			sb.append("\r\n");
 		});
 
@@ -801,69 +814,73 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private static String tryToGetInstructionsFromFile(String data) {
-		String result = null;
-
-		if (data != null) {
-			try {
-				if (data.startsWith("http://") || data.startsWith("https://")) {
-					try (InputStream in = new URL(data).openStream()) {
-						result = IOUtils.toString(in, StandardCharsets.UTF_8);
-						logger.info("Included: `{}`", data);
-
-					} catch (IOException e) {
-						URL url = new URL(data);
-
-						String userInfo = url.getUserInfo();
-						if (userInfo != null) {
-							try {
-								URLConnection connection;
-
-								// Remove user info from URL for connection
-								String cleanUrl = data.replaceFirst("//" + userInfo + "@", "//");
-								URL urlNoAuth = new URL(cleanUrl);
-								connection = urlNoAuth.openConnection();
-
-								// Encode user info for Basic Auth
-								String basicToken = Base64.getEncoder()
-										.encodeToString(userInfo.getBytes(StandardCharsets.UTF_8));
-								connection.setRequestProperty("Authorization", "Basic " + basicToken);
-
-								try (InputStream in = connection.getInputStream()) {
-									result = IOUtils.toString(in, StandardCharsets.UTF_8);
-									logger.info("Included: `{}`", url);
-								}
-
-							} catch (IOException ex) {
-								throw new IllegalArgumentException("Invalid basic auth token in URL: " + data, e);
-							}
-						} else {
-							throw new IllegalArgumentException("Invalid URL: " + data, e);
-						}
-					}
-				} else {
-					if (Strings.CS.startsWith(data.trim(), "file:")) {
-						data = StringUtils.substringAfter(data, "file:");
-						File file = new File(data);
-						if (file.exists()) {
-							try (FileReader reader = new FileReader(file)) {
-								result = IOUtils.toString(reader);
-							} catch (IOException e) {
-								throw new IllegalArgumentException("Failed to read file: " + file.getAbsolutePath(), e);
-							}
-							logger.info("Included: `{}`", data);
-
-						} else {
-							throw new IllegalArgumentException("File not found: " + file.getAbsolutePath());
-						}
-
-					} else {
-						result = data;
-					}
-				}
-			} catch (MalformedURLException e1) {
-				throw new IllegalArgumentException("Invalid basic auth token in URL: " + data, e1);
-			}
+		if (data == null) {
+			return null;
 		}
-		return result;
+
+		try {
+			if (data.startsWith("http://") || data.startsWith("https://")) {
+				return readFromHttpUrl(data);
+			}
+
+			String trimmed = data.trim();
+			if (Strings.CS.startsWith(trimmed, "file:")) {
+				String filePath = StringUtils.substringAfter(trimmed, "file:");
+				return readFromFilePath(filePath);
+			}
+
+			return data;
+		} catch (MalformedURLException e) {
+			throw new IllegalArgumentException("Invalid URL: " + data, e);
+		}
+	}
+
+	private static String readFromHttpUrl(String urlString) throws MalformedURLException {
+		URL url = new URL(urlString);
+		try (InputStream in = url.openStream()) {
+			String result = IOUtils.toString(in, StandardCharsets.UTF_8);
+			logger.info("Included: `{}`", urlString);
+			return result;
+		} catch (IOException e) {
+			String userInfo = url.getUserInfo();
+			if (userInfo == null) {
+				throw new IllegalArgumentException("Invalid URL: " + urlString, e);
+			}
+			return readFromHttpUrlWithBasicAuth(urlString, url, userInfo, e);
+		}
+	}
+
+	private static String readFromHttpUrlWithBasicAuth(String urlString, URL url, String userInfo, IOException cause) {
+		try {
+			String cleanUrl = urlString.replaceFirst("//" + userInfo + "@", "//");
+			URL urlNoAuth = new URL(cleanUrl);
+			URLConnection connection = urlNoAuth.openConnection();
+
+			String basicToken = Base64.getEncoder().encodeToString(userInfo.getBytes(StandardCharsets.UTF_8));
+			connection.setRequestProperty("Authorization", "Basic " + basicToken);
+
+			try (InputStream in = connection.getInputStream()) {
+				String result = IOUtils.toString(in, StandardCharsets.UTF_8);
+				logger.info("Included: `{}`", url);
+				return result;
+			}
+		} catch (IOException ex) {
+			throw new IllegalArgumentException("Invalid basic auth token in URL: " + urlString, cause);
+		}
+	}
+
+	private static String readFromFilePath(String filePath) {
+		File file = new File(filePath);
+		if (!file.exists()) {
+			throw new IllegalArgumentException("File not found: " + file.getAbsolutePath());
+		}
+
+		try (FileReader reader = new FileReader(file)) {
+			String result = IOUtils.toString(reader);
+			logger.info("Included: `{}`", filePath);
+			return result;
+		} catch (IOException e) {
+			throw new IllegalArgumentException("Failed to read file: " + file.getAbsolutePath(), e);
+		}
 	}
 }

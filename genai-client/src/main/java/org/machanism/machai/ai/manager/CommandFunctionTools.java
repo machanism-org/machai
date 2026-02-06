@@ -1,36 +1,31 @@
 package org.machanism.machai.ai.manager;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.maven.shared.utils.cli.CommandLineException;
-import org.apache.maven.shared.utils.cli.CommandLineUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Lists;
 
 /**
  * Installs a command-execution tool into a {@link GenAIProvider}.
  *
  * <p>
- * The installed tool is intended to execute shell commands from a controlled
- * working directory. The actual allow/deny policy is provider- or
- * caller-defined; this class focuses on wiring the tool and running the
- * process.
+ * The installed tool executes a shell command in the provider working directory
+ * supplied at runtime. This class performs the process execution and output
+ * capture; any command allow/deny policy must be enforced by the caller and/or
+ * the hosting environment.
  *
  * <h2>Installed tool</h2>
  * <ul>
  * <li>{@code run_command_line_tool} – executes a shell command and returns
- * stdout (and a non-zero exit code note when applicable).</li>
+ * stdout (and stderr on failure)</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -62,7 +57,7 @@ public class CommandFunctionTools {
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return command output (stdout and, on failure, stderr)
+	 * @return command output (stdout and, on non-zero exit, stderr)
 	 */
 	private String executeCommand(Object[] params) {
 		logger.info("Run shell command: {}", Arrays.toString(params));
@@ -70,44 +65,60 @@ public class CommandFunctionTools {
 		String command = ((JsonNode) params[0]).get("command").asText();
 		File workingDir = (File) params[1];
 
-		StringBuilder output = new StringBuilder();
-		try {
-			Process process = Runtime.getRuntime().exec("cmd /c " + command, null, workingDir);
+	    StringBuilder output = new StringBuilder();
+	    StringBuilder errorOutput = new StringBuilder();
 
-			try (InputStream inputStream = process.getInputStream();
-					InputStreamReader in = new InputStreamReader(inputStream);
-					BufferedReader reader = new BufferedReader(in)) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					output.append(line).append("\n");
-					logger.info("[CMD] {}", line);
-				}
+	    // Prepare shell command
+	    String shellCommand;
+	    if (SystemUtils.IS_OS_WINDOWS) {
+	        shellCommand = "cmd /c" + command;
+	    } else {
+	        shellCommand = "sh -c" + command;
+	    }
+
+	try
+
+	{
+		Process process = Runtime.getRuntime().exec(shellCommand, null, workingDir);
+
+		// Read standard output
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				output.append(line).append(System.lineSeparator());
+				logger.info("[CMD] {}", line);
 			}
-
-			int exitCode = process.waitFor();
-
-			if (exitCode != 0) {
-				ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
-				process.getErrorStream().transferTo(errorOutput);
-				String errorString = errorOutput.toString().replace("\0", "");
-				output.append("Command exited with code: ").append(exitCode);
-				if (StringUtils.isNotBlank(errorString)) {
-					output.append("\r\nError output: ").append(errorString);
-					logger.info("[CMD] Error output: {}", errorString);
-				}
-			}
-
-			String result = output.toString();
-			return result;
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			String result = output.toString();
-			logger.debug(result, e);
-			return result;
-		} catch (IOException e) {
-			String result = output.toString();
-			logger.debug(result, e);
-			return result;
 		}
+
+		// Read error output
+		try (BufferedReader errorReader = new BufferedReader(
+				new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
+			String line;
+			while ((line = errorReader.readLine()) != null) {
+				errorOutput.append(line).append(System.lineSeparator());
+				logger.error("[CMD] Error output: {}", line);
+			}
+		}
+
+		int exitCode = process.waitFor();
+		output.append("Command exited with code: ").append(exitCode).append(System.lineSeparator());
+
+		if (errorOutput.length() > 0) {
+			output.append("Error output: ").append(errorOutput);
+		}
+
+		return output.toString();
+	}catch(
+	InterruptedException e)
+	{
+		Thread.currentThread().interrupt();
+		logger.error("Command execution interrupted", e);
+		return output.append("Interrupted: ").append(e.getMessage()).toString();
+	}catch(
+	IOException e)
+	{
+		logger.error("IO error during command execution", e);
+		return output.append("IO Error: ").append(e.getMessage()).toString();
 	}
-}
+}}
