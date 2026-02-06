@@ -72,17 +72,13 @@ public class FileProcessor extends ProjectProcessor {
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
 
-	/**
-	 * Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}.
-	 */
+	/** Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}. */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/**
-	 * Utility that installs tool functions (filesystem/command) into the provider when supported.
-	 */
+	/** Utility that installs tool functions (filesystem/command) into the provider when supported. */
 	private final SystemFunctionTools systemFunctionTools;
 
 	/** Reviewer associations keyed by file extension. */
@@ -139,9 +135,7 @@ public class FileProcessor extends ProjectProcessor {
 		loadReviewers();
 	}
 
-	/**
-	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping supported file extensions to a reviewer.
-	 */
+	/** Loads file reviewers via the {@link ServiceLoader} registry, mapping supported file extensions to a reviewer. */
 	private void loadReviewers() {
 		reviewMap.clear();
 
@@ -194,7 +188,6 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File rootDir, String scanDir) throws IOException {
-
 		if (!Strings.CS.equals(rootDir.getAbsolutePath(), scanDir)) {
 			if (!isPathPattern(scanDir)) {
 				this.scanDir = new File(scanDir);
@@ -257,7 +250,7 @@ public class FileProcessor extends ProjectProcessor {
 				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
 					if (cause instanceof RuntimeException) {
-						throw (RuntimeException) cause;
+						throw (RuntimeException)cause;
 					}
 					throw new IllegalStateException("Module processing failed.", cause);
 				}
@@ -288,21 +281,22 @@ public class FileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		String path = ProjectLayout.getRelatedPath(rootDir, file);
 		if (Strings.CI.containsAny(file.getAbsolutePath(), ProjectLayout.EXCLUDE_DIRS)) {
 			return false;
 		}
 
+		String path = ProjectLayout.getRelatedPath(rootDir, file);
 		if (pathMatcher == null) {
 			return true;
 		}
 
-		boolean result = pathMatcher.matches(Path.of(path));
+		Path pathToMatch = Path.of(path);
+		boolean result = pathMatcher.matches(pathToMatch);
 
 		if (!result && scanDir != null) {
 			String relatedPath = ProjectLayout.getRelatedPath(file, scanDir);
 			if (relatedPath != null) {
-				String normalizedFileAbsolutePath = file.getAbsolutePath().replace("\\", "/");
+				String normalizedFileAbsolutePath = file.getAbsolutePath().replace("\\\\", "/");
 				String scanPath = normalizedFileAbsolutePath + "/" + relatedPath;
 				String relatedToRoot = ProjectLayout.getRelatedPath(rootDir, new File(scanPath));
 				result = pathMatcher.matches(Path.of(relatedToRoot));
@@ -409,10 +403,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
-		String perform;
-
 		logger.info("Processing file: '{}'", file);
 
+		String perform;
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
 			systemFunctionTools.applyTools(provider);
 			File projectDir = projectLayout.getProjectDir();
@@ -517,7 +510,6 @@ public class FileProcessor extends ProjectProcessor {
 		if (isPathPattern(pattern)) {
 			matcher = FileSystems.getDefault().getPathMatcher(pattern);
 			dir = projectDir;
-
 		} else {
 			if (!dir.isAbsolute()) {
 				dir = new File(projectDir, pattern);
@@ -756,7 +748,7 @@ public class FileProcessor extends ProjectProcessor {
 		data.lines().forEach(line -> {
 			String normalizedLine = StringUtils.stripToNull(line);
 			if (normalizedLine == null) {
-				sb.append("\r\n");
+				sb.append(System.lineSeparator());
 				return;
 			}
 
@@ -764,7 +756,7 @@ public class FileProcessor extends ProjectProcessor {
 			if (content != null) {
 				sb.append(content);
 			}
-			sb.append("\r\n");
+			sb.append(System.lineSeparator());
 		});
 
 		return sb.toString();
@@ -906,7 +898,7 @@ public class FileProcessor extends ProjectProcessor {
 			throw new IllegalArgumentException("File not found: " + file.getAbsolutePath());
 		}
 
-		try (FileReader reader = new FileReader(file)) {
+		try (FileReader reader = new FileReader(file, StandardCharsets.UTF_8)) {
 			String result = IOUtils.toString(reader);
 			logger.info("Included: `{}`", filePath);
 			return result;

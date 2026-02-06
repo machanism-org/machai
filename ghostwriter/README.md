@@ -21,24 +21,15 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
+Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded `@guidance` tags and AI-powered synthesis.
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
-
-It helps teams keep documentation accurate and consistent by combining:
-
-- project structure and source scanning
-- embedded, file-local guidance directives
-- configurable AI prompts (instructions and default guidance)
-- reproducible CLI-driven generation suitable for local use and CI
+Ghostwriter helps keep documentation consistent and up to date by treating `@guidance` blocks embedded in source and documentation files as mandatory constraints, then applying GenAI to produce repeatable, reviewable updates.
 
 ## Usage
 
 ### Basic Usage
-
-Run Ghostwriter against a project directory:
 
 ```bash
 java -jar gw.jar C:\projects\my-project
@@ -46,10 +37,7 @@ java -jar gw.jar C:\projects\my-project
 
 ### Typical Workflow
 
-1. (Optional) Create `gw.properties` next to `gw.jar` (or set `-Dgw.config=<path>`).
-2. Decide a root directory (`--root`) if you want all scan targets resolved relative to a specific root.
-3. Provide one or more scan targets as arguments:
-   - a directory path
-   - a pattern such as `glob:**/*.java` or `regex:^.*\/[^\/]+\.java$`
-4. (Optional) Add instructions (`--instructions`) and/or default guidance (`--guidance`).
-5. Run the CLI and review generated/updated documentation outputs.
+1. Add `@guidance` blocks (typically at the top of docs/source files) describing required structure and constraints.
+2. Run Ghostwriter against a project directory or a `glob:` / `regex:` path pattern.
+3. Review the updated/generated artifacts and commit the results.
+4. Re-run Ghostwriter periodically (or in CI) to keep documentation aligned with the guidance.
