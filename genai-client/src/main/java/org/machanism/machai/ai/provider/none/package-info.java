@@ -27,7 +27,7 @@
  */
 
 /**
- * No-op ("none") implementation of the generative-AI provider SPI.
+ * No-op ("none") implementation of the generative AI provider SPI.
  *
  * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, an implementation of
  * {@link org.machanism.machai.ai.manager.GenAIProvider} intended for environments where external LLM integration

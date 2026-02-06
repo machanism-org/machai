@@ -27,9 +27,9 @@ Page Structure:
 
 ## Introduction
 
-GenAI Client is a Java library for integrating with Generative AI providers through a small, stable API (`GenAIProvider`). It provides foundational prompt management and (provider-dependent) support for embeddings, tool/function calling, and file context so you can add AI-powered features without hard-coupling your code to a single vendor.
+GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers foundational prompt management, optional tool/function calling, file context, and (provider-dependent) embeddings through a small, stable API (`GenAIProvider`).
 
-The main benefit is provider portability: you can swap or combine backends (API-based providers like OpenAI-compatible endpoints, and UI/web-automation providers) by changing configuration rather than application code.
+The main benefit is provider portability: you can swap or combine backends (for example, OpenAI-compatible API providers and UI/web-automation providers) by changing configuration rather than application code.
 
 ## Overview
 
@@ -157,7 +157,9 @@ The OpenAI client reads the following environment variables (you must set at lea
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using an OpenAI-compatible gateway (example: CodeMie endpoint)**
+**Using the CodeMie API (OpenAI-compatible endpoint)**
+
+To route requests through CodeMie’s OpenAI-compatible gateway, configure:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -229,7 +231,7 @@ Automation is executed via [Anteater](https://ganteater.com) workspace recipes. 
 - Call `model(String)` to set the Anteater configuration name before initializing the workspace.
 - Call `setWorkingDir(File)` once per JVM instance to initialize the shared workspace:
   - The workspace `startDir` defaults to the provided working directory.
-  - If a directory exists under `workingDir` at the path specified by system property `recipes` (default: `genai-client/src/main/resources`), it is used instead.
+  - If a directory (or file) exists under `workingDir` at the path specified by system property `recipes` (default: `genai-client/src/main/resources`), it is used instead.
 
 **Thread safety and lifecycle**
 

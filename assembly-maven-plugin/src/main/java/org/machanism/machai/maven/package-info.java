@@ -28,20 +28,24 @@
  * Maven Mojo implementations for running an AI-assisted project assembly workflow.
  *
  * <p>
- * This package contains the {@code assembly} Maven goal implementation that wires the MachAI assembly workflow into a
- * Maven execution. The goal reads (or interactively requests) an assembly prompt, optionally recommends libraries via a
- * picker model, and then runs the {@link org.machanism.machai.bindex.ApplicationAssembly} process against the Maven base
- * directory.
+ * This package provides the {@code assembly} Maven goal, implemented by {@link org.machanism.machai.maven.Assembly},
+ * which integrates MachAI's assembly workflow into a Maven execution.
  * </p>
  *
- * <h2>Goals</h2>
+ * <p>
+ * The goal reads an assembly prompt from a configured file (or requests it interactively), uses a picker model to
+ * recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries), filters recommendations by score, and
+ * then runs {@link org.machanism.machai.bindex.ApplicationAssembly} against the Maven {@code basedir}.
+ * </p>
+ *
+ * <h2>Goal</h2>
  * <ul>
  *   <li>{@code assembly} &ndash; Recommend libraries and run an AI-driven assembly process against a project folder.</li>
  * </ul>
  *
  * <h2>Plugin parameters</h2>
  * <p>
- * Parameters may be supplied via system properties (for example, {@code -Dassembly.genai=...}) and/or via Maven plugin
+ * Parameters can be supplied via system properties (for example, {@code -Dassembly.genai=...}) and/or via Maven plugin
  * configuration.
  * </p>
  * <ul>
@@ -51,7 +55,7 @@
  *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; Prompt file path; if missing, the prompt is
  *   requested interactively.</li>
  *   <li>{@code assembly.score} (default {@code 0.9}) &ndash; Minimum score threshold for recommended libraries.</li>
- *   <li>{@code bindex.register.url} &ndash; Optional registration/lookup endpoint used by the picker.</li>
+ *   <li>{@code bindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
  * </ul>
  *
  * <h2>Usage examples</h2>

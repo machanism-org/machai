@@ -30,12 +30,12 @@
  * Web-automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
  * <p>Types in this package integrate with <a href="https://ganteater.com">Anteater</a> to automate a target
- * generative-AI service via its web user interface. Automation logic lives in Anteater recipes; this package bridges the
- * {@code GenAIProvider} API to those recipes.
+ * generative-AI service through its web user interface (UI). Automation logic is encapsulated in Anteater recipes; this
+ * package adapts the {@code GenAIProvider} API to those recipes.
  *
  * <h2>Key concepts</h2>
  * <ul>
- *   <li><strong>Configuration/model</strong>: an Anteater workspace configuration name set via
+ *   <li><strong>Model/configuration</strong>: the Anteater workspace configuration name set via
  *       {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
  *   <li><strong>Workspace start directory</strong>: derived from the working directory passed to
  *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)} and the optional system
@@ -54,7 +54,7 @@
  *
  * <h2>Lifecycle and constraints</h2>
  * <ul>
- *   <li>The underlying Anteater workspace is held in static state and is intended to be initialized once per JVM.</li>
+ *   <li>The underlying Anteater workspace is stored in static state and is intended to be initialized once per JVM.</li>
  *   <li>Changing the model/configuration or working directory after initialization is not supported and results in an
  *       {@link java.lang.IllegalArgumentException}.</li>
  *   <li>Call {@link org.machanism.machai.ai.provider.web.WebProvider#close()} to release workspace resources.</li>

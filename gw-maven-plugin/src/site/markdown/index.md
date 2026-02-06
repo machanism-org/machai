@@ -75,13 +75,13 @@ Add the plugin to your `pom.xml`:
 Run the plugin goal:
 
 ```sh
-mvn gw:gw
+mvn org.machanism.machai:gw-maven-plugin:0.0.8-SNAPSHOT:gw
 ```
 
 ### Typical Workflow
 
 1. Add `@guidance:` comments close to the code or artifacts they describe.
-2. Run `mvn gw:gw` to (re)generate or update the Maven Site Markdown pages.
+2. Run the plugin goal to (re)generate or update the Maven Site Markdown pages.
 3. Run `mvn site` to render the site and review the generated documentation.
 4. Iterate: update code and `@guidance:` comments as requirements evolve, then re-run the goals.
 
@@ -111,7 +111,7 @@ Example configuration:
 Example command line with custom parameters:
 
 ```sh
-mvn gw:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
+mvn org.machanism.machai:gw-maven-plugin:0.0.8-SNAPSHOT:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
 ```
 
 ## Resources

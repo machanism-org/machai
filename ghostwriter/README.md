@@ -23,33 +23,33 @@
 
 Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
 
-It is a CLI that processes one or more scan targets (directory paths or path patterns) under a root directory. It applies optional instructions and optional default guidance, then produces documentation updates while logging its work. It is designed for both local use and CI pipelines where you want deterministic, scriptable documentation review and regeneration.
-
 ## Introduction
 
-Ghostwriter helps you keep documentation consistent and up to date across large codebases by turning structured, in-repo guidance into repeatable, automatable documentation updates.
+Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
+
+It helps teams keep documentation accurate and consistent by combining:
+
+- project structure and source scanning
+- embedded, file-local guidance directives
+- configurable AI prompts (instructions and default guidance)
+- reproducible CLI-driven generation suitable for local use and CI
 
 ## Usage
 
 ### Basic Usage
 
+Run Ghostwriter against a project directory:
+
 ```bash
-java -jar gw.jar <path | path_pattern>
-```
-
-Examples (Windows):
-
-```bat
-java -jar gw.jar C:\projects\project
-java -jar gw.jar -r C:\projects\project src\project
-java -jar gw.jar -r C:\projects\project "glob:**/*.java"
-java -jar gw.jar -r C:\projects\project "regex:^.*\/[^\/]+\.java$"
+java -jar gw.jar C:\projects\my-project
 ```
 
 ### Typical Workflow
 
-1. Download and unzip the Ghostwriter distribution.
-2. (Optional) Create `gw.properties` in the same directory as the executable to set defaults (e.g., `root`, `genai`, `instructions`, `excludes`).
-3. Run Ghostwriter against a directory (or pattern) under the chosen root.
-4. Provide additional instructions via `--instructions` (URL/file) or interactively via stdin.
-5. Review logs and generated changes; repeat in CI as needed.
+1. (Optional) Create `gw.properties` next to `gw.jar` (or set `-Dgw.config=<path>`).
+2. Decide a root directory (`--root`) if you want all scan targets resolved relative to a specific root.
+3. Provide one or more scan targets as arguments:
+   - a directory path
+   - a pattern such as `glob:**/*.java` or `regex:^.*\/[^\/]+\.java$`
+4. (Optional) Add instructions (`--instructions`) and/or default guidance (`--guidance`).
+5. Run the CLI and review generated/updated documentation outputs.

@@ -1,20 +1,21 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains the Spring Boot entry point and Spring Shell command components that expose
- * Machai features through an interactive REPL or non-interactive command execution.
+ * <p>This package contains the Spring Boot entry point and Spring Shell command components that expose Machai
+ * features through an interactive REPL or non-interactive command execution.
  *
  * <h2>Key components</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.cli.MachaiCLI} – application entry point that boots Spring Boot and loads
  *       optional system properties from {@code machai.properties}.</li>
- *   <li>{@link org.machanism.machai.cli.ConfigCommand} – reads/writes persistent CLI defaults such as the
- *       working directory, GenAI provider/model, and semantic-search score threshold.</li>
- *   <li>{@link org.machanism.machai.cli.AssembyCommand} – picks libraries (Bindexes) from a prompt and assembles
- *       a project using a GenAI provider.</li>
+ *   <li>{@link org.machanism.machai.cli.ConfigCommand} – reads/writes persistent CLI defaults such as the working
+ *       directory, GenAI provider/model, and semantic-search score threshold.</li>
+ *   <li>{@link org.machanism.machai.cli.AssembyCommand} – picks libraries (Bindexes) from a prompt and assembles a
+ *       project using a GenAI provider.</li>
  *   <li>{@link org.machanism.machai.cli.BindexCommand} – generates and registers bindex metadata for projects.</li>
  *   <li>{@link org.machanism.machai.cli.GWCommand} – processes documents/files with the Ghostwriter pipeline.</li>
- *   <li>{@link org.machanism.machai.cli.CleanCommand} – removes Machai temporary directories (e.g. {@code .machai}).</li>
+ *   <li>{@link org.machanism.machai.cli.CleanCommand} – removes Machai temporary directories (e.g.
+ *       {@code .machai}).</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

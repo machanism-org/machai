@@ -30,87 +30,94 @@ Page Structure:
 
 Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
 
-It helps you keep documentation consistent and up to date across large codebases by turning structured, in-repo guidance into repeatable, automatable documentation updates.
+It helps teams keep documentation accurate and consistent by combining:
+
+- project structure and source scanning
+- embedded, file-local guidance directives
+- configurable AI prompts (instructions and default guidance)
+- reproducible CLI-driven generation suitable for local use and CI
 
 ## Overview
 
-Ghostwriter is a CLI that processes one or more scan targets (directory paths or path patterns) under a root directory. It applies optional instructions and optional default guidance, then produces updates while logging its work.
+Ghostwriter is designed to process one or more directories (or patterns) under a configured root directory, apply guidance/instructions, and generate or update documentation artifacts. It is packaged as a runnable CLI JAR (`gw.jar`) and can be configured via:
 
-It is designed for both local use and CI pipelines where you want deterministic, scriptable documentation review and regeneration.
+- command-line options
+- a properties file (`gw.properties`) located next to the executable JAR by default
+- an alternative config file path via `-Dgw.config=<path>`
 
 ## Key Features
 
-- Scans project directories and supports path patterns (e.g., `glob:` and `regex:` targets).
-- Uses embedded guidance tags to drive consistent documentation output.
-- Supports configurable GenAI provider/model selection.
-- Accepts external instructions via URL(s) or file path(s), or via interactive stdin.
-- Optional default guidance that can be applied as a final step per directory.
-- Excludes directories from processing.
-- Optional multi-threaded processing.
-- Optional logging of LLM request inputs to dedicated log files for audit/debug.
+- Scans directories or path patterns to process documentation sources
+- Supports default configuration via `gw.properties` (or `-Dgw.config` override)
+- Selects a GenAI provider/model for synthesis (e.g., `OpenAI:gpt-5.1`)
+- Accepts additional instructions and default guidance from text, URLs, or files
+- Excludes directories from processing
+- Optional multi-threaded processing
+- Optional logging of LLM request inputs into dedicated log files
 
 ## Getting Started
 
 ### Prerequisites
 
 - Java 11 or later
-- Network access to your configured GenAI provider
-- (Optional) A `gw.properties` configuration file placed next to the executable (or set `-Dgw.config=...`)
+- Network access for the selected GenAI provider (as configured in your environment)
+- (Optional) A `gw.properties` configuration file
 
 ### Installation
+
+Download the Ghostwriter CLI distribution:
 
 [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
 
 ### Basic Usage
 
+Run Ghostwriter against a project directory:
+
 ```bash
-java -jar gw.jar <path | path_pattern>
-```
-
-Examples (Windows):
-
-```bat
-java -jar gw.jar C:\projects\project
-java -jar gw.jar -r C:\projects\project src\project
-java -jar gw.jar -r C:\projects\project "glob:**/*.java"
-java -jar gw.jar -r C:\projects\project "regex:^.*\/[^\/]+\.java$"
+java -jar gw.jar C:\projects\my-project
 ```
 
 ### Typical Workflow
 
-1. Download and unzip the Ghostwriter distribution.
-2. (Optional) Create `gw.properties` in the same directory as the executable to set defaults (e.g., `root`, `genai`, `instructions`, `excludes`).
-3. Run Ghostwriter against a directory (or pattern) under the chosen root.
-4. Provide additional instructions via `--instructions` (URL/file) or interactively via stdin.
-5. Review logs and generated changes; repeat in CI as needed.
+1. (Optional) Create `gw.properties` next to `gw.jar` (or set `-Dgw.config=<path>`).
+2. Decide a root directory (`--root`) if you want all scan targets resolved relative to a specific root.
+3. Provide one or more scan targets as arguments:
+   - a directory path
+   - a pattern such as `glob:**/*.java` or `regex:^.*\/[^\/]+\.java$`
+4. (Optional) Add instructions (`--instructions`) and/or default guidance (`--guidance`).
+5. Run the CLI and review generated/updated documentation outputs.
 
 ## Configuration
 
-Ghostwriter is configured via command-line options and (optionally) a properties file loaded from the execution directory (defaults to `gw.properties`, override with `-Dgw.config=...`).
+Ghostwriter can be configured with a combination of:
+
+- **System property**: `-Dgw.config=<path>` to point to a properties file
+- **Properties** (typically in `gw.properties`): `root`, `genai`, `instructions`, `guidance`, `excludes`
+- **CLI options** (below) which override properties where applicable
 
 ### Command-line Options
 
-| Option | Args | Default | Description |
+| Option | Argument | Default | Description |
 |---|---:|---|---|
-| `-h`, `--help` | no | — | Show help and exit. |
-| `-r`, `--root <path>` | yes | From `gw.properties` key `root`; otherwise: current user directory (`user.dir`). | Root directory used to compute and validate scan targets. Scan targets must be within this root. |
-| `-t`, `--threads[=true|false]` | optional | `true` | Enable/disable multi-threaded processing. If provided without a value, it is treated as enabled. Use `--threads=false` to disable. |
-| `-a`, `--genai <provider:model>` | yes | From `gw.properties` key `genai`; otherwise: `OpenAI:gpt-5-mini`. | Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`). |
-| `-i`, `--instructions[=<url|file>]` | optional | From `gw.properties` key `instructions`; otherwise: none. | Additional instruction location(s) (URL or file path). If the option is present without a value, Ghostwriter reads instruction text from stdin (EOF-terminated). |
-| `-g`, `--guidance[=<file>]` | optional | From `gw.properties` key `guidance`; otherwise: none. | Default guidance applied as a final step per directory. If provided with a value, it is treated as a guidance file path (relative paths resolved against the execution directory). If used without a value, Ghostwriter reads guidance text from stdin (EOF-terminated). |
-| `-e`, `--excludes <dir[,dir...]>` | yes | From `gw.properties` key `excludes` (comma-separated); otherwise: none. | Comma-separated list of directories to exclude from processing. |
-| `-l`, `--logInputs` | no | `false` | Log LLM request inputs to dedicated log files. |
+| `-h`, `--help` | No | — | Show this help message and exit. |
+| `-r`, `--root` | Yes | If not set: uses the current user directory as root. | Specify the path to the root directory for file processing. |
+| `-t`, `--threads` | Optional | `true` | Enable multi-threaded processing to improve performance. |
+| `-a`, `--genai` | Yes | `OpenAI:gpt-5-mini` | Set the GenAI provider and model (for example: `OpenAI:gpt-5.1`). |
+| `-i`, `--instructions` | Optional | From `gw.properties` key `instructions` (if present) | Specify additional instructions as plain text, by URL, or by file path. Each line is processed: blank lines preserved; `http(s)://...` loaded from URL; `file:...` loaded from file path; other lines used as-is. To provide multiple locations, separate by comma (`,`). If used without a value, you will be prompted to enter text via stdin (EOF to finish). |
+| `-g`, `--guidance` | Optional | From `gw.properties` key `guidance` (if present) | Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. Input handling matches `--instructions`. If used without a value, you will be prompted to enter text via stdin (EOF to finish). |
+| `-e`, `--excludes` | Yes | From `gw.properties` key `excludes` (if present) | Specify a list of directories to exclude from processing. Provide multiple directories separated by commas or by repeating the option. |
+| `-l`, `--logInputs` | No | `false` | Log LLM request inputs to dedicated log files. |
 
 ### Example
 
 ```bash
-java -jar gw.jar "glob:**/*.md" \
-  --root "/path/to/repo" \
-  --genai "OpenAI:gpt-5.1" \
-  --instructions "https://example.com/team-guidelines.md" \
-  --guidance docs/default-guidance.md \
-  --excludes "target,node_modules" \
-  --threads=false \
+java -Dgw.config=gw.properties -jar gw.jar C:\projects\my-project ^
+  --root C:\projects\my-project ^
+  --genai OpenAI:gpt-5.1 ^
+  --threads true ^
+  --excludes target,.git,node_modules ^
+  --instructions file:docs/instructions.txt ^
+  --guidance https://example.com/ghostwriter-guidance.txt ^
   --logInputs
 ```
 
@@ -118,4 +125,4 @@ java -jar gw.jar "glob:**/*.md" \
 
 - GitHub: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
-- Download: https://sourceforge.net/projects/machanism/files/machai/gw.zip/download
+- Download (CLI distribution): https://sourceforge.net/projects/machanism/files/machai/gw.zip/download

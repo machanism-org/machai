@@ -27,14 +27,14 @@
 /**
  * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
  *
- * <p>This package defines provider-neutral abstractions that application code can use to build requests and
- * consume responses without coupling to a specific vendor SDK.
+ * <p>This package contains the core, provider-neutral types used to construct requests and consume responses
+ * without coupling application code to any specific vendor SDK.
  *
  * <h2>Responsibilities</h2>
  * <ul>
- *   <li>Defines the core request/response concepts shared across supported providers.</li>
- *   <li>Provides stable interfaces and value types that applications can depend on.</li>
- *   <li>Exposes entry points used by provider managers to execute model requests.</li>
+ *   <li>Defines shared request/response concepts that are common across supported providers.</li>
+ *   <li>Exposes stable interfaces and value types intended for direct use by application code.</li>
+ *   <li>Provides entry points used by provider implementations/managers to execute model requests.</li>
  * </ul>
  *
  * <h2>Related packages</h2>
@@ -46,7 +46,7 @@
  * <h2>Typical usage</h2>
  * <ol>
  *   <li>Select a provider and model via the provider manager.</li>
- *   <li>Configure request inputs such as instructions, prompts, and optional tool invocations.</li>
+ *   <li>Configure request inputs such as instructions and prompts (and optionally tools, depending on provider).</li>
  *   <li>Execute the request and consume the result.</li>
  * </ol>
  *

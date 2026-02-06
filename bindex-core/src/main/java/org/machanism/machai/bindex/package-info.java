@@ -26,22 +26,25 @@
  */
 
 /**
- * Provides the Bindex subsystem used by MachAI workflows to create, persist, register, and query
- * project indexes (typically stored as {@code bindex.json}).
+ * Bindex subsystem used by MachAI workflows to create, persist, register, and query project indexes.
  *
- * <p>The package includes utilities to:
- * <ul>
- *   <li>build or update an on-disk {@code bindex.json} for a given
- *       {@link org.machanism.machai.project.layout.ProjectLayout},</li>
- *   <li>register Bindex documents in a backing store for retrieval (for example, MongoDB with vector search),</li>
- *   <li>perform semantic search over registered Bindexes and expand transitive dependencies, and</li>
- *   <li>assemble selected Bindexes into prompt inputs for downstream GenAI execution.</li>
- * </ul>
+ * <p>A Bindex is typically persisted as {@code bindex.json} for a given
+ * {@link org.machanism.machai.project.layout.ProjectLayout}. This package provides the orchestration and
+ * supporting utilities needed to create that file, load it during processing, register it with a backing store,
+ * and later retrieve and assemble relevant Bindexes as inputs to downstream GenAI execution.
+ *
+ * <h2>Typical workflow</h2>
+ * <ol>
+ *   <li>Create or update an on-disk {@code bindex.json} for a project.</li>
+ *   <li>Register the Bindex with a backing store (for example, a document database and/or vector search index).</li>
+ *   <li>Query and select relevant Bindexes using semantic search and optional dependency expansion.</li>
+ *   <li>Assemble selected content into prompt-ready inputs for execution.</li>
+ * </ol>
  *
  * <h2>Main types</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.bindex.BindexCreator}: builds and writes {@code bindex.json} for a project.</li>
- *   <li>{@link org.machanism.machai.bindex.BindexProjectProcessor}: shared utilities for locating and loading
+ *   <li>{@link org.machanism.machai.bindex.BindexProjectProcessor}: utilities for locating and loading
  *       {@code bindex.json} during project processing.</li>
  *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers an on-disk Bindex with a backing store.</li>
  *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search and dependency expansion to select Bindexes.</li>
