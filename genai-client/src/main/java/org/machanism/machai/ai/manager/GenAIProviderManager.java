@@ -79,9 +79,12 @@ public class GenAIProviderManager {
 			provider.model(chatModelName);
 
 			return provider;
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| ClassNotFoundException | NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException("GenAI provider: " + providerName + " is not supported.", e);
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException
+				| NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException("Failed to initialize GenAI provider '" + providerName
+					+ "': provider is not supported or an error occurred during initialization.", e);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("GenAI provider initialization failed for '" + providerName + "'", e);
 		}
 	}
 
