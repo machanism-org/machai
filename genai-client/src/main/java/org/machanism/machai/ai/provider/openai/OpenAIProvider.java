@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Function;
@@ -23,6 +24,8 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.Usage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +60,7 @@ import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputMessage.Content;
 import com.openai.models.responses.ResponseReasoningItem;
 import com.openai.models.responses.ResponseReasoningItem.Summary;
+import com.openai.models.responses.ResponseUsage;
 import com.openai.models.responses.Tool;
 
 import ch.qos.logback.core.util.Duration;
@@ -265,11 +269,26 @@ public class OpenAIProvider implements GenAIProvider {
 		logInputs();
 		logger.debug("Sending request to LLM service.");
 		Response response = getClient().responses().create(builder.build());
+
+		logUsage(response.usage());
+
 		logger.debug("Received response from LLM service.");
 
 		result = parseResponse(response);
 		clear();
 		return result;
+	}
+
+	private void logUsage(Optional<ResponseUsage> usage) {
+		if (usage.isPresent()) {
+			ResponseUsage responseUsage = usage.get();
+			long inputTokens = responseUsage.inputTokens();
+			long inputCachedTokens = responseUsage.inputTokensDetails().cachedTokens();
+			long outputTokens = responseUsage.outputTokens();
+			long reasoningTokens = responseUsage.outputTokensDetails().reasoningTokens();
+
+			GenAIProviderManager.addUsage(new Usage(inputTokens, inputCachedTokens, outputTokens, reasoningTokens));
+		}
 	}
 
 	/**
