@@ -27,8 +27,7 @@ public class CodeMieProvider extends OpenAIProvider {
 			super.createClient(baseUrl, token);
 
 		} catch (IOException e) {
-			throw new IllegalArgumentException("Authorization failed for user '" + username
-					+ "': invalid credentials or insufficient permissions.", e);
+			throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
 		}
 	}
 
