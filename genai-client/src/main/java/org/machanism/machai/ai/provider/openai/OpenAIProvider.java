@@ -63,8 +63,6 @@ import com.openai.models.responses.ResponseReasoningItem.Summary;
 import com.openai.models.responses.ResponseUsage;
 import com.openai.models.responses.Tool;
 
-import ch.qos.logback.core.util.Duration;
-
 /**
  * The {@code OpenAIProvider} class integrates seamlessly with the OpenAI API,
  * serving as a concrete implementation of the {@code GenAIProvider} interface.
