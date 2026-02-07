@@ -133,7 +133,7 @@ public class GW extends AbstractMojo {
 	 * {@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
 	 * credentials.
 	 */
-	@Parameter(property = "gw.genai.serverId", required = true)
+	@Parameter(property = "gw.genai.serverId", required = false)
 	private String serverId;
 
 	/**
@@ -157,24 +157,23 @@ public class GW extends AbstractMojo {
 		if (settings == null) {
 			throw new MojoExecutionException("Maven settings are not available.");
 		}
-		if (serverId == null || serverId.trim().isEmpty()) {
-			throw new MojoExecutionException("Parameter gw.genai.serverId is required.");
-		}
-
-		Server server = settings.getServer(serverId);
-		if (server == null) {
-			throw new MojoExecutionException("No <server> with id '" + serverId + "' found in Maven settings.xml.");
-		}
 
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
-		String username = server.getUsername();
-		if (username != null && !username.isBlank()) {
-			config.set("GENAI_USERNAME", username);
-		}
-		String password = server.getPassword();
-		if (password != null && !password.isBlank()) {
-			config.set("GENAI_PASSWORD", password);
+		if (serverId != null) {
+			Server server = settings.getServer(serverId);
+			if (server == null) {
+				throw new MojoExecutionException("No <server> with id '" + serverId + "' found in Maven settings.xml.");
+			}
+
+			String username = server.getUsername();
+			if (username != null && !username.isBlank()) {
+				config.set("GENAI_USERNAME", username);
+			}
+			String password = server.getPassword();
+			if (password != null && !password.isBlank()) {
+				config.set("GENAI_PASSWORD", password);
+			}
 		}
 
 		List<MavenProject> modules = session.getAllProjects();
@@ -237,11 +236,10 @@ public class GW extends AbstractMojo {
 			processor.scanDocuments(rootDir, scanDir);
 		} catch (IOException e) {
 			throw new MojoExecutionException("Document assistance process failed.", e);
+		} finally {
+			GenAIProviderManager.logUsage();
+			logger.info("File processing completed.");
 		}
-		
-		GenAIProviderManager.logUsage();
-		
-		logger.info("Scanning finished.");
 	}
 
 }

@@ -19,15 +19,16 @@ public class CodeMieProvider extends OpenAIProvider {
 
 	@Override
 	public void init(Configurator conf) {
-		try {
-			String username = conf.get("GENAI_USERNAME");
-			String password = conf.get("GENAI_PASSWORD");
+		String username = conf.get("GENAI_USERNAME");
+		String password = conf.get("GENAI_PASSWORD");
 
+		try {
 			String token = getToken(username, password);
 			super.createClient(baseUrl, token);
 
 		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
+			throw new IllegalArgumentException("Authorization failed for user '" + username
+					+ "': invalid credentials or insufficient permissions.", e);
 		}
 	}
 
