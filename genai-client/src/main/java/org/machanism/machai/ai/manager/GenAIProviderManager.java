@@ -94,22 +94,26 @@ public class GenAIProviderManager {
 
 	public static void logUsage() {
 
-		int inputTokens = 0;
-		int inputCachedTokens = 0;
-		int outputTokens = 0;
-		int reasoningTokens = 0;
+		if (!usages.isEmpty()) {
+			int inputTokens = 0;
+			int inputCachedTokens = 0;
+			int outputTokens = 0;
+			int reasoningTokens = 0;
 
-		for (Usage u : usages) {
-			inputTokens += u.getInputTokens();
-			inputCachedTokens += u.getInputCachedTokens();
-			outputTokens += u.getOutputTokens();
-			reasoningTokens += u.getReasoningTokens();
+			for (Usage u : usages) {
+				inputTokens += u.getInputTokens();
+				inputCachedTokens += u.getInputCachedTokens();
+				outputTokens += u.getOutputTokens();
+				reasoningTokens += u.getReasoningTokens();
+			}
+
+			int totalTokens = inputTokens + inputCachedTokens + outputTokens + reasoningTokens;
+
+			logger.info(
+					"Token usage summary: Input tokens = {}, Cached input tokens = {}, Output tokens = {}, Reasoning tokens = {}. (Total tokens: {})",
+					inputTokens, inputCachedTokens, outputTokens, reasoningTokens, totalTokens);
+		} else {
+			logger.info("No token usage information available.");
 		}
-
-		int totalTokens = inputTokens + inputCachedTokens + outputTokens + reasoningTokens;
-
-		logger.info(
-				"Token usage summary: Input tokens = {}, Cached input tokens = {}, Output tokens = {}, Reasoning tokens = {}. (Total tokens: {})",
-				inputTokens, inputCachedTokens, outputTokens, reasoningTokens, totalTokens);
 	}
 }
