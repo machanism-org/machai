@@ -130,7 +130,7 @@ public class FileFunctionTools {
 			List<String> result = new ArrayList<>();
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					String relatedPath = ProjectLayout.getRelatedPath(workingDir, file, false);
+					String relatedPath = ProjectLayout.getRelatedPath(workingDir, file);
 					result.add(relatedPath);
 				}
 

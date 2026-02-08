@@ -2,8 +2,6 @@ package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.MalformedInputException;
-import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;

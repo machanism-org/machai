@@ -88,7 +88,7 @@ class ProjectLayoutTest {
 		File file = new File("/repo");
 
 		// Act
-		String related = ProjectLayout.getRelatedPath(dir, file);
+		String related = ProjectLayout.getRelatedPath(dir, file, false);
 
 		// Assert
 		assertEquals(".", related);

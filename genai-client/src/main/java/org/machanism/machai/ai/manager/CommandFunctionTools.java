@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.lang.SystemUtils;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,10 @@ public class CommandFunctionTools {
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("run_command_line_tool",
 				"Execute allowed shell commands (Linux/OSX only, some commands are denied for safety).",
-				this::executeCommand, "command:string:required:The command to run in the shell.");
+				this::executeCommand, "command:string:required:The command to run in the shell.",
+				"env:array:optional:array of strings, each element of which has environment variable settings in the format name=value, "
+						+ "or null if the subprocess should inherit the environment of the current process.",
+				"dir:string:optional:the working directory of the subprocess, or null if the subprocess should inherit the project directory.");
 	}
 
 	/**
@@ -67,8 +71,24 @@ public class CommandFunctionTools {
 
 		logger.info("Run shell command [{}]: {}", commandId, Arrays.toString(params));
 
-		String command = ((JsonNode) params[0]).get("command").asText();
-		File workingDir = (File) params[1];
+		JsonNode props = (JsonNode) params[0];
+		String command = props.get("command").asText();
+		String dir = props.get("dir").asText();
+		JsonNode env = props.get("env");
+
+		File projectDir = (File) params[1];
+		File workingDir;
+		if (dir == null) {
+			workingDir = new File(dir);
+			if (!workingDir.isAbsolute()) {
+				workingDir = new File(projectDir, dir);
+			} else {
+				return "Error: The requested working directory should be related from project path.";
+			}
+
+		} else {
+			workingDir = projectDir;
+		}
 
 		// Prepare shell command
 		String shellCommand;
@@ -81,9 +101,15 @@ public class CommandFunctionTools {
 		StringBuilder output = new StringBuilder();
 
 		try {
-			Map<String, String> envMap = System.getenv();
-			String[] envArray = envMap.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
-					.toArray(String[]::new);
+
+			String[] envArray = null;
+			if (env == null) {
+				logger.warn("Potential security risk detected: a local environment variable is being used by the System Command Functional tool.");
+				
+				Map<String, String> envMap = System.getenv();
+				envArray = envMap.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
+						.toArray(String[]::new);
+			}
 
 			Process process = Runtime.getRuntime().exec(shellCommand, envArray, workingDir);
 

@@ -69,12 +69,12 @@ public abstract class ProjectLayout {
 	/**
 	 * Computes relative path from current directory to target file.
 	 * 
-	 * @param currentPath Absolute path string
-	 * @param file        Target file
+	 * @param basePath Absolute path string
+	 * @param file     Target file
 	 * @return Relative path (string)
 	 */
-	public String getRelatedPath(String currentPath, File file) {
-		String relativePath = file.getAbsolutePath().replace("\\", "/").replace(currentPath, "");
+	public String getRelatedPath(String basePath, File file) {
+		String relativePath = file.getAbsolutePath().replace("\\", "/").replace(basePath.replace("\\", "/"), "");
 		if (Strings.CS.startsWith(relativePath, "/")) {
 			relativePath = StringUtils.substring(relativePath, 1);
 		}
@@ -96,13 +96,6 @@ public abstract class ProjectLayout {
 	 */
 	public abstract List<String> getTests();
 
-	/**
-	 * Computes relative path from project directory to target file.
-	 * 
-	 * @param dir  Project directory
-	 * @param file Target file
-	 * @return Relative path string
-	 */
 	public static String getRelatedPath(File dir, File file) {
 		return getRelatedPath(dir, file, false);
 	}

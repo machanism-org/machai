@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.machai.gw.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -24,8 +24,8 @@ public class TypeScriptReviewer implements Reviewer {
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Returns the file extensions supported by this reviewer.
-	 * This reviewer processes files with extension: ts.
+	 * Returns the file extensions supported by this reviewer. This reviewer
+	 * processes files with extension: ts.
 	 *
 	 * @return an array of supported file extension strings
 	 */
@@ -46,7 +46,7 @@ public class TypeScriptReviewer implements Reviewer {
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String content = Files.readString(guidancesFile.toPath());
 		String result = null;
-		if (StringUtils.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
+		if (Strings.CS.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
 			Pattern pattern = Pattern.compile("(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
 					+ "|(?:/\\*.*?" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*\\*/)", Pattern.DOTALL);
 			Matcher matcher = pattern.matcher(content);

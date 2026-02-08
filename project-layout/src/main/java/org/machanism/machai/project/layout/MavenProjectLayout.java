@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.slf4j.Logger;

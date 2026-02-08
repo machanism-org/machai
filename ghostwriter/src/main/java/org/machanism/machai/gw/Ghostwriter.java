@@ -15,6 +15,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,36 +101,30 @@ public final class Ghostwriter {
 		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-		        .desc("Enable multi-threaded processing to improve performance (default: true).")
-		        .hasArg(true)
-		        .optionalArg(true)
-		        .build();
+				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
+				.optionalArg(true).build();
 
 		Option rootDirOpt = new Option("r", "root", true,
-		        "Specify the path to the root directory for file processing.");
+				"Specify the path to the root directory for file processing.");
 
 		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt("instructions")
-			    .desc("Specify additional instructions as plain text, by URL, or by file path. "
-			        + "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
-			        + "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
-			        + "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
-			    .hasArg(true)
-			    .optionalArg(true)
-			    .build();
+				.desc("Specify system instructions as plain text, by URL, or by file path. "
+						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
+						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
+						+ "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
+				.hasArg(true).optionalArg(true).build();
 
-			Option excludesOpt = new Option("e", "excludes", true,
-			    "Specify a list of directories to exclude from processing. You can provide multiple directories by repeating the option.");
+		Option excludesOpt = new Option("e", "excludes", true,
+				"Specify a list of directories to exclude from processing. You can provide multiple directories by repeating the option.");
 
-			Option guidanceOpt = Option.builder("g").longOpt("guidance")
-			    .desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
-			        + "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
-			        + "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
-			        + "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
-			    .hasArg(true)
-			    .optionalArg(true)
-			    .build();
+		Option guidanceOpt = Option.builder("g").longOpt("guidance").desc(
+				"Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
+						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
+						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
+						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
+				.hasArg(true).optionalArg(true).build();
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
@@ -235,13 +230,15 @@ public final class Ghostwriter {
 		} catch (ParseException e) {
 			System.err.println("Error parsing arguments: " + e.getMessage());
 			help(options, formatter);
+
 		} finally {
-			logger.info("Finished processing files.");
+			GenAIProviderManager.logUsage();
+			logger.info("File processing completed.");
 		}
 	}
 
 	private static void help(Options options, HelpFormatter formatter) {
-		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n" + "Usage:\n"
+		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\nUsage:\n"
 				+ "  java -jar gw.jar <path | path_pattern> [options]\n\n" + "Options:";
 		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\projects\\project\n"
 				+ "  java -r C:\\projects\\project -jar gw.jar src/project\n"
