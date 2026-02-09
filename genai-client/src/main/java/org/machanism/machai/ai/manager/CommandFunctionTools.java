@@ -76,11 +76,9 @@ public class CommandFunctionTools {
 
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
-		JsonNode jsonNode = props.get("dir");
-		String dir = jsonNode != null && jsonNode.hasNonNull("dir") ? jsonNode.asText() : null;
 
-		jsonNode = props.get("env");
-		String env = jsonNode != null && jsonNode.hasNonNull("env") ? jsonNode.asText(dir) : null;
+		String dir = props.has(".") ? props.get("dir").asText(".") : ".";
+		String env = props.has("env") ? props.get("env").asText(null) : null;
 
 		File projectDir = (File) params[1];
 		File workingDir;
