@@ -1,69 +1,66 @@
 /**
- * Maven plugin goals (Mojos) that integrate the MachAI Generative Workflow (GW) documentation pipeline
- * into a Maven build.
+ * Maven plugin goals (Mojos) that integrate the MachAI Generative Workflow (GW) documentation pipeline into a Maven build.
  *
  * <p>
- * The goals in this package scan documentation sources (typically under {@code src/site}), invoke the
- * GW processing pipeline, and optionally clean temporary artifacts produced by workflow runs.
+ * The mojos in this package scan documentation sources (typically under {@code src/site}), invoke the GW processing
+ * pipeline, and optionally remove temporary artifacts created during workflow runs.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources and
- *     invokes {@link org.machanism.machai.gw.FileProcessor} to process discovered inputs.
+ *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources and invokes
+ *     {@link org.machanism.machai.gw.FileProcessor} to process the discovered inputs.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; removes workflow temporary
- *     files for the current Maven module.
+ *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; deletes temporary workflow files for the
+ *     current Maven module.
  *   </li>
  * </ul>
  *
  * <h2>Goal {@code gw} parameters</h2>
  * <p>
- * Parameters can be configured via {@code pom.xml} (plugin {@code &lt;configuration&gt;}) and/or via
- * system properties. Where applicable, the system property names are shown alongside each parameter.
+ * Parameters can be configured via {@code pom.xml} (plugin {@code &lt;configuration&gt;}) and/or via system properties.
+ * Where applicable, the system property names are shown alongside each parameter.
  * </p>
  * <ul>
  *   <li>
- *     <b>{@code genai}</b> / <b>{@code gw.genai}</b> (optional): Provider/model identifier forwarded
- *     to the workflow (for example {@code OpenAI:gpt-5}).
+ *     <b>{@code genai}</b> / <b>{@code gw.genai}</b> (optional): Provider/model identifier forwarded to the workflow
+ *     (for example {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
- *     <b>{@code scanDir}</b> (optional): Explicit scan root; when not set, defaults to the module base
- *     directory.
+ *     <b>{@code scanDir}</b> (optional): Explicit scan root; when not set, defaults to the module base directory
+ *     ({@code ${basedir}}).
  *   </li>
  *   <li>
- *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): One or more instruction
- *     location strings consumed by the workflow.
+ *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): Instruction location string consumed by
+ *     the workflow.
  *   </li>
  *   <li>
- *     <b>{@code guidance}</b> / <b>{@code gw.guidance}</b> (optional): Default guidance text forwarded
- *     to the workflow.
+ *     <b>{@code guidance}</b> / <b>{@code gw.guidance}</b> (optional): Default guidance text forwarded to the workflow.
  *   </li>
  *   <li>
- *     <b>{@code excludes}</b> / <b>{@code gw.excludes}</b> (optional): One or more exclude patterns or
- *     paths to skip during documentation scanning.
+ *     <b>{@code excludes}</b> / <b>{@code gw.excludes}</b> (optional): Exclude patterns/paths to skip during
+ *     documentation scanning.
  *   </li>
  *   <li>
- *     <b>{@code serverId}</b> / <b>{@code gw.genai.serverId}</b> (required): Maven {@code settings.xml}
- *     {@code &lt;server&gt;} id used to load GenAI credentials.
+ *     <b>{@code serverId}</b> / <b>{@code gw.genai.serverId}</b> (optional): Maven {@code settings.xml} {@code &lt;server&gt;}
+ *     id used to load GenAI credentials.
  *   </li>
  *   <li>
- *     <b>{@code threads}</b> / <b>{@code gw.threads}</b> (optional, default {@code true}): Enables or
- *     disables multi-threaded document processing.
+ *     <b>{@code threads}</b> / <b>{@code gw.threads}</b> (optional, default {@code true}): Enables or disables
+ *     multi-threaded document processing.
  *   </li>
  *   <li>
- *     <b>{@code logInputs}</b> / <b>{@code gw.logInputs}</b> (optional, default {@code false}): Logs the
- *     list of input files provided to the workflow.
+ *     <b>{@code logInputs}</b> / <b>{@code gw.logInputs}</b> (optional, default {@code false}): Logs the list of input
+ *     files provided to the workflow.
  *   </li>
  * </ul>
  *
  * <h2>Credentials</h2>
  * <p>
- * GenAI credentials are loaded from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry
- * whose id is provided by {@code gw.genai.serverId}. When present, credentials are exposed to the
- * workflow as configuration properties:
+ * GenAI credentials are loaded from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry whose id is provided
+ * by {@code gw.genai.serverId}. When present, credentials are exposed to the workflow as configuration properties:
  * </p>
  * <ul>
  *   <li>{@code GENAI_USERNAME}</li>
@@ -85,7 +82,7 @@
  *   &amp;lt;configuration&amp;gt;
  *     &amp;lt;genai&amp;gt;OpenAI:gpt-5&amp;lt;/genai&amp;gt;
  *     &amp;lt;serverId&amp;gt;genai&amp;lt;/serverId&amp;gt;
- *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;gt;
+ *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;lt;/threads&amp;gt;
  *     &amp;lt;instructions&amp;gt;
  *       &amp;lt;instruction&amp;gt;src/site/machai/instructions.md&amp;lt;/instruction&amp;gt;
  *     &amp;lt;/instructions&amp;gt;

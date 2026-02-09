@@ -25,17 +25,23 @@
 */
 
 /**
- * Maven Mojo implementations for running an AI-assisted project assembly workflow.
+ * Maven {@link org.apache.maven.plugin.Mojo} implementation(s) for MachAI's AI-assisted assembly workflow.
  *
  * <p>
- * This package provides the {@code assembly} Maven goal, implemented by {@link org.machanism.machai.maven.Assembly},
- * which integrates MachAI's assembly workflow into a Maven execution.
+ * This package provides the {@code assembly} goal implemented by
+ * {@link org.machanism.machai.maven.Assembly}. The goal orchestrates two phases:
  * </p>
+ * <ol>
+ *   <li><b>Library recommendation</b> (picker): Uses {@link org.machanism.machai.bindex.Picker} to recommend candidate
+ *   libraries as {@link org.machanism.machai.schema.Bindex} entries.</li>
+ *   <li><b>Project assembly</b>: Uses {@link org.machanism.machai.bindex.ApplicationAssembly} to apply the assembly
+ *   workflow to the Maven {@code basedir}.</li>
+ * </ol>
  *
  * <p>
- * The goal reads an assembly prompt from a configured file (or requests it interactively), uses a picker model to
- * recommend libraries (as {@link org.machanism.machai.schema.Bindex} entries), filters recommendations by score, and
- * then runs {@link org.machanism.machai.bindex.ApplicationAssembly} against the Maven {@code basedir}.
+ * GenAI providers for both phases are resolved via
+ * {@link org.machanism.machai.ai.manager.GenAIProviderManager} and are augmented with standard system function tools via
+ * {@link org.machanism.machai.ai.manager.SystemFunctionTools}.
  * </p>
  *
  * <h2>Goal</h2>
@@ -52,8 +58,8 @@
  *   <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; GenAI provider id for the assembly phase.</li>
  *   <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; GenAI provider id for the recommendation (picker)
  *   phase.</li>
- *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; Prompt file path; if missing, the prompt is
- *   requested interactively.</li>
+ *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; Path to a text file containing the assembly
+ *   prompt; if the file does not exist, the prompt is requested interactively.</li>
  *   <li>{@code assembly.score} (default {@code 0.9}) &ndash; Minimum score threshold for recommended libraries.</li>
  *   <li>{@code bindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
  * </ul>
@@ -61,10 +67,10 @@
  * <h2>Usage examples</h2>
  * <p><b>Command line:</b></p>
  * <pre>
- * mvn org.machanism.machai:assembly-maven-plugin:assembly \
- *   -Dassembly.genai=OpenAI:gpt-5 \
- *   -Dpick.genai=OpenAI:gpt-5-mini \
- *   -Dassembly.prompt.file=project.txt \
+ * mvn org.machanism.machai:assembly-maven-plugin:assembly
+ *   -Dassembly.genai=OpenAI:gpt-5
+ *   -Dpick.genai=OpenAI:gpt-5-mini
+ *   -Dassembly.prompt.file=project.txt
  *   -Dassembly.score=0.9
  * </pre>
  *

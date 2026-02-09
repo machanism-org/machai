@@ -310,10 +310,9 @@ public class FileProcessor extends ProjectProcessor {
 		if (!result && scanDir != null) {
 			String relatedPath = ProjectLayout.getRelatedPath(file, scanDir);
 			if (relatedPath != null) {
-				String normalizedFileAbsolutePath = file.getAbsolutePath().replace("\\\\", "/");
-				String scanPath = normalizedFileAbsolutePath + "/" + relatedPath;
-				String relatedToRoot = ProjectLayout.getRelatedPath(rootDir, new File(scanPath));
-				result = pathMatcher.matches(Path.of(relatedToRoot));
+				Path scanFilePath = scanDir.toPath().resolve(relatedPath);
+				String relatedToRoot = ProjectLayout.getRelatedPath(rootDir, scanFilePath.toFile());
+				result = relatedToRoot != null && pathMatcher.matches(Path.of(relatedToRoot));
 			}
 		}
 
@@ -612,7 +611,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (path == null || path.isBlank()) {
 			return 0;
 		}
-		String normalized = path.replace("\\", "/");
+		String normalized = path.replace("\\\\", "/");
 		return normalized.split("/").length;
 	}
 
@@ -868,11 +867,11 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		try {
-			if (data.startsWith("http://") || data.startsWith("https://")) {
-				return readFromHttpUrl(data);
+			String trimmed = data.trim();
+			if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+				return readFromHttpUrl(trimmed);
 			}
 
-			String trimmed = data.trim();
 			if (Strings.CS.startsWith(trimmed, "file:")) {
 				String filePath = StringUtils.substringAfter(trimmed, "file:");
 				return readFromFilePath(filePath);

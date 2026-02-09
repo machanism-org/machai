@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-Bindex Core (`bindex-core`) is the foundational library for bindex metadata: generating it for artifacts you produce, reading and validating it from dependencies, and combining it across modules to drive higher-level tooling.
+Bindex Core (`bindex-core`) is the foundational library for bindex metadata. It provides the core model and APIs for generating metadata for artifacts you produce, reading and validating metadata from dependencies, and combining metadata across modules to drive higher-level tooling.
 
 It enables consistent, automated handling of library metadata so downstream tools can reliably discover capabilities, integrate compatible components, and assemble projects within the Machanism ecosystem.
 
@@ -78,7 +78,7 @@ Add it to your `pom.xml`:
 
 Build this module:
 
-```bash
+```powershell
 mvn clean verify
 ```
 
@@ -102,7 +102,7 @@ Bindex Core is a library; most configuration is performed by the consuming tool/
 
 Example (override build properties):
 
-```bash
+```powershell
 mvn -Dmaven.compiler.release=17 -DskipTests=true clean verify
 ```
 

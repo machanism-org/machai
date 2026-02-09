@@ -29,9 +29,9 @@
 /**
  * Web-automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>Types in this package integrate with <a href="https://ganteater.com">Anteater</a> to automate a target
- * generative-AI service through its web user interface (UI). Automation logic is encapsulated in Anteater recipes; this
- * package adapts the {@code GenAIProvider} API to those recipes.
+ * <p>Types in this package use <a href="https://ganteater.com">Anteater</a> recipes to automate interactions with a
+ * generative-AI provider through its web user interface (UI). The package bridges the core {@code GenAIProvider} API to
+ * an Anteater workspace and recipe execution model.
  *
  * <h2>Key concepts</h2>
  * <ul>
@@ -39,7 +39,7 @@
  *       {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
  *   <li><strong>Workspace start directory</strong>: derived from the working directory passed to
  *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)} and the optional system
- *       property {@code recipes} (default: {@code genai-client/src/main/resources}).</li>
+ *       property {@code recipes} (default: {@code genai-client\src\main\resources}).</li>
  *   <li><strong>Recipe execution</strong>: prompts are submitted by running the {@code "Submit Prompt"} recipe via
  *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}.</li>
  * </ul>
@@ -48,7 +48,7 @@
  * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
  * provider.model("config.yaml");
- * provider.setWorkingDir(new File("/path/to/project"));
+ * provider.setWorkingDir(new File("C:\\path\\to\\project"));
  * String response = provider.perform();
  * }</pre>
  *

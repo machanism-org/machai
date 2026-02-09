@@ -60,7 +60,7 @@ Configuration can come from `gw.properties` located next to the executable direc
 
 ### Basic Usage
 
-```bash
+```cmd
 java -jar gw.jar C:\projects\my-project
 ```
 
@@ -76,31 +76,30 @@ java -jar gw.jar C:\projects\my-project
 Ghostwriter can be configured via:
 
 - A properties file `gw.properties` located next to the executable (or specified via `-Dgw.config=<file>`), and/or
-- Command-line options (which override corresponding properties where applicable).
+- Command-line options (which override corresponding configuration where applicable).
 
 ### Command-line Options
 
 | Option | Long option | Argument | Default | Description |
-|---|---|---:|---|---|
-| `-h` | `--help` |  | n/a | Show help and exit. |
-| `-l` | `--logInputs` |  | `false` | Log LLM request inputs to dedicated log files. |
-| `-t` | `--threads` | optional | `true` | Enable multi-threaded processing to improve performance. If provided without a value, defaults to `true`. |
-| `-r` | `--root` | required | user directory (when not set) | Root directory used as the base for scanning. |
+|---|---|---|---|---|
+| `-h` | `--help` | none | n/a | Show help and exit. |
+| `-l` | `--logInputs` | none | `false` | Log LLM request inputs to dedicated log files. |
+| `-r` | `--root` | required | (not set) | Root directory used as the base for scanning; if not set, defaults to the current user directory. |
+| `-t` | `--threads` | optional | `true` | Enable multi-threaded processing. If present without a value, it prompts for stdin (see notes below). |
 | `-a` | `--genai` | required | `OpenAI:gpt-5-mini` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). |
-| `-i` | `--instructions` | optional | none | Additional instructions to apply during processing. If used without a value, Ghostwriter reads text from stdin until EOF. Each input line is handled as: `http(s)://...` loaded from URL, `file:...` loaded from a file path, otherwise treated as literal text. |
-| `-g` | `--guidance` | optional | none | Default guidance applied as a final step for the current directory. If used without a value, Ghostwriter reads text from stdin until EOF. Each input line is handled as: `http(s)://...` loaded from URL, `file:...` loaded from a file path, otherwise treated as literal text. |
-| `-e` | `--excludes` | required | none | Comma-separated list of directories to exclude from processing (example: `target,.git,node_modules`). |
+| `-i` | `--instructions` | optional | (not set) | Additional system instructions (plain text, URL, or file path). If used without a value, reads from stdin until EOF. |
+| `-g` | `--guidance` | optional | (not set) | Default guidance (plain text, URL, or file path) applied as a final step for the current directory. If used without a value, reads from stdin until EOF. |
+| `-e` | `--excludes` | required | (not set) | Comma-separated list of directories to exclude (example: `target,.git,node_modules`). |
+
+Notes:
+
+- Configuration file: Ghostwriter attempts to load configuration from `gw.properties` located next to the executable. You can override the file location with `-Dgw.config=<file>`.
+- Scan targets: positional arguments after options are treated as scan targets (directories or `glob:` / `regex:` patterns). If no targets are provided, Ghostwriter scans the current user directory.
 
 ### Example
 
-```bash
-java -Dgw.config=gw.properties -jar gw.jar \
-  -r C:\projects\my-project \
-  -a OpenAI:gpt-5.1 \
-  -t true \
-  -e target,.git,node_modules \
-  -l \
-  "glob:**/*.md"
+```cmd
+java -Dgw.config=gw.properties -jar gw.jar -r C:\projects\my-project -a OpenAI:gpt-5.1 -t true -e target,.git,node_modules -l "glob:**\*.md"
 ```
 
 ## Resources

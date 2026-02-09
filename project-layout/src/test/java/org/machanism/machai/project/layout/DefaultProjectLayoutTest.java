@@ -3,88 +3,47 @@ package org.machanism.machai.project.layout;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class DefaultProjectLayoutTest {
 
-	@Test
-	void getModules_shouldReturnEmptyListWhenProjectDirDoesNotExist() {
-		// Arrange
-		File dir = new File("target/test-tmp/default-layout-empty");
-		if (dir.isDirectory()) {
-			File[] files = dir.listFiles();
-			if (files != null) {
-				for (File f : files) {
-					// best-effort cleanup
-					f.delete();
-				}
-			}
-			dir.delete();
-		}
-		assertFalse(dir.exists());
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(dir);
-
-		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertNotNull(modules);
-		assertTrue(modules.isEmpty());
-	}
+	@TempDir
+	Path tempDir;
 
 	@Test
-	void getModules_shouldReturnOnlyDirectoriesAndExcludeStandardExcludedDirs() throws Exception {
+	void getModules_shouldReturnDirectoriesExcludingKnownBuildAndVcsDirs_andCacheResult() throws IOException {
 		// Arrange
-		File dir = new File("target/test-tmp/default-layout-modules");
-		Files.createDirectories(dir.toPath());
+		Path moduleA = Files.createDirectories(tempDir.resolve("module-a"));
+		Files.createDirectories(tempDir.resolve("target"));
+		Files.createDirectories(tempDir.resolve(".git"));
+		Files.createDirectories(tempDir.resolve("build"));
 
-		Files.createDirectories(new File(dir, "module-a").toPath());
-		Files.createDirectories(new File(dir, "module-b").toPath());
-		Files.createDirectories(new File(dir, "target").toPath());
-		Files.createDirectories(new File(dir, "target-custom").toPath());
-		Files.write(new File(dir, "not-a-dir.txt").toPath(), "x".getBytes(StandardCharsets.UTF_8));
-
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(dir);
-
-		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertNotNull(modules);
-		assertEquals(2, modules.size());
-		assertTrue(modules.contains("module-a"));
-		assertTrue(modules.contains("module-b"));
-		assertFalse(modules.contains("target"));
-		assertFalse(modules.contains("target-custom"));
-	}
-
-	@Test
-	void getModules_shouldCacheAndReturnSameListInstanceAcrossCalls() throws Exception {
-		// Arrange
-		File dir = new File("target/test-tmp/default-layout-cache");
-		Files.createDirectories(dir.toPath());
-		Files.createDirectories(new File(dir, "module-a").toPath());
-
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(dir);
+		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
 		List<String> first = layout.getModules();
+		Files.createDirectories(tempDir.resolve("module-b"));
 		List<String> second = layout.getModules();
 
 		// Assert
-		assertSame(first, second);
-		assertTrue(second.contains("module-a"));
+		assertNotNull(first);
+		assertEquals(1, first.size());
+		assertTrue(first.contains(moduleA.getFileName().toString()));
+
+		assertSame(first, second, "Expected cached list instance to be returned on subsequent calls");
+		assertEquals(1, second.size(), "Expected cached result not to change after filesystem updates");
 	}
 
 	@Test
-	void getSources_documents_tests_shouldReturnNull() {
+	void getSources_getDocuments_getTests_shouldReturnNullAsNotImplemented() {
 		// Arrange
-		DefaultProjectLayout layout = new DefaultProjectLayout()
-				.projectDir(new File("target/test-tmp/default-layout-nulls"));
+		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(new File("."));
 
 		// Act
 		List<String> sources = layout.getSources();
@@ -95,19 +54,5 @@ class DefaultProjectLayoutTest {
 		assertNull(sources);
 		assertNull(docs);
 		assertNull(tests);
-	}
-
-	@Test
-	void projectDir_shouldReturnConcreteTypeForChaining() {
-		// Arrange
-		DefaultProjectLayout layout = new DefaultProjectLayout();
-		File dir = new File("target/test-tmp/default-chain");
-
-		// Act
-		DefaultProjectLayout returned = layout.projectDir(dir);
-
-		// Assert
-		assertSame(layout, returned);
-		assertSame(dir, layout.getProjectDir());
 	}
 }

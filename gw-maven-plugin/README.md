@@ -25,7 +25,7 @@
 
 ## Project Title and Overview
 
-Ghostwriter Maven Plugin (GW Maven Plugin) is a documentation automation tool for Maven-based Java projects. It scans the repository for embedded `@guidance:` directives and uses them to assemble and refresh Maven Site Markdown pages, helping keep documentation accurate and consistent as the code evolves.
+Ghostwriter Maven Plugin (GW Maven Plugin) is a documentation automation tool for Maven-based Java projects. It scans the repository for embedded `@guidance:` directives and uses them to assemble and refresh Maven Site Markdown pages, helping teams keep documentation accurate and consistent as the code evolves.
 
 Key features:
 
@@ -44,14 +44,14 @@ Key features:
 
 ### Checkout
 
-```sh
+```bat
 git clone https://github.com/machanism-org/machai.git
 cd machai
 ```
 
 ### Build
 
-```sh
+```bat
 mvn -U clean install
 ```
 
@@ -71,15 +71,9 @@ Add the plugin to your project `pom.xml`:
 
 ### Run the plugin
 
-Run by goal prefix:
+Run it directly by coordinates:
 
-```sh
-mvn gw:gw
-```
-
-Or run it directly by coordinates:
-
-```sh
+```bat
 mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw
 ```
 
@@ -99,13 +93,13 @@ mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw
 
 Command-line override example:
 
-```sh
-mvn gw:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
+```bat
+mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
 ```
 
 ### Typical workflow
 
 1. Add `@guidance:` comments close to the code or artifacts they describe.
-2. Run `mvn gw:gw` to (re)generate or update the Maven Site Markdown pages.
+2. Run the plugin goal to (re)generate or update the Maven Site Markdown pages.
 3. Run `mvn site` to render the site and review the generated documentation.
 4. Iterate: update code and `@guidance:` comments as requirements evolve, then re-run the goals.

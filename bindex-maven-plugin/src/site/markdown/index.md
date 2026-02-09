@@ -27,31 +27,29 @@ Page Structure:
 
 ## Introduction
 
-The **Bindex Maven Plugin** enables automated generation and registration of **bindex** metadata for Maven projects.
+The **Bindex Maven Plugin** enables automated generation and registration of **bindex** metadata for Maven projects. It generates a structured `bindex.json` descriptor for each Maven module so downstream tools can reliably discover, integrate, and assemble libraries.
 
-It helps you:
+Key benefits:
 
-- Produce a consistent, machine-readable descriptor (`bindex.json`) for each Maven module.
-- Keep that descriptor aligned with the module as it evolves.
-- Improve downstream discovery, integration, and assembly workflows that rely on structured metadata.
-- Support semantic search and other metadata-driven automation within the Machanism ecosystem.
+- Produces a consistent, machine-readable `bindex.json` per module.
+- Keeps metadata aligned with your module as it evolves (optional update mode).
+- Improves downstream discovery, integration, and assembly workflows that rely on structured metadata.
+- Supports metadata-driven automation (including GenAI-powered semantic search) within the Machanism ecosystem.
 
 ## Overview
 
-The plugin generates and maintains **bindex** metadata for the current Maven module.
-
-It can be run on-demand or bound to a Maven lifecycle phase (for example, `generate-resources`) so that metadata is always produced as part of a build.
+This plugin generates and maintains **bindex** metadata for the current Maven module. You can run it on-demand or bind it to a Maven lifecycle phase (for example, `generate-resources`) so metadata is always produced as part of the build.
 
 During execution it will:
 
 - Generate `bindex.json` when it does not exist.
-- Optionally update an existing `bindex.json` (when enabled) to keep metadata aligned with the module.
+- Optionally update an existing `bindex.json` (when enabled) to keep metadata synchronized with the module.
 
 ## Key Features
 
 - Generates a `bindex.json` descriptor for the current Maven module.
-- Updates an existing descriptor to keep metadata synchronized with project changes.
-- Designed to be run manually or bound to a lifecycle phase.
+- Optionally updates an existing descriptor to keep metadata synchronized with project changes.
+- Can be executed directly or bound to a lifecycle phase.
 - Standardizes metadata for discovery, indexing, and assembly workflows.
 
 ## Getting Started
@@ -79,8 +77,8 @@ mvn org.machanism.machai:bindex-maven-plugin:0.0.8-SNAPSHOT:bindex
 
 ### Typical Workflow
 
-1. Add/configure the plugin in your project `pom.xml` (optionally bind it to a lifecycle phase).
-2. Run the plugin to generate `bindex.json` for the module.
+1. Add the plugin to your project `pom.xml` (optionally bind it to a lifecycle phase).
+2. Run the `bindex` goal to generate `bindex.json` for the module.
 3. Commit `bindex.json` if your repository policy expects generated metadata to be versioned.
 4. Use `bindex.json` with downstream tooling that consumes **bindex** descriptors.
 
@@ -88,12 +86,12 @@ mvn org.machanism.machai:bindex-maven-plugin:0.0.8-SNAPSHOT:bindex
 
 | Parameter | Description | Default |
 |---|---|---|
-| `update` | Whether to update an existing `bindex.json` if present. | `false` |
+| `update` | Update an existing `bindex.json` if present. | `false` |
 
 Example (system property):
 
 ```bash
-mvn org.machanism.machai:bindex-maven-plugin:0.0.8-SNAPSHOT:bindex -Dupdate=false
+mvn org.machanism.machai:bindex-maven-plugin:0.0.8-SNAPSHOT:bindex -Dupdate=true
 ```
 
 ## Resources

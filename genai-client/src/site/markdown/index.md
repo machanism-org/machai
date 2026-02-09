@@ -27,7 +27,14 @@ Page Structure:
 
 ## Introduction
 
-GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers foundational prompt management, optional tool/function calling, file context, and (provider-dependent) embeddings through a small, stable API (`GenAIProvider`).
+GenAI Client is a Java library for integrating with Generative AI providers through a small, stable API (`GenAIProvider`).
+
+It provides the building blocks for:
+
+- Managing prompts and instructions.
+- Optional tool/function calling.
+- Optional file context.
+- Provider-dependent embeddings.
 
 The main benefit is provider portability: you can swap or combine backends (for example, OpenAI-compatible API providers and UI/web-automation providers) by changing configuration rather than application code.
 
@@ -36,8 +43,8 @@ The main benefit is provider portability: you can swap or combine backends (for 
 GenAI Client is centered around the `GenAIProvider` interface.
 
 - Provider implementations are resolved by name using `GenAIProviderManager`.
-- You configure a provider with a model (or provider-specific configuration) and optional session settings.
-- You execute a request via `perform()`.
+- You select a provider and its model/configuration.
+- You execute requests via `perform()`.
 
 This design provides:
 
@@ -76,6 +83,7 @@ This design provides:
 | `OPENAI_BASE_URL` | No | OpenAI / OpenAI-compatible | Override API base URL (useful for OpenAI-compatible gateways). |
 | `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token. |
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token. |
+| `AUTH_URL` | No | CodeMie | OAuth2 token endpoint override (defaults to CodeMie Keycloak token URL). |
 
 > Note: The Web provider uses Anteater recipes and is typically configured via `model(...)` and JVM system properties (for example, `-Drecipes=...`) rather than environment variables.
 
@@ -134,32 +142,29 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates seamlessly with the OpenAI API as a concrete implementation of `GenAIProvider`.
+The `OpenAIProvider` integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
-This provider enables generative AI workflows including prompt/response interactions, file inputs, function/tool calling, and vector embeddings.
+This provider enables a wide range of generative AI capabilities, including:
 
-**Capabilities**
+- Sending prompts and receiving responses from OpenAI Chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-- Chat-style prompt execution via `perform()`.
-- Optional system instructions via `instructions(String)`.
-- File context support:
-  - Upload local files via `addFile(File)`.
-  - Reference remote files via `addFile(URL)`.
-- Tool (function) calling via `addTool(...)` (provider-driven).
-- Text embeddings via `embedding(String)`.
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications.
 
-**Authentication / configuration**
+**Environment Variables**
 
-The OpenAI client reads the following environment variables (you must set at least `OPENAI_API_KEY`):
+The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using the CodeMie API (OpenAI-compatible endpoint)**
+**Using the CodeMie API**
 
-To route requests through CodeMie’s OpenAI-compatible gateway, configure:
+To use the CodeMie API, set the following environment variables:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -174,7 +179,9 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-The `CodeMieProvider` is an `OpenAIProvider` specialization that authenticates against CodeMie and then routes requests to CodeMie’s OpenAI-compatible API.
+The `CodeMieProvider` is an `OpenAIProvider` specialization.
+
+It authenticates against CodeMie, then routes requests to CodeMie’s OpenAI-compatible API endpoint.
 
 How it works:
 
@@ -186,6 +193,7 @@ How it works:
 
 - `GENAI_USERNAME` (required)
 - `GENAI_PASSWORD` (required)
+- `AUTH_URL` (optional; defaults to CodeMie Keycloak token URL)
 
 **Usage example**
 
@@ -211,7 +219,7 @@ This provider is intended for environments where no external LLM integration sho
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("None:");
-provider.inputsLog(new java.io.File("./inputsLog/inputs.txt"));
+provider.inputsLog(new java.io.File(".\\inputsLog\\inputs.txt"));
 provider.instructions("You are a helpful assistant.");
 provider.prompt("Describe the weather.");
 provider.perform();
@@ -226,28 +234,30 @@ The `WebProvider` is a `GenAIProvider` implementation that obtains model respons
 
 Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
 
-**Configuration**
-
-- Call `model(String)` to set the Anteater configuration name before initializing the workspace.
-- Call `setWorkingDir(File)` once per JVM instance to initialize the shared workspace:
-  - The workspace `startDir` defaults to the provided working directory.
-  - If a directory (or file) exists under `workingDir` at the path specified by system property `recipes` (default: `genai-client/src/main/resources`), it is used instead.
-
 **Thread safety and lifecycle**
 
 - Not thread-safe.
 - Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
 
+**Configuration**
+
+- Call `model(String)` to set the Anteater configuration name before initializing the workspace.
+- Call `setWorkingDir(File)` once per JVM instance to initialize the shared workspace.
+- The workspace start directory defaults to the provided working directory.
+- If a directory (or file) exists under `workingDir` at the path specified by system property `recipes` (default: `genai-client/src/main/resources`), it is used instead.
+
 **Usage example**
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
 provider.model("config.yaml");
-provider.setWorkingDir(new java.io.File("/path/to/project"));
+provider.setWorkingDir(new java.io.File("C:\\path\\to\\project"));
 String response = provider.perform();
 provider.close();
 ```
+
+**Thread safety:** NOT thread-safe.
 
 ## Resources
 

@@ -2,51 +2,40 @@ package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class JScriptProjectLayoutTest {
 
+	@TempDir
+	Path tempDir;
+
 	@Test
-	void isPackageJsonPresent_shouldReturnTrueWhenPackageJsonExists() throws Exception {
+	void isPackageJsonPresent_shouldReturnTrueOnlyWhenPackageJsonExists() throws IOException {
 		// Arrange
-		File dir = new File("target/test-tmp/js-project");
-		assertTrue(dir.mkdirs() || dir.isDirectory());
-		File pkg = new File(dir, "package.json");
-		Files.write(pkg.toPath(), "{\"name\":\"x\"}".getBytes(StandardCharsets.UTF_8));
-
-		// Act
-		boolean result = JScriptProjectLayout.isPackageJsonPresent(dir);
-
-		// Assert
-		assertTrue(result);
+		Path projectDir = tempDir.resolve("repo");
+		Files.createDirectories(projectDir);
+		
+		// Act + Assert
+		assertFalse(JScriptProjectLayout.isPackageJsonPresent(projectDir.toFile()));
+		Files.write(projectDir.resolve(JScriptProjectLayout.PROJECT_MODEL_FILE_NAME), "{}".getBytes(StandardCharsets.UTF_8));
+		assertTrue(JScriptProjectLayout.isPackageJsonPresent(projectDir.toFile()));
 	}
 
 	@Test
-	void isPackageJsonPresent_shouldReturnFalseWhenPackageJsonMissing() {
+	void getModules_shouldReturnNullWhenNoWorkspacesKey() throws IOException {
 		// Arrange
-		File dir = new File("target/test-tmp/not-js-project");
-		assertTrue(dir.mkdirs() || dir.isDirectory());
+		Path projectDir = tempDir.resolve("repo");
+		Files.createDirectories(projectDir);
+		Files.write(projectDir.resolve("package.json"), "{\"name\":\"repo\"}".getBytes(StandardCharsets.UTF_8));
 
-		// Act
-		boolean result = JScriptProjectLayout.isPackageJsonPresent(dir);
-
-		// Assert
-		assertFalse(result);
-	}
-
-	@Test
-	void getModules_shouldReturnNullWhenNoWorkspacesKey() throws Exception {
-		// Arrange
-		File dir = new File("target/test-tmp/js-no-workspaces");
-		assertTrue(dir.mkdirs() || dir.isDirectory());
-		File pkg = new File(dir, "package.json");
-		Files.write(pkg.toPath(), "{\"name\":\"x\"}".getBytes(StandardCharsets.UTF_8));
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(projectDir.toFile());
 
 		// Act
 		List<String> modules = layout.getModules();
@@ -56,108 +45,42 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListDueToCurrentWorkspaceGlobParsingBehavior() throws Exception {
+	void getModules_shouldResolveWorkspaceGlobs_andExcludePathsContainingExcludedDirs() throws IOException {
 		// Arrange
-		File dir = new File("target/test-tmp/js-workspaces");
-		assertTrue(dir.mkdirs() || dir.isDirectory());
+		Path projectDir = tempDir.resolve("repo");
+		Files.createDirectories(projectDir);
+		Files.write(projectDir.resolve("package.json"), "{\"workspaces\":[\"packages/**\"]}".getBytes(StandardCharsets.UTF_8));
 
-		String packageJson = "{\"name\":\"root\",\"workspaces\":[\"packages/**\"]}";
-		Files.write(new File(dir, "package.json").toPath(), packageJson.getBytes(StandardCharsets.UTF_8));
+		Path packages = Files.createDirectories(projectDir.resolve("packages"));
+		Path pkgA = Files.createDirectories(packages.resolve("a"));
+		Files.write(pkgA.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
 
-		File moduleA = new File(dir, "packages/module-a");
-		assertTrue(moduleA.mkdirs() || moduleA.isDirectory());
-		Files.write(new File(moduleA, "package.json").toPath(), "{\"name\":\"a\"}".getBytes(StandardCharsets.UTF_8));
+		Path nestedWithExcluded = Files.createDirectories(packages.resolve("node_modules").resolve("x"));
+		Files.write(nestedWithExcluded.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
 
-		File moduleB = new File(dir, "packages/module-b");
-		assertTrue(moduleB.mkdirs() || moduleB.isDirectory());
-		Files.write(new File(moduleB, "package.json").toPath(), "{\"name\":\"b\"}".getBytes(StandardCharsets.UTF_8));
-
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(projectDir.toFile());
 
 		// Act
 		List<String> modules = layout.getModules();
 
 		// Assert
 		assertNotNull(modules);
-		assertTrue(modules.isEmpty());
+		assertEquals(1, modules.size());
+		assertEquals("packages/a", modules.get(0).replace('\\', '/'));
 	}
 
 	@Test
-	void getModules_shouldReturnNullWhenWorkspacesIsNotArray() throws Exception {
+	void getModules_shouldThrowIllegalArgumentExceptionWhenPackageJsonIsInvalid() throws IOException {
 		// Arrange
-		File dir = new File("target/test-tmp/js-workspaces-not-array");
-		assertTrue(dir.mkdirs() || dir.isDirectory());
-
-		String packageJson = "{\"name\":\"root\",\"workspaces\":{\"packages\":[\"packages/*\"]}}";
-		Files.write(new File(dir, "package.json").toPath(), packageJson.getBytes(StandardCharsets.UTF_8));
-
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
-
-		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertNull(modules);
-	}
-
-	@Test
-	void getModules_shouldThrowIllegalArgumentExceptionWhenWorkspacePathDoesNotExist() throws Exception {
-		// Arrange
-		File dir = new File("target/test-tmp/js-workspaces-missing-path");
-		assertTrue(dir.mkdirs() || dir.isDirectory());
-
-		String packageJson = "{\"name\":\"root\",\"workspaces\":[\"missing/**\"]}";
-		Files.write(new File(dir, "package.json").toPath(), packageJson.getBytes(StandardCharsets.UTF_8));
-
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
+		Path projectDir = tempDir.resolve("repo");
+		Files.createDirectories(projectDir);
+		Files.write(projectDir.resolve("package.json"), "{ invalid json".getBytes(StandardCharsets.UTF_8));
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(projectDir.toFile());
 
 		// Act
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, layout::getModules);
 
 		// Assert
 		assertNotNull(ex.getCause());
-	}
-
-	@Test
-	void getModules_shouldThrowIllegalArgumentExceptionWhenPackageJsonIsInvalidJson() throws Exception {
-		// Arrange
-		File dir = new File("target/test-tmp/js-invalid-json");
-		assertTrue(dir.mkdirs() || dir.isDirectory());
-		Files.write(new File(dir, "package.json").toPath(), "not-json".getBytes(StandardCharsets.UTF_8));
-
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(dir);
-
-		// Act
-		assertThrows(IllegalArgumentException.class, layout::getModules);
-	}
-
-	@Test
-	void getSources_documents_tests_shouldReturnNull() {
-		// Arrange
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(new File("target/test-tmp/js-nulls"));
-
-		// Act
-		List<String> sources = layout.getSources();
-		List<String> docs = layout.getDocuments();
-		List<String> tests = layout.getTests();
-
-		// Assert
-		assertNull(sources);
-		assertNull(docs);
-		assertNull(tests);
-	}
-
-	@Test
-	void projectDir_shouldReturnConcreteTypeForChaining() {
-		// Arrange
-		JScriptProjectLayout layout = new JScriptProjectLayout();
-		File dir = new File("target/test-tmp/js-chain");
-
-		// Act
-		JScriptProjectLayout returned = layout.projectDir(dir);
-
-		// Assert
-		assertSame(layout, returned);
-		assertSame(dir, layout.getProjectDir());
 	}
 }

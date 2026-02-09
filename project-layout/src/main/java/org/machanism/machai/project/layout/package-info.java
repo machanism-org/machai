@@ -1,20 +1,17 @@
 /**
- * Detects and models a repository's on-disk layout so callers can consistently locate source, test, resource, and
- * documentation directories, and optionally discover modules/workspaces.
+ * Provides APIs for detecting and modeling a repository's on-disk layout.
  *
- * <p>The primary abstraction is {@link org.machanism.machai.project.layout.ProjectLayout}. Concrete implementations
- * encapsulate ecosystem-specific conventions (for example Maven, JavaScript/TypeScript workspaces, or Python) and expose
- * a uniform API for directory discovery.
+ * <p>This package defines a common abstraction, {@link org.machanism.machai.project.layout.ProjectLayout}, for locating
+ * conventional project directories (for example, sources, tests, resources, and documentation) from a configured project
+ * root. Implementations encapsulate ecosystem-specific conventions (such as Maven-style layouts or workspace-based
+ * repositories) while presenting a consistent interface to callers.
  *
- * <h2>Key concepts</h2>
+ * <h2>Key responsibilities</h2>
  * <ul>
- *   <li><strong>Project root</strong>: configured via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.</li>
- *   <li><strong>Modules/workspaces</strong>: optional discovery of nested projects (for example Maven multi-module projects or
- *       JS/TS workspaces).</li>
- *   <li><strong>Directory sets</strong>: conventional locations for sources, tests, and documentation.
- *       Implementations may consult build metadata files such as {@code pom.xml} or {@code package.json}.</li>
- *   <li><strong>Exclusions</strong>: a shared list of directories to ignore during scans (see
+ *   <li>Identify the project root directory and derive conventional subdirectories.</li>
+ *   <li>Optionally discover nested modules/workspaces within a repository.</li>
+ *   <li>Provide directory sets for sources, tests, resources, and documentation.</li>
+ *   <li>Apply shared exclusions when scanning directories (see
  *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}).</li>
  * </ul>
  *

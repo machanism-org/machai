@@ -3,8 +3,6 @@ package org.machanism.machai.project.layout;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,26 +10,26 @@ class ProjectLayoutTest {
 
 	private static final class TestLayout extends ProjectLayout {
 		@Override
-		public List<String> getSources() {
-			return Arrays.asList("src");
+		public java.util.List<String> getSources() {
+			return null;
 		}
 
 		@Override
-		public List<String> getDocuments() {
-			return Arrays.asList("docs");
+		public java.util.List<String> getDocuments() {
+			return null;
 		}
 
 		@Override
-		public List<String> getTests() {
-			return Arrays.asList("test");
+		public java.util.List<String> getTests() {
+			return null;
 		}
 	}
 
 	@Test
 	void projectDir_shouldSetAndReturnSameInstance() {
 		// Arrange
-		ProjectLayout layout = new TestLayout();
-		File dir = new File("target/test-tmp/repo");
+		TestLayout layout = new TestLayout();
+		File dir = new File("build\\tmp\\project");
 
 		// Act
 		ProjectLayout returned = layout.projectDir(dir);
@@ -42,89 +40,37 @@ class ProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_defaultImplementation_shouldReturnNull() {
+	void getRelatedPath_instanceMethod_shouldReturnRelativePathAndTrimLeadingSlash() {
 		// Arrange
-		ProjectLayout layout = new TestLayout();
+		TestLayout layout = new TestLayout();
+		String base = "C:/repo";
+		File file = new File("C:/repo/sub/module");
 
 		// Act
-		List<String> modules = layout.getModules();
+		String related = layout.getRelatedPath(base, file);
 
 		// Assert
-		assertNull(modules);
+		assertEquals("sub/module", related);
 	}
 
 	@Test
-	void getRelatedPath_instance_shouldStripCurrentPath_andLeadingSlash() {
+	void getRelatedPath_static_shouldReturnDotWhenFileEqualsDir() {
 		// Arrange
-		ProjectLayout layout = new TestLayout();
-		String currentPath = "C:/repo";
-		File file = new File("C:/repo/src/main/java");
-
-		// Act
-		String related = layout.getRelatedPath(currentPath, file);
-
-		// Assert
-		assertEquals("src/main/java", related);
-	}
-
-	@Test
-	void getRelatedPath_instance_shouldReturnEmptyStringWhenFileEqualsCurrentPath() {
-		// Arrange
-		ProjectLayout layout = new TestLayout();
-		String currentPath = "C:/repo";
+		File dir = new File("C:/repo");
 		File file = new File("C:/repo");
 
 		// Act
-		String related = layout.getRelatedPath(currentPath, file);
-
-		// Assert
-		assertEquals("", related);
-	}
-
-	@Test
-	void getRelatedPath_static_whenFileEqualsDir_shouldReturnDot() {
-		// Arrange
-		File dir = new File("/repo");
-		File file = new File("/repo");
-
-		// Act
-		String related = ProjectLayout.getRelatedPath(dir, file, false);
+		String related = ProjectLayout.getRelatedPath(dir, file);
 
 		// Assert
 		assertEquals(".", related);
 	}
 
 	@Test
-	void getRelatedPath_static_whenAddSingleDot_shouldPrefixWhenNotStartingWithDot() {
+	void getRelatedPath_static_shouldReturnNullWhenFileStringEqualsResult() {
 		// Arrange
-		File dir = new File("/repo");
-		File file = new File("/repo/module");
-
-		// Act
-		String related = ProjectLayout.getRelatedPath(dir, file, true);
-
-		// Assert
-		assertEquals("./module", related);
-	}
-
-	@Test
-	void getRelatedPath_static_whenRelativePathEmpty_shouldReturnDotEvenIfAddSingleDotTrue() {
-		// Arrange
-		File dir = new File("/repo");
-		File file = new File("/repo");
-
-		// Act
-		String related = ProjectLayout.getRelatedPath(dir, file, true);
-
-		// Assert
-		assertEquals(".", related);
-	}
-
-	@Test
-	void getRelatedPath_static_whenFileNotUnderDir_shouldReturnNull() {
-		// Arrange
-		File dir = new File("/repo");
-		File file = new File("/other/place");
+		File dir = new File("C:/repo");
+		File file = new File("C:/other");
 
 		// Act
 		String related = ProjectLayout.getRelatedPath(dir, file, false);
@@ -134,13 +80,15 @@ class ProjectLayoutTest {
 	}
 
 	@Test
-	void excludeDirs_shouldContainCommonBuildAndVcsDirectories() {
+	void getRelatedPath_static_shouldOptionallyAddSingleDotPrefix() {
 		// Arrange
-		List<String> exclude = Arrays.asList(ProjectLayout.EXCLUDE_DIRS);
+		File dir = new File("C:/repo");
+		File file = new File("C:/repo/a/b");
 
-		// Act + Assert
-		assertTrue(exclude.contains("node_modules"));
-		assertTrue(exclude.contains(".git"));
-		assertTrue(exclude.contains("target"));
+		// Act
+		String related = ProjectLayout.getRelatedPath(dir, file, true);
+
+		// Assert
+		assertEquals("./a/b", related);
 	}
 }

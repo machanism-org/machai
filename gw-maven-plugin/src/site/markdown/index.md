@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-Ghostwriter Maven Plugin (GW Maven Plugin) is an advanced documentation automation tool for Java projects. It scans the repository for embedded `@guidance:` directives and uses them to assemble and refresh Maven Site Markdown pages, helping teams keep documentation accurate and consistent as the code evolves.
+Ghostwriter Maven Plugin (GW Maven Plugin) is a documentation automation tool for Java projects. It scans the repository for embedded `@guidance:` directives and uses them to assemble and refresh Maven Site Markdown pages, helping teams keep documentation accurate and consistent as the code evolves.
 
 Benefits:
 
@@ -37,14 +37,13 @@ Benefits:
 
 ## Overview
 
-This plugin fits into standard Maven workflows. You can run it on demand or bind it into the build to generate or update Maven Site content based on `@guidance:` present in sources and resources.
+This plugin can be run on demand or bound into the build to generate or update Maven Site content based on `@guidance:` present in sources and resources.
 
 ## Key Features
 
 - Generates and refreshes Maven Site pages from embedded `@guidance:` comments
 - Scans project sources and resources to discover `@guidance:` directives
 - Integrates with standard Maven Site layout and workflows
-- Supports documentation that stays aligned with code, tests, and evolving requirements
 - Can be run from the command line or bound into the Maven lifecycle
 
 ## Getting Started
@@ -74,7 +73,7 @@ Add the plugin to your `pom.xml`:
 
 Run the plugin goal:
 
-```sh
+```bat
 mvn org.machanism.machai:gw-maven-plugin:0.0.8-SNAPSHOT:gw
 ```
 
@@ -110,7 +109,7 @@ Example configuration:
 
 Example command line with custom parameters:
 
-```sh
+```bat
 mvn org.machanism.machai:gw-maven-plugin:0.0.8-SNAPSHOT:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
 ```
 

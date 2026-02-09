@@ -12,7 +12,7 @@
  * <h2>Typical usage</h2>
  *
  * <pre>{@code
- * File projectDir = new File("/path/to/project");
+ * File projectDir = new File("C:\\path\\to\\project");
  *
  * // Detect the layout based on the project directory contents.
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
@@ -43,7 +43,7 @@ package org.machanism.machai.project;
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
+ *      - Use proper Markdown or HTML formatting for readability.
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.

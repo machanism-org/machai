@@ -32,7 +32,7 @@ import com.ganteater.ae.RecipeRunner;
  * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
  * provider.model("config.yaml");
- * provider.setWorkingDir(new File("/path/to/project"));
+ * provider.setWorkingDir(new File("C:\\path\\to\\project"));
  * String response = provider.perform();
  * }</pre>
  *

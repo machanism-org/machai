@@ -2,33 +2,34 @@
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
  * <p>This package contains the Spring Boot entry point and Spring Shell command components that expose Machai
- * features through an interactive REPL or non-interactive command execution.
+ * features through an interactive REPL and non-interactive command execution.
  *
- * <h2>Key components</h2>
+ * <h2>Key types</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.cli.MachaiCLI} – application entry point that boots Spring Boot and loads
- *       optional system properties from {@code machai.properties}.</li>
- *   <li>{@link org.machanism.machai.cli.ConfigCommand} – reads/writes persistent CLI defaults such as the working
- *       directory, GenAI provider/model, and semantic-search score threshold.</li>
- *   <li>{@link org.machanism.machai.cli.AssembyCommand} – picks libraries (Bindexes) from a prompt and assembles a
- *       project using a GenAI provider.</li>
- *   <li>{@link org.machanism.machai.cli.BindexCommand} – generates and registers bindex metadata for projects.</li>
- *   <li>{@link org.machanism.machai.cli.GWCommand} – processes documents/files with the Ghostwriter pipeline.</li>
- *   <li>{@link org.machanism.machai.cli.CleanCommand} – removes Machai temporary directories (e.g.
- *       {@code .machai}).</li>
+ *       optional system properties from {@code machai.properties} (or from the file provided via the
+ *       {@code -Dconfig=...} system property).</li>
+ *   <li>{@link org.machanism.machai.cli.ConfigCommand} – manages persistent CLI defaults such as working directory
+ *       ({@code dir}), GenAI provider/model ({@code genai}), and semantic-search score threshold ({@code score}).</li>
+ *   <li>{@link org.machanism.machai.cli.AssemblyCommand} – performs library picking (semantic search) and assembles an
+ *       application skeleton using a configured GenAI provider.</li>
+ *   <li>{@link org.machanism.machai.cli.BindexCommand} – generates bindex metadata for projects and registers bindex
+ *       files in an external registry.</li>
+ *   <li>{@link org.machanism.machai.cli.GWCommand} – processes documents/files using the Ghostwriter pipeline.</li>
+ *   <li>{@link org.machanism.machai.cli.CleanCommand} – deletes Machai temporary directories (for example
+ *       {@code .machai}) under a selected root directory.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
- * <p>The CLI is usually started via the {@code MachaiCLI} main class and then commands are invoked within the
- * Spring Shell environment:</p>
  *
  * <pre>
  * config genai OpenAI:gpt-5.1
- * bindex --dir ./my-project
+ * config dir .\\my-project
+ * bindex --dir .\\my-project
  * pick --query "Create a web app" --score 0.9
- * assembly --dir ./out
- * gw --dir ./my-project --scan ./my-project/docs
- * clean --dir ./my-project
+ * assembly --dir .\\out
+ * gw --dir .\\my-project --scan .\\my-project\\docs
+ * clean --dir .\\my-project
  * </pre>
  */
 package org.machanism.machai.cli;

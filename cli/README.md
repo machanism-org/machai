@@ -75,7 +75,7 @@ Example commands (as shown by `help`):
 ### Assembly commands
 
 - `pick`: Picks libraries based on user request.
-- `assembly`: Creates a project via picked library set.
+- `assembly`: Creates a project via picked librariy set.
 - `prompt`: Is used for request additional GenAI guidances.
 
 ### Bindex commands
@@ -85,12 +85,12 @@ Example commands (as shown by `help`):
 
 ### Built-in commands
 
-- `help`: Display help about available commands.
+- `help`: Display help about available commands
 - `stacktrace`: Display the full stacktrace of the last error.
 - `clear`: Clear the shell screen.
 - `quit`, `exit`: Exit the shell.
-- `history`: Display or save the history of previously run commands.
-- `version`: Show version info.
+- `history`: Display or save the history of previously run commands
+- `version`: Show version info
 - `script`: Read and execute commands from a file.
 
 ### Docs commands

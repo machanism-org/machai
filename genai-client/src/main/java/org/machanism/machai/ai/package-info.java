@@ -25,37 +25,31 @@
  */
 
 /**
- * Provider-agnostic public API for the Machanism generative AI (GenAI) client.
+ * Provider-neutral public API for building and executing GenAI requests.
  *
- * <p>This package contains the core, provider-neutral types used to construct requests and consume responses
- * without coupling application code to any specific vendor SDK.
- *
- * <h2>Responsibilities</h2>
+ * <p>This package acts as the root namespace for the GenAI client and groups the provider-agnostic types and
+ * subpackages used to:
  * <ul>
- *   <li>Defines shared request/response concepts that are common across supported providers.</li>
- *   <li>Exposes stable interfaces and value types intended for direct use by application code.</li>
- *   <li>Provides entry points used by provider implementations/managers to execute model requests.</li>
+ *   <li>select and configure a concrete provider and model,</li>
+ *   <li>submit prompts and system instructions,</li>
+ *   <li>attach local or remote files for provider-side processing,</li>
+ *   <li>register callable tools that a model may invoke during execution,</li>
+ *   <li>execute requests and consume the resulting text response or embeddings.</li>
  * </ul>
  *
- * <h2>Related packages</h2>
- * <ul>
- *   <li><strong>Providers</strong>: concrete integrations under {@code org.machanism.machai.ai.provider}.</li>
- *   <li><strong>Management</strong>: provider discovery/selection under {@code org.machanism.machai.ai.manager}.</li>
- * </ul>
+ * <p>Concrete provider integrations live under {@code org.machanism.machai.ai.provider}, while provider
+ * discovery/selection and shared utilities are under {@code org.machanism.machai.ai.manager}.
  *
  * <h2>Typical usage</h2>
- * <ol>
- *   <li>Select a provider and model via the provider manager.</li>
- *   <li>Configure request inputs such as instructions and prompts (and optionally tools, depending on provider).</li>
- *   <li>Execute the request and consume the result.</li>
- * </ol>
- *
- * <h2>Example</h2>
  * <pre>{@code
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini");
+ * Configurator conf = ...;
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
+ *
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Summarize this text.");
+ *
  * String response = provider.perform();
+ * provider.close();
  * }
  * </pre>
  */
