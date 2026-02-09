@@ -48,13 +48,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project workspace, extracts {@code @guidance:} blocks, and submits per-file review requests to a
- * configured GenAI provider.
+ * Scans a project workspace, extracts {@code @guidance:} blocks, and submits
+ * per-file review requests to a configured GenAI provider.
  *
  * <p>
- * The processor discovers file-type specific {@link Reviewer} implementations using {@link ServiceLoader}. Each
- * reviewer knows how to parse its corresponding file format and produce a prompt fragment that includes the original
- * file contents and any embedded guidance comments.
+ * The processor discovers file-type specific {@link Reviewer} implementations
+ * using {@link ServiceLoader}. Each reviewer knows how to parse its
+ * corresponding file format and produce a prompt fragment that includes the
+ * original file contents and any embedded guidance comments.
  * </p>
  *
  * <h2>High-level flow</h2>
@@ -62,7 +63,8 @@ import org.slf4j.LoggerFactory;
  * <li>Discover modules (if any) using {@link ProjectLayout}.</li>
  * <li>Traverse files (optionally filtered by pattern and excludes).</li>
  * <li>For each supported file, use a {@link Reviewer} to extract guidance.</li>
- * <li>Compose a prompt (project info + guidance + output format) and execute {@link GenAIProvider#perform()}.</li>
+ * <li>Compose a prompt (project info + guidance + output format) and execute
+ * {@link GenAIProvider#perform()}.</li>
  * </ol>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -72,13 +74,19 @@ public class FileProcessor extends ProjectProcessor {
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
 
-	/** Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}. */
+	/**
+	 * Temporary directory name for documentation inputs under
+	 * {@link #MACHAI_TEMP_DIR}.
+	 */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/** Utility that installs tool functions (filesystem/command) into the provider when supported. */
+	/**
+	 * Utility that installs tool functions (filesystem/command) into the provider
+	 * when supported.
+	 */
 	private final SystemFunctionTools systemFunctionTools;
 
 	/** Reviewer associations keyed by file extension. */
@@ -118,14 +126,14 @@ public class FileProcessor extends ProjectProcessor {
 	private int maxModuleThreads = Math.max(1, Runtime.getRuntime().availableProcessors());
 
 	/** Timeout for module processing worker pool shutdown. */
-	private long moduleThreadTimeoutMinutes = 40;
+	private long moduleThreadTimeoutMinutes = 60;
 
 	private File scanDir;
 
 	/**
 	 * Constructs a processor.
 	 *
-	 * @param genai provider key/name to use
+	 * @param genai        provider key/name to use
 	 * @param configurator configuration source
 	 */
 	public FileProcessor(String genai, Configurator configurator) {
@@ -135,7 +143,10 @@ public class FileProcessor extends ProjectProcessor {
 		loadReviewers();
 	}
 
-	/** Loads file reviewers via the {@link ServiceLoader} registry, mapping supported file extensions to a reviewer. */
+	/**
+	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping
+	 * supported file extensions to a reviewer.
+	 */
 	private void loadReviewers() {
 		reviewMap.clear();
 
@@ -163,8 +174,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and prepares inputs for documentation generation. This overload
-	 * defaults the scan start directory to {@code basedir}.
+	 * Scans documents in the given root directory and prepares inputs for
+	 * documentation generation. This overload defaults the scan start directory to
+	 * {@code basedir}.
 	 *
 	 * @param basedir root directory to scan
 	 * @throws IOException if an error occurs reading files
@@ -175,11 +187,12 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and start subdirectory, preparing inputs for documentation
-	 * generation.
+	 * Scans documents in the given root directory and start subdirectory, preparing
+	 * inputs for documentation generation.
 	 *
 	 * <p>
-	 * Note: callers may pass a raw directory (e.g. {@code src}) or a {@code glob:} / {@code regex:} pattern supported by
+	 * Note: callers may pass a raw directory (e.g. {@code src}) or a {@code glob:}
+	 * / {@code regex:} pattern supported by
 	 * {@link FileSystems#getPathMatcher(String)}.
 	 * </p>
 	 *
@@ -204,7 +217,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Recursively scans project folders, processing documentation inputs for all found modules and files.
+	 * Recursively scans project folders, processing documentation inputs for all
+	 * found modules and files.
 	 *
 	 * @param projectDir the directory containing the project/module to be scanned
 	 * @throws IOException if an error occurs reading files
@@ -250,7 +264,7 @@ public class FileProcessor extends ProjectProcessor {
 				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
 					if (cause instanceof RuntimeException) {
-						throw (RuntimeException)cause;
+						throw (RuntimeException) cause;
 					}
 					throw new IllegalStateException("Module processing failed.", cause);
 				}
@@ -311,7 +325,7 @@ public class FileProcessor extends ProjectProcessor {
 	 *
 	 * @param projectLayout project layout
 	 * @throws FileNotFoundException if the project layout cannot be created
-	 * @throws IOException if file reading fails
+	 * @throws IOException           if file reading fails
 	 */
 	protected void processParentFiles(ProjectLayout projectLayout) throws FileNotFoundException, IOException {
 		File projectDir = projectLayout.getProjectDir();
@@ -328,7 +342,8 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		if (match(projectDir) && children.isEmpty() && defaultGuidance != null) {
-			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), defaultGuidance);
+			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"),
+					defaultGuidance);
 			process(projectLayout, projectLayout.getProjectDir(), defaultGuidanceText);
 		}
 	}
@@ -368,9 +383,10 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Processes files in a project directory matching a provided pattern or directory.
+	 * Processes files in a project directory matching a provided pattern or
+	 * directory.
 	 *
-	 * @param layout project layout
+	 * @param layout      project layout
 	 * @param filePattern directory path, {@code glob:}, or {@code regex:} pattern
 	 */
 	public void processProjectDir(ProjectLayout layout, String filePattern) {
@@ -411,7 +427,8 @@ public class FileProcessor extends ProjectProcessor {
 			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
 
-			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), instructions);
+			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
+					instructions);
 			provider.instructions(effectiveInstructions);
 
 			String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
@@ -640,11 +657,13 @@ public class FileProcessor extends ProjectProcessor {
 	 * Enables or disables multi-threaded module processing.
 	 *
 	 * <p>
-	 * When enabling, this method verifies that the configured provider is thread-safe.
+	 * When enabling, this method verifies that the configured provider is
+	 * thread-safe.
 	 * </p>
 	 *
 	 * @param moduleMultiThread {@code true} to enable, {@code false} to disable
-	 * @throws IllegalArgumentException if enabling is requested but the provider is not thread-safe
+	 * @throws IllegalArgumentException if enabling is requested but the provider is
+	 *                                  not thread-safe
 	 */
 	public void setModuleMultiThread(boolean moduleMultiThread) {
 		if (!moduleMultiThread) {
@@ -654,8 +673,8 @@ public class FileProcessor extends ProjectProcessor {
 
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
 			if (!provider.isThreadSafe()) {
-				throw new IllegalArgumentException(
-						"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
+				throw new IllegalArgumentException("The provider '" + genai
+						+ "' is not thread-safe and cannot be used in a multi-threaded context.");
 			}
 		}
 		this.moduleMultiThread = true;
@@ -669,9 +688,10 @@ public class FileProcessor extends ProjectProcessor {
 	 * </p>
 	 * <ul>
 	 * <li>Blank lines are preserved as line breaks.</li>
-	 * <li>Lines starting with {@code http://} or {@code https://} are treated as URLs and the referenced content is
-	 * included.</li>
-	 * <li>Lines starting with {@code file:} are treated as file references and the referenced content is included.</li>
+	 * <li>Lines starting with {@code http://} or {@code https://} are treated as
+	 * URLs and the referenced content is included.</li>
+	 * <li>Lines starting with {@code file:} are treated as file references and the
+	 * referenced content is included.</li>
 	 * <li>All other lines are included as-is.</li>
 	 * </ul>
 	 *
@@ -721,20 +741,23 @@ public class FileProcessor extends ProjectProcessor {
 	 * </p>
 	 * <ul>
 	 * <li>Blank lines are preserved as line breaks.</li>
-	 * <li>Lines starting with {@code http://} or {@code https://} are treated as URLs and the referenced content is
-	 * included.</li>
-	 * <li>Lines starting with {@code file:} are treated as file references and the referenced content is included.</li>
+	 * <li>Lines starting with {@code http://} or {@code https://} are treated as
+	 * URLs and the referenced content is included.</li>
+	 * <li>Lines starting with {@code file:} are treated as file references and the
+	 * referenced content is included.</li>
 	 * <li>All other lines are included as-is.</li>
 	 * </ul>
 	 *
-	 * @param defaultGuidance default guidance input (plain text, URL, or {@code file:})
+	 * @param defaultGuidance default guidance input (plain text, URL, or
+	 *                        {@code file:})
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
 		this.defaultGuidance = parseLines(defaultGuidance);
 	}
 
 	/**
-	 * Parses input line-by-line and expands any {@code http(s)://} or {@code file:} references.
+	 * Parses input line-by-line and expands any {@code http(s)://} or {@code file:}
+	 * references.
 	 *
 	 * @param data raw input
 	 * @return expanded content with preserved line breaks
@@ -806,7 +829,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * @return timeout (in minutes) to wait for module processing completion during shutdown
+	 * @return timeout (in minutes) to wait for module processing completion during
+	 *         shutdown
 	 */
 	public long getModuleThreadTimeoutMinutes() {
 		return moduleThreadTimeoutMinutes;
@@ -828,8 +852,10 @@ public class FileProcessor extends ProjectProcessor {
 	 * Attempts to retrieve instructions from the given data string.
 	 *
 	 * <ul>
-	 * <li>If {@code data} starts with {@code http://} or {@code https://}, reads content from the specified URL.</li>
-	 * <li>If {@code data} starts with {@code file:}, reads content from the specified file path.</li>
+	 * <li>If {@code data} starts with {@code http://} or {@code https://}, reads
+	 * content from the specified URL.</li>
+	 * <li>If {@code data} starts with {@code file:}, reads content from the
+	 * specified file path.</li>
 	 * <li>Otherwise, returns {@code data}.</li>
 	 * </ul>
 	 *

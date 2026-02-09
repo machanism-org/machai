@@ -39,6 +39,8 @@ public class CommandFunctionTools {
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
 
+	private int maxResultSize = 10240;
+
 	/**
 	 * Installs the command-line tool function into the specified provider.
 	 *
@@ -107,7 +109,7 @@ public class CommandFunctionTools {
 			shellCommand = new String[] { "sh", "-c", command };
 		}
 
-		StringBuilder output = new StringBuilder();
+		LimitedStringBuilder output = new LimitedStringBuilder(maxResultSize);
 
 		try {
 
@@ -156,8 +158,11 @@ public class CommandFunctionTools {
 
 			// Wait for the process to finish
 			int exitCode = process.waitFor();
-			output.append("Command exited with code: ").append(exitCode).append(System.lineSeparator());
-			return output.toString();
+			output.append("Command exited with code: ").append(Integer.toString(exitCode))
+					.append(System.lineSeparator());
+
+			String resultOutput = output.getLastText();
+			return resultOutput;
 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();

@@ -147,7 +147,7 @@ public class OpenAIProvider implements GenAIProvider {
 
 	private File workingDir;
 
-	private long timeout = 120;
+	private long timeoutSec = 0;
 
 	@Override
 	public void init(Configurator config) {
@@ -163,7 +163,9 @@ public class OpenAIProvider implements GenAIProvider {
 		if (baseUrl != null) {
 			buillder.baseUrl(baseUrl);
 		}
-		buillder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(getTimeout())).build());
+		if (timeoutSec > 0) {
+			buillder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(timeoutSec)).build());
+		}
 		client = buillder.build();
 	}
 
@@ -444,14 +446,21 @@ public class OpenAIProvider implements GenAIProvider {
 	/**
 	 * Adds a tool to the current session, providing its function handler.
 	 * 
-	 * The parameters object for a function definition must be a JSON Schema object of type "object". Within the properties of this object, you can use the following standard JSON types:
+	 * The parameters object for a function definition must be a JSON Schema object
+	 * of type "object". Within the properties of this object, you can use the
+	 * following standard JSON types:
 	 * 
-	 * string: For text or character sequences. This can be further constrained using enum to specify a list of acceptable string values.
-	 * integer: For whole numbers. While internally the API might treat it as a number at times, integer is a valid declaration in the schema.
-	 * number: For any numerical value, including floats/decimals.
-	 * boolean: For true/false values. Use the full term boolean rather than bool.
-	 * array: For lists of items. The items property must be used to specify the type of elements within the array (e.g., {"type": "string"}). This is used for lists, including multi-dimensional arrays.
-	 * object: For nested data structures (dictionaries or maps in Python/JavaScript). You can define nested properties and required fields within an object type to guide the model on complex input structures. 
+	 * string: For text or character sequences. This can be further constrained
+	 * using enum to specify a list of acceptable string values. integer: For whole
+	 * numbers. While internally the API might treat it as a number at times,
+	 * integer is a valid declaration in the schema. number: For any numerical
+	 * value, including floats/decimals. boolean: For true/false values. Use the
+	 * full term boolean rather than bool. array: For lists of items. The items
+	 * property must be used to specify the type of elements within the array (e.g.,
+	 * {"type": "string"}). This is used for lists, including multi-dimensional
+	 * arrays. object: For nested data structures (dictionaries or maps in
+	 * Python/JavaScript). You can define nested properties and required fields
+	 * within an object type to guide the model on complex input structures.
 	 * 
 	 * @param name        tool function name
 	 * @param description tool description
@@ -546,11 +555,11 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	public long getTimeout() {
-		return timeout;
+		return timeoutSec;
 	}
 
 	public void setTimeout(long timeout) {
-		this.timeout = timeout;
+		this.timeoutSec = timeout;
 	}
 
 }
