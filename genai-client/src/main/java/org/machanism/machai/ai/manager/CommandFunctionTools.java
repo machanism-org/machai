@@ -6,11 +6,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.SystemUtils;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +48,8 @@ public class CommandFunctionTools {
 		provider.addTool("run_command_line_tool",
 				"Execute allowed shell commands (Linux/OSX only, some commands are denied for safety).",
 				this::executeCommand, "command:string:required:The command to run in the shell.",
-				"env:array:optional:array of strings, each element of which has environment variable settings in the format name=value, "
-						+ "or null if the subprocess should inherit the environment of the current process.",
+				"env:string:optional:Defines a set of environment variable settings as a single string, where each element follows the format NAME=VALUE "
+						+ "and is separated by a newline character (\\n). If set to null, the subprocess will inherit the environment variables from the current process.",
 				"dir:string:optional:the working directory of the subprocess, or null if the subprocess should inherit the project directory.");
 	}
 
@@ -73,12 +74,14 @@ public class CommandFunctionTools {
 
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
-		String dir = props.get("dir").asText();
-		JsonNode env = props.get("env");
+		JsonNode jsonNode = props.get("dir");
+		String dir = jsonNode == null ? null : jsonNode.asText();
+		jsonNode = props.get("env");
+		String env = jsonNode == null ? null : jsonNode.asText(dir);
 
 		File projectDir = (File) params[1];
 		File workingDir;
-		if (dir == null) {
+		if (dir != null) {
 			workingDir = new File(dir);
 			if (!workingDir.isAbsolute()) {
 				workingDir = new File(projectDir, dir);
@@ -91,11 +94,17 @@ public class CommandFunctionTools {
 		}
 
 		// Prepare shell command
-		String shellCommand;
+		String[] shellCommand;
 		if (SystemUtils.IS_OS_WINDOWS) {
-			shellCommand = "cmd /c " + command;
+			if (Strings.CS.startsWith(command, "cmd.exe /c ")) {
+				command = StringUtils.substringAfter(command, "cmd.exe /c ");
+			}
+			shellCommand = new String[] { "cmd.exe", "/c", command };
 		} else {
-			shellCommand = "sh -c " + command;
+			if (Strings.CS.startsWith(command, "sh -c ")) {
+				command = StringUtils.substringAfter(command, "sh -c ");
+			}
+			shellCommand = new String[] { "sh", "-c", command };
 		}
 
 		StringBuilder output = new StringBuilder();
@@ -103,12 +112,10 @@ public class CommandFunctionTools {
 		try {
 
 			String[] envArray = null;
-			if (env == null) {
-				logger.warn("Potential security risk detected: a local environment variable is being used by the System Command Functional tool.");
-				
-				Map<String, String> envMap = System.getenv();
-				envArray = envMap.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
-						.toArray(String[]::new);
+			if (env != null) {
+				envArray = env.lines().collect(Collectors.toList()).toArray(new String[0]);
+			} else {
+				logger.warn("System Command Functional tool uses local environment variables.");
 			}
 
 			Process process = Runtime.getRuntime().exec(shellCommand, envArray, workingDir);

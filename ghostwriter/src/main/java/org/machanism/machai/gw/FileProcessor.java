@@ -118,7 +118,7 @@ public class FileProcessor extends ProjectProcessor {
 	private int maxModuleThreads = Math.max(1, Runtime.getRuntime().availableProcessors());
 
 	/** Timeout for module processing worker pool shutdown. */
-	private long moduleThreadTimeoutMinutes = 20;
+	private long moduleThreadTimeoutMinutes = 40;
 
 	private File scanDir;
 
@@ -893,17 +893,17 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private static String readFromFilePath(String filePath) {
-		File file = new File(filePath);
-		if (!file.exists()) {
-			throw new IllegalArgumentException("File not found: " + file.getAbsolutePath());
+		Path path = Path.of(filePath);
+		if (!Files.exists(path)) {
+			throw new IllegalArgumentException("File not found: " + path.toAbsolutePath());
 		}
 
-		try (FileReader reader = new FileReader(file, StandardCharsets.UTF_8)) {
+		try (FileReader reader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
 			String result = IOUtils.toString(reader);
 			logger.info("Included: `{}`", filePath);
 			return result;
 		} catch (IOException e) {
-			throw new IllegalArgumentException("Failed to read file: " + file.getAbsolutePath(), e);
+			throw new IllegalArgumentException("Failed to read file: " + path.toAbsolutePath(), e);
 		}
 	}
 }

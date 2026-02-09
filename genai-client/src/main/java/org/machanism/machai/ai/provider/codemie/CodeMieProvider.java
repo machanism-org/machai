@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -14,16 +15,17 @@ import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 
 public class CodeMieProvider extends OpenAIProvider {
 
-	public static String url = "https://keycloak.eks-core.aws.main.edp.projects.epam.com/auth/realms/codemie-prod/protocol/openid-connect/token";
+	public static String authUrl = "https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token";
 	public static String baseUrl = "https://codemie.lab.epam.com/code-assistant-api/v1";
 
 	@Override
 	public void init(Configurator conf) {
 		String username = conf.get("GENAI_USERNAME");
 		String password = conf.get("GENAI_PASSWORD");
+		String authUrl = conf.get("AUTH_URL", CodeMieProvider.authUrl);
 
 		try {
-			String token = getToken(username, password);
+			String token = getToken(authUrl, username, password);
 			super.createClient(baseUrl, token);
 
 		} catch (IOException e) {
@@ -31,7 +33,7 @@ public class CodeMieProvider extends OpenAIProvider {
 		}
 	}
 
-	public static String getToken(String username, String password) throws IOException {
+	public static String getToken(String url, String username, String password) throws IOException {
 		String urlParameters = String.format("grant_type=password&client_id=codemie-sdk&username=%s&password=%s",
 				username, password);
 
