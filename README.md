@@ -28,7 +28,7 @@
 
 ![](src/site/resources/images/machai-logo.png)
 
-# Machai
+# Machai Project
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 

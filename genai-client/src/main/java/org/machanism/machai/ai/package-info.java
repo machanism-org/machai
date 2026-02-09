@@ -25,32 +25,18 @@
  */
 
 /**
- * Provider-neutral public API for building and executing GenAI requests.
+ * Provider-neutral public API for configuring and executing GenAI requests.
  *
- * <p>This package acts as the root namespace for the GenAI client and groups the provider-agnostic types and
- * subpackages used to:
+ * <p>This package contains the top-level, provider-agnostic types that applications use to:
  * <ul>
- *   <li>select and configure a concrete provider and model,</li>
- *   <li>submit prompts and system instructions,</li>
+ *   <li>select and configure an AI provider and model,</li>
+ *   <li>submit system instructions and user prompts,</li>
  *   <li>attach local or remote files for provider-side processing,</li>
  *   <li>register callable tools that a model may invoke during execution,</li>
  *   <li>execute requests and consume the resulting text response or embeddings.</li>
  * </ul>
  *
- * <p>Concrete provider integrations live under {@code org.machanism.machai.ai.provider}, while provider
+ * <p>Concrete provider integrations are located under {@code org.machanism.machai.ai.provider}. Provider
  * discovery/selection and shared utilities are under {@code org.machanism.machai.ai.manager}.
- *
- * <h2>Typical usage</h2>
- * <pre>{@code
- * Configurator conf = ...;
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
- *
- * provider.instructions("You are a helpful assistant.");
- * provider.prompt("Summarize this text.");
- *
- * String response = provider.perform();
- * provider.close();
- * }
- * </pre>
  */
 package org.machanism.machai.ai;

@@ -15,7 +15,7 @@ Page Structure:
    - Basic Usage: Example command to run the application.
    - Typical Workflow: Step-by-step outline of how to use the project artifacts.
 # Configuration
-   - Analyze /java/org/machanism/machai/gw/Ghostwriter.java java source file and generate cmd options description.
+   - Analyze /java/org/machananism/machai/gw/Ghostwriter.java java source file and generate cmd options description.
    - Table of cmd options, their descriptions, and default values.
    - Example: Command-line example showing how to configure and run the application with custom parameters.
 # Resources
@@ -81,15 +81,15 @@ Ghostwriter can be configured via:
 ### Command-line Options
 
 | Option | Long option | Argument | Default | Description |
-|---|---|---|---|---|
-| `-h` | `--help` | none | n/a | Show help and exit. |
-| `-l` | `--logInputs` | none | `false` | Log LLM request inputs to dedicated log files. |
-| `-r` | `--root` | required | (not set) | Root directory used as the base for scanning; if not set, defaults to the current user directory. |
-| `-t` | `--threads` | optional | `true` | Enable multi-threaded processing. If present without a value, it prompts for stdin (see notes below). |
-| `-a` | `--genai` | required | `OpenAI:gpt-5-mini` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). |
-| `-i` | `--instructions` | optional | (not set) | Additional system instructions (plain text, URL, or file path). If used without a value, reads from stdin until EOF. |
-| `-g` | `--guidance` | optional | (not set) | Default guidance (plain text, URL, or file path) applied as a final step for the current directory. If used without a value, reads from stdin until EOF. |
-| `-e` | `--excludes` | required | (not set) | Comma-separated list of directories to exclude (example: `target,.git,node_modules`). |
+|---|---|---:|---|---|
+| `-h` | `--help` | no | n/a | Show help and exit. |
+| `-l` | `--logInputs` | no | `false` | Log LLM request inputs to dedicated log files. |
+| `-r` | `--root` | yes | (not set) | Root directory used as the base for scanning. If not set, defaults to the current user directory. |
+| `-t` | `--threads` | optional | `true` | Enable multi-threaded processing. Accepts `true`/`false`. If used without a value, defaults to `true` (Commons CLI optional-arg behavior). |
+| `-a` | `--genai` | yes | `OpenAI:gpt-5-mini` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). |
+| `-i` | `--instructions` | optional | (not set) | Additional system instructions. Provide as plain text, URL, or file path. If used without a value, reads from stdin until EOF. |
+| `-g` | `--guidance` | optional | (not set) | Default guidance applied as a final step for the current directory. Provide as plain text, URL, or file path. If used without a value, reads from stdin until EOF. |
+| `-e` | `--excludes` | yes | (not set) | Comma-separated list of directories to exclude (example: `target,.git,node_modules`). |
 
 Notes:
 

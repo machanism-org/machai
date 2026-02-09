@@ -142,29 +142,27 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` is a `GenAIProvider` implementation backed by the OpenAI API.
 
-This provider enables a wide range of generative AI capabilities, including:
+It supports:
 
-- Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
-
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications.
+- Text generation via `prompt(...)` and `perform()`.
+- File context via `addFile(File)` and `addFile(URL)`.
+- Tool (function) calling via `addTool(...)` (provider-dependent).
+- Embeddings via `embedding(String)`.
 
 **Environment Variables**
 
-The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
+You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using the CodeMie API**
+**Using the CodeMie API via OpenAI-compatible gateway**
 
-To use the CodeMie API, set the following environment variables:
+To route `OpenAIProvider` requests through CodeMie’s OpenAI-compatible endpoint, set:
 
 - `OPENAI_API_KEY` = access token
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
@@ -175,17 +173,15 @@ To use the CodeMie API, set the following environment variables:
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 ```
 
-**Thread safety:** NOT thread-safe.
+**Thread safety:** not thread-safe.
 
 ### CodeMie
 
-The `CodeMieProvider` is an `OpenAIProvider` specialization.
-
-It authenticates against CodeMie, then routes requests to CodeMie’s OpenAI-compatible API endpoint.
+The `CodeMieProvider` is a specialization of `OpenAIProvider` that authenticates against CodeMie and then uses CodeMie’s OpenAI-compatible API endpoint.
 
 How it works:
 
-- Obtains an access token from CodeMie Keycloak (`grant_type=password`, `client_id=codemie-sdk`).
+- Obtains an access token from CodeMie Keycloak using `grant_type=password` and `client_id=codemie-sdk`.
 - Uses the access token as the API key when creating the OpenAI client.
 - Uses the CodeMie OpenAI-compatible base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
@@ -201,7 +197,7 @@ How it works:
 GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
 ```
 
-**Thread safety:** NOT thread-safe (inherits behavior from `OpenAIProvider`).
+**Thread safety:** not thread-safe (inherits behavior from `OpenAIProvider`).
 
 ### None
 
@@ -257,7 +253,7 @@ String response = provider.perform();
 provider.close();
 ```
 
-**Thread safety:** NOT thread-safe.
+**Thread safety:** not thread-safe.
 
 ## Resources
 

@@ -28,15 +28,20 @@
 /**
  * Provider discovery, configuration, and host-side tool wiring for generative AI integrations.
  *
- * <p>This package contains the {@link org.machanism.machai.ai.manager.GenAIProvider} SPI and the
- * {@link org.machanism.machai.ai.manager.GenAIProviderManager} factory that resolves a provider from a
- * {@code Provider:Model} identifier (or a fully qualified class name), instantiates it, initializes it from a
- * {@link org.machanism.macha.core.commons.configurator.Configurator}, and applies the chosen model.
+ * <p>This package contains the {@link org.machanism.machai.ai.manager.GenAIProvider} service-provider interface (SPI)
+ * and the {@link org.machanism.machai.ai.manager.GenAIProviderManager} entry point used to resolve and create a
+ * provider.
  *
- * <p>It also provides optional host-executed tool installers ({@link org.machanism.machai.ai.manager.FileFunctionTools},
+ * <p>Providers are selected using a {@code Provider:Model} identifier (or, alternatively, a fully qualified provider
+ * class name), configured using a
+ * {@link org.machanism.macha.core.commons.configurator.Configurator}, and then initialized with the chosen model.
+ *
+ * <p>The package also includes optional host-executed tool installers such as
+ * {@link org.machanism.machai.ai.manager.FileFunctionTools},
  * {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and
- * {@link org.machanism.machai.ai.manager.SystemFunctionTools}) that register functions via
- * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
+ * {@link org.machanism.machai.ai.manager.SystemFunctionTools}. These register callable functions via
+ * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}
+ * so a provider can invoke controlled host capabilities.
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
@@ -51,7 +56,7 @@
  * String response = provider.perform();
  * }</pre>
  *
- * <p><strong>Security note:</strong> tool functions execute on the hosting machine. Expose them only in
- * trusted environments and enforce appropriate allow/deny policies for paths and commands.
+ * <p><strong>Security note:</strong> tool functions execute on the hosting machine. Expose them only in trusted
+ * environments and enforce appropriate allow/deny policies for paths and commands.
  */
 package org.machanism.machai.ai.manager;

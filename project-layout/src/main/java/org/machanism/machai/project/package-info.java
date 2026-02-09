@@ -1,23 +1,25 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>This package centers on {@link org.machanism.machai.project.ProjectLayout}, a model of a project's on-disk
- * structure (for example Maven, JavaScript/Node, Python, or a default/fallback layout). A
- * {@link org.machanism.machai.project.ProjectLayoutManager} can inspect a candidate project root directory and
- * select an appropriate {@link org.machanism.machai.project.ProjectLayout} implementation.
+ * <p>The primary responsibilities in this package are:
+ * <ul>
+ *   <li>Detecting a project's on-disk layout (for example, Maven, JavaScript/Node, Python, or a default layout)</li>
+ *   <li>Providing a {@link org.machanism.machai.project.layout.ProjectLayout} instance configured for a specific
+ *       project root directory</li>
+ *   <li>Scanning a project and (optionally) its modules and delegating processing of discovered content</li>
+ * </ul>
  *
- * <p>Once a layout has been chosen, {@link org.machanism.machai.project.ProjectProcessor} can scan a project using
- * that layout and perform processing work over the discovered sources and resources.
+ * <p>{@link org.machanism.machai.project.ProjectLayoutManager} inspects a candidate project root and selects an
+ * appropriate {@link org.machanism.machai.project.layout.ProjectLayout} implementation. A
+ * {@link org.machanism.machai.project.ProjectProcessor} uses that layout to scan the project, iterate modules when
+ * present, and delegate folder-level processing to an implementation.
  *
  * <h2>Typical usage</h2>
  *
  * <pre>{@code
  * File projectDir = new File("C:\\path\\to\\project");
- *
- * // Detect the layout based on the project directory contents.
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);
  *
- * // Process the project using a custom processor.
  * ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
  * }</pre>

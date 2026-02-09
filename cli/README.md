@@ -39,7 +39,7 @@ A Java CLI application for intelligent library management, GenAI-powered documen
 
 ## Overview
 
-Machai CLI is a Java CLI with an interactive shell that helps you assemble projects, manage library/module metadata, and run GenAI-assisted document processing.
+Machai CLI provides an interactive shell for assembling projects from selected libraries, managing module metadata via bindex files, and running GenAI-assisted document processing.
 
 Key features:
 
@@ -72,18 +72,18 @@ mvn -pl cli -am clean install
 
 Example commands (as shown by `help`):
 
-### Assembly commands
+### Assemby Command
 
 - `pick`: Picks libraries based on user request.
 - `assembly`: Creates a project via picked librariy set.
 - `prompt`: Is used for request additional GenAI guidances.
 
-### Bindex commands
+### Bindex Command
 
 - `bindex`: Generates bindex files.
 - `register`: Registers bindex file.
 
-### Built-in commands
+### Built-In Commands
 
 - `help`: Display help about available commands
 - `stacktrace`: Display the full stacktrace of the last error.
@@ -93,7 +93,7 @@ Example commands (as shown by `help`):
 - `version`: Show version info
 - `script`: Read and execute commands from a file.
 
-### Docs commands
+### Docs Command
 
 - `docs`: GenAI document processing command.
 

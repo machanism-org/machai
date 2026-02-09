@@ -2,9 +2,9 @@
  * File-format-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations used by Ghostwriter
  * to locate and extract embedded {@code @guidance} instructions.
  *
- * <p>Each reviewer understands the comment syntax of its target format (for example Java, Markdown, HTML/XML,
- * Python, TypeScript, or plain text). When a supported file contains guidance, the reviewer emits a normalized
- * prompt fragment.
+ * <p>The reviewers in this package understand the comment syntax of their target formats (for example Java,
+ * Markdown, HTML/XML, Python, TypeScript, or plain text) and emit a normalized prompt fragment when guidance is
+ * found.
  *
  * <p>Prompt fragments include project-relative path context computed via
  * {@link org.machanism.machai.project.layout.ProjectLayout} so downstream steps can correlate guidance with the

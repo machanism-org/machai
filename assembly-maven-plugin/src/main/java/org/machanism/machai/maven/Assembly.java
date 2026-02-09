@@ -53,10 +53,10 @@ import org.machanism.machai.schema.Bindex;
  * <h2>Usage examples</h2>
  * <p><b>Command line:</b></p>
  * <pre>
- * mvn org.machanism.machai:assembly-maven-plugin:assembly \
- *   -Dassembly.genai=OpenAI:gpt-5 \
- *   -Dpick.genai=OpenAI:gpt-5-mini \
- *   -Dassembly.prompt.file=project.txt \
+ * mvn org.machanism.machai:assembly-maven-plugin:assembly
+ *   -Dassembly.genai=OpenAI:gpt-5
+ *   -Dpick.genai=OpenAI:gpt-5-mini
+ *   -Dassembly.prompt.file=project.txt
  *   -Dassembly.score=0.9
  * </pre>
  */

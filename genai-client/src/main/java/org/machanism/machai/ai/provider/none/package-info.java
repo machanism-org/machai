@@ -29,15 +29,15 @@
 /**
  * No-op ("none") implementation of the generative AI provider SPI.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a {@link org.machanism.machai.ai.manager.GenAIProvider}
- * implementation for environments where external LLM integration must not be used (for example, offline execution,
- * security/compliance constraints, or tests).
+ * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation for environments where external LLM
+ * integration must not be used (for example, offline execution, security/compliance constraints, or tests).
  *
  * <h2>Behavior</h2>
  * <ul>
  *   <li>No network calls are performed and no external AI service is contacted.</li>
  *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} accumulates prompt text in memory.</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} optionally writes:
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} may write:
  *     <ul>
  *       <li>{@code instructions.txt} (when instructions are set), and</li>
  *       <li>the accumulated prompts to the configured inputs log file (when

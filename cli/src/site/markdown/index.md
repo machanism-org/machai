@@ -66,7 +66,7 @@ Machai CLI is a Spring Boot + Spring Shell application that helps you:
 
 Run the packaged CLI:
 
-```bash
+```batch
 java -jar machai.jar
 ```
 
@@ -85,7 +85,7 @@ Set the following environment variables according to your chosen GenAI provider:
 
 ### Basic Usage
 
-```bash
+```batch
 java -jar machai.jar
 ```
 
@@ -93,31 +93,31 @@ java -jar machai.jar
 
 1. Generate (or update) `bindex.json` for a project:
 
-   ```bash
+   ```batch
    bindex --dir <project-path> --update true
    ```
 
 2. Register the generated metadata in the metadata database:
 
-   ```bash
+   ```batch
    register --dir <project-path> --registerUrl <url>
    ```
 
 3. Pick libraries by semantic search:
 
-   ```bash
+   ```batch
    pick --query "<prompt or file path>" --registerUrl <url>
    ```
 
 4. Assemble a new project from the picked libraries:
 
-   ```bash
+   ```batch
    assembly --dir <output-folder>
    ```
 
 5. (Optional) Run Ghostwriter processing:
 
-   ```bash
+   ```batch
    gw --root <working-directory>
    ```
 
@@ -133,7 +133,7 @@ java -jar machai.jar
 
 Example (generate metadata and register it):
 
-```bash
+```batch
 bindex --dir .\my-project --update true
 register --dir .\my-project --registerUrl https://metadata.example.com
 ```

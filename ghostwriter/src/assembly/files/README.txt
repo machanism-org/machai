@@ -3,17 +3,17 @@ Ghostwriter CLI (gw)
 
 1) Application Overview
 ----------------------
-Ghostwriter is an advanced documentation engine that scans project files for embedded `@guidance` blocks and uses GenAI to generate or update documentation artifacts in a repeatable, reviewable way.
+Ghostwriter is an advanced documentation engine that automatically scans and analyzes project files for embedded `@guidance` blocks, then uses GenAI-powered synthesis to generate or update documentation artifacts in a repeatable, reviewable way.
 
 Typical use cases:
 - Keep README and site documentation consistent and up to date.
-- Enforce a consistent documentation structure across repositories.
+- Enforce consistent documentation structure across repositories.
 - Periodically regenerate documentation locally or in CI.
 
 Key features:
 - Scans directories or supports `glob:` / `regex:` path patterns to target files.
 - Treats embedded `@guidance` instructions as mandatory constraints.
-- Accepts additional runtime instructions and default guidance via CLI (plain text, URL, file, or stdin).
+- Accepts additional runtime instructions and default guidance via CLI (plain text, URL, file path, or stdin).
 - Optional multi-threaded processing for improved throughput on larger repositories.
 - Optional logging of LLM request inputs to dedicated log files for traceability.
 
@@ -36,7 +36,7 @@ What’s in this folder:
 - gw.properties  : Default configuration (provider/model and credential placeholders)
 - gw.bat         : Windows launcher (runs gw.jar)
 - gw.sh          : Unix/macOS launcher (runs gw.jar)
-- g\             : Optional task instruction templates you can pass via --instructions
+- g\             : Optional instruction templates you can pass via --instructions
 
 Configuration sources:
 - gw.properties located next to gw.jar (default)
@@ -105,7 +105,7 @@ Override provider/model (CLI):
 
 Common options:
 - -r, --root <dir>
-  Root directory used as the base for scanning.
+  Root directory used as the base for scanning; if not set, defaults to the current user directory.
 
 - -e, --excludes <list>
   Comma-separated list of directories to exclude (example: target,.git,node_modules).
@@ -141,7 +141,7 @@ Unix/macOS via stdin:
 
   printf "%s\n" "Prefer concise docs." "Keep headings stable." | ./gw.sh -r /path/to/my-project -i
 
-Using the bundled template files under g\:
+Using the bundled templates under g\:
 
 Windows:
 

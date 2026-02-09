@@ -1,7 +1,7 @@
 /**
  * Provides APIs for detecting and modeling a repository's on-disk layout.
  *
- * <p>This package defines a common abstraction, {@link org.machanism.machai.project.layout.ProjectLayout}, for locating
+ * <p>This package defines {@link org.machanism.machai.project.layout.ProjectLayout}, a common abstraction for locating
  * conventional project directories (for example, sources, tests, resources, and documentation) from a configured project
  * root. Implementations encapsulate ecosystem-specific conventions (such as Maven-style layouts or workspace-based
  * repositories) while presenting a consistent interface to callers.

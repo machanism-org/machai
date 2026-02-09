@@ -67,14 +67,14 @@ Add the plugin to your `pom.xml`:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>0.0.8-SNAPSHOT</version>
+  <version>0.0.8</version>
 </plugin>
 ```
 
 Run the plugin goal:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:0.0.8-SNAPSHOT:gw
+mvn org.machanism.machai:gw-maven-plugin:0.0.8:gw
 ```
 
 ### Typical Workflow
@@ -99,7 +99,7 @@ Example configuration:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>0.0.8-SNAPSHOT</version>
+  <version>0.0.8</version>
   <configuration>
     <genai>CodeMie:gpt-5-2-2025-12-11</genai>
     <serverId>CodeMie</serverId>
@@ -110,7 +110,7 @@ Example configuration:
 Example command line with custom parameters:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:0.0.8-SNAPSHOT:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
+mvn org.machanism.machai:gw-maven-plugin:0.0.8:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
 ```
 
 ## Resources

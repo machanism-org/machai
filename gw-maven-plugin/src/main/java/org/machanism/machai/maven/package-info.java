@@ -1,9 +1,11 @@
 /**
- * Maven plugin goals (Mojos) that integrate the MachAI Generative Workflow (GW) documentation pipeline into a Maven build.
+ * Maven plugin goals (mojos) that integrate the MachAI Generative Workflow (GW) documentation pipeline into a Maven
+ * build.
  *
  * <p>
- * The mojos in this package scan documentation sources (typically under {@code src/site}), invoke the GW processing
- * pipeline, and optionally remove temporary artifacts created during workflow runs.
+ * The mojos in this package are responsible for discovering documentation inputs (typically under
+ * {@code src/site}), invoking the GW processing pipeline, and optionally removing workflow artifacts that are created
+ * during processing.
  * </p>
  *
  * <h2>Goals</h2>
@@ -44,8 +46,8 @@
  *     documentation scanning.
  *   </li>
  *   <li>
- *     <b>{@code serverId}</b> / <b>{@code gw.genai.serverId}</b> (optional): Maven {@code settings.xml} {@code &lt;server&gt;}
- *     id used to load GenAI credentials.
+ *     <b>{@code serverId}</b> / <b>{@code gw.genai.serverId}</b> (optional): Maven {@code settings.xml}
+ *     {@code &lt;server&gt;} id used to load GenAI credentials.
  *   </li>
  *   <li>
  *     <b>{@code threads}</b> / <b>{@code gw.threads}</b> (optional, default {@code true}): Enables or disables
@@ -59,8 +61,9 @@
  *
  * <h2>Credentials</h2>
  * <p>
- * GenAI credentials are loaded from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry whose id is provided
- * by {@code gw.genai.serverId}. When present, credentials are exposed to the workflow as configuration properties:
+ * GenAI credentials are loaded from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry whose id is
+ * provided by {@code gw.genai.serverId}. When present, credentials are exposed to the workflow as configuration
+ * properties:
  * </p>
  * <ul>
  *   <li>{@code GENAI_USERNAME}</li>
@@ -82,7 +85,7 @@
  *   &amp;lt;configuration&amp;gt;
  *     &amp;lt;genai&amp;gt;OpenAI:gpt-5&amp;lt;/genai&amp;gt;
  *     &amp;lt;serverId&amp;gt;genai&amp;lt;/serverId&amp;gt;
- *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;lt;/threads&amp;gt;
+ *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;gt;
  *     &amp;lt;instructions&amp;gt;
  *       &amp;lt;instruction&amp;gt;src/site/machai/instructions.md&amp;lt;/instruction&amp;gt;
  *     &amp;lt;/instructions&amp;gt;
