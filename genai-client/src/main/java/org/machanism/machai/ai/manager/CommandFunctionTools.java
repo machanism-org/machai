@@ -39,7 +39,7 @@ public class CommandFunctionTools {
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
 
-	private int maxResultSize = 10240;
+	private int maxResultSize = 4096;
 
 	/**
 	 * Installs the command-line tool function into the specified provider.
@@ -47,12 +47,10 @@ public class CommandFunctionTools {
 	 * @param provider provider instance to augment
 	 */
 	public void applyTools(GenAIProvider provider) {
-		provider.addTool("run_command_line_tool",
-				"Execute allowed shell commands (Linux/OSX only, some commands are denied for safety).",
-				this::executeCommand, "command:string:required:The command to run in the shell.",
-				"env:string:optional:Defines a set of environment variable settings as a single string, where each element follows the format NAME=VALUE "
-						+ "and is separated by a newline character (\\n). If set to null, the subprocess will inherit the environment variables from the current process.",
-				"dir:string:optional:the working directory of the subprocess, or null if the subprocess should inherit the project directory.");
+		provider.addTool("run_command_line_tool", "Executes a system command using Java's Process.exec() method.",
+				this::executeCommand, "command:string:required:The command to execute in the system shell.",
+				"env:string:optional:Specifies environment variable settings as a single string, with each variable in the format NAME=VALUE, separated by newline characters (\\n). If null, the subprocess inherits the environment variables from the current process.",
+				"dir:string:optional:The working directory for the subprocess. If null, the subprocess inherits the current project directory.");
 	}
 
 	/**
@@ -94,20 +92,6 @@ public class CommandFunctionTools {
 			workingDir = projectDir;
 		}
 
-		// Prepare shell command
-		String[] shellCommand;
-		if (SystemUtils.IS_OS_WINDOWS) {
-			if (Strings.CS.startsWith(command, "cmd.exe /c ")) {
-				command = StringUtils.substringAfter(command, "cmd.exe /c ");
-			}
-			shellCommand = new String[] { "cmd.exe", "/c", command };
-		} else {
-			if (Strings.CS.startsWith(command, "sh -c ")) {
-				command = StringUtils.substringAfter(command, "sh -c ");
-			}
-			shellCommand = new String[] { "sh", "-c", command };
-		}
-
 		LimitedStringBuilder output = new LimitedStringBuilder(maxResultSize);
 
 		try {
@@ -119,7 +103,7 @@ public class CommandFunctionTools {
 				logger.warn("System Command Functional tool uses local environment variables.");
 			}
 
-			Process process = Runtime.getRuntime().exec(shellCommand, envArray, workingDir);
+			Process process = Runtime.getRuntime().exec(command, envArray, workingDir);
 
 			Thread stdoutThread = new Thread(() -> {
 				try (BufferedReader reader = new BufferedReader(
