@@ -1,109 +1,104 @@
 <!-- @guidance:
-Page Structure: 
-# Header
-   - Project Title: need to use from pom.xml
-   - Maven Central Badge [![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
-# Introduction
-   - Full description of purpose and benefits.
-# Overview
-   - Explanation of the project function and value proposition.
-# Key Features
-   - Bulleted list highlighting the primary capabilities of the project.
-# Getting Started
-   - Prerequisites: List of required software and services.
-   - Add the Ghostwriter CLI application jar download link: [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download) to the installation section.
-   - Basic Usage: Example command to run the application.
-   - Typical Workflow: Step-by-step outline of how to use the project artifacts.
-# Configuration
-   - Analyze /java/org/machananism/machai/gw/Ghostwriter.java java source file and generate cmd options description.
-   - Table of cmd options, their descriptions, and default values.
-   - Example: Command-line example showing how to configure and run the application with custom parameters.
-# Resources
-   - List of relevant links (platform, GitHub, Maven).
+**VERY IMPORTANT NOTE:**  
+Ghostwriter works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
+Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
+
+Generate a content:
+1. **Project Title and Overview:**  
+   - Provide the project name and a brief description of its purpose and main features.
+2. **Module List:**  
+   Generate a table listing all modules in the project with the following columns:
+   **Name**: Display the module name as a clickable link in the format `[name]([artifactId]/)`, the [name] and [artifactId] values should be obtained from the module pom.xml file.
+   **Description**: Provide a comprehensive description for each module, using the content from `[module_dir]/src/site/markdown/index.md`.
+3. **Installation Instructions:**  
+   - Describe how to clone the repository and build the project using Maven.
+   - Include prerequisites such as Java version and build tools.
+4. **Usage:**  
+   - Explain how to run or use the project and its modules.
+   - Provide example commands or code snippets if applicable.
+5. **Contributing:**  
+   - Outline guidelines for contributing to the project, including code style, pull request process, and issue reporting.
+6. **License:**  
+   - State the project's license and provide a link to the license file.
+7. **Contact and Support:**  
+   - Include contact information or links for support and further questions.
+**Formatting Requirements:**
+- Do not use UTF symbols in the content.
+- Use Markdown syntax for headings, lists, code blocks, and links.
+- Ensure clarity and conciseness in each section.
+- Organize the README for easy navigation and readability.
 -->
 
 # Ghostwriter
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
+Ghostwriter is a documentation engine that scans a project, applies mandatory `@guidance` constraints embedded in source and documentation files, and uses GenAI to generate or update documentation consistently.
 
-## Introduction
+## Module List
 
-Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
+This project is a single-module build.
 
-It helps keep documentation consistent and up to date by treating `@guidance` blocks embedded in source and documentation files as mandatory constraints, then applying GenAI to produce repeatable, reviewable updates.
+| Name | Description |
+|---|---|
+| [Ghostwriter](ghostwriter/) | Ghostwriter CLI and core engine for scanning files, interpreting `@guidance` blocks, and generating or updating documentation artifacts. |
 
-## Overview
-
-Ghostwriter runs over one or more directories or path patterns, discovers files containing `@guidance` instructions, and generates or updates documentation artifacts based on that guidance.
-
-Configuration can come from `gw.properties` located next to the executable directory (or specified via `-Dgw.config=<file>`) and can be overridden via command-line options.
-
-## Key Features
-
-- Scans directories or supports `glob:` / `regex:` path patterns to target files.
-- Converts embedded `@guidance` instructions into mandatory constraints for generated/updated artifacts.
-- Accepts additional runtime instructions and default guidance via CLI (plain text, URL, file, or stdin).
-- Optional multi-threaded processing for improved throughput on larger repositories.
-- Optional logging of LLM request inputs to dedicated log files for traceability.
-
-## Getting Started
+## Installation Instructions
 
 ### Prerequisites
 
 - Java 11 or newer
+- Maven 3.9+ recommended
 - Network access to the configured GenAI provider
 
-### Installation
-
-- Download the Ghostwriter CLI package:
-  [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
-
-### Basic Usage
+### Clone
 
 ```cmd
-java -jar gw.jar C:\projects\my-project
+git clone https://github.com/machanism-org/machai.git
+cd machai
 ```
 
-### Typical Workflow
-
-1. Add `@guidance` blocks (typically at the top of docs/source files) describing required structure and constraints.
-2. Run Ghostwriter against a project directory or a `glob:` / `regex:` path pattern.
-3. Review the updated/generated artifacts and commit the results.
-4. Re-run Ghostwriter periodically (or in CI) to keep documentation aligned with the guidance.
-
-## Configuration
-
-Ghostwriter can be configured via:
-
-- A properties file `gw.properties` located next to the executable (or specified via `-Dgw.config=<file>`), and/or
-- Command-line options (which override corresponding configuration where applicable).
-
-### Command-line Options
-
-| Option | Long option | Argument | Default | Description |
-|---|---|---:|---|---|
-| `-h` | `--help` | no | n/a | Show help and exit. |
-| `-l` | `--logInputs` | no | `false` | Log LLM request inputs to dedicated log files. |
-| `-r` | `--root` | yes | (not set) | Root directory used as the base for scanning. If not set, defaults to the current user directory. |
-| `-t` | `--threads` | optional | `true` | Enable multi-threaded processing. Accepts `true`/`false`. If used without a value, defaults to `true` (Commons CLI optional-arg behavior). |
-| `-a` | `--genai` | yes | `OpenAI:gpt-5-mini` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). |
-| `-i` | `--instructions` | optional | (not set) | Additional system instructions. Provide as plain text, URL, or file path. If used without a value, reads from stdin until EOF. |
-| `-g` | `--guidance` | optional | (not set) | Default guidance applied as a final step for the current directory. Provide as plain text, URL, or file path. If used without a value, reads from stdin until EOF. |
-| `-e` | `--excludes` | yes | (not set) | Comma-separated list of directories to exclude (example: `target,.git,node_modules`). |
-
-Notes:
-
-- Configuration file: Ghostwriter attempts to load configuration from `gw.properties` located next to the executable. You can override the file location with `-Dgw.config=<file>`.
-- Scan targets: positional arguments after options are treated as scan targets (directories or `glob:` / `regex:` patterns). If no targets are provided, Ghostwriter scans the current user directory.
-
-### Example
+### Build
 
 ```cmd
-java -Dgw.config=gw.properties -jar gw.jar -r C:\projects\my-project -a OpenAI:gpt-5.1 -t true -e target,.git,node_modules -l "glob:**\*.md"
+mvn -pl ghostwriter -am clean verify
 ```
 
-## Resources
+## Usage
 
-- GitHub: https://github.com/machanism-org/machai
+### Run the CLI
+
+From the built artifact (example):
+
+```cmd
+java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar C:\projects\my-project
+```
+
+### Common options
+
+- Set the root directory:
+
+```cmd
+java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar -r C:\projects\my-project
+```
+
+- Target files with glob patterns:
+
+```cmd
+java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar "glob:**\*.md"
+```
+
+## Contributing
+
+- Use standard Java formatting and keep changes focused.
+- Add or update tests under `src/test/java` when behavior changes.
+- Open a pull request with a clear description and reproduction steps when relevant.
+- Report issues with logs, environment details (OS, Java, Maven), and minimal steps to reproduce.
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](../../LICENSE).
+
+## Contact and Support
+
+- Source repository: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
-- Download (CLI package): https://sourceforge.net/projects/machanism/files/machai/gw.zip/download
+- Downloads: https://sourceforge.net/projects/machanism/files/machai/gw.zip/download
