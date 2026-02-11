@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +46,8 @@ public class FileFunctionTools {
 	/** Logger for file tool operations and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
 
+	private static final String defaultCharset = "UTF-8";
+
 	/**
 	 * Installs file read/write/list tools into the provided provider.
 	 *
@@ -52,10 +55,12 @@ public class FileFunctionTools {
 	 */
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("read_file_from_file_system", "Read the contents of a file from the disk.", this::readFile,
-				"file_path:string:required:The path to the file to be read.");
+				"file_path:string:required:The path to the file to be read.",
+				"charsetName:string:optional:the name of the requested charset, default: " + defaultCharset);
 		provider.addTool("write_file_to_file_system", "Write changes to a file on the file system.", this::writeFile,
 				"file_path:string:required:The path to the file you want to write to or create.",
-				"text:string:required:The content to be written into the file (text, code, etc.).");
+				"text:string:required:The content to be written into the file (text, code, etc.).",
+				"charsetName:string:optional:the name of the requested charset, default: " + defaultCharset);
 		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
 				this::listFiles, "dir_path:string:optional:The path to the directory to list contents of.");
 		provider.addTool("get_recursive_file_list",
@@ -157,15 +162,17 @@ public class FileFunctionTools {
 	 */
 	private Object writeFile(Object[] params) {
 		String result;
-		String filePath = ((JsonNode) params[0]).get("file_path").asText();
-		String text = ((JsonNode) params[0]).get("text").asText();
+		JsonNode props = (JsonNode) params[0];
+		String filePath = props.get("file_path").asText();
+		String text = props.get("text").asText();
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset) : defaultCharset;
 		File workingDir = (File) params[1];
 		logger.info("Write file: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
 		File file = new File(workingDir, filePath);
 		if (file.getParentFile() != null) {
 			file.getParentFile().mkdirs();
 		}
-		try (Writer writer = new FileWriter(file)) {
+		try (Writer writer = new FileWriter(file, Charset.forName(charsetName))) {
 			IOUtils.write(text, writer);
 			return "File written successfully: " + filePath;
 		} catch (IOException e) {
@@ -189,12 +196,15 @@ public class FileFunctionTools {
 	 * @throws IllegalArgumentException on I/O error
 	 */
 	private Object readFile(Object[] params) {
-		String filePath = ((JsonNode) params[0]).get("file_path").asText();
+		JsonNode props = (JsonNode) params[0];
+		String filePath = props.get("file_path").asText();
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset) : defaultCharset;
+
 		logger.info("Read file: {}", Arrays.toString(params));
 		File workingDir = (File) params[1];
 		String result;
 		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
-			result = IOUtils.toString(io, "UTF8");
+			result = IOUtils.toString(io, charsetName);
 		} catch (FileNotFoundException e) {
 			result = "File not found.";
 		} catch (IOException e) {

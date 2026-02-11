@@ -38,6 +38,8 @@ public class CommandFunctionTools {
 
 	private static int defaultResultTailSize = 1024;
 
+	private static final String defaultCharset = "UTF-8";
+
 	/**
 	 * Installs the command-line tool function into the specified provider.
 	 *
@@ -51,7 +53,8 @@ public class CommandFunctionTools {
 				"dir:string:optional:The working directory for the subprocess. If null, the subprocess inherits the current project directory.",
 				"tailResultSize:integer:optional:Specifies the maximum number of characters to display from the end of the result content produced by the executed system command. "
 						+ "If the command output exceeds this limit, only the last tailResultSize characters will be shown. Default value: "
-						+ getDefaultResultTailSize());
+						+ getDefaultResultTailSize(),
+				"charsetName:string:optional:the name of the requested charset, default: " + defaultCharset);
 	}
 
 	/**
@@ -76,9 +79,10 @@ public class CommandFunctionTools {
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
 
-		String dir = props.has(".") ? props.get("dir").asText(".") : ".";
+		String dir = props.has("dir") ? props.get("dir").asText(".") : ".";
 		String env = props.has("env") ? props.get("env").asText(null) : null;
 		Integer tailResultSize = props.has("tailResultSize") ? props.get("tailResultSize").asInt(-1) : -1;
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset) : defaultCharset;
 
 		File projectDir = (File) params[1];
 		File workingDir;
@@ -110,7 +114,7 @@ public class CommandFunctionTools {
 
 			Thread stdoutThread = new Thread(() -> {
 				try (BufferedReader reader = new BufferedReader(
-						new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+						new InputStreamReader(process.getInputStream(), charsetName))) {
 					String line;
 					while ((line = reader.readLine()) != null) {
 						output.append(line).append(System.lineSeparator());
@@ -123,7 +127,7 @@ public class CommandFunctionTools {
 
 			Thread stderrThread = new Thread(() -> {
 				try (BufferedReader errorReader = new BufferedReader(
-						new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
+						new InputStreamReader(process.getErrorStream(), charsetName))) {
 					String line;
 					while ((line = errorReader.readLine()) != null) {
 						output.append(line).append(System.lineSeparator());
