@@ -21,25 +21,34 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
+Ghostwriter is a documentation engine that scans a project, applies mandatory `@guidance` constraints embedded in source and documentation files, and uses GenAI to generate or update documentation consistently.
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
+Ghostwriter scans a project, interprets mandatory `@guidance` blocks embedded in source and documentation files, and uses GenAI to generate or update documentation artifacts in a repeatable way.
 
-It helps keep documentation consistent and up to date by treating `@guidance` blocks embedded in source and documentation files as mandatory constraints, then applying GenAI to produce repeatable, reviewable updates.
+It is designed to keep documentation consistent and current by treating `@guidance` blocks as non-negotiable constraints during content generation.
 
 ## Usage
 
-### Basic Usage
+### Run the CLI
+
+From the built artifact (example):
 
 ```cmd
-java -jar gw.jar C:\projects\my-project
+java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar C:\projects\my-project
 ```
 
-### Typical Workflow
+### Common options
 
-1. Add `@guidance` blocks (typically at the top of docs/source files) describing required structure and constraints.
-2. Run Ghostwriter against a project directory or a `glob:` / `regex:` path pattern.
-3. Review the updated/generated artifacts and commit the results.
-4. Re-run Ghostwriter periodically (or in CI) to keep documentation aligned with the guidance.
+- Set the root directory:
+
+```cmd
+java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar -r C:\projects\my-project
+```
+
+- Target files with glob patterns:
+
+```cmd
+java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar "glob:**\*.md"
+```

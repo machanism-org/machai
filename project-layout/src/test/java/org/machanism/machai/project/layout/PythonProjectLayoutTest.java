@@ -16,59 +16,79 @@ class PythonProjectLayoutTest {
 	Path tempDir;
 
 	@Test
-	void isPythonProject_shouldReturnFalseWhenNoPyprojectToml() {
+	void isPythonProject_shouldReturnTrueWhenPyprojectHasNameAndNotPrivate() throws IOException {
 		// Arrange
-		Path projectDir = tempDir.resolve("repo");
-		assertDoesNotThrow(() -> Files.createDirectories(projectDir));
+		String pyproject = "[project]\n" +
+				"name = \"demo\"\n" +
+				"classifiers = [\"Development Status :: 4 - Beta\"]\n";
+		Files.write(tempDir.resolve("pyproject.toml"), pyproject.getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = PythonProjectLayout.isPythonProject(projectDir.toFile());
-
-		// Assert
-		assertFalse(result);
-	}
-
-	@Test
-	void isPythonProject_shouldReturnTrueWhenProjectNamePresentAndNotPrivate() throws IOException {
-		// Arrange
-		Path projectDir = tempDir.resolve("repo");
-		Files.createDirectories(projectDir);
-		String toml = "[project]\nname = \"my-lib\"\nclassifiers = [\"Development Status :: 4 - Beta\"]\n";
-		Files.write(projectDir.resolve("pyproject.toml"), toml.getBytes(StandardCharsets.UTF_8));
-
-		// Act
-		boolean result = PythonProjectLayout.isPythonProject(projectDir.toFile());
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
 
 		// Assert
 		assertTrue(result);
 	}
 
 	@Test
-	void isPythonProject_shouldReturnFalseWhenClassifierContainsPrivate_caseInsensitive() throws IOException {
+	void isPythonProject_shouldReturnFalseWhenClassifierContainsPrivate() throws IOException {
 		// Arrange
-		Path projectDir = tempDir.resolve("repo");
-		Files.createDirectories(projectDir);
-		String toml = "[project]\nname = \"my-lib\"\nclassifiers = [\"Private :: Internal\"]\n";
-		Files.write(projectDir.resolve("pyproject.toml"), toml.getBytes(StandardCharsets.UTF_8));
+		String pyproject = "[project]\n" +
+				"name = \"demo\"\n" +
+				"classifiers = [\"Private :: Do Not Publish\"]\n";
+		Files.write(tempDir.resolve("pyproject.toml"), pyproject.getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = PythonProjectLayout.isPythonProject(projectDir.toFile());
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
 
 		// Assert
 		assertFalse(result);
 	}
 
 	@Test
-	void isPythonProject_shouldReturnFalseWhenPyprojectIsUnreadableOrInvalid() throws IOException {
+	void isPythonProject_shouldReturnFalseWhenNameMissing() throws IOException {
 		// Arrange
-		Path projectDir = tempDir.resolve("repo");
-		Files.createDirectories(projectDir);
-		Files.write(projectDir.resolve("pyproject.toml"), "not toml".getBytes(StandardCharsets.UTF_8));
+		String pyproject = "[project]\n" +
+				"classifiers = [\"Development Status :: 4 - Beta\"]\n";
+		Files.write(tempDir.resolve("pyproject.toml"), pyproject.getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = PythonProjectLayout.isPythonProject(projectDir.toFile());
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
 
 		// Assert
 		assertFalse(result);
+	}
+
+	@Test
+	void isPythonProject_shouldReturnFalseWhenPyprojectCannotBeParsed() throws IOException {
+		// Arrange
+		Files.write(tempDir.resolve("pyproject.toml"), "not=toml=[".getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
+
+		// Assert
+		assertFalse(result);
+	}
+
+	@Test
+	void isPythonProject_shouldReturnFalseWhenPyprojectNotPresent() {
+		// Arrange
+		// Act
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
+
+		// Assert
+		assertFalse(result);
+	}
+
+	@Test
+	void notImplementedMethods_shouldReturnNull() {
+		// Arrange
+		PythonProjectLayout layout = (PythonProjectLayout) new PythonProjectLayout().projectDir(tempDir.toFile());
+
+		// Act & Assert
+		assertNull(layout.getSources());
+		assertNull(layout.getDocuments());
+		assertNull(layout.getTests());
 	}
 }

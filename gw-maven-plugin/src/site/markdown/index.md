@@ -37,7 +37,7 @@ Benefits:
 
 ## Overview
 
-This plugin can be run on demand or bound into the build to generate or update Maven Site content based on `@guidance:` present in sources and resources.
+This Maven plugin can be run on demand or bound into the build to generate or update Maven Site content based on `@guidance:` directives present in sources and resources.
 
 ## Key Features
 
@@ -67,14 +67,14 @@ Add the plugin to your `pom.xml`:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>0.0.8</version>
+  <version>0.0.9-SNAPSHOT</version>
 </plugin>
 ```
 
 Run the plugin goal:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:0.0.8:gw
+mvn org.machanism.machai:gw-maven-plugin:0.0.9-SNAPSHOT:gw
 ```
 
 ### Typical Workflow
@@ -99,7 +99,7 @@ Example configuration:
 <plugin>
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
-  <version>0.0.8</version>
+  <version>0.0.9-SNAPSHOT</version>
   <configuration>
     <genai>CodeMie:gpt-5-2-2025-12-11</genai>
     <serverId>CodeMie</serverId>
@@ -110,7 +110,7 @@ Example configuration:
 Example command line with custom parameters:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:0.0.8:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
+mvn org.machanism.machai:gw-maven-plugin:0.0.9-SNAPSHOT:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
 ```
 
 ## Resources

@@ -8,28 +8,11 @@ import org.junit.jupiter.api.Test;
 
 class ProjectLayoutTest {
 
-	private static final class TestLayout extends ProjectLayout {
-		@Override
-		public java.util.List<String> getSources() {
-			return null;
-		}
-
-		@Override
-		public java.util.List<String> getDocuments() {
-			return null;
-		}
-
-		@Override
-		public java.util.List<String> getTests() {
-			return null;
-		}
-	}
-
 	@Test
-	void projectDir_shouldSetAndReturnSameInstance() {
+	void projectDir_shouldStoreAndReturnSameInstance() {
 		// Arrange
-		TestLayout layout = new TestLayout();
-		File dir = new File("build\\tmp\\project");
+		ProjectLayout layout = new MavenProjectLayout();
+		File dir = new File(".");
 
 		// Act
 		ProjectLayout returned = layout.projectDir(dir);
@@ -40,55 +23,83 @@ class ProjectLayoutTest {
 	}
 
 	@Test
-	void getRelatedPath_instanceMethod_shouldReturnRelativePathAndTrimLeadingSlash() {
+	void getRelatedPath_instanceMethod_shouldReturnRelativePathWithNormalizedSeparatorsAndNoLeadingSlash() {
 		// Arrange
-		TestLayout layout = new TestLayout();
-		String base = "C:/repo";
-		File file = new File("C:/repo/sub/module");
+		ProjectLayout layout = new MavenProjectLayout();
+		String basePath = "C:\\work";
+		File file = new File("C:\\work\\sub\\file.txt");
 
 		// Act
-		String related = layout.getRelatedPath(base, file);
+		String relatedPath = layout.getRelatedPath(basePath, file);
 
 		// Assert
-		assertEquals("sub/module", related);
+		assertEquals("sub/file.txt", relatedPath);
 	}
 
 	@Test
-	void getRelatedPath_static_shouldReturnDotWhenFileEqualsDir() {
+	void getRelatedPath_static_shouldReturnDotWhenSameDirectory() {
 		// Arrange
-		File dir = new File("C:/repo");
-		File file = new File("C:/repo");
+		File dir = new File("C:\\work");
+		File file = new File("C:\\work");
 
 		// Act
-		String related = ProjectLayout.getRelatedPath(dir, file);
+		String relatedPath = ProjectLayout.getRelatedPath(dir, file);
 
 		// Assert
-		assertEquals(".", related);
+		assertEquals(".", relatedPath);
 	}
 
 	@Test
-	void getRelatedPath_static_shouldReturnNullWhenFileStringEqualsResult() {
+	void getRelatedPath_static_shouldPrependDotSlashWhenRequestedAndNotAlreadyDotted() {
 		// Arrange
-		File dir = new File("C:/repo");
-		File file = new File("C:/other");
+		File dir = new File("C:\\work");
+		File file = new File("C:\\work\\module");
 
 		// Act
-		String related = ProjectLayout.getRelatedPath(dir, file, false);
+		String relatedPath = ProjectLayout.getRelatedPath(dir, file, true);
 
 		// Assert
-		assertNull(related);
+		assertEquals("./module", relatedPath);
 	}
 
 	@Test
-	void getRelatedPath_static_shouldOptionallyAddSingleDotPrefix() {
+	void getRelatedPath_static_shouldReturnNullWhenFileIsNotUnderDir() {
 		// Arrange
-		File dir = new File("C:/repo");
-		File file = new File("C:/repo/a/b");
+		File dir = new File("C:\\work");
+		File file = new File("D:\\other\\file.txt");
 
 		// Act
-		String related = ProjectLayout.getRelatedPath(dir, file, true);
+		String relatedPath = ProjectLayout.getRelatedPath(dir, file, false);
 
 		// Assert
-		assertEquals("./a/b", related);
+		assertNull(relatedPath);
+	}
+
+	@Test
+	void defaultImplementations_shouldReturnNullExceptExcludedDirsConstant() {
+		// Arrange
+		ProjectLayout layout = new ProjectLayout() {
+			@Override
+			public java.util.List<String> getSources() {
+				return null;
+			}
+
+			@Override
+			public java.util.List<String> getDocuments() {
+				return null;
+			}
+
+			@Override
+			public java.util.List<String> getTests() {
+				return null;
+			}
+		};
+
+		// Act & Assert
+		assertNull(layout.getModules());
+		assertNull(layout.getProjectId());
+		assertNull(layout.getProjectName());
+		assertNotNull(ProjectLayout.EXCLUDE_DIRS);
+		assertTrue(ProjectLayout.EXCLUDE_DIRS.length > 0);
 	}
 }

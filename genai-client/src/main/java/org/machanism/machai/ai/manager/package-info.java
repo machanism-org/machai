@@ -29,11 +29,11 @@
  * Provider discovery, configuration, and host-side tool wiring for generative AI integrations.
  *
  * <p>This package contains the {@link org.machanism.machai.ai.manager.GenAIProvider} service-provider interface (SPI)
- * and the {@link org.machanism.machai.ai.manager.GenAIProviderManager} entry point used to resolve and create a
- * provider.
+ * and the {@link org.machanism.machai.ai.manager.GenAIProviderManager} entry point used to resolve and create an
+ * implementation.
  *
- * <p>Providers are selected using a {@code Provider:Model} identifier (or, alternatively, a fully qualified provider
- * class name), configured using a
+ * <p>Providers are typically selected using a {@code Provider:Model} identifier (or, alternatively, a fully qualified
+ * provider class name), configured using a
  * {@link org.machanism.macha.core.commons.configurator.Configurator}, and then initialized with the chosen model.
  *
  * <p>The package also includes optional host-executed tool installers such as

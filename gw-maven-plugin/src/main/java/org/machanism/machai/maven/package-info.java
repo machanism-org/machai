@@ -3,20 +3,16 @@
  * build.
  *
  * <p>
- * The mojos in this package are responsible for discovering documentation inputs (typically under
- * {@code src/site}), invoking the GW processing pipeline, and optionally removing workflow artifacts that are created
- * during processing.
+ * This package provides two goals:
  * </p>
- *
- * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources and invokes
- *     {@link org.machanism.machai.gw.FileProcessor} to process the discovered inputs.
+ *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources (typically under
+ *     {@code src/site}) and invokes {@link org.machanism.machai.gw.FileProcessor} to process the discovered inputs.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; deletes temporary workflow files for the
- *     current Maven module.
+ *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; deletes temporary workflow files created
+ *     during processing for the current Maven module.
  *   </li>
  * </ul>
  *
@@ -31,8 +27,11 @@
  *     (for example {@code OpenAI:gpt-5}).
  *   </li>
  *   <li>
- *     <b>{@code scanDir}</b> (optional): Explicit scan root; when not set, defaults to the module base directory
- *     ({@code ${basedir}}).
+ *     <b>{@code rootDir}</b> (implicit): The module base directory ({@code ${basedir}}) used as the primary scan
+ *     context.
+ *   </li>
+ *   <li>
+ *     <b>{@code scanDir}</b> (optional): Explicit scan root; when not set, defaults to {@code rootDir}.
  *   </li>
  *   <li>
  *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): Instruction location string consumed by

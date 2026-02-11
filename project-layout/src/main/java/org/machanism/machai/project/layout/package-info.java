@@ -1,15 +1,15 @@
 /**
  * Provides APIs for detecting and modeling a repository's on-disk layout.
  *
- * <p>This package defines {@link org.machanism.machai.project.layout.ProjectLayout}, a common abstraction for locating
- * conventional project directories (for example, sources, tests, resources, and documentation) from a configured project
- * root. Implementations encapsulate ecosystem-specific conventions (such as Maven-style layouts or workspace-based
- * repositories) while presenting a consistent interface to callers.
+ * <p>This package centers on {@link org.machanism.machai.project.layout.ProjectLayout}, which represents
+ * the conventional directory structure of a project rooted at a configured base directory.
+ * Implementations encapsulate ecosystem-specific conventions (for example, Maven-style layouts) while
+ * presenting a consistent interface to callers.
  *
  * <h2>Key responsibilities</h2>
  * <ul>
- *   <li>Identify the project root directory and derive conventional subdirectories.</li>
- *   <li>Optionally discover nested modules/workspaces within a repository.</li>
+ *   <li>Derive conventional subdirectories relative to the configured project root.</li>
+ *   <li>Optionally discover nested modules within a repository.</li>
  *   <li>Provide directory sets for sources, tests, resources, and documentation.</li>
  *   <li>Apply shared exclusions when scanning directories (see
  *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}).</li>

@@ -24,7 +24,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-The **Bindex Maven Plugin** generates and maintains **bindex** metadata for Maven projects. It produces a structured `bindex.json` descriptor for each Maven module so downstream tools can reliably discover, integrate, index, and assemble libraries.
+The **Bindex Maven Plugin** enables automated generation and registration of **bindex** metadata for Maven projects. It generates a structured `bindex.json` descriptor for each Maven module so downstream tools can reliably discover, integrate, index, and assemble libraries. It supports metadata-driven automation (including GenAI-powered semantic search) within the Machanism ecosystem.
 
 ## Installation Instructions
 
@@ -46,10 +46,10 @@ mvn -pl bindex-maven-plugin -am clean install
 
 ### Run the plugin
 
-Generate (or update) `bindex.json`:
+Generate (or update) `bindex.json` for the current module:
 
 ```powershell
-mvn org.machanism.machai:bindex-maven-plugin:0.0.8-SNAPSHOT:bindex
+mvn org.machanism.machai:bindex-maven-plugin:0.0.9-SNAPSHOT:bindex
 ```
 
 ### Configure the plugin
@@ -89,5 +89,5 @@ Add the plugin to your project `pom.xml` and (optionally) bind the goal to a lif
 Example (system property):
 
 ```powershell
-mvn org.machanism.machai:bindex-maven-plugin:0.0.8-SNAPSHOT:bindex -Dupdate=true
+mvn org.machanism.machai:bindex-maven-plugin:0.0.9-SNAPSHOT:bindex -Dupdate=true
 ```

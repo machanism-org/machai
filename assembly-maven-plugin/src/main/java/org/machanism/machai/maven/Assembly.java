@@ -26,10 +26,10 @@ import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
 
 /**
- * Maven plugin {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly} goal.
+ * Maven {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly} goal.
  *
  * <p>
- * The goal orchestrates an AI-assisted project “assembly” workflow:
+ * The goal orchestrates an AI-assisted project "assembly" workflow:
  * </p>
  * <ol>
  *   <li>Acquire a prompt from {@link #assemblyPromptFile} (if present) or request it interactively.</li>
@@ -40,14 +40,14 @@ import org.machanism.machai.schema.Bindex;
  *
  * <h2>Plugin parameters</h2>
  * <ul>
- *   <li>{@code -Dassembly.genai} (default {@code OpenAI:gpt-5}) &ndash; Provider id for the assembly phase.</li>
- *   <li>{@code -Dpick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider id for the library recommendation
+ *   <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; Provider id for the assembly phase.</li>
+ *   <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider id for the library recommendation
  *   (picker) phase.</li>
- *   <li>{@code -Dassembly.prompt.file} (default {@code project.txt}) &ndash; File containing the prompt; if absent,
+ *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; File containing the prompt; if absent,
  *   the prompt is requested interactively.</li>
- *   <li>{@code -Dassembly.score} (default {@code 0.9}) &ndash; Minimum score required for a recommended library to be
+ *   <li>{@code assembly.score} (default {@code 0.9}) &ndash; Minimum score required for a recommended library to be
  *   listed/used.</li>
- *   <li>{@code -Dbindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
+ *   <li>{@code bindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
  * </ul>
  *
  * <h2>Usage examples</h2>

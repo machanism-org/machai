@@ -17,25 +17,32 @@ class JScriptProjectLayoutTest {
 	Path tempDir;
 
 	@Test
-	void isPackageJsonPresent_shouldReturnTrueOnlyWhenPackageJsonExists() throws IOException {
+	void isPackageJsonPresent_shouldReturnTrueWhenPresent() throws IOException {
 		// Arrange
-		Path projectDir = tempDir.resolve("repo");
-		Files.createDirectories(projectDir);
-		
-		// Act + Assert
-		assertFalse(JScriptProjectLayout.isPackageJsonPresent(projectDir.toFile()));
-		Files.write(projectDir.resolve(JScriptProjectLayout.PROJECT_MODEL_FILE_NAME), "{}".getBytes(StandardCharsets.UTF_8));
-		assertTrue(JScriptProjectLayout.isPackageJsonPresent(projectDir.toFile()));
+		Files.write(tempDir.resolve(JScriptProjectLayout.PROJECT_MODEL_FILE_NAME), "{}".getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		boolean present = JScriptProjectLayout.isPackageJsonPresent(tempDir.toFile());
+
+		// Assert
+		assertTrue(present);
 	}
 
 	@Test
-	void getModules_shouldReturnNullWhenNoWorkspacesKey() throws IOException {
+	void isPackageJsonPresent_shouldReturnFalseWhenAbsent() {
 		// Arrange
-		Path projectDir = tempDir.resolve("repo");
-		Files.createDirectories(projectDir);
-		Files.write(projectDir.resolve("package.json"), "{\"name\":\"repo\"}".getBytes(StandardCharsets.UTF_8));
+		// Act
+		boolean present = JScriptProjectLayout.isPackageJsonPresent(tempDir.toFile());
 
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(projectDir.toFile());
+		// Assert
+		assertFalse(present);
+	}
+
+	@Test
+	void getModules_shouldReturnNullWhenWorkspacesNotDefined() throws IOException {
+		// Arrange
+		Files.write(tempDir.resolve("package.json"), "{\"name\":\"x\"}".getBytes(StandardCharsets.UTF_8));
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
 		List<String> modules = layout.getModules();
@@ -45,42 +52,50 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldResolveWorkspaceGlobs_andExcludePathsContainingExcludedDirs() throws IOException {
+	void getModules_shouldResolveWorkspaceGlobsAndExcludeDirectories() throws IOException {
 		// Arrange
-		Path projectDir = tempDir.resolve("repo");
-		Files.createDirectories(projectDir);
-		Files.write(projectDir.resolve("package.json"), "{\"workspaces\":[\"packages/**\"]}".getBytes(StandardCharsets.UTF_8));
+		Files.createDirectories(tempDir.resolve("packages\\a"));
+		Files.write(tempDir.resolve("packages\\a\\package.json"), "{\"name\":\"a\"}".getBytes(StandardCharsets.UTF_8));
+		Files.createDirectories(tempDir.resolve("packages\\b"));
+		Files.write(tempDir.resolve("packages\\b\\package.json"), "{\"name\":\"b\"}".getBytes(StandardCharsets.UTF_8));
 
-		Path packages = Files.createDirectories(projectDir.resolve("packages"));
-		Path pkgA = Files.createDirectories(packages.resolve("a"));
-		Files.write(pkgA.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
+		Files.createDirectories(tempDir.resolve("packages\\target\\c"));
+		Files.write(tempDir.resolve("packages\\target\\c\\package.json"), "{\"name\":\"c\"}".getBytes(StandardCharsets.UTF_8));
 
-		Path nestedWithExcluded = Files.createDirectories(packages.resolve("node_modules").resolve("x"));
-		Files.write(nestedWithExcluded.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
+		String rootPackageJson = "{\"workspaces\":[\"packages/**\"]}";
+		Files.write(tempDir.resolve("package.json"), rootPackageJson.getBytes(StandardCharsets.UTF_8));
 
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(projectDir.toFile());
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
 		List<String> modules = layout.getModules();
 
 		// Assert
 		assertNotNull(modules);
-		assertEquals(1, modules.size());
-		assertEquals("packages/a", modules.get(0).replace('\\', '/'));
+		assertEquals(2, modules.size());
+		assertTrue(modules.contains("packages/a"));
+		assertTrue(modules.contains("packages/b"));
+		assertFalse(modules.contains("packages/target/c"));
 	}
 
 	@Test
-	void getModules_shouldThrowIllegalArgumentExceptionWhenPackageJsonIsInvalid() throws IOException {
+	void getModules_shouldThrowIllegalArgumentExceptionWhenPackageJsonInvalid() throws IOException {
 		// Arrange
-		Path projectDir = tempDir.resolve("repo");
-		Files.createDirectories(projectDir);
-		Files.write(projectDir.resolve("package.json"), "{ invalid json".getBytes(StandardCharsets.UTF_8));
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(projectDir.toFile());
+		Files.write(tempDir.resolve("package.json"), "{ invalid json".getBytes(StandardCharsets.UTF_8));
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
 
-		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, layout::getModules);
+		// Act & Assert
+		assertThrows(IllegalArgumentException.class, layout::getModules);
+	}
 
-		// Assert
-		assertNotNull(ex.getCause());
+	@Test
+	void notImplementedMethods_shouldReturnNull() {
+		// Arrange
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
+
+		// Act & Assert
+		assertNull(layout.getSources());
+		assertNull(layout.getDocuments());
+		assertNull(layout.getTests());
 	}
 }

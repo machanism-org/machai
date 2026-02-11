@@ -28,12 +28,13 @@
  * Provider-neutral public API for configuring and executing GenAI requests.
  *
  * <p>This package contains the top-level, provider-agnostic types that applications use to:
+ *
  * <ul>
- *   <li>select and configure an AI provider and model,</li>
- *   <li>submit system instructions and user prompts,</li>
- *   <li>attach local or remote files for provider-side processing,</li>
- *   <li>register callable tools that a model may invoke during execution,</li>
- *   <li>execute requests and consume the resulting text response or embeddings.</li>
+ *   <li>Select and configure an AI provider and model.</li>
+ *   <li>Submit system instructions and user prompts.</li>
+ *   <li>Attach local or remote files for provider-side processing.</li>
+ *   <li>Register callable tools that a model may invoke during execution.</li>
+ *   <li>Execute requests and consume the resulting text response or embeddings.</li>
  * </ul>
  *
  * <p>Concrete provider integrations are located under {@code org.machanism.machai.ai.provider}. Provider

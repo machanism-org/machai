@@ -25,7 +25,7 @@
 */
 
 /**
- * Maven {@link org.apache.maven.plugin.Mojo} implementation(s) for MachAI's AI-assisted assembly workflow.
+ * Maven {@link org.apache.maven.plugin.Mojo} implementations for MachAI's AI-assisted assembly workflow.
  *
  * <p>
  * This package provides the {@code assembly} goal implemented by

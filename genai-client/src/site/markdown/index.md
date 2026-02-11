@@ -160,13 +160,6 @@ You must set at least `OPENAI_API_KEY`:
 - `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
 
-**Using the CodeMie API via OpenAI-compatible gateway**
-
-To route `OpenAIProvider` requests through CodeMie’s OpenAI-compatible endpoint, set:
-
-- `OPENAI_API_KEY` = access token
-- `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
-
 **Usage example**
 
 ```java
@@ -177,7 +170,7 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-The `CodeMieProvider` is a specialization of `OpenAIProvider` that authenticates against CodeMie and then uses CodeMie’s OpenAI-compatible API endpoint.
+The `CodeMieProvider` is a `GenAIProvider` implementation that authenticates against CodeMie and then uses CodeMie’s OpenAI-compatible API endpoint.
 
 How it works:
 
@@ -228,7 +221,7 @@ provider.close();
 
 The `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
+Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the "Submit Prompt" recipe (see `perform()`).
 
 **Thread safety and lifecycle**
 

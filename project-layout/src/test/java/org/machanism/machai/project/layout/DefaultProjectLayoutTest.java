@@ -17,42 +17,67 @@ class DefaultProjectLayoutTest {
 	Path tempDir;
 
 	@Test
-	void getModules_shouldReturnDirectoriesExcludingKnownBuildAndVcsDirs_andCacheResult() throws IOException {
+	void getModules_shouldReturnOnlyNonExcludedDirectories() throws IOException {
 		// Arrange
-		Path moduleA = Files.createDirectories(tempDir.resolve("module-a"));
+		Files.createDirectories(tempDir.resolve("moduleA"));
+		Files.createDirectories(tempDir.resolve("moduleB"));
 		Files.createDirectories(tempDir.resolve("target"));
 		Files.createDirectories(tempDir.resolve(".git"));
-		Files.createDirectories(tempDir.resolve("build"));
+		Files.createFile(tempDir.resolve("file.txt"));
 
 		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
-		List<String> first = layout.getModules();
-		Files.createDirectories(tempDir.resolve("module-b"));
-		List<String> second = layout.getModules();
+		List<String> modules = layout.getModules();
 
 		// Assert
-		assertNotNull(first);
-		assertEquals(1, first.size());
-		assertTrue(first.contains(moduleA.getFileName().toString()));
-
-		assertSame(first, second, "Expected cached list instance to be returned on subsequent calls");
-		assertEquals(1, second.size(), "Expected cached result not to change after filesystem updates");
+		assertNotNull(modules);
+		assertEquals(2, modules.size());
+		assertTrue(modules.contains("moduleA"));
+		assertTrue(modules.contains("moduleB"));
+		assertFalse(modules.contains("target"));
+		assertFalse(modules.contains(".git"));
 	}
 
 	@Test
-	void getSources_getDocuments_getTests_shouldReturnNullAsNotImplemented() {
+	void getModules_shouldCacheResultAndNotReflectLaterFilesystemChanges() throws IOException {
+		// Arrange
+		Files.createDirectories(tempDir.resolve("moduleA"));
+		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
+		List<String> first = layout.getModules();
+		Files.createDirectories(tempDir.resolve("moduleB"));
+
+		// Act
+		List<String> second = layout.getModules();
+
+		// Assert
+		assertSame(first, second);
+		assertEquals(1, second.size());
+		assertTrue(second.contains("moduleA"));
+		assertFalse(second.contains("moduleB"));
+	}
+
+	@Test
+	void getModules_shouldReturnEmptyListWhenNoSubdirectories() {
+		// Arrange
+		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
+
+		// Act
+		List<String> modules = layout.getModules();
+
+		// Assert
+		assertNotNull(modules);
+		assertTrue(modules.isEmpty());
+	}
+
+	@Test
+	void notImplementedMethods_shouldReturnNull() {
 		// Arrange
 		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(new File("."));
 
-		// Act
-		List<String> sources = layout.getSources();
-		List<String> docs = layout.getDocuments();
-		List<String> tests = layout.getTests();
-
-		// Assert
-		assertNull(sources);
-		assertNull(docs);
-		assertNull(tests);
+		// Act & Assert
+		assertNull(layout.getSources());
+		assertNull(layout.getDocuments());
+		assertNull(layout.getTests());
 	}
 }

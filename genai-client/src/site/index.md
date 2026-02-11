@@ -49,20 +49,22 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates with the OpenAI API and implements the `GenAIProvider` interface.
+The `OpenAIProvider` class integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
 
-This provider supports:
+This provider enables a wide range of generative AI capabilities, including:
 
 - Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for OpenAI workflows.
-- Performing common LLM tasks (text generation, summarization, question answering).
-- Creating vector embeddings for semantic search and similarity use cases.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
 
-By abstracting direct API interaction, `OpenAIProvider` provides a straightforward Java API for prompts, files, tools, and embeddings.
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+
+This class provides capabilities to send prompts, manage files, perform LLM requests, and create embeddings using OpenAI Chat models.
 
 Environment variables
 
-The client reads the following environment variables; you must set at least `OPENAI_API_KEY`:
+The client automatically reads the following environment variables. You must set at least `OPENAI_API_KEY`:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -71,9 +73,9 @@ The client reads the following environment variables; you must set at least `OPE
 
 Using the CodeMie API
 
-To use the CodeMie OpenAI-compatible endpoint with this provider, set:
+To use the CodeMie API, set the following environment variables:
 
-- `OPENAI_API_KEY` = access token
+- `OPENAI_API_KEY` = `eyJhbGciOiJSUzI1NiIsInR5c....`
 - `OPENAI_BASE_URL` = `https://codemie.lab.epam.com/code-assistant-api/v1`
 
 Usage example
@@ -90,7 +92,7 @@ This implementation is NOT thread-safe.
 
 `CodeMieProvider` is an `OpenAIProvider` specialization that targets the CodeMie OpenAI-compatible endpoint.
 
-On initialization, it authenticates against a token endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the underlying OpenAI client with the retrieved access token and uses the CodeMie base URL.
+On initialization it obtains an access token from the CodeMie authentication endpoint using the Resource Owner Password flow (`grant_type=password`, `client_id=codemie-sdk`). It then configures the underlying OpenAI client with the retrieved access token and uses the CodeMie base URL.
 
 Required configuration
 

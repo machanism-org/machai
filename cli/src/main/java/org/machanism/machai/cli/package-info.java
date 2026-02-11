@@ -1,14 +1,13 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains the Spring Boot entry point and Spring Shell command components that expose Machai
+ * <p>This package provides the Spring Boot entry point and Spring Shell command components that expose Machai
  * capabilities through an interactive REPL and non-interactive command execution.
  *
  * <h2>Key types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.cli.MachaiCLI} – application entry point that boots Spring Boot and loads
- *       optional system properties from {@code machai.properties} (or from the file provided via the
- *       {@code -Dconfig=...} system property).</li>
+ *   <li>{@link org.machanism.machai.cli.MachaiCLI} – boots the application and loads optional system properties from
+ *       {@code machai.properties} (or from the file provided via the {@code -Dconfig=...} system property).</li>
  *   <li>{@link org.machanism.machai.cli.ConfigCommand} – manages persistent CLI defaults such as working directory
  *       ({@code dir}), GenAI provider/model ({@code genai}), and semantic-search score threshold ({@code score}).</li>
  *   <li>{@link org.machanism.machai.cli.AssemblyCommand} – performs library picking (semantic search) and assembles an

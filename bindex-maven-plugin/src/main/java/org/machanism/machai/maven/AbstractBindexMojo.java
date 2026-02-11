@@ -65,7 +65,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 *
 	 * @param update whether to run in update mode (incremental refresh) instead of create mode
 	 */
-	void createBindex(boolean update) {
+	protected void createBindex(boolean update) {
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, configurator);
 
 		BindexCreator creator = new BindexCreator(provider);
@@ -87,7 +87,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 *
 	 * @return {@code true} if the project packaging is not {@code pom}; otherwise {@code false}
 	 */
-	boolean isBindexed() {
+	protected boolean isBindexed() {
 		return !"pom".equals(project.getPackaging());
 	}
 
