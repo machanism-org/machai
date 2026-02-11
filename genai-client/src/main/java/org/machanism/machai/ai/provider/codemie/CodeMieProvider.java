@@ -33,8 +33,14 @@ public class CodeMieProvider extends OpenAIProvider {
 	}
 
 	public static String getToken(String url, String username, String password) throws IOException {
-		String urlParameters = String.format("grant_type=password&client_id=codemie-sdk&username=%s&password=%s",
-				username, password);
+		String queryTemplate;
+		if (username.contains("@")) {
+			queryTemplate = "grant_type=password&client_id=codemie-sdk&username=%s&password=%s";
+		} else {
+			queryTemplate = "grant_type=client_credentials&client_id=%s&client_secret=%s";
+		}
+
+		String urlParameters = String.format(queryTemplate, username, password);
 
 		byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 

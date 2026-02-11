@@ -9,9 +9,6 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +36,7 @@ public class CommandFunctionTools {
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
 
-	private int maxResultSize = 4096;
+	private static int defaultResultTailSize = 1024;
 
 	/**
 	 * Installs the command-line tool function into the specified provider.
@@ -49,8 +46,12 @@ public class CommandFunctionTools {
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("run_command_line_tool", "Executes a system command using Java's Process.exec() method.",
 				this::executeCommand, "command:string:required:The command to execute in the system shell.",
-				"env:string:optional:Specifies environment variable settings as a single string, with each variable in the format NAME=VALUE, separated by newline characters (\\n). If null, the subprocess inherits the environment variables from the current process.",
-				"dir:string:optional:The working directory for the subprocess. If null, the subprocess inherits the current project directory.");
+				"env:string:optional:Specifies environment variable settings as a single string, with each variable in the format NAME=VALUE, separated by newline characters (\\n). "
+						+ "If null, the subprocess inherits the environment variables from the current process.",
+				"dir:string:optional:The working directory for the subprocess. If null, the subprocess inherits the current project directory.",
+				"tailResultSize:integer:optional:Specifies the maximum number of characters to display from the end of the result content produced by the executed system command. "
+						+ "If the command output exceeds this limit, only the last tailResultSize characters will be shown. Default value: "
+						+ getDefaultResultTailSize());
 	}
 
 	/**
@@ -77,6 +78,7 @@ public class CommandFunctionTools {
 
 		String dir = props.has(".") ? props.get("dir").asText(".") : ".";
 		String env = props.has("env") ? props.get("env").asText(null) : null;
+		Integer tailResultSize = props.has("tailResultSize") ? props.get("tailResultSize").asInt(-1) : null;
 
 		File projectDir = (File) params[1];
 		File workingDir;
@@ -92,7 +94,8 @@ public class CommandFunctionTools {
 			workingDir = projectDir;
 		}
 
-		LimitedStringBuilder output = new LimitedStringBuilder(maxResultSize);
+		LimitedStringBuilder output = new LimitedStringBuilder(
+				tailResultSize == -1 ? CommandFunctionTools.getDefaultResultTailSize() : tailResultSize);
 
 		try {
 
@@ -131,15 +134,12 @@ public class CommandFunctionTools {
 				}
 			});
 
-			// Start both threads
 			stdoutThread.start();
 			stderrThread.start();
 
-			// Wait for both threads to finish
 			stdoutThread.join();
 			stderrThread.join();
 
-			// Wait for the process to finish
 			int exitCode = process.waitFor();
 			output.append("Command exited with code: ").append(Integer.toString(exitCode))
 					.append(System.lineSeparator());
@@ -156,4 +156,13 @@ public class CommandFunctionTools {
 			return output.append("IO Error: ").append(e.getMessage()).toString();
 		}
 	}
+
+	public static int getDefaultResultTailSize() {
+		return defaultResultTailSize;
+	}
+
+	public static void setDefaultResultTailSize(int defaultResultTailSize) {
+		CommandFunctionTools.defaultResultTailSize = defaultResultTailSize;
+	}
+
 }

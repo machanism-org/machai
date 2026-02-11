@@ -35,6 +35,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -426,9 +427,14 @@ public class FileProcessor extends ProjectProcessor {
 			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
 
+			HashMap<String, String> valueMap = new HashMap<String, String>();
+			valueMap.put("projectId", projectLayout.getProjectId());
+			valueMap.put("projectName", projectLayout.getProjectName());
+
 			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
 					instructions);
-			provider.instructions(effectiveInstructions);
+			String instructionsLines = parseLines(effectiveInstructions, valueMap);
+			provider.instructions(instructionsLines);
 
 			String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
 			String osName = System.getProperty("os.name");
@@ -438,7 +444,9 @@ public class FileProcessor extends ProjectProcessor {
 			String projectInfo = getProjectStructureDescription(projectLayout);
 			provider.prompt(projectInfo);
 
-			provider.prompt(guidance);
+			String guidanceLines = parseLines(guidance, valueMap);
+
+			provider.prompt(guidanceLines);
 
 			provider.prompt(promptBundle.getString("output_format"));
 
@@ -552,7 +560,7 @@ public class FileProcessor extends ProjectProcessor {
 		return result;
 	}
 
-	private boolean isPathPattern(String pattern) {
+	private static boolean isPathPattern(String pattern) {
 		return Strings.CI.startsWithAny(pattern, "glob:", "regex:");
 	}
 
@@ -611,11 +619,11 @@ public class FileProcessor extends ProjectProcessor {
 		if (path == null || path.isBlank()) {
 			return 0;
 		}
-		String normalized = path.replace("\\\\", "/");
+		String normalized = path.replace("\\", "/");
 		return normalized.split("/").length;
 	}
 
-	private PathMatcher getPatternPath(String path) {
+	private static PathMatcher getPatternPath(String path) {
 		if (StringUtils.isBlank(path)) {
 			return null;
 		}
@@ -697,7 +705,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param instructions instructions input (plain text, URL, or {@code file:})
 	 */
 	public void setInstructions(String instructions) {
-		this.instructions = parseLines(instructions);
+		this.instructions = instructions;
 	}
 
 	/**
@@ -751,17 +759,18 @@ public class FileProcessor extends ProjectProcessor {
 	 *                        {@code file:})
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
-		this.defaultGuidance = parseLines(defaultGuidance);
+		this.defaultGuidance = defaultGuidance;
 	}
 
 	/**
 	 * Parses input line-by-line and expands any {@code http(s)://} or {@code file:}
 	 * references.
 	 *
-	 * @param data raw input
+	 * @param data     raw input
+	 * @param valueMap
 	 * @return expanded content with preserved line breaks
 	 */
-	private String parseLines(String data) {
+	private static String parseLines(String data, HashMap<String, String> valueMap) {
 		if (data == null) {
 			return StringUtils.EMPTY;
 		}
@@ -774,7 +783,10 @@ public class FileProcessor extends ProjectProcessor {
 				return;
 			}
 
-			String content = tryToGetInstructionsFromFile(normalizedLine);
+			normalizedLine = StrSubstitutor.replaceSystemProperties(normalizedLine);
+			normalizedLine = StrSubstitutor.replace(normalizedLine, valueMap);
+
+			String content = tryToGetInstructionsFromFile(normalizedLine, valueMap);
 			if (content != null) {
 				sb.append(content);
 			}
@@ -858,10 +870,11 @@ public class FileProcessor extends ProjectProcessor {
 	 * <li>Otherwise, returns {@code data}.</li>
 	 * </ul>
 	 *
-	 * @param data input string (URL, {@code file:} reference, or plain text)
+	 * @param data     input string (URL, {@code file:} reference, or plain text)
+	 * @param valueMap
 	 * @return content read from the URL/file, or the original input
 	 */
-	private static String tryToGetInstructionsFromFile(String data) {
+	private static String tryToGetInstructionsFromFile(String data, HashMap<String, String> valueMap) {
 		if (data == null) {
 			return null;
 		}
@@ -869,12 +882,12 @@ public class FileProcessor extends ProjectProcessor {
 		try {
 			String trimmed = data.trim();
 			if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-				return readFromHttpUrl(trimmed);
+				return parseLines(readFromHttpUrl(trimmed), valueMap);
 			}
 
 			if (Strings.CS.startsWith(trimmed, "file:")) {
 				String filePath = StringUtils.substringAfter(trimmed, "file:");
-				return readFromFilePath(filePath);
+				return parseLines(readFromFilePath(filePath, valueMap), valueMap);
 			}
 
 			return data;
@@ -917,7 +930,7 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
-	private static String readFromFilePath(String filePath) {
+	private static String readFromFilePath(String filePath, HashMap<String, String> valueMap) {
 		Path path = Path.of(filePath);
 		if (!Files.exists(path)) {
 			throw new IllegalArgumentException("File not found: " + path.toAbsolutePath());
@@ -926,6 +939,9 @@ public class FileProcessor extends ProjectProcessor {
 		try (FileReader reader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
 			String result = IOUtils.toString(reader);
 			logger.info("Included: `{}`", filePath);
+
+			result = tryToGetInstructionsFromFile(result, valueMap);
+
 			return result;
 		} catch (IOException e) {
 			throw new IllegalArgumentException("Failed to read file: " + path.toAbsolutePath(), e);
