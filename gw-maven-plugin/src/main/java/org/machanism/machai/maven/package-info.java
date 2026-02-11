@@ -59,6 +59,13 @@
  *   </li>
  * </ul>
  *
+ * <h2>Goal {@code clean} parameters</h2>
+ * <ul>
+ *   <li>
+ *     <b>{@code rootDir}</b> (implicit): The module base directory ({@code ${basedir}}) used as the cleanup context.
+ *   </li>
+ * </ul>
+ *
  * <h2>Credentials</h2>
  * <p>
  * GenAI credentials are loaded from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry whose id is
@@ -85,7 +92,7 @@
  *   &amp;lt;configuration&amp;gt;
  *     &amp;lt;genai&amp;gt;OpenAI:gpt-5&amp;lt;/genai&amp;gt;
  *     &amp;lt;serverId&amp;gt;genai&amp;lt;/serverId&amp;gt;
- *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;lt;/threads&amp;gt;
+ *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;gt;
  *     &amp;lt;instructions&amp;gt;
  *       &amp;lt;instruction&amp;gt;src/site/machai/instructions.md&amp;lt;/instruction&amp;gt;
  *     &amp;lt;/instructions&amp;gt;

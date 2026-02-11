@@ -25,22 +25,25 @@
 
 ## Project Title and Overview
 
-Ghostwriter Maven Plugin (GW Maven Plugin) is a documentation automation tool for Maven-based Java projects. It scans a repository for embedded `@guidance:` directives and uses them to assemble and refresh Maven Site Markdown pages, helping teams keep documentation accurate and consistent as the code evolves.
+GW Maven Plugin ("Ghostwriter Maven Plugin") is a documentation automation plugin for Maven-based Java projects. It scans documentation sources (typically under `src\site`) and runs them through the MachAI Generative Workflow (GW) pipeline to generate or update project documentation from embedded guidance tags and project context.
 
 Key features:
 
-- Generates and refreshes Maven Site pages from embedded `@guidance:` comments
-- Scans project sources and resources to discover `@guidance:` directives
-- Integrates with standard Maven Site layout and workflows
-- Can be run from the command line or bound into the Maven lifecycle
+- Maven goals to run the MachAI GW documentation pipeline from your build
+- Scans documentation sources (commonly `src\site`) with an optional scan root override
+- Supports additional instructions and default guidance to control output style/content
+- Supports exclude patterns for skipping directories/files during scanning
+- Can load GenAI credentials from Maven `settings.xml` via a `<server>` id
+- Aggregator execution for reactor builds, with optional multi-threading
+- Optional logging of the input file set passed to the workflow
 
 ## Installation Instructions
 
 ### Prerequisites
 
 - Git
-- Java 11+
-- Maven 3+
+- Java 11+ (project compiles with `maven.compiler.release=11`)
+- Maven 3.x
 
 ### Checkout
 
@@ -71,10 +74,22 @@ Add the plugin to your project `pom.xml`:
 
 ### Run the plugin
 
-Run the plugin goal:
+Aggregator (reactor) goal:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw
+mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.genai=OpenAI:gpt-5
+```
+
+Standard (single-module) goal:
+
+```bat
+mvn gw:std -Dgw.genai=OpenAI:gpt-5
+```
+
+If credentials are stored in Maven `settings.xml`:
+
+```bat
+mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai
 ```
 
 ### Configuration example
@@ -85,8 +100,14 @@ mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw
   <artifactId>gw-maven-plugin</artifactId>
   <version>REPLACE_WITH_LATEST_VERSION</version>
   <configuration>
-    <genai>CodeMie:gpt-5-2-2025-12-11</genai>
-    <serverId>CodeMie</serverId>
+    <scanDir>${basedir}</scanDir>
+    <excludes>
+      <exclude>**\\.machai\\**</exclude>
+    </excludes>
+    <genai>OpenAI:gpt-5</genai>
+    <serverId>genai</serverId>
+    <threads>true</threads>
+    <logInputs>false</logInputs>
   </configuration>
 </plugin>
 ```
@@ -94,12 +115,14 @@ mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw
 Command-line override example:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.genai=CodeMie:gpt-5-2-2025-12-11 -Dgw.serverId=CodeMie
+mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai -Dgw.logInputs=true
 ```
 
 ### Typical workflow
 
-1. Add `@guidance:` comments close to the code or artifacts they describe.
-2. Run the plugin goal to (re)generate or update the Maven Site Markdown pages.
-3. Run `mvn site` to render the site and review the generated documentation.
-4. Iterate: update code and `@guidance:` comments as requirements evolve, then re-run the goals.
+1. Add and/or update documentation sources under `src\site` (for example, `src\site\markdown`).
+2. Add embedded guidance tags in your documentation sources.
+3. (Optional) Provide shared instructions and/or default guidance.
+4. Configure credentials in Maven `settings.xml` and reference them via `gw.genai.serverId` if needed.
+5. Run `mvn org.machanism.machai:gw-maven-plugin:gw` (reactor) or `mvn gw:std` (single module).
+6. Review generated/updated documentation artifacts and commit changes.
