@@ -27,24 +27,23 @@
  */
 
 /**
- * Web-automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementation.
+ * Web UI automation backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>This package contains {@link org.machanism.machai.ai.manager.GenAIProvider} implementations that obtain model
- * responses by automating a target generative-AI provider through its web user interface (UI) using
- * <a href="https://ganteater.com">Anteater</a> workspace recipes.
+ * <p>This package contains providers that obtain responses from a generative AI service by automating its web user
+ * interface (UI) using <a href="https://ganteater.com">Anteater</a> workspace recipes.
  *
- * <h2>Overview</h2>
+ * <p>The primary entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
  * <ul>
- *   <li><strong>Configuration selection</strong>: typically via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
- *   <li><strong>Workspace initialization</strong>: via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}; recipe/config location
- *       may be overridden with system property {@code recipes}.</li>
- *   <li><strong>Prompt submission</strong>: via {@link org.machanism.machai.ai.provider.web.WebProvider#perform()} by
- *       running the {@code "Submit Prompt"} recipe and reading the {@code result} variable.</li>
+ *   <li>selects an Anteater workspace configuration via
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)};</li>
+ *   <li>initializes a shared {@code AEWorkspace} for a project directory via
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)} (intended to be called once
+ *       per JVM); and</li>
+ *   <li>submits accumulated prompts by running the {@code "Submit Prompt"} recipe via
+ *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()} and returning the {@code result} variable.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Usage</h2>
  * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
  * provider.model("config.yaml");

@@ -25,28 +25,28 @@
 */
 
 /**
- * Maven {@link org.apache.maven.plugin.Mojo} implementations for MachAI's AI-assisted assembly workflow.
+ * Maven goal implementation for MachAI's AI-assisted project assembly workflow.
  *
  * <p>
- * This package provides the {@code assembly} goal implemented by
- * {@link org.machanism.machai.maven.Assembly}. The goal orchestrates two phases:
+ * This package provides the Maven plugin entry point for the {@code assembly} goal
+ * (implemented by {@link org.machanism.machai.maven.Assembly}). The goal is intended to:
  * </p>
  * <ol>
- *   <li><b>Library recommendation</b> (picker): Uses {@link org.machanism.machai.bindex.Picker} to recommend candidate
- *   libraries as {@link org.machanism.machai.schema.Bindex} entries.</li>
- *   <li><b>Project assembly</b>: Uses {@link org.machanism.machai.bindex.ApplicationAssembly} to apply the assembly
- *   workflow to the Maven {@code basedir}.</li>
+ *   <li>Acquire a natural-language assembly prompt from a text file or interactively.</li>
+ *   <li>Recommend candidate libraries via {@link org.machanism.machai.bindex.Picker} as
+ *   {@link org.machanism.machai.schema.Bindex} entries.</li>
+ *   <li>Run {@link org.machanism.machai.bindex.ApplicationAssembly} to apply the assembly workflow to the Maven
+ *   execution base directory.</li>
  * </ol>
  *
  * <p>
- * GenAI providers for both phases are resolved via
- * {@link org.machanism.machai.ai.manager.GenAIProviderManager} and are augmented with standard system function tools via
- * {@link org.machanism.machai.ai.manager.SystemFunctionTools}.
+ * GenAI providers are selected using {@link org.machanism.machai.ai.manager.GenAIProviderManager}. Standard function
+ * tools are attached to providers via {@link org.machanism.machai.ai.manager.SystemFunctionTools}.
  * </p>
  *
  * <h2>Goal</h2>
  * <ul>
- *   <li>{@code assembly} &ndash; Recommend libraries and run an AI-driven assembly process against a project folder.</li>
+ *   <li>{@code assembly} &ndash; Recommend libraries and run an AI-assisted assembly process against a project folder.</li>
  * </ul>
  *
  * <h2>Plugin parameters</h2>

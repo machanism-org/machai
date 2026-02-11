@@ -27,23 +27,23 @@ Page Structure:
 
 ## Introduction
 
-Bindex Core (`bindex-core`) is the foundational library for bindex metadata. It provides the core model and APIs for generating metadata for artifacts you produce, reading and validating metadata from dependencies, and combining metadata across modules to drive higher-level tooling.
+Bindex Core (`bindex-core`) is the foundational Java library for working with **bindex metadata** within the Machanism ecosystem. It provides the domain model and supporting utilities required to generate, read, validate, merge, and publish metadata that describes libraries and artifacts.
 
-It enables consistent, automated handling of library metadata so downstream tools can reliably discover capabilities, integrate compatible components, and assemble projects within the Machanism ecosystem.
+By standardizing how this metadata is represented and handled, Bindex Core enables consistent discovery, integration, and assembly workflows across tooling (for example, Maven plugins and build integrations) and downstream consumers.
 
 ## Overview
 
-Bindex Core defines the canonical representation of bindex metadata and provides APIs intended for other Machanism components (for example, Maven plugins and build integrations). Typical uses include:
+Bindex Core defines the canonical representation of bindex metadata and exposes APIs intended for other Machanism components. It is typically used to:
 
-- Generating bindex metadata for produced artifacts.
-- Reading and validating metadata from modules and dependencies.
-- Merging and aggregating metadata across multi-module builds.
-- Driving library selection and project assembly decisions based on metadata.
-- Supporting publishing/registration so metadata can be discovered by downstream tooling.
+- Generate bindex metadata for produced artifacts.
+- Read and validate metadata from modules and dependencies.
+- Merge and aggregate metadata across multi-module builds.
+- Drive library selection and project assembly decisions based on metadata.
+- Support publishing/registration so metadata can be discovered by downstream tooling.
 
 ## Key Features
 
-- Canonical model for representing bindex metadata.
+- Canonical, versioned model for representing bindex metadata.
 - APIs and utilities for generating, reading, and validating metadata.
 - Merge/aggregation helpers for multi-module and dependency scenarios.
 - Library selection and project assembly support based on metadata.
@@ -58,7 +58,7 @@ Bindex Core defines the canonical representation of bindex metadata and provides
 
 ### Environment Variables
 
-Bindex Core does not require environment variables by default.
+Bindex Core does not require any environment variables by default.
 
 | Variable | Required | Description | Default |
 |---|:---:|---|---|

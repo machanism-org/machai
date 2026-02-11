@@ -30,11 +30,11 @@
  * Maven plugin goals (Mojos) that integrate Machai/Bindex operations into a Maven build.
  *
  * <p>
- * This package contains the plugin goal implementations that create and update Bindex indexes, publish module
- * metadata to a registry, and clean plugin-generated artifacts. Goals execute in the context of the current
- * {@link org.apache.maven.project.MavenProject} and are typically bound to standard Maven lifecycle phases.
- * Modules with {@code pom} packaging (commonly aggregator/parent modules) are generally skipped so that
- * module-specific work runs only where it applies.
+ * This package provides Mojo implementations for creating and updating Bindex indexes, publishing module metadata
+ * to a registry, and cleaning plugin-generated artifacts. Each goal runs in the context of the current
+ * {@link org.apache.maven.project.MavenProject} and is typically bound to a Maven lifecycle phase.
+ * Modules with {@code pom} packaging (commonly aggregator/parent modules) are generally skipped so that work
+ * executes only for concrete buildable modules.
  * </p>
  *
  * <h2>Provided goals</h2>

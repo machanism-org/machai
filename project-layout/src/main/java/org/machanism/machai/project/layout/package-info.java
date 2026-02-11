@@ -1,27 +1,34 @@
 /**
- * Provides APIs for detecting and modeling a repository's on-disk layout.
+ * APIs for detecting and modeling a repository's on-disk project layout.
  *
- * <p>This package centers on {@link org.machanism.machai.project.layout.ProjectLayout}, which represents
- * the conventional directory structure of a project rooted at a configured base directory.
- * Implementations encapsulate ecosystem-specific conventions (for example, Maven-style layouts) while
- * presenting a consistent interface to callers.
+ * <p>This package defines {@link org.machanism.machai.project.layout.ProjectLayout}, an abstraction
+ * that represents a project rooted at a configured base directory and exposes conventional locations
+ * for main sources/resources, test sources/resources, documentation, and (optionally) nested modules.
+ * Implementations encapsulate ecosystem-specific conventions and configuration sources.
  *
- * <h2>Key responsibilities</h2>
+ * <h2>Provided layouts</h2>
  * <ul>
- *   <li>Derive conventional subdirectories relative to the configured project root.</li>
- *   <li>Optionally discover nested modules within a repository.</li>
- *   <li>Provide directory sets for sources, tests, resources, and documentation.</li>
- *   <li>Apply shared exclusions when scanning directories (see
- *       {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}).</li>
+ *   <li>Maven projects via {@link org.machanism.machai.project.layout.MavenProjectLayout} (parses
+ *       {@code pom.xml} using {@link org.machanism.machai.project.layout.PomReader}).</li>
+ *   <li>JavaScript/TypeScript workspaces via {@link org.machanism.machai.project.layout.JScriptProjectLayout}
+ *       (reads {@code package.json}).</li>
+ *   <li>Python projects via {@link org.machanism.machai.project.layout.PythonProjectLayout} (inspects
+ *       {@code pyproject.toml}).</li>
+ *   <li>A minimal fallback via {@link org.machanism.machai.project.layout.DefaultProjectLayout}.</li>
  * </ul>
+ *
+ * <h2>Repository scanning and exclusions</h2>
+ * <p>When scanning a repository for nested modules, implementations typically exclude common build,
+ * VCS, and environment directories using {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  *
  * <h2>Typical usage</h2>
  * <pre>
  * ProjectLayout layout = new MavenProjectLayout()
- *         .projectDir(new java.io.File("/repo"));
+ *         .projectDir(new java.io.File("C:\\repo"));
  *
  * java.util.List&lt;String&gt; modules = layout.getModules();
  * java.util.List&lt;String&gt; sources = layout.getSources();
+ * java.util.List&lt;String&gt; tests = layout.getTests();
  * </pre>
  */
 package org.machanism.machai.project.layout;

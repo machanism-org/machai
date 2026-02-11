@@ -15,7 +15,7 @@
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * -  Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
+ *      - Use proper Markdown or HTML formatting for readability.
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.
@@ -29,14 +29,14 @@
 /**
  * No-op ("none") implementation of the generative AI provider SPI.
  *
- * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation for environments where external LLM
+ * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for environments where external LLM
  * integration must not be used (for example, offline execution, security/compliance constraints, or tests).
  *
  * <h2>Behavior</h2>
  * <ul>
  *   <li>No network calls are performed and no external AI service is contacted.</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} accumulates prompt text in memory.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} buffers prompt text in memory.</li>
  *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} may write:
  *     <ul>
  *       <li>{@code instructions.txt} (when instructions are set), and</li>

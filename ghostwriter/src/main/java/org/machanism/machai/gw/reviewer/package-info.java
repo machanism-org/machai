@@ -1,14 +1,12 @@
 /**
- * File-format-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations used by Ghostwriter to
- * scan project files and extract embedded {@code @guidance} instructions.
+ * File-format-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations used by Ghostwriter
+ * to scan project files and extract embedded {@code @guidance} instructions.
  *
- * <p>Reviewers in this package understand the comment syntax of their target formats (for example, Java,
- * Markdown, HTML/XML, Python, TypeScript, or plain text) and, when guidance is found, emit a normalized prompt
- * fragment suitable for downstream processing.
- *
- * <p>Prompt fragments include project-relative path context computed via
- * {@link org.machanism.machai.project.layout.ProjectLayout} so downstream steps can correlate extracted guidance
- * with the originating sources.
+ * <p>Each reviewer understands the comment conventions of a target format (for example, Java, Markdown, HTML/XML,
+ * Python, TypeScript, or plain text) and produces a normalized prompt fragment for downstream processing.
+ * Prompt fragments include project-relative path context computed via
+ * {@link org.machanism.machai.project.layout.ProjectLayout} so subsequent pipeline stages can correlate extracted
+ * guidance with the originating sources.
  */
 package org.machanism.machai.gw.reviewer;
 

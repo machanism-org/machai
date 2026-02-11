@@ -342,8 +342,7 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		if (match(projectDir) && children.isEmpty() && defaultGuidance != null) {
-			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"),
-					defaultGuidance);
+			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), defaultGuidance);
 			process(projectLayout, projectLayout.getProjectDir(), defaultGuidanceText);
 		}
 	}
@@ -427,12 +426,11 @@ public class FileProcessor extends ProjectProcessor {
 			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
 
-			HashMap<String, String> valueMap = new HashMap<String, String>();
+			HashMap<String, String> valueMap = new HashMap<>();
 			valueMap.put("projectId", projectLayout.getProjectId());
 			valueMap.put("projectName", projectLayout.getProjectName());
 
-			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
-					instructions);
+			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), instructions);
 			String instructionsLines = parseLines(effectiveInstructions, valueMap);
 			provider.instructions(instructionsLines);
 
@@ -478,7 +476,7 @@ public class FileProcessor extends ProjectProcessor {
 		List<String> documents = projectLayout.getDocuments();
 		List<String> modules = projectLayout.getModules();
 
-		content.add(projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`": "not defined");
+		content.add(projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`" : "not defined");
 		content.add(projectLayout.getProjectId());
 		content.add(".");
 		content.add(getDirInfoLine(sources, projectDir));
@@ -767,7 +765,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * references.
 	 *
 	 * @param data     raw input
-	 * @param valueMap
+	 * @param valueMap value substitution map
 	 * @return expanded content with preserved line breaks
 	 */
 	private static String parseLines(String data, HashMap<String, String> valueMap) {
@@ -871,7 +869,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * </ul>
 	 *
 	 * @param data     input string (URL, {@code file:} reference, or plain text)
-	 * @param valueMap
+	 * @param valueMap value substitution map
 	 * @return content read from the URL/file, or the original input
 	 */
 	private static String tryToGetInstructionsFromFile(String data, HashMap<String, String> valueMap) {

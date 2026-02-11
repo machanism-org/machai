@@ -29,11 +29,11 @@ import org.machanism.machai.schema.Bindex;
  * Maven {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly} goal.
  *
  * <p>
- * The goal orchestrates an AI-assisted project "assembly" workflow:
+ * This goal drives an AI-assisted "assembly" workflow for a target project directory:
  * </p>
  * <ol>
- *   <li>Acquire a prompt from {@link #assemblyPromptFile} (if present) or request it interactively.</li>
- *   <li>Use {@link #pickChatModel} to recommend candidate libraries (as {@link Bindex} entries).</li>
+ *   <li>Acquire a natural-language prompt from {@link #assemblyPromptFile} (if present) or request it interactively.</li>
+ *   <li>Use {@link #pickChatModel} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
  *   <li>Filter recommendations by {@link #score}.</li>
  *   <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
  * </ol>
@@ -122,18 +122,21 @@ public class Assembly extends AbstractMojo {
 	 * Executes the {@code assembly} goal.
 	 *
 	 * <p>
-	 * The execution performs the following steps:
+	 * Execution steps:
 	 * </p>
 	 * <ol>
-	 *   <li>Read the prompt from {@link #assemblyPromptFile} when it exists; otherwise prompt the user.</li>
-	 *   <li>Initialize the picker GenAI provider and apply standard system function tools.</li>
+	 *   <li>Read the prompt from {@link #assemblyPromptFile} if it exists; otherwise prompt the user.</li>
+	 *   <li>Create a {@link Configurator} backed by {@code bindex.properties}.</li>
+	 *   <li>Initialize the picker {@link GenAIProvider} and apply {@link SystemFunctionTools}.</li>
 	 *   <li>Use {@link Picker} to recommend libraries and log recommendations to the build output.</li>
-	 *   <li>Run the {@link ApplicationAssembly} workflow in {@link #basedir} using the assembly GenAI provider.</li>
-	 *   <li>Optionally enter an interactive prompt loop (skipped for {@link NoneProvider}).</li>
+	 *   <li>Initialize the assembly {@link GenAIProvider} and apply {@link SystemFunctionTools}.</li>
+	 *   <li>Run {@link ApplicationAssembly} against {@link #basedir}.</li>
+	 *   <li>If the provider is not a {@link NoneProvider}, enter an interactive prompt loop until the user types
+	 *   {@code exit}.</li>
 	 * </ol>
 	 *
-	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly
-	 *                                workflow fails
+	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly workflow
+	 *                                fails
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {

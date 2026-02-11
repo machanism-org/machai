@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-GenAI Client is a Java library for integrating with Generative AI providers through a small, stable API (`GenAIProvider`).
+GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers foundational prompt management and embedding capabilities, enabling AI-powered features across Machai modules.
 
 It provides the building blocks for:
 
@@ -36,7 +36,7 @@ It provides the building blocks for:
 - Optional file context.
 - Provider-dependent embeddings.
 
-The main benefit is provider portability: you can swap or combine backends (for example, OpenAI-compatible API providers and UI/web-automation providers) by changing configuration rather than application code.
+The main benefit is provider portability: you can swap or combine backends by changing configuration rather than application code.
 
 ## Overview
 
@@ -81,8 +81,8 @@ This design provides:
 | `OPENAI_ORG_ID` | No | OpenAI | Optional organization identifier. |
 | `OPENAI_PROJECT_ID` | No | OpenAI | Optional project identifier. |
 | `OPENAI_BASE_URL` | No | OpenAI / OpenAI-compatible | Override API base URL (useful for OpenAI-compatible gateways). |
-| `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token. |
-| `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token. |
+| `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (or a client id if using client_credentials). |
+| `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (or a client secret if using client_credentials). |
 | `AUTH_URL` | No | CodeMie | OAuth2 token endpoint override (defaults to CodeMie Keycloak token URL). |
 
 > Note: The Web provider uses Anteater recipes and is typically configured via `model(...)` and JVM system properties (for example, `-Drecipes=...`) rather than environment variables.
@@ -116,7 +116,7 @@ provider.close();
 | Parameter | Description | Default |
 |---|---|---|
 | Provider spec (`ProviderName:modelOrConfig`) | String passed to `GenAIProviderManager` to select provider and model/config. | None |
-| `model(String)` | Sets the provider model name (OpenAI) or configuration name (Web). | Provider-dependent |
+| `model(String)` | Sets the provider model name (OpenAI/CodeMie) or configuration name (Web). | Provider-dependent |
 | `setWorkingDir(File)` | Sets a working directory used by tools and/or provider workflows. | Not set |
 | `inputsLog(File)` | Enables logging of prompt inputs to a file for auditing/debugging. | Disabled |
 | `instructions(String)` | Sets system-level instructions for the request/session. | Not set |
@@ -142,18 +142,16 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` is a `GenAIProvider` implementation backed by the OpenAI API.
+The `OpenAIProvider` integrates with the OpenAI API as a concrete `GenAIProvider` implementation.
 
-It supports:
+It enables:
 
-- Text generation via `prompt(...)` and `perform()`.
-- File context via `addFile(File)` and `addFile(URL)`.
-- Tool (function) calling via `addTool(...)` (provider-dependent).
-- Embeddings via `embedding(String)`.
+- Sending prompts and receiving responses from OpenAI chat models.
+- Managing files for use in OpenAI workflows.
+- Performing common LLM tasks such as text generation, summarization, and question answering.
+- Creating vector embeddings for use cases like semantic search and similarity analysis.
 
-**Environment Variables**
-
-You must set at least `OPENAI_API_KEY`:
+**Environment variables** (must set at least `OPENAI_API_KEY`)
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_ORG_ID` (optional)
@@ -174,7 +172,7 @@ The `CodeMieProvider` is a `GenAIProvider` implementation that authenticates aga
 
 How it works:
 
-- Obtains an access token from CodeMie Keycloak using `grant_type=password` and `client_id=codemie-sdk`.
+- Obtains an access token from CodeMie Keycloak.
 - Uses the access token as the API key when creating the OpenAI client.
 - Uses the CodeMie OpenAI-compatible base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
@@ -190,7 +188,7 @@ How it works:
 GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
 ```
 
-**Thread safety:** not thread-safe (inherits behavior from `OpenAIProvider`).
+**Thread safety:** not thread-safe.
 
 ### None
 
@@ -221,7 +219,7 @@ provider.close();
 
 The `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the "Submit Prompt" recipe (see `perform()`).
+Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
 
 **Thread safety and lifecycle**
 

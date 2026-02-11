@@ -8,7 +8,8 @@
  * <ul>
  *   <li>
  *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources (typically under
- *     {@code src/site}) and invokes {@link org.machanism.machai.gw.FileProcessor} to process the discovered inputs.
+ *     {@code src/site}) for the current Maven reactor and invokes {@link org.machanism.machai.gw.FileProcessor} to
+ *     process the discovered inputs.
  *   </li>
  *   <li>
  *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; deletes temporary workflow files created
@@ -34,8 +35,8 @@
  *     <b>{@code scanDir}</b> (optional): Explicit scan root; when not set, defaults to {@code rootDir}.
  *   </li>
  *   <li>
- *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): Instruction location string consumed by
- *     the workflow.
+ *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): Instruction location string(s)
+ *     consumed by the workflow.
  *   </li>
  *   <li>
  *     <b>{@code guidance}</b> / <b>{@code gw.guidance}</b> (optional): Default guidance text forwarded to the workflow.
@@ -84,7 +85,7 @@
  *   &amp;lt;configuration&amp;gt;
  *     &amp;lt;genai&amp;gt;OpenAI:gpt-5&amp;lt;/genai&amp;gt;
  *     &amp;lt;serverId&amp;gt;genai&amp;lt;/serverId&amp;gt;
- *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;gt;
+ *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;lt;/threads&amp;gt;
  *     &amp;lt;instructions&amp;gt;
  *       &amp;lt;instruction&amp;gt;src/site/machai/instructions.md&amp;lt;/instruction&amp;gt;
  *     &amp;lt;/instructions&amp;gt;
@@ -112,7 +113,6 @@ package org.machanism.machai.maven;
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  * - Maintain Consistency and Formatting:
  * 		- Follow a consistent style and structure for all Javadoc comments.
- * 		- Use proper Markdown or HTML formatting for readability.
  * - Add Javadoc:
  *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
  *          methods, and fields, adhering to established best practices.

@@ -31,7 +31,14 @@ Generate a content:
 
 # Ghostwriter
 
-Ghostwriter is a documentation engine that scans a project, applies mandatory `@guidance` constraints embedded in source and documentation files, and uses GenAI to generate or update documentation consistently.
+Ghostwriter is a documentation engine that scans a project, applies mandatory `@guidance` constraints embedded in source and documentation files, and uses GenAI to generate or update documentation consistently across source code, documentation, project site content, and other relevant project assets.
+
+Key capabilities include:
+
+- Project scanning for documentation targets across multiple file types
+- Interpretation of inline `@guidance` blocks as mandatory constraints
+- Generation and update of Markdown and other documentation artifacts
+- Repeatable runs to keep documentation aligned with current project state
 
 ## Module List
 
@@ -39,7 +46,7 @@ This project is a single-module build.
 
 | Name | Description |
 |---|---|
-| [Ghostwriter](ghostwriter/) | Ghostwriter CLI and core engine for scanning files, interpreting `@guidance` blocks, and generating or updating documentation artifacts. |
+| [Ghostwriter](ghostwriter/) | Ghostwriter CLI and core engine for scanning project files, enforcing `@guidance` constraints, and generating or updating documentation artifacts in a consistent, automated way. |
 
 ## Installation Instructions
 
@@ -49,14 +56,14 @@ This project is a single-module build.
 - Maven 3.9+ recommended
 - Network access to the configured GenAI provider
 
-### Clone
+### Clone the repository
 
 ```cmd
 git clone https://github.com/machanism-org/machai.git
 cd machai
 ```
 
-### Build
+### Build with Maven
 
 ```cmd
 mvn -pl ghostwriter -am clean verify
@@ -66,7 +73,7 @@ mvn -pl ghostwriter -am clean verify
 
 ### Run the CLI
 
-From the built artifact (example):
+Example of running Ghostwriter against a local project directory:
 
 ```cmd
 java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar C:\projects\my-project
@@ -74,13 +81,13 @@ java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar C:\projects\my-proje
 
 ### Common options
 
-- Set the root directory:
+Set an explicit root directory:
 
 ```cmd
 java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar -r C:\projects\my-project
 ```
 
-- Target files with glob patterns:
+Target files with glob patterns:
 
 ```cmd
 java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar "glob:**\*.md"
@@ -88,9 +95,9 @@ java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar "glob:**\*.md"
 
 ## Contributing
 
-- Use standard Java formatting and keep changes focused.
+- Follow standard Java conventions and keep changes focused.
 - Add or update tests under `src/test/java` when behavior changes.
-- Open a pull request with a clear description and reproduction steps when relevant.
+- Open pull requests with a clear description, rationale, and reproduction steps when relevant.
 - Report issues with logs, environment details (OS, Java, Maven), and minimal steps to reproduce.
 
 ## License

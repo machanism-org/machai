@@ -36,25 +36,25 @@
  * Command-line orchestration and workspace scanning for Ghostwriter.
  *
  * <p>
- * This package contains the Ghostwriter CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the
+ * This package provides the Ghostwriter CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the core
  * scanning/processing engine ({@link org.machanism.machai.gw.FileProcessor}). Together they traverse a project
  * workspace, locate supported files, extract embedded {@code @guidance:} blocks using file-type-specific
- * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations, and submit per-file requests to a configured
+ * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations, and submit per-file requests to the configured
  * GenAI provider.
  * </p>
  *
- * <h2>Scanning model</h2>
+ * <h2>How scanning works</h2>
  * <ul>
  *   <li><strong>Project layout discovery</strong>: Uses
  *   {@link org.machanism.machai.project.layout.ProjectLayout} to identify modules and conventional source/test/doc
  *   directories.</li>
- *   <li><strong>File filtering</strong>: Scans may be restricted using {@code glob:}/{@code regex:} matchers and an
+ *   <li><strong>File selection</strong>: Scans can be restricted using {@code glob:}/{@code regex:} matchers and an
  *   optional list of exclude patterns or exact relative paths.</li>
  *   <li><strong>Reviewer selection</strong>: {@link java.util.ServiceLoader} loads
  *   {@link org.machanism.machai.gw.reviewer.Reviewer} services. The processor selects a reviewer by file extension;
- *   the reviewer extracts guidance and builds the per-file prompt fragment.</li>
- *   <li><strong>Prompt composition and execution</strong>: For each file, the processor composes a request that includes
- *   OS/project context, optional global instructions, per-file guidance, and a strict output format, then calls
+ *   the reviewer extracts guidance and builds a per-file prompt fragment.</li>
+ *   <li><strong>Prompt execution</strong>: For each file, the processor composes a request that includes OS/project
+ *   context, optional global instructions, per-file guidance, and a strict output format, then calls
  *   {@link org.machanism.machai.ai.manager.GenAIProvider#perform()}.</li>
  * </ul>
  *

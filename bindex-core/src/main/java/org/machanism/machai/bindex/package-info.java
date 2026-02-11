@@ -29,9 +29,9 @@
  * Bindex subsystem used by MachAI workflows to create, persist, register, and query project indexes.
  *
  * <p>A Bindex is typically persisted as {@code bindex.json} for a given
- * {@link org.machanism.machai.project.layout.ProjectLayout}. This package provides the orchestration and
- * supporting utilities needed to create that file, load it during processing, register it with a backing store,
- * and later retrieve and assemble relevant Bindexes as inputs to downstream GenAI execution.
+ * {@link org.machanism.machai.project.layout.ProjectLayout}. This package provides orchestration and supporting
+ * utilities to create that file, load it during processing, register it with a backing store, and retrieve and
+ * assemble relevant Bindexes as inputs to downstream GenAI execution.
  *
  * <h2>Typical workflow</h2>
  * <ol>
@@ -44,11 +44,13 @@
  * <h2>Main types</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.bindex.BindexCreator}: builds and writes {@code bindex.json} for a project.</li>
- *   <li>{@link org.machanism.machai.bindex.BindexProjectProcessor}: utilities for locating and loading
- *       {@code bindex.json} during project processing.</li>
+ *   <li>{@link org.machanism.machai.bindex.BindexProjectProcessor}: locates and loads {@code bindex.json} during
+ *       project processing.</li>
  *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers an on-disk Bindex with a backing store.</li>
- *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search and dependency expansion to select Bindexes.</li>
- *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: assembles selected Bindexes into prompt inputs for execution.</li>
+ *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search and dependency expansion to select
+ *       Bindexes.</li>
+ *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: assembles selected Bindexes into prompt inputs for
+ *       execution.</li>
  *   <li>{@link org.machanism.machai.bindex.BindexBuilderFactory}: selects a suitable
  *       {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation for a project layout.</li>
  * </ul>

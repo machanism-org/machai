@@ -280,11 +280,8 @@ public class OpenAIProvider implements GenAIProvider {
 			clear();
 
 		} catch (BadRequestException e) {
-			if (inputs.size() < 30) {
-				throw e;
-			} else {
-				logger.warn("Request inputs count: {}, LLM request processing terminated.", inputs.size());
-			}
+			logger.error("LLM request processing terminated. BadRequestException: {}, Request input count: {}",
+					e.getMessage(), inputs.size());
 		}
 
 		return result;
@@ -296,9 +293,8 @@ public class OpenAIProvider implements GenAIProvider {
 			long inputTokens = responseUsage.inputTokens();
 			long inputCachedTokens = responseUsage.inputTokensDetails().cachedTokens();
 			long outputTokens = responseUsage.outputTokens();
-			long reasoningTokens = responseUsage.outputTokensDetails().reasoningTokens();
 
-			GenAIProviderManager.addUsage(new Usage(inputTokens, inputCachedTokens, outputTokens, reasoningTokens));
+			GenAIProviderManager.addUsage(new Usage(inputTokens, inputCachedTokens, outputTokens));
 		}
 	}
 

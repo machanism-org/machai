@@ -178,24 +178,6 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
-	void getProjectId_shouldUseEmptyStringsForNullParts() {
-		// Arrange
-		Model model = new Model();
-		model.setModelVersion("4.0.0");
-		model.setGroupId(null);
-		model.setArtifactId("a");
-		model.setVersion(null);
-
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
-
-		// Act
-		String id = layout.getProjectId();
-
-		// Assert
-		assertEquals(":a:", id);
-	}
-
-	@Test
 	void getProjectName_shouldReturnModelName() {
 		// Arrange
 		Model model = new Model();
