@@ -78,7 +78,7 @@ public class CommandFunctionTools {
 
 		String dir = props.has(".") ? props.get("dir").asText(".") : ".";
 		String env = props.has("env") ? props.get("env").asText(null) : null;
-		Integer tailResultSize = props.has("tailResultSize") ? props.get("tailResultSize").asInt(-1) : null;
+		Integer tailResultSize = props.has("tailResultSize") ? props.get("tailResultSize").asInt(-1) : -1;
 
 		File projectDir = (File) params[1];
 		File workingDir;

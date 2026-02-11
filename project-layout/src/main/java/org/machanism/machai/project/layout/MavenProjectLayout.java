@@ -203,8 +203,7 @@ public class MavenProjectLayout extends ProjectLayout {
 	@Override
 	public String getProjectId() {
 		Model model = getModel();
-		return StringUtils.defaultString(model.getGroupId()) + ":" + StringUtils.defaultString(model.getArtifactId())
-				+ ":" + StringUtils.defaultString(model.getVersion());
+		return model.getArtifactId();
 	}
 
 	@Override

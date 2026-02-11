@@ -38,6 +38,7 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
+import com.openai.errors.BadRequestException;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.embeddings.EmbeddingModel;
@@ -268,14 +269,24 @@ public class OpenAIProvider implements GenAIProvider {
 
 		logInputs();
 		logger.debug("Sending request to LLM service.");
-		Response response = getClient().responses().create(builder.build());
 
-		logUsage(response.usage());
+		try {
+			Response response = getClient().responses().create(builder.build());
+			logUsage(response.usage());
 
-		logger.debug("Received response from LLM service.");
+			logger.debug("Received response from LLM service.");
 
-		result = parseResponse(response);
-		clear();
+			result = parseResponse(response);
+			clear();
+
+		} catch (BadRequestException e) {
+			if (inputs.size() < 30) {
+				throw e;
+			} else {
+				logger.warn("Request inputs count: {}, LLM request processing terminated.", inputs.size());
+			}
+		}
+
 		return result;
 	}
 

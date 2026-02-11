@@ -257,8 +257,11 @@ public class GW extends AbstractMojo {
 			}
 
 			processor.scanDocuments(rootDir, scanDir);
-		} catch (IOException e) {
-			throw new MojoExecutionException("Document assistance process failed.", e);
+			
+		} catch (Exception e) {
+			getLog().error(e);
+			throw new MojoExecutionException("File processing failed.", e);
+			
 		} finally {
 			GenAIProviderManager.logUsage();
 			logger.info("File processing completed.");

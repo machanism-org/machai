@@ -478,7 +478,7 @@ public class FileProcessor extends ProjectProcessor {
 		List<String> documents = projectLayout.getDocuments();
 		List<String> modules = projectLayout.getModules();
 
-		content.add(projectLayout.getProjectName());
+		content.add(projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`": "not defined");
 		content.add(projectLayout.getProjectId());
 		content.add(".");
 		content.add(getDirInfoLine(sources, projectDir));
