@@ -234,7 +234,6 @@ public class FileProcessor extends ProjectProcessor {
 				if (isModuleMultiThread()) {
 					processModulesMultiThreaded(projectDir, modules);
 				} else {
-					logger.info("Multi-threaded processing mode disabled.");
 					for (String module : modules) {
 						processModule(projectDir, module);
 					}
