@@ -11,7 +11,6 @@ public class Usage {
 	private final long inputTokens;
 	private final long inputCachedTokens;
 	private final long outputTokens;
-	private final long reasoningTokens;
 
 	/**
 	 * Creates a usage record.
@@ -19,13 +18,11 @@ public class Usage {
 	 * @param inputTokens        number of input tokens
 	 * @param inputCachedTokens  number of cached input tokens (provider-specific)
 	 * @param outputTokens       number of output tokens
-	 * @param reasoningTokens    number of reasoning tokens (provider-specific)
 	 */
-	public Usage(long inputTokens, long inputCachedTokens, long outputTokens, long reasoningTokens) {
+	public Usage(long inputTokens, long inputCachedTokens, long outputTokens) {
 		this.inputTokens = inputTokens;
 		this.inputCachedTokens = inputCachedTokens;
 		this.outputTokens = outputTokens;
-		this.reasoningTokens = reasoningTokens;
 	}
 
 	/**
@@ -53,15 +50,6 @@ public class Usage {
 	 */
 	public long getOutputTokens() {
 		return outputTokens;
-	}
-
-	/**
-	 * Returns the number of reasoning tokens.
-	 *
-	 * @return reasoning token count
-	 */
-	public long getReasoningTokens() {
-		return reasoningTokens;
 	}
 
 }

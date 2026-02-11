@@ -98,17 +98,15 @@ public class GenAIProviderManager {
 			long inputTokens = 0;
 			long inputCachedTokens = 0;
 			long outputTokens = 0;
-			long reasoningTokens = 0;
 
 			for (Usage u : usages) {
 				inputTokens += u.getInputTokens();
 				inputCachedTokens += u.getInputCachedTokens();
 				outputTokens += u.getOutputTokens();
-				reasoningTokens += u.getReasoningTokens();
 			}
 
-			logger.info("GenAI token usage summary: Input = {}, Cached = {}, Output = {}, Reasoning = {}.", inputTokens,
-					inputCachedTokens, outputTokens, reasoningTokens);
+			logger.info("GenAI token usage summary: Input = {}, Cached = {}, Output = {}.", inputTokens,
+					inputCachedTokens, outputTokens);
 		} else {
 			logger.info("GenAI token usage information not found.");
 		}
