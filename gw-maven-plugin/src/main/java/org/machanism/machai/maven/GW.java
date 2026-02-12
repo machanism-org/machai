@@ -25,40 +25,64 @@ import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
  * Maven goal {@code gw:gw} for processing guided documents in a Maven project.
+ *
+ * <h2>Processing order</h2>
  * <p>
- * <strong>Processing order:</strong> This goal processes files in reverse order, similar to
- * the Ghostwriter CLI. Sub-modules are processed first, followed by parent modules.
- * For details, see: https://www.machanism.org/guided-file-processing/index.html
+ * This goal processes files in reverse order, similar to the Ghostwriter CLI. Sub-modules are processed first,
+ * followed by parent modules. For more details, see:
+ * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided file processing</a>.
  * </p>
  *
  * <h2>Parameters</h2>
+ * <p>
+ * This goal inherits common parameters from {@link AbstractGWGoal}. Those inherited parameters are also available when
+ * running {@code gw:gw}.
+ * </p>
  * <ul>
- * <li>{@code -Dgw.threads} (default {@code true}) - Enables/disables multi-threaded processing
- * of module documents.</li>
+ * <li>
+ * {@code -Dgw.threads} (default {@code true})
+ * <ul>
+ * <li><strong>Type:</strong> boolean</li>
+ * <li><strong>Description:</strong> Enables or disables multi-threaded module processing.</li>
+ * </ul>
+ * </li>
  * </ul>
  *
  * <h2>Usage</h2>
  *
  * <h3>Run with defaults</h3>
+ *
  * <pre>
  * mvn gw:gw
  * </pre>
  *
  * <h3>Disable multi-threaded module processing</h3>
+ *
  * <pre>
  * mvn gw:gw -Dgw.threads=false
  * </pre>
  *
- * <p>
- * See {@link AbstractGWGoal} for additional shared configuration, parameters, and behavior.
- * </p>
+ * <h3>Typical configuration in {@code pom.xml}</h3>
+ *
+ * <pre>{@code
+ * <plugin>
+ *   <groupId>org.machanism</groupId>
+ *   <artifactId>gw-maven-plugin</artifactId>
+ *   <version>${gw-maven-plugin.version}</version>
+ *   <executions>
+ *     <execution>
+ *       <goals>
+ *         <goal>gw</goal>
+ *       </goals>
+ *     </execution>
+ *   </executions>
+ * </plugin>
+ * }</pre>
  */
 @Mojo(name = "gw", threadSafe = true, aggregator = true)
 public class GW extends AbstractGWGoal {
 
-	/**
-	 * Enables/disables multi-threaded document processing.
-	 */
+	/** Enables or disables multi-threaded module processing. */
 	@Parameter(property = "gw.threads", defaultValue = "true")
 	private boolean threads;
 

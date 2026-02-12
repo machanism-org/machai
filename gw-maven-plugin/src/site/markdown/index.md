@@ -45,35 +45,35 @@ Ensure that your content generation and documentation efforts consider the full 
 
 ## Introduction
 
-GW Maven Plugin (Ghostwriter Maven Plugin) is a Maven plugin that automates keeping repository content—especially documentation—accurate and consistent by running a Ghostwriter workflow during your Maven build.
+GW Maven Plugin (Ghostwriter Maven Plugin) is a Maven plugin that integrates Ghostwriter guided file processing into your build so documentation and other repository content stays accurate as your code evolves.
 
-It scans a configurable directory (commonly `src\\site`) for project files (Markdown, source, and other artifacts) that contain embedded `@guidance` blocks and other instructions. Those inputs are provided to a configured GenAI provider/model, which synthesizes updates and writes the resulting changes back to your working tree.
+It scans a configurable directory (often `src\site`) for project files (Markdown, source, and other artifacts) that include embedded `@guidance` blocks and other instructions. Those inputs are then passed to the configured GenAI provider/model, which synthesizes updates and writes resulting changes back to the working tree.
 
 The plugin provides two goals:
 
 - `gw:std` — standard, per-module execution.
 - `gw:gw` — aggregator/reactor execution across all modules.
 
-From the implementation:
+Based on the implementation:
 
-- `StandardProcess` (`gw:std`) builds configuration, then processes the current module; when invoked at the reactor root it can optionally delay execution-root processing until all other reactor projects complete (`gw.rootProjectLast`).
+- `StandardProcess` (`gw:std`) builds configuration and processes the current module; when invoked at the reactor root it can optionally delay execution-root processing until all other reactor projects complete (`gw.rootProjectLast`).
 - `GW` (`gw:gw`) runs in aggregator mode, enriches each module’s Maven model from the reactor, supports multi-threaded module processing (`gw.threads`), and processes modules in reverse order (sub-modules first), matching Ghostwriter CLI behavior.
 
 ## Overview
 
-The GW Maven Plugin enhances documentation and repository maintenance workflows by integrating guided file processing into Maven:
+The GW Maven Plugin enhances documentation and repository maintenance workflows by integrating guidance-driven automation into Maven:
 
-- **Guidance-driven generation:** Embedded `@guidance` blocks act as localized requirements for what should be generated or updated.
-- **Repository-aware context:** Files are processed using a Maven project layout so the workflow can consider Maven metadata (module structure, POM model) alongside docs and sources.
+- **Guidance-driven generation:** Embedded `@guidance` blocks act as localized, file-scoped requirements for what should be generated or updated.
+- **Maven-aware context:** Processing runs with a Maven project layout so the workflow can consider module boundaries and POM metadata alongside docs and sources.
 - **Flexible execution modes:** Run on a single module with `gw:std`, or across a full multi-module reactor with `gw:gw`.
-- **Automatable in CI:** As a standard Maven plugin, it can run in CI pipelines to keep docs synchronized with code changes.
+- **CI-friendly:** As a standard Maven plugin, it can run in CI pipelines to keep docs synchronized with code changes.
 
 ## Key Features
 
 - Two goals: standard (`gw:std`) and aggregator/reactor (`gw:gw`) modes
-- Scans a configurable root (often `src\\site`) and respects exclude patterns
+- Scans a configurable root (often `src\site`) and respects exclude patterns
 - Consumes embedded `@guidance` from Markdown and other project files
-- Optional default guidance text and external instruction inputs
+- Supports default guidance text and external instruction inputs
 - Optional credential loading from Maven `settings.xml` via `gw.genai.serverId` (mapped to `GENAI_USERNAME` / `GENAI_PASSWORD`)
 - Optional logging of the exact input file set passed to the workflow (`gw.logInputs`)
 - Aggregator mode supports multi-threaded module processing (`gw.threads`) and reverse module order processing
@@ -109,9 +109,9 @@ mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai
 
 ### Typical Workflow
 
-1. Add or update project files (documentation under `src\\site\\markdown`, source code, etc.).
+1. Add or update project files (documentation under `src\site\markdown`, source code, etc.).
 2. Add or refine embedded `@guidance` blocks in the files you want Ghostwriter to maintain.
-3. Configure the plugin (in `pom.xml`) and/or pass system properties (for example `-Dgw.genai=...`).
+3. Configure the plugin in `pom.xml` and/or pass system properties (for example `-Dgw.genai=...`).
 4. (Optional) Add GenAI credentials to Maven `settings.xml` and reference them via `-Dgw.genai.serverId=...`.
 5. Run `mvn gw:std` for a single module or `mvn gw:gw` for the full reactor.
 6. Review generated changes and commit them.
@@ -125,7 +125,7 @@ Common configuration parameters (via plugin `<configuration>` and/or system prop
 | `gw.genai` | Provider/model identifier forwarded to the workflow (for example `openai:gpt-4.1-mini`). | *(none)* |
 | `rootDir` | Maven module base directory. | `${basedir}` |
 | `gw.scanDir` | Scan root override (path to scan for documentation sources). | `${basedir}` |
-| `gw.instructions` | Instruction location(s) consumed by the workflow (for example a file path). | *(none)* |
+| `gw.instructions` | Instruction location(s) consumed by the workflow (for example a file path or URI). | *(none)* |
 | `gw.guidance` | Default guidance text forwarded to the workflow. | *(none)* |
 | `gw.excludes` | Exclude patterns/paths skipped during scanning. | *(none)* |
 | `gw.genai.serverId` | `settings.xml` `<server>` id used to load GenAI credentials (username/password). | *(none)* |
@@ -142,8 +142,8 @@ Example `pom.xml` configuration:
   <version>...</version>
   <configuration>
     <genai>openai:gpt-4.1-mini</genai>
-    <scanDir>${project.basedir}\\src\\site</scanDir>
-    <instructions>file:${project.basedir}\\src\\site\\instructions.md</instructions>
+    <scanDir>${project.basedir}\src\site</scanDir>
+    <instructions>file:${project.basedir}\src\site\instructions.md</instructions>
     <guidance>Write concise release notes.</guidance>
     <logInputs>false</logInputs>
   </configuration>

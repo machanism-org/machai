@@ -1,10 +1,10 @@
 /**
- * Maven plugin goals for running MachAI's generative-workflow (GW) guided document processing.
+ * Maven Mojos for running MachAI's generative-workflow (GW) guided document processing as Maven plugin goals.
  *
  * <p>
- * The mojos in this package scan documentation sources (for example, {@code src\site}) and pass
- * matching files to the MachAI GW {@code FileProcessor}. The plugin can be executed per-module
- * (see {@code gw:std}) or in aggregator mode across a full Maven reactor (see {@code gw:gw}).
+ * The goals in this package scan documentation sources (for example, {@code src\site}) and pass matching
+ * files to the MachAI GW {@link org.machanism.machai.gw.FileProcessor}. Configuration is provided via Maven
+ * plugin parameters (typically {@code -Dgw.*} system properties).
  * </p>
  *
  * <h2>Goals</h2>
