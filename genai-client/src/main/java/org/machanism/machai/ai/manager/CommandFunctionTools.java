@@ -90,7 +90,11 @@ public class CommandFunctionTools {
 		if (dir != null) {
 			workingDir = new File(dir);
 			if (!workingDir.isAbsolute()) {
-				workingDir = new File(projectDir, dir);
+				if (".".equals(dir)) {
+					workingDir = projectDir;
+				} else {
+					workingDir = new File(projectDir, dir);
+				}
 			} else {
 				return "Error: The specified working directory must be relative to the project path.";
 			}

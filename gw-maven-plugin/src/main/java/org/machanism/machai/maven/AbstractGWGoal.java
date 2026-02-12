@@ -113,7 +113,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * {@code settings.xml} {@code <server>} id used to read GenAI credentials.
 	 */
-	@Parameter(property = "gw.genai.serverId")
+	@Parameter(property = "gw.genai.serverId", required = false)
 	private String serverId;
 	/**
 	 * Whether to log the list of input files passed to the workflow.
