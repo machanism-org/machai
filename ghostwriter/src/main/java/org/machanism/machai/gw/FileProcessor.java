@@ -341,7 +341,8 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		if (match(projectDir) && children.isEmpty() && defaultGuidance != null) {
-			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), defaultGuidance);
+			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"),
+					defaultGuidance);
 			process(projectLayout, projectLayout.getProjectDir(), defaultGuidanceText);
 		}
 	}
@@ -429,7 +430,8 @@ public class FileProcessor extends ProjectProcessor {
 			valueMap.put("projectId", projectLayout.getProjectId());
 			valueMap.put("projectName", projectLayout.getProjectName());
 
-			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), instructions);
+			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
+					instructions);
 			String instructionsLines = parseLines(effectiveInstructions, valueMap);
 			provider.instructions(instructionsLines);
 
@@ -475,7 +477,8 @@ public class FileProcessor extends ProjectProcessor {
 		List<String> documents = projectLayout.getDocuments();
 		List<String> modules = projectLayout.getModules();
 
-		content.add(projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`" : "not defined");
+		content.add(
+				projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`" : "not defined");
 		content.add(projectLayout.getProjectId());
 		content.add(".");
 		content.add(getDirInfoLine(sources, projectDir));
@@ -591,22 +594,22 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private boolean shouldExcludePath(Path path) {
-		if (excludes == null || excludes.length == 0) {
-			return false;
-		}
+		if (path != null && excludes != null) {
 
-		for (String exclude : excludes) {
-			PathMatcher matcher = getPatternPath(exclude);
-			if (matcher != null) {
-				if (path != null && matcher.matches(path)) {
-					return true;
+			for (String exclude : excludes) {
+				PathMatcher matcher = getPatternPath(exclude);
+				if (matcher != null) {
+					if (matcher.matches(path)) {
+						return true;
+					}
+				} else {
+					String name = path.getFileName().toString();
+					if (Strings.CS.equals(name, exclude)) {
+						return true;
+					}
 				}
-				continue;
 			}
 
-			if (path != null && Strings.CS.equals(path.toString(), exclude)) {
-				return true;
-			}
 		}
 
 		return false;
@@ -621,14 +624,12 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private static PathMatcher getPatternPath(String path) {
-		if (StringUtils.isBlank(path)) {
-			return null;
-		}
-		if (isPathPattern(path)) {
-			return FileSystems.getDefault().getPathMatcher(path);
+		PathMatcher result = null;
+		if (StringUtils.isNotBlank(path) && isPathPattern(path)) {
+			result = FileSystems.getDefault().getPathMatcher(path);
 		}
 
-		return null;
+		return result;
 	}
 
 	/**
