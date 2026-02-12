@@ -1,131 +1,62 @@
 /**
- * Maven plugin goals (mojos) that integrate the MachAI Generative Workflow (GW) documentation pipeline into a Maven
- * build.
+ * Maven plugin goals for running MachAI's generative-workflow (GW) guided document processing.
  *
  * <p>
- * This package provides two goals:
+ * The mojos in this package scan documentation sources (for example, {@code src\site}) and pass
+ * matching files to the MachAI GW {@code FileProcessor}. The plugin can be executed per-module
+ * (see {@code gw:std}) or in aggregator mode across a full Maven reactor (see {@code gw:gw}).
  * </p>
+ *
+ * <h2>Goals</h2>
  * <ul>
- *   <li>
- *     {@link org.machanism.machai.maven.GW} (goal {@code gw}) &ndash; scans documentation sources (typically under
- *     {@code src/site}) for the current Maven reactor and invokes {@link org.machanism.machai.gw.FileProcessor} to
- *     process the discovered inputs.
- *   </li>
- *   <li>
- *     {@link org.machanism.machai.maven.Clean} (goal {@code clean}) &ndash; deletes temporary workflow files created
- *     during processing for the current Maven module.
- *   </li>
+ * <li>{@code gw:std} - Standard per-module scan/process goal.</li>
+ * <li>{@code gw:gw} - Aggregator goal that processes a reactor in reverse order (sub-modules first).</li>
+ * <li>{@code gw:clean} - Deletes temporary artifacts created by GW processing.</li>
  * </ul>
  *
- * <h2>Goal {@code gw} parameters</h2>
- * <p>
- * Parameters can be configured via {@code pom.xml} (plugin {@code &lt;configuration&gt;}) and/or via system properties.
- * Where applicable, the system property names are shown alongside each parameter.
- * </p>
- * <ul>
- *   <li>
- *     <b>{@code genai}</b> / <b>{@code gw.genai}</b> (optional): Provider/model identifier forwarded to the workflow
- *     (for example {@code OpenAI:gpt-5}).
- *   </li>
- *   <li>
- *     <b>{@code rootDir}</b> (implicit): The module base directory ({@code ${basedir}}) used as the primary scan
- *     context.
- *   </li>
- *   <li>
- *     <b>{@code scanDir}</b> (optional): Explicit scan root; when not set, defaults to {@code rootDir}.
- *   </li>
- *   <li>
- *     <b>{@code instructions}</b> / <b>{@code gw.instructions}</b> (optional): Instruction location string(s)
- *     consumed by the workflow.
- *   </li>
- *   <li>
- *     <b>{@code guidance}</b> / <b>{@code gw.guidance}</b> (optional): Default guidance text forwarded to the workflow.
- *   </li>
- *   <li>
- *     <b>{@code excludes}</b> / <b>{@code gw.excludes}</b> (optional): Exclude patterns/paths to skip during
- *     documentation scanning.
- *   </li>
- *   <li>
- *     <b>{@code serverId}</b> / <b>{@code gw.genai.serverId}</b> (optional): Maven {@code settings.xml}
- *     {@code &lt;server&gt;} id used to load GenAI credentials.
- *   </li>
- *   <li>
- *     <b>{@code threads}</b> / <b>{@code gw.threads}</b> (optional, default {@code true}): Enables or disables
- *     multi-threaded document processing.
- *   </li>
- *   <li>
- *     <b>{@code logInputs}</b> / <b>{@code gw.logInputs}</b> (optional, default {@code false}): Logs the list of input
- *     files provided to the workflow.
- *   </li>
- * </ul>
+ * <h2>Typical usage</h2>
+ * <pre>{@code
+ * mvn gw:std
+ * }</pre>
  *
- * <h2>Goal {@code clean} parameters</h2>
- * <ul>
- *   <li>
- *     <b>{@code rootDir}</b> (implicit): The module base directory ({@code ${basedir}}) used as the cleanup context.
- *   </li>
- * </ul>
- *
- * <h2>Credentials</h2>
- * <p>
- * GenAI credentials are loaded from Maven {@code settings.xml} using the {@code &lt;server&gt;} entry whose id is
- * provided by {@code gw.genai.serverId}. When present, credentials are exposed to the workflow as configuration
- * properties:
- * </p>
- * <ul>
- *   <li>{@code GENAI_USERNAME}</li>
- *   <li>{@code GENAI_PASSWORD}</li>
- * </ul>
- *
- * <h2>Usage examples</h2>
- * <p>Run from the command line:</p>
- * <pre>
- * mvn org.machanism.machai:gw-maven-plugin:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai
- * </pre>
- *
- * <p>Configure in {@code pom.xml}:</p>
- * <pre>
- * &amp;lt;plugin&amp;gt;
- *   &amp;lt;groupId&amp;gt;org.machanism.machai&amp;lt;/groupId&amp;gt;
- *   &amp;lt;artifactId&amp;gt;gw-maven-plugin&amp;lt;/artifactId&amp;gt;
- *   &amp;lt;version&amp;gt;${project.version}&amp;lt;/version&amp;gt;
- *   &amp;lt;configuration&amp;gt;
- *     &amp;lt;genai&amp;gt;OpenAI:gpt-5&amp;lt;/genai&amp;gt;
- *     &amp;lt;serverId&amp;gt;genai&amp;lt;/serverId&amp;gt;
- *     &amp;lt;threads&amp;gt;true&amp;lt;/threads&amp;gt;
- *     &amp;lt;instructions&amp;gt;
- *       &amp;lt;instruction&amp;gt;src/site/machai/instructions.md&amp;lt;/instruction&amp;gt;
- *     &amp;lt;/instructions&amp;gt;
- *     &amp;lt;excludes&amp;gt;
- *       &amp;lt;exclude&amp;gt;node_modules&amp;lt;/exclude&amp;gt;
- *     &amp;lt;/excludes&amp;gt;
- *   &amp;lt;/configuration&amp;gt;
- * &amp;lt;/plugin&amp;gt;
- * </pre>
+ * <h2>Reactor (aggregator) usage</h2>
+ * <pre>{@code
+ * mvn gw:gw
+ * }</pre>
  */
 package org.machanism.machai.maven;
 
 /*-
  * @guidance:
- * **IMPORTANT: UPDATE JAVADOC OF ALL JAVA CLASSES IN THE FOLDER AND THIS `package-info.java`!**
- *	
- * - All methods, classes, and fields must have Javadoc comments that clearly explain their purpose and usage.
+ *
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
+ *
+ * - Update Existing Javadoc and Add Missing Javadoc:
+ *      - Review all classes in the folder.
+ *      - Update any existing Javadoc to ensure it is accurate, comprehensive, and follows best practices.
+ *      - Add Javadoc to any classes, methods, or fields where it is missing.
+ *      - Ensure that all Javadoc is up-to-date and provides clear, meaningful documentation.
  * - Use Clear and Concise Descriptions:
- * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
- * 		- Avoid vague statements; be specific about functionality and intent.
+ *      - Write meaningful summaries that explain the purpose, behavior, and usage of each element.
+ *      - Avoid vague statements; be specific about functionality and intent.
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
  *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
+ * - Include Usage Examples Where Helpful:
+ *      - Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * - Maintain Consistency and Formatting:
- * 		- Follow a consistent style and structure for all Javadoc comments.
+ *      - Follow a consistent style and structure for all Javadoc comments.
+ *      - Use proper Markdown or HTML formatting for readability.
  * - Add Javadoc:
- *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
- *          methods, and fields, adhering to established best practices.
- *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
- *          and any exceptions thrown.
- *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc. 
- *          Ensure that the code is properly escaped and formatted for Javadoc.  *     - Generate javadoc with a description all maven plugin parameters and examples of usage. 
- * - **Use the Java version specified in the project's `pom.xml` for all test code and configuration.**
-*/
+ *      - Review the Java class source code and include comprehensive Javadoc comments for all classes,
+ *           methods, and fields, adhering to established best practices.
+ *      - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
+ *           and any exceptions thrown.
+ *      - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;`
+ *           and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc.
+ * - Use the Java Version Defined in `pom.xml`:
+ *      - All code improvements and Javadoc updates must be compatible with the Java version `maven.compiler.release` specified in the project's `pom.xml`.
+ *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
+ */

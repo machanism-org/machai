@@ -25,36 +25,33 @@
 
 ## Project Title and Overview
 
-GW Maven Plugin ("Ghostwriter Maven Plugin") is a documentation automation plugin for Maven-based Java projects. It scans documentation sources (typically under `src\site`) and runs them through the MachAI Generative Workflow (GW) pipeline to generate or update project documentation from embedded guidance tags and project context.
+GW Maven Plugin (Ghostwriter Maven Plugin) is a Maven plugin that automates keeping repository content—especially documentation—accurate and consistent by running a Ghostwriter workflow during your Maven build.
 
-Key features:
+It scans a configurable directory (commonly `src\\site`) for project files (Markdown, source, and other artifacts) that contain embedded `@guidance` blocks and other instructions. Those inputs are provided to a configured GenAI provider/model, which synthesizes updates and writes the resulting changes back to your working tree.
 
-- Maven goals to run the MachAI GW documentation pipeline from your build
-- Scans documentation sources (commonly `src\site`) with an optional scan root override
-- Supports additional instructions and default guidance to control output style/content
-- Supports exclude patterns for skipping directories/files during scanning
-- Can load GenAI credentials from Maven `settings.xml` via a `<server>` id
-- Aggregator execution for reactor builds, with optional multi-threading
-- Optional logging of the input file set passed to the workflow
+The plugin provides two goals:
+
+- `gw:std` — standard, per-module execution.
+- `gw:gw` — aggregator/reactor execution across all modules.
 
 ## Installation Instructions
 
 ### Prerequisites
 
 - Git
-- Java 11+ (project compiles with `maven.compiler.release=11`)
-- Maven 3.x
+- Java 11+ (this module compiles with `maven.compiler.release=11`)
+- Apache Maven 3.x
 
 ### Checkout
 
-```bat
+```cmd
 git clone https://github.com/machanism-org/machai.git
 cd machai
 ```
 
 ### Build
 
-```bat
+```cmd
 mvn -U clean install
 ```
 
@@ -74,22 +71,22 @@ Add the plugin to your project `pom.xml`:
 
 ### Run the plugin
 
-Aggregator (reactor) goal:
-
-```bat
-mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.genai=OpenAI:gpt-5
-```
-
 Standard (single-module) goal:
 
-```bat
-mvn gw:std -Dgw.genai=OpenAI:gpt-5
+```cmd
+mvn gw:std -Dgw.genai=openai:gpt-4.1-mini
+```
+
+Aggregator (reactor) goal:
+
+```cmd
+mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini
 ```
 
 If credentials are stored in Maven `settings.xml`:
 
-```bat
-mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai
+```cmd
+mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai
 ```
 
 ### Configuration example
@@ -100,11 +97,11 @@ mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.gen
   <artifactId>gw-maven-plugin</artifactId>
   <version>REPLACE_WITH_LATEST_VERSION</version>
   <configuration>
-    <scanDir>${basedir}</scanDir>
+    <scanDir>${project.basedir}\\src\\site</scanDir>
     <excludes>
       <exclude>**\\.machai\\**</exclude>
     </excludes>
-    <genai>OpenAI:gpt-5</genai>
+    <genai>openai:gpt-4.1-mini</genai>
     <serverId>genai</serverId>
     <threads>true</threads>
     <logInputs>false</logInputs>
@@ -114,15 +111,15 @@ mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.gen
 
 Command-line override example:
 
-```bat
-mvn org.machanism.machai:gw-maven-plugin:REPLACE_WITH_LATEST_VERSION:gw -Dgw.genai=OpenAI:gpt-5 -Dgw.genai.serverId=genai -Dgw.logInputs=true
+```cmd
+mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai -Dgw.logInputs=true
 ```
 
 ### Typical workflow
 
-1. Add and/or update documentation sources under `src\site` (for example, `src\site\markdown`).
-2. Add embedded guidance tags in your documentation sources.
-3. (Optional) Provide shared instructions and/or default guidance.
-4. Configure credentials in Maven `settings.xml` and reference them via `gw.genai.serverId` if needed.
-5. Run `mvn org.machanism.machai:gw-maven-plugin:gw` (reactor) or `mvn gw:std` (single module).
-6. Review generated/updated documentation artifacts and commit changes.
+1. Add or update project files (documentation under `src\\site\\markdown`, source code, etc.).
+2. Add or refine embedded `@guidance` blocks in the files you want Ghostwriter to maintain.
+3. Configure the plugin (in `pom.xml`) and/or pass system properties (for example `-Dgw.genai=...`).
+4. (Optional) Configure GenAI credentials in Maven `settings.xml` and reference them via `gw.genai.serverId`.
+5. Run `mvn gw:std` (single module) or `mvn gw:gw` (reactor/aggregator).
+6. Review generated changes and commit them.
