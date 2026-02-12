@@ -55,13 +55,13 @@ public class JavaReviewer implements Reviewer {
 				Matcher matcher = pattern.matcher(content);
 				if (matcher.find()) {
 					if (Strings.CS.equals(guidancesFile.getName(), "package-info.java")) {
-						String relatedFilePath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
+						String relatedFilePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
 						result = MessageFormat.format(promptBundle.getString("java_package_info_file"),
 								relatedFilePath);
 					} else {
-						String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
+						String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
 						String name = guidancesFile.getName();
-						result = MessageFormat.format(promptBundle.getString("java_file"), name, relatedPath, content);
+						result = MessageFormat.format(promptBundle.getString("java_file"), name, relativePath, content);
 					}
 				}
 			}

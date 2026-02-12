@@ -100,8 +100,8 @@ public class FileFunctionTools {
 		StringBuilder content = new StringBuilder();
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
-				String relatedPath = ProjectLayout.getRelatedPath(workingDir, file, true);
-				content.append(relatedPath).append("\n");
+				String relativePath = ProjectLayout.getRelativePath(workingDir, file, true);
+				content.append(relativePath).append("\n");
 			}
 		} else {
 			content.append("No files found in directory.");
@@ -135,8 +135,8 @@ public class FileFunctionTools {
 			List<String> result = new ArrayList<>();
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					String relatedPath = ProjectLayout.getRelatedPath(workingDir, file);
-					result.add(relatedPath);
+					String relativePath = ProjectLayout.getRelativePath(workingDir, file);
+					result.add(relativePath);
 				}
 
 				return StringUtils.join(result, ",");

@@ -9,42 +9,42 @@ import org.junit.jupiter.api.Test;
 class ProjectLayoutTest {
 
 	@Test
-	void getRelatedPath_static_shouldReturnDotWhenSameDirectory() {
+	void getRelativePath_static_shouldReturnDotWhenSameDirectory() {
 		// Arrange
 		File dir = new File("C:\\work");
 		File file = new File("C:\\work");
 
 		// Act
-		String relatedPath = ProjectLayout.getRelatedPath(dir, file);
+		String relativePath = ProjectLayout.getRelativePath(dir, file);
 
 		// Assert
-		assertEquals(".", relatedPath);
+		assertEquals(".", relativePath);
 	}
 
 	@Test
-	void getRelatedPath_static_shouldPrependDotSlashWhenRequestedAndNotAlreadyDotted() {
+	void getRelativePath_static_shouldPrependDotSlashWhenRequestedAndNotAlreadyDotted() {
 		// Arrange
 		File dir = new File("C:\\work");
 		File file = new File("C:\\work\\module");
 
 		// Act
-		String relatedPath = ProjectLayout.getRelatedPath(dir, file, true);
+		String relativePath = ProjectLayout.getRelativePath(dir, file, true);
 
 		// Assert
-		assertEquals("./module", relatedPath);
+		assertEquals("./module", relativePath);
 	}
 
 	@Test
-	void getRelatedPath_static_shouldReturnNullWhenFileIsNotUnderDir() {
+	void getRelativePath_static_shouldReturnNullWhenFileIsNotUnderDir() {
 		// Arrange
 		File dir = new File("C:\\work");
 		File file = new File("D:\\other\\file.txt");
 
 		// Act
-		String relatedPath = ProjectLayout.getRelatedPath(dir, file, false);
+		String relativePath = ProjectLayout.getRelativePath(dir, file, false);
 
 		// Assert
-		assertNull(relatedPath);
+		assertNull(relativePath);
 	}
 
 	@Test

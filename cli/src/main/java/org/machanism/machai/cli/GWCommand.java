@@ -66,8 +66,8 @@ public class GWCommand {
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 		scan = Optional.ofNullable(scan).orElse(dir);
 
-		String relatedPath = ProjectLayout.getRelatedPath(dir, scan);
-		if (relatedPath == null) {
+		String relativePath = ProjectLayout.getRelativePath(dir, scan);
+		if (relativePath == null) {
 			logger.warn(
 					"The starting document scan directory: `{}` is not located within the root directory or the current directory path: `{}`",
 					scan, dir);

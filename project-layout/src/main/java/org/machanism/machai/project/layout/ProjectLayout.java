@@ -73,7 +73,7 @@ public abstract class ProjectLayout {
 	 * @param file     Target file
 	 * @return Relative path (string)
 	 */
-	public String getRelatedPath(String basePath, File file) {
+	public String getRelativePath(String basePath, File file) {
 		String relativePath = file.getAbsolutePath().replace("\\", "/").replace(basePath.replace("\\", "/"), "");
 		if (Strings.CS.startsWith(relativePath, "/")) {
 			relativePath = StringUtils.substring(relativePath, 1);
@@ -96,8 +96,8 @@ public abstract class ProjectLayout {
 	 */
 	public abstract List<String> getTests();
 
-	public static String getRelatedPath(File dir, File file) {
-		return getRelatedPath(dir, file, false);
+	public static String getRelativePath(File dir, File file) {
+		return getRelativePath(dir, file, false);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public abstract class ProjectLayout {
 	 * @param addSingleDot If true, prefix with "./" if needed
 	 * @return Relative path string
 	 */
-	public static String getRelatedPath(File dir, File file, boolean addSingleDot) {
+	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		String currentPath = dir.getAbsolutePath().replace("\\", "/");
 		String fileStr = file.getAbsolutePath().replace("\\", "/");
 		String relativePath = fileStr.replace(currentPath, "");

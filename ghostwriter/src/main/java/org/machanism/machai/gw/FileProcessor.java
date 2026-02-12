@@ -205,9 +205,9 @@ public class FileProcessor extends ProjectProcessor {
 		if (!Strings.CS.equals(rootDir.getAbsolutePath(), scanDir)) {
 			if (!isPathPattern(scanDir)) {
 				this.scanDir = new File(scanDir);
-				String relatedPath = ProjectLayout.getRelatedPath(rootDir, new File(scanDir));
+				String relativePath = ProjectLayout.getRelativePath(rootDir, new File(scanDir));
 
-				scanDir = "glob:" + relatedPath + "{,/**}";
+				scanDir = "glob:" + relativePath + "{,/**}";
 			}
 
 			this.pathMatcher = FileSystems.getDefault().getPathMatcher(scanDir);
@@ -299,7 +299,7 @@ public class FileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		String path = ProjectLayout.getRelatedPath(rootDir, file);
+		String path = ProjectLayout.getRelativePath(rootDir, file);
 		if (pathMatcher == null) {
 			return true;
 		}
@@ -308,10 +308,10 @@ public class FileProcessor extends ProjectProcessor {
 		boolean result = pathMatcher.matches(pathToMatch);
 
 		if (!result && scanDir != null) {
-			String relatedPath = ProjectLayout.getRelatedPath(file, scanDir);
-			if (relatedPath != null) {
-				Path scanFilePath = scanDir.toPath().resolve(relatedPath);
-				String relatedToRoot = ProjectLayout.getRelatedPath(rootDir, scanFilePath.toFile());
+			String relativePath = ProjectLayout.getRelativePath(file, scanDir);
+			if (relativePath != null) {
+				Path scanFilePath = scanDir.toPath().resolve(relativePath);
+				String relatedToRoot = ProjectLayout.getRelativePath(rootDir, scanFilePath.toFile());
 				result = relatedToRoot != null && pathMatcher.matches(Path.of(relatedToRoot));
 			}
 		}
@@ -352,9 +352,9 @@ public class FileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		String relatedPath = ProjectLayout.getRelatedPath(projectLayout.getProjectDir(), dir);
+		String relativePath = ProjectLayout.getRelativePath(projectLayout.getProjectDir(), dir);
 
-		return Strings.CI.startsWithAny(relatedPath, modules.toArray(new String[0]));
+		return Strings.CI.startsWithAny(relativePath, modules.toArray(new String[0]));
 	}
 
 	private static void logIfNotBlank(String message) {
@@ -448,7 +448,7 @@ public class FileProcessor extends ProjectProcessor {
 			provider.prompt(promptBundle.getString("output_format"));
 
 			if (isLogInputs()) {
-				String inputsFileName = ProjectLayout.getRelatedPath(rootDir, file);
+				String inputsFileName = ProjectLayout.getRelativePath(rootDir, file);
 				File docsTempDir = new File(rootDir, MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
 				File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 				File parentDir = inputsFile.getParentFile();
@@ -543,7 +543,7 @@ public class FileProcessor extends ProjectProcessor {
 		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 
 		for (File file : files) {
-			String path = ProjectLayout.getRelatedPath(projectDir, file);
+			String path = ProjectLayout.getRelativePath(projectDir, file);
 
 			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(Path.of(path))) {
 				continue;
@@ -574,9 +574,9 @@ public class FileProcessor extends ProjectProcessor {
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
 			String name = file.getName();
-			Path relatedPath = Path.of(ProjectLayout.getRelatedPath(rootDir, file));
+			Path relativePath = Path.of(ProjectLayout.getRelativePath(rootDir, file));
 
-			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(relatedPath)) {
+			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(relativePath)) {
 				continue;
 			}
 			if (file.isDirectory()) {

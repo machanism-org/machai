@@ -53,9 +53,9 @@ public class TypeScriptReviewer implements Reviewer {
 			if (matcher.find()) {
 				String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
 				if (guidanceText != null) {
-					String relatedPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile);
+					String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
 					String name = guidancesFile.getName();
-					result = MessageFormat.format(promptBundle.getString("typescript_file"), name, relatedPath,
+					result = MessageFormat.format(promptBundle.getString("typescript_file"), name, relativePath,
 							guidanceText.trim());
 				}
 			}

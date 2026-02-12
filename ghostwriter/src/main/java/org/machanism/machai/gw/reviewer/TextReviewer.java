@@ -62,7 +62,7 @@ public class TextReviewer implements Reviewer {
 	 */
 	public String getPrompt(File projectDir, File guidancesFile, String guidance) {
 		if (StringUtils.isNotBlank(guidance)) {
-			String parentsPath = ProjectLayout.getRelatedPath(projectDir, guidancesFile.getParentFile());
+			String parentsPath = ProjectLayout.getRelativePath(projectDir, guidancesFile.getParentFile());
 			guidance = MessageFormat.format(promptBundle.getString("guidance_file"), parentsPath, guidance);
 		}
 		return guidance;

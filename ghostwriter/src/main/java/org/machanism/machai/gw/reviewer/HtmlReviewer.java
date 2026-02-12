@@ -51,7 +51,7 @@ public class HtmlReviewer implements Reviewer {
 		String result = null;
 		if (matcher.find()) {
 			result = MessageFormat.format(promptBundle.getString("html_file"), guidancesFile.getName(),
-					ProjectLayout.getRelatedPath(projectDir, guidancesFile), content);
+					ProjectLayout.getRelativePath(projectDir, guidancesFile), content);
 		}
 
 		return result;

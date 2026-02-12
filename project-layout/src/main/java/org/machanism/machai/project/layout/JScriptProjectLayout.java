@@ -83,7 +83,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 							return false;
 						}).forEach(p -> {
 							File dir = p.toFile().getParentFile();
-							String relativePath = ProjectLayout.getRelatedPath(getProjectDir(), dir);
+							String relativePath = ProjectLayout.getRelativePath(getProjectDir(), dir);
 							modules.add(relativePath);
 						});
 					} catch (IOException e) {

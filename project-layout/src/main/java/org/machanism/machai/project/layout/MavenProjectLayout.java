@@ -149,11 +149,11 @@ public class MavenProjectLayout extends ProjectLayout {
 
 		String sourceDirectory = build.getSourceDirectory();
 		if (sourceDirectory != null) {
-			sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(sourceDirectory)));
+			sources.add(ProjectLayout.getRelativePath(getProjectDir(), new File(sourceDirectory)));
 		}
 		if (build.getResources() != null) {
 			sources.addAll(build.getResources().stream().map(r -> r.getDirectory())
-					.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p)))
+					.map(p -> ProjectLayout.getRelativePath(getProjectDir(), new File(p)))
 					.collect(Collectors.toList()));
 		}
 		return sources;
@@ -184,11 +184,11 @@ public class MavenProjectLayout extends ProjectLayout {
 		Build build = model.getBuild();
 		if (build != null) {
 			if (build.getTestSourceDirectory() != null) {
-				sources.add(ProjectLayout.getRelatedPath(getProjectDir(), new File(build.getTestSourceDirectory())));
+				sources.add(ProjectLayout.getRelativePath(getProjectDir(), new File(build.getTestSourceDirectory())));
 			}
 			if (build.getTestResources() != null) {
 				sources.addAll(build.getTestResources().stream().map(r -> r.getDirectory())
-						.map(p -> ProjectLayout.getRelatedPath(getProjectDir(), new File(p)))
+						.map(p -> ProjectLayout.getRelativePath(getProjectDir(), new File(p)))
 						.collect(Collectors.toList()));
 			}
 		}

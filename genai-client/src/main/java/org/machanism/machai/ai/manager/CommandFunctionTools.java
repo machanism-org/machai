@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -91,7 +90,7 @@ public class CommandFunctionTools {
 			if (!workingDir.isAbsolute()) {
 				workingDir = new File(projectDir, dir);
 			} else {
-				return "Error: The requested working directory should be related from project path.";
+				return "Error: The specified working directory must be relative to the project path.";
 			}
 
 		} else {
