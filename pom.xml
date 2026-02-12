@@ -131,11 +131,6 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.17</version>
 		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.5.6</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -186,6 +181,7 @@
 					<configuration>
 						<genai>CodeMie:gpt-5-2-2025-12-11</genai>
 						<serverId>CodeMie</serverId>
+						<logInputs>true</logInputs>
 						<excludes>
 							<exclude>logs</exclude>
 						</excludes>
