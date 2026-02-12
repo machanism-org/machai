@@ -143,7 +143,7 @@ Example `pom.xml` configuration:
   <configuration>
     <genai>openai:gpt-4.1-mini</genai>
     <scanDir>${project.basedir}\\src\\site</scanDir>
-    <instructions>${project.basedir}\\src\\site\\instructions.md</instructions>
+    <instructions>file:${project.basedir}\\src\\site\\instructions.md</instructions>
     <guidance>Write concise release notes.</guidance>
     <logInputs>false</logInputs>
   </configuration>
