@@ -1,5 +1,10 @@
 package org.machanism.machai.gw;
 
+/*@guidance: 
+FileProcessor does not support dependency resolution during project processing. 
+It processes projects using a child-first approach only.
+*/
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -69,6 +74,9 @@ import org.slf4j.LoggerFactory;
  * </ol>
  */
 public class FileProcessor extends ProjectProcessor {
+
+	public static final String NOT_DEFINED = "not defined";
+
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(FileProcessor.class);
 
@@ -426,13 +434,12 @@ public class FileProcessor extends ProjectProcessor {
 			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
 
-			HashMap<String, String> valueMap = new HashMap<>();
-			valueMap.put("projectId", projectLayout.getProjectId());
-			valueMap.put("projectName", projectLayout.getProjectName());
+			HashMap<String, String> props = getProperties(projectLayout);
 
 			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
 					instructions);
-			String instructionsLines = parseLines(effectiveInstructions, valueMap);
+
+			String instructionsLines = parseLines(effectiveInstructions, props);
 			provider.instructions(instructionsLines);
 
 			String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
@@ -443,8 +450,7 @@ public class FileProcessor extends ProjectProcessor {
 			String projectInfo = getProjectStructureDescription(projectLayout);
 			provider.prompt(projectInfo);
 
-			String guidanceLines = parseLines(guidance, valueMap);
-
+			String guidanceLines = parseLines(guidance, props);
 			provider.prompt(guidanceLines);
 
 			provider.prompt(promptBundle.getString("output_format"));
@@ -467,6 +473,14 @@ public class FileProcessor extends ProjectProcessor {
 		return perform;
 	}
 
+	private HashMap<String, String> getProperties(ProjectLayout projectLayout) {
+		HashMap<String, String> valueMap = new HashMap<>();
+		valueMap.put("projectId", projectLayout.getProjectId());
+		valueMap.put("projectName", projectLayout.getProjectName());
+		valueMap.put("parentId", projectLayout.getParentProjectId());
+		return valueMap;
+	}
+
 	private String getProjectStructureDescription(ProjectLayout projectLayout) throws IOException {
 		List<String> content = new ArrayList<>();
 
@@ -477,8 +491,7 @@ public class FileProcessor extends ProjectProcessor {
 		List<String> documents = projectLayout.getDocuments();
 		List<String> modules = projectLayout.getModules();
 
-		content.add(
-				projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`" : "not defined");
+		content.add(projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`" : NOT_DEFINED);
 		content.add(projectLayout.getProjectId());
 		content.add(".");
 		content.add(projectLayout.getProjectLayoutType());
@@ -500,7 +513,7 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		if (StringUtils.isBlank(line)) {
-			line = "not defined";
+			line = NOT_DEFINED;
 		}
 		return line;
 	}

@@ -21,122 +21,54 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *   - The `gw:gw` goal processes files in reverse order, similar to the Ghostwriter CLI.
  *   - Sub-modules are processed first, followed by parent modules.
  *   - For more details, see: https://www.machanism.org/guided-file-processing/index.html 
- * 
- * Example of usage without project pom.xml file:
- * 
- * ```batch
- * @echo off
- * 
- * :: Set the project home directory variable
- * SET PROJECT_HOME=...
- * 
- * SET PARAMS=^
- *  -Dgw.genai=CodeMie:gpt-5-2-2025-12-11^
- *  -Dgw.scanDir=glob:.^
- *  -Dgw.guidance=file:%PROJECT_HOME%\guidance.txt^
- *  -Dgw.instructions=file:%PROJECT_HOME%\instructions.txt^
- *  -Dgw.logInputs=true^
- * 
- * call mvn %PARAMS%^
- *  -DGENAI_USERNAME=...^
- *  -DGENAI_PASSWORD=...^
- *  org.machanism.machai:gw-maven-plugin:0.0.9:gw
- * ```
+ *   - It can be run without pom.xml.
  */
 
 /**
- * Maven goal {@code gw:gw} for processing guided documents in a Maven project.
+ * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a project.
+ * <p>
+ * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present
+ * in the current directory.
+ * </p>
  *
  * <h2>Processing order</h2>
  * <p>
- * This goal processes files in reverse order, similar to the Ghostwriter CLI.
- * Sub-modules are processed first, followed by parent modules. For more details,
- * see:
- * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided file
- * processing</a>.
+ * The {@code gw:gw} goal processes files in reverse order, similar to the Ghostwriter CLI.
+ * Sub-modules are processed first, followed by parent modules.
+ * For more details, see:
+ * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided file processing</a>.
  * </p>
  *
  * <h2>Parameters</h2>
  * <p>
- * This goal supports all parameters defined by {@link AbstractGWGoal}, plus the
- * additional parameter defined below.
+ * This goal defines the following parameters in addition to those inherited from
+ * {@link AbstractGWGoal}:
  * </p>
- *
- * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
- * <p>
- * The following parameters are inherited from {@link AbstractGWGoal} and are
- * available when running {@code gw:gw}. Refer to {@link AbstractGWGoal} for the
- * complete list and semantics.
- * </p>
- *
- * <h3>Goal-specific parameters</h3>
  * <ul>
- * <li><strong>{@code gw.threads}</strong> (type: {@code boolean}, default:
- * {@code true})
- * <ul>
- * <li><strong>Description:</strong> Enables or disables multi-threaded module
- * processing.</li>
- * </ul>
+ * <li>
+ * {@code -Dgw.threads} ({@link #threads}): Enables or disables multi-threaded module processing.
+ * Default: {@code false}.
  * </li>
  * </ul>
  *
- * <h2>Usage</h2>
- *
- * <h3>Run with defaults</h3>
- *
+ * <h2>Usage examples</h2>
  * <pre>
  * mvn gw:gw
  * </pre>
- *
- * <h3>Disable multi-threaded module processing</h3>
  *
  * <pre>
  * mvn gw:gw -Dgw.threads=false
  * </pre>
  *
- * <h3>Typical configuration in {@code pom.xml}</h3>
- *
- * <pre>{@code
- * <plugin>
- *   <groupId>org.machanism</groupId>
- *   <artifactId>gw-maven-plugin</artifactId>
- *   <version>${gw-maven-plugin.version}</version>
- *   <executions>
- *     <execution>
- *       <goals>
- *         <goal>gw</goal>
- *       </goals>
- *     </execution>
- *   </executions>
- * </plugin>
- * }</pre>
- *
- * <h3>Usage without a project {@code pom.xml}</h3>
- *
- * <pre>{@code
- * @echo off
- *
- * :: Set the project home directory variable
- * SET PROJECT_HOME=...
- *
- * SET PARAMS=^
- *  -Dgw.genai=CodeMie:gpt-5-2-2025-12-11^
- *  -Dgw.scanDir=glob:.^
- *  -Dgw.guidance=file:%PROJECT_HOME%\guidance.txt^
- *  -Dgw.instructions=file:%PROJECT_HOME%\instructions.txt^
- *  -Dgw.logInputs=true^
- *
- * call mvn %PARAMS%^
- *  -DGENAI_USERNAME=...^
- *  -DGENAI_PASSWORD=...^
- *  org.machanism.machai:gw-maven-plugin:0.0.9:gw
- * }</pre>
+ * <p>
+ * See {@link AbstractGWGoal} for additional shared parameters and behavior.
+ * </p>
  */
 @Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false)
 public class GW extends AbstractGWGoal {
 
 	/** Enables or disables multi-threaded module processing. */
-	@Parameter(property = "gw.threads", defaultValue = "true")
+	@Parameter(property = "gw.threads", defaultValue = "false")
 	private boolean threads;
 
 	@Override

@@ -1,34 +1,38 @@
 /**
- * Maven plugin goals (Mojos) for running MachAI's generative-workflow (GW) guided document processing.
+ * Maven plugin goals (Mojos) for running MachAI's guided file processing (GW) from within Maven builds.
  *
  * <p>
- * This package contains the Maven {@code Mojo} implementations that:
- * </p>
- * <ul>
- *   <li>scan documentation sources (for example, {@code src\site}),</li>
- *   <li>select files based on the plugin configuration, and</li>
- *   <li>invoke the MachAI GW processing pipeline via {@link org.machanism.machai.gw.FileProcessor}.</li>
- * </ul>
- *
- * <p>
- * Configuration is typically supplied using Maven plugin parameters (often via {@code -Dgw.*} system properties)
- * or POM configuration.
+ * The goals in this package locate documentation sources (for example, {@code src\site}), optionally apply
+ * include/exclude configuration, and invoke the GW processing pipeline via
+ * {@link org.machanism.machai.gw.FileProcessor}.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
- *   <li>{@code gw:std} - Standard per-module scan and process goal.</li>
- *   <li>{@code gw:gw} - Aggregator goal that processes a reactor build in reverse order (sub-modules first).</li>
- *   <li>{@code gw:clean} - Deletes temporary artifacts created by GW processing.</li>
+ *   <li>
+ *     {@code gw:gw} - Aggregator goal that can run without a {@code pom.xml} and processes a reactor build in reverse
+ *     order (sub-modules first, then parent modules).
+ *   </li>
+ *   <li>
+ *     {@code gw:mod} - Processes Maven reactor modules following standard Maven reactor dependency ordering.
+ *   </li>
+ *   <li>
+ *     {@code gw:clean} - Deletes temporary artifacts created by GW processing.
+ *   </li>
  * </ul>
+ *
+ * <h2>Configuration</h2>
+ * <p>
+ * Parameters are provided via standard Maven plugin configuration and/or system properties (typically {@code -Dgw.*}).
+ * Shared parameters and scanning behavior are defined by {@link org.machanism.machai.maven.AbstractGWGoal}.
+ * </p>
  *
  * <h2>Examples</h2>
  * <pre>{@code
- * mvn gw:std
- * }</pre>
- *
- * <pre>{@code
  * mvn gw:gw
+ * }</pre>
+ * <pre>{@code
+ * mvn gw:mod -Dgw.scanDir=src\site
  * }</pre>
  */
 package org.machanism.machai.maven;

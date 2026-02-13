@@ -10,7 +10,6 @@ import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.model.DomainObjectSet;
 import org.gradle.tooling.model.GradleProject;
-import org.gradle.tooling.model.ProjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

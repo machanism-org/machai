@@ -25,12 +25,12 @@
 
 GW Maven Plugin (Ghostwriter Maven Plugin) integrates Ghostwriter guided file processing into Maven so documentation and other repository content stays accurate as your code evolves.
 
-The plugin scans project files (for example, documentation under `src\\site`) for embedded `@guidance` blocks and other instructions, invokes the configured GenAI provider/model to synthesize updates, and writes the resulting changes back to the working tree.
+It scans project files (including source code, documentation, and project site content under `src\\site`) for embedded `@guidance` blocks and other instructions, invokes the configured GenAI provider/model to synthesize updates, and writes the resulting changes back to the working tree.
 
-It provides two goals:
+The plugin provides two goals:
 
-- `gw:std` — standard, per-module execution.
-- `gw:gw` — aggregator/reactor execution across all modules.
+- `gw:mod` — processes documents across a multi-module (reactor) build using standard Maven reactor ordering (optionally deferring the execution-root module via `gw.rootProjectLast`).
+- `gw:gw` — aggregator/reactor execution across all modules, with Maven-model enrichment, optional multi-threaded processing (`gw.threads`), and reverse module order processing (sub-modules first), matching Ghostwriter CLI behavior.
 
 ## Installation Instructions
 
@@ -69,13 +69,13 @@ Add the plugin to your project `pom.xml`:
 
 ### Run the plugin
 
-Standard (single-module) goal:
+Reactor goal:
 
 ```cmd
-mvn gw:std -Dgw.genai=openai:gpt-4.1-mini
+mvn gw:mod -Dgw.genai=openai:gpt-4.1-mini
 ```
 
-Aggregator (reactor) goal:
+Aggregator goal:
 
 ```cmd
 mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini
@@ -119,5 +119,5 @@ mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai -Dgw.logInput
 2. Add or refine embedded `@guidance` blocks in the files you want Ghostwriter to maintain.
 3. Configure the plugin (in `pom.xml`) and/or pass system properties (for example `-Dgw.genai=...`).
 4. (Optional) Configure GenAI credentials in Maven `settings.xml` and reference them via `gw.genai.serverId`.
-5. Run `mvn gw:std` (single module) or `mvn gw:gw` (reactor/aggregator).
+5. Run `mvn gw:mod` (reactor ordering) or `mvn gw:gw` (reverse module ordering).
 6. Review generated changes and commit them.

@@ -141,4 +141,8 @@ public abstract class ProjectLayout {
 		return replace;
 	}
 
+	public String getParentProjectId() {
+		return null;
+	}
+
 }
