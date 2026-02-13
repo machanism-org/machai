@@ -136,4 +136,9 @@ public abstract class ProjectLayout {
 		return null;
 	}
 
+	public String getProjectLayoutType() {
+		String replace = getClass().getSimpleName().replace(ProjectLayout.class.getSimpleName(), "");
+		return replace;
+	}
+
 }
