@@ -26,9 +26,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
  * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a project.
+ *
  * <p>
- * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present
- * in the current directory.
+ * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present in the
+ * current directory.
  * </p>
  *
  * <h2>Processing order</h2>
@@ -51,6 +52,11 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </li>
  * </ul>
  *
+ * <p>
+ * See {@link AbstractGWGoal} for additional shared parameters, such as configuring the GenAI
+ * provider and selecting documents to scan.
+ * </p>
+ *
  * <h2>Usage examples</h2>
  * <pre>
  * mvn gw:gw
@@ -60,14 +66,24 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:gw -Dgw.threads=false
  * </pre>
  *
- * <p>
- * See {@link AbstractGWGoal} for additional shared parameters and behavior.
- * </p>
+ * <pre>
+ * mvn -pl :my-module gw:gw
+ * </pre>
+ *
+ * <pre>
+ * mvn gw:gw -Dgw.threads=true
+ * </pre>
  */
 @Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false)
 public class GW extends AbstractGWGoal {
 
-	/** Enables or disables multi-threaded module processing. */
+	/**
+	 * Enables or disables multi-threaded module processing.
+	 *
+	 * <p>
+	 * When enabled, module processing may occur concurrently.
+	 * </p>
+	 */
 	@Parameter(property = "gw.threads", defaultValue = "false")
 	private boolean threads;
 

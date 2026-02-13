@@ -27,27 +27,27 @@ Page Structure:
 
 ## Introduction
 
-Bindex Core (`bindex-core`) is the foundational Java library for working with **bindex metadata** within the Machanism ecosystem. It provides the domain model and supporting utilities required to generate, read, validate, merge, and publish metadata that describes libraries and artifacts.
-
-By standardizing how this metadata is represented and handled, Bindex Core enables consistent discovery, integration, and assembly workflows across tooling (for example, Maven plugins and build integrations) and downstream consumers.
+Bindex Core (`bindex-core`) provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly. It enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.
 
 ## Overview
 
-Bindex Core defines the canonical representation of bindex metadata and exposes APIs intended for other Machanism components. It is typically used to:
+Bindex Core is the foundational Java library for working with **bindex metadata** within the Machanism ecosystem. It defines the canonical representation of bindex metadata and exposes APIs intended for other Machanism components.
+
+It is typically used to:
 
 - Generate bindex metadata for produced artifacts.
 - Read and validate metadata from modules and dependencies.
 - Merge and aggregate metadata across multi-module builds.
-- Drive library selection and project assembly decisions based on metadata.
+- Support library selection and project assembly decisions based on metadata.
 - Support publishing/registration so metadata can be discovered by downstream tooling.
 
 ## Key Features
 
 - Canonical, versioned model for representing bindex metadata.
-- APIs and utilities for generating, reading, and validating metadata.
-- Merge/aggregation helpers for multi-module and dependency scenarios.
-- Library selection and project assembly support based on metadata.
-- Hooks for publishing/registration workflows used by downstream tools.
+- APIs and utilities for generating, reading, validating, and merging metadata.
+- Aggregation helpers for multi-module and dependency scenarios.
+- Building blocks for library selection and project assembly workflows.
+- Designed for integration into Maven plugins and other build tooling.
 
 ## Getting Started
 

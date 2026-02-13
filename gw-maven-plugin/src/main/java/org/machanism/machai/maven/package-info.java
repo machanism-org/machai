@@ -1,9 +1,9 @@
 /**
- * Maven plugin goals (Mojos) for running MachAI's guided file processing (GW) from within Maven builds.
+ * Maven plugin goals (Mojos) that integrate MachAI's guided file processing (GW) into Maven builds.
  *
  * <p>
- * The goals in this package locate documentation sources (for example, {@code src\site}), optionally apply
- * include/exclude configuration, and invoke the GW processing pipeline via
+ * The goals in this package locate documentation or other input sources (for example, {@code src\site}), apply
+ * include/exclude configuration, and execute the GW processing pipeline via
  * {@link org.machanism.machai.gw.FileProcessor}.
  * </p>
  *

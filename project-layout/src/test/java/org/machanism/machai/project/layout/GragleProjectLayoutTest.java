@@ -34,6 +34,7 @@ class GragleProjectLayoutTest {
 	@Test
 	void isGradleProject_shouldReturnFalseWhenBuildGradleMissing() {
 		// Arrange
+
 		// Act
 		boolean result = GragleProjectLayout.isGradleProject(tempDir.toFile());
 
@@ -42,30 +43,54 @@ class GragleProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldThrowNullPointerExceptionWhenNoGradleProjectModelAvailable() {
+	void getModules_shouldReturnNullWhenNoChildren() throws Exception {
 		// Arrange
 		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
 
-		// Act & Assert
-		assertThrows(NullPointerException.class, layout::getModules);
+		GradleProject root = StubGradleProjectFactory.project("root", StubGradleProjectFactory.domainObjectSet());
+		setPrivateProjectField(layout, root);
+
+		// Act
+		List<String> modules = layout.getModules();
+
+		// Assert
+		assertNull(modules);
 	}
 
 	@Test
-	void getProjectId_shouldThrowNullPointerExceptionWhenNoGradleProjectModelAvailable() {
+	void getModules_shouldReturnChildrenNamesWhenChildrenPresent() throws Exception {
 		// Arrange
 		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
 
-		// Act & Assert
-		assertThrows(NullPointerException.class, layout::getProjectId);
+		GradleProject childA = StubGradleProjectFactory.project("a", StubGradleProjectFactory.domainObjectSet());
+		GradleProject childB = StubGradleProjectFactory.project("b", StubGradleProjectFactory.domainObjectSet());
+		DomainObjectSet<GradleProject> children = StubGradleProjectFactory.domainObjectSet(childA, childB);
+		GradleProject root = StubGradleProjectFactory.project("root", children);
+		setPrivateProjectField(layout, root);
+
+		// Act
+		List<String> modules = layout.getModules();
+
+		// Assert
+		assertEquals(2, modules.size());
+		assertTrue(modules.contains("a"));
+		assertTrue(modules.contains("b"));
 	}
 
 	@Test
-	void getProjectName_shouldThrowNullPointerExceptionWhenNoGradleProjectModelAvailable() {
+	void getProjectIdAndName_shouldReturnGradleProjectName() throws Exception {
 		// Arrange
 		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		GradleProject root = StubGradleProjectFactory.project("demo", StubGradleProjectFactory.domainObjectSet());
+		setPrivateProjectField(layout, root);
 
-		// Act & Assert
-		assertThrows(NullPointerException.class, layout::getProjectName);
+		// Act
+		String id = layout.getProjectId();
+		String name = layout.getProjectName();
+
+		// Assert
+		assertEquals("demo", id);
+		assertEquals("demo", name);
 	}
 
 	@Test
@@ -119,57 +144,6 @@ class GragleProjectLayoutTest {
 		// Assert
 		assertSame(layout, result);
 		assertSame(dir, result.getProjectDir());
-	}
-
-	@Test
-	void getModules_shouldReturnNullWhenNoChildren() throws Exception {
-		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
-
-		GradleProject root = StubGradleProjectFactory.project("root", StubGradleProjectFactory.domainObjectSet());
-		setPrivateProjectField(layout, root);
-
-		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertNull(modules);
-	}
-
-	@Test
-	void getModules_shouldReturnChildrenNamesWhenChildrenPresent() throws Exception {
-		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
-
-		GradleProject childA = StubGradleProjectFactory.project("a", StubGradleProjectFactory.domainObjectSet());
-		GradleProject childB = StubGradleProjectFactory.project("b", StubGradleProjectFactory.domainObjectSet());
-		DomainObjectSet<GradleProject> children = StubGradleProjectFactory.domainObjectSet(childA, childB);
-		GradleProject root = StubGradleProjectFactory.project("root", children);
-		setPrivateProjectField(layout, root);
-
-		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertEquals(2, modules.size());
-		assertTrue(modules.contains("a"));
-		assertTrue(modules.contains("b"));
-	}
-
-	@Test
-	void getProjectIdAndName_shouldReturnGradleProjectName() throws Exception {
-		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
-		GradleProject root = StubGradleProjectFactory.project("demo", StubGradleProjectFactory.domainObjectSet());
-		setPrivateProjectField(layout, root);
-
-		// Act
-		String id = layout.getProjectId();
-		String name = layout.getProjectName();
-
-		// Assert
-		assertEquals("demo", id);
-		assertEquals("demo", name);
 	}
 
 	private static void setPrivateProjectField(GragleProjectLayout layout, GradleProject project) throws Exception {

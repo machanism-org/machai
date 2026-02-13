@@ -28,20 +28,20 @@
  * Maven goal implementation for MachAI's AI-assisted project assembly workflow.
  *
  * <p>
- * This package provides the Maven plugin entry point for the {@code assembly} goal
- * (implemented by {@link org.machanism.machai.maven.Assembly}). The goal is intended to:
+ * This package provides the Maven plugin {@code assembly} goal implementation, exposed by
+ * {@link org.machanism.machai.maven.Assembly}. The goal helps bootstrap or evolve a project by:
  * </p>
  * <ol>
- *   <li>Acquire a natural-language assembly prompt from a text file or interactively.</li>
- *   <li>Recommend candidate libraries via {@link org.machanism.machai.bindex.Picker} as
- *   {@link org.machanism.machai.schema.Bindex} entries.</li>
- *   <li>Run {@link org.machanism.machai.bindex.ApplicationAssembly} to apply the assembly workflow to the Maven
+ *   <li>Obtaining a natural-language prompt from a file or from interactive input.</li>
+ *   <li>Requesting library recommendations (as {@link org.machanism.machai.schema.Bindex} entries) via
+ *   {@link org.machanism.machai.bindex.Picker}.</li>
+ *   <li>Executing the assembly workflow via {@link org.machanism.machai.bindex.ApplicationAssembly} in the Maven
  *   execution base directory.</li>
  * </ol>
  *
  * <p>
- * GenAI providers are selected using {@link org.machanism.machai.ai.manager.GenAIProviderManager}. Standard function
- * tools are attached to providers via {@link org.machanism.machai.ai.manager.SystemFunctionTools}.
+ * GenAI providers are selected by id using {@link org.machanism.machai.ai.manager.GenAIProviderManager}. Providers are
+ * augmented with standard function tools via {@link org.machanism.machai.ai.manager.SystemFunctionTools}.
  * </p>
  *
  * <h2>Goal</h2>
@@ -51,7 +51,7 @@
  *
  * <h2>Plugin parameters</h2>
  * <p>
- * Parameters can be supplied via system properties (for example, {@code -Dassembly.genai=...}) and/or via Maven plugin
+ * Parameters may be supplied via system properties (for example, {@code -Dassembly.genai=...}) and/or via Maven plugin
  * configuration.
  * </p>
  * <ul>

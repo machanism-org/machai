@@ -31,30 +31,30 @@ Generate a content:
 
 # Ghostwriter
 
-Ghostwriter is a documentation engine that scans a project, applies mandatory `@guidance` constraints embedded in source and documentation files, and uses GenAI to generate or update documentation consistently across source code, documentation, project site content, and other relevant project assets.
+Ghostwriter is an AI-assisted documentation engine that scans a project, applies mandatory @guidance constraints embedded in source and documentation files, and generates or updates documentation to keep it consistent with the current project state.
 
-Key capabilities include:
+Main features:
 
-- Project scanning for documentation targets across multiple file types
-- Interpretation of inline `@guidance` blocks as mandatory constraints
-- Generation and update of Markdown and other documentation artifacts
-- Repeatable runs to keep documentation aligned with current project state
+- Scans many file types, including source code, Markdown, and other project artifacts
+- Treats inline @guidance blocks as mandatory constraints during generation
+- Generates or updates documentation in repeatable runs
+- Provides language-aware reviewers for multiple formats (for example: Java, Markdown, HTML, Python, TypeScript)
 
 ## Module List
 
-This project is a single-module build.
+This project is a single-module Maven build.
 
 | Name | Description |
 |---|---|
-| [Ghostwriter](ghostwriter/) | Ghostwriter CLI and core engine for scanning project files, enforcing `@guidance` constraints, and generating or updating documentation artifacts in a consistent, automated way. |
+| [Ghostwriter](ghostwriter/) | Ghostwriter CLI and core engine that scans project files, enforces embedded @guidance constraints, and generates or updates documentation artifacts. |
 
 ## Installation Instructions
 
 ### Prerequisites
 
-- Java 11 or newer
-- Maven 3.9+ recommended
-- Network access to the configured GenAI provider
+- Java 11 (or newer)
+- Maven 3.9+ (recommended)
+- Network access to the configured GenAI provider (if enabled)
 
 ### Clone the repository
 
@@ -65,6 +65,8 @@ cd machai
 
 ### Build with Maven
 
+To build only this module (and required dependencies):
+
 ```cmd
 mvn -pl ghostwriter -am clean verify
 ```
@@ -73,31 +75,31 @@ mvn -pl ghostwriter -am clean verify
 
 ### Run the CLI
 
-Example of running Ghostwriter against a local project directory:
+After building, run the packaged JAR against a local project directory:
 
 ```cmd
-java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar C:\projects\my-project
+java -jar ghostwriter\target\ghostwriter-0.0.10-SNAPSHOT.jar C:\projects\my-project
 ```
 
-### Common options
+### Examples
 
 Set an explicit root directory:
 
 ```cmd
-java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar -r C:\projects\my-project
+java -jar ghostwriter\target\ghostwriter-0.0.10-SNAPSHOT.jar -r C:\projects\my-project
 ```
 
-Target files with glob patterns:
+Target files with a glob pattern:
 
 ```cmd
-java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar "glob:**\*.md"
+java -jar ghostwriter\target\ghostwriter-0.0.10-SNAPSHOT.jar "glob:**\*.md"
 ```
 
 ## Contributing
 
-- Follow standard Java conventions and keep changes focused.
+- Follow standard Java conventions and keep changes focused and well tested.
 - Add or update tests under `src/test/java` when behavior changes.
-- Open pull requests with a clear description, rationale, and reproduction steps when relevant.
+- Open pull requests with a clear description, rationale, and reproduction steps (when applicable).
 - Report issues with logs, environment details (OS, Java, Maven), and minimal steps to reproduce.
 
 ## License

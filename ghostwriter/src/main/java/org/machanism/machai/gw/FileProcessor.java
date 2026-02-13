@@ -613,7 +613,6 @@ public class FileProcessor extends ProjectProcessor {
 
 	private boolean shouldExcludePath(Path path) {
 		if (path != null && excludes != null) {
-
 			for (String exclude : excludes) {
 				PathMatcher matcher = getPatternPath(exclude);
 				if (matcher != null) {
@@ -621,13 +620,12 @@ public class FileProcessor extends ProjectProcessor {
 						return true;
 					}
 				} else {
-					String name = path.getFileName().toString();
-					if (Strings.CS.equals(name, exclude)) {
+					String relative = path.toString();
+					if (Strings.CS.equals(relative, exclude) || Strings.CS.equals(path.getFileName().toString(), exclude)) {
 						return true;
 					}
 				}
 			}
-
 		}
 
 		return false;
@@ -642,12 +640,11 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	private static PathMatcher getPatternPath(String path) {
-		PathMatcher result = null;
 		if (StringUtils.isNotBlank(path) && isPathPattern(path)) {
-			result = FileSystems.getDefault().getPathMatcher(path);
+			return FileSystems.getDefault().getPathMatcher(path);
 		}
 
-		return result;
+		return null;
 	}
 
 	/**

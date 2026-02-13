@@ -4,6 +4,7 @@
  * <p>This package defines {@link org.machanism.machai.project.layout.ProjectLayout}, an abstraction representing a
  * project rooted at a configured base directory. A {@code ProjectLayout} exposes conventional locations (relative to
  * the project root) for:
+ *
  * <ul>
  *   <li>main sources and resources</li>
  *   <li>test sources and resources</li>

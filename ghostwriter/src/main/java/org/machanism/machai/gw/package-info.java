@@ -36,38 +36,24 @@
  * Command-line orchestration and workspace scanning for Ghostwriter.
  *
  * <p>
- * This package provides the Ghostwriter CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the core
- * scanning/processing engine ({@link org.machanism.machai.gw.FileProcessor}). Together they traverse a project
- * workspace, locate supported files, extract embedded {@code @guidance:} blocks using file-type-specific
+ * This package contains the Ghostwriter CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the
+ * workspace scanning/processing engine ({@link org.machanism.machai.gw.FileProcessor}). Together they traverse a
+ * project directory, locate supported files, extract embedded {@code @guidance:} blocks using file-type-specific
  * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations, and submit per-file requests to the configured
- * GenAI provider.
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  * </p>
  *
- * <h2>How scanning works</h2>
+ * <h2>Scanning model</h2>
  * <ul>
- *   <li><strong>Project layout discovery</strong>: Uses
- *   {@link org.machanism.machai.project.layout.ProjectLayout} to identify modules and conventional source/test/doc
- *   directories.</li>
- *   <li><strong>File selection</strong>: Scans can be restricted using {@code glob:}/{@code regex:} matchers and an
- *   optional list of exclude patterns or exact relative paths.</li>
+ *   <li><strong>Layout discovery</strong>: Uses {@link org.machanism.machai.project.layout.ProjectLayout} to identify
+ *   conventional source/test/doc folders and (optionally) child modules.</li>
+ *   <li><strong>Child-first processing</strong>: When modules are present, module folders are processed before files in
+ *   the parent project directory.</li>
+ *   <li><strong>Filtering</strong>: Scans may be restricted using {@code glob:}/{@code regex:} matchers and an optional
+ *   list of exclude patterns or exact relative paths.</li>
  *   <li><strong>Reviewer selection</strong>: {@link java.util.ServiceLoader} loads
  *   {@link org.machanism.machai.gw.reviewer.Reviewer} services. The processor selects a reviewer by file extension;
  *   the reviewer extracts guidance and builds a per-file prompt fragment.</li>
- *   <li><strong>Prompt execution</strong>: For each file, the processor composes a request that includes OS/project
- *   context, optional global instructions, per-file guidance, and a strict output format, then calls
- *   {@link org.machanism.machai.ai.manager.GenAIProvider#perform()}.</li>
  * </ul>
- *
- * <h2>Typical usage</h2>
- *
- * <pre>
- * {@code
- * // Scan a project directory
- * java -jar gw.jar C:\\projects\\my-project
- *
- * // Scan only Java sources using a glob pattern
- * java -jar gw.jar "glob:**\\*.java"
- * }
- * </pre>
  */
 package org.machanism.machai.gw;

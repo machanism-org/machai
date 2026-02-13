@@ -49,16 +49,14 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
 
-This provider enables a wide range of generative AI capabilities, including:
+Capabilities
 
-- Sending prompts and receiving responses from OpenAI Chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
-
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports synchronous requests and can be configured to accommodate different use cases and model parameters.
+- Sends prompts and receives responses from OpenAI Chat models.
+- Manages files for use in OpenAI workflows.
+- Performs common LLM requests (text generation, summarization, question answering).
+- Creates vector embeddings for tasks like semantic search and similarity analysis.
 
 Environment variables
 
@@ -90,7 +88,7 @@ This implementation is NOT thread-safe.
 
 The `CodeMieProvider` is an `OpenAIProvider` specialization that targets the CodeMie OpenAI-compatible endpoint.
 
-On initialization it obtains an access token from the CodeMie authentication endpoint and then configures the underlying OpenAI client with the retrieved token and CodeMie base URL.
+On initialization it obtains an access token from the CodeMie authentication endpoint and then configures the underlying OpenAI client with the retrieved token and the CodeMie base URL.
 
 Required configuration
 

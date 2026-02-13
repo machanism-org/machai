@@ -27,20 +27,13 @@ Page Structure:
 
 ## Introduction
 
-GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers foundational prompt management and embedding capabilities, enabling AI-powered features across Machai modules.
+GenAI Client is a Java library for integrating with Generative AI providers. It provides foundational prompt management, optional tool/function calling, optional file context, and provider-dependent embedding support.
 
-It provides the building blocks for:
-
-- Managing prompts and instructions.
-- Optional tool/function calling.
-- Optional file context.
-- Provider-dependent embeddings.
-
-The main benefit is provider portability: you can swap or combine backends by changing configuration rather than application code.
+The primary benefit is provider portability: you can swap or combine backends by changing configuration rather than application code.
 
 ## Overview
 
-GenAI Client is centered around the `GenAIProvider` interface.
+GenAI Client is centered around the `GenAIProvider` interface:
 
 - Provider implementations are resolved by name using `GenAIProviderManager`.
 - You select a provider and its model/configuration.
@@ -168,7 +161,7 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-The `CodeMieProvider` is a `GenAIProvider` implementation that authenticates against CodeMie and then uses CodeMie’s OpenAI-compatible API endpoint.
+The `CodeMieProvider` extends `OpenAIProvider` and authenticates against CodeMie, then calls CodeMie’s OpenAI-compatible API endpoint.
 
 How it works:
 

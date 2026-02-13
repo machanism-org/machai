@@ -21,39 +21,39 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is a documentation engine that scans a project, applies mandatory `@guidance` constraints embedded in source and documentation files, and uses GenAI to generate or update documentation consistently across source code, documentation, project site content, and other relevant project assets.
+Ghostwriter is an AI-assisted documentation engine that scans a project, applies mandatory `@guidance` constraints embedded in source and documentation files, and generates or updates documentation to keep it consistent with the current project state.
 
 ## Introduction
 
-Ghostwriter scans a project to find documentation targets across multiple file types, interprets inline `@guidance` blocks as mandatory constraints, and uses GenAI to generate or update documentation artifacts in a repeatable way.
+Ghostwriter works with many file types across a project, including source code, documentation, project site content, and other relevant artifacts. It treats inline `@guidance` blocks as mandatory constraints and can generate or update documentation in repeatable runs to keep project documentation aligned with the current project state.
 
-Key capabilities include:
+Key features include:
 
-- Project scanning for documentation targets across multiple file types
-- Interpretation of inline `@guidance` blocks as mandatory constraints
-- Generation and update of Markdown and other documentation artifacts
-- Repeatable runs to keep documentation aligned with current project state
+- Scans many file types, including source code, Markdown, and other project artifacts
+- Treats inline `@guidance` blocks as mandatory constraints during generation
+- Generates or updates documentation in repeatable runs
+- Provides language-aware reviewers for multiple formats (for example: Java, Markdown, HTML, Python, TypeScript)
 
 ## Usage
 
 ### Run the CLI
 
-Example of running Ghostwriter against a local project directory:
+After building, run the packaged JAR against a local project directory:
 
 ```cmd
-java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar C:\projects\my-project
+java -jar ghostwriter\target\ghostwriter-0.0.10-SNAPSHOT.jar C:\projects\my-project
 ```
 
-### Common options
+### Examples
 
 Set an explicit root directory:
 
 ```cmd
-java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar -r C:\projects\my-project
+java -jar ghostwriter\target\ghostwriter-0.0.10-SNAPSHOT.jar -r C:\projects\my-project
 ```
 
-Target files with glob patterns:
+Target files with a glob pattern:
 
 ```cmd
-java -jar ghostwriter\target\ghostwriter-0.0.9-SNAPSHOT.jar "glob:**\*.md"
+java -jar ghostwriter\target\ghostwriter-0.0.10-SNAPSHOT.jar "glob:**\*.md"
 ```

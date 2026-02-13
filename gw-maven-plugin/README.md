@@ -23,21 +23,21 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
 
-GW Maven Plugin (Ghostwriter Maven Plugin) integrates Ghostwriter guided file processing into Maven so documentation and other repository content stays accurate as your code evolves.
+GW Maven Plugin integrates **Ghostwriter guided file processing** into Maven builds so documentation and other project files can be generated and kept up to date as part of your normal development and CI workflow.
 
-It scans project files (including source code, documentation, and project site content under `src\\site`) for embedded `@guidance` blocks and other instructions, invokes the configured GenAI provider/model to synthesize updates, and writes the resulting changes back to the working tree.
+It scans project files—including source code, documentation, and Maven Site content—for embedded `@guidance:` instructions and runs an AI-assisted synthesis workflow to produce consistent, maintainable outputs.
 
-The plugin provides two goals:
+The plugin provides two primary goals:
 
-- `gw:mod` — processes documents across a multi-module (reactor) build using standard Maven reactor ordering (optionally deferring the execution-root module via `gw.rootProjectLast`).
-- `gw:gw` — aggregator/reactor execution across all modules, with Maven-model enrichment, optional multi-threaded processing (`gw.threads`), and reverse module order processing (sub-modules first), matching Ghostwriter CLI behavior.
+- **`gw:gw`**: aggregator processing that can run without a `pom.xml` (`requiresProject=false`) and processes modules in **reverse order** (sub-modules first), similar to the Ghostwriter CLI.
+- **`gw:reactor`**: reactor-aware processing that follows standard Maven reactor dependency ordering, with an option to defer the execution-root project until the rest of the reactor has completed.
 
 ## Installation Instructions
 
 ### Prerequisites
 
 - Git
-- Java 11+ (this module compiles with `maven.compiler.release=11`)
+- Java 11+
 - Apache Maven 3.x
 
 ### Checkout
@@ -69,13 +69,19 @@ Add the plugin to your project `pom.xml`:
 
 ### Run the plugin
 
-Reactor goal:
+Basic guided processing:
 
 ```cmd
-mvn gw:mod -Dgw.genai=openai:gpt-4.1-mini
+mvn gw:gw
 ```
 
-Aggregator goal:
+Reactor/module processing:
+
+```cmd
+mvn gw:reactor
+```
+
+With a GenAI provider/model:
 
 ```cmd
 mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini
@@ -112,12 +118,3 @@ Command-line override example:
 ```cmd
 mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai -Dgw.logInputs=true
 ```
-
-### Typical workflow
-
-1. Add or update project files (documentation under `src\\site\\markdown`, source code, etc.).
-2. Add or refine embedded `@guidance` blocks in the files you want Ghostwriter to maintain.
-3. Configure the plugin (in `pom.xml`) and/or pass system properties (for example `-Dgw.genai=...`).
-4. (Optional) Configure GenAI credentials in Maven `settings.xml` and reference them via `gw.genai.serverId`.
-5. Run `mvn gw:mod` (reactor ordering) or `mvn gw:gw` (reverse module ordering).
-6. Review generated changes and commit them.
