@@ -45,16 +45,16 @@ Ensure that your content generation and documentation efforts consider the full 
 
 ## Introduction
 
-GW Maven Plugin (Ghostwriter Maven Plugin) is a Maven plugin that integrates Ghostwriter guided file processing into your build so documentation and other repository content stays accurate as your code evolves.
+GW Maven Plugin (Ghostwriter Maven Plugin) integrates Ghostwriter guided file processing into Maven so documentation and other repository content stays accurate as your code evolves.
 
-It scans a configurable directory (often `src\site`) for project files (Markdown, source, and other artifacts) that include embedded `@guidance` blocks and other instructions. Those inputs are then passed to the configured GenAI provider/model, which synthesizes updates and writes resulting changes back to the working tree.
+The plugin runs a scan over project files (for example, documentation under `src\site`) and looks for embedded `@guidance` blocks and other instructions. It then invokes the configured GenAI provider/model to synthesize updates and writes the resulting changes back to the working tree.
 
-The plugin provides two goals:
+It provides two goals:
 
 - `gw:std` — standard, per-module execution.
 - `gw:gw` — aggregator/reactor execution across all modules.
 
-Based on the implementation:
+From the implementation:
 
 - `StandardProcess` (`gw:std`) builds configuration and processes the current module; when invoked at the reactor root it can optionally delay execution-root processing until all other reactor projects complete (`gw.rootProjectLast`).
 - `GW` (`gw:gw`) runs in aggregator mode, enriches each module’s Maven model from the reactor, supports multi-threaded module processing (`gw.threads`), and processes modules in reverse order (sub-modules first), matching Ghostwriter CLI behavior.
@@ -71,11 +71,11 @@ The GW Maven Plugin enhances documentation and repository maintenance workflows 
 ## Key Features
 
 - Two goals: standard (`gw:std`) and aggregator/reactor (`gw:gw`) modes
-- Scans a configurable root (often `src\site`) and respects exclude patterns
+- Scans a configurable root (commonly `src\site`) and supports exclude patterns
 - Consumes embedded `@guidance` from Markdown and other project files
-- Supports default guidance text and external instruction inputs
-- Optional credential loading from Maven `settings.xml` via `gw.genai.serverId` (mapped to `GENAI_USERNAME` / `GENAI_PASSWORD`)
-- Optional logging of the exact input file set passed to the workflow (`gw.logInputs`)
+- Supports external instruction inputs and default guidance text
+- Can load GenAI credentials from Maven `settings.xml` via `gw.genai.serverId` (mapped to `GENAI_USERNAME` / `GENAI_PASSWORD`)
+- Optional logging of the input file set passed to the workflow (`gw.logInputs`)
 - Aggregator mode supports multi-threaded module processing (`gw.threads`) and reverse module order processing
 
 ## Getting Started
@@ -101,10 +101,10 @@ Run the aggregator goal:
 mvn gw:gw
 ```
 
-Specify a provider/model and load credentials from a `settings.xml` `<server>`:
+Run without a project `pom.xml` (fully qualified coordinate):
 
 ```cmd
-mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai
+mvn -Dgw.genai=openai:gpt-4.1-mini -Dgw.scanDir=glob:. -Dgw.logInputs=true org.machanism.machai:gw-maven-plugin:0.0.9:std
 ```
 
 ### Typical Workflow
@@ -142,8 +142,8 @@ Example `pom.xml` configuration:
   <version>...</version>
   <configuration>
     <genai>openai:gpt-4.1-mini</genai>
-    <scanDir>${project.basedir}\src\site</scanDir>
-    <instructions>file:${project.basedir}\src\site\instructions.md</instructions>
+    <scanDir>${project.basedir}\\src\\site</scanDir>
+    <instructions>file:${project.basedir}\\src\\site\\instructions.md</instructions>
     <guidance>Write concise release notes.</guidance>
     <logInputs>false</logInputs>
   </configuration>

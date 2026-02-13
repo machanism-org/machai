@@ -1,25 +1,32 @@
 /**
- * Maven Mojos for running MachAI's generative-workflow (GW) guided document processing as Maven plugin goals.
+ * Maven plugin goals (Mojos) for running MachAI's generative-workflow (GW) guided document processing.
  *
  * <p>
- * The goals in this package scan documentation sources (for example, {@code src\site}) and pass matching
- * files to the MachAI GW {@link org.machanism.machai.gw.FileProcessor}. Configuration is provided via Maven
- * plugin parameters (typically {@code -Dgw.*} system properties).
+ * This package contains the Maven {@code Mojo} implementations that:
+ * </p>
+ * <ul>
+ *   <li>scan documentation sources (for example, {@code src\site}),</li>
+ *   <li>select files based on the plugin configuration, and</li>
+ *   <li>invoke the MachAI GW processing pipeline via {@link org.machanism.machai.gw.FileProcessor}.</li>
+ * </ul>
+ *
+ * <p>
+ * Configuration is typically supplied using Maven plugin parameters (often via {@code -Dgw.*} system properties)
+ * or POM configuration.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
- * <li>{@code gw:std} - Standard per-module scan/process goal.</li>
- * <li>{@code gw:gw} - Aggregator goal that processes a reactor in reverse order (sub-modules first).</li>
- * <li>{@code gw:clean} - Deletes temporary artifacts created by GW processing.</li>
+ *   <li>{@code gw:std} - Standard per-module scan and process goal.</li>
+ *   <li>{@code gw:gw} - Aggregator goal that processes a reactor build in reverse order (sub-modules first).</li>
+ *   <li>{@code gw:clean} - Deletes temporary artifacts created by GW processing.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Examples</h2>
  * <pre>{@code
  * mvn gw:std
  * }</pre>
  *
- * <h2>Reactor (aggregator) usage</h2>
  * <pre>{@code
  * mvn gw:gw
  * }</pre>

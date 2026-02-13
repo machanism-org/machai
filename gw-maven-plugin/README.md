@@ -23,11 +23,11 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
 
-GW Maven Plugin (Ghostwriter Maven Plugin) is a Maven plugin that automates keeping repository content—especially documentation—accurate and consistent by running a Ghostwriter workflow during your Maven build.
+GW Maven Plugin (Ghostwriter Maven Plugin) integrates Ghostwriter guided file processing into Maven so documentation and other repository content stays accurate as your code evolves.
 
-It scans a configurable directory (commonly `src\\site`) for project files (Markdown, source, and other artifacts) that contain embedded `@guidance` blocks and other instructions. Those inputs are provided to a configured GenAI provider/model, which synthesizes updates and writes the resulting changes back to your working tree.
+The plugin scans project files (for example, documentation under `src\\site`) for embedded `@guidance` blocks and other instructions, invokes the configured GenAI provider/model to synthesize updates, and writes the resulting changes back to the working tree.
 
-The plugin provides two goals:
+It provides two goals:
 
 - `gw:std` — standard, per-module execution.
 - `gw:gw` — aggregator/reactor execution across all modules.
