@@ -210,4 +210,9 @@ public class MavenProjectLayout extends ProjectLayout {
 	public String getProjectName() {
 		return getModel().getName();
 	}
+
+	public String getParentId() {
+		String artifactId = getModel().getParent().getArtifactId();
+		return artifactId;
+	}
 }

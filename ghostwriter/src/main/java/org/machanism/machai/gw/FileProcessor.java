@@ -477,7 +477,11 @@ public class FileProcessor extends ProjectProcessor {
 		HashMap<String, String> valueMap = new HashMap<>();
 		valueMap.put("projectId", projectLayout.getProjectId());
 		valueMap.put("projectName", projectLayout.getProjectName());
-		valueMap.put("parentId", projectLayout.getParentProjectId());
+		String parentId = projectLayout.getParentId();
+		if (parentId != null) {
+			valueMap.put("parentId", parentId);
+		}
+		valueMap.put("rootDirName", rootDir.getName());
 		return valueMap;
 	}
 

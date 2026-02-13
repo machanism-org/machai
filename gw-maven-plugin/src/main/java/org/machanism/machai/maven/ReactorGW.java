@@ -24,20 +24,22 @@ ProcessModules supports Maven reactor for module processing. All submodules will
 /**
  * Maven goal that processes documents across a multi-module (reactor) build.
  * <p>
- * This goal supports Maven reactor module processing: all submodules are processed according to their
- * dependencies, following standard Maven reactor logic.
+ * This goal supports Maven reactor module processing: all submodules are
+ * processed according to their dependencies, following standard Maven reactor
+ * logic.
  * </p>
  *
  * <h2>Parameters</h2>
  * <p>
- * This goal inherits additional common parameters from {@link AbstractGWGoal}. Refer to that class
- * for the complete list.
+ * This goal inherits additional common parameters from {@link AbstractGWGoal}.
+ * Refer to that class for the complete list.
  * </p>
  * <ul>
- * <li><b>{@code gw.rootProjectLast}</b> ({@link #rootProjectLast}): If {@code true}, delays
- * processing of the execution-root project until all other reactor projects complete. This is
- * primarily useful when the execution root is an aggregator ({@code pom} packaging) and you want
- * all submodules to be processed first.</li>
+ * <li><b>{@code gw.rootProjectLast}</b> ({@link #rootProjectLast}): If
+ * {@code true}, delays processing of the execution-root project until all other
+ * reactor projects complete. This is primarily useful when the execution root
+ * is an aggregator ({@code pom} packaging) and you want all submodules to be
+ * processed first.</li>
  * </ul>
  *
  * <h2>Usage</h2>
@@ -45,13 +47,13 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <h3>Command line</h3>
  *
  * <pre>
- * mvn gw:mod
+ * mvn gw:reactor
  * </pre>
  *
  * <h3>Delay execution-root project processing</h3>
  *
  * <pre>
- * mvn gw:mod -Dgw.rootProjectLast=true
+ * mvn gw:reactor -Dgw.rootProjectLast=true
  * </pre>
  *
  * <h3>Plugin configuration</h3>
@@ -67,23 +69,24 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * &lt;/plugin&gt;
  * </pre>
  */
-@Mojo(name = "mod", threadSafe = true)
-public class ProcessModules extends AbstractGWGoal {
+@Mojo(name = "reactor", threadSafe = true)
+public class ReactorGW extends AbstractGWGoal {
 
 	/** Logger for this class. */
-	static final Logger logger = LoggerFactory.getLogger(ProcessModules.class);
+	static final Logger logger = LoggerFactory.getLogger(ReactorGW.class);
 
 	/**
-	 * If {@code true}, delays processing of the execution-root project until all other reactor
-	 * projects complete.
+	 * If {@code true}, delays processing of the execution-root project until all
+	 * other reactor projects complete.
 	 */
 	@Parameter(property = "gw.rootProjectLast", defaultValue = "false")
 	private boolean rootProjectLast;
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		String executionRootDirectory = session.getExecutionRootDirectory();
-		boolean rootProject = executionRootDirectory.equals(rootDir.getAbsolutePath());
+		String rootDir = session.getExecutionRootDirectory();
+		boolean rootProject = rootDir.equals(basedir.getAbsolutePath());
+
 		boolean pomProject = "pom".equals(project.getPackaging());
 
 		PropertiesConfigurator config = getConfiguration();
@@ -108,6 +111,10 @@ public class ProcessModules extends AbstractGWGoal {
 			}
 		};
 		documents.setModuleMultiThread(false);
+
+		if (scanDir == null) {
+			scanDir = basedir.getAbsolutePath();
+		}
 
 		if (!rootProject || (rootProject && !pomProject) || (rootProject && !rootProjectLast)) {
 			scanDocuments(documents);

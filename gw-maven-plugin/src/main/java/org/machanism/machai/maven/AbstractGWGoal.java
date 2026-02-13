@@ -79,7 +79,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	 * The Maven module base directory.
 	 */
 	@Parameter(defaultValue = "${basedir}", required = true)
-	protected File rootDir;
+	protected File basedir;
 	/**
 	 * Optional scan root override.
 	 */
@@ -209,6 +209,8 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 				processor.setDefaultGuidance(guidance);
 			}
 
+			File rootDir = new File(session.getExecutionRootDirectory());
+			
 			logger.info("Scanning documents in the root directory: {}", rootDir);
 			processor.setLogInputs(logInputs);
 
@@ -216,7 +218,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 				scanDir = rootDir.getAbsolutePath();
 			}
 
-			processor.scanDocuments(rootDir, scanDir);
+			processor.scanDocuments(basedir, scanDir);
 			logger.info("Scanning finished.");
 
 		} catch (Exception e) {
