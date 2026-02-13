@@ -1,20 +1,17 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>This package determines a project's on-disk structure (its <em>layout</em>) and uses that structure to perform
- * consistent scanning and folder-level processing.
- *
- * <p>It provides:
+ * <p>This package is responsible for:
  * <ul>
- *   <li>Detection of a project's layout (for example, Maven, JavaScript/Node, Python, or a default layout)</li>
- *   <li>Creation of a {@link org.machanism.machai.project.layout.ProjectLayout} configured for a specific project root</li>
- *   <li>Project scanning (optionally including modules) and delegation of folder-level processing</li>
+ *   <li>Determining a project's on-disk structure (its <em>layout</em>)</li>
+ *   <li>Configuring a {@link org.machanism.machai.project.layout.ProjectLayout} for a given project root</li>
+ *   <li>Scanning project folders (optionally including modules) and delegating folder-level processing</li>
  * </ul>
  *
- * <p>{@link org.machanism.machai.project.ProjectLayoutManager} inspects a candidate project root and selects an
- * appropriate {@link org.machanism.machai.project.layout.ProjectLayout} implementation.
- * {@link org.machanism.machai.project.ProjectProcessor} can then use the selected layout to scan the project,
- * optionally iterate over modules when present, and delegate processing for each discovered folder.
+ * <p>At a high level, {@link org.machanism.machai.project.ProjectLayoutManager} inspects a candidate project root and
+ * selects an appropriate {@link org.machanism.machai.project.layout.ProjectLayout} implementation.
+ * {@link org.machanism.machai.project.ProjectProcessor} then uses that layout to scan the project root, optionally
+ * iterate over modules when present, and delegate processing for each discovered folder.
  *
  * <h2>Typical usage</h2>
  *

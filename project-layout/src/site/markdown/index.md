@@ -52,8 +52,7 @@ Add the dependency:
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>project-layout</artifactId>
-  <!-- Use the latest released version from Maven Central. -->
-  <version><!-- latest --></version>
+  <version>0.0.9</version>
 </dependency>
 ```
 

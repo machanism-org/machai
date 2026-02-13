@@ -131,37 +131,6 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	}
 
 	/**
-	 * Creates a default {@link FileProcessor} and scans the current module's documents.
-	 *
-	 * @throws MojoExecutionException if file scanning or processing fails
-	 */
-	protected void scanDocuments() throws MojoExecutionException {
-		PropertiesConfigurator config = getConfiguration();
-		File basedir = project.getBasedir();
-
-		FileProcessor documents = new FileProcessor(genai, config) {
-			@Override
-			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
-				MavenProjectLayout projectLayout = new MavenProjectLayout();
-				projectLayout.projectDir(projectDir);
-				Model model = project.getModel();
-				projectLayout.model(model);
-				return projectLayout;
-			}
-
-			@Override
-			protected void processModule(File projectDir, String module) throws IOException {
-				// No-op for this implementation
-			}
-		};
-
-		logger.info("Scanning documents in the root directory: {}", basedir);
-		documents.setModuleMultiThread(false);
-		scanDocuments(documents);
-		logger.info("Scanning finished.");
-	}
-
-	/**
 	 * Builds a {@link PropertiesConfigurator} for workflow execution.
 	 *
 	 * <p>
@@ -205,6 +174,10 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	 * @throws MojoExecutionException if processing fails
 	 */
 	protected void scanDocuments(FileProcessor processor) throws MojoExecutionException {
+		
+		File basedir = project.getBasedir();
+		logger.info("Scanning documents in the root directory: {}", basedir);
+		
 		processor.setExcludes(excludes);
 
 		try {
@@ -225,7 +198,9 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 				scanDir = rootDir.getAbsolutePath();
 			}
 
-			processor.scanDocuments(rootDir, scanDir);
+			processor.scanDocuments(rootDir, scanDir);			
+			logger.info("Scanning finished.");
+			
 		} catch (Exception e) {
 			getLog().error(e);
 			throw new MojoExecutionException("File processing failed.", e);

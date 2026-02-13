@@ -1,8 +1,18 @@
 package org.machanism.machai.maven;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.gw.FileProcessor;
+import org.machanism.machai.project.ProjectLayoutManager;
+import org.machanism.machai.project.layout.MavenProjectLayout;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +82,7 @@ import org.slf4j.LoggerFactory;
  * mvn gw:std -Dgw.instructions=path\\to\\instructions.md -Dgw.guidance=path\\to\\guidance.md
  * </pre>
  */
-@Mojo(name = "std", threadSafe = true)
+@Mojo(name = "std", threadSafe = true, requiresProject = false)
 public class StandardProcess extends AbstractGWGoal {
 
 	/** Logger for this class. */
@@ -90,9 +100,32 @@ public class StandardProcess extends AbstractGWGoal {
 		String executionRootDirectory = session.getExecutionRootDirectory();
 		boolean rootProject = executionRootDirectory.equals(rootDir.getAbsolutePath());
 		boolean pomProject = "pom".equals(project.getPackaging());
-		
+
+		PropertiesConfigurator config = getConfiguration();
+
+		FileProcessor documents = new FileProcessor(genai, config) {
+			@Override
+			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+				ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
+
+				if (projectLayout instanceof MavenProjectLayout) {
+					projectLayout.projectDir(projectDir);
+					Model model = project.getModel();
+					((MavenProjectLayout) projectLayout).model(model);
+				}
+
+				return projectLayout;
+			}
+
+			@Override
+			protected void processModule(File projectDir, String module) throws IOException {
+				// No-op for this implementation
+			}
+		};
+		documents.setModuleMultiThread(false);
+
 		if (!rootProject || (rootProject && !pomProject) || (rootProject && !rootProjectLast)) {
-			scanDocuments();
+			scanDocuments(documents);
 			return;
 		}
 
@@ -101,7 +134,7 @@ public class StandardProcess extends AbstractGWGoal {
 				while (!reactorProjects.isEmpty()) {
 					Thread.sleep(500);
 				}
-				scanDocuments();
+				scanDocuments(documents);
 			} catch (MojoExecutionException e) {
 				getLog().error(e);
 			} catch (InterruptedException e) {
