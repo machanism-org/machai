@@ -24,8 +24,9 @@ ProcessModules supports Maven reactor for module processing. All submodules will
 /**
  * Maven goal that processes documents across a multi-module (reactor) build.
  * <p>
- * This goal supports Maven reactor module processing: all submodules are processed
- * according to their dependencies, following standard Maven reactor logic.
+ * This goal supports Maven reactor module processing: all submodules are
+ * processed according to their dependencies, following standard Maven reactor
+ * logic.
  * </p>
  *
  * <h2>Parameters</h2>
@@ -34,9 +35,9 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * Refer to that class for the complete list and their usage.
  * </p>
  * <ul>
- * <li><b>{@code gw.rootProjectLast}</b> ({@link #rootProjectLast}): If {@code true},
- * delays processing of the execution-root project until all other reactor projects
- * have completed.</li>
+ * <li><b>{@code gw.rootProjectLast}</b> ({@link #rootProjectLast}): If
+ * {@code true}, delays processing of the execution-root project until all other
+ * reactor projects have completed.</li>
  * </ul>
  *
  * <h2>Usage</h2>
@@ -68,13 +69,14 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *
  * <h2>Inherited parameters</h2>
  * <p>
- * In addition to {@link #rootProjectLast}, this goal supports all parameters from
- * {@link AbstractGWGoal}. Common examples include:
+ * In addition to {@link #rootProjectLast}, this goal supports all parameters
+ * from {@link AbstractGWGoal}. Common examples include:
  * </p>
  * <ul>
- * <li><b>{@code gw.scanDir}</b>: Base directory used to locate source documents.
- * Can be overridden from the command line via {@code -Dgw.scanDir=...} or in
- * plugin configuration using {@code &lt;scanDir&gt;...&lt;/scanDir&gt;}.</li>
+ * <li><b>{@code gw.scanDir}</b>: Base directory used to locate source
+ * documents. Can be overridden from the command line via
+ * {@code -Dgw.scanDir=...} or in plugin configuration using
+ * {@code &lt;scanDir&gt;...&lt;/scanDir&gt;}.</li>
  * </ul>
  */
 @Mojo(name = "reactor", threadSafe = true)
@@ -84,22 +86,22 @@ public class ReactorGW extends AbstractGWGoal {
 	static final Logger logger = LoggerFactory.getLogger(ReactorGW.class);
 
 	/**
-	 * If {@code true}, delays processing of the execution-root project until all other
-	 * reactor projects complete.
+	 * If {@code true}, delays processing of the execution-root project until all
+	 * other reactor projects complete.
 	 */
 	@Parameter(property = "gw.rootProjectLast", defaultValue = "false")
 	private boolean rootProjectLast;
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		String rootDir = session.getExecutionRootDirectory();
-		boolean rootProject = rootDir.equals(basedir.getAbsolutePath());
-
+		String executionRootDirectory = session.getExecutionRootDirectory();
+		boolean rootProject = executionRootDirectory.equals(basedir.getAbsolutePath());
 		boolean pomProject = "pom".equals(project.getPackaging());
 
 		PropertiesConfigurator config = getConfiguration();
 
 		FileProcessor documents = new FileProcessor(genai, config) {
+
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
@@ -117,6 +119,7 @@ public class ReactorGW extends AbstractGWGoal {
 			protected void processModule(File projectDir, String module) throws IOException {
 				// No-op for this implementation
 			}
+
 		};
 		documents.setModuleMultiThread(false);
 

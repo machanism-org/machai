@@ -21,39 +21,23 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is an AI-assisted documentation engine that scans a project, applies mandatory `@guidance` constraints embedded in source and documentation files, and generates or updates documentation to keep it consistent with the current project state.
+Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. It helps teams keep documentation accurate and consistent by generating updates directly from the source tree and the rules embedded in documentation files.
 
 ## Introduction
 
-Ghostwriter works with many file types across a project, including source code, documentation, project site content, and other relevant artifacts. It treats inline `@guidance` blocks as mandatory constraints and can generate or update documentation in repeatable runs to keep project documentation aligned with the current project state.
-
-Key features include:
-
-- Scans many file types, including source code, Markdown, and other project artifacts
-- Treats inline `@guidance` blocks as mandatory constraints during generation
-- Generates or updates documentation in repeatable runs
-- Provides language-aware reviewers for multiple formats (for example: Java, Markdown, HTML, Python, TypeScript)
+Ghostwriter runs as a CLI that traverses one or more directories (or file patterns), extracts `@guidance` blocks embedded in documents, and uses a configured GenAI provider/model to synthesize or review content. It supports applying default, directory-level guidance as a final step, while allowing file-specific guidance to steer output.
 
 ## Usage
 
-### Run the CLI
+### Basic usage
 
-After building, run the packaged JAR against a local project directory:
-
-```cmd
-java -jar ghostwriter\target\ghostwriter-0.0.10-SNAPSHOT.jar C:\projects\my-project
+```bat
+java -jar gw.jar C:\projects\my-project
 ```
 
-### Examples
+### Typical workflow
 
-Set an explicit root directory:
-
-```cmd
-java -jar ghostwriter\target\ghostwriter-0.0.10-SNAPSHOT.jar -r C:\projects\my-project
-```
-
-Target files with a glob pattern:
-
-```cmd
-java -jar ghostwriter\target\ghostwriter-0.0.10-SNAPSHOT.jar "glob:**\*.md"
-```
+1. Add `@guidance` blocks to documentation files where you want consistent, rule-driven output.
+2. Configure your GenAI provider/model (via `gw.properties` or CLI).
+3. Run Ghostwriter against a project directory (or a pattern) to generate/review documentation updates.
+4. Review changes and commit the updated documentation.

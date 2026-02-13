@@ -298,7 +298,7 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
-	private boolean match(File file) {
+	protected boolean match(File file) {
 		if (file == null) {
 			return false;
 		}
@@ -307,11 +307,11 @@ public class FileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		String path = ProjectLayout.getRelativePath(rootDir, file);
 		if (pathMatcher == null) {
 			return true;
 		}
 
+		String path = ProjectLayout.getRelativePath(rootDir, file);
 		Path pathToMatch = Path.of(path);
 		boolean result = pathMatcher.matches(pathToMatch);
 
@@ -481,7 +481,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (parentId != null) {
 			valueMap.put("parentId", parentId);
 		}
-		valueMap.put("rootDirName", rootDir.getName());
+		valueMap.put("parentDirName", projectLayout.getProjectDir().getParentFile().getName());
 		return valueMap;
 	}
 
@@ -621,7 +621,8 @@ public class FileProcessor extends ProjectProcessor {
 					}
 				} else {
 					String relative = path.toString();
-					if (Strings.CS.equals(relative, exclude) || Strings.CS.equals(path.getFileName().toString(), exclude)) {
+					if (Strings.CS.equals(relative, exclude)
+							|| Strings.CS.equals(path.getFileName().toString(), exclude)) {
 						return true;
 					}
 				}
@@ -900,7 +901,7 @@ public class FileProcessor extends ProjectProcessor {
 
 			if (Strings.CS.startsWith(trimmed, "file:")) {
 				String filePath = StringUtils.substringAfter(trimmed, "file:");
-				return parseLines(readFromFilePath(filePath, valueMap), valueMap);
+				return parseLines(readFromFilePath(filePath), valueMap);
 			}
 
 			return data;
@@ -943,7 +944,7 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
-	private static String readFromFilePath(String filePath, HashMap<String, String> valueMap) {
+	private static String readFromFilePath(String filePath) {
 		Path path = Path.of(filePath);
 		if (!Files.exists(path)) {
 			throw new IllegalArgumentException("File not found: " + path.toAbsolutePath());
@@ -952,9 +953,6 @@ public class FileProcessor extends ProjectProcessor {
 		try (FileReader reader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
 			String result = IOUtils.toString(reader);
 			logger.info("Included: `{}`", filePath);
-
-			result = tryToGetInstructionsFromFile(result, valueMap);
-
 			return result;
 		} catch (IOException e) {
 			throw new IllegalArgumentException("Failed to read file: " + path.toAbsolutePath(), e);

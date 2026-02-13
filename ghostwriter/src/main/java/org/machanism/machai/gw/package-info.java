@@ -36,24 +36,22 @@
  * Command-line orchestration and workspace scanning for Ghostwriter.
  *
  * <p>
- * This package contains the Ghostwriter CLI entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the
- * workspace scanning/processing engine ({@link org.machanism.machai.gw.FileProcessor}). Together they traverse a
- * project directory, locate supported files, extract embedded {@code @guidance:} blocks using file-type-specific
- * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations, and submit per-file requests to the configured
- * {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * This package provides the command-line entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the scanning
+ * engine ({@link org.machanism.machai.gw.FileProcessor}) that walks a project directory and submits per-file review
+ * requests to a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
  * </p>
  *
- * <h2>Scanning model</h2>
+ * <h2>Processing model</h2>
  * <ul>
- *   <li><strong>Layout discovery</strong>: Uses {@link org.machanism.machai.project.layout.ProjectLayout} to identify
- *   conventional source/test/doc folders and (optionally) child modules.</li>
- *   <li><strong>Child-first processing</strong>: When modules are present, module folders are processed before files in
- *   the parent project directory.</li>
- *   <li><strong>Filtering</strong>: Scans may be restricted using {@code glob:}/{@code regex:} matchers and an optional
- *   list of exclude patterns or exact relative paths.</li>
+ *   <li><strong>Layout discovery</strong>: Uses {@link org.machanism.machai.project.layout.ProjectLayout} to determine
+ *   conventional source/test/docs folders and (optionally) child modules.</li>
+ *   <li><strong>Child-first traversal</strong>: When modules are present, module folders are processed before files in
+ *   the parent project directory. Dependency resolution between modules is not performed.</li>
+ *   <li><strong>Filtering</strong>: Scans may be limited using {@code glob:} / {@code regex:} matchers and an optional
+ *   exclude list.</li>
  *   <li><strong>Reviewer selection</strong>: {@link java.util.ServiceLoader} loads
  *   {@link org.machanism.machai.gw.reviewer.Reviewer} services. The processor selects a reviewer by file extension;
- *   the reviewer extracts guidance and builds a per-file prompt fragment.</li>
+ *   the reviewer extracts any embedded {@code @guidance:} blocks and produces a prompt fragment.</li>
  * </ul>
  */
 package org.machanism.machai.gw;
