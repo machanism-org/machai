@@ -20,7 +20,7 @@ Page Structure:
 # Configuration
    - Analyze /java/org/machananism/machai/gw/processor/Ghostwriter.java java source file and generate cmd options description.
    - Table of cmd options, their descriptions, and default values.
-   - Example: Command-line example showing how to configure and run the application with custom parameters.
+   - Example: Command-line example showing how to configure and run the application with custom parameters included information from Ghostwriter.help() method.
 # Resources
    - List of relevant links (platform, GitHub, Maven).
 -->
@@ -31,9 +31,9 @@ Page Structure:
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded `@guidance` directives and AI-powered synthesis.
+Ghostwriter is an advanced documentation engine that scans, analyzes, and assembles project documentation using embedded `@guidance` directives and AI-powered synthesis.
 
-It is designed to help teams keep documentation accurate and up-to-date by:
+It helps teams keep documentation accurate and up-to-date by:
 
 - Generating or updating content from real project sources (code, docs, site pages, and other relevant artifacts)
 - Applying embedded, file-local directives (`@guidance`) to control what gets generated
@@ -43,7 +43,7 @@ It is designed to help teams keep documentation accurate and up-to-date by:
 
 Ghostwriter provides a CLI that scans one or more directories (or patterns) for supported files, extracts embedded guidance directives, and then invokes a configured GenAI provider to produce the requested content.
 
-This makes it useful for:
+Common uses include:
 
 - Project site and README generation
 - API and developer documentation enrichment
@@ -52,11 +52,11 @@ This makes it useful for:
 
 ## Key Features
 
-- Scans directories (or glob/regex patterns) for supported project files
+- Scans directories and patterns (raw paths, glob patterns, or regex patterns) for supported project files
 - Extracts embedded `@guidance` directives and applies them during processing
-- Supports additional system-level instructions and default directory-level guidance
-- Configurable GenAI provider and model via CLI option or properties
-- Optional multi-threaded processing for improved performance
+- Supports system-level instructions and directory-level default guidance
+- Configurable GenAI provider and model via properties and/or CLI
+- Optional multi-threaded processing
 - Optional logging of LLM request inputs for auditing/debugging
 
 ## Getting Started
@@ -90,21 +90,23 @@ Ghostwriter can be configured through a properties file (default: `gw.properties
 
 ### Command-line options
 
-| Option | Long option | Argument | Default | Description |
+| Option | Long option | Arg | Default | Description |
 |---|---|---:|---|---|
 | `-h` | `--help` | No | n/a | Show help and exit. |
 | `-l` | `--logInputs` | No | `false` | Log LLM request inputs to dedicated log files. |
-| `-t` | `--threads` | Yes (optional) | `true` | Enable multi-threaded processing to improve performance. |
-| `-r` | `--root` | Yes | `user.dir` if not set | Root directory used as the project boundary and base for scanning. |
+| `-t` | `--threads` | Yes (optional) | `true` | Enable multi-threaded processing to improve performance. Accepts an optional boolean value (e.g., `-t false`). |
+| `-r` | `--root` | Yes | `user.dir` (when not configured) | Root directory used as the project boundary and base for scanning. |
 | `-a` | `--genai` | Yes | `OpenAI:gpt-5-mini` | GenAI provider and model (for example: `OpenAI:gpt-5.1`). |
-| `-i` | `--instructions` | Yes (optional) | none | System instructions text. May be provided inline, line-by-line via stdin (when used without a value), and can include `http(s)://...` or `file:...` lines which are loaded and inlined. |
-| `-g` | `--guidance` | Yes (optional) | none | Default guidance applied as a final step for the current directory. May be provided inline, via stdin (when used without a value), and can include `http(s)://...` or `file:...` lines which are loaded and inlined. |
-| `-e` | `--excludes` | Yes | none | Comma-separated list of directories to exclude from processing (can be provided via properties or via CLI). |
+| `-i` | `--instructions` | Yes (optional) | none | System instructions text. Each line is processed: `http(s)://...` lines are loaded and inlined, `file:...` lines are loaded and inlined, other lines are used as-is. If used without a value, Ghostwriter reads instructions from stdin until EOF. |
+| `-g` | `--guidance` | Yes (optional) | none | Default directory-level guidance applied as a final step for the current directory. Same loading rules as `--instructions`. If used without a value, Ghostwriter reads guidance from stdin until EOF. |
+| `-e` | `--excludes` | Yes | none | Comma-separated list of directories to exclude from processing. |
 
 ### Example
 
+The CLI help notes that `<scanDir>` can be a raw path, a glob pattern, or a regex pattern.
+
 ```cmd
-java -jar gw.jar src\site\markdown -r . -t true -a "OpenAI:gpt-5.1" -e "target,.git" -l
+java -jar gw.jar "glob:**\*.java" -r . -t true -a "OpenAI:gpt-5.1" -e "target,.git" -l
 ```
 
 ## Resources

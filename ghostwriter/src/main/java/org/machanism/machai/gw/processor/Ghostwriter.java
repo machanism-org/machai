@@ -226,10 +226,26 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Prints CLI help text.
+	 * Prints the Ghostwriter CLI help text, including usage instructions, option descriptions, and example commands.
+	 * <p>
+	 * The help message covers:
+	 * <ul>
+	 *   <li>General description of the Ghostwriter CLI for scanning and processing directories or files using GenAI guidance.</li>
+	 *   <li>Usage syntax: {@code java -jar gw.jar <scanDir> [options]}</li>
+	 *   <li>
+	 *     Explanation of the {@code <scanDir>} argument:
+	 *     <ul>
+	 *       <li>Should be a relative path with respect to the current project directory.</li>
+	 *       <li>If an absolute path is provided, it must be located within the root project directory.</li>
+	 *       <li>Supports raw directory names, glob patterns (e.g., {@code glob:** /*.java}), and regex patterns (e.g., {@code regex:^.*\/[^\/]+\.java$}).</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>Descriptions of all available CLI options.</li>
+	 *   <li>Example commands demonstrating typical usage.</li>
+	 * </ul>
 	 *
-	 * @param options   configured options
-	 * @param formatter formatter instance
+	 * @param options   the configured CLI options to display in the help message
+	 * @param formatter the formatter instance used to print the help text
 	 */
 	private static void help(Options options, HelpFormatter formatter) {
 		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n\n"
