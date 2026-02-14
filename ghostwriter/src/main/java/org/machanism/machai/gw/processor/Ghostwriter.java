@@ -249,7 +249,7 @@ public final class Ghostwriter {
 	 */
 	private static void help(Options options, HelpFormatter formatter) {
 		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n\n"
-				+ "Usage:\n" + "  java -jar gw.jar <scanDir> [options]\n\n"
+				+ "Usage:\n  java -jar gw.jar <scanDir> [options]\n\n"
 				+ "  <scanDir> specifies the scanning path or pattern.\n"
 				+ "    - Use a relative path with respect to the current project directory.\n"
 				+ "    - If an absolute path is provided, it must be located within the root project directory.\n"

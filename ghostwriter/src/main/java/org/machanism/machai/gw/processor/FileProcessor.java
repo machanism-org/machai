@@ -338,11 +338,42 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Determines whether a file should be considered for processing.
+	 * Determines whether the specified file should be included for processing based on exclusion rules,
+	 * path matching patterns, and project structure.
 	 *
-	 * @param file       file to test
-	 * @param projectDir project root directory
-	 * @return {@code true} if the file should be included, otherwise {@code false}
+	 * <p>
+	 * The matching logic proceeds as follows:
+	 * <ol>
+	 *   <li>If the {@code file} is {@code null}, returns {@code false}.</li>
+	 *   <li>If the file's absolute path contains any of the excluded directory names defined in {@code ProjectLayout.EXCLUDE_DIRS}, returns {@code false}.</li>
+	 *   <li>
+	 *     If {@code pathMatcher} is {@code null}:
+	 *     <ul>
+	 *       <li>If {@code defaultGuidance} is {@code null} or the file is the project directory itself, returns {@code true}.</li>
+	 *       <li>Otherwise, returns {@code false}.</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>
+	 *     Computes the relative path from {@code projectDir} to {@code file}. If this is {@code null}, returns {@code false}.</li>
+	 *   <li>
+	 *     Uses {@code pathMatcher} to check if the relative path matches the configured pattern.
+	 *     <ul>
+	 *       <li>If it matches, returns {@code true}.</li>
+	 *       <li>If it does not match and {@code scanDir} is not {@code null}:
+	 *         <ul>
+	 *           <li>Computes the relative path from {@code file} to {@code scanDir}.</li>
+	 *           <li>If this is not {@code null}, resolves the path and checks if it matches the pattern relative to the project root.</li>
+	 *           <li>If this secondary check matches, returns {@code true}.</li>
+	 *         </ul>
+	 *       </li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>If none of the above conditions are met, returns {@code false}.</li>
+	 * </ol>
+	 *
+	 * @param file       the file to check for inclusion
+	 * @param projectDir the root directory of the project
+	 * @return {@code true} if the file matches all criteria for processing; {@code false} otherwise
 	 */
 	protected boolean match(File file, File projectDir) {
 		if (file == null) {
@@ -354,7 +385,7 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		if (pathMatcher == null) {
-			return true;
+			return defaultGuidance == null || Objects.equals(file, projectDir);
 		}
 
 		String path = ProjectLayout.getRelativePath(projectDir, file);
@@ -397,7 +428,9 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		if (match(projectDir, projectDir) && children.isEmpty() && defaultGuidance != null) {
+		boolean match = match(projectDir, projectDir);
+
+		if (match && defaultGuidance != null) {
 			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"),
 					defaultGuidance);
 			process(projectLayout, projectLayout.getProjectDir(), defaultGuidanceText);
@@ -486,6 +519,7 @@ public class FileProcessor extends ProjectProcessor {
 
 			if (guidance != null) {
 				perform = process(projectLayout, file, guidance);
+
 			} else if (defaultGuidance != null) {
 				String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), file,
 						defaultGuidance);
