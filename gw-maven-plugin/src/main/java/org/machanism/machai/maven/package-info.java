@@ -1,20 +1,23 @@
 /**
- * Maven plugin goals (Mojos) that integrate MachAI's guided file processing (GW) into Maven builds.
+ * Maven plugin goals (Mojos) that integrate MachAI's guided workflow (GW) processing into Maven builds.
  *
  * <p>
- * The goals in this package locate documentation or other input sources (for example, {@code src\site}), apply
- * include/exclude configuration, and execute the GW processing pipeline via
- * {@link org.machanism.machai.gw.FileProcessor}.
+ * This package contains the {@code gw:*} Mojos and supporting types that:
  * </p>
+ * <ul>
+ *   <li>scan a project (or reactor) for input documents (for example, under {@code src\\site}),</li>
+ *   <li>apply include/exclude configuration and other parameters, and</li>
+ *   <li>invoke the GW processing pipeline as part of a Maven build.</li>
+ * </ul>
  *
  * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     {@code gw:gw} - Aggregator goal that can run without a {@code pom.xml} and processes a reactor build in reverse
- *     order (sub-modules first, then parent modules).
+ *     {@code gw:gw} - Aggregator goal that can be run without a {@code pom.xml}; processes a multi-module build in
+ *     reverse order (sub-modules first, then parent modules).
  *   </li>
  *   <li>
- *     {@code gw:mod} - Processes Maven reactor modules following standard Maven reactor dependency ordering.
+ *     {@code gw:reactor} - Processes Maven reactor modules following standard Maven reactor dependency ordering.
  *   </li>
  *   <li>
  *     {@code gw:clean} - Deletes temporary artifacts created by GW processing.
@@ -23,8 +26,9 @@
  *
  * <h2>Configuration</h2>
  * <p>
- * Parameters are provided via standard Maven plugin configuration and/or system properties (typically {@code -Dgw.*}).
- * Shared parameters and scanning behavior are defined by {@link org.machanism.machai.maven.AbstractGWGoal}.
+ * Parameters are supplied through standard Maven plugin configuration and/or system properties (typically
+ * {@code -Dgw.*}). Common parameters and scanning behavior are defined on the shared base class
+ * {@link org.machanism.machai.maven.AbstractGWGoal}.
  * </p>
  *
  * <h2>Examples</h2>
@@ -32,7 +36,7 @@
  * mvn gw:gw
  * }</pre>
  * <pre>{@code
- * mvn gw:mod -Dgw.scanDir=src\site
+ * mvn gw:reactor -Dgw.scanDir=src\\site
  * }</pre>
  */
 package org.machanism.machai.maven;

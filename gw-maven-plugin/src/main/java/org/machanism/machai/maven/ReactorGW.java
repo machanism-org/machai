@@ -9,7 +9,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.gw.FileProcessor;
+import org.machanism.machai.gw.processor.FileProcessor;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -24,23 +24,29 @@ ProcessModules supports Maven reactor for module processing. All submodules will
 /**
  * Maven goal that processes documents across a multi-module (reactor) build.
  * <p>
- * This goal supports Maven reactor module processing: all submodules are
- * processed according to their dependencies, following standard Maven reactor
- * logic.
+ * This goal supports Maven reactor module processing: all submodules are processed according to their dependencies,
+ * following standard Maven reactor logic.
  * </p>
  *
  * <h2>Parameters</h2>
- * <p>
- * This goal inherits additional common parameters from {@link AbstractGWGoal}.
- * Refer to that class for the complete list and their usage.
- * </p>
  * <ul>
- * <li><b>{@code gw.rootProjectLast}</b> ({@link #rootProjectLast}): If
- * {@code true}, delays processing of the execution-root project until all other
- * reactor projects have completed.</li>
+ * <li><b>{@code gw.rootProjectLast}</b> / {@code &lt;rootProjectLast&gt;} ({@link #rootProjectLast}): If {@code true},
+ * delays processing of the execution-root project until all other reactor projects have completed.
+ * <p>
+ * Default: {@code false}
+ * </p>
+ * </li>
  * </ul>
  *
- * <h2>Usage</h2>
+ * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
+ * <ul>
+ * <li><b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}): Base directory used to locate source
+ * documents. If not provided, defaults to {@code ${project.basedir}}.</li>
+ * <li><b>{@code gw.genai}</b> / {@code &lt;genai&gt;} ({@code genai}): GenAI provider or configuration used during
+ * processing.</li>
+ * </ul>
+ *
+ * <h2>Usage examples</h2>
  *
  * <h3>Command line</h3>
  *
@@ -63,21 +69,11 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *   &lt;version&gt;...&lt;/version&gt;
  *   &lt;configuration&gt;
  *     &lt;rootProjectLast&gt;true&lt;/rootProjectLast&gt;
+ *     &lt;!-- inherited from AbstractGWGoal --&gt;
+ *     &lt;scanDir&gt;${project.basedir}&lt;/scanDir&gt;
  *   &lt;/configuration&gt;
  * &lt;/plugin&gt;
  * </pre>
- *
- * <h2>Inherited parameters</h2>
- * <p>
- * In addition to {@link #rootProjectLast}, this goal supports all parameters
- * from {@link AbstractGWGoal}. Common examples include:
- * </p>
- * <ul>
- * <li><b>{@code gw.scanDir}</b>: Base directory used to locate source
- * documents. Can be overridden from the command line via
- * {@code -Dgw.scanDir=...} or in plugin configuration using
- * {@code &lt;scanDir&gt;...&lt;/scanDir&gt;}.</li>
- * </ul>
  */
 @Mojo(name = "reactor", threadSafe = true)
 public class ReactorGW extends AbstractGWGoal {
@@ -86,8 +82,7 @@ public class ReactorGW extends AbstractGWGoal {
 	static final Logger logger = LoggerFactory.getLogger(ReactorGW.class);
 
 	/**
-	 * If {@code true}, delays processing of the execution-root project until all
-	 * other reactor projects complete.
+	 * If {@code true}, delays processing of the execution-root project until all other reactor projects complete.
 	 */
 	@Parameter(property = "gw.rootProjectLast", defaultValue = "false")
 	private boolean rootProjectLast;
@@ -132,7 +127,7 @@ public class ReactorGW extends AbstractGWGoal {
 			return;
 		}
 
-		new Thread(() -> {
+		Thread deferredRootScanThread = new Thread(() -> {
 			try {
 				while (!reactorProjects.isEmpty()) {
 					Thread.sleep(500);
@@ -144,6 +139,8 @@ public class ReactorGW extends AbstractGWGoal {
 				Thread.currentThread().interrupt();
 				getLog().error(e);
 			}
-		}, "gw-std-root-last").start();
+		}, "gw-reactor-root-last");
+		deferredRootScanThread.setDaemon(true);
+		deferredRootScanThread.start();
 	}
 }

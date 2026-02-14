@@ -1,14 +1,11 @@
 package org.machanism.machai.maven;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -17,9 +14,7 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.gw.FileProcessor;
-import org.machanism.machai.project.layout.MavenProjectLayout;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.gw.processor.FileProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,8 +189,6 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 			basedir = SystemUtils.getUserDir();
 		}
 
-		logger.info("Scanning documents in the root directory: {}", basedir);
-
 		processor.setExcludes(excludes);
 
 		try {
@@ -209,9 +202,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 				processor.setDefaultGuidance(guidance);
 			}
 
-			File rootDir = new File(session.getExecutionRootDirectory());
-			
-			logger.info("Scanning documents in the root directory: {}", rootDir);
+			File rootDir = new File(session.getExecutionRootDirectory());	
 			processor.setLogInputs(logInputs);
 
 			if (scanDir == null) {

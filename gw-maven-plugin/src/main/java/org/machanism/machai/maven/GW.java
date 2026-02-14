@@ -11,7 +11,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.gw.FileProcessor;
+import org.machanism.machai.gw.processor.FileProcessor;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -28,8 +28,8 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a project.
  *
  * <p>
- * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present in the
- * current directory.
+ * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present in the current
+ * directory.
  * </p>
  *
  * <h2>Processing order</h2>
@@ -42,47 +42,75 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <h2>Parameters</h2>
  * <p>
- * This goal defines the following parameters in addition to those inherited from
- * {@link AbstractGWGoal}:
+ * This goal defines the following parameters in addition to those inherited from {@link AbstractGWGoal}:
  * </p>
- * <ul>
- * <li>
- * {@code -Dgw.threads} ({@link #threads}): Enables or disables multi-threaded module processing.
+ * <dl>
+ * <dt>{@code -Dgw.threads}</dt>
+ * <dd>
+ * Enables or disables multi-threaded module processing.
  * Default: {@code false}.
- * </li>
- * </ul>
+ * </dd>
+ * </dl>
  *
  * <p>
- * See {@link AbstractGWGoal} for additional shared parameters, such as configuring the GenAI
- * provider and selecting documents to scan.
+ * See {@link AbstractGWGoal} for additional shared parameters, including GenAI provider configuration and
+ * document selection settings.
  * </p>
  *
+ * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
+ * <dl>
+ * <dt>{@code -Dgw.basedir}</dt>
+ * <dd>
+ * Project directory to process.
+ * See {@link AbstractGWGoal#basedir}.
+ * </dd>
+ * <dt>{@code -Dgw.genai}</dt>
+ * <dd>
+ * GenAI provider identifier to use.
+ * See {@link AbstractGWGoal#genai}.
+ * </dd>
+ * <dt>{@code -Dgw.docs}</dt>
+ * <dd>
+ * Document scan selector(s) / filter(s).
+ * See {@link AbstractGWGoal#docs}.
+ * </dd>
+ * </dl>
+ *
  * <h2>Usage examples</h2>
+ *
+ * <p>Run in the current directory:</p>
  * <pre>
  * mvn gw:gw
  * </pre>
  *
+ * <p>Run without a {@code pom.xml} (requires this goal's {@code requiresProject=false}):</p>
+ * <pre>
+ * cd path\\to\\project
+ * mvn gw:gw
+ * </pre>
+ *
+ * <p>Enable multi-threaded processing:</p>
+ * <pre>
+ * mvn gw:gw -Dgw.threads=true
+ * </pre>
+ *
+ * <p>Disable multi-threaded processing (default):</p>
  * <pre>
  * mvn gw:gw -Dgw.threads=false
  * </pre>
  *
+ * <p>Run against a specific module:</p>
  * <pre>
  * mvn -pl :my-module gw:gw
  * </pre>
  *
- * <pre>
- * mvn gw:gw -Dgw.threads=true
- * </pre>
+ * @see AbstractGWGoal
  */
 @Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false)
 public class GW extends AbstractGWGoal {
 
 	/**
 	 * Enables or disables multi-threaded module processing.
-	 *
-	 * <p>
-	 * When enabled, module processing may occur concurrently.
-	 * </p>
 	 */
 	@Parameter(property = "gw.threads", defaultValue = "false")
 	private boolean threads;

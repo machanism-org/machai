@@ -45,30 +45,30 @@ Ensure that your content generation and documentation efforts consider the full 
 
 ## Introduction
 
-GW Maven Plugin integrates **Ghostwriter guided file processing** into Maven builds so documentation can be generated and kept up to date as part of your normal development and CI workflow.
-It scans project files—including source code, documentation, and Maven Site content—for embedded `@guidance:` instructions and runs an AI-assisted synthesis workflow to produce consistent, maintainable outputs.
+GW Maven Plugin integrates Ghostwriter guided file processing into Maven builds so documentation and other project artifacts can be generated and kept up to date as part of normal development and CI workflows.
 
-The plugin provides two primary goals:
+It scans project files (source code, documentation, Maven Site pages, and other content) for embedded `@guidance:` instructions and runs Ghostwriter processing across a single project or an entire multi-module build.
 
-- **`gw:gw`**: aggregator processing that can be run even without a `pom.xml` (`requiresProject=false`) and processes modules in **reverse order** (sub-modules first, then parent), similar to the Ghostwriter CLI.
-- **`gw:reactor`**: reactor-aware processing that follows standard Maven reactor dependency ordering, with an option to defer the execution-root project until the rest of the reactor has completed.
+The `gw:gw` goal (implemented by `org.machanism.machai.maven.GW`) is an aggregator goal that can run even when a `pom.xml` is not present (`requiresProject=false`). When working with multi-module builds, it processes modules in reverse order (sub-modules first, then parent), mirroring the Ghostwriter CLI behavior.
+
+For multi-module builds that should follow Maven’s standard reactor ordering, the `gw:reactor` goal (implemented by `org.machanism.machai.maven.ReactorGW`) processes modules according to reactor dependency order, with an option to delay processing of the execution-root project until all other reactor modules complete.
 
 ## Overview
 
 The core value proposition is to make guided documentation automation a first-class Maven activity:
 
-- Keep docs current by running guided processing during local development and CI.
-- Apply consistent rules across all modules by centralizing configuration in Maven properties and plugin parameters.
-- Support both common multi-module processing strategies: reverse-order (CLI-like) and Maven reactor ordering.
+- **Keep docs current** by running guided processing during local development and CI.
+- **Standardize behavior across modules** by centralizing configuration in Maven properties and plugin parameters.
+- **Fit different build strategies** with both CLI-like reverse ordering (`gw:gw`) and reactor dependency ordering (`gw:reactor`).
 
 ## Key Features
 
 - Scans **all relevant project files** (code, docs, site pages, and other content) for embedded `@guidance:` instructions.
-- Goal **`gw:gw`** can run **without a `pom.xml`** and processes modules **sub-modules first**.
-- Goal **`gw:reactor`** processes reactor modules using **standard Maven dependency order**.
-- Shared configuration parameters for scan roots, excludes, instruction locations, and default guidance.
+- Goal **`gw:gw`** can run **without a `pom.xml`** and processes modules **sub-modules first** (reverse order).
+- Goal **`gw:reactor`** processes modules using **standard Maven reactor dependency order**.
+- Optional **root-project-last** behavior for reactor builds to process the execution root after other modules.
+- Shared configuration via Maven properties and plugin parameters.
 - Optional credential loading from `~/.m2/settings.xml` via a configured `<server>` id.
-- Optional logging of input files sent to the workflow.
 
 ## Getting Started
 
@@ -76,7 +76,7 @@ The core value proposition is to make guided documentation automation a first-cl
 
 - Java 11+.
 - Apache Maven.
-- A configured GenAI provider/model identifier (for example, via `-Dgw.genai=...`) and any required provider credentials.
+- A configured GenAI provider/model identifier and any required provider credentials (for example via `-Dgw.genai=...`).
 - (Optional) Maven `settings.xml` credentials if you use `-Dgw.genai.serverId=...`.
 
 ### Basic Usage
@@ -96,25 +96,25 @@ mvn gw:reactor
 ### Typical Workflow
 
 1. Add `@guidance:` comments to relevant project files (code, docs, site pages, etc.).
-2. (Optional) Configure defaults:
+2. Configure defaults (optional):
    - Default guidance: `-Dgw.guidance=...`
    - Instruction locations: `-Dgw.instructions=...`
    - Excludes: `-Dgw.excludes=...`
-3. (Optional) Configure credentials:
+3. Configure credentials (optional):
    - Add a `<server>` entry in `~/.m2/settings.xml`.
    - Run with `-Dgw.genai.serverId=<serverId>`.
-4. Execute one of the goals:
+4. Execute a goal:
    - `gw:gw` for reverse-order (sub-modules first) processing.
    - `gw:reactor` for Maven reactor-ordered processing.
-5. Review and commit the updated/generated documentation.
+5. Review and commit the updated/generated artifacts.
 
 ## Configuration
 
-Common parameters are inherited by both goals from the shared base goal.
+Common parameters are inherited by both goals from the shared base goal (`AbstractGWGoal`).
 
 | Parameter / Property | Description | Default |
 |---|---|---|
-| `gw.genai` | GenAI provider/model identifier passed to the workflow. | (none) |
+| `gw.genai` | GenAI provider/model identifier passed to Ghostwriter processing. | (none) |
 | `gw.scanDir` | Scan root override; when omitted, scans the module base directory. | `${basedir}` |
 | `gw.instructions` | Instruction locations (file paths or classpath locations) consumed by the workflow. | (none) |
 | `gw.guidance` | Default guidance text forwarded to the workflow. | (none) |

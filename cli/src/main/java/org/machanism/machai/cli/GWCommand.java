@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.bindex.ApplicationAssembly;
-import org.machanism.machai.gw.FileProcessor;
+import org.machanism.machai.gw.processor.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

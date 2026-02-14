@@ -216,6 +216,9 @@ public class FileProcessor extends ProjectProcessor {
 	 * @throws IllegalArgumentException if the scan path is not located within the root project directory
 	 */
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
+		logger.info("Using project directory: {}", projectDir);
+		logger.info("Initiating scan in path: {}", scanDir);
+		
 		if (projectDir == null) {
 			throw new IllegalArgumentException("projectDir must not be null");
 		}

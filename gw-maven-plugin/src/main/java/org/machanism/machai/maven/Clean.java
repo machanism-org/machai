@@ -7,7 +7,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.machanism.machai.gw.FileProcessor;
+import org.machanism.machai.gw.processor.FileProcessor;
 
 /**
  * Maven goal that deletes temporary artifacts created by the MachAI generative-workflow (GW) document processing.

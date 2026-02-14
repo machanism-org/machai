@@ -23,9 +23,13 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
 
-GW Maven Plugin integrates **Ghostwriter guided file processing** into Maven builds so documentation and other project files can be generated and kept up to date as part of your normal development and CI workflow.
+GW Maven Plugin integrates Ghostwriter guided file processing into Maven builds so documentation and other project artifacts can be generated and kept up to date as part of normal development and CI workflows.
 
-It scans project files—including source code, documentation, and Maven Site content—for embedded `@guidance:` instructions and runs an AI-assisted synthesis workflow to produce consistent, maintainable outputs.
+At a high level, the plugin:
+
+- scans project files (source code, documentation, Maven Site pages, and other content) for embedded `@guidance:` instructions
+- runs Ghostwriter processing for the project (and, where applicable, its modules)
+- supports different module-ordering strategies depending on the goal used
 
 The plugin provides two primary goals:
 
@@ -38,7 +42,7 @@ The plugin provides two primary goals:
 
 - Git
 - Java 11+
-- Apache Maven 3.x
+- Apache Maven
 
 ### Checkout
 
