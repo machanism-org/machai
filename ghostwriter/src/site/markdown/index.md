@@ -31,29 +31,25 @@ Page Structure:
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine that scans, analyzes, and assembles project documentation using embedded `@guidance` directives and AI-powered synthesis.
+Ghostwriter is a documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider to generate or refine documentation.
 
-It helps teams keep documentation accurate and up-to-date by:
-
-- Generating or updating content from real project sources (code, docs, site pages, and other relevant artifacts)
-- Applying embedded, file-local directives (`@guidance`) to control what gets generated
-- Producing consistent results using a configurable GenAI provider/model
+It supports **all types of project files**—including source code, documentation, project site content, and other relevant artifacts—so teams can keep docs aligned with the evolving codebase.
 
 ## Overview
 
-Ghostwriter provides a CLI that scans one or more directories (or patterns) for supported files, extracts embedded guidance directives, and then invokes a configured GenAI provider to produce the requested content.
+Ghostwriter provides a command-line workflow to:
 
-Common uses include:
+- Scan one or more directories or patterns for supported project files
+- Extract embedded `@guidance` directives (optionally combined with system instructions)
+- Invoke a configured GenAI provider/model to synthesize changes
+- Write improved content back to the project files
 
-- Project site and README generation
-- API and developer documentation enrichment
-- Reviewing and improving existing Markdown/HTML/text documentation
-- Keeping documentation aligned with the current codebase
+Common use cases include project site/README generation, API documentation enrichment, and continuous documentation maintenance.
 
 ## Key Features
 
-- Scans directories and patterns (raw paths, glob patterns, or regex patterns) for supported project files
-- Extracts embedded `@guidance` directives and applies them during processing
+- Scans directories or patterns (raw paths, glob patterns, or regex patterns)
+- Extracts and applies embedded `@guidance` directives during processing
 - Supports system-level instructions and directory-level default guidance
 - Configurable GenAI provider and model via properties and/or CLI
 - Optional multi-threaded processing
@@ -64,7 +60,7 @@ Common uses include:
 ### Prerequisites
 
 - Java 11 or later
-- Network access to your selected GenAI provider (as configured in your environment/properties)
+- Network access and credentials for your selected GenAI provider (as configured in your environment and/or `gw.properties`)
 
 ### Installation
 
@@ -80,9 +76,9 @@ java -jar gw.jar src\main\java
 
 ### Typical Workflow
 
-1. Add embedded `@guidance` blocks to files you want Ghostwriter to generate or refine.
-2. Run Ghostwriter against the directory (or pattern) that contains those files.
-3. Review the generated output, commit changes, and re-run as needed to keep docs current.
+1. Add embedded `@guidance` blocks to the files you want Ghostwriter to generate or refine.
+2. Run Ghostwriter against the directory (or pattern) containing those files.
+3. Review the output, commit changes, and re-run as needed.
 
 ## Configuration
 
@@ -90,20 +86,20 @@ Ghostwriter can be configured through a properties file (default: `gw.properties
 
 ### Command-line options
 
-| Option | Long option | Arg | Default | Description |
-|---|---|---:|---|---|
+| Option | Long option | Argument | Default | Description |
+|---|---|---|---|---|
 | `-h` | `--help` | No | n/a | Show help and exit. |
 | `-l` | `--logInputs` | No | `false` | Log LLM request inputs to dedicated log files. |
-| `-t` | `--threads` | Yes (optional) | `true` | Enable multi-threaded processing to improve performance. Accepts an optional boolean value (e.g., `-t false`). |
-| `-r` | `--root` | Yes | `user.dir` (when not configured) | Root directory used as the project boundary and base for scanning. |
-| `-a` | `--genai` | Yes | `OpenAI:gpt-5-mini` | GenAI provider and model (for example: `OpenAI:gpt-5.1`). |
-| `-i` | `--instructions` | Yes (optional) | none | System instructions text. Each line is processed: `http(s)://...` lines are loaded and inlined, `file:...` lines are loaded and inlined, other lines are used as-is. If used without a value, Ghostwriter reads instructions from stdin until EOF. |
+| `-t` | `--threads` | Yes (optional) | `true` | Enable multi-threaded processing (default: `true`). If used without a value, defaults to `true`. You may pass an explicit boolean value (e.g., `-t false`). |
+| `-r` | `--root` | Yes | `user.dir` | Root directory used as the project boundary and base for scanning when not configured via properties. |
+| `-a` | `--genai` | Yes | `OpenAI:gpt-5-mini` | GenAI provider and model (e.g., `OpenAI:gpt-5.1`). |
+| `-i` | `--instructions` | Yes (optional) | none | System instructions. Each line is processed: blank lines are preserved; `http(s)://...` lines are loaded and inlined; `file:...` lines are loaded and inlined; other lines are used as-is. If used without a value, Ghostwriter reads instructions from stdin until EOF. |
 | `-g` | `--guidance` | Yes (optional) | none | Default directory-level guidance applied as a final step for the current directory. Same loading rules as `--instructions`. If used without a value, Ghostwriter reads guidance from stdin until EOF. |
-| `-e` | `--excludes` | Yes | none | Comma-separated list of directories to exclude from processing. |
+| `-e` | `--excludes` | Yes | none | Comma-separated list of directories to exclude from processing (e.g., `target,.git`). |
 
 ### Example
 
-The CLI help notes that `<scanDir>` can be a raw path, a glob pattern, or a regex pattern.
+From the CLI help: `<scanDir>` can be a raw path, a glob pattern, or a regex pattern.
 
 ```cmd
 java -jar gw.jar "glob:**\*.java" -r . -t true -a "OpenAI:gpt-5.1" -e "target,.git" -l

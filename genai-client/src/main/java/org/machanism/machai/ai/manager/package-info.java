@@ -29,20 +29,20 @@
  * Provider discovery, configuration, and host-side tool wiring for generative AI integrations.
  *
  * <p>This package defines the {@link org.machanism.machai.ai.manager.GenAIProvider} service-provider interface (SPI)
- * and related utilities used to resolve, configure, and interact with concrete provider implementations.
+ * and supporting utilities used to resolve, configure, and interact with concrete provider implementations.
  *
  * <h2>Key responsibilities</h2>
  * <ul>
- * <li><strong>Provider resolution</strong> via {@link org.machanism.machai.ai.manager.GenAIProviderManager}, which
- * creates provider instances using a {@code Provider:Model} identifier (or a fully qualified provider class name)
- * and applies the selected model.</li>
- * <li><strong>Session interaction contract</strong> via {@link org.machanism.machai.ai.manager.GenAIProvider}, which
- * supports prompts, instructions, file attachments, embeddings, and tool registration.</li>
- * <li><strong>Host tool installation</strong> via {@link org.machanism.machai.ai.manager.FileFunctionTools},
- * {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and the convenience wrapper
- * {@link org.machanism.machai.ai.manager.SystemFunctionTools}.</li>
- * <li><strong>Operational metrics</strong> via {@link org.machanism.machai.ai.manager.Usage} aggregated by
- * {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *   <li><strong>Provider resolution</strong> via {@link org.machanism.machai.ai.manager.GenAIProviderManager}, which
+ *   creates provider instances using a {@code Provider:Model} identifier (or a fully qualified provider class name)
+ *   and applies the selected model.</li>
+ *   <li><strong>Session interaction contract</strong> via {@link org.machanism.machai.ai.manager.GenAIProvider}, which
+ *   supports prompts, instructions, file attachments, embeddings, and tool registration.</li>
+ *   <li><strong>Host tool installation</strong> via {@link org.machanism.machai.ai.manager.FileFunctionTools},
+ *   {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and the convenience wrapper
+ *   {@link org.machanism.machai.ai.manager.SystemFunctionTools}.</li>
+ *   <li><strong>Operational metrics</strong> via {@link org.machanism.machai.ai.manager.Usage} aggregated by
+ *   {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

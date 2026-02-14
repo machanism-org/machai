@@ -1,19 +1,14 @@
 /**
- * Reviewers for extracting embedded {@code @guidance} instructions from project files.
+ * File-format-specific {@link org.machanism.machai.gw.reviewer.Reviewer reviewers} used by Ghostwriter to scan
+ * project files and extract embedded guidance instructions.
  *
- * <p>This package provides file-format-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations
- * used by Ghostwriter to scan source and documentation files, locate guidance comments, and produce a normalized
- * prompt fragment for downstream pipeline stages.
+ * <p>The {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) is implemented for
+ * multiple file types. Each implementation understands the target format's comment conventions (for example,
+ * Java block/line comments, HTML comments, or Python comments) and returns a normalized prompt fragment.
  *
- * <h2>Responsibilities</h2>
- * <ul>
- *   <li>Detect whether a file contains guidance markers (see
- *       {@link org.machanism.machai.gw.processor.FileProcessor#GUIDANCE_TAG_NAME}).</li>
- *   <li>Parse guidance using the target format's comment conventions (for example, Java block and line comments,
- *       or HTML/Markdown comments).</li>
- *   <li>Format a prompt fragment that includes project-relative path context computed via
- *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
- * </ul>
+ * <p>Prompt fragments typically include enough file and path context (for example, via
+ * {@link org.machanism.machai.project.layout.ProjectLayout}) for downstream processors to locate and apply the
+ * extracted instructions.
  */
 package org.machanism.machai.gw.reviewer;
 

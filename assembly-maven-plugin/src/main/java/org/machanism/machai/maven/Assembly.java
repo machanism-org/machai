@@ -32,26 +32,28 @@ import org.machanism.machai.schema.Bindex;
  * This goal drives an AI-assisted "assembly" workflow for a target project directory:
  * </p>
  * <ol>
- *   <li>Acquire a natural-language prompt from {@link #assemblyPromptFile} (if present) or request it interactively.</li>
- *   <li>Use {@link #pickChatModel} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
- *   <li>Filter recommendations by {@link #score}.</li>
- *   <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
+ * <li>Acquire a natural-language prompt from {@link #assemblyPromptFile} (if present) or request it interactively.</li>
+ * <li>Use {@link #pickChatModel} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
+ * <li>Filter recommendations by {@link #score}.</li>
+ * <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
  * </ol>
  *
  * <h2>Plugin parameters</h2>
  * <ul>
- *   <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; Provider id for the assembly phase.</li>
- *   <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider id for the library recommendation
- *   (picker) phase.</li>
- *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; File containing the prompt; if absent,
- *   the prompt is requested interactively.</li>
- *   <li>{@code assembly.score} (default {@code 0.9}) &ndash; Minimum score required for a recommended library to be
- *   listed/used.</li>
- *   <li>{@code bindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
+ * <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; Provider id for the assembly phase.</li>
+ * <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider id for the library recommendation
+ * (picker) phase.</li>
+ * <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; File containing the prompt; if absent,
+ * the prompt is requested interactively.</li>
+ * <li>{@code assembly.score} (default {@code 0.9}) &ndash; Minimum score required for a recommended library to be
+ * listed/used.</li>
+ * <li>{@code bindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
  * </ul>
  *
  * <h2>Usage examples</h2>
- * <p><b>Command line:</b></p>
+ * <p>
+ * <b>Command line:</b>
+ * </p>
  * <pre>
  * mvn org.machanism.machai:assembly-maven-plugin:assembly
  *   -Dassembly.genai=OpenAI:gpt-5
@@ -125,18 +127,18 @@ public class Assembly extends AbstractMojo {
 	 * Execution steps:
 	 * </p>
 	 * <ol>
-	 *   <li>Read the prompt from {@link #assemblyPromptFile} if it exists; otherwise prompt the user.</li>
-	 *   <li>Create a {@link Configurator} backed by {@code bindex.properties}.</li>
-	 *   <li>Initialize the picker {@link GenAIProvider} and apply {@link SystemFunctionTools}.</li>
-	 *   <li>Use {@link Picker} to recommend libraries and log recommendations to the build output.</li>
-	 *   <li>Initialize the assembly {@link GenAIProvider} and apply {@link SystemFunctionTools}.</li>
-	 *   <li>Run {@link ApplicationAssembly} against {@link #basedir}.</li>
-	 *   <li>If the provider is not a {@link NoneProvider}, enter an interactive prompt loop until the user types
-	 *   {@code exit}.</li>
+	 * <li>Read the prompt from {@link #assemblyPromptFile} if it exists; otherwise prompt the user.</li>
+	 * <li>Create a {@link Configurator} backed by {@code bindex.properties}.</li>
+	 * <li>Initialize the picker {@link GenAIProvider} and apply {@link SystemFunctionTools}.</li>
+	 * <li>Use {@link Picker} to recommend libraries and log recommendations to the build output.</li>
+	 * <li>Initialize the assembly {@link GenAIProvider} and apply {@link SystemFunctionTools}.</li>
+	 * <li>Run {@link ApplicationAssembly} against {@link #basedir}.</li>
+	 * <li>If the provider is not a {@link NoneProvider}, enter an interactive prompt loop until the user types
+	 * {@code exit}.</li>
 	 * </ol>
 	 *
-	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly workflow
-	 *                                fails
+	 * @throws MojoExecutionException
+	 *             if prompt acquisition fails, provider interaction fails, or the assembly workflow fails
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {

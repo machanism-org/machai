@@ -3,24 +3,20 @@ Ghostwriter CLI (gw)
 
 1) Application Overview
 -----------------------
-Ghostwriter is a CLI documentation engine that scans, analyzes, and assembles project documentation using embedded `@guidance` directives and AI-powered synthesis.
+Ghostwriter is a documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider to generate or refine documentation.
 
-It helps teams keep documentation accurate and up-to-date by:
-- Generating or updating content from real project sources (code, docs, site pages, and other relevant artifacts)
-- Applying embedded, file-local directives (`@guidance`) to control what gets generated
-- Producing consistent results using a configurable GenAI provider/model
+It supports all types of project files—including source code, documentation, project site content, and other relevant artifacts—so teams can keep docs aligned with the evolving codebase.
 
-Common use cases
-- Project site and README generation
-- API and developer documentation enrichment
-- Reviewing and improving existing Markdown/HTML/text documentation
-- Keeping documentation aligned with the current codebase
+Typical use cases
+- Project site/README generation
+- API documentation enrichment
+- Continuous documentation maintenance
 
 Key features
-- Scans directories and patterns (raw paths, `glob:` patterns, or `regex:` patterns) for supported project files
-- Extracts embedded `@guidance` directives and applies them during processing
-- Supports system-level instructions and directory-level default guidance
-- Configurable GenAI provider/model via properties and/or CLI
+- Scans directories or patterns (raw paths, glob patterns, or regex patterns)
+- Extracts embedded `@guidance` directives (optionally combined with system instructions)
+- Invokes a configured GenAI provider/model to synthesize changes
+- Writes improved content back to the project files
 - Optional multi-threaded processing
 - Optional logging of LLM request inputs for auditing/debugging
 
@@ -33,7 +29,8 @@ Supported GenAI providers
 ----------------------------
 Prerequisites
 - Java 11 or later
-- Network access to your selected GenAI provider
+- Network access and credentials for your selected GenAI provider
+- Configuration via gw.properties and/or environment variables / Java system properties
 
 Download / install
 - Download the Ghostwriter CLI bundle:
@@ -45,15 +42,13 @@ Build (from source)
 
 What’s included in this folder
 - gw.properties
-  - Sample/default configuration (GenAI provider/model selection and credential placeholders).
+  - Sample configuration: provider/model selection and credential placeholders.
 - gw.bat
-  - Windows launcher script (runs gw.jar and forwards all args).
+  - Windows launcher (runs gw.jar and forwards all args).
 - gw.sh
-  - Unix-like launcher script (runs gw.jar and forwards all args).
-- g\create_tests
-  - Example instructions prompt for generating unit tests.
-- g\to_java21
-  - Example instructions prompt for migrating a codebase from Java 17 to Java 21.
+  - Unix-like launcher (runs gw.jar and forwards all args).
+- g\
+  - Folder containing example instruction prompt files (used with -i file:...).
 
 
 3) How to Run
@@ -84,9 +79,9 @@ Unix (.sh)
 
 Configuration sources
 - Properties file: default is gw.properties, or pass -Dgw.config=<path>
-- CLI options
 - Environment variables (recommended for credentials)
 - Java system properties (-D...)
+- CLI options
 
 Environment variables (auth)
 - CodeMie:
@@ -126,21 +121,20 @@ Common CLI options
 - -l, --logInputs
   - Log LLM request inputs to dedicated log files.
 - -t [true|false], --threads [true|false]
-  - Enable/disable multi-threaded processing.
+  - Enable/disable multi-threaded processing (default: true).
 - -r <path>, --root <path>
   - Root directory used as the project boundary and base for scanning.
 - -a <provider:model>, --genai <provider:model>
-  - GenAI provider and model (example: OpenAI:gpt-5.1).
+  - GenAI provider and model (e.g., OpenAI:gpt-5.1).
 - -i [text], --instructions [text]
-  - System instructions text.
-  - Each line is processed: http(s)://... lines are loaded and inlined, file:... lines are loaded and inlined, other lines are used as-is.
+  - System instructions.
+  - Each line is processed: blank lines preserved; http(s)://... lines loaded and inlined; file:... lines loaded and inlined; other lines used as-is.
   - If used without a value, Ghostwriter reads instructions from stdin until EOF.
 - -g [text], --guidance [text]
   - Default directory-level guidance applied as a final step for the current directory.
-  - Same loading rules as --instructions.
-  - If used without a value, Ghostwriter reads guidance from stdin until EOF.
+  - Same loading rules as --instructions. If used without a value, reads from stdin until EOF.
 - -e <dirs>, --excludes <dirs>
-  - Comma-separated list of directories to exclude from processing.
+  - Comma-separated list of directories to exclude from processing (e.g., target,.git).
 
 Examples
 
@@ -178,6 +172,17 @@ Unix
 java -jar gw.jar /path/to/my-project -i file:./g/create_tests
 ```
 
+Notes on --root and scanning
+- <scanDir> can be a raw path, a glob pattern, or a regex pattern.
+- Use --root to define the project boundary/base directory.
+
+Example (glob scan)
+
+Windows
+```bat
+java -jar gw.jar "glob:**\*.java" -r . -e "target,.git" -l
+```
+
 
 4) Troubleshooting & Support
 ----------------------------
@@ -187,11 +192,11 @@ Common issues
   - If using an OpenAI-compatible endpoint, confirm OPENAI_BASE_URL is correct.
 - Nothing changes / no files processed
   - Ensure the target directory contains files with embedded @guidance directives.
-  - Check --root and --excludes aren’t filtering the intended content.
+  - Check --root and --excludes aren’t filtering intended content.
 - Missing configuration
   - Place gw.properties next to gw.jar, or pass -Dgw.config=<path>.
 
-Logs and debugging
+Logs and debug output
 - Use --logInputs to write LLM request inputs to dedicated log files (useful for auditing/debugging).
 - Run --help to confirm available options and defaults.
 

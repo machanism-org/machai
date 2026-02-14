@@ -23,15 +23,18 @@ ProcessModules supports Maven reactor for module processing. All submodules will
 
 /**
  * Maven goal that processes documents across a multi-module (reactor) build.
+ *
  * <p>
- * This goal supports Maven reactor module processing: all submodules are processed according to their dependencies,
- * following standard Maven reactor logic.
+ * This goal supports Maven reactor module processing: all submodules are
+ * processed according to their dependencies, following standard Maven reactor
+ * logic.
  * </p>
  *
  * <h2>Parameters</h2>
  * <ul>
- * <li><b>{@code gw.rootProjectLast}</b> / {@code &lt;rootProjectLast&gt;} ({@link #rootProjectLast}): If {@code true},
- * delays processing of the execution-root project until all other reactor projects have completed.
+ * <li><b>{@code gw.rootProjectLast}</b> / {@code &lt;rootProjectLast&gt;}
+ * ({@link #rootProjectLast}): If {@code true}, delays processing of the
+ * execution-root project until all other reactor projects have completed.
  * <p>
  * Default: {@code false}
  * </p>
@@ -40,10 +43,29 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
- * <li><b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}): Base directory used to locate source
- * documents. If not provided, defaults to {@code ${project.basedir}}.</li>
- * <li><b>{@code gw.genai}</b> / {@code &lt;genai&gt;} ({@code genai}): GenAI provider or configuration used during
- * processing.</li>
+ * <li><b>{@code gw.genai}</b> / {@code &lt;genai&gt;} ({@code genai}):
+ * Provider/model identifier to pass to the workflow.</li>
+ * <li><b>{@code ${basedir}}</b> ({@code basedir}): The Maven module base
+ * directory.</li>
+ * <li><b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}):
+ * Optional scan root override. When omitted, defaults to the execution root
+ * directory.</li>
+ * <li><b>{@code gw.instructions}</b> / {@code &lt;instructions&gt;}
+ * ({@code instructions}): Instruction locations (for example, file paths or
+ * classpath locations) consumed by the workflow.</li>
+ * <li><b>{@code gw.guidance}</b> / {@code &lt;guidance&gt;} ({@code guidance}):
+ * Default guidance text forwarded to the workflow.</li>
+ * <li><b>{@code gw.excludes}</b> / {@code &lt;excludes&gt;} ({@code excludes}):
+ * Exclude patterns/paths that should be skipped when scanning documentation
+ * sources.</li>
+ * <li><b>{@code gw.genai.serverId}</b> ({@code serverId}): {@code settings.xml}
+ * {@code &lt;server&gt;} id used to read GenAI credentials.</li>
+ * <li><b>{@code gw.logInputs}</b> ({@code logInputs}): Whether to log the list
+ * of input files passed to the workflow.
+ * <p>
+ * Default: {@code false}
+ * </p>
+ * </li>
  * </ul>
  *
  * <h2>Usage examples</h2>
@@ -60,6 +82,18 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * mvn gw:reactor -Dgw.rootProjectLast=true
  * </pre>
  *
+ * <h3>Override scan root</h3>
+ *
+ * <pre>
+ * mvn gw:reactor -Dgw.scanDir=src\\site
+ * </pre>
+ *
+ * <h3>Use Maven settings credentials for the GenAI provider</h3>
+ *
+ * <pre>
+ * mvn gw:reactor -Dgw.genai.serverId=my-genai-server
+ * </pre>
+ *
  * <h3>Plugin configuration</h3>
  *
  * <pre>
@@ -71,6 +105,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *     &lt;rootProjectLast&gt;true&lt;/rootProjectLast&gt;
  *     &lt;!-- inherited from AbstractGWGoal --&gt;
  *     &lt;scanDir&gt;${project.basedir}&lt;/scanDir&gt;
+ *     &lt;logInputs&gt;true&lt;/logInputs&gt;
  *   &lt;/configuration&gt;
  * &lt;/plugin&gt;
  * </pre>
@@ -79,10 +114,11 @@ ProcessModules supports Maven reactor for module processing. All submodules will
 public class ReactorGW extends AbstractGWGoal {
 
 	/** Logger for this class. */
-	static final Logger logger = LoggerFactory.getLogger(ReactorGW.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReactorGW.class);
 
 	/**
-	 * If {@code true}, delays processing of the execution-root project until all other reactor projects complete.
+	 * If {@code true}, delays processing of the execution-root project until all
+	 * other reactor projects complete.
 	 */
 	@Parameter(property = "gw.rootProjectLast", defaultValue = "false")
 	private boolean rootProjectLast;
@@ -122,7 +158,7 @@ public class ReactorGW extends AbstractGWGoal {
 			scanDir = basedir.getAbsolutePath();
 		}
 
-		if (!rootProject || (rootProject && !pomProject) || (rootProject && !rootProjectLast)) {
+		if (!rootProject || !pomProject || !rootProjectLast) {
 			scanDocuments(documents);
 			return;
 		}
@@ -134,13 +170,12 @@ public class ReactorGW extends AbstractGWGoal {
 				}
 				scanDocuments(documents);
 			} catch (MojoExecutionException e) {
-				getLog().error(e);
+				LOGGER.error("Failed to scan documents in deferred execution-root processing.", e);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				getLog().error(e);
+				LOGGER.error("Deferred execution-root processing was interrupted.", e);
 			}
 		}, "gw-reactor-root-last");
-		deferredRootScanThread.setDaemon(true);
 		deferredRootScanThread.start();
 	}
 }

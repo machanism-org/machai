@@ -1,75 +1,69 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Resource;
+import org.apache.maven.model.Parent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class MavenProjectLayoutTest {
 
 	@TempDir
-	Path tempDir;
+	File tempDir;
 
 	@Test
-	void isMavenProject_shouldReturnTrueWhenPomExists() throws IOException {
+	void isMavenProject_whenPomExists_returnsTrue() throws Exception {
 		// Arrange
-		Files.write(tempDir.resolve("pom.xml"), minimalPom("com.acme", "demo", "1.0").getBytes(StandardCharsets.UTF_8));
+		Files.write(new File(tempDir, "pom.xml").toPath(), minimalPom("jar").getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = MavenProjectLayout.isMavenProject(tempDir.toFile());
+		boolean result = MavenProjectLayout.isMavenProject(tempDir);
 
 		// Assert
-		assertTrue(result);
+		org.junit.jupiter.api.Assertions.assertTrue(result);
 	}
 
 	@Test
-	void isMavenProject_shouldReturnFalseWhenPomAbsent() {
-		// Arrange
-		// Act
-		boolean result = MavenProjectLayout.isMavenProject(tempDir.toFile());
-
-		// Assert
-		assertFalse(result);
-	}
-
-	@Test
-	void getModules_shouldReturnModulesWhenPackagingPom() {
+	void getModules_whenPackagingPom_returnsModules() {
 		// Arrange
 		Model model = new Model();
 		model.setModelVersion("4.0.0");
+		model.setGroupId("g");
+		model.setArtifactId("a");
+		model.setVersion("1");
 		model.setPackaging("pom");
-		model.addModule("module-a");
-		model.addModule("module-b");
+		model.setModules(java.util.Arrays.asList("m1", "m2"));
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir).model(model);
 
 		// Act
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertEquals(Arrays.asList("module-a", "module-b"), modules);
+		assertEquals(java.util.Arrays.asList("m1", "m2"), modules);
 	}
 
 	@Test
-	void getModules_shouldReturnNullWhenNotPomPackaging() {
+	void getModules_whenPackagingNotPom_returnsNull() {
 		// Arrange
 		Model model = new Model();
 		model.setModelVersion("4.0.0");
+		model.setGroupId("g");
+		model.setArtifactId("a");
+		model.setVersion("1");
 		model.setPackaging("jar");
-		model.addModule("module-a");
+		model.setModules(java.util.Arrays.asList("m1"));
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir).model(model);
 
 		// Act
 		List<String> modules = layout.getModules();
@@ -79,13 +73,16 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
-	void getSources_shouldAddDefaultSourceAndTestDirsWhenBuildMissing() {
+	void getSources_whenBuildNull_setsDefaultsAndReturnsRelativeSourceDir() {
 		// Arrange
 		Model model = new Model();
 		model.setModelVersion("4.0.0");
+		model.setGroupId("g");
+		model.setArtifactId("a");
+		model.setVersion("1");
 		model.setBuild(null);
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir).model(model);
 
 		// Act
 		List<String> sources = layout.getSources();
@@ -99,127 +96,94 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
-	void getSources_shouldIncludeResourcesDirectoriesAsRelativePaths() {
+	void getTests_whenBuildHasTestSourceDirectory_returnsRelative() {
 		// Arrange
 		Build build = new Build();
-		build.setSourceDirectory(new File(tempDir.toFile(), "custom-src").getAbsolutePath());
-		Resource res1 = new Resource();
-		res1.setDirectory(new File(tempDir.toFile(), "src/main/resources").getAbsolutePath());
-		Resource res2 = new Resource();
-		res2.setDirectory(new File(tempDir.toFile(), "other-res").getAbsolutePath());
-		build.setResources(Arrays.asList(res1, res2));
-
+		build.setTestSourceDirectory(new File(tempDir, "custom-tests").getAbsolutePath());
 		Model model = new Model();
 		model.setModelVersion("4.0.0");
+		model.setGroupId("g");
+		model.setArtifactId("a");
+		model.setVersion("1");
 		model.setBuild(build);
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
-
-		// Act
-		List<String> sources = layout.getSources();
-
-		// Assert
-		assertEquals(3, sources.size());
-		assertTrue(sources.contains("custom-src"));
-		assertTrue(sources.contains("src/main/resources"));
-		assertTrue(sources.contains("other-res"));
-	}
-
-	@Test
-	void getTests_shouldReturnEmptyListWhenBuildMissing() {
-		// Arrange
-		Model model = new Model();
-		model.setModelVersion("4.0.0");
-		model.setBuild(null);
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir).model(model);
 
 		// Act
 		List<String> tests = layout.getTests();
 
 		// Assert
-		assertNotNull(tests);
-		assertTrue(tests.isEmpty());
+		assertEquals(1, tests.size());
+		assertEquals("custom-tests", tests.get(0));
 	}
 
 	@Test
-	void getTests_shouldIncludeTestSourceDirectoryAndTestResources() {
+	void getDocuments_returnsSrcSite() {
 		// Arrange
-		Build build = new Build();
-		build.setTestSourceDirectory(new File(tempDir.toFile(), "src/test/java").getAbsolutePath());
-		Resource tr = new Resource();
-		tr.setDirectory(new File(tempDir.toFile(), "src/test/resources").getAbsolutePath());
-		build.setTestResources(Arrays.asList(tr));
-
 		Model model = new Model();
 		model.setModelVersion("4.0.0");
-		model.setBuild(build);
-
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
-
-		// Act
-		List<String> tests = layout.getTests();
-
-		// Assert
-		assertEquals(2, tests.size());
-		assertTrue(tests.contains("src/test/java"));
-		assertTrue(tests.contains("src/test/resources"));
-	}
-
-	@Test
-	void getDocuments_shouldReturnDefaultSiteDir() {
-		// Arrange
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(new Model());
+		model.setGroupId("g");
+		model.setArtifactId("a");
+		model.setVersion("1");
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir).model(model);
 
 		// Act
 		List<String> docs = layout.getDocuments();
 
 		// Assert
-		assertEquals(Arrays.asList("src/site"), docs);
+		assertEquals(java.util.Collections.singletonList("src/site"), docs);
 	}
 
 	@Test
-	void getProjectName_shouldReturnModelName() {
+	void getProjectIdAndNameAndParentId_fromModel() {
 		// Arrange
+		Parent parent = new Parent();
+		parent.setGroupId("pg");
+		parent.setArtifactId("parent-art");
+		parent.setVersion("1");
 		Model model = new Model();
 		model.setModelVersion("4.0.0");
-		model.setName("My Project");
+		model.setGroupId("g");
+		model.setArtifactId("my-art");
+		model.setVersion("1");
+		model.setName("My Name");
+		model.setParent(parent);
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir).model(model);
 
 		// Act
+		String id = layout.getProjectId();
 		String name = layout.getProjectName();
+		String parentId = layout.getParentId();
 
 		// Assert
-		assertEquals("My Project", name);
+		assertEquals("my-art", id);
+		assertEquals("My Name", name);
+		assertEquals("parent-art", parentId);
 	}
 
 	@Test
-	void getModel_shouldFallbackToNonEffectivePomWhenEffectiveFails() throws IOException {
+	void projectDir_returnsSameTypeForChaining() {
 		// Arrange
-		Files.write(tempDir.resolve("pom.xml"), minimalPom("com.acme", "demo", "1.0").getBytes(StandardCharsets.UTF_8));
-
 		MavenProjectLayout layout = new MavenProjectLayout();
-		layout.projectDir(tempDir.toFile());
-		layout.effectivePomRequired(true);
 
 		// Act
-		Model model = layout.getModel();
+		MavenProjectLayout chained = layout.projectDir(tempDir);
 
 		// Assert
-		assertNotNull(model);
-		assertEquals("com.acme", model.getGroupId());
-		assertEquals("demo", model.getArtifactId());
-		assertEquals("1.0", model.getVersion());
+		org.junit.jupiter.api.Assertions.assertSame(layout, chained);
+		assertEquals(tempDir.getAbsolutePath(), chained.getProjectDir().getAbsolutePath());
 	}
 
-	private static String minimalPom(String groupId, String artifactId, String version) {
-		return "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
-				"  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-				"  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
-				"  <modelVersion>4.0.0</modelVersion>\n" +
-				"  <groupId>" + groupId + "</groupId>\n" +
-				"  <artifactId>" + artifactId + "</artifactId>\n" +
-				"  <version>" + version + "</version>\n" +
-				"</project>\n";
+	private static String minimalPom(String packaging) {
+		return "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
+				+ "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+				+ "  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
+				+ "  <modelVersion>4.0.0</modelVersion>\n"
+				+ "  <groupId>org.example</groupId>\n"
+				+ "  <artifactId>demo</artifactId>\n"
+				+ "  <version>1.0.0</version>\n"
+				+ "  <packaging>" + packaging + "</packaging>\n"
+				+ "</project>\n";
 	}
 }

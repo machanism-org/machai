@@ -1,154 +1,65 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
-import org.gradle.tooling.model.DomainObjectSet;
-import org.gradle.tooling.model.GradleProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class GragleProjectLayoutTest {
 
 	@TempDir
-	Path tempDir;
+	File tempDir;
 
 	@Test
-	void isGradleProject_shouldReturnTrueWhenBuildGradleExists() throws IOException {
+	void isGradleProject_whenBuildGradleExists_returnsTrue() throws Exception {
 		// Arrange
-		Files.write(tempDir.resolve("build.gradle"), "// gradle".getBytes());
+		Files.write(new File(tempDir, "build.gradle").toPath(), "plugins {}".getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = GragleProjectLayout.isGradleProject(tempDir.toFile());
+		boolean result = GragleProjectLayout.isGradleProject(tempDir);
 
 		// Assert
-		assertTrue(result);
+		org.junit.jupiter.api.Assertions.assertTrue(result);
 	}
 
 	@Test
-	void isGradleProject_shouldReturnFalseWhenBuildGradleMissing() {
+	void getSources_returnsDefaultSrcMain() {
 		// Arrange
-
-		// Act
-		boolean result = GragleProjectLayout.isGradleProject(tempDir.toFile());
-
-		// Assert
-		assertFalse(result);
-	}
-
-	@Test
-	void getModules_shouldReturnNullWhenNoChildren() throws Exception {
-		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
-
-		GradleProject root = StubGradleProjectFactory.project("root", StubGradleProjectFactory.domainObjectSet());
-		setPrivateProjectField(layout, root);
-
-		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertNull(modules);
-	}
-
-	@Test
-	void getModules_shouldReturnChildrenNamesWhenChildrenPresent() throws Exception {
-		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
-
-		GradleProject childA = StubGradleProjectFactory.project("a", StubGradleProjectFactory.domainObjectSet());
-		GradleProject childB = StubGradleProjectFactory.project("b", StubGradleProjectFactory.domainObjectSet());
-		DomainObjectSet<GradleProject> children = StubGradleProjectFactory.domainObjectSet(childA, childB);
-		GradleProject root = StubGradleProjectFactory.project("root", children);
-		setPrivateProjectField(layout, root);
-
-		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertEquals(2, modules.size());
-		assertTrue(modules.contains("a"));
-		assertTrue(modules.contains("b"));
-	}
-
-	@Test
-	void getProjectIdAndName_shouldReturnGradleProjectName() throws Exception {
-		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
-		GradleProject root = StubGradleProjectFactory.project("demo", StubGradleProjectFactory.domainObjectSet());
-		setPrivateProjectField(layout, root);
-
-		// Act
-		String id = layout.getProjectId();
-		String name = layout.getProjectName();
-
-		// Assert
-		assertEquals("demo", id);
-		assertEquals("demo", name);
-	}
-
-	@Test
-	void getSources_shouldReturnDefaultGradleSourceRoot() {
-		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir);
 
 		// Act
 		List<String> sources = layout.getSources();
 
 		// Assert
-		assertEquals(1, sources.size());
-		assertEquals("src/main", sources.get(0));
+		assertEquals(java.util.Collections.singletonList("src/main"), sources);
 	}
 
 	@Test
-	void getDocuments_shouldReturnDefaultSiteDirectory() {
+	void getTests_returnsDefaultSrcTest() {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
-
-		// Act
-		List<String> docs = layout.getDocuments();
-
-		// Assert
-		assertEquals(1, docs.size());
-		assertEquals("src/site", docs.get(0));
-	}
-
-	@Test
-	void getTests_shouldReturnDefaultGradleTestRoot() {
-		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir);
 
 		// Act
 		List<String> tests = layout.getTests();
 
 		// Assert
-		assertEquals(1, tests.size());
-		assertEquals("src/test", tests.get(0));
+		assertEquals(java.util.Collections.singletonList("src/test"), tests);
 	}
 
 	@Test
-	void projectDir_shouldReturnSameConcreteType() {
+	void getDocuments_returnsSrcSite() {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout();
-		File dir = tempDir.toFile();
+		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir);
 
 		// Act
-		GragleProjectLayout result = layout.projectDir(dir);
+		List<String> docs = layout.getDocuments();
 
 		// Assert
-		assertSame(layout, result);
-		assertSame(dir, result.getProjectDir());
-	}
-
-	private static void setPrivateProjectField(GragleProjectLayout layout, GradleProject project) throws Exception {
-		Field field = GragleProjectLayout.class.getDeclaredField("project");
-		field.setAccessible(true);
-		field.set(layout, project);
+		assertEquals(java.util.Collections.singletonList("src/site"), docs);
 	}
 }

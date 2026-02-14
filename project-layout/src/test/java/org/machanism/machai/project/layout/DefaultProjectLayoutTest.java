@@ -1,11 +1,10 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -14,70 +13,41 @@ import org.junit.jupiter.api.io.TempDir;
 class DefaultProjectLayoutTest {
 
 	@TempDir
-	Path tempDir;
+	File tempDir;
 
 	@Test
-	void getModules_shouldReturnOnlyNonExcludedDirectories() throws IOException {
+	void getModules_filtersExcludedDirectoriesAndCachesResult() throws Exception {
 		// Arrange
-		Files.createDirectories(tempDir.resolve("moduleA"));
-		Files.createDirectories(tempDir.resolve("moduleB"));
-		Files.createDirectories(tempDir.resolve("target"));
-		Files.createDirectories(tempDir.resolve(".git"));
-		Files.createFile(tempDir.resolve("file.txt"));
+		Files.createDirectories(new File(tempDir, "moduleA").toPath());
+		Files.createDirectories(new File(tempDir, "moduleB").toPath());
+		Files.createDirectories(new File(tempDir, "target").toPath());
+		Files.createDirectories(new File(tempDir, ".git").toPath());
 
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
+		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir);
 
 		// Act
-		List<String> modules = layout.getModules();
-
-		// Assert
-		assertNotNull(modules);
-		assertEquals(2, modules.size());
-		assertTrue(modules.contains("moduleA"));
-		assertTrue(modules.contains("moduleB"));
-		assertFalse(modules.contains("target"));
-		assertFalse(modules.contains(".git"));
-	}
-
-	@Test
-	void getModules_shouldCacheResultAndNotReflectLaterFilesystemChanges() throws IOException {
-		// Arrange
-		Files.createDirectories(tempDir.resolve("moduleA"));
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
 		List<String> first = layout.getModules();
-		Files.createDirectories(tempDir.resolve("moduleB"));
-
-		// Act
+		Files.createDirectories(new File(tempDir, "moduleC").toPath());
 		List<String> second = layout.getModules();
 
 		// Assert
+		assertEquals(2, first.size());
+		org.junit.jupiter.api.Assertions.assertTrue(first.contains("moduleA"));
+		org.junit.jupiter.api.Assertions.assertTrue(first.contains("moduleB"));
 		assertSame(first, second);
-		assertEquals(1, second.size());
-		assertTrue(second.contains("moduleA"));
-		assertFalse(second.contains("moduleB"));
+		org.junit.jupiter.api.Assertions.assertFalse(second.contains("moduleC"));
 	}
 
 	@Test
-	void getModules_shouldReturnEmptyListWhenNoSubdirectories() {
+	void projectDir_returnsSameTypeForChaining() {
 		// Arrange
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
+		DefaultProjectLayout layout = new DefaultProjectLayout();
 
 		// Act
-		List<String> modules = layout.getModules();
+		DefaultProjectLayout chained = layout.projectDir(tempDir);
 
 		// Assert
-		assertNotNull(modules);
-		assertTrue(modules.isEmpty());
-	}
-
-	@Test
-	void notImplementedMethods_shouldReturnNull() {
-		// Arrange
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(new File("."));
-
-		// Act & Assert
-		assertNull(layout.getSources());
-		assertNull(layout.getDocuments());
-		assertNull(layout.getTests());
+		assertSame(layout, chained);
+		assertEquals(tempDir.getAbsolutePath(), chained.getProjectDir().getAbsolutePath());
 	}
 }

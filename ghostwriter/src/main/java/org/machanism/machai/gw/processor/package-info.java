@@ -38,23 +38,25 @@
  */
 
 /**
- * Project scanning and orchestration for Ghostwriter.
+ * Project scanning and prompt orchestration for Ghostwriter.
  *
  * <p>
  * This package contains the command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the
- * {@link org.machanism.machai.gw.processor.FileProcessor} that traverse a project tree, identify supported files, and
- * dispatch each file to an appropriate {@link org.machanism.machai.gw.reviewer.Reviewer} implementation.
+ * {@link org.machanism.machai.gw.processor.FileProcessor} responsible for traversing a project tree, selecting files to
+ * process, and invoking a {@link org.machanism.machai.gw.reviewer.Reviewer} per supported file type.
  * </p>
  *
  * <p>
- * Reviewers extract embedded {@code @guidance} directives from supported file formats. The extracted guidance, together
- * with optional system instructions and project metadata, forms the prompt sent to a configured
- * {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Scanning is traversal-based and intentionally avoids dependency resolution and project builds. When a project layout
+ * defines nested modules, modules are processed in a child-first order (modules first, then parent-directory files).
  * </p>
  *
- * <p>
- * For multi-module projects, modules are processed in a child-first order. Processing is traversal-based and does not
- * attempt to build the project or resolve inter-module dependencies.
- * </p>
+ * <h2>Processing flow</h2>
+ * <ol>
+ * <li>Discover modules from the active {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
+ * <li>Traverse files and directories, applying exclude rules and optional scan patterns.</li>
+ * <li>For each supported file, extract embedded directives and compose the full prompt.</li>
+ * <li>Invoke the configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate output.</li>
+ * </ol>
  */
 package org.machanism.machai.gw.processor;

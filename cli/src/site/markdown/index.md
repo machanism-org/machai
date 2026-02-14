@@ -134,8 +134,8 @@ java -jar machai.jar
 Example (generate metadata and register it):
 
 ```batch
-bindex --dir .\\my-project --update true
-register --dir .\\my-project --registerUrl https://metadata.example.com
+bindex --dir .\my-project --update true
+register --dir .\my-project --registerUrl https://metadata.example.com
 ```
 
 ## Resources

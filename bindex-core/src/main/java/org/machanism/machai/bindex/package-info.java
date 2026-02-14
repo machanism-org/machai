@@ -26,33 +26,30 @@
  */
 
 /**
- * Bindex subsystem used by MachAI workflows to create, persist, register, and query project indexes.
+ * APIs for creating, persisting, registering, and retrieving MachAI "Bindex" documents.
  *
- * <p>A Bindex is typically persisted as {@code bindex.json} for a given
- * {@link org.machanism.machai.project.layout.ProjectLayout}. This package provides orchestration and supporting
- * utilities to create that file, load it during processing, register it with a backing store, and retrieve and
- * assemble relevant Bindexes as inputs to downstream GenAI execution.
+ * <p>A Bindex is a JSON representation (typically {@code bindex.json}) describing a project/library, including
+ * its metadata, classification, and dependencies. This package provides a workflow to:
+ * <ul>
+ *   <li>Generate or update {@code bindex.json} for a local project directory.</li>
+ *   <li>Load an existing {@code bindex.json} during processing.</li>
+ *   <li>Register Bindex documents into a MongoDB-backed store for later retrieval.</li>
+ *   <li>Semantically select relevant Bindex documents for a user query using vector search over classification
+ *       embeddings and include transitive dependencies.</li>
+ *   <li>Assemble selected Bindex content into prompt inputs for downstream LLM-assisted workflows.</li>
+ * </ul>
  *
  * <h2>Typical workflow</h2>
  * <ol>
- *   <li>Create or update an on-disk {@code bindex.json} for a project.</li>
- *   <li>Register the Bindex with a backing store (for example, a document database and/or vector search index).</li>
- *   <li>Query and select relevant Bindexes using semantic search and optional dependency expansion.</li>
- *   <li>Assemble selected content into prompt-ready inputs for execution.</li>
+ *   <li>Create or update {@code bindex.json} via {@link org.machanism.machai.bindex.BindexCreator}.</li>
+ *   <li>Register the document via {@link org.machanism.machai.bindex.BindexRegister}.</li>
+ *   <li>Retrieve relevant Bindexes for a query via {@link org.machanism.machai.bindex.Picker}.</li>
+ *   <li>Assemble prompt-ready inputs via {@link org.machanism.machai.bindex.ApplicationAssembly}.</li>
  * </ol>
  *
- * <h2>Main types</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.bindex.BindexCreator}: builds and writes {@code bindex.json} for a project.</li>
- *   <li>{@link org.machanism.machai.bindex.BindexProjectProcessor}: locates and loads {@code bindex.json} during
- *       project processing.</li>
- *   <li>{@link org.machanism.machai.bindex.BindexRegister}: registers an on-disk Bindex with a backing store.</li>
- *   <li>{@link org.machanism.machai.bindex.Picker}: performs semantic search and dependency expansion to select
- *       Bindexes.</li>
- *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly}: assembles selected Bindexes into prompt inputs for
- *       execution.</li>
- *   <li>{@link org.machanism.machai.bindex.BindexBuilderFactory}: selects a suitable
- *       {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation for a project layout.</li>
- * </ul>
+ * <h2>Builder selection</h2>
+ * {@link org.machanism.machai.bindex.BindexBuilderFactory} chooses an appropriate
+ * {@link org.machanism.machai.bindex.builder.BindexBuilder} implementation based on the detected
+ * {@link org.machanism.machai.project.layout.ProjectLayout} (for example Maven, Python, or JavaScript layouts).
  */
 package org.machanism.machai.bindex;

@@ -72,7 +72,7 @@ The plugin does not require any environment variables.
 Generate (or update) `bindex.json`:
 
 ```bash
-mvn org.machanism.machai:bindex-maven-plugin:0.0.10-SNAPSHOT:bindex
+mvn org.machanism.machai:bindex-maven-plugin:bindex
 ```
 
 ### Typical Workflow
@@ -91,7 +91,7 @@ mvn org.machanism.machai:bindex-maven-plugin:0.0.10-SNAPSHOT:bindex
 Example (system property):
 
 ```bash
-mvn org.machanism.machai:bindex-maven-plugin:0.0.10-SNAPSHOT:bindex -Dupdate=true
+mvn org.machanism.machai:bindex-maven-plugin:bindex -Dupdate=true
 ```
 
 ## Resources

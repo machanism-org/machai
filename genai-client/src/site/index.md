@@ -49,14 +49,18 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates with the OpenAI API as a concrete implementation of the `GenAIProvider` interface.
+The `OpenAIProvider` class integrates seamlessly with the OpenAI API, serving as a concrete implementation of the `GenAIProvider` interface.
 
-Capabilities
+This provider enables a wide range of generative AI capabilities, including:
 
-- Sends prompts and receives responses from OpenAI Chat models.
-- Manages files for use in OpenAI workflows.
-- Performs common LLM requests (text generation, summarization, question answering).
-- Creates vector embeddings for tasks like semantic search and similarity analysis.
+- Sending prompts and receiving responses from OpenAI Chat models.
+- Managing files for use in various OpenAI workflows.
+- Performing advanced large language model (LLM) requests, such as text generation, summarization, and question answering.
+- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+
+By abstracting the complexities of direct API interaction, `OpenAIProvider` allows developers to leverage OpenAI’s powerful models efficiently within their applications. It supports both synchronous and asynchronous operations, and can be easily extended or configured to accommodate different use cases and model parameters.
+
+This class provides capabilities to send prompts, manage files, perform LLM requests, and create embeddings using OpenAI Chat models.
 
 Environment variables
 
@@ -88,7 +92,7 @@ This implementation is NOT thread-safe.
 
 The `CodeMieProvider` is an `OpenAIProvider` specialization that targets the CodeMie OpenAI-compatible endpoint.
 
-On initialization it obtains an access token from the CodeMie authentication endpoint and then configures the underlying OpenAI client with the retrieved token and the CodeMie base URL.
+On initialization, it obtains an access token from the CodeMie authentication endpoint and then configures the underlying OpenAI client with the retrieved token and the CodeMie base URL.
 
 Required configuration
 
@@ -124,7 +128,7 @@ provider.perform();
 
 ### Web
 
-The `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
+`WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
 Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
 

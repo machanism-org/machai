@@ -28,19 +28,24 @@
  * Maven goal implementation for MachAI's AI-assisted project assembly workflow.
  *
  * <p>
- * This package provides the Maven plugin {@code assembly} goal implementation, exposed by
- * {@link org.machanism.machai.maven.Assembly}. The goal helps bootstrap or evolve a project by:
+ * This package provides the {@link org.machanism.machai.maven.Assembly} Maven {@code Mojo}, exposing the
+ * {@code assembly} goal. The goal operates on the Maven execution base directory and coordinates two GenAI-driven
+ * phases: library recommendation ("picking") and project modification ("assembly").
  * </p>
+ *
+ * <h2>Workflow</h2>
  * <ol>
- *   <li>Obtaining a natural-language prompt from a file or from interactive input.</li>
- *   <li>Requesting library recommendations (as {@link org.machanism.machai.schema.Bindex} entries) via
- *   {@link org.machanism.machai.bindex.Picker}.</li>
- *   <li>Executing the assembly workflow via {@link org.machanism.machai.bindex.ApplicationAssembly} in the Maven
- *   execution base directory.</li>
+ *   <li>Acquire a natural-language prompt from {@code assembly.prompt.file} if the file exists; otherwise prompt
+ *   interactively.</li>
+ *   <li>Resolve a picker GenAI provider ({@code pick.genai}) and recommend candidate libraries (as
+ *   {@link org.machanism.machai.schema.Bindex} entries) via {@link org.machanism.machai.bindex.Picker}.</li>
+ *   <li>Filter recommendations by score using {@code assembly.score}.</li>
+ *   <li>Resolve an assembly GenAI provider ({@code assembly.genai}) and apply changes to the project directory via
+ *   {@link org.machanism.machai.bindex.ApplicationAssembly}.</li>
  * </ol>
  *
  * <p>
- * GenAI providers are selected by id using {@link org.machanism.machai.ai.manager.GenAIProviderManager}. Providers are
+ * GenAI providers are resolved by id using {@link org.machanism.machai.ai.manager.GenAIProviderManager} and are
  * augmented with standard function tools via {@link org.machanism.machai.ai.manager.SystemFunctionTools}.
  * </p>
  *

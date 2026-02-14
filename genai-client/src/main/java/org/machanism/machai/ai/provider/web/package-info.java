@@ -29,19 +29,15 @@
 /**
  * Web UI automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>This package contains providers that obtain responses from a generative AI service by automating the service's web
- * user interface (UI) using <a href="https://ganteater.com">Anteater</a> workspace recipes.
+ * <p>This package contains a {@link org.machanism.machai.ai.provider.web.WebProvider} that obtains model responses by
+ * automating a generative AI service through its web user interface using
+ * <a href="https://ganteater.com">Anteater</a> workspace recipes.
  *
- * <p>The primary entry point is {@link org.machanism.machai.ai.provider.web.WebProvider}, which:
- * <ul>
- *   <li>selects an Anteater workspace configuration via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)};</li>
- *   <li>initializes a shared {@code AEWorkspace} for a project directory via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)} (intended to be called once
- *       per JVM); and</li>
- *   <li>submits accumulated prompts by running the {@code "Submit Prompt"} recipe via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#perform()} and returning the {@code result} variable.</li>
- * </ul>
+ * <p>The provider loads an Anteater configuration via {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)},
+ * binds the workspace to a project working directory via
+ * {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}, and submits the currently
+ * configured prompt list by executing the {@code "Submit Prompt"} recipe via
+ * {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}.
  *
  * <h2>Usage</h2>
  * <pre>{@code

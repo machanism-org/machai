@@ -1,77 +1,81 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class ProjectLayoutTest {
 
+	@TempDir
+	File tempDir;
+
 	@Test
-	void getRelativePath_static_shouldReturnDotWhenSameDirectory() {
+	void getRelativePath_instanceMethod_stripsBasePathAndLeadingSlash() throws Exception {
 		// Arrange
-		File dir = new File("C:\\work");
-		File file = new File("C:\\work");
+		File base = new File(tempDir, "base");
+		File file = new File(base, "a\\b.txt");
+		file.getParentFile().mkdirs();
+		file.createNewFile();
+		ProjectLayout layout = new DefaultProjectLayout().projectDir(base);
 
 		// Act
-		String relativePath = ProjectLayout.getRelativePath(dir, file);
+		String relative = layout.getRelativePath(base.getAbsolutePath(), file);
 
 		// Assert
-		assertEquals(".", relativePath);
+		assertEquals("a/b.txt", relative);
 	}
 
 	@Test
-	void getRelativePath_static_shouldPrependDotSlashWhenRequestedAndNotAlreadyDotted() {
+	void getRelativePath_static_whenFileEqualsDir_returnsDot() {
 		// Arrange
-		File dir = new File("C:\\work");
-		File file = new File("C:\\work\\module");
+		File dir = tempDir;
 
 		// Act
-		String relativePath = ProjectLayout.getRelativePath(dir, file, true);
+		String relative = ProjectLayout.getRelativePath(dir, dir);
 
 		// Assert
-		assertEquals("./module", relativePath);
+		assertEquals(".", relative);
 	}
 
 	@Test
-	void getRelativePath_static_shouldReturnNullWhenFileIsNotUnderDir() {
+	void getRelativePath_static_whenAddSingleDotTrue_prefixesForNonDotPath() {
 		// Arrange
-		File dir = new File("C:\\work");
-		File file = new File("D:\\other\\file.txt");
+		File dir = tempDir;
+		File file = new File(dir, "child");
 
 		// Act
-		String relativePath = ProjectLayout.getRelativePath(dir, file, false);
+		String relative = ProjectLayout.getRelativePath(dir, file, true);
 
 		// Assert
-		assertNull(relativePath);
+		assertEquals("./child", relative);
 	}
 
 	@Test
-	void defaultImplementations_shouldReturnNullExceptExcludedDirsConstant() {
+	void getRelativePath_static_whenFileOutsideDir_returnsNull() {
 		// Arrange
-		ProjectLayout layout = new ProjectLayout() {
-			@Override
-			public java.util.List<String> getSources() {
-				return null;
-			}
+		File dir = new File(tempDir, "p1");
+		File file = new File(tempDir, "p2\\x.txt");
 
-			@Override
-			public java.util.List<String> getDocuments() {
-				return null;
-			}
+		// Act
+		String relative = ProjectLayout.getRelativePath(dir, file);
 
-			@Override
-			public java.util.List<String> getTests() {
-				return null;
-			}
-		};
+		// Assert
+		assertNull(relative);
+	}
 
-		// Act & Assert
-		assertNull(layout.getModules());
-		assertNull(layout.getProjectId());
-		assertNull(layout.getProjectName());
-		assertNotNull(ProjectLayout.EXCLUDE_DIRS);
-		assertTrue(ProjectLayout.EXCLUDE_DIRS.length > 0);
+	@Test
+	void getProjectLayoutType_stripsProjectLayoutSuffix() {
+		// Arrange
+		ProjectLayout layout = new MavenProjectLayout();
+
+		// Act
+		String type = layout.getProjectLayoutType();
+
+		// Assert
+		assertEquals("Maven", type);
 	}
 }

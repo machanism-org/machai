@@ -1,23 +1,26 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>The types in this package are responsible for:
+ * <p>This package provides core entry points for:
+ *
  * <ul>
- *   <li>Inspecting a candidate project root directory and identifying its on-disk structure (its <em>layout</em>)</li>
- *   <li>Configuring a {@link org.machanism.machai.project.layout.ProjectLayout} for a detected build system or
- *       directory convention</li>
- *   <li>Scanning source and resource folders (optionally across modules) and delegating folder-level processing</li>
+ *   <li>Inspecting a candidate project root directory and determining its on-disk structure (its <em>layout</em>).</li>
+ *   <li>Detecting or selecting an appropriate {@link org.machanism.machai.project.layout.ProjectLayout}
+ *       implementation (for example, Maven, Gradle, or other conventions).</li>
+ *   <li>Traversing configured source and resource folders (optionally across modules) and delegating folder-level
+ *       processing.</li>
  * </ul>
  *
  * <p>Typical flow:
+ *
  * <ol>
  *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} inspects a project root and selects an appropriate
- *       {@link org.machanism.machai.project.layout.ProjectLayout} implementation</li>
- *   <li>{@link org.machanism.machai.project.ProjectProcessor} uses that layout to scan the project, optionally iterating
- *       module roots when present, and delegates processing for each discovered folder</li>
+ *       {@link org.machanism.machai.project.layout.ProjectLayout} implementation.</li>
+ *   <li>{@link org.machanism.machai.project.ProjectProcessor} uses that layout to traverse the project and delegates
+ *       processing for each discovered folder.</li>
  * </ol>
  *
- * <h2>Typical usage</h2>
+ * <h2>Example</h2>
  *
  * <pre>{@code
  * File projectDir = new File("C:\\path\\to\\project");

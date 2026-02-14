@@ -34,72 +34,85 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <h2>Processing order</h2>
  * <p>
- * The {@code gw:gw} goal processes files in reverse order, similar to the Ghostwriter CLI.
- * Sub-modules are processed first, followed by parent modules.
- * For more details, see:
+ * The {@code gw:gw} goal processes files in reverse order, similar to the Ghostwriter CLI: sub-modules are processed
+ * first, followed by parent modules. For more details, see:
  * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided file processing</a>.
  * </p>
  *
  * <h2>Parameters</h2>
+ *
  * <p>
- * This goal defines the following parameters in addition to those inherited from {@link AbstractGWGoal}:
+ * This goal defines the following parameter in addition to those inherited from {@link AbstractGWGoal}.
  * </p>
  * <dl>
  * <dt>{@code -Dgw.threads}</dt>
  * <dd>
- * Enables or disables multi-threaded module processing.
- * Default: {@code false}.
+ * Enables or disables multi-threaded module processing. Default: {@code false}.
+ * </dd>
+ * </dl>
+ *
+ * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
+ * <p>
+ * This goal also supports all shared parameters defined by {@link AbstractGWGoal}.
+ * </p>
+ *
+ * <h4>Common parameters</h4>
+ * <dl>
+ * <dt>{@code -Dgw.path}</dt>
+ * <dd>
+ * Optional path to the base directory to scan. Default: the current Maven basedir.
+ * </dd>
+ *
+ * <dt>{@code -Dgw.genai}</dt>
+ * <dd>
+ * Path to the GenAI configuration/properties file used by Ghostwriter. Default: implementation-defined by
+ * {@link AbstractGWGoal}.
+ * </dd>
+ *
+ * <dt>{@code -Dgw.profile}</dt>
+ * <dd>
+ * Optional processing profile name. Default: implementation-defined by {@link AbstractGWGoal}.
+ * </dd>
+ *
+ * <dt>{@code -Dgw.dryRun}</dt>
+ * <dd>
+ * If {@code true}, performs a dry run (no files are modified). Default: {@code false}.
  * </dd>
  * </dl>
  *
  * <p>
- * See {@link AbstractGWGoal} for additional shared parameters, including GenAI provider configuration and
- * document selection settings.
+ * Refer to {@link AbstractGWGoal} for the authoritative list and exact semantics of inherited parameters.
  * </p>
- *
- * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
- * <dl>
- * <dt>{@code -Dgw.basedir}</dt>
- * <dd>
- * Project directory to process.
- * See {@link AbstractGWGoal#basedir}.
- * </dd>
- * <dt>{@code -Dgw.genai}</dt>
- * <dd>
- * GenAI provider identifier to use.
- * See {@link AbstractGWGoal#genai}.
- * </dd>
- * <dt>{@code -Dgw.docs}</dt>
- * <dd>
- * Document scan selector(s) / filter(s).
- * See {@link AbstractGWGoal#docs}.
- * </dd>
- * </dl>
  *
  * <h2>Usage examples</h2>
  *
  * <p>Run in the current directory:</p>
+ *
  * <pre>
  * mvn gw:gw
  * </pre>
  *
- * <p>Run without a {@code pom.xml} (requires this goal's {@code requiresProject=false}):</p>
+ * <p>Run without a {@code pom.xml} (this goal sets {@code requiresProject=false}):</p>
+ *
  * <pre>
  * cd path\\to\\project
  * mvn gw:gw
  * </pre>
  *
  * <p>Enable multi-threaded processing:</p>
+ *
  * <pre>
  * mvn gw:gw -Dgw.threads=true
  * </pre>
  *
  * <p>Disable multi-threaded processing (default):</p>
+ *
  * <pre>
  * mvn gw:gw -Dgw.threads=false
  * </pre>
  *
  * <p>Run against a specific module:</p>
+ *
  * <pre>
  * mvn -pl :my-module gw:gw
  * </pre>
@@ -111,6 +124,10 @@ public class GW extends AbstractGWGoal {
 
 	/**
 	 * Enables or disables multi-threaded module processing.
+	 *
+	 * <p>
+	 * When enabled, modules may be processed concurrently.
+	 * </p>
 	 */
 	@Parameter(property = "gw.threads", defaultValue = "false")
 	private boolean threads;

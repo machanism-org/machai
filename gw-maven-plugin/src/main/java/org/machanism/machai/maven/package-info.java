@@ -1,43 +1,44 @@
 /**
- * Maven plugin goals (Mojos) that integrate MachAI's guided workflow (GW) processing into Maven builds.
+ * Maven plugin goals (Mojos) and supporting infrastructure for integrating MachAI's guided workflow (GW)
+ * document processing into Maven builds.
  *
  * <p>
- * This package contains the {@code gw:*} Mojos and supporting types that:
+ * The goals in this package locate documentation sources (for example under {@code src/site}), apply any configured
+ * include/exclude rules, and invoke MachAI's guided workflow processing pipeline. Goals share a common configuration
+ * surface (see {@link org.machanism.machai.maven.AbstractGWGoal}) and differ primarily in how they traverse
+ * multi-module projects.
  * </p>
- * <ul>
- *   <li>scan a project (or reactor) for input documents (for example, under {@code src\\site}),</li>
- *   <li>apply include/exclude configuration and other parameters, and</li>
- *   <li>invoke the GW processing pipeline as part of a Maven build.</li>
- * </ul>
  *
  * <h2>Goals</h2>
  * <ul>
- *   <li>
- *     {@code gw:gw} - Aggregator goal that can be run without a {@code pom.xml}; processes a multi-module build in
- *     reverse order (sub-modules first, then parent modules).
- *   </li>
- *   <li>
- *     {@code gw:reactor} - Processes Maven reactor modules following standard Maven reactor dependency ordering.
- *   </li>
- *   <li>
- *     {@code gw:clean} - Deletes temporary artifacts created by GW processing.
- *   </li>
+ *   <li>{@link org.machanism.machai.maven.GW} ({@code gw:gw}) - Aggregator goal that can run without a
+ *   {@code pom.xml} and processes modules in reverse order (sub-modules first, then parent modules).</li>
+ *   <li>{@link org.machanism.machai.maven.ReactorGW} ({@code gw:reactor}) - Processes modules using standard Maven
+ *   reactor dependency ordering (optionally deferring the root project).</li>
+ *   <li>{@link org.machanism.machai.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by GW
+ *   processing.</li>
+ * </ul>
+ *
+ * <h2>Shared infrastructure</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.maven.AbstractGWGoal} - Base class defining shared parameters and the common
+ *   scan/execute flow used by concrete goals.</li>
  * </ul>
  *
  * <h2>Configuration</h2>
  * <p>
- * Parameters are supplied through standard Maven plugin configuration and/or system properties (typically
- * {@code -Dgw.*}). Common parameters and scanning behavior are defined on the shared base class
- * {@link org.machanism.machai.maven.AbstractGWGoal}.
+ * Configuration is supplied via standard Maven plugin configuration and/or system properties (typically
+ * {@code -Dgw.*}). Some credentials can be sourced from {@code settings.xml} (see
+ * {@link org.machanism.machai.maven.AbstractGWGoal}).
  * </p>
  *
- * <h2>Examples</h2>
- * <pre>{@code
+ * <h2>Usage examples</h2>
+ * <pre>
  * mvn gw:gw
- * }</pre>
- * <pre>{@code
+ * </pre>
+ * <pre>
  * mvn gw:reactor -Dgw.scanDir=src\\site
- * }</pre>
+ * </pre>
  */
 package org.machanism.machai.maven;
 

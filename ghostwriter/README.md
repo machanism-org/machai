@@ -22,17 +22,13 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is an advanced documentation engine that scans, analyzes, and assembles project documentation using embedded `@guidance` directives and AI-powered synthesis.
+Ghostwriter is a documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider to generate or refine documentation.
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine that scans, analyzes, and assembles project documentation using embedded `@guidance` directives and AI-powered synthesis.
+Ghostwriter is a documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider to generate or refine documentation.
 
-It helps teams keep documentation accurate and up-to-date by:
-
-- Generating or updating content from real project sources (code, docs, site pages, and other relevant artifacts)
-- Applying embedded, file-local directives (`@guidance`) to control what gets generated
-- Producing consistent results using a configurable GenAI provider/model
+It supports **all types of project files**—including source code, documentation, project site content, and other relevant artifacts—so teams can keep docs aligned with the evolving codebase.
 
 ## Usage
 
@@ -41,7 +37,7 @@ It helps teams keep documentation accurate and up-to-date by:
 #### Prerequisites
 
 - Java 11 or later
-- Network access to your selected GenAI provider (as configured in your environment/properties)
+- Network access and credentials for your selected GenAI provider (as configured in your environment and/or `gw.properties`)
 
 #### Installation
 
@@ -57,6 +53,6 @@ java -jar gw.jar src\main\java
 
 #### Typical Workflow
 
-1. Add embedded `@guidance` blocks to files you want Ghostwriter to generate or refine.
-2. Run Ghostwriter against the directory (or pattern) that contains those files.
-3. Review the generated output, commit changes, and re-run as needed to keep docs current.
+1. Add embedded `@guidance` blocks to the files you want Ghostwriter to generate or refine.
+2. Run Ghostwriter against the directory (or pattern) containing those files.
+3. Review the output, commit changes, and re-run as needed.

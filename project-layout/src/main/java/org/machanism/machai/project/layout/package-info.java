@@ -1,34 +1,43 @@
 /**
  * APIs for detecting and modeling a repository's on-disk project layout.
  *
- * <p>This package defines {@link org.machanism.machai.project.layout.ProjectLayout}, an abstraction representing a
- * project rooted at a configured base directory. A {@code ProjectLayout} exposes conventional locations (relative to
- * the project root) for:
+ * <p>The central abstraction is {@link org.machanism.machai.project.layout.ProjectLayout}, which represents a project
+ * rooted at a configured base directory and exposes conventional locations (relative to that root) such as:
  *
  * <ul>
- *   <li>main sources and resources</li>
- *   <li>test sources and resources</li>
- *   <li>documentation</li>
- *   <li>(optionally) nested modules</li>
+ *   <li>main sources and resources (see {@link org.machanism.machai.project.layout.ProjectLayout#getSources()})</li>
+ *   <li>test sources and resources (see {@link org.machanism.machai.project.layout.ProjectLayout#getTests()})</li>
+ *   <li>documentation (see {@link org.machanism.machai.project.layout.ProjectLayout#getDocuments()})</li>
+ *   <li>optionally nested modules (see {@link org.machanism.machai.project.layout.ProjectLayout#getModules()})</li>
  * </ul>
  *
- * <p>Implementations encapsulate ecosystem-specific conventions and configuration sources, such as build descriptors
- * (for example, {@code pom.xml}), workspace manifests (for example, {@code package.json}), or Python metadata (for
- * example, {@code pyproject.toml}). A minimal default implementation is provided for repositories that do not match a
- * specific ecosystem.
+ * <p>Concrete implementations encapsulate ecosystem-specific conventions and configuration sources:
  *
- * <h2>Repository scanning and exclusions</h2>
- * <p>When scanning for nested modules, implementations typically skip common build, VCS, and environment directories
- * using {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
+ * <ul>
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} parses {@code pom.xml} via
+ *       {@link org.machanism.machai.project.layout.PomReader} to resolve sources, tests, and multi-module structure.</li>
+ *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} uses the Gradle Tooling API to discover
+ *       modules and applies standard Gradle directory conventions.</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} inspects {@code package.json} workspaces to
+ *       detect modules in JS/TS monorepos.</li>
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} detects Python projects using
+ *       {@code pyproject.toml} metadata.</li>
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} provides a minimal fallback when no
+ *       ecosystem-specific layout is detected.</li>
+ * </ul>
+ *
+ * <h2>Directory scanning and exclusions</h2>
+ * <p>When implementations scan a repository (for example, to discover nested modules), they typically skip common build,
+ * VCS, IDE, and environment directories using {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  *
  * <h2>Typical usage</h2>
  * <pre>
- * ProjectLayout layout = new MavenProjectLayout()
- *         .projectDir(new java.io.File("C:\\repo"));
+ * ProjectLayout layout = new MavenProjectLayout().projectDir(new java.io.File("C:\\repo"));
  *
  * java.util.List&lt;String&gt; modules = layout.getModules();
  * java.util.List&lt;String&gt; sources = layout.getSources();
  * java.util.List&lt;String&gt; tests = layout.getTests();
+ * java.util.List&lt;String&gt; docs = layout.getDocuments();
  * </pre>
  */
 package org.machanism.machai.project.layout;
