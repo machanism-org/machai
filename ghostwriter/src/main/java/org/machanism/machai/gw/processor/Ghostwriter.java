@@ -23,9 +23,10 @@ import org.slf4j.LoggerFactory;
  * Command-line entry point for Ghostwriter.
  *
  * <p>
- * This CLI bootstraps configuration, parses command-line options, and invokes {@link FileProcessor} to scan a directory
- * tree for supported files. For each file, Ghostwriter extracts embedded {@code @guidance} directives and submits the
- * resulting prompt to the configured GenAI provider.
+ * This CLI bootstraps configuration, parses command-line options, and invokes
+ * {@link FileProcessor} to scan a directory tree for supported files. For each
+ * file, Ghostwriter extracts embedded {@code @guidance} directives and submits
+ * the resulting prompt to the configured GenAI provider.
  * </p>
  */
 public final class Ghostwriter {
@@ -40,27 +41,34 @@ public final class Ghostwriter {
 	private static PropertiesConfigurator config = new PropertiesConfigurator();
 
 	/** Directory used as the execution base for relative configuration files. */
-	private static File execDir;
+	private static File gwHomeDir;
 
 	static {
 		try {
-			execDir = new File(Ghostwriter.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-			if (execDir.isFile()) {
-				execDir = execDir.getParentFile();
+			gwHomeDir = config.getFile("GW_HOME", null);
+
+			if (gwHomeDir == null) {
+				System.out.println(
+						"GW_HOME environment variable not found. Using the directory where the Ghostwriter JAR file is located.");
+				gwHomeDir = new File(Ghostwriter.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+				if (gwHomeDir.isFile()) {
+					gwHomeDir = gwHomeDir.getParentFile();
+				}
 			}
 
-			org.machanism.machai.log.FileAppender.setExecutionDir(execDir);
+			org.machanism.machai.log.FileAppender.setExecutionDir(gwHomeDir);
 			logger = LoggerFactory.getLogger(Ghostwriter.class);
-			logger.info("Executing in directory: {}", execDir);
+			logger.info("Ghostwriter home directory: {}", gwHomeDir);
 
 			try {
-				File configFile = new File(System.getProperty("gw.config", "gw.properties"));
+				File configFile = new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"));
 				config.setConfiguration(configFile.getAbsolutePath());
 			} catch (IOException e) {
 				// The property file is not defined, ignore.
 			}
 		} catch (Exception e) {
-			// Configuration file not found. An alternative configuration method will be used.
+			// Configuration file not found. An alternative configuration method will be
+			// used.
 		}
 	}
 
@@ -82,12 +90,11 @@ public final class Ghostwriter {
 		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: true).")
-				.hasArg(true)
-				.optionalArg(true)
-				.build();
+				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
+				.optionalArg(true).build();
 
-		Option rootDirOpt = new Option("r", "root", true, "Specify the path to the root directory for file processing.");
+		Option rootDirOpt = new Option("r", "root", true,
+				"Specify the path to the root directory for file processing.");
 
 		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
@@ -96,22 +103,17 @@ public final class Ghostwriter {
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
 						+ "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
-				.hasArg(true)
-				.optionalArg(true)
-				.build();
+				.hasArg(true).optionalArg(true).build();
 
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a list of directories to exclude from processing. You can provide multiple directories by repeating the option.");
 
-		Option guidanceOpt = Option.builder("g")
-				.longOpt("guidance")
-				.desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
+		Option guidanceOpt = Option.builder("g").longOpt("guidance").desc(
+				"Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
 						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
-				.hasArg(true)
-				.optionalArg(true)
-				.build();
+				.hasArg(true).optionalArg(true).build();
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
@@ -181,8 +183,7 @@ public final class Ghostwriter {
 				defaultGuidance = cmd.getOptionValue(guidanceOpt);
 				if (defaultGuidance == null) {
 					defaultGuidance = readText("Please enter the guidance text below. When finished, press "
-							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
-							+ " to signal end of input (EOF):");
+							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") + " to signal end of input (EOF):");
 				}
 			}
 
@@ -226,22 +227,27 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Prints the Ghostwriter CLI help text, including usage instructions, option descriptions, and example commands.
+	 * Prints the Ghostwriter CLI help text, including usage instructions, option
+	 * descriptions, and example commands.
 	 * <p>
 	 * The help message covers:
 	 * <ul>
-	 *   <li>General description of the Ghostwriter CLI for scanning and processing directories or files using GenAI guidance.</li>
-	 *   <li>Usage syntax: {@code java -jar gw.jar <scanDir> [options]}</li>
-	 *   <li>
-	 *     Explanation of the {@code <scanDir>} argument:
-	 *     <ul>
-	 *       <li>Should be a relative path with respect to the current project directory.</li>
-	 *       <li>If an absolute path is provided, it must be located within the root project directory.</li>
-	 *       <li>Supports raw directory names, glob patterns (e.g., {@code glob:** /*.java}), and regex patterns (e.g., {@code regex:^.*\/[^\/]+\.java$}).</li>
-	 *     </ul>
-	 *   </li>
-	 *   <li>Descriptions of all available CLI options.</li>
-	 *   <li>Example commands demonstrating typical usage.</li>
+	 * <li>General description of the Ghostwriter CLI for scanning and processing
+	 * directories or files using GenAI guidance.</li>
+	 * <li>Usage syntax: {@code java -jar gw.jar <scanDir> [options]}</li>
+	 * <li>Explanation of the {@code <scanDir>} argument:
+	 * <ul>
+	 * <li>Should be a relative path with respect to the current project
+	 * directory.</li>
+	 * <li>If an absolute path is provided, it must be located within the root
+	 * project directory.</li>
+	 * <li>Supports raw directory names, glob patterns (e.g.,
+	 * {@code glob:** /*.java}), and regex patterns (e.g.,
+	 * {@code regex:^.*\/[^\/]+\.java$}).</li>
+	 * </ul>
+	 * </li>
+	 * <li>Descriptions of all available CLI options.</li>
+	 * <li>Example commands demonstrating typical usage.</li>
 	 * </ul>
 	 *
 	 * @param options   the configured CLI options to display in the help message

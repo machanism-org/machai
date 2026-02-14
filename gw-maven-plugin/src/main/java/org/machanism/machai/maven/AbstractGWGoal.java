@@ -208,7 +208,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 			if (scanDir == null) {
 				scanDir = rootDir.getAbsolutePath();
 			}
-
+			
 			processor.scanDocuments(basedir, scanDir);
 			logger.info("Scanning finished.");
 

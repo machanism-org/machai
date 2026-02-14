@@ -6,8 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -1000,7 +998,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param valueMap value substitution map
 	 * @return expanded content with preserved line breaks
 	 */
-	private static String parseLines(String data, HashMap<String, String> valueMap) {
+	private String parseLines(String data, HashMap<String, String> valueMap) {
 		if (data == null) {
 			return StringUtils.EMPTY;
 		}
@@ -1110,7 +1108,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param valueMap value substitution map
 	 * @return content read from the URL/file, or the original input
 	 */
-	private static String tryToGetInstructionsFromFile(String data, HashMap<String, String> valueMap) {
+	private String tryToGetInstructionsFromFile(String data, HashMap<String, String> valueMap) {
 		if (data == null) {
 			return null;
 		}
@@ -1195,46 +1193,20 @@ public class FileProcessor extends ProjectProcessor {
 	 *                 URI)
 	 * @return file content
 	 */
-	private static String readFromFilePath(String filePath) {
-		Path path = toLocalPath(filePath);
-		if (!Files.exists(path)) {
-			throw new IllegalArgumentException("File not found: " + path.toAbsolutePath());
+	private String readFromFilePath(String filePath) {
+		File file = new File(filePath);
+		if (!file.isAbsolute()) {
+			file = new File(rootDir, filePath);
 		}
 
-		try (FileReader reader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
+		try (FileReader reader = new FileReader(file, StandardCharsets.UTF_8)) {
 			String result = IOUtils.toString(reader);
-			logger.info("Included: `{}`", path);
+			logger.info("Included file: `{}`", file);
 			return result;
 		} catch (IOException e) {
-			throw new IllegalArgumentException("Failed to read file: " + path.toAbsolutePath(), e);
+			throw new IllegalArgumentException(
+					"Failed to read file: " + file.getAbsolutePath() + ", Error: " + e.getMessage());
 		}
 	}
 
-	/**
-	 * Converts a provided path string into a local {@link Path}.
-	 *
-	 * @param filePath raw path or {@code file:} URI
-	 * @return local path
-	 */
-	private static Path toLocalPath(String filePath) {
-		String trimmed = StringUtils.trimToNull(filePath);
-		if (trimmed == null) {
-			throw new IllegalArgumentException("File path must not be blank");
-		}
-
-		try {
-			URI uri = new URI(trimmed);
-			if (uri.getScheme() == null) {
-				return Path.of(trimmed);
-			}
-			if (!Strings.CI.equals(uri.getScheme(), "file")) {
-				throw new IllegalArgumentException("Unsupported URI scheme for file path: " + trimmed);
-			}
-			return Path.of(uri);
-		} catch (URISyntaxException e) {
-			return Path.of(trimmed);
-		} catch (IllegalArgumentException e) {
-			throw new IllegalArgumentException("Invalid file path: " + trimmed, e);
-		}
-	}
 }
