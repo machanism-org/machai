@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.machanism.machai.gw.FileProcessor;
+import org.machanism.machai.gw.processor.FileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**

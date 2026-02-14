@@ -1,8 +1,12 @@
 /*-
  * @guidance:
  *
- * **IMPORTANT: UPDATE OR ADD JAVADOC FOR ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
- *
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE CURRENT FILE PARENT FOLDER AND THIS `package-info.java`!**.	
+ * Ghostwriter works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
+ * Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
+ * FileProcessor does not support dependency resolution during project processing. 
+ * It processes projects using a child-first approach only.
+ * 
  * - Update Existing Javadoc and Add Missing Javadoc:
  *      - Review all classes in the folder.
  *      - Update any existing Javadoc to ensure it is accurate, comprehensive, and follows best practices.
@@ -32,26 +36,25 @@
  *      - All code improvements and Javadoc updates must be compatible with the Java version `maven.compiler.release` specified in the project's `pom.xml`.
  *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
  */
+
 /**
- * Command-line orchestration and workspace scanning for Ghostwriter.
+ * Project scanning and orchestration for Ghostwriter.
  *
  * <p>
- * This package provides the command-line entry point ({@link org.machanism.machai.gw.Ghostwriter}) and the scanning
- * engine ({@link org.machanism.machai.gw.FileProcessor}) that walks a project directory and submits per-file review
- * requests to a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * This package contains the command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the
+ * {@link org.machanism.machai.gw.processor.FileProcessor} that traverse a project tree, identify supported files, and
+ * dispatch each file to an appropriate {@link org.machanism.machai.gw.reviewer.Reviewer} implementation.
  * </p>
  *
- * <h2>Processing model</h2>
- * <ul>
- *   <li><strong>Layout discovery</strong>: Uses {@link org.machanism.machai.project.layout.ProjectLayout} to determine
- *   conventional source/test/docs folders and (optionally) child modules.</li>
- *   <li><strong>Child-first traversal</strong>: When modules are present, module folders are processed before files in
- *   the parent project directory. Dependency resolution between modules is not performed.</li>
- *   <li><strong>Filtering</strong>: Scans may be limited using {@code glob:} / {@code regex:} matchers and an optional
- *   exclude list.</li>
- *   <li><strong>Reviewer selection</strong>: {@link java.util.ServiceLoader} loads
- *   {@link org.machanism.machai.gw.reviewer.Reviewer} services. The processor selects a reviewer by file extension;
- *   the reviewer extracts any embedded {@code @guidance:} blocks and produces a prompt fragment.</li>
- * </ul>
+ * <p>
+ * Reviewers extract embedded {@code @guidance} directives from supported file formats. The extracted guidance, together
+ * with optional system instructions and project metadata, forms the prompt sent to a configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * </p>
+ *
+ * <p>
+ * For multi-module projects, modules are processed in a child-first order. Processing is traversal-based and does not
+ * attempt to build the project or resolve inter-module dependencies.
+ * </p>
  */
-package org.machanism.machai.gw;
+package org.machanism.machai.gw.processor;

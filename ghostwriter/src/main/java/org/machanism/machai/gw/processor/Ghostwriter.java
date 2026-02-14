@@ -1,4 +1,4 @@
-package org.machanism.machai.gw;
+package org.machanism.machai.gw.processor;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,31 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Command-line entry point for the Ghostwriter document scanning tool.
+ * Command-line entry point for Ghostwriter.
  *
  * <p>
- * This class:
+ * This CLI bootstraps configuration, parses command-line options, and invokes {@link FileProcessor} to scan a directory
+ * tree for supported files. For each file, Ghostwriter extracts embedded {@code @guidance} directives and submits the
+ * resulting prompt to the configured GenAI provider.
  * </p>
- * <ul>
- * <li>parses CLI options</li>
- * <li>loads configuration from {@code gw.properties} (or
- * {@code -Dgw.config})</li>
- * <li>configures and runs {@link FileProcessor} over one or more scan
- * roots</li>
- * </ul>
- *
- * <p>
- * Example usage:
- * </p>
- *
- * <pre>
- * {@code
- * java -jar gw.jar C:\projects\my-project
- * }
- * </pre>
- *
- * @author Viktor Tovstyi
- * @since 0.0.2
  */
 public final class Ghostwriter {
 
@@ -78,8 +60,7 @@ public final class Ghostwriter {
 				// The property file is not defined, ignore.
 			}
 		} catch (Exception e) {
-			// Configuration file not found. An alternative configuration method will be
-			// used.
+			// Configuration file not found. An alternative configuration method will be used.
 		}
 	}
 
@@ -101,11 +82,12 @@ public final class Ghostwriter {
 		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
-				.optionalArg(true).build();
+				.desc("Enable multi-threaded processing to improve performance (default: true).")
+				.hasArg(true)
+				.optionalArg(true)
+				.build();
 
-		Option rootDirOpt = new Option("r", "root", true,
-				"Specify the path to the root directory for file processing.");
+		Option rootDirOpt = new Option("r", "root", true, "Specify the path to the root directory for file processing.");
 
 		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
@@ -114,17 +96,22 @@ public final class Ghostwriter {
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
 						+ "If the option is used without a value, you will be prompted to enter instruction text via standard input (stdin).")
-				.hasArg(true).optionalArg(true).build();
+				.hasArg(true)
+				.optionalArg(true)
+				.build();
 
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a list of directories to exclude from processing. You can provide multiple directories by repeating the option.");
 
-		Option guidanceOpt = Option.builder("g").longOpt("guidance").desc(
-				"Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
+		Option guidanceOpt = Option.builder("g")
+				.longOpt("guidance")
+				.desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
 						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
-				.hasArg(true).optionalArg(true).build();
+				.hasArg(true)
+				.optionalArg(true)
+				.build();
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
@@ -194,7 +181,8 @@ public final class Ghostwriter {
 				defaultGuidance = cmd.getOptionValue(guidanceOpt);
 				if (defaultGuidance == null) {
 					defaultGuidance = readText("Please enter the guidance text below. When finished, press "
-							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") + " to signal end of input (EOF):");
+							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
+							+ " to signal end of input (EOF):");
 				}
 			}
 
@@ -217,7 +205,7 @@ public final class Ghostwriter {
 				processor.setModuleMultiThread(multiThread);
 
 				if (defaultGuidance != null) {
-					logger.info("Default Guidance: {}", StringUtils.abbreviate(instructions, 60));
+					logger.info("Default Guidance: {}", StringUtils.abbreviate(defaultGuidance, 60));
 					processor.setDefaultGuidance(defaultGuidance);
 				}
 
@@ -237,16 +225,32 @@ public final class Ghostwriter {
 		}
 	}
 
+	/**
+	 * Prints CLI help text.
+	 *
+	 * @param options   configured options
+	 * @param formatter formatter instance
+	 */
 	private static void help(Options options, HelpFormatter formatter) {
-		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\nUsage:\n"
-				+ "  java -jar gw.jar <path | path_pattern> [options]\n\n" + "Options:";
+		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n\n"
+				+ "Usage:\n" + "  java -jar gw.jar <scanDir> [options]\n\n"
+				+ "  <scanDir> specifies the scanning path or pattern.\n"
+				+ "    - Use a relative path with respect to the current project directory.\n"
+				+ "    - If an absolute path is provided, it must be located within the root project directory.\n"
+				+ "    - Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex patterns (e.g., \"regex:^.*\\/[^\\/]+\\.java$\").\n\n"
+				+ "Options:";
 		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\projects\\project\n"
-				+ "  java -r C:\\projects\\project -jar gw.jar src/project\n"
-				+ "  java -r C:\\projects\\project -jar gw.jar \"glob:**/*.java\"\n"
-				+ "  java -r C:\\projects\\project -jar gw.jar \"regex:^.*\\/[^\\/]+\\.java$\"\n";
-		formatter.printHelp("java -jar gw.jar <path | pattern>", header, options, footer, true);
+				+ "  java -jar gw.jar src/project\n" + "  java -jar gw.jar \"glob:**/*.java\"\n"
+				+ "  java -jar gw.jar \"regex:^.*\\/[^\\/]+\\.java$\"\n";
+		formatter.printHelp("java -jar gw.jar <scanDir> [options]", header, options, footer, true);
 	}
 
+	/**
+	 * Reads multi-line text from standard input until EOF.
+	 *
+	 * @param prompt prompt to display before reading
+	 * @return the entered text, or {@code null} if no content was entered
+	 */
 	private static String readText(String prompt) {
 		System.out.println(prompt);
 		StringBuilder sb = new StringBuilder();

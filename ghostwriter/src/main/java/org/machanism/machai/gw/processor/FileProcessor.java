@@ -1,9 +1,4 @@
-package org.machanism.machai.gw;
-
-/*@guidance: 
-FileProcessor does not support dependency resolution during project processing. 
-It processes projects using a child-first approach only.
-*/
+package org.machanism.machai.gw.processor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -54,27 +51,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Scans a project workspace, extracts {@code @guidance:} blocks, and submits
- * per-file review requests to a configured GenAI provider.
+ * Scans a project tree, extracts per-file {@code @guidance} directives through {@link Reviewer}s, and dispatches the
+ * resulting prompts to a configured {@link GenAIProvider}.
  *
  * <p>
- * The processor discovers file-type specific {@link Reviewer} implementations
- * using {@link ServiceLoader}. Each reviewer knows how to parse its
- * corresponding file format and produce a prompt fragment that includes the
- * original file contents and any embedded guidance comments.
+ * The processor supports single-module and multi-module project layouts. For multi-module builds, modules are processed
+ * child-first (each module is scanned before the parent project directory). Processing is traversal-based; it does not
+ * attempt to build projects or resolve dependencies.
  * </p>
- *
- * <h2>High-level flow</h2>
- * <ol>
- * <li>Discover modules (if any) using {@link ProjectLayout}.</li>
- * <li>Traverse files (optionally filtered by pattern and excludes).</li>
- * <li>For each supported file, use a {@link Reviewer} to extract guidance.</li>
- * <li>Compose a prompt (project info + guidance + output format) and execute
- * {@link GenAIProvider#perform()}.</li>
- * </ol>
  */
 public class FileProcessor extends ProjectProcessor {
 
+	/** String used in generated output when a value is absent in project metadata. */
 	public static final String NOT_DEFINED = "not defined";
 
 	/** Logger for documentation input processing events. */
@@ -84,8 +72,7 @@ public class FileProcessor extends ProjectProcessor {
 	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
 
 	/**
-	 * Temporary directory name for documentation inputs under
-	 * {@link #MACHAI_TEMP_DIR}.
+	 * Temporary directory name for documentation inputs under {@link #MACHAI_TEMP_DIR}.
 	 */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
@@ -93,9 +80,8 @@ public class FileProcessor extends ProjectProcessor {
 	private File rootDir;
 
 	/**
-	 * Specifies a special scanning path or path pattern. This should be a relative
-	 * path with respect to the current processing project. If an absolute path is
-	 * provided, it must be located within the {@code rootDir}.
+	 * Specifies a special scanning path or path pattern. This should be a relative path with respect to the current
+	 * processing project. If an absolute path is provided, it must be located within the {@code rootDir}.
 	 */
 	private File scanDir;
 
@@ -103,8 +89,7 @@ public class FileProcessor extends ProjectProcessor {
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Utility that installs tool functions (filesystem/command) into the provider
-	 * when supported.
+	 * Utility that installs tool functions (filesystem/command) into the provider when supported.
 	 */
 	private final SystemFunctionTools systemFunctionTools;
 
@@ -146,8 +131,8 @@ public class FileProcessor extends ProjectProcessor {
 
 	/**
 	 * Constructs a processor.
-	 * 
-	 * @param rootDir      TODO
+	 *
+	 * @param rootDir      root directory used as a base for relative paths
 	 * @param genai        provider key/name to use
 	 * @param configurator configuration source
 	 */
@@ -160,8 +145,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping
-	 * supported file extensions to a reviewer.
+	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping supported file extensions to a reviewer.
 	 */
 	private void loadReviewers() {
 		reviewerMap.clear();
@@ -178,6 +162,12 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
+	/**
+	 * Normalizes a file extension (with or without a leading dot) into a lower-case lookup key.
+	 *
+	 * @param extension the extension to normalize (e.g., {@code "java"} or {@code ".java"})
+	 * @return normalized key, or {@code null} if the input is blank
+	 */
 	private static String normalizeExtensionKey(String extension) {
 		String value = StringUtils.trimToNull(extension);
 		if (value == null) {
@@ -190,9 +180,8 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and prepares inputs for
-	 * documentation generation. This overload defaults the scan start directory to
-	 * {@code basedir}.
+	 * Scans documents in the given root directory and prepares inputs for documentation generation. This overload
+	 * defaults the scan start directory to {@code basedir}.
 	 *
 	 * @param basedir root directory to scan
 	 * @throws IOException if an error occurs reading files
@@ -208,25 +197,32 @@ public class FileProcessor extends ProjectProcessor {
 	 *
 	 * <p>
 	 * The {@code scanDir} parameter can be either:
-	 * <ul>
-	 *   <li>A raw directory name (e.g., {@code src}),</li>
-	 *   <li>or a pattern string prefixed with {@code glob:} or {@code regex:}, as supported by
-	 *       {@link java.nio.file.FileSystems#getPathMatcher(String)}.</li>
-	 * </ul>
 	 * </p>
+	 * <ul>
+	 * <li>A raw directory name (e.g., {@code src}),</li>
+	 * <li>or a pattern string prefixed with {@code glob:} or {@code regex:}, as supported by
+	 * {@link java.nio.file.FileSystems#getPathMatcher(String)}.</li>
+	 * </ul>
 	 *
 	 * <p>
-	 * If a directory path is provided, it should be relative to the current processing project.
-	 * If an absolute path is provided, it must be located within the {@code projectDir}.
+	 * If a directory path is provided, it should be relative to the current processing project. If an absolute path is
+	 * provided, it must be located within the {@code projectDir}.
 	 * </p>
 	 *
 	 * @param projectDir the root directory of the project to scan
-	 * @param scanDir    the file glob/regex pattern or start directory to scan; must be a relative path with respect to the project,
-	 *                   or an absolute path located within {@code projectDir}
-	 * @throws IOException if an error occurs while reading files during the scan
+	 * @param scanDir    the file glob/regex pattern or start directory to scan; must be a relative path with respect to
+	 *                   the project, or an absolute path located within {@code projectDir}
+	 * @throws IOException              if an error occurs while reading files during the scan
 	 * @throws IllegalArgumentException if the scan path is not located within the root project directory
 	 */
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
+		if (projectDir == null) {
+			throw new IllegalArgumentException("projectDir must not be null");
+		}
+		if (StringUtils.isBlank(scanDir)) {
+			throw new IllegalArgumentException("scanDir must not be blank");
+		}
+
 		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
 			if (!isPathPattern(scanDir)) {
 				this.scanDir = new File(scanDir);
@@ -247,8 +243,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Recursively scans project folders, processing documentation inputs for all
-	 * found modules and files.
+	 * Recursively scans project folders, processing documentation inputs for all found modules and files.
 	 *
 	 * @param projectDir the directory containing the project/module to be scanned
 	 * @throws IOException if an error occurs reading files
@@ -273,6 +268,12 @@ public class FileProcessor extends ProjectProcessor {
 		processParentFiles(projectLayout);
 	}
 
+	/**
+	 * Processes all discovered modules concurrently.
+	 *
+	 * @param projectDir the parent project directory
+	 * @param modules    module relative paths
+	 */
 	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
 		ExecutorService executor = Executors.newFixedThreadPool(Math.min(modules.size(), getMaxModuleThreads()));
 		try {
@@ -312,6 +313,13 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
+	/**
+	 * Determines whether a file should be considered for processing.
+	 *
+	 * @param file       file to test
+	 * @param projectDir project root directory
+	 * @return {@code true} if the file should be included, otherwise {@code false}
+	 */
 	protected boolean match(File file, File projectDir) {
 		if (file == null) {
 			return false;
@@ -326,6 +334,9 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		String path = ProjectLayout.getRelativePath(projectDir, file);
+		if (path == null) {
+			return false;
+		}
 		Path pathToMatch = Path.of(path);
 		boolean result = pathMatcher.matches(pathToMatch);
 
@@ -369,6 +380,13 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
+	/**
+	 * Checks whether {@code dir} is one of the project module directories.
+	 *
+	 * @param projectLayout layout containing module definitions
+	 * @param dir           directory candidate
+	 * @return {@code true} if {@code dir} is a module directory, otherwise {@code false}
+	 */
 	private static boolean isModuleDir(ProjectLayout projectLayout, File dir) {
 		List<String> modules = projectLayout.getModules();
 		if (modules == null || modules.isEmpty() || dir == null) {
@@ -377,9 +395,14 @@ public class FileProcessor extends ProjectProcessor {
 
 		String relativePath = ProjectLayout.getRelativePath(projectLayout.getProjectDir(), dir);
 
-		return Strings.CI.startsWithAny(relativePath, modules.toArray(new String[0]));
+		return relativePath != null && Strings.CI.startsWithAny(relativePath, modules.toArray(new String[0]));
 	}
 
+	/**
+	 * Logs a message at debug level when it is non-blank.
+	 *
+	 * @param message message to log
+	 */
 	private static void logIfNotBlank(String message) {
 		if (StringUtils.isNotBlank(message)) {
 			logger.debug(message);
@@ -404,8 +427,7 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Processes files in a project directory matching a provided pattern or
-	 * directory.
+	 * Processes files in a project directory matching a provided pattern or directory.
 	 *
 	 * @param layout      project layout
 	 * @param filePattern directory path, {@code glob:}, or {@code regex:} pattern
@@ -421,6 +443,14 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
+	/**
+	 * Extracts guidance for a file and, when present, performs provider processing.
+	 *
+	 * @param projectLayout project layout
+	 * @param file          file to process
+	 * @return provider output, or {@code null} if the file is skipped
+	 * @throws IOException if reading the file or provider execution fails
+	 */
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
@@ -439,6 +469,15 @@ public class FileProcessor extends ProjectProcessor {
 		return perform;
 	}
 
+	/**
+	 * Creates a provider and performs a full prompt run for the given file.
+	 *
+	 * @param projectLayout project layout
+	 * @param file          file being processed (used for logging and templating)
+	 * @param guidance      guidance content to include in the prompt
+	 * @return provider output
+	 * @throws IOException if creating inputs logs fails or provider I/O fails
+	 */
 	private String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
 		logger.info("Processing file: '{}'", file);
 
@@ -487,6 +526,12 @@ public class FileProcessor extends ProjectProcessor {
 		return perform;
 	}
 
+	/**
+	 * Builds a substitution map used to expand project metadata placeholders in prompt templates.
+	 *
+	 * @param projectLayout current project layout
+	 * @return placeholder map
+	 */
 	private HashMap<String, String> getProperties(ProjectLayout projectLayout) {
 		HashMap<String, String> valueMap = new HashMap<>();
 		valueMap.put("projectId", projectLayout.getProjectId());
@@ -495,10 +540,20 @@ public class FileProcessor extends ProjectProcessor {
 		if (parentId != null) {
 			valueMap.put("parentId", parentId);
 		}
-		valueMap.put("parentDirName", projectLayout.getProjectDir().getParentFile().getName());
+		File parentDir = projectLayout.getProjectDir().getParentFile();
+		if (parentDir != null) {
+			valueMap.put("parentDirName", parentDir.getName());
+		}
 		return valueMap;
 	}
 
+	/**
+	 * Builds a human-readable description of the project structure used in prompts.
+	 *
+	 * @param projectLayout current project layout
+	 * @return formatted project information block
+	 * @throws IOException if computing relative paths fails
+	 */
 	private String getProjectStructureDescription(ProjectLayout projectLayout) throws IOException {
 		List<String> content = new ArrayList<>();
 
@@ -525,6 +580,13 @@ public class FileProcessor extends ProjectProcessor {
 		return MessageFormat.format(promptBundle.getString("project_information"), array);
 	}
 
+	/**
+	 * Produces a formatted list of existing directories from the provided list.
+	 *
+	 * @param sources    directory list from the layout
+	 * @param projectDir project root directory
+	 * @return formatted directory list, or {@link #NOT_DEFINED} if none apply
+	 */
 	private String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
@@ -539,6 +601,14 @@ public class FileProcessor extends ProjectProcessor {
 		return line;
 	}
 
+	/**
+	 * Uses a {@link Reviewer} (based on file extension) to extract guidance.
+	 *
+	 * @param projectDir project root directory
+	 * @param file       file being parsed
+	 * @return guidance text, or {@code null} if the file type is not supported
+	 * @throws IOException if the file cannot be read
+	 */
 	private String parseFile(File projectDir, File file) throws IOException {
 		if (!file.isFile()) {
 			return null;
@@ -553,6 +623,12 @@ public class FileProcessor extends ProjectProcessor {
 		return reviewer.perform(projectDir, file);
 	}
 
+	/**
+	 * Resolves a reviewer for a given file extension.
+	 *
+	 * @param extension file extension (with or without a dot)
+	 * @return reviewer, or {@code null} if none is registered for that extension
+	 */
 	private Reviewer getReviewerForExtension(String extension) {
 		String key = normalizeExtensionKey(extension);
 		if (key == null) {
@@ -561,6 +637,14 @@ public class FileProcessor extends ProjectProcessor {
 		return reviewerMap.get(key);
 	}
 
+	/**
+	 * Finds all files/directories in the provided project folder that match a pattern.
+	 *
+	 * @param projectDir project root
+	 * @param pattern    directory path, {@code glob:} matcher, or {@code regex:} matcher
+	 * @return matching files/directories
+	 * @throws IOException if directory traversal fails
+	 */
 	private List<File> findFiles(File projectDir, String pattern) throws IOException {
 		List<File> result = new ArrayList<>();
 		File dir = new File(pattern);
@@ -582,6 +666,9 @@ public class FileProcessor extends ProjectProcessor {
 
 		for (File file : files) {
 			String path = ProjectLayout.getRelativePath(projectDir, file);
+			if (path == null) {
+				continue;
+			}
 
 			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(Path.of(path))) {
 				continue;
@@ -595,10 +682,23 @@ public class FileProcessor extends ProjectProcessor {
 		return result;
 	}
 
+	/**
+	 * Tests whether a scan pattern string is a {@code glob:} or {@code regex:} matcher.
+	 *
+	 * @param pattern scan directory argument
+	 * @return {@code true} when the pattern uses a path-matcher prefix
+	 */
 	private static boolean isPathPattern(String pattern) {
 		return Strings.CI.startsWithAny(pattern, "glob:", "regex:");
 	}
 
+	/**
+	 * Recursively lists all files under a directory, excluding known build/tooling directories.
+	 *
+	 * @param projectDir directory to traverse
+	 * @return files found
+	 * @throws IOException if directory listing fails
+	 */
 	private List<File> findFiles(File projectDir) throws IOException {
 		if (projectDir == null || !projectDir.isDirectory()) {
 			return Collections.emptyList();
@@ -612,7 +712,11 @@ public class FileProcessor extends ProjectProcessor {
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
 			String name = file.getName();
-			Path relativePath = Path.of(ProjectLayout.getRelativePath(projectDir, file));
+			String relativePathString = ProjectLayout.getRelativePath(projectDir, file);
+			if (relativePathString == null) {
+				continue;
+			}
+			Path relativePath = Path.of(relativePathString);
 
 			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(relativePath)) {
 				continue;
@@ -628,6 +732,12 @@ public class FileProcessor extends ProjectProcessor {
 		return result;
 	}
 
+	/**
+	 * Determines whether a relative path should be excluded according to {@link #excludes}.
+	 *
+	 * @param path project-relative path
+	 * @return {@code true} when excluded
+	 */
 	private boolean shouldExcludePath(Path path) {
 		if (path != null && excludes != null) {
 			for (String exclude : excludes) {
@@ -649,6 +759,12 @@ public class FileProcessor extends ProjectProcessor {
 		return false;
 	}
 
+	/**
+	 * Computes the depth of a path for sorting.
+	 *
+	 * @param path input path
+	 * @return number of path segments
+	 */
 	private static int pathDepth(String path) {
 		if (path == null || path.isBlank()) {
 			return 0;
@@ -657,6 +773,12 @@ public class FileProcessor extends ProjectProcessor {
 		return normalized.split("/").length;
 	}
 
+	/**
+	 * Returns a {@link PathMatcher} when the provided string is a path pattern.
+	 *
+	 * @param path pattern candidate
+	 * @return matcher or {@code null} when {@code path} is not a pattern
+	 */
 	private static PathMatcher getPatternPath(String path) {
 		if (StringUtils.isNotBlank(path) && isPathPattern(path)) {
 			return FileSystems.getDefault().getPathMatcher(path);
@@ -666,7 +788,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * @return root directory used as a base for relative paths
+	 * Returns the root directory used as a base for relative paths.
+	 *
+	 * @return root directory
 	 */
 	public File getRootDir() {
 		return rootDir;
@@ -685,7 +809,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * @return whether module processing is executed concurrently
+	 * Returns whether module processing is executed concurrently.
+	 *
+	 * @return {@code true} if multi-threaded module processing is enabled
 	 */
 	public boolean isModuleMultiThread() {
 		return moduleMultiThread;
@@ -695,13 +821,11 @@ public class FileProcessor extends ProjectProcessor {
 	 * Enables or disables multi-threaded module processing.
 	 *
 	 * <p>
-	 * When enabling, this method verifies that the configured provider is
-	 * thread-safe.
+	 * When enabling, this method verifies that the configured provider is thread-safe.
 	 * </p>
 	 *
 	 * @param moduleMultiThread {@code true} to enable, {@code false} to disable
-	 * @throws IllegalArgumentException if enabling is requested but the provider is
-	 *                                  not thread-safe
+	 * @throws IllegalArgumentException if enabling is requested but the provider is not thread-safe
 	 */
 	public void setModuleMultiThread(boolean moduleMultiThread) {
 		if (!moduleMultiThread) {
@@ -726,10 +850,9 @@ public class FileProcessor extends ProjectProcessor {
 	 * </p>
 	 * <ul>
 	 * <li>Blank lines are preserved as line breaks.</li>
-	 * <li>Lines starting with {@code http://} or {@code https://} are treated as
-	 * URLs and the referenced content is included.</li>
-	 * <li>Lines starting with {@code file:} are treated as file references and the
-	 * referenced content is included.</li>
+	 * <li>Lines starting with {@code http://} or {@code https://} are treated as URLs and the referenced content is
+	 * included.</li>
+	 * <li>Lines starting with {@code file:} are treated as file references and the referenced content is included.</li>
 	 * <li>All other lines are included as-is.</li>
 	 * </ul>
 	 *
@@ -740,7 +863,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * @return whether composed prompt inputs are logged to files
+	 * Returns whether composed prompt inputs are logged to files.
+	 *
+	 * @return {@code true} when input logging is enabled
 	 */
 	public boolean isLogInputs() {
 		return logInputs;
@@ -756,7 +881,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * @return whether recursion into modules/subdirectories is disabled
+	 * Returns whether recursion into modules/subdirectories is disabled.
+	 *
+	 * @return {@code true} when non-recursive mode is enabled
 	 */
 	public boolean isNonRecursive() {
 		return nonRecursive;
@@ -779,23 +906,20 @@ public class FileProcessor extends ProjectProcessor {
 	 * </p>
 	 * <ul>
 	 * <li>Blank lines are preserved as line breaks.</li>
-	 * <li>Lines starting with {@code http://} or {@code https://} are treated as
-	 * URLs and the referenced content is included.</li>
-	 * <li>Lines starting with {@code file:} are treated as file references and the
-	 * referenced content is included.</li>
+	 * <li>Lines starting with {@code http://} or {@code https://} are treated as URLs and the referenced content is
+	 * included.</li>
+	 * <li>Lines starting with {@code file:} are treated as file references and the referenced content is included.</li>
 	 * <li>All other lines are included as-is.</li>
 	 * </ul>
 	 *
-	 * @param defaultGuidance default guidance input (plain text, URL, or
-	 *                        {@code file:})
+	 * @param defaultGuidance default guidance input (plain text, URL, or {@code file:})
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
 		this.defaultGuidance = defaultGuidance;
 	}
 
 	/**
-	 * Parses input line-by-line and expands any {@code http(s)://} or {@code file:}
-	 * references.
+	 * Parses input line-by-line and expands any {@code http(s)://} or {@code file:} references.
 	 *
 	 * @param data     raw input
 	 * @param valueMap value substitution map
@@ -828,7 +952,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * @return excludes configured for this processor
+	 * Returns excludes configured for this processor.
+	 *
+	 * @return exclude list
 	 */
 	public String[] getExcludes() {
 		return excludes;
@@ -852,7 +978,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * @return maximum number of worker threads used for module processing
+	 * Returns the maximum number of worker threads used for module processing.
+	 *
+	 * @return maximum module thread count
 	 */
 	public int getMaxModuleThreads() {
 		return maxModuleThreads;
@@ -871,8 +999,9 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * @return timeout (in minutes) to wait for module processing completion during
-	 *         shutdown
+	 * Returns timeout (in minutes) to wait for module processing completion during shutdown.
+	 *
+	 * @return shutdown timeout in minutes
 	 */
 	public long getModuleThreadTimeoutMinutes() {
 		return moduleThreadTimeoutMinutes;
@@ -894,10 +1023,8 @@ public class FileProcessor extends ProjectProcessor {
 	 * Attempts to retrieve instructions from the given data string.
 	 *
 	 * <ul>
-	 * <li>If {@code data} starts with {@code http://} or {@code https://}, reads
-	 * content from the specified URL.</li>
-	 * <li>If {@code data} starts with {@code file:}, reads content from the
-	 * specified file path.</li>
+	 * <li>If {@code data} starts with {@code http://} or {@code https://}, reads content from the specified URL.</li>
+	 * <li>If {@code data} starts with {@code file:}, reads content from the specified file path.</li>
 	 * <li>Otherwise, returns {@code data}.</li>
 	 * </ul>
 	 *
@@ -927,6 +1054,18 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
+	/**
+	 * Reads text content from a URL using UTF-8.
+	 *
+	 * <p>
+	 * If an initial unauthenticated request fails and the URL includes user-info (e.g., {@code https://user:pass@host}),
+	 * the request is retried with an HTTP Basic {@code Authorization} header.
+	 * </p>
+	 *
+	 * @param urlString URL to read
+	 * @return response body
+	 * @throws MalformedURLException if {@code urlString} is not a valid URL
+	 */
 	private static String readFromHttpUrl(String urlString) throws MalformedURLException {
 		URL url = new URL(urlString);
 		try (InputStream in = url.openStream()) {
@@ -942,6 +1081,15 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
+	/**
+	 * Retries reading a URL using an HTTP Basic {@code Authorization} header.
+	 *
+	 * @param urlString original URL string (may include user-info)
+	 * @param url       parsed URL
+	 * @param userInfo  raw user-info from {@link URL#getUserInfo()}
+	 * @param cause     original exception
+	 * @return response body
+	 */
 	private static String readFromHttpUrlWithBasicAuth(String urlString, URL url, String userInfo, IOException cause) {
 		try {
 			String cleanUrl = urlString.replaceFirst("//" + userInfo + "@", "//");
@@ -961,18 +1109,52 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
+	/**
+	 * Reads text content from a local file path using UTF-8.
+	 *
+	 * @param filePath local filesystem path (may be a raw path or a {@code file:} URI)
+	 * @return file content
+	 */
 	private static String readFromFilePath(String filePath) {
-		Path path = Path.of(filePath);
+		Path path = toLocalPath(filePath);
 		if (!Files.exists(path)) {
 			throw new IllegalArgumentException("File not found: " + path.toAbsolutePath());
 		}
 
 		try (FileReader reader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
 			String result = IOUtils.toString(reader);
-			logger.info("Included: `{}`", filePath);
+			logger.info("Included: `{}`", path);
 			return result;
 		} catch (IOException e) {
 			throw new IllegalArgumentException("Failed to read file: " + path.toAbsolutePath(), e);
+		}
+	}
+
+	/**
+	 * Converts a provided path string into a local {@link Path}.
+	 *
+	 * @param filePath raw path or {@code file:} URI
+	 * @return local path
+	 */
+	private static Path toLocalPath(String filePath) {
+		String trimmed = StringUtils.trimToNull(filePath);
+		if (trimmed == null) {
+			throw new IllegalArgumentException("File path must not be blank");
+		}
+
+		try {
+			URI uri = new URI(trimmed);
+			if (uri.getScheme() == null) {
+				return Path.of(trimmed);
+			}
+			if (!Strings.CI.equals(uri.getScheme(), "file")) {
+				throw new IllegalArgumentException("Unsupported URI scheme for file path: " + trimmed);
+			}
+			return Path.of(uri);
+		} catch (URISyntaxException e) {
+			return Path.of(trimmed);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Invalid file path: " + trimmed, e);
 		}
 	}
 }

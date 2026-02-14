@@ -83,7 +83,7 @@
 							<archive>
 								<manifest>
 									<mainClass>
-										org.machanism.machai.gw.Ghostwriter</mainClass>
+										org.machanism.machai.gw.processor.Ghostwriter</mainClass>
 								</manifest>
 								<manifestEntries>
 									<Class-Path><![CDATA[lib/ae.jar lib/web-ae-plugin.jar]]></Class-Path>
