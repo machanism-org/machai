@@ -89,6 +89,16 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
+	/** Root scanning directory for the current documentation run. */
+	private File rootDir;
+
+	/**
+	 * Specifies a special scanning path or path pattern. This should be a relative
+	 * path with respect to the current processing project. If an absolute path is
+	 * provided, it must be located within the {@code rootDir}.
+	 */
+	private File scanDir;
+
 	/** Resource bundle supplying prompt templates for generators. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
@@ -99,10 +109,7 @@ public class FileProcessor extends ProjectProcessor {
 	private final SystemFunctionTools systemFunctionTools;
 
 	/** Reviewer associations keyed by file extension. */
-	private final Map<String, Reviewer> reviewMap = new HashMap<>();
-
-	/** Root scanning directory for the current documentation run. */
-	private File rootDir;
+	private final Map<String, Reviewer> reviewerMap = new HashMap<>();
 
 	/** Provider key/name (including model) used when creating GenAI providers. */
 	private final String genai;
@@ -137,16 +144,16 @@ public class FileProcessor extends ProjectProcessor {
 	/** Timeout for module processing worker pool shutdown. */
 	private long moduleThreadTimeoutMinutes = 60;
 
-	private File scanDir;
-
 	/**
 	 * Constructs a processor.
-	 *
+	 * 
+	 * @param rootDir      TODO
 	 * @param genai        provider key/name to use
 	 * @param configurator configuration source
 	 */
-	public FileProcessor(String genai, Configurator configurator) {
+	public FileProcessor(File rootDir, String genai, Configurator configurator) {
 		this.genai = genai;
+		this.rootDir = rootDir;
 		this.configurator = configurator;
 		this.systemFunctionTools = new SystemFunctionTools();
 		loadReviewers();
@@ -157,7 +164,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * supported file extensions to a reviewer.
 	 */
 	private void loadReviewers() {
-		reviewMap.clear();
+		reviewerMap.clear();
 
 		ServiceLoader<Reviewer> reviewerServiceLoader = ServiceLoader.load(Reviewer.class);
 		for (Reviewer reviewer : reviewerServiceLoader) {
@@ -165,7 +172,7 @@ public class FileProcessor extends ProjectProcessor {
 			for (String extension : extensions) {
 				String key = normalizeExtensionKey(extension);
 				if (key != null) {
-					reviewMap.putIfAbsent(key, reviewer);
+					reviewerMap.putIfAbsent(key, reviewer);
 				}
 			}
 		}
@@ -196,24 +203,39 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Scans documents in the given root directory and start subdirectory, preparing
-	 * inputs for documentation generation.
+	 * Scans documents within the specified project root directory and the provided start subdirectory or pattern,
+	 * preparing inputs for documentation generation.
 	 *
 	 * <p>
-	 * Note: callers may pass a raw directory (e.g. {@code src}) or a {@code glob:}
-	 * / {@code regex:} pattern supported by
-	 * {@link FileSystems#getPathMatcher(String)}.
+	 * The {@code scanDir} parameter can be either:
+	 * <ul>
+	 *   <li>A raw directory name (e.g., {@code src}),</li>
+	 *   <li>or a pattern string prefixed with {@code glob:} or {@code regex:}, as supported by
+	 *       {@link java.nio.file.FileSystems#getPathMatcher(String)}.</li>
+	 * </ul>
 	 * </p>
 	 *
-	 * @param rootDir the root directory of the project to scan
-	 * @param scanDir file glob/regex pattern or start directory
-	 * @throws IOException if an error occurs reading files
+	 * <p>
+	 * If a directory path is provided, it should be relative to the current processing project.
+	 * If an absolute path is provided, it must be located within the {@code projectDir}.
+	 * </p>
+	 *
+	 * @param projectDir the root directory of the project to scan
+	 * @param scanDir    the file glob/regex pattern or start directory to scan; must be a relative path with respect to the project,
+	 *                   or an absolute path located within {@code projectDir}
+	 * @throws IOException if an error occurs while reading files during the scan
+	 * @throws IllegalArgumentException if the scan path is not located within the root project directory
 	 */
-	public void scanDocuments(File rootDir, String scanDir) throws IOException {
-		if (!Strings.CS.equals(rootDir.getAbsolutePath(), scanDir)) {
+	public void scanDocuments(File projectDir, String scanDir) throws IOException {
+		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
 			if (!isPathPattern(scanDir)) {
 				this.scanDir = new File(scanDir);
-				String relativePath = ProjectLayout.getRelativePath(rootDir, new File(scanDir));
+				String relativePath = ProjectLayout.getRelativePath(projectDir, new File(scanDir));
+				if (relativePath == null) {
+					throw new IllegalArgumentException(
+							"Error: The specified scan path must be located within the root project directory: "
+									+ projectDir.getAbsolutePath());
+				}
 
 				scanDir = "glob:" + relativePath + "{,/**}";
 			}
@@ -221,8 +243,7 @@ public class FileProcessor extends ProjectProcessor {
 			this.pathMatcher = FileSystems.getDefault().getPathMatcher(scanDir);
 		}
 
-		this.rootDir = rootDir;
-		scanFolder(rootDir);
+		scanFolder(projectDir);
 	}
 
 	/**
@@ -291,14 +312,7 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
-	@Override
-	protected void processModule(File projectDir, String module) throws IOException {
-		if (match(new File(projectDir, module))) {
-			super.processModule(projectDir, module);
-		}
-	}
-
-	protected boolean match(File file) {
+	protected boolean match(File file, File projectDir) {
 		if (file == null) {
 			return false;
 		}
@@ -311,7 +325,7 @@ public class FileProcessor extends ProjectProcessor {
 			return true;
 		}
 
-		String path = ProjectLayout.getRelativePath(rootDir, file);
+		String path = ProjectLayout.getRelativePath(projectDir, file);
 		Path pathToMatch = Path.of(path);
 		boolean result = pathMatcher.matches(pathToMatch);
 
@@ -319,7 +333,7 @@ public class FileProcessor extends ProjectProcessor {
 			String relativePath = ProjectLayout.getRelativePath(file, scanDir);
 			if (relativePath != null) {
 				Path scanFilePath = scanDir.toPath().resolve(relativePath);
-				String relatedToRoot = ProjectLayout.getRelativePath(rootDir, scanFilePath.toFile());
+				String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
 				result = relatedToRoot != null && pathMatcher.matches(Path.of(relatedToRoot));
 			}
 		}
@@ -338,7 +352,7 @@ public class FileProcessor extends ProjectProcessor {
 		File projectDir = projectLayout.getProjectDir();
 		List<File> children = findFiles(projectDir);
 
-		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child));
+		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
 
 		for (File child : children) {
 			if (child.isDirectory()) {
@@ -348,7 +362,7 @@ public class FileProcessor extends ProjectProcessor {
 			}
 		}
 
-		if (match(projectDir) && children.isEmpty() && defaultGuidance != null) {
+		if (match(projectDir, projectDir) && children.isEmpty() && defaultGuidance != null) {
 			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"),
 					defaultGuidance);
 			process(projectLayout, projectLayout.getProjectDir(), defaultGuidanceText);
@@ -410,8 +424,8 @@ public class FileProcessor extends ProjectProcessor {
 	private String processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
-		if (match(file)) {
-			File projectDir = projectLayout.getProjectDir();
+		File projectDir = projectLayout.getProjectDir();
+		if (match(file, projectDir)) {
 			String guidance = parseFile(projectDir, file);
 
 			if (guidance != null) {
@@ -497,7 +511,10 @@ public class FileProcessor extends ProjectProcessor {
 
 		content.add(projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`" : NOT_DEFINED);
 		content.add(projectLayout.getProjectId());
-		content.add(".");
+
+		String relativePath = ProjectLayout.getRelativePath(rootDir, projectDir);
+		content.add(relativePath);
+
 		content.add(projectLayout.getProjectLayoutType());
 		content.add(getDirInfoLine(sources, projectDir));
 		content.add(getDirInfoLine(tests, projectDir));
@@ -541,7 +558,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (key == null) {
 			return null;
 		}
-		return reviewMap.get(key);
+		return reviewerMap.get(key);
 	}
 
 	private List<File> findFiles(File projectDir, String pattern) throws IOException {
@@ -595,7 +612,7 @@ public class FileProcessor extends ProjectProcessor {
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
 			String name = file.getName();
-			Path relativePath = Path.of(ProjectLayout.getRelativePath(rootDir, file));
+			Path relativePath = Path.of(ProjectLayout.getRelativePath(projectDir, file));
 
 			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(relativePath)) {
 				continue;

@@ -100,7 +100,7 @@ public class ReactorGW extends AbstractGWGoal {
 
 		PropertiesConfigurator config = getConfiguration();
 
-		FileProcessor documents = new FileProcessor(genai, config) {
+		FileProcessor documents = new FileProcessor(new File(executionRootDirectory), genai, config) {
 
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

@@ -1,4 +1,7 @@
 <!-- @guidance:
+**VERY IMPORTANT NOTE:**  
+Ghostwriter maven plugin works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
+Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
 Page Structure: 
 # Header
    - Project Title: need to use from pom.xml

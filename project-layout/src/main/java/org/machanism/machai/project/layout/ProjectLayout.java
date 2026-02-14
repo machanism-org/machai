@@ -96,17 +96,31 @@ public abstract class ProjectLayout {
 	 */
 	public abstract List<String> getTests();
 
-	public static String getRelativePath(File dir, File file) {
-		return getRelativePath(dir, file, false);
-	}
-
 	/**
-	 * Computes relative path, optionally prepending single dot.
-	 * 
-	 * @param dir          Project directory
-	 * @param file         Target file
-	 * @param addSingleDot If true, prefix with "./" if needed
-	 * @return Relative path string
+	 * Computes the relative path from the specified project directory to the target file.
+	 * The result is not prefixed with "./".
+	 *
+	 * @param dir  the base project directory
+	 * @param file the target file for which to compute the relative path
+	 * @return the relative path string, or {@code null} if the target file is not within the project directory
+	 * @see #getRelativePath(File, File, boolean)
+	 */
+	public static String getRelativePath(File dir, File file) {
+	    return getRelativePath(dir, file, false);
+	}
+	/**
+	 * Computes the relative path from the specified project directory to the target file.
+	 * Optionally, the result can be prefixed with "./" if {@code addSingleDot} is {@code true}.
+	 *
+	 * <p>
+	 * If the target file is the same as the project directory, returns ".".
+	 * If an absolute path is provided, it must be located within the project directory.
+	 * </p>
+	 *
+	 * @param dir          the base project directory
+	 * @param file         the target file for which to compute the relative path
+	 * @param addSingleDot if {@code true}, prefixes the result with "./" when appropriate
+	 * @return the relative path string, or {@code null} if the target file is not within the project directory
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		String currentPath = dir.getAbsolutePath().replace("\\", "/");

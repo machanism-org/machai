@@ -91,7 +91,7 @@ public class GW extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator config = getConfiguration();
 
-		FileProcessor processor = new FileProcessor(genai, config) {
+		FileProcessor processor = new FileProcessor(basedir, genai, config) {
 
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

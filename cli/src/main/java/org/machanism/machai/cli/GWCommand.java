@@ -78,7 +78,7 @@ public class GWCommand {
 		}
 
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
-		FileProcessor documents = new FileProcessor(chatModel, config);
+		FileProcessor documents = new FileProcessor(dir, chatModel, config);
 
 		if (instructions != null) {
 			File instructionsFile = new File(instructions);

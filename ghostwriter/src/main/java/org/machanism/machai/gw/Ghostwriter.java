@@ -203,7 +203,7 @@ public final class Ghostwriter {
 			for (String scanDir : dirs) {
 				logger.info("Starting scan of directory: {}", scanDir);
 
-				FileProcessor processor = new FileProcessor(genai, config);
+				FileProcessor processor = new FileProcessor(rootDir, genai, config);
 				if (excludes != null) {
 					logger.info("Excludes: {}", Arrays.toString(excludes));
 					processor.setExcludes(excludes);
