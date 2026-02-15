@@ -23,7 +23,8 @@
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
  *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
- *      - Do not use escaping in `{@code ...}` tags.    
+ *     - Do not use escaping in `{@code ...}` tags.   
+ *     - When showing `${...}` variable placeholders, do not use escaping or wrap them in `{@code ...}`.
  */
 
 /**

@@ -149,7 +149,7 @@ public class WebPageFunctionTools implements FunctionTools {
 	 * </ul>
 	 * <p>
 	 * Both tools support variable placeholders in header values (e.g.,
-	 * {@code ${propertyName}}), which are resolved using the {@link Configurator}
+	 * ${propertyName}), which are resolved using the {@link Configurator}
 	 * if available. <br>
 	 * For HTTP Basic Authentication, you may either use the userInfo format in the
 	 * URL or set the {@code Authorization} header directly.
