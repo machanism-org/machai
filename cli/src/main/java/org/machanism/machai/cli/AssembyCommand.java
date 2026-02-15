@@ -13,7 +13,7 @@ import org.jline.reader.LineReader;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.ai.tools.SystemFunctionTools;
+import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
@@ -139,7 +139,7 @@ public class AssembyCommand {
 
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
-		SystemFunctionTools.getInstance().applyTools(provider);
+		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 		logger.info("The project directory: {}", dir);
@@ -180,7 +180,7 @@ public class AssembyCommand {
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 
-		SystemFunctionTools.getInstance().applyTools(provider);
+		FunctionToolsLoader.getInstance().applyTools(provider);
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 		provider.setWorkingDir(dir);
 

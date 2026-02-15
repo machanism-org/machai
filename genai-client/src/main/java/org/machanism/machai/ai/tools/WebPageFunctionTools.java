@@ -10,9 +10,17 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Properties;
 import java.util.Random;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,21 +28,56 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Installs an HTTP GET web-page fetching tool into a {@link GenAIProvider}.
+ * Provides tools for fetching web content and executing REST API calls, and
+ * installs them into a {@link GenAIProvider} for use in GenAI-powered
+ * workflows.
  *
  * <p>
- * The installed tool retrieves the response body for a given URL and optionally
- * strips HTML tags to return plain text.
- *
- * <h2>Installed tool</h2>
+ * The main tools installed are:
  * <ul>
- * <li>{@code get_web_content} – performs an HTTP GET and returns either the
- * response body or extracted text</li>
+ * <li>{@code get_web_content} – Fetches the content of a web page using an HTTP
+ * GET request. Supports returning either the full HTML content or plain text
+ * (HTML tags stripped).</li>
+ * <li>{@code call_rest_api} – Executes a REST API call to the specified URL
+ * using the given HTTP method (GET, POST, PUT, PATCH, DELETE, etc.), with
+ * support for custom headers and request body.</li>
  * </ul>
  *
+ * <h2>HTTP Header Variable Placeholders</h2>
  * <p>
- * This class does not enforce outbound network policies (for example allow/deny
+ * When specifying HTTP headers for either tool, you can use variable
+ * placeholders in the header value. Placeholders are written in the format
+ * <b>{@code ${propertyName}}</b>. At runtime, the value will be resolved using
+ * the {@link Configurator} instance provided to this class. If the property is
+ * not found, the original value is used.
+ * </p>
+ * <p>
+ * Example header string:
+ * 
+ * <pre>
+ * Authorization=Bearer ${apiToken}
+ * Content-Type=application/json
+ * </pre>
+ * <ul>
+ * <li>{@code Authorization} header will be set to {@code Bearer <value>} where
+ * {@code <value>} is resolved from {@code apiToken} in the configurator.</li>
+ * <li>{@code Content-Type} header will be set to {@code application/json}.</li>
+ * </ul>
+ *
+ * <h2>Network Policy</h2>
+ * <p>
+ * This class does not enforce outbound network policies (such as allow/deny
  * lists). Such controls must be implemented by the hosting application.
+ * </p>
+ *
+ * <h2>Usage</h2>
+ * <ol>
+ * <li>Instantiate and configure {@code WebPageFunctionTools} with a
+ * {@link Configurator} if variable resolution is needed.</li>
+ * <li>Call {@link #applyTools(GenAIProvider)} to register the tools.</li>
+ * <li>Invoke the tools via the provider, passing parameters as described in the
+ * tool documentation.</li>
+ * </ol>
  *
  * @author Viktor Tovstyi
  */
@@ -47,27 +90,61 @@ public class WebPageFunctionTools implements FunctionTools {
 
 	private static final String defaultCharset = "UTF-8";
 
+	private Configurator configurator;
+
 	/**
-	 * Registers the {@code get_web_content} tool with the provided
-	 * {@link GenAIProvider}.
+	 * Provides tools for fetching web content and executing REST API calls, and
+	 * installs them into a {@link GenAIProvider} for use in GenAI-powered
+	 * workflows.
 	 *
 	 * <p>
-	 * Supported parameters:
+	 * The main tools installed are:
 	 * <ul>
-	 * <li><b>url</b> (string, required): the URL to fetch</li>
-	 * <li><b>headers</b> (string, optional): HTTP headers as {@code NAME=VALUE}
-	 * pairs separated by newlines ({@code \n}); if omitted, no extra headers are
-	 * sent</li>
-	 * <li><b>timeout</b> (integer, optional): request timeout in milliseconds;
-	 * defaults to {@value #TIMEOUT}</li>
-	 * <li><b>charsetName</b> (string, optional): character set to decode the
-	 * response with; defaults to {@code UTF-8}</li>
-	 * <li><b>textOnly</b> (boolean, optional): if {@code true}, returns the page
-	 * text content (HTML stripped via jsoup); otherwise returns the full response
-	 * content</li>
+	 * <li>{@code get_web_content} – Fetches the content of a web page using an HTTP
+	 * GET request. Supports returning either the full HTML content or plain text
+	 * (HTML tags stripped).</li>
+	 * <li>{@code call_rest_api} – Executes a REST API call to the specified URL
+	 * using the given HTTP method (GET, POST, PUT, PATCH, DELETE, etc.), with
+	 * support for custom headers and request body.</li>
 	 * </ul>
 	 *
-	 * @param provider provider instance to augment
+	 * <h2>HTTP Header Variable Placeholders</h2>
+	 * <p>
+	 * When specifying HTTP headers for either tool, you can use variable
+	 * placeholders in the header value. Placeholders are written in the format
+	 * <b>${propertyName}</b>. At runtime, the value will be resolved using the
+	 * {@link Configurator} instance provided to this class. If the property is not
+	 * found, the original value is used.
+	 * </p>
+	 * <p>
+	 * Example header string:
+	 * 
+	 * <pre>
+	 * Authorization=Bearer ${apiToken}
+	 * Content-Type=application/json
+	 * </pre>
+	 * <ul>
+	 * <li>{@code Authorization} header will be set to {@code Bearer <value>} where
+	 * {@code <value>} is resolved from {@code apiToken} in the configurator.</li>
+	 * <li>{@code Content-Type} header will be set to {@code application/json}.</li>
+	 * </ul>
+	 *
+	 * <h2>Network Policy</h2>
+	 * <p>
+	 * This class does not enforce outbound network policies (such as allow/deny
+	 * lists). Such controls must be implemented by the hosting application.
+	 * </p>
+	 *
+	 * <h2>Usage</h2>
+	 * <ol>
+	 * <li>Instantiate and configure {@code WebPageFunctionTools} with a
+	 * {@link Configurator} if variable resolution is needed.</li>
+	 * <li>Call {@link #applyTools(GenAIProvider)} to register the tools.</li>
+	 * <li>Invoke the tools via the provider, passing parameters as described in the
+	 * tool documentation.</li>
+	 * </ol>
+	 *
+	 * @author Viktor Tovstyi
 	 */
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("get_web_content", "Fetches the content of a web page using an HTTP GET request.",
@@ -146,16 +223,7 @@ public class WebPageFunctionTools implements FunctionTools {
 		connection.setConnectTimeout(timeout);
 		connection.setReadTimeout(timeout);
 
-		if (headers != null) {
-			for (String headerLine : headers.split("\\R")) {
-				int idx = headerLine.indexOf('=');
-				if (idx > 0) {
-					String name = headerLine.substring(0, idx).trim();
-					String value = headerLine.substring(idx + 1).trim();
-					connection.setRequestProperty(name, value);
-				}
-			}
-		}
+		fillHeader(headers, connection);
 
 		int responseCode = connection.getResponseCode();
 		output.append("HTTP ").append(Integer.toString(responseCode)).append(" ")
@@ -198,17 +266,7 @@ public class WebPageFunctionTools implements FunctionTools {
 			connection.setConnectTimeout(timeout);
 			connection.setReadTimeout(timeout);
 
-			// Set headers if provided
-			if (headers != null) {
-				for (String headerLine : headers.split("\\R")) {
-					int idx = headerLine.indexOf('=');
-					if (idx > 0) {
-						String name = headerLine.substring(0, idx).trim();
-						String value = headerLine.substring(idx + 1).trim();
-						connection.setRequestProperty(name, value);
-					}
-				}
-			}
+			fillHeader(headers, connection);
 
 			// Write body for POST, PUT, PATCH, etc.
 			if (body != null && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
@@ -241,4 +299,38 @@ public class WebPageFunctionTools implements FunctionTools {
 		}
 	}
 
+	private void fillHeader(String headers, HttpURLConnection connection) {
+		// Set headers if provided
+		if (headers != null) {
+			for (String headerLine : headers.split("\\R")) {
+				int idx = headerLine.indexOf('=');
+				if (idx > 0) {
+					String name = headerLine.substring(0, idx).trim();
+					String value = headerLine.substring(idx + 1).trim();
+
+					value = replase(value, configurator);
+					connection.setRequestProperty(name, value);
+				}
+			}
+		}
+	}
+
+	private String replase(String value, Configurator conf) {
+		Properties properties = new Properties();
+
+		Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
+		Matcher matcher = pattern.matcher(value);
+		while (matcher.find()) {
+			String propName = matcher.group(1);
+			properties.put(propName, conf.get(propName, "${" + propName + "}"));
+		}
+
+		value = StringSubstitutor.replace(value, properties);
+		return value;
+	}
+
+	@Override
+	public void setConfigurator(Configurator configurator) {
+		this.configurator = configurator;
+	}
 }

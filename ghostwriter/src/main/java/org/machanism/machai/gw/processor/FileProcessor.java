@@ -42,7 +42,7 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.ai.tools.SystemFunctionTools;
+import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -139,7 +139,7 @@ public class FileProcessor extends ProjectProcessor {
 	public FileProcessor(File rootDir, String genai, Configurator configurator) {
 		logger.info("File processing root directory: {}", rootDir);
 
-		SystemFunctionTools.getInstance().setConfiguration(configurator);
+		FunctionToolsLoader.getInstance().setConfiguration(configurator);
 		
 		this.genai = genai;
 		this.rootDir = rootDir;
@@ -543,7 +543,7 @@ public class FileProcessor extends ProjectProcessor {
 
 		String perform;
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
-			SystemFunctionTools.getInstance().applyTools(provider);
+			FunctionToolsLoader.getInstance().applyTools(provider);
 			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
 

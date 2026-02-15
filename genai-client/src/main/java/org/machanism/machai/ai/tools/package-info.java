@@ -42,7 +42,7 @@
  * <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – file and directory operations (read, write, list)</li>
  * <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution with bounded output capture</li>
  * <li>{@link org.machanism.machai.ai.tools.WebPageFunctionTools} – HTTP GET page fetch (HTML or extracted text)</li>
- * <li>{@link org.machanism.machai.ai.tools.SystemFunctionTools} – convenience installer for the common tool set</li>
+ * <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – convenience installer for the common tool set</li>
  * </ul>
  *
  * <h2>Supporting utilities</h2>

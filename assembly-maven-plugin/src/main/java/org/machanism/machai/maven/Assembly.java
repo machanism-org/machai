@@ -20,7 +20,7 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.provider.none.NoneProvider;
-import org.machanism.machai.ai.tools.SystemFunctionTools;
+import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
@@ -129,9 +129,9 @@ public class Assembly extends AbstractMojo {
 	 * <ol>
 	 * <li>Read the prompt from {@link #assemblyPromptFile} if it exists; otherwise prompt the user.</li>
 	 * <li>Create a {@link Configurator} backed by {@code bindex.properties}.</li>
-	 * <li>Initialize the picker {@link GenAIProvider} and apply {@link SystemFunctionTools}.</li>
+	 * <li>Initialize the picker {@link GenAIProvider} and apply {@link FunctionToolsLoader}.</li>
 	 * <li>Use {@link Picker} to recommend libraries and log recommendations to the build output.</li>
-	 * <li>Initialize the assembly {@link GenAIProvider} and apply {@link SystemFunctionTools}.</li>
+	 * <li>Initialize the assembly {@link GenAIProvider} and apply {@link FunctionToolsLoader}.</li>
 	 * <li>Run {@link ApplicationAssembly} against {@link #basedir}.</li>
 	 * <li>If the provider is not a {@link NoneProvider}, enter an interactive prompt loop until the user types
 	 * {@code exit}.</li>
@@ -156,7 +156,7 @@ public class Assembly extends AbstractMojo {
 
 			GenAIProvider provider = GenAIProviderManager.getProvider(pickChatModel, config);
 			provider.setWorkingDir(basedir);
-			SystemFunctionTools.getInstance().applyTools(provider);
+			FunctionToolsLoader.getInstance().applyTools(provider);
 
 			try (Picker picker = new Picker(provider, registerUrl)) {
 				picker.setScore(score);
@@ -177,7 +177,7 @@ public class Assembly extends AbstractMojo {
 
 				GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(chatModel, config);
 				assemblyProvider.setWorkingDir(basedir);
-				SystemFunctionTools.getInstance().applyTools(assemblyProvider);
+				FunctionToolsLoader.getInstance().applyTools(assemblyProvider);
 
 				ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider);
 

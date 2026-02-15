@@ -29,11 +29,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Viktor Tovstyi
  */
-public class SystemFunctionTools {
+public class FunctionToolsLoader {
 
-	private static final Logger logger = LoggerFactory.getLogger(SystemFunctionTools.class);
+	private static final Logger logger = LoggerFactory.getLogger(FunctionToolsLoader.class);
 
-	private static final SystemFunctionTools INSTANCE = new SystemFunctionTools();
+	private static final FunctionToolsLoader INSTANCE = new FunctionToolsLoader();
 
 	private final List<FunctionTools> functionTools = new ArrayList<>();
 
@@ -41,11 +41,11 @@ public class SystemFunctionTools {
 	 * Private constructor to prevent external instantiation. Creates a tool
 	 * installer that applies both file and command tools.
 	 */
-	private SystemFunctionTools() {
+	private FunctionToolsLoader() {
 		ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
 		for (FunctionTools functionTool : functionToolServiceLoader) {
 			functionTools.add(functionTool);
-			logger.info("Added FunctionTool: {}", functionTool.getClass().getName());
+			logger.info("FunctionTool: {}", functionTool.getClass().getName());
 		}
 	}
 
@@ -54,7 +54,7 @@ public class SystemFunctionTools {
 	 *
 	 * @return the singleton instance
 	 */
-	public static SystemFunctionTools getInstance() {
+	public static FunctionToolsLoader getInstance() {
 		return INSTANCE;
 	}
 
