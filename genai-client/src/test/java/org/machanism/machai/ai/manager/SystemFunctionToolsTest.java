@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.tools.SystemFunctionTools;
 
 /**
  * Unit tests for {@link SystemFunctionTools}.

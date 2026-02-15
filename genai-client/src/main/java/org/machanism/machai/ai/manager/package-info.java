@@ -38,9 +38,9 @@
  *   and applies the selected model.</li>
  *   <li><strong>Session interaction contract</strong> via {@link org.machanism.machai.ai.manager.GenAIProvider}, which
  *   supports prompts, instructions, file attachments, embeddings, and tool registration.</li>
- *   <li><strong>Host tool installation</strong> via {@link org.machanism.machai.ai.manager.FileFunctionTools},
+ *   <li><strong>Host tool installation</strong> via {@link org.machanism.machai.ai.tools.FileFunctionTools},
  *   {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and the convenience wrapper
- *   {@link org.machanism.machai.ai.manager.SystemFunctionTools}.</li>
+ *   {@link org.machanism.machai.ai.tools.SystemFunctionTools}.</li>
  *   <li><strong>Operational metrics</strong> via {@link org.machanism.machai.ai.manager.Usage} aggregated by
  *   {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
  * </ul>

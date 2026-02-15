@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.manager;
+package org.machanism.machai.ai.tools;
 
 /**
  * A {@link StringBuilder}-like helper that retains only the last {@code maxSize} characters.

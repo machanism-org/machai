@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  *   processor.scanFolder(new File("/path/to/project"));
  * }</pre>
  *
- * @author machanism
+ * @author Viktor Tovstyi
  * @since 0.0.2
  */
 public abstract class ProjectProcessor {

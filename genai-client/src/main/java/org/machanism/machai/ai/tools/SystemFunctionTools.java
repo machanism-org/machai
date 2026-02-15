@@ -1,4 +1,6 @@
-package org.machanism.machai.ai.manager;
+package org.machanism.machai.ai.tools;
+
+import org.machanism.machai.ai.manager.GenAIProvider;
 
 /**
  * Applies a standard set of local system tools to a {@link GenAIProvider}.

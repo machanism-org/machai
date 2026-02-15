@@ -2,6 +2,8 @@ package org.machanism.machai.ai.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.tools.FileFunctionTools;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import java.io.File;

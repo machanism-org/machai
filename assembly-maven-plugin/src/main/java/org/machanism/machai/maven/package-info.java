@@ -46,7 +46,7 @@
  *
  * <p>
  * GenAI providers are resolved by id using {@link org.machanism.machai.ai.manager.GenAIProviderManager} and are
- * augmented with standard function tools via {@link org.machanism.machai.ai.manager.SystemFunctionTools}.
+ * augmented with standard function tools via {@link org.machanism.machai.ai.tools.SystemFunctionTools}.
  * </p>
  *
  * <h2>Goal</h2>

@@ -26,7 +26,7 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
  * }</pre>
  *
- * @author machanism
+ * @author Viktor Tovstyi
  * @since 0.0.2
  */
 public class ProjectLayoutManager {
