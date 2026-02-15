@@ -42,6 +42,7 @@ package org.machanism.machai.gw.reviewer;
  *           and any exceptions thrown.
  *      - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;`
  *           and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc.
+ *      - Do not use escaping in `{@code ...}` tags.    
  * - Use the Java Version Defined in `pom.xml`:
  *      - All code improvements and Javadoc updates must be compatible with the Java version specified in the project's `pom.xml`.
  *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.

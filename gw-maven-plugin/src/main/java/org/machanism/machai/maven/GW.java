@@ -53,23 +53,23 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
- * <li><b>{@code gw.genai}</b> / {@code &lt;genai&gt;} ({@code genai}):
+ * <li><b>{@code gw.genai}</b> / {@code <genai>} ({@code genai}):
  * Provider/model identifier to pass to the workflow.</li>
  * <li><b>{@code ${basedir}}</b> ({@code basedir}): The Maven module base
  * directory.</li>
- * <li><b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}):
+ * <li><b>{@code gw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}):
  * Optional scan root override. When omitted, defaults to the execution root
  * directory.</li>
- * <li><b>{@code gw.instructions}</b> / {@code &lt;instructions&gt;}
+ * <li><b>{@code gw.instructions}</b> / {@code <instructions>}
  * ({@code instructions}): Instruction locations (for example, file paths or
  * classpath locations) consumed by the workflow.</li>
- * <li><b>{@code gw.guidance}</b> / {@code &lt;guidance&gt;} ({@code guidance}):
+ * <li><b>{@code gw.guidance}</b> / {@code <guidance>} ({@code guidance}):
  * Default guidance text forwarded to the workflow.</li>
- * <li><b>{@code gw.excludes}</b> / {@code &lt;excludes&gt;} ({@code excludes}):
+ * <li><b>{@code gw.excludes}</b> / {@code <excludes>} ({@code excludes}):
  * Exclude patterns/paths that should be skipped when scanning documentation
  * sources.</li>
  * <li><b>{@code gw.genai.serverId}</b> ({@code serverId}): {@code settings.xml}
- * {@code &lt;server&gt;} id used to read GenAI credentials.</li>
+ * {@code <server>} id used to read GenAI credentials.</li>
  * <li><b>{@code gw.logInputs}</b> ({@code logInputs}): Whether to log the list
  * of input files passed to the workflow.
  * <p>
