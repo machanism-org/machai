@@ -1,6 +1,12 @@
 package org.machanism.machai.ai.tools;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
+
 import org.machanism.machai.ai.manager.GenAIProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Applies a standard set of local system tools to a {@link GenAIProvider}.
@@ -24,21 +30,31 @@ import org.machanism.machai.ai.manager.GenAIProvider;
  */
 public class SystemFunctionTools {
 
-	/** Provides file system utility methods for GenAIProvider environments. */
-	private final FileFunctionTools fileFunctionTools;
+	private static final Logger logger = LoggerFactory.getLogger(SystemFunctionTools.class);
 
-	/** Provides shell command utility methods for GenAIProvider environments. */
-	private final CommandFunctionTools commandFunctionTools;
+	private static final SystemFunctionTools INSTANCE = new SystemFunctionTools();
 
-	private final WebPageFunctionTools webPageFunctionTools;
+	private final List<FunctionTools> functionTools = new ArrayList<>();
 
 	/**
-	 * Creates a tool installer that applies both file and command tools.
+	 * Private constructor to prevent external instantiation. Creates a tool
+	 * installer that applies both file and command tools.
 	 */
-	public SystemFunctionTools() {
-		this.fileFunctionTools = new FileFunctionTools();
-		this.commandFunctionTools = new CommandFunctionTools();
-		this.webPageFunctionTools = new WebPageFunctionTools();
+	private SystemFunctionTools() {
+		ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
+		for (FunctionTools functionTool : functionToolServiceLoader) {
+			functionTools.add(functionTool);
+			logger.info("Added FunctionTool: {}", functionTool.getClass().getName());
+		}
+	}
+
+	/**
+	 * Returns the singleton instance of SystemFunctionTools.
+	 *
+	 * @return the singleton instance
+	 */
+	public static SystemFunctionTools getInstance() {
+		return INSTANCE;
 	}
 
 	/**
@@ -47,9 +63,8 @@ public class SystemFunctionTools {
 	 * @param provider the provider instance to augment with tool functions
 	 */
 	public void applyTools(GenAIProvider provider) {
-		fileFunctionTools.applyTools(provider);
-		commandFunctionTools.applyTools(provider);
-		webPageFunctionTools.applyTools(provider);
+		for (FunctionTools functionTool : functionTools) {
+			functionTool.applyTools(provider);
+		}
 	}
-
 }

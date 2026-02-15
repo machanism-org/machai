@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * @author Viktor Tovstyi
  */
-public class CommandFunctionTools {
+public class CommandFunctionTools implements FunctionTools {
 
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);

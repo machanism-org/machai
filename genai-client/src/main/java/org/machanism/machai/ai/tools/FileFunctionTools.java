@@ -40,7 +40,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * @author Viktor Tovstyi
  */
-public class FileFunctionTools {
+public class FileFunctionTools implements FunctionTools {
 
 	private static final int MAXWIDTH = 120;
 

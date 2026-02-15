@@ -58,9 +58,6 @@ public class AssembyCommand {
 	/** JLine line reader for shell interaction. */
 	LineReader reader;
 
-	/** Utility for applying system function tools to GenAI providers. */
-	private SystemFunctionTools functionTools = new SystemFunctionTools();
-
 	private PropertiesConfigurator config;
 
 	/**
@@ -142,7 +139,7 @@ public class AssembyCommand {
 
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
-		functionTools.applyTools(provider);
+		SystemFunctionTools.getInstance().applyTools(provider);
 
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 		logger.info("The project directory: {}", dir);
@@ -183,7 +180,7 @@ public class AssembyCommand {
 		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 
-		functionTools.applyTools(provider);
+		SystemFunctionTools.getInstance().applyTools(provider);
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 		provider.setWorkingDir(dir);
 

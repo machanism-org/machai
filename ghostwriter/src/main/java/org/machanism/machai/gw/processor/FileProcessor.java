@@ -93,12 +93,6 @@ public class FileProcessor extends ProjectProcessor {
 	/** Resource bundle supplying prompt templates for generators. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/**
-	 * Utility that installs tool functions (filesystem/command) into the provider
-	 * when supported.
-	 */
-	private final SystemFunctionTools systemFunctionTools;
-
 	/** Reviewer associations keyed by file extension. */
 	private final Map<String, Reviewer> reviewerMap = new HashMap<>();
 
@@ -148,7 +142,6 @@ public class FileProcessor extends ProjectProcessor {
 		this.genai = genai;
 		this.rootDir = rootDir;
 		this.configurator = configurator;
-		this.systemFunctionTools = new SystemFunctionTools();
 		loadReviewers();
 	}
 
@@ -548,7 +541,7 @@ public class FileProcessor extends ProjectProcessor {
 
 		String perform;
 		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
-			systemFunctionTools.applyTools(provider);
+			SystemFunctionTools.getInstance().applyTools(provider);
 			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
 

@@ -27,10 +27,8 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * <h2>Installed tool</h2>
  * <ul>
- * <li>
- * {@code get_web_content} – performs an HTTP GET and returns either the response
- * body or extracted text
- * </li>
+ * <li>{@code get_web_content} – performs an HTTP GET and returns either the
+ * response body or extracted text</li>
  * </ul>
  *
  * <p>
@@ -39,7 +37,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * @author Viktor Tovstyi
  */
-public class WebPageFunctionTools {
+public class WebPageFunctionTools implements FunctionTools {
 
 	private static final int TIMEOUT = 10000;
 
@@ -49,7 +47,8 @@ public class WebPageFunctionTools {
 	private static final String defaultCharset = "UTF-8";
 
 	/**
-	 * Registers the {@code get_web_content} tool with the provided	 * {@link GenAIProvider}.
+	 * Registers the {@code get_web_content} tool with the provided
+	 * {@link GenAIProvider}.
 	 *
 	 * <p>
 	 * Supported parameters:
@@ -120,9 +119,10 @@ public class WebPageFunctionTools {
 	/**
 	 * Performs the HTTP request and returns the response content.
 	 *
-	 * @param url URL to fetch
-	 * @param headers optional headers as {@code NAME=VALUE} pairs separated by newlines
-	 * @param timeout timeout in milliseconds
+	 * @param url         URL to fetch
+	 * @param headers     optional headers as {@code NAME=VALUE} pairs separated by
+	 *                    newlines
+	 * @param timeout     timeout in milliseconds
 	 * @param charsetName charset used to decode the response
 	 * @return response content including an initial status line
 	 * @throws IOException if the request cannot be executed
