@@ -185,12 +185,39 @@ public class WebPageFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Fetches the content of a web page using an HTTP GET request. Optionally
-	 * extracts content using a CSS selector and/or returns only plain text.
+	 * Fetches the content of a web page using an HTTP GET request, with support for custom headers, timeout, character set,
+	 * plain text extraction, and CSS selector-based content extraction.
+	 * <p>
+	 * This method allows for flexible web content retrieval and post-processing. It supports extracting only the plain text
+	 * from the page, or extracting and returning only the content matching a specified CSS selector.
+	 * <p>
+	 * The method expects the first element of {@code params} to be a {@link JsonNode} containing the following properties:
+	 * <ul>
+	 *   <li><b>url</b> (string, required): The URL of the web page to fetch.</li>
+	 *   <li><b>headers</b> (string, optional): HTTP headers as a single string, with each header in the format {@code NAME=VALUE},
+	 *       separated by newline characters ({@code \n}). If {@code null}, no additional headers are sent.
+	 *       <br>Supports variable placeholders in the format {@code ${propertyName}}, which are resolved using the {@link Configurator} if available.
+	 *       <br>To use HTTP Basic Authentication, include an {@code Authorization} header with the value {@code Basic <base64-encoded-credentials>}.</li>
+	 *   <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to wait for the HTTP response. Defaults to the class constant {@code TIMEOUT} if not specified.</li>
+	 *   <li><b>charsetName</b> (string, optional): The name of the character set to use when decoding the response content. Defaults to the class constant {@code defaultCharset}.</li>
+	 *   <li><b>textOnly</b> (boolean, optional): If {@code true}, only the plain text content of the web page is returned (HTML tags are stripped using jsoup). If {@code false} or not specified, the full HTML content is returned.</li>
+	 *   <li><b>cssSelectorQuery</b> (string, optional): If provided, extracts and returns only the content matching the specified CSS selector.
+	 *       If {@code textOnly} is also {@code true}, returns only the text of the selected elements; otherwise, returns their HTML.</li>
+	 * </ul>
+	 * <p>
+	 * <b>Behavior:</b>
+	 * <ul>
+	 *   <li>If {@code cssSelectorQuery} is provided and not empty, the method uses jsoup to select matching elements from the HTML response.
+	 *       The returned content is either the text or HTML of those elements, depending on {@code textOnly}.</li>
+	 *   <li>If {@code cssSelectorQuery} is not provided but {@code textOnly} is {@code true}, the method returns the plain text of the entire page.</li>
+	 *   <li>If neither {@code cssSelectorQuery} nor {@code textOnly} is set, the method returns the full HTML response.</li>
+	 * </ul>
+	 * <p>
+	 * The method logs the request and response details, and returns the requested content as a string.
+	 * If an error occurs, an error message is returned.
 	 *
-	 * @param params tool invocation parameters
-	 * @return response content (HTML, text, or selected content) or an error
-	 *         message
+	 * @param params an array where the first element is a {@link JsonNode} containing the web content fetch parameters
+	 * @return the fetched web content as a string (plain text, HTML, or selected content), or an error message if the request fails
 	 */
 	public String getWebContent(Object[] params) {
 		String requestId = Integer.toHexString(new Random().nextInt());
@@ -269,40 +296,15 @@ public class WebPageFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Performs an HTTP GET request to the specified URL and returns the full response content as a string.
-	 * <p>
-	 * This method establishes a connection to the given URL, applies any provided HTTP headers (including support for variable
-	 * placeholders and authentication), sets the specified timeout values, and reads the response using the given character set.
-	 * The returned string includes the HTTP status line (e.g., {@code HTTP 200 OK}) followed by the response body.
-	 * <p>
-	 * If the response code is 400 or higher, the method reads from the error stream; otherwise, it reads from the input stream.
-	 * <p>
-	 * <b>Header Handling:</b>
-	 * <ul>
-	 *   <li>Headers should be provided as a single string, with each header in the format {@code NAME=VALUE}, separated by newline characters ({@code \n}).</li>
-	 *   <li>Variable placeholders in the format {@code ${propertyName}} are supported and will be resolved using the {@link Configurator} if available.</li>
-	 *   <li>To use HTTP Basic Authentication, include an {@code Authorization} header with the value {@code Basic <base64-encoded-credentials>}.</li>
-	 * </ul>
-	 * <p>
-	 * <b>Example usage:</b>
-	 * <pre>
-	 * String response = getWebPage(
-	 *     "https://example.com",
-	 *     "Authorization=Basic dXNlcjpwYXNz\nContent-Type=application/json",
-	 *     5000,
-	 *     "UTF-8"
-	 * );
-	 * </pre>
+	 * Performs the HTTP request and returns the response content.
 	 *
-	 * @param url         the URL to fetch
-	 * @param headers     optional HTTP headers as {@code NAME=VALUE} pairs separated by newlines; may include variable placeholders
-	 * @param timeout     the timeout in milliseconds for both connection and read operations
-	 * @param charsetName the character set to use when decoding the response content
-	 * @return the HTTP response as a string, including the status line and body
-	 * @throws IOException                   if an I/O error occurs during the request
-	 * @throws MalformedURLException         if the provided URL is invalid
-	 * @throws ProtocolException             if there is an error setting the HTTP method
-	 * @throws UnsupportedEncodingException  if the specified character set is not supported
+	 * @param url         URL to fetch
+	 * @param headers     optional headers as {@code NAME=VALUE} pairs separated by
+	 *                    newlines
+	 * @param timeout     timeout in milliseconds
+	 * @param charsetName charset used to decode the response
+	 * @return response content including an initial status line
+	 * @throws IOException if the request cannot be executed
 	 */
 	private String getWebPage(String url, String headers, int timeout, String charsetName)
 			throws IOException, MalformedURLException, ProtocolException, UnsupportedEncodingException {
