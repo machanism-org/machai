@@ -281,6 +281,8 @@ public final class Ghostwriter {
 				sb.append(scanner.nextLine()).append("\n");
 			}
 		}
+		
+		System.out.println("Input complete. Processing your text...");
 		return sb.length() > 0 ? sb.deleteCharAt(sb.length() - 1).toString() : null;
 	}
 }

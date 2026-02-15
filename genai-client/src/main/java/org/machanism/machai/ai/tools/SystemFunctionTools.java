@@ -5,11 +5,15 @@ import org.machanism.machai.ai.manager.GenAIProvider;
 /**
  * Applies a standard set of local system tools to a {@link GenAIProvider}.
  *
- * <p>This class is a small convenience wrapper that installs both {@link FileFunctionTools} (file
- * read/write/list operations) and {@link CommandFunctionTools} (shell command execution) onto a provider
- * instance via {@link GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
+ * <p>
+ * This class is a small convenience wrapper that installs both
+ * {@link FileFunctionTools} (file read/write/list operations) and
+ * {@link CommandFunctionTools} (shell command execution) onto a provider
+ * instance via
+ * {@link GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
  *
  * <h2>Usage</h2>
+ * 
  * <pre>{@code
  * Configurator conf = ...;
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
@@ -26,12 +30,15 @@ public class SystemFunctionTools {
 	/** Provides shell command utility methods for GenAIProvider environments. */
 	private final CommandFunctionTools commandFunctionTools;
 
+	private final WebPageFunctionTools webPageFunctionTools;
+
 	/**
 	 * Creates a tool installer that applies both file and command tools.
 	 */
 	public SystemFunctionTools() {
 		this.fileFunctionTools = new FileFunctionTools();
 		this.commandFunctionTools = new CommandFunctionTools();
+		this.webPageFunctionTools = new WebPageFunctionTools();
 	}
 
 	/**
@@ -42,6 +49,7 @@ public class SystemFunctionTools {
 	public void applyTools(GenAIProvider provider) {
 		fileFunctionTools.applyTools(provider);
 		commandFunctionTools.applyTools(provider);
+		webPageFunctionTools.applyTools(provider);
 	}
 
 }

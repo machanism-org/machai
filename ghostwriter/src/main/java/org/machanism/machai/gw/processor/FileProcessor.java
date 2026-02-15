@@ -338,6 +338,17 @@ public class FileProcessor extends ProjectProcessor {
 		}
 	}
 
+	@Override
+	protected void processModule(File projectDir, String module) throws IOException {
+		if (scanDir != null) {
+			if (match(new File(projectDir, module), projectDir)) {
+				super.processModule(projectDir, module);
+			}
+		} else {
+			super.processModule(projectDir, module);
+		}
+	}
+
 	/**
 	 * Determines whether the specified file should be included for processing based
 	 * on exclusion rules, path matching patterns, and project structure.
