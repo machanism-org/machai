@@ -92,77 +92,70 @@ public class WebPageFunctionTools implements FunctionTools {
 	private Configurator configurator;
 
 	/**
-	 * Provides tools for fetching web content and executing REST API calls, and
-	 * installs them into a {@link GenAIProvider} for use in GenAI-powered
-	 * workflows.
-	 *
+	 * Registers web content and REST API functional tools with the provided
+	 * {@link GenAIProvider}.
 	 * <p>
-	 * The main tools installed are:
+	 * The following tools are installed:
 	 * <ul>
-	 * <li>{@code get_web_content} – Fetches the content of a web page using an HTTP
-	 * GET request. Supports returning the full HTML content, plain text (HTML tags
-	 * stripped), or content extracted using a CSS selector.</li>
-	 * <li>{@code call_rest_api} – Executes a REST API call to the specified URL
-	 * using the given HTTP method (GET, POST, PUT, PATCH, DELETE, etc.), with
-	 * support for custom headers and request body.</li>
-	 * </ul>
-	 *
-	 * <h2>get_web_content Tool Parameters</h2>
+	 * <li><b>get_web_content</b> – Fetches the content of a web page using an HTTP
+	 * GET request. <br>
+	 * The URL may include user credentials in the userInfo format (e.g.,
+	 * {@code https://user:password@host/path}) for basic authentication. <br>
+	 * <b>Parameters:</b>
 	 * <ul>
-	 * <li><b>url</b> (string, required): The URL of the web page to fetch.</li>
-	 * <li><b>headers</b> (string, optional): HTTP headers as {@code NAME=VALUE}
-	 * pairs separated by newlines ({@code \n}); if omitted, no extra headers are
-	 * sent.</li>
-	 * <li><b>timeout</b> (integer, optional): Request timeout in milliseconds;
-	 * defaults to {@value #TIMEOUT}.</li>
-	 * <li><b>charsetName</b> (string, optional): Character set to decode the
-	 * response with; defaults to {@code UTF-8}.</li>
-	 * <li><b>textOnly</b> (boolean, optional): If {@code true}, returns the page
-	 * text content (HTML stripped via jsoup); otherwise returns the full response
-	 * content.</li>
+	 * <li><b>url</b> (string, required): The URL of the web page to fetch. Supports
+	 * userInfo format for basic authentication.</li>
+	 * <li><b>headers</b> (string, optional): HTTP headers as a single string, with
+	 * each header in the format {@code NAME=VALUE}, separated by newline characters
+	 * ({@code \n}). If {@code null}, no additional headers are sent.</li>
+	 * <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to
+	 * wait for the HTTP response. If not specified, a default timeout will be
+	 * used.</li>
+	 * <li><b>charsetName</b> (string, optional): The name of the character set to
+	 * use when decoding the response content. Defaults to the value of
+	 * {@code defaultCharset}.</li>
+	 * <li><b>textOnly</b> (boolean, optional): If {@code true}, only the plain text
+	 * content of the web page is returned (HTML tags are stripped). If
+	 * {@code false} or not specified, the full HTML content is returned.</li>
 	 * <li><b>cssSelectorQuery</b> (string, optional): If provided, extracts and
 	 * returns only the content matching the specified CSS selector. If
 	 * {@code textOnly} is also {@code true}, returns only the text of the selected
 	 * elements; otherwise, returns their HTML.</li>
 	 * </ul>
-	 *
-	 * <h2>HTTP Header Variable Placeholders</h2>
-	 * <p>
-	 * When specifying HTTP headers for either tool, you can use variable
-	 * placeholders in the header value. Placeholders are written in the format
-	 * <b>${propertyName}</b>. At runtime, the value will be resolved using the
-	 * {@link Configurator} instance provided to this class. If the property is not
-	 * found, the original value is used.
-	 * </p>
-	 * <p>
-	 * Example header string:
-	 * 
-	 * <pre>
-	 * Authorization=Bearer ${apiToken}
-	 * Content-Type=application/json
-	 * </pre>
+	 * </li>
+	 * <li><b>call_rest_api</b> – Executes a REST API call to the specified URL
+	 * using the given HTTP method. <br>
+	 * The URL may include user credentials in the userInfo format (e.g.,
+	 * {@code https://user:password@host/path}) for basic authentication. <br>
+	 * <b>Parameters:</b>
 	 * <ul>
-	 * <li>{@code Authorization} header will be set to {@code Bearer <value>} where
-	 * {@code <value>} is resolved from {@code apiToken} in the configurator.</li>
-	 * <li>{@code Content-Type} header will be set to {@code application/json}.</li>
+	 * <li><b>url</b> (string, required): The URL of the REST endpoint. Supports
+	 * userInfo format for basic authentication.</li>
+	 * <li><b>method</b> (string, optional): The HTTP method to use (GET, POST, PUT,
+	 * PATCH, DELETE, etc.). Default is GET.</li>
+	 * <li><b>headers</b> (string, optional): HTTP headers as a single string, with
+	 * each header in the format {@code NAME=VALUE}, separated by newline characters
+	 * ({@code \n}). If {@code null}, no additional headers are sent.</li>
+	 * <li><b>body</b> (string, optional): The request body to send (for POST, PUT,
+	 * PATCH, etc.).</li>
+	 * <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to
+	 * wait for the HTTP response. If not specified, a default timeout will be
+	 * used.</li>
+	 * <li><b>charsetName</b> (string, optional): The name of the character set to
+	 * use when decoding the response content. Defaults to the value of
+	 * {@code defaultCharset}.</li>
 	 * </ul>
-	 *
-	 * <h2>Network Policy</h2>
+	 * </li>
+	 * </ul>
 	 * <p>
-	 * This class does not enforce outbound network policies (such as allow/deny
-	 * lists). Such controls must be implemented by the hosting application.
-	 * </p>
+	 * Both tools support variable placeholders in header values (e.g.,
+	 * {@code ${propertyName}}), which are resolved using the {@link Configurator}
+	 * if available. <br>
+	 * For HTTP Basic Authentication, you may either use the userInfo format in the
+	 * URL or set the {@code Authorization} header directly.
 	 *
-	 * <h2>Usage</h2>
-	 * <ol>
-	 * <li>Instantiate and configure {@code WebPageFunctionTools} with a
-	 * {@link Configurator} if variable resolution is needed.</li>
-	 * <li>Call {@link #applyTools(GenAIProvider)} to register the tools.</li>
-	 * <li>Invoke the tools via the provider, passing parameters as described in the
-	 * tool documentation.</li>
-	 * </ol>
-	 *
-	 * @author Viktor Tovstyi
+	 * @param provider the {@link GenAIProvider} instance to which the tools will be
+	 *                 registered
 	 */
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("get_web_content",
@@ -298,7 +291,7 @@ public class WebPageFunctionTools implements FunctionTools {
 			if (userInfo != null) {
 				String cleanUrl = url.toString().replace("//" + userInfo + "@", "//");
 				userInfo = replace(userInfo, configurator);
-				
+
 				url = new URL(cleanUrl);
 				connection = (HttpURLConnection) url.openConnection();
 
