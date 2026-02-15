@@ -192,7 +192,7 @@ public class WebPageFunctionTools implements FunctionTools {
 	 * @return response content (HTML, text, or selected content) or an error
 	 *         message
 	 */
-	private String getWebContent(Object[] params) {
+	public String getWebContent(Object[] params) {
 		String requestId = Integer.toHexString(new Random().nextInt());
 		logger.info("Fetching web content [{}]: {}", requestId, Arrays.toString(params));
 
@@ -269,15 +269,40 @@ public class WebPageFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Performs the HTTP request and returns the response content.
+	 * Performs an HTTP GET request to the specified URL and returns the full response content as a string.
+	 * <p>
+	 * This method establishes a connection to the given URL, applies any provided HTTP headers (including support for variable
+	 * placeholders and authentication), sets the specified timeout values, and reads the response using the given character set.
+	 * The returned string includes the HTTP status line (e.g., {@code HTTP 200 OK}) followed by the response body.
+	 * <p>
+	 * If the response code is 400 or higher, the method reads from the error stream; otherwise, it reads from the input stream.
+	 * <p>
+	 * <b>Header Handling:</b>
+	 * <ul>
+	 *   <li>Headers should be provided as a single string, with each header in the format {@code NAME=VALUE}, separated by newline characters ({@code \n}).</li>
+	 *   <li>Variable placeholders in the format {@code ${propertyName}} are supported and will be resolved using the {@link Configurator} if available.</li>
+	 *   <li>To use HTTP Basic Authentication, include an {@code Authorization} header with the value {@code Basic <base64-encoded-credentials>}.</li>
+	 * </ul>
+	 * <p>
+	 * <b>Example usage:</b>
+	 * <pre>
+	 * String response = getWebPage(
+	 *     "https://example.com",
+	 *     "Authorization=Basic dXNlcjpwYXNz\nContent-Type=application/json",
+	 *     5000,
+	 *     "UTF-8"
+	 * );
+	 * </pre>
 	 *
-	 * @param url         URL to fetch
-	 * @param headers     optional headers as {@code NAME=VALUE} pairs separated by
-	 *                    newlines
-	 * @param timeout     timeout in milliseconds
-	 * @param charsetName charset used to decode the response
-	 * @return response content including an initial status line
-	 * @throws IOException if the request cannot be executed
+	 * @param url         the URL to fetch
+	 * @param headers     optional HTTP headers as {@code NAME=VALUE} pairs separated by newlines; may include variable placeholders
+	 * @param timeout     the timeout in milliseconds for both connection and read operations
+	 * @param charsetName the character set to use when decoding the response content
+	 * @return the HTTP response as a string, including the status line and body
+	 * @throws IOException                   if an I/O error occurs during the request
+	 * @throws MalformedURLException         if the provided URL is invalid
+	 * @throws ProtocolException             if there is an error setting the HTTP method
+	 * @throws UnsupportedEncodingException  if the specified character set is not supported
 	 */
 	private String getWebPage(String url, String headers, int timeout, String charsetName)
 			throws IOException, MalformedURLException, ProtocolException, UnsupportedEncodingException {
@@ -306,13 +331,42 @@ public class WebPageFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Executes a REST call to the specified URL using the given HTTP method.
+	 * Executes a REST API call to the specified URL using the provided HTTP method, headers, request body, and other options.
+	 * <p>
+	 * This method supports a wide range of REST operations (GET, POST, PUT, PATCH, DELETE, etc.) and allows for custom configuration
+	 * of headers, timeouts, character encoding, and request body. It also supports HTTP Basic Authentication via headers.
+	 * <p>
+	 * The method expects the first element of {@code params} to be a {@link JsonNode} containing the following properties:
+	 * <ul>
+	 *   <li><b>url</b> (string, required): The URL of the REST endpoint to call.</li>
+	 *   <li><b>method</b> (string, optional): The HTTP method to use (e.g., GET, POST, PUT, PATCH, DELETE). Defaults to GET if not specified.</li>
+	 *   <li><b>headers</b> (string, optional): HTTP headers as a single string, with each header in the format {@code NAME=VALUE}, separated by newline characters ({@code \n}). If {@code null}, no additional headers are sent.
+	 *       <br>Supports variable placeholders in the format {@code ${propertyName}}, which are resolved using the {@link Configurator} if available.
+	 *       <br>To use HTTP Basic Authentication, include an {@code Authorization} header with the value {@code Basic <base64-encoded-credentials>}.</li>
+	 *   <li><b>body</b> (string, optional): The request body to send (for POST, PUT, PATCH, etc.). Ignored for GET and DELETE requests.</li>
+	 *   <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to wait for the HTTP response. Defaults to the class constant {@code TIMEOUT} if not specified.</li>
+	 *   <li><b>charsetName</b> (string, optional): The name of the character set to use when encoding the request body and decoding the response content. Defaults to the class constant {@code defaultCharset}.</li>
+	 * </ul>
+	 * <p>
+	 * <b>Example usage:</b>
+	 * <pre>
+	 * {
+	 *   "url": "https://api.example.com/resource",
+	 *   "method": "POST",
+	 *   "headers": "Authorization=Basic dXNlcjpwYXNz\nContent-Type=application/json",
+	 *   "body": "{\"key\":\"value\"}",
+	 *   "timeout": 5000,
+	 *   "charsetName": "UTF-8"
+	 * }
+	 * </pre>
+	 * <p>
+	 * The method logs the request and response details, and returns the full HTTP response as a string, including the status line.
+	 * If an error occurs, an error message is returned.
 	 *
-	 * @param params tool invocation parameters (expects a JsonNode with keys: url,
-	 *               method, headers, body, timeout, charsetName)
-	 * @return response content (body as string) or an error message
+	 * @param params an array where the first element is a {@link JsonNode} containing the REST call parameters
+	 * @return the HTTP response as a string (including status line and body), or an error message if the request fails
 	 */
-	private String callRestApi(Object[] params) {
+	public String callRestApi(Object[] params) {
 		String requestId = Integer.toHexString(new Random().nextInt());
 		logger.info("Executing REST call [{}]: {}", requestId, Arrays.toString(params));
 
