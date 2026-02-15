@@ -140,7 +140,7 @@ public class FileProcessor extends ProjectProcessor {
 		logger.info("File processing root directory: {}", rootDir);
 
 		FunctionToolsLoader.getInstance().setConfiguration(configurator);
-		
+
 		this.genai = genai;
 		this.rootDir = rootDir;
 		this.configurator = configurator;
@@ -1010,11 +1010,17 @@ public class FileProcessor extends ProjectProcessor {
 			normalizedLine = StrSubstitutor.replaceSystemProperties(normalizedLine);
 			normalizedLine = StrSubstitutor.replace(normalizedLine, valueMap);
 
-			String content = tryToGetInstructionsFromFile(normalizedLine, valueMap);
-			if (content != null) {
-				sb.append(content);
+			String content;
+			try {
+				content = tryToGetInstructionsFromFile(normalizedLine, valueMap);
+
+				if (content != null) {
+					sb.append(content);
+				}
+				sb.append(System.lineSeparator());
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
 			}
-			sb.append(System.lineSeparator());
 		});
 
 		return sb.toString();
@@ -1103,27 +1109,24 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param data     input string (URL, {@code file:} reference, or plain text)
 	 * @param valueMap value substitution map
 	 * @return content read from the URL/file, or the original input
+	 * @throws IOException
 	 */
-	private String tryToGetInstructionsFromFile(String data, HashMap<String, String> valueMap) {
+	private String tryToGetInstructionsFromFile(String data, HashMap<String, String> valueMap) throws IOException {
 		if (data == null) {
 			return null;
 		}
 
-		try {
-			String trimmed = data.trim();
-			if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-				return parseLines(readFromHttpUrl(trimmed), valueMap);
-			}
-
-			if (Strings.CS.startsWith(trimmed, "file:")) {
-				String filePath = StringUtils.substringAfter(trimmed, "file:");
-				return parseLines(readFromFilePath(filePath), valueMap);
-			}
-
-			return data;
-		} catch (MalformedURLException e) {
-			throw new IllegalArgumentException("Invalid URL: " + data, e);
+		String trimmed = data.trim();
+		if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+			return parseLines(readFromHttpUrl(trimmed), valueMap);
 		}
+
+		if (Strings.CS.startsWith(trimmed, "file:")) {
+			String filePath = StringUtils.substringAfter(trimmed, "file:");
+			return parseLines(readFromFilePath(filePath), valueMap);
+		}
+
+		return data;
 	}
 
 	/**
@@ -1139,46 +1142,12 @@ public class FileProcessor extends ProjectProcessor {
 	 * @return response body
 	 * @throws MalformedURLException if {@code urlString} is not a valid URL
 	 */
-	private static String readFromHttpUrl(String urlString) throws MalformedURLException {
+	private static String readFromHttpUrl(String urlString) throws IOException {
 		URL url = new URL(urlString);
 		try (InputStream in = url.openStream()) {
 			String result = IOUtils.toString(in, StandardCharsets.UTF_8);
 			logger.info("Included: `{}`", urlString);
 			return result;
-		} catch (IOException e) {
-			String userInfo = url.getUserInfo();
-			if (userInfo == null) {
-				throw new IllegalArgumentException("Invalid URL: " + urlString, e);
-			}
-			return readFromHttpUrlWithBasicAuth(urlString, url, userInfo, e);
-		}
-	}
-
-	/**
-	 * Retries reading a URL using an HTTP Basic {@code Authorization} header.
-	 *
-	 * @param urlString original URL string (may include user-info)
-	 * @param url       parsed URL
-	 * @param userInfo  raw user-info from {@link URL#getUserInfo()}
-	 * @param cause     original exception
-	 * @return response body
-	 */
-	private static String readFromHttpUrlWithBasicAuth(String urlString, URL url, String userInfo, IOException cause) {
-		try {
-			String cleanUrl = urlString.replaceFirst("//" + userInfo + "@", "//");
-			URL urlNoAuth = new URL(cleanUrl);
-			URLConnection connection = urlNoAuth.openConnection();
-
-			String basicToken = Base64.getEncoder().encodeToString(userInfo.getBytes(StandardCharsets.UTF_8));
-			connection.setRequestProperty("Authorization", "Basic " + basicToken);
-
-			try (InputStream in = connection.getInputStream()) {
-				String result = IOUtils.toString(in, StandardCharsets.UTF_8);
-				logger.info("Included: `{}`", url);
-				return result;
-			}
-		} catch (IOException ex) {
-			throw new IllegalArgumentException("Invalid basic auth token in URL: " + urlString, cause);
 		}
 	}
 

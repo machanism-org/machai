@@ -9,15 +9,14 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Base64;
 import java.util.Properties;
 import java.util.Random;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -101,11 +100,30 @@ public class WebPageFunctionTools implements FunctionTools {
 	 * The main tools installed are:
 	 * <ul>
 	 * <li>{@code get_web_content} – Fetches the content of a web page using an HTTP
-	 * GET request. Supports returning either the full HTML content or plain text
-	 * (HTML tags stripped).</li>
+	 * GET request. Supports returning the full HTML content, plain text (HTML tags
+	 * stripped), or content extracted using a CSS selector.</li>
 	 * <li>{@code call_rest_api} – Executes a REST API call to the specified URL
 	 * using the given HTTP method (GET, POST, PUT, PATCH, DELETE, etc.), with
 	 * support for custom headers and request body.</li>
+	 * </ul>
+	 *
+	 * <h2>get_web_content Tool Parameters</h2>
+	 * <ul>
+	 * <li><b>url</b> (string, required): The URL of the web page to fetch.</li>
+	 * <li><b>headers</b> (string, optional): HTTP headers as {@code NAME=VALUE}
+	 * pairs separated by newlines ({@code \n}); if omitted, no extra headers are
+	 * sent.</li>
+	 * <li><b>timeout</b> (integer, optional): Request timeout in milliseconds;
+	 * defaults to {@value #TIMEOUT}.</li>
+	 * <li><b>charsetName</b> (string, optional): Character set to decode the
+	 * response with; defaults to {@code UTF-8}.</li>
+	 * <li><b>textOnly</b> (boolean, optional): If {@code true}, returns the page
+	 * text content (HTML stripped via jsoup); otherwise returns the full response
+	 * content.</li>
+	 * <li><b>cssSelectorQuery</b> (string, optional): If provided, extracts and
+	 * returns only the content matching the specified CSS selector. If
+	 * {@code textOnly} is also {@code true}, returns only the text of the selected
+	 * elements; otherwise, returns their HTML.</li>
 	 * </ul>
 	 *
 	 * <h2>HTTP Header Variable Placeholders</h2>
@@ -153,7 +171,8 @@ public class WebPageFunctionTools implements FunctionTools {
 				"timeout:integer:optional:The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.",
 				"charsetName:string:optional:The name of the character set to use when decoding the response content. Default: "
 						+ defaultCharset,
-				"textOnly:boolean:optional:If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.");
+				"textOnly:boolean:optional:If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.",
+				"cssSelectorQuery:string:optional:If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.");
 
 		provider.addTool("call_rest_api", "Executes a REST API call to the specified URL using the given HTTP method.",
 				this::callRestApi, "url:string:required:The URL of the REST endpoint.",
@@ -166,10 +185,12 @@ public class WebPageFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Fetches the content of a web page using an HTTP GET request.
+	 * Fetches the content of a web page using an HTTP GET request. Optionally
+	 * extracts content using a CSS selector and/or returns only plain text.
 	 *
 	 * @param params tool invocation parameters
-	 * @return response content (HTML or text) or an error message
+	 * @return response content (HTML, text, or selected content) or an error
+	 *         message
 	 */
 	private String getWebContent(Object[] params) {
 		String requestId = Integer.toHexString(new Random().nextInt());
@@ -183,9 +204,24 @@ public class WebPageFunctionTools implements FunctionTools {
 		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
 				: defaultCharset;
 		boolean textOnly = props.has("textOnly") && props.get("textOnly").asBoolean(false);
+		String cssSelectorQuery = props.has("cssSelectorQuery") ? props.get("cssSelectorQuery").asText(null) : null;
 
 		try {
 			String response = getWebPage(url, headers, timeout, charsetName);
+
+			if (cssSelectorQuery != null && !cssSelectorQuery.isEmpty()) {
+				org.jsoup.nodes.Document doc = Jsoup.parse(response);
+				org.jsoup.select.Elements elements = doc.select(cssSelectorQuery);
+				StringBuilder selectedContent = new StringBuilder();
+				for (org.jsoup.nodes.Element element : elements) {
+					selectedContent.append(textOnly ? element.text() : element.outerHtml())
+							.append(System.lineSeparator());
+				}
+				String result = selectedContent.toString().trim();
+				logger.info("[WEB {}] Downloaded web content ({} bytes), CSS selector '{}' matched {} elements.",
+						requestId, response.length(), cssSelectorQuery, elements.size());
+				return result;
+			}
 
 			if (textOnly) {
 				String plainText = Jsoup.parse(response).text();
@@ -200,6 +236,35 @@ public class WebPageFunctionTools implements FunctionTools {
 		} catch (IOException e) {
 			logger.error("[WEB {}] IO error during web content fetch", requestId, e);
 			return "IO Error: " + e.getMessage();
+		}
+	}
+
+	private HttpURLConnection getConnection(URL url, String headers, String charsetName) {
+		try {
+			HttpURLConnection connection;
+
+			String userInfo = url.getUserInfo();
+			if (userInfo != null) {
+				userInfo = replase(userInfo, configurator);
+
+				String cleanUrl = url.toString().replaceFirst("//" + userInfo + "@", "//");
+				url = new URL(cleanUrl);
+				connection = (HttpURLConnection) url.openConnection();
+				
+				byte[] bytes = userInfo.getBytes(StandardCharsets.UTF_8);
+
+				String basicToken = Base64.getEncoder().encodeToString(bytes);
+				connection.setRequestProperty("Authorization", "Basic " + basicToken);
+
+			} else {
+				connection = (HttpURLConnection) url.openConnection();
+			}
+
+			fillHeader(headers, connection);
+			return connection;
+
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
 		}
 	}
 
@@ -218,7 +283,7 @@ public class WebPageFunctionTools implements FunctionTools {
 			throws IOException, MalformedURLException, ProtocolException, UnsupportedEncodingException {
 		StringBuilder output = new StringBuilder();
 
-		HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+		HttpURLConnection connection = getConnection(new URL(url), headers, charsetName);
 		connection.setRequestMethod("GET");
 		connection.setConnectTimeout(timeout);
 		connection.setReadTimeout(timeout);
@@ -261,7 +326,7 @@ public class WebPageFunctionTools implements FunctionTools {
 				: defaultCharset;
 
 		try {
-			HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+			HttpURLConnection connection = getConnection(new URL(url), headers, charsetName);
 			connection.setRequestMethod(method);
 			connection.setConnectTimeout(timeout);
 			connection.setReadTimeout(timeout);
@@ -300,7 +365,6 @@ public class WebPageFunctionTools implements FunctionTools {
 	}
 
 	private void fillHeader(String headers, HttpURLConnection connection) {
-		// Set headers if provided
 		if (headers != null) {
 			for (String headerLine : headers.split("\\R")) {
 				int idx = headerLine.indexOf('=');

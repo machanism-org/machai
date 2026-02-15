@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public final class Ghostwriter {
 
 	/** Logger for the Ghostwriter application. */
-	private static Logger logger;
+	private static final Logger logger = LoggerFactory.getLogger(Ghostwriter.class);
 
 	/** Default provider/model identifier used when none is configured. */
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
@@ -277,7 +277,7 @@ public final class Ghostwriter {
 				sb.append(scanner.nextLine()).append("\n");
 			}
 		}
-		
+
 		System.out.println("Input complete. Processing your text...");
 		return sb.length() > 0 ? sb.deleteCharAt(sb.length() - 1).toString() : null;
 	}
