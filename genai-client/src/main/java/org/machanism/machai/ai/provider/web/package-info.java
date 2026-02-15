@@ -33,6 +33,19 @@
  * automating a target GenAI service through its web user interface using
  * <a href="https://ganteater.com">Anteater</a> workspace recipes.
  *
+ * <h2>Typical usage</h2>
+ * <p>Callers typically configure the target automation recipe ("model") and working directory, then execute the
+ * automation to obtain a response.
+ *
+ * <pre>{@code
+ * WebProvider provider = new WebProvider()
+ *     .model("openai-chatgpt")
+ *     .setWorkingDir(new File("C:\\anteater-workspace"));
+ *
+ * GenAIResponse response = provider.perform();
+ * System.out.println(response.text());
+ * }</pre>
+ *
  * <h2>Lifecycle</h2>
  * <ol>
  *   <li>Select the Anteater configuration via {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>

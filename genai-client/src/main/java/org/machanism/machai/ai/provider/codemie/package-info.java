@@ -27,15 +27,16 @@
  */
 
 /**
- * Integration with EPAM CodeMie as an OpenAI-compatible provider.
+ * EPAM CodeMie provider implementation.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, an
- * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider} specialization that authenticates against the CodeMie
- * OpenID Connect token endpoint, obtains an OAuth 2.0 access token, and configures an OpenAI-compatible client to call
- * the CodeMie Code Assistant API.
+ * <p>This package provides {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a concrete * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider} implementation that:
+ * <ol>
+ *   <li>Obtains an OAuth 2.0 access token from CodeMie's OpenID Connect token endpoint.</li>
+ *   <li>Initializes an OpenAI-compatible client configured to call the CodeMie Code Assistant REST API.</li>
+ * </ol>
  *
  * <h2>Authentication</h2>
- * <p>{@code CodeMieProvider} selects the OAuth 2.0 grant type based on the configured {@code GENAI_USERNAME}:
+ * <p>The provider selects the grant type based on {@code GENAI_USERNAME}:
  * <ul>
  *   <li><b>Password grant</b> when the username contains {@code "@"} (typical user e-mail login).</li>
  *   <li><b>Client credentials</b> when the username does not contain {@code "@"} (service-to-service).</li>

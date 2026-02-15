@@ -27,22 +27,22 @@
  */
 
 /**
- * OpenAI-backed implementation of the MachAI {@link org.machanism.machai.ai.manager.GenAIProvider} abstraction.
+ * OpenAI-backed provider implementation for the MachAI {@link org.machanism.machai.ai.manager.GenAIProvider}
+ * abstraction.
  *
  * <p>
- * This package contains {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, which adapts the OpenAI
- * Java SDK to the provider interface used by the rest of the application.
+ * The types in this package adapt the OpenAI Java SDK to MachAI's provider interface. They build request inputs
+ * (prompts, optional instructions, and optional file inputs), execute calls through the OpenAI Responses API,
+ * handle iterative tool/function calls, and report usage metrics.
  * </p>
  *
  * <h2>Responsibilities</h2>
  * <ul>
- *   <li>Build and maintain a conversation input list (user prompts, optional session instructions, and file inputs).
- *   </li>
- *   <li>Execute requests via the OpenAI Responses API and parse results, including iterative handling of function
- *       tool calls.</li>
- *   <li>Register tools (function calling) and dispatch tool invocations to application-provided handlers.</li>
- *   <li>Create vector embeddings for an input string.</li>
- *   <li>Report token usage metrics to {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *   <li>Translate MachAI provider configuration into OpenAI request structures.</li>
+ *   <li>Execute responses requests and parse text/tool-call outputs.</li>
+ *   <li>Register and dispatch function tools to application handlers.</li>
+ *   <li>Create vector embeddings for input text.</li>
+ *   <li>Report token usage to {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
  * </ul>
  *
  * <h2>Usage</h2>
@@ -55,8 +55,8 @@
  * </pre>
  *
  * <p>
- * <strong>Thread-safety:</strong> the provider implementation is not thread-safe; use one instance per request or
- * synchronize access externally.
+ * <strong>Thread-safety:</strong> instances are not thread-safe; use one instance per request or synchronize
+ * access externally.
  * </p>
  */
 package org.machanism.machai.ai.provider.openai;

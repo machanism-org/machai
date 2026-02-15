@@ -27,15 +27,15 @@
  */
 
 /**
- * Host-integrated “tool” implementations that can be registered with a
+ * Host-integrated tool implementations that can be registered with a
  * {@link org.machanism.machai.ai.manager.GenAIProvider} to expose a small, auditable set of capabilities to an AI
  * workflow.
  *
  * <p>
  * Tools in this package are typically installed by registering named functions via
  * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
- * Each function should be narrowly scoped (for example, reading a file, listing a directory, executing a command, or
- * fetching a web page) so that calling code can reason about and constrain what the AI can do.
+ * Each function is intended to be narrowly scoped (for example, reading a file, listing a directory, executing a
+ * command, or fetching a web page) so that calling code can reason about and constrain what the AI can do.
  *
  * <h2>Tool installers</h2>
  * <ul>
