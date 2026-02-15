@@ -52,33 +52,31 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </dl>
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
+ * <ul>
+ * <li><b>{@code gw.genai}</b> / {@code &lt;genai&gt;} ({@code genai}):
+ * Provider/model identifier to pass to the workflow.</li>
+ * <li><b>{@code ${basedir}}</b> ({@code basedir}): The Maven module base
+ * directory.</li>
+ * <li><b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}):
+ * Optional scan root override. When omitted, defaults to the execution root
+ * directory.</li>
+ * <li><b>{@code gw.instructions}</b> / {@code &lt;instructions&gt;}
+ * ({@code instructions}): Instruction locations (for example, file paths or
+ * classpath locations) consumed by the workflow.</li>
+ * <li><b>{@code gw.guidance}</b> / {@code &lt;guidance&gt;} ({@code guidance}):
+ * Default guidance text forwarded to the workflow.</li>
+ * <li><b>{@code gw.excludes}</b> / {@code &lt;excludes&gt;} ({@code excludes}):
+ * Exclude patterns/paths that should be skipped when scanning documentation
+ * sources.</li>
+ * <li><b>{@code gw.genai.serverId}</b> ({@code serverId}): {@code settings.xml}
+ * {@code &lt;server&gt;} id used to read GenAI credentials.</li>
+ * <li><b>{@code gw.logInputs}</b> ({@code logInputs}): Whether to log the list
+ * of input files passed to the workflow.
  * <p>
- * This goal also supports all shared parameters defined by {@link AbstractGWGoal}.
+ * Default: {@code false}
  * </p>
- *
- * <h4>Common parameters</h4>
- * <dl>
- * <dt>{@code -Dgw.path}</dt>
- * <dd>
- * Optional path to the base directory to scan. Default: the current Maven basedir.
- * </dd>
- *
- * <dt>{@code -Dgw.genai}</dt>
- * <dd>
- * Path to the GenAI configuration/properties file used by Ghostwriter. Default: implementation-defined by
- * {@link AbstractGWGoal}.
- * </dd>
- *
- * <dt>{@code -Dgw.profile}</dt>
- * <dd>
- * Optional processing profile name. Default: implementation-defined by {@link AbstractGWGoal}.
- * </dd>
- *
- * <dt>{@code -Dgw.dryRun}</dt>
- * <dd>
- * If {@code true}, performs a dry run (no files are modified). Default: {@code false}.
- * </dd>
- * </dl>
+ * </li>
+ * </ul>
  *
  * <p>
  * Refer to {@link AbstractGWGoal} for the authoritative list and exact semantics of inherited parameters.
