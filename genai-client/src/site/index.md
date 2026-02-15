@@ -90,14 +90,25 @@ This implementation is NOT thread-safe.
 
 ### CodeMie
 
-The `CodeMieProvider` is an `OpenAIProvider` specialization that targets the CodeMie OpenAI-compatible endpoint.
+GenAI provider implementation for EPAM CodeMie.
 
-On initialization, it obtains an access token from the CodeMie authentication endpoint and then configures the underlying OpenAI client with the retrieved token and the CodeMie base URL.
+This provider obtains an access token from a configurable OpenID Connect token endpoint and then initializes an OpenAI-compatible client (via `OpenAIProvider`) to call the CodeMie Code Assistant REST API.
 
-Required configuration
+The authentication mode is selected based on the configured username:
 
-- `GENAI_USERNAME`
-- `GENAI_PASSWORD`
+- If the username contains `"@"`, the password grant is used (typical user e-mail login).
+- Otherwise, the client credentials grant is used (service-to-service).
+
+Configuration
+
+Required configuration keys:
+
+- `GENAI_USERNAME` – user e-mail or client id
+- `GENAI_PASSWORD` – password or client secret
+
+Optional configuration keys:
+
+- `AUTH_URL` – token endpoint override
 
 Built-in endpoints
 

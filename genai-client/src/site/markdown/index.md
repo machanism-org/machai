@@ -176,15 +176,18 @@ The `CodeMieProvider` extends `OpenAIProvider` and integrates with CodeMie by fi
 
 How it works:
 
-- Uses `GENAI_USERNAME` / `GENAI_PASSWORD` to request an access token from CodeMie Keycloak (override the token endpoint with `AUTH_URL` if needed).
-- Uses that access token as the API key when constructing the underlying OpenAI client.
+- Uses `GENAI_USERNAME` / `GENAI_PASSWORD` to request an access token from a configurable OpenID Connect token endpoint (override with `AUTH_URL` if needed).
+- Selects OAuth2 grant type automatically:
+  - If `GENAI_USERNAME` contains `@`: uses the `password` grant.
+  - Otherwise: uses `client_credentials`.
+- Uses that access token as the API key when constructing the underlying OpenAI-compatible client.
 - Uses the CodeMie OpenAI-compatible base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`.
 
 **Authentication / configuration**
 
 - `GENAI_USERNAME` (required)
 - `GENAI_PASSWORD` (required)
-- `AUTH_URL` (optional; defaults to CodeMie Keycloak token URL)
+- `AUTH_URL` (optional; defaults to the CodeMie token endpoint)
 
 **Usage example**
 

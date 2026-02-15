@@ -1,47 +1,66 @@
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
- * 
+ * **IMPORTANT: UPDATE THIS `package-info.java`!**
+ *
  * - Use Clear and Concise Descriptions:
- * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
- * 		- Avoid vague statements; be specific about functionality and intent.
+ *     - Write meaningful summaries that explain the purpose, behavior, and usage of the package and its elements.
+ *     - Avoid vague statements; be specific about functionality and intent.
+ *
  * - Update `package-info.java`:
- *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
- *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
- *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
- * -  Include Usage Examples Where Helpful:
- * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * -  Maintain Consistency and Formatting:
- * 		- Follow a consistent style and structure for all Javadoc comments.
+ *     - Analyze the source code within this package.
+ *     - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose, scope, and usage.
+ *     - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
+ *     - Place the package-level Javadoc immediately before the `package` declaration.
+ *
+ * - Include Usage Examples Where Helpful:
+ *     - Provide code snippets or examples in Javadoc comments for complex classes or methods, if relevant to the package.
+ *
+ * - Maintain Consistency and Formatting:
+ *     - Follow a consistent style and structure for all Javadoc comments.
+ *     - Use proper Markdown or HTML formatting for readability.
+ *
  * - Add Javadoc:
- *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
- *          methods, and fields, adhering to established best practices.
- *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
- *          and any exceptions thrown.
- *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` as `&amp;gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *     - Summarize the purpose and scope of child packages within the parent package-level Javadoc.
+ *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted.
  */
 
 /**
- * Provider-neutral public API for configuring and executing GenAI operations.
+ * Top-level API for integrating with generative-AI (GenAI) providers.
  *
- * <p>This package defines the provider-agnostic abstractions used by the GenAI Client library. It models
- * <em>what</em> an AI operation is (requests, options, tools, and results) rather than <em>how</em> a specific
- * provider performs it.
+ * <p>This package defines the public, provider-neutral abstractions used by the GenAI Client:
  *
- * <h2>Typical usage</h2>
- * <ol>
- *   <li>Select and configure a provider/model.</li>
- *   <li>Build a request from system instructions and user input, optionally registering tools/functions.</li>
- *   <li>Execute the operation and consume the returned result (generated text, tool calls, embeddings, etc.).</li>
- * </ol>
- *
- * <h2>Related packages</h2>
  * <ul>
- *   <li>{@code org.machanism.machai.ai.provider} for provider-specific implementations.</li>
- *   <li>{@code org.machanism.machai.ai.manager} for provider discovery/selection and management.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider} is the central contract implemented by
+ *   each provider. It supports session-style prompting (instructions + prompts), attaching local or remote
+ *   files, invoking a provider to obtain a textual response, and computing embeddings.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProviderManager} resolves a provider from an identifier of the
+ *   form {@code Provider:Model} (for example {@code OpenAI:gpt-4o-mini}) and initializes it with application
+ *   configuration.</li>
+ *   <li>Tool functions can be registered via {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)},
+ *   enabling providers to call back into the host application to perform actions such as reading/writing files,
+ *   executing commands, or fetching web content.</li>
  * </ul>
+ *
+ * <h2>Subpackages</h2>
+ * <ul>
+ *   <li>{@code org.machanism.machai.ai.manager} – provider contract, provider resolution, and usage accounting.</li>
+ *   <li>{@code org.machanism.machai.ai.provider.*} – concrete provider implementations (for example OpenAI, Web,
+ *   CodeMie, or a no-op provider).</li>
+ *   <li>{@code org.machanism.machai.ai.tools} – reusable tool installers that register common host-side functions
+ *   (file system, command execution, web fetching) with a provider.</li>
+ * </ul>
+ *
+ * <h2>Example</h2>
+ * <pre>{@code
+ * Configurator conf = ...;
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
+ *
+ * provider.instructions("You are a helpful assistant.");
+ * provider.prompt("Summarize this repository.");
+ * String answer = provider.perform();
+ *
+ * provider.close();
+ * }</pre>
  */
 package org.machanism.machai.ai;

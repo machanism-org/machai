@@ -18,42 +18,56 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Installs an HTTP GET web-page fetching tool into a {@link GenAIProvider}.
+ *
+ * <p>
+ * The installed tool retrieves the response body for a given URL and optionally
+ * strips HTML tags to return plain text.
+ *
+ * <h2>Installed tool</h2>
+ * <ul>
+ * <li>
+ * {@code get_web_content} – performs an HTTP GET and returns either the response
+ * body or extracted text
+ * </li>
+ * </ul>
+ *
+ * <p>
+ * This class does not enforce outbound network policies (for example allow/deny
+ * lists). Such controls must be implemented by the hosting application.
+ *
+ * @author Viktor Tovstyi
+ */
 public class WebPageFunctionTools {
 
 	private static final int TIMEOUT = 10000;
 
-	/** Logger for shell tool execution and diagnostics. */
+	/** Logger for web fetch tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(WebPageFunctionTools.class);
 
 	private static final String defaultCharset = "UTF-8";
 
 	/**
-	 * Registers the {@code get_web_content} functional tool with the provided
-	 * {@link GenAIProvider}.
-	 * <p>
-	 * This tool allows fetching the content of a web page using an HTTP GET
-	 * request. The following parameters are supported:
-	 * <ul>
-	 * <li><b>url</b> (string, required): The URL of the web page to fetch.</li>
-	 * <li><b>headers</b> (string, optional): HTTP headers as a single string, with
-	 * each header in the format {@code NAME=VALUE}, separated by newline characters
-	 * ({@code \n}). If {@code null}, no additional headers are sent.</li>
-	 * <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to
-	 * wait for the HTTP response. If not specified, a default timeout will be
-	 * used.</li>
-	 * <li><b>charsetName</b> (string, optional): The name of the character set to
-	 * use when decoding the response content. Defaults to the value of
-	 * {@code defaultCharset}.</li>
-	 * <li><b>textOnly</b> (boolean, optional): If {@code true}, only the plain text
-	 * content of the web page is returned (HTML tags are stripped using jsoup). If
-	 * {@code false} or not specified, the full HTML content is returned.</li>
-	 * </ul>
-	 * <p>
-	 * The tool is registered with the provider and can be invoked to retrieve web
-	 * content as part of GenAI-powered workflows.
+	 * Registers the {@code get_web_content} tool with the provided	 * {@link GenAIProvider}.
 	 *
-	 * @param provider the {@link GenAIProvider} instance to which the tool will be
-	 *                 registered
+	 * <p>
+	 * Supported parameters:
+	 * <ul>
+	 * <li><b>url</b> (string, required): the URL to fetch</li>
+	 * <li><b>headers</b> (string, optional): HTTP headers as {@code NAME=VALUE}
+	 * pairs separated by newlines ({@code \n}); if omitted, no extra headers are
+	 * sent</li>
+	 * <li><b>timeout</b> (integer, optional): request timeout in milliseconds;
+	 * defaults to {@value #TIMEOUT}</li>
+	 * <li><b>charsetName</b> (string, optional): character set to decode the
+	 * response with; defaults to {@code UTF-8}</li>
+	 * <li><b>textOnly</b> (boolean, optional): if {@code true}, returns the page
+	 * text content (HTML stripped via jsoup); otherwise returns the full response
+	 * content</li>
+	 * </ul>
+	 *
+	 * @param provider provider instance to augment
 	 */
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("get_web_content", "Fetches the content of a web page using an HTTP GET request.",
@@ -66,35 +80,10 @@ public class WebPageFunctionTools {
 	}
 
 	/**
-	 * Fetches the content of a web page using an HTTP GET request, with support for
-	 * custom headers, timeout, character set, and an option to return only the
-	 * plain text content.
-	 * <p>
-	 * The method expects the first element of {@code params} to be a
-	 * {@link JsonNode} containing the following properties:
-	 * <ul>
-	 * <li><b>url</b> (string, required): The URL of the web page to fetch.</li>
-	 * <li><b>headers</b> (string, optional): HTTP headers as a single string, with
-	 * each header in the format {@code NAME=VALUE}, separated by newline characters
-	 * ({@code \n}).</li>
-	 * <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to
-	 * wait for the HTTP response. Defaults to 10,000 ms (10 seconds) if not
-	 * specified.</li>
-	 * <li><b>charsetName</b> (string, optional): The name of the character set to
-	 * use when decoding the response content. Defaults to the value of
-	 * {@code defaultCharset}.</li>
-	 * <li><b>textOnly</b> (boolean, optional): If {@code true}, only the plain text
-	 * content of the web page is returned (HTML tags are stripped using jsoup). If
-	 * {@code false} or not specified, the full HTML content is returned.</li>
-	 * </ul>
-	 * <p>
-	 * The method logs the download operation and returns the requested content as a
-	 * string. If an error occurs, an error message is returned.
+	 * Fetches the content of a web page using an HTTP GET request.
 	 *
-	 * @param params an array where the first element is a {@link JsonNode}
-	 *               containing request parameters
-	 * @return the fetched web content as a string (plain text or HTML), or an error
-	 *         message if the request fails
+	 * @param params tool invocation parameters
+	 * @return response content (HTML or text) or an error message
 	 */
 	private String getWebContent(Object[] params) {
 		String requestId = Integer.toHexString(new Random().nextInt());
@@ -104,7 +93,7 @@ public class WebPageFunctionTools {
 		String url = props.get("url").asText();
 
 		String headers = props.has("headers") ? props.get("headers").asText(null) : null;
-		int timeout = props.has("timeout") ? props.get("timeout").asInt(TIMEOUT) : 10000;
+		int timeout = props.has("timeout") ? props.get("timeout").asInt(TIMEOUT) : TIMEOUT;
 		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
 				: defaultCharset;
 		boolean textOnly = props.has("textOnly") && props.get("textOnly").asBoolean(false);
@@ -113,15 +102,14 @@ public class WebPageFunctionTools {
 			String response = getWebPage(url, headers, timeout, charsetName);
 
 			if (textOnly) {
-				// Extract only plain text using jsoup
 				String plainText = Jsoup.parse(response).text();
 				logger.info("[WEB {}] Downloaded web content ({} bytes, plain text: {} chars).", requestId,
 						response.length(), plainText.length());
 				return plainText;
-			} else {
-				logger.info("[WEB {}] Downloaded web content ({} bytes).", requestId, response.length());
-				return response;
 			}
+
+			logger.info("[WEB {}] Downloaded web content ({} bytes).", requestId, response.length());
+			return response;
 
 		} catch (IOException e) {
 			logger.error("[WEB {}] IO error during web content fetch", requestId, e);
@@ -129,6 +117,16 @@ public class WebPageFunctionTools {
 		}
 	}
 
+	/**
+	 * Performs the HTTP request and returns the response content.
+	 *
+	 * @param url URL to fetch
+	 * @param headers optional headers as {@code NAME=VALUE} pairs separated by newlines
+	 * @param timeout timeout in milliseconds
+	 * @param charsetName charset used to decode the response
+	 * @return response content including an initial status line
+	 * @throws IOException if the request cannot be executed
+	 */
 	private String getWebPage(String url, String headers, int timeout, String charsetName)
 			throws IOException, MalformedURLException, ProtocolException, UnsupportedEncodingException {
 		StringBuilder output = new StringBuilder();
@@ -138,7 +136,6 @@ public class WebPageFunctionTools {
 		connection.setConnectTimeout(timeout);
 		connection.setReadTimeout(timeout);
 
-		// Set headers if provided
 		if (headers != null) {
 			for (String headerLine : headers.split("\\R")) {
 				int idx = headerLine.indexOf('=');

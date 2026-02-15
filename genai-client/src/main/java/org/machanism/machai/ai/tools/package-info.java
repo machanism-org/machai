@@ -27,36 +27,35 @@
  */
 
 /**
- * OpenAI-backed implementation of the MachAI {@link org.machanism.machai.ai.manager.GenAIProvider} abstraction.
+ * Host-integrated “tool” implementations that can be registered with a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} to expose a small, auditable set of capabilities to an AI
+ * workflow.
  *
  * <p>
- * This package contains {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, which adapts the OpenAI
- * Java SDK to the provider interface used by the rest of the application.
- * </p>
+ * Tools in this package are typically installed by registering named functions via
+ * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
+ * Each function should be narrowly scoped (for example, reading a file, listing a directory, executing a command, or
+ * fetching a web page) so that calling code can reason about and constrain what the AI can do.
  *
- * <h2>Responsibilities</h2>
+ * <h2>Tool installers</h2>
  * <ul>
- *   <li>Build and maintain a conversation input list (user prompts, optional session instructions, and file inputs).
- *   </li>
- *   <li>Execute requests via the OpenAI Responses API and parse results, including iterative handling of function
- *       tool calls.</li>
- *   <li>Register tools (function calling) and dispatch tool invocations to application-provided handlers.</li>
- *   <li>Create vector embeddings for an input string.</li>
- *   <li>Report token usage metrics to {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ * <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – file and directory operations (read, write, list)</li>
+ * <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution with bounded output capture</li>
+ * <li>{@link org.machanism.machai.ai.tools.WebPageFunctionTools} – HTTP GET page fetch (HTML or extracted text)</li>
+ * <li>{@link org.machanism.machai.ai.tools.SystemFunctionTools} – convenience installer for the common tool set</li>
  * </ul>
  *
- * <h2>Usage</h2>
- * <pre>
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
- * provider.model("gpt-5.1");
- * provider.instructions("You are a concise assistant.");
- * provider.prompt("Summarize this text...");
- * String answer = provider.perform();
- * </pre>
+ * <h2>Supporting utilities</h2>
+ * <ul>
+ * <li>{@link org.machanism.machai.ai.tools.LimitedStringBuilder} – retains only the last N characters of accumulated
+ * output</li>
+ * </ul>
  *
- * <p>
- * <strong>Thread-safety:</strong> the provider implementation is not thread-safe; use one instance per request or
- * synchronize access externally.
- * </p>
+ * <h2>Example</h2>
+ * <pre>{@code
+ * GenAIProvider provider = ...;
+ * new SystemFunctionTools().applyTools(provider);
+ * }
+ * </pre>
  */
-package org.machanism.machai.ai.provider.openai;
+package org.machanism.machai.ai.tools;

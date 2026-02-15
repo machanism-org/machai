@@ -23,26 +23,29 @@
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
  *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *      - Do not use escaping in `{@code ...}` tags.    
  */
 
 /**
- * Provider discovery, configuration, and host-side tool wiring for generative AI integrations.
+ * Manager and service provider interfaces (SPI) for GenAI integrations.
  *
- * <p>This package defines the {@link org.machanism.machai.ai.manager.GenAIProvider} service-provider interface (SPI)
- * and supporting utilities used to resolve, configure, and interact with concrete provider implementations.
+ * <p>This package contains the core abstractions that allow the application to select and operate a concrete
+ * generative-AI provider (for example OpenAI, Gemini, a local model, or a no-op provider) at runtime. The
+ * abstractions focus on:
  *
- * <h2>Key responsibilities</h2>
  * <ul>
- *   <li><strong>Provider resolution</strong> via {@link org.machanism.machai.ai.manager.GenAIProviderManager}, which
- *   creates provider instances using a {@code Provider:Model} identifier (or a fully qualified provider class name)
- *   and applies the selected model.</li>
- *   <li><strong>Session interaction contract</strong> via {@link org.machanism.machai.ai.manager.GenAIProvider}, which
- *   supports prompts, instructions, file attachments, embeddings, and tool registration.</li>
- *   <li><strong>Host tool installation</strong> via {@link org.machanism.machai.ai.tools.FileFunctionTools},
- *   {@link org.machanism.machai.ai.manager.CommandFunctionTools}, and the convenience wrapper
- *   {@link org.machanism.machai.ai.tools.SystemFunctionTools}.</li>
- *   <li><strong>Operational metrics</strong> via {@link org.machanism.machai.ai.manager.Usage} aggregated by
- *   {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *   <li>building a request (instructions, prompts, and optional attachments/tooling),</li>
+ *   <li>executing a provider run and returning the textual result, and</li>
+ *   <li>capturing and aggregating token usage metrics.</li>
+ * </ul>
+ *
+ * <h2>Key types</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider} &ndash; fluent provider contract for collecting input
+ *   and executing a run.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProviderManager} &ndash; factory/registry for resolving a provider
+ *   implementation by {@code Provider:Model} identifier and for aggregating usage.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.Usage} &ndash; immutable token usage metrics for a single provider run.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
@@ -50,15 +53,12 @@
  * Configurator conf = ...;
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  *
- * // Optionally expose host tools to the provider.
- * new SystemFunctionTools().applyTools(provider);
- *
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Summarize this project.");
  * String response = provider.perform();
- * }</pre>
  *
- * <p><strong>Security note:</strong> tool functions execute on the hosting machine. Expose them only in trusted
- * environments and enforce appropriate allow/deny policies for paths and commands.
+ * GenAIProviderManager.addUsage(provider.usage());
+ * GenAIProviderManager.logUsage();
+ * }</pre>
  */
 package org.machanism.machai.ai.manager;

@@ -22,29 +22,24 @@
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` as `&lt;` 
  *          and `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *      - Do not use escaping in `{@code ...}` tags.    
  */
 
 /**
- * No-op ("none") generative AI provider implementation.
+ * No-op ("none") generative AI provider.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for environments where a real LLM
- * backend must not be used (for example, offline execution, security/compliance constraints, or tests).
+ * <p>This package contains an implementation of {@link org.machanism.machai.ai.manager.GenAIProvider} that performs no
+ * LLM calls. It is intended for offline execution, security/compliance constrained deployments, and deterministic tests
+ * where prompts may be captured without sending them to an external service.
  *
  * <h2>Behavior</h2>
  * <ul>
  *   <li>No network calls are performed and no external AI service is contacted.</li>
  *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} accumulates prompt text in memory.</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} optionally writes:
- *     <ul>
- *       <li>{@code instructions.txt} next to the configured inputs log file (when instructions are set), and</li>
- *       <li>the accumulated prompts to the configured inputs log file (when
- *           {@link org.machanism.machai.ai.manager.GenAIProvider#inputsLog(java.io.File)} is set).</li>
- *     </ul>
- *     It then clears the internal buffer and returns {@code null}.</li>
- *   <li>Capabilities requiring a real backend (for example,
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} optionally writes the configured instructions
+ *       and accumulated prompts to the configured log files, clears the internal buffer, and returns {@code null}.</li>
+ *   <li>Operations that require a real backend (for example,
  *       {@link org.machanism.machai.ai.manager.GenAIProvider#embedding(String)}) are unsupported and throw
  *       {@link java.lang.UnsupportedOperationException}.</li>
  * </ul>

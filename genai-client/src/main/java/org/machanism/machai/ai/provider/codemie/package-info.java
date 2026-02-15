@@ -27,36 +27,36 @@
  */
 
 /**
- * OpenAI-backed implementation of the MachAI {@link org.machanism.machai.ai.manager.GenAIProvider} abstraction.
+ * Integration with EPAM CodeMie as an OpenAI-compatible provider.
  *
- * <p>
- * This package contains {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, which adapts the OpenAI
- * Java SDK to the provider interface used by the rest of the application.
- * </p>
+ * <p>This package contains {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, an
+ * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider} specialization that authenticates against the CodeMie
+ * OpenID Connect token endpoint, obtains an OAuth 2.0 access token, and configures an OpenAI-compatible client to call
+ * the CodeMie Code Assistant API.
  *
- * <h2>Responsibilities</h2>
+ * <h2>Authentication</h2>
+ * <p>{@code CodeMieProvider} selects the OAuth 2.0 grant type based on the configured {@code GENAI_USERNAME}:
  * <ul>
- *   <li>Build and maintain a conversation input list (user prompts, optional session instructions, and file inputs).
- *   </li>
- *   <li>Execute requests via the OpenAI Responses API and parse results, including iterative handling of function
- *       tool calls.</li>
- *   <li>Register tools (function calling) and dispatch tool invocations to application-provided handlers.</li>
- *   <li>Create vector embeddings for an input string.</li>
- *   <li>Report token usage metrics to {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *   <li><b>Password grant</b> when the username contains {@code "@"} (typical user e-mail login).</li>
+ *   <li><b>Client credentials</b> when the username does not contain {@code "@"} (service-to-service).</li>
+ * </ul>
+ *
+ * <h2>Configuration</h2>
+ * <ul>
+ *   <li>{@code GENAI_USERNAME} – user e-mail or client id.</li>
+ *   <li>{@code GENAI_PASSWORD} – password or client secret.</li>
+ *   <li>{@code AUTH_URL} (optional) – token endpoint override; defaults to
+ *       {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider#authUrl}.</li>
  * </ul>
  *
  * <h2>Usage</h2>
- * <pre>
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
- * provider.model("gpt-5.1");
- * provider.instructions("You are a concise assistant.");
- * provider.prompt("Summarize this text...");
- * String answer = provider.perform();
- * </pre>
+ * <pre>{@code
+ * Configurator conf = ...;
+ * CodeMieProvider provider = new CodeMieProvider();
+ * provider.init(conf);
  *
- * <p>
- * <strong>Thread-safety:</strong> the provider implementation is not thread-safe; use one instance per request or
- * synchronize access externally.
- * </p>
+ * // Continue using the provider via the OpenAIProvider/GenAIProvider APIs.
+ * }
+ * </pre>
  */
-package org.machanism.machai.ai.provider.openai;
+package org.machanism.machai.ai.provider.codemie;
