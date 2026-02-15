@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,12 @@ public class SystemFunctionTools {
 	public void applyTools(GenAIProvider provider) {
 		for (FunctionTools functionTool : functionTools) {
 			functionTool.applyTools(provider);
+		}
+	}
+
+	public void setConfiguration(Configurator configurator) {
+		for (FunctionTools functionTool : functionTools) {
+			functionTool.setConfigurator(configurator);
 		}
 	}
 }

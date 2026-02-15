@@ -139,6 +139,8 @@ public class FileProcessor extends ProjectProcessor {
 	public FileProcessor(File rootDir, String genai, Configurator configurator) {
 		logger.info("File processing root directory: {}", rootDir);
 
+		SystemFunctionTools.getInstance().setConfiguration(configurator);
+		
 		this.genai = genai;
 		this.rootDir = rootDir;
 		this.configurator = configurator;
