@@ -436,11 +436,7 @@ public class FileProcessor extends ProjectProcessor {
 		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
 
 		for (File child : children) {
-			if (child.isDirectory()) {
-				processProjectDir(projectLayout, child.getAbsolutePath());
-			} else {
-				logIfNotBlank(processFile(projectLayout, child));
-			}
+			processFile(projectLayout, child);
 		}
 
 		boolean match = match(projectDir, projectDir);
@@ -472,17 +468,6 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Logs a message at debug level when it is non-blank.
-	 *
-	 * @param message message to log
-	 */
-	private static void logIfNotBlank(String message) {
-		if (StringUtils.isNotBlank(message)) {
-			logger.debug(message);
-		}
-	}
-
-	/**
 	 * Processes a project layout for documentation gathering.
 	 *
 	 * @param projectLayout layout describing sources, tests, docs, and modules
@@ -492,7 +477,7 @@ public class FileProcessor extends ProjectProcessor {
 		try {
 			List<File> files = findFiles(projectLayout.getProjectDir());
 			for (File file : files) {
-				logIfNotBlank(processFile(projectLayout, file));
+				processFile(projectLayout, file);
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
@@ -510,7 +495,7 @@ public class FileProcessor extends ProjectProcessor {
 		try {
 			List<File> files = findFiles(layout.getProjectDir(), filePattern);
 			for (File file : files) {
-				logIfNotBlank(processFile(layout, file));
+				processFile(layout, file);
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
@@ -541,6 +526,11 @@ public class FileProcessor extends ProjectProcessor {
 				perform = process(projectLayout, file, defaultGuidanceText);
 			}
 		}
+
+		if (StringUtils.isNotBlank(perform)) {
+			logger.debug(perform);
+		}
+
 		return perform;
 	}
 

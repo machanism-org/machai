@@ -56,10 +56,6 @@ public final class Ghostwriter {
 				}
 			}
 
-			org.machanism.machai.log.FileAppender.setExecutionDir(gwHomeDir);
-			logger = LoggerFactory.getLogger(Ghostwriter.class);
-			logger.info("Ghostwriter home directory: {}", gwHomeDir);
-
 			try {
 				File configFile = new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"));
 				config.setConfiguration(configFile.getAbsolutePath());
