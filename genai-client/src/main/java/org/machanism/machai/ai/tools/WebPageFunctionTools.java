@@ -17,6 +17,7 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -149,8 +150,8 @@ public class WebPageFunctionTools implements FunctionTools {
 	 * </ul>
 	 * <p>
 	 * Both tools support variable placeholders in header values (e.g.,
-	 * ${propertyName}), which are resolved using the {@link Configurator}
-	 * if available. <br>
+	 * ${propertyName}), which are resolved using the {@link Configurator} if
+	 * available. <br>
 	 * For HTTP Basic Authentication, you may either use the userInfo format in the
 	 * URL or set the {@code Authorization} header directly.
 	 *
@@ -251,7 +252,12 @@ public class WebPageFunctionTools implements FunctionTools {
 		String cssSelectorQuery = props.has("cssSelectorQuery") ? props.get("cssSelectorQuery").asText(null) : null;
 
 		try {
-			String response = getWebPage(url, headers, timeout, charsetName);
+			HttpURLConnection connection = getConnection(new URL(url), headers, charsetName);
+			logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
+
+			fillHeader(headers, connection);
+
+			String response = getWebPage(connection, timeout, charsetName);
 
 			if (cssSelectorQuery != null && !cssSelectorQuery.isEmpty()) {
 				org.jsoup.nodes.Document doc = Jsoup.parse(response);
@@ -283,14 +289,14 @@ public class WebPageFunctionTools implements FunctionTools {
 		}
 	}
 
-	private HttpURLConnection getConnection(URL url, String headers, String charsetName) {
+	private HttpURLConnection getConnection(URL url, String headers, String charsetName) throws IOException {
+		url = new URL(replace(url.toString(), configurator));
 		try {
 			HttpURLConnection connection;
 
 			String userInfo = url.getUserInfo();
 			if (userInfo != null) {
 				String cleanUrl = url.toString().replace("//" + userInfo + "@", "//");
-				userInfo = replace(userInfo, configurator);
 
 				url = new URL(cleanUrl);
 				connection = (HttpURLConnection) url.openConnection();
@@ -313,25 +319,24 @@ public class WebPageFunctionTools implements FunctionTools {
 
 	/**
 	 * Performs the HTTP request and returns the response content.
-	 *
-	 * @param url         URL to fetch
+	 * 
+	 * @param connection
 	 * @param headers     optional headers as {@code NAME=VALUE} pairs separated by
 	 *                    newlines
 	 * @param timeout     timeout in milliseconds
 	 * @param charsetName charset used to decode the response
+	 * @param url         URL to fetch
+	 *
 	 * @return response content including an initial status line
 	 * @throws IOException if the request cannot be executed
 	 */
-	private String getWebPage(String url, String headers, int timeout, String charsetName)
+	private String getWebPage(HttpURLConnection connection, int timeout, String charsetName)
 			throws IOException, MalformedURLException, ProtocolException, UnsupportedEncodingException {
 		StringBuilder output = new StringBuilder();
 
-		HttpURLConnection connection = getConnection(new URL(url), headers, charsetName);
 		connection.setRequestMethod("GET");
 		connection.setConnectTimeout(timeout);
 		connection.setReadTimeout(timeout);
-
-		fillHeader(headers, connection);
 
 		int responseCode = connection.getResponseCode();
 		output.append("HTTP ").append(Integer.toString(responseCode)).append(" ")
@@ -416,12 +421,15 @@ public class WebPageFunctionTools implements FunctionTools {
 				: defaultCharset;
 
 		try {
-			HttpURLConnection connection = getConnection(new URL(url), headers, charsetName);
+			URL callUrl = new URL(url);
+			HttpURLConnection connection = getConnection(callUrl, headers, charsetName);
+			logger.info("[REST {}] URL: {}", requestId, connection.getURL());
+
+			fillHeader(headers, connection);
+
 			connection.setRequestMethod(method);
 			connection.setConnectTimeout(timeout);
 			connection.setReadTimeout(timeout);
-
-			fillHeader(headers, connection);
 
 			// Write body for POST, PUT, PATCH, etc.
 			if (body != null && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
@@ -445,11 +453,13 @@ public class WebPageFunctionTools implements FunctionTools {
 				}
 			}
 
-			logger.info("[REST {}] Received response ({} bytes).", requestId, response.length());
-			return response.toString();
+			String result = response.toString();
+			logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
+					StringUtils.abbreviate(result.replaceAll("\\R", " "), 60));
+			return result;
 
 		} catch (IOException e) {
-			logger.error("[REST {}] IO error during REST call", requestId, e);
+			logger.error("[REST {}] IO error during REST call: {}", requestId, e.getMessage());
 			return "IO Error: " + e.getMessage();
 		}
 	}

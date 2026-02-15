@@ -34,6 +34,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -557,8 +558,10 @@ public class FileProcessor extends ProjectProcessor {
 			String projectInfo = getProjectStructureDescription(projectLayout);
 			provider.prompt(projectInfo);
 
+			String guidanceLines = parseLines(guidance);
+
 			HashMap<String, String> props = getProperties(projectLayout);
-			String guidanceLines = parseLines(guidance, props);
+			guidanceLines = StrSubstitutor.replace(guidanceLines, props);
 			provider.prompt(guidanceLines);
 
 			provider.prompt(promptBundle.getString("output_format"));
@@ -582,23 +585,40 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Builds a substitution map used to expand project metadata placeholders in
-	 * prompt templates.
+	 * Collects key project properties from the provided {@link ProjectLayout} and
+	 * returns them as a map.
+	 * <p>
+	 * The returned map contains the following entries:
+	 * <ul>
+	 * <li><b>#id</b>: The project identifier, as returned by
+	 * {@code projectLayout.getProjectId()}.</li>
+	 * <li><b>#name</b>: The project name, as returned by
+	 * {@code projectLayout.getProjectName()}.</li>
+	 * <li><b>#parentId</b> (optional): The parent project identifier, included only
+	 * if {@code projectLayout.getParentId()} is not {@code null}.</li>
+	 * <li><b>#parentDir</b> (optional): The name of the parent directory of the
+	 * project, included only if the parent directory exists.</li>
+	 * </ul>
+	 * <p>
+	 * This method is useful for extracting key metadata about a project for use in
+	 * templates, configuration, or reporting.
 	 *
-	 * @param projectLayout current project layout
-	 * @return placeholder map
+	 * @param projectLayout the {@link ProjectLayout} instance from which to extract
+	 *                      properties
+	 * @return a {@link HashMap} containing project property keys and their
+	 *         corresponding values
 	 */
-	private HashMap<String, String> getProperties(ProjectLayout projectLayout) {
+	protected HashMap<String, String> getProperties(ProjectLayout projectLayout) {
 		HashMap<String, String> valueMap = new HashMap<>();
-		valueMap.put("projectId", projectLayout.getProjectId());
-		valueMap.put("projectName", projectLayout.getProjectName());
+		valueMap.put("#id", projectLayout.getProjectId());
+		valueMap.put("#name", projectLayout.getProjectName());
 		String parentId = projectLayout.getParentId();
 		if (parentId != null) {
-			valueMap.put("parentId", parentId);
+			valueMap.put("#parentId", parentId);
 		}
 		File parentDir = projectLayout.getProjectDir().getParentFile();
 		if (parentDir != null) {
-			valueMap.put("parentDirName", parentDir.getName());
+			valueMap.put("#parentDir", parentDir.getName());
 		}
 		return valueMap;
 	}
@@ -922,7 +942,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param instructions instructions input (plain text, URL, or {@code file:})
 	 */
 	public void setInstructions(String instructions) {
-		this.instructions = parseLines(instructions, null);
+		this.instructions = parseLines(instructions);
 	}
 
 	/**
@@ -991,7 +1011,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @param valueMap value substitution map
 	 * @return expanded content with preserved line breaks
 	 */
-	private String parseLines(String data, HashMap<String, String> valueMap) {
+	private String parseLines(String data) {
 		if (data == null) {
 			return StringUtils.EMPTY;
 		}
@@ -1006,7 +1026,7 @@ public class FileProcessor extends ProjectProcessor {
 
 			String content;
 			try {
-				content = tryToGetInstructionsFromFile(normalizedLine, valueMap);
+				content = tryToGetInstructionsFromFile(normalizedLine);
 
 				if (content != null) {
 					sb.append(content);
@@ -1105,19 +1125,19 @@ public class FileProcessor extends ProjectProcessor {
 	 * @return content read from the URL/file, or the original input
 	 * @throws IOException
 	 */
-	private String tryToGetInstructionsFromFile(String data, HashMap<String, String> valueMap) throws IOException {
+	private String tryToGetInstructionsFromFile(String data) throws IOException {
 		if (data == null) {
 			return null;
 		}
 
 		String trimmed = data.trim();
 		if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-			return parseLines(readFromHttpUrl(trimmed), valueMap);
+			return parseLines(readFromHttpUrl(trimmed));
 		}
 
 		if (Strings.CS.startsWith(trimmed, "file:")) {
 			String filePath = StringUtils.substringAfter(trimmed, "file:");
-			return parseLines(readFromFilePath(filePath), valueMap);
+			return parseLines(readFromFilePath(filePath));
 		}
 
 		return data;
