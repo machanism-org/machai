@@ -4,10 +4,25 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.shared.utils.cli.CommandLineException;
+import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +54,11 @@ public class CommandFunctionTools implements FunctionTools {
 	private static int defaultResultTailSize = 1024;
 
 	private static final String defaultCharset = "UTF-8";
+
+	/** Define allowed commands (add as needed) */
+	private Set<String> allowedCommands = null;
+
+	private int processTimeoutSeconds = 600;
 
 	/**
 	 * Exception to signal process termination with a specific exit code.
@@ -106,13 +126,24 @@ public class CommandFunctionTools implements FunctionTools {
 	 *                 registered
 	 */
 	public void applyTools(GenAIProvider provider) {
-		provider.addTool("run_command_line_tool", "Executes a system command using Java's Process.exec() method.",
-				this::executeCommand, "command:string:required:The command to execute in the system shell.",
-				"env:string:optional:Specifies environment variable settings as a single string, with each variable in the format NAME=VALUE, separated by newline characters (\\n). If null, the subprocess inherits the environment variables from the current process.",
-				"dir:string:optional:The working directory for the subprocess. If null, the subprocess inherits the current project directory.",
-				"tailResultSize:integer:optional:Specifies the maximum number of characters to display from the end of the result content produced by the executed system command. If the command output exceeds this limit, only the last tailResultSize characters will be shown. Default value: "
+		provider.addTool("run_command_line_tool",
+				"Executes a system command using Java's ProcessBuilder for controlled and secure execution."
+						+ (allowedCommands == null ? ""
+								: allowedCommands.isEmpty() ? " (Disabled)"
+										: " Allowed commands: " + StringUtils.join(allowedCommands, ", "))
+						+ " Only explicitly allowed commands can be executed for security reasons. "
+						+ "The tool supports setting environment variables, working directory, output tail size, and character encoding.",
+				this::executeCommand,
+				"command:string:required:The system command to execute. Only the following commands are permitted: "
+						+ (allowedCommands == null || allowedCommands.isEmpty()
+								? "None (command execution is disabled)."
+								: StringUtils.join(allowedCommands, ", ")),
+				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). If omitted, the subprocess inherits the current process environment.",
+				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. If omitted, the current project directory is used.",
+				"tailResultSize:integer:optional:The maximum number of characters to display from the end of the command output. If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
 						+ defaultResultTailSize,
-				"charsetName:string:optional:The name of the requested charset. Default: " + defaultCharset);
+				"charsetName:string:optional:The character encoding to use for reading command output. Default: "
+						+ defaultCharset);
 
 		provider.addTool("terminate_process",
 				"Throws an exception to immediately terminate the process. Useful for signaling fatal errors or controlled shutdowns from within a function tool. Supports specifying a custom exit code.",
@@ -142,7 +173,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @throws ProcessTerminationException always thrown to terminate the process
 	 *                                     with the specified exit code
 	 */
-	private String terminateProcess(Object[] params) {
+	public String terminateProcess(Object[] params) {
 		JsonNode props = (JsonNode) params[0];
 		String message = props.has("message") ? props.get("message").asText("Process terminated by function tool.")
 				: "Process terminated by function tool.";
@@ -169,56 +200,69 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param params tool arguments
 	 * @return command output (stdout and, on non-zero exit, stderr)
 	 */
-	private String executeCommand(Object[] params) {
-
+	public String executeCommand(Object[] params) {
 		String commandId = Integer.toHexString(new Random().nextInt());
-
 		logger.info("Run shell command [{}]: {}", commandId, Arrays.toString(params));
 
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
 
+		// Validate command: allow only whitelisted commands or patterns
+		if (!isValidCommand(command)) {
+			return "Error: Invalid or unsafe command.";
+		}
+
 		String dir = props.has("dir") ? props.get("dir").asText(".") : ".";
-		String env = props.has("env") ? props.get("env").asText(null) : null;
+
+		File projectDir = (File) params[1];
+		File workingDir = resolveWorkingDir(projectDir, dir);
+		if (workingDir == null) {
+			return "Error: Invalid working directory.";
+		}
+
+		// Validate working directory
+		try {
+			Path projectPath = projectDir.toPath().toRealPath();
+			Path workingPath = workingDir.toPath().toRealPath();
+			if (!workingPath.startsWith(projectPath)) {
+				return "Error: Working directory must be within project directory.";
+			}
+		} catch (IOException e) {
+			return "Error: Unable to resolve working directory.";
+		}
+
 		Integer tailResultSize = props.has("tailResultSize") ? props.get("tailResultSize").asInt(defaultResultTailSize)
 				: defaultResultTailSize;
 		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
 				: defaultCharset;
 
-		File projectDir = (File) params[1];
-		File workingDir;
-		if (dir != null) {
-			workingDir = new File(dir);
-			if (!workingDir.isAbsolute()) {
-				if (".".equals(dir)) {
-					workingDir = projectDir;
-				} else {
-					workingDir = new File(projectDir, dir);
-				}
-			} else {
-				return "Error: The specified working directory must be relative to the project path.";
-			}
-
-		} else {
-			workingDir = projectDir;
-		}
-
+		// Parse command safely
+		Process prc = null;
+		ExecutorService executor = Executors.newFixedThreadPool(2);
 		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
 
 		try {
+			String[] commandParts = CommandLineUtils.translateCommandline(command);
 
-			String[] envArray = null;
-			if (env != null) {
-				envArray = env.lines().collect(Collectors.toList()).toArray(new String[0]);
-			} else {
-				logger.warn("System Command Functional tool uses local environment variables.");
+			ProcessBuilder pb = new ProcessBuilder(commandParts);
+			pb.directory(workingDir);
+
+			// Set environment variables safely
+			if (props.has("env")) {
+				Map<String, String> envMap = parseEnv(props.get("env").asText());
+				pb.environment().putAll(envMap);
 			}
 
-			Process process = Runtime.getRuntime().exec(command, envArray, workingDir);
+			Future<?> stdoutFuture = null;
+			Future<?> stderrFuture = null;
 
-			Thread stdoutThread = new Thread(() -> {
+			final Process process = pb.start();
+			prc = process;
+
+			// Read stdout
+			stdoutFuture = executor.submit(() -> {
 				try (BufferedReader reader = new BufferedReader(
-						new InputStreamReader(process.getInputStream(), charsetName))) {
+						new InputStreamReader(process.getInputStream(), Charset.forName(charsetName)))) {
 					String line;
 					while ((line = reader.readLine()) != null) {
 						output.append(line).append(System.lineSeparator());
@@ -229,11 +273,12 @@ public class CommandFunctionTools implements FunctionTools {
 				}
 			});
 
-			Thread stderrThread = new Thread(() -> {
-				try (BufferedReader errorReader = new BufferedReader(
-						new InputStreamReader(process.getErrorStream(), charsetName))) {
+			// Read stderr
+			stderrFuture = executor.submit(() -> {
+				try (BufferedReader reader = new BufferedReader(
+						new InputStreamReader(process.getErrorStream(), Charset.forName(charsetName)))) {
 					String line;
-					while ((line = errorReader.readLine()) != null) {
+					while ((line = reader.readLine()) != null) {
 						output.append(line).append(System.lineSeparator());
 						logger.error("[CMD {}] [ERROR] {}", commandId, line);
 					}
@@ -242,27 +287,122 @@ public class CommandFunctionTools implements FunctionTools {
 				}
 			});
 
-			stdoutThread.start();
-			stderrThread.start();
+			boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
+			if (!finished) {
+				process.destroyForcibly();
+				output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds))
+						.append(" seconds.").append(System.lineSeparator());
+				logger.warn("[CMD {}] Command timed out", commandId);
+			}
 
-			stdoutThread.join();
-			stderrThread.join();
+			// Wait for output threads to finish
+			stdoutFuture.get(5, TimeUnit.SECONDS);
+			stderrFuture.get(5, TimeUnit.SECONDS);
 
-			int exitCode = process.waitFor();
+			int exitCode = process.exitValue();
 			output.append("Command exited with code: ").append(Integer.toString(exitCode))
 					.append(System.lineSeparator());
 
-			String resultOutput = output.getLastText();
-			return resultOutput;
+			return output.getLastText();
 
+		} catch (TimeoutException e) {
+			output.append("Output reading timed out.").append(System.lineSeparator());
+			logger.error("[CMD {}] Output reading timed out", commandId, e);
+			return output.getLastText();
+			
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			logger.error("[CMD " + commandId + "] Command execution interrupted", e);
+			logger.error("[CMD {}] Command execution interrupted", commandId, e);
 			return output.append("Interrupted: ").append(e.getMessage()).toString();
-		} catch (IOException e) {
-			logger.error("[CMD " + commandId + "] IO error during command execution", e);
+			
+		} catch (IOException | ExecutionException e) {
+			logger.error("[CMD {}] IO error during command execution", commandId, e);
 			return output.append("IO Error: ").append(e.getMessage()).toString();
+			
+		} catch (CommandLineException e) {
+			return "Error: " + e.getMessage();
+			
+		} finally {
+			if (prc != null && prc.isAlive()) {
+				prc.destroyForcibly();
+			}
+			if (executor != null) {
+				executor.shutdownNow();
+			}
 		}
 	}
 
+	public File resolveWorkingDir(File projectDir, String dir) {
+		if (projectDir == null || dir == null) {
+			return null;
+		}
+
+		try {
+			// Always resolve against the canonical project directory
+			File baseDir = projectDir.getCanonicalFile();
+			File candidate;
+
+			if (".".equals(dir)) {
+				candidate = baseDir;
+			} else {
+				File temp = new File(dir);
+				if (temp.isAbsolute()) {
+					// Reject absolute paths for security
+					return null;
+				}
+				candidate = new File(baseDir, dir).getCanonicalFile();
+			}
+
+			// Ensure the candidate is within the project directory (no path traversal)
+			Path basePath = baseDir.toPath();
+			Path candidatePath = candidate.toPath();
+			if (!candidatePath.startsWith(basePath)) {
+				return null;
+			}
+
+			return candidate;
+		} catch (IOException e) {
+			// Could not resolve canonical path
+			return null;
+		}
+	}
+
+	public Map<String, String> parseEnv(String envString) {
+		Map<String, String> envMap = new HashMap<>();
+		if (envString == null || envString.isEmpty()) {
+			return envMap;
+		}
+
+		String[] lines = envString.split("\\r?\\n");
+		for (String line : lines) {
+			line = line.trim();
+			if (line.isEmpty() || line.startsWith("#")) {
+				continue; // Skip empty lines and comments
+			}
+			int idx = line.indexOf('=');
+			if (idx > 0 && idx < line.length() - 1) {
+				String key = line.substring(0, idx).trim();
+				String value = line.substring(idx + 1).trim();
+				// Optionally, validate key (e.g., only allow [A-Z_][A-Z0-9_]*)
+				if (key.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+					envMap.put(key, value);
+				}
+			}
+		}
+		return envMap;
+	}
+
+	public boolean isValidCommand(String command) {
+		if (allowedCommands == null) {
+			return true;
+		}
+
+		if (command == null || command.trim().isEmpty()) {
+			return false;
+		}
+
+		// Extract the base command (first word)
+		String baseCommand = command.trim().split("\\s+")[0];
+		return allowedCommands.contains(baseCommand);
+	}
 }
