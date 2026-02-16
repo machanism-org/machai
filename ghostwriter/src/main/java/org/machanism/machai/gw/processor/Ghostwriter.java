@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,6 +124,7 @@ public final class Ghostwriter {
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
 
+		int exitCode = 0;
 		try {
 			CommandLine cmd = parser.parse(options, args);
 
@@ -212,14 +214,21 @@ public final class Ghostwriter {
 				logger.info("Finished scanning directory: {}", scanDir);
 			}
 
-		} catch (ParseException e) {
-			System.err.println("Error parsing arguments: " + e.getMessage());
-			help(options, formatter);
-
-		} finally {
-			GenAIProviderManager.logUsage();
-			logger.info("File processing completed.");
-		}
+	    } catch (ProcessTerminationException e) {
+	        System.err.println("Process terminated: " + e.getMessage());
+	        exitCode = e.getExitCode();
+	    } catch (ParseException e) {
+	        System.err.println("Error parsing arguments: " + e.getMessage());
+	        help(options, formatter);
+	        exitCode = 2;
+	    } catch (Exception e) {
+	        System.err.println("Unexpected error: " + e.getMessage());
+	        exitCode = 1;
+	    } finally {
+	        GenAIProviderManager.logUsage();
+	        logger.info("File processing completed.");
+	        System.exit(exitCode);
+	    }
 	}
 
 	/**

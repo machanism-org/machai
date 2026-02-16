@@ -9,6 +9,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.gw.processor.FileProcessor;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
@@ -43,12 +44,12 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
- * <li><b>{@code gw.genai}</b> / {@code <genai>} ({@code genai}):
- * Provider/model identifier to pass to the workflow.</li>
+ * <li><b>{@code gw.genai}</b> / {@code <genai>} ({@code genai}): Provider/model
+ * identifier to pass to the workflow.</li>
  * <li><b>{@code ${basedir}}</b> ({@code basedir}): The Maven module base
  * directory.</li>
- * <li><b>{@code gw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}):
- * Optional scan root override. When omitted, defaults to the execution root
+ * <li><b>{@code gw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}): Optional
+ * scan root override. When omitted, defaults to the execution root
  * directory.</li>
  * <li><b>{@code gw.instructions}</b> / {@code <instructions>}
  * ({@code instructions}): Instruction locations (for example, file paths or
@@ -150,7 +151,6 @@ public class ReactorGW extends AbstractGWGoal {
 			protected void processModule(File projectDir, String module) throws IOException {
 				// No-op for this implementation
 			}
-
 		};
 		documents.setModuleMultiThread(false);
 
@@ -159,7 +159,13 @@ public class ReactorGW extends AbstractGWGoal {
 		}
 
 		if (!rootProject || !pomProject || !rootProjectLast) {
-			scanDocuments(documents);
+			try {
+				scanDocuments(documents);
+			} catch (ProcessTerminationException e) {
+				LOGGER.error("Process terminated: {} (exit code: {})", e.getMessage(), e.getExitCode());
+				throw new MojoExecutionException(
+						"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
+			}
 			return;
 		}
 
@@ -168,7 +174,14 @@ public class ReactorGW extends AbstractGWGoal {
 				while (!reactorProjects.isEmpty()) {
 					Thread.sleep(500);
 				}
-				scanDocuments(documents);
+				try {
+					scanDocuments(documents);
+				} catch (ProcessTerminationException e) {
+					LOGGER.error("Process terminated in deferred execution-root processing: {} (exit code: {})",
+							e.getMessage(), e.getExitCode());
+					throw new RuntimeException(
+							"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
+				}
 			} catch (MojoExecutionException e) {
 				LOGGER.error("Failed to scan documents in deferred execution-root processing.", e);
 			} catch (InterruptedException e) {

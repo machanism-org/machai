@@ -41,6 +41,28 @@ public class CommandFunctionTools implements FunctionTools {
 	private static final String defaultCharset = "UTF-8";
 
 	/**
+	 * Exception to signal process termination with a specific exit code.
+	 */
+	public static class ProcessTerminationException extends RuntimeException {
+		private static final long serialVersionUID = -4615360980518233932L;
+		private final int exitCode;
+
+		public ProcessTerminationException(String message, int exitCode) {
+			super(message);
+			this.exitCode = exitCode;
+		}
+
+		public ProcessTerminationException(String message, Throwable cause, int exitCode) {
+			super(message, cause);
+			this.exitCode = exitCode;
+		}
+
+		public int getExitCode() {
+			return exitCode;
+		}
+	}
+
+	/**
 	 * Registers system command and process control tools with the provided
 	 * {@link GenAIProvider}.
 	 * <p>
@@ -93,39 +115,44 @@ public class CommandFunctionTools implements FunctionTools {
 				"charsetName:string:optional:The name of the requested charset. Default: " + defaultCharset);
 
 		provider.addTool("terminate_process",
-				"Throws an exception to immediately terminate the process. Useful for signaling fatal errors or controlled shutdowns from within a function tool.",
+				"Throws an exception to immediately terminate the process. Useful for signaling fatal errors or controlled shutdowns from within a function tool. Supports specifying a custom exit code.",
 				this::terminateProcess,
 				"message:string:optional:The exception message to use. Defaults to 'Process terminated by function tool.'",
-				"cause:string:optional:An optional cause message. If provided, it is wrapped in a new Exception as the cause.");
+				"cause:string:optional:An optional cause message. If provided, it is wrapped in a new Exception as the cause.",
+				"exitCode:integer:optional:The exit code to return when terminating the process. Defaults to 1 if not specified.");
 	}
 
 	/**
-	 * Throws a {@link RuntimeException} to signal that the function tool should
-	 * terminate the process.
+	 * Throws a {@link ProcessTerminationException} to signal that the function tool
+	 * should terminate the process with a specific exit code.
 	 * <p>
-	 * The exception message and cause can be specified via the {@code params}
-	 * array:
+	 * The exception message, cause, and exit code can be specified via the
+	 * {@code params} array:
 	 * <ul>
 	 * <li><b>message</b> (string, optional): The exception message. Defaults to
 	 * "Process terminated by function tool."</li>
 	 * <li><b>cause</b> (string, optional): The cause message. If provided, it is
 	 * wrapped in a new {@link Exception} as the cause.</li>
+	 * <li><b>exitCode</b> (integer, optional): The exit code to return. Defaults to
+	 * 1 if not specified.</li>
 	 * </ul>
 	 *
 	 * @param params tool invocation parameters (expects a JsonNode with optional
-	 *               "message" and "cause" fields)
-	 * @throws RuntimeException always thrown to terminate the process
+	 *               "message", "cause", and "exitCode" fields)
+	 * @throws ProcessTerminationException always thrown to terminate the process
+	 *                                     with the specified exit code
 	 */
 	private String terminateProcess(Object[] params) {
 		JsonNode props = (JsonNode) params[0];
 		String message = props.has("message") ? props.get("message").asText("Process terminated by function tool.")
 				: "Process terminated by function tool.";
 		String cause = props.has("cause") ? props.get("cause").asText(null) : null;
+		int exitCode = props.has("exitCode") ? props.get("exitCode").asInt(1) : 1;
 
 		if (cause != null) {
-			throw new RuntimeException(message, new Exception(cause));
+			throw new ProcessTerminationException(message, new Exception(cause), exitCode);
 		} else {
-			throw new RuntimeException(message);
+			throw new ProcessTerminationException(message, exitCode);
 		}
 	}
 
