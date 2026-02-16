@@ -338,7 +338,8 @@ public class FileProcessor extends ProjectProcessor {
 	@Override
 	protected void processModule(File projectDir, String module) throws IOException {
 		if (scanDir != null) {
-			if (match(new File(projectDir, module), projectDir)) {
+			String relativePath = ProjectLayout.getRelativePath(new File(projectDir, module), scanDir);
+			if (match(new File(projectDir, module), projectDir) || relativePath != null) {
 				super.processModule(projectDir, module);
 			}
 		} else {
@@ -400,10 +401,11 @@ public class FileProcessor extends ProjectProcessor {
 			return defaultGuidance == null || Objects.equals(file, projectDir);
 		}
 
-		String path = ProjectLayout.getRelativePath(projectDir, file);
-		if (path == null) {
-			return false;
-		}
+		String relativeProjectDir = ProjectLayout.getRelativePath(rootDir, projectDir);
+		String relativeScanDir = ProjectLayout.getRelativePath(projectDir, file);
+		
+		String path = relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + "/" + relativeScanDir;
+		
 		Path pathToMatch = Path.of(path);
 		boolean result = pathMatcher.matches(pathToMatch);
 
