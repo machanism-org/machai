@@ -22,13 +22,13 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is a documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider to generate or refine documentation.
+Ghostwriter is an AI-assisted documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider/model to generate or refine content.
 
 ## Introduction
 
-Ghostwriter is a documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider to generate or refine documentation.
+Ghostwriter is an AI-assisted documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider/model to generate or refine content.
 
-It supports **all types of project files**—including source code, documentation, project site content, and other relevant artifacts—so teams can keep docs aligned with the evolving codebase.
+It works across **all types of project files**—including source code, documentation, project site content, and other relevant artifacts—helping teams keep documentation aligned with the evolving codebase.
 
 ## Usage
 
@@ -37,7 +37,7 @@ It supports **all types of project files**—including source code, documentatio
 #### Prerequisites
 
 - Java 11 or later
-- Network access and credentials for your selected GenAI provider (as configured in your environment and/or `gw.properties`)
+- Network access and credentials for your selected GenAI provider (configured via `gw.properties` and/or environment)
 
 #### Installation
 
@@ -54,5 +54,5 @@ java -jar gw.jar src\main\java
 #### Typical Workflow
 
 1. Add embedded `@guidance` blocks to the files you want Ghostwriter to generate or refine.
-2. Run Ghostwriter against the directory (or pattern) containing those files.
-3. Review the output, commit changes, and re-run as needed.
+2. Run Ghostwriter against a directory (or pattern) containing those files.
+3. Review the changes, commit, and re-run as needed.

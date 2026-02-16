@@ -1,6 +1,6 @@
 /**
  * File-format-specific {@link org.machanism.machai.gw.reviewer.Reviewer reviewers} used by Ghostwriter to scan
- * project files and extract embedded guidance instructions.
+ * project files and extract embedded {@code @guidance} instructions.
  *
  * <p>The {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) is implemented for
  * multiple file types. Each implementation understands the target format's comment conventions (for example,

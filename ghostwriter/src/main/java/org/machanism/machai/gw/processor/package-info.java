@@ -42,22 +42,21 @@
  * Project scanning and prompt orchestration for Ghostwriter.
  *
  * <p>
- * This package contains the command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the
- * {@link org.machanism.machai.gw.processor.FileProcessor} responsible for traversing a project tree, selecting files to
- * process, and invoking a {@link org.machanism.machai.gw.reviewer.Reviewer} per supported file type.
+ * This package provides the command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the
+ * scanning engine ({@link org.machanism.machai.gw.processor.FileProcessor}). Together they:
  * </p>
+ *
+ * <ul>
+ * <li>Traverse a project directory tree (including multi-module layouts) using a child-first module order.</li>
+ * <li>Select candidate files while applying built-in and configured exclude rules.</li>
+ * <li>Extract embedded {@code @guidance:} directives via file-type {@link org.machanism.machai.gw.reviewer.Reviewer}s.</li>
+ * <li>Compose prompts (including optional project-wide instructions/default guidance) and invoke a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
+ * <li>Optionally persist per-file input logs for auditing and troubleshooting.</li>
+ * </ul>
  *
  * <p>
- * Scanning is traversal-based and intentionally avoids dependency resolution and project builds. When a project layout
- * defines nested modules, modules are processed in a child-first order (modules first, then parent-directory files).
+ * Processing is traversal-based and intentionally avoids dependency resolution and project builds.
  * </p>
- *
- * <h2>Processing flow</h2>
- * <ol>
- * <li>Discover modules from the active {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
- * <li>Traverse files and directories, applying exclude rules and optional scan patterns.</li>
- * <li>For each supported file, extract embedded directives and compose the full prompt.</li>
- * <li>Invoke the configured {@link org.machanism.machai.ai.manager.GenAIProvider} to generate output.</li>
- * </ol>
  */
 package org.machanism.machai.gw.processor;
