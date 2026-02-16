@@ -73,6 +73,21 @@
 		</plugins>
 	</build>
 	
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<links>
+						<link>
+							https://docs.oracle.com/en/java/javase/11/docs/api/</link>
+					</links>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+	
 	<scm>
 		<connection>scm:git:https://github.com/machanism-org/machai.git</connection>
 		<developerConnection>scm:git:https://github.com/machanism-org/machai.git</developerConnection>

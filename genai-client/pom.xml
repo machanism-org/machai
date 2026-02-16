@@ -99,15 +99,22 @@
 		</dependency>
 	</dependencies>
 
-	<build>
+	<reporting>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.21.0</version>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<links>
+						<link>
+							https://docs.oracle.com/en/java/javase/11/docs/api/</link>
+						<link>
+							https://macha.machanism.org/core/core-commons/configurator/apidocs/</link>
+					</links>
+				</configuration>
 			</plugin>
 		</plugins>
-	</build>
+	</reporting>
 
 	<scm>
 		<connection>scm:git:https://github.com/machanism-org/machai.git</connection>

@@ -12,7 +12,12 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins to unify access to multiple GenAI providers, generate and consume bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate documentation updates from embedded guidance using Ghostwriter.</description>
+	<description>Machai is a modular toolkit for GenAI-enabled developer
+		automation. It provides Java libraries, a command line application, and
+		Maven plugins to unify access to multiple GenAI providers, generate and
+		consume bindex metadata for library discovery and reuse, assemble
+		projects using metadata-driven updates, and automate documentation
+		updates from embedded guidance using Ghostwriter.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -281,8 +286,8 @@
 					<doclint>none</doclint>
 					<show>package</show>
 					<useStandardDocletOptions>true</useStandardDocletOptions>
-					<bottom><![CDATA[&copy;2025 Machanism.org. All Rights Reserved.]]></bottom>
-					<header><![CDATA[<h1><a href="${project.url}">${project.name}<a></h1>]]></header>
+					<bottom><![CDATA[&copy;2025-2026 Machanism.org. All Rights Reserved.]]></bottom>
+					<header><![CDATA[<h1><a href="${project.url}">${project.name}</a></h1>]]></header>
 				</configuration>
 			</plugin>
 		</plugins>
