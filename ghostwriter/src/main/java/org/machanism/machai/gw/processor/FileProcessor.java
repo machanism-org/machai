@@ -100,16 +100,20 @@ public class FileProcessor extends ProjectProcessor {
 	/** Whether module processing is executed concurrently. */
 	private boolean moduleMultiThread;
 
-	/** Optional additional instructions appended to each prompt. */
-	private String instructions = StringUtils.EMPTY;
-
 	/** Whether to persist the composed inputs to a per-file log. */
 	private boolean logInputs;
 
 	/** Whether module discovery/recursion is disabled for the current run. */
 	private boolean nonRecursive;
 
-	/** Default guidance applied when a file does not contain embedded guidance. */
+	/**
+	 * Optional additional instructions appended to each prompt sent to the GenAI provider.
+	 */
+	private String instructions = StringUtils.EMPTY;
+	
+	/**
+	 * Default guidance applied when a file does not contain embedded {@code @guidance} directives.
+	 */
 	private String defaultGuidance;
 
 	/** Optional matcher used to limit module/file processing to a subset. */
@@ -925,27 +929,6 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Sets the instructions string used by this processor.
-	 *
-	 * <p>
-	 * The provided input is parsed line-by-line:
-	 * </p>
-	 * <ul>
-	 * <li>Blank lines are preserved as line breaks.</li>
-	 * <li>Lines starting with {@code http://} or {@code https://} are treated as
-	 * URLs and the referenced content is included.</li>
-	 * <li>Lines starting with {@code file:} are treated as file references and the
-	 * referenced content is included.</li>
-	 * <li>All other lines are included as-is.</li>
-	 * </ul>
-	 *
-	 * @param instructions instructions input (plain text, URL, or {@code file:})
-	 */
-	public void setInstructions(String instructions) {
-		this.instructions = parseLines(instructions);
-	}
-
-	/**
 	 * Returns whether composed prompt inputs are logged to files.
 	 *
 	 * @return {@code true} when input logging is enabled
@@ -980,24 +963,147 @@ public class FileProcessor extends ProjectProcessor {
 	public void setNonRecursive(boolean nonRecursive) {
 		this.nonRecursive = nonRecursive;
 	}
-
+	
 	/**
-	 * Sets the default guidance applied when a file contains no embedded guidance.
-	 *
+	 * Sets the additional instructions to be appended to each prompt sent to the GenAI provider.
+	 * 
 	 * <p>
-	 * The provided input is parsed line-by-line:
+	 * This property allows you to provide project-wide or context-specific guidance that will be included
+	 * in every documentation generation prompt, ensuring consistency and adherence to standards.
 	 * </p>
+	 * <p>
+	 * <b>How to use:</b>
 	 * <ul>
-	 * <li>Blank lines are preserved as line breaks.</li>
-	 * <li>Lines starting with {@code http://} or {@code https://} are treated as
-	 * URLs and the referenced content is included.</li>
-	 * <li>Lines starting with {@code file:} are treated as file references and the
-	 * referenced content is included.</li>
-	 * <li>All other lines are included as-is.</li>
+	 *   <li>Set the value using {@link #setInstructions(String)}.</li>
+	 *   <li>The value can be:
+	 *     <ul>
+	 *       <li>Plain text instructions</li>
+	 *       <li>A URL (starting with {@code http://} or {@code https://}) to include remote content</li>
+	 *       <li>A file reference (starting with {@code file:}) to include local file content</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>The input is parsed line-by-line:
+	 *     <ul>
+	 *       <li>Blank lines are preserved as line breaks.</li>
+	 *       <li>Lines starting with {@code http://} or {@code https://} are fetched and included as content.</li>
+	 *       <li>Lines starting with {@code file:} are read from the specified file and included.</li>
+	 *       <li>All other lines are included as-is.</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>The instructions are appended to every GenAI prompt, in addition to any file-specific or default guidance.</li>
+	 * </ul>
+	 * <p>
+	 * <b>Example usage:</b>
+	 * <pre>
+	 * FileProcessor processor = new FileProcessor(rootDir, genai, configurator);
+	 * processor.setInstructions("file:project-instructions.txt");
+	 * // or
+	 * processor.setInstructions("Please ensure all documentation follows the company style guide.");
+	 * // or
+	 * processor.setInstructions("https://example.com/instructions.md");
+	 * </pre>
+	 * <p>
+	 * <b>Best Practices:</b>
+	 * <ul>
+	 *   <li>Use {@code instructions} to enforce consistent standards or provide important context for all files.</li>
+	 *   <li>Store reusable instructions in a file or at a URL for easy updates and sharing.</li>
+	 *   <li>Combine with {@code defaultGuidance} for maximum flexibility.</li>
 	 * </ul>
 	 *
-	 * @param defaultGuidance default guidance input (plain text, URL, or
-	 *                        {@code file:})
+	 * @param instructions instructions input (plain text, URL, or {@code file:})
+	 */
+	public void setInstructions(String instructions) {
+		this.instructions = parseLines(instructions);
+	}
+
+	/**
+	 * Default guidance applied when a file does not contain embedded {@code @guidance} directives.
+	 * <p>
+	 * <b>Processing Logic:</b>
+	 * <ol>
+	 *   <li>
+	 *     <b>Purpose:</b>  
+	 *     {@code defaultGuidance} provides fallback instructions for files that lack an embedded {@code @guidance} directive,
+	 *     ensuring every file can be processed with meaningful guidance.
+	 *   </li>
+	 *   <li>
+	 *     <b>Setting the Value:</b>  
+	 *     The value can be set as plain text, a file reference (e.g., {@code file:instructions.txt}), or a URL (e.g., {@code https://example.com/guidance.md}).
+	 *   </li>
+	 *   <li>
+	 *     <b>Parsing the Value:</b>
+	 *     <ul>
+	 *       <li>Blank lines are preserved as line breaks.</li>
+	 *       <li>Lines starting with {@code http://} or {@code https://} are fetched from the specified URL and included as content.</li>
+	 *       <li>Lines starting with {@code file:} are read from the specified file and included as content.</li>
+	 *       <li>All other lines are included as-is.</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>
+	 *     <b>When Processing a File:</b>
+	 *     <ul>
+	 *       <li>If the file contains an embedded {@code @guidance} directive, that guidance is used for the prompt.</li>
+	 *       <li>If not, and {@code defaultGuidance} is set, the parsed {@code defaultGuidance} is used as the prompt for that file.</li>
+	 *       <li>If neither is present, the file is skipped or processed with minimal instructions.</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>
+	 *     <b>Prompt Construction:</b>  
+	 *     The parsed {@code defaultGuidance} is formatted (e.g., using templates or variable substitution) and included in the prompt sent to the GenAI provider for documentation generation.
+	 *   </li>
+	 * </ol>
+	 * <p>
+	 * 
+	 * <p>
+	 * This property provides a fallback mechanism for documentation generation, ensuring that every file
+	 * can be processed with meaningful instructions even if it lacks explicit guidance comments.
+	 * </p>
+	 * <p>
+	 * <b>How to use:</b>
+	 * <ul>
+	 *   <li>Set the value using {@link #setDefaultGuidance(String)}.</li>
+	 *   <li>The value can be:
+	 *     <ul>
+	 *       <li>Plain text instructions</li>
+	 *       <li>A URL (starting with {@code http://} or {@code https://}) to include remote content</li>
+	 *       <li>A file reference (starting with {@code file:}) to include local file content</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>The value is parsed line-by-line:
+	 *     <ul>
+	 *       <li>Blank lines are preserved as line breaks.</li>
+	 *       <li>Lines starting with {@code http://} or {@code https://} are fetched and included as content.</li>
+	 *       <li>Lines starting with {@code file:} are read from the specified file and included.</li>
+	 *       <li>All other lines are included as-is.</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>When processing a file:
+	 *     <ul>
+	 *       <li>If the file contains an embedded {@code @guidance} directive, that guidance is used.</li>
+	 *       <li>If not, and {@code defaultGuidance} is set, the processor uses the parsed {@code defaultGuidance} as the prompt for that file.</li>
+	 *       <li>If neither is present, the file is skipped or processed with minimal instructions.</li>
+	 *     </ul>
+	 *   </li>
+	 * </ul>
+	 * <p>
+	 * <b>Example usage:</b>
+	 * <pre>
+	 * FileProcessor processor = new FileProcessor(rootDir, genai, configurator);
+	 * processor.setDefaultGuidance("file:default-guidance.txt");
+	 * // or
+	 * processor.setDefaultGuidance("Please review and document this file according to project standards.");
+	 * // or
+	 * processor.setDefaultGuidance("https://example.com/guidance-template.md");
+	 * </pre>
+	 * <p>
+	 * <b>Best Practices:</b>
+	 * <ul>
+	 *   <li>Use {@code defaultGuidance} to enforce consistent documentation standards across your project.</li>
+	 *   <li>Store reusable guidance templates in a file or at a URL for easy updates and sharing.</li>
+	 *   <li>Combine with project-specific variables and templates for maximum flexibility.</li>
+	 * </ul>
+	 *
+	 * @param defaultGuidance default guidance input (plain text, URL, or {@code file:})
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
 		this.defaultGuidance = defaultGuidance;
