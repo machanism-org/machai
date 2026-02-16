@@ -143,6 +143,13 @@ public interface GenAIProvider extends Closeable {
 	void setWorkingDir(File workingDir);
 
 	/**
+	 * Returns token usage metrics for the most recent {@link #perform()} invocation.
+	 *
+	 * @return usage metrics; implementations may return zero values if not supported
+	 */
+	Usage usage();
+
+	/**
 	 * Releases any resources held by this provider.
 	 */
 	@Override

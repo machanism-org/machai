@@ -28,25 +28,28 @@
 /**
  * Provider-neutral API for interacting with generative-AI (GenAI) models.
  *
- * <p>This package defines the top-level public entry points used by the GenAI Client to create and use a
- * {@link org.machanism.machai.ai.manager.GenAIProvider}.
- * Providers implement a common workflow:
+ * <p>This package contains the public entry points used by the GenAI Client to configure and obtain a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} instance and to invoke model operations such as generating
+ * a response, attaching files, registering function tools, and retrieving token usage.
  *
+ * <p>The main workflow is:
  * <ol>
- *   <li>Create and initialize a provider instance from configuration.</li>
- *   <li>Select a model.</li>
- *   <li>Accumulate conversation state (instructions, prompts, optional files).</li>
- *   <li>Execute the run and obtain a textual response, and optionally compute embeddings.</li>
+ *   <li>Resolve a provider implementation and model name (typically via
+ *   {@link org.machanism.machai.ai.manager.GenAIProviderManager#getProvider(String, org.machanism.macha.core.commons.configurator.Configurator)}).</li>
+ *   <li>Optionally install host-side function tools (see {@code org.machanism.machai.ai.tools}).</li>
+ *   <li>Build request state by adding instructions, prompts, and optional files.</li>
+ *   <li>Execute the request with {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and inspect
+ *   {@link org.machanism.machai.ai.manager.GenAIProvider#usage()}.</li>
  * </ol>
  *
  * <h2>Subpackages</h2>
  * <ul>
- *   <li>{@code org.machanism.machai.ai.manager} – core abstractions and runtime management:
- *     provider contract, reflective provider resolution, and token usage accounting.</li>
+ *   <li>{@code org.machanism.machai.ai.manager} – core abstractions and runtime management (provider contract,
+ *   reflective provider resolution, and token usage accounting).</li>
  *   <li>{@code org.machanism.machai.ai.provider.*} – concrete provider implementations (for example OpenAI, Web UI
- *     automation, a "none" provider, and other integrations).</li>
- *   <li>{@code org.machanism.machai.ai.tools} – host-side tool installers for registering common functions (file I/O,
- *     command execution, web fetching) with a provider.</li>
+ *   automation, a "none" provider, and other integrations).</li>
+ *   <li>{@code org.machanism.machai.ai.tools} – optional host-side tool installers that register common functions
+ *   (file I/O, command execution, web fetching) with a provider.</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -54,10 +57,15 @@
  * Configurator conf = ...;
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  *
+ * // Optional: install file/command/web tools, depending on the provider.
+ * FunctionToolsLoader.getInstance().setConfiguration(conf);
+ * FunctionToolsLoader.getInstance().applyTools(provider);
+ *
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Summarize this repository.");
- *
  * String answer = provider.perform();
+ * Usage usage = provider.usage();
+ *
  * provider.close();
  * }</pre>
  */

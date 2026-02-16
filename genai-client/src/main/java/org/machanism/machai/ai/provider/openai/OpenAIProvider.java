@@ -65,62 +65,52 @@ import com.openai.models.responses.ResponseUsage;
 import com.openai.models.responses.Tool;
 
 /**
- * The {@code OpenAIProvider} class integrates seamlessly with the OpenAI API,
- * serving as a concrete implementation of the {@code GenAIProvider} interface.
- * 
- * This provider enables a wide range of generative AI capabilities, including:
- * <ul>
- * <li>Sending prompts and receiving responses from OpenAI Chat models.</li>
- * <li>Managing files for use in various OpenAI workflows.</li>
- * <li>Performing advanced large language model (LLM) requests, such as text
- * generation, summarization, and question answering.</li>
- * <li>Creating and utilizing vector embeddings for tasks like semantic search
- * and similarity analysis.</li>
- * </ul>
- * 
- * By abstracting the complexities of direct API interaction,
- * {@code OpenAIProvider} allows developers to leverage OpenAI’s powerful models
- * efficiently within their applications. It supports both synchronous and
- * asynchronous operations, and can be easily extended or configured to
- * accommodate different use cases and model parameters.
+ * OpenAI-backed implementation of MachAI's {@link GenAIProvider} abstraction.
+ *
  * <p>
- * This class provides capabilities to send prompts, manage files, perform LLM
- * requests, and create embeddings using OpenAI Chat models.
+ * This provider adapts the OpenAI Java SDK to MachAI's provider interface. It
+ * accumulates user inputs (text prompts and optional file references), optional
+ * system-level instructions, and an optional set of function tools. When
+ * {@link #perform()} is invoked, the provider calls the OpenAI Responses API,
+ * processes the model output (including iterative function tool calls), and
+ * returns the final assistant text.
  * </p>
- * 
+ *
+ * <h2>Capabilities</h2>
+ * <ul>
+ * <li>Submit prompts and retrieve text responses.</li>
+ * <li>Upload local files or attach files by URL for use in a request.</li>
+ * <li>Register function tools and dispatch tool calls to application handlers.</li>
+ * <li>Create vector embeddings for input text.</li>
+ * <li>Report token usage to {@link GenAIProviderManager}.</li>
+ * </ul>
+ *
+ * <h2>Configuration</h2>
  * <p>
- * <b>Environment Variables:</b><br>
- * The client automatically reads the following environment variables. You must
- * set at least {@code OPENAI_API_KEY}:
+ * {@link #init(Configurator)} expects configuration keys compatible with OpenAI
+ * connectivity:
+ * </p>
  * <ul>
  * <li>{@code OPENAI_API_KEY} (required)</li>
- * <li>{@code OPENAI_ORG_ID} (optional)</li>
- * <li>{@code OPENAI_PROJECT_ID} (optional)</li>
  * <li>{@code OPENAI_BASE_URL} (optional)</li>
  * </ul>
- * </p>
- * 
- * <p>
- * <b>Using the CodeMie API:</b><br>
- * To use the CodeMie API, set the following environment variables:
- * <ul>
- * <li>{@code OPENAI_API_KEY}=eyJhbGciOiJSUzI1NiIsInR5c....</li>
- * <li>{@code OPENAI_BASE_URL}=https://codemie.lab.epam.com/code-assistant-api/v1</li>
- * </ul>
- * </p>
- * 
- * <p>
- * <b>Usage example:</b>
- * </p>
- * 
- * <pre>
+ *
+ * <h2>Usage</h2>
+ *
+ * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+ * provider.model("gpt-5.1");
+ * provider.instructions("You are a concise assistant.");
+ * provider.prompt("Summarize this text...");
+ * String answer = provider.perform();
+ * }
  * </pre>
- * 
+ *
  * <p>
- * <b>Thread safety:</b> This implementation is NOT thread-safe.
+ * <strong>Thread-safety:</strong> instances are not thread-safe. Use one
+ * provider instance per request or synchronize externally.
  * </p>
- * 
+ *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
@@ -131,25 +121,40 @@ public class OpenAIProvider implements GenAIProvider {
 
 	/** OpenAI client for API interactions. */
 	private OpenAIClient client;
-	/** Active chat model. */
+	/** Active chat model identifier used in {@link #perform()}. */
 	private String chatModel;
 
 	/** Maps tools to handler functions. */
 	private Map<Tool, Function<Object[], Object>> toolMap = new HashMap<>();
-	/** List of prompt items for conversation. */
+	/** List of prompt items for the current request/session. */
 	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
-	/** Instructions for the model, if any. */
+	/** Optional instructions applied to the request. */
 	private String instructions;
-	/** ResourceBundle for localized prompt templates. */
+	/** Optional {@link ResourceBundle} used to format prompt templates. */
 	private ResourceBundle promptBundle;
 
 	/** Optional log file for input data. */
 	private File inputsLog;
 
+	/** Working directory passed to tool handlers as contextual information. */
 	private File workingDir;
 
+	/** Request timeout in seconds; {@code 0} means SDK defaults are used. */
 	private long timeoutSec = 0;
 
+	/** Latest usage metrics captured from the most recent {@link #perform()} call. */
+	private Usage lastUsage = new Usage(0, 0, 0);
+
+	/**
+	 * Initializes the provider from the given configuration.
+	 *
+	 * <p>
+	 * The implementation reads {@code OPENAI_BASE_URL} and {@code OPENAI_API_KEY}
+	 * and creates an {@link OpenAIClient}.
+	 * </p>
+	 *
+	 * @param config provider configuration (must contain {@code OPENAI_API_KEY})
+	 */
 	@Override
 	public void init(Configurator config) {
 		String baseUrl = config.get("OPENAI_BASE_URL");
@@ -158,6 +163,12 @@ public class OpenAIProvider implements GenAIProvider {
 		createClient(baseUrl, privateKey);
 	}
 
+	/**
+	 * Creates the underlying OpenAI client.
+	 *
+	 * @param baseUrl    optional base URL override
+	 * @param privateKey API key
+	 */
 	protected void createClient(String baseUrl, String privateKey) {
 		com.openai.client.okhttp.OpenAIOkHttpClient.Builder buillder = OpenAIOkHttpClient.builder();
 		buillder.apiKey(privateKey);
@@ -171,8 +182,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Adds a text prompt to the current conversation.
-	 * 
+	 * Adds a text prompt to the current request input.
+	 *
 	 * @param text the prompt string
 	 */
 	@Override
@@ -183,12 +194,18 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Adds a prompt from a file, formatting the file content according to a
-	 * ResourceBundle message.
-	 * 
+	 * Adds a prompt from a file.
+	 *
+	 * <p>
+	 * The file content is read as UTF-8 text. If {@code bundleMessageName} is not
+	 * {@code null}, the read content is formatted using either the configured
+	 * {@link #promptBundle(ResourceBundle)} (when available) or
+	 * {@link String#format(String, Object...)}.
+	 * </p>
+	 *
 	 * @param file              the file containing prompt data
-	 * @param bundleMessageName key for message in ResourceBundle, or null for raw
-	 *                          file content
+	 * @param bundleMessageName key for a message in the {@link ResourceBundle}, or
+	 *                          {@code null} to use raw file content
 	 * @throws IOException if reading the file fails
 	 */
 	@Override
@@ -212,8 +229,9 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Uploads a file to OpenAI and adds its reference as input.
-	 * 
+	 * Uploads a file to OpenAI and adds its server-side reference to the current
+	 * request inputs.
+	 *
 	 * @param file local file to upload
 	 * @throws IOException           if reading file fails
 	 * @throws FileNotFoundException if file is missing
@@ -235,8 +253,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Adds input from a file by URL.
-	 * 
+	 * Adds a file input by URL.
+	 *
 	 * @param fileUrl the URL of the input file
 	 * @throws IOException           on network error
 	 * @throws FileNotFoundException if the file cannot be found
@@ -252,9 +270,16 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Performs a request using current inputs and returns the response string.
-	 * 
-	 * @return the model response
+	 * Executes a request using the currently configured model, inputs, and tools.
+	 *
+	 * <p>
+	 * If the response contains tool calls, the provider executes the matching tool
+	 * handlers and recursively continues the conversation until a final text
+	 * response is produced.
+	 * </p>
+	 *
+	 * @return the final model response text (may be {@code null} if no text was
+	 *         produced)
 	 */
 	@Override
 	public String perform() {
@@ -272,7 +297,7 @@ public class OpenAIProvider implements GenAIProvider {
 
 		try {
 			Response response = getClient().responses().create(builder.build());
-			logUsage(response.usage());
+			captureUsage(response.usage());
 
 			logger.debug("Received response from LLM service.");
 
@@ -287,23 +312,37 @@ public class OpenAIProvider implements GenAIProvider {
 		return result;
 	}
 
-	private void logUsage(Optional<ResponseUsage> usage) {
+	/**
+	 * Extracts token usage from the response and stores it as {@link #usage()}.
+	 *
+	 * @param usage optional usage information from the OpenAI response
+	 */
+	private void captureUsage(Optional<ResponseUsage> usage) {
 		if (usage.isPresent()) {
 			ResponseUsage responseUsage = usage.get();
 			long inputTokens = responseUsage.inputTokens();
 			long inputCachedTokens = responseUsage.inputTokensDetails().cachedTokens();
 			long outputTokens = responseUsage.outputTokens();
 
-			GenAIProviderManager.addUsage(new Usage(inputTokens, inputCachedTokens, outputTokens));
+			lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
+			GenAIProviderManager.addUsage(lastUsage);
+		} else {
+			lastUsage = new Usage(0, 0, 0);
 		}
 	}
 
 	/**
-	 * Parses the given response and recursively handles tool calls and reasoning.
-	 * 
-	 * @param response     response object
-	 * @param instructions optional instructions
-	 * @return response string, following reasoning and/or tool calls
+	 * Parses the given response and handles function tool calls and reasoning
+	 * items.
+	 *
+	 * <p>
+	 * Tool calls are executed via {@link #callFunction(ResponseFunctionToolCall)}.
+	 * If any tool calls are present, the method continues the conversation by
+	 * calling {@link #perform()} again until the model returns a final message.
+	 * </p>
+	 *
+	 * @param response response object
+	 * @return response string, potentially after one or more tool call iterations
 	 */
 	private String parseResponse(Response response) {
 		String result = null;
@@ -361,10 +400,11 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Requests embeddings for the given text using the current embedding model.
-	 * 
+	 * Requests an embedding vector for the given input text.
+	 *
 	 * @param text input to embed
-	 * @return embedding as a list of {@code float} values
+	 * @return embedding as a list of {@code float} values, or {@code null} when
+	 *         {@code text} is {@code null}
 	 */
 	@Override
 	public List<Float> embedding(String text) {
@@ -379,11 +419,21 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Handles a function tool call from the response by looking for a registered
-	 * handler.
-	 * 
+	 * Executes a function tool call by finding a registered tool with the same
+	 * name and delegating to its handler.
+	 *
+	 * <p>
+	 * The handler is invoked with an {@code Object[]} of length 2:
+	 * </p>
+	 * <ol>
+	 * <li>index {@code 0}: parsed JSON arguments as a Jackson {@link JsonNode}</li>
+	 * <li>index {@code 1}: the configured {@link #setWorkingDir(File)} value</li>
+	 * </ol>
+	 *
 	 * @param functionCall call details
-	 * @return result from function handler, or null if not found
+	 * @return result from function handler, or {@code null} if no matching tool is
+	 *         registered
+	 * @throws IllegalArgumentException if the tool call arguments cannot be parsed
 	 */
 	private Object callFunction(ResponseFunctionToolCall functionCall) {
 		String name = functionCall.name();
@@ -406,7 +456,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Logs the input items to a file, if logging is enabled.
+	 * Writes the current request inputs to {@link #inputsLog} when logging is
+	 * enabled.
 	 */
 	private void logInputs() {
 		if (inputsLog != null) {
@@ -443,7 +494,7 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Clears all input items for the next request.
+	 * Clears all accumulated inputs for the next request.
 	 */
 	@Override
 	public void clear() {
@@ -451,29 +502,19 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Adds a tool to the current session, providing its function handler.
-	 * 
-	 * The parameters object for a function definition must be a JSON Schema object
-	 * of type "object". Within the properties of this object, you can use the
-	 * following standard JSON types:
-	 * 
-	 * string: For text or character sequences. This can be further constrained
-	 * using enum to specify a list of acceptable string values. integer: For whole
-	 * numbers. While internally the API might treat it as a number at times,
-	 * integer is a valid declaration in the schema. number: For any numerical
-	 * value, including floats/decimals. boolean: For true/false values. Use the
-	 * full term boolean rather than bool. array: For lists of items. The items
-	 * property must be used to specify the type of elements within the array (e.g.,
-	 * {"type": "string"}). This is used for lists, including multi-dimensional
-	 * arrays. object: For nested data structures (dictionaries or maps in
-	 * Python/JavaScript). You can define nested properties and required fields
-	 * within an object type to guide the model on complex input structures.
-	 * 
+	 * Registers a function tool for the current provider instance.
+	 *
+	 * <p>
+	 * The {@code paramsDesc} entries must follow the format
+	 * {@code name:type:required:description}. The parameter schema passed to OpenAI
+	 * is a JSON Schema object of type {@code object}.
+	 * </p>
+	 *
 	 * @param name        tool function name
 	 * @param description tool description
 	 * @param function    handler callback for tool execution
-	 * @param paramsDesc  array of parameter descriptions in format
-	 *                    name:type:required:description
+	 * @param paramsDesc  parameter descriptors in the format
+	 *                    {@code name:type:required:description}
 	 */
 	@Override
 	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
@@ -507,9 +548,9 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Sets instructions for the model to use in the session.
-	 * 
-	 * @param instructions text for model instructions
+	 * Sets system-level instructions applied to subsequent requests.
+	 *
+	 * @param instructions instruction text (may be {@code null} to clear)
 	 */
 	@Override
 	public void instructions(String instructions) {
@@ -517,18 +558,18 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Set the ResourceBundle for prompts.
-	 * 
-	 * @param promptBundle ResourceBundle instance
+	 * Sets the resource bundle used for prompt formatting.
+	 *
+	 * @param promptBundle resource bundle instance (may be {@code null})
 	 */
 	public void promptBundle(ResourceBundle promptBundle) {
 		this.promptBundle = promptBundle;
 	}
 
 	/**
-	 * Set the file used for logging model inputs.
-	 * 
-	 * @param inputsLog file for input logging
+	 * Enables request input logging to the given file.
+	 *
+	 * @param inputsLog file for input logging (may be {@code null} to disable)
 	 */
 	@Override
 	public void inputsLog(File inputsLog) {
@@ -536,35 +577,68 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Initializes the chat model and OpenAI client. Requires OPENAI_API_KEY
-	 * environment variable to be set.
-	 * 
-	 * @param chatModelName the model name (e.g., "gpt-4")
-	 * @throws RuntimeException if API key is missing
+	 * Sets the model identifier to use for requests.
+	 *
+	 * @param chatModelName model name (for example, {@code gpt-4.1} or a custom
+	 *                      deployment name)
 	 */
 	@Override
 	public void model(String chatModelName) {
 		this.chatModel = chatModelName;
 	}
 
+	/**
+	 * Sets the working directory passed to tool handlers.
+	 *
+	 * @param workingDir working directory (may be {@code null})
+	 */
 	@Override
 	public void setWorkingDir(File workingDir) {
 		this.workingDir = workingDir;
 	}
 
+	/**
+	 * Returns token usage metrics captured from the most recent {@link #perform()} call.
+	 *
+	 * @return usage metrics; never {@code null}
+	 */
+	@Override
+	public Usage usage() {
+		return lastUsage;
+	}
+
+	/**
+	 * Closes the underlying OpenAI client.
+	 */
 	@Override
 	public void close() {
 		getClient().close();
 	}
 
+	/**
+	 * Returns the underlying OpenAI client.
+	 *
+	 * @return OpenAI client
+	 */
 	protected OpenAIClient getClient() {
 		return client;
 	}
 
+	/**
+	 * Returns the configured request timeout.
+	 *
+	 * @return timeout in seconds; {@code 0} indicates the SDK default
+	 */
 	public long getTimeout() {
 		return timeoutSec;
 	}
 
+	/**
+	 * Sets a request timeout (in seconds) for new clients created by
+	 * {@link #createClient(String, String)}.
+	 *
+	 * @param timeout timeout in seconds; use {@code 0} to use SDK defaults
+	 */
 	public void setTimeout(long timeout) {
 		this.timeoutSec = timeout;
 	}

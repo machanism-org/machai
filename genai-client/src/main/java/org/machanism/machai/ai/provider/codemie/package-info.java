@@ -29,7 +29,7 @@
 /**
  * EPAM CodeMie provider implementation.
  *
- * <p>This package provides {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a concrete * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider} implementation that:
+ * <p>This package provides {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, an * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider} implementation that:
  * <ol>
  *   <li>Obtains an OAuth 2.0 access token from CodeMie's OpenID Connect token endpoint.</li>
  *   <li>Initializes an OpenAI-compatible client configured to call the CodeMie Code Assistant REST API.</li>

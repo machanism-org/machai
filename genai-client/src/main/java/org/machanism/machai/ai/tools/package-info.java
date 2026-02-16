@@ -33,23 +33,23 @@
  * workflow.
  *
  * <p>
- * Tools in this package are typically installed by registering named functions via
- * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
- * Each function is intended to be narrowly scoped (for example, reading a file, listing a directory, executing a
- * command, or fetching a web page) so that calling code can reason about and constrain what the AI can do.
+ * This package contains installer classes that register named tool functions (for example, file I/O, directory
+ * listing, command execution, and HTTP page retrieval) and small supporting utilities used by those installers.
+ * Callers typically choose which tool sets to install and can constrain availability by registering only the
+ * functions they intend an AI workflow to access.
  *
  * <h2>Tool installers</h2>
  * <ul>
- * <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – file and directory operations (read, write, list)</li>
- * <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution with bounded output capture</li>
- * <li>{@link org.machanism.machai.ai.tools.WebPageFunctionTools} – HTTP GET page fetch (HTML or extracted text)</li>
- * <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – convenience installer for the common tool set</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – file and directory operations (read, write, list)</li>
+ *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution with bounded output capture</li>
+ *   <li>{@link org.machanism.machai.ai.tools.WebPageFunctionTools} – HTTP GET page fetch (HTML or extracted text)</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – convenience installer for common tool sets</li>
  * </ul>
  *
  * <h2>Supporting utilities</h2>
  * <ul>
- * <li>{@link org.machanism.machai.ai.tools.LimitedStringBuilder} – retains only the last N characters of accumulated
- * output</li>
+ *   <li>{@link org.machanism.machai.ai.tools.LimitedStringBuilder} – retains only the last N characters of accumulated
+ *       output</li>
  * </ul>
  *
  * <h2>Example</h2>

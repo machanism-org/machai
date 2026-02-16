@@ -63,7 +63,7 @@ public class WebProvider extends NoneProvider {
 	 * <p>The list of prompts is passed to the workspace as a system variable named {@code INPUTS}. The recipe is expected
 	 * to place the final response text into a variable named {@code result}.
 	 *
-	 * @return the response captured by the automation recipe
+	 * @return the response captured by the automation recipe, or {@code null} if the recipe produced no result
 	 * @throws IllegalArgumentException if the underlying automation fails for any reason
 	 */
 	@Override
@@ -90,7 +90,7 @@ public class WebProvider extends NoneProvider {
 	 * <ol>
 	 *   <li>Use {@code workingDir} by default.</li>
 	 *   <li>If a directory (or file) exists under {@code workingDir} at the path provided by system property
-	 *       {@code recipes} (default: {@code genai-client/src/main/resources}), that location is used instead.</li>
+	 *       {@code recipes} (default: {@code genai-client\src\main\resources}), that location is used instead.</li>
 	 * </ol>
 	 *
 	 * @param workingDir project root directory used for workspace variables and to resolve recipe locations
@@ -107,7 +107,7 @@ public class WebProvider extends NoneProvider {
 			rootDir = workingDir;
 
 			File startDir = workingDir;
-			String recipes = System.getProperty("recipes", "genai-client/src/main/resources");
+			String recipes = System.getProperty("recipes", "genai-client\\src\\main\\resources");
 			File externalAeConfigFile = new File(workingDir, recipes);
 			if (externalAeConfigFile.exists()) {
 				startDir = externalAeConfigFile;

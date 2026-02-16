@@ -27,11 +27,13 @@ Page Structure:
 
 ## Introduction
 
-GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers foundational prompt management and embedding capabilities, enabling AI-powered features across Machai modules.
+GenAI Client is a Java library for integrating applications with Generative AI providers via a single, consistent API. It provides foundational capabilities such as prompt/instruction management, optional tool (function) calling, optional file attachments, and (provider-dependent) embeddings.
 
-The library simplifies interactions with AI services, supporting use cases such as semantic search, automated content generation, and intelligent project assembly within the Machanism ecosystem.
+The main benefits are:
 
-A key benefit is provider portability: you can swap or combine backends by changing configuration rather than application code.
+- **Provider portability:** switch or combine backends mostly through configuration rather than rewriting calling code.
+- **A stable abstraction:** use the same `GenAIProvider` interface across OpenAI-compatible APIs, token-brokered gateways (like CodeMie), UI-automation providers, or no-op operation.
+- **Extensibility:** register Java functions as tools so models can request structured actions (provider-dependent).
 
 ## Overview
 
@@ -137,30 +139,22 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-The `OpenAIProvider` integrates seamlessly with the OpenAI API as a concrete implementation of `GenAIProvider`.
+`OpenAIProvider` is an OpenAI-backed implementation of the `GenAIProvider` abstraction. It adapts the OpenAI Java SDK to the library’s provider interface by accumulating user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools.
 
-This provider enables a wide range of generative AI capabilities, including:
+When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
 
-- Sending prompts and receiving responses from OpenAI chat models.
-- Managing files for use in various OpenAI workflows.
-- Performing advanced LLM requests, such as text generation, summarization, and question answering.
-- Creating and utilizing vector embeddings for tasks like semantic search and similarity analysis.
+**Capabilities**
 
-By abstracting the complexities of direct API interaction, `OpenAIProvider` allows you to leverage OpenAI models efficiently from a consistent `GenAIProvider` API.
+- Submit prompts and retrieve text responses.
+- Upload local files or attach files by URL for use in a request.
+- Register function tools and dispatch tool calls to application handlers.
+- Create vector embeddings for input text.
+- Report token usage to `GenAIProviderManager`.
 
-**Environment Variables** (must set at least `OPENAI_API_KEY`)
+**Configuration**
 
 - `OPENAI_API_KEY` (required)
-- `OPENAI_ORG_ID` (optional)
-- `OPENAI_PROJECT_ID` (optional)
 - `OPENAI_BASE_URL` (optional)
-
-**Using the CodeMie API via OpenAIProvider**
-
-To point the OpenAI provider at CodeMie’s OpenAI-compatible gateway, set:
-
-- `OPENAI_API_KEY` to a valid bearer token
-- `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
 
 **Usage example**
 
@@ -172,22 +166,25 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-The `CodeMieProvider` extends `OpenAIProvider` and integrates with CodeMie by first obtaining an OAuth2 access token and then calling CodeMie’s OpenAI-compatible API endpoint.
+`CodeMieProvider` is a GenAI provider implementation for EPAM CodeMie.
 
-How it works:
+It obtains an access token from a configurable OpenID Connect token endpoint and then initializes an OpenAI-compatible client (via `OpenAIProvider`) to call the CodeMie Code Assistant REST API.
 
-- Uses `GENAI_USERNAME` / `GENAI_PASSWORD` to request an access token from a configurable OpenID Connect token endpoint (override with `AUTH_URL` if needed).
-- Selects OAuth2 grant type automatically:
-  - If `GENAI_USERNAME` contains `@`: uses the `password` grant.
-  - Otherwise: uses `client_credentials`.
-- Uses that access token as the API key when constructing the underlying OpenAI-compatible client.
-- Uses the CodeMie OpenAI-compatible base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`.
+The authentication mode is selected based on the configured username:
+
+- If the username contains `@`, the password grant is used (typical user e-mail login).
+- Otherwise, the client credentials grant is used (service-to-service).
 
 **Authentication / configuration**
 
 - `GENAI_USERNAME` (required)
 - `GENAI_PASSWORD` (required)
-- `AUTH_URL` (optional; defaults to the CodeMie token endpoint)
+- `AUTH_URL` (optional; token endpoint override)
+
+**Endpoints (defaults)**
+
+- Token endpoint: `https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token` (override with `AUTH_URL`)
+- OpenAI-compatible base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`
 
 **Usage example**
 
@@ -199,7 +196,7 @@ GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
 
 ### None
 
-The `NoneProvider` is a no-op implementation of `GenAIProvider` intended for environments where no external LLM integration should be used.
+`NoneProvider` is a no-op implementation of `GenAIProvider` intended for environments where no external LLM integration should be used.
 
 It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
@@ -224,22 +221,15 @@ provider.close();
 
 ### Web
 
-The `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
+`WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via [Anteater](https://ganteater.com) workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
+Automation is executed via the Anteater workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
 
 **Thread safety and lifecycle**
 
 - Not thread-safe.
 - Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
 - `close()` closes the underlying workspace.
-
-**Configuration**
-
-- Invoke `model(String)` before `setWorkingDir(File)` so the workspace can load the correct configuration.
-- Call `setWorkingDir(File)` once per JVM instance; subsequent calls must use the same directory.
-- The workspace start directory defaults to the provided working directory.
-- If a directory (or file) exists under `workingDir` at the path provided by system property `recipes` (default: `genai-client/src/main/resources`), that location is used instead.
 
 **Usage example**
 
