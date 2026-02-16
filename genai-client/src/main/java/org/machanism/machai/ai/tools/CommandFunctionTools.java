@@ -41,20 +41,92 @@ public class CommandFunctionTools implements FunctionTools {
 	private static final String defaultCharset = "UTF-8";
 
 	/**
-	 * Installs the command-line tool function into the specified provider.
+	 * Registers system command and process control tools with the provided
+	 * {@link GenAIProvider}.
+	 * <p>
+	 * The following tools are installed:
+	 * <ul>
+	 * <li><b>run_command_line_tool</b> – Executes a system command using Java's
+	 * {@code Process.exec()} method. <br>
+	 * <b>Parameters:</b>
+	 * <ul>
+	 * <li><b>command</b> (string, required): The command to execute in the system
+	 * shell.</li>
+	 * <li><b>env</b> (string, optional): Environment variable settings as a single
+	 * string, with each variable in the format {@code NAME=VALUE}, separated by
+	 * newline characters ({@code \n}). If {@code null}, the subprocess inherits the
+	 * environment variables from the current process.</li>
+	 * <li><b>dir</b> (string, optional): The working directory for the subprocess.
+	 * If {@code null}, the subprocess inherits the current project directory.</li>
+	 * <li><b>tailResultSize</b> (integer, optional): Specifies the maximum number
+	 * of characters to display from the end of the result content produced by the
+	 * executed system command. If the command output exceeds this limit, only the
+	 * last {@code tailResultSize} characters will be shown. Default value:
+	 * {@code defaultResultTailSize}.</li>
+	 * <li><b>charsetName</b> (string, optional): The name of the requested charset.
+	 * Default: {@code defaultCharset}.</li>
+	 * </ul>
+	 * </li>
+	 * <li><b>terminate_process</b> – Throws an exception to immediately terminate
+	 * the process. Useful for signaling fatal errors or controlled shutdowns from
+	 * within a function tool. <br>
+	 * <b>Parameters:</b>
+	 * <ul>
+	 * <li><b>message</b> (string, optional): The exception message to use. Defaults
+	 * to "Process terminated by function tool."</li>
+	 * <li><b>cause</b> (string, optional): An optional cause message. If provided,
+	 * it is wrapped in a new Exception as the cause.</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
 	 *
-	 * @param provider provider instance to augment
+	 * @param provider the {@link GenAIProvider} instance to which the tools will be
+	 *                 registered
 	 */
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("run_command_line_tool", "Executes a system command using Java's Process.exec() method.",
 				this::executeCommand, "command:string:required:The command to execute in the system shell.",
-				"env:string:optional:Specifies environment variable settings as a single string, with each variable in the format NAME=VALUE, separated by newline characters (\\n). "
-						+ "If null, the subprocess inherits the environment variables from the current process.",
+				"env:string:optional:Specifies environment variable settings as a single string, with each variable in the format NAME=VALUE, separated by newline characters (\\n). If null, the subprocess inherits the environment variables from the current process.",
 				"dir:string:optional:The working directory for the subprocess. If null, the subprocess inherits the current project directory.",
-				"tailResultSize:integer:optional:Specifies the maximum number of characters to display from the end of the result content produced by the executed system command. "
-						+ "If the command output exceeds this limit, only the last tailResultSize characters will be shown. Default value: "
+				"tailResultSize:integer:optional:Specifies the maximum number of characters to display from the end of the result content produced by the executed system command. If the command output exceeds this limit, only the last tailResultSize characters will be shown. Default value: "
 						+ defaultResultTailSize,
-				"charsetName:string:optional:the name of the requested charset, default: " + defaultCharset);
+				"charsetName:string:optional:The name of the requested charset. Default: " + defaultCharset);
+
+		provider.addTool("terminate_process",
+				"Throws an exception to immediately terminate the process. Useful for signaling fatal errors or controlled shutdowns from within a function tool.",
+				this::terminateProcess,
+				"message:string:optional:The exception message to use. Defaults to 'Process terminated by function tool.'",
+				"cause:string:optional:An optional cause message. If provided, it is wrapped in a new Exception as the cause.");
+	}
+
+	/**
+	 * Throws a {@link RuntimeException} to signal that the function tool should
+	 * terminate the process.
+	 * <p>
+	 * The exception message and cause can be specified via the {@code params}
+	 * array:
+	 * <ul>
+	 * <li><b>message</b> (string, optional): The exception message. Defaults to
+	 * "Process terminated by function tool."</li>
+	 * <li><b>cause</b> (string, optional): The cause message. If provided, it is
+	 * wrapped in a new {@link Exception} as the cause.</li>
+	 * </ul>
+	 *
+	 * @param params tool invocation parameters (expects a JsonNode with optional
+	 *               "message" and "cause" fields)
+	 * @throws RuntimeException always thrown to terminate the process
+	 */
+	private String terminateProcess(Object[] params) {
+		JsonNode props = (JsonNode) params[0];
+		String message = props.has("message") ? props.get("message").asText("Process terminated by function tool.")
+				: "Process terminated by function tool.";
+		String cause = props.has("cause") ? props.get("cause").asText(null) : null;
+
+		if (cause != null) {
+			throw new RuntimeException(message, new Exception(cause));
+		} else {
+			throw new RuntimeException(message);
+		}
 	}
 
 	/**
