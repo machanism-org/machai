@@ -28,18 +28,19 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Installs a command-execution tool into a {@link GenAIProvider}.
+ * Installs command-execution and process-termination tools into a
+ * {@link GenAIProvider}.
  *
  * <p>
- * The installed tool executes a shell command in the provider working directory
- * supplied at runtime. This class performs the process execution and output
- * capture; any command allow/deny policy must be enforced by the caller and/or
- * the hosting environment.
+ * The primary tool executes a command line using {@link ProcessBuilder} in a
+ * controlled working directory and captures stdout/stderr into a bounded buffer
+ * (see {@link LimitedStringBuilder}). Hosts may optionally provide an allow-list
+ * via {@link #isValidCommand(String)} semantics to restrict execution.
  *
- * <h2>Installed tool</h2>
+ * <h2>Installed tools</h2>
  * <ul>
- * <li>{@code run_command_line_tool} – executes a shell command and returns
- * stdout (and stderr on failure)</li>
+ * <li>{@code run_command_line_tool} – executes a command line and returns output</li>
+ * <li>{@code terminate_process} – throws an exception to abort execution</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -53,9 +54,15 @@ public class CommandFunctionTools implements FunctionTools {
 
 	private static final String defaultCharset = "UTF-8";
 
-	/** Define allowed commands (add as needed) */
+	/**
+	 * Allow-list for executable base commands.
+	 * <p>
+	 * If {@code null}, all commands are considered allowed. If empty, command
+	 * execution is effectively disabled.
+	 */
 	private Set<String> allowedCommands = null;
 
+	/** Maximum time to wait for a started process to complete. */
 	private int processTimeoutSeconds = 600;
 
 	/**
@@ -65,16 +72,34 @@ public class CommandFunctionTools implements FunctionTools {
 		private static final long serialVersionUID = -4615360980518233932L;
 		private final int exitCode;
 
+		/**
+		 * Creates a termination exception.
+		 *
+		 * @param message  message to expose to the host
+		 * @param exitCode desired process exit code
+		 */
 		public ProcessTerminationException(String message, int exitCode) {
 			super(message);
 			this.exitCode = exitCode;
 		}
 
+		/**
+		 * Creates a termination exception.
+		 *
+		 * @param message  message to expose to the host
+		 * @param cause    underlying cause
+		 * @param exitCode desired process exit code
+		 */
 		public ProcessTerminationException(String message, Throwable cause, int exitCode) {
 			super(message, cause);
 			this.exitCode = exitCode;
 		}
 
+		/**
+		 * Returns the desired exit code.
+		 *
+		 * @return exit code
+		 */
 		public int getExitCode() {
 			return exitCode;
 		}
@@ -164,12 +189,12 @@ public class CommandFunctionTools implements FunctionTools {
 	 * wrapped in a new {@link Exception} as the cause.</li>
 	 * <li><b>exitCode</b> (integer, optional): The exit code to return. Defaults to
 	 * 1 if not specified.</li>
-	 * </ul>
-	 *
-	 * @param params tool invocation parameters (expects a JsonNode with optional
-	 *               "message", "cause", and "exitCode" fields)
+	 * </ul>	 *
+	 * @param params tool invocation parameters (expects a {@link JsonNode} with
+	 *               optional {@code message}, {@code cause}, and {@code exitCode}
+	 *               fields)
+	 * @return never returns; always throws
 	 * @throws ProcessTerminationException always thrown to terminate the process
-	 *                                     with the specified exit code
 	 */
 	public String terminateProcess(Object[] params) {
 		JsonNode props = (JsonNode) params[0];
@@ -180,23 +205,22 @@ public class CommandFunctionTools implements FunctionTools {
 
 		if (cause != null) {
 			throw new ProcessTerminationException(message, new Exception(cause), exitCode);
-		} else {
-			throw new ProcessTerminationException(message, exitCode);
 		}
+		throw new ProcessTerminationException(message, exitCode);
 	}
 
 	/**
-	 * Executes the supplied shell command and returns its output.
+	 * Executes the supplied command and returns the captured output.
 	 *
 	 * <p>
 	 * Expected parameters:
 	 * <ol>
-	 * <li>{@link JsonNode} containing {@code command}</li>
-	 * <li>{@link File} working directory</li>
+	 * <li>{@link JsonNode} containing {@code command} and optional settings</li>
+	 * <li>{@link File} project working directory supplied by the provider runtime</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return command output (stdout and, on non-zero exit, stderr)
+	 * @return command output (bounded to the configured tail size)
 	 */
 	public String executeCommand(Object[] params) {
 		String commandId = Integer.toHexString(new Random().nextInt());
@@ -205,7 +229,6 @@ public class CommandFunctionTools implements FunctionTools {
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
 
-		// Validate command: allow only whitelisted commands or patterns
 		if (!isValidCommand(command)) {
 			return "Error: Invalid or unsafe command.";
 		}
@@ -218,7 +241,6 @@ public class CommandFunctionTools implements FunctionTools {
 			return "Error: Invalid working directory.";
 		}
 
-		// Validate working directory
 		try {
 			Path projectPath = projectDir.toPath().toRealPath();
 			Path workingPath = workingDir.toPath().toRealPath();
@@ -234,7 +256,6 @@ public class CommandFunctionTools implements FunctionTools {
 		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
 				: defaultCharset;
 
-		// Parse command safely
 		Process prc = null;
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
@@ -245,45 +266,21 @@ public class CommandFunctionTools implements FunctionTools {
 			ProcessBuilder pb = new ProcessBuilder(commandParts);
 			pb.directory(workingDir);
 
-			// Set environment variables safely
 			if (props.has("env")) {
 				Map<String, String> envMap = parseEnv(props.get("env").asText());
 				pb.environment().putAll(envMap);
 			}
 
-			Future<?> stdoutFuture = null;
-			Future<?> stderrFuture = null;
-
 			final Process process = pb.start();
 			prc = process;
 
-			// Read stdout
-			stdoutFuture = executor.submit(() -> {
-				try (BufferedReader reader = new BufferedReader(
-						new InputStreamReader(process.getInputStream(), Charset.forName(charsetName)))) {
-					String line;
-					while ((line = reader.readLine()) != null) {
-						output.append(line).append(System.lineSeparator());
-						logger.info("[CMD {}] [OUTPUT] {}", commandId, line);
-					}
-				} catch (IOException e) {
-					logger.error("[CMD {}] Error reading stdout", commandId, e);
-				}
-			});
+			Future<?> stdoutFuture = executor.submit(() -> readStream(process.getInputStream(), charsetName, output,
+					line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
+					e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
 
-			// Read stderr
-			stderrFuture = executor.submit(() -> {
-				try (BufferedReader reader = new BufferedReader(
-						new InputStreamReader(process.getErrorStream(), Charset.forName(charsetName)))) {
-					String line;
-					while ((line = reader.readLine()) != null) {
-						output.append(line).append(System.lineSeparator());
-						logger.error("[CMD {}] [ERROR] {}", commandId, line);
-					}
-				} catch (IOException e) {
-					logger.error("[CMD {}] Error reading stderr", commandId, e);
-				}
-			});
+			Future<?> stderrFuture = executor.submit(() -> readStream(process.getErrorStream(), charsetName, output,
+					line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
+					e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
 
 			boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
 			if (!finished) {
@@ -293,7 +290,6 @@ public class CommandFunctionTools implements FunctionTools {
 				logger.warn("[CMD {}] Command timed out", commandId);
 			}
 
-			// Wait for output threads to finish
 			stdoutFuture.get(5, TimeUnit.SECONDS);
 			stderrFuture.get(5, TimeUnit.SECONDS);
 
@@ -307,36 +303,44 @@ public class CommandFunctionTools implements FunctionTools {
 			output.append("Output reading timed out.").append(System.lineSeparator());
 			logger.error("[CMD {}] Output reading timed out", commandId, e);
 			return output.getLastText();
-			
+
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			logger.error("[CMD {}] Command execution interrupted", commandId, e);
 			return output.append("Interrupted: ").append(e.getMessage()).toString();
-			
+
 		} catch (IOException | ExecutionException e) {
 			logger.error("[CMD {}] IO error during command execution", commandId, e);
 			return output.append("IO Error: ").append(e.getMessage()).toString();
-			
+
 		} catch (CommandLineException e) {
 			return "Error: " + e.getMessage();
-			
+
 		} finally {
 			if (prc != null && prc.isAlive()) {
 				prc.destroyForcibly();
 			}
-			if (executor != null) {
-				executor.shutdownNow();
-			}
+			executor.shutdownNow();
 		}
 	}
 
+	/**
+	 * Resolves a working directory relative to a canonical project directory.
+	 *
+	 * <p>
+	 * Absolute paths are rejected and attempts to traverse outside the project
+	 * directory are blocked.
+	 *
+	 * @param projectDir canonical project directory
+	 * @param dir        requested relative directory (or {@code .})
+	 * @return resolved directory, or {@code null} if invalid
+	 */
 	public File resolveWorkingDir(File projectDir, String dir) {
 		if (projectDir == null || dir == null) {
 			return null;
 		}
 
 		try {
-			// Always resolve against the canonical project directory
 			File baseDir = projectDir.getCanonicalFile();
 			File candidate;
 
@@ -345,13 +349,11 @@ public class CommandFunctionTools implements FunctionTools {
 			} else {
 				File temp = new File(dir);
 				if (temp.isAbsolute()) {
-					// Reject absolute paths for security
 					return null;
 				}
 				candidate = new File(baseDir, dir).getCanonicalFile();
 			}
 
-			// Ensure the candidate is within the project directory (no path traversal)
 			Path basePath = baseDir.toPath();
 			Path candidatePath = candidate.toPath();
 			if (!candidatePath.startsWith(basePath)) {
@@ -360,11 +362,20 @@ public class CommandFunctionTools implements FunctionTools {
 
 			return candidate;
 		} catch (IOException e) {
-			// Could not resolve canonical path
 			return null;
 		}
 	}
 
+	/**
+	 * Parses an {@code env} parameter string into a map.
+	 *
+	 * <p>
+	 * Lines are separated by {@code \n} (or {@code \r\n}); empty lines and lines
+	 * starting with {@code #} are ignored.
+	 *
+	 * @param envString environment string
+	 * @return parsed environment variables
+	 */
 	public Map<String, String> parseEnv(String envString) {
 		Map<String, String> envMap = new HashMap<>();
 		if (envString == null || envString.isEmpty()) {
@@ -375,13 +386,12 @@ public class CommandFunctionTools implements FunctionTools {
 		for (String line : lines) {
 			line = line.trim();
 			if (line.isEmpty() || line.startsWith("#")) {
-				continue; // Skip empty lines and comments
+				continue;
 			}
 			int idx = line.indexOf('=');
 			if (idx > 0 && idx < line.length() - 1) {
 				String key = line.substring(0, idx).trim();
 				String value = line.substring(idx + 1).trim();
-				// Optionally, validate key (e.g., only allow [A-Z_][A-Z0-9_]*)
 				if (key.matches("[A-Za-z_][A-Za-z0-9_]*")) {
 					envMap.put(key, value);
 				}
@@ -390,6 +400,12 @@ public class CommandFunctionTools implements FunctionTools {
 		return envMap;
 	}
 
+	/**
+	 * Validates a command against the configured allow-list.
+	 *
+	 * @param command raw command line string
+	 * @return {@code true} if allowed
+	 */
 	public boolean isValidCommand(String command) {
 		if (allowedCommands == null) {
 			return true;
@@ -399,8 +415,28 @@ public class CommandFunctionTools implements FunctionTools {
 			return false;
 		}
 
-		// Extract the base command (first word)
 		String baseCommand = command.trim().split("\\s+")[0];
 		return allowedCommands.contains(baseCommand);
+	}
+
+	private interface LineConsumer {
+		void accept(String line);
+	}
+
+	private interface ErrorConsumer {
+		void accept(IOException e);
+	}
+
+	private void readStream(java.io.InputStream inputStream, String charsetName, LimitedStringBuilder output,
+			LineConsumer lineConsumer, ErrorConsumer errorConsumer) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				output.append(line).append(System.lineSeparator());
+				lineConsumer.accept(line);
+			}
+		} catch (IOException e) {
+			errorConsumer.accept(e);
+		}
 	}
 }

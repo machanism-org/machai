@@ -10,22 +10,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Applies a standard set of local system tools to a {@link GenAIProvider}.
+ * Loads {@link FunctionTools} implementations via {@link ServiceLoader} and
+ * applies them to a {@link GenAIProvider}.
  *
  * <p>
- * This class is a small convenience wrapper that installs both
- * {@link FileFunctionTools} (file read/write/list operations) and
- * {@link CommandFunctionTools} (shell command execution) onto a provider
- * instance via
- * {@link GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
+ * This loader is a convenience entry point for host applications that want to
+ * expose a curated set of local capabilities (file access, command execution,
+ * HTTP retrieval, etc.) to an AI workflow. Implementations are discovered from
+ * the classpath and must be registered as service providers.
  *
  * <h2>Usage</h2>
- * 
  * <pre>{@code
  * Configurator conf = ...;
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
- * new SystemFunctionTools().applyTools(provider);
- * }</pre>
+ * GenAIProvider provider = ...;
+ * FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
+ * loader.setConfiguration(conf);
+ * loader.applyTools(provider);
+ * }
+ * </pre>
  *
  * @author Viktor Tovstyi
  */
@@ -38,8 +40,10 @@ public class FunctionToolsLoader {
 	private final List<FunctionTools> functionTools = new ArrayList<>();
 
 	/**
-	 * Private constructor to prevent external instantiation. Creates a tool
-	 * installer that applies both file and command tools.
+	 * Private constructor to prevent external instantiation.
+	 * <p>
+	 * Discovers available {@link FunctionTools} implementations using
+	 * {@link ServiceLoader}.
 	 */
 	private FunctionToolsLoader() {
 		ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
@@ -50,18 +54,18 @@ public class FunctionToolsLoader {
 	}
 
 	/**
-	 * Returns the singleton instance of SystemFunctionTools.
+	 * Returns the singleton instance.
 	 *
-	 * @return the singleton instance
+	 * @return singleton loader
 	 */
 	public static FunctionToolsLoader getInstance() {
 		return INSTANCE;
 	}
 
 	/**
-	 * Attaches both file and command tool capabilities to the specified provider.
+	 * Applies all discovered tool installers to the given provider.
 	 *
-	 * @param provider the provider instance to augment with tool functions
+	 * @param provider provider instance to augment with tool functions
 	 */
 	public void applyTools(GenAIProvider provider) {
 		for (FunctionTools functionTool : functionTools) {
@@ -69,6 +73,11 @@ public class FunctionToolsLoader {
 		}
 	}
 
+	/**
+	 * Supplies configuration to all discovered tool installers.
+	 *
+	 * @param configurator configuration source used by tool installers
+	 */
 	public void setConfiguration(Configurator configurator) {
 		for (FunctionTools functionTool : functionTools) {
 			functionTool.setConfigurator(configurator);

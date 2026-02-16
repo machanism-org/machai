@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * <h2>Installed tools</h2>
  * <ul>
- * <li>{@code read_file_from_file_system} – reads a file as UTF-8 text</li>
+ * <li>{@code read_file_from_file_system} – reads a file as text</li>
  * <li>{@code write_file_to_file_system} – writes a file (creating parent
  * directories as needed)</li>
  * <li>{@code list_files_in_directory} – lists immediate children of a
@@ -80,7 +80,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a newline-separated list of absolute file paths
+	 * @return a newline-separated list of project-relative file paths, or a message
+	 *         if no files are found
 	 */
 	private Object getRecursiveFiles(Object[] params) {
 		String result;
@@ -114,17 +115,18 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Lists files in a directory.
+	 * Lists direct children of a directory.
 	 *
 	 * <p>
 	 * Expected parameters:
 	 * <ol>
-	 * <li>{@link JsonNode} containing {@code dir_path}</li>
+	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a newline-separated list of absolute paths for directory children
+	 * @return a comma-separated list of project-relative paths, or a message if the
+	 *         directory does not exist or is empty
 	 */
 	private Object listFiles(Object[] params) {
 		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
@@ -158,8 +160,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return {@code true} if successful
-	 * @throws IllegalArgumentException on I/O error
+	 * @return success message, or an error message if writing fails
 	 */
 	private Object writeFile(Object[] params) {
 		String result;
@@ -193,7 +194,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return file content as UTF-8 text, or a message if the file does not exist
+	 * @return file content as text, or a message if the file does not exist
 	 * @throws IllegalArgumentException on I/O error
 	 */
 	private Object readFile(Object[] params) {
@@ -218,7 +219,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * Helper to collect all files recursively.
 	 *
 	 * @param directory directory to start with
-	 * @return list of files
+	 * @return list of files (not directories)
 	 */
 	private List<File> listFilesRecursively(File directory) {
 		List<File> allFiles = new ArrayList<>();
