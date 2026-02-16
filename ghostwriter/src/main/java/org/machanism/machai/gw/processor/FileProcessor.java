@@ -551,7 +551,6 @@ public class FileProcessor extends ProjectProcessor {
 
 			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
 					instructions);
-
 			provider.instructions(effectiveInstructions);
 
 			String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
@@ -567,8 +566,6 @@ public class FileProcessor extends ProjectProcessor {
 			HashMap<String, String> props = getProperties(projectLayout);
 			guidanceLines = StrSubstitutor.replace(guidanceLines, props);
 			provider.prompt(guidanceLines);
-
-			provider.prompt(promptBundle.getString("output_format"));
 
 			if (isLogInputs()) {
 				String inputsFileName = ProjectLayout.getRelativePath(rootDir, file);
