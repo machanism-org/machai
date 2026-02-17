@@ -1,37 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- Console Appender (INFO Level) -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %-5level %msg%n</pattern>
-        </encoder>
-    </appender>
-    
-    <!-- File Appender (DEBUG Level) -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/gw.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- Daily rollover -->
-            <fileNamePattern>logs/gw.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <!-- Keep 30 days of history -->
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
+	<!-- Console Appender (INFO Level) -->
+	<appender name="CONSOLE"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %msg%n</pattern>
+		</encoder>
+	</appender>
 
-    <!-- Logger for specific package -->
-    <logger name="org.machanism.machai" level="INFO" additivity="false">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
-    </logger>
+	<!-- File Appender (DEBUG Level) -->
+	<appender name="FILE"
+		class="org.machanism.machai.log.FileAppender">
+		<file>logs/gw.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- Daily rollover -->
+			<fileNamePattern>logs/gw.%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<!-- Keep 30 days of history -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
 
-    <!-- Root Logger -->
-    <root level="WARN">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
-    </root>
+	<!-- Logger for specific package -->
+	<logger name="org.machanism.machai" level="INFO"
+		additivity="false">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="FILE" />
+	</logger>
+
+	<!-- Root Logger -->
+	<root level="WARN">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="FILE" />
+	</root>
 
 </configuration>

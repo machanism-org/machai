@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public final class Ghostwriter {
 
 	/** Logger for the Ghostwriter application. */
-	private static final Logger logger = LoggerFactory.getLogger(Ghostwriter.class);
+	private static Logger logger;
 
 	/** Default provider/model identifier used when none is configured. */
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
@@ -56,6 +56,9 @@ public final class Ghostwriter {
 					gwHomeDir = gwHomeDir.getParentFile();
 				}
 			}
+
+			org.machanism.machai.log.FileAppender.setExecutionDir(gwHomeDir);
+			logger = LoggerFactory.getLogger(Ghostwriter.class);
 
 			try {
 				File configFile = new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"));
@@ -214,21 +217,21 @@ public final class Ghostwriter {
 				logger.info("Finished scanning directory: {}", scanDir);
 			}
 
-	    } catch (ProcessTerminationException e) {
-	        System.err.println("Process terminated: " + e.getMessage());
-	        exitCode = e.getExitCode();
-	    } catch (ParseException e) {
-	        System.err.println("Error parsing arguments: " + e.getMessage());
-	        help(options, formatter);
-	        exitCode = 2;
-	    } catch (Exception e) {
-	        System.err.println("Unexpected error: " + e.getMessage());
-	        exitCode = 1;
-	    } finally {
-	        GenAIProviderManager.logUsage();
-	        logger.info("File processing completed.");
-	        System.exit(exitCode);
-	    }
+		} catch (ProcessTerminationException e) {
+			System.err.println("Process terminated: " + e.getMessage());
+			exitCode = e.getExitCode();
+		} catch (ParseException e) {
+			System.err.println("Error parsing arguments: " + e.getMessage());
+			help(options, formatter);
+			exitCode = 2;
+		} catch (Exception e) {
+			System.err.println("Unexpected error: " + e.getMessage());
+			exitCode = 1;
+		} finally {
+			GenAIProviderManager.logUsage();
+			logger.info("File processing completed.");
+			System.exit(exitCode);
+		}
 	}
 
 	/**
