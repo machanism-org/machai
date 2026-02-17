@@ -84,6 +84,10 @@
 							https://docs.oracle.com/en/java/javase/11/docs/api/</link>
 						<link>
 							https://macha.machanism.org/core/core-commons/configurator/apidocs/</link>
+						<link>
+							https://machai.machanism.org/bindex-core/apidocs/</link>
+						<link>
+							https://machai.machanism.org/project-layout/apidocs/</link>
 					</links>
 				</configuration>
 			</plugin>
