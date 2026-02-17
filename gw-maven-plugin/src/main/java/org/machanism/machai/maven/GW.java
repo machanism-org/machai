@@ -26,40 +26,43 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 
 /**
- * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a project.
+ * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a
+ * project.
  *
  * <p>
- * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present in the current
- * directory.
+ * This goal is an aggregator and can be executed even when a {@code pom.xml} is
+ * not present in the current directory.
  * </p>
  *
  * <h2>Processing order</h2>
  * <p>
- * The {@code gw:gw} goal processes files in reverse order, similar to the Ghostwriter CLI: sub-modules are processed
- * first, followed by parent modules. For more details, see:
- * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided file processing</a>.
+ * The {@code gw:gw} goal processes files in reverse order, similar to the
+ * Ghostwriter CLI: sub-modules are processed first, followed by parent modules.
+ * For more details, see:
+ * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided
+ * file processing</a>.
  * </p>
  *
  * <h2>Parameters</h2>
  *
  * <p>
- * This goal defines the following parameter in addition to those inherited from {@link AbstractGWGoal}.
+ * This goal defines the following parameter in addition to those inherited from
+ * {@link AbstractGWGoal}.
  * </p>
  * <dl>
  * <dt>{@code -Dgw.threads}</dt>
- * <dd>
- * Enables or disables multi-threaded module processing. Default: {@code false}.
- * </dd>
+ * <dd>Enables or disables multi-threaded module processing. Default:
+ * {@code false}.</dd>
  * </dl>
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
- * <li><b>{@code gw.genai}</b> / {@code <genai>} ({@code genai}):
- * Provider/model identifier to pass to the workflow.</li>
+ * <li><b>{@code gw.genai}</b> / {@code <genai>} ({@code genai}): Provider/model
+ * identifier to pass to the workflow.</li>
  * <li><b>{@code ${basedir}}</b> ({@code basedir}): The Maven module base
  * directory.</li>
- * <li><b>{@code gw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}):
- * Optional scan root override. When omitted, defaults to the execution root
+ * <li><b>{@code gw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}): Optional
+ * scan root override. When omitted, defaults to the execution root
  * directory.</li>
  * <li><b>{@code gw.instructions}</b> / {@code <instructions>}
  * ({@code instructions}): Instruction locations (for example, file paths or
@@ -80,37 +83,48 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </ul>
  *
  * <p>
- * Refer to {@link AbstractGWGoal} for the authoritative list and exact semantics of inherited parameters.
+ * Refer to {@link AbstractGWGoal} for the authoritative list and exact
+ * semantics of inherited parameters.
  * </p>
  *
  * <h2>Usage examples</h2>
  *
- * <p>Run in the current directory:</p>
+ * <p>
+ * Run in the current directory:
+ * </p>
  *
  * <pre>
  * mvn gw:gw
  * </pre>
  *
- * <p>Run without a {@code pom.xml} (this goal sets {@code requiresProject=false}):</p>
+ * <p>
+ * Run without a {@code pom.xml} (this goal sets {@code requiresProject=false}):
+ * </p>
  *
  * <pre>
  * cd path\\to\\project
  * mvn gw:gw
  * </pre>
  *
- * <p>Enable multi-threaded processing:</p>
+ * <p>
+ * Enable multi-threaded processing:
+ * </p>
  *
  * <pre>
  * mvn gw:gw -Dgw.threads=true
  * </pre>
  *
- * <p>Disable multi-threaded processing (default):</p>
+ * <p>
+ * Disable multi-threaded processing (default):
+ * </p>
  *
  * <pre>
  * mvn gw:gw -Dgw.threads=false
  * </pre>
  *
- * <p>Run against a specific module:</p>
+ * <p>
+ * Run against a specific module:
+ * </p>
  *
  * <pre>
  * mvn -pl :my-module gw:gw
@@ -135,6 +149,7 @@ public class GW extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator config = getConfiguration();
 
+		String genai = config.get("genai", this.genai);
 		FileProcessor processor = new FileProcessor(basedir, genai, config) {
 
 			@Override
@@ -164,13 +179,14 @@ public class GW extends AbstractGWGoal {
 		processor.setNonRecursive(nonRecursive);
 
 		processor.setModuleMultiThread(threads);
-	    try {
-	        scanDocuments(processor);
-	    } catch (ProcessTerminationException e) {
-	        // Optionally log the exit code
-	        getLog().error("Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")");
-	        throw new MojoExecutionException("Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
-	    }
+		try {
+			scanDocuments(processor);
+		} catch (ProcessTerminationException e) {
+			// Optionally log the exit code
+			getLog().error("Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")");
+			throw new MojoExecutionException(
+					"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
+		}
 	}
 
 }

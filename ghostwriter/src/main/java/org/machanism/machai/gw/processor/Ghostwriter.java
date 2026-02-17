@@ -29,6 +29,24 @@ import org.slf4j.LoggerFactory;
  * file, Ghostwriter extracts embedded {@code @guidance} directives and submits
  * the resulting prompt to the configured GenAI provider.
  * </p>
+ *
+ * <p>
+ * It supports various command-line options to customize the scanning and
+ * processing behavior, such as specifying the root directory, enabling
+ * multi-threading, and defining system instructions.
+ * </p>
+ *
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * java -jar gw.jar <scanDir> [options]
+ * }</pre>
+ *
+ * <p>Example options:</p>
+ * <ul>
+ * <li>-h, --help: Show help message and exit</li>
+ * <li>-r, --root: Specify the root directory</li>
+ * <li>-a, --genai: Set GenAI provider and model</li>
+ * </ul>
  */
 public final class Ghostwriter {
 
@@ -90,8 +108,8 @@ public final class Ghostwriter {
 		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
-				.optionalArg(true).build();
+				.desc("Enable multi-threaded processing to improve performance (default: true).")
+				.hasArg(true).optionalArg(true).build();
 
 		Option rootDirOpt = new Option("r", "root", true,
 				"Specify the path to the root directory for file processing.");
@@ -180,7 +198,12 @@ public final class Ghostwriter {
 
 			boolean multiThread = config.getBoolean("threads", false);
 			if (cmd.hasOption(multiThreadOption)) {
-				multiThread = Boolean.parseBoolean(cmd.getOptionValue(multiThreadOption));
+				String opt = cmd.getOptionValue(multiThreadOption);
+				if (opt == null) {
+					multiThread = true;
+				} else {
+					multiThread = Boolean.parseBoolean(opt);
+				}
 			}
 
 			String defaultGuidance = config.get("guidance", null);
@@ -194,7 +217,7 @@ public final class Ghostwriter {
 
 			boolean logInputs = config.getBoolean("logInputs", false);
 			if (cmd.hasOption(logInputsOption)) {
-				logInputs = Boolean.parseBoolean(cmd.getOptionValue(logInputsOption));
+				logInputs = true;
 			}
 
 			for (String scanDir : dirs) {

@@ -132,6 +132,8 @@ public class FileFunctionTools implements FunctionTools {
 		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
 		String filePath = dirNode == null ? null : dirNode.asText();
 		File workingDir = (File) params[1];
+		logger.info("List files: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
+
 		File directory = new File(workingDir, StringUtils.defaultIfBlank(filePath, "."));
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
@@ -167,7 +169,8 @@ public class FileFunctionTools implements FunctionTools {
 		JsonNode props = (JsonNode) params[0];
 		String filePath = props.get("file_path").asText();
 		String text = props.get("text").asText();
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset) : defaultCharset;
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
+				: defaultCharset;
 		File workingDir = (File) params[1];
 		logger.info("Write file: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
 		File file = new File(workingDir, filePath);
@@ -200,7 +203,8 @@ public class FileFunctionTools implements FunctionTools {
 	private Object readFile(Object[] params) {
 		JsonNode props = (JsonNode) params[0];
 		String filePath = props.get("file_path").asText();
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset) : defaultCharset;
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
+				: defaultCharset;
 
 		logger.info("Read file: {}", Arrays.toString(params));
 		File workingDir = (File) params[1];

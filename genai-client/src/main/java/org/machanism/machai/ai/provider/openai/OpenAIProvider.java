@@ -26,6 +26,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,6 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
-import com.openai.errors.BadRequestException;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.embeddings.EmbeddingModel;
@@ -59,8 +59,6 @@ import com.openai.models.responses.ResponseInputItem.Message.Role;
 import com.openai.models.responses.ResponseOutputItem;
 import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputMessage.Content;
-import com.openai.models.responses.ResponseReasoningItem;
-import com.openai.models.responses.ResponseReasoningItem.Summary;
 import com.openai.models.responses.ResponseUsage;
 import com.openai.models.responses.Tool;
 
@@ -80,7 +78,8 @@ import com.openai.models.responses.Tool;
  * <ul>
  * <li>Submit prompts and retrieve text responses.</li>
  * <li>Upload local files or attach files by URL for use in a request.</li>
- * <li>Register function tools and dispatch tool calls to application handlers.</li>
+ * <li>Register function tools and dispatch tool calls to application
+ * handlers.</li>
  * <li>Create vector embeddings for input text.</li>
  * <li>Report token usage to {@link GenAIProviderManager}.</li>
  * </ul>
@@ -121,15 +120,13 @@ public class OpenAIProvider implements GenAIProvider {
 
 	/** OpenAI client for API interactions. */
 	private OpenAIClient client;
+
 	/** Active chat model identifier used in {@link #perform()}. */
 	private String chatModel;
 
 	/** Maps tools to handler functions. */
 	private Map<Tool, Function<Object[], Object>> toolMap = new HashMap<>();
-	/** List of prompt items for the current request/session. */
-	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
-	/** Optional instructions applied to the request. */
-	private String instructions;
+
 	/** Optional {@link ResourceBundle} used to format prompt templates. */
 	private ResourceBundle promptBundle;
 
@@ -142,8 +139,17 @@ public class OpenAIProvider implements GenAIProvider {
 	/** Request timeout in seconds; {@code 0} means SDK defaults are used. */
 	private long timeoutSec = 0;
 
-	/** Latest usage metrics captured from the most recent {@link #perform()} call. */
+	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
+
+	/**
+	 * Latest usage metrics captured from the most recent {@link #perform()} call.
+	 */
 	private Usage lastUsage = new Usage(0, 0, 0);
+
+	private Builder builder;
+
+	/** Optional instructions applied to the request. */
+	private String instructions;
 
 	/**
 	 * Initializes the provider from the given configuration.
@@ -179,6 +185,9 @@ public class OpenAIProvider implements GenAIProvider {
 			buillder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(timeoutSec)).build());
 		}
 		client = buillder.build();
+
+		FunctionToolsLoader.getInstance().applyTools(this);
+		builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()));
 	}
 
 	/**
@@ -284,31 +293,19 @@ public class OpenAIProvider implements GenAIProvider {
 	@Override
 	public String perform() {
 		String result = null;
-		Builder builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()));
-
-		if (instructions != null) {
-			builder.instructions(instructions);
-		}
 
 		builder.inputOfResponse(inputs);
+		builder.instructions(instructions);
 
 		logInputs();
+
+		ResponseCreateParams responseCreateParams = builder.build();
 		logger.debug("Sending request to LLM service.");
+		Response response = getClient().responses().create(responseCreateParams);
+		logger.debug("Received response from LLM service.");
+		captureUsage(response.usage());
 
-		try {
-			Response response = getClient().responses().create(builder.build());
-			captureUsage(response.usage());
-
-			logger.debug("Received response from LLM service.");
-
-			result = parseResponse(response);
-			clear();
-
-		} catch (BadRequestException e) {
-			logger.error("LLM request processing terminated. BadRequestException: {}, Request input count: {}",
-					e.getMessage(), inputs.size());
-		}
-
+		result = parseResponse(response);
 		return result;
 	}
 
@@ -345,58 +342,40 @@ public class OpenAIProvider implements GenAIProvider {
 	 * @return response string, potentially after one or more tool call iterations
 	 */
 	private String parseResponse(Response response) {
-		String result = null;
 		List<ResponseOutputItem> output = response.output();
-		boolean fcall = false;
-		ResponseInputItem asReasoning = null;
 		String text = null;
+		boolean fnCall = false;
 		for (ResponseOutputItem item : output) {
 			if (item.isFunctionCall()) {
-				if (asReasoning != null) {
-					inputs.add(asReasoning);
-					asReasoning = null;
-				}
 				ResponseFunctionToolCall functionCall = item.asFunctionCall();
 				inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
+
 				Object value = callFunction(functionCall);
 
 				Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
+				String callId = functionCall.callId();
+
 				ResponseInputItem ofOutput = ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput
-						.builder().callId(functionCall.callId()).outputAsJson(callFunction).build());
+						.builder().callId(callId).outputAsJson(callFunction).build());
 				inputs.add(ofOutput);
-				fcall = true;
+				fnCall = true;
 			}
 			if (item.isMessage()) {
-				asReasoning = null;
 				ResponseOutputMessage outMessage = item.asMessage();
 				List<Content> contentList = outMessage.content();
 				for (Content content : contentList) {
 					text = content.outputText().get().text();
-					Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
-							.addInputTextContent(text).build();
-					inputs.add(ResponseInputItem.ofMessage(message));
-				}
-			}
-			if (item.isReasoning()) {
-				ResponseReasoningItem reasoningItem = item.asReasoning();
-				asReasoning = ResponseInputItem.ofReasoning(reasoningItem);
-				for (Summary summary : reasoningItem.summary()) {
-					String txt = summary.text();
-					if (StringUtils.isNotBlank(txt)) {
-						logger.debug("Reasoning: {}", txt);
+					if (StringUtils.isNotBlank(text)) {
+						logger.info("LLM Response: {}", text);
 					}
 				}
 			}
 		}
-		if (fcall) {
-			if (StringUtils.isNotBlank(text)) {
-				logger.debug("Response: {}", text);
-			}
-			result = perform();
-		} else {
-			result = text;
+
+		if (fnCall) {
+			perform();
 		}
-		return result;
+		return text;
 	}
 
 	/**
@@ -419,8 +398,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Executes a function tool call by finding a registered tool with the same
-	 * name and delegating to its handler.
+	 * Executes a function tool call by finding a registered tool with the same name
+	 * and delegating to its handler.
 	 *
 	 * <p>
 	 * The handler is invoked with an {@code Object[]} of length 2:
@@ -573,7 +552,6 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public void inputsLog(File inputsLog) {
-		this.inputsLog = inputsLog;
 	}
 
 	/**
@@ -598,7 +576,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Returns token usage metrics captured from the most recent {@link #perform()} call.
+	 * Returns token usage metrics captured from the most recent {@link #perform()}
+	 * call.
 	 *
 	 * @return usage metrics; never {@code null}
 	 */

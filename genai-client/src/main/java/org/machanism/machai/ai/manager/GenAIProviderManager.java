@@ -82,8 +82,8 @@ public class GenAIProviderManager {
 			Class<? extends GenAIProvider> providerClass = (Class<? extends GenAIProvider>) Class.forName(className);
 			Constructor<? extends GenAIProvider> constructor = providerClass.getConstructor();
 			GenAIProvider provider = constructor.newInstance();
-			provider.init(conf);
 			provider.model(chatModelName);
+			provider.init(conf);
 			return provider;
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException
 				| NoSuchMethodException | SecurityException e) {
