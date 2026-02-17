@@ -1,6 +1,11 @@
 package org.machanism.machai.project.layout;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -97,30 +102,35 @@ public abstract class ProjectLayout {
 	public abstract List<String> getTests();
 
 	/**
-	 * Computes the relative path from the specified project directory to the target file.
-	 * The result is not prefixed with "./".
+	 * Computes the relative path from the specified project directory to the target
+	 * file. The result is not prefixed with "./".
 	 *
 	 * @param dir  the base project directory
 	 * @param file the target file for which to compute the relative path
-	 * @return the relative path string, or {@code null} if the target file is not within the project directory
+	 * @return the relative path string, or {@code null} if the target file is not
+	 *         within the project directory
 	 * @see #getRelativePath(File, File, boolean)
 	 */
 	public static String getRelativePath(File dir, File file) {
-	    return getRelativePath(dir, file, false);
+		return getRelativePath(dir, file, false);
 	}
+
 	/**
-	 * Computes the relative path from the specified project directory to the target file.
-	 * Optionally, the result can be prefixed with "./" if {@code addSingleDot} is {@code true}.
+	 * Computes the relative path from the specified project directory to the target
+	 * file. Optionally, the result can be prefixed with "./" if
+	 * {@code addSingleDot} is {@code true}.
 	 *
 	 * <p>
-	 * If the target file is the same as the project directory, returns ".".
-	 * If an absolute path is provided, it must be located within the project directory.
+	 * If the target file is the same as the project directory, returns ".". If an
+	 * absolute path is provided, it must be located within the project directory.
 	 * </p>
 	 *
 	 * @param dir          the base project directory
 	 * @param file         the target file for which to compute the relative path
-	 * @param addSingleDot if {@code true}, prefixes the result with "./" when appropriate
-	 * @return the relative path string, or {@code null} if the target file is not within the project directory
+	 * @param addSingleDot if {@code true}, prefixes the result with "./" when
+	 *                     appropriate
+	 * @return the relative path string, or {@code null} if the target file is not
+	 *         within the project directory
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		String currentPath = dir.getAbsolutePath().replace("\\", "/");
@@ -139,6 +149,34 @@ public abstract class ProjectLayout {
 		if (Strings.CS.equals(fileStr, result)) {
 			result = null;
 		}
+		return result;
+	}
+
+	/**
+	 * Recursively lists all files under a directory, excluding known build/tooling
+	 * directories.
+	 *
+	 * @param projectDir directory to traverse
+	 * @return files found
+	 * @throws IOException if directory listing fails
+	 */
+	public static List<File> findFiles(File projectDir) {
+		if (projectDir == null || !projectDir.isDirectory()) {
+			return Collections.emptyList();
+		}
+
+		File[] files = projectDir.listFiles();
+
+		List<File> result = new ArrayList<>();
+		if (files != null) {
+			for (File file : files) {
+				result.add(file);
+				if (file.isDirectory()) {
+					result.addAll(findFiles(file));
+				}
+			}
+		}
+
 		return result;
 	}
 

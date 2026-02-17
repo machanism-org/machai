@@ -2,15 +2,14 @@ package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,37 +59,32 @@ public class JScriptProjectLayout extends ProjectLayout {
 		JsonNode packageJson = getPackageJson();
 		JsonNode workspacesNode = packageJson.get("workspaces");
 		if (workspacesNode != null) {
-			List<String> modules = new ArrayList<String>();
+			Set<String> modules = new HashSet<>();
 
 			if (workspacesNode.isArray()) {
 				Iterator<JsonNode> iterator = workspacesNode.iterator();
 				while (iterator.hasNext()) {
-					String module = iterator.next().asText();
+					String globPattern = iterator.next().asText();
 
-					String requiredStartWith = StringUtils.substringBefore(module, "**");
-					File dirToScan = new File(getProjectDir(), requiredStartWith);
+					// Use glob pattern to find matching directories
+					PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
+					File baseDir = getProjectDir();
 
-					try (Stream<Path> stream = Files.walk(dirToScan.toPath())) {
-						stream.filter(p -> {
-							File file = p.toFile();
-							boolean containsAny = Strings.CS.containsAny(file.getAbsolutePath(), EXCLUDE_DIRS);
-							boolean isProjectBuildFile = Strings.CS.equals(file.getName(), PROJECT_MODEL_FILE_NAME);
-							if (isProjectBuildFile) {
-								if (!containsAny) {
-									return true;
-								}
+					List<File> files = ProjectLayout.findFiles(baseDir);
+
+					if (files != null) {
+						for (File file : files) {
+							String path = ProjectLayout.getRelativePath(getProjectDir(), file, true);
+							Path pathToMatch = new File(path).toPath();
+
+							if (file.isDirectory() && matcher.matches(pathToMatch)) {
+								String relativePath = ProjectLayout.getRelativePath(baseDir, file);
+								modules.add(relativePath);
 							}
-							return false;
-						}).forEach(p -> {
-							File dir = p.toFile().getParentFile();
-							String relativePath = ProjectLayout.getRelativePath(getProjectDir(), dir);
-							modules.add(relativePath);
-						});
-					} catch (IOException e) {
-						throw new IllegalArgumentException(e);
+						}
 					}
 				}
-				result = modules;
+				result = new ArrayList<>(modules);
 			}
 		}
 
@@ -159,5 +153,10 @@ public class JScriptProjectLayout extends ProjectLayout {
 	@Override
 	public JScriptProjectLayout projectDir(File projectDir) {
 		return (JScriptProjectLayout) super.projectDir(projectDir);
+	}
+	
+	@Override
+	public String getProjectId() {
+		return getPackageJson().get("name").asText();
 	}
 }
