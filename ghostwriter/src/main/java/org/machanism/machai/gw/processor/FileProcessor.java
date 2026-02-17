@@ -407,8 +407,10 @@ public class FileProcessor extends ProjectProcessor {
 		String path = relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + "/" + relativeScanDir;
 		
 		Path pathToMatch = Path.of(path);
-		boolean result = pathMatcher.matches(pathToMatch);
+		boolean fullMatch = pathMatcher.matches(pathToMatch);
+		boolean projectMatch = pathMatcher.matches(Path.of(relativeScanDir));
 
+		boolean result = fullMatch || projectMatch;
 		if (!result && scanDir != null) {
 			String relativePath = ProjectLayout.getRelativePath(file, scanDir);
 			if (relativePath != null) {

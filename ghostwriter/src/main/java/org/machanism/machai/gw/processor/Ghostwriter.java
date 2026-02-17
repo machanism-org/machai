@@ -177,7 +177,11 @@ public final class Ghostwriter {
 			}
 
 			logger.info("Root directory: {}", rootDir);
-			boolean multiThread = Boolean.parseBoolean(cmd.getOptionValue(multiThreadOption, "true"));
+
+			boolean multiThread = config.getBoolean("threads", false);
+			if (cmd.hasOption(multiThreadOption)) {
+				multiThread = Boolean.parseBoolean(cmd.getOptionValue(multiThreadOption));
+			}
 
 			String defaultGuidance = config.get("guidance", null);
 			if (cmd.hasOption(guidanceOpt)) {
@@ -188,7 +192,10 @@ public final class Ghostwriter {
 				}
 			}
 
-			boolean logInputs = cmd.hasOption(logInputsOption);
+			boolean logInputs = config.getBoolean("logInputs", false);
+			if (cmd.hasOption(logInputsOption)) {
+				logInputs = Boolean.parseBoolean(cmd.getOptionValue(logInputsOption));
+			}
 
 			for (String scanDir : dirs) {
 				logger.info("Starting scan of directory: {}", scanDir);
@@ -218,14 +225,14 @@ public final class Ghostwriter {
 			}
 
 		} catch (ProcessTerminationException e) {
-			System.err.println("Process terminated: " + e.getMessage());
+			logger.error("Process terminated: " + e.getMessage(), e);
 			exitCode = e.getExitCode();
 		} catch (ParseException e) {
-			System.err.println("Error parsing arguments: " + e.getMessage());
+			logger.error("Error parsing arguments: " + e.getMessage());
 			help(options, formatter);
 			exitCode = 2;
 		} catch (Exception e) {
-			System.err.println("Unexpected error: " + e.getMessage());
+			logger.error("Unexpected error: " + e.getMessage(), e);
 			exitCode = 1;
 		} finally {
 			GenAIProviderManager.logUsage();
