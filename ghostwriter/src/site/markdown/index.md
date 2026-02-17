@@ -1,3 +1,6 @@
+---
+canonical: https://machai.machanism.org/ghostwriter/index.html
+---
 <!-- @guidance:
 **VERY IMPORTANT NOTE:**  
 Ghostwriter maven plugin works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
