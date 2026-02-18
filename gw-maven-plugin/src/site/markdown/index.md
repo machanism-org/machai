@@ -49,7 +49,7 @@ GW Maven Plugin integrates MachAI Ghostwriter guided file processing into Maven 
 
 At a high level, the plugin configures a Ghostwriter `FileProcessor`, determines the active project layout, then scans the chosen root directory for files containing embedded `@guidance:` instructions. Those instructions drive Ghostwriter’s processing so the repository can continuously synthesize and maintain high-quality documentation (and any other guided artifacts) with consistent, repeatable behavior.
 
-The primary goal, `gw:gw` (implemented by `org.machanism.machai.maven.GW`), is an aggregator goal that can run even when a `pom.xml` is not present (`requiresProject=false`). When executed inside a Maven session, it can also enrich a detected Maven project layout with the effective Maven model from the reactor, allowing guided processing to incorporate project metadata.
+The primary goal, `gw:gw` (implemented by `org.machanism.machai.gw.maven.GW`), is an aggregator goal that can run even when a `pom.xml` is not present (`requiresProject=false`). When executed inside a Maven session, it can also enrich a detected Maven project layout with the effective Maven model from the reactor, allowing guided processing to incorporate project metadata.
 
 ## Overview
 

@@ -9,17 +9,17 @@
  *
  * <h2>Goals</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.maven.GW} ({@code gw:gw}) - Aggregator goal that can run without a
+ *   <li>{@link org.machanism.machai.gw.maven.GW} ({@code gw:gw}) - Aggregator goal that can run without a
  *   {@code pom.xml} and processes modules in reverse order (sub-modules first, then parent modules).</li>
- *   <li>{@link org.machanism.machai.maven.ReactorGW} ({@code gw:reactor}) - Processes modules using standard Maven
+ *   <li>{@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor}) - Processes modules using standard Maven
  *   reactor dependency ordering (optionally deferring the root project).</li>
- *   <li>{@link org.machanism.machai.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by GW
+ *   <li>{@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by GW
  *   processing.</li>
  * </ul>
  *
  * <h2>Shared infrastructure</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.maven.AbstractGWGoal} - Base class defining shared parameters and the common
+ *   <li>{@link org.machanism.machai.gw.maven.AbstractGWGoal} - Base class defining shared parameters and the common
  *   scan/execute flow used by concrete goals.</li>
  * </ul>
  *
@@ -27,7 +27,7 @@
  * <p>
  * Configuration is supplied via standard Maven plugin configuration and/or system properties (typically
  * {@code -Dgw.*}). Some credentials can be sourced from {@code settings.xml} (see
- * {@link org.machanism.machai.maven.AbstractGWGoal}).
+ * {@link org.machanism.machai.gw.maven.AbstractGWGoal}).
  * </p>
  *
  * <h2>Usage examples</h2>
@@ -38,7 +38,7 @@
  * mvn gw:reactor -Dgw.scanDir=src\\site
  * </pre>
  */
-package org.machanism.machai.maven;
+package org.machanism.machai.gw.maven;
 
 /*-
  * @guidance:

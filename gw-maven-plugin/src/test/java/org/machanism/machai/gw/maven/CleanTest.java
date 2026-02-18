@@ -1,4 +1,4 @@
-package org.machanism.machai.maven;
+package org.machanism.machai.gw.maven;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;

@@ -1,4 +1,4 @@
-package org.machanism.machai.maven;
+package org.machanism.machai.gw.maven;
 
 import java.io.File;
 import java.util.List;
