@@ -1,5 +1,5 @@
 ---
-canonical: http://machai.machanism.org/gw-maven-plugin/project-processing.html
+canonical: https://machai.machanism.org/gw-maven-plugin/project-processing.html
 ---
 
 # Project Processing
