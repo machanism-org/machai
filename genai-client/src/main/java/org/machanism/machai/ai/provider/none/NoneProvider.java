@@ -214,16 +214,6 @@ public class NoneProvider implements GenAIProvider {
 	/**
 	 * No-op.
 	 *
-	 * @param chatModelName ignored
-	 */
-	@Override
-	public void model(String chatModelName) {
-		// No-op.
-	}
-
-	/**
-	 * No-op.
-	 *
 	 * @param workingDir ignored
 	 */
 	@Override

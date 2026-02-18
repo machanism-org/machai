@@ -92,16 +92,22 @@ import com.openai.models.responses.Tool;
  * <ul>
  * <li>{@code OPENAI_API_KEY} (required)</li>
  * <li>{@code OPENAI_BASE_URL} (optional)</li>
+ * <li>{@code chatModel} (optional; required before {@link #perform()} if not set
+ * via configuration)</li>
  * </ul>
  *
  * <h2>Usage</h2>
  *
  * <pre>{@code
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
- * provider.model("gpt-5.1");
+ * Configurator conf = ...;
+ * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1", conf);
+ *
  * provider.instructions("You are a concise assistant.");
  * provider.prompt("Summarize this text...");
  * String answer = provider.perform();
+ *
+ * provider.clear();
+ * provider.close();
  * }
  * </pre>
  *
@@ -121,7 +127,7 @@ public class OpenAIProvider implements GenAIProvider {
 	/** OpenAI client for API interactions. */
 	private OpenAIClient client;
 
-	/** Active chat model identifier used in {@link #perform()}. */
+	/** Active model identifier used in {@link #perform()}. */
 	private String chatModel;
 
 	/** Maps tools to handler functions. */
@@ -139,13 +145,13 @@ public class OpenAIProvider implements GenAIProvider {
 	/** Request timeout in seconds; {@code 0} means SDK defaults are used. */
 	private long timeoutSec = 0;
 
+	/** Accumulated request input items for the current conversation. */
 	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
 
-	/**
-	 * Latest usage metrics captured from the most recent {@link #perform()} call.
-	 */
+	/** Latest usage metrics captured from the most recent {@link #perform()} call. */
 	private Usage lastUsage = new Usage(0, 0, 0);
 
+	/** Builder used to create {@link ResponseCreateParams} for {@link #perform()}. */
 	private Builder builder;
 
 	/** Optional instructions applied to the request. */
@@ -165,26 +171,17 @@ public class OpenAIProvider implements GenAIProvider {
 	public void init(Configurator config) {
 		String baseUrl = config.get("OPENAI_BASE_URL");
 		String privateKey = config.get("OPENAI_API_KEY");
+		chatModel = config.get("chatModel");
 
-		createClient(baseUrl, privateKey);
-	}
-
-	/**
-	 * Creates the underlying OpenAI client.
-	 *
-	 * @param baseUrl    optional base URL override
-	 * @param privateKey API key
-	 */
-	protected void createClient(String baseUrl, String privateKey) {
-		com.openai.client.okhttp.OpenAIOkHttpClient.Builder buillder = OpenAIOkHttpClient.builder();
-		buillder.apiKey(privateKey);
+		OpenAIOkHttpClient.Builder clientBuilder = OpenAIOkHttpClient.builder();
+		clientBuilder.apiKey(privateKey);
 		if (baseUrl != null) {
-			buillder.baseUrl(baseUrl);
+			clientBuilder.baseUrl(baseUrl);
 		}
 		if (timeoutSec > 0) {
-			buillder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(timeoutSec)).build());
+			clientBuilder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(timeoutSec)).build());
 		}
-		client = buillder.build();
+		client = clientBuilder.build();
 
 		FunctionToolsLoader.getInstance().applyTools(this);
 		builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()));
@@ -252,11 +249,10 @@ public class OpenAIProvider implements GenAIProvider {
 					.purpose(FilePurpose.USER_DATA).build();
 			FileObject fileObject = getClient().files().create(params);
 
-			com.openai.models.responses.ResponseInputFile.Builder builder = ResponseInputFile.builder()
-					.fileId(fileObject.id());
+			ResponseInputFile.Builder inputFileBuilder = ResponseInputFile.builder().fileId(fileObject.id());
 
 			Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
-					.addContent(builder.build()).build();
+					.addContent(inputFileBuilder.build()).build();
 			inputs.add(ResponseInputItem.ofMessage(message));
 		}
 	}
@@ -270,11 +266,10 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
-		com.openai.models.responses.ResponseInputFile.Builder builder = ResponseInputFile.builder()
-				.fileUrl(fileUrl.toString());
+		ResponseInputFile.Builder inputFileBuilder = ResponseInputFile.builder().fileUrl(fileUrl.toString());
 
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
-				.addContent(builder.build()).build();
+				.addContent(inputFileBuilder.build()).build();
 		inputs.add(ResponseInputItem.ofMessage(message));
 	}
 
@@ -283,8 +278,8 @@ public class OpenAIProvider implements GenAIProvider {
 	 *
 	 * <p>
 	 * If the response contains tool calls, the provider executes the matching tool
-	 * handlers and recursively continues the conversation until a final text
-	 * response is produced.
+	 * handlers and continues the conversation until a final text response is
+	 * produced.
 	 * </p>
 	 *
 	 * @return the final model response text (may be {@code null} if no text was
@@ -292,8 +287,6 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public String perform() {
-		String result = null;
-
 		builder.inputOfResponse(inputs);
 		builder.instructions(instructions);
 
@@ -302,11 +295,11 @@ public class OpenAIProvider implements GenAIProvider {
 		ResponseCreateParams responseCreateParams = builder.build();
 		logger.debug("Sending request to LLM service.");
 		Response response = getClient().responses().create(responseCreateParams);
+
 		logger.debug("Received response from LLM service.");
 		captureUsage(response.usage());
 
-		result = parseResponse(response);
-		return result;
+		return parseResponse(response);
 	}
 
 	/**
@@ -329,52 +322,64 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Parses the given response and handles function tool calls and reasoning
-	 * items.
+	 * Parses the given response and handles function tool calls.
 	 *
 	 * <p>
 	 * Tool calls are executed via {@link #callFunction(ResponseFunctionToolCall)}.
-	 * If any tool calls are present, the method continues the conversation by
-	 * calling {@link #perform()} again until the model returns a final message.
+	 * If tool calls are present, the method creates and sends a follow-up request
+	 * with both the tool call and tool output attached, and repeats until the
+	 * model returns a final message.
 	 * </p>
 	 *
 	 * @param response response object
 	 * @return response string, potentially after one or more tool call iterations
 	 */
 	private String parseResponse(Response response) {
-		List<ResponseOutputItem> output = response.output();
 		String text = null;
-		boolean fnCall = false;
-		for (ResponseOutputItem item : output) {
-			if (item.isFunctionCall()) {
-				ResponseFunctionToolCall functionCall = item.asFunctionCall();
-				inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
+		Response current = response;
 
-				Object value = callFunction(functionCall);
+		while (current != null) {
+			boolean anyToolCalls = false;
+			List<ResponseOutputItem> output = current.output();
+			for (ResponseOutputItem item : output) {
+				if (item.isFunctionCall()) {
+					anyToolCalls = true;
+					ResponseFunctionToolCall functionCall = item.asFunctionCall();
+					inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
-				Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
-				String callId = functionCall.callId();
+					Object value = callFunction(functionCall);
+					Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
 
-				ResponseInputItem ofOutput = ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput
-						.builder().callId(callId).outputAsJson(callFunction).build());
-				inputs.add(ofOutput);
-				fnCall = true;
-			}
-			if (item.isMessage()) {
-				ResponseOutputMessage outMessage = item.asMessage();
-				List<Content> contentList = outMessage.content();
-				for (Content content : contentList) {
-					text = content.outputText().get().text();
-					if (StringUtils.isNotBlank(text)) {
-						logger.info("LLM Response: {}", text);
+					inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
+							.callId(functionCall.callId()).outputAsJson(callFunction).build()));
+				}
+				if (item.isMessage()) {
+					ResponseOutputMessage outMessage = item.asMessage();
+					List<Content> contentList = outMessage.content();
+					for (Content content : contentList) {
+						if (content.outputText().isPresent()) {
+							String candidate = content.outputText().get().text();
+							if (StringUtils.isNotBlank(candidate)) {
+								text = candidate;
+								logger.debug("LLM Response: {}", text);
+							}
+						}
 					}
 				}
 			}
+
+			if (!anyToolCalls) {
+				break;
+			}
+
+			builder.inputOfResponse(inputs);
+			builder.instructions(instructions);
+			ResponseCreateParams followUpParams = builder.build();
+			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
+			current = getClient().responses().create(followUpParams);
+			captureUsage(current.usage());
 		}
 
-		if (fnCall) {
-			perform();
-		}
 		return text;
 	}
 
@@ -445,7 +450,7 @@ public class OpenAIProvider implements GenAIProvider {
 				parentFile.mkdirs();
 			}
 			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
-				streamWriter.write(instructions);
+				streamWriter.write(StringUtils.defaultString(instructions));
 
 				for (ResponseInputItem responseInputItem : inputs) {
 					String inputText = "";
@@ -499,29 +504,26 @@ public class OpenAIProvider implements GenAIProvider {
 	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
 		Map<String, Map<String, String>> fromValue = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
-		ArrayNode requiregProps = mapper.createArrayNode();
+		ArrayNode requiredProps = mapper.createArrayNode();
 		if (paramsDesc != null) {
 			for (String pDesc : paramsDesc) {
 				String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
-				if (StringUtils.equals(desc[2], "required")) {
-					requiregProps.add(desc[0]);
+				if (desc.length >= 3 && StringUtils.equals(desc[2], "required")) {
+					requiredProps.add(desc[0]);
 				}
 				Map<String, String> value = new HashMap<>();
 				value.put("type", desc[1]);
-				value.put("description", desc[3]);
+				value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
 				fromValue.put(desc[0], value);
 			}
 		}
 		JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
-		JsonValue requiredVal = JsonValue.from(mapper.createArrayNode());
+		JsonValue requiredVal = JsonValue.fromJsonNode(requiredProps);
 		Parameters params = Parameters.builder().putAdditionalProperty("properties", propsVal)
 				.putAdditionalProperty("type", JsonString.of("object")).putAdditionalProperty("required", requiredVal)
 				.build();
-		com.openai.models.responses.FunctionTool.Builder toolBuilder = FunctionTool.builder().name(name)
-				.description(description);
-		if (params != null) {
-			toolBuilder.parameters(params);
-		}
+		FunctionTool.Builder toolBuilder = FunctionTool.builder().name(name).description(description);
+		toolBuilder.parameters(params);
 		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
 		toolMap.put(tool, function);
 	}
@@ -552,17 +554,7 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public void inputsLog(File inputsLog) {
-	}
-
-	/**
-	 * Sets the model identifier to use for requests.
-	 *
-	 * @param chatModelName model name (for example, {@code gpt-4.1} or a custom
-	 *                      deployment name)
-	 */
-	@Override
-	public void model(String chatModelName) {
-		this.chatModel = chatModelName;
+		this.inputsLog = inputsLog;
 	}
 
 	/**
@@ -613,13 +605,22 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Sets a request timeout (in seconds) for new clients created by
-	 * {@link #createClient(String, String)}.
+	 * Sets a request timeout (in seconds) for new clients created by this provider.
 	 *
 	 * @param timeout timeout in seconds; use {@code 0} to use SDK defaults
 	 */
 	public void setTimeout(long timeout) {
 		this.timeoutSec = timeout;
+	}
+
+	/**
+	 * Indicates whether the provider instance is safe for concurrent use.
+	 *
+	 * @return {@code false}; this implementation stores per-request mutable state
+	 */
+	@Override
+	public boolean isThreadSafe() {
+		return false;
 	}
 
 }

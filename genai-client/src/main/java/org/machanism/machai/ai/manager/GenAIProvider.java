@@ -129,13 +129,6 @@ public interface GenAIProvider extends Closeable {
 	void inputsLog(File bindexTempDir);
 
 	/**
-	 * Selects the model name for this provider instance.
-	 *
-	 * @param chatModelName the model name to use
-	 */
-	void model(String chatModelName);
-
-	/**
 	 * Configures the working directory used for file and tool operations.
 	 *
 	 * @param workingDir the working directory
