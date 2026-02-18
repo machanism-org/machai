@@ -104,20 +104,6 @@ mvn gw:gw
 4. Execute the plugin: `mvn gw:gw` (or `mvn gw:reactor` for reactor-ordered processing).
 5. Review and commit the updated/generated artifacts.
 
-## Configuration
-
-| Parameter / Property | Description | Default |
-|---|---|---|
-| `gw.genai` | GenAI provider/model identifier passed to Ghostwriter processing. | (none) |
-| `gw.scanDir` | Scan root override; when omitted, scans the Maven execution root directory (or the current module base directory when appropriate). | execution root directory |
-| `gw.instructions` | Instruction locations (file paths or classpath locations) consumed by the workflow. | (none) |
-| `gw.guidance` | Default guidance text forwarded to the workflow. | (none) |
-| `gw.excludes` | Exclude patterns/paths to skip while scanning. | (none) |
-| `gw.genai.serverId` | `settings.xml` `<server>` id used to load `GENAI_USERNAME`/`GENAI_PASSWORD`. | (none) |
-| `gw.logInputs` | If `true`, logs the list of input files passed to the workflow. | `false` |
-| `gw.threads` | Enables/disables multi-threaded module processing for `gw:gw`. | `false` |
-| `gw.rootProjectLast` | For `gw:reactor`, delays processing of the execution-root project until all other reactor projects complete. | `false` |
-
 ## Resources
 
 - Official documentation: https://www.machanism.org/guided-file-processing/index.html
