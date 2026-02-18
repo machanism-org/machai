@@ -35,15 +35,14 @@
  */
 
 /**
- * Host-integrated tool implementations that can be registered with a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} to expose a small,
- * auditable set of capabilities to an AI workflow.
+ * Host-integrated tool implementations for registering a small, auditable set of
+ * local capabilities with a {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
  * <p>
- * The tools in this package are intended to be installed by a hosting
- * application, which can decide which functions are available to an AI model
- * and under what constraints (for example: allowing only a limited set of
- * commands, restricting file access to the project directory, or disabling
+ * The classes in this package define host-side function tools that can be exposed
+ * to an AI workflow. Tools are registered with a provider and typically operate
+ * within host-defined constraints (for example: restricting file access to the
+ * project directory, allow-listing commands, bounding output size, and controlling
  * outbound network access).
  *
  * <h2>Tool installers</h2>
@@ -55,8 +54,9 @@
  *       tool installers and applies them to a provider</li>
  * </ul>
  *
- * <h2>Supporting utilities</h2>
+ * <h2>Supporting types</h2>
  * <ul>
+ *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} – SPI for providing tool installers</li>
  *   <li>{@link org.machanism.machai.ai.tools.LimitedStringBuilder} – retains only the last {@code N} characters of
  *       accumulated output</li>
  * </ul>

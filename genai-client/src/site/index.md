@@ -47,38 +47,21 @@ and generate the content for this section following net format:
 ... FULL DESCRIPTION ...
 -->
 
-### OpenAI
+### Claude
 
-OpenAI-backed implementation of MachAI's `GenAIProvider` abstraction.
+Anthropic Claude-backed implementation of MachAI's `GenAIProvider` abstraction.
 
-This provider adapts the OpenAI Java SDK to MachAI's provider interface. It accumulates user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools. When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
-
-Capabilities
-
-- Submit prompts and retrieve text responses.
-- Upload local files or attach files by URL for use in a request.
-- Register function tools and dispatch tool calls to application handlers.
-- Create vector embeddings for input text.
-- Report token usage to `GenAIProviderManager`.
+This provider adapts the Anthropic Claude API to MachAI's provider interface.
 
 Configuration
 
-- `OPENAI_API_KEY` (required)
-- `OPENAI_BASE_URL` (optional)
-
-Usage
-
-```java
-GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
-provider.model("gpt-5.1");
-provider.instructions("You are a concise assistant.");
-provider.prompt("Summarize this text...");
-String answer = provider.perform();
-```
+- `ANTHROPIC_API_KEY` (required)
+- `ANTHROPIC_BASE_URL` (optional)
+- `chatModel` (required before `perform()` if not set elsewhere)
 
 Thread-safety
 
-Instances are not thread-safe. Use one provider instance per request or synchronize externally.
+Instances are not thread-safe.
 
 ### CodeMie
 
@@ -128,6 +111,30 @@ provider.instructions("You are a helpful assistant.");
 provider.prompt("Describe the weather.");
 provider.perform();
 ```
+
+### OpenAI
+
+OpenAI-backed implementation of MachAI's `GenAIProvider` abstraction.
+
+This provider adapts the OpenAI Java SDK to MachAI's provider interface. It accumulates user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools. When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
+
+Capabilities
+
+- Submit prompts and retrieve text responses.
+- Upload local files or attach files by URL for use in a request.
+- Register function tools and dispatch tool calls to application handlers.
+- Create vector embeddings for input text.
+- Report token usage to `GenAIProviderManager`.
+
+Configuration
+
+- `OPENAI_API_KEY` (required)
+- `OPENAI_BASE_URL` (optional)
+- `chatModel` (optional; required before `perform()` if not set via configuration)
+
+Thread-safety
+
+Instances are not thread-safe. Use one provider instance per request or synchronize externally.
 
 ### Web
 

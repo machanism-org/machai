@@ -27,20 +27,19 @@
  */
 
 /**
- * No-op ("none") generative AI provider.
+ * No-op ("none") generative AI provider implementation.
  *
- * <p>This package contains an implementation of {@link org.machanism.machai.ai.manager.GenAIProvider} that performs no
- * LLM calls. It is intended for offline execution, security/compliance constrained deployments, and deterministic tests
- * where prompts may be captured without sending them to an external service.
+ * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, an implementation of
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} that intentionally avoids any external LLM/backend calls.
+ * It is useful for offline execution, security/compliance constrained deployments, or deterministic testing where
+ * prompts should be captured locally.
  *
  * <h2>Behavior</h2>
  * <ul>
- *   <li>No network calls are performed and no external AI service is contacted.</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} accumulates prompt text in memory.</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider#perform()} optionally writes the configured instructions
- *       and accumulated prompts to the configured log files, clears the internal buffer, and returns {@code null}.</li>
- *   <li>Operations that require a real backend (for example,
- *       {@link org.machanism.machai.ai.manager.GenAIProvider#embedding(String)}) are unsupported and throw
+ *   <li>{@code prompt(...)} accumulates prompt text in memory.</li>
+ *   <li>{@code perform()} optionally writes {@code instructions.txt} and the prompt log to the configured
+ *       {@link java.io.File} (via {@code inputsLog(...)}), clears the internal buffer, and returns {@code null}.</li>
+ *   <li>Capabilities that require a real backend (for example {@code embedding(...)}) are unsupported and throw
  *       {@link java.lang.UnsupportedOperationException}.</li>
  * </ul>
  *

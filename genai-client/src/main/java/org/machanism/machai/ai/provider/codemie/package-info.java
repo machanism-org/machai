@@ -27,17 +27,22 @@
  */
 
 /**
- * EPAM CodeMie provider implementation.
+ * EPAM CodeMie provider integration.
  *
- * <p>This package provides {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, an
- * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider} implementation that:
- * <ol>
- *   <li>Obtains an OAuth 2.0 access token from CodeMie's OpenID Connect token endpoint.</li>
- *   <li>Initializes an OpenAI-compatible client configured to call the CodeMie Code Assistant REST API.</li>
- * </ol>
+ * <p>This package provides {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that authenticates against
+ * CodeMie (via an OpenID Connect token endpoint) and then delegates requests to an OpenAI-compatible
+ * provider configured for the CodeMie Code Assistant API.
+ *
+ * <h2>Overview</h2>
+ * <ul>
+ *   <li>Retrieves an OAuth 2.0 access token from the configured token endpoint.</li>
+ *   <li>Configures an underlying {@link org.machanism.machai.ai.provider.openai.OpenAIProvider} with the
+ *       CodeMie base URL and the retrieved token (as {@code OPENAI_API_KEY}).</li>
+ * </ul>
  *
  * <h2>Authentication</h2>
- * <p>The provider selects the grant type based on {@code GENAI_USERNAME}:
+ * <p>The grant type is derived from the configured {@code GENAI_USERNAME} value:
  * <ul>
  *   <li><b>Password grant</b> when the username contains {@code "@"} (typical user e-mail login).</li>
  *   <li><b>Client credentials</b> when the username does not contain {@code "@"} (service-to-service).</li>
@@ -54,10 +59,14 @@
  * <h2>Usage</h2>
  * <pre>{@code
  * Configurator conf = ...;
+ * conf.set("GENAI_USERNAME", "user@example.com");
+ * conf.set("GENAI_PASSWORD", "...");
+ * conf.set("chatModel", "gpt-4o-mini");
+ *
  * CodeMieProvider provider = new CodeMieProvider();
  * provider.init(conf);
  *
- * // Continue using the provider via the OpenAIProvider/GenAIProvider APIs.
+ * // Use the provider via the GenAIProvider APIs.
  * }
  * </pre>
  */

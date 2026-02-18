@@ -81,6 +81,8 @@ This design provides:
 | `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (or a client id if using client_credentials). |
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (or a client secret if using client_credentials). |
 | `AUTH_URL` | No | CodeMie | OAuth2 token endpoint override (defaults to CodeMie Keycloak token URL). |
+| `ANTHROPIC_API_KEY` | Conditional | Claude | API key used to authenticate requests. |
+| `ANTHROPIC_BASE_URL` | No | Claude | Override API base URL (if using a compatible gateway/proxy). |
 
 > Note: The Web provider uses Anteater recipes and is typically configured via `model(...)` and JVM system properties (for example, `-Drecipes=...`) rather than environment variables.
 
@@ -113,7 +115,7 @@ provider.close();
 | Parameter | Description | Default |
 |---|---|---|
 | Provider spec (`ProviderName:modelOrConfig`) | String passed to `GenAIProviderManager` to select provider and model/config. | None |
-| `model(String)` | Sets the provider model name (OpenAI/CodeMie) or configuration name (Web). | Provider-dependent |
+| `model(String)` | Sets the provider model name (OpenAI/CodeMie/Claude) or configuration name (Web). | Provider-dependent |
 | `setWorkingDir(File)` | Sets a working directory used by tools and/or provider workflows. | Not set |
 | `inputsLog(File)` | Enables logging of prompt inputs to a file for auditing/debugging. | Disabled |
 | `instructions(String)` | Sets system-level instructions for the request/session. | Not set |
@@ -139,9 +141,9 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` is an OpenAI-backed implementation of the `GenAIProvider` abstraction. It adapts the OpenAI Java SDK to the library’s provider interface by accumulating user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools.
+`OpenAIProvider` is an OpenAI-backed implementation of the `GenAIProvider` abstraction.
 
-When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
+This provider adapts the OpenAI Java SDK to the library’s provider interface. It accumulates user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools. When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
 
 **Capabilities**
 
@@ -155,6 +157,7 @@ When `perform()` is invoked, the provider calls the OpenAI Responses API, proces
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_BASE_URL` (optional)
+- `chatModel` (optional; required before `perform()` if not set elsewhere)
 
 **Usage example**
 
@@ -168,7 +171,7 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 `CodeMieProvider` is a GenAI provider implementation for EPAM CodeMie.
 
-It obtains an access token from a configurable OpenID Connect token endpoint and then initializes an OpenAI-compatible client (via `OpenAIProvider`) to call the CodeMie Code Assistant REST API.
+This provider obtains an access token from a configurable OpenID Connect token endpoint and then initializes an OpenAI-compatible client (via `OpenAIProvider`) to call the CodeMie Code Assistant REST API.
 
 The authentication mode is selected based on the configured username:
 
@@ -190,6 +193,26 @@ The authentication mode is selected based on the configured username:
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
+```
+
+**Thread safety:** not thread-safe.
+
+### Claude
+
+`ClaudeProvider` is an Anthropic Claude-backed implementation of the `GenAIProvider` abstraction.
+
+It adapts the Anthropic Claude API to the library’s provider interface.
+
+**Configuration**
+
+- `ANTHROPIC_API_KEY` (required)
+- `ANTHROPIC_BASE_URL` (optional)
+- `chatModel` (required)
+
+**Usage example**
+
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("Claude:claude-...");
 ```
 
 **Thread safety:** not thread-safe.
@@ -223,7 +246,7 @@ provider.close();
 
 `WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via the Anteater workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
 
 **Thread safety and lifecycle**
 
