@@ -2,7 +2,8 @@ package org.machanism.machai.ai.provider.web;
 
 import java.io.File;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.provider.none.NoneProvider;
 import org.slf4j.Logger;
@@ -57,6 +58,11 @@ public class WebProvider extends NoneProvider {
 		System.setProperty("java.awt.headless", "false");
 	}
 
+	@Override
+	public void init(Configurator config) {
+		configName = config.get("chatModel");
+	}
+	
 	/**
 	 * Submits the current prompts to the configured web UI by executing the {@code "Submit Prompt"} recipe.
 	 *
@@ -90,7 +96,7 @@ public class WebProvider extends NoneProvider {
 	 * <ol>
 	 *   <li>Use {@code workingDir} by default.</li>
 	 *   <li>If a directory (or file) exists under {@code workingDir} at the path provided by system property
-	 *       {@code recipes} (default: {@code genai-client\src\main\resources}), that location is used instead.</li>
+	 *       {@code recipes} (default: {@code genai-client\\src\\main\\resources}), that location is used instead.</li>
 	 * </ol>
 	 *
 	 * @param workingDir project root directory used for workspace variables and to resolve recipe locations
@@ -124,29 +130,10 @@ public class WebProvider extends NoneProvider {
 				rootDir = null;
 				throw new IllegalArgumentException(e);
 			}
-		} else if (!StringUtils.equals(rootDir.getAbsolutePath(), workingDir.getAbsolutePath())) {
+		} else if (!Strings.CS.equals(rootDir.getAbsolutePath(), workingDir.getAbsolutePath())) {
 			throw new IllegalArgumentException("WorkingDir change detected. Requested: `" + workingDir.getAbsolutePath()
 					+ "`; currently in use: `" + rootDir.getAbsolutePath() + "`");
 		}
-	}
-
-	/**
-	 * Sets the Anteater workspace configuration name.
-	 *
-	 * <p>This must be invoked before {@link #setWorkingDir(File)} so that the workspace can load the correct
-	 * configuration.
-	 *
-	 * @param configName configuration file name or identifier understood by Anteater
-	 * @throws IllegalArgumentException if a different configuration is requested after one has already been set
-	 */
-	@Override
-	public void model(String configName) {
-		String trimmedConfigName = StringUtils.trimToNull(configName);
-		if (WebProvider.configName != null && !StringUtils.equals(WebProvider.configName, trimmedConfigName)) {
-			throw new IllegalArgumentException("Configuration change detected. Requested: `" + trimmedConfigName
-					+ "`; currently in use: `" + WebProvider.configName + "`.");
-		}
-		WebProvider.configName = trimmedConfigName;
 	}
 
 	/**
