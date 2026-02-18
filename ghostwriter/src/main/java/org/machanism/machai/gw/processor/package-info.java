@@ -39,24 +39,30 @@
  */
 
 /**
- * Project scanning and prompt orchestration for Ghostwriter.
+ * Provides the Ghostwriter command-line application entry point and the core processor that
+ * traverses project directories, extracts per-file {@code @guidance} directives, and delegates
+ * the resulting prompts to a configured GenAI provider.
  *
  * <p>
- * This package provides the command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the
- * scanning engine ({@link org.machanism.machai.gw.processor.FileProcessor}). Together they:
+ * The primary entry point is {@link org.machanism.machai.gw.processor.Ghostwriter}, which parses CLI options,
+ * loads configuration, and creates a {@link org.machanism.machai.gw.processor.FileProcessor} instance.
+ * The {@code FileProcessor} walks a project tree (including multi-module layouts) using a child-first traversal
+ * strategy and invokes a configured {@link org.machanism.machai.ai.manager.GenAIProvider} with composed prompts.
  * </p>
  *
+ * <h2>Key Concepts</h2>
  * <ul>
- * <li>Traverse a project directory tree (including multi-module layouts) using a child-first module order.</li>
- * <li>Select candidate files while applying built-in and configured exclude rules.</li>
- * <li>Extract embedded {@code @guidance:} directives via file-type {@link org.machanism.machai.gw.reviewer.Reviewer}s.</li>
- * <li>Compose prompts (including optional project-wide instructions/default guidance) and invoke a
- * {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
- * <li>Optionally persist per-file input logs for auditing and troubleshooting.</li>
+ * <li><b>Reviewer-based extraction</b>: Guidance is extracted per file by
+ * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations selected by file extension.</li>
+ * <li><b>Project-layout awareness</b>: Traversal honors {@link org.machanism.machai.project.layout.ProjectLayout}
+ * metadata for sources, tests, documents, and modules.</li>
+ * <li><b>No dependency resolution</b>: Scanning is filesystem-based and does not run builds or resolve dependencies.</li>
  * </ul>
  *
- * <p>
- * Processing is traversal-based and intentionally avoids dependency resolution and project builds.
- * </p>
+ * <h2>Typical Usage</h2>
+ * <p>Run from the command line:</p>
+ * <pre>{@code
+ * java -jar gw.jar . --genai OpenAI:gpt-5-mini --threads true
+ * }</pre>
  */
 package org.machanism.machai.gw.processor;

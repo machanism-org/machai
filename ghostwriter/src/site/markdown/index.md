@@ -30,106 +30,113 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
-# Ghostwriter
+# ghostwriter
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 
 ## Introduction
 
-Ghostwriter is an AI-assisted documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider/model to generate or refine content.
+Ghostwriter is a guidance-driven documentation engine that scans project files, extracts embedded `@guidance` directives, and uses a configured GenAI provider to synthesize and apply updates. It is built for real-world repositories where documentation spans many formats (source code, Markdown, HTML, configuration, and site content), enabling teams to keep artifacts accurate and consistent with less manual effort.
 
-It works across **all types of project files**—including source code, documentation, project site content, and other relevant artifacts—helping teams keep documentation aligned with the evolving codebase.
+Key benefits:
+
+- Keeps documentation and project artifacts aligned by generating updates directly from file-embedded guidance.
+- Works across heterogeneous repositories (code, docs, site pages, configs) in a single run.
+- Supports project/module-aware scanning, exclusions, and provider-agnostic GenAI execution.
 
 ## Overview
 
-Ghostwriter provides a command-line workflow to:
+Ghostwriter runs as a CLI: you point it at a project root and a scan target (a directory, file, or a `glob:`/`regex:` path pattern). For each supported file type, Ghostwriter:
 
-- Scan a directory or a path pattern (raw path, `glob:` pattern, or `regex:` pattern)
-- Extract embedded `@guidance` blocks from supported file types
-- Optionally apply system-wide `--instructions`
-- Invoke the configured GenAI provider/model to synthesize improvements
-- Write updated content back to project files
+1. Selects a reviewer based on file extension.
+2. Extracts embedded guidance directives from the file.
+3. Builds a prompt that includes system instructions, OS-specific processing instructions, project structure metadata, and the extracted guidance.
+4. Submits the prompt to the configured GenAI provider to produce and apply the result.
 
-Common use cases include project site/README generation, API documentation enrichment, and ongoing documentation maintenance.
+For multi-module projects, Ghostwriter can process modules child-first and optionally in parallel (when the chosen provider is thread-safe).
 
 ## Key Features
 
-- Scans raw directories, glob patterns, or regex patterns
-- Extracts embedded `@guidance` directives during processing
-- Supports system instructions (`--instructions`) and directory-level default guidance (`--guidance`)
-- Configurable GenAI provider and model (example: `OpenAI:gpt-5.1`)
-- Optional multi-threaded module processing
-- Optional logging of composed LLM request inputs (for auditing/debugging)
-- Exclude directories via comma-separated `--excludes`
+- Multi-format processing via pluggable reviewers (e.g., Java, Markdown, HTML, etc.).
+- Guidance-driven generation based on embedded `@guidance` directives.
+- Pattern-based scanning with `glob:` and `regex:` path matchers.
+- Module-aware scanning for multi-module project layouts.
+- Optional multi-threaded module processing.
+- Optional logging of composed LLM inputs per processed file.
+- Project-relative path safety: absolute scan paths must be within the root project directory.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 11 or later
-- Network access and credentials for your selected GenAI provider (configured via `gw.properties` and/or environment)
+- Java 11+
+- Network access to your configured GenAI provider (as applicable)
+- A project directory containing files with embedded `@guidance` directives (or use `--guidance` for fallback processing)
 
 ### Installation
 
-Download the Ghostwriter CLI bundle:
+Download the Ghostwriter CLI package:
 
 [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
 
 ### Basic Usage
 
 ```cmd
-java -jar gw.jar src\main\java
+java -jar gw.jar src
 ```
 
 ### Typical Workflow
 
-1. Add embedded `@guidance` blocks to the files you want Ghostwriter to generate or refine.
-2. Run Ghostwriter against a directory (or pattern) containing those files.
-3. Review the changes, commit, and re-run as needed.
+1. Add `@guidance` directives to the files you want Ghostwriter to process.
+2. Run Ghostwriter against a folder, file, or pattern.
+3. Review generated changes in your working tree.
+4. Iterate by refining guidance (or providing `--instructions` / `--guidance` defaults) and re-running.
 
 ## Configuration
 
-Ghostwriter can be configured through a properties file (default: `gw.properties`, or via `-Dgw.config=<path>`) and/or CLI options.
+Ghostwriter CLI options (from `org.machanism.machai.gw.processor.Ghostwriter`):
 
-### Command-line options
+| Option | Argument | Default | Description |
+|---|---:|---|---|
+| `-h`, `--help` | none | n/a | Show help message and exit. |
+| `-r`, `--root` | path | user directory (when not configured) | Root directory used as the base for scan path validation and project-relative resolution. |
+| `-t`, `--threads` | boolean (optional) | `false` (when not set); `true` if provided without value | Enable multi-threaded module processing (only if the provider is thread-safe). |
+| `-a`, `--genai` | `provider:model` | `OpenAI:gpt-5-mini` | GenAI provider and model identifier. |
+| `-i`, `--instructions` | text / URL / `file:` (optional) | none | System instructions appended to each prompt. If used without a value, Ghostwriter reads multi-line input from stdin until EOF. Lines may reference `http(s)://...` or `file:...` to include external content. |
+| `-g`, `--guidance` | text / URL / `file:` (optional) | none | Default guidance applied as a fallback for files/directories that do not contain embedded guidance. If used without a value, Ghostwriter reads multi-line input from stdin until EOF. Lines may reference `http(s)://...` or `file:...` to include external content. |
+| `-e`, `--excludes` | comma-separated list | none | Exclude paths or patterns from processing. Provide a comma-separated list (repeat as needed). Supports exact paths/file names and `glob:`/`regex:` patterns. |
+| `-l`, `--logInputs` | none | `false` | Log composed LLM request inputs to dedicated log files under the MachAI temp directory. |
 
-Defaults shown below are based on the current implementation (including fallback behavior when a value is not provided).
+### Command-line Examples
 
-| Option | Long option | Arg | Default | Description |
-|---|---|---:|---|---|
-| `-h` | `--help` | No | n/a | Show help and exit. |
-| `-l` | `--logInputs` | No | `false` | Log composed LLM request inputs to per-file logs. |
-| `-t` | `--threads` | Yes (optional) | `true` | Enable multi-threaded module processing. If the option is present with no value, it defaults to `true`. You may pass an explicit boolean (e.g., `-t false`). |
-| `-r` | `--root` | Yes | `user.dir` (when not configured) | Root directory used as the project boundary and base for scanning. If not provided via config or option, defaults to the current working directory. |
-| `-a` | `--genai` | Yes | `OpenAI:gpt-5-mini` | GenAI provider and model (example: `OpenAI:gpt-5.1`). |
-| `-i` | `--instructions` | Yes (optional) | none | System instructions added to every prompt. Each line is processed: blank lines preserved; `http(s)://...` lines are fetched and inlined; `file:...` lines are read and inlined; other lines used as-is. If used without a value, Ghostwriter reads from stdin until EOF. |
-| `-g` | `--guidance` | Yes (optional) | none | Default directory-level guidance applied as a final step for the current directory and as a fallback for files without embedded `@guidance`. Same loading rules as `--instructions`. If used without a value, Ghostwriter reads from stdin until EOF. |
-| `-e` | `--excludes` | Yes | none | Comma-separated list of directories/patterns to exclude (example: `target,.git`). |
-
-### Example
-
-From the CLI help: `<scanDir>` can be a raw path, a glob pattern, or a regex pattern.
+From the built-in help output:
 
 ```cmd
-java -jar gw.jar "glob:**\*.java" -r . -t true -a "OpenAI:gpt-5.1" -e "target,.git" -l
+java -jar gw.jar C:\projects\project
+java -jar gw.jar src\project
+java -jar gw.jar "glob:**/*.java"
+java -jar gw.jar "regex:^.*\\/[^\\/]+\\.java$"
+```
+
+A typical run with explicit configuration:
+
+```cmd
+java -jar gw.jar src -r C:\projects\project -a "OpenAI:gpt-5-mini" -t -e ".machai,target" -l
 ```
 
 ## Default Guidance
 
-`defaultGuidance` is a fallback instruction set used when a file does not contain an embedded `@guidance` directive.
+`defaultGuidance` is a fallback instruction set used when a file does not contain embedded `@guidance` directives. This is useful when you want to run Ghostwriter across a directory tree and ensure every matched file (or the directory itself) still receives actionable guidance.
 
-- **Purpose:** ensure files without per-file guidance can still be processed consistently.
-- **How it’s set:** via CLI `--guidance` (or the `guidance` property), as plain text or by referencing external content:
-  - `http://` or `https://` lines are fetched and inlined
-  - `file:` lines are read from disk and inlined
-  - blank lines are preserved; other lines are used as-is
-- **How it’s applied:**
-  - If a supported file contains `@guidance`, that guidance is used.
-  - Otherwise, if `defaultGuidance` is set, it is used to build the prompt for the file.
-  - Additionally, when `--guidance` is set, Ghostwriter applies it as a final step to the directory being processed.
+How it works:
+
+- Set via `--guidance` on the CLI (or via configuration key `guidance`).
+- If a matched file has no embedded guidance, Ghostwriter formats and applies `defaultGuidance` for that file.
+- If the project directory itself matches and `defaultGuidance` is set, Ghostwriter also applies it as a final step for the directory.
+- The value can be provided as plain text, or as line-based input that includes `http(s)://...` and `file:...` references to include external content.
 
 ## Resources
 
-- GitHub: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
-- Download bundle: https://sourceforge.net/projects/machanism/files/machai/gw.zip/download
+- GitHub: https://github.com/machanism-org/machai
+- Project site: https://machai.machanism.org/ghostwriter/index.html

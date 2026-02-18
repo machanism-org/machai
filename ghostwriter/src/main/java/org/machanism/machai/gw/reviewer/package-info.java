@@ -6,9 +6,14 @@
  * multiple file types. Each implementation understands the target format's comment conventions (for example,
  * Java block/line comments, HTML comments, or Python comments) and returns a normalized prompt fragment.
  *
- * <p>Prompt fragments typically include enough file and path context (for example, via
- * {@link org.machanism.machai.project.layout.ProjectLayout}) for downstream processors to locate and apply the
- * extracted instructions.
+ * <p>Reviewers generally return {@code null} when no relevant guidance is present in the analyzed file. When
+ * guidance is detected, implementations typically format a prompt fragment via the {@code document-prompts}
+ * resource bundle and include path context computed by
+ * {@link org.machanism.machai.project.layout.ProjectLayout}.
+ *
+ * <p>This package provides reviewers for Java ({@code .java}, including {@code package-info.java}), TypeScript
+ * ({@code .ts}), Python ({@code .py}), HTML/XML ({@code .html}, {@code .htm}, {@code .xml}), Markdown
+ * ({@code .md}), and a generic text reviewer for {@code @guidance.txt} files.
  */
 package org.machanism.machai.gw.reviewer;
 

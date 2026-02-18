@@ -22,13 +22,17 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is an AI-assisted documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider/model to generate or refine content.
+Ghostwriter is a guidance-driven documentation engine and CLI that scans project files, extracts embedded `@guidance` directives, and uses a configured GenAI provider to synthesize and apply updates.
 
 ## Introduction
 
-Ghostwriter is an AI-assisted documentation engine and CLI that scans your project, extracts embedded `@guidance` directives, and uses a configured GenAI provider/model to generate or refine content.
+Ghostwriter is a guidance-driven documentation engine that scans project files, extracts embedded `@guidance` directives, and uses a configured GenAI provider to synthesize and apply updates. It is built for real-world repositories where documentation spans many formats (source code, Markdown, HTML, configuration, and site content), enabling teams to keep artifacts accurate and consistent with less manual effort.
 
-It works across **all types of project files**—including source code, documentation, project site content, and other relevant artifacts—helping teams keep documentation aligned with the evolving codebase.
+Key benefits:
+
+- Keeps documentation and project artifacts aligned by generating updates directly from file-embedded guidance.
+- Works across heterogeneous repositories (code, docs, site pages, configs) in a single run.
+- Supports project/module-aware scanning, exclusions, and provider-agnostic GenAI execution.
 
 ## Usage
 
@@ -36,23 +40,25 @@ It works across **all types of project files**—including source code, document
 
 #### Prerequisites
 
-- Java 11 or later
-- Network access and credentials for your selected GenAI provider (configured via `gw.properties` and/or environment)
+- Java 11+
+- Network access to your configured GenAI provider (as applicable)
+- A project directory containing files with embedded `@guidance` directives (or use `--guidance` for fallback processing)
 
 #### Installation
 
-Download the Ghostwriter CLI bundle:
+Download the Ghostwriter CLI package:
 
 [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
 
 #### Basic Usage
 
 ```cmd
-java -jar gw.jar src\main\java
+java -jar gw.jar src
 ```
 
 #### Typical Workflow
 
-1. Add embedded `@guidance` blocks to the files you want Ghostwriter to generate or refine.
-2. Run Ghostwriter against a directory (or pattern) containing those files.
-3. Review the changes, commit, and re-run as needed.
+1. Add `@guidance` directives to the files you want Ghostwriter to process.
+2. Run Ghostwriter against a folder, file, or pattern.
+3. Review generated changes in your working tree.
+4. Iterate by refining guidance (or providing `--instructions` / `--guidance` defaults) and re-running.
