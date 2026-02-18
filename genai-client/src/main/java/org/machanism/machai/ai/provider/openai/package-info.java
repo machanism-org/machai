@@ -31,15 +31,15 @@
  * abstraction.
  *
  * <p>
- * The types in this package adapt the OpenAI Java SDK to MachAI's provider interface. They build request inputs
- * (prompts, optional instructions, and optional file inputs), execute calls through the OpenAI Responses API,
- * handle iterative tool/function calls, and report usage metrics.
+ * The types in this package adapt the OpenAI Java SDK to the MachAI provider interface. They construct request
+ * inputs (prompts, optional instructions, and optional file inputs), execute calls through the OpenAI Responses
+ * API, handle iterative tool/function calls, and report usage metrics.
  * </p>
  *
  * <h2>Responsibilities</h2>
  * <ul>
  *   <li>Translate MachAI provider configuration into OpenAI request structures.</li>
- *   <li>Execute responses requests and parse text/tool-call outputs.</li>
+ *   <li>Execute response requests and parse text/tool-call outputs.</li>
  *   <li>Register and dispatch function tools to application handlers.</li>
  *   <li>Create vector embeddings for input text.</li>
  *   <li>Report token usage to {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
@@ -55,7 +55,7 @@
  * </pre>
  *
  * <p>
- * <strong>Thread-safety:</strong> instances are not thread-safe; use one instance per request or synchronize
+ * <strong>Thread-safety:</strong> Instances are not thread-safe; use one instance per request or synchronize
  * access externally.
  * </p>
  */

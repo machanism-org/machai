@@ -23,17 +23,13 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
 
-GW Maven Plugin integrates Ghostwriter guided file processing into Maven builds so documentation and other project artifacts can be generated and kept up to date as part of normal development and CI workflows.
+GW Maven Plugin integrates MachAI Ghostwriter guided file processing into Maven builds, enabling documentation and other project artifacts to be generated and kept up to date as part of normal development and CI workflows.
 
-At a high level, the plugin:
-
-- scans project files (source code, documentation, Maven Site pages, and other content) for embedded `@guidance:` instructions
-- runs Ghostwriter processing for the project (and, where applicable, its modules)
-- supports different module-ordering strategies depending on the goal used
+At a high level, the plugin configures Ghostwriter processing, determines the active project layout, then scans the chosen root directory for files containing embedded `@guidance:` instructions. Those instructions drive Ghostwriters processing so the repository can continuously synthesize and maintain high-quality documentation (and any other guided artifacts) with consistent, repeatable behavior.
 
 The plugin provides two primary goals:
 
-- **`gw:gw`**: aggregator processing that can run without a `pom.xml` (`requiresProject=false`) and processes modules in **reverse order** (sub-modules first), similar to the Ghostwriter CLI.
+- **`gw:gw`**: aggregator processing that can run without a `pom.xml` (`requiresProject=false`) and can process modules in reverse order (sub-modules first), similar to the Ghostwriter CLI.
 - **`gw:reactor`**: reactor-aware processing that follows standard Maven reactor dependency ordering, with an option to defer the execution-root project until the rest of the reactor has completed.
 
 ## Installation Instructions
@@ -42,7 +38,7 @@ The plugin provides two primary goals:
 
 - Git
 - Java 11+
-- Apache Maven
+- Apache Maven 3.x
 
 ### Checkout
 

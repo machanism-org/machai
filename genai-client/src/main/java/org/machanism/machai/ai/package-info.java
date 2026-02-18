@@ -28,28 +28,30 @@
 /**
  * Provider-neutral API for interacting with generative-AI (GenAI) models.
  *
- * <p>This package contains the public entry points used by the GenAI Client to configure and obtain a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} instance and to invoke model operations such as generating
- * a response, attaching files, registering function tools, and retrieving token usage.
+ * <p>This package defines the top-level namespace for the GenAI Client. It exposes core entry points for:
+ * <ul>
+ *   <li>selecting and instantiating a concrete provider implementation for a given provider/model identifier,</li>
+ *   <li>driving a request by supplying instructions, prompts, and optional file inputs,</li>
+ *   <li>optionally registering host-side function tools that a provider may invoke during execution,</li>
+ *   <li>inspecting token usage for the most recent run.</li>
+ * </ul>
  *
- * <p>The main workflow is:
+ * <h2>Typical workflow</h2>
  * <ol>
- *   <li>Resolve a provider implementation and model name (typically via
- *   {@link org.machanism.machai.ai.manager.GenAIProviderManager#getProvider(String, org.machanism.macha.core.commons.configurator.Configurator)}).</li>
- *   <li>Optionally install host-side function tools (see {@code org.machanism.machai.ai.tools}).</li>
- *   <li>Build request state by adding instructions, prompts, and optional files.</li>
- *   <li>Execute the request with {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and inspect
+ *   <li>Resolve a provider and model with
+ *   {@link org.machanism.machai.ai.manager.GenAIProviderManager#getProvider(String, org.machanism.macha.core.commons.configurator.Configurator)}.</li>
+ *   <li>Optionally install host-side tools via {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
+ *   <li>Build request state using {@link org.machanism.machai.ai.manager.GenAIProvider#instructions(String)},
+ *   {@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)}, and optional attachments.</li>
+ *   <li>Execute with {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and read metrics with
  *   {@link org.machanism.machai.ai.manager.GenAIProvider#usage()}.</li>
  * </ol>
  *
  * <h2>Subpackages</h2>
  * <ul>
- *   <li>{@code org.machanism.machai.ai.manager} – core abstractions and runtime management (provider contract,
- *   reflective provider resolution, and token usage accounting).</li>
- *   <li>{@code org.machanism.machai.ai.provider.*} – concrete provider implementations (for example OpenAI, Web UI
- *   automation, a "none" provider, and other integrations).</li>
- *   <li>{@code org.machanism.machai.ai.tools} – optional host-side tool installers that register common functions
- *   (file I/O, command execution, web fetching) with a provider.</li>
+ *   <li>{@code org.machanism.machai.ai.manager} – provider contract, reflective provider resolution, and usage accounting.</li>
+ *   <li>{@code org.machanism.machai.ai.provider.*} – concrete provider implementations (for example OpenAI, web automation, or a no-op provider).</li>
+ *   <li>{@code org.machanism.machai.ai.tools} – optional host-side tool installers (file I/O, command execution, web access).</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -57,7 +59,7 @@
  * Configurator conf = ...;
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  *
- * // Optional: install file/command/web tools, depending on the provider.
+ * // Optional: install host-side tools, depending on the provider and host policy.
  * FunctionToolsLoader.getInstance().setConfiguration(conf);
  * FunctionToolsLoader.getInstance().applyTools(provider);
  *

@@ -30,31 +30,35 @@
  * Maven plugin goals (Mojos) that integrate Machai/Bindex operations into a Maven build.
  *
  * <p>
- * The classes in this package provide Maven {@code mojo} implementations for generating and maintaining a
- * <em>Bindex</em> index for the current module, optionally publishing derived metadata to a registry service,
- * and cleaning any plugin-generated artifacts.
+ * This package contains the plugin entry points that create or update a <em>Bindex</em> index for the current
+ * Maven module, optionally register derived metadata with an external registry service, and clean temporary
+ * artifacts created during execution.
  * </p>
  *
- * <h2>Primary goals</h2>
+ * <h2>Included goals</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.maven.Create} &ndash; Create a new index for the current module.</li>
- *   <li>{@link org.machanism.machai.maven.Update} &ndash; Refresh an existing index for the current module.</li>
- *   <li>{@link org.machanism.machai.maven.Register} &ndash; Scan the module and publish metadata to a registry endpoint.</li>
+ *   <li>{@link org.machanism.machai.maven.Update} &ndash; Update/refresh an existing index for the current module.</li>
+ *   <li>{@link org.machanism.machai.maven.Register} &ndash; Scan and publish metadata to a registry endpoint.</li>
  *   <li>{@link org.machanism.machai.maven.Clean} &ndash; Remove plugin-generated temporary artifacts.</li>
  * </ul>
  *
  * <h2>Execution model</h2>
  * <p>
- * Goals execute against the current {@link org.apache.maven.project.MavenProject}. Projects with {@code pom}
- * packaging (aggregators/parents) are typically skipped so work is only performed for buildable modules.
+ * Goals execute against the current {@link org.apache.maven.project.MavenProject}. Modules with {@code pom}
+ * packaging (parents/aggregators) are typically skipped so the plugin only runs on buildable modules.
  * </p>
  *
  * <h2>Configuration</h2>
- * <p>
- * Provider/model selection is controlled via {@code -Dbindex.genai=Provider:Model} (for example,
- * {@code -Dbindex.genai=OpenAI:gpt-5}). Shared parameters and behavior are provided by
- * {@link org.machanism.machai.maven.AbstractBindexMojo}.
- * </p>
+ * <ul>
+ *   <li>
+ *     AI provider/model selection: {@code -Dbindex.genai=Provider:Model}
+ *     (for example {@code -Dbindex.genai=OpenAI:gpt-5}).
+ *   </li>
+ *   <li>
+ *     Registry endpoint (for {@code register}): {@code -Dbindex.register.url=http://host:port}.
+ *   </li>
+ * </ul>
  *
  * <h2>Command-line usage</h2>
  * <pre>

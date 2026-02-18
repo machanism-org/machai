@@ -45,25 +45,25 @@ Ensure that your content generation and documentation efforts consider the full 
 
 ## Introduction
 
-GW Maven Plugin integrates MachAI Ghostwriter guided file processing into Maven builds, allowing documentation and other project artifacts to be generated and kept up to date as part of normal development and CI workflows.
+GW Maven Plugin integrates MachAI Ghostwriter guided file processing into Maven builds, enabling documentation and other project artifacts to be generated and kept up to date as part of normal development and CI workflows.
 
-The plugin scans the project directory (including source code, documentation, Maven Site content, and other relevant files) for embedded `@guidance:` instructions and runs Ghostwriter processing over the discovered inputs.
+At a high level, the plugin configures a Ghostwriter `FileProcessor`, determines the active project layout, then scans the chosen root directory for files containing embedded `@guidance:` instructions. Those instructions drive Ghostwriter’s processing so the repository can continuously synthesize and maintain high-quality documentation (and any other guided artifacts) with consistent, repeatable behavior.
 
-The primary goal, `gw:gw` (implemented by `org.machanism.machai.maven.GW`), is an aggregator goal that can run even when a `pom.xml` is not present (`requiresProject=false`). During execution it configures a Ghostwriter `FileProcessor`, detects the project layout, and—when running inside a Maven session—may enrich a Maven project layout with the effective Maven model so processing can use reactor/project metadata.
+The primary goal, `gw:gw` (implemented by `org.machanism.machai.maven.GW`), is an aggregator goal that can run even when a `pom.xml` is not present (`requiresProject=false`). When executed inside a Maven session, it can also enrich a detected Maven project layout with the effective Maven model from the reactor, allowing guided processing to incorporate project metadata.
 
 ## Overview
 
-The core value proposition is to make guided documentation automation a first-class Maven activity:
+The GW Maven Plugin makes guided documentation automation a first-class Maven activity:
 
-- **Keep docs current** by running guided processing during local development and CI.
-- **Standardize behavior across modules** by centralizing configuration in Maven properties and plugin parameters.
-- **Fit different build strategies** with support for single-project processing and multi-module aggregation.
+- **Keep artifacts current** by running guided processing during local development and CI.
+- **Standardize behavior** by centralizing configuration in Maven properties and plugin parameters.
+- **Support different build strategies** with both single-project aggregation (`gw:gw`) and reactor-ordered processing (`gw:reactor`).
 
-At runtime, the plugin configures a Ghostwriter `FileProcessor`, applies configuration (instructions, default guidance, excludes, optional credential mapping), then scans from a configurable root directory (typically the Maven execution root) to build the input set for processing.
+Under the hood, the plugin configures Ghostwriter processing (instructions, default guidance, excludes, provider configuration, and optional credential mapping), scans from a configurable root directory, and passes the resolved inputs to Ghostwriter for guided updates.
 
 ## Key Features
 
-- Scans **all relevant project files** (code, docs, site pages, and other content) for embedded `@guidance:` instructions.
+- Scans **all relevant project files** (source code, documentation, Maven Site content, and more) for embedded `@guidance:` instructions.
 - Goal **`gw:gw`** is an **aggregator** goal and can run **without a `pom.xml`** (`requiresProject=false`).
 - Supports **multi-module** builds and can process modules using the Maven reactor.
 - Optional **multi-threaded module processing** for `gw:gw` via `-Dgw.threads=true`.
@@ -105,8 +105,6 @@ mvn gw:gw
 5. Review and commit the updated/generated artifacts.
 
 ## Configuration
-
-Common parameters are defined on the shared base goal (`AbstractGWGoal`). Additional goal-specific parameters include `gw.threads` (`gw:gw`) and `gw.rootProjectLast` (`gw:reactor`).
 
 | Parameter / Property | Description | Default |
 |---|---|---|

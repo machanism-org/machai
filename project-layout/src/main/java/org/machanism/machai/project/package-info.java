@@ -1,7 +1,7 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>This package provides core entry points for:
+ * <p>This package provides the core entry points for:
  *
  * <ul>
  *   <li>Inspecting a candidate project root directory and determining its on-disk structure (its <em>layout</em>).</li>

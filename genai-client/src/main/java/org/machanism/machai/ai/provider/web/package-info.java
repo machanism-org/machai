@@ -29,33 +29,29 @@
 /**
  * Web UI automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>This package provides {@link org.machanism.machai.ai.provider.web.WebProvider}, which obtains model responses by
- * automating a target GenAI service through its web user interface using
+ * <p>This package contains {@link org.machanism.machai.ai.provider.web.WebProvider}, which obtains model responses by
+ * driving a target GenAI service through its browser-based user interface using
  * <a href="https://ganteater.com">Anteater</a> workspace recipes.
  *
+ * <h2>How it works</h2>
+ * <p>{@link org.machanism.machai.ai.provider.web.WebProvider} maintains a shared (static) Anteater workspace instance.
+ * Callers select an Anteater configuration via {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)},
+ * set the workspace start directory and variables via
+ * {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}, then execute the automation
+ * flow via {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}.
+ *
  * <h2>Typical usage</h2>
- * <p>Callers typically configure the target automation recipe ("model") and working directory, then execute the
- * automation to obtain a response.
- *
  * <pre>{@code
- * WebProvider provider = new WebProvider()
- *     .model("openai-chatgpt")
- *     .setWorkingDir(new File("C:\\anteater-workspace"));
+ * WebProvider provider = new WebProvider();
+ * provider.model("openai-chatgpt");
+ * provider.setWorkingDir(new File("C:\\anteater-workspace"));
  *
- * GenAIResponse response = provider.perform();
- * System.out.println(response.text());
+ * String responseText = provider.perform();
+ * System.out.println(responseText);
  * }</pre>
  *
- * <h2>Lifecycle</h2>
- * <ol>
- *   <li>Select the Anteater configuration via {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)}.</li>
- *   <li>Initialize the workspace via
- *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}.</li>
- *   <li>Execute automation and obtain the response via {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}.</li>
- * </ol>
- *
  * <h2>State and thread safety</h2>
- * <p>Automation is not thread-safe. The underlying workspace is held in static state and is initialized once per JVM;
- * attempts to change the working directory or configuration after initialization result in an error.
+ * <p>Automation is not thread-safe. Workspace state is stored in static fields and is intended to be initialized once
+ * per JVM; attempts to change the working directory or configuration after initialization will fail.
  */
 package org.machanism.machai.ai.provider.web;

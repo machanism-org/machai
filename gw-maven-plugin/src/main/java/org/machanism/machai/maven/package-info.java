@@ -3,10 +3,8 @@
  * document processing into Maven builds.
  *
  * <p>
- * The goals in this package locate documentation sources (for example under {@code src/site}), apply any configured
- * include/exclude rules, and invoke MachAI's guided workflow processing pipeline. Goals share a common configuration
- * surface (see {@link org.machanism.machai.maven.AbstractGWGoal}) and differ primarily in how they traverse
- * multi-module projects.
+ * The goals in this package locate documentation sources (for example under {@code src/site}), apply configured
+ * include/exclude rules, and invoke MachAI's guided workflow processing pipeline.
  * </p>
  *
  * <h2>Goals</h2>

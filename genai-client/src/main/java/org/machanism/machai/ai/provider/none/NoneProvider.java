@@ -218,7 +218,7 @@ public class NoneProvider implements GenAIProvider {
 	 */
 	@Override
 	public void model(String chatModelName) {
-		// No-op in NoneProvider
+		// No-op.
 	}
 
 	/**
@@ -228,7 +228,7 @@ public class NoneProvider implements GenAIProvider {
 	 */
 	@Override
 	public void setWorkingDir(File workingDir) {
-		// No-op
+		// No-op.
 	}
 
 	/**
@@ -255,7 +255,7 @@ public class NoneProvider implements GenAIProvider {
 	 */
 	@Override
 	public void close() {
-		// No-op
+		// No-op.
 	}
 
 	/**
@@ -267,7 +267,7 @@ public class NoneProvider implements GenAIProvider {
 	 */
 	@Override
 	public void init(Configurator conf) {
-		// No-op
+		// No-op.
 	}
 
 }

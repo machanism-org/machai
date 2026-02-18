@@ -28,56 +28,37 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Provides tools for fetching web content and executing REST API calls, and
- * installs them into a {@link GenAIProvider} for use in GenAI-powered
- * workflows.
+ * Installs HTTP retrieval tools into a {@link GenAIProvider}.
  *
  * <p>
- * The main tools installed are:
+ * This tool set provides two host-side functions:
+ * </p>
  * <ul>
- * <li>{@code get_web_content} – Fetches the content of a web page using an HTTP
- * GET request. Supports returning either the full HTML content or plain text
- * (HTML tags stripped).</li>
- * <li>{@code call_rest_api} – Executes a REST API call to the specified URL
- * using the given HTTP method (GET, POST, PUT, PATCH, DELETE, etc.), with
- * support for custom headers and request body.</li>
+ * <li>{@code get_web_content} – Fetches web page content over HTTP(S) via GET and
+ * optionally returns plain text or content selected via a CSS selector.</li>
+ * <li>{@code call_rest_api} – Executes a generic REST call using an arbitrary
+ * HTTP method with optional headers and request body.</li>
  * </ul>
  *
- * <h2>HTTP Header Variable Placeholders</h2>
+ * <h2>Header variable placeholders</h2>
  * <p>
- * When specifying HTTP headers for either tool, you can use variable
- * placeholders in the header value. Placeholders are written in the format
- * <b>{@code ${propertyName}}</b>. At runtime, the value will be resolved using
- * the {@link Configurator} instance provided to this class. If the property is
- * not found, the original value is used.
- * </p>
- * <p>
- * Example header string:
- * 
- * <pre>
- * Authorization=Bearer ${apiToken}
- * Content-Type=application/json
- * </pre>
- * <ul>
- * <li>{@code Authorization} header will be set to {@code Bearer <value>} where
- * {@code <value>} is resolved from {@code apiToken} in the configurator.</li>
- * <li>{@code Content-Type} header will be set to {@code application/json}.</li>
- * </ul>
- *
- * <h2>Network Policy</h2>
- * <p>
- * This class does not enforce outbound network policies (such as allow/deny
- * lists). Such controls must be implemented by the hosting application.
+ * Header values may include placeholders in the form ${propertyName}. When a
+ * {@link Configurator} is provided via {@link #setConfigurator(Configurator)},
+ * those placeholders are resolved at runtime.
  * </p>
  *
- * <h2>Usage</h2>
- * <ol>
- * <li>Instantiate and configure {@code WebPageFunctionTools} with a
- * {@link Configurator} if variable resolution is needed.</li>
- * <li>Call {@link #applyTools(GenAIProvider)} to register the tools.</li>
- * <li>Invoke the tools via the provider, passing parameters as described in the
- * tool documentation.</li>
- * </ol>
+ * <h2>Authentication</h2>
+ * <p>
+ * HTTP Basic authentication is supported via the URL {@code userInfo} component
+ * (for example {@code https://user:password@host/path}), which is converted into
+ * an {@code Authorization: Basic ...} header. You can also specify an explicit
+ * {@code Authorization} header.
+ * </p>
+ *
+ * <p>
+ * Outbound network policy (allow/deny lists) is intentionally left to the host
+ * application.
+ * </p>
  *
  * @author Viktor Tovstyi
  */
@@ -90,73 +71,17 @@ public class WebPageFunctionTools implements FunctionTools {
 
 	private static final String defaultCharset = "UTF-8";
 
+	/**
+	 * Optional configuration source used to resolve ${...} placeholders in header
+	 * values.
+	 */
 	private Configurator configurator;
 
 	/**
-	 * Registers web content and REST API functional tools with the provided
+	 * Registers web content and REST API function tools with the provided
 	 * {@link GenAIProvider}.
-	 * <p>
-	 * The following tools are installed:
-	 * <ul>
-	 * <li><b>get_web_content</b> – Fetches the content of a web page using an HTTP
-	 * GET request. <br>
-	 * The URL may include user credentials in the userInfo format (e.g.,
-	 * {@code https://user:password@host/path}) for basic authentication. <br>
-	 * <b>Parameters:</b>
-	 * <ul>
-	 * <li><b>url</b> (string, required): The URL of the web page to fetch. Supports
-	 * userInfo format for basic authentication.</li>
-	 * <li><b>headers</b> (string, optional): HTTP headers as a single string, with
-	 * each header in the format {@code NAME=VALUE}, separated by newline characters
-	 * ({@code \n}). If {@code null}, no additional headers are sent.</li>
-	 * <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to
-	 * wait for the HTTP response. If not specified, a default timeout will be
-	 * used.</li>
-	 * <li><b>charsetName</b> (string, optional): The name of the character set to
-	 * use when decoding the response content. Defaults to the value of
-	 * {@code defaultCharset}.</li>
-	 * <li><b>textOnly</b> (boolean, optional): If {@code true}, only the plain text
-	 * content of the web page is returned (HTML tags are stripped). If
-	 * {@code false} or not specified, the full HTML content is returned.</li>
-	 * <li><b>cssSelectorQuery</b> (string, optional): If provided, extracts and
-	 * returns only the content matching the specified CSS selector. If
-	 * {@code textOnly} is also {@code true}, returns only the text of the selected
-	 * elements; otherwise, returns their HTML.</li>
-	 * </ul>
-	 * </li>
-	 * <li><b>call_rest_api</b> – Executes a REST API call to the specified URL
-	 * using the given HTTP method. <br>
-	 * The URL may include user credentials in the userInfo format (e.g.,
-	 * {@code https://user:password@host/path}) for basic authentication. <br>
-	 * <b>Parameters:</b>
-	 * <ul>
-	 * <li><b>url</b> (string, required): The URL of the REST endpoint. Supports
-	 * userInfo format for basic authentication.</li>
-	 * <li><b>method</b> (string, optional): The HTTP method to use (GET, POST, PUT,
-	 * PATCH, DELETE, etc.). Default is GET.</li>
-	 * <li><b>headers</b> (string, optional): HTTP headers as a single string, with
-	 * each header in the format {@code NAME=VALUE}, separated by newline characters
-	 * ({@code \n}). If {@code null}, no additional headers are sent.</li>
-	 * <li><b>body</b> (string, optional): The request body to send (for POST, PUT,
-	 * PATCH, etc.).</li>
-	 * <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to
-	 * wait for the HTTP response. If not specified, a default timeout will be
-	 * used.</li>
-	 * <li><b>charsetName</b> (string, optional): The name of the character set to
-	 * use when decoding the response content. Defaults to the value of
-	 * {@code defaultCharset}.</li>
-	 * </ul>
-	 * </li>
-	 * </ul>
-	 * <p>
-	 * Both tools support variable placeholders in header values (e.g.,
-	 * ${propertyName}), which are resolved using the {@link Configurator} if
-	 * available. <br>
-	 * For HTTP Basic Authentication, you may either use the userInfo format in the
-	 * URL or set the {@code Authorization} header directly.
 	 *
-	 * @param provider the {@link GenAIProvider} instance to which the tools will be
-	 *                 registered
+	 * @param provider the provider to register tools with
 	 */
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("get_web_content",
@@ -183,59 +108,34 @@ public class WebPageFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Fetches the content of a web page using an HTTP GET request, with support for
-	 * custom headers, timeout, character set, plain text extraction, and CSS
-	 * selector-based content extraction.
-	 * <p>
-	 * This method allows for flexible web content retrieval and post-processing. It
-	 * supports extracting only the plain text from the page, or extracting and
-	 * returning only the content matching a specified CSS selector.
-	 * <p>
-	 * The method expects the first element of {@code params} to be a
-	 * {@link JsonNode} containing the following properties:
-	 * <ul>
-	 * <li><b>url</b> (string, required): The URL of the web page to fetch.</li>
-	 * <li><b>headers</b> (string, optional): HTTP headers as a single string, with
-	 * each header in the format {@code NAME=VALUE}, separated by newline characters
-	 * ({@code \n}). If {@code null}, no additional headers are sent. <br>
-	 * Supports variable placeholders in the format {@code ${propertyName}}, which
-	 * are resolved using the {@link Configurator} if available. <br>
-	 * To use HTTP Basic Authentication, include an {@code Authorization} header
-	 * with the value {@code Basic <base64-encoded-credentials>}.</li>
-	 * <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to
-	 * wait for the HTTP response. Defaults to the class constant {@code TIMEOUT} if
-	 * not specified.</li>
-	 * <li><b>charsetName</b> (string, optional): The name of the character set to
-	 * use when decoding the response content. Defaults to the class constant
-	 * {@code defaultCharset}.</li>
-	 * <li><b>textOnly</b> (boolean, optional): If {@code true}, only the plain text
-	 * content of the web page is returned (HTML tags are stripped using jsoup). If
-	 * {@code false} or not specified, the full HTML content is returned.</li>
-	 * <li><b>cssSelectorQuery</b> (string, optional): If provided, extracts and
-	 * returns only the content matching the specified CSS selector. If
-	 * {@code textOnly} is also {@code true}, returns only the text of the selected
-	 * elements; otherwise, returns their HTML.</li>
-	 * </ul>
-	 * <p>
-	 * <b>Behavior:</b>
-	 * <ul>
-	 * <li>If {@code cssSelectorQuery} is provided and not empty, the method uses
-	 * jsoup to select matching elements from the HTML response. The returned
-	 * content is either the text or HTML of those elements, depending on
-	 * {@code textOnly}.</li>
-	 * <li>If {@code cssSelectorQuery} is not provided but {@code textOnly} is
-	 * {@code true}, the method returns the plain text of the entire page.</li>
-	 * <li>If neither {@code cssSelectorQuery} nor {@code textOnly} is set, the
-	 * method returns the full HTML response.</li>
-	 * </ul>
-	 * <p>
-	 * The method logs the request and response details, and returns the requested
-	 * content as a string. If an error occurs, an error message is returned.
+	 * Retrieves web content via an HTTP GET request.
 	 *
-	 * @param params an array where the first element is a {@link JsonNode}
-	 *               containing the web content fetch parameters
-	 * @return the fetched web content as a string (plain text, HTML, or selected
-	 *         content), or an error message if the request fails
+	 * <p>
+	 * Parameters are passed in {@code params}:
+	 * </p>
+	 * <ol>
+	 * <li>{@link JsonNode} containing the tool arguments</li>
+	 * <li>(optional) additional runtime-supplied arguments, ignored by this tool</li>
+	 * </ol>
+	 *
+	 * <p>
+	 * Supported JSON properties:
+	 * </p>
+	 * <ul>
+	 * <li>{@code url} (required) – target URL</li>
+	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE} pairs</li>
+	 * <li>{@code timeout} (optional) – timeout in milliseconds (default
+	 * {@value #TIMEOUT})</li>
+	 * <li>{@code charsetName} (optional) – response decoding charset (default
+	 * {@code UTF-8})</li>
+	 * <li>{@code textOnly} (optional) – if {@code true}, strips HTML to plain text</li>
+	 * <li>{@code cssSelectorQuery} (optional) – extracts content matching the CSS
+	 * selector (text or HTML depending on {@code textOnly})</li>
+	 * </ul>
+	 *
+	 * @param params tool arguments
+	 * @return response content (including an initial HTTP status line) or an error
+	 *         message
 	 */
 	public String getWebContent(Object[] params) {
 		String requestId = Integer.toHexString(new Random().nextInt());
@@ -289,6 +189,20 @@ public class WebPageFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Creates and configures an {@link HttpURLConnection}.
+	 *
+	 * <p>
+	 * If the URL contains {@code userInfo}, it is removed from the URL and used to
+	 * set an HTTP Basic {@code Authorization} header.
+	 * </p>
+	 *
+	 * @param url         URL to connect to
+	 * @param headers     optional headers (newline-separated {@code NAME=VALUE})
+	 * @param charsetName charset name (currently unused, but kept for API symmetry)
+	 * @return connection
+	 * @throws IOException if opening a connection fails
+	 */
 	private HttpURLConnection getConnection(URL url, String headers, String charsetName) throws IOException {
 		url = new URL(replace(url.toString(), configurator));
 		try {
@@ -318,15 +232,11 @@ public class WebPageFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Performs the HTTP request and returns the response content.
-	 * 
-	 * @param connection
-	 * @param headers     optional headers as {@code NAME=VALUE} pairs separated by
-	 *                    newlines
+	 * Performs the HTTP GET request and returns the response content.
+	 *
+	 * @param connection  open connection
 	 * @param timeout     timeout in milliseconds
 	 * @param charsetName charset used to decode the response
-	 * @param url         URL to fetch
-	 *
 	 * @return response content including an initial status line
 	 * @throws IOException if the request cannot be executed
 	 */
@@ -354,58 +264,25 @@ public class WebPageFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Executes a REST API call to the specified URL using the provided HTTP method,
-	 * headers, request body, and other options.
-	 * <p>
-	 * This method supports a wide range of REST operations (GET, POST, PUT, PATCH,
-	 * DELETE, etc.) and allows for custom configuration of headers, timeouts,
-	 * character encoding, and request body. It also supports HTTP Basic
-	 * Authentication via headers.
-	 * <p>
-	 * The method expects the first element of {@code params} to be a
-	 * {@link JsonNode} containing the following properties:
-	 * <ul>
-	 * <li><b>url</b> (string, required): The URL of the REST endpoint to call.</li>
-	 * <li><b>method</b> (string, optional): The HTTP method to use (e.g., GET,
-	 * POST, PUT, PATCH, DELETE). Defaults to GET if not specified.</li>
-	 * <li><b>headers</b> (string, optional): HTTP headers as a single string, with
-	 * each header in the format {@code NAME=VALUE}, separated by newline characters
-	 * ({@code \n}). If {@code null}, no additional headers are sent. <br>
-	 * Supports variable placeholders in the format {@code ${propertyName}}, which
-	 * are resolved using the {@link Configurator} if available. <br>
-	 * To use HTTP Basic Authentication, include an {@code Authorization} header
-	 * with the value {@code Basic <base64-encoded-credentials>}.</li>
-	 * <li><b>body</b> (string, optional): The request body to send (for POST, PUT,
-	 * PATCH, etc.). Ignored for GET and DELETE requests.</li>
-	 * <li><b>timeout</b> (integer, optional): The maximum time in milliseconds to
-	 * wait for the HTTP response. Defaults to the class constant {@code TIMEOUT} if
-	 * not specified.</li>
-	 * <li><b>charsetName</b> (string, optional): The name of the character set to
-	 * use when encoding the request body and decoding the response content.
-	 * Defaults to the class constant {@code defaultCharset}.</li>
-	 * </ul>
-	 * <p>
-	 * <b>Example usage:</b>
-	 * 
-	 * <pre>
-	 * {
-	 *   "url": "https://api.example.com/resource",
-	 *   "method": "POST",
-	 *   "headers": "Authorization=Basic dXNlcjpwYXNz\nContent-Type=application/json",
-	 *   "body": "{\"key\":\"value\"}",
-	 *   "timeout": 5000,
-	 *   "charsetName": "UTF-8"
-	 * }
-	 * </pre>
-	 * <p>
-	 * The method logs the request and response details, and returns the full HTTP
-	 * response as a string, including the status line. If an error occurs, an error
-	 * message is returned.
+	 * Executes an HTTP request against the provided endpoint.
 	 *
-	 * @param params an array where the first element is a {@link JsonNode}
-	 *               containing the REST call parameters
-	 * @return the HTTP response as a string (including status line and body), or an
-	 *         error message if the request fails
+	 * <p>
+	 * Supported JSON properties:
+	 * </p>
+	 * <ul>
+	 * <li>{@code url} (required) – endpoint URL</li>
+	 * <li>{@code method} (optional) – HTTP method (default {@code GET})</li>
+	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE} pairs</li>
+	 * <li>{@code body} (optional) – request body (used for POST/PUT/PATCH only)</li>
+	 * <li>{@code timeout} (optional) – timeout in milliseconds (default
+	 * {@value #TIMEOUT})</li>
+	 * <li>{@code charsetName} (optional) – request/response charset (default
+	 * {@code UTF-8})</li>
+	 * </ul>
+	 *
+	 * @param params tool arguments
+	 * @return response content including an initial HTTP status line, or an error
+	 *         message
 	 */
 	public String callRestApi(Object[] params) {
 		String requestId = Integer.toHexString(new Random().nextInt());
@@ -431,7 +308,6 @@ public class WebPageFunctionTools implements FunctionTools {
 			connection.setConnectTimeout(timeout);
 			connection.setReadTimeout(timeout);
 
-			// Write body for POST, PUT, PATCH, etc.
 			if (body != null && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
 					|| "PATCH".equalsIgnoreCase(method))) {
 				connection.setDoOutput(true);
@@ -464,6 +340,17 @@ public class WebPageFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Applies headers to the connection.
+	 *
+	 * <p>
+	 * Each header line must be in the form {@code NAME=VALUE}. Header values may
+	 * include ${...} placeholders.
+	 * </p>
+	 *
+	 * @param headers    newline-separated header definitions
+	 * @param connection connection to configure
+	 */
 	private void fillHeader(String headers, HttpURLConnection connection) {
 		if (headers != null) {
 			for (String headerLine : headers.split("\\R")) {
@@ -479,7 +366,19 @@ public class WebPageFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Resolves ${...} placeholders using the provided configurator.
+	 *
+	 * @param value raw value that may contain placeholders
+	 * @param conf  configurator used for lookup; if {@code null}, the value is
+	 *              returned unchanged
+	 * @return resolved value
+	 */
 	private String replace(String value, Configurator conf) {
+		if (value == null || conf == null) {
+			return value;
+		}
+
 		Properties properties = new Properties();
 
 		Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
@@ -487,13 +386,19 @@ public class WebPageFunctionTools implements FunctionTools {
 		while (matcher.find()) {
 			String propName = matcher.group(1);
 			String propValue = conf.get(propName);
-			properties.put(propName, propValue);
+			if (propValue != null) {
+				properties.put(propName, propValue);
+			}
 		}
 
-		value = StringSubstitutor.replace(value, properties);
-		return value;
+		return StringSubstitutor.replace(value, properties);
 	}
 
+	/**
+	 * Supplies configuration for resolving header placeholders.
+	 *
+	 * @param configurator configurator to use (may be {@code null})
+	 */
 	@Override
 	public void setConfigurator(Configurator configurator) {
 		this.configurator = configurator;

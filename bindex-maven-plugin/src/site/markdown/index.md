@@ -96,6 +96,7 @@ mvn org.machanism.machai:bindex-maven-plugin:bindex -Dupdate=true
 
 ## Resources
 
+- [Machai platform](https://machai.machanism.org)
 - [Maven Central artifact](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 - [GitHub repository](https://github.com/machanism-org/machai)
 - [Maven](https://maven.apache.org)

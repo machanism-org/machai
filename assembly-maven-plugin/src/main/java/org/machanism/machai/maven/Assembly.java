@@ -29,7 +29,7 @@ import org.machanism.machai.schema.Bindex;
  * Maven {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly} goal.
  *
  * <p>
- * This goal drives an AI-assisted "assembly" workflow for a target project directory:
+ * This goal drives an AI-assisted "assembly" workflow for the Maven execution {@link #basedir}:
  * </p>
  * <ol>
  * <li>Acquire a natural-language prompt from {@link #assemblyPromptFile} (if present) or request it interactively.</li>

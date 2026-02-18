@@ -1,8 +1,14 @@
 package org.machanism.machai.bindex;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Language;
 
 class PickerTest {
@@ -18,5 +24,75 @@ class PickerTest {
 
         // Assert
         assertEquals("java", normalized);
+    }
+
+    @Test
+    void getScore_whenIdNotPresent_returnsNull() throws Exception {
+        // Arrange
+        Picker picker = new Picker(null, "mongodb://localhost");
+
+        // Act
+        Double score = picker.getScore("missing");
+
+        // Assert
+        assertNull(score);
+
+        // Cleanup
+        picker.close();
+    }
+
+    @Test
+    void setEmbeddingModelName_andGetEmbeddingModelName_roundTrip() throws Exception {
+        // Arrange
+        Picker picker = new Picker(null, "mongodb://localhost");
+
+        // Act
+        picker.setEmbeddingModelName("custom-model");
+
+        // Assert
+        assertEquals("custom-model", picker.getEmbeddingModelName());
+
+        // Cleanup
+        picker.close();
+    }
+
+    @Test
+    void addDependencies_whenTransitiveAndCycles_collectsUniqueIds() throws Exception {
+        // Arrange
+        Picker picker = new Picker(null, "mongodb://localhost") {
+            @Override
+            protected Bindex getBindex(String id) {
+                if ("a".equals(id)) {
+                    Bindex b = new Bindex();
+                    b.setId("a");
+                    b.setDependencies(List.of("b", "c"));
+                    return b;
+                }
+                if ("b".equals(id)) {
+                    Bindex b = new Bindex();
+                    b.setId("b");
+                    b.setDependencies(List.of("c"));
+                    return b;
+                }
+                if ("c".equals(id)) {
+                    Bindex b = new Bindex();
+                    b.setId("c");
+                    b.setDependencies(List.of("a"));
+                    return b;
+                }
+                return null;
+            }
+        };
+
+        Set<String> deps = new HashSet<>();
+
+        // Act
+        picker.addDependencies(deps, "a");
+
+        // Assert
+        assertEquals(Set.of("a", "b", "c"), deps);
+
+        // Cleanup
+        picker.close();
     }
 }

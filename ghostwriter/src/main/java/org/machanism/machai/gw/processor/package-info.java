@@ -39,28 +39,25 @@
  */
 
 /**
- * Provides the Ghostwriter command-line application entry point and the core processor that
- * traverses project directories, extracts per-file {@code @guidance} directives, and delegates
- * the resulting prompts to a configured GenAI provider.
+ * Project scanning and prompt orchestration for the Ghostwriter CLI.
  *
  * <p>
- * The primary entry point is {@link org.machanism.machai.gw.processor.Ghostwriter}, which parses CLI options,
- * loads configuration, and creates a {@link org.machanism.machai.gw.processor.FileProcessor} instance.
- * The {@code FileProcessor} walks a project tree (including multi-module layouts) using a child-first traversal
- * strategy and invokes a configured {@link org.machanism.machai.ai.manager.GenAIProvider} with composed prompts.
+ * This package contains the command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter})
+ * and the filesystem-based processor ({@link org.machanism.machai.gw.processor.FileProcessor}) that traverses
+ * a project directory tree. For each supported file, Ghostwriter extracts embedded {@code @guidance:}
+ * directives using extension-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations and
+ * submits the composed prompts to a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
  * </p>
  *
- * <h2>Key Concepts</h2>
+ * <h2>Processing Model</h2>
  * <ul>
- * <li><b>Reviewer-based extraction</b>: Guidance is extracted per file by
- * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations selected by file extension.</li>
- * <li><b>Project-layout awareness</b>: Traversal honors {@link org.machanism.machai.project.layout.ProjectLayout}
- * metadata for sources, tests, documents, and modules.</li>
- * <li><b>No dependency resolution</b>: Scanning is filesystem-based and does not run builds or resolve dependencies.</li>
+ * <li><b>Child-first module traversal</b>: In multi-module layouts, modules are processed before the parent.</li>
+ * <li><b>No dependency resolution</b>: Processing is purely filesystem-based; builds are not executed.</li>
+ * <li><b>Layout-aware scanning</b>: Traversal uses {@link org.machanism.machai.project.layout.ProjectLayout}
+ * metadata (sources, tests, documents, modules) to describe project structure in prompts.</li>
  * </ul>
  *
  * <h2>Typical Usage</h2>
- * <p>Run from the command line:</p>
  * <pre>{@code
  * java -jar gw.jar . --genai OpenAI:gpt-5-mini --threads true
  * }</pre>

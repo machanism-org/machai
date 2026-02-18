@@ -27,26 +27,19 @@
  */
 
 /**
- * Manager and service provider interfaces (SPI) for GenAI integrations.
+ * Manager and service provider interfaces (SPI) for selecting and operating GenAI provider integrations.
  *
- * <p>This package contains the core abstractions that allow the application to select and operate a concrete
- * generative-AI provider (for example OpenAI, Gemini, a local model, or a no-op provider) at runtime. The
- * abstractions focus on:
- *
+ * <p>This package provides the core abstractions used by the application to:
  * <ul>
- *   <li>building a request (instructions, prompts, and optional attachments/tooling),</li>
- *   <li>executing a provider run and returning the textual result, and</li>
- *   <li>capturing and aggregating token usage metrics.</li>
+ *   <li>resolve a concrete {@link org.machanism.machai.ai.manager.GenAIProvider} implementation by identifier,</li>
+ *   <li>configure it with a specific model and application {@code Configurator},</li>
+ *   <li>execute a completion run via {@link org.machanism.machai.ai.manager.GenAIProvider#perform()}, and</li>
+ *   <li>collect and aggregate token {@link org.machanism.machai.ai.manager.Usage} metrics across runs.</li>
  * </ul>
  *
- * <h2>Key types</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider} &ndash; fluent provider contract for collecting input
- *   and executing a run.</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenAIProviderManager} &ndash; factory/registry for resolving a provider
- *   implementation by {@code Provider:Model} identifier and for aggregating usage.</li>
- *   <li>{@link org.machanism.machai.ai.manager.Usage} &ndash; immutable token usage metrics for a single provider run.</li>
- * </ul>
+ * <p>The main entry point is {@link org.machanism.machai.ai.manager.GenAIProviderManager}, which creates provider
+ * instances from a {@code Provider:Model} identifier. Providers may also be referenced by fully qualified class
+ * name.
  *
  * <h2>Typical usage</h2>
  * <pre>{@code

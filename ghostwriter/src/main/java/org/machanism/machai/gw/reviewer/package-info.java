@@ -6,12 +6,19 @@
  * multiple file types. Each implementation understands the target format's comment conventions (for example,
  * Java block/line comments, HTML comments, or Python comments) and returns a normalized prompt fragment.
  *
- * <p>Reviewers generally return {@code null} when no relevant guidance is present in the analyzed file. When
- * guidance is detected, implementations typically format a prompt fragment via the {@code document-prompts}
- * resource bundle and include path context computed by
- * {@link org.machanism.machai.project.layout.ProjectLayout}.
+ * <p>A reviewer returns a formatted prompt fragment when guidance is detected in a file; otherwise it returns
+ * {@code null}.
  *
- * <p>This package provides reviewers for Java ({@code .java}, including {@code package-info.java}), TypeScript
+ * <p>Implementations are responsible for:
+ * <ul>
+ *   <li>Detecting guidance markers in the target file format (for example, {@code // @guidance: ...} in Java or
+ *       {@code <!-- @guidance: ... -->} in HTML/Markdown).</li>
+ *   <li>Producing a prompt fragment using the {@code document-prompts} resource bundle.</li>
+ *   <li>Including file and/or directory context based on paths computed by
+ *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
+ * </ul>
+ *
+ * <p>This package includes reviewers for Java ({@code .java}, including {@code package-info.java}), TypeScript
  * ({@code .ts}), Python ({@code .py}), HTML/XML ({@code .html}, {@code .htm}, {@code .xml}), Markdown
  * ({@code .md}), and a generic text reviewer for {@code @guidance.txt} files.
  */

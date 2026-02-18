@@ -1,8 +1,8 @@
 package org.machanism.machai.bindex;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -50,7 +51,20 @@ class ApplicationAssemblyTest {
     }
 
     @Test
-    void assembly_whenPromptThrowsRuntimeException_propagatesRuntimeException() throws Exception {
+    void assembly_whenInputsLogThrowsRuntimeException_propagatesRuntimeException() throws Exception {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        doThrow(new RuntimeException("fail")).when(provider).inputsLog(eq(new File(tempDir, ".machai/assembly-inputs.txt")));
+
+        ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir);
+
+        // Act / Assert
+        assertThrows(RuntimeException.class,
+                () -> assembly.assembly("do something", Collections.emptyList()));
+    }
+
+    @Test
+    void assembly_whenPromptThrowsRuntimeException_propagatesRuntimeException() {
         // Arrange
         GenAIProvider provider = mock(GenAIProvider.class);
         doThrow(new RuntimeException("boom")).when(provider).prompt(anyString());
@@ -75,7 +89,7 @@ class ApplicationAssemblyTest {
         ApplicationAssembly returned = assembly.projectDir(tempDir);
 
         // Assert
-        assertEquals(assembly, returned);
+        assertSame(assembly, returned);
     }
 
     @Test
@@ -102,6 +116,21 @@ class ApplicationAssemblyTest {
         // Assert
         verify(provider).prompt(contains("id-1"));
         verify(provider).prompt(contains("id-2"));
+        verify(provider).perform();
+    }
+
+    @Test
+    void assembly_whenBindexListIsEmpty_stillPerforms() {
+        // Arrange
+        GenAIProvider provider = mock(GenAIProvider.class);
+        when(provider.perform()).thenReturn("ok");
+
+        ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir);
+
+        // Act
+        assembly.assembly("assemble", List.of());
+
+        // Assert
         verify(provider).perform();
     }
 }

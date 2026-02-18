@@ -267,8 +267,10 @@ public final class Ghostwriter {
 	/**
 	 * Prints the Ghostwriter CLI help text, including usage instructions, option
 	 * descriptions, and example commands.
+	 *
 	 * <p>
 	 * The help message covers:
+	 * </p>
 	 * <ul>
 	 * <li>General description of the Ghostwriter CLI for scanning and processing
 	 * directories or files using GenAI guidance.</li>
@@ -280,7 +282,7 @@ public final class Ghostwriter {
 	 * <li>If an absolute path is provided, it must be located within the root
 	 * project directory.</li>
 	 * <li>Supports raw directory names, glob patterns (e.g.,
-	 * {@code glob:** /*.java}), and regex patterns (e.g.,
+	 * {@code glob:**\/*.java}), and regex patterns (e.g.,
 	 * {@code regex:^.*\/[^\/]+\.java$}).</li>
 	 * </ul>
 	 * </li>

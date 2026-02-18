@@ -26,56 +26,49 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 
 /**
- * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a
- * project.
+ * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a project.
  *
  * <p>
- * This goal is an aggregator and can be executed even when a {@code pom.xml} is
- * not present in the current directory.
+ * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present in the current directory.
  * </p>
  *
  * <h2>Processing order</h2>
  * <p>
- * The {@code gw:gw} goal processes files in reverse order, similar to the
- * Ghostwriter CLI: sub-modules are processed first, followed by parent modules.
- * For more details, see:
- * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided
- * file processing</a>.
+ * The {@code gw:gw} goal processes files in reverse order, similar to the Ghostwriter CLI: sub-modules are processed
+ * first, followed by parent modules. For more details, see:
+ * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided file processing</a>.
  * </p>
  *
  * <h2>Parameters</h2>
  *
  * <p>
- * This goal defines the following parameter in addition to those inherited from
- * {@link AbstractGWGoal}.
+ * This goal defines the following parameter in addition to those inherited from {@link AbstractGWGoal}.
  * </p>
  * <dl>
- * <dt>{@code -Dgw.threads}</dt>
- * <dd>Enables or disables multi-threaded module processing. Default:
- * {@code false}.</dd>
+ * <dt>{@code -Dgw.threads} / {@code <threads>}</dt>
+ * <dd>
+ * Enables or disables multi-threaded module processing.
+ * <p>
+ * Default: {@code false}
+ * </p>
+ * </dd>
  * </dl>
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
- * <li><b>{@code gw.genai}</b> / {@code <genai>} ({@code genai}): Provider/model
- * identifier to pass to the workflow.</li>
- * <li><b>{@code ${basedir}}</b> ({@code basedir}): The Maven module base
- * directory.</li>
- * <li><b>{@code gw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}): Optional
- * scan root override. When omitted, defaults to the execution root
- * directory.</li>
- * <li><b>{@code gw.instructions}</b> / {@code <instructions>}
- * ({@code instructions}): Instruction locations (for example, file paths or
- * classpath locations) consumed by the workflow.</li>
- * <li><b>{@code gw.guidance}</b> / {@code <guidance>} ({@code guidance}):
- * Default guidance text forwarded to the workflow.</li>
- * <li><b>{@code gw.excludes}</b> / {@code <excludes>} ({@code excludes}):
- * Exclude patterns/paths that should be skipped when scanning documentation
- * sources.</li>
- * <li><b>{@code gw.genai.serverId}</b> ({@code serverId}): {@code settings.xml}
- * {@code <server>} id used to read GenAI credentials.</li>
- * <li><b>{@code gw.logInputs}</b> ({@code logInputs}): Whether to log the list
- * of input files passed to the workflow.
+ * <li><b>{@code gw.genai}</b> / {@code <genai>} ({@code genai}): Provider/model identifier to pass to the workflow.</li>
+ * <li><b>{@code ${basedir}}</b> ({@code basedir}): The Maven module base directory.</li>
+ * <li><b>{@code gw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}): Optional scan root override. When omitted,
+ * defaults to the execution root directory.</li>
+ * <li><b>{@code gw.instructions}</b> / {@code <instructions>} ({@code instructions}): Instruction locations (for
+ * example, file paths or classpath locations) consumed by the workflow.</li>
+ * <li><b>{@code gw.guidance}</b> / {@code <guidance>} ({@code guidance}): Default guidance text forwarded to the
+ * workflow.</li>
+ * <li><b>{@code gw.excludes}</b> / {@code <excludes>} ({@code excludes}): Exclude patterns/paths that should be skipped
+ * when scanning documentation sources.</li>
+ * <li><b>{@code gw.genai.serverId}</b> ({@code serverId}): {@code settings.xml} {@code <server>} id used to read GenAI
+ * credentials.</li>
+ * <li><b>{@code gw.logInputs}</b> ({@code logInputs}): Whether to log the list of input files passed to the workflow.
  * <p>
  * Default: {@code false}
  * </p>
@@ -83,8 +76,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </ul>
  *
  * <p>
- * Refer to {@link AbstractGWGoal} for the authoritative list and exact
- * semantics of inherited parameters.
+ * Refer to {@link AbstractGWGoal} for the authoritative list and exact semantics of inherited parameters.
  * </p>
  *
  * <h2>Usage examples</h2>
@@ -182,7 +174,6 @@ public class GW extends AbstractGWGoal {
 		try {
 			scanDocuments(processor);
 		} catch (ProcessTerminationException e) {
-			// Optionally log the exit code
 			getLog().error("Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")");
 			throw new MojoExecutionException(
 					"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
