@@ -165,17 +165,8 @@ public class OpenAIProvider implements GenAIProvider {
 	public void init(Configurator config) {
 		String baseUrl = config.get("OPENAI_BASE_URL");
 		String privateKey = config.get("OPENAI_API_KEY");
+		chatModel = config.get("chatModel");
 
-		createClient(baseUrl, privateKey);
-	}
-
-	/**
-	 * Creates the underlying OpenAI client.
-	 *
-	 * @param baseUrl    optional base URL override
-	 * @param privateKey API key
-	 */
-	protected void createClient(String baseUrl, String privateKey) {
 		com.openai.client.okhttp.OpenAIOkHttpClient.Builder buillder = OpenAIOkHttpClient.builder();
 		buillder.apiKey(privateKey);
 		if (baseUrl != null) {
@@ -302,6 +293,7 @@ public class OpenAIProvider implements GenAIProvider {
 		ResponseCreateParams responseCreateParams = builder.build();
 		logger.debug("Sending request to LLM service.");
 		Response response = getClient().responses().create(responseCreateParams);
+
 		logger.debug("Received response from LLM service.");
 		captureUsage(response.usage());
 
@@ -348,7 +340,8 @@ public class OpenAIProvider implements GenAIProvider {
 		for (ResponseOutputItem item : output) {
 			if (item.isFunctionCall()) {
 				ResponseFunctionToolCall functionCall = item.asFunctionCall();
-				inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
+				ResponseInputItem ofFunctionCall = ResponseInputItem.ofFunctionCall(functionCall);
+				inputs.add(ofFunctionCall);
 
 				Object value = callFunction(functionCall);
 
@@ -366,7 +359,7 @@ public class OpenAIProvider implements GenAIProvider {
 				for (Content content : contentList) {
 					text = content.outputText().get().text();
 					if (StringUtils.isNotBlank(text)) {
-						logger.info("LLM Response: {}", text);
+						logger.debug("LLM Response: {}", text);
 					}
 				}
 			}
@@ -552,17 +545,6 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public void inputsLog(File inputsLog) {
-	}
-
-	/**
-	 * Sets the model identifier to use for requests.
-	 *
-	 * @param chatModelName model name (for example, {@code gpt-4.1} or a custom
-	 *                      deployment name)
-	 */
-	@Override
-	public void model(String chatModelName) {
-		this.chatModel = chatModelName;
 	}
 
 	/**

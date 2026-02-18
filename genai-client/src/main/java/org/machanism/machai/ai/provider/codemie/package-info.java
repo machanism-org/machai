@@ -27,13 +27,17 @@
  */
 
 /**
- * EPAM CodeMie provider implementation.
+ * EPAM CodeMie provider integration.
  *
- * <p>This package provides {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, an
- * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider} implementation that:
+ * <p>This package contains {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that wraps an
+ * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider} to communicate with the CodeMie
+ * Code Assistant API.
+ *
+ * <h2>Responsibilities</h2>
  * <ol>
- *   <li>Obtains an OAuth 2.0 access token from CodeMie's OpenID Connect token endpoint.</li>
- *   <li>Initializes an OpenAI-compatible client configured to call the CodeMie Code Assistant REST API.</li>
+ *   <li>Obtain an OAuth 2.0 access token from CodeMie's OpenID Connect token endpoint.</li>
+ *   <li>Configure the underlying OpenAI-compatible client to use CodeMie's API base URL and the retrieved token.</li>
  * </ol>
  *
  * <h2>Authentication</h2>
@@ -57,7 +61,7 @@
  * CodeMieProvider provider = new CodeMieProvider();
  * provider.init(conf);
  *
- * // Continue using the provider via the OpenAIProvider/GenAIProvider APIs.
+ * // Continue using the provider via the GenAIProvider APIs.
  * }
  * </pre>
  */
