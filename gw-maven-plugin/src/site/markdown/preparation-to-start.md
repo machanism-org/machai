@@ -9,7 +9,7 @@ canonical: https://machai.machanism.org/gw-maven-plugin/preparation-to-start.htm
 Before you begin, ensure you have the following:
 
 - **Java Development Kit (JDK):**  
-  Java 11 or higher (as specified in your project’s `pom.xml`).  
+  Java 8 or higher (as specified in your project’s `pom.xml`).  
   [Learn more about installing the JDK](https://adoptium.net/).
 
 - **Maven:**  

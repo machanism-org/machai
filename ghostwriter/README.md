@@ -40,7 +40,7 @@ Benefits:
 
 #### Prerequisites
 
-- Java 11+
+- Java 8+
 - Network access to your configured GenAI provider (as applicable)
 - A project directory containing files with embedded `@guidance` directives (or use `--guidance` as a fallback)
 

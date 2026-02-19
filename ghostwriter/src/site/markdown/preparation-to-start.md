@@ -8,7 +8,7 @@ canonical: https://machai.machanism.org/ghostwriter/preparation-to-start.html
 
 Before you begin, ensure your environment meets the following requirements:
 
-- **Java Development Kit (JDK) 11 or higher**  
+- **Java Development Kit (JDK) 8 or higher**  
   [Download JDK](https://adoptopenjdk.net/) or use your system’s package manager.
 
 - **Active subscription to OpenAI or CodeMie API service**  
