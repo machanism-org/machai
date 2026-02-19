@@ -63,7 +63,7 @@ This design provides:
 
 ### Prerequisites
 
-- Java 11+.
+- Java 8+.
 - Maven.
 - Provider credentials/configuration (depending on the provider you use):
   - OpenAI-compatible providers: API key/token and (optionally) a base URL override.

@@ -23,21 +23,23 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
 
+## Project Title and Overview
+
 GW Maven Plugin integrates MachAI Ghostwriter guided file processing into Maven builds, enabling documentation and other project artifacts to be generated and kept up to date as part of normal development and CI workflows.
 
-At a high level, the plugin configures Ghostwriter processing, determines the active project layout, then scans the chosen root directory for files containing embedded `@guidance:` instructions. Those instructions drive Ghostwriters processing so the repository can continuously synthesize and maintain high-quality documentation (and any other guided artifacts) with consistent, repeatable behavior.
+It works by configuring a Ghostwriter `FileProcessor`, detecting the active project layout (including Maven reactor metadata when available), then scanning a configurable root directory for files containing embedded `@guidance:` instructions. Those instructions drive repeatable, consistent synthesis and updates across the repository—including source code, documentation, Maven Site content, and other relevant files.
 
 The plugin provides two primary goals:
 
-- **`gw:gw`**: aggregator processing that can run without a `pom.xml` (`requiresProject=false`) and can process modules in reverse order (sub-modules first), similar to the Ghostwriter CLI.
-- **`gw:reactor`**: reactor-aware processing that follows standard Maven reactor dependency ordering, with an option to defer the execution-root project until the rest of the reactor has completed.
+- **`gw:gw`**: an **aggregator** goal that can run **without a `pom.xml`** (`requiresProject=false`) and can process modules in reverse order (sub-modules first), similar to the Ghostwriter CLI.
+- **`gw:reactor`**: a **reactor-aware** goal that follows standard Maven reactor dependency ordering, with an option to defer the execution-root project until the rest of the reactor has completed.
 
 ## Installation Instructions
 
 ### Prerequisites
 
 - Git
-- Java 11+
+- Java 8+
 - Apache Maven 3.x
 
 ### Checkout

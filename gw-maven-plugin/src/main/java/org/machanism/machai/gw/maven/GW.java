@@ -55,29 +55,30 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </dl>
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
+ * <p>
+ * The following parameters are defined on {@link AbstractGWGoal} and are available to this goal.
+ * Refer to {@link AbstractGWGoal} for the authoritative list and exact semantics.
+ * </p>
  * <ul>
- * <li><b>{@code gw.genai}</b> / {@code <genai>} ({@code genai}): Provider/model identifier to pass to the workflow.</li>
- * <li><b>{@code ${basedir}}</b> ({@code basedir}): The Maven module base directory.</li>
- * <li><b>{@code gw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}): Optional scan root override. When omitted,
+ * <li><b>{@code -Dgw.genai}</b> / {@code <genai>} ({@code genai}): Provider/model identifier forwarded to the workflow.
+ * Example: {@code openai:gpt-4o-mini}.</li>
+ * <li><b>{@code -Dgw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}): Optional scan root override. When omitted,
  * defaults to the execution root directory.</li>
- * <li><b>{@code gw.instructions}</b> / {@code <instructions>} ({@code instructions}): Instruction locations (for
+ * <li><b>{@code -Dgw.instructions}</b> / {@code <instructions>} ({@code instructions}): Instruction locations (for
  * example, file paths or classpath locations) consumed by the workflow.</li>
- * <li><b>{@code gw.guidance}</b> / {@code <guidance>} ({@code guidance}): Default guidance text forwarded to the
+ * <li><b>{@code -Dgw.guidance}</b> / {@code <guidance>} ({@code guidance}): Default guidance text forwarded to the
  * workflow.</li>
- * <li><b>{@code gw.excludes}</b> / {@code <excludes>} ({@code excludes}): Exclude patterns/paths that should be skipped
- * when scanning documentation sources.</li>
- * <li><b>{@code gw.genai.serverId}</b> ({@code serverId}): {@code settings.xml} {@code <server>} id used to read GenAI
- * credentials.</li>
- * <li><b>{@code gw.logInputs}</b> ({@code logInputs}): Whether to log the list of input files passed to the workflow.
+ * <li><b>{@code -Dgw.excludes}</b> / {@code <excludes>} ({@code excludes}): Exclude patterns/paths to skip when scanning
+ * documentation sources.</li>
+ * <li><b>{@code -Dgw.genai.serverId}</b> / {@code <serverId>} ({@code serverId}): {@code settings.xml} {@code <server>}
+ * id used to read GenAI credentials.</li>
+ * <li><b>{@code -Dgw.logInputs}</b> / {@code <logInputs>} ({@code logInputs}): Whether to log the list of input files
+ * passed to the workflow.
  * <p>
  * Default: {@code false}
  * </p>
  * </li>
  * </ul>
- *
- * <p>
- * Refer to {@link AbstractGWGoal} for the authoritative list and exact semantics of inherited parameters.
- * </p>
  *
  * <h2>Usage examples</h2>
  *

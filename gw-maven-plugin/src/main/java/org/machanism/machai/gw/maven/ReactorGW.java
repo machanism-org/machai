@@ -46,7 +46,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <ul>
  * <li><b>{@code gw.genai}</b> / {@code &lt;genai&gt;} ({@code genai}): Provider/model identifier to pass to
  * the workflow.</li>
- * <li><b>{@code ${basedir}}</b> ({@code basedir}): The Maven module base directory.</li>
+ * <li><b>${basedir}</b> ({@code basedir}): The Maven module base directory.</li>
  * <li><b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}): Optional scan root override.
  * When omitted, defaults to the execution root directory.</li>
  * <li><b>{@code gw.instructions}</b> / {@code &lt;instructions&gt;} ({@code instructions}): Instruction
