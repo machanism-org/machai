@@ -14,6 +14,7 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIAdapter;
 import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.provider.claude.ClaudeProvider;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 
 /**
@@ -59,6 +60,8 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * <ul>
 	 * <li>{@code GENAI_USERNAME} – user e-mail or client id.</li>
 	 * <li>{@code GENAI_PASSWORD} – password or client secret.</li>
+	 * <li>{@code chatModel} – model identifier (for example {@code gpt-4o-mini} or
+	 * {@code claude-3-5-sonnet}).</li>
 	 * </ul>
 	 * Optional configuration keys:
 	 * <ul>
@@ -66,7 +69,7 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * </ul>
 	 *
 	 * @param conf configuration source
-	 * @throws IllegalArgumentException if authorization fails
+	 * @throws IllegalArgumentException if authorization fails or an unsupported model is configured
 	 */
 	@Override
 	public void init(Configurator conf) {
@@ -88,6 +91,9 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 
 			if (Strings.CS.startsWithAny(chatModel, "gpt-")) {
 				provider = new OpenAIProvider();
+				setProvider(provider);
+			} else if (Strings.CS.startsWithAny(chatModel, "claude-")) {
+				provider = new ClaudeProvider();
 				setProvider(provider);
 			} else {
 				throw new IllegalArgumentException("Unsupported model: '" + chatModel + "'.");
@@ -111,13 +117,10 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * </ul>
 	 *
 	 * @param url      token endpoint URL
-	 * @param username user e-mail (password grant) or client id (client
-	 *                 credentials)
-	 * @param password password (password grant) or client secret (client
-	 *                 credentials)
+	 * @param username user e-mail (password grant) or client id (client credentials)
+	 * @param password password (password grant) or client secret (client credentials)
 	 * @return the {@code access_token} value extracted from the response
-	 * @throws IOException if the HTTP request fails, returns a non-200 response, or
-	 *                     the token cannot be read
+	 * @throws IOException if the HTTP request fails, returns a non-200 response, or the token cannot be read
 	 */
 	public static String getToken(String url, String username, String password) throws IOException {
 		String queryTemplate;
@@ -150,14 +153,19 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 					response.append(inputLine);
 				}
 
-				String accessToken = StringUtils.substringBetween(response.toString(), "\"access_token\":\"", "\",");
-				return accessToken;
+				return StringUtils.substringBetween(response.toString(), "\"access_token\":\"", "\",");
 			}
 		}
 
 		throw new IOException("Failed to obtain token: received HTTP response code " + responseCode);
 	}
 
+	/**
+	 * URL-encodes a value using UTF-8 for use in {@code application/x-www-form-urlencoded} bodies.
+	 *
+	 * @param value value to encode
+	 * @return encoded value
+	 */
 	private static String urlEncode(String value) {
 		return URLEncoder.encode(value, StandardCharsets.UTF_8);
 	}
