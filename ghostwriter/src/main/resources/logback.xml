@@ -1,43 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-	<!-- Console Appender (INFO Level) -->
+	<timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"
+		timeReference="contextBirth" />
+
+	<!-- Console Appender: INFO and above -->
 	<appender name="CONSOLE"
 		class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} %-5level %msg%n</pattern>
 		</encoder>
 	</appender>
 
-	<!-- File Appender (DEBUG Level) -->
+	<!-- File Appender: DEBUG and above -->
 	<appender name="FILE"
 		class="org.machanism.machai.log.FileAppender">
-		<file>logs/gw.log</file>
+		<file>logs/gw-${bySecond}.log</file>
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- Daily rollover -->
-			<fileNamePattern>logs/gw.%d{yyyy-MM-dd}.log
-			</fileNamePattern>
+			<fileNamePattern>logs/archive/gw.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<!-- Keep 30 days of history -->
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
 			</pattern>
 		</encoder>
 	</appender>
 
-	<!-- Logger for specific package -->
-	<logger name="org.machanism.machai" level="INFO"
+	<!-- Logger for your package: DEBUG and above to file, INFO and above to 
+		console -->
+	<logger name="org.machanism.machai" level="DEBUG"
 		additivity="false">
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE" />
 	</logger>
 
-	<!-- Root Logger -->
+	<!-- Root Logger (optional, can be left as WARN) -->
 	<root level="WARN">
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE" />
 	</root>
-
 </configuration>

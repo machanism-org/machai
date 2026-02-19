@@ -248,7 +248,7 @@ public final class Ghostwriter {
 			}
 
 		} catch (ProcessTerminationException e) {
-			logger.error("Process terminated: " + e.getMessage(), e);
+			logger.error("Process terminated: {}", e.getMessage());
 			exitCode = e.getExitCode();
 		} catch (ParseException e) {
 			logger.error("Error parsing arguments: " + e.getMessage());

@@ -48,7 +48,6 @@ public class GragleProjectLayout extends ProjectLayout {
 			} catch (Exception e) {
 				logger.warn("Effective model building failed: {}",
 						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
-				logger.debug("Effective model building failed.", e);
 			}
 		}
 		return project;
