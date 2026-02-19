@@ -47,7 +47,7 @@
 		<menu name="Get Started">
             <item name="Overview" href="index.html" />
             <item name="Quick Start Guide" href="preparation-to-start.html" />
-            <item name="Project Workflow" href="project-processing.html" />
+            <item name="Project Workflow" href="project-workflow.html" />
         </menu>
 		<menu ref="modules" />
 		<menu ref="reports" />

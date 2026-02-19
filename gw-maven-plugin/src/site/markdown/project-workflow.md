@@ -2,7 +2,7 @@
 canonical: https://machai.machanism.org/gw-maven-plugin/project-processing.html
 ---
 
-# Project Processing
+# Project Workflow
 
 The **GW Maven Plugin** enables automated documentation and code review for your Maven projects using GenAI and customizable guidance. This guide explains how the plugin processes your project, how to control its behavior, and best practices for effective usage.
 

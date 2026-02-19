@@ -2,13 +2,13 @@
 canonical: https://machai.machanism.org/ghostwriter/project-processing.html
 ---
 
-# Project Processing
+# Project Workflow
 
 ## Overview
 
 Project Processing in Ghostwriter enables you to automate the analysis, documentation, and enhancement of entire software projects using GenAI-powered tools. This feature is designed to streamline project-level operations, improve code quality, and facilitate intelligent metadata management across all components of your project.
 
-## Project Processing
+## Project File Processing
 
 When working with project processing, you have two convenient ways to configure Ghostwriter for project-level processing:
 

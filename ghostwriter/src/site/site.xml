@@ -46,7 +46,7 @@
         <menu name="Get Started">
             <item name="Overview" href="index.html" />
             <item name="Quick Start Guide" href="preparation-to-start.html" />
-            <item name="Project Workflow" href="project-processing.html" />
+            <item name="Project Workflow" href="project-workflow.html" />
         </menu>
 		<menu ref="reports" />
 		<footer><![CDATA[©2025-2026 Machanism.org. All Rights Reserved.
