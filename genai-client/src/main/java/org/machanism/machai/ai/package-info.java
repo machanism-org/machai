@@ -26,30 +26,31 @@
  */
 
 /**
- * Provider-neutral entry point for interacting with generative-AI models.
+ * Provider-neutral API for interacting with generative-AI models.
  *
  * <p>
- * This package defines the top-level API used by the GenAI Client to work with different model providers through a
- * single {@link org.machanism.machai.ai.manager.GenAIProvider} contract. It covers provider resolution, request
- * construction (instructions, prompts, optional file inputs), optional registration of host-side function tools,
- * execution, and collection of token {@link org.machanism.machai.ai.manager.Usage}.
+ * The types in this package act as the entry point used by the GenAI Client to talk to different model providers
+ * through a shared contract (see {@link org.machanism.machai.ai.manager.GenAIProvider}). It supports provider/model
+ * resolution, request construction (instructions, prompts, optional file inputs), optional registration of host-side
+ * function tools, execution, and access to token {@link org.machanism.machai.ai.manager.Usage}.
  * </p>
  *
  * <h2>Typical workflow</h2>
  * <ol>
- *   <li>Resolve a provider/model via
+ *   <li>Resolve a provider/model using
  *   {@link org.machanism.machai.ai.manager.GenAIProviderManager#getProvider(String, org.machanism.macha.core.commons.configurator.Configurator)}.</li>
  *   <li>(Optional) Register host-side tools via {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
- *   <li>Build the request using {@link org.machanism.machai.ai.manager.GenAIProvider#instructions(String)} and
- *   {@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} (and optional file inputs / tools).</li>
- *   <li>Execute with {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and read
+ *   <li>Configure the request via {@link org.machanism.machai.ai.manager.GenAIProvider#instructions(String)} and
+ *   {@link org.machanism.machai.ai.manager.GenAIProvider#prompt(String)} (and any supported attachments/tools).</li>
+ *   <li>Execute with {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and read usage with
  *   {@link org.machanism.machai.ai.manager.GenAIProvider#usage()}.</li>
+ *   <li>Release resources by calling {@link org.machanism.machai.ai.manager.GenAIProvider#close()}.</li>
  * </ol>
  *
  * <h2>Subpackages</h2>
  * <ul>
  *   <li>{@code org.machanism.machai.ai.manager} – provider contracts, provider/model resolution, and usage accounting.</li>
- *   <li>{@code org.machanism.machai.ai.provider.*} – concrete provider implementations (for example OpenAI, Web, None).</li>
+ *   <li>{@code org.machanism.machai.ai.provider.*} – concrete provider implementations (e.g., OpenAI, Web, None).</li>
  *   <li>{@code org.machanism.machai.ai.tools} – optional host-side tools (file/web/command) and their loader.</li>
  * </ul>
  *

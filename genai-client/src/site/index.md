@@ -55,7 +55,7 @@ This provider adapts the Anthropic Java SDK to MachAI's provider interface.
 
 Status
 
-- Currently not implemented (methods throw or return placeholders).
+- Not implemented yet: `init(...)` throws `NotImplementedError`, and other methods are currently no-op or placeholders.
 
 Thread-safety
 
@@ -81,7 +81,7 @@ After a token is retrieved, this provider configures the underlying OpenAI-compa
 - `OPENAI_BASE_URL` to the CodeMie API base URL.
 - `OPENAI_API_KEY` to the retrieved access token.
 
-It then delegates requests to either:
+It then delegates requests to:
 
 - `OpenAIProvider` for `gpt-*` models
 - `ClaudeProvider` for `claude-*` models
@@ -144,6 +144,20 @@ Configuration
 - `OPENAI_API_KEY` (required)
 - `OPENAI_BASE_URL` (optional)
 - `chatModel` (optional; required before `perform()` if not set via configuration)
+
+Usage
+
+```java
+Configurator conf = ...;
+GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1", conf);
+
+provider.instructions("You are a concise assistant.");
+provider.prompt("Summarize this text...");
+String answer = provider.perform();
+
+provider.clear();
+provider.close();
+```
 
 Thread-safety
 

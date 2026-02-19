@@ -30,25 +30,24 @@
  * EPAM CodeMie provider integration.
  *
  * <p>This package contains {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that obtains an OAuth 2.0 access token from a
- * configurable OpenID Connect (OIDC) token endpoint, then delegates all model calls to an underlying
- * OpenAI-compatible provider configured for the CodeMie Code Assistant REST API.
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that authenticates against a configurable
+ * OpenID Connect (OIDC) token endpoint and delegates model calls to an OpenAI-compatible provider configured for the
+ * CodeMie Code Assistant REST API.
  *
  * <h2>How it works</h2>
  * <ol>
- *   <li>Obtain an access token from the configured token endpoint.</li>
- *   <li>Initialize an OpenAI-compatible provider by setting {@code OPENAI_BASE_URL} to the CodeMie API base URL and
+ *   <li>Obtain an OAuth 2.0 access token from the configured token endpoint.</li>
+ *   <li>Configure an OpenAI-compatible provider by setting {@code OPENAI_BASE_URL} to the CodeMie API base URL and
  *       {@code OPENAI_API_KEY} to the retrieved token.</li>
- *   <li>Delegate calls based on the model prefix:
- *       <ul>
- *         <li>{@code gpt-*} models are routed to {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}.</li>
- *         <li>{@code claude-*} models are routed to {@link org.machanism.machai.ai.provider.claude.ClaudeProvider}.</li>
- *       </ul>
- *   </li>
+ *   <li>Delegate requests based on the configured model prefix:</li>
  * </ol>
+ * <ul>
+ *   <li>{@code gpt-*} models are routed to {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}.</li>
+ *   <li>{@code claude-*} models are routed to {@link org.machanism.machai.ai.provider.claude.ClaudeProvider}.</li>
+ * </ul>
  *
  * <h2>Grant selection</h2>
- * <p>The OAuth 2.0 grant type is selected from {@code GENAI_USERNAME}:
+ * <p>The OAuth 2.0 grant type is selected from {@code GENAI_USERNAME}:</p>
  * <ul>
  *   <li><b>Password grant</b> when the username contains {@code "@"} (typical e-mail login).</li>
  *   <li><b>Client credentials</b> otherwise (service-to-service).</li>

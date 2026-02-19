@@ -27,20 +27,22 @@
  */
 
 /**
- * No-op generative-AI provider implementation.
+ * No-op generative-AI provider.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a {@link org.machanism.machai.ai.manager.GenAIProvider}
- * implementation intended for deployments where external LLM/model calls are not permitted or are intentionally
- * disabled.
+ * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation for deployments where external model calls
+ * are disabled or not permitted.
  *
  * <h2>Behavior</h2>
  * <ul>
- *   <li>{@code prompt(...)} accumulates text in an in-memory buffer.</li>
- *   <li>{@code perform()} optionally writes {@code instructions.txt} (when {@code instructions(...)} was set) and
- *       writes the current prompt buffer to the configured inputs log (via {@code inputsLog(...)}), then clears
- *       the buffer and returns {@code null}.</li>
- *   <li>Operations that require an actual model backend (for example {@code embedding(...)}) are unsupported and
- *       throw {@link java.lang.UnsupportedOperationException}.</li>
+ *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)} appends text to an in-memory
+ *       buffer.</li>
+ *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} optionally writes
+ *       {@code instructions.txt} (when instructions were provided) and writes the accumulated prompt text to a
+ *       configured inputs log file; it then clears the buffer and returns {@code null}.</li>
+ *   <li>Capabilities requiring a model backend (for example
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String)}) are unsupported and throw
+ *       {@link java.lang.UnsupportedOperationException}.</li>
  * </ul>
  *
  * <h2>Example</h2>

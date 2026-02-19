@@ -29,27 +29,24 @@
 /**
  * Web UI automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>This package provides {@link org.machanism.machai.ai.provider.web.WebProvider}, which obtains responses from a GenAI
- * service by driving its browser-based UI using <a href="https://ganteater.com">Anteater</a> workspace recipes.
+ * <p>This package contains providers that obtain responses from a GenAI service by driving its browser-based UI using * <a href="https://ganteater.com">Anteater</a> workspace recipes.
  *
  * <h2>How it works</h2>
- * <p>{@link org.machanism.machai.ai.provider.web.WebProvider} manages a shared Anteater {@code AEWorkspace} instance.
- * Typical execution flow:
+ * <p>{@link org.machanism.machai.ai.provider.web.WebProvider} coordinates a shared Anteater {@code AEWorkspace} and executes * a recipe-based workflow to submit prompts and retrieve results.
+ *
  * <ol>
- *   <li>Initialize provider configuration via {@code init(Configurator)} (sets the Anteater configuration name).</li>
- *   <li>Call {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)} once to initialize the
- *       workspace start directory, variables (e.g., {@code PROJECT_DIR}), load the Anteater configuration, and run setup
- *       nodes.</li>
- *   <li>Queue prompts via the provider API.</li>
- *   <li>Call {@link org.machanism.machai.ai.provider.web.WebProvider#perform()} to run the {@code "Submit Prompt"}
- *       recipe. Prompts are passed as system variable {@code INPUTS} and the recipe is expected to return a response in
- *       variable {@code result}.</li>
+ *   <li>Initialize provider configuration via {@code init(Configurator)} (selects the Anteater configuration name).</li>
+ *   <li>Initialize the workspace by calling *       {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)} once. This sets the workspace *       start directory, injects variables (e.g., {@code PROJECT_DIR}), loads the Anteater configuration, and runs setup *       nodes.</li>
+ *   <li>Queue one or more prompts using the provider API.</li>
+ *   <li>Execute {@link org.machanism.machai.ai.provider.web.WebProvider#perform()} to run the {@code "Submit Prompt"}
+ *       recipe. Prompts are passed via the {@code INPUTS} system variable and the recipe is expected to return the final
+ *       response in the {@code result} variable.</li>
  * </ol>
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
  * WebProvider provider = new WebProvider();
- * provider.init(configurator); // sets chatModel/config name
+ * provider.init(configurator); // selects chatModel / config name
  * provider.setWorkingDir(new File("C:\\path\\to\\project"));
  *
  * // provider.prompt("..."); // add one or more prompts
@@ -58,7 +55,7 @@
  * }</pre>
  *
  * <h2>State and thread safety</h2>
- * <p>Automation is not thread-safe. Workspace state is stored in static fields and is intended to be initialized once per
- * JVM instance; attempts to change the working directory after initialization will fail.
+ * <p>Browser automation is not thread-safe. The underlying workspace is stored in static state and is intended to be
+ * initialized once per JVM; attempts to change the working directory after initialization fail.
  */
 package org.machanism.machai.ai.provider.web;

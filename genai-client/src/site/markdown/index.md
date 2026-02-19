@@ -141,7 +141,7 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` is an OpenAI-backed implementation of the `GenAIProvider` abstraction.
+`OpenAIProvider` is an OpenAI-backed implementation of MachAI's `GenAIProvider` abstraction.
 
 This provider adapts the OpenAI Java SDK to MachAI's provider interface. It accumulates user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools. When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
 
@@ -173,19 +173,21 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 This provider obtains an access token from a configurable OpenID Connect token endpoint and then initializes an OpenAI-compatible client (via `OpenAIProvider`) to call the CodeMie Code Assistant REST API.
 
-After a token is retrieved, this provider configures the underlying OpenAI-compatible provider by setting:
-
-- `OPENAI_BASE_URL` to the CodeMie API base URL
-- `OPENAI_API_KEY` to the retrieved access token
-
-and then delegates requests to either `OpenAIProvider` (for `gpt-*` models) or `ClaudeProvider` (for `claude-*` models).
-
 **Authentication modes**
 
 The authentication mode is selected based on the configured username:
 
 - If the username contains `@`, the password grant is used (typical user e-mail login).
 - Otherwise, the client credentials grant is used (service-to-service).
+
+**Delegation**
+
+After a token is retrieved, this provider configures the underlying OpenAI-compatible provider by setting:
+
+- `OPENAI_BASE_URL` to the CodeMie API base URL
+- `OPENAI_API_KEY` to the retrieved access token
+
+and then delegates requests to either `OpenAIProvider` (for `gpt-*` models) or `ClaudeProvider` (for `claude-*` models).
 
 **Authentication / configuration**
 
@@ -209,9 +211,9 @@ GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
 
 ### Claude
 
-`ClaudeProvider` is intended to be an Anthropic-backed implementation of the `GenAIProvider` abstraction.
+`ClaudeProvider` is an Anthropic-backed implementation of MachAI's `GenAIProvider` abstraction.
 
-It is currently a stub: most methods are not implemented and `init(...)` throws `NotImplementedError`.
+This provider is currently a stub: `init(Configurator)` throws `NotImplementedError`, and most other methods are no-ops.
 
 **Configuration**
 
@@ -227,9 +229,9 @@ GenAIProvider provider = GenAIProviderManager.getProvider("Claude:claude-...");
 
 ### None
 
-`NoneProvider` is a no-op implementation of `GenAIProvider` intended for environments where no external LLM integration should be used.
+`NoneProvider` is a no-op implementation of `GenAIProvider`.
 
-It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
+This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
 **Key characteristics**
 
@@ -248,7 +250,7 @@ provider.perform();
 provider.close();
 ```
 
-**Thread safety:** thread-safe.
+**Thread safety:** (not specified; treat as not thread-safe unless documented).
 
 ### Web
 

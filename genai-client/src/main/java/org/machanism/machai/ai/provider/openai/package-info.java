@@ -30,15 +30,15 @@
  * OpenAI-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementation.
  *
  * <p>
- * This package provides the OpenAI integration for MachAI's provider abstraction. It adapts the OpenAI Java SDK
- * (notably the Responses API) to the {@code GenAIProvider} lifecycle: collecting prompt text, optional system
- * instructions, optional file inputs, and optional function tools; executing the request; dispatching any
- * model-requested tool calls to application handlers; and returning the assistant's final text.
+ * This package provides an OpenAI integration for MachAI's provider abstraction. It adapts OpenAI's APIs to the
+ * {@code GenAIProvider} lifecycle: collecting prompt text and optional system instructions, attaching optional
+ * file inputs and function tools, executing the request, dispatching any model-requested tool calls to
+ * application handlers, and returning the assistant's final text.
  * </p>
  *
  * <h2>Capabilities</h2>
  * <ul>
- *   <li>Prompt submission and response parsing via the OpenAI Responses API.</li>
+ *   <li>Prompt submission and response parsing via OpenAI's Responses API.</li>
  *   <li>Local file upload and URL-based file attachment as request inputs.</li>
  *   <li>Registration and dispatch of function tools to application-defined handlers.</li>
  *   <li>Embedding generation for text inputs.</li>
@@ -57,8 +57,8 @@
  * </pre>
  *
  * <p>
- * <strong>Thread-safety:</strong> provider instances are not thread-safe because they maintain per-request
- * mutable state (inputs, tool mappings, and usage). Use one instance per request or synchronize externally.
+ * <strong>Thread-safety:</strong> provider instances are not thread-safe because they maintain per-request mutable
+ * state (inputs, tool mappings, and usage). Use one instance per request or synchronize externally.
  * </p>
  */
 package org.machanism.machai.ai.provider.openai;
