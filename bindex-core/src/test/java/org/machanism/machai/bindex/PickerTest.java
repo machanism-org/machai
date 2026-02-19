@@ -3,6 +3,7 @@ package org.machanism.machai.bindex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,32 +66,32 @@ class PickerTest {
                 if ("a".equals(id)) {
                     Bindex b = new Bindex();
                     b.setId("a");
-                    b.setDependencies(List.of("b", "c"));
+                    b.setDependencies(Arrays.asList("b", "c"));
                     return b;
                 }
                 if ("b".equals(id)) {
                     Bindex b = new Bindex();
                     b.setId("b");
-                    b.setDependencies(List.of("c"));
+                    b.setDependencies(Arrays.asList("c"));
                     return b;
                 }
                 if ("c".equals(id)) {
                     Bindex b = new Bindex();
                     b.setId("c");
-                    b.setDependencies(List.of("a"));
+                    b.setDependencies(Arrays.asList("a"));
                     return b;
                 }
                 return null;
             }
         };
 
-        Set<String> deps = new HashSet<>();
+        Set<String> deps = new HashSet<String>();
 
         // Act
         picker.addDependencies(deps, "a");
 
         // Assert
-        assertEquals(Set.of("a", "b", "c"), deps);
+        assertEquals(new HashSet<String>(Arrays.asList("a", "b", "c")), deps);
 
         // Cleanup
         picker.close();

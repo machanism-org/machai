@@ -1,15 +1,14 @@
 package org.machanism.machai.bindex;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
@@ -37,7 +36,7 @@ class BindexCreatorTest {
     }
 
     @Test
-    void processFolder_whenNoExistingBindexAndUpdateFalse_createsFile() throws Exception {
+    public void processFolder_whenNoExistingBindexAndUpdateFalse_createsFile() throws Exception {
         // Arrange
         GenAIProvider provider = mock(GenAIProvider.class);
         when(provider.perform()).thenReturn("{\"id\":\"x\",\"name\":\"n\",\"version\":\"1\"}");
@@ -46,23 +45,24 @@ class BindexCreatorTest {
         BindexCreator creator = new BindexCreator(provider);
 
         // Act
-        assertDoesNotThrow(() -> creator.processFolder(layout));
+        creator.processFolder(layout); // No assertDoesNotThrow in JUnit 4, just let it throw if it fails
 
         // Assert
         File bindexFile = new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME);
         assertNotNull(bindexFile);
-        assertEquals(true, bindexFile.exists());
+        assertTrue(bindexFile.exists());
 
-        String json = Files.readString(bindexFile.toPath(), StandardCharsets.UTF_8);
+        String json = new String(Files.readAllBytes(bindexFile.toPath()), StandardCharsets.UTF_8);
         assertNotNull(json);
-        org.junit.jupiter.api.Assertions.assertTrue(json.contains("\"version\""));
+        assertTrue(json.contains("\"version\""));
     }
 
     @Test
-    void processFolder_whenUpdateFalseAndExistingBindex_present_doesNotOverwrite() throws Exception {
+    public void processFolder_whenUpdateFalseAndExistingBindex_present_doesNotOverwrite() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME).toPath(),
-                "{\"id\":\"x\",\"name\":\"n\",\"version\":\"1\"}", StandardCharsets.UTF_8);
+        File bindexFile = new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME);
+        Files.write(bindexFile.toPath(),
+            "{\"id\":\"x\",\"name\":\"n\",\"version\":\"1\"}".getBytes(StandardCharsets.UTF_8));
 
         GenAIProvider provider = mock(GenAIProvider.class);
         when(provider.perform()).thenReturn("{\"id\":\"x\",\"name\":\"n\",\"version\":\"2\"}");
@@ -80,11 +80,10 @@ class BindexCreatorTest {
     }
 
     @Test
-    void processFolder_whenUpdateTrue_overwritesExistingFile() throws Exception {
+    public void processFolder_whenUpdateTrue_overwritesExistingFile() throws Exception {
         // Arrange
         File bindexFile = new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME);
-        Files.writeString(bindexFile.toPath(), "{\"id\":\"x\",\"name\":\"n\",\"version\":\"1\"}",
-                StandardCharsets.UTF_8);
+        Files.write(bindexFile.toPath(), "{\"id\":\"x\",\"name\":\"n\",\"version\":\"1\"}".getBytes(StandardCharsets.UTF_8));
 
         GenAIProvider provider = mock(GenAIProvider.class);
         when(provider.perform()).thenReturn("{\"id\":\"x\",\"name\":\"n\",\"version\":\"2\"}");
@@ -100,6 +99,7 @@ class BindexCreatorTest {
         assertNotNull(loaded);
         assertEquals("2", loaded.getVersion());
     }
+
 
     @Test
     void processFolder_whenProviderReturnsNull_doesNotCreateFile() throws Exception {

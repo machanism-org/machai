@@ -6,94 +6,96 @@ import java.io.IOException;
 
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.machanism.machai.schema. Bindex;
+import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * BindexRegister handles registration and update of  Bindex documents for given projects,
- * leveraging Picker for registration id management.
- * <p>
- * Usage Example:
- * <pre>
- *     try(BindexRegister register = new BindexRegister(provider)) {
- *         register.processFolder(layout);
- *     }
- * </pre>
+ * Registers a project's {@link Bindex} document in the backing Bindex registry.
  *
- * This class supports registration, ID lookup, and document update via Picker.
+ * <p>This type reads {@code bindex.json} from a project directory and uses {@link Picker} to * insert or update the corresponding document in the registry.
+ *
+ * <h2>Example</h2>
+ *
+ * <pre>
+ * GenAIProvider provider = ...;
+ * ProjectLayout layout = ...;
+ *
+ * try (BindexRegister register = new BindexRegister(provider, null)) {
+ *     register.update(true).processFolder(layout);
+ * }
+ * </pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
- * @see  BindexProjectProcessor
+ * @see BindexProjectProcessor
  */
-public class BindexRegister extends  BindexProjectProcessor implements Closeable {
+public class BindexRegister extends BindexProjectProcessor implements Closeable {
 
-    /** Logger instance for the BindexRegister class. */
-    private static Logger logger = LoggerFactory.getLogger(BindexRegister.class);
+	/** Logger instance for this class. */
+	private static final Logger LOGGER = LoggerFactory.getLogger(BindexRegister.class);
 
-    /** Picker instance for registration id management. */
-    private Picker picker;
+	/** Picker instance used to register and look up Bindex documents. */
+	private final Picker picker;
 
-    /** Update flag to force registration document updates. */
-    private boolean update;
+	/** Whether to force re-registration even when an entry already exists. */
+	private boolean update;
 
-    /**
-     * Constructs a BindexRegister with specified GenAIProvider.
-     *
-     * @param provider GenAIProvider used for Picker instantiation
-     * @param url 
-     */
-    public BindexRegister(GenAIProvider provider, String url) {
-        super();
-        picker = new Picker(provider, url);
-    }
+	/**
+	 * Creates a register instance.
+	 *
+	 * @param provider GenAI provider used by {@link Picker}
+	 * @param url      MongoDB connection URI to use; when {@code null}, {@link Picker} chooses a default
+	 */
+	public BindexRegister(GenAIProvider provider, String url) {
+		this.picker = new Picker(provider, url);
+	}
 
-    /**
-     * Processes folder registration using the provided project layout, optionally updating IDs.
-     *
-     * @param projectLayout ProjectLayout to process
-     * @throws IllegalArgumentException If an IO error occurs during registration
-     */
-    public void processFolder(ProjectLayout projectLayout) {
-         Bindex bindex;
-        try {
-            File projectDir = projectLayout.getProjectDir();
-            bindex = getBindex(projectDir);
+	/**
+	 * Registers the Bindex found in the given project directory.
+	 *
+	 * <p>If no {@code bindex.json} exists, this method performs no action.
+	 *
+	 * @param projectLayout layout describing the project directory
+	 * @throws IllegalArgumentException if the registration fails due to an I/O error
+	 */
+	public void processFolder(ProjectLayout projectLayout) {
+		try {
+			File projectDir = projectLayout.getProjectDir();
+			Bindex bindex = getBindex(projectDir);
+			if (bindex == null) {
+				return;
+			}
 
-            String regId = null;
-            if (bindex != null) {
-                regId = picker.getRegistredId(bindex);
-                if (regId == null || update) {
-                    regId = picker.create(bindex);
-                    logger.info("Registration id: {}", regId);
-                }
-            }
+			String registeredId = picker.getRegistredId(bindex);
+			if (registeredId == null || update) {
+				registeredId = picker.create(bindex);
+				LOGGER.info("Registration id: {}", registeredId);
+			}
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
 
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
+	/**
+	 * Closes the underlying {@link Picker} (and its database resources).
+	 *
+	 * @throws IOException if closing fails
+	 */
+	@Override
+	public void close() throws IOException {
+		picker.close();
+	}
 
-    /**
-     * Closes the Picker resource.
-     *
-     * @throws IOException If Picker close fails
-     */
-    @Override
-    public void close() throws IOException {
-        picker.close();
-    }
-
-    /**
-     * Sets the update mode for registration, enabling overwrite if true.
-     *
-     * @param overwrite Whether to force update registration
-     * @return This BindexRegister instance for chained calls
-     */
-    public BindexRegister update(boolean overwrite) {
-        this.update = overwrite;
-        return this;
-    }
+	/**
+	 * Enables or disables update mode.
+	 *
+	 * @param overwrite {@code true} to overwrite existing registrations; {@code false} to only register when missing
+	 * @return this instance for chaining
+	 */
+	public BindexRegister update(boolean overwrite) {
+		this.update = overwrite;
+		return this;
+	}
 
 }

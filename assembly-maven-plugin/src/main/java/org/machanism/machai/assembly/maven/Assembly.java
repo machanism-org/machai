@@ -1,4 +1,4 @@
-package org.machanism.machai.maven;
+package org.machanism.machai.assembly.maven;
 
 import java.io.File;
 import java.io.FileReader;
@@ -29,13 +29,15 @@ import org.machanism.machai.schema.Bindex;
  * Maven {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly} goal.
  *
  * <p>
- * This goal drives an AI-assisted "assembly" workflow for the Maven execution {@link #basedir}:
+ * The goal runs an AI-assisted workflow against the Maven execution {@link #basedir}:
  * </p>
  * <ol>
  * <li>Acquire a natural-language prompt from {@link #assemblyPromptFile} (if present) or request it interactively.</li>
  * <li>Use {@link #pickChatModel} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
  * <li>Filter recommendations by {@link #score}.</li>
  * <li>Run {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
+ * <li>If the assembly provider supports interactive prompting, continue prompting until the user types
+ * {@code exit}.</li>
  * </ol>
  *
  * <h2>Plugin parameters</h2>
@@ -66,7 +68,7 @@ import org.machanism.machai.schema.Bindex;
 public class Assembly extends AbstractMojo {
 
 	/**
-	 * Interactive prompter used to collect the prompt when {@link #assemblyPromptFile} does not exist.
+	 * Interactive prompt provider used to collect the assembly prompt when {@link #assemblyPromptFile} does not exist.
 	 */
 	@Component
 	protected Prompter prompter;

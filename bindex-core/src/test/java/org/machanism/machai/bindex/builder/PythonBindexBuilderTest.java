@@ -33,18 +33,22 @@ class PythonBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act / Assert
-        assertThrows(IOException.class, builder::projectContext);
+        assertThrows(IOException.class, new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
     }
 
     @Test
     void projectContext_whenProjectNamePresent_promptsFilesInInferredSourceDirAndAdditionalRules() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, "pyproject.toml").toPath(), "[project]\nname=\"my.pkg\"\n",
-                StandardCharsets.UTF_8);
+        Files.write(new File(tempDir, "pyproject.toml").toPath(), "[project]\nname=\"my.pkg\"\n".getBytes(StandardCharsets.UTF_8));
 
-        File sourceDir = new File(tempDir, "my/pkg");
+        File sourceDir = new File(tempDir, "my\\pkg");
         Files.createDirectories(sourceDir.toPath());
-        Files.writeString(new File(sourceDir, "a.py").toPath(), "print('x')", StandardCharsets.UTF_8);
+        Files.write(new File(sourceDir, "a.py").toPath(), "print('x')".getBytes(StandardCharsets.UTF_8));
 
         GenAIProvider provider = mock(GenAIProvider.class);
         ProjectLayout layout = org.machanism.machai.bindex.TestLayouts.projectLayout(tempDir);
@@ -52,7 +56,12 @@ class PythonBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act
-        assertDoesNotThrow(builder::projectContext);
+        assertDoesNotThrow(new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
 
         // Assert
         verify(provider, atLeastOnce()).prompt(anyString());
@@ -62,7 +71,7 @@ class PythonBindexBuilderTest {
     @Test
     void projectContext_whenProjectNameMissing_stillPromptsManifestAndAdditionalRulesOnly() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, "pyproject.toml").toPath(), "[project]\n", StandardCharsets.UTF_8);
+        Files.write(new File(tempDir, "pyproject.toml").toPath(), "[project]\n".getBytes(StandardCharsets.UTF_8));
 
         GenAIProvider provider = mock(GenAIProvider.class);
         ProjectLayout layout = org.machanism.machai.bindex.TestLayouts.projectLayout(tempDir);
@@ -70,7 +79,12 @@ class PythonBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act
-        assertDoesNotThrow(builder::projectContext);
+        assertDoesNotThrow(new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
 
         // Assert
         verify(provider, atLeastOnce()).prompt(anyString());
@@ -80,12 +94,11 @@ class PythonBindexBuilderTest {
     @Test
     void projectContext_whenPromptFileThrows_propagatesException() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, "pyproject.toml").toPath(), "[project]\nname=\"my.pkg\"\n",
-                StandardCharsets.UTF_8);
+        Files.write(new File(tempDir, "pyproject.toml").toPath(), "[project]\nname=\"my.pkg\"\n".getBytes(StandardCharsets.UTF_8));
 
-        File sourceDir = new File(tempDir, "my/pkg");
+        File sourceDir = new File(tempDir, "my\\pkg");
         Files.createDirectories(sourceDir.toPath());
-        Files.writeString(new File(sourceDir, "a.py").toPath(), "print('x')", StandardCharsets.UTF_8);
+        Files.write(new File(sourceDir, "a.py").toPath(), "print('x')".getBytes(StandardCharsets.UTF_8));
 
         GenAIProvider provider = mock(GenAIProvider.class);
         org.mockito.Mockito.doThrow(new IOException("fail")).when(provider).promptFile(any(File.class), anyString());
@@ -95,6 +108,11 @@ class PythonBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act / Assert
-        assertThrows(IOException.class, builder::projectContext);
+        assertThrows(IOException.class, new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
     }
 }

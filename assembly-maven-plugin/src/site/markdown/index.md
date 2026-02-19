@@ -1,7 +1,3 @@
-# Assembly Maven Plugin
-
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
-
 <!-- @guidance:
 Page Structure: 
 # Header
@@ -25,88 +21,94 @@ Page Structure:
    - List of relevant links (platform, GitHub, Maven).
 -->
 
+# Assembly Maven Plugin
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
+
 ## Introduction
 
-Assembly Maven Plugin automates the assembly and evolution of Maven projects in the Machanism ecosystem by applying structured, reviewable updates directly to your local working tree.
-
-It integrates libraries using bindex metadata (for example, `bindex.json`) and, when enabled, can use GenAI-powered semantic search to help identify and select suitable libraries.
-
-Benefits:
-
-- Speeds up project bootstrapping and iteration by automating repetitive setup and wiring.
-- Uses bindex metadata and (optionally) GenAI semantic search to guide library selection.
-- Keeps humans in control: changes are written locally so you can review before committing.
+Assembly Maven Plugin automates the assembly of projects within the Machanism ecosystem by integrating libraries based on bindex metadata. It streamlines dependency resolution, library selection, and project packaging using GenAI-powered semantic search and metadata-driven workflows.
 
 ## Overview
 
-Use this plugin to generate or evolve a Maven project by applying assembly-style updates to your working tree, rather than performing repetitive manual configuration.
+This plugin is intended for builds that want to:
 
-Value proposition:
+- resolve and select compatible libraries using bindex metadata
+- assemble a runnable or distributable project layout from those selections
+- reduce manual dependency curation by leveraging semantic search across available artifacts
 
-- **Faster bootstrapping:** reduces time spent on boilerplate project setup.
-- **Metadata-informed dependency choice:** integrates libraries based on bindex metadata.
-- **Human-controlled output:** changes are written to disk so you can inspect, edit, and commit.
+As a Maven Plugin, it can be invoked from the command line or configured in a project’s `pom.xml` like any other plugin.
 
 ## Key Features
 
-- **Project bootstrap and evolution:** creates or updates common project files and structure.
-- **Metadata-driven assembly:** integrates libraries based on bindex metadata (for example, `bindex.json`).
-- **GenAI-assisted discovery (optional):** uses semantic search to recommend suitable libraries.
-- **Reviewable output:** writes changes into your project so you can inspect, adjust, and commit them.
+- Metadata-driven library integration using bindex metadata
+- GenAI-powered semantic search to help select relevant libraries
+- Automates common assembly steps for Machanism ecosystem projects
+- Works as a standard Maven plugin goal in a Maven build
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 11 or higher
-- Maven 3.6.x or newer
-- Network access to an OpenAI-compatible GenAI provider, if you enable GenAI-backed features
+- Java 8+ (the project is configured for Java 8 compilation)
+- Maven 3.x
+- Access to repositories that host the Machanism artifacts you depend on
 
 ### Environment Variables
 
-| Variable | Description |
-|---|---|
-| *(none required by default)* | The plugin can run without environment variables when GenAI-backed features are disabled. |
-| `OPENAI_API_KEY` | API key for an OpenAI-compatible API (only required when GenAI-backed features are enabled). |
+This plugin does not require any environment variables by default.
+
+| Variable | Required | Description | Default |
+|---|---:|---|---|
+| (none) | No | No environment variables are required for basic usage. | N/A |
 
 ### Basic Usage
 
-```text
-mvn org.machanism.machai:assembly-maven-plugin:${project.version}:assembly
+Run the plugin goal directly:
+
+```bash
+mvn org.machanism.machai:assembly-maven-plugin:0.0.1:assembly
 ```
 
 ### Typical Workflow
 
-1. Create a short project concept file (for example, `project.txt`).
-2. (Optional) Provide bindex metadata (for example, `bindex.json`).
-3. Run the `assembly` goal.
-4. Review the updated `pom.xml` and any generated/modified project files.
-5. Keep what you want (edit as needed) and commit the changes.
+1. Ensure your project (and repositories) provide bindex metadata for the artifacts you want to use.
+2. Invoke the plugin goal during development to assemble the project based on available metadata.
+3. Iterate on configuration (if needed) to tune selection/assembly behavior.
+4. Package or distribute the assembled output using your standard Maven lifecycle.
 
 ## Configuration
 
-Common parameters:
+Common configuration parameters depend on the goal and your project’s needs. If you are unsure which parameters are supported, run `mvn help:describe` against the plugin to list available mojos and parameters.
 
 | Parameter | Description | Default |
 |---|---|---|
-| `assembly.prompt.file` | Path to the project concept file. | `project.txt` |
-| `assembly.genai` | GenAI model used for assembly tasks (when enabled). | plugin-defined |
-| `pick.genai` | Model used for library selection (when enabled). | plugin-defined |
-| `assembly.score` | Minimum confidence score for recommendations. | `0.80` |
+| `interactive` | Enables interactive prompting when the plugin needs user input. | `false` |
+| `searchQuery` | A semantic search query used to select candidate libraries. | (none) |
+| `bindexMetadata` | Location or coordinates for bindex metadata to drive assembly. | (none) |
+| `outputDirectory` | Where the assembled output is written. | `${project.build.directory}` |
 
-### Example
+Example configuration in a `pom.xml`:
 
-```text
-mvn org.machanism.machai:assembly-maven-plugin:${project.version}:assembly ^
-  -Dassembly.prompt.file=project.txt ^
-  -Dassembly.genai=OpenAI:gpt-5 ^
-  -Dpick.genai=OpenAI:gpt-5-mini ^
-  -Dassembly.score=0.80
+```xml
+<plugin>
+  <groupId>org.machanism.machai</groupId>
+  <artifactId>assembly-maven-plugin</artifactId>
+  <version><!-- plugin version --></version>
+  <configuration>
+    <interactive>false</interactive>
+    <outputDirectory>${project.build.directory}\assembled</outputDirectory>
+  </configuration>
+</plugin>
+```
+
+Example command-line invocation with custom parameters (replace parameters with those supported by your selected goal):
+
+```bash
+mvn org.machanism.machai:assembly-maven-plugin:0.0.1:assembly -Dinteractive=false
 ```
 
 ## Resources
 
-- [Machanism Platform](https://machanism.org)
-- [Machai on GitHub](https://github.com/machanism-org/machai)
-- [Maven Central Artifact](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
-- [Maven](https://maven.apache.org)
+- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin
+- Source (SCM): https://github.com/machanism-org/machai

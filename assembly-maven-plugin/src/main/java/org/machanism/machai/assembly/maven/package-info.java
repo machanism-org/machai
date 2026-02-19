@@ -28,25 +28,20 @@
  * Maven goal implementation for MachAI's AI-assisted project assembly workflow.
  *
  * <p>
- * This package provides the {@link org.machanism.machai.maven.Assembly} Maven {@code Mojo}, exposing the
- * {@code assembly} goal. The goal operates on the Maven execution base directory and coordinates two GenAI-driven
- * phases: library recommendation ("picking") and project modification ("assembly").
+ * This package contains the {@link org.machanism.machai.assembly.maven.Assembly} Maven {@code Mojo}, which exposes the
+ * {@code assembly} goal. The goal coordinates two GenAI-assisted phases:
  * </p>
- *
- * <h2>Workflow</h2>
  * <ol>
- *   <li>Acquire a natural-language prompt from {@code assembly.prompt.file} if the file exists; otherwise prompt
- *   interactively.</li>
- *   <li>Resolve a picker GenAI provider ({@code pick.genai}) and recommend candidate libraries (as
- *   {@link org.machanism.machai.schema.Bindex} entries) via {@link org.machanism.machai.bindex.Picker}.</li>
- *   <li>Filter recommendations by score using {@code assembly.score}.</li>
- *   <li>Resolve an assembly GenAI provider ({@code assembly.genai}) and apply changes to the project directory via
+ *   <li><b>Picking</b>: recommend candidate libraries as {@link org.machanism.machai.schema.Bindex} entries via
+ *   {@link org.machanism.machai.bindex.Picker}.</li>
+ *   <li><b>Assembly</b>: apply changes to the project directory via
  *   {@link org.machanism.machai.bindex.ApplicationAssembly}.</li>
  * </ol>
  *
  * <p>
- * GenAI providers are resolved by id using {@link org.machanism.machai.ai.manager.GenAIProviderManager} and are
- * augmented with standard function tools via {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
+ * Providers are resolved by id (for example {@code OpenAI:gpt-5}) using
+ * {@link org.machanism.machai.ai.manager.GenAIProviderManager} and are augmented with standard function tools via
+ * {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
  * </p>
  *
  * <h2>Goal</h2>
@@ -94,4 +89,4 @@
  * &lt;/plugin&gt;
  * </pre>
  */
-package org.machanism.machai.maven;
+package org.machanism.machai.assembly.maven;

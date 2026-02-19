@@ -35,13 +35,18 @@ class JScriptBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act / Assert
-        assertThrows(IOException.class, () -> builder.projectContext());
+        assertThrows(IOException.class, new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
     }
 
     @Test
     void projectContext_whenSrcDirectoryMissing_promptsManifestAndAdditionalRulesOnly() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, "package.json").toPath(), "{}", StandardCharsets.UTF_8);
+        Files.write(new File(tempDir, "package.json").toPath(), "{}".getBytes(StandardCharsets.UTF_8));
 
         GenAIProvider provider = mock(GenAIProvider.class);
         ProjectLayout layout = org.machanism.machai.bindex.TestLayouts.projectLayout(tempDir);
@@ -50,7 +55,12 @@ class JScriptBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act
-        assertDoesNotThrow(() -> builder.projectContext());
+        assertDoesNotThrow(new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
 
         // Assert
         verify(provider, atLeast(2)).prompt(anyString());
@@ -60,14 +70,14 @@ class JScriptBindexBuilderTest {
     @Test
     void projectContext_walksSrcAndPromptsOnlyEligibleExtensions_andSwallowsPromptFileErrors() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, "package.json").toPath(), "{}", StandardCharsets.UTF_8);
+        Files.write(new File(tempDir, "package.json").toPath(), "{}".getBytes(StandardCharsets.UTF_8));
 
         File srcDir = new File(tempDir, "src");
         Files.createDirectories(srcDir.toPath());
-        Files.writeString(new File(srcDir, "a.js").toPath(), "console.log(1)", StandardCharsets.UTF_8);
-        Files.writeString(new File(srcDir, "b.ts").toPath(), "export const x = 1;", StandardCharsets.UTF_8);
-        Files.writeString(new File(srcDir, "c.vue").toPath(), "<template></template>", StandardCharsets.UTF_8);
-        Files.writeString(new File(srcDir, "ignored.txt").toPath(), "nope", StandardCharsets.UTF_8);
+        Files.write(new File(srcDir, "a.js").toPath(), "console.log(1)".getBytes(StandardCharsets.UTF_8));
+        Files.write(new File(srcDir, "b.ts").toPath(), "export const x = 1;".getBytes(StandardCharsets.UTF_8));
+        Files.write(new File(srcDir, "c.vue").toPath(), "<template></template>".getBytes(StandardCharsets.UTF_8));
+        Files.write(new File(srcDir, "ignored.txt").toPath(), "nope".getBytes(StandardCharsets.UTF_8));
 
         GenAIProvider provider = mock(GenAIProvider.class);
         doThrow(new IOException("fail")).when(provider).promptFile(any(File.class), anyString());
@@ -78,7 +88,12 @@ class JScriptBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act
-        assertDoesNotThrow(() -> builder.projectContext());
+        assertDoesNotThrow(new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
 
         // Assert
         verify(provider, atLeast(2)).prompt(anyString());
@@ -88,7 +103,7 @@ class JScriptBindexBuilderTest {
     @Test
     void projectContext_whenPromptFails_propagatesRuntimeException() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, "package.json").toPath(), "{}", StandardCharsets.UTF_8);
+        Files.write(new File(tempDir, "package.json").toPath(), "{}".getBytes(StandardCharsets.UTF_8));
         Files.createDirectories(new File(tempDir, "src").toPath());
 
         GenAIProvider provider = mock(GenAIProvider.class);
@@ -100,6 +115,11 @@ class JScriptBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act / Assert
-        assertThrows(RuntimeException.class, () -> builder.projectContext());
+        assertThrows(RuntimeException.class, new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
     }
 }

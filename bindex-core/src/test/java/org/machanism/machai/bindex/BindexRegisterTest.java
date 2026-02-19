@@ -60,9 +60,8 @@ class BindexRegisterTest {
     @Test
     void processFolder_whenRegisteredIdExistsAndUpdateFalse_doesNotCreate() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME).toPath(),
-                "{\"id\":\"i\",\"name\":\"n\",\"version\":\"1\",\"classification\":{\"languages\":[],\"domains\":[],\"layers\":[],\"integrations\":[]},\"dependencies\":[]}",
-                StandardCharsets.UTF_8);
+        Files.write(new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME).toPath(),
+                "{\"id\":\"i\",\"name\":\"n\",\"version\":\"1\",\"classification\":{\"languages\":[],\"domains\":[],\"layers\":[],\"integrations\":[]},\"dependencies\":[]}".getBytes(StandardCharsets.UTF_8));
 
         BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost");
 
@@ -83,9 +82,8 @@ class BindexRegisterTest {
     @Test
     void processFolder_whenRegisteredIdMissing_creates() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME).toPath(),
-                "{\"id\":\"i\",\"name\":\"n\",\"version\":\"1\",\"classification\":{\"languages\":[],\"domains\":[],\"layers\":[],\"integrations\":[]},\"dependencies\":[]}",
-                StandardCharsets.UTF_8);
+        Files.write(new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME).toPath(),
+                "{\"id\":\"i\",\"name\":\"n\",\"version\":\"1\",\"classification\":{\"languages\":[],\"domains\":[],\"layers\":[],\"integrations\":[]},\"dependencies\":[]}".getBytes(StandardCharsets.UTF_8));
 
         BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost");
 
@@ -107,9 +105,8 @@ class BindexRegisterTest {
     @Test
     void processFolder_whenUpdateTrue_alwaysCreates() throws Exception {
         // Arrange
-        Files.writeString(new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME).toPath(),
-                "{\"id\":\"i\",\"name\":\"n\",\"version\":\"1\",\"classification\":{\"languages\":[],\"domains\":[],\"layers\":[],\"integrations\":[]},\"dependencies\":[]}",
-                StandardCharsets.UTF_8);
+        Files.write(new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME).toPath(),
+                "{\"id\":\"i\",\"name\":\"n\",\"version\":\"1\",\"classification\":{\"languages\":[],\"domains\":[],\"layers\":[],\"integrations\":[]},\"dependencies\":[]}".getBytes(StandardCharsets.UTF_8));
 
         BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost");
 

@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
@@ -39,7 +40,7 @@ class MavenBindexBuilderTest {
         model.setDependencyManagement(new org.apache.maven.model.DependencyManagement());
         model.setReporting(new org.apache.maven.model.Reporting());
         model.setScm(new org.apache.maven.model.Scm());
-        model.setPluginRepositories(new java.util.ArrayList<>());
+        model.setPluginRepositories(new java.util.ArrayList<org.apache.maven.model.Repository>());
 
         MavenBindexBuilder builder = new MavenBindexBuilder(mock(MavenProjectLayout.class));
 
@@ -53,7 +54,6 @@ class MavenBindexBuilderTest {
         assertNull(model.getReporting());
         assertNull(model.getScm());
 
-        // Maven Model may normalize these to empty values.
         if (model.getProperties() != null) {
             org.junit.jupiter.api.Assertions.assertTrue(model.getProperties().isEmpty());
         }
@@ -81,7 +81,12 @@ class MavenBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act
-        assertDoesNotThrow(builder::projectContext);
+        assertDoesNotThrow(new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
 
         // Assert
         verify(provider, never()).prompt(anyString());
@@ -113,7 +118,12 @@ class MavenBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act
-        assertDoesNotThrow(builder::projectContext);
+        assertDoesNotThrow(new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
 
         // Assert
         verify(provider, atLeastOnce()).prompt(anyString());
@@ -123,14 +133,14 @@ class MavenBindexBuilderTest {
     @Test
     void projectContext_whenPromptFileThrows_isSwallowedAndContextContinues() throws Exception {
         // Arrange
-        File srcMainJava = new File(tempDir, "src/main/java");
+        File srcMainJava = new File(tempDir, "src\\main\\java");
         Files.createDirectories(srcMainJava.toPath());
         File javaFile = new File(srcMainJava, "A.java");
-        Files.writeString(javaFile.toPath(), "class A {}", StandardCharsets.UTF_8);
+        Files.write(javaFile.toPath(), "class A {}".getBytes(StandardCharsets.UTF_8));
 
-        File resourcesDir = new File(tempDir, "src/main/resources");
+        File resourcesDir = new File(tempDir, "src\\main\\resources");
         Files.createDirectories(resourcesDir.toPath());
-        Files.writeString(new File(resourcesDir, "a.txt").toPath(), "x", StandardCharsets.UTF_8);
+        Files.write(new File(resourcesDir, "a.txt").toPath(), "x".getBytes(StandardCharsets.UTF_8));
 
         MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir);
 
@@ -138,7 +148,7 @@ class MavenBindexBuilderTest {
         build.setSourceDirectory(srcMainJava.getAbsolutePath());
         Resource r = new Resource();
         r.setDirectory(resourcesDir.getAbsolutePath());
-        build.setResources(java.util.List.of(r));
+        build.setResources(Collections.singletonList(r));
 
         Model model = new Model();
         model.setBuild(build);
@@ -155,7 +165,12 @@ class MavenBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act
-        assertDoesNotThrow(builder::projectContext);
+        assertDoesNotThrow(new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
 
         // Assert
         verify(provider, atLeastOnce()).prompt(anyString());
@@ -185,6 +200,11 @@ class MavenBindexBuilderTest {
         builder.genAIProvider(provider);
 
         // Act / Assert
-        assertThrows(RuntimeException.class, builder::projectContext);
+        assertThrows(RuntimeException.class, new org.junit.jupiter.api.function.Executable() {
+            @Override
+            public void execute() throws Throwable {
+                builder.projectContext();
+            }
+        });
     }
 }

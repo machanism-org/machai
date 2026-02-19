@@ -53,7 +53,7 @@ It is typically used to:
 
 ### Prerequisites
 
-- Java 11+
+- Java 8+
 - Maven 3.9+
 
 ### Environment Variables
@@ -96,14 +96,14 @@ Bindex Core is a library; most configuration is performed by the consuming tool/
 
 | Parameter | Description | Default |
 |---|---|---|
-| `maven.compiler.release` | Java release target used to compile the project. | `11` |
+| `maven.compiler.release` | Java release target used to compile the project. | `8` |
 | `maven.javadoc.skip` | Whether to skip Javadoc generation. | `false` |
 | `skipTests` | Whether to skip unit tests during the build. | `false` |
 
 Example (override build properties):
 
 ```powershell
-mvn -Dmaven.compiler.release=17 -DskipTests=true clean verify
+mvn -Dmaven.compiler.release=11 -DskipTests=true clean verify
 ```
 
 ## Resources

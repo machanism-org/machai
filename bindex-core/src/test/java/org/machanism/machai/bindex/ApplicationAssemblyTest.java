@@ -120,7 +120,7 @@ class ApplicationAssemblyTest {
     }
 
     @Test
-    void assembly_whenBindexListIsEmpty_stillPerforms() {
+    public void assembly_whenBindexListIsEmpty_stillPerforms() {
         // Arrange
         GenAIProvider provider = mock(GenAIProvider.class);
         when(provider.perform()).thenReturn("ok");
@@ -128,7 +128,7 @@ class ApplicationAssemblyTest {
         ApplicationAssembly assembly = new ApplicationAssembly(provider).projectDir(tempDir);
 
         // Act
-        assembly.assembly("assemble", List.of());
+        assembly.assembly("assemble", Collections.emptyList());
 
         // Assert
         verify(provider).perform();

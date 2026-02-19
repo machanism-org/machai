@@ -3,7 +3,7 @@ package org.machanism.machai.bindex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -51,12 +51,11 @@ class BindexProjectProcessorTest {
     }
 
     @Test
-    void getBindex_whenFileExistsAndValid_parsesAndReturnsBindex() throws Exception {
+    public void getBindex_whenFileExistsAndValid_parsesAndReturnsBindex() throws Exception {
         // Arrange
         TestProcessor processor = new TestProcessor();
         File file = new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME);
-        Files.writeString(file.toPath(), "{\"id\":\"i\",\"name\":\"n\",\"version\":\"1\"}",
-                StandardCharsets.UTF_8);
+        Files.write(file.toPath(), "{\"id\":\"i\",\"name\":\"n\",\"version\":\"1\"}".getBytes(StandardCharsets.UTF_8));
 
         // Act
         Bindex bindex = processor.getBindex(tempDir);
@@ -67,13 +66,18 @@ class BindexProjectProcessorTest {
     }
 
     @Test
-    void getBindex_whenFileExistsButInvalidJson_throwsIllegalArgumentException() throws Exception {
+    public void getBindex_whenFileExistsButInvalidJson_throwsIllegalArgumentException() throws Exception {
         // Arrange
         TestProcessor processor = new TestProcessor();
         File file = new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME);
-        Files.writeString(file.toPath(), "not-json", StandardCharsets.UTF_8);
+        Files.write(file.toPath(), "not-json".getBytes(StandardCharsets.UTF_8));
 
         // Act / Assert
-        assertThrows(IllegalArgumentException.class, () -> processor.getBindex(tempDir));
+        try {
+            processor.getBindex(tempDir);
+            fail("Expected IllegalArgumentException to be thrown");
+        } catch (IllegalArgumentException e) {
+            // Test passes
+        }
     }
 }
