@@ -190,8 +190,7 @@ public class OpenAIProvider implements GenAIProvider {
 			client = clientBuilder.build();
 		}
 
-		FunctionToolsLoader.getInstance().applyTools(this);
-		builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()));
+		builder = ResponseCreateParams.builder().model(chatModel);
 	}
 
 	/**
@@ -299,7 +298,7 @@ public class OpenAIProvider implements GenAIProvider {
 
 		logInputs();
 
-		ResponseCreateParams responseCreateParams = builder.build();
+		ResponseCreateParams responseCreateParams = builder.tools(new ArrayList<Tool>(toolMap.keySet())).build();
 		logger.debug("Sending request to LLM service.");
 		Response response = getClient().responses().create(responseCreateParams);
 
