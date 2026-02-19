@@ -3,6 +3,7 @@ package org.machanism.machai.gw.reviewer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -47,11 +48,12 @@ public class JavaReviewer implements Reviewer {
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String result = null;
 		try {
-			String content = Files.readString(guidancesFile.toPath());
+			// Java 8 compatible file reading
+			String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
+
 			if (Strings.CS.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
-				Pattern pattern = Pattern.compile("(?:/\\*.*?" + FileProcessor.GUIDANCE_TAG_NAME
-						+ "\\s*(.*?)\\s*\\*/)|(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))",
-						Pattern.DOTALL);
+				Pattern pattern = Pattern.compile("(?:/\\*.*?" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*\\*/)|"
+						+ "(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))", Pattern.DOTALL);
 				Matcher matcher = pattern.matcher(content);
 				if (matcher.find()) {
 					if (Strings.CS.equals(guidancesFile.getName(), "package-info.java")) {

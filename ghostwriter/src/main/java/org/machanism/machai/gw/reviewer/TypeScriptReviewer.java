@@ -2,6 +2,7 @@ package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -44,7 +45,8 @@ public class TypeScriptReviewer implements Reviewer {
 	 * @throws IOException if an error occurs reading the file
 	 */
 	public String perform(File projectDir, File guidancesFile) throws IOException {
-		String content = Files.readString(guidancesFile.toPath());
+		// Java 8 compatible file reading
+		String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
 		String result = null;
 		if (Strings.CS.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
 			Pattern pattern = Pattern.compile("(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"

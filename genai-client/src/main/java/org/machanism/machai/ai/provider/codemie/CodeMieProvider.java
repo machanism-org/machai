@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -160,13 +161,12 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 		throw new IOException("Failed to obtain token: received HTTP response code " + responseCode);
 	}
 
-	/**
-	 * URL-encodes a value using UTF-8 for use in {@code application/x-www-form-urlencoded} bodies.
-	 *
-	 * @param value value to encode
-	 * @return encoded value
-	 */
 	private static String urlEncode(String value) {
-		return URLEncoder.encode(value, StandardCharsets.UTF_8);
+	    try {
+	        return URLEncoder.encode(value, "UTF-8");
+	    } catch (UnsupportedEncodingException e) {
+	        // UTF-8 is always supported, but handle exception just in case
+	        throw new RuntimeException("UTF-8 encoding not supported", e);
+	    }
 	}
 }

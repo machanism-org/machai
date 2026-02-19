@@ -2,6 +2,7 @@ package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -44,23 +45,29 @@ public class PythonReviewer implements Reviewer {
 	 * @throws IOException if an error occurs reading the file
 	 */
 	public String perform(File projectDir, File guidancesFile) throws IOException {
-		String content = Files.readString(guidancesFile.toPath());
-		String result = null;
-		if (Strings.CS.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
-			Pattern pattern = Pattern.compile("(?:#\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
-					+ "|(?:[\"\']{3}\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*[\"\']{3})", Pattern.DOTALL);
-			Matcher matcher = pattern.matcher(content);
-			if (matcher.find()) {
-				String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
-				if (guidanceText != null) {
-					String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
-					String name = guidancesFile.getName();
-					result = MessageFormat.format(promptBundle.getString("python_file"), name, relativePath,
-							guidanceText.trim());
-				}
-			}
-		}
-		return result;
+	    // Java 8 compatible file reading
+	    String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
+	    String result = null;
+	    if (Strings.CS.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
+	        Pattern pattern = Pattern.compile(
+	            "(?:#\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
+	            + "|(?:[\"']{3}\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*[\"']{3})",
+	            Pattern.DOTALL
+	        );
+	        Matcher matcher = pattern.matcher(content);
+	        if (matcher.find()) {
+	            String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+	            if (guidanceText != null) {
+	                String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
+	                String name = guidancesFile.getName();
+	                result = MessageFormat.format(
+	                    promptBundle.getString("python_file"),
+	                    name, relativePath, guidanceText.trim()
+	                );
+	            }
+	        }
+	    }
+	    return result;
 	}
 
 }

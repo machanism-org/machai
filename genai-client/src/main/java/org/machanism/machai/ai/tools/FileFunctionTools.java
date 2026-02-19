@@ -3,10 +3,12 @@ package org.machanism.machai.ai.tools;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +16,6 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +103,7 @@ public class FileFunctionTools implements FunctionTools {
 		StringBuilder content = new StringBuilder();
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
-				String relativePath = ProjectLayout.getRelativePath(workingDir, file, true);
+				String relativePath = getRelativePath(workingDir, file, true);
 				content.append(relativePath).append("\n");
 			}
 		} else {
@@ -140,7 +141,7 @@ public class FileFunctionTools implements FunctionTools {
 			List<String> result = new ArrayList<>();
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					String relativePath = ProjectLayout.getRelativePath(workingDir, file);
+					String relativePath = getRelativePath(workingDir, file, true);
 					result.add(relativePath);
 				}
 
@@ -165,25 +166,24 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return success message, or an error message if writing fails
 	 */
 	private Object writeFile(Object[] params) {
-		String result;
-		JsonNode props = (JsonNode) params[0];
-		String filePath = props.get("file_path").asText();
-		String text = props.get("text").asText();
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
-				: defaultCharset;
-		File workingDir = (File) params[1];
-		logger.info("Write file: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
-		File file = new File(workingDir, filePath);
-		if (file.getParentFile() != null) {
-			file.getParentFile().mkdirs();
-		}
-		try (Writer writer = new FileWriter(file, Charset.forName(charsetName))) {
-			IOUtils.write(text, writer);
-			return "File written successfully: " + filePath;
-		} catch (IOException e) {
-			result = e.getMessage();
-		}
-		return result;
+	    String result;
+	    JsonNode props = (JsonNode) params[0];
+	    String filePath = props.get("file_path").asText();
+	    String text = props.get("text").asText();
+	    String charsetName = props.has("charsetName") ? props.get("charsetName").asText() : defaultCharset;
+	    File workingDir = (File) params[1];
+	    logger.info("Write file: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
+	    File file = new File(workingDir, filePath);
+	    if (file.getParentFile() != null) {
+	        file.getParentFile().mkdirs();
+	    }
+	    try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName(charsetName))) {
+	        writer.write(text);
+	        return "File written successfully: " + filePath;
+	    } catch (IOException e) {
+	        result = e.getMessage();
+	    }
+	    return result;
 	}
 
 	/**
@@ -242,4 +242,37 @@ public class FileFunctionTools implements FunctionTools {
 		return allFiles;
 	}
 
+	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
+		if (dir == null || file == null) {
+			return null;
+		}
+
+		Path dirPath = dir.toPath().toAbsolutePath().normalize();
+		Path filePath = file.toPath().toAbsolutePath().normalize();
+
+		// If file and dir are the same, return "."
+		if (dirPath.equals(filePath)) {
+			return ".";
+		}
+
+		String relativePath;
+		try {
+			relativePath = dirPath.relativize(filePath).toString().replace("\\", "/");
+		} catch (IllegalArgumentException e) {
+			// file is not a descendant of dir
+			return null;
+		}
+
+		// Optionally add "./" prefix
+		if (addSingleDot && !relativePath.startsWith(".")) {
+			relativePath = "./" + relativePath;
+		}
+
+		// If the result is empty, return "."
+		if (relativePath.isEmpty()) {
+			return ".";
+		}
+
+		return relativePath;
+	}
 }

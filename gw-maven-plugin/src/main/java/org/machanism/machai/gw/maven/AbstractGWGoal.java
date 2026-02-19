@@ -164,11 +164,11 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 			}
 
 			String username = server.getUsername();
-			if (username != null && !username.isBlank()) {
+			if (StringUtils.isNotBlank(username)) {
 				config.set("GENAI_USERNAME", username);
 			}
 			String password = server.getPassword();
-			if (password != null && !password.isBlank()) {
+			if (StringUtils.isNotBlank(password)) {
 				config.set("GENAI_PASSWORD", password);
 			}
 		}
@@ -202,13 +202,13 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 				processor.setDefaultGuidance(guidance);
 			}
 
-			File rootDir = new File(session.getExecutionRootDirectory());	
+			File rootDir = new File(session.getExecutionRootDirectory());
 			processor.setLogInputs(logInputs);
 
 			if (scanDir == null) {
 				scanDir = rootDir.getAbsolutePath();
 			}
-			
+
 			processor.scanDocuments(basedir, scanDir);
 			logger.info("Scanning finished.");
 

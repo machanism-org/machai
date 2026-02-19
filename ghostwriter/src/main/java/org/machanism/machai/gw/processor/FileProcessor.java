@@ -1,10 +1,13 @@
 package org.machanism.machai.gw.processor;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -413,9 +416,9 @@ public class FileProcessor extends ProjectProcessor {
 
 		String path = relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + "/" + relativeScanDir;
 
-		Path pathToMatch = Path.of(path);
+		Path pathToMatch = new File(path).toPath();
 		boolean fullMatch = pathMatcher.matches(pathToMatch);
-		boolean projectMatch = pathMatcher.matches(Path.of(relativeScanDir));
+		boolean projectMatch = pathMatcher.matches(new File(relativeScanDir).toPath());
 
 		boolean result = fullMatch || projectMatch;
 		if (!result && scanDir != null) {
@@ -423,7 +426,7 @@ public class FileProcessor extends ProjectProcessor {
 			if (relativePath != null) {
 				Path scanFilePath = scanDir.toPath().resolve(relativePath);
 				String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
-				result = relatedToRoot != null && pathMatcher.matches(Path.of(relatedToRoot));
+				result = relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
 			}
 		}
 
@@ -555,9 +558,9 @@ public class FileProcessor extends ProjectProcessor {
 		logger.info("Processing file: '{}'", file);
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator);
-		
+
 		FunctionToolsLoader.getInstance().applyTools(provider);
-		
+
 		File projectDir = projectLayout.getProjectDir();
 		provider.setWorkingDir(projectDir);
 
@@ -759,7 +762,7 @@ public class FileProcessor extends ProjectProcessor {
 				continue;
 			}
 
-			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(Path.of(path))) {
+			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(new File(path).toPath())) {
 				continue;
 			}
 
@@ -807,7 +810,7 @@ public class FileProcessor extends ProjectProcessor {
 			if (relativePathString == null) {
 				continue;
 			}
-			Path relativePath = Path.of(relativePathString);
+			Path relativePath = new File(relativePathString).toPath();
 
 			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(relativePath)) {
 				continue;
@@ -857,7 +860,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * @return number of path segments
 	 */
 	private static int pathDepth(String path) {
-		if (path == null || path.isBlank()) {
+		if (StringUtils.isBlank(path)) {
 			return 0;
 		}
 		String normalized = path.replace("\\", "/");
@@ -1070,32 +1073,37 @@ public class FileProcessor extends ProjectProcessor {
 	 * @return expanded content with preserved line breaks
 	 */
 	private String parseLines(String data) {
-		if (data == null) {
-			return StringUtils.EMPTY;
-		}
+	    if (data == null) {
+	        return StringUtils.EMPTY;
+	    }
 
-		StringBuilder sb = new StringBuilder();
-		data.lines().forEach(line -> {
-			String normalizedLine = StringUtils.stripToNull(line);
-			if (normalizedLine == null) {
-				sb.append(System.lineSeparator());
-				return;
-			}
+	    StringBuilder sb = new StringBuilder();
+	    try (BufferedReader reader = new BufferedReader(new StringReader(data))) {
+	        String line;
+	        while ((line = reader.readLine()) != null) {
+	            String normalizedLine = StringUtils.stripToNull(line);
+	            if (normalizedLine == null) {
+	                sb.append(System.lineSeparator());
+	                continue;
+	            }
 
-			String content;
-			try {
-				content = tryToGetInstructionsFromFile(normalizedLine);
+	            String content;
+	            try {
+	                content = tryToGetInstructionsFromFile(normalizedLine);
 
-				if (content != null) {
-					sb.append(content);
-				}
-				sb.append(System.lineSeparator());
-			} catch (IOException e) {
-				throw new IllegalArgumentException(e);
-			}
-		});
+	                if (content != null) {
+	                    sb.append(content);
+	                }
+	                sb.append(System.lineSeparator());
+	            } catch (IOException e) {
+	                throw new IllegalArgumentException(e);
+	            }
+	        }
+	    } catch (IOException e) {
+	        throw new IllegalArgumentException(e);
+	    }
 
-		return sb.toString();
+	    return sb.toString();
 	}
 
 	/**
@@ -1230,19 +1238,19 @@ public class FileProcessor extends ProjectProcessor {
 	 * @return file content
 	 */
 	private String readFromFilePath(String filePath) {
-		File file = new File(filePath);
-		if (!file.isAbsolute()) {
-			file = new File(rootDir, filePath);
-		}
+	    File file = new File(filePath);
+	    if (!file.isAbsolute()) {
+	        file = new File(rootDir, filePath);
+	    }
 
-		try (FileReader reader = new FileReader(file, StandardCharsets.UTF_8)) {
-			String result = IOUtils.toString(reader);
-			logger.info("Included file: `{}`", file);
-			return result;
-		} catch (IOException e) {
-			throw new IllegalArgumentException(
-					"Failed to read file: " + file.getAbsolutePath() + ", Error: " + e.getMessage());
-		}
+	    try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+	        String result = IOUtils.toString(reader);
+	        logger.info("Included file: `{}`", file);
+	        return result;
+	    } catch (IOException e) {
+	        throw new IllegalArgumentException(
+	                "Failed to read file: " + file.getAbsolutePath() + ", Error: " + e.getMessage());
+	    }
 	}
 
 }

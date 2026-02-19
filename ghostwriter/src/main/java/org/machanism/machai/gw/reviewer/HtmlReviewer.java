@@ -42,19 +42,20 @@ public class HtmlReviewer implements Reviewer {
 	 * @throws IOException if an error occurs reading the file
 	 */
 	public String perform(File projectDir, File guidancesFile) throws IOException {
-		String content = Files.readString(guidancesFile.toPath());
+	    // Java 8 compatible file reading
+	    String content = new String(Files.readAllBytes(guidancesFile.toPath()), java.nio.charset.StandardCharsets.UTF_8);
 
-		Pattern pattern = Pattern.compile("<!--\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*-->",
-				Pattern.DOTALL);
-		Matcher matcher = pattern.matcher(content);
+	    Pattern pattern = Pattern.compile("<!--\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*-->",
+	            Pattern.DOTALL);
+	    Matcher matcher = pattern.matcher(content);
 
-		String result = null;
-		if (matcher.find()) {
-			result = MessageFormat.format(promptBundle.getString("html_file"), guidancesFile.getName(),
-					ProjectLayout.getRelativePath(projectDir, guidancesFile), content);
-		}
+	    String result = null;
+	    if (matcher.find()) {
+	        result = MessageFormat.format(promptBundle.getString("html_file"), guidancesFile.getName(),
+	                ProjectLayout.getRelativePath(projectDir, guidancesFile), content);
+	    }
 
-		return result;
+	    return result;
 	}
 
 }

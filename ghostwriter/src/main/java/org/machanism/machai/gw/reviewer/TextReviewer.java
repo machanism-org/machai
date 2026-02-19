@@ -2,6 +2,7 @@ package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -13,8 +14,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
 /**
  * Reviewer implementation for generic guidance text files.
  *
- * <p>This reviewer only processes files named {@code @guidance.txt}. When such a file is found, its full contents
- * are returned formatted as a prompt fragment with directory context for downstream processing.
+ * <p>
+ * This reviewer only processes files named {@code @guidance.txt}. When such a
+ * file is found, its full contents are returned formatted as a prompt fragment
+ * with directory context for downstream processing.
  */
 public class TextReviewer implements Reviewer {
 
@@ -33,32 +36,38 @@ public class TextReviewer implements Reviewer {
 	}
 
 	/**
-	 * Reads and formats the guidance file if the provided file is named {@code @guidance.txt}.
+	 * Reads and formats the guidance file if the provided file is named
+	 * {@code @guidance.txt}.
 	 *
-	 * @param projectDir the project root directory used to compute related paths for context
+	 * @param projectDir    the project root directory used to compute related paths
+	 *                      for context
 	 * @param guidancesFile the file to analyze
-	 * @return the formatted guidance prompt, or {@code null} when the file is not a guidance file
+	 * @return the formatted guidance prompt, or {@code null} when the file is not a
+	 *         guidance file
 	 * @throws IOException if an error occurs reading the file
 	 */
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String guidance;
 		if (Strings.CS.equals(guidancesFile.getName(), GUIDANCE_FILE_NAME)) {
-			guidance = Files.readString(guidancesFile.toPath());
+			// Java 8 compatible file reading
+			guidance = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
 			guidance = getPrompt(projectDir, guidancesFile, guidance);
 		} else {
 			guidance = null;
 		}
-
 		return guidance;
 	}
 
 	/**
 	 * Formats the raw guidance content into a prompt fragment.
 	 *
-	 * @param projectDir the project root directory used to compute related paths for context
-	 * @param guidancesFile the guidance file (used to compute the parent directory context)
-	 * @param guidance the raw guidance content
-	 * @return the formatted prompt fragment, or the original guidance content if blank
+	 * @param projectDir    the project root directory used to compute related paths
+	 *                      for context
+	 * @param guidancesFile the guidance file (used to compute the parent directory
+	 *                      context)
+	 * @param guidance      the raw guidance content
+	 * @return the formatted prompt fragment, or the original guidance content if
+	 *         blank
 	 */
 	public String getPrompt(File projectDir, File guidancesFile, String guidance) {
 		if (StringUtils.isNotBlank(guidance)) {
