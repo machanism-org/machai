@@ -45,7 +45,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  * </p>
  * <ul>
  * <li>A deny-list heuristic check via {@link CommandSecurityChecker}</li>
- * <li>An optional allow-list via {@link #isValidCommand(String)}</li>
  * <li>Project-root confinement for the working directory (see
  * {@link #resolveWorkingDir(File, String)})</li>
  * </ul>
@@ -72,14 +71,6 @@ public class CommandFunctionTools implements FunctionTools {
 
 	/** Default character set used to decode process output streams. */
 	private static final String defaultCharset = "UTF-8";
-
-	/**
-	 * Allow-list for executable base commands.
-	 * <p>
-	 * If {@code null}, all commands are considered allowed (subject to deny-list
-	 * checks). If empty, command execution is effectively disabled.
-	 */
-	private Set<String> allowedCommands = null;
 
 	/** Maximum time to wait for a started process to complete. */
 	private int processTimeoutSeconds = 600;
@@ -183,16 +174,10 @@ public class CommandFunctionTools implements FunctionTools {
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("run_command_line_tool",
 				"Executes a system command using Java's ProcessBuilder for controlled and secure execution."
-						+ (allowedCommands == null ? ""
-								: allowedCommands.isEmpty() ? " (Disabled)"
-										: " Allowed commands: " + StringUtils.join(allowedCommands, ", "))
 						+ " Only explicitly allowed commands can be executed for security reasons. "
 						+ "The tool supports setting environment variables, working directory, output tail size, and character encoding.",
 				this::executeCommand,
-				"command:string:required:The system command to execute. Only the following commands are permitted: "
-						+ (allowedCommands == null || allowedCommands.isEmpty()
-								? "None (command execution is disabled)."
-								: StringUtils.join(allowedCommands, ", ")),
+				"command:string:required:The system command to execute.",
 				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). If omitted, the subprocess inherits the current process environment.",
 				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. If omitted, the current project directory is used.",
 				"tailResultSize:integer:optional:The maximum number of characters to display from the end of the command output. If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
@@ -258,7 +243,7 @@ public class CommandFunctionTools implements FunctionTools {
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
 
-		if (!isValidCommand(command)) {
+		if (checker.isDangerous(command)) {
 			return "Error: Invalid or unsafe command.";
 		}
 
@@ -429,35 +414,6 @@ public class CommandFunctionTools implements FunctionTools {
 			}
 		}
 		return envMap;
-	}
-
-	/**
-	 * Validates the provided command line against configured security policies.
-	 *
-	 * <p>
-	 * This method applies the deny-list check (via {@link CommandSecurityChecker})
-	 * and then enforces the optional allow-list.
-	 * </p>
-	 *
-	 * @param command raw command line string
-	 * @return {@code true} if the command is allowed; {@code false} otherwise
-	 */
-	public boolean isValidCommand(String command) {
-
-		if (checker.isDangerous(command)) {
-			return false;
-		}
-
-		if (allowedCommands == null) {
-			return true;
-		}
-
-		if (command == null || command.trim().isEmpty()) {
-			return false;
-		}
-
-		String baseCommand = command.trim().split("\\s+")[0];
-		return allowedCommands.contains(baseCommand);
 	}
 
 	/**
