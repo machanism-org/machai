@@ -25,78 +25,95 @@ Page Structure:
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-## Introduction
+# Introduction
 
-The **Bindex Maven Plugin** enables automated generation and registration of **bindex** metadata for Maven projects. It generates a structured `bindex.json` descriptor for each Maven module so downstream tools can reliably discover, integrate, and assemble libraries.
+The **Bindex Maven Plugin** automates the generation and (optionally) registration of **bindex metadata** for Maven projects.
+This metadata is designed to improve library discovery, integration, and assembly—particularly when paired with the Machanism ecosystem’s structured metadata model and GenAI-powered semantic search.
 
-Key benefits:
+# Overview
 
-- Produces a consistent, machine-readable `bindex.json` per module.
-- Keeps metadata aligned with your module as it evolves (optional update mode).
-- Improves downstream discovery, integration, and assembly workflows that rely on structured metadata.
-- Supports metadata-driven automation (including GenAI-powered semantic search) within the Machanism ecosystem.
+This plugin runs during your Maven build to produce machine-readable bindex metadata describing your project and its outputs.
+Downstream tools can then index and query that metadata to:
 
-## Overview
+- discover compatible libraries faster,
+- enrich search and dependency analysis with semantic information,
+- support automated assembly/integration workflows.
 
-This plugin generates and maintains **bindex** metadata for the current Maven module. You can run it on-demand or bind it to a Maven lifecycle phase (for example, `generate-resources`) so metadata is always produced as part of the build.
+# Key Features
 
-During execution it will:
+- Generates bindex metadata as part of a standard Maven build.
+- Supports repeatable builds (metadata can be regenerated deterministically from the project model).
+- Integrates with Machanism tooling for metadata indexing and semantic search.
 
-- Generate `bindex.json` when it does not exist.
-- Optionally update an existing `bindex.json` (when enabled) to keep metadata synchronized with the module.
+# Getting Started
 
-## Key Features
+## Prerequisites
 
-- Generates a `bindex.json` descriptor for the current Maven module.
-- Optionally updates an existing descriptor to keep metadata synchronized with project changes.
-- Can be executed directly or bound to a lifecycle phase.
-- Standardizes metadata for discovery, indexing, and assembly workflows.
+- Java 8+ (build runtime)
+- Maven 3.x
+- Network access (only required if you publish/register metadata to a remote service)
 
-## Getting Started
+## Environment Variables
 
-### Prerequisites
+This plugin does not require any environment variables for basic metadata generation.
 
-- Java 11+
-- Maven 3.6+
+| Environment variable | Required | Description | Default |
+|---|---:|---|---|
+| (none) | No | No environment variables are required for basic usage. | n/a |
 
-### Environment Variables
+## Basic Usage
 
-The plugin does not require any environment variables.
+Add the plugin to your project’s `pom.xml` and run Maven normally:
 
-| Variable name | Description |
-|---|---|
-| _None_ | _Not required._ |
-
-### Basic Usage
-
-Generate (or update) `bindex.json`:
-
-```bash
-mvn org.machanism.machai:bindex-maven-plugin:bindex
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.machanism.machai</groupId>
+      <artifactId>bindex-maven-plugin</artifactId>
+      <version><!-- use the latest release from Maven Central --></version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>bindex</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
 ```
 
-### Typical Workflow
+```cmd
+mvn verify
+```
 
-1. Add the plugin to your project `pom.xml` (optionally bind it to a lifecycle phase).
-2. Run the `bindex` goal to generate `bindex.json` for the module.
-3. Commit `bindex.json` if your repository policy expects generated metadata to be versioned.
-4. Use `bindex.json` with downstream tooling that consumes **bindex** descriptors.
+## Typical Workflow
 
-## Configuration
+1. Add the plugin to your `pom.xml`.
+2. Run your normal build lifecycle (`mvn verify`, `mvn package`, etc.).
+3. Collect the generated bindex metadata from the configured output location.
+4. (Optional) Publish/register the generated metadata so it can be indexed and searched by other tools.
+
+# Configuration
+
+Common configuration parameters (names may vary by plugin version):
 
 | Parameter | Description | Default |
 |---|---|---|
-| `update` | Update an existing `bindex.json` if present. | `false` |
+| `outputDirectory` | Where generated bindex metadata is written. | Plugin-defined |
+| `skip` | Skips bindex generation when `true`. | `false` |
+| `register` | Registers/publishes generated metadata when `true`. | `false` |
 
-Example (system property):
+Example with custom parameters:
 
-```bash
-mvn org.machanism.machai:bindex-maven-plugin:bindex -Dupdate=true
+```cmd
+mvn -Dbindex.skip=false -Dbindex.register=false verify
 ```
 
-## Resources
+# Resources
 
-- [Machai platform](https://machai.machanism.org)
-- [Maven Central artifact](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
-- [GitHub repository](https://github.com/machanism-org/machai)
-- [Maven](https://maven.apache.org)
+- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin
+- Project site: https://machai.machanism.org/bindex-maven-plugin
+- Source repository: https://github.com/machanism-org/machai
+- Issue tracker: https://github.com/machanism-org/machai/issues

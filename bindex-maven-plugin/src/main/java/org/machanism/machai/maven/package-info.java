@@ -30,15 +30,15 @@
  * Maven plugin goals (Mojos) that integrate Machai/Bindex operations into a Maven build.
  *
  * <p>
- * This package contains the plugin entry points that create or update a <em>Bindex</em> index for the current
- * Maven module, optionally register derived metadata with an external registry service, and clean temporary
+ * This package provides Maven plugin entry points for creating or updating a Bindex index for the current
+ * module, optionally registering derived metadata with an external registry service, and cleaning temporary
  * artifacts created during execution.
  * </p>
  *
  * <h2>Included goals</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.maven.Create} &ndash; Create a new index for the current module.</li>
- *   <li>{@link org.machanism.machai.maven.Update} &ndash; Update/refresh an existing index for the current module.</li>
+ *   <li>{@link org.machanism.machai.maven.Update} &ndash; Update or refresh an existing index for the current module.</li>
  *   <li>{@link org.machanism.machai.maven.Register} &ndash; Scan and publish metadata to a registry endpoint.</li>
  *   <li>{@link org.machanism.machai.maven.Clean} &ndash; Remove plugin-generated temporary artifacts.</li>
  * </ul>
@@ -46,19 +46,15 @@
  * <h2>Execution model</h2>
  * <p>
  * Goals execute against the current {@link org.apache.maven.project.MavenProject}. Modules with {@code pom}
- * packaging (parents/aggregators) are typically skipped so the plugin only runs on buildable modules.
+ * packaging (parents or aggregators) are typically skipped so the plugin only runs on buildable modules.
  * </p>
  *
  * <h2>Configuration</h2>
- * <ul>
- *   <li>
- *     AI provider/model selection: {@code -Dbindex.genai=Provider:Model}
- *     (for example {@code -Dbindex.genai=OpenAI:gpt-5}).
- *   </li>
- *   <li>
- *     Registry endpoint (for {@code register}): {@code -Dbindex.register.url=http://host:port}.
- *   </li>
- * </ul>
+ * <p>
+ * Goals are configured via standard Maven plugin configuration as well as system properties. Common properties
+ * include selecting the AI provider/model (for example {@code -Dbindex.genai=Provider:Model}) and specifying a
+ * registry endpoint for {@code register} (for example {@code -Dbindex.register.url=http://host:port}).
+ * </p>
  *
  * <h2>Command-line usage</h2>
  * <pre>
