@@ -90,7 +90,7 @@ public class GenAIProviderManager {
 			throw new IllegalArgumentException("Failed to initialize GenAI provider '" + providerName
 					+ "': provider is not supported or an error occurred during initialization.", e);
 		} catch (IllegalArgumentException e) {
-			throw new IllegalArgumentException("GenAI provider initialization failed for '" + providerName + "'", e);
+			throw e;
 		}
 	}
 

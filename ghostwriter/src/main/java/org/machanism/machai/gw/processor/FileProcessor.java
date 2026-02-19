@@ -107,12 +107,14 @@ public class FileProcessor extends ProjectProcessor {
 	private boolean nonRecursive;
 
 	/**
-	 * Optional additional instructions appended to each prompt sent to the GenAI provider.
+	 * Optional additional instructions appended to each prompt sent to the GenAI
+	 * provider.
 	 */
 	private String instructions = StringUtils.EMPTY;
 
 	/**
-	 * Default guidance applied when a file does not contain embedded {@code @guidance} directives.
+	 * Default guidance applied when a file does not contain embedded
+	 * {@code @guidance} directives.
 	 */
 	private String defaultGuidance;
 
@@ -553,41 +555,39 @@ public class FileProcessor extends ProjectProcessor {
 		logger.info("Processing file: '{}'", file);
 
 		String perform;
-		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
-			File projectDir = projectLayout.getProjectDir();
-			provider.setWorkingDir(projectDir);
+		GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator);
+		File projectDir = projectLayout.getProjectDir();
+		provider.setWorkingDir(projectDir);
 
-			String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
-					instructions);
-			provider.instructions(effectiveInstructions);
+		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), instructions);
+		provider.instructions(effectiveInstructions);
 
-			String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
-			String osName = System.getProperty("os.name");
-			docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
-			provider.prompt(docsProcessingInstructions);
+		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
+		String osName = System.getProperty("os.name");
+		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
+		provider.prompt(docsProcessingInstructions);
 
-			String projectInfo = getProjectStructureDescription(projectLayout);
-			provider.prompt(projectInfo);
+		String projectInfo = getProjectStructureDescription(projectLayout);
+		provider.prompt(projectInfo);
 
-			String guidanceLines = parseLines(guidance);
+		String guidanceLines = parseLines(guidance);
 
-			HashMap<String, String> props = getProperties(projectLayout);
-			guidanceLines = StrSubstitutor.replace(guidanceLines, props);
-			provider.prompt(guidanceLines);
+		HashMap<String, String> props = getProperties(projectLayout);
+		guidanceLines = StrSubstitutor.replace(guidanceLines, props);
+		provider.prompt(guidanceLines);
 
-			if (isLogInputs()) {
-				String inputsFileName = ProjectLayout.getRelativePath(rootDir, file);
-				File docsTempDir = new File(rootDir, MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
-				File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
-				File parentDir = inputsFile.getParentFile();
-				if (parentDir != null) {
-					Files.createDirectories(parentDir.toPath());
-				}
-				provider.inputsLog(inputsFile);
+		if (isLogInputs()) {
+			String inputsFileName = ProjectLayout.getRelativePath(rootDir, file);
+			File docsTempDir = new File(rootDir, MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
+			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
+			File parentDir = inputsFile.getParentFile();
+			if (parentDir != null) {
+				Files.createDirectories(parentDir.toPath());
 			}
-
-			perform = provider.perform();
+			provider.inputsLog(inputsFile);
 		}
+
+		perform = provider.perform();
 
 		logger.info("Finished processing file: {}", file.getAbsolutePath());
 		return perform;
@@ -924,11 +924,10 @@ public class FileProcessor extends ProjectProcessor {
 			return;
 		}
 
-		try (GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator)) {
-			if (!provider.isThreadSafe()) {
-				throw new IllegalArgumentException("The provider '" + genai
-						+ "' is not thread-safe and cannot be used in a multi-threaded context.");
-			}
+		GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator);
+		if (!provider.isThreadSafe()) {
+			throw new IllegalArgumentException(
+					"The provider '" + genai + "' is not thread-safe and cannot be used in a multi-threaded context.");
 		}
 		this.moduleMultiThread = true;
 	}
@@ -970,11 +969,13 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Sets the additional instructions to be appended to each prompt sent to the GenAI provider.
+	 * Sets the additional instructions to be appended to each prompt sent to the
+	 * GenAI provider.
 	 *
 	 * <p>
-	 * This property allows you to provide project-wide or context-specific guidance that will be included
-	 * in every documentation generation prompt, ensuring consistency and adherence to standards.
+	 * This property allows you to provide project-wide or context-specific guidance
+	 * that will be included in every documentation generation prompt, ensuring
+	 * consistency and adherence to standards.
 	 * </p>
 	 * <p>
 	 * <b>How to use:</b>
@@ -983,23 +984,29 @@ public class FileProcessor extends ProjectProcessor {
 	 * <li>The value can be:
 	 * <ul>
 	 * <li>Plain text instructions</li>
-	 * <li>A URL (starting with {@code http://} or {@code https://}) to include remote content</li>
-	 * <li>A file reference (starting with {@code file:}) to include local file content</li>
+	 * <li>A URL (starting with {@code http://} or {@code https://}) to include
+	 * remote content</li>
+	 * <li>A file reference (starting with {@code file:}) to include local file
+	 * content</li>
 	 * </ul>
 	 * </li>
 	 * <li>The input is parsed line-by-line:
 	 * <ul>
 	 * <li>Blank lines are preserved as line breaks.</li>
-	 * <li>Lines starting with {@code http://} or {@code https://} are fetched and included as content.</li>
-	 * <li>Lines starting with {@code file:} are read from the specified file and included.</li>
+	 * <li>Lines starting with {@code http://} or {@code https://} are fetched and
+	 * included as content.</li>
+	 * <li>Lines starting with {@code file:} are read from the specified file and
+	 * included.</li>
 	 * <li>All other lines are included as-is.</li>
 	 * </ul>
 	 * </li>
-	 * <li>The instructions are appended to every GenAI prompt, in addition to any file-specific or default guidance.</li>
+	 * <li>The instructions are appended to every GenAI prompt, in addition to any
+	 * file-specific or default guidance.</li>
 	 * </ul>
 	 * <p>
 	 * <b>Example usage:</b>
 	 * </p>
+	 * 
 	 * <pre>
 	 * FileProcessor processor = new FileProcessor(rootDir, genai, configurator);
 	 * processor.setInstructions("file:project-instructions.txt");
@@ -1011,8 +1018,10 @@ public class FileProcessor extends ProjectProcessor {
 	 * <p>
 	 * <b>Best Practices:</b>
 	 * <ul>
-	 * <li>Use {@code instructions} to enforce consistent standards or provide important context for all files.</li>
-	 * <li>Store reusable instructions in a file or at a URL for easy updates and sharing.</li>
+	 * <li>Use {@code instructions} to enforce consistent standards or provide
+	 * important context for all files.</li>
+	 * <li>Store reusable instructions in a file or at a URL for easy updates and
+	 * sharing.</li>
 	 * <li>Combine with {@code defaultGuidance} for maximum flexibility.</li>
 	 * </ul>
 	 *
@@ -1023,23 +1032,29 @@ public class FileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Default guidance applied when a file does not contain embedded {@code @guidance} directives.
+	 * Default guidance applied when a file does not contain embedded
+	 * {@code @guidance} directives.
 	 * <p>
-	 * {@code defaultGuidance} provides fallback instructions for files that lack an embedded {@code @guidance} directive,
-	 * ensuring every file can be processed with meaningful guidance.
+	 * {@code defaultGuidance} provides fallback instructions for files that lack an
+	 * embedded {@code @guidance} directive, ensuring every file can be processed
+	 * with meaningful guidance.
 	 * </p>
 	 * <p>
-	 * The value can be set as plain text, a file reference (e.g., {@code file:instructions.txt}), or a URL
-	 * (e.g., {@code https://example.com/guidance.md}). The value is parsed line-by-line:
+	 * The value can be set as plain text, a file reference (e.g.,
+	 * {@code file:instructions.txt}), or a URL (e.g.,
+	 * {@code https://example.com/guidance.md}). The value is parsed line-by-line:
 	 * </p>
 	 * <ul>
 	 * <li>Blank lines are preserved as line breaks.</li>
-	 * <li>Lines starting with {@code http://} or {@code https://} are fetched from the specified URL and included.</li>
-	 * <li>Lines starting with {@code file:} are read from the specified file and included.</li>
+	 * <li>Lines starting with {@code http://} or {@code https://} are fetched from
+	 * the specified URL and included.</li>
+	 * <li>Lines starting with {@code file:} are read from the specified file and
+	 * included.</li>
 	 * <li>All other lines are included as-is.</li>
 	 * </ul>
 	 *
-	 * @param defaultGuidance default guidance input (plain text, URL, or {@code file:})
+	 * @param defaultGuidance default guidance input (plain text, URL, or
+	 *                        {@code file:})
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
 		this.defaultGuidance = defaultGuidance;

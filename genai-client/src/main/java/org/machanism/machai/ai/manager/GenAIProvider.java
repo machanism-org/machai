@@ -39,7 +39,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  *
  * @author Viktor Tovstyi
  */
-public interface GenAIProvider extends Closeable {
+public interface GenAIProvider {
 
 	/**
 	 * Initializes the provider with application configuration.
@@ -145,7 +145,6 @@ public interface GenAIProvider extends Closeable {
 	/**
 	 * Releases any resources held by this provider.
 	 */
-	@Override
 	void close();
 
 	/**

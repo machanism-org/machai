@@ -92,8 +92,8 @@ import com.openai.models.responses.Tool;
  * <ul>
  * <li>{@code OPENAI_API_KEY} (required)</li>
  * <li>{@code OPENAI_BASE_URL} (optional)</li>
- * <li>{@code chatModel} (optional; required before {@link #perform()} if not set
- * via configuration)</li>
+ * <li>{@code chatModel} (optional; required before {@link #perform()} if not
+ * set via configuration)</li>
  * </ul>
  *
  * <h2>Usage</h2>
@@ -125,7 +125,7 @@ public class OpenAIProvider implements GenAIProvider {
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
 	/** OpenAI client for API interactions. */
-	private OpenAIClient client;
+	private static OpenAIClient client;
 
 	/** Active model identifier used in {@link #perform()}. */
 	private String chatModel;
@@ -148,10 +148,14 @@ public class OpenAIProvider implements GenAIProvider {
 	/** Accumulated request input items for the current conversation. */
 	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
 
-	/** Latest usage metrics captured from the most recent {@link #perform()} call. */
+	/**
+	 * Latest usage metrics captured from the most recent {@link #perform()} call.
+	 */
 	private Usage lastUsage = new Usage(0, 0, 0);
 
-	/** Builder used to create {@link ResponseCreateParams} for {@link #perform()}. */
+	/**
+	 * Builder used to create {@link ResponseCreateParams} for {@link #perform()}.
+	 */
 	private Builder builder;
 
 	/** Optional instructions applied to the request. */
@@ -169,19 +173,22 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public void init(Configurator config) {
-		String baseUrl = config.get("OPENAI_BASE_URL");
-		String privateKey = config.get("OPENAI_API_KEY");
+
 		chatModel = config.get("chatModel");
 
-		OpenAIOkHttpClient.Builder clientBuilder = OpenAIOkHttpClient.builder();
-		clientBuilder.apiKey(privateKey);
-		if (baseUrl != null) {
-			clientBuilder.baseUrl(baseUrl);
+		if (client == null) {
+			String baseUrl = config.get("OPENAI_BASE_URL");
+			String privateKey = config.get("OPENAI_API_KEY");
+			OpenAIOkHttpClient.Builder clientBuilder = OpenAIOkHttpClient.builder();
+			clientBuilder.apiKey(privateKey);
+			if (baseUrl != null) {
+				clientBuilder.baseUrl(baseUrl);
+			}
+			if (timeoutSec > 0) {
+				clientBuilder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(timeoutSec)).build());
+			}
+			client = clientBuilder.build();
 		}
-		if (timeoutSec > 0) {
-			clientBuilder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(timeoutSec)).build());
-		}
-		client = clientBuilder.build();
 
 		FunctionToolsLoader.getInstance().applyTools(this);
 		builder = ResponseCreateParams.builder().model(chatModel).tools(new ArrayList<Tool>(toolMap.keySet()));
@@ -327,8 +334,8 @@ public class OpenAIProvider implements GenAIProvider {
 	 * <p>
 	 * Tool calls are executed via {@link #callFunction(ResponseFunctionToolCall)}.
 	 * If tool calls are present, the method creates and sends a follow-up request
-	 * with both the tool call and tool output attached, and repeats until the
-	 * model returns a final message.
+	 * with both the tool call and tool output attached, and repeats until the model
+	 * returns a final message.
 	 * </p>
 	 *
 	 * @param response response object
