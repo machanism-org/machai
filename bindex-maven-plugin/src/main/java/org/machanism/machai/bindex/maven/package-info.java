@@ -30,30 +30,29 @@
  * Maven plugin goals (Mojos) that integrate Machai/Bindex operations into a Maven build.
  *
  * <p>
- * This package provides Maven plugin entry points for creating or updating a Bindex index for the current
- * module, optionally registering derived metadata with an external registry service, and cleaning temporary
- * artifacts created during execution.
+ * This package provides goal implementations that create or update a Bindex index for the current Maven module,
+ * optionally register derived metadata with an external registry service, and clean up temporary artifacts created
+ * during execution.
  * </p>
  *
- * <h2>Included goals</h2>
+ * <h2>Goals</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.maven.Create} &ndash; Create a new index for the current module.</li>
- *   <li>{@link org.machanism.machai.maven.Update} &ndash; Update or refresh an existing index for the current module.</li>
- *   <li>{@link org.machanism.machai.maven.Register} &ndash; Scan and publish metadata to a registry endpoint.</li>
- *   <li>{@link org.machanism.machai.maven.Clean} &ndash; Remove plugin-generated temporary artifacts.</li>
+ *   <li>{@link org.machanism.machai.bindex.maven.Create create} &ndash; Create a new Bindex index for the current module.</li>
+ *   <li>{@link org.machanism.machai.bindex.maven.Update update} &ndash; Update (refresh) an existing Bindex index.</li>
+ *   <li>{@link org.machanism.machai.bindex.maven.Register register} &ndash; Scan the project and publish metadata to a registry.</li>
+ *   <li>{@link org.machanism.machai.bindex.maven.Clean clean} &ndash; Remove plugin-generated temporary artifacts.</li>
  * </ul>
  *
  * <h2>Execution model</h2>
  * <p>
  * Goals execute against the current {@link org.apache.maven.project.MavenProject}. Modules with {@code pom}
- * packaging (parents or aggregators) are typically skipped so the plugin only runs on buildable modules.
+ * packaging (parents/aggregators) are typically skipped so the plugin only runs on buildable modules.
  * </p>
  *
  * <h2>Configuration</h2>
  * <p>
- * Goals are configured via standard Maven plugin configuration as well as system properties. Common properties
- * include selecting the AI provider/model (for example {@code -Dbindex.genai=Provider:Model}) and specifying a
- * registry endpoint for {@code register} (for example {@code -Dbindex.register.url=http://host:port}).
+ * The AI provider/model is selected using {@code -Dbindex.genai} (for example {@code OpenAI:gpt-5}). The
+ * {@code register} goal additionally uses {@code -Dbindex.register.url} to specify the registry endpoint.
  * </p>
  *
  * <h2>Command-line usage</h2>
@@ -64,4 +63,4 @@
  * mvn org.machanism.machai:bindex-maven-plugin:clean
  * </pre>
  */
-package org.machanism.machai.maven;
+package org.machanism.machai.bindex.maven;

@@ -1,4 +1,4 @@
-package org.machanism.machai.maven;
+package org.machanism.machai.bindex.maven;
 
 import java.io.File;
 import java.io.IOException;

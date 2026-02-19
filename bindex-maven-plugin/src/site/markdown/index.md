@@ -27,23 +27,23 @@ Page Structure:
 
 # Introduction
 
-The **Bindex Maven Plugin** automates the generation and (optionally) registration of **bindex metadata** for Maven projects.
-This metadata is designed to improve library discovery, integration, and assembly—particularly when paired with the Machanism ecosystem’s structured metadata model and GenAI-powered semantic search.
+The **Bindex Maven Plugin** enables automated generation and (optionally) registration of **bindex metadata** for Maven projects.
+It improves library discovery, integration, and assembly by producing structured, machine-readable metadata that can be indexed and searched—especially within the Machanism ecosystem’s metadata model and GenAI-assisted semantic search tooling.
 
 # Overview
 
-This plugin runs during your Maven build to produce machine-readable bindex metadata describing your project and its outputs.
-Downstream tools can then index and query that metadata to:
+During a Maven build, this plugin reads your project model and emits bindex metadata describing the project and its outputs.
+Downstream tools can index and query that metadata to:
 
 - discover compatible libraries faster,
-- enrich search and dependency analysis with semantic information,
-- support automated assembly/integration workflows.
+- enrich search and dependency analysis with semantic context,
+- support automated assembly and integration workflows.
 
 # Key Features
 
-- Generates bindex metadata as part of a standard Maven build.
+- Generates bindex metadata during a standard Maven build.
 - Supports repeatable builds (metadata can be regenerated deterministically from the project model).
-- Integrates with Machanism tooling for metadata indexing and semantic search.
+- Can optionally register/publish generated metadata for indexing.
 
 # Getting Started
 
@@ -51,7 +51,7 @@ Downstream tools can then index and query that metadata to:
 
 - Java 8+ (build runtime)
 - Maven 3.x
-- Network access (only required if you publish/register metadata to a remote service)
+- Network access (only required if you register/publish metadata to a remote service)
 
 ## Environment Variables
 
@@ -63,7 +63,7 @@ This plugin does not require any environment variables for basic metadata genera
 
 ## Basic Usage
 
-Add the plugin to your project’s `pom.xml` and run Maven normally:
+Configure the plugin in your project’s `pom.xml` and run Maven normally:
 
 ```xml
 <build>
@@ -93,11 +93,11 @@ mvn verify
 1. Add the plugin to your `pom.xml`.
 2. Run your normal build lifecycle (`mvn verify`, `mvn package`, etc.).
 3. Collect the generated bindex metadata from the configured output location.
-4. (Optional) Publish/register the generated metadata so it can be indexed and searched by other tools.
+4. (Optional) Register/publish the generated metadata so it can be indexed and searched by other tools.
 
 # Configuration
 
-Common configuration parameters (names may vary by plugin version):
+Common configuration parameters:
 
 | Parameter | Description | Default |
 |---|---|---|

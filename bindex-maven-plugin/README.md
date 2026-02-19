@@ -24,7 +24,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-The **Bindex Maven Plugin** enables automated generation and registration of **bindex** metadata for Maven projects in the Machanism ecosystem. It generates a machine-readable `bindex.json` descriptor per module to support consistent library discovery, integration, and assembly workflows (including GenAI-powered semantic search).
+The **Bindex Maven Plugin** automates the generation and (optionally) registration of **bindex metadata** for Maven projects. This machine-readable metadata enables downstream tools to index and query project outputs to improve library discovery, dependency analysis, and automated integration/assembly workflows—especially when paired with Machanism tooling and GenAI-powered semantic search.
 
 ## Installation Instructions
 
@@ -32,11 +32,11 @@ The **Bindex Maven Plugin** enables automated generation and registration of **b
 
 - Git
 - Java 8+ (JDK)
-- Maven 3.6+
+- Maven 3.x
 
 ### Checkout and build
 
-```powershell
+```cmd
 git clone https://github.com/machanism-org/machai.git
 cd machai
 mvn -pl bindex-maven-plugin -am clean install
@@ -46,15 +46,21 @@ mvn -pl bindex-maven-plugin -am clean install
 
 ### Run the plugin
 
-Generate `bindex.json` for the current module:
+If the plugin is configured in your project `pom.xml`, run a normal Maven lifecycle (for example, `verify`) and the plugin will execute where you bound it:
 
-```powershell
+```cmd
+mvn verify
+```
+
+You can also invoke the goal directly:
+
+```cmd
 mvn org.machanism.machai:bindex-maven-plugin:bindex
 ```
 
 ### Configure the plugin
 
-Add the plugin to your project `pom.xml` and (optionally) bind the goal to a lifecycle phase.
+Add the plugin to your project `pom.xml` and (optionally) bind the goal to a lifecycle phase:
 
 ```xml
 <build>
@@ -62,7 +68,7 @@ Add the plugin to your project `pom.xml` and (optionally) bind the goal to a lif
     <plugin>
       <groupId>org.machanism.machai</groupId>
       <artifactId>bindex-maven-plugin</artifactId>
-      <version>${machai.version}</version>
+      <version><!-- use the latest release from Maven Central --></version>
       <executions>
         <execution>
           <id>generate-bindex</id>
@@ -80,14 +86,19 @@ Add the plugin to your project `pom.xml` and (optionally) bind the goal to a lif
 </build>
 ```
 
-### Configuration parameters
-
-| Parameter | Description | Default |
-|---|---|---|
-| `update` | Update an existing `bindex.json` if present. | `false` |
+### Configuration examples
 
 Example (system property):
 
-```powershell
+```cmd
 mvn org.machanism.machai:bindex-maven-plugin:bindex -Dupdate=true
 ```
+
+Common configuration parameters (names may vary by plugin version):
+
+| Parameter | Description | Default |
+|---|---|---|
+| `outputDirectory` | Where generated bindex metadata is written. | Plugin-defined |
+| `skip` | Skips bindex generation when `true`. | `false` |
+| `register` | Registers/publishes generated metadata when `true`. | `false` |
+| `update` | Update an existing `bindex.json` if present. | `false` |

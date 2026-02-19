@@ -1,4 +1,4 @@
-package org.machanism.machai.maven;
+package org.machanism.machai.bindex.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
