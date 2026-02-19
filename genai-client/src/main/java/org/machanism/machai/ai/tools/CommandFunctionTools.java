@@ -34,12 +34,14 @@ import com.fasterxml.jackson.databind.JsonNode;
  * <p>
  * The primary tool executes a command line using {@link ProcessBuilder} in a
  * controlled working directory and captures stdout/stderr into a bounded buffer
- * (see {@link LimitedStringBuilder}). Hosts may optionally provide an allow-list
- * via {@link #isValidCommand(String)} semantics to restrict execution.
+ * (see {@link LimitedStringBuilder}). Hosts may optionally provide an
+ * allow-list via {@link #isValidCommand(String)} semantics to restrict
+ * execution.
  *
  * <h2>Installed tools</h2>
  * <ul>
- * <li>{@code run_command_line_tool} – executes a command line and returns output</li>
+ * <li>{@code run_command_line_tool} – executes a command line and returns
+ * output</li>
  * <li>{@code terminate_process} – throws an exception to abort execution</li>
  * </ul>
  *
@@ -64,6 +66,8 @@ public class CommandFunctionTools implements FunctionTools {
 
 	/** Maximum time to wait for a started process to complete. */
 	private int processTimeoutSeconds = 600;
+
+	private CommandSecurityChecker checker;
 
 	/**
 	 * Exception to signal process termination with a specific exit code.
@@ -102,6 +106,15 @@ public class CommandFunctionTools implements FunctionTools {
 		 */
 		public int getExitCode() {
 			return exitCode;
+		}
+	}
+
+	public CommandFunctionTools() {
+		super();
+		try {
+			checker = new CommandSecurityChecker("denylist-windows.txt", "denylist-unix.txt");
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
 		}
 	}
 
@@ -189,7 +202,9 @@ public class CommandFunctionTools implements FunctionTools {
 	 * wrapped in a new {@link Exception} as the cause.</li>
 	 * <li><b>exitCode</b> (integer, optional): The exit code to return. Defaults to
 	 * 1 if not specified.</li>
-	 * </ul>	 *
+	 * </ul>
+	 * *
+	 * 
 	 * @param params tool invocation parameters (expects a {@link JsonNode} with
 	 *               optional {@code message}, {@code cause}, and {@code exitCode}
 	 *               fields)
@@ -216,7 +231,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Expected parameters:
 	 * <ol>
 	 * <li>{@link JsonNode} containing {@code command} and optional settings</li>
-	 * <li>{@link File} project working directory supplied by the provider runtime</li>
+	 * <li>{@link File} project working directory supplied by the provider
+	 * runtime</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
@@ -407,6 +423,11 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @return {@code true} if allowed
 	 */
 	public boolean isValidCommand(String command) {
+
+		if (checker.isDangerous(command)) {
+			return false;
+		}
+
 		if (allowedCommands == null) {
 			return true;
 		}
@@ -429,7 +450,8 @@ public class CommandFunctionTools implements FunctionTools {
 
 	private void readStream(java.io.InputStream inputStream, String charsetName, LimitedStringBuilder output,
 			LineConsumer lineConsumer, ErrorConsumer errorConsumer) {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append(System.lineSeparator());

