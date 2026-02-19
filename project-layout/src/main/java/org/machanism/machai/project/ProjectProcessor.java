@@ -51,11 +51,7 @@ public abstract class ProjectProcessor {
 			}
 		} else {
 			projectLayout = getProjectLayout(projectDir);
-			try {
-				processFolder(projectLayout);
-			} catch (Exception e) {
-				logger.error("Project dir: " + projectDir, e);
-			}
+			processFolder(projectLayout);
 		}
 	}
 

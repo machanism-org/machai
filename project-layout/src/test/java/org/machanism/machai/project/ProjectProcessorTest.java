@@ -1,6 +1,5 @@
 package org.machanism.machai.project;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -45,18 +44,6 @@ class ProjectProcessorTest {
 		// Assert
 		assertEquals(1, processor.processFolderInvocations);
 		assertEquals(0, processor.processedModules.size());
-	}
-
-	@Test
-	void scanFolder_whenProcessFolderThrows_exceptionIsCaughtAndDoesNotPropagate() throws Exception {
-		// Arrange
-		RecordingProcessor processor = new RecordingProcessor();
-		processor.layoutToReturn = new FixedModulesLayout(null);
-		processor.throwInProcessFolder = true;
-
-		// Act + Assert
-		assertDoesNotThrow(() -> processor.scanFolder(tempDir));
-		assertEquals(1, processor.processFolderInvocations);
 	}
 
 	@Test
