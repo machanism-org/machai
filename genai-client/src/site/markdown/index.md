@@ -74,10 +74,10 @@ This design provides:
 
 | Variable | Required | Used by | Description |
 |---|---:|---|---|
-| `OPENAI_API_KEY` | Conditional | OpenAI / OpenAI-compatible | API key (or access token) used to authenticate requests. |
+| `OPENAI_API_KEY` | Conditional | OpenAI / OpenAI-compatible / CodeMie (internal delegation) | API key (or access token) used to authenticate requests. |
 | `OPENAI_ORG_ID` | No | OpenAI | Optional organization identifier. |
 | `OPENAI_PROJECT_ID` | No | OpenAI | Optional project identifier. |
-| `OPENAI_BASE_URL` | No | OpenAI / OpenAI-compatible | Override API base URL (useful for OpenAI-compatible gateways). |
+| `OPENAI_BASE_URL` | No | OpenAI / OpenAI-compatible / CodeMie (internal delegation) | Override API base URL (useful for OpenAI-compatible gateways). |
 | `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (or a client id if using client_credentials). |
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (or a client secret if using client_credentials). |
 | `AUTH_URL` | No | CodeMie | OAuth2 token endpoint override (defaults to CodeMie Keycloak token URL). |
@@ -143,7 +143,7 @@ and generate the content for this section following net format:
 
 `OpenAIProvider` is an OpenAI-backed implementation of the `GenAIProvider` abstraction.
 
-This provider adapts the OpenAI Java SDK to the library’s provider interface. It accumulates user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools. When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
+This provider adapts the OpenAI Java SDK to MachAI's provider interface. It accumulates user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools. When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
 
 **Capabilities**
 
@@ -157,7 +157,7 @@ This provider adapts the OpenAI Java SDK to the library’s provider interface. 
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_BASE_URL` (optional)
-- `chatModel` (optional; required before `perform()` if not set elsewhere)
+- `chatModel` (optional; required before `perform()` if not set via configuration)
 
 **Usage example**
 
@@ -173,6 +173,15 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 This provider obtains an access token from a configurable OpenID Connect token endpoint and then initializes an OpenAI-compatible client (via `OpenAIProvider`) to call the CodeMie Code Assistant REST API.
 
+After a token is retrieved, this provider configures the underlying OpenAI-compatible provider by setting:
+
+- `OPENAI_BASE_URL` to the CodeMie API base URL
+- `OPENAI_API_KEY` to the retrieved access token
+
+and then delegates requests to either `OpenAIProvider` (for `gpt-*` models) or `ClaudeProvider` (for `claude-*` models).
+
+**Authentication modes**
+
 The authentication mode is selected based on the configured username:
 
 - If the username contains `@`, the password grant is used (typical user e-mail login).
@@ -182,6 +191,7 @@ The authentication mode is selected based on the configured username:
 
 - `GENAI_USERNAME` (required)
 - `GENAI_PASSWORD` (required)
+- `chatModel` (required)
 - `AUTH_URL` (optional; token endpoint override)
 
 **Endpoints (defaults)**
@@ -199,15 +209,13 @@ GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
 
 ### Claude
 
-`ClaudeProvider` is an Anthropic Claude-backed implementation of the `GenAIProvider` abstraction.
+`ClaudeProvider` is intended to be an Anthropic-backed implementation of the `GenAIProvider` abstraction.
 
-It adapts the Anthropic Claude API to the library’s provider interface.
+It is currently a stub: most methods are not implemented and `init(...)` throws `NotImplementedError`.
 
 **Configuration**
 
-- `ANTHROPIC_API_KEY` (required)
-- `ANTHROPIC_BASE_URL` (optional)
-- `chatModel` (required)
+- Not available yet.
 
 **Usage example**
 
@@ -227,7 +235,7 @@ It accumulates prompt text in memory and can optionally write instructions and p
 
 - No network calls are performed.
 - `perform()` always returns `null`.
-- Unsupported capabilities (for example, `embedding(String)`) throw an exception.
+- Unsupported capabilities (for example, `embedding(String)`) throw `UnsupportedOperationException`.
 
 **Usage example**
 

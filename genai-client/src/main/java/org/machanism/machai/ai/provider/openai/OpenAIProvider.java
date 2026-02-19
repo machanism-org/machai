@@ -26,7 +26,6 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.manager.Usage;
-import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +142,7 @@ public class OpenAIProvider implements GenAIProvider {
 	private File workingDir;
 
 	/** Request timeout in seconds; {@code 0} means SDK defaults are used. */
-	private long timeoutSec = 0;
+	private long requestTimeoutSec = 600;
 
 	/** Accumulated request input items for the current conversation. */
 	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
@@ -184,8 +183,8 @@ public class OpenAIProvider implements GenAIProvider {
 			if (baseUrl != null) {
 				clientBuilder.baseUrl(baseUrl);
 			}
-			if (timeoutSec > 0) {
-				clientBuilder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(timeoutSec)).build());
+			if (requestTimeoutSec > 0) {
+				clientBuilder.timeout(Timeout.builder().request(java.time.Duration.ofSeconds(requestTimeoutSec)).build());
 			}
 			client = clientBuilder.build();
 		}
@@ -607,7 +606,7 @@ public class OpenAIProvider implements GenAIProvider {
 	 * @return timeout in seconds; {@code 0} indicates the SDK default
 	 */
 	public long getTimeout() {
-		return timeoutSec;
+		return requestTimeoutSec;
 	}
 
 	/**
@@ -616,7 +615,7 @@ public class OpenAIProvider implements GenAIProvider {
 	 * @param timeout timeout in seconds; use {@code 0} to use SDK defaults
 	 */
 	public void setTimeout(long timeout) {
-		this.timeoutSec = timeout;
+		this.requestTimeoutSec = timeout;
 	}
 
 	/**

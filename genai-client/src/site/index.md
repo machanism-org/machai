@@ -49,15 +49,13 @@ and generate the content for this section following net format:
 
 ### Claude
 
-Anthropic Claude-backed implementation of MachAI's `GenAIProvider` abstraction.
+Anthropic-backed implementation of MachAI's `GenAIProvider` abstraction.
 
-This provider adapts the Anthropic Claude API to MachAI's provider interface.
+This provider adapts the Anthropic Java SDK to MachAI's provider interface.
 
-Configuration
+Status
 
-- `ANTHROPIC_API_KEY` (required)
-- `ANTHROPIC_BASE_URL` (optional)
-- `chatModel` (required before `perform()` if not set elsewhere)
+- Currently not implemented (methods throw or return placeholders).
 
 Thread-safety
 
@@ -69,10 +67,24 @@ GenAI provider implementation for EPAM CodeMie.
 
 This provider obtains an access token from a configurable OpenID Connect token endpoint and then initializes an OpenAI-compatible client (via `OpenAIProvider`) to call the CodeMie Code Assistant REST API.
 
+Authentication modes
+
 The authentication mode is selected based on the configured username:
 
 - If the username contains `"@"`, the password grant is used (typical user e-mail login).
 - Otherwise, the client credentials grant is used (service-to-service).
+
+Delegation
+
+After a token is retrieved, this provider configures the underlying OpenAI-compatible provider by setting:
+
+- `OPENAI_BASE_URL` to the CodeMie API base URL.
+- `OPENAI_API_KEY` to the retrieved access token.
+
+It then delegates requests to either:
+
+- `OpenAIProvider` for `gpt-*` models
+- `ClaudeProvider` for `claude-*` models
 
 Configuration
 
@@ -80,6 +92,7 @@ Required configuration keys:
 
 - `GENAI_USERNAME` – user e-mail or client id.
 - `GENAI_PASSWORD` – password or client secret.
+- `chatModel` – model identifier (for example `gpt-4o-mini` or `claude-3-5-sonnet`).
 
 Optional configuration keys:
 
@@ -100,7 +113,7 @@ Key characteristics
 
 - No network calls are performed.
 - `perform()` always returns `null`.
-- Unsupported capabilities (for example, `embedding(String)`) throw an exception.
+- Unsupported capabilities (for example, `embedding(String)`) throw `UnsupportedOperationException`.
 
 Example
 
@@ -140,7 +153,7 @@ Instances are not thread-safe. Use one provider instance per request or synchron
 
 `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
 
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
+Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `Submit Prompt` recipe (see `perform()`).
 
 Thread safety and lifecycle
 

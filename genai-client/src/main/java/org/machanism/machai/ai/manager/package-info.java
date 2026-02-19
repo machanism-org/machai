@@ -27,19 +27,24 @@
  */
 
 /**
- * Manager and service provider interfaces (SPI) for selecting and operating GenAI provider integrations.
+ * Manager API and service provider interface (SPI) for resolving and operating generative-AI provider integrations.
  *
- * <p>This package provides the core abstractions used by the application to:
+ * <p>This package defines the core abstractions used to integrate multiple AI backends behind a single contract:
  * <ul>
- *   <li>resolve a concrete {@link org.machanism.machai.ai.manager.GenAIProvider} implementation by identifier,</li>
- *   <li>configure it with a specific model and application {@code Configurator},</li>
- *   <li>execute a completion run via {@link org.machanism.machai.ai.manager.GenAIProvider#perform()}, and</li>
- *   <li>collect and aggregate token {@link org.machanism.machai.ai.manager.Usage} metrics across runs.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider} is the provider contract for prompts, tools,
+ *   embeddings, execution, and lifecycle management.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIAdapter} is a delegating implementation used to decorate a
+ *   provider instance (for example, to add logging, metrics, retries, or request shaping) without changing the
+ *   underlying provider implementation.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenAIProviderManager} resolves providers from a
+ *   {@code Provider:Model} identifier and initializes them using a {@link org.machanism.macha.core.commons.configurator.Configurator}.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.Usage} captures per-invocation token consumption metrics that can be
+ *   aggregated and logged by the manager.</li>
  * </ul>
  *
- * <p>The main entry point is {@link org.machanism.machai.ai.manager.GenAIProviderManager}, which creates provider
- * instances from a {@code Provider:Model} identifier. Providers may also be referenced by fully qualified class
- * name.
+ * <h2>Provider resolution</h2>
+ * <p>Providers are resolved by a {@code Provider:Model} identifier (for example, {@code OpenAI:gpt-4o-mini}). If the
+ * provider prefix is omitted, the default provider is selected.
  *
  * <h2>Typical usage</h2>
  * <pre>{@code

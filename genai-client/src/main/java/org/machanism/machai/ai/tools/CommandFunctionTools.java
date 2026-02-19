@@ -28,21 +28,28 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Installs command-execution and process-termination tools into a
- * {@link GenAIProvider}.
+ * Installs command-execution and process-termination tools into a {@link GenAIProvider}.
  *
  * <p>
- * The primary tool executes a command line using {@link ProcessBuilder} in a
- * controlled working directory and captures stdout/stderr into a bounded buffer
- * (see {@link LimitedStringBuilder}). Hosts may optionally provide an
- * allow-list via {@link #isValidCommand(String)} semantics to restrict
- * execution.
+ * The installed tools provide a controlled wrapper around {@link ProcessBuilder} to execute a host command line
+ * within a validated working directory and capture both stdout and stderr into a bounded buffer
+ * (see {@link LimitedStringBuilder}).
+ * </p>
+ *
+ * <h2>Security model</h2>
+ * <p>
+ * Command execution is intended to be restricted by the host application. This implementation supports:
+ * </p>
+ * <ul>
+ *   <li>A deny-list heuristic check via {@link CommandSecurityChecker}</li>
+ *   <li>An optional allow-list via {@link #isValidCommand(String)}</li>
+ *   <li>Project-root confinement for the working directory (see {@link #resolveWorkingDir(File, String)})</li>
+ * </ul>
  *
  * <h2>Installed tools</h2>
  * <ul>
- * <li>{@code run_command_line_tool} – executes a command line and returns
- * output</li>
- * <li>{@code terminate_process} – throws an exception to abort execution</li>
+ *   <li>{@code run_command_line_tool} – executes a command line and returns output</li>
+ *   <li>{@code terminate_process} – aborts execution by throwing a {@link ProcessTerminationException}</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -52,14 +59,16 @@ public class CommandFunctionTools implements FunctionTools {
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
 
+	/** Default maximum number of characters to return from captured process output. */
 	private static int defaultResultTailSize = 1024;
 
+	/** Default character set used to decode process output streams. */
 	private static final String defaultCharset = "UTF-8";
 
 	/**
 	 * Allow-list for executable base commands.
 	 * <p>
-	 * If {@code null}, all commands are considered allowed. If empty, command
+	 * If {@code null}, all commands are considered allowed (subject to deny-list checks). If empty, command
 	 * execution is effectively disabled.
 	 */
 	private Set<String> allowedCommands = null;
@@ -67,10 +76,11 @@ public class CommandFunctionTools implements FunctionTools {
 	/** Maximum time to wait for a started process to complete. */
 	private int processTimeoutSeconds = 600;
 
+	/** Checker that rejects known-dangerous command fragments. */
 	private CommandSecurityChecker checker;
 
 	/**
-	 * Exception to signal process termination with a specific exit code.
+	 * Runtime exception used by {@code terminate_process} to signal early termination to the host.
 	 */
 	public static class ProcessTerminationException extends RuntimeException {
 		private static final long serialVersionUID = -4615360980518233932L;
@@ -109,6 +119,11 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Creates a tool installer and initializes the default deny-lists.
+	 *
+	 * @throws IllegalArgumentException if deny-list resources cannot be loaded
+	 */
 	public CommandFunctionTools() {
 		super();
 		try {
@@ -119,47 +134,38 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Registers system command and process control tools with the provided
-	 * {@link GenAIProvider}.
+	 * Registers system command and process control tools with the provided {@link GenAIProvider}.
 	 * <p>
 	 * The following tools are installed:
+	 * </p>
 	 * <ul>
-	 * <li><b>run_command_line_tool</b> – Executes a system command using Java's
-	 * {@code Process.exec()} method. <br>
-	 * <b>Parameters:</b>
-	 * <ul>
-	 * <li><b>command</b> (string, required): The command to execute in the system
-	 * shell.</li>
-	 * <li><b>env</b> (string, optional): Environment variable settings as a single
-	 * string, with each variable in the format {@code NAME=VALUE}, separated by
-	 * newline characters ({@code \n}). If {@code null}, the subprocess inherits the
-	 * environment variables from the current process.</li>
-	 * <li><b>dir</b> (string, optional): The working directory for the subprocess.
-	 * If {@code null}, the subprocess inherits the current project directory.</li>
-	 * <li><b>tailResultSize</b> (integer, optional): Specifies the maximum number
-	 * of characters to display from the end of the result content produced by the
-	 * executed system command. If the command output exceeds this limit, only the
-	 * last {@code tailResultSize} characters will be shown. Default value:
-	 * {@code defaultResultTailSize}.</li>
-	 * <li><b>charsetName</b> (string, optional): The name of the requested charset.
-	 * Default: {@code defaultCharset}.</li>
-	 * </ul>
-	 * </li>
-	 * <li><b>terminate_process</b> – Throws an exception to immediately terminate
-	 * the process. Useful for signaling fatal errors or controlled shutdowns from
-	 * within a function tool. <br>
-	 * <b>Parameters:</b>
-	 * <ul>
-	 * <li><b>message</b> (string, optional): The exception message to use. Defaults
-	 * to "Process terminated by function tool."</li>
-	 * <li><b>cause</b> (string, optional): An optional cause message. If provided,
-	 * it is wrapped in a new Exception as the cause.</li>
-	 * </ul>
-	 * </li>
+	 *   <li>
+	 *     <b>run_command_line_tool</b> – Executes a system command using Java's {@link ProcessBuilder}.<br>
+	 *     <b>Parameters:</b>
+	 *     <ul>
+	 *       <li><b>command</b> (string, required): The command to execute.</li>
+	 *       <li><b>env</b> (string, optional): Environment variables as {@code NAME=VALUE} pairs separated by
+	 *           newline characters ({@code \n}).</li>
+	 *       <li><b>dir</b> (string, optional): Working directory relative to the project directory; defaults to
+	 *           {@code .}.</li>
+	 *       <li><b>tailResultSize</b> (integer, optional): Maximum number of characters to return from captured
+	 *           output; defaults to {@code defaultResultTailSize}.</li>
+	 *       <li><b>charsetName</b> (string, optional): Character set used to decode process output; defaults to
+	 *           {@code defaultCharset}.</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>
+	 *     <b>terminate_process</b> – Throws an exception to immediately terminate execution.<br>
+	 *     <b>Parameters:</b>
+	 *     <ul>
+	 *       <li><b>message</b> (string, optional): Exception message; defaults to "Process terminated by function tool."</li>
+	 *       <li><b>cause</b> (string, optional): Optional cause message; wrapped in an {@link Exception}.</li>
+	 *       <li><b>exitCode</b> (integer, optional): Exit code; defaults to 1.</li>
+	 *     </ul>
+	 *   </li>
 	 * </ul>
 	 *
-	 * @param provider the {@link GenAIProvider} instance to which the tools will be
-	 *                 registered
+	 * @param provider the provider instance to which tools will be registered
 	 */
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("run_command_line_tool",
@@ -171,8 +177,7 @@ public class CommandFunctionTools implements FunctionTools {
 						+ "The tool supports setting environment variables, working directory, output tail size, and character encoding.",
 				this::executeCommand,
 				"command:string:required:The system command to execute. Only the following commands are permitted: "
-						+ (allowedCommands == null || allowedCommands.isEmpty()
-								? "None (command execution is disabled)."
+						+ (allowedCommands == null || allowedCommands.isEmpty() ? "None (command execution is disabled)."
 								: StringUtils.join(allowedCommands, ", ")),
 				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). If omitted, the subprocess inherits the current process environment.",
 				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. If omitted, the current project directory is used.",
@@ -190,26 +195,17 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Throws a {@link ProcessTerminationException} to signal that the function tool
-	 * should terminate the process with a specific exit code.
+	 * Implements the {@code terminate_process} tool.
+	 *
 	 * <p>
-	 * The exception message, cause, and exit code can be specified via the
-	 * {@code params} array:
-	 * <ul>
-	 * <li><b>message</b> (string, optional): The exception message. Defaults to
-	 * "Process terminated by function tool."</li>
-	 * <li><b>cause</b> (string, optional): The cause message. If provided, it is
-	 * wrapped in a new {@link Exception} as the cause.</li>
-	 * <li><b>exitCode</b> (integer, optional): The exit code to return. Defaults to
-	 * 1 if not specified.</li>
-	 * </ul>
-	 * *
-	 * 
-	 * @param params tool invocation parameters (expects a {@link JsonNode} with
-	 *               optional {@code message}, {@code cause}, and {@code exitCode}
-	 *               fields)
+	 * Reads {@code message}, {@code cause}, and {@code exitCode} from the supplied {@link JsonNode} and throws a
+	 * {@link ProcessTerminationException}. This mechanism allows a tool invocation to abort the overall workflow
+	 * with an explicit exit code.
+	 * </p>
+	 *
+	 * @param params tool invocation parameters (expects a single {@link JsonNode} argument)
 	 * @return never returns; always throws
-	 * @throws ProcessTerminationException always thrown to terminate the process
+	 * @throws ProcessTerminationException always thrown to terminate execution
 	 */
 	public String terminateProcess(Object[] params) {
 		JsonNode props = (JsonNode) params[0];
@@ -225,18 +221,18 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Executes the supplied command and returns the captured output.
+	 * Implements the {@code run_command_line_tool} tool.
 	 *
 	 * <p>
 	 * Expected parameters:
+	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} containing {@code command} and optional settings</li>
-	 * <li>{@link File} project working directory supplied by the provider
-	 * runtime</li>
+	 *   <li>{@link JsonNode} containing {@code command} and optional settings</li>
+	 *   <li>{@link File} project working directory supplied by the provider runtime</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return command output (bounded to the configured tail size)
+	 * @return command output bounded to the configured tail size
 	 */
 	public String executeCommand(Object[] params) {
 		String commandId = Integer.toHexString(new Random().nextInt());
@@ -344,8 +340,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Resolves a working directory relative to a canonical project directory.
 	 *
 	 * <p>
-	 * Absolute paths are rejected and attempts to traverse outside the project
-	 * directory are blocked.
+	 * Absolute paths are rejected and attempts to traverse outside the project directory are blocked.
+	 * </p>
 	 *
 	 * @param projectDir canonical project directory
 	 * @param dir        requested relative directory (or {@code .})
@@ -383,11 +379,12 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Parses an {@code env} parameter string into a map.
+	 * Parses the {@code env} parameter string into a map of environment variables.
 	 *
 	 * <p>
-	 * Lines are separated by {@code \n} (or {@code \r\n}); empty lines and lines
-	 * starting with {@code #} are ignored.
+	 * Lines are separated by {@code \n} (or {@code \r\n}); empty lines and lines starting with {@code #} are
+	 * ignored.
+	 * </p>
 	 *
 	 * @param envString environment string
 	 * @return parsed environment variables
@@ -417,10 +414,15 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Validates a command against the configured allow-list.
+	 * Validates the provided command line against configured security policies.
+	 *
+	 * <p>
+	 * This method applies the deny-list check (via {@link CommandSecurityChecker}) and then enforces the optional
+	 * allow-list.
+	 * </p>
 	 *
 	 * @param command raw command line string
-	 * @return {@code true} if allowed
+	 * @return {@code true} if the command is allowed; {@code false} otherwise
 	 */
 	public boolean isValidCommand(String command) {
 
@@ -440,18 +442,43 @@ public class CommandFunctionTools implements FunctionTools {
 		return allowedCommands.contains(baseCommand);
 	}
 
+	/**
+	 * Functional interface used for streaming output line processing.
+	 */
 	private interface LineConsumer {
+		/**
+		 * Consumes a single line of output.
+		 *
+		 * @param line output line
+		 */
 		void accept(String line);
 	}
 
+	/**
+	 * Functional interface used for handling stream read failures.
+	 */
 	private interface ErrorConsumer {
+		/**
+		 * Called when an {@link IOException} occurs while reading a stream.
+		 *
+		 * @param e exception
+		 */
 		void accept(IOException e);
 	}
 
+	/**
+	 * Reads a process stream and appends its content to {@code output} while also passing each line to the provided
+	 * consumer.
+	 *
+	 * @param inputStream   process stream
+	 * @param charsetName   stream character set
+	 * @param output        bounded output buffer
+	 * @param lineConsumer  callback invoked for each line read
+	 * @param errorConsumer callback invoked if reading fails
+	 */
 	private void readStream(java.io.InputStream inputStream, String charsetName, LimitedStringBuilder output,
 			LineConsumer lineConsumer, ErrorConsumer errorConsumer) {
-		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append(System.lineSeparator());

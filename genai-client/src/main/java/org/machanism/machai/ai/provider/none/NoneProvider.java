@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li>No network calls are performed.</li>
  *   <li>{@link #perform()} always returns {@code null}.</li>
- *   <li>Unsupported capabilities (for example, {@link #embedding(String)}) throw an exception.</li>
+ *   <li>Unsupported capabilities (for example, {@link #embedding(String)}) throw
+ *       {@link UnsupportedOperationException}.</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -70,6 +71,8 @@ public class NoneProvider implements GenAIProvider {
 	/**
 	 * Appends the given text to the prompt buffer.
 	 *
+	 * <p>Each call appends the provided text followed by a blank line.
+	 *
 	 * @param text prompt text to append
 	 */
 	@Override
@@ -79,10 +82,10 @@ public class NoneProvider implements GenAIProvider {
 	}
 
 	/**
-	 * No-op.
+	 * Ignores the provided file.
 	 *
 	 * @param file              file containing prompt text
-	 * @param bundleMessageName unused, present for interface compatibility
+	 * @param bundleMessageName unused; present for interface compatibility
 	 * @throws IOException never thrown by this implementation
 	 */
 	@Override
@@ -91,7 +94,7 @@ public class NoneProvider implements GenAIProvider {
 	}
 
 	/**
-	 * No-op.
+	 * Ignores the provided file.
 	 *
 	 * @param file ignored
 	 * @throws IOException           never thrown by this implementation
@@ -103,7 +106,7 @@ public class NoneProvider implements GenAIProvider {
 	}
 
 	/**
-	 * No-op.
+	 * Ignores the provided URL.
 	 *
 	 * @param fileUrl ignored
 	 * @throws IOException           never thrown by this implementation
@@ -115,7 +118,7 @@ public class NoneProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Unsupported by this provider.
+	 * Indicates that embedding generation is not available for this provider.
 	 *
 	 * @param text input text
 	 * @return never returns normally
@@ -127,7 +130,7 @@ public class NoneProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Clears accumulated prompts.
+	 * Clears the accumulated prompt buffer.
 	 */
 	@Override
 	public void clear() {
@@ -135,7 +138,9 @@ public class NoneProvider implements GenAIProvider {
 	}
 
 	/**
-	 * No-op.
+	 * Registers a tool.
+	 *
+	 * <p>This provider does not support tools; the registration is ignored.
 	 *
 	 * @param name        tool name
 	 * @param description tool description
@@ -212,7 +217,9 @@ public class NoneProvider implements GenAIProvider {
 	}
 
 	/**
-	 * No-op.
+	 * Configures the working directory.
+	 *
+	 * <p>This provider does not use a working directory; the configuration is ignored.
 	 *
 	 * @param workingDir ignored
 	 */
@@ -223,6 +230,8 @@ public class NoneProvider implements GenAIProvider {
 
 	/**
 	 * Returns token usage metrics captured from the most recent {@link #perform()} call.
+	 *
+	 * <p>Since this provider does not call a model, the returned usage is always zero.
 	 *
 	 * @return usage metrics; never {@code null}
 	 */

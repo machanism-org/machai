@@ -29,29 +29,36 @@
 /**
  * Web UI automation-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementations.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.web.WebProvider}, which obtains model responses by
- * driving a target GenAI service through its browser-based user interface using
- * <a href="https://ganteater.com">Anteater</a> workspace recipes.
+ * <p>This package provides {@link org.machanism.machai.ai.provider.web.WebProvider}, which obtains responses from a GenAI
+ * service by driving its browser-based UI using <a href="https://ganteater.com">Anteater</a> workspace recipes.
  *
  * <h2>How it works</h2>
- * <p>{@link org.machanism.machai.ai.provider.web.WebProvider} maintains a shared (static) Anteater workspace instance.
- * Callers select an Anteater configuration via {@link org.machanism.machai.ai.provider.web.WebProvider#model(String)},
- * set the workspace start directory and variables via
- * {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)}, then execute the automation
- * flow via {@link org.machanism.machai.ai.provider.web.WebProvider#perform()}.
+ * <p>{@link org.machanism.machai.ai.provider.web.WebProvider} manages a shared Anteater {@code AEWorkspace} instance.
+ * Typical execution flow:
+ * <ol>
+ *   <li>Initialize provider configuration via {@code init(Configurator)} (sets the Anteater configuration name).</li>
+ *   <li>Call {@link org.machanism.machai.ai.provider.web.WebProvider#setWorkingDir(java.io.File)} once to initialize the
+ *       workspace start directory, variables (e.g., {@code PROJECT_DIR}), load the Anteater configuration, and run setup
+ *       nodes.</li>
+ *   <li>Queue prompts via the provider API.</li>
+ *   <li>Call {@link org.machanism.machai.ai.provider.web.WebProvider#perform()} to run the {@code "Submit Prompt"}
+ *       recipe. Prompts are passed as system variable {@code INPUTS} and the recipe is expected to return a response in
+ *       variable {@code result}.</li>
+ * </ol>
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
  * WebProvider provider = new WebProvider();
- * provider.model("openai-chatgpt");
- * provider.setWorkingDir(new File("C:\\anteater-workspace"));
+ * provider.init(configurator); // sets chatModel/config name
+ * provider.setWorkingDir(new File("C:\\path\\to\\project"));
  *
+ * // provider.prompt("..."); // add one or more prompts
  * String responseText = provider.perform();
  * System.out.println(responseText);
  * }</pre>
  *
  * <h2>State and thread safety</h2>
- * <p>Automation is not thread-safe. Workspace state is stored in static fields and is intended to be initialized once
- * per JVM; attempts to change the working directory or configuration after initialization will fail.
+ * <p>Automation is not thread-safe. Workspace state is stored in static fields and is intended to be initialized once per
+ * JVM instance; attempts to change the working directory after initialization will fail.
  */
 package org.machanism.machai.ai.provider.web;

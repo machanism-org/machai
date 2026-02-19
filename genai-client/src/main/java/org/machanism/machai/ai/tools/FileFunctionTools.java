@@ -25,18 +25,17 @@ import com.fasterxml.jackson.databind.JsonNode;
  * Installs file-system tools into a {@link GenAIProvider}.
  *
  * <p>
- * The installed tools operate relative to a working directory supplied by the
- * provider/tool runtime.
+ * Tools in this installer are intended for host-integrated use where the host controls the base working
+ * directory. All paths provided to these tools are interpreted relative to the working directory supplied by the
+ * provider/runtime.
+ * </p>
  *
  * <h2>Installed tools</h2>
  * <ul>
- * <li>{@code read_file_from_file_system} – reads a file as text</li>
- * <li>{@code write_file_to_file_system} – writes a file (creating parent
- * directories as needed)</li>
- * <li>{@code list_files_in_directory} – lists immediate children of a
- * directory</li>
- * <li>{@code get_recursive_file_list} – recursively lists all files under a
- * directory</li>
+ *   <li>{@code read_file_from_file_system} – reads a file as text</li>
+ *   <li>{@code write_file_to_file_system} – writes a file (creating parent directories as needed)</li>
+ *   <li>{@code list_files_in_directory} – lists immediate children of a directory</li>
+ *   <li>{@code get_recursive_file_list} – recursively lists all files under a directory</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -48,10 +47,11 @@ public class FileFunctionTools implements FunctionTools {
 	/** Logger for file tool operations and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
 
+	/** Default character set used to decode/encode file content. */
 	private static final String defaultCharset = "UTF-8";
 
 	/**
-	 * Installs file read/write/list tools into the provided provider.
+	 * Registers file read/write/list tools into the provided provider.
 	 *
 	 * @param provider provider instance
 	 */
@@ -71,18 +71,18 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Lists files recursively in a directory.
+	 * Implements {@code get_recursive_file_list}.
 	 *
 	 * <p>
 	 * Expected parameters:
+	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
-	 * <li>{@link File} working directory</li>
+	 *   <li>{@link JsonNode} optionally containing {@code dir_path}</li>
+	 *   <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a newline-separated list of project-relative file paths, or a message
-	 *         if no files are found
+	 * @return a newline-separated list of project-relative file paths, or a message if no files are found
 	 */
 	private Object getRecursiveFiles(Object[] params) {
 		String result;
@@ -116,18 +116,19 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Lists direct children of a directory.
+	 * Implements {@code list_files_in_directory}.
 	 *
 	 * <p>
 	 * Expected parameters:
+	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
-	 * <li>{@link File} working directory</li>
+	 *   <li>{@link JsonNode} optionally containing {@code dir_path}</li>
+	 *   <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a comma-separated list of project-relative paths, or a message if the
-	 *         directory does not exist or is empty
+	 * @return a comma-separated list of project-relative paths, or a message if the directory does not exist or is
+	 *         empty
 	 */
 	private Object listFiles(Object[] params) {
 		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
@@ -153,47 +154,49 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Writes content to a file in the working directory.
+	 * Implements {@code write_file_to_file_system}.
 	 *
 	 * <p>
 	 * Expected parameters:
+	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} containing {@code file_path} and {@code text}</li>
-	 * <li>{@link File} working directory</li>
+	 *   <li>{@link JsonNode} containing {@code file_path} and {@code text}</li>
+	 *   <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
 	 * @return success message, or an error message if writing fails
 	 */
 	private Object writeFile(Object[] params) {
-	    String result;
-	    JsonNode props = (JsonNode) params[0];
-	    String filePath = props.get("file_path").asText();
-	    String text = props.get("text").asText();
-	    String charsetName = props.has("charsetName") ? props.get("charsetName").asText() : defaultCharset;
-	    File workingDir = (File) params[1];
-	    logger.info("Write file: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
-	    File file = new File(workingDir, filePath);
-	    if (file.getParentFile() != null) {
-	        file.getParentFile().mkdirs();
-	    }
-	    try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName(charsetName))) {
-	        writer.write(text);
-	        return "File written successfully: " + filePath;
-	    } catch (IOException e) {
-	        result = e.getMessage();
-	    }
-	    return result;
+		String result;
+		JsonNode props = (JsonNode) params[0];
+		String filePath = props.get("file_path").asText();
+		String text = props.get("text").asText();
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText() : defaultCharset;
+		File workingDir = (File) params[1];
+		logger.info("Write file: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
+		File file = new File(workingDir, filePath);
+		if (file.getParentFile() != null) {
+			file.getParentFile().mkdirs();
+		}
+		try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName(charsetName))) {
+			writer.write(text);
+			return "File written successfully: " + filePath;
+		} catch (IOException e) {
+			result = e.getMessage();
+		}
+		return result;
 	}
 
 	/**
-	 * Reads content from a file in the working directory.
+	 * Implements {@code read_file_from_file_system}.
 	 *
 	 * <p>
 	 * Expected parameters:
+	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} containing {@code file_path}</li>
-	 * <li>{@link File} working directory</li>
+	 *   <li>{@link JsonNode} containing {@code file_path}</li>
+	 *   <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
@@ -220,7 +223,7 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Helper to collect all files recursively.
+	 * Collects all files under {@code directory} recursively.
 	 *
 	 * @param directory directory to start with
 	 * @return list of files (not directories)
@@ -242,6 +245,19 @@ public class FileFunctionTools implements FunctionTools {
 		return allFiles;
 	}
 
+	/**
+	 * Computes a project-relative path string.
+	 *
+	 * <p>
+	 * The returned path always uses forward slashes ({@code /}) for consistency across platforms.
+	 * </p>
+	 *
+	 * @param dir          base directory used to relativize the {@code file}
+	 * @param file         target file or directory
+	 * @param addSingleDot whether to prefix relative paths with {@code ./}
+	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or {@code null} if {@code file} is not a
+	 *         descendant of {@code dir}
+	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		if (dir == null || file == null) {
 			return null;
@@ -250,7 +266,6 @@ public class FileFunctionTools implements FunctionTools {
 		Path dirPath = dir.toPath().toAbsolutePath().normalize();
 		Path filePath = file.toPath().toAbsolutePath().normalize();
 
-		// If file and dir are the same, return "."
 		if (dirPath.equals(filePath)) {
 			return ".";
 		}
@@ -259,16 +274,13 @@ public class FileFunctionTools implements FunctionTools {
 		try {
 			relativePath = dirPath.relativize(filePath).toString().replace("\\", "/");
 		} catch (IllegalArgumentException e) {
-			// file is not a descendant of dir
 			return null;
 		}
 
-		// Optionally add "./" prefix
 		if (addSingleDot && !relativePath.startsWith(".")) {
 			relativePath = "./" + relativePath;
 		}
 
-		// If the result is empty, return "."
 		if (relativePath.isEmpty()) {
 			return ".";
 		}

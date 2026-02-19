@@ -35,33 +35,30 @@
  */
 
 /**
- * Host-integrated tool implementations for registering a small, auditable set of
- * local capabilities with a {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Host-integrated function tools for exposing a small, auditable set of local capabilities to a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
  * <p>
- * The classes in this package define host-side function tools that can be exposed
- * to an AI workflow. Tools are registered with a provider and typically operate
- * within host-defined constraints (for example: restricting file access to the
- * project directory, allow-listing commands, bounding output size, and controlling
- * outbound network access).
- *
- * <h2>Tool installers</h2>
+ * This package contains tool installer implementations (see {@link org.machanism.machai.ai.tools.FunctionTools})
+ * that register callable functions ("tools") with a provider. These tools are designed to run inside the host
+ * application and therefore focus on controlled access patterns such as:
+ * </p>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – file and directory operations (read, write, list)</li>
- *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution with bounded output capture</li>
- *   <li>{@link org.machanism.machai.ai.tools.WebPageFunctionTools} – HTTP retrieval and REST API calls</li>
- *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – loads {@link java.util.ServiceLoader}-discovered
- *       tool installers and applies them to a provider</li>
+ *   <li>Performing file operations relative to a host-supplied working directory</li>
+ *   <li>Executing system commands with allow/deny-list checks and bounded output capture</li>
+ *   <li>Fetching web content and calling REST APIs with optional header templating</li>
  * </ul>
  *
- * <h2>Supporting types</h2>
+ * <h2>Key components</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} – SPI for providing tool installers</li>
- *   <li>{@link org.machanism.machai.ai.tools.LimitedStringBuilder} – retains only the last {@code N} characters of
- *       accumulated output</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – read/write/list file-system utilities</li>
+ *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution and process termination</li>
+ *   <li>{@link org.machanism.machai.ai.tools.WebPageFunctionTools} – HTTP GET retrieval and REST calls</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – discovers tool installers via
+ *       {@link java.util.ServiceLoader} and applies them to a provider</li>
  * </ul>
  *
- * <h2>Example</h2>
+ * <h2>Usage</h2>
  * <pre>{@code
  * GenAIProvider provider = ...;
  * FunctionToolsLoader.getInstance().applyTools(provider);

@@ -1,6 +1,5 @@
 package org.machanism.machai.ai.manager;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,9 +10,9 @@ import java.util.function.Function;
 import org.machanism.macha.core.commons.configurator.Configurator;
 
 /**
- * Contract for a generative-AI provider implementation.
+ * Contract for a generative-AI provider integration.
  *
- * <p>A {@code GenAIProvider} represents a concrete integration (for example OpenAI, Gemini, local model, etc.)
+ * <p>A {@code GenAIProvider} represents a concrete implementation (for example OpenAI, Gemini, local model, etc.)
  * capable of:
  * <ul>
  *   <li>collecting prompts and system instructions for a conversation,</li>

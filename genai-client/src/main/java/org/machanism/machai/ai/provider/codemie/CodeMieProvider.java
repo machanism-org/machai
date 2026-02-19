@@ -22,18 +22,26 @@ import org.machanism.machai.ai.provider.openai.OpenAIProvider;
  * GenAI provider implementation for EPAM CodeMie.
  *
  * <p>
- * This provider obtains an access token from a configurable OpenID Connect
- * token endpoint and then initializes an OpenAI-compatible client (via
- * {@link OpenAIProvider}) to call the CodeMie Code Assistant REST API.
+ * This provider obtains an access token from a configurable OpenID Connect token endpoint and then initializes an
+ * OpenAI-compatible client (via {@link OpenAIProvider}) to call the CodeMie Code Assistant REST API.
  *
+ * <h2>Authentication modes</h2>
  * <p>
  * The authentication mode is selected based on the configured username:
  * <ul>
- * <li>If the username contains {@code "@"}, the password grant is used (typical
- * user e-mail login).</li>
- * <li>Otherwise, the client credentials grant is used
- * (service-to-service).</li>
+ * <li>If the username contains {@code "@"}, the password grant is used (typical user e-mail login).</li>
+ * <li>Otherwise, the client credentials grant is used (service-to-service).</li>
  * </ul>
+ *
+ * <h2>Delegation</h2>
+ * <p>
+ * After a token is retrieved, this provider configures the underlying OpenAI-compatible provider by setting:
+ * <ul>
+ * <li>{@code OPENAI_BASE_URL} to {@link #baseUrl}</li>
+ * <li>{@code OPENAI_API_KEY} to the retrieved access token</li>
+ * </ul>
+ * and then delegates requests to either {@link OpenAIProvider} (for {@code gpt-*} models) or {@link ClaudeProvider}
+ * (for {@code claude-*} models).
  */
 public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 
@@ -61,9 +69,10 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * <ul>
 	 * <li>{@code GENAI_USERNAME} – user e-mail or client id.</li>
 	 * <li>{@code GENAI_PASSWORD} – password or client secret.</li>
-	 * <li>{@code chatModel} – model identifier (for example {@code gpt-4o-mini} or
-	 * {@code claude-3-5-sonnet}).</li>
+	 * <li>{@code chatModel} – model identifier (for example {@code gpt-4o-mini} or {@code claude-3-5-sonnet}).</li>
 	 * </ul>
+	 *
+	 * <p>
 	 * Optional configuration keys:
 	 * <ul>
 	 * <li>{@code AUTH_URL} – token endpoint override.</li>
@@ -107,17 +116,17 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	}
 
 	/**
-	 * Requests an OAuth2 access token from the given token endpoint.
+	 * Requests an OAuth 2.0 access token from the given token endpoint.
 	 *
 	 * <p>
-	 * The request uses {@code application/x-www-form-urlencoded} and selects the
-	 * grant type based on the {@code username} value:
+	 * The request uses {@code application/x-www-form-urlencoded} and selects the grant type based on the
+	 * {@code username} value:
 	 * <ul>
 	 * <li>{@code password} if the username contains {@code "@"}.</li>
 	 * <li>{@code client_credentials} otherwise.</li>
 	 * </ul>
 	 *
-	 * @param url      token endpoint URL
+	 * @param url token endpoint URL
 	 * @param username user e-mail (password grant) or client id (client credentials)
 	 * @param password password (password grant) or client secret (client credentials)
 	 * @return the {@code access_token} value extracted from the response
@@ -161,12 +170,19 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 		throw new IOException("Failed to obtain token: received HTTP response code " + responseCode);
 	}
 
+	/**
+	 * URL-encodes a value for {@code application/x-www-form-urlencoded} request bodies.
+	 *
+	 * @param value value to encode
+	 * @return encoded value using UTF-8
+	 * @throws RuntimeException if UTF-8 is not supported (unexpected on a compliant JVM)
+	 */
 	private static String urlEncode(String value) {
-	    try {
-	        return URLEncoder.encode(value, "UTF-8");
-	    } catch (UnsupportedEncodingException e) {
-	        // UTF-8 is always supported, but handle exception just in case
-	        throw new RuntimeException("UTF-8 encoding not supported", e);
-	    }
+		try {
+			return URLEncoder.encode(value, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// UTF-8 is always supported, but handle exception just in case
+			throw new RuntimeException("UTF-8 encoding not supported", e);
+		}
 	}
 }

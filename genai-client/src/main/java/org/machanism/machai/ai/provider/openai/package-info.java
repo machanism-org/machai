@@ -27,36 +27,38 @@
  */
 
 /**
- * OpenAI-backed provider implementation for the MachAI {@link org.machanism.machai.ai.manager.GenAIProvider}
- * abstraction.
+ * OpenAI-backed {@link org.machanism.machai.ai.manager.GenAIProvider} implementation.
  *
  * <p>
- * The types in this package adapt the OpenAI Java SDK to the MachAI provider interface. They construct request
- * inputs (prompts, optional instructions, and optional file inputs), execute calls through the OpenAI Responses
- * API, handle iterative tool/function calls, and report usage metrics.
+ * This package provides the OpenAI integration for MachAI's provider abstraction. It adapts the OpenAI Java SDK
+ * (notably the Responses API) to the {@code GenAIProvider} lifecycle: collecting prompt text, optional system
+ * instructions, optional file inputs, and optional function tools; executing the request; dispatching any
+ * model-requested tool calls to application handlers; and returning the assistant's final text.
  * </p>
  *
- * <h2>Responsibilities</h2>
+ * <h2>Capabilities</h2>
  * <ul>
- *   <li>Translate MachAI provider configuration into OpenAI request structures.</li>
- *   <li>Execute response requests and parse text/tool-call outputs.</li>
- *   <li>Register and dispatch function tools to application handlers.</li>
- *   <li>Create vector embeddings for input text.</li>
- *   <li>Report token usage to {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *   <li>Prompt submission and response parsing via the OpenAI Responses API.</li>
+ *   <li>Local file upload and URL-based file attachment as request inputs.</li>
+ *   <li>Registration and dispatch of function tools to application-defined handlers.</li>
+ *   <li>Embedding generation for text inputs.</li>
+ *   <li>Token usage accounting reported to
+ *     {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
  * </ul>
  *
- * <h2>Usage</h2>
- * <pre>
+ * <h2>Example</h2>
+ * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
  * provider.model("gpt-5.1");
  * provider.instructions("You are a concise assistant.");
  * provider.prompt("Summarize this text...");
  * String answer = provider.perform();
+ * }
  * </pre>
  *
  * <p>
- * <strong>Thread-safety:</strong> Instances are not thread-safe; use one instance per request or synchronize
- * access externally.
+ * <strong>Thread-safety:</strong> provider instances are not thread-safe because they maintain per-request
+ * mutable state (inputs, tool mappings, and usage). Use one instance per request or synchronize externally.
  * </p>
  */
 package org.machanism.machai.ai.provider.openai;

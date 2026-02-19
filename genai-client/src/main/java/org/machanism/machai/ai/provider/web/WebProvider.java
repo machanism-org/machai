@@ -44,7 +44,11 @@ public class WebProvider extends NoneProvider {
 	/** Logger for this class. */
 	private static final Logger logger = LoggerFactory.getLogger(WebProvider.class);
 
-	/** Shared Anteater workspace instance used for automation task execution. */
+	/**
+	 * Shared Anteater workspace instance used for automation task execution.
+	 *
+	 * <p>Note: this is static to reuse the same browser/workspace across provider instances within the same JVM.
+	 */
 	private static AEWorkspace workspace = new AEWorkspace();
 
 	/** Root directory for workspace operations (set once per JVM instance). */
@@ -58,11 +62,18 @@ public class WebProvider extends NoneProvider {
 		System.setProperty("java.awt.headless", "false");
 	}
 
+	/**
+	 * Initializes this provider from the configured application settings.
+	 *
+	 * <p>The {@code chatModel} property is used as the Anteater configuration name.
+	 *
+	 * @param config configuration source
+	 */
 	@Override
 	public void init(Configurator config) {
 		configName = config.get("chatModel");
 	}
-	
+
 	/**
 	 * Submits the current prompts to the configured web UI by executing the {@code "Submit Prompt"} recipe.
 	 *

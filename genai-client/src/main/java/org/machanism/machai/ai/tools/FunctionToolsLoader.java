@@ -10,14 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Loads {@link FunctionTools} implementations via {@link ServiceLoader} and
- * applies them to a {@link GenAIProvider}.
+ * Discovers and applies {@link FunctionTools} implementations using {@link ServiceLoader}.
  *
  * <p>
- * This loader is a convenience entry point for host applications that want to
- * expose a curated set of local capabilities (file access, command execution,
- * HTTP retrieval, etc.) to an AI workflow. Implementations are discovered from
- * the classpath and must be registered as service providers.
+ * This class acts as a host-side entry point for registering a curated set of local capabilities (for example,
+ * file access, command execution, and HTTP retrieval) with a {@link GenAIProvider}. Implementations are
+ * discovered from the classpath, typically via {@code META-INF/services} provider configuration, and then
+ * applied to the provider in discovery order.
+ * </p>
  *
  * <h2>Usage</h2>
  * <pre>{@code
@@ -42,8 +42,8 @@ public class FunctionToolsLoader {
 	/**
 	 * Private constructor to prevent external instantiation.
 	 * <p>
-	 * Discovers available {@link FunctionTools} implementations using
-	 * {@link ServiceLoader}.
+	 * Discovers available {@link FunctionTools} implementations using {@link ServiceLoader}.
+	 * </p>
 	 */
 	private FunctionToolsLoader() {
 		ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
@@ -75,6 +75,12 @@ public class FunctionToolsLoader {
 
 	/**
 	 * Supplies configuration to all discovered tool installers.
+	 *
+	 * <p>
+	 * Not all {@link FunctionTools} implementations use configuration, but the loader provides a centralized way to
+	 * propagate a {@link Configurator} to all tool installers (for example, for resolving header placeholders in web
+	 * requests).
+	 * </p>
 	 *
 	 * @param configurator configuration source used by tool installers
 	 */
