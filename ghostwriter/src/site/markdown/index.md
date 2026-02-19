@@ -69,7 +69,7 @@ Because Ghostwriter is guidance-first, it can process not only source code, but 
 
 ### Prerequisites
 
-- Java 11+
+- Java 8+
 - Network access to your configured GenAI provider (as applicable)
 - A project directory containing files with embedded `@guidance` directives (or use `--guidance` as a fallback)
 
@@ -104,7 +104,7 @@ Ghostwriter CLI options (from `org.machanism.machai.gw.processor.Ghostwriter`):
 | `-a`, `--genai` | `provider:model` | `OpenAI:gpt-5-mini` (or `genai` from `gw.properties`) | GenAI provider and model identifier (for example, `OpenAI:gpt-5.1`). |
 | `-i`, `--instructions` | text / URL / `file:` (optional) | `instructions` from `gw.properties` (if set) | System instructions appended to each prompt. If used without a value, Ghostwriter reads multi-line input from stdin until EOF. Input supports line-based inclusion: `http(s)://...` loads remote content, `file:...` loads file content, other lines are used as-is. Blank lines are preserved. |
 | `-g`, `--guidance` | text / URL / `file:` (optional) | `guidance` from `gw.properties` (if set) | Default guidance used when embedded guidance is absent. When scanning a directory, it is also applied as a final step for the current directory. If used without a value, Ghostwriter reads multi-line input from stdin until EOF. Input supports `http(s)://...` and `file:...` line inclusions. Blank lines are preserved. |
-| `-e`, `--excludes` | comma-separated list | `excludes` from `gw.properties` (if set) | Exclude paths or patterns from processing. Provide a comma-separated list. |
+| `-e`, `--excludes` | comma-separated list | `excludes` from `gw.properties` (if set) | Exclude paths or patterns from processing. Provide a comma-separated list.
 | `-l`, `--logInputs` | none | `false` (from `gw.properties` key `logInputs`) | Log composed LLM request inputs to dedicated log files. |
 
 ### Command-line Examples

@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * The processor supports single-module and multi-module project layouts. For
- * multi-module builds, modules are processed child-first (each module is
- * scanned before the parent project directory). Processing is traversal-based;
- * it does not attempt to build projects or resolve dependencies.
+ * multi-module builds, modules are processed child-first (each module is scanned
+ * before the parent project directory). Processing is traversal-based; it does
+ * not attempt to build projects or resolve dependencies.
  * </p>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -359,6 +359,7 @@ public class FileProcessor extends ProjectProcessor {
 	 *
 	 * <p>
 	 * The matching logic proceeds as follows:
+	 * </p>
 	 * <ol>
 	 * <li>If the {@code file} is {@code null}, returns {@code false}.</li>
 	 * <li>If the file's absolute path contains any of the excluded directory names
@@ -603,6 +604,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * returns them as a map.
 	 * <p>
 	 * The returned map contains the following entries:
+	 * </p>
 	 * <ul>
 	 * <li><b>#id</b>: The project identifier, as returned by
 	 * {@code projectLayout.getProjectId()}.</li>
@@ -613,9 +615,11 @@ public class FileProcessor extends ProjectProcessor {
 	 * <li><b>#parentDir</b> (optional): The name of the parent directory of the
 	 * project, included only if the parent directory exists.</li>
 	 * </ul>
+	 *
 	 * <p>
 	 * This method is useful for extracting key metadata about a project for use in
 	 * templates, configuration, or reporting.
+	 * </p>
 	 *
 	 * @param projectLayout the {@link ProjectLayout} instance from which to extract
 	 *                      properties
@@ -863,7 +867,7 @@ public class FileProcessor extends ProjectProcessor {
 		if (StringUtils.isBlank(path)) {
 			return 0;
 		}
-		String normalized = path.replace("\\", "/");
+		String normalized = path.replace("\\\\", "/");
 		return normalized.split("/").length;
 	}
 
@@ -982,8 +986,10 @@ public class FileProcessor extends ProjectProcessor {
 	 * that will be included in every documentation generation prompt, ensuring
 	 * consistency and adherence to standards.
 	 * </p>
+	 *
 	 * <p>
 	 * <b>How to use:</b>
+	 * </p>
 	 * <ul>
 	 * <li>Set the value using {@link #setInstructions(String)}.</li>
 	 * <li>The value can be:
@@ -1008,10 +1014,11 @@ public class FileProcessor extends ProjectProcessor {
 	 * <li>The instructions are appended to every GenAI prompt, in addition to any
 	 * file-specific or default guidance.</li>
 	 * </ul>
+	 *
 	 * <p>
 	 * <b>Example usage:</b>
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * FileProcessor processor = new FileProcessor(rootDir, genai, configurator);
 	 * processor.setInstructions("file:project-instructions.txt");
@@ -1020,8 +1027,10 @@ public class FileProcessor extends ProjectProcessor {
 	 * // or
 	 * processor.setInstructions("https://example.com/instructions.md");
 	 * </pre>
+	 *
 	 * <p>
 	 * <b>Best Practices:</b>
+	 * </p>
 	 * <ul>
 	 * <li>Use {@code instructions} to enforce consistent standards or provide
 	 * important context for all files.</li>
@@ -1073,37 +1082,37 @@ public class FileProcessor extends ProjectProcessor {
 	 * @return expanded content with preserved line breaks
 	 */
 	private String parseLines(String data) {
-	    if (data == null) {
-	        return StringUtils.EMPTY;
-	    }
+		if (data == null) {
+			return StringUtils.EMPTY;
+		}
 
-	    StringBuilder sb = new StringBuilder();
-	    try (BufferedReader reader = new BufferedReader(new StringReader(data))) {
-	        String line;
-	        while ((line = reader.readLine()) != null) {
-	            String normalizedLine = StringUtils.stripToNull(line);
-	            if (normalizedLine == null) {
-	                sb.append(System.lineSeparator());
-	                continue;
-	            }
+		StringBuilder sb = new StringBuilder();
+		try (BufferedReader reader = new BufferedReader(new StringReader(data))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String normalizedLine = StringUtils.stripToNull(line);
+				if (normalizedLine == null) {
+					sb.append(System.lineSeparator());
+					continue;
+				}
 
-	            String content;
-	            try {
-	                content = tryToGetInstructionsFromFile(normalizedLine);
+				String content;
+				try {
+					content = tryToGetInstructionsFromFile(normalizedLine);
 
-	                if (content != null) {
-	                    sb.append(content);
-	                }
-	                sb.append(System.lineSeparator());
-	            } catch (IOException e) {
-	                throw new IllegalArgumentException(e);
-	            }
-	        }
-	    } catch (IOException e) {
-	        throw new IllegalArgumentException(e);
-	    }
+					if (content != null) {
+						sb.append(content);
+					}
+					sb.append(System.lineSeparator());
+				} catch (IOException e) {
+					throw new IllegalArgumentException(e);
+				}
+			}
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
 
-	    return sb.toString();
+		return sb.toString();
 	}
 
 	/**
@@ -1238,19 +1247,19 @@ public class FileProcessor extends ProjectProcessor {
 	 * @return file content
 	 */
 	private String readFromFilePath(String filePath) {
-	    File file = new File(filePath);
-	    if (!file.isAbsolute()) {
-	        file = new File(rootDir, filePath);
-	    }
+		File file = new File(filePath);
+		if (!file.isAbsolute()) {
+			file = new File(rootDir, filePath);
+		}
 
-	    try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
-	        String result = IOUtils.toString(reader);
-	        logger.info("Included file: `{}`", file);
-	        return result;
-	    } catch (IOException e) {
-	        throw new IllegalArgumentException(
-	                "Failed to read file: " + file.getAbsolutePath() + ", Error: " + e.getMessage());
-	    }
+		try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+			String result = IOUtils.toString(reader);
+			logger.info("Included file: `{}`", file);
+			return result;
+		} catch (IOException e) {
+			throw new IllegalArgumentException(
+					"Failed to read file: " + file.getAbsolutePath() + ", Error: " + e.getMessage(), e);
+		}
 	}
 
 }

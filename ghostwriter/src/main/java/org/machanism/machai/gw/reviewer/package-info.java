@@ -2,12 +2,17 @@
  * File-format-specific {@link org.machanism.machai.gw.reviewer.Reviewer reviewers} used by Ghostwriter to scan
  * project files and extract embedded {@code @guidance} instructions.
  *
- * <p>The {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) is implemented for
- * several common source and documentation formats. Each implementation understands the comment conventions of its
- * target format (for example, Java block/line comments, HTML comment blocks, or Python triple-quoted strings) and
- * returns a prompt fragment that includes the file's relative path for context.
+ * <p>This package contains {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI)
+ * implementations for common source and documentation formats. Each implementation understands the comment
+ * conventions of its target format (for example, Java block/line comments, HTML comment blocks, or Python
+ * triple-quoted strings) and, when guidance is present, returns a prompt fragment that includes the file's
+ * relative path for context.
  *
- * <p>Implementations in this package currently support:
+ * <p>Ghostwriter uses these reviewers as the first step in turning a repository into a structured prompt:
+ * reviewers detect guidance markers, collect relevant content, and format it using the {@code document-prompts}
+ * resource bundle.
+ *
+ * <h2>Supported formats</h2>
  * <ul>
  *   <li>Java ({@code .java}, including {@code package-info.java})</li>
  *   <li>TypeScript ({@code .ts})</li>
@@ -17,13 +22,15 @@
  *   <li>Generic text guidance files named {@code @guidance.txt}</li>
  * </ul>
  *
- * <p>Reviewers typically:
- * <ul>
- *   <li>Detect the format-appropriate guidance marker (usually the literal {@code @guidance:}).</li>
- *   <li>Compute file and/or directory context using
- *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
- *   <li>Format extracted content using the {@code document-prompts} resource bundle.</li>
- * </ul>
+ * <h2>Implementing a new reviewer</h2>
+ * <p>To add support for a new format:
+ * <ol>
+ *   <li>Implement {@link org.machanism.machai.gw.reviewer.Reviewer}.</li>
+ *   <li>Return supported extensions from {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()}.</li>
+ *   <li>In {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)}, parse the file,
+ *       detect {@code @guidance} markers, and produce a prompt fragment that includes
+ *       {@link org.machanism.machai.project.layout.ProjectLayout}-derived context.</li>
+ * </ol>
  */
 package org.machanism.machai.gw.reviewer;
 
