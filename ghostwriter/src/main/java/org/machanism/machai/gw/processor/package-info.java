@@ -39,27 +39,28 @@
  */
 
 /**
- * Project scanning and prompt orchestration for the Ghostwriter CLI.
+ * Command-line project scanning and prompt orchestration for Ghostwriter.
  *
  * <p>
- * This package contains the command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter})
- * and the filesystem-based processor ({@link org.machanism.machai.gw.processor.FileProcessor}) that traverses
- * a project directory tree. For each supported file, Ghostwriter extracts embedded {@code @guidance:}
- * directives using extension-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations and
- * submits the composed prompts to a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * This package contains the Ghostwriter CLI entry point ({@link org.machanism.machai.gw.processor.Ghostwriter})
+ * and the filesystem-based processor ({@link org.machanism.machai.gw.processor.FileProcessor}). Together they
+ * traverse a project directory tree and, for each supported file type, extract embedded {@code @guidance:}
+ * directives via extension-specific {@link org.machanism.machai.gw.reviewer.Reviewer} implementations.
  * </p>
  *
- * <h2>Processing Model</h2>
- * <ul>
- * <li><b>Child-first module traversal</b>: In multi-module layouts, modules are processed before the parent.</li>
- * <li><b>No dependency resolution</b>: Processing is purely filesystem-based; builds are not executed.</li>
- * <li><b>Layout-aware scanning</b>: Traversal uses {@link org.machanism.machai.project.layout.ProjectLayout}
- * metadata (sources, tests, documents, modules) to describe project structure in prompts.</li>
- * </ul>
+ * <p>
+ * For each processed file, Ghostwriter composes a prompt that includes OS-specific processing instructions,
+ * a layout-derived project structure description (sources, tests, docs, modules), and the file's extracted
+ * guidance. The prompt is then dispatched to a configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * </p>
  *
- * <h2>Typical Usage</h2>
- * <pre>{@code
- * java -jar gw.jar . --genai OpenAI:gpt-5-mini --threads true
- * }</pre>
+ * <h2>Processing model</h2>
+ * <ul>
+ * <li><b>Child-first module traversal</b>: in multi-module layouts, modules are processed before the parent.</li>
+ * <li><b>No dependency resolution</b>: processing is purely filesystem-based; builds are not executed.</li>
+ * <li><b>Broad file coverage</b>: traversal includes source code, documentation, project site content, and other
+ * relevant files supported by registered reviewers.</li>
+ * </ul>
  */
 package org.machanism.machai.gw.processor;

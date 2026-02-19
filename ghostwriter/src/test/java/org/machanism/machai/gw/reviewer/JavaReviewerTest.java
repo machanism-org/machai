@@ -1,25 +1,13 @@
 package org.machanism.machai.gw.reviewer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.io.IOException;
-
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link JavaReviewer}.
  */
 class JavaReviewerTest {
-
-    @Test
-    @Disabled
-    void perform_returnsNull_whenNoGuidance() throws IOException {
-        JavaReviewer reviewer = new JavaReviewer();
-
-        assertNull(reviewer.perform(null, null));
-    }
 
     @Test
     void extractPackageName_findsPackageName() {

@@ -3,24 +3,27 @@
  * project files and extract embedded {@code @guidance} instructions.
  *
  * <p>The {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) is implemented for
- * multiple file types. Each implementation understands the target format's comment conventions (for example,
- * Java block/line comments, HTML comments, or Python comments) and returns a normalized prompt fragment.
+ * several common source and documentation formats. Each implementation understands the comment conventions of its
+ * target format (for example, Java block/line comments, HTML comment blocks, or Python triple-quoted strings) and
+ * returns a prompt fragment that includes the file's relative path for context.
  *
- * <p>A reviewer returns a formatted prompt fragment when guidance is detected in a file; otherwise it returns
- * {@code null}.
- *
- * <p>Implementations are responsible for:
+ * <p>Implementations in this package currently support:
  * <ul>
- *   <li>Detecting guidance markers in the target file format (for example, {@code // @guidance: ...} in Java or
- *       {@code <!-- @guidance: ... -->} in HTML/Markdown).</li>
- *   <li>Producing a prompt fragment using the {@code document-prompts} resource bundle.</li>
- *   <li>Including file and/or directory context based on paths computed by
- *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
+ *   <li>Java ({@code .java}, including {@code package-info.java})</li>
+ *   <li>TypeScript ({@code .ts})</li>
+ *   <li>Python ({@code .py})</li>
+ *   <li>HTML/XML ({@code .html}, {@code .htm}, {@code .xml})</li>
+ *   <li>Markdown ({@code .md})</li>
+ *   <li>Generic text guidance files named {@code @guidance.txt}</li>
  * </ul>
  *
- * <p>This package includes reviewers for Java ({@code .java}, including {@code package-info.java}), TypeScript
- * ({@code .ts}), Python ({@code .py}), HTML/XML ({@code .html}, {@code .htm}, {@code .xml}), Markdown
- * ({@code .md}), and a generic text reviewer for {@code @guidance.txt} files.
+ * <p>Reviewers typically:
+ * <ul>
+ *   <li>Detect the format-appropriate guidance marker (usually the literal {@code @guidance:}).</li>
+ *   <li>Compute file and/or directory context using
+ *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
+ *   <li>Format extracted content using the {@code document-prompts} resource bundle.</li>
+ * </ul>
  */
 package org.machanism.machai.gw.reviewer;
 

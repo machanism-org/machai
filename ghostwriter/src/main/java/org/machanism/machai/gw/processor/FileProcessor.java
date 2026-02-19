@@ -554,8 +554,10 @@ public class FileProcessor extends ProjectProcessor {
 	private String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
 		logger.info("Processing file: '{}'", file);
 
-		String perform;
 		GenAIProvider provider = GenAIProviderManager.getProvider(genai, configurator);
+		
+		FunctionToolsLoader.getInstance().applyTools(provider);
+		
 		File projectDir = projectLayout.getProjectDir();
 		provider.setWorkingDir(projectDir);
 
@@ -587,7 +589,7 @@ public class FileProcessor extends ProjectProcessor {
 			provider.inputsLog(inputsFile);
 		}
 
-		perform = provider.perform();
+		String perform = provider.perform();
 
 		logger.info("Finished processing file: {}", file.getAbsolutePath());
 		return perform;

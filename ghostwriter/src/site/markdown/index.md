@@ -36,13 +36,13 @@ Page Structure:
 
 ## Introduction
 
-Ghostwriter is a guidance-driven documentation engine that scans project files, extracts embedded `@guidance` directives, and uses a configured GenAI provider to synthesize and apply updates. It is designed for real-world repositories where documentation spans many formats (source code, Markdown, HTML, configuration, and site content), enabling teams to keep artifacts accurate and consistent with less manual effort.
+Ghostwriter is a guidance-driven documentation engine that scans project files, extracts embedded `@guidance` directives, and uses a configured GenAI provider to synthesize and apply updates. It is built for real-world repositories where documentation spans many formats (source code, Markdown, HTML, configuration, and site content), enabling teams to keep artifacts accurate and consistent with less manual effort.
 
 Benefits:
 
 - Keeps documentation and project artifacts aligned by generating updates directly from file-embedded guidance.
 - Works across heterogeneous repositories (code, docs, site pages, configs) in a single run.
-- Supports project/module-aware scanning, exclusions, and provider-agnostic GenAI execution.
+- Supports module-aware scanning, exclusions, and provider-agnostic GenAI execution.
 
 ## Overview
 
@@ -100,11 +100,11 @@ Ghostwriter CLI options (from `org.machanism.machai.gw.processor.Ghostwriter`):
 |---|---|---|---|
 | `-h`, `--help` | none | n/a | Show help message and exit. |
 | `-r`, `--root` | path | If not set: `root` from `gw.properties`; otherwise user directory | Root directory used as the base for scan path validation and project-relative resolution. |
-| `-t`, `--threads` | boolean (optional) | `false` (from `gw.properties` key `threads`) | Enable multi-threaded processing. If the option is present with no value, it enables threading (`true`). If a value is provided (`true`/`false`), that value is used. |
+| `-t`, `--threads` | `true`/`false` (optional) | `false` (from `gw.properties` key `threads`) | Enable multi-threaded processing. If present with no value, it enables threading (`true`). If a value is provided, that value is used. |
 | `-a`, `--genai` | `provider:model` | `OpenAI:gpt-5-mini` (or `genai` from `gw.properties`) | GenAI provider and model identifier (for example, `OpenAI:gpt-5.1`). |
-| `-i`, `--instructions` | text / URL / `file:` (optional) | `instructions` from `gw.properties` (if set) | System instructions appended to each prompt. If used without a value, Ghostwriter reads multi-line input from stdin until EOF. Lines may include `http(s)://...` to include remote content, and `file:...` to include file content. |
-| `-g`, `--guidance` | text / URL / `file:` (optional) | `guidance` from `gw.properties` (if set) | Default guidance used when embedded guidance is absent, and also applied as a final step for the matched directory when set. If used without a value, Ghostwriter reads multi-line input from stdin until EOF. Lines may include `http(s)://...` and `file:...` references. |
-| `-e`, `--excludes` | comma-separated list | `excludes` from `gw.properties` (if set) | Exclude paths or patterns from processing. Provide a comma-separated list (repeatable). |
+| `-i`, `--instructions` | text / URL / `file:` (optional) | `instructions` from `gw.properties` (if set) | System instructions appended to each prompt. If used without a value, Ghostwriter reads multi-line input from stdin until EOF. Input supports line-based inclusion: `http(s)://...` loads remote content, `file:...` loads file content, other lines are used as-is. Blank lines are preserved. |
+| `-g`, `--guidance` | text / URL / `file:` (optional) | `guidance` from `gw.properties` (if set) | Default guidance used when embedded guidance is absent. When scanning a directory, it is also applied as a final step for the current directory. If used without a value, Ghostwriter reads multi-line input from stdin until EOF. Input supports `http(s)://...` and `file:...` line inclusions. Blank lines are preserved. |
+| `-e`, `--excludes` | comma-separated list | `excludes` from `gw.properties` (if set) | Exclude paths or patterns from processing. Provide a comma-separated list. |
 | `-l`, `--logInputs` | none | `false` (from `gw.properties` key `logInputs`) | Log composed LLM request inputs to dedicated log files. |
 
 ### Command-line Examples
@@ -131,9 +131,9 @@ java -jar gw.jar src -r C:\projects\project -a "OpenAI:gpt-5-mini" -t -e ".macha
 How it is set and applied:
 
 - Set via `--guidance` on the CLI (or via the `guidance` key in `gw.properties`).
-- If a matched file has no embedded guidance, Ghostwriter formats and applies `defaultGuidance` for that file.
-- When scanning a directory path, Ghostwriter may also apply `defaultGuidance` as a final step for the directory itself (as described by the CLI option help).
-- The value can be provided as plain text, or entered via stdin, or composed from line-based input that includes `http(s)://...` and `file:...` references.
+- If a matched file has no embedded guidance, Ghostwriter applies `defaultGuidance` for that file.
+- When scanning a directory path, Ghostwriter also applies `defaultGuidance` as a final step for the directory (as described by the CLI option help).
+- The value can be provided as plain text, read from stdin, or composed from line-based input that includes `http(s)://...` and `file:...` references.
 
 ## Resources
 

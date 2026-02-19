@@ -26,13 +26,13 @@ Ghostwriter is a guidance-driven documentation engine and CLI that scans project
 
 ## Introduction
 
-Ghostwriter is a guidance-driven documentation engine that scans project files, extracts embedded `@guidance` directives, and uses a configured GenAI provider to synthesize and apply updates. It is designed for real-world repositories where documentation spans many formats (source code, Markdown, HTML, configuration, and site content), enabling teams to keep artifacts accurate and consistent with less manual effort.
+Ghostwriter is a guidance-driven documentation engine that scans project files, extracts embedded `@guidance` directives, and uses a configured GenAI provider to synthesize and apply updates. It is built for real-world repositories where documentation spans many formats (source code, Markdown, HTML, configuration, and site content), enabling teams to keep artifacts accurate and consistent with less manual effort.
 
 Benefits:
 
 - Keeps documentation and project artifacts aligned by generating updates directly from file-embedded guidance.
 - Works across heterogeneous repositories (code, docs, site pages, configs) in a single run.
-- Supports project/module-aware scanning, exclusions, and provider-agnostic GenAI execution.
+- Supports module-aware scanning, exclusions, and provider-agnostic GenAI execution.
 
 ## Usage
 
