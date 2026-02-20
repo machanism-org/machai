@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.provider.claude;
+package org.machanism.machai.ai.provider.gemini;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,18 +12,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.Usage;
 
-/**
- * Anthropic-backed implementation of MachAI's {@link GenAIProvider}
- * abstraction.
- *
- * <p>
- * This provider adapts the Anthropic Java SDK to MachAI's provider interface.
- * </p>
- *
- * @author Viktor Tovstyi
- * @since 0.0.11
- */
-public class ClaudeProvider implements GenAIProvider {
+public class GeminiProvider implements GenAIProvider {
 
 	@Override
 	public void init(Configurator config) {
@@ -45,7 +34,6 @@ public class ClaudeProvider implements GenAIProvider {
 
 	@Override
 	public void addFile(URL fileUrl) throws IOException {
-		prompt("File URL: " + fileUrl.toString());
 	}
 
 	@Override
