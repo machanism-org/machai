@@ -2,98 +2,165 @@ package org.machanism.machai.cli;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.Scanner;
 
-import org.apache.commons.lang.SystemUtils;
+import javax.annotation.PostConstruct;
+
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.bindex.ApplicationAssembly;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.gw.processor.FileProcessor;
-import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
-/**
- * Shell command for GenAI document processing operations.
- * <p>
- * Provides CLI functionality to scan and process documents using the selected
- * GenAI provider and model. Usage Example:
- * 
- * <pre>
- * {@code
- * ProcessCommand docsCmd = new ProcessCommand();
- * docsCmd.docs(new File("/projects/"), "OpenAI:gpt-5.1");
- * }
- * </pre>
- * 
- * @author Viktor Tovstyi
- * @since 0.0.2
- */
 @ShellComponent
 public class GWCommand {
 
-	private static Logger logger = LoggerFactory.getLogger(ApplicationAssembly.class);
+	private static Logger logger;
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
+	private static final PropertiesConfigurator config = new PropertiesConfigurator();
+	private static File gwHomeDir;
 
-	private PropertiesConfigurator config;
+	@PostConstruct
+	public void init() {
+		try {
+			gwHomeDir = config.getFile("GW_HOME", null);
 
-	/**
-	 * Scans and processes documents in the given project directory using the
-	 * specified GenAI chat model.
-	 * 
-	 * @param scan      The root directory to scan
-	 * @param chatModel GenAI service provider/model
-	 * @throws IOException if scan or processing fails
-	 */
-	@ShellMethod("Processing files using the Ghostwriter command.")
-	public void gw(
-			@ShellOption(help = "The path fo the project directory.", value = { "-d",
-					"--dir" }, defaultValue = ShellOption.NULL) File dir,
-			@ShellOption(help = "The path to the directory to be processed.", value = { "-s",
-					"--scan" }, defaultValue = ShellOption.NULL) File scan,
-			@ShellOption(help = "Enable multi-threaded processing.", value = { "-t",
-					"--threads" }, defaultValue = "false") boolean threads,
-			@ShellOption(help = "Specifies additional file processing instructions. "
-					+ "Provide either the instruction text directly or the path to a file containing the instructions.", value = {
-							"-i", "--instructions" }, defaultValue = ShellOption.NULL, arity = 1) String instructions,
-			@ShellOption(help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", value = {
-					"-g", "--genai" }, defaultValue = ShellOption.NULL, arity = 1) String chatModel)
-			throws IOException {
-
-		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-		scan = Optional.ofNullable(scan).orElse(dir);
-
-		String relativePath = ProjectLayout.getRelativePath(dir, scan);
-		if (relativePath == null) {
-			logger.warn(
-					"The starting document scan directory: `{}` is not located within the root directory or the current directory path: `{}`",
-					scan, dir);
-			dir = scan;
-		} else {
-			logger.info("Root project directory: {}", dir);
-			logger.info("Starting document scan in directory: {}", scan);
-		}
-
-		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
-		FileProcessor documents = new FileProcessor(dir, chatModel, config);
-
-		if (instructions != null) {
-			File instructionsFile = new File(instructions);
-			if (instructionsFile.exists()) {
-				try {
-					instructions = Files.readString(instructionsFile.toPath());
-				} catch (IOException e) {
-					logger.info("Failed to read instructions from file: {}", instructions);
+			if (gwHomeDir == null) {
+				System.out.println(
+						"GW_HOME environment variable not found. Using the directory where the Ghostwriter JAR file is located.");
+				gwHomeDir = new File(GWCommand.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+				if (gwHomeDir.isFile()) {
+					gwHomeDir = gwHomeDir.getParentFile();
 				}
 			}
+
+			org.machanism.machai.log.FileAppender.setExecutionDir(gwHomeDir);
+			logger = LoggerFactory.getLogger(GWCommand.class);
+
+			try {
+				File configFile = new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"));
+				config.setConfiguration(configFile.getAbsolutePath());
+			} catch (IOException e) {
+				// The property file is not defined, ignore.
+			}
+		} catch (Exception e) {
+			// Configuration file not found. An alternative configuration method will be
+			// used.
 		}
-		documents.setInstructions(instructions);
-		documents.setModuleMultiThread(threads);
-		documents.scanDocuments(dir, scan.getAbsolutePath());
-		logger.info("Scanning finished.");
 	}
 
+	@ShellMethod("Scan and process directories or files using GenAI guidance.")
+	public void gw(
+			@ShellOption(value = "root", help = "Root directory for file processing", defaultValue = ShellOption.NULL) String root,
+			@ShellOption(value = "threads", help = "Enable multi-threaded processing", defaultValue = "false") boolean threads,
+			@ShellOption(value = "genai", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String genai,
+			@ShellOption(value = "instructions", help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
+			@ShellOption(value = "guidance", help = "Default guidance as text, URL, or file path", defaultValue = ShellOption.NULL) String guidance,
+			@ShellOption(value = "excludes", help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
+			@ShellOption(value = "logInputs", help = "Log LLM request inputs to dedicated log files", defaultValue = "false") boolean logInputs,
+			@ShellOption(value = "scanDirs", help = "Directories to scan", defaultValue = ShellOption.NULL) String[] scanDirs) {
+		logger.info("GW home dir: {}", gwHomeDir);
+
+		try {
+			File rootDir = config.getFile("root", null);
+			if (root != null) {
+				rootDir = new File(root);
+			}
+
+			String genaiValue = config.get("genai", DEFAULT_GENAI_VALUE);
+			if (genai != null) {
+				genaiValue = genai;
+			}
+
+			String instructionsValue = config.get("instructions", null);
+			if (instructions != null) {
+				instructionsValue = instructions;
+				if (instructionsValue.isEmpty()) {
+					instructionsValue = readText("No instructions were provided as an option value.\n"
+							+ "Please enter the instructions text below. When you are done, press Ctrl+D (or Ctrl+Z on Windows) to finish:");
+				}
+			}
+
+			if (rootDir == null) {
+				rootDir = new File(System.getProperty("user.dir"));
+			}
+
+			String[] dirs = scanDirs;
+			if (dirs == null || dirs.length == 0) {
+				dirs = new String[] { rootDir.getAbsolutePath() };
+			}
+
+			String[] excludesArr = null;
+			if (excludes != null) {
+				excludesArr = excludes.split(",");
+			}
+
+			logger.info("Root directory: {}", rootDir);
+
+			boolean multiThread = threads;
+
+			String defaultGuidance = config.get("guidance", null);
+			if (guidance != null) {
+				defaultGuidance = guidance;
+				if (defaultGuidance.isEmpty()) {
+					defaultGuidance = readText(
+							"Please enter the guidance text below. When finished, press Ctrl+D (or Ctrl+Z on Windows) to signal end of input:");
+				}
+			}
+
+			for (String scanDir : dirs) {
+				logger.info("Starting scan of directory: {}", scanDir);
+
+				FileProcessor processor = new FileProcessor(rootDir, genaiValue, config);
+				if (excludesArr != null) {
+					logger.info("Excludes: {}", Arrays.toString(excludesArr));
+					processor.setExcludes(excludesArr);
+				}
+
+				if (instructionsValue != null) {
+					logger.info("Instructions: {}",
+							org.apache.commons.lang.StringUtils.abbreviate(instructionsValue, 60));
+					processor.setInstructions(instructionsValue);
+				}
+
+				processor.setModuleMultiThread(multiThread);
+
+				if (defaultGuidance != null) {
+					logger.info("Default Guidance: {}",
+							org.apache.commons.lang.StringUtils.abbreviate(defaultGuidance, 60));
+					processor.setDefaultGuidance(defaultGuidance);
+				}
+
+				processor.setLogInputs(logInputs);
+
+				processor.scanDocuments(rootDir, scanDir);
+				logger.info("Finished scanning directory: {}", scanDir);
+			}
+
+		} catch (ProcessTerminationException e) {
+			logger.error("Process terminated: {}", e.getMessage());
+		} catch (Exception e) {
+			logger.error("Unexpected error: " + e.getMessage(), e);
+		} finally {
+			GenAIProviderManager.logUsage();
+			logger.info("File processing completed.");
+		}
+	}
+
+	private String readText(String prompt) {
+		System.out.println(prompt);
+		StringBuilder sb = new StringBuilder();
+		try (Scanner scanner = new Scanner(System.in)) {
+			while (scanner.hasNextLine()) {
+				sb.append(scanner.nextLine()).append("\n");
+			}
+		}
+		System.out.println("Input complete. Processing your text...");
+		return sb.length() > 0 ? sb.deleteCharAt(sb.length() - 1).toString() : null;
+	}
 }

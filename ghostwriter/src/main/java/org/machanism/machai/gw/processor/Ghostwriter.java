@@ -95,6 +95,7 @@ public final class Ghostwriter {
 		if (version != null) {
 			logger.info("Ghostwriter {} (Machai project)", version);
 		}
+		logger.info("GW home dir: {}", gwHomeDir);
 
 		Options options = new Options();
 

@@ -65,7 +65,13 @@ public class AssembyCommand {
 	 */
 	public AssembyCommand() {
 		super();
-		config = new PropertiesConfigurator("machai.properties");
+		config = new PropertiesConfigurator();
+		String configFileName = "machai.properties";
+		try {
+			config.setConfiguration(configFileName);
+		} catch (Exception e) {
+			logger.debug("Configuration filr: `{}` not found.", configFileName);
+		}
 	}
 
 	/**

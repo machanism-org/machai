@@ -1,0 +1,39 @@
+<configuration>
+	<statusListener
+		class="ch.qos.logback.core.status.NopStatusListener" />
+
+	<!-- Console Appender (INFO Level) -->
+	<appender name="CONSOLE"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- File Appender (DEBUG Level) -->
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>logs/machai.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>logs/machai.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<!-- Only org.machanism logs go to CONSOLE -->
+	<logger name="org.machanism" level="INFO" additivity="false">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="FILE" />
+	</logger>
+
+	<!-- Root Logger: everything else goes to file only -->
+	<root level="WARN">
+		<appender-ref ref="FILE" />
+	</root>
+
+</configuration>
