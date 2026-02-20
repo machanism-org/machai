@@ -63,12 +63,12 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * @author Viktor Tovstyi
  */
-public class WebPageFunctionTools implements FunctionTools {
+public class WebFunctionTools implements FunctionTools {
 
 	private static final int TIMEOUT = 10000;
 
 	/** Logger for web fetch tool execution and diagnostics. */
-	private static final Logger logger = LoggerFactory.getLogger(WebPageFunctionTools.class);
+	private static final Logger logger = LoggerFactory.getLogger(WebFunctionTools.class);
 
 	/** Default character set for decoding responses and encoding request bodies. */
 	private static final String defaultCharset = "UTF-8";
@@ -78,7 +78,7 @@ public class WebPageFunctionTools implements FunctionTools {
 	 * values.
 	 */
 	private Configurator configurator;
-
+	
 	/**
 	 * Registers web content and REST API function tools with the provided
 	 * {@link GenAIProvider}.
