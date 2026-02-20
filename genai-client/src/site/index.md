@@ -55,7 +55,7 @@ This provider adapts the Anthropic Java SDK to MachAI's provider interface.
 
 Status
 
-- Not implemented yet: `init(...)` throws `NotImplementedError`, and other methods are currently no-op or placeholders.
+- Not implemented yet: `init(...)` throws `NotImplementedException`, and other methods are currently no-op or placeholders.
 
 Thread-safety
 
@@ -78,12 +78,13 @@ Delegation
 
 After a token is retrieved, this provider configures the underlying OpenAI-compatible provider by setting:
 
-- `OPENAI_BASE_URL` to the CodeMie API base URL.
-- `OPENAI_API_KEY` to the retrieved access token.
+- `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
+- `OPENAI_API_KEY` to the retrieved access token
 
 It then delegates requests to:
 
 - `OpenAIProvider` for `gpt-*` models
+- `GeminiProvider` for `gemini-*` models
 - `ClaudeProvider` for `claude-*` models
 
 Configuration
@@ -92,7 +93,7 @@ Required configuration keys:
 
 - `GENAI_USERNAME` – user e-mail or client id.
 - `GENAI_PASSWORD` – password or client secret.
-- `chatModel` – model identifier (for example `gpt-4o-mini` or `claude-3-5-sonnet`).
+- `chatModel` – model identifier (for example `gpt-4o-mini`, `gemini-1.5-pro`, or `claude-3-5-sonnet`).
 
 Optional configuration keys:
 
@@ -102,6 +103,18 @@ Built-in endpoints
 
 - Token URL (default): `https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token`
 - Base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`
+
+### Gemini
+
+Google Gemini-backed implementation of MachAI's `GenAIProvider` abstraction.
+
+Status
+
+- Not implemented yet: `init(...)` throws `NotImplementedException`, and other methods are currently no-op or placeholders.
+
+Thread-safety
+
+Instances are not thread-safe.
 
 ### None
 

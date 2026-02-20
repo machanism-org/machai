@@ -29,7 +29,8 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a project.
  *
  * <p>
- * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present in the current directory.
+ * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present in the current directory
+ * (it sets {@code requiresProject=false}).
  * </p>
  *
  * <h2>Processing order</h2>
@@ -133,6 +134,10 @@ public class GW extends AbstractGWGoal {
 	 *
 	 * <p>
 	 * When enabled, modules may be processed concurrently.
+	 * </p>
+	 *
+	 * <p>
+	 * Can be set via {@code -Dgw.threads=true}.
 	 * </p>
 	 */
 	@Parameter(property = "gw.threads", defaultValue = "false")

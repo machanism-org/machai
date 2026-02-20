@@ -26,27 +26,17 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This CLI bootstraps configuration, parses command-line options, and invokes
  * {@link FileProcessor} to scan a directory tree for supported files. For each
- * file, Ghostwriter extracts embedded {@code @guidance} directives and submits
+ * file, Ghostwriter extracts embedded {@code @guidance:} directives and submits
  * the resulting prompt to the configured GenAI provider.
  * </p>
  *
  * <p>
- * It supports various command-line options to customize the scanning and
- * processing behavior, such as specifying the root directory, enabling
- * multi-threading, and defining system instructions.
+ * Usage example:
  * </p>
  *
- * <p>Usage example:</p>
  * <pre>{@code
  * java -jar gw.jar <scanDir> [options]
  * }</pre>
- *
- * <p>Example options:</p>
- * <ul>
- * <li>-h, --help: Show help message and exit</li>
- * <li>-r, --root: Specify the root directory</li>
- * <li>-a, --genai: Set GenAI provider and model</li>
- * </ul>
  */
 public final class Ghostwriter {
 
@@ -57,7 +47,7 @@ public final class Ghostwriter {
 	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
 
 	/** Properties-based configuration used by the CLI. */
-	private static PropertiesConfigurator config = new PropertiesConfigurator();
+	private static final PropertiesConfigurator config = new PropertiesConfigurator();
 
 	/** Directory used as the execution base for relative configuration files. */
 	private static File gwHomeDir;
@@ -101,6 +91,10 @@ public final class Ghostwriter {
 	 * @throws IOException if scanning fails while reading files
 	 */
 	public static void main(String[] args) throws IOException {
+		String version = Ghostwriter.class.getPackage().getImplementationVersion();
+		if (version != null) {
+			logger.info("Ghostwriter {} (Machai project)", version);
+		}
 
 		Options options = new Options();
 
@@ -108,8 +102,8 @@ public final class Ghostwriter {
 		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: true).")
-				.hasArg(true).optionalArg(true).build();
+				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
+				.optionalArg(true).build();
 
 		Option rootDirOpt = new Option("r", "root", true,
 				"Specify the path to the root directory for file processing.");
@@ -267,28 +261,6 @@ public final class Ghostwriter {
 	/**
 	 * Prints the Ghostwriter CLI help text, including usage instructions, option
 	 * descriptions, and example commands.
-	 *
-	 * <p>
-	 * The help message covers:
-	 * </p>
-	 * <ul>
-	 * <li>General description of the Ghostwriter CLI for scanning and processing
-	 * directories or files using GenAI guidance.</li>
-	 * <li>Usage syntax: {@code java -jar gw.jar <scanDir> [options]}</li>
-	 * <li>Explanation of the {@code <scanDir>} argument:
-	 * <ul>
-	 * <li>Should be a relative path with respect to the current project
-	 * directory.</li>
-	 * <li>If an absolute path is provided, it must be located within the root
-	 * project directory.</li>
-	 * <li>Supports raw directory names, glob patterns (e.g.,
-	 * {@code glob:**\/*.java}), and regex patterns (e.g.,
-	 * {@code regex:^.*\/[^\/]+\.java$}).</li>
-	 * </ul>
-	 * </li>
-	 * <li>Descriptions of all available CLI options.</li>
-	 * <li>Example commands demonstrating typical usage.</li>
-	 * </ul>
 	 *
 	 * @param options   the configured CLI options to display in the help message
 	 * @param formatter the formatter instance used to print the help text

@@ -39,8 +39,10 @@
  *   <li>Obtain an OAuth 2.0 access token from the configured token endpoint.</li>
  *   <li>Configure an OpenAI-compatible provider by setting {@code OPENAI_BASE_URL} to the CodeMie API base URL and
  *       {@code OPENAI_API_KEY} to the retrieved token.</li>
- *   <li>Delegate requests based on the configured model prefix:</li>
+ *   <li>Delegate requests based on the configured model prefix.</li>
  * </ol>
+ *
+ * <h2>Model routing</h2>
  * <ul>
  *   <li>{@code gpt-*} models are routed to {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}.</li>
  *   <li>{@code claude-*} models are routed to {@link org.machanism.machai.ai.provider.claude.ClaudeProvider}.</li>

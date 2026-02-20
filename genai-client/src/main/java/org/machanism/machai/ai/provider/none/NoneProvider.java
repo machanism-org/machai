@@ -86,10 +86,9 @@ public class NoneProvider implements GenAIProvider {
 	 *
 	 * @param file              file containing prompt text
 	 * @param bundleMessageName unused; present for interface compatibility
-	 * @throws IOException never thrown by this implementation
 	 */
 	@Override
-	public void promptFile(File file, String bundleMessageName) throws IOException {
+	public void promptFile(File file, String bundleMessageName) {
 		// No-op in NoneProvider
 	}
 
@@ -97,11 +96,9 @@ public class NoneProvider implements GenAIProvider {
 	 * Ignores the provided file.
 	 *
 	 * @param file ignored
-	 * @throws IOException           never thrown by this implementation
-	 * @throws FileNotFoundException never thrown by this implementation
 	 */
 	@Override
-	public void addFile(File file) throws IOException, FileNotFoundException {
+	public void addFile(File file) {
 		// No-op in NoneProvider
 	}
 
@@ -109,11 +106,9 @@ public class NoneProvider implements GenAIProvider {
 	 * Ignores the provided URL.
 	 *
 	 * @param fileUrl ignored
-	 * @throws IOException           never thrown by this implementation
-	 * @throws FileNotFoundException never thrown by this implementation
 	 */
 	@Override
-	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
+	public void addFile(URL fileUrl) {
 		// No-op in NoneProvider
 	}
 

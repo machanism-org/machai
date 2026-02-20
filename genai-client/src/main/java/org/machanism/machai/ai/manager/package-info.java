@@ -27,7 +27,8 @@
  */
 
 /**
- * Manager API and service provider interface (SPI) for resolving and operating generative-AI provider integrations.
+ * Manager API and service provider interface (SPI) for resolving, configuring, and operating generative-AI provider
+ * integrations.
  *
  * <p>This package defines the core abstractions for integrating multiple AI backends behind a single contract.
  * Implementations can be discovered and configured, then selected at runtime by name and model.

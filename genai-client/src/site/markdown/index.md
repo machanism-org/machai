@@ -83,6 +83,8 @@ This design provides:
 | `AUTH_URL` | No | CodeMie | OAuth2 token endpoint override (defaults to CodeMie Keycloak token URL). |
 | `ANTHROPIC_API_KEY` | Conditional | Claude | API key used to authenticate requests. |
 | `ANTHROPIC_BASE_URL` | No | Claude | Override API base URL (if using a compatible gateway/proxy). |
+| `GEMINI_API_KEY` | Conditional | Gemini | API key used to authenticate requests. |
+| `GEMINI_BASE_URL` | No | Gemini | Override API base URL (if using a compatible gateway/proxy). |
 
 > Note: The Web provider uses Anteater recipes and is typically configured via `model(...)` and JVM system properties (for example, `-Drecipes=...`) rather than environment variables.
 
@@ -115,7 +117,7 @@ provider.close();
 | Parameter | Description | Default |
 |---|---|---|
 | Provider spec (`ProviderName:modelOrConfig`) | String passed to `GenAIProviderManager` to select provider and model/config. | None |
-| `model(String)` | Sets the provider model name (OpenAI/CodeMie/Claude) or configuration name (Web). | Provider-dependent |
+| `model(String)` | Sets the provider model name (OpenAI/CodeMie) or configuration name (Web). | Provider-dependent |
 | `setWorkingDir(File)` | Sets a working directory used by tools and/or provider workflows. | Not set |
 | `inputsLog(File)` | Enables logging of prompt inputs to a file for auditing/debugging. | Disabled |
 | `instructions(String)` | Sets system-level instructions for the request/session. | Not set |
@@ -187,7 +189,11 @@ After a token is retrieved, this provider configures the underlying OpenAI-compa
 - `OPENAI_BASE_URL` to the CodeMie API base URL
 - `OPENAI_API_KEY` to the retrieved access token
 
-and then delegates requests to either `OpenAIProvider` (for `gpt-*` models) or `ClaudeProvider` (for `claude-*` models).
+and then delegates requests to:
+
+- `OpenAIProvider` for `gpt-*` models
+- `GeminiProvider` for `gemini-*` models
+- `ClaudeProvider` for `claude-*` models
 
 **Authentication / configuration**
 
@@ -211,9 +217,9 @@ GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
 
 ### Claude
 
-`ClaudeProvider` is an Anthropic-backed implementation of MachAI's `GenAIProvider` abstraction.
+`ClaudeProvider` is intended to be an Anthropic-backed implementation of MachAI's `GenAIProvider` abstraction.
 
-This provider is currently a stub: `init(Configurator)` throws `NotImplementedError`, and most other methods are no-ops.
+At the moment, this provider is not implemented: `init(Configurator)` throws `NotImplementedException` and the remaining methods are no-ops.
 
 **Configuration**
 
@@ -223,6 +229,24 @@ This provider is currently a stub: `init(Configurator)` throws `NotImplementedEr
 
 ```java
 GenAIProvider provider = GenAIProviderManager.getProvider("Claude:claude-...");
+```
+
+**Thread safety:** not thread-safe.
+
+### Gemini
+
+`GeminiProvider` is intended to be a Google Gemini-backed implementation of MachAI's `GenAIProvider` abstraction.
+
+At the moment, this provider is not implemented: `init(Configurator)` throws `NotImplementedException` and the remaining methods are no-ops.
+
+**Configuration**
+
+- Not available yet.
+
+**Usage example**
+
+```java
+GenAIProvider provider = GenAIProviderManager.getProvider("Gemini:gemini-...");
 ```
 
 **Thread safety:** not thread-safe.

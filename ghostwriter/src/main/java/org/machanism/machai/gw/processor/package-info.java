@@ -42,18 +42,26 @@
  * Command-line project scanning and prompt orchestration for Ghostwriter.
  *
  * <p>
- * This package contains the Ghostwriter CLI entry point ({@link Ghostwriter})
- * and the filesystem-based processor ({@link FileProcessor}). Together they
- * traverse a project directory tree and, for each supported file type, extract
- * embedded {@code @guidance:} directives via extension-specific
- * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations.
+ * This package provides the Ghostwriter command-line entry point
+ * ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the core filesystem
+ * processor ({@link org.machanism.machai.gw.processor.FileProcessor}). Together
+ * they walk a project directory tree, identify files supported by registered
+ * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations, and extract
+ * embedded {@code @guidance:} directives.
  * </p>
  *
  * <p>
- * For each processed file, Ghostwriter composes a prompt that includes OS-specific
- * processing instructions, a layout-derived project structure description
- * (sources, tests, docs, modules), and the file's extracted guidance. The prompt
- * is then dispatched to a configured
+ * For each file, a prompt is composed from:
+ * </p>
+ * <ul>
+ * <li>OS-specific processing constraints (for example, command syntax),</li>
+ * <li>a layout-derived description of the project structure (sources, tests,
+ * documents, modules), and</li>
+ * <li>the extracted guidance (or configured default guidance when absent).</li>
+ * </ul>
+ *
+ * <p>
+ * The composed prompt is then dispatched to a configured
  * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  * </p>
  *
@@ -61,11 +69,11 @@
  * <ul>
  * <li><b>Child-first module traversal</b>: in multi-module layouts, modules are
  * processed before the parent.</li>
- * <li><b>No dependency resolution</b>: processing is purely filesystem-based;
- * builds are not executed.</li>
- * <li><b>Broad file coverage</b>: traversal includes source code, documentation,
- * project site content, and other relevant files supported by registered
- * reviewers.</li>
+ * <li><b>No dependency resolution</b>: processing is filesystem-based; builds are
+ * not executed.</li>
+ * <li><b>Broad file coverage</b>: traversal can include source code,
+ * documentation, project site content, and other relevant files supported by the
+ * active reviewers.</li>
  * </ul>
  */
 package org.machanism.machai.gw.processor;

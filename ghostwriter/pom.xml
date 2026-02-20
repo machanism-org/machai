@@ -94,6 +94,7 @@
 									<archive>
 										<manifestEntries>
 											<Class-Path>${plugins-class-path}</Class-Path>
+											<Implementation-Version>${project.version}</Implementation-Version>
 										</manifestEntries>
 									</archive>
 									<descriptorRefs>

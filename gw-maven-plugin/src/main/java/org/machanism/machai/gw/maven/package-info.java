@@ -1,10 +1,10 @@
 /**
- * Maven plugin goals (Mojos) and supporting infrastructure for integrating MachAI's guided workflow (GW)
+ * Maven plugin goals (Mojos) and shared infrastructure for integrating MachAI's guided workflow (GW)
  * document processing into Maven builds.
  *
  * <p>
  * The goals in this package locate documentation sources (for example under {@code src/site}), apply configured
- * include/exclude rules, and invoke MachAI's guided workflow processing pipeline.
+ * include/exclude rules, and invoke the guided workflow processing pipeline.
  * </p>
  *
  * <h2>Goals</h2>
@@ -12,9 +12,9 @@
  *   <li>{@link org.machanism.machai.gw.maven.GW} ({@code gw:gw}) - Aggregator goal that can run without a
  *   {@code pom.xml} and processes modules in reverse order (sub-modules first, then parent modules).</li>
  *   <li>{@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor}) - Processes modules using standard Maven
- *   reactor dependency ordering (optionally deferring the root project).</li>
+ *   reactor dependency ordering (optionally deferring the execution-root project).</li>
  *   <li>{@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by GW
- *   processing.</li>
+ *   processing (typically bound to Maven's {@code clean} lifecycle phase).</li>
  * </ul>
  *
  * <h2>Shared infrastructure</h2>

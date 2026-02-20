@@ -21,16 +21,6 @@
  *   <li>Markdown ({@code .md})</li>
  *   <li>Generic text guidance files named {@code @guidance.txt}</li>
  * </ul>
- *
- * <h2>Implementing a new reviewer</h2>
- * <p>To add support for a new format:
- * <ol>
- *   <li>Implement {@link org.machanism.machai.gw.reviewer.Reviewer}.</li>
- *   <li>Return supported extensions from {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()}.</li>
- *   <li>In {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)}, parse the file,
- *       detect {@code @guidance} markers, and produce a prompt fragment that includes
- *       {@link org.machanism.machai.project.layout.ProjectLayout}-derived context.</li>
- * </ol>
  */
 package org.machanism.machai.gw.reviewer;
 

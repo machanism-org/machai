@@ -35,27 +35,27 @@
  */
 
 /**
- * Host-integrated function tools for exposing a small, auditable set of local capabilities to a
+ * Host-integrated function tools that expose a small, auditable set of local capabilities to a
  * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
  * <p>
- * This package contains tool installer implementations (see {@link org.machanism.machai.ai.tools.FunctionTools})
- * that register callable functions ("tools") with a provider. These tools are designed to run inside the host
- * application and therefore focus on controlled access patterns such as:
+ * The classes in this package register named "tools" (functions) with a provider. These tools are intended to
+ * run inside the host application and therefore focus on controlled access patterns, such as:
  * </p>
  * <ul>
- *   <li>Performing file operations relative to a host-supplied working directory</li>
- *   <li>Executing system commands with allow/deny-list checks and bounded output capture</li>
- *   <li>Fetching web content and calling REST APIs with optional header templating</li>
+ *   <li>Reading, writing, and enumerating files relative to a host-supplied working directory</li>
+ *   <li>Executing system commands with heuristic deny-list checks, project-root confinement, and bounded output</li>
+ *   <li>Fetching web content and invoking REST endpoints with optional header templating and authentication</li>
  * </ul>
  *
  * <h2>Key components</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – read/write/list file-system utilities</li>
- *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution and process termination</li>
- *   <li>{@link org.machanism.machai.ai.tools.WebPageFunctionTools} – HTTP GET retrieval and REST calls</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} – SPI implemented by tool installers</li>
  *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – discovers tool installers via
  *       {@link java.util.ServiceLoader} and applies them to a provider</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – file-system utilities</li>
+ *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution and process termination</li>
+ *   <li>{@link org.machanism.machai.ai.tools.WebFunctionTools} – web fetching and REST calls</li>
  * </ul>
  *
  * <h2>Usage</h2>
