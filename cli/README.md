@@ -72,30 +72,30 @@ mvn -pl cli -am clean install
 
 Example commands (as shown by `help`):
 
-### Assembly Command
+### Assembly command
 
 - `pick`: Picks libraries based on user request.
 - `assembly`: Creates a project via picked library set.
-- `prompt`: Is used for request additional GenAI guidances.
+- `prompt`: Used to request additional GenAI guidance.
 
-### Bindex Command
+### Bindex command
 
 - `bindex`: Generates bindex files.
 - `register`: Registers bindex file.
 
-### Docs Command
+### Docs command
 
 - `docs`: GenAI document processing command.
 
-### Built-In Commands
+### Built-in commands
 
 - `help`: Display help about available commands
-- `stacktrace`: Display the full stacktrace of the last error.
-- `clear`: Clear the shell screen.
-- `quit`, `exit`: Exit the shell.
+- `stacktrace`: Display the full stacktrace of the last error
+- `clear`: Clear the shell screen
+- `quit`, `exit`: Exit the shell
 - `history`: Display or save the history of previously run commands
 - `version`: Show version info
-- `script`: Read and execute commands from a file.
+- `script`: Read and execute commands from a file
 
 ## Reference
 
