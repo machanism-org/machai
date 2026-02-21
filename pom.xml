@@ -12,7 +12,12 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins to unify access to multiple GenAI providers, generate and consume bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate documentation updates from embedded guidance using Ghostwriter.</description>
+	<description>Machai is a modular toolkit for GenAI-enabled developer
+		automation. It provides Java libraries, a command line application, and
+		Maven plugins to unify access to multiple GenAI providers, generate and
+		consume bindex metadata for library discovery and reuse, assemble
+		projects using metadata-driven updates, and automate documentation
+		updates from embedded guidance using Ghostwriter.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -121,10 +126,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.mockito</groupId>
-		    <artifactId>mockito-core</artifactId>
-		    <version>4.11.0</version>
-		    <scope>test</scope>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>4.11.0</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -255,6 +260,32 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 				<version>3.21.0</version>
+			</plugin>
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>replacer</artifactId>
+				<version>1.5.3</version>
+				<executions>
+					<execution>
+						<phase>site</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<basedir>${stagingDirectory}</basedir>
+					<includes>
+						<include>**/*.html</include>
+					</includes>
+					<!-- Regex to match HTML comments -->
+					<replacements>
+						<replacement>
+							<token>&lt;!--[\s\S]*?--&gt;</token>
+							<value></value>
+						</replacement>
+					</replacements>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.simplify4u.plugins</groupId>
