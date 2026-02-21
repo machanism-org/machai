@@ -57,15 +57,13 @@ public final class Ghostwriter {
 			gwHomeDir = config.getFile("GW_HOME", null);
 
 			if (gwHomeDir == null) {
-				System.out.println(
-						"GW_HOME environment variable not found. Using the directory where the Ghostwriter JAR file is located.");
-				gwHomeDir = new File(Ghostwriter.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-				if (gwHomeDir.isFile()) {
-					gwHomeDir = gwHomeDir.getParentFile();
+				gwHomeDir = config.getFile("root", null);
+				if (gwHomeDir == null) {
+					gwHomeDir = SystemUtils.getUserDir();
 				}
-			}
+			} 
 
-			org.machanism.machai.log.FileAppender.setExecutionDir(gwHomeDir);
+			System.setProperty("gwHomeDir", gwHomeDir.getAbsolutePath());
 			logger = LoggerFactory.getLogger(Ghostwriter.class);
 
 			try {
@@ -95,7 +93,7 @@ public final class Ghostwriter {
 		if (version != null) {
 			logger.info("Ghostwriter {} (Machai project)", version);
 		}
-		logger.info("GW home dir: {}", gwHomeDir);
+		logger.info("Home directory: {}", gwHomeDir);
 
 		Options options = new Options();
 
@@ -105,9 +103,6 @@ public final class Ghostwriter {
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
 				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
 				.optionalArg(true).build();
-
-		Option rootDirOpt = new Option("r", "root", true,
-				"Specify the path to the root directory for file processing.");
 
 		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
@@ -129,7 +124,6 @@ public final class Ghostwriter {
 				.hasArg(true).optionalArg(true).build();
 
 		options.addOption(helpOption);
-		options.addOption(rootDirOpt);
 		options.addOption(multiThreadOption);
 		options.addOption(genaiOpt);
 		options.addOption(instructionsOpt);
@@ -150,9 +144,6 @@ public final class Ghostwriter {
 			}
 
 			File rootDir = config.getFile("root", null);
-			if (cmd.hasOption(rootDirOpt)) {
-				rootDir = new File(cmd.getOptionValue(rootDirOpt));
-			}
 
 			String genai = config.get("genai", DEFAULT_GENAI_VALUE);
 			if (cmd.hasOption(genaiOpt)) {
@@ -189,8 +180,6 @@ public final class Ghostwriter {
 				excludes = StringUtils.split(cmd.getOptionValue(excludesOpt), ",");
 			}
 
-			logger.info("Root directory: {}", rootDir);
-
 			boolean multiThread = config.getBoolean("threads", false);
 			if (cmd.hasOption(multiThreadOption)) {
 				String opt = cmd.getOptionValue(multiThreadOption);
@@ -216,8 +205,6 @@ public final class Ghostwriter {
 			}
 
 			for (String scanDir : dirs) {
-				logger.info("Starting scan of directory: {}", scanDir);
-
 				FileProcessor processor = new FileProcessor(rootDir, genai, config);
 				if (excludes != null) {
 					logger.info("Excludes: {}", Arrays.toString(excludes));

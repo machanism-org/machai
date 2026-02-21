@@ -1,23 +1,25 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>This package provides the core entry points for:
+ * <p>The primary responsibilities of this package are:
  *
  * <ul>
- *   <li>Inspecting a candidate project root directory and determining its on-disk structure (its <em>layout</em>).</li>
- *   <li>Detecting or selecting an appropriate {@link org.machanism.machai.project.layout.ProjectLayout}
- *       implementation (for example, Maven, Gradle, or other conventions).</li>
- *   <li>Traversing configured source and resource folders (optionally across modules) and delegating folder-level
- *       processing.</li>
+ *   <li>Detect a project’s on-disk conventions (its {@link org.machanism.machai.project.layout.ProjectLayout}).</li>
+ *   <li>Traverse the detected source/resource folders and (optionally) recurse into modules.</li>
+ *   <li>Provide an extensible processing hook via {@link org.machanism.machai.project.ProjectProcessor}.</li>
  * </ul>
  *
- * <p>Typical flow:
+ * <h2>Typical workflow</h2>
  *
  * <ol>
- *   <li>{@link org.machanism.machai.project.ProjectLayoutManager} inspects a project root and selects an appropriate
- *       {@link org.machanism.machai.project.layout.ProjectLayout} implementation.</li>
- *   <li>{@link org.machanism.machai.project.ProjectProcessor} uses that layout to traverse the project and delegates
- *       processing for each discovered folder.</li>
+ *   <li>Call {@link org.machanism.machai.project.ProjectLayoutManager#detectProjectLayout(java.io.File)} to select a
+ *       {@link org.machanism.machai.project.layout.ProjectLayout} implementation based on marker files (for example,
+ *       {@code pom.xml} for Maven or {@code package.json} for Node).</li>
+ *   <li>Use a {@link org.machanism.machai.project.ProjectProcessor} implementation to scan the project root via
+ *       {@link org.machanism.machai.project.ProjectProcessor#scanFolder(java.io.File)}. The processor will recurse into
+ *       modules when the selected layout reports them.</li>
+ *   <li>Implement {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
+ *       to perform the work for each scanned project/module.</li>
  * </ol>
  *
  * <h2>Example</h2>
@@ -58,5 +60,5 @@ package org.machanism.machai.project;
  *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
  *          and any exceptions thrown.
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ *          and `>` as `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */

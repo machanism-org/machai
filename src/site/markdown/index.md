@@ -91,7 +91,7 @@ help
 ```bat
 cd ghostwriter
 mvn -Ppack package
-java -jar target\gw.jar --root ..
+java -Droot=... -jar target\gw.jar
 ```
 
 ### Run Maven plugins

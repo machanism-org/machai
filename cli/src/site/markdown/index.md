@@ -215,7 +215,7 @@ Machai CLI can be used interactively (REPL) or by invoking a single command (dep
 - Process a directory with optional guidance and instructions:
 
   ```text
-  gw --root C:\\work\\my-project --scanDirs C:\\work\\my-project\\docs --genai OpenAI:gpt-5-mini --threads false
+  gw --genai OpenAI:gpt-5-mini --threads false C:\\work\\my-project\\docs
   ```
 
 ### Clean temporary folders

@@ -68,7 +68,6 @@ java -jar gw.jar src
 | Option | Description | Default |
 |---|---|---|
 | `-h`, `--help` | Show help message and exit. | N/A |
-| `-r`, `--root <path>` | Root directory used as the base for relative paths (and to validate scan paths). | `root` from `gw.properties` (if present); otherwise the current working directory |
 | `-t`, `--threads[=<true\|false>]` | Enable multi-threaded module processing. If provided without a value, it enables multi-threading. | `threads` from `gw.properties` (fallback `false`) |
 | `-a`, `--genai <provider:model>` | GenAI provider and model (for example: `OpenAI:gpt-5.1`). | `genai` from `gw.properties` (fallback `OpenAI:gpt-5-mini`) |
 | `-i`, `--instructions[=<text\|url\|file:path>]` | System instructions as plain text, URL, or file reference. If used without a value, you will be prompted to enter multi-line instructions via stdin (EOF to finish). | `instructions` from `gw.properties` (if present) |

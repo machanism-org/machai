@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
@@ -39,7 +40,6 @@ public class GWCommand {
 				}
 			}
 
-			org.machanism.machai.log.FileAppender.setExecutionDir(gwHomeDir);
 			logger = LoggerFactory.getLogger(GWCommand.class);
 
 			try {
@@ -56,7 +56,6 @@ public class GWCommand {
 
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
 	public void gw(
-			@ShellOption(value = "root", help = "Root directory for file processing", defaultValue = ShellOption.NULL) String root,
 			@ShellOption(value = "threads", help = "Enable multi-threaded processing", defaultValue = "false") boolean threads,
 			@ShellOption(value = "genai", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String genai,
 			@ShellOption(value = "instructions", help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
@@ -67,10 +66,7 @@ public class GWCommand {
 		logger.info("GW home dir: {}", gwHomeDir);
 
 		try {
-			File rootDir = config.getFile("root", null);
-			if (root != null) {
-				rootDir = new File(root);
-			}
+			File rootDir = config.getFile("root", SystemUtils.getUserDir());
 
 			String genaiValue = config.get("genai", DEFAULT_GENAI_VALUE);
 			if (genai != null) {
@@ -86,10 +82,6 @@ public class GWCommand {
 				}
 			}
 
-			if (rootDir == null) {
-				rootDir = new File(System.getProperty("user.dir"));
-			}
-
 			String[] dirs = scanDirs;
 			if (dirs == null || dirs.length == 0) {
 				dirs = new String[] { rootDir.getAbsolutePath() };
@@ -99,8 +91,6 @@ public class GWCommand {
 			if (excludes != null) {
 				excludesArr = excludes.split(",");
 			}
-
-			logger.info("Root directory: {}", rootDir);
 
 			boolean multiThread = threads;
 
@@ -114,8 +104,6 @@ public class GWCommand {
 			}
 
 			for (String scanDir : dirs) {
-				logger.info("Starting scan of directory: {}", scanDir);
-
 				FileProcessor processor = new FileProcessor(rootDir, genaiValue, config);
 				if (excludesArr != null) {
 					logger.info("Excludes: {}", Arrays.toString(excludesArr));

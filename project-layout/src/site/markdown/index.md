@@ -58,9 +58,10 @@ Add the dependency:
 
 ## Typical Workflow
 
-1. Use the default Maven-style layout or configure your own conventions.
-2. Resolve the directories you need (main sources, test sources, resources, docs) against the project base directory.
-3. Use the resolved paths in your build/tooling logic (scanners, generators, compilers, packagers).
+1. Add `project-layout` as a dependency to your build/tooling project.
+2. Obtain or construct a layout definition (for example, Maven-style sources/resources/tests/docs).
+3. Resolve the directories you need (main sources, test sources, resources, docs) against the project base directory.
+4. Use the resolved paths in your build/tooling logic (scanners, generators, compilers, packagers).
 
 # Resources
 

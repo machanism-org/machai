@@ -17,12 +17,12 @@
 
 	<!-- File Appender: DEBUG and above -->
 	<appender name="FILE"
-		class="org.machanism.machai.log.FileAppender">
-		<file>logs/gw-${bySecond}.log</file>
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${gwHomeDir}/logs/gw-${bySecond}.log</file>
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- Daily rollover -->
-			<fileNamePattern>logs/archive/gw.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${gwHomeDir}/logs/archive/gw.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<!-- Keep 30 days of history -->
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>

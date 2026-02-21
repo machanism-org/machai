@@ -139,7 +139,7 @@ Command-line options override both environment variables and `gw.properties` set
 
 - **Override the root directory:**
   ```sh
-  gw --root "/home/user/projects/machai"
+  gw -Droot=/home/user/projects/machai
   ```
 
 - **Specify a custom guidance file:**
@@ -215,8 +215,6 @@ Options:
                            prompted to enter instruction text via standard
                            input (stdin).
  -l,--logInputs            Log LLM request inputs to dedicated log files.
- -r,--root <arg>           Specify the path to the root directory for file
-                           processing.
  -t,--threads <arg>        Enable multi-threaded processing to improve
                            performance (default: true).
 

@@ -1,8 +1,8 @@
 /**
- * APIs for detecting and modeling a repository's on-disk project layout.
+ * APIs for detecting, describing, and working with a repository's on-disk project layout.
  *
- * <p>The central abstraction is {@link org.machanism.machai.project.layout.ProjectLayout}, which represents a project
- * rooted at a configured base directory and exposes conventional locations (relative to that root) such as:
+ * <p>This package provides the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction, which models a
+ * project rooted at a configured base directory and exposes conventional locations (relative to that root) such as:
  *
  * <ul>
  *   <li>main sources and resources (see {@link org.machanism.machai.project.layout.ProjectLayout#getSources()})</li>
@@ -16,8 +16,8 @@
  * <ul>
  *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} parses {@code pom.xml} via
  *       {@link org.machanism.machai.project.layout.PomReader} to resolve sources, tests, and multi-module structure.</li>
- *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} uses the Gradle Tooling API to discover
- *       modules and applies standard Gradle directory conventions.</li>
+ *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} uses the Gradle Tooling API to discover modules
+ *       and applies standard Gradle directory conventions.</li>
  *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} inspects {@code package.json} workspaces to
  *       detect modules in JS/TS monorepos.</li>
  *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} detects Python projects using
@@ -27,8 +27,9 @@
  * </ul>
  *
  * <h2>Directory scanning and exclusions</h2>
- * <p>When implementations scan a repository (for example, to discover nested modules), they typically skip common build,
- * VCS, IDE, and environment directories using {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
+ * <p>Some implementations scan a repository (for example, to discover nested modules). During scanning, common build,
+ * VCS, IDE, and environment directories are typically excluded using
+ * {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  *
  * <h2>Typical usage</h2>
  * <pre>

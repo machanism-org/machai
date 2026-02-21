@@ -180,7 +180,6 @@ java -jar gw.jar src\main\java
 The CLI options are defined in `org.machanism.machai.gw.processor.Ghostwriter`.
 
 - `-h`, `--help` — Show help and exit.
-- `-r`, `--root <path>` — Root directory used as the base for processing.
 - `-t`, `--threads[=<true|false>]` — Enable multi-threaded processing. If specified without a value, it enables multi-threading.
 - `-a`, `--genai <provider:model>` — Set the GenAI provider and model (example: `OpenAI:gpt-5.1`).
 - `-i`, `--instructions[=<text|url|file:...>]` — Provide global system instructions. When used without a value, you are prompted to enter multi-line text via stdin. Lines can reference `http(s)://...` or `file:...` to include external/local content.
@@ -193,7 +192,6 @@ The CLI options are defined in `org.machanism.machai.gw.processor.Ghostwriter`.
 | Option | Argument | Description | Default |
 |---|---:|---|---|
 | `-h`, `--help` | none | Show help message and exit. | n/a |
-| `-r`, `--root` | path | Root directory for file processing. | From config key `root`; if unset, falls back to the current user directory. |
 | `-t`, `--threads` | `true`/`false` (optional) | Enable multi-threaded module processing; if used without a value, it enables it. | From config key `threads` (default `false`); when enabled, provider must be thread-safe. |
 | `-a`, `--genai` | `provider:model` | GenAI provider/model identifier. | From config key `genai`; otherwise `OpenAI:gpt-5-mini`. |
 | `-i`, `--instructions` | text/url/file (optional) | Global instructions appended to every prompt; supports `http(s)://...` and `file:...` includes; prompts via stdin if no value. | From config key `instructions`; otherwise none. |
