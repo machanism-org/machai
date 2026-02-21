@@ -41,10 +41,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <h2>Parameters</h2>
- *
  * <p>
  * This goal defines the following parameter in addition to those inherited from {@link AbstractGWGoal}.
  * </p>
+ *
  * <dl>
  * <dt>{@code -Dgw.threads} / {@code <threads>}</dt>
  * <dd>
@@ -86,7 +86,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * Run in the current directory:
  * </p>
- *
  * <pre>
  * mvn gw:gw
  * </pre>
@@ -94,7 +93,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * Run without a {@code pom.xml} (this goal sets {@code requiresProject=false}):
  * </p>
- *
  * <pre>
  * cd path\\to\\project
  * mvn gw:gw
@@ -103,7 +101,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * Enable multi-threaded processing:
  * </p>
- *
  * <pre>
  * mvn gw:gw -Dgw.threads=true
  * </pre>
@@ -111,7 +108,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * Disable multi-threaded processing (default):
  * </p>
- *
  * <pre>
  * mvn gw:gw -Dgw.threads=false
  * </pre>
@@ -119,7 +115,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * Run against a specific module:
  * </p>
- *
  * <pre>
  * mvn -pl :my-module gw:gw
  * </pre>

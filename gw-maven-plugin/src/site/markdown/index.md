@@ -2,6 +2,10 @@
 **VERY IMPORTANT NOTE:**  
 Ghostwriter works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
 Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
+
+**GW Maven Plugin is the primary adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html).**  
+It serves as the main integration point, enabling Ghostwriter’s features and automation within Maven-based projects.
+
 # Header
    - **Project Title:**  
      - Automatically extract the project title from `pom.xml`.
@@ -35,6 +39,7 @@ Ensure that your content generation and documentation efforts consider the full 
      - GitHub repository
      - Maven Central page
      - Any other useful resources
+     
 **Formatting Requirements:**
 - Use Markdown syntax for headings, lists, tables, code blocks, and links.
 - Ensure clarity, conciseness, and easy navigation throughout the page.
@@ -47,61 +52,54 @@ Ensure that your content generation and documentation efforts consider the full 
 
 ## Introduction
 
-GW Maven Plugin integrates the **Ghostwriter** guided file processing workflow into Maven builds to automate and maintain project documentation. It scans your project (source code, documentation, site content, configuration, and other relevant files), detects embedded guidance tags, and orchestrates AI-assisted synthesis to generate consistent, up-to-date artifacts.
+GW Maven Plugin is the Maven integration for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings Ghostwriter’s guided file processing into Maven builds so documentation and other project artifacts can be generated and kept current directly from your project sources.
 
-The primary goal, `gw:gw`, is designed to work well in multi-module builds and mirrors the Ghostwriter CLI processing approach: it processes sub-modules first and then parent modules (reverse order). It can also be executed even when a `pom.xml` is not present in the current directory (the goal is declared with `requiresProject=false`).
+The plugin executes Ghostwriter’s scanning and processing pipeline against the current project (or even a directory without a `pom.xml`) and supports reactor-aware behavior such as processing order and optional multi-threaded module processing.
 
 ## Overview
 
-At a high level, the plugin:
+The plugin provides Maven goals that:
 
-- Creates a configured Ghostwriter `FileProcessor` from Maven execution context.
-- Scans a target directory (defaulting to the Maven execution root) for supported files.
-- Applies includes/excludes and optional instruction/guidance inputs.
-- Runs guided processing and writes results back into the project, enabling repeatable documentation updates.
+- Scan a project (including multi-module reactors) for guided content.
+- Apply instructions and `@guidance` directives embedded in files to produce consistent outputs.
+- Optionally source GenAI credentials from Maven `settings.xml` and pass them into the Ghostwriter workflow.
 
-This makes documentation automation a first-class part of your Maven workflow, suitable for CI usage and for keeping project sites and docs synchronized with code changes.
+In practice, this allows teams to run documentation automation using standard Maven invocations (local developer machines and CI), keeping generated documentation aligned with the current codebase.
 
 ## Key Features
 
-- Maven goal to run Ghostwriter guided file processing from the command line or CI
-- Works with multi-module reactors; supports reverse-order module processing (sub-modules before parents)
-- Can run without a `pom.xml` in the current directory (`requiresProject=false`)
-- Configurable scan root (`gw.scanDir`) and exclude patterns (`gw.excludes`)
-- Optional instruction sources (`gw.instructions`) and default guidance (`gw.guidance`)
-- Optional logging of workflow input files (`gw.logInputs`)
-- Optional multi-threaded module processing (`gw.threads`)
-- Supports credentials sourced from `~/.m2/settings.xml` via `gw.genai.serverId`
+- Maven goal for running Ghostwriter guided file processing (`gw:gw`).
+- Works even when a `pom.xml` is not present (`requiresProject=false`).
+- Reactor-aware execution with reverse processing order (sub-modules first, then parent), matching Ghostwriter CLI behavior.
+- Optional multi-threaded module processing (`-Dgw.threads=true`).
+- Supports instruction inputs and default guidance injection.
+- Supports exclude patterns to skip files/paths.
+- Can load GenAI credentials from Maven `settings.xml` via `-Dgw.genai.serverId=...`.
+- Optional logging of the resolved input file list (`-Dgw.logInputs=true`).
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java (see version notes below)
-- Maven 3.x
-- A supported GenAI provider configuration (provider/model string passed via `gw.genai`)
-- (Optional) Maven `settings.xml` entry if you want to supply credentials via `gw.genai.serverId`
+- Java installed.
+- Maven 3.x installed.
+- Network access to your chosen GenAI provider (if using an online provider).
+- Maven `settings.xml` configured with credentials (optional) when using `gw.genai.serverId`.
 
 ### Java Version
 
-- **Build configuration (from `pom.xml`):** compiled with `maven.compiler.release=8` (Java 8 bytecode).
-- **Practical runtime requirements:** may be higher depending on the runtime requirements of the Ghostwriter/GenAI dependencies and your chosen provider integration.
+- **Build/runtime target in this project:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
+- **Functional requirement:** depends on the Ghostwriter runtime and the selected provider tooling; Java 8 is the intended baseline for this plugin, but your environment may require a newer Java to match the provider/client libraries used by the overall Ghostwriter stack.
 
 ### Basic Usage
+
+Run Ghostwriter processing for the current directory:
 
 ```cmd
 mvn gw:gw
 ```
 
-Common variants:
-
-```cmd
-mvn gw:gw -Dgw.scanDir=src\site
-```
-
-```cmd
-mvn gw:gw -Dgw.genai=openai:gpt-4o-mini
-```
+Enable multi-threaded module processing:
 
 ```cmd
 mvn gw:gw -Dgw.threads=true
@@ -109,31 +107,30 @@ mvn gw:gw -Dgw.threads=true
 
 ### Typical Workflow
 
-1. Add guidance tags (and any project-specific instruction files) to the repository.
-2. Configure the execution (provider/model, scan root, excludes).
-3. Run the goal:
-   - `mvn gw:gw`
-4. Review generated/updated outputs.
-5. Commit the changes and repeat in CI to keep docs current.
+1. Add or update `@guidance` directives in project files (source, docs, site content, etc.).
+2. (Optional) Provide additional instructions via `-Dgw.instructions=...`.
+3. Run the Maven goal (`mvn gw:gw`).
+4. Review generated/updated outputs and commit the results.
+5. In multi-module projects, rely on reactor processing (sub-modules first) to ensure parent artifacts aggregate the latest module changes.
 
 ## Configuration
 
+Common parameters (set via `-D...` system properties or plugin configuration where applicable):
+
 | Parameter | Description | Default |
 |---|---|---|
-| `gw.genai` | Provider/model identifier forwarded to the Ghostwriter workflow. | (none) |
-| `gw.scanDir` | Scan root directory. If omitted, defaults to the Maven execution root directory. | `${session.executionRootDirectory}` |
-| `gw.instructions` | Instruction locations consumed by the workflow (for example, file paths or classpath locations). | (none) |
+| `gw.genai` | GenAI provider/model identifier forwarded to the workflow. | (none) |
+| `gw.genai.serverId` | `settings.xml` `<server>` id used to read GenAI credentials and map them to `GENAI_USERNAME` / `GENAI_PASSWORD`. | (none) |
+| `gw.scanDir` | Scan root directory. When omitted, uses Maven execution root directory. | execution root directory |
+| `gw.instructions` | Instruction locations consumed by the workflow. | (none) |
 | `gw.guidance` | Default guidance text forwarded to the workflow. | (none) |
-| `gw.excludes` | Exclude patterns/paths to skip while scanning documentation sources. | (none) |
-| `gw.genai.serverId` | `settings.xml` `<server>` id used to read GenAI credentials. | (none) |
-| `gw.logInputs` | Logs the list of input files passed to the workflow. | `false` |
-| `gw.threads` | Enables multi-threaded module processing. | `false` |
+| `gw.excludes` | Exclude patterns/paths to skip while scanning. | (none) |
+| `gw.logInputs` | Log the list of input files passed to the workflow. | `false` |
+| `gw.threads` | Enable multi-threaded module processing for `gw:gw`. | `false` |
 
 ## Resources
 
-- Ghostwriter guided file processing overview: https://www.machanism.org/guided-file-processing/index.html
-- GitHub (parent repository): https://github.com/machanism-org/machai
-- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin
-- Machai / Ghostwriter docs (API links referenced by the build):
-  - https://machai.machanism.org/ghostwriter/apidocs/
-  - https://macha.machanism.org/core/core-commons/configurator/apidocs/
+- Ghostwriter: https://machai.machanism.org/ghostwriter/index.html
+- Guided file processing (processing order details): https://www.machanism.org/guided-file-processing/index.html
+- GitHub repository: https://github.com/machanism-org/machai
+- Maven Central (artifact page): https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin

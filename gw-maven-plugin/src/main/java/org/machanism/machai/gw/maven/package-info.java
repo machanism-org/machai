@@ -1,10 +1,11 @@
 /**
- * Maven plugin goals (Mojos) and shared infrastructure for integrating MachAI's guided workflow (GW)
+ * Maven plugin goals (Mojos) and supporting infrastructure for integrating MachAI's guided workflow (GW)
  * document processing into Maven builds.
  *
  * <p>
- * The goals in this package locate documentation sources (for example under {@code src/site}), apply configured
- * include/exclude rules, and invoke the guided workflow processing pipeline.
+ * The goals in this package scan a documentation source tree (commonly {@code src/site}), apply configured
+ * include/exclude rules, and invoke the GW processing pipeline. Configuration can be supplied using standard Maven
+ * plugin configuration and/or system properties (typically {@code -Dgw.*}).
  * </p>
  *
  * <h2>Goals</h2>
@@ -23,11 +24,11 @@
  *   scan/execute flow used by concrete goals.</li>
  * </ul>
  *
- * <h2>Configuration</h2>
+ * <h2>Configuration and credentials</h2>
  * <p>
- * Configuration is supplied via standard Maven plugin configuration and/or system properties (typically
- * {@code -Dgw.*}). Some credentials can be sourced from {@code settings.xml} (see
- * {@link org.machanism.machai.gw.maven.AbstractGWGoal}).
+ * In addition to standard parameters such as {@code gw.scanDir}, {@code gw.instructions}, {@code gw.guidance}, and
+ * {@code gw.excludes}, GenAI credentials can optionally be sourced from {@code ~/.m2/settings.xml} by providing
+ * {@code -Dgw.genai.serverId=&lt;serverId&gt;}. See {@link org.machanism.machai.gw.maven.AbstractGWGoal}.
  * </p>
  *
  * <h2>Usage examples</h2>

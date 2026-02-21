@@ -45,7 +45,7 @@
 		<menu ref="parent" />
         <menu name="Get Started">
             <item name="Overview" href="index.html" />
-            <item name="Quick Start Guide" href="preparation-to-start.html" />
+            <item name="Preparation to Start" href="preparation-to-start.html" />
             <item name="Project Workflow" href="project-workflow.html" />
         </menu>
 		<menu ref="reports" />

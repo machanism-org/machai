@@ -8,21 +8,21 @@ The Ghostwriter Maven plugin is designed to work with **all types of project fil
 
 ## Page Structure
 
-### 1. Header
+### Header
 - **Project Title:** Extract from `pom.xml`.
 - **Maven Central Badge:**  
   `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
 
-### 2. Introduction
+### Introduction
 - Provide a comprehensive description of the project's purpose and its main benefits.
 
-### 3. Overview
+### Overview
 - Explain the core functionality and value proposition of the project.
 
-### 4. Key Features
+### Key Features
 - Present a bulleted list of the primary capabilities and features.
 
-### 5. Getting Started
+### Getting Started
 - **Prerequisites:** List all required software and services.
 - **Download:**  
   Add the Ghostwriter CLI application jar download link:  
@@ -32,7 +32,7 @@ The Ghostwriter Maven plugin is designed to work with **all types of project fil
 - **Java Version:**  
   Note that the required Java version is defined in `pom.xml`, but actual functional requirements may differ. Clearly state both.
 
-### 6. Configuration
+### Configuration
 - **Command-Line Options:**  
   Analyze the `/java/org/machananism/machai/gw/processor/Ghostwriter.java` source file to extract and describe all available command-line options.
 - **Options Table:**  
@@ -41,10 +41,10 @@ The Ghostwriter Maven plugin is designed to work with **all types of project fil
   Provide a command-line example showing how to configure and run the application with custom parameters.  
   Include information from the `Ghostwriter.help()` method.
 
-### 7. Default Guidance
+### Default Guidance
 - Use the documentation for the `FileProcessor.setDefaultGuidance(String defaultGuidance)` method to generate a section detailing the purpose and usage of `defaultGuidance`.
 
-### 8. Resources
+### Resources
 - List relevant links, including platform, GitHub, and Maven Central.
 
 **General Instructions:**
@@ -57,13 +57,15 @@ The Ghostwriter Maven plugin is designed to work with **all types of project fil
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 
+> No mainstream tool offers the full range of features provided by Machai Ghostwriter out of the box.
+>
+>  ― <cite>&copy; OpenAI</cite>
+
 ## Introduction
 
 Ghostwriter is an advanced documentation engine for projects that automatically scans, analyzes, and assembles documentation from the files you already have—source code, documentation, project site content, and other project artifacts—by using embedded `@guidance:` directives and AI-powered synthesis.
 
 Its goal is to turn your repository into the single source of truth: you add or update small, local guidance next to the content (e.g., in a Markdown page, Java source file, or HTML template), and Ghostwriter can generate or refine the surrounding documentation consistently.
-
-## Overview
 
 Ghostwriter runs as a CLI that traverses a project directory tree, detects supported file types, extracts embedded `@guidance:` instructions (via file-type reviewers), and sends the resulting prompt to a configured GenAI provider.
 
@@ -79,79 +81,50 @@ At a high level, the pipeline is:
    - optional global instructions.
 5. Execute the prompt via the configured provider/model.
 
-## What Are the Differences?
+## Machai Ghostwriter vs. Other Tools
 
-This section compares leading AI code assistant tools—**GitHub Copilot**, **Claude Code**, **Cursor**, and **Machai Ghostwriter**—to help you understand their unique strengths, integration options, and best-fit scenarios.
+Based on the current landscape of AI code assistant tools, **the tool most similar to Machai Ghostwriter is [Amazon CodeWhisperer](https://aws.amazon.com/codewhisperer/)**—but even it is not a perfect match. Here’s why:
 
-### Tool Overview
+**Key Similarities:**
 
-| Tool                | Description                                                                                   |
-|---------------------|----------------------------------------------------------------------------------------------|
-| **GitHub Copilot**  | AI code completion and suggestion tool by GitHub (powered by OpenAI), integrated into IDEs.  |
-| **Claude Code**     | Anthropic’s Claude model, focused on safe, helpful, and context-aware code generation.       |
-| **Cursor**          | An AI-powered code editor and assistant, often integrating models like GPT-4 and Claude.     |
-| **Machai Ghostwriter** | Maven plugin and CLI tool for automated documentation, code review, and project analysis using GenAI, designed for integration in CI/CD and project automation pipelines. |
+- **Project-wide and batch processing:**  
+  Both Machai Ghostwriter and CodeWhisperer can be integrated into CI/CD pipelines and can process entire projects, not just provide inline suggestions.
+- **Automation focus:**  
+  Both are designed to automate code review, documentation, and code analysis tasks, rather than just assist interactively in an IDE.
+- **Integration with build tools:**  
+  Machai Ghostwriter is a Maven plugin/CLI, while CodeWhisperer can be integrated into build and deployment pipelines via AWS tooling.
 
-### Integration & Usage
+**Key Differences:**
 
-| Tool                | Integration/Usage                                                                                 |
-|---------------------|--------------------------------------------------------------------------------------------------|
-| **GitHub Copilot**  | IDE plugins (VS Code, JetBrains, Neovim), works as you type, suggests code and comments inline.  |
-| **Claude Code**     | API access, can be integrated into custom tools, chatbots, or editors that support Claude.       |
-| **Cursor**          | Standalone code editor with built-in AI assistant, supports multiple models and chat workflows.   |
-| **Machai Ghostwriter** | Maven plugin/CLI, runs as part of build or CI pipeline, processes entire projects or modules, generates documentation, reviews code, and applies guidance. |
+- **Custom Guidance and Documentation:**  
+  Machai Ghostwriter is unique in its use of `@guidance` tags, customizable documentation generation, and enforcement of project standards.
+- **Open extensibility:**  
+  Machai Ghostwriter is open for extension via Maven configuration, custom guidance, and GenAI provider integration, while CodeWhisperer is more tightly coupled to AWS and less customizable.
+- **IDE vs. Pipeline:**  
+  Most other tools (GitHub Copilot, Cursor, Tabnine, etc.) are primarily IDE assistants, focusing on inline code suggestions, not project-wide automation.
 
-### Key Features
+### Other comparisons
 
-| Tool                | Key Features                                                                                                   |
-|---------------------|----------------------------------------------------------------------------------------------------------------|
-| **GitHub Copilot**  | - Code completion<br/>- Inline suggestions<br/>- Docstring generation<br/>- Test suggestion<br/>- Multi-language   |
-| **Claude Code**     | - Context-aware code generation<br/>- Large context window<br/>- Safe and helpful responses<br/>- API-based       |
-| **Cursor**          | - AI chat for code<br/>- Codebase search<br/>- Refactoring suggestions<br/>- Multi-model support                  |
-| **Machai Ghostwriter** | - Automated documentation generation<br/>- Code review and analysis<br/>- Guidance enforcement<br/>- Multi-module Maven support<br/>- Integration with GenAI providers<br/>- Customizable via guidance and instructions |
+- **Tabnine:**  
+  Offers some project-wide code analysis and batch suggestions, but is still primarily an IDE assistant.
+- **Claude Code (Anthropic) and OpenAI Function Calling:**  
+  Can be used for project-wide automation if integrated via API, but require custom scripting and do not offer out-of-the-box project scanning or documentation enforcement like Machai Ghostwriter.
+- **Cursor:**  
+  Has some project-wide features, but is fundamentally an AI-powered code editor.
 
-### Strengths & Use Cases
+**Summary Table:**
 
-| Tool                | Strengths / Best For                                                                                 |
-|---------------------|-----------------------------------------------------------------------------------------------------|
-| **GitHub Copilot**  | Fast, inline code suggestions; boosting developer productivity in IDEs; learning from code context.  |
-| **Claude Code**     | Handling large files and context; safe, explainable code generation; API-driven workflows.           |
-| **Cursor**          | AI-first code editing; conversational code assistance; codebase-wide queries and refactoring.        |
-| **Machai Ghostwriter** | Project-wide documentation and review automation; enforcing standards via guidance; CI/CD integration; batch processing of large codebases. |
+| Tool                   | Project-wide Automation | Custom Guidance | CI/CD Integration | Documentation Generation |
+|------------------------|------------------------|-----------------|-------------------|-------------------------|
+| **Machai Ghostwriter** | Yes                    | Yes             | Yes               | Yes                     |
+| **Amazon CodeWhisperer** | Yes                  | Limited         | Yes (AWS)         | Limited                 |
+| **Tabnine**            | Partial                | No              | Partial           | No                      |
+| **GitHub Copilot**     | No                     | No              | No                | Partial                 |
+| **Claude Code / OpenAI API** | Possible (API)   | Yes (API)       | Yes (API)         | Yes (API)               |
+| **Cursor**             | Partial                | Yes             | No                | Partial                 |
 
-### Limitations
 
-| Tool                | Limitations                                                                                          |
-|---------------------|-----------------------------------------------------------------------------------------------------|
-| **GitHub Copilot**  | Not project-wide; limited to what’s in the current file/context; requires IDE plugin.                |
-| **Claude Code**     | API access may require setup; not as tightly integrated with IDEs as Copilot.                        |
-| **Cursor**          | Newer tool; may lack some advanced IDE features; requires using its own editor.                      |
-| **Machai Ghostwriter** | Not an inline code assistant; works at project/module level, not per keystroke; requires Maven/CLI setup. |
-
-### Open Source / Extensibility
-
-| Tool                | Open Source / Extensibility                                                                         |
-|---------------------|-----------------------------------------------------------------------------------------------------|
-| **GitHub Copilot**  | Closed source; extensible via plugin APIs.                                                          |
-| **Claude Code**     | API-based; can be integrated into custom tools.                                                     |
-| **Cursor**          | Proprietary editor; extensibility via plugins and model selection.                                  |
-| **Machai Ghostwriter** | Open for extension via Maven plugin configuration, custom guidance, and integration with GenAI providers. |
-
-### Summary Table
-
-| Tool                | Inline Suggestions | Project-wide Automation | Documentation Generation | IDE Integration | CI/CD Integration | Custom Guidance |
-|---------------------|-------------------|------------------------|-------------------------|-----------------|-------------------|-----------------|
-| **GitHub Copilot**  | Yes               | No                     | Partial                 | Yes             | No                | No              |
-| **Claude Code**     | No (API)          | Yes (via API)          | Yes (via API)           | No (API only)   | Yes (API)         | Yes (API)       |
-| **Cursor**          | Yes (in-editor)   | Partial                | Partial                 | Yes (own editor)| No                | Yes             |
-| **Machai Ghostwriter** | No             | Yes                    | Yes                     | No              | Yes               | Yes             |
-
-### When to Use Machai Ghostwriter
-
-- You want to automate documentation and code review for entire projects or modules.
-- You need to enforce project standards and guidance across a codebase.
-- You want to integrate GenAI-powered documentation and review into your CI/CD pipeline.
-- You prefer batch or pipeline processing over inline code suggestions.
+**Amazon CodeWhisperer** is the closest in terms of automation and project-wide processing, but **Machai Ghostwriter remains unique** in its deep integration with Maven, customizable guidance, and documentation-first approach.  
 
 ## Key Features
 
