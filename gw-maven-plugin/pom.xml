@@ -90,6 +90,15 @@
 						org.machanism.machai:gw-maven-plugin</mojoDependencies>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>plantuml-generator-maven-plugin</artifactId>
+				<groupId>de.elnarion.maven</groupId>
+				<configuration>
+					<scanPackages>
+						<scanPackage>org.machanism.machai.gw.maven</scanPackage>
+					</scanPackages>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	

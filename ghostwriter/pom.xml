@@ -94,7 +94,8 @@
 									<archive>
 										<manifestEntries>
 											<Class-Path>${plugins-class-path}</Class-Path>
-											<Implementation-Version>${project.version}</Implementation-Version>
+											<Implementation-Version>
+												${project.version}</Implementation-Version>
 										</manifestEntries>
 									</archive>
 									<descriptorRefs>
@@ -216,6 +217,21 @@
 			</plugin>
 		</plugins>
 	</reporting>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>plantuml-generator-maven-plugin</artifactId>
+				<groupId>de.elnarion.maven</groupId>
+				<configuration>
+					<scanPackages>
+						<scanPackage>org.machanism.machai.gw.processor</scanPackage>
+						<scanPackage>org.machanism.machai.gw.reviewer</scanPackage>
+					</scanPackages>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 	<scm>
 		<connection>scm:git:https://github.com/machanism-org/machai.git</connection>

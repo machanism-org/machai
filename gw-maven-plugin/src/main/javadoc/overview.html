@@ -1,0 +1,129 @@
+<!-- 
+@guidance:
+**IMPORTANT: GENERATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+
+Ghostwriter supports **all types of project files—including source code, documentation, project site content, and other relevant files**.
+
+- **Write Clear and Concise Descriptions:**
+	- Follow best practices for creating a package overview.
+    - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
+    - Avoid vague or generic statements; be specific about functionality and intent.
+    - Aggregate information from `package-info.java` files from source folders.
+    - Use the class diagram located at `../images/class-diagram.png`.
+    - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GW Maven Plugin API Overview</title>
+</head>
+<body>
+
+<h1>GW Maven Plugin</h1>
+
+<p>
+  GW Maven Plugin provides Maven goals (Mojos) and shared infrastructure for running the
+  MachAI Ghostwriter guided workflow (GW) document-processing pipeline as part of a Maven build.
+  The plugin scans a documentation/content source tree (commonly <code>src/site</code>) for files
+  containing <code>@guidance</code> directives and delegates processing to Ghostwriter’s file-processing
+  pipeline.
+</p>
+
+<h2>Architecture and package structure</h2>
+
+<p>
+  The public API is organized primarily under the package
+  <code>org.machanism.machai.gw.maven</code>, which contains the Maven goals and the shared execution
+  infrastructure they build upon.
+</p>
+
+<ul>
+  <li>
+    <strong>Goals (Mojos)</strong>
+    <ul>
+      <li>
+        <code>GW</code> (<code>gw:gw</code>): aggregator-style goal that can run without a <code>pom.xml</code>.
+        It processes modules in reverse order (sub-modules first, then parent modules), matching
+        the Ghostwriter CLI’s ordering.
+      </li>
+      <li>
+        <code>ReactorGW</code> (<code>gw:reactor</code>): processes projects in standard Maven reactor dependency order
+        and can optionally defer processing of the execution-root project.
+      </li>
+      <li>
+        <code>Clean</code> (<code>gw:clean</code>): deletes temporary artifacts created by GW processing (typically bound
+        to Maven’s <code>clean</code> lifecycle).
+      </li>
+    </ul>
+  </li>
+  <li>
+    <strong>Shared infrastructure</strong>
+    <ul>
+      <li>
+        <code>AbstractGWGoal</code>: base class defining shared parameters (for example, instruction locations,
+        default guidance, scan directory, exclude rules, and optional credentials lookup) and the common
+        scan/execute flow.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2>Input scanning and processing</h2>
+
+<p>
+  At runtime, each goal configures a Ghostwriter <code>FileProcessor</code>, determines a scan root (either the
+  Maven execution root directory or an explicit directory provided via <code>-Dgw.scanDir</code>), applies
+  include/exclude behavior managed by the processor, and then invokes the GW processing pipeline.
+  This design allows guided updates to be applied to a broad set of project artifacts, including source
+  code, documentation, project site content, and other relevant files.
+</p>
+
+<h2>Credentials and configuration</h2>
+
+<p>
+  In addition to standard Maven plugin configuration, GenAI credentials can optionally be sourced from
+  <code>~/.m2/settings.xml</code> by providing <code>-Dgw.genai.serverId=&lt;serverId&gt;</code>. When configured, the
+  plugin reads the matching <code>&lt;server&gt;</code> credentials and forwards them to the Ghostwriter workflow.
+</p>
+
+<h2>Class diagram</h2>
+
+<p>
+  The following diagram summarizes the main goal types and shared infrastructure.
+</p>
+
+<p>
+  <img src="../images/class-diagram.png" alt="Class diagram for GW Maven Plugin" />
+</p>
+
+<h2>Common usage</h2>
+
+<p>
+  Run guided file processing for the current project:
+</p>
+
+<pre>
+mvn gw:gw
+</pre>
+
+<p>
+  Run reactor-ordered processing in a multi-module build:
+</p>
+
+<pre>
+mvn gw:reactor
+</pre>
+
+<p>
+  Override the scan root directory:
+</p>
+
+<pre>
+mvn gw:reactor -Dgw.scanDir=src\\site
+</pre>
+
+</body>
+</html>

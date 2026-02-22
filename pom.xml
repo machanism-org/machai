@@ -12,12 +12,7 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a modular toolkit for GenAI-enabled developer
-		automation. It provides Java libraries, a command line application, and
-		Maven plugins to unify access to multiple GenAI providers, generate and
-		consume bindex metadata for library discovery and reuse, assemble
-		projects using metadata-driven updates, and automate documentation
-		updates from embedded guidance using Ghostwriter.</description>
+	<description>Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins for unified access to multiple GenAI providers, for generating and consuming bindex metadata for library discovery and reuse, for assembling projects using metadata-driven updates, and for automating documentation updates from embedded guidance using Ghostwriter.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -225,6 +220,32 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<artifactId>plantuml-generator-maven-plugin</artifactId>
+				<groupId>de.elnarion.maven</groupId>
+				<version>3.0.1</version>
+				<configuration>
+					<outputFilename>class-diagram.puml</outputFilename>
+					<outputDirectory>target/generated-docs/puml</outputDirectory>
+					<maxVisibilityFields>PUBLIC</maxVisibilityFields>
+					<maxVisibilityMethods>PROTECTED</maxVisibilityMethods>
+					<hideFields>true</hideFields>
+					<hideMethods>true</hideMethods>
+					<hideClasses>true</hideClasses>
+					<scanPackages>
+						<scanPackage>org.machanism.machai.gw.*</scanPackage>
+					</scanPackages>
+				</configuration>
+				<executions>
+					<execution>
+						<id>gen-class-diagram</id>
+						<phase>site</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>com.github.funthomas424242</groupId>
 				<artifactId>plantuml-maven-plugin</artifactId>
 				<version>1.5.2</version>
@@ -255,7 +276,6 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
@@ -311,6 +331,7 @@
 				<configuration>
 					<doclint>none</doclint>
 					<show>package</show>
+					
 					<useStandardDocletOptions>true</useStandardDocletOptions>
 					<bottom><![CDATA[&copy;2025-2026 Machanism.org. All Rights Reserved.]]></bottom>
 					<header><![CDATA[<h1><a href="${project.url}">${project.name}</a></h1>]]></header>

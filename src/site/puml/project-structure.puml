@@ -1,0 +1,30 @@
+@startuml
+
+title Machai Project structure
+
+package "machai" {
+  package "project-layout" as project_layout
+  package "genai-client" as genai_client
+  package "bindex-core" as bindex_core
+  package "cli" as cli
+  package "bindex-maven-plugin" as bindex_maven_plugin
+  package "assembly-maven-plugin" as assembly_maven_plugin
+  package "ghostwriter" as ghostwriter
+  package "gw-maven-plugin" as gw_maven_plugin
+
+  bindex_core --> project_layout : depends on
+  bindex_core --> genai_client : depends on
+
+  cli --> bindex_core : depends on
+  cli --> ghostwriter : depends on
+
+  bindex_maven_plugin --> bindex_core : depends on
+  assembly_maven_plugin --> bindex_core : depends on
+
+  ghostwriter --> project_layout : depends on
+  ghostwriter --> genai_client : depends on
+
+  gw_maven_plugin --> ghostwriter : depends on
+}
+
+@enduml
