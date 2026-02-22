@@ -1,56 +1,54 @@
 ---
 canonical: https://machai.machanism.org/ghostwriter/index.html
 ---
+
 <!-- @guidance:
 **IMPORTANT:**  
 The Ghostwriter Maven plugin is designed to work with **all types of project files**—including source code, documentation, project site content, and any other relevant files.  
 **When generating content or documentation, always consider the full range of file types present in the project.**
-
-## Page Structure
-
-### Header
-- **Project Title:** Extract from `pom.xml`.
-- **Maven Central Badge:**  
-  `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
-
-### Introduction
-- Provide a comprehensive description of the project's purpose and its main benefits.
-
-### Overview
-- Explain the core functionality and value proposition of the project.
-
-### Key Features
-- Present a bulleted list of the primary capabilities and features.
-
-### Getting Started
-- **Prerequisites:** List all required software and services.
-- **Download:**  
-  Add the Ghostwriter CLI application jar download link:  
-  `[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)`
-- **Basic Usage:** Provide an example command to run the application.
-- **Typical Workflow:** Outline the step-by-step process for using the project artifacts.
-- **Java Version:**  
-  Note that the required Java version is defined in `pom.xml`, but actual functional requirements may differ. Clearly state both.
-
-### Configuration
-- **Command-Line Options:**  
-  Analyze the `/java/org/machananism/machai/gw/processor/Ghostwriter.java` source file to extract and describe all available command-line options.
-- **Options Table:**  
-  Present a table listing each option, its description, and default value.
-- **Example:**  
-  Provide a command-line example showing how to configure and run the application with custom parameters.  
-  Include information from the `Ghostwriter.help()` method.
-
-### Default Guidance
-- Use the documentation for the `FileProcessor.setDefaultGuidance(String defaultGuidance)` method to generate a section detailing the purpose and usage of `defaultGuidance`.
-
-### Resources
-- List relevant links, including platform, GitHub, and Maven Central.
-
-**General Instructions:**
-- Ensure clarity and completeness in each section.
+# Page Structure
+1. **Header**
+   - **Project Title:** Extract automatically from `pom.xml`.
+   - **Maven Central Badge:**  
+     Use the following Markdown, replacing `[groupId]` and `[artifactId]` with values from `pom.xml`:  
+     `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
+2. **Quote**
+   - Do not change this section. Leave it exactly as provided.
+3. **Introduction**
+   - Provide a comprehensive description of the project's purpose and main benefits.
+   - Reference [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
+4. **Overview**
+   - Clearly explain the core functionality and value proposition of the project.
+5. **Machai Ghostwriter vs. Other Tools.** 
+   - Identify the AI code assistant tool most similar to Machai Ghostwriter and explain why, focusing on project-wide automation, CI/CD integration, and extensibility.
+   - List key similarities and key differences between Machai Ghostwriter and the closest tool.
+   - Briefly compare Machai Ghostwriter to other popular tools (e.g., Tabnine, GitHub Copilot, Claude Code, Cursor) in terms of project-wide automation, guidance, and documentation features.
+   - Summarize the comparison in a Markdown table showing which tools support project-wide automation, custom guidance, CI/CD integration, and documentation generation.
+   - Conclude with a short statement on what makes Machai Ghostwriter unique.
+Let me know if you want it even shorter or tailored for a specific toolset!
+6. **Key Features**
+   - Present a concise, bulleted list of the primary capabilities and features.
+7. **Getting Started**
+   - **Prerequisites:** List all required software, services, and environment settings.
+   - **Download:**  
+     Add a download link for the Ghostwriter CLI application jar:  
+     `[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)`
+   - **Basic Usage:** Provide an example command to run the application.
+   - **Typical Workflow:** Outline the step-by-step process for using the project artifacts.
+   - **Java Version:** State the required Java version as defined in `pom.xml`, and clarify any additional functional requirements.
+8. **Configuration**
+   - **Command-Line Options:** Analyze `/java/org/machanism/machai/gw/processor/Ghostwriter.java` to extract and describe all available command-line options.
+   - **Options Table:** Present a table listing each option, its description, and default value.
+   - **Example:** Provide a command-line example showing how to configure and run the application with custom parameters. Include information from the `Ghostwriter.help()` method.
+9. **Default Guidance**
+   - Use the documentation for the `FileProcessor.setDefaultGuidance(String defaultGuidance)` method to generate a section detailing the purpose and usage of `defaultGuidance`.
+10. **Resources**
+   - List relevant links, including the official platform, GitHub repository, and Maven Central page.
+# General Instructions
+- Ensure clarity, completeness, and accuracy in each section.
 - Use information from project files and source code as specified.
 - Structure the documentation for easy navigation and practical use.
+- Use Markdown syntax for headings, lists, tables, code blocks, and links.
 -->
 
 # Ghostwriter
@@ -63,88 +61,80 @@ The Ghostwriter Maven plugin is designed to work with **all types of project fil
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine for projects that automatically scans, analyzes, and assembles documentation from the files you already have—source code, documentation, project site content, and other project artifacts—by using embedded `@guidance:` directives and AI-powered synthesis.
+Ghostwriter is Machai’s guidance-driven, repository-scale documentation and transformation engine.
 
-Its goal is to turn your repository into the single source of truth: you add or update small, local guidance next to the content (e.g., in a Markdown page, Java source file, or HTML template), and Ghostwriter can generate or refine the surrounding documentation consistently.
+It scans your repository (source code, docs, project-site Markdown, build metadata, and other artifacts), extracts embedded `@guidance:` directives, and uses a configured GenAI provider to apply consistent improvements across many files in a repeatable way. This makes it practical to keep documentation, conventions, and refactors aligned across an entire project—especially when changes must be deterministic, reviewable, and CI-friendly.
 
-Ghostwriter runs as a CLI that traverses a project directory tree, detects supported file types, extracts embedded `@guidance:` instructions (via file-type reviewers), and sends the resulting prompt to a configured GenAI provider.
+Ghostwriter is built on **[Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)**: guidance lives next to the content it controls, and the processor composes those local directives—plus any configured defaults—into a structured prompt per file. The result is automation that remains explicit and version-controlled inside the repository.
 
-At a high level, the pipeline is:
+## Overview
 
-1. Determine the project root and scan target (directory or `glob:` / `regex:` pattern).
-2. Traverse the project (module-aware for Maven multi-module layouts).
-3. For each supported file, extract `@guidance:` directives.
-4. Compose a prompt including:
-   - processing instructions (including OS-specific constraints),
-   - the current project structure,
-   - extracted per-file guidance (or fallback default guidance),
-   - optional global instructions.
-5. Execute the prompt via the configured provider/model.
+At a high level, Ghostwriter runs as a CLI that:
+
+1. Resolves the project root and scan target (directory, `glob:...`, or `regex:...`).
+2. Traverses the project (Maven multi-module aware).
+3. For each supported file type, extracts `@guidance:` directives using pluggable reviewers.
+4. Composes an LLM request input that can include:
+   - environment constraints (OS, project layout, etc.),
+   - per-file guidance (or fallback default guidance),
+   - optional global instruction blocks.
+5. Sends the request to the configured provider/model and applies the resulting updates.
+
+The core value proposition is **documentation and refactoring at repository scale**, while keeping intent explicit via embedded guidance and preserving auditability through version control (and optional input logging).
 
 ## Machai Ghostwriter vs. Other Tools
 
-Based on the current landscape of AI code assistant tools, **the tool most similar to Machai Ghostwriter is [Amazon CodeWhisperer](https://aws.amazon.com/codewhisperer/)**—but even it is not a perfect match. Here’s why:
+The closest mainstream tool conceptually is **[Claude Code](https://www.anthropic.com/claude-code)**: it can operate across multiple files and can be used in automated workflows. Ghostwriter, however, is purpose-built for **repeatable, guidance-driven batch processing** as a CLI (and Maven-friendly artifact), rather than an interactive agent primarily optimized for ad-hoc developer sessions.
 
-**Key Similarities:**
+### Key similarities
 
-- **Project-wide and batch processing:**  
-  Both Machai Ghostwriter and CodeWhisperer can be integrated into CI/CD pipelines and can process entire projects, not just provide inline suggestions.
-- **Automation focus:**  
-  Both are designed to automate code review, documentation, and code analysis tasks, rather than just assist interactively in an IDE.
-- **Integration with build tools:**  
-  Machai Ghostwriter is a Maven plugin/CLI, while CodeWhisperer can be integrated into build and deployment pipelines via AWS tooling.
+- **Multi-file changes:** both can apply edits across multiple files in a repository.
+- **Automation potential:** both can be used in scripted or CI workflows (Ghostwriter directly; Claude Code via your integration).
+- **Repository context:** both can use broader project context to produce coherent changes.
 
-**Key Differences:**
+### Key differences
 
-- **Custom Guidance and Documentation:**  
-  Machai Ghostwriter is unique in its use of `@guidance` tags, customizable documentation generation, and enforcement of project standards.
-- **Open extensibility:**  
-  Machai Ghostwriter is open for extension via Maven configuration, custom guidance, and GenAI provider integration, while CodeWhisperer is more tightly coupled to AWS and less customizable.
-- **IDE vs. Pipeline:**  
-  Most other tools (GitHub Copilot, Cursor, Tabnine, etc.) are primarily IDE assistants, focusing on inline code suggestions, not project-wide automation.
+- **Guidance-first operation:** Ghostwriter extracts embedded `@guidance:` directives from many file types (source, docs, site content, build files) and composes them into a prompt per file.
+- **Deterministic batch processing:** Ghostwriter’s primary workflow is scanning a target (directory/`glob:`/`regex:`) and applying updates systematically, including Maven multi-module traversal.
+- **Extensibility via reviewers and tools:** file-type handling is pluggable via reviewer implementations; function tools can be attached via a loader mechanism.
+- **Auditability:** Ghostwriter can persist composed request inputs per file when input logging is enabled.
 
-### Other comparisons
+### Brief comparison to other popular tools
 
-- **Tabnine:**  
-  Offers some project-wide code analysis and batch suggestions, but is still primarily an IDE assistant.
-- **Claude Code (Anthropic) and OpenAI Function Calling:**  
-  Can be used for project-wide automation if integrated via API, but require custom scripting and do not offer out-of-the-box project scanning or documentation enforcement like Machai Ghostwriter.
-- **Cursor:**  
-  Has some project-wide features, but is fundamentally an AI-powered code editor.
+- **GitHub Copilot / Tabnine / Cursor:** primarily IDE/editor copilots designed for interactive completion and chat; they do not center on repository-wide, `@guidance:`-driven enforcement across documentation and project-site content.
+- **Claude Code:** closer to Ghostwriter in multi-file capabilities, but typically driven by interactive sessions rather than guidance embedded directly in the files being processed.
 
-**Summary Table:**
+### Summary table
 
-| Tool                   | Project-wide Automation | Custom Guidance | CI/CD Integration | Documentation Generation |
-|------------------------|------------------------|-----------------|-------------------|-------------------------|
-| **Machai Ghostwriter** | Yes                    | Yes             | Yes               | Yes                     |
-| **Amazon CodeWhisperer** | Yes                  | Limited         | Yes (AWS)         | Limited                 |
-| **Tabnine**            | Partial                | No              | Partial           | No                      |
-| **GitHub Copilot**     | No                     | No              | No                | Partial                 |
-| **Claude Code / OpenAI API** | Possible (API)   | Yes (API)       | Yes (API)         | Yes (API)               |
-| **Cursor**             | Partial                | Yes             | No                | Partial                 |
+| Tool | Project-wide automation | Custom guidance embedded in files | CI/CD integration | Documentation generation |
+|---|---:|---:|---:|---:|
+| **Machai Ghostwriter** | Yes | Yes (`@guidance:`) | Yes | Yes |
+| **Claude Code** | Yes | Partial (prompting/conventions) | Possible | Possible |
+| **GitHub Copilot** | Limited | No | Limited | Partial |
+| **Cursor** | Limited | Partial (workspace rules) | Limited | Partial |
+| **Tabnine** | Limited | No | Limited | Limited |
 
-
-**Amazon CodeWhisperer** is the closest in terms of automation and project-wide processing, but **Machai Ghostwriter remains unique** in its deep integration with Maven, customizable guidance, and documentation-first approach.  
+Machai Ghostwriter is unique because it makes **version-controlled, per-file guidance** the primary interface for reliable, repeatable repository-wide improvements.
 
 ## Key Features
 
-- Scans and processes many project file types (not just source code), including project site content.
-- Extracts embedded `@guidance:` directives using pluggable per-type reviewers.
-- Supports directory scanning as well as `glob:` and `regex:` path matchers.
-- Module-aware scanning for Maven multi-module projects (child modules first).
+- Processes many project file types (not just Java), including documentation and project-site Markdown.
+- Extracts embedded `@guidance:` directives via pluggable, file-type-aware reviewers.
+- Supports scan targets as a directory, `glob:` matcher, or `regex:` matcher.
+- Maven multi-module traversal (child modules first).
 - Optional multi-threaded module processing (when the provider is thread-safe).
-- Optional logging of composed LLM inputs to per-file log files.
-- Supports reusable global instruction blocks and default guidance loaded from plain text, URLs, or local files.
+- Optional logging of composed LLM request inputs.
+- Supports global instructions and default guidance loaded from plain text, URLs, or local files.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java: required to run the CLI.
-  - **Build target (from `pom.xml`):** Java **8** (`maven.compiler.release=8`).
-  - **Runtime requirement:** depends on the chosen GenAI provider client and your environment; if you encounter runtime issues on Java 8, use a newer JRE (e.g., 11+) while still building at the project’s configured release level.
-- Network access to your configured GenAI provider endpoint (as applicable).
-- Provider credentials/configuration (commonly via `GW_HOME\gw.properties`, environment variables, or provider-specific configuration expected by the Machai GenAI client).
+- **Java**
+  - **Build target:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
+  - **Runtime:** depends on your selected GenAI provider/client; you can run with a newer JRE if required by the provider SDK while still building at the configured release level.
+- **GenAI provider access and credentials** as required by your provider (for example via `GW_HOME\\gw.properties`, environment variables, or provider-specific configuration).
+- **Network access** to the provider endpoint (if applicable).
 
 ### Download
 
@@ -153,61 +143,68 @@ Based on the current landscape of AI code assistant tools, **the tool most simil
 ### Basic Usage
 
 ```text
-java -jar gw.jar <scanDir> [options]
+java -jar gw.jar <scanTarget> [options]
 ```
 
-Example (scan a folder):
+Example (scan a folder on Windows):
 
 ```text
-java -jar gw.jar src\main\java
+java -jar gw.jar src\\main\\java
 ```
 
 ### Typical Workflow
 
-1. Add `@guidance:` directives to the files you want Ghostwriter to act on (e.g., Markdown pages under `src\site`, Java sources, HTML, etc.).
+1. Add `@guidance:` directives to the files you want Ghostwriter to update (Markdown under `src\\site`, Java sources, templates, etc.).
 2. Choose a scan target:
-   - a directory path (relative to the current project), or
-   - a `glob:` matcher (for example: `glob:**/*.java`), or
-   - a `regex:` matcher.
-3. Configure your GenAI provider/model (via `-a/--genai` or configuration).
-4. Optionally set global instructions (`-i/--instructions`) and/or fallback guidance (`-g/--guidance`).
-5. Run Ghostwriter and review the generated outputs/changes (depending on provider tools and your workflow).
+   - directory path (relative to the project), or
+   - `glob:` matcher (example: `glob:**/*.java`), or
+   - `regex:` matcher.
+3. Configure your GenAI provider/model and credentials.
+4. Optionally add global instructions and/or default guidance.
+5. Run Ghostwriter, then review and commit the results.
 
 ## Configuration
 
 ### Command-Line Options
 
-The CLI options are defined in `org.machanism.machai.gw.processor.Ghostwriter`.
+The CLI options are defined in `org.machanism.machai.gw.processor.Ghostwriter`:
 
 - `-h`, `--help` — Show help and exit.
 - `-t`, `--threads[=<true|false>]` — Enable multi-threaded processing. If specified without a value, it enables multi-threading.
 - `-a`, `--genai <provider:model>` — Set the GenAI provider and model (example: `OpenAI:gpt-5.1`).
-- `-i`, `--instructions[=<text|url|file:...>]` — Provide global system instructions. When used without a value, you are prompted to enter multi-line text via stdin. Lines can reference `http(s)://...` or `file:...` to include external/local content.
-- `-g`, `--guidance[=<text|url|file:...>]` — Provide default guidance (fallback). When used without a value, you are prompted to enter multi-line text via stdin. Lines can reference `http(s)://...` or `file:...`.
-- `-e`, `--excludes <csv>` — Comma-separated list of directories/paths/patterns to exclude from processing.
+- `-i`, `--instructions[=<text|url|file:...>]` — Provide global system instructions. When used without a value, you are prompted to enter multi-line text via stdin.
+- `-g`, `--guidance[=<text|url|file:...>]` — Provide default guidance (fallback). When used without a value, you are prompted to enter multi-line text via stdin.
+- `-e`, `--excludes <csv>` — Comma-separated list of directories to exclude from processing.
 - `-l`, `--logInputs` — Log composed LLM request inputs to dedicated log files.
+
+Notes on `--instructions` and `--guidance` values:
+
+- blank lines are preserved,
+- lines beginning with `http://` or `https://` are fetched and included,
+- lines beginning with `file:` are read from the referenced file and included,
+- other lines are included as-is.
 
 ### Options Table
 
 | Option | Argument | Description | Default |
-|---|---:|---|---|
+|---|---|---|---|
 | `-h`, `--help` | none | Show help message and exit. | n/a |
-| `-t`, `--threads` | `true`/`false` (optional) | Enable multi-threaded module processing; if used without a value, it enables it. | From config key `threads` (default `false`); when enabled, provider must be thread-safe. |
+| `-t`, `--threads` | `true`/`false` (optional) | Enable multi-threaded module processing; if used without a value, it enables it. | From config key `threads` (default `false`). |
 | `-a`, `--genai` | `provider:model` | GenAI provider/model identifier. | From config key `genai`; otherwise `OpenAI:gpt-5-mini`. |
-| `-i`, `--instructions` | text/url/file (optional) | Global instructions appended to every prompt; supports `http(s)://...` and `file:...` includes; prompts via stdin if no value. | From config key `instructions`; otherwise none. |
-| `-g`, `--guidance` | text/url/file (optional) | Fallback guidance used when files have no embedded `@guidance:`; supports `http(s)://...` and `file:...` includes; prompts via stdin if no value. | From config key `guidance`; otherwise none. |
-| `-e`, `--excludes` | csv | Comma-separated exclude list (can also be configured via config key `excludes`). | From config key `excludes`; otherwise none. |
-| `-l`, `--logInputs` | none | Log composed LLM inputs to per-file log files under a temp folder. | From config key `logInputs` (default `false`). |
+| `-i`, `--instructions` | text/url/file (optional) | Global instructions appended to every prompt; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `instructions`; otherwise none. |
+| `-g`, `--guidance` | text/url/file (optional) | Fallback guidance used when files have no embedded `@guidance:`; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `guidance`; otherwise none. |
+| `-e`, `--excludes` | csv | Comma-separated exclude list (also configurable via config key `excludes`). | From config key `excludes`; otherwise none. |
+| `-l`, `--logInputs` | none | Log composed LLM inputs to per-file log files. | From config key `logInputs` (default `false`). |
 
 ### Example
 
 The built-in help text documents supported scan targets:
 
 - raw directory names,
-- `glob:` patterns (e.g., `glob:**/*.java`),
+- `glob:` patterns (for example `glob:**/*.java`),
 - `regex:` patterns.
 
-Example (Windows) scanning Java sources with a glob, enabling threads, setting provider/model, adding instructions and default guidance:
+Example (Windows): scan Java sources via glob, enable threads, set provider/model, add instructions and default guidance, exclude common folders, and log inputs:
 
 ```text
 java -jar gw.jar "glob:**/*.java" -t -a OpenAI:gpt-5.1 -i file:project-instructions.txt -g file:default-guidance.txt -e target,.git -l
@@ -217,27 +214,22 @@ java -jar gw.jar "glob:**/*.java" -t -a OpenAI:gpt-5.1 -i file:project-instructi
 
 `defaultGuidance` is a fallback instruction block used when a file does not contain embedded `@guidance:` directives.
 
-You set it via:
+It can be set via:
 
-- CLI: `-g/--guidance` (plain text, `http(s)://...`, or `file:...`; supports stdin when provided without a value), or
+- CLI: `-g` / `--guidance` (plain text, `http(s)://...`, or `file:...`; supports stdin when provided without a value), or
 - API: `FileProcessor#setDefaultGuidance(String)`.
 
-Behavior and supported formats (as documented on `setDefaultGuidance`):
+The value is treated as plain text, but each line may also act as an include directive:
 
-- Plain text is used as provided.
-- Each line is processed:
-  - blank lines are preserved,
-  - lines starting with `http://` or `https://` are loaded and included,
-  - lines starting with `file:` are read from the specified file path and included,
-  - other lines are included as-is.
+- blank lines are preserved,
+- lines beginning with `http://` or `https://` are fetched and included,
+- lines beginning with `file:` are read from the referenced file and included,
+- other lines are included as-is.
 
-When a supported file has no embedded guidance, Ghostwriter applies the default guidance to ensure the file can still be processed with meaningful instructions.
+This allows Ghostwriter to still process supported files meaningfully even when no per-file guidance is present.
 
 ## Resources
 
-- Project site: https://machai.machanism.org/ghostwriter/
+- Official platform: https://machai.machanism.org/ghostwriter/
 - GitHub (SCM): https://github.com/machanism-org/machai
-- Maven Central (artifact): https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
-- GitHub Copilot: https://github.com/features/copilot
-- Anthropic Claude: https://www.anthropic.com/claude
-- Cursor: https://www.cursor.so/
+- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter

@@ -1,34 +1,46 @@
 /**
- * Maven plugin goals (Mojos) and supporting infrastructure for integrating MachAI's guided workflow (GW)
- * document processing into Maven builds.
+ * Maven plugin goals (Mojos) and shared infrastructure for running MachAI Ghostwriter guided workflow (GW)
+ * document processing as part of a Maven build.
  *
  * <p>
- * The goals in this package scan a documentation source tree (commonly {@code src/site}), apply configured
- * include/exclude rules, and invoke the GW processing pipeline. Configuration can be supplied using standard Maven
- * plugin configuration and/or system properties (typically {@code -Dgw.*}).
+ * The goals in this package configure a {@link org.machanism.machai.gw.processor.FileProcessor}, scan a
+ * documentation source tree (commonly {@code src/site}) starting at an execution root or an explicit scan directory
+ * ({@code -Dgw.scanDir}), apply include/exclude behavior managed by the processor, and invoke the GW processing
+ * pipeline.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.gw.maven.GW} ({@code gw:gw}) - Aggregator goal that can run without a
- *   {@code pom.xml} and processes modules in reverse order (sub-modules first, then parent modules).</li>
- *   <li>{@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor}) - Processes modules using standard Maven
- *   reactor dependency ordering (optionally deferring the execution-root project).</li>
- *   <li>{@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by GW
- *   processing (typically bound to Maven's {@code clean} lifecycle phase).</li>
+ *   <li>
+ *     {@link org.machanism.machai.gw.maven.GW} ({@code gw:gw})
+ *     - Aggregator goal that can run without a {@code pom.xml}.
+ *     It processes modules in reverse order (sub-modules first, then parent modules), similar to the Ghostwriter CLI.
+ *   </li>
+ *   <li>
+ *     {@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor})
+ *     - Processes modules using standard Maven reactor dependency ordering, with an option to defer processing of the
+ *     execution-root project.
+ *   </li>
+ *   <li>
+ *     {@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean})
+ *     - Deletes temporary artifacts created by GW processing (typically bound to Maven's {@code clean} lifecycle).
+ *   </li>
  * </ul>
  *
  * <h2>Shared infrastructure</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.gw.maven.AbstractGWGoal} - Base class defining shared parameters and the common
- *   scan/execute flow used by concrete goals.</li>
+ *   <li>
+ *     {@link org.machanism.machai.gw.maven.AbstractGWGoal}
+ *     - Base class defining shared parameters (for example, instructions, default guidance, scan directory,
+ *     excludes, and optional credentials lookup) and the common scan/execute flow.
+ *   </li>
  * </ul>
  *
  * <h2>Configuration and credentials</h2>
  * <p>
- * In addition to standard parameters such as {@code gw.scanDir}, {@code gw.instructions}, {@code gw.guidance}, and
- * {@code gw.excludes}, GenAI credentials can optionally be sourced from {@code ~/.m2/settings.xml} by providing
- * {@code -Dgw.genai.serverId=&lt;serverId&gt;}. See {@link org.machanism.machai.gw.maven.AbstractGWGoal}.
+ * In addition to standard Maven plugin parameters, GenAI credentials can optionally be sourced from
+ * {@code ~/.m2/settings.xml} by providing {@code -Dgw.genai.serverId=&lt;serverId&gt;}. When configured,
+ * the goal reads the matching {@code &lt;server&gt;} credentials and forwards them to the workflow.
  * </p>
  *
  * <h2>Usage examples</h2>

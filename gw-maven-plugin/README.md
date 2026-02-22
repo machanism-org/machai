@@ -25,19 +25,21 @@
 
 ## Project Title and Overview
 
-GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates Ghostwriters guided file processing into Maven builds by scanning project files (source code, documentation, site content, and other artifacts) for embedded `@guidance:` instructions and applying consistent updates.
+GW Maven Plugin is the Maven integration for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It runs Ghostwriter’s guided file processing from within Maven so documentation, site content, and other project artifacts can be generated and kept current as part of a standard Maven workflow.
 
-The plugin provides two main goals:
+The plugin scans project content (source code, documentation, project site content, and other relevant files) for `@guidance` directives and delegates processing to Ghostwriter’s workflow. It supports CI-friendly execution, optional credential lookup via Maven `settings.xml`, and multi-module builds.
+
+It provides two main goals:
 
 - **`gw:gw`**: an **aggregator** goal that can run **without a `pom.xml`** (`requiresProject=false`) and processes modules in reverse order (sub-modules first), similar to the Ghostwriter CLI.
-- **`gw:reactor`**: a **reactor-aware** goal that follows standard Maven reactor dependency ordering, with an option to defer the execution-root project until the rest of the reactor has completed.
+- **`gw:reactor`**: a **reactor-aware** goal that processes modules according to standard Maven reactor dependency ordering, with an option to defer the execution-root project until the rest of the reactor has completed.
 
 ## Installation Instructions
 
 ### Prerequisites
 
 - Git
-- Java 8+ (the build is configured for Java 8 via `maven.compiler.release`; functional/runtime requirements may vary depending on the selected GenAI provider and the Ghostwriter runtime)
+- Java 8+ (this module is built for Java 8 via `maven.compiler.release`; functional/runtime requirements may vary depending on the selected GenAI provider and the Ghostwriter runtime)
 - Apache Maven 3.x
 
 ### Checkout

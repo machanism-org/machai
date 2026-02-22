@@ -44,21 +44,36 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
- * <li><b>{@code gw.genai}</b> / {@code &lt;genai&gt;} ({@code genai}): Provider/model identifier to pass to
- * the workflow.</li>
- * <li><b>${basedir}</b> ({@code basedir}): The Maven module base directory.</li>
- * <li><b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}): Optional scan root override.
- * When omitted, defaults to the execution root directory.</li>
- * <li><b>{@code gw.instructions}</b> / {@code &lt;instructions&gt;} ({@code instructions}): Instruction
- * locations (for example, file paths or classpath locations) consumed by the workflow.</li>
- * <li><b>{@code gw.guidance}</b> / {@code &lt;guidance&gt;} ({@code guidance}): Default guidance text
- * forwarded to the workflow.</li>
- * <li><b>{@code gw.excludes}</b> / {@code &lt;excludes&gt;} ({@code excludes}): Exclude patterns/paths that
- * should be skipped when scanning documentation sources.</li>
- * <li><b>{@code gw.genai.serverId}</b> ({@code serverId}): {@code settings.xml} {@code &lt;server&gt;} id
- * used to read GenAI credentials.</li>
- * <li><b>{@code gw.logInputs}</b> ({@code logInputs}): Whether to log the list of input files passed
+ * <li>
+ * <b>{@code gw.genai}</b> / {@code &lt;genai&gt;} ({@code genai}): Provider/model identifier passed to the
+ * workflow.
+ * </li>
+ * <li>
+ * <b>${basedir}</b> ({@code basedir}): Maven module base directory.
+ * </li>
+ * <li>
+ * <b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}): Optional scan root override.
+ * When omitted, defaults to the module base directory.
+ * </li>
+ * <li>
+ * <b>{@code gw.instructions}</b> / {@code &lt;instructions&gt;} ({@code instructions}): Instruction
+ * locations (for example, file paths or classpath locations) consumed by the workflow.
+ * </li>
+ * <li>
+ * <b>{@code gw.guidance}</b> / {@code &lt;guidance&gt;} ({@code guidance}): Default guidance text forwarded
  * to the workflow.
+ * </li>
+ * <li>
+ * <b>{@code gw.excludes}</b> / {@code &lt;excludes&gt;} ({@code excludes}): Exclude patterns/paths that
+ * should be skipped when scanning documentation sources.
+ * </li>
+ * <li>
+ * <b>{@code gw.genai.serverId}</b> ({@code serverId}): {@code settings.xml} {@code &lt;server&gt;} id
+ * used to read GenAI credentials.
+ * </li>
+ * <li>
+ * <b>{@code gw.logInputs}</b> ({@code logInputs}): Whether to log the list of input files passed to
+ * the workflow.
  * <p>
  * Default: {@code false}
  * </p>

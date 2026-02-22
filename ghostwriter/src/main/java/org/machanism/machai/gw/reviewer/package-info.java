@@ -1,25 +1,28 @@
 /**
- * File-format-specific {@link org.machanism.machai.gw.reviewer.Reviewer reviewers} used by Ghostwriter to scan
- * project files and extract embedded {@code @guidance} instructions.
+ * File format reviewers used by Ghostwriter to discover embedded {@code @guidance} instructions and
+ * normalize them into prompt fragments.
  *
- * <p>This package contains {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI)
- * implementations for common source and documentation formats. Each implementation understands the comment
- * conventions of its target format (for example, Java block/line comments, HTML comment blocks, or Python
- * triple-quoted strings) and, when guidance is present, returns a prompt fragment that includes the file's
- * relative path for context.
+ * <p>This package provides {@link org.machanism.machai.gw.reviewer.Reviewer} implementations for a
+ * variety of source and documentation formats. Each reviewer is responsible for:
+ * <ul>
+ *   <li>detecting whether a file contains the {@code @guidance} tag, and</li>
+ *   <li>emitting a formatted fragment (usually including the file name, a project-relative path, and
+ *       either the full file content or extracted guidance text) that can be appended to the
+ *       assembled prompt.</li>
+ * </ul>
  *
- * <p>Ghostwriter uses these reviewers as the first step in turning a repository into a structured prompt:
- * reviewers detect guidance markers, collect relevant content, and format it using the {@code document-prompts}
- * resource bundle.
+ * <p>Project-relative paths are computed via
+ * {@link org.machanism.machai.project.layout.ProjectLayout} so the resulting fragments remain stable
+ * across environments.
  *
  * <h2>Supported formats</h2>
  * <ul>
- *   <li>Java ({@code .java}, including {@code package-info.java})</li>
+ *   <li>Java source ({@code .java}, including {@code package-info.java})</li>
  *   <li>TypeScript ({@code .ts})</li>
  *   <li>Python ({@code .py})</li>
  *   <li>HTML/XML ({@code .html}, {@code .htm}, {@code .xml})</li>
  *   <li>Markdown ({@code .md})</li>
- *   <li>Generic text guidance files named {@code @guidance.txt}</li>
+ *   <li>Guidance text files named {@code @guidance.txt}</li>
  * </ul>
  */
 package org.machanism.machai.gw.reviewer;

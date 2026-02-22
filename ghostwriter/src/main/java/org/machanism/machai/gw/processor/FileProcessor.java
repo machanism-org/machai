@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * The processor supports single-module and multi-module project layouts. For
- * multi-module builds, modules are processed child-first (each module is
- * scanned before the parent project directory). Processing is traversal-based;
- * it does not attempt to build projects or resolve dependencies.
+ * multi-module builds, modules are processed child-first (each module is scanned
+ * before the parent project directory). Processing is traversal-based; it does
+ * not attempt to build projects or resolve dependencies.
  * </p>
  */
 public class FileProcessor extends ProjectProcessor {
@@ -243,9 +243,9 @@ public class FileProcessor extends ProjectProcessor {
 		}
 
 		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
-			
+
 			logger.info("Scan path: {}", scanDir);
-			
+
 			if (!isPathPattern(scanDir)) {
 				this.scanDir = new File(scanDir);
 				String relativePath = ProjectLayout.getRelativePath(projectDir, new File(scanDir));
@@ -768,8 +768,7 @@ public class FileProcessor extends ProjectProcessor {
 				continue;
 			}
 
-			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS)
-					|| shouldExcludePath(new File(path).toPath())) {
+			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(new File(path).toPath())) {
 				continue;
 			}
 
@@ -849,8 +848,7 @@ public class FileProcessor extends ProjectProcessor {
 					}
 				} else {
 					String relative = path.toString();
-					if (Strings.CS.equals(relative, exclude)
-							|| Strings.CS.equals(path.getFileName().toString(), exclude)) {
+					if (Strings.CS.equals(relative, exclude) || Strings.CS.equals(path.getFileName().toString(), exclude)) {
 						return true;
 					}
 				}

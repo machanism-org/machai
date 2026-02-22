@@ -30,13 +30,17 @@ import org.slf4j.LoggerFactory;
  * the resulting prompt to the configured GenAI provider.
  * </p>
  *
- * <p>
- * Usage example:
- * </p>
+ * <h2>Usage</h2>
  *
  * <pre>{@code
  * java -jar gw.jar <scanDir> [options]
  * }</pre>
+ *
+ * <p>
+ * The {@code <scanDir>} argument may be a directory path (relative to the
+ * configured project root), or a {@code glob:} / {@code regex:} expression as
+ * supported by {@link java.nio.file.FileSystems#getPathMatcher(String)}.
+ * </p>
  */
 public final class Ghostwriter {
 
@@ -61,7 +65,7 @@ public final class Ghostwriter {
 				if (gwHomeDir == null) {
 					gwHomeDir = SystemUtils.getUserDir();
 				}
-			} 
+			}
 
 			System.setProperty("gwHomeDir", gwHomeDir.getAbsolutePath());
 			logger = LoggerFactory.getLogger(Ghostwriter.class);
@@ -98,13 +102,15 @@ public final class Ghostwriter {
 		Options options = new Options();
 
 		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
-		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
+		Option logInputsOption = new Option("l", "logInputs", false,
+				"Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: true).").hasArg(true)
-				.optionalArg(true).build();
+				.desc("Enable multi-threaded processing to improve performance (default: false).")
+				.hasArg(true).optionalArg(true).build();
 
-		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
+		Option genaiOpt = new Option("a", "genai", true,
+				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt("instructions")
 				.desc("Specify system instructions as plain text, by URL, or by file path. "
@@ -114,10 +120,10 @@ public final class Ghostwriter {
 				.hasArg(true).optionalArg(true).build();
 
 		Option excludesOpt = new Option("e", "excludes", true,
-				"Specify a list of directories to exclude from processing. You can provide multiple directories by repeating the option.");
+				"Specify a comma-separated list of directories to exclude from processing.");
 
-		Option guidanceOpt = Option.builder("g").longOpt("guidance").desc(
-				"Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
+		Option guidanceOpt = Option.builder("g").longOpt("guidance")
+				.desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
 						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
@@ -147,7 +153,10 @@ public final class Ghostwriter {
 
 			String genai = config.get("genai", DEFAULT_GENAI_VALUE);
 			if (cmd.hasOption(genaiOpt)) {
-				genai = cmd.getOptionValue(genaiOpt);
+				String opt = StringUtils.trimToNull(cmd.getOptionValue(genaiOpt));
+				if (opt != null) {
+					genai = opt;
+				}
 			}
 
 			String instructions = config.get("instructions", null);
@@ -175,9 +184,9 @@ public final class Ghostwriter {
 				}
 			}
 
-			String[] excludes = StringUtils.split(config.get("excludes", null), ",");
+			String[] excludes = StringUtils.split(config.get("excludes", null), ',');
 			if (cmd.hasOption(excludesOpt)) {
-				excludes = StringUtils.split(cmd.getOptionValue(excludesOpt), ",");
+				excludes = StringUtils.split(cmd.getOptionValue(excludesOpt), ',');
 			}
 
 			boolean multiThread = config.getBoolean("threads", false);
@@ -195,7 +204,8 @@ public final class Ghostwriter {
 				defaultGuidance = cmd.getOptionValue(guidanceOpt);
 				if (defaultGuidance == null) {
 					defaultGuidance = readText("Please enter the guidance text below. When finished, press "
-							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") + " to signal end of input (EOF):");
+							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
+							+ " to signal end of input (EOF):");
 				}
 			}
 
@@ -233,16 +243,18 @@ public final class Ghostwriter {
 			logger.error("Process terminated: {}", e.getMessage());
 			exitCode = e.getExitCode();
 		} catch (ParseException e) {
-			logger.error("Error parsing arguments: " + e.getMessage());
+			logger.error("Error parsing arguments: {}", e.getMessage());
 			help(options, formatter);
 			exitCode = 2;
 		} catch (Exception e) {
-			logger.error("Unexpected error: " + e.getMessage(), e);
+			logger.error("Unexpected error: {}", e.getMessage(), e);
 			exitCode = 1;
 		} finally {
 			GenAIProviderManager.logUsage();
 			logger.info("File processing completed.");
-			System.exit(exitCode);
+			if (exitCode != 0) {
+				System.exit(exitCode);
+			}
 		}
 	}
 
@@ -259,11 +271,11 @@ public final class Ghostwriter {
 				+ "  <scanDir> specifies the scanning path or pattern.\n"
 				+ "    - Use a relative path with respect to the current project directory.\n"
 				+ "    - If an absolute path is provided, it must be located within the root project directory.\n"
-				+ "    - Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex patterns (e.g., \"regex:^.*\\/[^\\/]+\\.java$\").\n\n"
+				+ "    - Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex patterns (e.g., \"regex:^.*\\\\/[^\\\\/]+\\\\.java$\").\n\n"
 				+ "Options:";
-		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\projects\\project\n"
-				+ "  java -jar gw.jar src/project\n" + "  java -jar gw.jar \"glob:**/*.java\"\n"
-				+ "  java -jar gw.jar \"regex:^.*\\/[^\\/]+\\.java$\"\n";
+		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\\\projects\\\\project\n"
+				+ "  java -jar gw.jar src\\project\n" + "  java -jar gw.jar \"glob:**/*.java\"\n"
+				+ "  java -jar gw.jar \"regex:^.*\\\\/[^\\\\/]+\\\\.java$\"\n";
 		formatter.printHelp("java -jar gw.jar <scanDir> [options]", header, options, footer, true);
 	}
 

@@ -46,7 +46,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <dl>
- * <dt>{@code -Dgw.threads} / {@code <threads>}</dt>
+ * <dt><b>{@code -Dgw.threads}</b> / {@code <threads>}</dt>
  * <dd>
  * Enables or disables multi-threaded module processing.
  * <p>
@@ -60,32 +60,40 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * The following parameters are defined on {@link AbstractGWGoal} and are available to this goal.
  * Refer to {@link AbstractGWGoal} for the authoritative list and exact semantics.
  * </p>
- * <ul>
- * <li><b>{@code -Dgw.genai}</b> / {@code <genai>} ({@code genai}): Provider/model identifier forwarded to the workflow.
- * Example: {@code openai:gpt-4o-mini}.</li>
- * <li><b>{@code -Dgw.scanDir}</b> / {@code <scanDir>} ({@code scanDir}): Optional scan root override. When omitted,
- * defaults to the execution root directory.</li>
- * <li><b>{@code -Dgw.instructions}</b> / {@code <instructions>} ({@code instructions}): Instruction locations (for
- * example, file paths or classpath locations) consumed by the workflow.</li>
- * <li><b>{@code -Dgw.guidance}</b> / {@code <guidance>} ({@code guidance}): Default guidance text forwarded to the
- * workflow.</li>
- * <li><b>{@code -Dgw.excludes}</b> / {@code <excludes>} ({@code excludes}): Exclude patterns/paths to skip when scanning
- * documentation sources.</li>
- * <li><b>{@code -Dgw.genai.serverId}</b> / {@code <serverId>} ({@code serverId}): {@code settings.xml} {@code <server>}
- * id used to read GenAI credentials.</li>
- * <li><b>{@code -Dgw.logInputs}</b> / {@code <logInputs>} ({@code logInputs}): Whether to log the list of input files
- * passed to the workflow.
+ * <dl>
+ * <dt><b>{@code -Dgw.genai}</b> / {@code <genai>}</dt>
+ * <dd>Provider/model identifier forwarded to the workflow. Example: {@code openai:gpt-4o-mini}.</dd>
+ *
+ * <dt><b>{@code -Dgw.scanDir}</b> / {@code <scanDir>}</dt>
+ * <dd>Optional scan root override. When omitted, defaults to the execution root directory.</dd>
+ *
+ * <dt><b>{@code -Dgw.instructions}</b> / {@code <instructions>}</dt>
+ * <dd>Instruction locations (for example, file paths or classpath locations) consumed by the workflow.</dd>
+ *
+ * <dt><b>{@code -Dgw.guidance}</b> / {@code <guidance>}</dt>
+ * <dd>Default guidance text forwarded to the workflow.</dd>
+ *
+ * <dt><b>{@code -Dgw.excludes}</b> / {@code <excludes>}</dt>
+ * <dd>Exclude patterns/paths to skip when scanning documentation sources.</dd>
+ *
+ * <dt><b>{@code -Dgw.genai.serverId}</b> / {@code <serverId>}</dt>
+ * <dd>{@code settings.xml} {@code <server>} id used to read GenAI credentials.</dd>
+ *
+ * <dt><b>{@code -Dgw.logInputs}</b> / {@code <logInputs>}</dt>
+ * <dd>
+ * Whether to log the list of input files passed to the workflow.
  * <p>
  * Default: {@code false}
  * </p>
- * </li>
- * </ul>
+ * </dd>
+ * </dl>
  *
  * <h2>Usage examples</h2>
  *
  * <p>
  * Run in the current directory:
  * </p>
+ *
  * <pre>
  * mvn gw:gw
  * </pre>
@@ -93,6 +101,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * Run without a {@code pom.xml} (this goal sets {@code requiresProject=false}):
  * </p>
+ *
  * <pre>
  * cd path\\to\\project
  * mvn gw:gw
@@ -101,6 +110,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * Enable multi-threaded processing:
  * </p>
+ *
  * <pre>
  * mvn gw:gw -Dgw.threads=true
  * </pre>
@@ -108,6 +118,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * Disable multi-threaded processing (default):
  * </p>
+ *
  * <pre>
  * mvn gw:gw -Dgw.threads=false
  * </pre>
@@ -115,6 +126,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * Run against a specific module:
  * </p>
+ *
  * <pre>
  * mvn -pl :my-module gw:gw
  * </pre>
