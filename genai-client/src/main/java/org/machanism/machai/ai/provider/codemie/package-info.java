@@ -26,10 +26,12 @@
  *      - Do not use escaping in `{@code ...}` tags.    
  */
 
+package org.machanism.machai.ai.provider.codemie;
+
 /**
  * EPAM CodeMie provider integration.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a
+ * <p>This package provides {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a
  * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that authenticates against a configurable
  * OpenID Connect (OIDC) token endpoint and delegates model calls to an OpenAI-compatible provider configured for the
  * CodeMie Code Assistant REST API.
@@ -77,4 +79,3 @@
  * }
  * </pre>
  */
-package org.machanism.machai.ai.provider.codemie;

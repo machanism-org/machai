@@ -26,4 +26,18 @@
  *      - Do not use escaping in `{@code ...}` tags.    
  */
 
+/**
+ * Gemini provider integration for the MachAI framework.
+ *
+ * <p>
+ * This package contains the implementation details required to communicate with Google's Gemini models,
+ * including request/response mapping and any provider-specific configuration that is needed to
+ * execute prompts through the framework's abstractions.
+ * </p>
+ *
+ * <p>
+ * Typical usage is indirect: applications configure MachAI to use the Gemini provider, and then
+ * interact with the framework's higher-level APIs to send prompts and receive model outputs.
+ * </p>
+ */
 package org.machanism.machai.ai.provider.gemini;

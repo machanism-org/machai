@@ -29,10 +29,10 @@
  * Provider-neutral entry point for interacting with generative-AI models.
  *
  * <p>
- * This package defines the top-level API used by the GenAI Client to work with different model vendors through a
- * shared contract. A provider is resolved from a {@code Provider:Model} identifier, initialized from application
- * configuration, and then used as a session-like object to accumulate instructions/prompts, optional attachments,
- * and optional host-side tools before producing a response.
+ * This package provides the shared, top-level API used by the GenAI client to talk to different model vendors
+ * through a single contract. A provider is resolved from a {@code Provider:Model} identifier, configured from the
+ * application {@code Configurator}, and then used as a session-like object to accumulate instructions/prompts,
+ * optional attachments, and optional host-side tools before producing a response.
  * </p>
  *
  * <h2>Core concepts</h2>
@@ -43,8 +43,8 @@
  *   </li>
  *   <li>
  *     <strong>Provider resolution</strong> – {@link org.machanism.machai.ai.manager.GenAIProviderManager} creates a
- *     concrete provider instance from either a short provider name (e.g. {@code OpenAI}) or a fully-qualified class
- *     name, and applies the selected model.
+ *     concrete provider instance from either a short provider name (for example {@code OpenAI}) or a
+ *     fully-qualified class name, and applies the selected model.
  *   </li>
  *   <li>
  *     <strong>Host-side tools</strong> – {@link org.machanism.machai.ai.tools.FunctionToolsLoader} discovers optional
@@ -65,13 +65,13 @@
  *   <li>Add instructions/prompts and any supported attachments or tools.</li>
  *   <li>Execute with {@link org.machanism.machai.ai.manager.GenAIProvider#perform()} and read
  *   {@link org.machanism.machai.ai.manager.GenAIProvider#usage()}.</li>
- *   <li>Clear or close the provider when finished.</li>
+ *   <li>Close the provider when finished.</li>
  * </ol>
  *
  * <h2>Subpackages</h2>
  * <ul>
  *   <li>{@code org.machanism.machai.ai.manager} – provider contracts, provider/model resolution, and usage reporting.</li>
- *   <li>{@code org.machanism.machai.ai.provider.*} – concrete provider implementations (e.g. OpenAI, Gemini, Claude).</li>
+ *   <li>{@code org.machanism.machai.ai.provider.*} – concrete provider implementations (for example OpenAI, Gemini, Claude).</li>
  *   <li>{@code org.machanism.machai.ai.tools} – optional host-side tool installers and security helpers.</li>
  * </ul>
  *

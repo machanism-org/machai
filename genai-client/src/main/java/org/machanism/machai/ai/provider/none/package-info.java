@@ -27,18 +27,18 @@
  */
 
 /**
- * No-op generative-AI provider.
+ * No-op generative-AI provider implementation.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation for deployments where external model calls
- * are disabled or not permitted.
+ * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for deployments where external
+ * model calls are disabled or not permitted.
  *
  * <h2>Behavior</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)} appends text to an in-memory
  *       buffer.</li>
- *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} optionally writes
- *       {@code instructions.txt} (when instructions were provided) and writes the accumulated prompt text to a
+ *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} optionally writes an
+ *       {@code instructions.txt} file (when instructions were provided) and writes the accumulated prompt text to a
  *       configured inputs log file; it then clears the buffer and returns {@code null}.</li>
  *   <li>Capabilities requiring a model backend (for example
  *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String)}) are unsupported and throw

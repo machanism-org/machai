@@ -31,7 +31,7 @@
  * integrations.
  *
  * <p>This package defines the core abstractions for integrating multiple AI backends behind a single contract.
- * Implementations can be discovered and configured, then selected at runtime by name and model.
+ * Provider implementations can be discovered and configured, then selected at runtime by provider name and model.
  *
  * <h2>Core types</h2>
  * <ul>
@@ -61,6 +61,7 @@
  *
  * GenAIProviderManager.addUsage(provider.usage());
  * GenAIProviderManager.logUsage();
- * }</pre>
+ * }
+ * </pre>
  */
 package org.machanism.machai.ai.manager;

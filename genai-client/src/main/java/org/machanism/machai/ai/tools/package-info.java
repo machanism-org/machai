@@ -48,6 +48,14 @@
  *   <li>Fetching web content and invoking REST endpoints with optional header templating and authentication</li>
  * </ul>
  *
+ * <h2>Architecture overview</h2>
+ * <p>
+ * Tool installers implement {@link org.machanism.machai.ai.tools.FunctionTools} and register functions via
+ * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
+ * Installers are typically discovered using {@link java.util.ServiceLoader} and applied by
+ * {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
+ * </p>
+ *
  * <h2>Key components</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} – SPI implemented by tool installers</li>
