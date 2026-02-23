@@ -25,21 +25,23 @@
 
 ## Project Title and Overview
 
-GW Maven Plugin is the Maven integration for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It runs Ghostwriter’s guided file processing from within Maven so documentation, site content, and other project artifacts can be generated and kept current as part of a standard Maven workflow.
+GW Maven Plugin is the Maven integration for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html) and the primary adapter for bringing Ghostwriters guided file processing into Maven-based projects.
 
-The plugin scans project content (source code, documentation, project site content, and other relevant files) for `@guidance` directives and delegates processing to Ghostwriter’s workflow. It supports CI-friendly execution, optional credential lookup via Maven `settings.xml`, and multi-module builds.
+It scans all types of project filesincluding source code, documentation, Maven site content, and other relevant artifactsfor embedded `@guidance` directives and runs Ghostwriters processing pipeline as part of a repeatable Maven workflow. This supports local development and CI use cases, integrates with Mavens execution context and multi-module reactor builds, and can optionally resolve GenAI credentials via Maven `settings.xml`.
 
-It provides two main goals:
+The plugin provides two main goals:
 
-- **`gw:gw`**: an **aggregator** goal that can run **without a `pom.xml`** (`requiresProject=false`) and processes modules in reverse order (sub-modules first), similar to the Ghostwriter CLI.
-- **`gw:reactor`**: a **reactor-aware** goal that processes modules according to standard Maven reactor dependency ordering, with an option to defer the execution-root project until the rest of the reactor has completed.
+- **`gw:gw`**: an **aggregator** goal that can run **without a `pom.xml`** (`requiresProject=false`) and processes modules in reverse order (sub-modules first).
+- **`gw:reactor`**: a **reactor-aware** goal that processes modules according to Maven reactor dependency ordering, with an option to defer the execution-root project until other reactor projects complete.
 
 ## Installation Instructions
 
 ### Prerequisites
 
 - Git
-- Java 8+ (this module is built for Java 8 via `maven.compiler.release`; functional/runtime requirements may vary depending on the selected GenAI provider and the Ghostwriter runtime)
+- Java installed
+  - **Build/runtime target in this project:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
+  - **Functional requirement:** depends on the Ghostwriter runtime and the selected GenAI provider; some provider stacks may require a newer Java version.
 - Apache Maven 3.x
 
 ### Checkout
@@ -71,25 +73,33 @@ Add the plugin to your project `pom.xml`:
 
 ### Run the plugin
 
-Basic guided processing:
+Guided file processing for the current directory (module order: sub-modules first):
 
 ```cmd
 mvn gw:gw
 ```
 
-Reactor/module processing:
+Reactor-ordered processing in a multi-module build:
 
 ```cmd
 mvn gw:reactor
 ```
 
-With a GenAI provider/model:
+Enable multi-threaded module processing (for `gw:gw`):
+
+```cmd
+mvn gw:gw -Dgw.threads=true
+```
+
+### GenAI provider and credentials examples
+
+Specify a GenAI provider/model:
 
 ```cmd
 mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini
 ```
 
-If credentials are stored in Maven `settings.xml`:
+If credentials are stored in Maven `settings.xml` under a `<server>` entry:
 
 ```cmd
 mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai

@@ -3,18 +3,18 @@
  * document processing as part of a Maven build.
  *
  * <p>
- * The goals in this package configure a {@link org.machanism.machai.gw.processor.FileProcessor}, scan a
- * documentation source tree (commonly {@code src/site}) starting at an execution root or an explicit scan directory
- * ({@code -Dgw.scanDir}), apply include/exclude behavior managed by the processor, and invoke the GW processing
- * pipeline.
+ * The goals in this package configure a {@link org.machanism.machai.gw.processor.FileProcessor} and then scan a
+ * documentation source tree (commonly {@code src/site}). The scan root is typically Maven's execution root directory
+ * but can be overridden with {@code -Dgw.scanDir}. During scanning, include/exclude behavior is applied by the
+ * processor and, if enabled, the plugin forwards credentials from Maven {@code settings.xml}.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
  *   <li>
  *     {@link org.machanism.machai.gw.maven.GW} ({@code gw:gw})
- *     - Aggregator goal that can run without a {@code pom.xml}.
- *     It processes modules in reverse order (sub-modules first, then parent modules), similar to the Ghostwriter CLI.
+ *     - Aggregator goal that can run without a {@code pom.xml}. It processes modules in reverse order (sub-modules
+ *     first, then parent modules), similar to the Ghostwriter CLI.
  *   </li>
  *   <li>
  *     {@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor})
@@ -31,8 +31,8 @@
  * <ul>
  *   <li>
  *     {@link org.machanism.machai.gw.maven.AbstractGWGoal}
- *     - Base class defining shared parameters (for example, instructions, default guidance, scan directory,
- *     excludes, and optional credentials lookup) and the common scan/execute flow.
+ *     - Base class defining shared parameters (for example, instructions, default guidance, scan directory, excludes,
+ *     and optional credentials lookup) and the common scan/execute flow.
  *   </li>
  * </ul>
  *

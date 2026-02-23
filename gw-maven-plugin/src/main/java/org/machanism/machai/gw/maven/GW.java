@@ -60,6 +60,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * The following parameters are defined on {@link AbstractGWGoal} and are available to this goal.
  * Refer to {@link AbstractGWGoal} for the authoritative list and exact semantics.
  * </p>
+ *
  * <dl>
  * <dt><b>{@code -Dgw.genai}</b> / {@code <genai>}</dt>
  * <dd>Provider/model identifier forwarded to the workflow. Example: {@code openai:gpt-4o-mini}.</dd>
