@@ -1,30 +1,62 @@
+' @guidance: For each module, use information from its pom.xml file to create a PlantUML dependency diagram and save it as `src/site/puml/project-structure.puml`.
 @startuml
 
-title Machai Project structure
+title Machai Project - Module Dependencies
 
-package "machai" {
-  package "project-layout" as project_layout
-  package "genai-client" as genai_client
-  package "bindex-core" as bindex_core
-  package "cli" as cli
-  package "bindex-maven-plugin" as bindex_maven_plugin
-  package "assembly-maven-plugin" as assembly_maven_plugin
-  package "ghostwriter" as ghostwriter
-  package "gw-maven-plugin" as gw_maven_plugin
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment left
 
-  bindex_core --> project_layout : depends on
-  bindex_core --> genai_client : depends on
-
-  cli --> bindex_core : depends on
-  cli --> ghostwriter : depends on
-
-  bindex_maven_plugin --> bindex_core : depends on
-  assembly_maven_plugin --> bindex_core : depends on
-
-  ghostwriter --> project_layout : depends on
-  ghostwriter --> genai_client : depends on
-
-  gw_maven_plugin --> ghostwriter : depends on
+skinparam component {
+  BackgroundColor #EEF6FF
+  BorderColor #2E5EAA
+  FontColor #0B1F44
 }
+
+skinparam arrow {
+  Color #2E5EAA
+  Thickness 1
+}
+
+legend left
+  <b>Legend</b>
+  A --> B : A depends on B
+endlegend
+
+component "machai\n(root pom)" as machai_root <<pom>>
+component "project-layout" as project_layout
+component "genai-client" as genai_client
+component "bindex-core" as bindex_core
+component "machai-cli" as machai_cli
+component "bindex-maven-plugin" as bindex_maven_plugin
+component "assembly-maven-plugin" as assembly_maven_plugin
+component "ghostwriter" as ghostwriter
+component "gw-maven-plugin" as gw_maven_plugin
+
+machai_root ..> project_layout : module
+machai_root ..> genai_client : module
+machai_root ..> bindex_core : module
+machai_root ..> machai_cli : module
+machai_root ..> bindex_maven_plugin : module
+machai_root ..> assembly_maven_plugin : module
+machai_root ..> ghostwriter : module
+machai_root ..> gw_maven_plugin : module
+
+' Dependencies from module pom.xml files
+bindex_core --> project_layout
+bindex_core --> genai_client
+
+ghostwriter --> project_layout
+ghostwriter --> genai_client
+
+machai_cli --> bindex_core
+machai_cli --> ghostwriter
+
+bindex_maven_plugin --> bindex_core
+assembly_maven_plugin --> bindex_core
+
+ gw_maven_plugin --> ghostwriter
 
 @enduml

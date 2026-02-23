@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class Ghostwriter {
 
+	private static final String GW_ROOTDIR_NAME = "GW_ROOTDIR";
+
 	/** Logger for the Ghostwriter application. */
 	private static Logger logger;
 
@@ -61,7 +63,7 @@ public final class Ghostwriter {
 			gwHomeDir = config.getFile("GW_HOME", null);
 
 			if (gwHomeDir == null) {
-				gwHomeDir = config.getFile("root", null);
+				gwHomeDir = config.getFile(GW_ROOTDIR_NAME, null);
 				if (gwHomeDir == null) {
 					gwHomeDir = SystemUtils.getUserDir();
 				}
@@ -149,7 +151,7 @@ public final class Ghostwriter {
 				return;
 			}
 
-			File rootDir = config.getFile("root", null);
+			File rootDir = config.getFile(GW_ROOTDIR_NAME, null);
 
 			String genai = config.get("genai", DEFAULT_GENAI_VALUE);
 			if (cmd.hasOption(genaiOpt)) {

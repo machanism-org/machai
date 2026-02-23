@@ -11,8 +11,7 @@ Generate a content:
    **Name**: Display the module name as a clickable link in the format `[name]([artifactId]/)`, the [name] and [artifactId] values should be obtained from the module pom.xml file.
    **Description**: Provide a comprehensive description for each module, using the content from `[module_dir]/src/site/markdown/index.md`.
    **Project structure**: 
-    - For each module, use information from its pom.xml file to create a PlantUML diagram and save it as `src/site/puml/project-structure.puml`.
-    - This diagram will be rendered as an image at `./images/project-structure.png`.
+    - Use the project structure diagram by the path: `./images/project-structure.png`.
     - Include this image in the section to visually represent the project structure.
 3. **Installation Instructions:**  
    - Describe how to clone the repository and build the project using Maven).
@@ -35,7 +34,7 @@ Generate a content:
 
 # Machai Project
 
-Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins to unify access to multiple GenAI providers, generate and consume bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate documentation updates from embedded guidance using Ghostwriter.
+Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins that unify access to multiple GenAI providers, generate and consume bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate documentation updates from embedded guidance using Ghostwriter.
 
 ## Project structure
 

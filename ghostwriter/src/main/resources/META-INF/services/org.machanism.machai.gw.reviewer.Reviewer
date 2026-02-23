@@ -4,3 +4,4 @@ org.machanism.machai.gw.reviewer.TypeScriptReviewer
 org.machanism.machai.gw.reviewer.MarkdownReviewer
 org.machanism.machai.gw.reviewer.PythonReviewer
 org.machanism.machai.gw.reviewer.HtmlReviewer
+org.machanism.machai.gw.reviewer.PumlReviewer
