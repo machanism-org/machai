@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This CLI bootstraps configuration, parses command-line options, and invokes
  * {@link FileProcessor} to scan a directory tree for supported files. For each
- * file, Ghostwriter extracts embedded directives and submits the resulting prompt
- * to the configured GenAI provider.
+ * file, Ghostwriter extracts embedded {@code @guidance:} directives and submits
+ * the resulting prompt to the configured GenAI provider.
  * </p>
  *
  * <h2>Usage</h2>
@@ -44,34 +44,24 @@ import org.slf4j.LoggerFactory;
  */
 public final class Ghostwriter {
 
-	/** Default configuration file name looked up relative to {@code gw.home}. */
 	public static final String GW_PROPERTIES_FILE_NAME = "gw.properties";
 
-	/** System property name that points to an alternate configuration file. */
 	public static final String GW_CONFIG_PROP_NAME = "gw.config";
 
-	/** System property name for Ghostwriter's home directory. */
 	public static final String GW_HOME_PROP_NAME = "gw.home";
 
-	/** Configuration property name for the root directory of the project to scan. */
-	public static final String GW_ROOTDIR_PROP_NAME = "gw.rootdir";
+	public static final String GW_ROOTDIR_PROP_NAME = "gw.rootDir";
 
-	/** Configuration property name for selecting the GenAI provider and model. */
 	public static final String GW_GENAI_PROP_NAME = "gw.genai";
 
-	/** Configuration property name for system-level prompt instructions. */
 	public static final String GW_INSTRUCTIONS_PROP_NAME = "gw.instructions";
 
-	/** Configuration property name for excluding paths or patterns. */
 	public static final String GW_EXCLUDES_PROP_NAME = "gw.excludes";
 
-	/** Configuration property name for default guidance applied to files. */
 	public static final String GW_GUIDANCE_PROP_NAME = "gw.guidance";
 
-	/** Configuration property name for enabling module-level multi-threading. */
 	public static final String GW_THREADS_PROP_NAME = "gw.threads";
 
-	/** Configuration property name for logging per-file prompt inputs. */
 	public static final String GW_LOG_INPUTS_PROP_NAME = "gw.logInputs";
 
 	/** Logger for the Ghostwriter application. */

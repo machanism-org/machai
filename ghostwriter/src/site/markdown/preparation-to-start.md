@@ -77,8 +77,8 @@ The following properties are read by the `Ghostwriter` CLI bootstrap (`src/main/
 | Property name | Description | Default value | Usage context |
 |---|---|---|---|
 | `gw.config` | Overrides the configuration file name/path loaded at startup. Ghostwriter loads the configuration file from: `<gwHomeDir>\<gw.config>` if set; otherwise `<gwHomeDir>\gw.properties`. | `gw.properties` | Read as a Java system property during static initialization, before scanning begins. |
-| `gw.home` | Base “home directory” used to locate `gw.properties` (or the file specified by `gw.config`). | If not set, falls back to `gw.rootdir`; if that is not set, falls back to the current working directory (`user.dir`). | Read during static initialization to compute `gwHomeDir`. |
-| `gw.rootdir` | Root project directory used to resolve and constrain scanning. Also used as a fallback to determine `gwHomeDir` when `gw.home` is not set. | If not set, defaults to the current working directory (`user.dir`). | Used to initialize the `FileProcessor` (`new FileProcessor(rootDir, genai, config)`) and as the base for scanning (`processor.scanDocuments(rootDir, scanDir)`). |
+| `gw.home` | Base “home directory” used to locate `gw.properties` (or the file specified by `gw.config`). | If not set, falls back to `gw.rootDir`; if that is not set, falls back to the current working directory (`user.dir`). | Read during static initialization to compute `gwHomeDir`. |
+| `gw.rootDir` | Root project directory used to resolve and constrain scanning. Also used as a fallback to determine `gwHomeDir` when `gw.home` is not set. | If not set, defaults to the current working directory (`user.dir`). | Used to initialize the `FileProcessor` (`new FileProcessor(rootDir, genai, config)`) and as the base for scanning (`processor.scanDocuments(rootDir, scanDir)`). |
 | `gw.genai` | Selects the GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | No default; must be provided (otherwise the CLI throws an error). | Required to run. Can be overridden by CLI option `-a` (long option name is `genai`). |
 | `gw.instructions` | System instructions text to apply (may be plain text, URL, or `file:` reference depending on downstream handling). | `null` | Passed into `FileProcessor.setInstructions(instructions)` when present. Can be overridden by CLI option `-i/--instructions` (if specified without a value, instructions are read from stdin until EOF). |
 | `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null` | Split on commas and passed into `FileProcessor.setExcludes(excludes)`. Can be overridden by CLI option `-e/--excludes`. |
@@ -89,8 +89,8 @@ The following properties are read by the `Ghostwriter` CLI bootstrap (`src/main/
 **Sample `gw.properties`:**
 ```properties
 # Root project directory
-# (Ghostwriter reads this as gw.rootdir)
-gw.rootdir=C:\\projects\\machanism.org\\machai
+# (Ghostwriter reads this as gw.rootDir)
+gw.rootDir=C:\\projects\\machanism.org\\machai
 
 # GenAI provider and model
 # (required)
@@ -154,7 +154,7 @@ Command-line options override both environment variables and `gw.properties` set
 
 - **Override the root directory:**
   ```text
-  gw -Dgw.rootdir=C:\projects\machai
+  gw -Dgw.rootDir=C:\projects\machai
   ```
 
 - **Specify a custom guidance file:**

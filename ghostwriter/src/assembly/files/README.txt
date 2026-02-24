@@ -95,9 +95,9 @@ Configuration can be supplied via:
 Home/config file resolution
 - gw.home
   - Description: home directory used as the base for locating the configuration file
-  - Default: if not set, falls back to gw.rootdir; if still not set, uses the current working directory
+  - Default: if not set, falls back to gw.rootDir; if still not set, uses the current working directory
   - Usage context: affects where gw.properties (or gw.config-selected file) is loaded from
-- gw.rootdir
+- gw.rootDir
   - Description: root project directory used by the processor as the repository root
   - Default: if not set, current working directory
   - Usage context: controls the “root” used when scanning targets and validating absolute scan paths

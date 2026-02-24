@@ -339,7 +339,7 @@ public class WebFunctionTools implements FunctionTools {
 
 			String result = response.toString();
 			logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
-					StringUtils.abbreviate(result.replaceAll("\\R", " "), 60));
+					StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
 			logger.debug("[REST {}] Received response ({} bytes): {}", requestId, response.length(), result);
 			return result;
 
