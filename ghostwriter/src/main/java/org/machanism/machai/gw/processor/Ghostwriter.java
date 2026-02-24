@@ -2,6 +2,7 @@ package org.machanism.machai.gw.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The {@code <scanDir>} argument may be a directory path (relative to the
  * configured project root), or a {@code glob:} / {@code regex:} expression as
- * supported by {@link java.nio.file.FileSystems#getPathMatcher(String)}.
+ * supported by {@link FileSystems#getPathMatcher(String)}.
  * </p>
  */
 public final class Ghostwriter {
@@ -107,7 +108,7 @@ public final class Ghostwriter {
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a comma-separated list of directories to exclude from processing.");
 
-		Option guidanceOpt = Option.builder("g").longOpt(GW_GUIDANCE_PROP_NAME).desc(
+		Option guidanceOpt = Option.builder("g").longOpt("guidance").desc(
 				"Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
@@ -201,7 +202,7 @@ public final class Ghostwriter {
 				}
 			} else {
 				if (dirs.length == 0) {
-					dirs = new String[] { SystemUtils.getUserDir().getPath() };
+					dirs = new String[] { rootDir.getAbsolutePath() };
 				}
 			}
 
@@ -266,18 +267,33 @@ public final class Ghostwriter {
 			}
 
 		} catch (ProcessTerminationException e) {
-			logger.error("Process terminated: {}", e.getMessage());
+			if (logger != null) {
+				logger.error("Process terminated: {}", e.getMessage());
+			} else {
+				System.err.println("Process terminated: " + e.getMessage());
+			}
 			exitCode = e.getExitCode();
 		} catch (ParseException e) {
-			logger.error("Error parsing arguments: {}", e.getMessage());
+			if (logger != null) {
+				logger.error("Error parsing arguments: {}", e.getMessage());
+			} else {
+				System.err.println("Error parsing arguments: " + e.getMessage());
+			}
 			help(options, formatter);
 			exitCode = 2;
 		} catch (Exception e) {
-			logger.error("Unexpected error: {}", e.getMessage(), e);
+			if (logger != null) {
+				logger.error("Unexpected error: {}", e.getMessage(), e);
+			} else {
+				System.err.println("Unexpected error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
 			exitCode = 1;
 		} finally {
 			GenAIProviderManager.logUsage();
-			logger.info("File processing completed.");
+			if (logger != null) {
+				logger.info("File processing completed.");
+			}
 			if (exitCode != 0) {
 				System.exit(exitCode);
 			}
