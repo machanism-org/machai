@@ -18,7 +18,7 @@
 	<!-- File Appender: DEBUG and above -->
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${gwHomeDir}/logs/gw-${bySecond}.log</file>
+		<file>${gw.home}/logs/gw-${bySecond}.log</file>
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- Daily rollover -->

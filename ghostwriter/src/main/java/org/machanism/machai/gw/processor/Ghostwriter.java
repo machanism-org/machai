@@ -73,33 +73,6 @@ public final class Ghostwriter {
 	/** Directory used as the execution base for relative configuration files. */
 	private static File gwHomeDir;
 
-	static {
-		try {
-			gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
-
-			if (gwHomeDir == null) {
-				gwHomeDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
-				if (gwHomeDir == null) {
-					gwHomeDir = SystemUtils.getUserDir();
-				}
-			}
-
-			System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
-			logger = LoggerFactory.getLogger(Ghostwriter.class);
-
-			try {
-				File configFile = new File(gwHomeDir,
-						System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
-				config.setConfiguration(configFile.getAbsolutePath());
-			} catch (IOException e) {
-				// The property file is not defined, ignore.
-			}
-		} catch (Exception e) {
-			// Configuration file not found. An alternative configuration method will be
-			// used.
-		}
-	}
-
 	private Ghostwriter() {
 		// Utility class.
 	}
@@ -111,24 +84,18 @@ public final class Ghostwriter {
 	 * @throws IOException if scanning fails while reading files
 	 */
 	public static void main(String[] args) throws IOException {
-		String version = Ghostwriter.class.getPackage().getImplementationVersion();
-		if (version != null) {
-			logger.info("Ghostwriter {} (Machai project)", version);
-		}
-		logger.info("Home directory: {}", gwHomeDir);
-
 		Options options = new Options();
-
 		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
-		Option logInputsOption = new Option("l", "logInputs", false,
-				"Log LLM request inputs to dedicated log files.");
+		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: false).")
-				.hasArg(true).optionalArg(true).build();
+				.desc("Enable multi-threaded processing to improve performance (default: false).").hasArg(true)
+				.optionalArg(true).build();
 
-		Option genaiOpt = new Option("a", "genai", true,
-				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
+		Option rootDirOpt = new Option("r", "root", true,
+				"Specify the path to the root directory for file processing.");
+
+		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt("instructions")
 				.desc("Specify system instructions as plain text, by URL, or by file path. "
@@ -148,6 +115,7 @@ public final class Ghostwriter {
 				.hasArg(true).optionalArg(true).build();
 
 		options.addOption(helpOption);
+		options.addOption(rootDirOpt);
 		options.addOption(multiThreadOption);
 		options.addOption(genaiOpt);
 		options.addOption(instructionsOpt);
@@ -162,12 +130,47 @@ public final class Ghostwriter {
 		try {
 			CommandLine cmd = parser.parse(options, args);
 
+			File rootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
+			if (cmd.hasOption(rootDirOpt)) {
+				rootDir = new File(cmd.getOptionValue(rootDirOpt));
+			}
+
+			try {
+				gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
+
+				if (gwHomeDir == null) {
+					gwHomeDir = rootDir;
+					if (gwHomeDir == null) {
+						gwHomeDir = SystemUtils.getUserDir();
+					}
+				}
+
+				System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
+				logger = LoggerFactory.getLogger(Ghostwriter.class);
+
+				try {
+					File configFile = new File(gwHomeDir,
+							System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
+					config.setConfiguration(configFile.getAbsolutePath());
+
+				} catch (IOException e) {
+					// The property file is not defined, ignore.
+				}
+			} catch (Exception e) {
+				// Configuration file not found. An alternative configuration method will be
+				// used.
+			}
+
+			String version = Ghostwriter.class.getPackage().getImplementationVersion();
+			if (version != null) {
+				logger.info("Ghostwriter {} (Machai project)", version);
+			}
+			logger.info("Home directory: {}", gwHomeDir);
+
 			if (cmd.hasOption(helpOption)) {
 				help(options, formatter);
 				return;
 			}
-
-			File rootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
 
 			String genai = config.get(GW_GENAI_PROP_NAME, null);
 			if (cmd.hasOption(genaiOpt)) {
@@ -222,8 +225,7 @@ public final class Ghostwriter {
 				defaultGuidance = cmd.getOptionValue(guidanceOpt);
 				if (defaultGuidance == null) {
 					defaultGuidance = readText("Please enter the guidance text below. When finished, press "
-							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
-							+ " to signal end of input (EOF):");
+							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D") + " to signal end of input (EOF):");
 				}
 			}
 
@@ -233,9 +235,9 @@ public final class Ghostwriter {
 			}
 
 			if (StringUtils.isBlank(genai)) {
-				throw new IllegalArgumentException("No GenAI provider/model configured. Set '"
-						+ GW_GENAI_PROP_NAME + "' in " + GW_PROPERTIES_FILE_NAME + " or pass -a/--"
-						+ GW_GENAI_PROP_NAME + " (e.g., OpenAI:gpt-5.1).");
+				throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_GENAI_PROP_NAME
+						+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -a/--" + GW_GENAI_PROP_NAME
+						+ " (e.g., OpenAI:gpt-5.1).");
 			}
 
 			for (String scanDir : dirs) {
