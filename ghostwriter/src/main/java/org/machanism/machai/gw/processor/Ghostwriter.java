@@ -44,13 +44,28 @@ import org.slf4j.LoggerFactory;
  */
 public final class Ghostwriter {
 
-	private static final String GW_ROOTDIR_NAME = "GW_ROOTDIR";
+	public static final String GW_PROPERTIES_FILE_NAME = "gw.properties";
+
+	public static final String GW_CONFIG_PROP_NAME = "gw.config";
+
+	public static final String GW_HOME_PROP_NAME = "gw.home";
+
+	public static final String GW_ROOTDIR_PROP_NAME = "gw.rootdir";
+
+	public static final String GW_GENAI_PROP_NAME = "gw.genai";
+
+	public static final String GW_INSTRUCTIONS_PROP_NAME = "gw.instructions";
+
+	public static final String GW_EXCLUDES_PROP_NAME = "gw.excludes";
+
+	public static final String GW_GUIDANCE_PROP_NAME = "gw.guidance";
+
+	public static final String GW_THREADS_PROP_NAME = "gw.threads";
+
+	public static final String GW_LOG_INPUTS_PROP_NAME = "gw.logInputs";
 
 	/** Logger for the Ghostwriter application. */
 	private static Logger logger;
-
-	/** Default provider/model identifier used when none is configured. */
-	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
 
 	/** Properties-based configuration used by the CLI. */
 	private static final PropertiesConfigurator config = new PropertiesConfigurator();
@@ -60,10 +75,10 @@ public final class Ghostwriter {
 
 	static {
 		try {
-			gwHomeDir = config.getFile("GW_HOME", null);
+			gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
 
 			if (gwHomeDir == null) {
-				gwHomeDir = config.getFile(GW_ROOTDIR_NAME, null);
+				gwHomeDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
 				if (gwHomeDir == null) {
 					gwHomeDir = SystemUtils.getUserDir();
 				}
@@ -73,7 +88,8 @@ public final class Ghostwriter {
 			logger = LoggerFactory.getLogger(Ghostwriter.class);
 
 			try {
-				File configFile = new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"));
+				File configFile = new File(gwHomeDir,
+						System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
 				config.setConfiguration(configFile.getAbsolutePath());
 			} catch (IOException e) {
 				// The property file is not defined, ignore.
@@ -111,7 +127,7 @@ public final class Ghostwriter {
 				.desc("Enable multi-threaded processing to improve performance (default: false).")
 				.hasArg(true).optionalArg(true).build();
 
-		Option genaiOpt = new Option("a", "genai", true,
+		Option genaiOpt = new Option("a", GW_GENAI_PROP_NAME, true,
 				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt("instructions")
@@ -124,8 +140,8 @@ public final class Ghostwriter {
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a comma-separated list of directories to exclude from processing.");
 
-		Option guidanceOpt = Option.builder("g").longOpt("guidance")
-				.desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
+		Option guidanceOpt = Option.builder("g").longOpt(GW_GUIDANCE_PROP_NAME).desc(
+				"Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
 						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
@@ -151,9 +167,9 @@ public final class Ghostwriter {
 				return;
 			}
 
-			File rootDir = config.getFile(GW_ROOTDIR_NAME, null);
+			File rootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
 
-			String genai = config.get("genai", DEFAULT_GENAI_VALUE);
+			String genai = config.get(GW_GENAI_PROP_NAME, null);
 			if (cmd.hasOption(genaiOpt)) {
 				String opt = StringUtils.trimToNull(cmd.getOptionValue(genaiOpt));
 				if (opt != null) {
@@ -161,7 +177,7 @@ public final class Ghostwriter {
 				}
 			}
 
-			String instructions = config.get("instructions", null);
+			String instructions = config.get(GW_INSTRUCTIONS_PROP_NAME, null);
 			if (cmd.hasOption(instructionsOpt)) {
 				instructions = cmd.getOptionValue(instructionsOpt);
 
@@ -186,12 +202,12 @@ public final class Ghostwriter {
 				}
 			}
 
-			String[] excludes = StringUtils.split(config.get("excludes", null), ',');
+			String[] excludes = StringUtils.split(config.get(GW_EXCLUDES_PROP_NAME, null), ',');
 			if (cmd.hasOption(excludesOpt)) {
 				excludes = StringUtils.split(cmd.getOptionValue(excludesOpt), ',');
 			}
 
-			boolean multiThread = config.getBoolean("threads", false);
+			boolean multiThread = config.getBoolean(GW_THREADS_PROP_NAME, false);
 			if (cmd.hasOption(multiThreadOption)) {
 				String opt = cmd.getOptionValue(multiThreadOption);
 				if (opt == null) {
@@ -201,7 +217,7 @@ public final class Ghostwriter {
 				}
 			}
 
-			String defaultGuidance = config.get("guidance", null);
+			String defaultGuidance = config.get(GW_GUIDANCE_PROP_NAME, null);
 			if (cmd.hasOption(guidanceOpt)) {
 				defaultGuidance = cmd.getOptionValue(guidanceOpt);
 				if (defaultGuidance == null) {
@@ -211,9 +227,16 @@ public final class Ghostwriter {
 				}
 			}
 
-			boolean logInputs = config.getBoolean("logInputs", false);
+			boolean logInputs = config.getBoolean(GW_LOG_INPUTS_PROP_NAME, false);
 			if (cmd.hasOption(logInputsOption)) {
 				logInputs = true;
+			}
+
+			if (StringUtils.isBlank(genai)) {
+				throw new IllegalArgumentException("No GenAI provider/model configured. Set '"
+						+ GW_GENAI_PROP_NAME + "' in " + GW_PROPERTIES_FILE_NAME + " or pass -a/--"
+						+ GW_GENAI_PROP_NAME + " (e.g., OpenAI:gpt-5.1)."
+				);
 			}
 
 			for (String scanDir : dirs) {

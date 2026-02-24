@@ -12,11 +12,14 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 /**
  * Delegating {@link GenAIProvider} implementation.
  *
- * <p>This adapter forwards all {@link GenAIProvider} calls to an underlying provider instance configured via
- * {@link #setProvider(GenAIProvider)}.
+ * <p>
+ * This adapter forwards all {@link GenAIProvider} calls to an underlying
+ * provider instance configured via {@link #setProvider(GenAIProvider)}.
  *
- * <p>Intended use cases include decorating providers (for example, adding cross-cutting concerns like logging,
- * metrics, retries, or request shaping) while preserving the {@link GenAIProvider} contract.
+ * <p>
+ * Intended use cases include decorating providers (for example, adding
+ * cross-cutting concerns like logging, metrics, retries, or request shaping)
+ * while preserving the {@link GenAIProvider} contract.
  */
 public class GenAIAdapter implements GenAIProvider {
 
@@ -28,7 +31,8 @@ public class GenAIAdapter implements GenAIProvider {
 	/**
 	 * Creates an adapter without a delegate.
 	 *
-	 * <p>Call {@link #setProvider(GenAIProvider)} before invoking any other methods.
+	 * <p>
+	 * Call {@link #setProvider(GenAIProvider)} before invoking any other methods.
 	 */
 	public GenAIAdapter() {
 		super();

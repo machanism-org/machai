@@ -42,7 +42,7 @@
  * Command-line project scanning and prompt orchestration for Ghostwriter.
  *
  * <p>
- * This package provides the Ghostwriter command-line entry point
+ * This package contains the Ghostwriter command-line entry point
  * ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the core filesystem
  * processor ({@link org.machanism.machai.gw.processor.FileProcessor}). Together
  * they walk a project directory tree, identify files supported by registered
@@ -51,24 +51,21 @@
  * </p>
  *
  * <p>
- * For each file, a prompt is composed from:
+ * For each file, a prompt is composed from OS-specific processing constraints,
+ * a layout-derived description of the project structure (sources, tests,
+ * documents, modules), and extracted guidance (or configured default guidance
+ * when guidance is absent).
  * </p>
- * <ul>
- * <li>OS-specific processing constraints (for example, command syntax),</li>
- * <li>a layout-derived description of the project structure (sources, tests,
- * documents, modules), and</li>
- * <li>the extracted guidance (or configured default guidance when absent).</li>
- * </ul>
  *
  * <p>
- * The composed prompt is then dispatched to a configured
+ * The composed prompt is dispatched to a configured
  * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  * </p>
  *
  * <h2>Processing model</h2>
  * <ul>
  * <li><b>Child-first module traversal</b>: in multi-module layouts, modules are
- * processed before the parent.</li>
+ * processed before the parent project.</li>
  * <li><b>No dependency resolution</b>: processing is filesystem-based; builds are
  * not executed.</li>
  * <li><b>Broad file coverage</b>: traversal can include source code,

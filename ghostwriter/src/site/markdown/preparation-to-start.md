@@ -2,6 +2,11 @@
 canonical: https://machai.machanism.org/ghostwriter/preparation-to-start.html
 ---
 
+<!-- @guidance:  
+Analyze the `src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java` class to extract and document all available configuration properties.  
+For each property, provide its name, description, default value (if any), and usage context.
+-->
+
 # Preparation to Start
 
 ## Prerequisites
@@ -56,7 +61,7 @@ Ghostwriter CLI offers flexible configuration using a `gw.properties` file. This
 > The `gw.properties` file is **optional**. It provides default values for configuration settings, but any of these values can be overridden at runtime using Java system properties (e.g., `-Dproperty=value`), environment variables, or command-line options.  
 > **By default,** Ghostwriter will look for `gw.properties` in the directory specified by the `GW_HOME` environment variable. If `GW_HOME` is not defined, Ghostwriter will attempt to find `gw.properties` in the folder where the `gw.jar` file is located.  
 > If you want to use a custom configuration file, specify its path using the Java system property `gw.config`, for example:  
-> `java -Dgw.config=/path/to/custom.properties -jar gw.jar ...`  
+> `java -Dgw.config=C:\path\to\custom.properties -jar gw.jar ...`  
 > This allows you to adapt Ghostwriter to different environments and workflows without modifying the properties file.
 
 **Where to place it:**  
@@ -65,28 +70,44 @@ Ghostwriter automatically loads this file at startup.
 If `GW_HOME` is not set, place `gw.properties` in the same folder as your `gw.jar` file.  
 To use a custom configuration file, provide its path with the `gw.config` system property.
 
+## Configuration Properties Reference
+
+The following properties are read by the `Ghostwriter` CLI bootstrap (`src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java`). They can be supplied via `gw.properties` and/or overridden via Java system properties (for example: `java -Dgw.genai=OpenAI:gpt-5.1 -jar gw.jar ...`). Some values can also be set via CLI options.
+
+| Property name | Description | Default value | Usage context |
+|---|---|---|---|
+| `gw.config` | Overrides the configuration file name/path loaded at startup. Ghostwriter loads the configuration file from: `<gwHomeDir>\<gw.config>` if set; otherwise `<gwHomeDir>\gw.properties`. | `gw.properties` | Read as a Java system property during static initialization, before scanning begins. |
+| `gw.home` | Base “home directory” used to locate `gw.properties` (or the file specified by `gw.config`). | If not set, falls back to `gw.rootdir`; if that is not set, falls back to the current working directory (`user.dir`). | Read during static initialization to compute `gwHomeDir`. |
+| `gw.rootdir` | Root project directory used to resolve and constrain scanning. Also used as a fallback to determine `gwHomeDir` when `gw.home` is not set. | If not set, defaults to the current working directory (`user.dir`). | Used to initialize the `FileProcessor` (`new FileProcessor(rootDir, genai, config)`) and as the base for scanning (`processor.scanDocuments(rootDir, scanDir)`). |
+| `gw.genai` | Selects the GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | No default; must be provided (otherwise the CLI throws an error). | Required to run. Can be overridden by CLI option `-a` (long option name is `gw.genai`). |
+| `gw.instructions` | System instructions text to apply (may be plain text, URL, or `file:` reference depending on downstream handling). | `null` | Passed into `FileProcessor.setInstructions(instructions)` when present. Can be overridden by CLI option `-i/--instructions` (if specified without a value, instructions are read from stdin until EOF). |
+| `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null` | Split on commas and passed into `FileProcessor.setExcludes(excludes)`. Can be overridden by CLI option `-e/--excludes`. |
+| `gw.guidance` | Default guidance to apply as a final step for the current directory (may be plain text, URL, or `file:` reference depending on downstream handling). | `null` | Passed into `FileProcessor.setDefaultGuidance(defaultGuidance)` when present. Can be overridden by CLI option `-g` (long option name is `gw.guidance`; if specified without a value, guidance is read from stdin until EOF). |
+| `gw.threads` | Enables/disables multi-threaded processing. | `false` | Read as a boolean and passed into `FileProcessor.setModuleMultiThread(multiThread)`. Can be overridden by CLI option `-t/--threads` (if provided without a value, it forces `true`; if a value is provided, it is parsed as a boolean). |
+| `gw.logInputs` | Enables logging of LLM request inputs to dedicated log files. | `false` | Read as a boolean and passed into `FileProcessor.setLogInputs(logInputs)`. Can be enabled via CLI flag `-l/--logInputs` (always sets to `true` when present). |
+
 **Sample `gw.properties`:**
 ```properties
-#Set the root project directory
-root=C:\\projects\\machanism.org\\machai
+# Root project directory
+# (Ghostwriter reads this as gw.rootdir)
+gw.rootdir=C:\\projects\\machanism.org\\machai
 
-#Configure GenAI provider and model
-genai=CodeMie:gpt-5-2-2025-12-11
+# GenAI provider and model
+# (required)
+gw.genai=CodeMie:gpt-5-2-2025-12-11
 
-#Enable logging of input prompts
-logInputs=true
+# Enable logging of input prompts
+gw.logInputs=true
 
-#GenAI authentication credentials
-GENAI_USERNAME=your_username
-GENAI_PASSWORD=your_password
+# Default instructions and guidance (optional)
+gw.instructions=file:C:\\projects\\MDDA-BPD\\instructions.txt
+gw.guidance=file:C:\\projects\\MDDA-BPD\\guidance.txt
 
-#Default guidance and additional instructions files
-guidance=file:C:\\projects\\MDDA-BPD\\guidance.txt
-instructions=file:C:\\projects\\MDDA-BPD\\instructions.txt
+# Exclude directories (optional)
+gw.excludes=target,.git
 
-#Custom properties for use in functional tools (optional)
-impactSoftwareQualities=SECURITY
-severities=CRITICAL,BLOCKER,MAJOR,MINOR
+# Enable multi-threaded processing (optional; default is false)
+gw.threads=true
 ```
 
 ### Overriding Settings: Environment Variables and Command-Line Options
@@ -107,24 +128,18 @@ If a setting is specified in multiple places, the value from the highest-priorit
 
 Set environment variables before running Ghostwriter to override configuration properties.
 
-**Examples:**
+**Examples (Windows PowerShell):**
 
 - **Set the root directory:**
-  ```sh
-  export GW_ROOT="/home/user/projects/machai"
+  ```powershell
+  $env:gw_rootdir = "C:\projects\machai"
   gw
   ```
 
 - **Set GenAI credentials securely:**
-  ```sh
-  export GENAI_USERNAME="your_username"
-  export GENAI_PASSWORD="your_password"
-  gw
-  ```
-
-- **Set severity levels:**
-  ```sh
-  export GW_SEVERITIES="CRITICAL,MAJOR,MINOR"
+  ```powershell
+  $env:GENAI_USERNAME = "your_username"
+  $env:GENAI_PASSWORD = "your_password"
   gw
   ```
 
@@ -138,23 +153,18 @@ Command-line options override both environment variables and `gw.properties` set
 **Examples:**
 
 - **Override the root directory:**
-  ```sh
-  gw -Droot=/home/user/projects/machai
+  ```text
+  gw -Dgw.rootdir=C:\projects\machai
   ```
 
 - **Specify a custom guidance file:**
-  ```sh
-  gw --guidance "/home/user/guidance.txt"
+  ```text
+  gw --guidance "C:\projects\guidance.txt"
   ```
 
 - **Override GenAI provider:**
-  ```sh
+  ```text
   gw --genai "CodeMie:gpt-5-2-2025-12-11"
-  ```
-
-- **Change custom property:**
-  ```sh
-  gw -Dseverities=CRITICAL,MAJOR,MINOR
   ```
 
 **Tip:**  
@@ -220,7 +230,7 @@ Options:
 
 Examples:
   java -jar gw.jar C:\projects\project
-  java -jar gw.jar src/project
+  java -jar gw.jar src\project
   java -jar gw.jar "glob:**/*.java"
   java -jar gw.jar "regex:^.*\/[^\/]+\.java$"
 09:59:07.662 INFO  GenAI token usage information not found.
@@ -231,4 +241,3 @@ You can flexibly control Ghostwriter’s behavior by setting environment variabl
 
 **Advanced Configuration:**  
 For a complete list of supported properties and detailed explanations, see the [Ghostwriter configuration reference](https://machai.machanism.org/ghostwriter/docs.html#configuration).
-

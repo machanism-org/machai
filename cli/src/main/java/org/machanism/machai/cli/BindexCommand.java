@@ -11,6 +11,7 @@ import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
@@ -64,7 +65,7 @@ public class BindexCommand {
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
+		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		BindexCreator register = new BindexCreator(provider);
 		register.update(update);
@@ -92,7 +93,7 @@ public class BindexCommand {
 			throws IOException {
 
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get("genai", DEFAULT_GENAI_VALUE));
+		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		try (BindexRegister register = new BindexRegister(provider, registerUrl)) {
 			register.update(update);

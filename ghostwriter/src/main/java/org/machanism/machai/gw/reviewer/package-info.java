@@ -1,27 +1,27 @@
 /**
- * File format reviewers used by Ghostwriter to discover embedded {@code @guidance} instructions and
- * normalize them into prompt fragments.
+ * Provides {@link org.machanism.machai.gw.reviewer.Reviewer} implementations that scan project files for embedded
+ * {@code @guidance} instructions and convert them into normalized prompt fragments used by Ghostwriter.
  *
- * <p>This package provides {@link org.machanism.machai.gw.reviewer.Reviewer} implementations for a
- * variety of source and documentation formats. Each reviewer is responsible for:
+ * <p>Each reviewer targets a specific file format and understands that format's comment conventions.
+ * When guidance is present, the reviewer returns a formatted fragment that includes stable, project-relative
+ * path context (via {@link org.machanism.machai.project.layout.ProjectLayout}) so prompts remain consistent across
+ * environments.
+ *
+ * <h2>Responsibilities</h2>
  * <ul>
- *   <li>detecting whether a file contains the {@code @guidance} tag, and</li>
- *   <li>emitting a formatted fragment (usually including the file name, a project-relative path, and
- *       either the full file content or extracted guidance text) that can be appended to the
- *       assembled prompt.</li>
+ *   <li>Detect whether a file contains the {@code @guidance} tag.</li>
+ *   <li>Read the file content (or extract guidance text, depending on format).</li>
+ *   <li>Emit a prompt fragment suitable for downstream processing.</li>
  * </ul>
  *
- * <p>Project-relative paths are computed via
- * {@link org.machanism.machai.project.layout.ProjectLayout} so the resulting fragments remain stable
- * across environments.
- *
- * <h2>Supported formats</h2>
+ * <h2>Commonly reviewed formats</h2>
  * <ul>
  *   <li>Java source ({@code .java}, including {@code package-info.java})</li>
  *   <li>TypeScript ({@code .ts})</li>
  *   <li>Python ({@code .py})</li>
  *   <li>HTML/XML ({@code .html}, {@code .htm}, {@code .xml})</li>
  *   <li>Markdown ({@code .md})</li>
+ *   <li>PlantUML ({@code .puml})</li>
  *   <li>Guidance text files named {@code @guidance.txt}</li>
  * </ul>
  */

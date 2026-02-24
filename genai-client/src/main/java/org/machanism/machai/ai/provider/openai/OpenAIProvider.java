@@ -148,7 +148,7 @@ public class OpenAIProvider implements GenAIProvider {
 		if (client == null) {
 			String baseUrl = config.get("OPENAI_BASE_URL");
 			String privateKey = config.get("OPENAI_API_KEY");
-			timeoutSec = config.getLong("GENAI_TIMEOUT");
+			timeoutSec = config.getLong("GENAI_TIMEOUT", 0);
 
 			OpenAIOkHttpClient.Builder clientBuilder = OpenAIOkHttpClient.builder();
 			clientBuilder.apiKey(privateKey);

@@ -21,6 +21,8 @@ The content must be based on the information from `/src/site/markdown/index.md` 
 
 3. **How to Run**
    - Provide command-line usage examples for running the application.
+   - Analyze the `src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java` class to extract and document all available configuration properties.  
+   - For each property, provide its name, description, default value (if any), and usage context.
    - Explain how to set environment variables or Java system properties for configuration.
    - Demonstrate how to use options such as `instructions`, `excludes`, and `root` directory.
    - Include example commands for both Windows (`.bat`) and Unix (`.sh`) environments.

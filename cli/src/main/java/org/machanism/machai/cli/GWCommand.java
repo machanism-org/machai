@@ -12,6 +12,7 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
@@ -22,14 +23,13 @@ import org.springframework.shell.standard.ShellOption;
 public class GWCommand {
 
 	private static Logger logger;
-	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
 	private static final PropertiesConfigurator config = new PropertiesConfigurator();
 	private static File gwHomeDir;
 
 	@PostConstruct
 	public void init() {
 		try {
-			gwHomeDir = config.getFile("GW_HOME", null);
+			gwHomeDir = config.getFile(Ghostwriter.GW_HOME_PROP_NAME, null);
 
 			if (gwHomeDir == null) {
 				System.out.println(
@@ -43,7 +43,7 @@ public class GWCommand {
 			logger = LoggerFactory.getLogger(GWCommand.class);
 
 			try {
-				File configFile = new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"));
+				File configFile = new File(gwHomeDir, System.getProperty(Ghostwriter.GW_CONFIG_PROP_NAME, Ghostwriter.GW_PROPERTIES_FILE_NAME));
 				config.setConfiguration(configFile.getAbsolutePath());
 			} catch (IOException e) {
 				// The property file is not defined, ignore.
@@ -66,14 +66,14 @@ public class GWCommand {
 		logger.info("GW home dir: {}", gwHomeDir);
 
 		try {
-			File rootDir = config.getFile("root", SystemUtils.getUserDir());
+			File rootDir = config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, SystemUtils.getUserDir());
 
-			String genaiValue = config.get("genai", DEFAULT_GENAI_VALUE);
+			String genaiValue = config.get(Ghostwriter.GW_GENAI_PROP_NAME, null);
 			if (genai != null) {
 				genaiValue = genai;
 			}
 
-			String instructionsValue = config.get("instructions", null);
+			String instructionsValue = config.get(Ghostwriter.GW_INSTRUCTIONS_PROP_NAME, null);
 			if (instructions != null) {
 				instructionsValue = instructions;
 				if (instructionsValue.isEmpty()) {
@@ -94,7 +94,7 @@ public class GWCommand {
 
 			boolean multiThread = threads;
 
-			String defaultGuidance = config.get("guidance", null);
+			String defaultGuidance = config.get(Ghostwriter.GW_GUIDANCE_PROP_NAME, null);
 			if (guidance != null) {
 				defaultGuidance = guidance;
 				if (defaultGuidance.isEmpty()) {

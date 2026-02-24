@@ -13,6 +13,7 @@ import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -155,7 +156,7 @@ public class GW extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator config = getConfiguration();
 
-		String genai = config.get("genai", this.genai);
+		String genai = config.get(Ghostwriter.GW_GENAI_PROP_NAME, this.genai);
 		FileProcessor processor = new FileProcessor(basedir, genai, config) {
 
 			@Override
