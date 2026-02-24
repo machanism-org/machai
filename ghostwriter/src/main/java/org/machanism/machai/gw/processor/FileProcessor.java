@@ -40,6 +40,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
@@ -1214,6 +1215,7 @@ public class FileProcessor extends ProjectProcessor {
 
 		if (Strings.CS.startsWith(trimmed, "file:")) {
 			String filePath = StringUtils.substringAfter(trimmed, "file:");
+			filePath = StringSubstitutor.replaceSystemProperties(filePath);
 			return parseLines(readFromFilePath(filePath));
 		}
 

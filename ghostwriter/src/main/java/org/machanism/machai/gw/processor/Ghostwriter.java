@@ -84,7 +84,7 @@ public final class Ghostwriter {
 				}
 			}
 
-			System.setProperty("gwHomeDir", gwHomeDir.getAbsolutePath());
+			System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
 			logger = LoggerFactory.getLogger(Ghostwriter.class);
 
 			try {

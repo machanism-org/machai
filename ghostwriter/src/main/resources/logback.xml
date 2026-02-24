@@ -22,7 +22,7 @@
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- Daily rollover -->
-			<fileNamePattern>${gwHomeDir}/logs/archive/gw.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${gw.home}/logs/archive/gw.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<!-- Keep 30 days of history -->
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>

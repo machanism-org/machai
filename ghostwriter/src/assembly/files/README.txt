@@ -93,18 +93,22 @@ Configuration can be supplied via:
 - CLI options (override config values where applicable)
 
 Home/config file resolution
+The following properties control how Ghostwriter resolves its home and configuration files. 
+These properties can be set via environment variables or Java system properties, but cannot be set in the configuration file itself:
 - gw.home
-  - Description: home directory used as the base for locating the configuration file
-  - Default: if not set, falls back to gw.rootDir; if still not set, uses the current working directory
-  - Usage context: affects where gw.properties (or gw.config-selected file) is loaded from
+  - Description: The home directory used as the base for locating the configuration file.
+  - Default: If not set, falls back to `gw.rootDir`; if still not set, uses the current working directory.
+  - Usage context: Determines where `gw.properties` (or the selected config file) is loaded from.
+
 - gw.rootDir
-  - Description: root project directory used by the processor as the repository root
-  - Default: if not set, current working directory
-  - Usage context: controls the “root” used when scanning targets and validating absolute scan paths
+  - Description: The root project directory used by the processor as the repository root.
+  - Default: If not set, uses the current working directory.
+  - Usage context: Defines the "root" directory for scanning targets and validating absolute scan paths.
+
 - gw.config
-  - Description: configuration file name (within gw.home) to load
-  - Default: gw.properties
-  - Usage context: use to switch config profiles/files
+  - Description: The name of the configuration file (within `gw.home`) to load.
+  - Default: `gw.properties`
+  - Usage context: Allows switching between different configuration profiles or files.
 
 GenAI provider/model
 - gw.genai
