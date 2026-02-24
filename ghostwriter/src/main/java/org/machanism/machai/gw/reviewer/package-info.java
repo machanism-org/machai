@@ -1,28 +1,15 @@
 /**
- * Provides {@link org.machanism.machai.gw.reviewer.Reviewer} implementations that scan project files for embedded
- * {@code @guidance} instructions and convert them into normalized prompt fragments used by Ghostwriter.
+ * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and concrete
+ * implementations that inspect source and documentation files for embedded {@code @guidance} instructions.
  *
- * <p>Each reviewer targets a specific file format and understands that format's comment conventions.
- * When guidance is present, the reviewer returns a formatted fragment that includes stable, project-relative
- * path context (via {@link org.machanism.machai.project.layout.ProjectLayout}) so prompts remain consistent across
- * environments.
+ * <p>Each {@code Reviewer} targets one or more file types (for example, Java, Markdown, HTML/XML, TypeScript,
+ * Python, PlantUML, or plain text) and is responsible for:
  *
- * <h2>Responsibilities</h2>
  * <ul>
- *   <li>Detect whether a file contains the {@code @guidance} tag.</li>
- *   <li>Read the file content (or extract guidance text, depending on format).</li>
- *   <li>Emit a prompt fragment suitable for downstream processing.</li>
- * </ul>
- *
- * <h2>Commonly reviewed formats</h2>
- * <ul>
- *   <li>Java source ({@code .java}, including {@code package-info.java})</li>
- *   <li>TypeScript ({@code .ts})</li>
- *   <li>Python ({@code .py})</li>
- *   <li>HTML/XML ({@code .html}, {@code .htm}, {@code .xml})</li>
- *   <li>Markdown ({@code .md})</li>
- *   <li>PlantUML ({@code .puml})</li>
- *   <li>Guidance text files named {@code @guidance.txt}</li>
+ *   <li>Detecting whether a file contains the guidance tag appropriate to the file format's comment syntax.</li>
+ *   <li>Reading and extracting the relevant guidance and/or file content.</li>
+ *   <li>Producing a normalized prompt fragment that includes a stable, project-relative path via
+ *   {@link org.machanism.machai.project.layout.ProjectLayout} so prompts are consistent across environments.</li>
  * </ul>
  */
 package org.machanism.machai.gw.reviewer;

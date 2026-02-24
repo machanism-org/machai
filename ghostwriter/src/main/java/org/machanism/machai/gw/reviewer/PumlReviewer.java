@@ -55,12 +55,16 @@ public class PumlReviewer implements Reviewer {
 
         String content = FileUtils.readFileToString(guidancesFile, StandardCharsets.UTF_8);
 
-        Matcher matcher = GUIDANCE_PATTERN.matcher(content);
-        if (!matcher.find()) {
+        if (!containsGuidanceTag(content)) {
             return null;
         }
 
         String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
         return MessageFormat.format(PROMPT_BUNDLE.getString("puml_file"), relativePath, content);
+    }
+
+    private static boolean containsGuidanceTag(String content) {
+        Matcher matcher = GUIDANCE_PATTERN.matcher(content);
+        return matcher.find();
     }
 }

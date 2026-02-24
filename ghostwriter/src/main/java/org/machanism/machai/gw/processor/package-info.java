@@ -1,7 +1,7 @@
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE CURRENT FILE PARENT FOLDER AND THIS `package-info.java`!**.	
+ * **IMPORTANT: ADD OR UPDATE JAVADOC TO ALL CLASSES IN THE CURRENT FOLDER AND THIS `package-info.java`!**.	
  * Ghostwriter works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
  * Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
  * FileProcessor does not support dependency resolution during project processing. 
@@ -45,29 +45,28 @@
  * This package contains the Ghostwriter command-line entry point
  * ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the core filesystem
  * processor ({@link org.machanism.machai.gw.processor.FileProcessor}). Together
- * they walk a project directory tree, identify files supported by registered
- * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations, and extract
- * embedded {@code @guidance:} directives.
- * </p>
- *
- * <p>
- * For each file, a prompt is composed from OS-specific processing constraints,
- * a layout-derived description of the project structure (sources, tests,
- * documents, modules), and extracted guidance (or configured default guidance
- * when guidance is absent).
- * </p>
- *
- * <p>
- * The composed prompt is dispatched to a configured
+ * they perform a filesystem traversal to discover processable files, extract any
+ * embedded {@code @guidance:} directives, and submit prompts to a configured
  * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  * </p>
  *
+ * <h2>Responsibilities</h2>
+ * <ul>
+ * <li>Walk a project directory tree (including modules).</li>
+ * <li>Select files supported by registered
+ * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations.</li>
+ * <li>Apply a child-first traversal strategy for multi-module layouts (modules
+ * are processed before the parent project directory).</li>
+ * <li>Optionally apply default guidance when files do not include embedded
+ * directives.</li>
+ * <li>Optionally persist composed per-file prompt inputs for auditing/debugging.
+ * </li>
+ * </ul>
+ *
  * <h2>Processing model</h2>
  * <ul>
- * <li><b>Child-first module traversal</b>: in multi-module layouts, modules are
- * processed before the parent project.</li>
  * <li><b>No dependency resolution</b>: processing is filesystem-based; builds are
- * not executed.</li>
+ * not executed and dependencies are not resolved.</li>
  * <li><b>Broad file coverage</b>: traversal can include source code,
  * documentation, project site content, and other relevant files supported by the
  * active reviewers.</li>
