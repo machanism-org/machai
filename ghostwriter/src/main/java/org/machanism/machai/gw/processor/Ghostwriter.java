@@ -127,7 +127,7 @@ public final class Ghostwriter {
 				.desc("Enable multi-threaded processing to improve performance (default: false).")
 				.hasArg(true).optionalArg(true).build();
 
-		Option genaiOpt = new Option("a", GW_GENAI_PROP_NAME, true,
+		Option genaiOpt = new Option("a", "genai", true,
 				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt("instructions")

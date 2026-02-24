@@ -110,7 +110,7 @@ GenAI provider/model
 - gw.genai
   - Description: GenAI provider/model identifier
   - Default: none (must be configured); documentation examples use values such as OpenAI:gpt-5-mini or OpenAI:gpt-5.1
-  - CLI option: -a/--gw.genai <provider:model>
+  - CLI option: -a/--genai <provider:model>
   - Usage context: selects which provider/client/model Ghostwriter uses
 
 Global instructions
@@ -189,7 +189,7 @@ Using Java system properties
 
 Common issues
 - “No GenAI provider/model configured”
-  - Set gw.genai in gw.properties or pass -a/--gw.genai (example: -a OpenAI:gpt-5.1)
+  - Set gw.genai in gw.properties or pass -a/--genai (example: -a OpenAI:gpt-5.1)
 - Authentication/authorization errors
   - Verify provider credentials (e.g., CodeMie GENAI_USERNAME/GENAI_PASSWORD or OPENAI_API_KEY)
   - If using an OpenAI-compatible endpoint, verify OPENAI_BASE_URL
