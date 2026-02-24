@@ -22,121 +22,141 @@ Ghostwriter supports **all types of project files—including source code, docum
 </head>
 <body>
 
-<h1>Ghostwriter</h1>
+<header>
+  <h1>Ghostwriter</h1>
 
-<p>
-  Ghostwriter is a command-line tool that orchestrates documentation and review updates across a project’s file tree.
-  It scans directories for supported files, extracts embedded <code>@guidance:</code> directives, and composes a prompt
-  for a configured GenAI provider.
-</p>
+  <p>
+    Ghostwriter is a command-line utility that scans a project’s filesystem, extracts embedded
+    <code>@guidance:</code> directives from supported file formats, and orchestrates GenAI-driven updates to the
+    files it finds.
+  </p>
 
-<p>
-  Processing is <strong>filesystem-based</strong>: Ghostwriter does not compile, run builds, or resolve dependencies.
-  For multi-module layouts, modules are processed <strong>child-first</strong> so module-level guidance is applied before the
-  parent project.
-</p>
+  <p>
+    Ghostwriter is <strong>filesystem-based</strong>: it does not compile sources, execute builds, or resolve
+    dependencies. For multi-module layouts, modules are processed <strong>child-first</strong> so module guidance is
+    applied before the parent project.
+  </p>
+</header>
 
-<h2>Architecture</h2>
+<section>
+  <h2>Architecture</h2>
 
-<p>
-  <img src="../images/class-diagram.png" alt="Ghostwriter class diagram" />
-</p>
+  <figure>
+    <img src="../images/class-diagram.png" alt="Ghostwriter class diagram" />
+    <figcaption>High-level class relationships in the Ghostwriter processing pipeline.</figcaption>
+  </figure>
 
-<p>
-  The codebase is organized into two primary packages:
-</p>
+  <p>
+    The codebase is organized around two cooperating packages:
+  </p>
 
-<ul>
-  <li>
-    <strong><code>org.machanism.machai.gw.processor</code></strong> — CLI entry point and the core scan → extract → compose →
-    dispatch pipeline.
-  </li>
-  <li>
-    <strong><code>org.machanism.machai.gw.reviewer</code></strong> — the reviewer SPI and format-specific implementations that
-    extract guidance and normalize it into prompt fragments.
-  </li>
-</ul>
+  <dl>
+    <dt><strong><code>org.machanism.machai.gw.processor</code></strong></dt>
+    <dd>
+      Command-line entry point and the scan → extract → compose → dispatch pipeline. This package is responsible
+      for traversing project folders (including child-first module traversal), applying include/exclude rules,
+      composing prompts, and invoking a configured GenAI provider.
+    </dd>
 
-<h2><code>org.machanism.machai.gw.processor</code></h2>
+    <dt><strong><code>org.machanism.machai.gw.reviewer</code></strong></dt>
+    <dd>
+      Reviewer SPI and format-specific implementations used to extract and normalize guidance from project files.
+      Reviewers are loaded via Java’s <code>ServiceLoader</code> and mapped to file extensions.
+    </dd>
+  </dl>
+</section>
 
-<p>
-  This package contains the user-facing CLI and the project traversal logic.
-</p>
+<section>
+  <h2><code>org.machanism.machai.gw.processor</code></h2>
 
-<ul>
-  <li>
-    <strong><code>Ghostwriter</code></strong> — application entry point. It loads configuration, parses CLI options (scan target,
-    excludes, instructions, default guidance, threading, input logging), and invokes the processing pipeline.
-  </li>
-  <li>
-    <strong><code>FileProcessor</code></strong> — scans the project tree, applies include/exclude rules, delegates parsing to
-    reviewers, and dispatches composed prompts to the configured GenAI provider.
-  </li>
-</ul>
+  <p>
+    This package contains the user-facing CLI and the processing pipeline that turns project files into GenAI
+    prompt runs.
+  </p>
 
-<p>
-  For each processed file, Ghostwriter composes a prompt from:
-</p>
+  <ul>
+    <li>
+      <strong><code>Ghostwriter</code></strong> — CLI entry point. Loads configuration, parses options (scan target, root,
+      excludes, instructions, default guidance, threading, input logging), and invokes the processing pipeline.
+    </li>
+    <li>
+      <strong><code>FileProcessor</code></strong> — traverses the filesystem, discovers modules (child-first), delegates file
+      parsing to reviewers, assembles prompts, and dispatches them to the selected GenAI provider.
+    </li>
+  </ul>
 
-<ol>
-  <li>System instructions (optional; configured or provided via the CLI).</li>
-  <li>Environment constraints (for example, OS-specific command syntax rules).</li>
-  <li>
-    Project context (project name/id, source/test/doc roots, module layout) plus extracted per-file guidance (or the
-    default guidance when the file has none).
-  </li>
-</ol>
+  <h3>Key behaviors</h3>
+  <ul>
+    <li><strong>Child-first module traversal</strong>: modules are processed before their parent directory.</li>
+    <li><strong>No dependency resolution</strong>: the processor does not build projects or resolve artifacts.</li>
+    <li>
+      <strong>Configurable scope</strong>: the scan target may be a directory path or a
+      <code>java.nio.file.FileSystems.getPathMatcher</code> expression (for example, <code>glob:**/*.java</code> or
+      <code>regex:...</code>).
+    </li>
+    <li>
+      <strong>Optional auditing</strong>: composed prompt inputs may be logged to a temporary directory for debugging
+      and traceability.
+    </li>
+  </ul>
 
-<h3>Scanning and scope</h3>
+  <h3>Prompt composition (high-level)</h3>
+  <p>
+    For each processed file, Ghostwriter composes a prompt using:
+  </p>
+  <ol>
+    <li>System instructions (configured or supplied via the CLI).</li>
+    <li>Environment constraints (for example, OS-specific command syntax rules).</li>
+    <li>Project context (layout, source/test/doc roots, modules).</li>
+    <li>Per-file extracted guidance (or default guidance if the file contains none).</li>
+  </ol>
+</section>
 
-<ul>
-  <li>
-    <strong>Broad file coverage</strong>: the scan can include source code, documentation, project site content, and other
-    relevant files supported by available reviewers.
-  </li>
-  <li>
-    <strong>Configurable targets</strong>: the scan target may be a directory path or a matcher expression supported by
-    <code>java.nio.file.FileSystems.getPathMatcher</code> (for example, <code>glob:**/*.java</code> or <code>regex:... </code>).
-  </li>
-  <li>
-    <strong>Excludes</strong>: directories and paths can be excluded via configuration and/or CLI-provided rules.
-  </li>
-  <li>
-    <strong>Input logging</strong>: composed prompt inputs can optionally be logged to a temporary directory for auditing and
-    debugging.
-  </li>
-</ul>
+<section>
+  <h2><code>org.machanism.machai.gw.reviewer</code></h2>
 
-<h2><code>org.machanism.machai.gw.reviewer</code></h2>
+  <p>
+    The reviewer package defines the <code>Reviewer</code> service-provider interface (SPI) and a set of
+    implementations responsible for extracting embedded <code>@guidance</code> instructions.
+  </p>
 
-<p>
-  The reviewer package defines the <code>Reviewer</code> service-provider interface (SPI) and a set of implementations
-  responsible for extracting guidance from specific file formats. Reviewers are loaded via Java’s
-  <code>ServiceLoader</code> and mapped to file extensions.
-</p>
+  <p>
+    Reviewers are designed to understand a format’s comment conventions and return a normalized prompt fragment
+    for downstream processing.
+  </p>
 
-<p>
-  Supported formats typically include Java source (including <code>package-info.java</code>), TypeScript, Python,
-  HTML/XML, Markdown, PlantUML (<code>.puml</code>), and dedicated guidance files named <code>@guidance.txt</code>.
-</p>
+  <p>
+    Implementations in this project include reviewers for:
+  </p>
+  <ul>
+    <li>Java source (<code>.java</code>)</li>
+    <li>Markdown (<code>.md</code>)</li>
+    <li>HTML (<code>.html</code>)</li>
+    <li>TypeScript (<code>.ts</code>)</li>
+    <li>Python (<code>.py</code>)</li>
+    <li>PlantUML (<code>.puml</code>)</li>
+    <li>Plain text guidance (<code>.txt</code>)</li>
+  </ul>
+</section>
 
-<h2>Typical usage</h2>
+<section>
+  <h2>Typical usage</h2>
 
-<pre>
-java -jar gw.jar &lt;scanDir&gt; [options]
-</pre>
+  <pre><code>java -jar gw.jar &lt;scanDir&gt; [options]</code></pre>
 
-<p>
-  The <code>&lt;scanDir&gt;</code> argument may be a relative path or a matcher expression supported by
-  <code>java.nio.file.FileSystems.getPathMatcher</code>.
-</p>
+  <p>
+    The <code>&lt;scanDir&gt;</code> argument can be a relative directory path or a matcher expression supported by
+    <code>java.nio.file.FileSystems.getPathMatcher</code>.
+  </p>
+</section>
 
-<h2>See also</h2>
-
-<ul>
-  <li><a href="org/machanism/machai/gw/processor/package-summary.html">Processor package</a></li>
-  <li><a href="org/machanism/machai/gw/reviewer/package-summary.html">Reviewer package</a></li>
-</ul>
+<section>
+  <h2>See also</h2>
+  <ul>
+    <li><a href="org/machanism/machai/gw/processor/package-summary.html">Processor package</a></li>
+    <li><a href="org/machanism/machai/gw/reviewer/package-summary.html">Reviewer package</a></li>
+  </ul>
+</section>
 
 </body>
 </html>

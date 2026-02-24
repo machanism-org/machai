@@ -88,10 +88,6 @@ The following properties are read by the `Ghostwriter` CLI bootstrap (`src/main/
 
 **Sample `gw.properties`:**
 ```properties
-# Root project directory
-# (Ghostwriter reads this as gw.rootDir)
-gw.rootDir=C:\\projects\\machanism.org\\machai
-
 # GenAI provider and model
 # (required)
 gw.genai=CodeMie:gpt-5-2-2025-12-11
@@ -154,17 +150,17 @@ Command-line options override both environment variables and `gw.properties` set
 
 - **Override the root directory:**
   ```text
-  gw -Dgw.rootDir=C:\projects\machai
+  java -Dgw.rootDir=C:\projects\machai -jar gw.jar 
   ```
 
 - **Specify a custom guidance file:**
   ```text
-  gw --guidance "C:\projects\guidance.txt"
+  java -jar gw.jar --guidance "C:\projects\guidance.txt"
   ```
 
 - **Override GenAI provider:**
   ```text
-  gw --genai "CodeMie:gpt-5-2-2025-12-11"
+  java -jar gw.jar --genai "CodeMie:gpt-5-2-2025-12-11"
   ```
 
 **Tip:**  

@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
@@ -25,10 +24,7 @@ public class PumlReviewer implements Reviewer {
     // PlantUML comments can be either ' (single quote) or /* ... */
     // We'll look for @guidance: in either single-line or block comments
     private static final Pattern GUIDANCE_PATTERN = Pattern.compile(
-            "(?m)^(?:'|//)\\s*" + Pattern.quote(FileProcessor.GUIDANCE_TAG_NAME)
-                    + "(?<single>.*)$|/\\*.*?" + Pattern.quote(FileProcessor.GUIDANCE_TAG_NAME)
-                    + "(?<block>.*?)\\*/",
-            Pattern.DOTALL);
+            "(?s)" + Pattern.quote(FileProcessor.GUIDANCE_TAG_NAME));
 
     /**
      * Returns the file extensions supported by this reviewer. This reviewer handles files with the 'puml' extension.
@@ -64,7 +60,6 @@ public class PumlReviewer implements Reviewer {
     }
 
     private static boolean containsGuidanceTag(String content) {
-        Matcher matcher = GUIDANCE_PATTERN.matcher(content);
-        return matcher.find();
+        return GUIDANCE_PATTERN.matcher(content).find();
     }
 }
