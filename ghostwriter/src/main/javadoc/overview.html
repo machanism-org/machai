@@ -32,9 +32,9 @@ Ghostwriter supports **all types of project files—including source code, docum
   </p>
 
   <p>
-    Ghostwriter is <strong>filesystem-based</strong>: it does not compile sources, execute builds, or resolve
-    dependencies. For multi-module layouts, modules are processed <strong>child-first</strong> so module guidance is
-    applied before the parent project.
+    The tool is intentionally <strong>filesystem-based</strong>: it does not compile sources, execute builds, or
+    resolve dependencies. For multi-module layouts, modules are processed <strong>child-first</strong> so module
+    guidance is applied before the parent project.
   </p>
 </header>
 
@@ -47,15 +47,15 @@ Ghostwriter supports **all types of project files—including source code, docum
   </figure>
 
   <p>
-    The codebase is organized around two cooperating packages:
+    Ghostwriter is organized around two cooperating packages:
   </p>
 
   <dl>
     <dt><strong><code>org.machanism.machai.gw.processor</code></strong></dt>
     <dd>
-      Command-line entry point and the scan → extract → compose → dispatch pipeline. This package is responsible
-      for traversing project folders (including child-first module traversal), applying include/exclude rules,
-      composing prompts, and invoking a configured GenAI provider.
+      Command-line entry point and the scan → extract → compose → dispatch pipeline. This package traverses the
+      project tree (including child-first module traversal), applies include/exclude rules, composes prompts,
+      and invokes a configured GenAI provider.
     </dd>
 
     <dt><strong><code>org.machanism.machai.gw.reviewer</code></strong></dt>
@@ -80,7 +80,7 @@ Ghostwriter supports **all types of project files—including source code, docum
       excludes, instructions, default guidance, threading, input logging), and invokes the processing pipeline.
     </li>
     <li>
-      <strong><code>FileProcessor</code></strong> — traverses the filesystem, discovers modules (child-first), delegates file
+      <strong><code>FileProcessor</code></strong> — Traverses the filesystem, discovers modules (child-first), delegates file
       parsing to reviewers, assembles prompts, and dispatches them to the selected GenAI provider.
     </li>
   </ul>
@@ -88,9 +88,9 @@ Ghostwriter supports **all types of project files—including source code, docum
   <h3>Key behaviors</h3>
   <ul>
     <li><strong>Child-first module traversal</strong>: modules are processed before their parent directory.</li>
-    <li><strong>No dependency resolution</strong>: the processor does not build projects or resolve artifacts.</li>
+    <li><strong>No dependency resolution</strong>: projects are not built and artifacts are not resolved.</li>
     <li>
-      <strong>Configurable scope</strong>: the scan target may be a directory path or a
+      <strong>Configurable scan scope</strong>: the scan target may be a directory path or a
       <code>java.nio.file.FileSystems.getPathMatcher</code> expression (for example, <code>glob:**/*.java</code> or
       <code>regex:...</code>).
     </li>
@@ -121,13 +121,11 @@ Ghostwriter supports **all types of project files—including source code, docum
   </p>
 
   <p>
-    Reviewers are designed to understand a format’s comment conventions and return a normalized prompt fragment
-    for downstream processing.
+    Reviewers understand a format’s comment conventions and return a normalized guidance fragment for
+    downstream prompt composition.
   </p>
 
-  <p>
-    Implementations in this project include reviewers for:
-  </p>
+  <h3>Included reviewers</h3>
   <ul>
     <li>Java source (<code>.java</code>)</li>
     <li>Markdown (<code>.md</code>)</li>

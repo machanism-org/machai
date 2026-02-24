@@ -90,8 +90,8 @@ public final class Ghostwriter {
 		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: false).").hasArg(true)
-				.optionalArg(true).build();
+				.desc("Enable multi-threaded processing to improve performance (default: false).")
+				.hasArg(true).optionalArg(true).build();
 
 		Option rootDirOpt = new Option("r", "root", true,
 				"Specify the path to the root directory for file processing.");
@@ -108,8 +108,8 @@ public final class Ghostwriter {
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a comma-separated list of directories to exclude from processing.");
 
-		Option guidanceOpt = Option.builder("g").longOpt("guidance").desc(
-				"Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
+		Option guidanceOpt = Option.builder("g").longOpt("guidance")
+				.desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
 						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
@@ -136,31 +136,7 @@ public final class Ghostwriter {
 				rootDir = new File(cmd.getOptionValue(rootDirOpt));
 			}
 
-			try {
-				gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
-
-				if (gwHomeDir == null) {
-					gwHomeDir = rootDir;
-					if (gwHomeDir == null) {
-						gwHomeDir = SystemUtils.getUserDir();
-					}
-				}
-
-				System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
-				logger = LoggerFactory.getLogger(Ghostwriter.class);
-
-				try {
-					File configFile = new File(gwHomeDir,
-							System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
-					config.setConfiguration(configFile.getAbsolutePath());
-
-				} catch (IOException e) {
-					// The property file is not defined, ignore.
-				}
-			} catch (Exception e) {
-				// Configuration file not found. An alternative configuration method will be
-				// used.
-			}
+			initializeConfiguration(rootDir);
 
 			String version = Ghostwriter.class.getPackage().getImplementationVersion();
 			if (version != null) {
@@ -193,17 +169,9 @@ public final class Ghostwriter {
 				}
 			}
 
-			String[] dirs = cmd.getArgs();
-
-			if (rootDir == null) {
-				rootDir = SystemUtils.getUserDir();
-				if (dirs.length == 0) {
-					dirs = new String[] { rootDir.getAbsolutePath() };
-				}
-			} else {
-				if (dirs.length == 0) {
-					dirs = new String[] { rootDir.getAbsolutePath() };
-				}
+			String[] scanDirs = cmd.getArgs();
+			if (scanDirs == null || scanDirs.length == 0) {
+				scanDirs = new String[] { rootDir != null ? rootDir.getAbsolutePath() : SystemUtils.getUserDir().getAbsolutePath() };
 			}
 
 			String[] excludes = StringUtils.split(config.get(GW_EXCLUDES_PROP_NAME, null), ',');
@@ -237,11 +205,14 @@ public final class Ghostwriter {
 
 			if (StringUtils.isBlank(genai)) {
 				throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_GENAI_PROP_NAME
-						+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -a/--" + GW_GENAI_PROP_NAME
-						+ " (e.g., OpenAI:gpt-5.1).");
+						+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -a/--genai (e.g., OpenAI:gpt-5.1).");
 			}
 
-			for (String scanDir : dirs) {
+			if (rootDir == null) {
+				rootDir = SystemUtils.getUserDir();
+			}
+
+			for (String scanDir : scanDirs) {
 				FileProcessor processor = new FileProcessor(rootDir, genai, config);
 				if (excludes != null) {
 					logger.info("Excludes: {}", Arrays.toString(excludes));
@@ -300,6 +271,34 @@ public final class Ghostwriter {
 		}
 	}
 
+	private static void initializeConfiguration(File rootDir) {
+		try {
+			gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
+
+			if (gwHomeDir == null) {
+				gwHomeDir = rootDir;
+				if (gwHomeDir == null) {
+					gwHomeDir = SystemUtils.getUserDir();
+				}
+			}
+
+			System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
+			logger = LoggerFactory.getLogger(Ghostwriter.class);
+
+			try {
+				File configFile = new File(gwHomeDir, System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
+				config.setConfiguration(configFile.getAbsolutePath());
+			} catch (IOException e) {
+				// The property file is not defined, ignore.
+			}
+		} catch (Exception e) {
+			// Configuration file not found. An alternative configuration method will be used.
+			if (logger == null) {
+				logger = LoggerFactory.getLogger(Ghostwriter.class);
+			}
+		}
+	}
+
 	/**
 	 * Prints the Ghostwriter CLI help text, including usage instructions, option
 	 * descriptions, and example commands.
@@ -315,8 +314,10 @@ public final class Ghostwriter {
 				+ "    - If an absolute path is provided, it must be located within the root project directory.\n"
 				+ "    - Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex patterns (e.g., \"regex:^.*\\\\/[^\\\\/]+\\\\.java$\").\n\n"
 				+ "Options:";
-		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\\\projects\\\\project\n"
-				+ "  java -jar gw.jar src\\project\n" + "  java -jar gw.jar \"glob:**/*.java\"\n"
+		String footer = "\nExamples:\n"
+				+ "  java -jar gw.jar C:\\\\projects\\\\project\n"
+				+ "  java -jar gw.jar src\\project\n"
+				+ "  java -jar gw.jar \"glob:**/*.java\"\n"
 				+ "  java -jar gw.jar \"regex:^.*\\\\/[^\\\\/]+\\\\.java$\"\n";
 		formatter.printHelp("java -jar gw.jar <scanDir> [options]", header, options, footer, true);
 	}

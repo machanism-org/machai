@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.machanism.machai.gw.processor.FileProcessor;
@@ -20,11 +19,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
 public class PumlReviewer implements Reviewer {
 
     private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("document-prompts");
-
-    // PlantUML comments can be either ' (single quote) or /* ... */
-    // We'll look for @guidance: in either single-line or block comments
-    private static final Pattern GUIDANCE_PATTERN = Pattern.compile(
-            "(?s)" + Pattern.quote(FileProcessor.GUIDANCE_TAG_NAME));
 
     /**
      * Returns the file extensions supported by this reviewer. This reviewer handles files with the 'puml' extension.
@@ -51,15 +45,11 @@ public class PumlReviewer implements Reviewer {
 
         String content = FileUtils.readFileToString(guidancesFile, StandardCharsets.UTF_8);
 
-        if (!containsGuidanceTag(content)) {
+        if (!content.contains(FileProcessor.GUIDANCE_TAG_NAME)) {
             return null;
         }
 
         String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
         return MessageFormat.format(PROMPT_BUNDLE.getString("puml_file"), relativePath, content);
-    }
-
-    private static boolean containsGuidanceTag(String content) {
-        return GUIDANCE_PATTERN.matcher(content).find();
     }
 }

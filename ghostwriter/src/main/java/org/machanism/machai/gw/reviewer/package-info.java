@@ -1,22 +1,13 @@
 /**
  * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and
- * implementations for extracting embedded {@code @guidance} instructions from source and documentation
- * files.
+ * implementations that scan project files to locate embedded {@code @guidance} instructions.
  *
- * <p>Each {@code Reviewer} targets one or more file types and is responsible for detecting the appropriate
- * comment syntax for the target format (for example, Java block comments in Java sources, HTML comments in
- * Markdown/HTML, or hash comments in Python), then producing a normalized prompt fragment for downstream
- * processing.
- *
- * <p>Implementations typically:
- * <ul>
- *   <li>Detect whether a file contains the guidance tag ({@code @guidance}).</li>
- *   <li>Read the file content and extract guidance text and/or full file content as required by the prompt
- *       templates.</li>
- *   <li>Compute a stable, project-relative path via
- *       {@link org.machanism.machai.project.layout.ProjectLayout} so prompts are consistent across
- *       environments.</li>
- * </ul>
+ * <p>Each {@code Reviewer} targets one or more file types and understands the comment syntax for its target
+ * format (for example, Java block comments, HTML comments, or single-line hash comments). When guidance is
+ * found, the reviewer formats a prompt fragment for downstream processing, typically including the
+ * project-relative path (via
+ * {@link org.machanism.machai.project.layout.ProjectLayout}) and, depending on file type, either the full
+ * file content or the extracted guidance text.
  */
 package org.machanism.machai.gw.reviewer;
 

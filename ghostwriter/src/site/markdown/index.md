@@ -73,7 +73,7 @@ At a high level, Ghostwriter runs as a CLI that:
 
 1. Resolves the project root and scan target (directory, `glob:...`, or `regex:...`).
 2. Traverses the project (Maven multi-module aware).
-3. For each supported file type, extracts `@guidance:` directives using pluggable reviewers.
+3. For each supported file type, extracts embedded `@guidance:` directives using pluggable reviewers.
 4. Composes an LLM request input that can include:
    - environment constraints (OS, project layout, etc.),
    - per-file guidance (or fallback default guidance),
@@ -163,6 +163,10 @@ java -jar gw.jar src\\main\\java
 4. Optionally add global instructions and/or default guidance.
 5. Run Ghostwriter, then review and commit the results.
 
+### Java Version
+
+Ghostwriter is compiled with **Java 8** (`maven.compiler.release=8`). You can usually run it on a newer JVM, but any selected provider/client libraries may impose additional runtime requirements.
+
 ## Configuration
 
 ### Command-Line Options
@@ -170,7 +174,8 @@ java -jar gw.jar src\\main\\java
 The CLI options are defined in `org.machanism.machai.gw.processor.Ghostwriter`:
 
 - `-h`, `--help` — Show help and exit.
-- `-t`, `--threads[=<true|false>]` — Enable multi-threaded processing. If specified without a value, it enables multi-threading.
+- `-r`, `--root <path>` — Specify the root directory used as the base for relative paths.
+- `-t`, `--threads[=<true|false>]` — Enable multi-threaded module processing; if specified without a value, it enables it.
 - `-a`, `--genai <provider:model>` — Set the GenAI provider and model (example: `OpenAI:gpt-5.1`).
 - `-i`, `--instructions[=<text|url|file:...>]` — Provide global system instructions. When used without a value, you are prompted to enter multi-line text via stdin.
 - `-g`, `--guidance[=<text|url|file:...>]` — Provide default guidance (fallback). When used without a value, you are prompted to enter multi-line text via stdin.
@@ -189,12 +194,13 @@ Notes on `--instructions` and `--guidance` values:
 | Option | Argument | Description | Default |
 |---|---|---|---|
 | `-h`, `--help` | none | Show help message and exit. | n/a |
-| `-t`, `--threads` | `true`/`false` (optional) | Enable multi-threaded module processing; if used without a value, it enables it. | From config key `threads` (default `false`). |
-| `-a`, `--genai` | `provider:model` | GenAI provider/model identifier. | From config key `genai`; otherwise `OpenAI:gpt-5-mini`. |
-| `-i`, `--instructions` | text/url/file (optional) | Global instructions appended to every prompt; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `instructions`; otherwise none. |
-| `-g`, `--guidance` | text/url/file (optional) | Fallback guidance used when files have no embedded `@guidance:`; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `guidance`; otherwise none. |
-| `-e`, `--excludes` | csv | Comma-separated exclude list (also configurable via config key `excludes`). | From config key `excludes`; otherwise none. |
-| `-l`, `--logInputs` | none | Log composed LLM inputs to per-file log files. | From config key `logInputs` (default `false`). |
+| `-r`, `--root` | `path` | Root directory used as the base for relative scan targets and `file:` includes. | From config key `gw.rootDir`; otherwise current working directory. |
+| `-t`, `--threads` | `true`/`false` (optional) | Enable multi-threaded module processing; if used without a value, it enables it. | From config key `gw.threads` (default `false`). |
+| `-a`, `--genai` | `provider:model` | GenAI provider/model identifier. | From config key `gw.genai`; otherwise must be provided. |
+| `-i`, `--instructions` | text/url/file (optional) | Global system instructions appended to every prompt; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `gw.instructions`; otherwise none. |
+| `-g`, `--guidance` | text/url/file (optional) | Fallback guidance used when files have no embedded `@guidance:`; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `gw.guidance`; otherwise none. |
+| `-e`, `--excludes` | csv | Comma-separated exclude list. | From config key `gw.excludes`; otherwise none. |
+| `-l`, `--logInputs` | none | Log composed LLM inputs to per-file log files. | From config key `gw.logInputs` (default `false`). |
 
 ### Example
 
@@ -214,19 +220,25 @@ java -jar gw.jar "glob:**/*.java" -t -a OpenAI:gpt-5.1 -i file:project-instructi
 
 `defaultGuidance` is a fallback instruction block used when a file does not contain embedded `@guidance:` directives.
 
-It can be set via:
+### Purpose
 
-- CLI: `-g` / `--guidance` (plain text, `http(s)://...`, or `file:...`; supports stdin when provided without a value), or
-- API: `FileProcessor#setDefaultGuidance(String)`.
+When Ghostwriter processes a file, it first asks the reviewer for that file type to extract embedded `@guidance:` directives. If no guidance is found, `defaultGuidance` provides a project-wide baseline so the file can still be updated in a consistent way.
 
-The value is treated as plain text, but each line may also act as an include directive:
+### How it’s set
+
+- CLI: `-g` / `--guidance` (plain text, `http(s)://...`, or `file:...`; supports stdin when provided without a value)
+- API: `FileProcessor#setDefaultGuidance(String)`
+
+### How it’s interpreted
+
+The value is parsed line-by-line:
 
 - blank lines are preserved,
 - lines beginning with `http://` or `https://` are fetched and included,
 - lines beginning with `file:` are read from the referenced file and included,
 - other lines are included as-is.
 
-This allows Ghostwriter to still process supported files meaningfully even when no per-file guidance is present.
+This makes it easy to keep shared guidance in version-controlled files (or hosted documents) while still allowing simple inline defaults.
 
 ## Resources
 
