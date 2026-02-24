@@ -217,7 +217,7 @@ public class FileProcessor extends ProjectProcessor {
 	 * <ul>
 	 * <li>A raw directory name (e.g., {@code src}),</li>
 	 * <li>or a pattern string prefixed with {@code glob:} or {@code regex:}, as
-	 * supported by {@link java.nio.file.FileSystems#getPathMatcher(String)}.</li>
+	 * supported by {@link FileSystems#getPathMatcher(String)}.</li>
 	 * </ul>
 	 *
 	 * <p>
@@ -871,8 +871,9 @@ public class FileProcessor extends ProjectProcessor {
 		if (StringUtils.isBlank(path)) {
 			return 0;
 		}
-		String normalized = path.replace("\\\\", "/");
-		return normalized.split("/").length;
+		String normalized = path.replace("\\", "/");
+		int length = normalized.split("/").length;
+		return length;
 	}
 
 	/**
