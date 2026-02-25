@@ -65,6 +65,8 @@ import org.slf4j.LoggerFactory;
  */
 public class FileProcessor extends ProjectProcessor {
 
+	private static final String GW_PROJECT_LAYOUT_PROP_PREFIX = "project.";
+
 	/**
 	 * String used in generated output when a value is absent in project metadata.
 	 */
@@ -609,13 +611,13 @@ public class FileProcessor extends ProjectProcessor {
 	 * The returned map contains the following entries:
 	 * </p>
 	 * <ul>
-	 * <li><b>#id</b>: The project identifier, as returned by
+	 * <li><b>project.id</b>: The project identifier, as returned by
 	 * {@code projectLayout.getProjectId()}.</li>
-	 * <li><b>#name</b>: The project name, as returned by
+	 * <li><b>project.name</b>: The project name, as returned by
 	 * {@code projectLayout.getProjectName()}.</li>
-	 * <li><b>#parentId</b> (optional): The parent project identifier, included only
+	 * <li><b>project.parentId</b> (optional): The parent project identifier, included only
 	 * if {@code projectLayout.getParentId()} is not {@code null}.</li>
-	 * <li><b>#parentDir</b> (optional): The name of the parent directory of the
+	 * <li><b>project.parentDir</b> (optional): The name of the parent directory of the
 	 * project, included only if the parent directory exists.</li>
 	 * </ul>
 	 *
@@ -631,15 +633,15 @@ public class FileProcessor extends ProjectProcessor {
 	 */
 	protected HashMap<String, String> getProperties(ProjectLayout projectLayout) {
 		HashMap<String, String> valueMap = new HashMap<>();
-		valueMap.put("#id", projectLayout.getProjectId());
-		valueMap.put("#name", projectLayout.getProjectName());
+		valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "id", projectLayout.getProjectId());
+		valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "name", projectLayout.getProjectName());
 		String parentId = projectLayout.getParentId();
 		if (parentId != null) {
-			valueMap.put("#parentId", parentId);
+			valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "parentId", parentId);
 		}
 		File parentDir = projectLayout.getProjectDir().getParentFile();
 		if (parentDir != null) {
-			valueMap.put("#parentDir", parentDir.getName());
+			valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "parentDir", parentDir.getName());
 		}
 		return valueMap;
 	}
