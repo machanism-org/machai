@@ -49,7 +49,7 @@ public class AssembyCommand {
 	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
 
 	private static final double DEFAULT_SCORE_VALUE = 0.90;
-	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
+	private static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
 
 	/** List of picked Bindex objects matching the search query. */
 	private List<Bindex> bindexList;
@@ -93,14 +93,19 @@ public class AssembyCommand {
 			@ShellOption(value = { "-g",
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
-		query = getQueryFromFile(query);
 
-		findQuery = query;
-		chatModel = Optional.ofNullable(chatModel)
-				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
-		score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", 0.90));
-		bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
+		try {
+			query = getQueryFromFile(query);
+
+			findQuery = query;
+			chatModel = Optional.ofNullable(chatModel)
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
+			score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", 0.90));
+			bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
+		} finally {
+			GenAIProviderManager.logUsage();
+		}
 	}
 
 	/**
@@ -145,33 +150,38 @@ public class AssembyCommand {
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		chatModel = Optional.ofNullable(chatModel)
-				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
-		FunctionToolsLoader.getInstance().applyTools(provider);
+		try {
+			chatModel = Optional.ofNullable(chatModel)
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
+			FunctionToolsLoader.getInstance().applyTools(provider);
 
-		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-		logger.info("The project directory: {}", dir);
-		provider.setWorkingDir(dir);
+			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+			logger.info("The project directory: {}", dir);
+			provider.setWorkingDir(dir);
 
-		String prompt = query;
-		if (query == null) {
-			if (bindexList == null) {
-				throw new IllegalArgumentException("The query is empty.");
+			String prompt = query;
+			if (query == null) {
+				if (bindexList == null) {
+					throw new IllegalArgumentException("The query is empty.");
+				}
+				prompt = this.findQuery;
+			} else {
+				query = getQueryFromFile(query);
+				score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", DEFAULT_SCORE_VALUE));
+				bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
 			}
-			prompt = this.findQuery;
-		} else {
-			query = getQueryFromFile(query);
-			score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", DEFAULT_SCORE_VALUE));
-			bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
+
+			if (!bindexList.isEmpty()) {
+
+				ApplicationAssembly assembly = new ApplicationAssembly(provider);
+				assembly.projectDir(dir);
+				assembly.assembly(prompt, bindexList);
+			}
+		} finally {
+			GenAIProviderManager.logUsage();
 		}
 
-		if (!bindexList.isEmpty()) {
-
-			ApplicationAssembly assembly = new ApplicationAssembly(provider);
-			assembly.projectDir(dir);
-			assembly.assembly(prompt, bindexList);
-		}
 	}
 
 	/**
@@ -186,19 +196,24 @@ public class AssembyCommand {
 			@ShellOption(value = { "-d",
 					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
 
-		chatModel = Optional.ofNullable(chatModel)
-				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
+		try {
+			chatModel = Optional.ofNullable(chatModel)
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 
-		FunctionToolsLoader.getInstance().applyTools(provider);
-		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-		provider.setWorkingDir(dir);
+			FunctionToolsLoader.getInstance().applyTools(provider);
+			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+			provider.setWorkingDir(dir);
 
-		provider.prompt(query);
-		String response = provider.perform();
-		if (response != null) {
-			logger.info(response);
+			provider.prompt(query);
+			String response = provider.perform();
+			if (response != null) {
+				logger.info(response);
+			}
+		} finally {
+			GenAIProviderManager.logUsage();
 		}
+
 	}
 
 	/**
