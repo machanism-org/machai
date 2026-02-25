@@ -143,11 +143,6 @@ public interface GenAIProvider {
 	Usage usage();
 
 	/**
-	 * Releases any resources held by this provider.
-	 */
-	void close();
-
-	/**
 	 * Indicates whether this provider instance is safe for concurrent use.
 	 *
 	 * @return {@code true} if the instance is thread-safe; {@code false} otherwise

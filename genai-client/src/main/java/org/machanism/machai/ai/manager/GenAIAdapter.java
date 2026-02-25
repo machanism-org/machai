@@ -107,9 +107,4 @@ public class GenAIAdapter implements GenAIProvider {
 		return provider.usage();
 	}
 
-	@Override
-	public void close() {
-		provider.close();
-	}
-
 }

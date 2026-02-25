@@ -66,10 +66,6 @@ public class GeminiProvider implements GenAIProvider {
 	}
 
 	@Override
-	public void close() {
-	}
-
-	@Override
 	public boolean isThreadSafe() {
 		return false;
 	}

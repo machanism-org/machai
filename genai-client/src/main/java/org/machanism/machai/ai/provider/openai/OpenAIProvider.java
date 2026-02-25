@@ -348,24 +348,19 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public List<Double> embedding(String text, long dimensions) {
-		try {
-			List<Double> embedding = null;
-			if (text != null) {
-				EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(EMBEDDING_MODEL)
-						.dimensions(dimensions).build();
-				CreateEmbeddingResponse response = getClient().embeddings().create(params);
-				
-				//com.openai.models.embeddings.CreateEmbeddingResponse.Usage usage = response.usage();
+		List<Double> embedding = null;
+		if (text != null) {
+			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(EMBEDDING_MODEL)
+					.dimensions(dimensions).build();
+			CreateEmbeddingResponse response = getClient().embeddings().create(params);
 
-				embedding = response.data().get(0).embedding().stream().map(Double::valueOf)
-						.collect(Collectors.toList());
-			}
+			// com.openai.models.embeddings.CreateEmbeddingResponse.Usage usage =
+			// response.usage();
 
-			return embedding;
-		} catch (BadRequestException e) {
-			e.printStackTrace();
-			throw e;
+			embedding = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
 		}
+
+		return embedding;
 	}
 
 	/**
@@ -533,14 +528,6 @@ public class OpenAIProvider implements GenAIProvider {
 	@Override
 	public Usage usage() {
 		return lastUsage;
-	}
-
-	/**
-	 * Closes the underlying OpenAI client.
-	 */
-	@Override
-	public void close() {
-		getClient().close();
 	}
 
 	/**

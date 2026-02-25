@@ -9,6 +9,8 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
@@ -104,17 +106,18 @@ public class BindexBuilder {
 	public Bindex build() throws IOException {
 
 		StringBuilder prompt = new StringBuilder();
-		prompt.append(bindexSchemaPrompt());
+		String bindexSchemaPrompt = bindexSchemaPrompt();
+		prompt.append(bindexSchemaPrompt + System.lineSeparator());
 
 		if (origin != null) {
 			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
 			String update_bindex_prompt = MessageFormat.format(PROMPT_BUNDLE.getString("update_bindex_prompt"),
 					bindexStr);
-			prompt.append(update_bindex_prompt);
+			prompt.append(update_bindex_prompt + System.lineSeparator());
 		}
 
-		prompt.append(projectContext());
-		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt"));
+		prompt.append(projectContext() + System.lineSeparator());
+		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt") + System.lineSeparator());
 
 		provider.prompt(prompt.toString());
 
@@ -126,7 +129,11 @@ public class BindexBuilder {
 			return null;
 		}
 
-		return new ObjectMapper().readValue(output, Bindex.class);
+		if (StringUtils.startsWith(output, "```json")) {
+			output = StringUtils.substringBetween(output, "```json", "```");
+		}
+		Bindex value = new ObjectMapper().readValue(output, Bindex.class);
+		return value;
 	}
 
 	/**

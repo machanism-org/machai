@@ -84,23 +84,24 @@ public class MavenBindexBuilder extends BindexBuilder {
 		StringBuilder prompt = new StringBuilder();
 		Build build = projectLayout.getModel().getBuild();
 		if (build != null) {
-			addResources(build.getSourceDirectory());
+			String sourceDirectory = build.getSourceDirectory();
+			prompt.append(addResources(sourceDirectory));
 
 			List<Resource> resourcesDirectory = build.getResources();
 			if (resourcesDirectory != null) {
 				for (Resource resource : resourcesDirectory) {
-					addResources(resource.getDirectory());
+					prompt.append(addResources(resource.getDirectory()));
 				}
 			}
 
 			List<Resource> testResourcesDirectory = build.getTestResources();
 			if (testResourcesDirectory != null) {
 				for (Resource resource : testResourcesDirectory) {
-					addResources(resource.getDirectory());
+					prompt.append(addResources(resource.getDirectory()));
 				}
 			}
 
-			addResources(build.getTestSourceDirectory());
+			prompt.append(addResources(build.getTestSourceDirectory()));
 
 			Model model = projectLayout.getModel();
 			removeNotImportantData(model);

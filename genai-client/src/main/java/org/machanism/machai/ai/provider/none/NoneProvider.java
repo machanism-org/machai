@@ -234,14 +234,6 @@ public class NoneProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Releases resources held by this provider.
-	 */
-	@Override
-	public void close() {
-		// No-op.
-	}
-
-	/**
 	 * Initializes this provider from configuration.
 	 *
 	 * <p>This implementation performs no initialization and exists only for interface compatibility.

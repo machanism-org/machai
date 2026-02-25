@@ -78,10 +78,6 @@ public class ClaudeProvider implements GenAIProvider {
 	}
 
 	@Override
-	public void close() {
-	}
-
-	@Override
 	public boolean isThreadSafe() {
 		return false;
 	}

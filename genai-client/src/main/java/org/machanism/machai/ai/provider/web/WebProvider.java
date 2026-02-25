@@ -157,13 +157,4 @@ public class WebProvider extends NoneProvider {
 		return false;
 	}
 
-	/**
-	 * Releases resources held by the underlying Anteater workspace.
-	 *
-	 * <p>This method is idempotent.
-	 */
-	@Override
-	public void close() {
-		workspace.close();
-	}
 }
