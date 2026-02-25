@@ -34,13 +34,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
-import com.openai.core.JsonField;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
+import com.openai.errors.BadRequestException;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
-import com.openai.models.embeddings.EmbeddingModel;
 import com.openai.models.files.FileCreateParams;
 import com.openai.models.files.FileObject;
 import com.openai.models.files.FilePurpose;
@@ -245,12 +244,17 @@ public class OpenAIProvider implements GenAIProvider {
 		ResponseCreateParams responseCreateParams = builder.tools(new ArrayList<Tool>(toolMap.keySet())).build();
 		logger.debug("Sending request to LLM service.");
 
-		Response response = getClient().responses().create(responseCreateParams);
+		try {
+			Response response = getClient().responses().create(responseCreateParams);
 
-		logger.debug("Received response from LLM service.");
-		captureUsage(response.usage());
+			logger.debug("Received response from LLM service.");
+			captureUsage(response.usage());
 
-		return parseResponse(response);
+			return parseResponse(response);
+		} catch (BadRequestException e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	/**
@@ -344,15 +348,24 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public List<Double> embedding(String text, long dimensions) {
-		List<Double> embedding = null;
-		if (text != null) {
-			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(EMBEDDING_MODEL)
-					.dimensions(dimensions).build();
-			CreateEmbeddingResponse response = getClient().embeddings().create(params);
-			embedding = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
-		}
+		try {
+			List<Double> embedding = null;
+			if (text != null) {
+				EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(EMBEDDING_MODEL)
+						.dimensions(dimensions).build();
+				CreateEmbeddingResponse response = getClient().embeddings().create(params);
+				
+				//com.openai.models.embeddings.CreateEmbeddingResponse.Usage usage = response.usage();
 
-		return embedding;
+				embedding = response.data().get(0).embedding().stream().map(Double::valueOf)
+						.collect(Collectors.toList());
+			}
+
+			return embedding;
+		} catch (BadRequestException e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	/**

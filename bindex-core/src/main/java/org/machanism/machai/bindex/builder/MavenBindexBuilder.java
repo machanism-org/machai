@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Resource;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.PomReader;
 import org.slf4j.Logger;
@@ -55,8 +56,8 @@ public class MavenBindexBuilder extends BindexBuilder {
 	 * @param projectLayout Maven project layout describing the POM and directory
 	 *                      structure
 	 */
-	public MavenBindexBuilder(MavenProjectLayout projectLayout) {
-		super(projectLayout);
+	public MavenBindexBuilder(MavenProjectLayout projectLayout, String genai, Configurator config) {
+		super(projectLayout, genai, config);
 		this.projectLayout = projectLayout;
 	}
 
@@ -72,44 +73,43 @@ public class MavenBindexBuilder extends BindexBuilder {
 	 * <li>prompts the cleaned POM text,</li>
 	 * <li>adds any additional Maven-specific prompting rules.</li>
 	 * </ol>
+	 * 
+	 * @return
 	 *
 	 * @throws IOException if source/resource files cannot be read or prompting
 	 *                     fails
 	 */
 	@Override
-	public void projectContext() throws IOException {
+	public String projectContext() throws IOException {
+		StringBuilder prompt = new StringBuilder();
 		Build build = projectLayout.getModel().getBuild();
-		if (build == null) {
-			return;
-		}
+		if (build != null) {
+			addResources(build.getSourceDirectory());
 
-		addResources(build.getSourceDirectory());
-
-		List<Resource> resourcesDirectory = build.getResources();
-		if (resourcesDirectory != null) {
-			for (Resource resource : resourcesDirectory) {
-				addResources(resource.getDirectory());
+			List<Resource> resourcesDirectory = build.getResources();
+			if (resourcesDirectory != null) {
+				for (Resource resource : resourcesDirectory) {
+					addResources(resource.getDirectory());
+				}
 			}
-		}
 
-		List<Resource> testResourcesDirectory = build.getTestResources();
-		if (testResourcesDirectory != null) {
-			for (Resource resource : testResourcesDirectory) {
-				addResources(resource.getDirectory());
+			List<Resource> testResourcesDirectory = build.getTestResources();
+			if (testResourcesDirectory != null) {
+				for (Resource resource : testResourcesDirectory) {
+					addResources(resource.getDirectory());
+				}
 			}
+
+			addResources(build.getTestSourceDirectory());
+
+			Model model = projectLayout.getModel();
+			removeNotImportantData(model);
+
+			String pom = PomReader.printModel(model);
+			prompt.append(MessageFormat.format(promptBundle.getString("pom_resource_section"), pom));
+			prompt.append(promptBundle.getString("additional_rules"));
 		}
-
-		addResources(build.getTestSourceDirectory());
-
-		Model model = projectLayout.getModel();
-		removeNotImportantData(model);
-
-		String pom = PomReader.printModel(model);
-		String prompt = MessageFormat.format(promptBundle.getString("pom_resource_section"), pom);
-		getGenAIProvider().prompt(prompt);
-
-		prompt = promptBundle.getString("additional_rules");
-		getGenAIProvider().prompt(prompt);
+		return prompt.toString();
 	}
 
 	/**
@@ -117,25 +117,29 @@ public class MavenBindexBuilder extends BindexBuilder {
 	 *
 	 * @param directory directory path (as configured in the POM) to scan; ignored
 	 *                  if blank or missing
+	 * @return
 	 * @throws IOException if walking the directory fails
 	 */
-	private void addResources(String directory) throws IOException {
+	private String addResources(String directory) throws IOException {
+		StringBuilder prompt = new StringBuilder();
 		if (StringUtils.isBlank(directory)) {
-			return;
+			return prompt.toString();
 		}
 
 		Path startPath = Paths.get(directory);
 		if (!Files.exists(startPath)) {
-			return;
+			return prompt.toString();
 		}
 
 		Files.walk(startPath).filter(Files::isRegularFile).forEach(f -> {
 			try {
-				promptFile(f.toFile(), "source_resource_section");
+				prompt.append(promptFile(f.toFile(), "source_resource_section"));
 			} catch (IOException e) {
 				logger.warn("File: {} adding failed.", f);
 			}
 		});
+
+		return prompt.toString();
 	}
 
 	/**

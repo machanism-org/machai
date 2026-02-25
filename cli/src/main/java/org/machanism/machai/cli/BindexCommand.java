@@ -62,16 +62,20 @@ public class BindexCommand {
 			@ShellOption(value = { "-u",
 					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "false") boolean update,
 			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String genai)
 			throws IOException {
 
-		chatModel = Optional.ofNullable(chatModel)
-				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
-		BindexCreator register = new BindexCreator(provider);
-		register.update(update);
-		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-		register.scanFolder(dir);
+		try {
+			genai = Optional.ofNullable(genai)
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+			BindexCreator register = new BindexCreator(genai, config);
+			register.update(update);
+			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+			register.scanFolder(dir);
+
+		} finally {
+			GenAIProviderManager.logUsage();
+		}
 	}
 
 	/**
@@ -93,12 +97,17 @@ public class BindexCommand {
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-		chatModel = Optional.ofNullable(chatModel)
-				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
-		BindexRegister register = new BindexRegister(provider, registerUrl);
-		register.update(update);
-		register.scanFolder(dir);
+		try {
+			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+			chatModel = Optional.ofNullable(chatModel)
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
+			BindexRegister register = new BindexRegister(provider, registerUrl);
+			register.update(update);
+			register.scanFolder(dir);
+		} finally {
+			GenAIProviderManager.logUsage();
+		}
+
 	}
 }

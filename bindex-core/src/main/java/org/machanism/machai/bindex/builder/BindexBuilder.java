@@ -9,7 +9,9 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
 
@@ -57,22 +59,26 @@ public class BindexBuilder {
 	 */
 	private Bindex origin;
 
-	/** Provider used to accumulate prompts and perform the generation request. */
-	private GenAIProvider genAIProvider;
-
 	/** Optional {@link ResourceBundle} used to format prompt templates. */
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
 
 	/** Project layout used to locate files and contextual data for generation. */
 	private final ProjectLayout projectLayout;
 
+	private GenAIProvider provider;
+
 	/**
 	 * Constructs a builder for the specified project layout.
 	 *
 	 * @param projectLayout describes the target project on disk
 	 */
-	public BindexBuilder(ProjectLayout projectLayout) {
+	public BindexBuilder(ProjectLayout projectLayout, String genai, Configurator config) {
 		this.projectLayout = projectLayout;
+
+		provider = GenAIProviderManager.getProvider(genai, config);
+
+		String systemPrompt = PROMPT_BUNDLE.getString("bindex_system_instructions");
+		provider.instructions(systemPrompt);
 	}
 
 	/**
@@ -96,22 +102,25 @@ public class BindexBuilder {
 	 *                     the output cannot be parsed
 	 */
 	public Bindex build() throws IOException {
-		bindexSchemaPrompt(genAIProvider);
+
+		StringBuilder prompt = new StringBuilder();
+		prompt.append(bindexSchemaPrompt());
 
 		if (origin != null) {
 			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
-			String prompt = MessageFormat.format(PROMPT_BUNDLE.getString("update_bindex_prompt"), bindexStr);
-			genAIProvider.prompt(prompt);
+			String update_bindex_prompt = MessageFormat.format(PROMPT_BUNDLE.getString("update_bindex_prompt"),
+					bindexStr);
+			prompt.append(update_bindex_prompt);
 		}
 
-		projectContext();
+		prompt.append(projectContext());
+		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt"));
 
-		String prompt = PROMPT_BUNDLE.getString("bindex_generation_prompt");
-		getGenAIProvider().prompt(prompt);
+		provider.prompt(prompt.toString());
 
 		File tmpBindexDir = new File(projectLayout.getProjectDir(), BINDEX_TEMP_DIR);
-		genAIProvider.inputsLog(tmpBindexDir);
-		String output = genAIProvider.perform();
+		provider.inputsLog(tmpBindexDir);
+		String output = provider.perform();
 
 		if (output == null) {
 			return null;
@@ -128,21 +137,22 @@ public class BindexBuilder {
 	 *
 	 * @throws IOException if project context cannot be established
 	 */
-	protected void projectContext() throws IOException {
-		// no-op
+	protected String projectContext() throws IOException {
+		return "";
 	}
 
 	/**
 	 * Prompts the provider with the Bindex JSON schema.
 	 *
 	 * @param provider provider to receive schema instructions
+	 * @return
 	 * @throws IOException if the schema cannot be read or prompting fails
 	 */
-	public static void bindexSchemaPrompt(GenAIProvider provider) throws IOException {
+	public static String bindexSchemaPrompt() throws IOException {
 		URL systemResource = Bindex.class.getResource(BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, "UTF8");
 		String prompt = MessageFormat.format(PROMPT_BUNDLE.getString("bindex_schema_section"), schema);
-		provider.prompt(prompt);
+		return prompt;
 	}
 
 	/**
@@ -163,29 +173,6 @@ public class BindexBuilder {
 	 */
 	public Bindex getOrigin() {
 		return origin;
-	}
-
-	/**
-	 * Returns the {@link GenAIProvider} used for building.
-	 *
-	 * @return provider used for prompts
-	 */
-	public GenAIProvider getGenAIProvider() {
-		return genAIProvider;
-	}
-
-	/**
-	 * Sets the {@link GenAIProvider} for this builder and applies the system
-	 * instructions prompt.
-	 *
-	 * @param genAIProvider provider instance
-	 * @return this builder for fluent chaining
-	 */
-	public BindexBuilder genAIProvider(GenAIProvider genAIProvider) {
-		this.genAIProvider = genAIProvider;
-		String systemPrompt = PROMPT_BUNDLE.getString("bindex_system_instructions");
-		this.genAIProvider.instructions(systemPrompt);
-		return this;
 	}
 
 	/**
@@ -213,7 +200,7 @@ public class BindexBuilder {
 	 * @param provider
 	 * @throws IOException if reading the file fails
 	 */
-	public void promptFile(File file, String bundleMessageName) throws IOException {
+	public String promptFile(File file, String bundleMessageName) throws IOException {
 		String type = FilenameUtils.getExtension(file.getName());
 		try (FileInputStream input = new FileInputStream(file)) {
 			String fileData = IOUtils.toString(input, "UTF8");
@@ -228,7 +215,11 @@ public class BindexBuilder {
 			} else {
 				prompt = fileData;
 			}
-			genAIProvider.prompt(prompt);
+			return prompt;
 		}
+	}
+
+	public GenAIProvider getGenAIProvider() {
+		return provider;
 	}
 }

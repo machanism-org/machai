@@ -11,6 +11,7 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.layout.JScriptProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -47,8 +48,8 @@ public class JScriptBindexBuilder extends BindexBuilder {
 	 * @param projectLayout layout describing the project directory and manifest
 	 *                      location
 	 */
-	public JScriptBindexBuilder(ProjectLayout projectLayout) {
-		super(projectLayout);
+	public JScriptBindexBuilder(ProjectLayout projectLayout, String genai, Configurator config) {
+		super(projectLayout, genai, config);
 	}
 
 	/**
@@ -62,16 +63,19 @@ public class JScriptBindexBuilder extends BindexBuilder {
 	 * {@code .js}/{@code .ts}/{@code .vue} file,</li>
 	 * <li>adds additional prompting rules for JavaScript projects.</li>
 	 * </ol>
+	 * 
+	 * @return
 	 *
 	 * @throws IOException if reading files fails or prompting fails
 	 */
 	@Override
-	public void projectContext() throws IOException {
+	public String projectContext() throws IOException {
+		StringBuilder prompt = new StringBuilder();
+
 		File packageFile = new File(getProjectLayout().getProjectDir(), JScriptProjectLayout.PROJECT_MODEL_FILE_NAME);
 		try (FileReader reader = new FileReader(packageFile)) {
-			String prompt = MessageFormat.format(promptBundle.getString("js_resource_section"),
-					IOUtils.toString(reader));
-			getGenAIProvider().prompt(prompt);
+			prompt.append(
+					MessageFormat.format(promptBundle.getString("js_resource_section"), IOUtils.toString(reader)));
 		}
 
 		Path startPath = Paths.get(new File(getProjectLayout().getProjectDir(), "src").getAbsolutePath());
@@ -86,8 +90,8 @@ public class JScriptBindexBuilder extends BindexBuilder {
 					});
 		}
 
-		String prompt = promptBundle.getString("additional_rules");
-		getGenAIProvider().prompt(prompt);
+		prompt.append(promptBundle.getString("additional_rules"));
+		return prompt.toString();
 	}
 
 }

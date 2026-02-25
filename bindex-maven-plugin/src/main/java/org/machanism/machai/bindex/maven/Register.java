@@ -52,7 +52,7 @@ public class Register extends AbstractBindexMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (isBindexed()) {
-			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, getConfigurator());
+			GenAIProvider provider = GenAIProviderManager.getProvider(genai, getConfigurator());
 			try {
 				BindexRegister register = new BindexRegister(provider, registerUrl);
 				register.update(update);

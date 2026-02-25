@@ -3,6 +3,7 @@ package org.machanism.machai.bindex;
 import java.io.File;
 import java.io.IOException;
 
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -23,10 +24,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <h2>Example</h2>
  *
  * <pre>
- * GenAIProvider provider = ...;
+ * GenAIProvider genai = ...;
  * ProjectLayout layout = ...;
  *
- * new BindexCreator(provider)
+ * new BindexCreator(genai)
  *     .update(true)
  *     .processFolder(layout);
  * </pre>
@@ -40,19 +41,22 @@ public class BindexCreator extends BindexProjectProcessor {
 	/** Logger instance for the BindexCreator class. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BindexCreator.class);
 
-	/** Provider used to generate or enrich the Bindex. */
-	private final GenAIProvider provider;
+	/** ChatModel used to generate or enrich the Bindex. */
+	private final String genai;
 
 	/** Whether an existing Bindex should be overwritten. */
 	private boolean update;
 
+	private Configurator config;
+
 	/**
 	 * Creates a {@link BindexCreator}.
 	 *
-	 * @param provider provider used for AI-assisted Bindex creation
+	 * @param genai genai used for AI-assisted Bindex creation
 	 */
-	public BindexCreator(GenAIProvider provider) {
-		this.provider = provider;
+	public BindexCreator(String genai, Configurator config) {
+		this.genai = genai;
+		this.config = config;
 	}
 
 	/**
@@ -69,7 +73,7 @@ public class BindexCreator extends BindexProjectProcessor {
 	 */
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
-			BindexBuilder bindexBuilder = BindexBuilderFactory.create(projectLayout);
+			BindexBuilder bindexBuilder = BindexBuilderFactory.create(projectLayout, genai, config);
 
 			File projectDir = bindexBuilder.getProjectLayout().getProjectDir();
 			Bindex origin = getBindex(projectDir);
@@ -85,7 +89,7 @@ public class BindexCreator extends BindexProjectProcessor {
 				parent.mkdirs();
 			}
 
-			Bindex bindex = bindexBuilder.origin(origin).genAIProvider(provider).build();
+			Bindex bindex = bindexBuilder.origin(origin).build();
 			if (bindex != null) {
 				new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(bindexFile, bindex);
 				LOGGER.info("Bindex file: {}", bindexFile);

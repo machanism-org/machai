@@ -8,6 +8,7 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 import org.apache.commons.io.IOUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
@@ -44,8 +45,8 @@ public class PythonBindexBuilder extends BindexBuilder {
 	 * @param projectLayout layout describing the project directory and manifest
 	 *                      location
 	 */
-	public PythonBindexBuilder(ProjectLayout projectLayout) {
-		super(projectLayout);
+	public PythonBindexBuilder(ProjectLayout projectLayout, String genai, Configurator config) {
+		super(projectLayout, genai, config);
 	}
 
 	/**
@@ -64,13 +65,14 @@ public class PythonBindexBuilder extends BindexBuilder {
 	 * @throws IOException if reading the manifest fails or prompting fails
 	 */
 	@Override
-	public void projectContext() throws IOException {
+	public String projectContext() throws IOException {
 		File pyprojectTomlFile = new File(getProjectLayout().getProjectDir(), PROJECT_MODEL_FILE_NAME);
 
+		StringBuilder prompt = new StringBuilder();
+
 		try (FileReader reader = new FileReader(pyprojectTomlFile)) {
-			String prompt = MessageFormat.format(promptBundle.getString("project_build_section"),
-					IOUtils.toString(reader));
-			getGenAIProvider().prompt(prompt);
+			prompt.append(
+					MessageFormat.format(promptBundle.getString("project_build_section"), IOUtils.toString(reader)));
 		}
 
 		TomlParseResult result = Toml.parse(pyprojectTomlFile.toPath());
@@ -92,7 +94,9 @@ public class PythonBindexBuilder extends BindexBuilder {
 			}
 		}
 
-		String prompt = promptBundle.getString("additional_rules");
-		getGenAIProvider().prompt(prompt);
+		prompt.append(promptBundle.getString("additional_rules"));
+
+		return prompt.toString();
 	}
+
 }
