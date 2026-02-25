@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>machai</artifactId>
-		<version>0.0.12-SNAPSHOT</version>
+		<version>0.0.12</version>
 	</parent>
 
 	<artifactId>machai-cli</artifactId>
@@ -76,12 +76,12 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>bindex-core</artifactId>
-			<version>0.0.12-SNAPSHOT</version>
+			<version>0.0.12</version>
 		</dependency>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>ghostwriter</artifactId>
-			<version>0.0.12-SNAPSHOT</version>
+			<version>0.0.12</version>
 		</dependency>
 
 		<dependency>
