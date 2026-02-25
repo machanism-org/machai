@@ -67,7 +67,7 @@ import com.mongodb.client.result.InsertOneResult;
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
-public class Picker implements Closeable {
+public class Picker {
 	private static Logger logger = LoggerFactory.getLogger(Picker.class);
 
 	private static final String INSTANCENAME = "machanism";
@@ -125,16 +125,6 @@ public class Picker implements Closeable {
 		mongoClient = MongoClients.create(uri);
 		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
 		collection = database.getCollection(CONNECTION);
-	}
-
-	/**
-	 * Closes the resource-backed connections.
-	 *
-	 * @throws IOException if closing the MongoDB client fails
-	 */
-	@Override
-	public void close() throws IOException {
-		mongoClient.close();
 	}
 
 	/**

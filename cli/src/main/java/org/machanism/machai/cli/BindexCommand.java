@@ -97,9 +97,8 @@ public class BindexCommand {
 		chatModel = Optional.ofNullable(chatModel)
 				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
-		try (BindexRegister register = new BindexRegister(provider, registerUrl)) {
-			register.update(update);
-			register.scanFolder(dir);
-		}
+		BindexRegister register = new BindexRegister(provider, registerUrl);
+		register.update(update);
+		register.scanFolder(dir);
 	}
 }

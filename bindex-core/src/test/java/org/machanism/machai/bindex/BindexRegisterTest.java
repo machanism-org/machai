@@ -1,16 +1,13 @@
 package org.machanism.machai.bindex;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -123,32 +120,6 @@ class BindexRegisterTest {
         // Assert
         verify(picker).getRegistredId(any(Bindex.class));
         verify(picker).create(any(Bindex.class));
-    }
-
-    @Test
-    void close_delegatesToPickerClose() throws Exception {
-        // Arrange
-        BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost");
-        Picker picker = mock(Picker.class);
-        setPicker(register, picker);
-
-        // Act
-        register.close();
-
-        // Assert
-        verify(picker).close();
-    }
-
-    @Test
-    void close_whenPickerCloseThrows_propagatesIOException() throws Exception {
-        // Arrange
-        BindexRegister register = new BindexRegister(mock(GenAIProvider.class), "mongodb://localhost");
-        Picker picker = mock(Picker.class);
-        doThrow(new IOException("fail")).when(picker).close();
-        setPicker(register, picker);
-
-        // Act / Assert
-        assertThrows(IOException.class, register::close);
     }
 
     private static void setPicker(BindexRegister register, Picker picker) throws Exception {

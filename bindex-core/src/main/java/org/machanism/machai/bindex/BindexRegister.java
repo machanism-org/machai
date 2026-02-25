@@ -1,6 +1,5 @@
 package org.machanism.machai.bindex;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @since 0.0.2
  * @see BindexProjectProcessor
  */
-public class BindexRegister extends BindexProjectProcessor implements Closeable {
+public class BindexRegister extends BindexProjectProcessor {
 
 	/** Logger instance for this class. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BindexRegister.class);
@@ -75,16 +74,6 @@ public class BindexRegister extends BindexProjectProcessor implements Closeable 
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
-	}
-
-	/**
-	 * Closes the underlying {@link Picker} (and its database resources).
-	 *
-	 * @throws IOException if closing fails
-	 */
-	@Override
-	public void close() throws IOException {
-		picker.close();
 	}
 
 	/**

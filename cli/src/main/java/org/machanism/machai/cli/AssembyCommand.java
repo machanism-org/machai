@@ -96,7 +96,8 @@ public class AssembyCommand {
 		query = getQueryFromFile(query);
 
 		findQuery = query;
-		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+		chatModel = Optional.ofNullable(chatModel)
+				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", 0.90));
 		bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
@@ -144,7 +145,8 @@ public class AssembyCommand {
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+		chatModel = Optional.ofNullable(chatModel)
+				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
@@ -184,7 +186,8 @@ public class AssembyCommand {
 			@ShellOption(value = { "-d",
 					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
 
-		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+		chatModel = Optional.ofNullable(chatModel)
+				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 
 		FunctionToolsLoader.getInstance().applyTools(provider);
@@ -213,12 +216,11 @@ public class AssembyCommand {
 	private List<Bindex> pickBricks(GenAIProvider provider, String query, Double score, String url, String chatModel)
 			throws IOException {
 		List<Bindex> bindexList = null;
-		try (Picker picker = new Picker(provider, url)) {
-			picker.setScore(score);
-			bindexList = picker.pick(query);
-			logger.info("Search results for libraries matching the requested query:");
-			printFindResult(bindexList, picker);
-		}
+		Picker picker = new Picker(provider, url);
+		picker.setScore(score);
+		bindexList = picker.pick(query);
+		logger.info("Search results for libraries matching the requested query:");
+		printFindResult(bindexList, picker);
 		return bindexList;
 	}
 

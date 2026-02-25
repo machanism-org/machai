@@ -11,11 +11,13 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexRegister;
 
 /**
- * Maven goal that registers the project's Bindex metadata in an external registry.
+ * Maven goal that registers the project's Bindex metadata in an external
+ * registry.
  *
  * <p>
- * Uses the configured AI provider/model to scan the project folder and publish metadata to the configured registry.
- * The goal is skipped for projects with {@code pom} packaging.
+ * Uses the configured AI provider/model to scan the project folder and publish
+ * metadata to the configured registry. The goal is skipped for projects with
+ * {@code pom} packaging.
  * </p>
  *
  * <p>
@@ -33,7 +35,8 @@ public class Register extends AbstractBindexMojo {
 	protected boolean update;
 
 	/**
-	 * URL of the registry database endpoint where project metadata should be stored.
+	 * URL of the registry database endpoint where project metadata should be
+	 * stored.
 	 */
 	@Parameter(property = "bindex.register.url")
 	protected String registerUrl;
@@ -41,14 +44,17 @@ public class Register extends AbstractBindexMojo {
 	/**
 	 * Runs the {@code register} goal.
 	 *
-	 * @throws MojoExecutionException if an unexpected error occurs during registration
-	 * @throws MojoFailureException if the goal fails due to a known, user-correctable problem
+	 * @throws MojoExecutionException if an unexpected error occurs during
+	 *                                registration
+	 * @throws MojoFailureException   if the goal fails due to a known,
+	 *                                user-correctable problem
 	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (isBindexed()) {
 			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, getConfigurator());
-			try (BindexRegister register = new BindexRegister(provider, registerUrl)) {
+			try {
+				BindexRegister register = new BindexRegister(provider, registerUrl);
 				register.update(update);
 				register.scanFolder(project.getBasedir());
 			} catch (IOException e) {

@@ -37,9 +37,6 @@ class PickerTest {
 
         // Assert
         assertNull(score);
-
-        // Cleanup
-        picker.close();
     }
 
     @Test
@@ -52,9 +49,6 @@ class PickerTest {
 
         // Assert
         assertEquals("custom-model", picker.getEmbeddingModelName());
-
-        // Cleanup
-        picker.close();
     }
 
     @Test
@@ -92,8 +86,5 @@ class PickerTest {
 
         // Assert
         assertEquals(new HashSet<String>(Arrays.asList("a", "b", "c")), deps);
-
-        // Cleanup
-        picker.close();
     }
 }
