@@ -50,7 +50,6 @@ public abstract class ProjectProcessor {
 				processModule(projectDir, module);
 			}
 		} else {
-			projectLayout = getProjectLayout(projectDir);
 			processFolder(projectLayout);
 		}
 	}

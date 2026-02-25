@@ -49,10 +49,6 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.InsertOneResult;
 
-import dev.langchain4j.data.embedding.Embedding;
-import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
-import dev.langchain4j.model.output.Response;
-
 /**
  * Picker handles Bindex registration, lookup, and semantic queries using
  * embeddings and MongoDB.
@@ -201,10 +197,10 @@ public class Picker implements Closeable {
 	 * @return BsonArray of vector values
 	 * @throws JsonProcessingException On embedding or serialization errors
 	 */
-	BsonArray getEmbeddingBson(Classification classification, Integer dimensions) throws JsonProcessingException {
+	BsonArray getEmbeddingBson(Classification classification, int dimensions) throws JsonProcessingException {
 		String text = getClassificationText(classification);
 
-		List<Double> descEmbedding = getEmbedding(text, dimensions);
+		List<Double> descEmbedding = provider.embedding(text, dimensions); // , dimensions);
 		BsonArray bsonArray = new BsonArray(descEmbedding.stream().map(BsonDouble::new).collect(Collectors.toList()));
 		return bsonArray;
 	}
@@ -224,40 +220,6 @@ public class Picker implements Closeable {
 			id = ((ObjectId) document.get("_id")).toString();
 		}
 		return id;
-	}
-
-	/**
-	 * Calculates OpenAI embedding vector for the given classification text.
-	 *
-	 * @param text       Classification text
-	 * @param dimensions Required embedding vector dimensions
-	 * @return List of Double values (embedding vector)
-	 */
-	private List<Double> getEmbedding(String text, Integer dimensions) {
-
-		String embeddingApiKey = System.getenv("EMBEDDING_OPENAI_API_KEY");
-		if (StringUtils.isBlank(embeddingApiKey)) {
-			embeddingApiKey = System.getenv("OPENAI_API_KEY");
-			if (StringUtils.isNotBlank(embeddingApiKey)) {
-				logger.warn(
-						"EMBEDDING_OPENAI_API_KEY is not defined. The system will use OPENAI_API_KEY for embedding model operations.");
-			} else {
-				throw new IllegalStateException("EMBEDDING_OPENAI_API_KEY env variable is not set or is empty.");
-			}
-		}
-
-		String embeddingBaseUrl = System.getenv("EMBEDDING_OPENAI_BASE_URL");
-
-		OpenAiEmbeddingModel embeddingModel = OpenAiEmbeddingModel.builder()
-				.apiKey(embeddingApiKey)
-				.baseUrl(embeddingBaseUrl)
-				.modelName(embeddingModelName)
-				.timeout(java.time.Duration.ofSeconds(60))
-				.dimensions(dimensions)
-				.build();
-
-		Response<Embedding> response = embeddingModel.embed(text);
-		return response.content().vectorAsList().stream().map(Double::valueOf).collect(Collectors.toList());
 	}
 
 	/**
@@ -404,9 +366,9 @@ public class Picker implements Closeable {
 	 * @param bsons        Additional filters (language, layers, etc.)
 	 * @return Collection of result IDs (name:version tuples)
 	 */
-	private Collection<String> getResults(String indexName, String propertyPath, String query, Integer dimensions,
+	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
 			Bson... bsons) {
-		Iterable<Double> queryEmbedding = getEmbedding(query, dimensions);
+		Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
 
 		List<Bson> pipeline = new ArrayList<>();
 

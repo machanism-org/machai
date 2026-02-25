@@ -109,7 +109,7 @@ public class NoneProvider implements GenAIProvider {
 	 * @throws UnsupportedOperationException always thrown
 	 */
 	@Override
-	public List<Float> embedding(String text) {
+	public List<Double> embedding(String text, long dimensions) {
 		throw new UnsupportedOperationException("NoneProvider doesn't support embedding generation.");
 	}
 

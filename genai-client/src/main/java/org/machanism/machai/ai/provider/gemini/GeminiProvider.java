@@ -75,7 +75,7 @@ public class GeminiProvider implements GenAIProvider {
 	}
 
 	@Override
-	public List<Float> embedding(String text) {
+	public List<Double> embedding(String text, long dimensions) {
 		return null;
 	}
 }

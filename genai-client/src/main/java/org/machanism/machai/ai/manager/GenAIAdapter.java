@@ -68,8 +68,8 @@ public class GenAIAdapter implements GenAIProvider {
 	}
 
 	@Override
-	public List<Float> embedding(String text) {
-		return provider.embedding(text);
+	public List<Double> embedding(String text, long dimensions) {
+		return provider.embedding(text, dimensions);
 	}
 
 	@Override

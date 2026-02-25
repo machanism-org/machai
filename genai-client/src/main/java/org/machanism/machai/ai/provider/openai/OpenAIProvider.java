@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,11 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -36,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.core.JsonField;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
@@ -71,15 +70,22 @@ import com.openai.models.responses.Tool;
  * Configuration variables used by {@link #init(Configurator)}:
  * </p>
  * <ul>
- * <li>{@code chatModel}: model identifier passed to the OpenAI Responses API.</li>
+ * <li>{@code chatModel}: model identifier passed to the OpenAI Responses
+ * API.</li>
  * <li>{@code OPENAI_API_KEY}: API key (required).</li>
- * <li>{@code OPENAI_BASE_URL}: optional base URL for OpenAI-compatible endpoints.</li>
- * <li>{@code GENAI_TIMEOUT}: optional request timeout (seconds); when {@code 0} or missing, SDK defaults are used.</li>
- * <li>{@code MAX_OUTPUT_TOKENS}: optional max output token limit (defaults to {@link #MAX_OUTPUT_TOKENS}).</li>
- * <li>{@code MAX_TOOL_CALLS}: optional max tool call limit (defaults to {@link #MAX_TOOL_CALLS}).</li>
+ * <li>{@code OPENAI_BASE_URL}: optional base URL for OpenAI-compatible
+ * endpoints.</li>
+ * <li>{@code GENAI_TIMEOUT}: optional request timeout (seconds); when {@code 0}
+ * or missing, SDK defaults are used.</li>
+ * <li>{@code MAX_OUTPUT_TOKENS}: optional max output token limit (defaults to
+ * {@link #MAX_OUTPUT_TOKENS}).</li>
+ * <li>{@code MAX_TOOL_CALLS}: optional max tool call limit (defaults to
+ * {@link #MAX_TOOL_CALLS}).</li>
  * </ul>
  */
 public class OpenAIProvider implements GenAIProvider {
+
+	private static final String EMBEDDING_MODEL = "text-embedding-005";
 
 	/** Logger instance for this provider. */
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
@@ -130,7 +136,8 @@ public class OpenAIProvider implements GenAIProvider {
 	 * Initializes the provider from the given configuration.
 	 *
 	 * <p>
-	 * The implementation reads {@code OPENAI_BASE_URL} and {@code OPENAI_API_KEY} and creates an {@link OpenAIClient}.
+	 * The implementation reads {@code OPENAI_BASE_URL} and {@code OPENAI_API_KEY}
+	 * and creates an {@link OpenAIClient}.
 	 * </p>
 	 *
 	 * @param config provider configuration (must contain {@code OPENAI_API_KEY})
@@ -176,7 +183,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Uploads a file to OpenAI and adds its server-side reference to the current request inputs.
+	 * Uploads a file to OpenAI and adds its server-side reference to the current
+	 * request inputs.
 	 *
 	 * @param file local file to upload
 	 * @throws IOException           if reading file fails
@@ -185,8 +193,8 @@ public class OpenAIProvider implements GenAIProvider {
 	@Override
 	public void addFile(File file) throws IOException, FileNotFoundException {
 		try (FileInputStream input = new FileInputStream(file)) {
-			FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input)).purpose(FilePurpose.USER_DATA)
-					.build();
+			FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input))
+					.purpose(FilePurpose.USER_DATA).build();
 			FileObject fileObject = getClient().files().create(params);
 
 			ResponseInputFile.Builder inputFileBuilder = ResponseInputFile.builder().fileId(fileObject.id());
@@ -217,11 +225,13 @@ public class OpenAIProvider implements GenAIProvider {
 	 * Executes a request using the currently configured model, inputs, and tools.
 	 *
 	 * <p>
-	 * If the response contains tool calls, the provider executes the matching tool handlers and continues the
-	 * conversation until a final text response is produced.
+	 * If the response contains tool calls, the provider executes the matching tool
+	 * handlers and continues the conversation until a final text response is
+	 * produced.
 	 * </p>
 	 *
-	 * @return the final model response text (may be {@code null} if no text was produced)
+	 * @return the final model response text (may be {@code null} if no text was
+	 *         produced)
 	 */
 	@Override
 	public String perform() {
@@ -266,9 +276,10 @@ public class OpenAIProvider implements GenAIProvider {
 	 * Parses the given response and handles function tool calls.
 	 *
 	 * <p>
-	 * Tool calls are executed via {@link #callFunction(ResponseFunctionToolCall)}. If tool calls are present, the
-	 * method creates and sends a follow-up request with both the tool call and tool output attached, and repeats until
-	 * the model returns a final message.
+	 * Tool calls are executed via {@link #callFunction(ResponseFunctionToolCall)}.
+	 * If tool calls are present, the method creates and sends a follow-up request
+	 * with both the tool call and tool output attached, and repeats until the model
+	 * returns a final message.
 	 * </p>
 	 *
 	 * @param response response object
@@ -326,23 +337,27 @@ public class OpenAIProvider implements GenAIProvider {
 	/**
 	 * Requests an embedding vector for the given input text.
 	 *
-	 * @param text input to embed
-	 * @return embedding as a list of {@code float} values, or {@code null} when {@code text} is {@code null}
+	 * @param text       input to embed
+	 * @param dimensions
+	 * @return embedding as a list of {@code float} values, or {@code null} when
+	 *         {@code text} is {@code null}
 	 */
 	@Override
-	public List<Float> embedding(String text) {
-		List<Float> embedding = null;
+	public List<Double> embedding(String text, long dimensions) {
+		List<Double> embedding = null;
 		if (text != null) {
-			EmbeddingModel embModel = EmbeddingModel.TEXT_EMBEDDING_ADA_002;
-			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(embModel).build();
+			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(EMBEDDING_MODEL)
+					.dimensions(dimensions).build();
 			CreateEmbeddingResponse response = getClient().embeddings().create(params);
-			embedding = response.data().get(0).embedding();
+			embedding = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
 		}
+
 		return embedding;
 	}
 
 	/**
-	 * Executes a function tool call by finding a registered tool with the same name and delegating to its handler.
+	 * Executes a function tool call by finding a registered tool with the same name
+	 * and delegating to its handler.
 	 *
 	 * <p>
 	 * The handler is invoked with an {@code Object[]} of length 2:
@@ -353,7 +368,8 @@ public class OpenAIProvider implements GenAIProvider {
 	 * </ol>
 	 *
 	 * @param functionCall call details
-	 * @return result from function handler, or {@code null} if no matching tool is registered
+	 * @return result from function handler, or {@code null} if no matching tool is
+	 *         registered
 	 * @throws IllegalArgumentException if the tool call arguments cannot be parsed
 	 */
 	private Object callFunction(ResponseFunctionToolCall functionCall) {
@@ -377,7 +393,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Writes the current request inputs to {@link #inputsLog} when logging is enabled.
+	 * Writes the current request inputs to {@link #inputsLog} when logging is
+	 * enabled.
 	 */
 	private void logInputs() {
 		if (inputsLog != null) {
@@ -396,7 +413,8 @@ public class OpenAIProvider implements GenAIProvider {
 							if (responseInputContent.isInputText()) {
 								inputText = responseInputContent.inputText().get().text();
 							} else if (responseInputContent.isInputFile()) {
-								inputText = "Add resource by URL: " + responseInputContent.inputFile().get().fileUrl().get();
+								inputText = "Add resource by URL: "
+										+ responseInputContent.inputFile().get().fileUrl().get();
 							}
 						} else {
 							inputText = "Data invalid: " + responseInputItem;
@@ -424,14 +442,16 @@ public class OpenAIProvider implements GenAIProvider {
 	 * Registers a function tool for the current provider instance.
 	 *
 	 * <p>
-	 * The {@code paramsDesc} entries must follow the format {@code name:type:required:description}. The parameter
-	 * schema passed to OpenAI is a JSON Schema object of type {@code object}.
+	 * The {@code paramsDesc} entries must follow the format
+	 * {@code name:type:required:description}. The parameter schema passed to OpenAI
+	 * is a JSON Schema object of type {@code object}.
 	 * </p>
 	 *
 	 * @param name        tool function name
 	 * @param description tool description
 	 * @param function    handler callback for tool execution
-	 * @param paramsDesc  parameter descriptors in the format {@code name:type:required:description}
+	 * @param paramsDesc  parameter descriptors in the format
+	 *                    {@code name:type:required:description}
 	 */
 	@Override
 	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
@@ -492,7 +512,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Returns token usage metrics captured from the most recent {@link #perform()} call.
+	 * Returns token usage metrics captured from the most recent {@link #perform()}
+	 * call.
 	 *
 	 * @return usage metrics; never {@code null}
 	 */

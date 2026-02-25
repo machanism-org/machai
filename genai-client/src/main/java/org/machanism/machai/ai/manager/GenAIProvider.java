@@ -82,7 +82,7 @@ public interface GenAIProvider {
 	 * @param text the input text
 	 * @return the embedding vector
 	 */
-	List<Float> embedding(String text);
+	List<Double> embedding(String text, long dimensions);
 
 	/**
 	 * Clears any stored files and session/provider state.
