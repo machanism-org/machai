@@ -58,11 +58,6 @@ public class GenAIAdapter implements GenAIProvider {
 	}
 
 	@Override
-	public void promptFile(File file, String bundleMessageName) throws IOException {
-		provider.promptFile(file, bundleMessageName);
-	}
-
-	@Override
 	public void addFile(File file) throws IOException, FileNotFoundException {
 		provider.addFile(file);
 	}

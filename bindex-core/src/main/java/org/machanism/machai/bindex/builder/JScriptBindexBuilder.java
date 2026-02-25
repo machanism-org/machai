@@ -19,15 +19,16 @@ import org.slf4j.LoggerFactory;
 /**
  * {@link BindexBuilder} specialization for JavaScript/TypeScript/Vue projects.
  *
- * <p>This builder reads {@code package.json} from the project root and walks the {@code src} directory,
- * prompting the configured GenAI provider with all discovered source files (extensions: {@code .js},
- * {@code .ts}, {@code .vue}).
+ * <p>
+ * This builder reads {@code package.json} from the project root and walks the
+ * {@code src} directory, prompting the configured GenAI provider with all
+ * discovered source files (extensions: {@code .js}, {@code .ts}, {@code .vue}).
  *
- * <p>Example:
+ * <p>
+ * Example:
+ * 
  * <pre>{@code
- * Bindex bindex = new JScriptBindexBuilder(layout)
- *     .genAIProvider(provider)
- *     .build();
+ * Bindex bindex = new JScriptBindexBuilder(layout).genAIProvider(provider).build();
  * }</pre>
  *
  * @author Viktor Tovstyi
@@ -37,53 +38,56 @@ import org.slf4j.LoggerFactory;
  */
 public class JScriptBindexBuilder extends BindexBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(JScriptBindexBuilder.class);
-    private static final ResourceBundle promptBundle = ResourceBundle.getBundle("js_project_prompts");
+	private static final Logger logger = LoggerFactory.getLogger(JScriptBindexBuilder.class);
+	private static final ResourceBundle promptBundle = ResourceBundle.getBundle("js_project_prompts");
 
-    /**
-     * Creates a builder for a JavaScript/TypeScript/Vue project.
-     *
-     * @param projectLayout layout describing the project directory and manifest location
-     */
-    public JScriptBindexBuilder(ProjectLayout projectLayout) {
-        super(projectLayout);
-    }
+	/**
+	 * Creates a builder for a JavaScript/TypeScript/Vue project.
+	 *
+	 * @param projectLayout layout describing the project directory and manifest
+	 *                      location
+	 */
+	public JScriptBindexBuilder(ProjectLayout projectLayout) {
+		super(projectLayout);
+	}
 
-    /**
-     * Adds JavaScript project context to the provider.
-     *
-     * <p>The implementation:
-     * <ol>
-     *   <li>prompts the contents of {@code package.json},</li>
-     *   <li>walks the {@code src} tree and prompts each {@code .js}/{@code .ts}/{@code .vue} file,</li>
-     *   <li>adds additional prompting rules for JavaScript projects.</li>
-     * </ol>
-     *
-     * @throws IOException if reading files fails or prompting fails
-     */
-    @Override
-    public void projectContext() throws IOException {
-        File packageFile = new File(getProjectLayout().getProjectDir(), JScriptProjectLayout.PROJECT_MODEL_FILE_NAME);
-        try (FileReader reader = new FileReader(packageFile)) {
-            String prompt = MessageFormat.format(promptBundle.getString("js_resource_section"), IOUtils.toString(reader));
-            getGenAIProvider().prompt(prompt);
-        }
+	/**
+	 * Adds JavaScript project context to the provider.
+	 *
+	 * <p>
+	 * The implementation:
+	 * <ol>
+	 * <li>prompts the contents of {@code package.json},</li>
+	 * <li>walks the {@code src} tree and prompts each
+	 * {@code .js}/{@code .ts}/{@code .vue} file,</li>
+	 * <li>adds additional prompting rules for JavaScript projects.</li>
+	 * </ol>
+	 *
+	 * @throws IOException if reading files fails or prompting fails
+	 */
+	@Override
+	public void projectContext() throws IOException {
+		File packageFile = new File(getProjectLayout().getProjectDir(), JScriptProjectLayout.PROJECT_MODEL_FILE_NAME);
+		try (FileReader reader = new FileReader(packageFile)) {
+			String prompt = MessageFormat.format(promptBundle.getString("js_resource_section"),
+					IOUtils.toString(reader));
+			getGenAIProvider().prompt(prompt);
+		}
 
-        Path startPath = Paths.get(new File(getProjectLayout().getProjectDir(), "src").getAbsolutePath());
-        if (Files.exists(startPath)) {
-            Files.walk(startPath)
-                .filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js"))
-                .forEach(f -> {
-                    try {
-                        getGenAIProvider().promptFile(f.toFile(), "source_resource_section");
-                    } catch (IOException e) {
-                        logger.warn("File: {} adding failed.", f);
-                    }
-                });
-        }
+		Path startPath = Paths.get(new File(getProjectLayout().getProjectDir(), "src").getAbsolutePath());
+		if (Files.exists(startPath)) {
+			Files.walk(startPath).filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js"))
+					.forEach(f -> {
+						try {
+							promptFile(f.toFile(), "source_resource_section");
+						} catch (IOException e) {
+							logger.warn("File: {} adding failed.", f);
+						}
+					});
+		}
 
-        String prompt = promptBundle.getString("additional_rules");
-        getGenAIProvider().prompt(prompt);
-    }
+		String prompt = promptBundle.getString("additional_rules");
+		getGenAIProvider().prompt(prompt);
+	}
 
 }

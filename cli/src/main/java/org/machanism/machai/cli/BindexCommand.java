@@ -37,14 +37,14 @@ import org.springframework.shell.standard.ShellOption;
  */
 @ShellComponent
 public class BindexCommand {
-	private static final String DEFAULT_GENAI_VALUE = "OpenAI:gpt-5-mini";
+	private static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
 
 	/** JLine line reader for shell interaction. */
 	@Autowired
 	@Lazy
 	LineReader reader;
 
-	private PropertiesConfigurator config;
+	private PropertiesConfigurator config = new PropertiesConfigurator();
 
 	/**
 	 * Generates bindex files for the given directory using GenAI provider.
@@ -65,7 +65,8 @@ public class BindexCommand {
 					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
 			throws IOException {
 
-		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+		chatModel = Optional.ofNullable(chatModel)
+				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		BindexCreator register = new BindexCreator(provider);
 		register.update(update);
@@ -93,7 +94,8 @@ public class BindexCommand {
 			throws IOException {
 
 		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-		chatModel = Optional.ofNullable(chatModel).orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+		chatModel = Optional.ofNullable(chatModel)
+				.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
 		GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 		try (BindexRegister register = new BindexRegister(provider, registerUrl)) {
 			register.update(update);

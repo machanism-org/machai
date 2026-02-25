@@ -84,17 +84,6 @@ public class NoneProvider implements GenAIProvider {
 	/**
 	 * Ignores the provided file.
 	 *
-	 * @param file              file containing prompt text
-	 * @param bundleMessageName unused; present for interface compatibility
-	 */
-	@Override
-	public void promptFile(File file, String bundleMessageName) {
-		// No-op in NoneProvider
-	}
-
-	/**
-	 * Ignores the provided file.
-	 *
 	 * @param file ignored
 	 */
 	@Override

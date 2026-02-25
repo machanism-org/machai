@@ -13,9 +13,12 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Creates or updates a project's {@code bindex.json} file using a {@link GenAIProvider}.
+ * Creates or updates a project's {@code bindex.json} file using a
+ * {@link GenAIProvider}.
  *
- * <p>The actual Bindex content is produced by a {@link BindexBuilder} selected by * {@link BindexBuilderFactory} based on the provided {@link ProjectLayout}.
+ * <p>
+ * The actual Bindex content is produced by a {@link BindexBuilder} selected by
+ * {@link BindexBuilderFactory} based on the provided {@link ProjectLayout}.
  *
  * <h2>Example</h2>
  *
@@ -53,13 +56,16 @@ public class BindexCreator extends BindexProjectProcessor {
 	}
 
 	/**
-	 * Creates or updates {@code bindex.json} in the project directory described by the given layout.
+	 * Creates or updates {@code bindex.json} in the project directory described by
+	 * the given layout.
 	 *
-	 * <p>If {@link #update(boolean)} is enabled, any existing Bindex file will be regenerated.
-	 * If update is disabled, an existing file is left unchanged.
+	 * <p>
+	 * If {@link #update(boolean)} is enabled, any existing Bindex file will be
+	 * regenerated. If update is disabled, an existing file is left unchanged.
 	 *
 	 * @param projectLayout project layout to inspect
-	 * @throws IllegalArgumentException if an I/O error occurs while reading or writing the Bindex
+	 * @throws IllegalArgumentException if an I/O error occurs while reading or
+	 *                                  writing the Bindex
 	 */
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
@@ -70,6 +76,7 @@ public class BindexCreator extends BindexProjectProcessor {
 
 			File bindexFile = getBindexFile(projectDir);
 			if (!update && origin != null) {
+				LOGGER.info("Bindex file found at {}. Skipping generation.", bindexFile);
 				return;
 			}
 
@@ -80,7 +87,7 @@ public class BindexCreator extends BindexProjectProcessor {
 
 			Bindex bindex = bindexBuilder.origin(origin).genAIProvider(provider).build();
 			if (bindex != null) {
-				new ObjectMapper().writeValue(bindexFile, bindex);
+				new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(bindexFile, bindex);
 				LOGGER.info("Bindex file: {}", bindexFile);
 			}
 		} catch (IOException e) {
@@ -91,7 +98,8 @@ public class BindexCreator extends BindexProjectProcessor {
 	/**
 	 * Enables or disables update mode.
 	 *
-	 * @param update {@code true} to overwrite an existing {@code bindex.json}; {@code false} to only create when absent
+	 * @param update {@code true} to overwrite an existing {@code bindex.json};
+	 *               {@code false} to only create when absent
 	 * @return this instance for chaining
 	 */
 	public BindexCreator update(boolean update) {

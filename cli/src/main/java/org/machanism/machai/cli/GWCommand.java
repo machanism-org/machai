@@ -1,7 +1,6 @@
 package org.machanism.machai.cli;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -14,7 +13,6 @@ import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationExce
 import org.machanism.machai.gw.processor.FileProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -28,30 +26,6 @@ public class GWCommand {
 
 	@PostConstruct
 	public void init() {
-		try {
-			gwHomeDir = config.getFile(Ghostwriter.GW_HOME_PROP_NAME, null);
-
-			if (gwHomeDir == null) {
-				System.out.println(
-						"GW_HOME environment variable not found. Using the directory where the Ghostwriter JAR file is located.");
-				gwHomeDir = new File(GWCommand.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-				if (gwHomeDir.isFile()) {
-					gwHomeDir = gwHomeDir.getParentFile();
-				}
-			}
-
-			logger = LoggerFactory.getLogger(GWCommand.class);
-
-			try {
-				File configFile = new File(gwHomeDir, System.getProperty(Ghostwriter.GW_CONFIG_PROP_NAME, Ghostwriter.GW_PROPERTIES_FILE_NAME));
-				config.setConfiguration(configFile.getAbsolutePath());
-			} catch (IOException e) {
-				// The property file is not defined, ignore.
-			}
-		} catch (Exception e) {
-			// Configuration file not found. An alternative configuration method will be
-			// used.
-		}
 	}
 
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")

@@ -97,9 +97,6 @@ public class OpenAIProvider implements GenAIProvider {
 	/** Maps tools to handler functions. */
 	private Map<Tool, Function<Object[], Object>> toolMap = new HashMap<>();
 
-	/** Optional {@link ResourceBundle} used to format prompt templates. */
-	private ResourceBundle promptBundle;
-
 	/** Optional log file for input data. */
 	private File inputsLog;
 
@@ -176,38 +173,6 @@ public class OpenAIProvider implements GenAIProvider {
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
 				.addInputTextContent(text).build();
 		inputs.add(ResponseInputItem.ofMessage(message));
-	}
-
-	/**
-	 * Adds a prompt from a file.
-	 *
-	 * <p>
-	 * The file content is read as UTF-8 text. If {@code bundleMessageName} is not {@code null}, the read content is
-	 * formatted using either the configured {@link #promptBundle(ResourceBundle)} (when available) or
-	 * {@link String#format(String, Object...)}.
-	 * </p>
-	 *
-	 * @param file              the file containing prompt data
-	 * @param bundleMessageName key for a message in the {@link ResourceBundle}, or {@code null} to use raw file content
-	 * @throws IOException if reading the file fails
-	 */
-	@Override
-	public void promptFile(File file, String bundleMessageName) throws IOException {
-		String type = FilenameUtils.getExtension(file.getName());
-		try (FileInputStream input = new FileInputStream(file)) {
-			String fileData = IOUtils.toString(input, "UTF8");
-			String prompt;
-			if (bundleMessageName != null) {
-				if (promptBundle != null) {
-					prompt = MessageFormat.format(promptBundle.getString(bundleMessageName), file.getName(), type, fileData);
-				} else {
-					prompt = String.format(bundleMessageName, file.getName(), type);
-				}
-			} else {
-				prompt = fileData;
-			}
-			prompt(prompt);
-		}
 	}
 
 	/**
@@ -504,15 +469,6 @@ public class OpenAIProvider implements GenAIProvider {
 	@Override
 	public void instructions(String instructions) {
 		this.instructions = instructions;
-	}
-
-	/**
-	 * Sets the resource bundle used for prompt formatting.
-	 *
-	 * @param promptBundle resource bundle instance (may be {@code null})
-	 */
-	public void promptBundle(ResourceBundle promptBundle) {
-		this.promptBundle = promptBundle;
 	}
 
 	/**

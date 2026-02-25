@@ -36,10 +36,6 @@ public class ClaudeProvider implements GenAIProvider {
 	}
 
 	@Override
-	public void promptFile(File file, String bundleMessageName) throws IOException {
-	}
-
-	@Override
 	public void addFile(File file) throws IOException {
 	}
 

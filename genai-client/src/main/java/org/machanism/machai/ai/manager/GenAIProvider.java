@@ -59,16 +59,6 @@ public interface GenAIProvider {
 	void prompt(String text);
 
 	/**
-	 * Adds a user prompt using the contents of a file.
-	 *
-	 * @param file              the file containing prompt content
-	 * @param bundleMessageName a message identifier associated with the prompt (for
-	 *                          example, a resource bundle key)
-	 * @throws IOException if the file cannot be read
-	 */
-	void promptFile(File file, String bundleMessageName) throws IOException;
-
-	/**
 	 * Adds a local file resource for provider processing.
 	 *
 	 * @param file the file to add
