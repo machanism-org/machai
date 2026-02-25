@@ -32,7 +32,7 @@ Ghostwriter will process the current subfolder, but will always treat the path s
 **Example usage:**
 
 ```sh
-gw
+java -jar /opt/gw/gw.jar
 ```
 *(Run this command from any subfolder within `/path/to/your/project`)*
 
@@ -49,7 +49,7 @@ Alternatively, you can start Ghostwriter from within your project directory with
 - Run Ghostwriter CLI:
 
   ```sh
-  gw
+  java -jar /opt/gw/gw.jar
   ```
 
 Ghostwriter will treat the current directory as the project root and process all files and subfolders accordingly.

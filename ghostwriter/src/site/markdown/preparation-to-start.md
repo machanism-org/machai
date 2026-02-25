@@ -126,7 +126,7 @@ Ghostwriter CLI supports overriding several configuration properties via command
 To view all available command-line options, run:
 
 ```text
-C:\projects\machanism.org\machai>gw -h
+C:\projects\machanism.org\machai>java -jar \opt\gw\gw.jar -h
 usage: java -jar gw.jar <scanDir> [options] [-a <arg>] [-e <arg>] [-g
        <arg>] [-h] [-i <arg>] [-l] [-r <arg>] [-t <arg>]
 
