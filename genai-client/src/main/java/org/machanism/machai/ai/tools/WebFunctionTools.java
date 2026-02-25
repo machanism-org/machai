@@ -20,12 +20,15 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
+import org.jsoup.helper.W3CDom;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import net.htmlparser.jericho.Source;
 
 /**
  * Installs HTTP retrieval tools into a {@link GenAIProvider}.
@@ -95,7 +98,7 @@ public class WebFunctionTools implements FunctionTools {
 				"charsetName:string:optional:The name of the character set to use when decoding the response content. Default: "
 						+ defaultCharset,
 				"textOnly:boolean:optional:If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.",
-				"cssSelectorQuery:string:optional:If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.");
+				"selector:string:optional:If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.");
 
 		provider.addTool("call_rest_api",
 				"Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in the userInfo format (e.g., https://user:password@host/path) for basic authentication.",
@@ -135,8 +138,8 @@ public class WebFunctionTools implements FunctionTools {
 	 * {@code UTF-8})</li>
 	 * <li>{@code textOnly} (optional) – if {@code true}, strips HTML to plain
 	 * text</li>
-	 * <li>{@code cssSelectorQuery} (optional) – extracts content matching the CSS
-	 * selector (text or HTML depending on {@code textOnly})</li>
+	 * <li>{@code selector} (optional) – extracts content matching the CSS selector
+	 * (text or HTML depending on {@code textOnly})</li>
 	 * </ul>
 	 *
 	 * @param params tool arguments
@@ -154,7 +157,7 @@ public class WebFunctionTools implements FunctionTools {
 		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
 				: defaultCharset;
 		boolean textOnly = props.has("textOnly") && props.get("textOnly").asBoolean(false);
-		String cssSelectorQuery = props.has("cssSelectorQuery") ? props.get("cssSelectorQuery").asText(null) : null;
+		String selector = props.has("selector") ? props.get("selector").asText(null) : null;
 
 		try {
 			HttpURLConnection connection = getConnection(new URL(url), headers, charsetName);
@@ -164,25 +167,22 @@ public class WebFunctionTools implements FunctionTools {
 
 			String response = getWebPage(connection, timeout, charsetName);
 
-			if (cssSelectorQuery != null && !cssSelectorQuery.isEmpty()) {
+			if (selector != null && !selector.isEmpty()) {
 				org.jsoup.nodes.Document doc = Jsoup.parse(response);
-				org.jsoup.select.Elements elements = doc.select(cssSelectorQuery);
+				org.jsoup.select.Elements elements = doc.select(selector);
 				StringBuilder selectedContent = new StringBuilder();
 				for (org.jsoup.nodes.Element element : elements) {
-					selectedContent.append(textOnly ? element.text() : element.outerHtml())
-							.append(System.lineSeparator());
+					selectedContent.append(element.outerHtml()).append(System.lineSeparator());
 				}
-				String result = selectedContent.toString().trim();
-				logger.info("[WEB {}] Downloaded web content ({} bytes), CSS selector '{}' matched {} elements.",
-						requestId, response.length(), cssSelectorQuery, elements.size());
-				return result;
+				response = selectedContent.toString().trim();
 			}
 
 			if (textOnly) {
-				String plainText = Jsoup.parse(response).text();
-				logger.info("[WEB {}] Downloaded web content ({} bytes, plain text: {} chars).", requestId,
-						response.length(), plainText.length());
-				return plainText;
+				response = new Source(response)
+						.getRenderer()
+						.setMaxLineLength(180)
+						.setNewLine("\r\n")
+						.toString();
 			}
 
 			logger.info("[WEB {}] Downloaded web content ({} bytes).", requestId, response.length());
