@@ -11,6 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -66,18 +69,22 @@ public class JScriptProjectLayout extends ProjectLayout {
 				while (iterator.hasNext()) {
 					String globPattern = iterator.next().asText();
 
+					if (Strings.CS.startsWith(globPattern, "./")) {
+						globPattern = StringUtils.substringAfter("./", globPattern);
+					}
+
 					// Use glob pattern to find matching directories
 					PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
 					File baseDir = getProjectDir();
 
-					List<File> files = ProjectLayout.findFiles(baseDir);
+					List<File> files = ProjectLayout.findDirectories(baseDir);
 
 					if (files != null) {
 						for (File file : files) {
-							String path = ProjectLayout.getRelativePath(getProjectDir(), file, true);
+							String path = ProjectLayout.getRelativePath(getProjectDir(), file, false);
 							Path pathToMatch = new File(path).toPath();
 
-							if (file.isDirectory() && matcher.matches(pathToMatch)) {
+							if (matcher.matches(pathToMatch) && isPackageJsonPresent(file)) {
 								String relativePath = ProjectLayout.getRelativePath(baseDir, file);
 								modules.add(relativePath);
 							}
@@ -154,7 +161,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 	public JScriptProjectLayout projectDir(File projectDir) {
 		return (JScriptProjectLayout) super.projectDir(projectDir);
 	}
-	
+
 	@Override
 	public String getProjectId() {
 		return getPackageJson().get("name").asText();

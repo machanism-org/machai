@@ -170,9 +170,38 @@ public abstract class ProjectLayout {
 		List<File> result = new ArrayList<>();
 		if (files != null) {
 			for (File file : files) {
-				result.add(file);
-				if (file.isDirectory()) {
-					result.addAll(findFiles(file));
+				if (!Strings.CS.startsWithAny(file.getName(), EXCLUDE_DIRS)) {
+					result.add(file);
+					if (file.isDirectory()) {
+						result.addAll(findFiles(file));
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Recursively lists all directories, excluding known build/tooling directories.
+	 *
+	 * @param projectDir directory to traverse
+	 * @return dirs found
+	 * @throws IOException if directory listing fails
+	 */
+	public static List<File> findDirectories(File projectDir) {
+		if (projectDir == null || !projectDir.isDirectory()) {
+			return Collections.emptyList();
+		}
+
+		File[] files = projectDir.listFiles();
+
+		List<File> result = new ArrayList<>();
+		if (files != null) {
+			for (File file : files) {
+				if (file.isDirectory() && !Strings.CS.startsWithAny(file.getName(), EXCLUDE_DIRS)) {
+					result.add(file);
+					result.addAll(findDirectories(file));
 				}
 			}
 		}
