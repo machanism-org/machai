@@ -30,23 +30,26 @@
  * Maven plugin goals (Mojos) that integrate Machai/Bindex operations into a Maven build.
  *
  * <p>
- * This package provides goal implementations that create or update a Bindex index for the current Maven module,
- * optionally register derived metadata with an external registry service, and clean up temporary artifacts created
- * during execution.
+ * This package contains the plugin entry points that:
  * </p>
+ * <ul>
+ *   <li>create or update a Bindex index for the current Maven module,</li>
+ *   <li>optionally publish derived metadata to an external registry service, and</li>
+ *   <li>clean up plugin-generated temporary artifacts.</li>
+ * </ul>
  *
  * <h2>Goals</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.maven.Create create} &ndash; Create a new Bindex index for the current module.</li>
- *   <li>{@link org.machanism.machai.bindex.maven.Update update} &ndash; Update (refresh) an existing Bindex index.</li>
- *   <li>{@link org.machanism.machai.bindex.maven.Register register} &ndash; Scan the project and publish metadata to a registry.</li>
- *   <li>{@link org.machanism.machai.bindex.maven.Clean clean} &ndash; Remove plugin-generated temporary artifacts.</li>
+ *   <li>{@link org.machanism.machai.bindex.maven.Create create} &ndash; create a new Bindex index for the current module.</li>
+ *   <li>{@link org.machanism.machai.bindex.maven.Update update} &ndash; refresh an existing Bindex index.</li>
+ *   <li>{@link org.machanism.machai.bindex.maven.Register register} &ndash; scan the project and publish metadata to a registry.</li>
+ *   <li>{@link org.machanism.machai.bindex.maven.Clean clean} &ndash; remove plugin-generated temporary artifacts.</li>
  * </ul>
  *
  * <h2>Execution model</h2>
  * <p>
  * Goals execute against the current {@link org.apache.maven.project.MavenProject}. Modules with {@code pom}
- * packaging (parents/aggregators) are typically skipped so the plugin only runs on buildable modules.
+ * packaging (parents/aggregators) are typically skipped so the plugin runs only on buildable modules.
  * </p>
  *
  * <h2>Configuration</h2>

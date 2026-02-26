@@ -24,7 +24,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-The **Bindex Maven Plugin** automates the generation and (optionally) registration of **bindex metadata** for Maven projects. This machine-readable metadata enables downstream tools to index and query project outputs to improve library discovery, dependency analysis, and automated integration/assembly workflows—especially when paired with Machanism tooling and GenAI-powered semantic search.
+The **Bindex Maven Plugin** enables automated generation and (optionally) registration of **bindex metadata** for Maven projects. During a Maven build, it reads the project model and emits structured, machine-readable metadata describing the project and its outputs. Downstream tools can index and query this metadata to improve library discovery, enrich dependency analysis (including semantic search), and support automated assembly and integration workflows—particularly within the Machanism ecosystem.
 
 ## Installation Instructions
 
@@ -44,23 +44,9 @@ mvn -pl bindex-maven-plugin -am clean install
 
 ## Usage
 
-### Run the plugin
+### Add the plugin to your project
 
-If the plugin is configured in your project `pom.xml`, run a normal Maven lifecycle (for example, `verify`) and the plugin will execute where you bound it:
-
-```cmd
-mvn verify
-```
-
-You can also invoke the goal directly:
-
-```cmd
-mvn org.machanism.machai:bindex-maven-plugin:bindex
-```
-
-### Configure the plugin
-
-Add the plugin to your project `pom.xml` and (optionally) bind the goal to a lifecycle phase:
+Configure the plugin in your project `pom.xml` and (optionally) bind it to a lifecycle phase:
 
 ```xml
 <build>
@@ -86,6 +72,27 @@ Add the plugin to your project `pom.xml` and (optionally) bind the goal to a lif
 </build>
 ```
 
+### Run the plugin
+
+Run a normal Maven lifecycle (for example, `verify`) and the plugin will execute where you bound it:
+
+```cmd
+mvn verify
+```
+
+You can also invoke the goal directly:
+
+```cmd
+mvn org.machanism.machai:bindex-maven-plugin:bindex
+```
+
+### Typical workflow
+
+1. Add the plugin to your `pom.xml`.
+2. Run your normal build lifecycle (`mvn verify`, `mvn package`, etc.).
+3. Collect the generated bindex metadata from the configured output location.
+4. (Optional) Register/publish the generated metadata so it can be indexed and searched by other tools.
+
 ### Configuration examples
 
 Example (system property):
@@ -94,7 +101,7 @@ Example (system property):
 mvn org.machanism.machai:bindex-maven-plugin:bindex -Dupdate=true
 ```
 
-Common configuration parameters (names may vary by plugin version):
+Common configuration parameters:
 
 | Parameter | Description | Default |
 |---|---|---|
