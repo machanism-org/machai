@@ -30,9 +30,9 @@ import org.machanism.machai.schema.Bindex;
  * </p>
  * <ol>
  *   <li>Acquires a natural-language prompt from {@link #assemblyPromptFile} (if present) or requests it interactively.</li>
- *   <li>Uses {@link #pickChatModel} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
+ *   <li>Uses {@link #genai} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
  *   <li>Filters recommendations by {@link #score}.</li>
- *   <li>Runs {@link ApplicationAssembly} with {@link #chatModel} to apply changes in {@link #basedir}.</li>
+ *   <li>Runs {@link ApplicationAssembly} with {@link #genai} to apply changes in {@link #basedir}.</li>
  * </ol>
  *
  * <p>
@@ -58,7 +58,6 @@ import org.machanism.machai.schema.Bindex;
  * <pre>
  * mvn org.machanism.machai:assembly-maven-plugin:assembly
  *   -Dassembly.genai=OpenAI:gpt-5
- *   -Dpick.genai=OpenAI:gpt-5-mini
  *   -Dassembly.prompt.file=project.txt
  *   -Dassembly.score=0.9
  * </pre>
@@ -79,18 +78,8 @@ public class Assembly extends AbstractMojo {
 	 * The value is resolved by {@link GenAIProviderManager} (for example, {@code OpenAI:gpt-5}).
 	 * </p>
 	 */
-	@Parameter(property = "assembly.genai", defaultValue = "OpenAI:gpt-5")
-	protected String chatModel;
-
-	/**
-	 * GenAI provider identifier used for library recommendation/picking.
-	 *
-	 * <p>
-	 * The value is resolved by {@link GenAIProviderManager} (for example, {@code OpenAI:gpt-5-mini}).
-	 * </p>
-	 */
-	@Parameter(property = "pick.genai", defaultValue = "OpenAI:gpt-5-mini")
-	protected String pickChatModel;
+	@Parameter(property = "assembly.genai", required = true)
+	protected String genai;
 
 	/**
 	 * Prompt file for the assembly workflow.
@@ -129,8 +118,8 @@ public class Assembly extends AbstractMojo {
 	 * <ol>
 	 *   <li>Read the prompt from {@link #assemblyPromptFile} if it exists; otherwise prompt the user.</li>
 	 *   <li>Create a {@link Configurator} backed by {@code bindex.properties}.</li>
-	 *   <li>Run {@link Picker} using {@link #pickChatModel} and log any recommended {@link Bindex} entries.</li>
-	 *   <li>Run {@link ApplicationAssembly} using {@link #chatModel} to apply changes to {@link #basedir}.</li>
+	 *   <li>Run {@link Picker} using {@link #genai} and log any recommended {@link Bindex} entries.</li>
+	 *   <li>Run {@link ApplicationAssembly} using {@link #genai} to apply changes to {@link #basedir}.</li>
 	 * </ol>
 	 *
 	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly workflow fails
@@ -149,7 +138,7 @@ public class Assembly extends AbstractMojo {
 
 			Configurator config = new PropertiesConfigurator("bindex.properties");
 
-			Picker picker = new Picker(pickChatModel, registerUrl, config);
+			Picker picker = new Picker(genai, registerUrl, config);
 			picker.setScore(score);
 			List<Bindex> bindexList = picker.pick(query);
 
@@ -165,7 +154,7 @@ public class Assembly extends AbstractMojo {
 				getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
 			}
 
-			ApplicationAssembly assembly = new ApplicationAssembly(chatModel, config, basedir);
+			ApplicationAssembly assembly = new ApplicationAssembly(genai, config, basedir);
 
 			getLog().info("The project directory: " + basedir);
 			assembly.projectDir(basedir);

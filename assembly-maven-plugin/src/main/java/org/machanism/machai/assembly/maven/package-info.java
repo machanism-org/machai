@@ -1,91 +1,66 @@
 /*-
  * @guidance:
- * **IMPORTANT: UPDATE JAVADOC OF ALL JAVA CLASSES IN THE FOLDER AND THIS `package-info.java`!**
- *	
- * - All methods, classes, and fields must have Javadoc comments that clearly explain their purpose and usage.
+ *
+ * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
+ *
+ * - Update Existing Javadoc and Add Missing Javadoc:
+ *      - Review all classes in the folder.
+ *      - Update any existing Javadoc to ensure it is accurate, comprehensive, and follows best practices.
+ *      - Add Javadoc to any classes, methods, or fields where it is missing.
+ *      - Ensure that all Javadoc is up-to-date and provides clear, meaningful documentation.
  * - Use Clear and Concise Descriptions:
- * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
- * 		- Avoid vague statements; be specific about functionality and intent.
+ *      - Write meaningful summaries that explain the purpose, behavior, and usage of each element.
+ *      - Avoid vague statements; be specific about functionality and intent.
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package's overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
+ * - Include Usage Examples Where Helpful:
+ *      - Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * - Maintain Consistency and Formatting:
- * 		- Follow a consistent style and structure for all Javadoc comments.
- *      		- Use proper Markdown or HTML formatting for readability.
+ *      - Follow a consistent style and structure for all Javadoc comments.
+ *      - Use proper Markdown or HTML formatting for readability.
  * - Add Javadoc:
- *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
- *          methods, and fields, adhering to established best practices.
- *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
- *          and any exceptions thrown.
- *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` and `&gt;` in `<pre>` content for Javadoc. 
- *          Ensure that the code is properly escaped and formatted for Javadoc.  *     - Generate javadoc with a description all maven plugin parameters and examples of usage. 
- * - **Use the Java version specified in the project's `pom.xml` for all test code and configuration.**
-*/
+ *      - Review the Java class source code and include comprehensive Javadoc comments for all classes,
+ *           methods, and fields, adhering to established best practices.
+ *      - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
+ *           and any exceptions thrown.
+ *      - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;`
+ *           and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc.
+ *      - Do not use escaping in `{@code ...}` tags.    
+ * - Use the Java Version Defined in `pom.xml`:
+ *      - All code improvements and Javadoc updates must be compatible with the Java version `maven.compiler.release` specified in the project's `pom.xml`.
+ *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
+ */
+
 
 /**
- * Maven goal implementation for MachAI's AI-assisted project assembly workflow.
+ * Maven plugin integration for MachAI's AI-assisted project assembly workflow.
  *
  * <p>
- * This package contains the {@link org.machanism.machai.assembly.maven.Assembly} Maven {@code Mojo}, which exposes the
- * {@code assembly} goal. The goal orchestrates an AI-assisted workflow that:
+ * This package provides the {@link org.machanism.machai.assembly.maven.Assembly} Maven {@code Mojo} that exposes the
+ * {@code assembly} goal. The goal:
  * </p>
  * <ol>
- *   <li>Collects a natural-language prompt from a text file or via interactive input.</li>
- *   <li>Uses a picker model to recommend candidate libraries as {@link org.machanism.machai.schema.Bindex} entries.</li>
- *   <li>Invokes the assembly model to apply changes to a target project directory.</li>
+ *   <li>Obtains a natural-language prompt from a configured text file or via interactive input.</li>
+ *   <li>Uses MachAI's {@link org.machanism.machai.bindex.Picker} to recommend candidate libraries as
+ *   {@link org.machanism.machai.schema.Bindex} entries.</li>
+ *   <li>Runs {@link org.machanism.machai.bindex.ApplicationAssembly} to apply changes to a target project directory.</li>
  * </ol>
  *
  * <p>
- * Provider identifiers (for example {@code OpenAI:gpt-5}) are resolved by
- * {@link org.machanism.machai.ai.manager.GenAIProviderManager} and augmented with standard function tools via
- * {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
+ * The primary inputs are configured via Maven properties and/or plugin configuration (for example,
+ * {@code -Dassembly.genai=...} and {@code -Dassembly.prompt.file=...}).
  * </p>
  *
- * <h2>Goal</h2>
- * <ul>
- *   <li>{@code assembly} &ndash; Recommend libraries and run an AI-assisted assembly process against a project folder.</li>
- * </ul>
- *
- * <h2>Plugin parameters</h2>
- * <p>
- * Parameters may be supplied via system properties (for example, {@code -Dassembly.genai=...}) and/or via Maven plugin
- * configuration.
- * </p>
- * <ul>
- *   <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; GenAI provider id for the assembly phase.</li>
- *   <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; GenAI provider id for the recommendation (picker)
- *   phase.</li>
- *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; Path to a text file containing the assembly
- *   prompt; if the file does not exist, the prompt is requested interactively.</li>
- *   <li>{@code assembly.score} (default {@code 0.9}) &ndash; Minimum score threshold for recommended libraries.</li>
- *   <li>{@code bindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
- * </ul>
- *
- * <h2>Usage examples</h2>
- * <p><b>Command line:</b></p>
+ * <h2>Usage</h2>
  * <pre>
  * mvn org.machanism.machai:assembly-maven-plugin:assembly
  *   -Dassembly.genai=OpenAI:gpt-5
  *   -Dpick.genai=OpenAI:gpt-5-mini
  *   -Dassembly.prompt.file=project.txt
  *   -Dassembly.score=0.9
- * </pre>
- *
- * <p><b>POM configuration:</b></p>
- * <pre>
- * &lt;plugin&gt;
- *   &lt;groupId&gt;org.machanism.machai&lt;/groupId&gt;
- *   &lt;artifactId&gt;assembly-maven-plugin&lt;/artifactId&gt;
- *   &lt;configuration&gt;
- *     &lt;assembly.genai&gt;OpenAI:gpt-5&lt;/assembly.genai&gt;
- *     &lt;pick.genai&gt;OpenAI:gpt-5-mini&lt;/pick.genai&gt;
- *     &lt;assembly.prompt.file&gt;project.txt&lt;/assembly.prompt.file&gt;
- *     &lt;assembly.score&gt;0.9&lt;/assembly.score&gt;
- *     &lt;bindex.register.url&gt;https://register.project.example&lt;/bindex.register.url&gt;
- *   &lt;/configuration&gt;
- * &lt;/plugin&gt;
  * </pre>
  */
 package org.machanism.machai.assembly.maven;

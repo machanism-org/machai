@@ -8,8 +8,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 
@@ -34,7 +32,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 * The AI provider/model identifier used by the plugin (for example
 	 * {@code OpenAI:gpt-5}).
 	 */
-	@Parameter(property = "bindex.genai", defaultValue = "OpenAI:gpt-5")
+	@Parameter(property = "bindex.genai", required = true)
 	protected String genai;
 
 	/**
