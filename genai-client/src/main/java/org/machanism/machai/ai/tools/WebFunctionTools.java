@@ -81,7 +81,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * values.
 	 */
 	private Configurator configurator;
-	
+
 	/**
 	 * Registers web content and REST API function tools with the provided
 	 * {@link GenAIProvider}.
@@ -185,7 +185,8 @@ public class WebFunctionTools implements FunctionTools {
 						.toString();
 			}
 
-			logger.info("[WEB {}] Downloaded web content ({} bytes).", requestId, response.length());
+			logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
+					StringUtils.abbreviate(response, 80).replace("\n", " ").replace("\r", ""));
 			return response;
 
 		} catch (IOException e) {
