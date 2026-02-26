@@ -18,6 +18,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Registers Bindex-related function tools for a {@link GenAIProvider}.
+ *
+ * <p>The tools exposed by this type are intended to be consumed by LLM-assisted workflows
+ * so they can retrieve additional context (a Bindex document or the Bindex JSON schema)
+ * on demand.
+ *
+ * <h2>Exposed tools</h2>
+ * <ul>
+ *   <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
+ *   <li>{@code get_bindex_schema}: Returns the JSON schema that defines the {@link Bindex} document shape.</li>
+ * </ul>
+ *
+ * <p>A {@link BindexRepository} is created when {@link #setConfigurator(Configurator)} is invoked.
+ *
+ * @author Viktor Tovstyi
+ * @since 0.0.2
+ */
 public class BindexFunctionTools implements FunctionTools {
 
 	private static final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
@@ -25,8 +43,7 @@ public class BindexFunctionTools implements FunctionTools {
 	private BindexRepository bindexRepository;
 
 	/**
-	 * Registers web content, REST API, and Bindex function tools with the provided
-	 * {@link GenAIProvider}.
+	 * Registers Bindex function tools with the provided {@link GenAIProvider}.
 	 *
 	 * @param provider the provider to register tools with
 	 */
@@ -44,12 +61,17 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implementation for the get_bindex function tool.
+	 * Implementation for the {@code get_bindex} function tool.
 	 *
-	 * @param params tool invocation parameters
-	 * @return bindex metadata as a string in the requested format
+	 * @param params tool invocation parameters; the first element is expected to be a JSON node
+	 *               containing the tool arguments
+	 * @return the serialized {@link Bindex} as JSON, or {@code null} if not found
+	 * @throws IllegalStateException if the repository has not been configured yet
 	 */
 	private String getBindex(Object[] params) {
+		if (bindexRepository == null) {
+			throw new IllegalStateException("BindexRepository is not initialized. Call setConfigurator(...) first.");
+		}
 		JsonNode props = (JsonNode) params[0];
 		String id = props.get("id").asText();
 		Bindex bindex = bindexRepository.getBindex(id);
@@ -64,10 +86,10 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Returns the schema definition for bindex metadata.
+	 * Implementation for the {@code get_bindex_schema} function tool.
 	 *
 	 * @param params tool invocation parameters (not used)
-	 * @return the bindex schema as a string (e.g., JSON Schema)
+	 * @return the Bindex schema resource content as JSON string
 	 */
 	private String getBindexSchema(Object[] params) {
 		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
@@ -82,7 +104,7 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Supplies configuration for resolving header placeholders.
+	 * Supplies configuration used to initialize the underlying {@link BindexRepository}.
 	 *
 	 * @param configurator configurator to use (may be {@code null})
 	 */

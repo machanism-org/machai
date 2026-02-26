@@ -31,7 +31,7 @@ Bindex Core (`bindex-core`) provides core functionality for bindex metadata mana
 
 ## Overview
 
-Bindex Core is the foundational Java library for working with **bindex metadata** within the Machanism ecosystem. It defines the canonical representation of bindex metadata and exposes APIs intended for other Machanism components.
+Bindex Core is the foundational Java library for working with **bindex metadata** in the Machanism ecosystem. It defines the canonical representation of bindex metadata and exposes APIs intended for other Machanism components.
 
 It is typically used to:
 
