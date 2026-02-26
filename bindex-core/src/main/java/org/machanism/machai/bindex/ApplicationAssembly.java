@@ -92,30 +92,24 @@ public class ApplicationAssembly {
 		String assemblyInstructions = PROMPT_BUNDLE.getString("assembly_instructions");
 		bindexPrompt.append(assemblyInstructions);
 
-		try {
-			bindexPrompt.append(BindexBuilder.bindexSchemaPrompt() + "\r\n");
+		String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
+		bindexPrompt.append(userPrompt + "\r\n");
 
-			for (Bindex bindex : bindexList) {
-				bindexPrompt.append("- `" + bindex.getId() + "`: `" + bindex.getDescription() + "`\r\n");
-			}
-			bindexPrompt.append("\r\n");
-
-			String promptStr = MessageFormat.format(PROMPT_BUNDLE.getString("recommended_library_section"),
-					bindexPrompt.toString());
-			bindexPrompt.append(promptStr + "\r\n");
-
-			String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
-			bindexPrompt.append(userPrompt + "\r\n");
-
-			provider.prompt(bindexPrompt.toString());
-
-			File bindexTempDir = new File(projectDir, ASSEMBLY_TEMP_DIR);
-			provider.inputsLog(bindexTempDir);
-			provider.perform();
-
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
+		StringBuilder picked = new StringBuilder();
+		for (Bindex bindex : bindexList) {
+			picked.append("- `" + bindex.getId() + "`: `" + bindex.getDescription() + "`\r\n");
 		}
+		bindexPrompt.append("\r\n");
+
+		String promptStr = MessageFormat.format(PROMPT_BUNDLE.getString("recommended_library_section"),
+				picked.toString());
+		bindexPrompt.append(promptStr + "\r\n");
+
+		provider.prompt(bindexPrompt.toString());
+
+		File bindexTempDir = new File(projectDir, ASSEMBLY_TEMP_DIR);
+		provider.inputsLog(bindexTempDir);
+		provider.perform();
 	}
 
 	/**

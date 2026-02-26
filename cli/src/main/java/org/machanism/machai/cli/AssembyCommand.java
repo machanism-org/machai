@@ -153,6 +153,7 @@ public class AssembyCommand {
 		try {
 			chatModel = Optional.ofNullable(chatModel)
 					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+			
 			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 			FunctionToolsLoader.getInstance().applyTools(provider);
 

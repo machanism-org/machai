@@ -106,8 +106,6 @@ public class BindexBuilder {
 	public Bindex build() throws IOException {
 
 		StringBuilder prompt = new StringBuilder();
-		String bindexSchemaPrompt = bindexSchemaPrompt();
-		prompt.append(bindexSchemaPrompt + System.lineSeparator());
 
 		if (origin != null) {
 			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
@@ -146,20 +144,6 @@ public class BindexBuilder {
 	 */
 	protected String projectContext() throws IOException {
 		return "";
-	}
-
-	/**
-	 * Prompts the provider with the Bindex JSON schema.
-	 *
-	 * @param provider provider to receive schema instructions
-	 * @return
-	 * @throws IOException if the schema cannot be read or prompting fails
-	 */
-	public static String bindexSchemaPrompt() throws IOException {
-		URL systemResource = Bindex.class.getResource(BINDEX_SCHEMA_RESOURCE);
-		String schema = IOUtils.toString(systemResource, "UTF8");
-		String prompt = MessageFormat.format(PROMPT_BUNDLE.getString("bindex_schema_section"), schema);
-		return prompt;
 	}
 
 	/**
