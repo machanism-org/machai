@@ -82,9 +82,10 @@ public final class Ghostwriter {
 	 * Main entry point.
 	 *
 	 * @param args command line arguments
-	 * @throws IOException if scanning fails while reading files
+	 * @throws IOException    if scanning fails while reading files
+	 * @throws ParseException
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, ParseException {
 		Options options = new Options();
 		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
 		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
@@ -128,16 +129,16 @@ public final class Ghostwriter {
 		HelpFormatter formatter = new HelpFormatter();
 
 		int exitCode = 0;
+		CommandLine cmd = parser.parse(options, args);
+
+		File rootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
+		if (cmd.hasOption(rootDirOpt)) {
+			rootDir = new File(cmd.getOptionValue(rootDirOpt));
+		}
+
+		initializeConfiguration(rootDir);
+
 		try {
-			CommandLine cmd = parser.parse(options, args);
-
-			File rootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
-			if (cmd.hasOption(rootDirOpt)) {
-				rootDir = new File(cmd.getOptionValue(rootDirOpt));
-			}
-
-			initializeConfiguration(rootDir);
-
 			String version = Ghostwriter.class.getPackage().getImplementationVersion();
 			if (version != null) {
 				logger.info("Ghostwriter {} (Machai project)", version);
@@ -241,36 +242,17 @@ public final class Ghostwriter {
 		} catch (ProcessTerminationException e) {
 			if (logger != null) {
 				logger.error("Process terminated: {}", e.getMessage());
-			} else {
-				System.err.println("Process terminated: " + e.getMessage());
 			}
 			exitCode = e.getExitCode();
-		} catch (ParseException e) {
-			if (logger != null) {
-				logger.error("Error parsing arguments: {}", e.getMessage());
-			} else {
-				System.err.println("Error parsing arguments: " + e.getMessage());
-			}
-			help(options, formatter);
-			exitCode = 2;
 		} catch (IllegalArgumentException e) {
-			if (logger != null) {
-				logger.error("Error: {}", e.getMessage());
-			}
+			logger.error("Error: {}", e.getMessage());
 			exitCode = 1;
 		} catch (Exception e) {
-			if (logger != null) {
-				logger.error("Unexpected error: {}", e.getMessage(), e);
-			} else {
-				System.err.println("Unexpected error: " + e.getMessage());
-				e.printStackTrace(System.err);
-			}
+			logger.error("Unexpected error: {}", e.getMessage(), e);
 			exitCode = 1;
 		} finally {
 			GenAIProviderManager.logUsage();
-			if (logger != null) {
-				logger.info("File processing completed.");
-			}
+			logger.info("File processing completed.");
 			if (exitCode != 0) {
 				System.exit(exitCode);
 			}
