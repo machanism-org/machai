@@ -29,18 +29,17 @@
  *
  * <p>
  * This package contains the {@link org.machanism.machai.assembly.maven.Assembly} Maven {@code Mojo}, which exposes the
- * {@code assembly} goal. The goal coordinates two GenAI-assisted phases:
+ * {@code assembly} goal. The goal orchestrates an AI-assisted workflow that:
  * </p>
  * <ol>
- *   <li><b>Picking</b>: recommend candidate libraries as {@link org.machanism.machai.schema.Bindex} entries via
- *   {@link org.machanism.machai.bindex.Picker}.</li>
- *   <li><b>Assembly</b>: apply changes to the project directory via
- *   {@link org.machanism.machai.bindex.ApplicationAssembly}.</li>
+ *   <li>Collects a natural-language prompt from a text file or via interactive input.</li>
+ *   <li>Uses a picker model to recommend candidate libraries as {@link org.machanism.machai.schema.Bindex} entries.</li>
+ *   <li>Invokes the assembly model to apply changes to a target project directory.</li>
  * </ol>
  *
  * <p>
- * Providers are resolved by id (for example {@code OpenAI:gpt-5}) using
- * {@link org.machanism.machai.ai.manager.GenAIProviderManager} and are augmented with standard function tools via
+ * Provider identifiers (for example {@code OpenAI:gpt-5}) are resolved by
+ * {@link org.machanism.machai.ai.manager.GenAIProviderManager} and augmented with standard function tools via
  * {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
  * </p>
  *

@@ -31,28 +31,24 @@ Assembly Maven Plugin automates the assembly of projects within the Machanism ec
 
 ## Overview
 
-This plugin is intended for builds that want to:
+The Assembly Maven Plugin helps automate creation of a runnable or distributable project layout by selecting and integrating libraries based on bindex metadata. It is designed to reduce manual dependency curation by leveraging semantic search across available artifacts.
 
-- resolve and select compatible libraries using bindex metadata
-- assemble a runnable or distributable project layout from those selections
-- reduce manual dependency curation by leveraging semantic search across available artifacts
-
-As a Maven Plugin, it can be invoked from the command line or configured in a project’s `pom.xml` like any other plugin.
+As a standard Maven plugin, it can be run from the command line or configured in a project’s `pom.xml`.
 
 ## Key Features
 
 - Metadata-driven library integration using bindex metadata
 - GenAI-powered semantic search to help select relevant libraries
 - Automates common assembly steps for Machanism ecosystem projects
-- Works as a standard Maven plugin goal in a Maven build
+- Runs as a standard Maven plugin goal during a Maven build
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 8+ (the project is configured for Java 8 compilation)
+- Java 8 (project compiles with `maven.compiler.release=8`)
 - Maven 3.x
-- Access to repositories that host the Machanism artifacts you depend on
+- Access to repositories hosting the Machanism artifacts you depend on
 
 ### Environment Variables
 
@@ -67,24 +63,28 @@ This plugin does not require any environment variables by default.
 Run the plugin goal directly:
 
 ```bash
-mvn org.machanism.machai:assembly-maven-plugin:0.0.1:assembly
+mvn org.machanism.machai:assembly-maven-plugin:<version>:assembly
 ```
 
 ### Typical Workflow
 
 1. Ensure your project (and repositories) provide bindex metadata for the artifacts you want to use.
-2. Invoke the plugin goal during development to assemble the project based on available metadata.
-3. Iterate on configuration (if needed) to tune selection/assembly behavior.
+2. Configure the plugin in your `pom.xml` (optional) to set output location and behavior.
+3. Invoke the `assembly` goal to assemble the output based on available metadata.
 4. Package or distribute the assembled output using your standard Maven lifecycle.
 
 ## Configuration
 
-Common configuration parameters depend on the goal and your project’s needs. If you are unsure which parameters are supported, run `mvn help:describe` against the plugin to list available mojos and parameters.
+Supported configuration parameters depend on the goal. To list available goals and parameters, run:
+
+```bash
+mvn help:describe -Dplugin=org.machanism.machai:assembly-maven-plugin -Ddetail
+```
 
 | Parameter | Description | Default |
 |---|---|---|
 | `interactive` | Enables interactive prompting when the plugin needs user input. | `false` |
-| `searchQuery` | A semantic search query used to select candidate libraries. | (none) |
+| `searchQuery` | Semantic search query used to select candidate libraries. | (none) |
 | `bindexMetadata` | Location or coordinates for bindex metadata to drive assembly. | (none) |
 | `outputDirectory` | Where the assembled output is written. | `${project.build.directory}` |
 
@@ -97,15 +97,15 @@ Example configuration in a `pom.xml`:
   <version><!-- plugin version --></version>
   <configuration>
     <interactive>false</interactive>
-    <outputDirectory>${project.build.directory}\assembled</outputDirectory>
+    <outputDirectory>${project.build.directory}\\assembled</outputDirectory>
   </configuration>
 </plugin>
 ```
 
-Example command-line invocation with custom parameters (replace parameters with those supported by your selected goal):
+Example command-line invocation with custom parameters:
 
 ```bash
-mvn org.machanism.machai:assembly-maven-plugin:0.0.1:assembly -Dinteractive=false
+mvn org.machanism.machai:assembly-maven-plugin:<version>:assembly -Dinteractive=false
 ```
 
 ## Resources
