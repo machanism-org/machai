@@ -17,7 +17,7 @@ It serves as the main integration point, enabling Ghostwriter’s features and a
      - Replace `[groupId]` and `[artifactId]` with values from `pom.xml`.
 2. Introduction
    - Provide a comprehensive description of the GW Maven plugin, including its purpose and benefits.
-   - Analyze `/src/main/java/org/machanism/machai/maven/StandardProcess.java` and `/src/main/java/org/machanism/machai/maven/GW.java` to inform the description.
+   - Analyze `/src/main/java/org/machanism/machai/gw/maven/StandardProcess.java` and `/src/main/java/org/machanism/machai/gw/maven/GW.java` to inform the description.
    - Reference [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
 3. Overview
    - Clearly explain the main functions and value proposition of the GW Maven plugin.

@@ -16,9 +16,7 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.ai.provider.none.NoneProvider;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
@@ -28,8 +26,7 @@ import org.machanism.machai.schema.Bindex;
  * Maven {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly} goal.
  *
  * <p>
- * This goal runs MachAI's AI-assisted workflow against the Maven execution {@link #basedir}.
- * It:
+ * This goal runs MachAI's AI-assisted workflow against the Maven execution {@link #basedir}. It:
  * </p>
  * <ol>
  *   <li>Acquires a natural-language prompt from {@link #assemblyPromptFile} (if present) or requests it interactively.</li>
@@ -46,10 +43,10 @@ import org.machanism.machai.schema.Bindex;
  * <h2>Plugin parameters</h2>
  * <ul>
  *   <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; Provider id for the assembly phase.</li>
- *   <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider id for the library recommendation
- *   (picker) phase.</li>
- *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; File containing the prompt; if absent, the
- *   prompt is requested interactively.</li>
+ *   <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; Provider id for the library recommendation (picker)
+ *   phase.</li>
+ *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; File containing the prompt; if absent, the prompt
+ *   is requested interactively.</li>
  *   <li>{@code assembly.score} (default {@code 0.9}) &ndash; Minimum score required for a recommended library to be
  *   listed/used.</li>
  *   <li>{@code bindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
@@ -136,8 +133,7 @@ public class Assembly extends AbstractMojo {
 	 *   <li>Run {@link ApplicationAssembly} using {@link #chatModel} to apply changes to {@link #basedir}.</li>
 	 * </ol>
 	 *
-	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly workflow
-	 *                                fails
+	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly workflow fails
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
