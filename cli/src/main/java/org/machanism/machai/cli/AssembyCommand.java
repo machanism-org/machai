@@ -173,8 +173,7 @@ public class AssembyCommand {
 			}
 
 			if (!bindexList.isEmpty()) {
-
-				ApplicationAssembly assembly = new ApplicationAssembly(provider);
+				ApplicationAssembly assembly = new ApplicationAssembly(provider, config);
 				assembly.projectDir(dir);
 				assembly.assembly(prompt, bindexList);
 			}

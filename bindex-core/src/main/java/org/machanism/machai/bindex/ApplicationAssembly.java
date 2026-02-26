@@ -8,7 +8,9 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
@@ -60,11 +62,13 @@ public class ApplicationAssembly {
 	 * Constructs an instance that uses the provided {@link GenAIProvider} to
 	 * execute the assembled prompt.
 	 *
-	 * @param provider provider used to send instructions/prompts and execute the
-	 *                 request
+	 * @param provider     provider used to send instructions/prompts and execute
+	 *                     the request
+	 * @param configurator
 	 */
-	public ApplicationAssembly(GenAIProvider provider) {
+	public ApplicationAssembly(GenAIProvider provider, Configurator configurator) {
 		this.provider = provider;
+		FunctionToolsLoader.getInstance().setConfiguration(configurator);
 	}
 
 	/**
@@ -83,29 +87,32 @@ public class ApplicationAssembly {
 		String systemPrompt = PROMPT_BUNDLE.getString("assembly_system_instructions");
 		provider.instructions(systemPrompt);
 
+		StringBuilder bindexPrompt = new StringBuilder();
+
 		String assemblyInstructions = PROMPT_BUNDLE.getString("assembly_instructions");
-		provider.prompt(assemblyInstructions);
+		bindexPrompt.append(assemblyInstructions);
 
 		try {
-			provider.prompt(BindexBuilder.bindexSchemaPrompt());
+			bindexPrompt.append(BindexBuilder.bindexSchemaPrompt() + "\r\n");
 
-			ObjectMapper objectMapper = new ObjectMapper();
 			for (Bindex bindex : bindexList) {
-				String bindexStr = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(bindex);
-				String bindexPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("recommended_library_section"),
-						bindex.getId(), bindexStr);
-				provider.prompt(bindexPrompt);
+				bindexPrompt.append("- `" + bindex.getId() + "`: `" + bindex.getDescription() + "`\r\n");
 			}
+			bindexPrompt.append("\r\n");
+
+			String promptStr = MessageFormat.format(PROMPT_BUNDLE.getString("recommended_library_section"),
+					bindexPrompt.toString());
+			bindexPrompt.append(promptStr + "\r\n");
 
 			String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
-			provider.prompt(userPrompt);
+			bindexPrompt.append(userPrompt + "\r\n");
+
+			provider.prompt(bindexPrompt.toString());
 
 			File bindexTempDir = new File(projectDir, ASSEMBLY_TEMP_DIR);
 			provider.inputsLog(bindexTempDir);
-			String response = provider.perform();
-			if (StringUtils.isNotBlank(response)) {
-				LOGGER.info(response);
-			}
+			provider.perform();
+
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}

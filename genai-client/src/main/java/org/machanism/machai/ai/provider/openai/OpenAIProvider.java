@@ -244,17 +244,12 @@ public class OpenAIProvider implements GenAIProvider {
 		ResponseCreateParams responseCreateParams = builder.tools(new ArrayList<Tool>(toolMap.keySet())).build();
 		logger.debug("Sending request to LLM service.");
 
-		try {
-			Response response = getClient().responses().create(responseCreateParams);
+		Response response = getClient().responses().create(responseCreateParams);
 
-			logger.debug("Received response from LLM service.");
-			captureUsage(response.usage());
+		logger.debug("Received response from LLM service.");
+		captureUsage(response.usage());
 
-			return parseResponse(response);
-		} catch (BadRequestException e) {
-			e.printStackTrace();
-			throw e;
-		}
+		return parseResponse(response);
 	}
 
 	/**

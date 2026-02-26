@@ -198,7 +198,7 @@ public class Assembly extends AbstractMojo {
 			assemblyProvider.setWorkingDir(basedir);
 			FunctionToolsLoader.getInstance().applyTools(assemblyProvider);
 
-			ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider);
+			ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider, config);
 
 			getLog().info("The project directory: " + basedir);
 			assembly.projectDir(basedir);
