@@ -52,9 +52,8 @@ public class Register extends AbstractBindexMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (isBindexed()) {
-			GenAIProvider provider = GenAIProviderManager.getProvider(genai, getConfigurator());
 			try {
-				BindexRegister register = new BindexRegister(provider, registerUrl);
+				BindexRegister register = new BindexRegister(genai, registerUrl, getConfigurator());
 				register.update(update);
 				register.scanFolder(project.getBasedir());
 			} catch (IOException e) {

@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
@@ -101,8 +100,7 @@ public class BindexCommand {
 			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 			chatModel = Optional.ofNullable(chatModel)
 					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
-			BindexRegister register = new BindexRegister(provider, registerUrl);
+			BindexRegister register = new BindexRegister(chatModel, registerUrl, config);
 			register.update(update);
 			register.scanFolder(dir);
 		} finally {

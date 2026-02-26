@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.schema.Bindex;
@@ -61,14 +62,17 @@ public class ApplicationAssembly {
 	/**
 	 * Constructs an instance that uses the provided {@link GenAIProvider} to
 	 * execute the assembled prompt.
+	 * @param dir 
 	 *
 	 * @param provider     provider used to send instructions/prompts and execute
 	 *                     the request
 	 * @param configurator
 	 */
-	public ApplicationAssembly(GenAIProvider provider, Configurator configurator) {
-		this.provider = provider;
-		FunctionToolsLoader.getInstance().setConfiguration(configurator);
+	public ApplicationAssembly(String genai, Configurator config, File dir) {
+		this.provider = GenAIProviderManager.getProvider(genai, config);
+		FunctionToolsLoader.getInstance().applyTools(provider);
+		provider.setWorkingDir(dir);
+		FunctionToolsLoader.getInstance().setConfiguration(config);
 	}
 
 	/**

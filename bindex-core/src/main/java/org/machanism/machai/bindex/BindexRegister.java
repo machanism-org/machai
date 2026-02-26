@@ -3,6 +3,7 @@ package org.machanism.machai.bindex;
 import java.io.File;
 import java.io.IOException;
 
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
@@ -12,7 +13,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Registers a project's {@link Bindex} document in the backing Bindex registry.
  *
- * <p>This type reads {@code bindex.json} from a project directory and uses {@link Picker} to * insert or update the corresponding document in the registry.
+ * <p>
+ * This type reads {@code bindex.json} from a project directory and uses
+ * {@link Picker} to insert or update the corresponding document in the
+ * registry.
  *
  * <h2>Example</h2>
  *
@@ -44,19 +48,22 @@ public class BindexRegister extends BindexProjectProcessor {
 	 * Creates a register instance.
 	 *
 	 * @param provider GenAI provider used by {@link Picker}
-	 * @param url      MongoDB connection URI to use; when {@code null}, {@link Picker} chooses a default
+	 * @param url      MongoDB connection URI to use; when {@code null},
+	 *                 {@link Picker} chooses a default
 	 */
-	public BindexRegister(GenAIProvider provider, String url) {
-		this.picker = new Picker(provider, url);
+	public BindexRegister(String genai, String url, Configurator conf) {
+		this.picker = new Picker(genai, url, conf);
 	}
 
 	/**
 	 * Registers the Bindex found in the given project directory.
 	 *
-	 * <p>If no {@code bindex.json} exists, this method performs no action.
+	 * <p>
+	 * If no {@code bindex.json} exists, this method performs no action.
 	 *
 	 * @param projectLayout layout describing the project directory
-	 * @throws IllegalArgumentException if the registration fails due to an I/O error
+	 * @throws IllegalArgumentException if the registration fails due to an I/O
+	 *                                  error
 	 */
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
@@ -79,7 +86,8 @@ public class BindexRegister extends BindexProjectProcessor {
 	/**
 	 * Enables or disables update mode.
 	 *
-	 * @param overwrite {@code true} to overwrite existing registrations; {@code false} to only register when missing
+	 * @param overwrite {@code true} to overwrite existing registrations;
+	 *                  {@code false} to only register when missing
 	 * @return this instance for chaining
 	 */
 	public BindexRegister update(boolean overwrite) {

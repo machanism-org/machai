@@ -25,7 +25,10 @@ import org.bson.BsonDouble;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
@@ -103,15 +106,17 @@ public class Picker {
 	/**
 	 * Constructs a Picker for registration and semantic search.
 	 *
-	 * @param provider GenAIProvider instance used for embedding, schema
-	 *                 classification, etc.
-	 * @param uri      database URI. If the value is null, the default value will be
-	 *                 used..
+	 * @param genai GenAIProvider instance used for embedding, schema
+	 *              classification, etc.
+	 * @param uri   database URI. If the value is null, the default value will be
+	 *              used..
+	 * @param config 
 	 * @throws IllegalStateException If the required environment variables are
 	 *                               missing for DB or OpenAI access
 	 */
-	public Picker(GenAIProvider provider, String uri) {
-		this.provider = provider;
+	public Picker(String genai, String uri, Configurator config) {
+		this.provider = GenAIProviderManager.getProvider(genai, config);
+		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		if (uri == null) {
 			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");

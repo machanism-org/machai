@@ -91,18 +91,17 @@ public class AssembyCommand {
 			@ShellOption(value = { "-s",
 					"--score" }, help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.", defaultValue = ShellOption.NULL) Double score,
 			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String genai)
 			throws IOException {
 
 		try {
 			query = getQueryFromFile(query);
 
 			findQuery = query;
-			chatModel = Optional.ofNullable(chatModel)
+			genai = Optional.ofNullable(genai)
 					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 			score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", 0.90));
-			bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
+			bindexList = pickBricks(query, score, registerUrl, genai);
 		} finally {
 			GenAIProviderManager.logUsage();
 		}
@@ -132,7 +131,7 @@ public class AssembyCommand {
 	 *                  query)
 	 * @param dir       The directory for the assembled project
 	 * @param score     Minimum similarity threshold
-	 * @param chatModel GenAI service provider/model (default is
+	 * @param genai GenAI service provider/model (default is
 	 *                  Ghostwriter.CHAT_MODEL)
 	 * @throws IOException              if an error occurs
 	 * @throws IllegalArgumentException if query or bindexList is missing
@@ -147,19 +146,15 @@ public class AssembyCommand {
 			@ShellOption(value = { "-s",
 					"--score" }, help = "Minimum similarity threshold for search results.", defaultValue = ShellOption.NULL) Double score,
 			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String genai)
 			throws IOException {
 
 		try {
-			chatModel = Optional.ofNullable(chatModel)
+			genai = Optional.ofNullable(genai)
 					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-			
-			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
-			FunctionToolsLoader.getInstance().applyTools(provider);
 
 			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 			logger.info("The project directory: {}", dir);
-			provider.setWorkingDir(dir);
 
 			String prompt = query;
 			if (query == null) {
@@ -170,11 +165,11 @@ public class AssembyCommand {
 			} else {
 				query = getQueryFromFile(query);
 				score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", DEFAULT_SCORE_VALUE));
-				bindexList = pickBricks(provider, query, score, registerUrl, chatModel);
+				bindexList = pickBricks(query, score, registerUrl, genai);
 			}
 
 			if (!bindexList.isEmpty()) {
-				ApplicationAssembly assembly = new ApplicationAssembly(provider, config);
+				ApplicationAssembly assembly = new ApplicationAssembly(genai, config, dir);
 				assembly.projectDir(dir);
 				assembly.assembly(prompt, bindexList);
 			}
@@ -219,19 +214,18 @@ public class AssembyCommand {
 	/**
 	 * Picks bricks (libraries) using a Picker service and scores them.
 	 * 
-	 * @param provider
 	 * @param query     The query string describing requirements
 	 * @param score     Minimum similarity score
 	 * @param url
-	 * @param chatModel
+	 * @param genai
 	 * 
 	 * @return List< Bindex> found matching libraries
 	 * @throws IOException if picking fails
 	 */
-	private List<Bindex> pickBricks(GenAIProvider provider, String query, Double score, String url, String chatModel)
+	private List<Bindex> pickBricks(String query, Double score, String url, String genai)
 			throws IOException {
 		List<Bindex> bindexList = null;
-		Picker picker = new Picker(provider, url);
+		Picker picker = new Picker(genai, url, config);
 		picker.setScore(score);
 		bindexList = picker.pick(query);
 		logger.info("Search results for libraries matching the requested query:");

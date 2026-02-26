@@ -173,11 +173,7 @@ public class Assembly extends AbstractMojo {
 
 			Configurator config = new PropertiesConfigurator("bindex.properties");
 
-			GenAIProvider provider = GenAIProviderManager.getProvider(pickChatModel, config);
-			provider.setWorkingDir(basedir);
-			FunctionToolsLoader.getInstance().applyTools(provider);
-
-			Picker picker = new Picker(provider, registerUrl);
+			Picker picker = new Picker(pickChatModel, registerUrl, config);
 			picker.setScore(score);
 			List<Bindex> bindexList = picker.pick(query);
 
@@ -194,22 +190,12 @@ public class Assembly extends AbstractMojo {
 				getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
 			}
 
-			GenAIProvider assemblyProvider = GenAIProviderManager.getProvider(chatModel, config);
-			assemblyProvider.setWorkingDir(basedir);
-			FunctionToolsLoader.getInstance().applyTools(assemblyProvider);
-
-			ApplicationAssembly assembly = new ApplicationAssembly(assemblyProvider, config);
+			ApplicationAssembly assembly = new ApplicationAssembly(chatModel, config, basedir);
 
 			getLog().info("The project directory: " + basedir);
 			assembly.projectDir(basedir);
 			assembly.assembly(query, bindexList);
 
-			if (!(assemblyProvider instanceof NoneProvider)) {
-				String prompt;
-				while (!StringUtils.equalsIgnoreCase(prompt = prompter.prompt("Prompt"), "exit")) {
-					assemblyProvider.prompt(prompt);
-				}
-			}
 		} catch (IOException | PrompterException e) {
 			throw new MojoExecutionException("The project assembly process failed.", e);
 		}
