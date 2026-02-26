@@ -1,7 +1,6 @@
 package org.machanism.machai.ai.provider.none;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;

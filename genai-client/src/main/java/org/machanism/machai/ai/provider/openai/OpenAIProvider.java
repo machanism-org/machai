@@ -37,7 +37,6 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
-import com.openai.errors.BadRequestException;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.files.FileCreateParams;
@@ -59,6 +58,7 @@ import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputMessage.Content;
 import com.openai.models.responses.ResponseUsage;
 import com.openai.models.responses.Tool;
+import com.openai.services.blocking.ModelService;
 
 /* @guidance: add to the OpenAIProvider class javadoc add information about configuration variable. */
 
@@ -145,6 +145,7 @@ public class OpenAIProvider implements GenAIProvider {
 	public void init(Configurator config) {
 
 		chatModel = config.get("chatModel");
+
 		maxOutputTokens = config.getLong("MAX_OUTPUT_TOKENS", MAX_OUTPUT_TOKENS);
 		maxToolCalls = config.getLong("MAX_TOOL_CALLS", MAX_TOOL_CALLS);
 
@@ -164,9 +165,17 @@ public class OpenAIProvider implements GenAIProvider {
 				clientBuilder.timeout(timeout);
 			}
 			client = clientBuilder.build();
+
+			if (StringUtils.isBlank(chatModel)) {
+				ModelService models = client.models();
+				List<String> items = models.list().items().stream().map(i -> i.id()).collect(Collectors.toList());
+				throw new IllegalArgumentException(
+						"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
+			}
 		}
 
 		builder = ResponseCreateParams.builder().model(chatModel);
+
 	}
 
 	/**

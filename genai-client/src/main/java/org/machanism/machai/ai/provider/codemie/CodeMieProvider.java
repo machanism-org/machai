@@ -107,7 +107,7 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 			conf.set("OPENAI_BASE_URL", baseUrl);
 			conf.set("OPENAI_API_KEY", token);
 
-			if (Strings.CS.startsWithAny(chatModel, "gpt-")) {
+			if (Strings.CS.startsWithAny(chatModel, "gpt-") || StringUtils.isBlank(chatModel)) {
 				provider = new OpenAIProvider();
 				setProvider(provider);
 			} else if (Strings.CS.startsWithAny(chatModel, "gemini-")) {

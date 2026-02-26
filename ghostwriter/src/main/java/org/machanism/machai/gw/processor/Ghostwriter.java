@@ -171,7 +171,8 @@ public final class Ghostwriter {
 
 			String[] scanDirs = cmd.getArgs();
 			if (scanDirs == null || scanDirs.length == 0) {
-				scanDirs = new String[] { rootDir != null ? rootDir.getAbsolutePath() : SystemUtils.getUserDir().getAbsolutePath() };
+				scanDirs = new String[] {
+						rootDir != null ? rootDir.getAbsolutePath() : SystemUtils.getUserDir().getAbsolutePath() };
 			}
 
 			String[] excludes = StringUtils.split(config.get(GW_EXCLUDES_PROP_NAME, null), ',');
@@ -252,6 +253,11 @@ public final class Ghostwriter {
 			}
 			help(options, formatter);
 			exitCode = 2;
+		} catch (IllegalArgumentException e) {
+			if (logger != null) {
+				logger.error("Error: {}", e.getMessage());
+			}
+			exitCode = 1;
 		} catch (Exception e) {
 			if (logger != null) {
 				logger.error("Unexpected error: {}", e.getMessage(), e);
@@ -292,7 +298,8 @@ public final class Ghostwriter {
 				// The property file is not defined, ignore.
 			}
 		} catch (Exception e) {
-			// Configuration file not found. An alternative configuration method will be used.
+			// Configuration file not found. An alternative configuration method will be
+			// used.
 			if (logger == null) {
 				logger = LoggerFactory.getLogger(Ghostwriter.class);
 			}
