@@ -32,7 +32,7 @@ public class Act extends AbstractGWGoal {
 			AIFileProcessor fileProcessor = new AIFileProcessor(basedir, getConfiguration(), genai);
 
 			try {
-				String action = prompter.prompt("Action");
+				String action = prompter.prompt("Act");
 
 				String name = StringUtils.substringBefore(action, " ");
 				String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(action, " "),
