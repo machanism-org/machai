@@ -3,7 +3,10 @@ package org.machanism.machai.gw.processor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
@@ -82,19 +85,20 @@ public final class Ghostwriter {
 	private static File gwHomeDir;
 
 	/** Processor implementation used by this CLI instance. */
-	private final GuidanceProcessor processor;
+	private final AIFileProcessor processor;
 
 	/**
 	 * Creates a new Ghostwriter CLI instance.
 	 *
-	 * @param rootDir root directory of the project to scan; if {@code null}, the
-	 *                value is derived from configuration or defaults to the current
-	 *                working directory
-	 * @param genai   provider key/name (including model), e.g.
-	 *               {@code OpenAI:gpt-5.1}
-	 * @param config  configuration source
+	 * @param rootDir    root directory of the project to scan; if {@code null}, the
+	 *                   value is derived from configuration or defaults to the
+	 *                   current working directory
+	 * @param genai      provider key/name (including model), e.g.
+	 *                   {@code OpenAI:gpt-5.1}
+	 * @param config     configuration source
+	 * @param processor  processor implementation
 	 */
-	public Ghostwriter(File rootDir, String genai, PropertiesConfigurator config) {
+	public Ghostwriter(File rootDir, String genai, PropertiesConfigurator config, AIFileProcessor processor) {
 		String version = Ghostwriter.class.getPackage().getImplementationVersion();
 		if (version != null) {
 			logger.info("Ghostwriter {} (Machai project)", version);
@@ -113,7 +117,7 @@ public final class Ghostwriter {
 			}
 		}
 
-		this.processor = new GuidanceProcessor(rootDir, genai, config);
+		this.processor = processor;
 	}
 
 	/**
@@ -155,8 +159,8 @@ public final class Ghostwriter {
 	 *
 	 * <p>
 	 * The configuration file defaults to {@link #GW_PROPERTIES_FILE_NAME} in the
-	 * resolved home directory, but can be overridden via the {@link #GW_CONFIG_PROP_NAME}
-	 * system property.
+	 * resolved home directory, but can be overridden via the
+	 * {@link #GW_CONFIG_PROP_NAME} system property.
 	 * </p>
 	 *
 	 * @param rootDir optional root directory used to resolve the home directory
@@ -257,11 +261,10 @@ public final class Ghostwriter {
 	 * Sets default guidance applied when embedded {@code @guidance} directives are
 	 * not present.
 	 *
-	 * @param defaultGuidance default guidance text, URL, or {@code file:}
-	 *                        reference
+	 * @param defaultGuidance default guidance text, URL, or {@code file:} reference
 	 */
 	public void setDefaultGuidance(String defaultGuidance) {
-		if (defaultGuidance != null) {
+		if (defaultGuidance != null && processor instanceof GuidanceProcessor) {
 			logger.info("Default Guidance: {}", StringUtils.abbreviate(defaultGuidance, 60));
 			processor.setDefaultGuidance(defaultGuidance);
 		}
@@ -323,6 +326,10 @@ public final class Ghostwriter {
 						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
 				.hasArg(true).optionalArg(true).build();
 
+		Option actOpt = Option.builder().longOpt("act")
+				.desc("Run Ghostwriter in Act mode: an interactive mode for executing predefined prompts.")
+				.hasArg(true).optionalArg(true).build();
+
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
 		options.addOption(multiThreadOption);
@@ -331,6 +338,7 @@ public final class Ghostwriter {
 		options.addOption(guidanceOpt);
 		options.addOption(excludesOpt);
 		options.addOption(logInputsOption);
+		options.addOption(actOpt);
 
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = parser.parse(options, args);
@@ -354,7 +362,6 @@ public final class Ghostwriter {
 				genai = opt;
 			}
 		}
-		Ghostwriter ghostwriter = new Ghostwriter(rootDir, genai, config);
 
 		String instructions = config.get(GW_INSTRUCTIONS_PROP_NAME, null);
 		if (cmd.hasOption(instructionsOpt.getOpt())) {
@@ -367,13 +374,11 @@ public final class Ghostwriter {
 						+ " to finish and signal end of input (EOF):");
 			}
 		}
-		ghostwriter.setInstructions(instructions);
 
 		String[] excludes = StringUtils.split(config.get(GW_EXCLUDES_PROP_NAME, null), ',');
 		if (cmd.hasOption(excludesOpt.getOpt())) {
 			excludes = StringUtils.split(cmd.getOptionValue(excludesOpt.getOpt()), ',');
 		}
-		ghostwriter.setExcludes(excludes);
 
 		boolean multiThread = config.getBoolean(GW_THREADS_PROP_NAME, false);
 		if (cmd.hasOption(multiThreadOption.getOpt())) {
@@ -384,7 +389,6 @@ public final class Ghostwriter {
 				multiThread = Boolean.parseBoolean(opt);
 			}
 		}
-		ghostwriter.setMultiThread(multiThread);
 
 		String defaultGuidance = config.get(GW_GUIDANCE_PROP_NAME, null);
 		if (cmd.hasOption(guidanceOpt.getOpt())) {
@@ -395,22 +399,70 @@ public final class Ghostwriter {
 						+ " to signal end of input (EOF):");
 			}
 		}
-		ghostwriter.setDefaultGuidance(defaultGuidance);
 
 		boolean logInputs = config.getBoolean(GW_LOG_INPUTS_PROP_NAME, false);
 		if (cmd.hasOption(logInputsOption.getOpt())) {
 			logInputs = true;
 		}
-		ghostwriter.setLogInputs(logInputs);
 
-		String[] scanDirs = cmd.getArgs();
-		if (scanDirs == null || scanDirs.length == 0) {
-			scanDirs = new String[] { SystemUtils.getUserDir().getAbsolutePath() };
+		if (rootDir == null) {
+			rootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
+			if (rootDir == null) {
+				rootDir = SystemUtils.getUserDir();
+			}
 		}
 
-		int exitCode = ghostwriter.perform(scanDirs);
-		if (exitCode != 0) {
-			System.exit(exitCode);
+		try {
+			AIFileProcessor processor;
+			if (cmd.hasOption(actOpt.getLongOpt())) {
+				processor = new AIFileProcessor(rootDir, config, genai);
+
+				String action = cmd.getOptionValue(actOpt.getLongOpt());
+
+				if (action == null) {
+					action = readText("Act:");
+				}
+
+				String name = StringUtils.substringBefore(action, " ");
+				String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(action, " "),
+						StringUtils.defaultString(defaultGuidance));
+
+				ResourceBundle promptBundle = ResourceBundle.getBundle("act/" + name);
+
+				try {
+					instructions = promptBundle.getString("instructions");
+				} catch (MissingResourceException e) {
+					// do nothing
+				}
+
+				defaultGuidance = MessageFormat.format(promptBundle.getString("inputs"), prompt);
+
+			} else {
+				processor = new GuidanceProcessor(rootDir, genai, config);
+			}
+
+			Ghostwriter ghostwriter = new Ghostwriter(rootDir, genai, config, processor);
+
+			ghostwriter.setInstructions(instructions);
+			ghostwriter.setExcludes(excludes);
+			ghostwriter.setMultiThread(multiThread);
+			ghostwriter.setDefaultGuidance(defaultGuidance);
+			ghostwriter.setLogInputs(logInputs);
+
+			String[] scanDirs = cmd.getArgs();
+			if (scanDirs == null || scanDirs.length == 0) {
+				scanDirs = new String[] { SystemUtils.getUserDir().getAbsolutePath() };
+			}
+
+			int exitCode = ghostwriter.perform(scanDirs);
+			if (exitCode != 0) {
+				System.exit(exitCode);
+			}
+
+		} catch (IOException e) {
+			logger.error("I/O error occurred during file processing: {}", e.getMessage(), e);
+		} finally {
+			GenAIProviderManager.logUsage();
 		}
 	}
 }

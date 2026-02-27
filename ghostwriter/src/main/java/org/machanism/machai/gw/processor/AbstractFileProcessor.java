@@ -190,7 +190,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @throws IOException           if file reading fails
 	 */
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
-	};
+	}
 
 	/**
 	 * Extracts guidance for a file and, when present, performs provider processing.
@@ -477,7 +477,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param maxModuleThreads maximum thread count (values &lt;= 0 are not allowed)
 	 */
-	public void setMaxModuleThreads(int maxModuleThreads, AIFileProcessor fileProcessor) {
+	public void setMaxModuleThreads(int maxModuleThreads) {
 		if (maxModuleThreads <= 0) {
 			throw new IllegalArgumentException("maxModuleThreads must be > 0");
 		}
@@ -499,7 +499,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param moduleThreadTimeoutMinutes timeout in minutes
 	 */
-	public void setModuleThreadTimeoutMinutes(long moduleThreadTimeoutMinutes, AIFileProcessor fileProcessor) {
+	public void setModuleThreadTimeoutMinutes(long moduleThreadTimeoutMinutes) {
 		if (moduleThreadTimeoutMinutes <= 0) {
 			throw new IllegalArgumentException("moduleThreadTimeoutMinutes must be > 0");
 		}

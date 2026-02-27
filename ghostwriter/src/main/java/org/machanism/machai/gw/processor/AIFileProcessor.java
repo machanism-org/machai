@@ -1,7 +1,14 @@
 package org.machanism.machai.gw.processor;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -9,7 +16,10 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
@@ -64,6 +74,18 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	/** Whether to persist the composed inputs to a per-file log. */
 	private boolean logInputs;
+
+	/**
+	 * Optional additional instructions appended to each prompt sent to the GenAI
+	 * provider.
+	 */
+	private String instructions = "You are a highly skilled software engineer and developer, with expertise in all major programming languages, frameworks, and platforms.";
+
+	/**
+	 * Default guidance applied when a file does not contain embedded
+	 * {@code @guidance} directives.
+	 */
+	private String defaultGuidance;
 
 	/**
 	 * Creates a new processor using the given provider key.
@@ -214,4 +236,164 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public void setLogInputs(boolean logInputs) {
 		this.logInputs = logInputs;
 	}
+
+	/**
+	 * Sets the additional instructions to be appended to each prompt sent to the
+	 * GenAI provider.
+	 *
+	 * <p>
+	 * The input is parsed line-by-line:
+	 * </p>
+	 * <ul>
+	 * <li>Blank lines are preserved.</li>
+	 * <li>Lines starting with {@code http://} or {@code https://} are fetched and
+	 * included.</li>
+	 * <li>Lines starting with {@code file:} are read from the referenced file and
+	 * included.</li>
+	 * <li>All other lines are included as-is.</li>
+	 * </ul>
+	 *
+	 * @param instructions instructions input (plain text, URL, or {@code file:})
+	 */
+	public void setInstructions(String instructions) {
+		this.instructions = parseLines(instructions);
+	}
+
+	public String getInstructions() {
+		return instructions;
+	}
+
+	/**
+	 * Parses input line-by-line and expands any {@code http(s)://} or {@code file:}
+	 * references.
+	 *
+	 * @param data raw input
+	 * @return expanded content with preserved line breaks
+	 */
+	public String parseLines(String data) {
+		if (data == null) {
+			return StringUtils.EMPTY;
+		}
+
+		StringBuilder sb = new StringBuilder();
+		try (BufferedReader reader = new BufferedReader(new StringReader(data))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String normalizedLine = StringUtils.stripToNull(line);
+				if (normalizedLine == null) {
+					sb.append(System.lineSeparator());
+					continue;
+				}
+
+				try {
+					String content = tryToGetInstructionsFromReference(normalizedLine);
+					if (content != null) {
+						sb.append(content);
+					}
+					sb.append(System.lineSeparator());
+				} catch (IOException e) {
+					throw new IllegalArgumentException(e);
+				}
+			}
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * Attempts to retrieve expanded content from the given data string.
+	 *
+	 * <ul>
+	 * <li>If {@code data} starts with {@code http://} or {@code https://}, reads
+	 * content from the specified URL.</li>
+	 * <li>If {@code data} starts with {@code file:}, reads content from the
+	 * specified file path.</li>
+	 * <li>Otherwise, returns {@code data}.</li>
+	 * </ul>
+	 *
+	 * @param data input string (URL, {@code file:} reference, or plain text)
+	 * @return content read from the URL/file, or the original input
+	 * @throws IOException if reading referenced content fails
+	 */
+	private String tryToGetInstructionsFromReference(String data) throws IOException {
+		if (data == null) {
+			return null;
+		}
+
+		String trimmed = data.trim();
+		if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+			return parseLines(readFromHttpUrl(trimmed));
+		}
+
+		if (Strings.CS.startsWith(trimmed, "file:")) {
+			String filePath = StringUtils.substringAfter(trimmed, "file:");
+			filePath = StringSubstitutor.replaceSystemProperties(filePath);
+			return parseLines(readFromFilePath(filePath));
+		}
+
+		return data;
+	}
+
+	/**
+	 * Reads text content from a URL using UTF-8.
+	 *
+	 * @param urlString URL to read
+	 * @return response body
+	 * @throws IOException if an I/O error occurs
+	 */
+	private static String readFromHttpUrl(String urlString) throws IOException {
+		URL url = new URL(urlString);
+		try (InputStream in = url.openStream()) {
+			String result = IOUtils.toString(in, StandardCharsets.UTF_8);
+			logger.info("Included: `{}`", urlString);
+			return result;
+		}
+	}
+
+	/**
+	 * Reads text content from a local file path using UTF-8.
+	 *
+	 * @param filePath local filesystem path (may be a raw path or a {@code file:}
+	 *                 URI)
+	 * @return file content
+	 */
+	private String readFromFilePath(String filePath) {
+		File file = new File(filePath);
+		if (!file.isAbsolute()) {
+			file = new File(getRootDir(), filePath);
+		}
+
+		try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+			String result = IOUtils.toString(reader);
+			logger.info("Included file: `{}`", file);
+			return result;
+		} catch (IOException e) {
+			throw new IllegalArgumentException(
+					"Failed to read file: " + file.getAbsolutePath() + ", Error: " + e.getMessage(), e);
+		}
+	}
+
+	public void scanDocuments(File projectDir, String scanDir) throws IOException {
+		ProjectLayout projectLayout = getProjectLayout(projectDir);
+		String perform = process(projectLayout, getRootDir(), getInstructions(), defaultGuidance);
+		logger.info(perform);
+	}
+
+	public String getDefaultGuidance() {
+		return defaultGuidance;
+	}
+
+	/**
+	 * Sets the default guidance applied when a file does not contain embedded
+	 * {@code @guidance} directives.
+	 *
+	 * @param defaultGuidance default guidance input (plain text, URL, or
+	 *                        {@code file:})
+	 */
+	public void setDefaultGuidance(String defaultGuidance) {
+		this.defaultGuidance = defaultGuidance;
+	}
+
 }
