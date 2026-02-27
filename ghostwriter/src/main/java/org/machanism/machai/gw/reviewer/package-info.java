@@ -1,20 +1,24 @@
 /**
- * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and
- * format-specific implementations that scan project files for embedded {@code @guidance} instructions.
+ * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and a set of
+ * format-specific implementations used by the Ghostwriter pipeline to scan project files and extract embedded
+ * {@code @guidance} instructions.
  *
- * <p>The types in this package are used by the Ghostwriter pipeline to:
+ * <p>Each {@code Reviewer} implementation understands the comment conventions of its target file format and, when
+ * guidance is present, returns a normalized prompt fragment suitable for downstream processing.
+ * Implementations in this package currently support, among others:
  *
  * <ul>
- *   <li>Determine which file extensions are supported by a given reviewer via
- *       {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()}.</li>
- *   <li>Extract guidance and/or file content from supported formats (for example Java, Markdown, HTML,
- *       TypeScript, Python, PlantUML, or plain text).</li>
- *   <li>Return a normalized prompt fragment that includes project-relative path context computed using
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}.</li>
+ *   <li>Java source (including {@code package-info.java})</li>
+ *   <li>Markdown</li>
+ *   <li>HTML/XML</li>
+ *   <li>TypeScript</li>
+ *   <li>Python</li>
+ *   <li>PlantUML</li>
+ *   <li>Plain text guidance files (for example {@code @guidance.txt})</li>
  * </ul>
  *
- * <p>Each reviewer is responsible for applying the comment conventions of its target format (for example
- * {@code // ...}, {@code /* ... *\/}, {@code <!-- ... -->}, or {@code # ...}) when locating guidance.
+ * <p>Reviewers commonly include project-relative path context using
+ * {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}.
  */
 package org.machanism.machai.gw.reviewer;
 

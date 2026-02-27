@@ -24,16 +24,11 @@ Ghostwriter supports **all types of project files—including source code, docum
 
 <header>
   <h1>Ghostwriter</h1>
-
   <p>
     Ghostwriter is a command-line utility that scans a project’s filesystem, extracts embedded
     <code>@guidance:</code> directives from supported file formats, and orchestrates GenAI-driven updates.
-  </p>
-
-  <p>
     The tool is intentionally <strong>filesystem-based</strong>: it does not compile sources, execute builds,
-    or resolve dependencies. For multi-module layouts, modules are processed <strong>child-first</strong> so
-    module guidance is applied before the parent project.
+    or resolve dependencies.
   </p>
 </header>
 
@@ -46,24 +41,51 @@ Ghostwriter supports **all types of project files—including source code, docum
   </figure>
 
   <p>
-    Ghostwriter is organized into two cooperating packages:
+    Ghostwriter’s pipeline is split across two cooperating packages:
   </p>
 
   <dl>
     <dt><strong><code>org.machanism.machai.gw.processor</code></strong></dt>
     <dd>
-      Command-line entry point and the scan → extract → compose → dispatch pipeline. This package traverses the
-      project tree (including child-first module traversal), applies include/exclude rules, composes prompts,
-      and invokes a configured GenAI provider.
+      The CLI entry point and the scan → extract → compose → dispatch pipeline. It traverses the project tree,
+      applies include/exclude rules, composes prompts from project context and extracted guidance, and invokes
+      a configured GenAI provider. For multi-module builds, modules are processed <strong>child-first</strong>
+      (each module is scanned before the parent project directory).
     </dd>
 
     <dt><strong><code>org.machanism.machai.gw.reviewer</code></strong></dt>
     <dd>
-      Reviewer SPI and format-specific implementations used to extract and normalize guidance from project
-      files. Reviewers are typically loaded via Java’s <code>ServiceLoader</code> and mapped to file
-      extensions.
+      The reviewer SPI and format-specific implementations used to extract and normalize guidance from project
+      files. Reviewers are typically loaded via Java’s <code>ServiceLoader</code> and are selected by file
+      extension.
     </dd>
   </dl>
+</section>
+
+<section>
+  <h2>Processing model</h2>
+
+  <p>
+    Ghostwriter operates on project files directly. It can scan and extract guidance from many file types,
+    including source code, documentation, project site content, and other relevant project files.
+  </p>
+
+  <h3>Module traversal</h3>
+  <p>
+    When a project layout declares modules, Ghostwriter processes modules before their parent directory
+    (child-first). This ensures module-local guidance is applied before parent-level guidance.
+  </p>
+
+  <h3>Scan targeting</h3>
+  <p>
+    The scan target can be either a directory path or a matcher expression supported by
+    <code>java.nio.file.FileSystems.getPathMatcher</code>.
+  </p>
+  <ul>
+    <li>Directory path (typically relative to the project root)</li>
+    <li><code>glob:</code> patterns (for example, <code>glob:**/*.java</code>)</li>
+    <li><code>regex:</code> patterns (for example, <code>regex:^.*/[^/]+\\.java$</code>)</li>
+  </ul>
 </section>
 
 <section>
@@ -76,60 +98,46 @@ Ghostwriter supports **all types of project files—including source code, docum
 
   <ul>
     <li>
-      <strong><code>Ghostwriter</code></strong> — CLI entry point. Loads configuration, parses options, and invokes the
-      processing pipeline.
+      <strong><code>Ghostwriter</code></strong> — CLI entry point. Loads configuration, parses options, and invokes
+      the processing pipeline.
     </li>
     <li>
-      <strong><code>GuidanceProcessor</code></strong> — Walks the filesystem (including child-first modules), delegates
-      file parsing to reviewers, assembles prompts, and dispatches them to the selected provider.
-    </li>
-    <li>
-      <strong><code>FileProcessor</code></strong> — File-discovery and per-file processing support used by the pipeline.
+      <strong><code>GuidanceProcessor</code></strong> — Walks the filesystem (including child-first module
+      traversal), delegates file parsing to reviewers, assembles prompts, and dispatches them to the selected
+      provider.
     </li>
   </ul>
 
   <h3>Key behaviors</h3>
   <ul>
-    <li><strong>Child-first module traversal</strong>: modules are processed before their parent directory.</li>
-    <li><strong>No dependency resolution</strong>: projects are not built and dependencies are not resolved.</li>
+    <li><strong>Child-first module traversal</strong>: modules are processed before the parent directory.</li>
+    <li><strong>No dependency resolution</strong>: projects are not built and dependencies are not resolved during scanning.</li>
     <li>
-      <strong>Configurable scan scope</strong>: the scan target may be a directory path or a matcher expression
-      supported by <code>java.nio.file.FileSystems.getPathMatcher</code> (for example, <code>glob:**/*.java</code>
-      or <code>regex:...</code>).
+      <strong>Configurable scan scope</strong>: scanning can target directories or path-matcher expressions.
     </li>
     <li>
-      <strong>Optional auditing</strong>: composed prompt inputs may be logged for debugging and traceability.
+      <strong>Optional auditing</strong>: composed prompt inputs can be logged for debugging and traceability.
     </li>
   </ul>
-
-  <h3>Prompt composition (high-level)</h3>
-  <p>
-    For each processed file, Ghostwriter composes a prompt using:
-  </p>
-  <ol>
-    <li>System instructions (configured or supplied via the CLI).</li>
-    <li>Environment constraints (for example, OS-specific command syntax rules).</li>
-    <li>Project context (layout, source/test/doc roots, modules).</li>
-    <li>Per-file extracted guidance (or default guidance if the file contains none).</li>
-  </ol>
 </section>
 
 <section>
   <h2><code>org.machanism.machai.gw.reviewer</code></h2>
 
   <p>
-    The reviewer package defines the <code>Reviewer</code> service-provider interface (SPI) and a set of
-    implementations responsible for extracting embedded <code>@guidance</code> instructions.
+    The reviewer package defines the <code>Reviewer</code> service-provider interface (SPI) and includes
+    implementations responsible for extracting embedded <code>@guidance</code> instructions from various
+    file formats.
   </p>
 
   <p>
-    Reviewers understand a format’s comment conventions and return a normalized guidance fragment for
+    Each reviewer understands a format’s comment conventions and returns a normalized guidance fragment for
     downstream prompt composition.
   </p>
 
   <h3>Included reviewers</h3>
   <ul>
-    <li>Java source (<code>.java</code>)</li>
+    <li>Java source (<code>.java</code>, including <code>package-info.java</code>)</li>
     <li>Markdown (<code>.md</code>)</li>
     <li>HTML (<code>.html</code>)</li>
     <li>TypeScript (<code>.ts</code>)</li>
