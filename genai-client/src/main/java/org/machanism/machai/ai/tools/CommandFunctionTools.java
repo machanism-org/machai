@@ -176,7 +176,7 @@ public class CommandFunctionTools implements FunctionTools {
 						+ "The tool supports setting environment variables, working directory, output tail size, and character encoding.",
 				this::executeCommand,
 				"command:string:required:The system command to execute. When running system commands or scripts, use the correct Windows command prompt (`cmd.exe`) or PowerShell syntax. "
-				+ "Do not use Unix/Linux shell features such as heredoc (`<<`), semicolon-separated commands, or Unix-style path separators. Use Windows-style commands and path separators (e.g., `\\\\`).",
+						+ "Do not use Unix/Linux shell features such as heredoc (`<<`), semicolon-separated commands, or Unix-style path separators. Use Windows-style commands and path separators (e.g., `\\\\`).",
 				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). If omitted, the subprocess inherits the current process environment.",
 				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. If omitted, the current project directory is used.",
 				"tailResultSize:integer:optional:The maximum number of characters to display from the end of the command output. If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
@@ -242,7 +242,10 @@ public class CommandFunctionTools implements FunctionTools {
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
 
-		if (checker.isDangerous(command)) {
+		try {
+			checker.danyCheck(command);
+		} catch (DenyException e) {
+			logger.error("[CMD {}] Invalid or unsafe command: ", e.getMessage());
 			return "Error: Invalid or unsafe command.";
 		}
 
