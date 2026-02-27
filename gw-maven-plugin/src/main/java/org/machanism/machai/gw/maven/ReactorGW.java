@@ -10,7 +10,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
-import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -143,7 +143,7 @@ public class ReactorGW extends AbstractGWGoal {
 
 		PropertiesConfigurator config = getConfiguration();
 
-		FileProcessor documents = new FileProcessor(new File(executionRootDirectory), genai, config) {
+		GuidanceProcessor documents = new GuidanceProcessor(new File(executionRootDirectory), genai, config) {
 
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

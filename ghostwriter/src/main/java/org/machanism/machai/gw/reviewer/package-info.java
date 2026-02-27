@@ -1,13 +1,20 @@
 /**
  * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and
- * implementations that scan project files to locate embedded {@code @guidance} instructions.
+ * format-specific implementations that scan project files for embedded {@code @guidance} instructions.
  *
- * <p>Each {@code Reviewer} targets one or more file types and understands the comment syntax for its target
- * format (for example, Java block comments, HTML comments, or single-line hash comments). When guidance is
- * found, the reviewer formats a prompt fragment for downstream processing, typically including the
- * project-relative path (via
- * {@link org.machanism.machai.project.layout.ProjectLayout}) and, depending on file type, either the full
- * file content or the extracted guidance text.
+ * <p>The types in this package are used by the Ghostwriter pipeline to:
+ *
+ * <ul>
+ *   <li>Determine which file extensions are supported by a given reviewer via
+ *       {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()}.</li>
+ *   <li>Extract guidance and/or file content from supported formats (for example Java, Markdown, HTML,
+ *       TypeScript, Python, PlantUML, or plain text).</li>
+ *   <li>Return a normalized prompt fragment that includes project-relative path context computed using
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}.</li>
+ * </ul>
+ *
+ * <p>Each reviewer is responsible for applying the comment conventions of its target format (for example
+ * {@code // ...}, {@code /* ... *\/}, {@code <!-- ... -->}, or {@code # ...}) when locating guidance.
  */
 package org.machanism.machai.gw.reviewer;
 

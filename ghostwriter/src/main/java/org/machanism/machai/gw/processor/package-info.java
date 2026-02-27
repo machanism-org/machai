@@ -4,7 +4,7 @@
  * **IMPORTANT: ADD OR UPDATE JAVADOC TO ALL CLASSES IN THE CURRENT FOLDER AND THIS `package-info.java`!**.	
  * Ghostwriter works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
  * Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
- * FileProcessor does not support dependency resolution during project processing. 
+ * GuidanceProcessor does not support dependency resolution during project processing. 
  * It processes projects using a child-first approach only.
  * 
  * - Update Existing Javadoc and Add Missing Javadoc:
@@ -44,7 +44,7 @@
  * <p>
  * This package contains Ghostwriter's command-line entry point
  * ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the filesystem
- * processor ({@link org.machanism.machai.gw.processor.FileProcessor}). Together
+ * processor ({@link org.machanism.machai.gw.processor.GuidanceProcessor}). Together
  * they walk a project directory, locate files supported by registered
  * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations, extract
  * embedded {@code @guidance:} directives, and submit a composed prompt to a
@@ -64,8 +64,8 @@
  * <h2>Typical flow</h2>
  * <ol>
  * <li>{@link org.machanism.machai.gw.processor.Ghostwriter} parses CLI options and
- * configures a {@link org.machanism.machai.gw.processor.FileProcessor}.</li>
- * <li>{@link org.machanism.machai.gw.processor.FileProcessor} walks the filesystem
+ * configures a {@link org.machanism.machai.gw.processor.GuidanceProcessor}.</li>
+ * <li>{@link org.machanism.machai.gw.processor.GuidanceProcessor} walks the filesystem
  * (optionally constrained by include/exclude patterns).</li>
  * <li>Each supported file is reviewed to extract guidance, then a prompt is built
  * from project metadata and per-file content.</li>

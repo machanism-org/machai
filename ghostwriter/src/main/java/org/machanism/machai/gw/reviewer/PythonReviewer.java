@@ -10,14 +10,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.Strings;
-import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
  * Reviewer implementation for Python source files (.py).
  * <p>
  * Extracts guidance information or comments annotated with the
- * {@link FileProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
+ * {@link GuidanceProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
  * supporting Python file comment conventions.
  */
 public class PythonReviewer implements Reviewer {
@@ -48,10 +48,10 @@ public class PythonReviewer implements Reviewer {
 	    // Java 8 compatible file reading
 	    String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
 	    String result = null;
-	    if (Strings.CS.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
+	    if (Strings.CS.contains(content, GuidanceProcessor.GUIDANCE_TAG_NAME)) {
 	        Pattern pattern = Pattern.compile(
-	            "(?:#\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
-	            + "|(?:[\"']{3}\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*[\"']{3})",
+	            "(?:#\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
+	            + "|(?:[\"']{3}\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*[\"']{3})",
 	            Pattern.DOTALL
 	        );
 	        Matcher matcher = pattern.matcher(content);

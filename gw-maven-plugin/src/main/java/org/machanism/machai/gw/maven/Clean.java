@@ -7,7 +7,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 
 /**
  * Maven goal that deletes temporary artifacts created by the MachAI generative-workflow (GW) document processing.
@@ -33,7 +33,7 @@ public class Clean extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
-			FileProcessor.deleteTempFiles(basedir);
+			GuidanceProcessor.deleteTempFiles(basedir);
 		} catch (RuntimeException e) {
 			throw new MojoExecutionException("Failed to delete workflow temporary files.", e);
 		}

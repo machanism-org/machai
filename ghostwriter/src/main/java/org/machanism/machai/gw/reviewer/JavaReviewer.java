@@ -11,14 +11,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.Strings;
-import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
  * Reviewer implementation for Java source files (.java).
  * <p>
  * Extracts guidance information or comments annotated with the
- * {@link FileProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
+ * {@link GuidanceProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
  * including support for package-info.java and regular Java files.
  */
 public class JavaReviewer implements Reviewer {
@@ -51,9 +51,9 @@ public class JavaReviewer implements Reviewer {
 			// Java 8 compatible file reading
 			String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
 
-			if (Strings.CS.contains(content, FileProcessor.GUIDANCE_TAG_NAME)) {
-				Pattern pattern = Pattern.compile("(?:/\\*.*?" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*\\*/)|"
-						+ "(?://\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))", Pattern.DOTALL);
+			if (Strings.CS.contains(content, GuidanceProcessor.GUIDANCE_TAG_NAME)) {
+				Pattern pattern = Pattern.compile("(?:/\\*.*?" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*\\*/)|"
+						+ "(?://\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))", Pattern.DOTALL);
 				Matcher matcher = pattern.matcher(content);
 				if (matcher.find()) {
 					if (Strings.CS.equals(guidancesFile.getName(), "package-info.java")) {

@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
@@ -45,7 +45,7 @@ public class HtmlReviewer implements Reviewer {
 	    // Java 8 compatible file reading
 	    String content = new String(Files.readAllBytes(guidancesFile.toPath()), java.nio.charset.StandardCharsets.UTF_8);
 
-	    Pattern pattern = Pattern.compile("<!--\\s*" + FileProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*-->",
+	    Pattern pattern = Pattern.compile("<!--\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*-->",
 	            Pattern.DOTALL);
 	    Matcher matcher = pattern.matcher(content);
 

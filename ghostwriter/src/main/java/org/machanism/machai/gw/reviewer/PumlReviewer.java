@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 
 import org.apache.commons.io.FileUtils;
-import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
@@ -45,7 +45,7 @@ public class PumlReviewer implements Reviewer {
 
         String content = FileUtils.readFileToString(guidancesFile, StandardCharsets.UTF_8);
 
-        if (!content.contains(FileProcessor.GUIDANCE_TAG_NAME)) {
+        if (!content.contains(GuidanceProcessor.GUIDANCE_TAG_NAME)) {
             return null;
         }
 

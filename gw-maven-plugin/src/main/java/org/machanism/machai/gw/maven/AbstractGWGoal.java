@@ -14,7 +14,7 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * scan/execute flow. Concrete goals typically configure goal-specific behavior
  * (for example, reactor aggregation, processing order, or threading) and then
  * delegate to {@link #scanDocuments()} or
- * {@link #scanDocuments(FileProcessor)}.
+ * {@link #scanDocuments(GuidanceProcessor)}.
  * </p>
  *
  * <h2>Common parameters</h2>
@@ -177,12 +177,12 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	}
 
 	/**
-	 * Configures and runs a {@link FileProcessor} scan for the current module.
+	 * Configures and runs a {@link GuidanceProcessor} scan for the current module.
 	 *
 	 * @param processor processor instance to configure and run
 	 * @throws MojoExecutionException if processing fails
 	 */
-	protected void scanDocuments(FileProcessor processor) throws MojoExecutionException {
+	protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
 
 		File basedir = project.getBasedir();
 		if (basedir == null) {

@@ -12,7 +12,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
-import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -157,7 +157,7 @@ public class GW extends AbstractGWGoal {
 		PropertiesConfigurator config = getConfiguration();
 
 		String genai = config.get(Ghostwriter.GW_GENAI_PROP_NAME, this.genai);
-		FileProcessor processor = new FileProcessor(basedir, genai, config) {
+		GuidanceProcessor processor = new GuidanceProcessor(basedir, genai, config) {
 
 			@Override
 			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

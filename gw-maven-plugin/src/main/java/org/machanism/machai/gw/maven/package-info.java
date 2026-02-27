@@ -3,7 +3,7 @@
  * document processing as part of a Maven build.
  *
  * <p>
- * The goals in this package configure a {@link org.machanism.machai.gw.processor.FileProcessor} and then scan a
+ * The goals in this package configure a {@link org.machanism.machai.gw.processor.GuidanceProcessor} and then scan a
  * documentation source tree (commonly {@code src/site}). The scan root is typically Maven's execution root directory
  * but can be overridden with {@code -Dgw.scanDir}. During scanning, include/exclude behavior is applied by the
  * processor and, if enabled, the plugin forwards credentials from Maven {@code settings.xml}.
