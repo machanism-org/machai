@@ -2,6 +2,7 @@ package org.machanism.machai.gw.maven;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,11 +35,18 @@ public class Act extends AbstractGWGoal {
 				String action = prompter.prompt("Action");
 
 				String name = StringUtils.substringBefore(action, " ");
-				String prompt = StringUtils.substringAfter(action, " ");
+				String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(action, " "),
+						StringUtils.defaultString(guidance));
 
 				ResourceBundle promptBundle = ResourceBundle.getBundle("act/" + name);
 
-				String commitInstructions = promptBundle.getString("instructions");
+				String commitInstructions;
+				try {
+					commitInstructions = promptBundle.getString("instructions");
+				} catch (MissingResourceException e) {
+					commitInstructions = instructions;
+				}
+
 				String inputs = MessageFormat.format(promptBundle.getString("inputs"), prompt);
 
 				ProjectLayout projectLayout = fileProcessor.getProjectLayout(basedir);
@@ -50,9 +58,9 @@ public class Act extends AbstractGWGoal {
 			}
 
 		} catch (IOException e) {
-		    getLog().error("I/O error occurred during file processing: " + e.getMessage());
-		    throw new MojoExecutionException("I/O error occurred during file processing", e);
-		    
+			getLog().error("I/O error occurred during file processing: " + e.getMessage());
+			throw new MojoExecutionException("I/O error occurred during file processing", e);
+
 		} finally {
 			GenAIProviderManager.logUsage();
 		}
