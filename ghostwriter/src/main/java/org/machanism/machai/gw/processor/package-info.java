@@ -39,38 +39,37 @@
  */
 
 /**
- * Command-line project scanning and prompt orchestration.
+ * Command-line project scanning, guidance extraction, and prompt orchestration.
  *
  * <p>
- * This package contains Ghostwriter's command-line entry point
- * ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the filesystem
- * processor ({@link org.machanism.machai.gw.processor.GuidanceProcessor}). Together
- * they walk a project directory, locate files supported by registered
- * {@link org.machanism.machai.gw.reviewer.Reviewer} implementations, extract
- * embedded {@code @guidance:} directives, and submit a composed prompt to a
- * configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * The {@code org.machanism.machai.gw.processor} package contains Ghostwriter's
+ * command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter})
+ * and the processors responsible for walking a project tree and invoking a GenAI
+ * provider.
  * </p>
+ *
+ * <h2>Responsibilities</h2>
+ * <ul>
+ * <li><b>Filesystem traversal</b> via {@link org.machanism.machai.gw.processor.AbstractFileProcessor},
+ * including support for include matchers ({@code glob:}/{@code regex:}) and
+ * exclusion rules.</li>
+ * <li><b>Provider orchestration</b> via {@link org.machanism.machai.gw.processor.AIFileProcessor},
+ * which creates/configures the {@link org.machanism.machai.ai.manager.GenAIProvider},
+ * applies function tools, and optionally logs composed inputs.</li>
+ * <li><b>Guidance extraction</b> via {@link org.machanism.machai.gw.processor.GuidanceProcessor},
+ * which selects {@link org.machanism.machai.gw.reviewer.Reviewer} implementations
+ * by file extension, extracts embedded {@code @guidance:} directives, and submits
+ * the resulting prompt to the provider.</li>
+ * </ul>
  *
  * <h2>Key behaviors</h2>
  * <ul>
- * <li><b>Child-first traversal</b>: for multi-module layouts, modules are
- * processed before the parent project directory.</li>
- * <li><b>No dependency resolution</b>: processing is filesystem-based; projects
- * are not built and dependencies are not resolved during scanning.</li>
- * <li><b>Broad file coverage</b>: reviewers may support source code,
- * documentation, project site content, and other relevant project files.</li>
+ * <li><b>Child-first module processing</b>: in multi-module projects, modules are scanned
+ * before the parent directory.</li>
+ * <li><b>No dependency resolution</b>: scanning is purely filesystem-based; the project
+ * is not built and dependencies are not resolved during processing.</li>
+ * <li><b>Broad file coverage</b>: reviewers may support source code, documentation,
+ * project site content, and other relevant project files.</li>
  * </ul>
- *
- * <h2>Typical flow</h2>
- * <ol>
- * <li>{@link org.machanism.machai.gw.processor.Ghostwriter} parses CLI options and
- * configures a {@link org.machanism.machai.gw.processor.GuidanceProcessor}.</li>
- * <li>{@link org.machanism.machai.gw.processor.GuidanceProcessor} walks the filesystem
- * (optionally constrained by include/exclude patterns).</li>
- * <li>Each supported file is reviewed to extract guidance, then a prompt is built
- * from project metadata and per-file content.</li>
- * <li>The prompt is sent to the configured provider; optionally, composed inputs
- * are logged for auditing and debugging.</li>
- * </ol>
  */
 package org.machanism.machai.gw.processor;

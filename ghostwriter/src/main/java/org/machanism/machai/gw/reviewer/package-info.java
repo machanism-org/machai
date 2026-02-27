@@ -1,24 +1,15 @@
 /**
- * Provides the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI) and a set of
- * format-specific implementations used by the Ghostwriter pipeline to scan project files and extract embedded
- * {@code @guidance} instructions.
+ * File-format aware scanners that extract embedded {@code @guidance} instructions from project files.
  *
- * <p>Each {@code Reviewer} implementation understands the comment conventions of its target file format and, when
- * guidance is present, returns a normalized prompt fragment suitable for downstream processing.
- * Implementations in this package currently support, among others:
+ * <p>The central abstraction is {@link org.machanism.machai.gw.reviewer.Reviewer}, a small service-provider
+ * interface (SPI) implemented by format-specific reviewers (for example Java, Markdown, HTML/XML, TypeScript,
+ * Python, PlantUML, and plain text guidance files). A reviewer understands the comment conventions of its
+ * target format, detects guidance blocks tagged with the Ghostwriter guidance marker, and emits a normalized
+ * prompt fragment that includes project-relative path context.
  *
- * <ul>
- *   <li>Java source (including {@code package-info.java})</li>
- *   <li>Markdown</li>
- *   <li>HTML/XML</li>
- *   <li>TypeScript</li>
- *   <li>Python</li>
- *   <li>PlantUML</li>
- *   <li>Plain text guidance files (for example {@code @guidance.txt})</li>
- * </ul>
+ * <p>These prompt fragments are consumed by the Ghostwriter pipeline to drive downstream processing.
  *
- * <p>Reviewers commonly include project-relative path context using
- * {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}.
+ * @see org.machanism.machai.gw.reviewer.Reviewer
  */
 package org.machanism.machai.gw.reviewer;
 
