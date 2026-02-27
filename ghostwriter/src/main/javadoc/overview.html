@@ -25,25 +25,24 @@ Ghostwriter supports **all types of project files—including source code, docum
 <header>
   <h1>Ghostwriter</h1>
   <p>
-    Ghostwriter is a command-line utility that scans a project’s filesystem, extracts embedded
+    Ghostwriter is a filesystem-first command-line utility that scans a project, extracts embedded
     <code>@guidance:</code> directives from supported file formats, and orchestrates GenAI-driven updates.
-    The tool is intentionally <strong>filesystem-based</strong>: it does not compile sources, execute builds,
-    or resolve dependencies.
+    The pipeline does <strong>not</strong> compile sources, execute builds, or resolve dependencies.
   </p>
 </header>
 
 <section>
-  <h2>Purpose and scope</h2>
+  <h2>What Ghostwriter does</h2>
   <p>
-    Ghostwriter turns in-repository guidance (for example, <code>@guidance:</code> comments in source,
-    documentation, and site content) into provider-ready prompts that can be used to update project files.
-    Its scan-and-review model is designed to work across the full set of files that commonly make up a project:
-    source code, documentation, project site content, and other relevant artifacts.
+    Ghostwriter turns in-repository guidance (for example, <code>@guidance:</code> blocks in source code,
+    documentation, project site content, and other relevant project files) into provider-ready prompts.
+    Each selected file is reviewed by a format-specific implementation that extracts and normalizes guidance,
+    including project-relative path context.
   </p>
 </section>
 
 <section>
-  <h2>Architecture</h2>
+  <h2>High-level architecture</h2>
 
   <figure>
     <img src="../images/class-diagram.png" alt="Ghostwriter class diagram" />
@@ -57,20 +56,17 @@ Ghostwriter supports **all types of project files—including source code, docum
   <dl>
     <dt><strong><code>org.machanism.machai.gw.processor</code></strong></dt>
     <dd>
-      Command-line entry point and processing pipeline responsible for filesystem traversal, prompt composition,
-      and provider orchestration.
-      The processor walks a project tree, applies include/exclude rules, extracts guidance via reviewers,
-      and submits the composed prompt to a configured GenAI provider.
-      In multi-module layouts, modules are processed <strong>child-first</strong> (each module is scanned before
-      the parent directory).
+      Command-line entry point and processing pipeline that performs filesystem traversal, selects reviewers,
+      composes prompts, and invokes a configured GenAI provider.
+      Key behaviors include <strong>child-first module processing</strong> and a deliberate
+      <strong>no dependency resolution</strong> model.
     </dd>
 
     <dt><strong><code>org.machanism.machai.gw.reviewer</code></strong></dt>
     <dd>
-      Reviewer service-provider interface (SPI) and format-specific implementations used to extract and
-      normalize guidance from project files.
-      Reviewers understand comment conventions for a specific format, find <code>@guidance:</code> blocks,
-      and return normalized guidance fragments for downstream prompt composition.
+      Reviewer service-provider interface (SPI) and format-specific implementations that detect and extract
+      <code>@guidance</code> directives from supported file formats (for example Java, Markdown, HTML/XML,
+      TypeScript, Python, PlantUML, and plain text).
     </dd>
   </dl>
 </section>
@@ -78,67 +74,64 @@ Ghostwriter supports **all types of project files—including source code, docum
 <section>
   <h2>Processing model</h2>
 
-  <h3>Filesystem-first scanning</h3>
+  <h3>Filesystem scanning</h3>
   <p>
-    Ghostwriter operates directly on files and directories. It does not compile the project, execute builds,
-    or resolve dependencies; the guidance pipeline is based on file content and project layout only.
+    Ghostwriter operates directly on files and directories. It does not build the project; guidance extraction
+    and prompt composition are driven entirely by file content and the declared project layout.
   </p>
 
   <h3>Module traversal</h3>
   <p>
-    When a project layout declares modules, Ghostwriter processes modules before their parent directory
-    (child-first). This helps ensure module-local guidance is discovered and applied before parent-level guidance.
+    In multi-module layouts, Ghostwriter processes modules before their parent directory (child-first).
+    This ensures module-local guidance is collected and applied prior to any parent-level aggregation.
   </p>
 
-  <h3>Scan targeting</h3>
+  <h3>Scan targets and matchers</h3>
   <p>
-    A scan target can be a directory path or a matcher expression supported by
-    <code>java.nio.file.FileSystems.getPathMatcher</code>.
+    A scan target can be a directory path (typically relative to the project root) or a matcher expression
+    supported by <code>java.nio.file.FileSystems.getPathMatcher</code>.
   </p>
   <ul>
-    <li>Directory path (typically relative to the project root)</li>
+    <li>Directory path (for example, <code>src/main</code>)</li>
     <li><code>glob:</code> patterns (for example, <code>glob:**/*.java</code>)</li>
     <li><code>regex:</code> patterns (for example, <code>regex:^.*/[^/]+\\.java$</code>)</li>
   </ul>
 
   <h3>Guidance extraction and orchestration</h3>
   <p>
-    For each selected file, Ghostwriter delegates guidance extraction to a matching reviewer.
-    The extracted guidance is normalized (including project-relative path context) and combined with project
-    context to form a provider-ready prompt.
+    For each selected file, Ghostwriter selects an appropriate reviewer based on the file format,
+    extracts embedded guidance, and combines the results with project context to build a provider-ready prompt.
+    The resulting prompt is then submitted to the configured GenAI provider.
   </p>
 </section>
 
 <section>
-  <h2>Packages</h2>
+  <h2>Package overview</h2>
 
   <h3><code>org.machanism.machai.gw.processor</code></h3>
   <p>
-    Contains the user-facing CLI and the processing pipeline that turns scanned files into GenAI provider calls.
+    Command-line project scanning, guidance extraction, and prompt orchestration.
+    This package contains Ghostwriter's CLI entry point and the processing pipeline responsible for:
   </p>
   <ul>
     <li>
-      <strong>Filesystem traversal</strong>: walk the project tree, support include matchers
-      (<code>glob:</code>/<code>regex:</code>), and apply exclusion rules.
+      <strong>Filesystem traversal</strong>: walking the project tree, supporting include matchers
+      (<code>glob:</code>/<code>regex:</code>) and applying exclusion rules.
     </li>
     <li>
-      <strong>Provider orchestration</strong>: create and configure a provider, apply any configured function tools,
-      and optionally log composed prompt inputs for traceability.
+      <strong>Provider orchestration</strong>: creating/configuring the GenAI provider, applying any configured
+      function tools, and optionally logging composed prompt inputs for traceability.
     </li>
     <li>
-      <strong>Guidance processing</strong>: select reviewers by file extension, extract embedded guidance, compose
-      prompts, and dispatch them to the provider.
+      <strong>Guidance processing</strong>: selecting reviewers by file extension, extracting embedded
+      <code>@guidance:</code> directives, composing prompts, and dispatching them to the provider.
     </li>
   </ul>
 
   <h3><code>org.machanism.machai.gw.reviewer</code></h3>
   <p>
-    Defines the <code>Reviewer</code> SPI and contains implementations responsible for extracting embedded
-    <code>@guidance</code> directives from different file formats.
-  </p>
-  <p>
-    Reviewers commonly cover both code and documentation formats, such as Java source (including
-    <code>package-info.java</code>), Markdown, HTML/XML, TypeScript, Python, PlantUML, and plain text guidance files.
+    File-format aware scanners that extract embedded <code>@guidance</code> instructions from project files.
+    Reviewers implement a small SPI and encapsulate comment parsing and normalization per file format.
   </p>
 </section>
 
