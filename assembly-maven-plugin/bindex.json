@@ -1,0 +1,114 @@
+{
+  "id" : "org.machanism.machai:assembly-maven-plugin:0.0.13-SNAPSHOT",
+  "name" : "org.machanism.machai:assembly-maven-plugin",
+  "version" : "0.0.13-SNAPSHOT",
+  "location" : {
+    "repositoryType" : "Maven",
+    "repositoryUrl" : "https://repo.maven.apache.org/maven2",
+    "coordinates" : {
+      "group" : "org.machanism.machai",
+      "artifactId" : "assembly-maven-plugin",
+      "version" : "0.0.13-SNAPSHOT",
+      "extension" : "maven-plugin"
+    }
+  },
+  "description" : "Assembly Maven Plugin (org.machanism.machai:assembly-maven-plugin) is a Maven plugin that provides the \"assembly\" goal to run an AI-assisted project assembly workflow over a target project directory (by default the Maven execution basedir). It performs two GenAI-driven phases: (1) library recommendation (\"picking\") using org.machanism.machai.bindex.Picker, where a natural-language prompt is read from a configurable file (default project.txt) or requested interactively, then a GenAI provider (default OpenAI:gpt-5-mini) recommends candidate libraries as org.machanism.machai.schema.Bindex entries; recommendations can be filtered by a minimum score threshold (default 0.9) and optionally use a registration/lookup endpoint (bindex.register.url) for bindex metadata. (2) project assembly using org.machanism.machai.bindex.ApplicationAssembly, where a separate GenAI provider (default OpenAI:gpt-5) applies changes to the project directory to integrate the selected libraries and produce an assembled project. The plugin integrates with the Machanism Machai ecosystem: it uses bindex-core for interpreting bindex.json metadata, GenAIProviderManager to resolve provider ids, and FunctionToolsLoader to attach function tools to providers. If the selected provider is interactive (not org.machanism.machai.ai.provider.none.NoneProvider), the plugin can continue in an interactive prompt loop until the user types \"exit\". Typical usage is from the Maven CLI or CI pipelines to scaffold/assemble projects and guide dependency/library selection via semantic search over bindex descriptions.",
+  "authors" : [ {
+    "name" : "Viktor Tovstyi",
+    "email" : "viktor.tovstyi@gmail.com"
+  } ],
+  "license" : "Apache License, Version 2.0",
+  "classification" : {
+    "type" : "plugin",
+    "domains" : [ "Build Automation", "Maven Plugins", "Project Scaffolding", "Software Assembly", "Dependency Management", "Developer Tooling", "GenAI Tooling", "Semantic Search" ],
+    "languages" : [ {
+      "name" : "Java"
+    } ],
+    "layers" : [ "Infrastructure" ],
+    "usageContext" : [ "Maven build lifecycle", "CLI usage (mvn ...:assembly)", "CI/CD build pipelines", "Interactive project assembly sessions", "Machanism Machai ecosystem project assembly" ],
+    "targetEnvironment" : [ "Java", "Maven" ],
+    "integrations" : [ "Maven" ]
+  },
+  "constructors" : [ {
+    "package" : "org.machanism.machai.assembly.maven",
+    "signature" : "public org.machanism.machai.assembly.maven.Assembly()",
+    "description" : "Creates a new Maven Mojo instance for the \"assembly\" goal. Configuration is provided via Maven @Parameter injection (system properties and plugin configuration). At execution time, the Mojo reads a natural-language assembly prompt from a file or interactive input, invokes a picker GenAI provider to recommend libraries (Bindex entries), and then invokes an assembly GenAI provider to apply changes to the project directory.",
+    "examples" : [ {
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly -Dassembly.genai=OpenAI:gpt-5 -Dpick.genai=OpenAI:gpt-5-mini -Dassembly.prompt.file=project.txt -Dassembly.score=0.9",
+      "description" : "Runs the \"assembly\" goal from the command line, configuring separate GenAI providers for picking and assembly, reading the prompt from project.txt, and requiring a minimum recommendation score of 0.9."
+    } ]
+  } ],
+  "features" : [ {
+    "name" : "assembly",
+    "package" : "org.machanism.machai.assembly.maven",
+    "signature" : "public void execute() throws org.apache.maven.plugin.MojoExecutionException",
+    "description" : "Implements the Maven \"assembly\" goal. Reads an assembly prompt from the configured file (assembly.prompt.file, default project.txt) or requests it interactively via org.codehaus.plexus.components.interactivity.Prompter. Initializes a configuration source (org.machanism.macha.core.commons.configurator.PropertiesConfigurator backed by bindex.properties). Resolves and configures a picker GenAI provider (pick.genai, default OpenAI:gpt-5-mini) using org.machanism.machai.ai.manager.GenAIProviderManager, sets the working directory to the Maven basedir, applies function tools via org.machanism.machai.ai.tools.FunctionToolsLoader, and uses org.machanism.machai.bindex.Picker to recommend org.machanism.machai.schema.Bindex artifacts. Filters recommendations by a minimum score (assembly.score, default 0.9), logs the recommended library ids and scores, then resolves and configures an assembly GenAI provider (assembly.genai, default OpenAI:gpt-5) and runs org.machanism.machai.bindex.ApplicationAssembly against the project directory to apply the changes. If the provider is interactive (not org.machanism.machai.ai.provider.none.NoneProvider), enters a prompt loop until the user types \"exit\". Wraps IO and prompting failures into MojoExecutionException.",
+    "examples" : [ {
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly -Dassembly.genai=OpenAI:gpt-5 -Dpick.genai=OpenAI:gpt-5-mini -Dassembly.prompt.file=project.txt -Dassembly.score=0.9",
+      "description" : "Runs the plugin goal with explicit providers for picking and assembly, reads the prompt from project.txt, and filters recommendations with score >= 0.9."
+    }, {
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly -Dassembly.prompt.file=missing.txt",
+      "description" : "If the prompt file does not exist, the Mojo requests the prompt interactively from the user using the Maven/plexus prompter."
+    }, {
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly -Dbindex.register.url=https://register.project.example",
+      "description" : "Runs the picker with an optional registration/lookup endpoint to resolve or register bindex metadata during library recommendation."
+    } ]
+  } ],
+  "customizations" : [ {
+    "name" : "assembly.genai",
+    "package" : "org.machanism.machai.assembly.maven",
+    "description" : "System property / plugin configuration parameter selecting the GenAI provider id for the assembly phase (used to apply changes to the project). Resolved by org.machanism.machai.ai.manager.GenAIProviderManager. Default: OpenAI:gpt-5.",
+    "type" : "configuration property",
+    "examples" : [ {
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly -Dassembly.genai=OpenAI:gpt-5",
+      "description" : "Sets the GenAI provider used for the assembly phase."
+    } ]
+  }, {
+    "name" : "pick.genai",
+    "package" : "org.machanism.machai.assembly.maven",
+    "description" : "System property / plugin configuration parameter selecting the GenAI provider id for the picker phase (used to recommend candidate libraries as Bindex entries). Resolved by org.machanism.machai.ai.manager.GenAIProviderManager. Default: OpenAI:gpt-5-mini.",
+    "type" : "configuration property",
+    "examples" : [ {
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly -Dpick.genai=OpenAI:gpt-5-mini",
+      "description" : "Sets the GenAI provider used for the recommendation (picker) phase."
+    } ]
+  }, {
+    "name" : "assembly.prompt.file",
+    "package" : "org.machanism.machai.assembly.maven",
+    "description" : "System property / plugin configuration parameter specifying the text file that contains the natural-language assembly prompt. If the file does not exist, the prompt is requested interactively via org.codehaus.plexus.components.interactivity.Prompter. Default: project.txt.",
+    "type" : "configuration property",
+    "examples" : [ {
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly -Dassembly.prompt.file=project.txt",
+      "description" : "Reads the assembly prompt from project.txt."
+    } ]
+  }, {
+    "name" : "assembly.score",
+    "package" : "org.machanism.machai.assembly.maven",
+    "description" : "System property / plugin configuration parameter specifying the minimum score threshold for recommended libraries produced by org.machanism.machai.bindex.Picker. Default: 0.9.",
+    "type" : "configuration property",
+    "examples" : [ {
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly -Dassembly.score=0.95",
+      "description" : "Requires recommendations to have a score of at least 0.95."
+    } ]
+  }, {
+    "name" : "bindex.register.url",
+    "package" : "org.machanism.machai.assembly.maven",
+    "description" : "Optional system property / plugin configuration parameter providing a registration/lookup endpoint used by org.machanism.machai.bindex.Picker to look up and/or register bindex metadata during the recommendation phase.",
+    "type" : "configuration property",
+    "examples" : [ {
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly -Dbindex.register.url=https://register.project.example",
+      "description" : "Configures the picker to use a remote registry endpoint for bindex metadata lookup/registration."
+    } ]
+  } ],
+  "studs" : [ ],
+  "examples" : [ {
+    "type" : "cli",
+    "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:assembly\n  -Dassembly.genai=OpenAI:gpt-5\n  -Dpick.genai=OpenAI:gpt-5-mini\n  -Dassembly.prompt.file=project.txt\n  -Dassembly.score=0.9",
+    "description" : "Command-line invocation configuring both phases and using a prompt file."
+  }, {
+    "type" : "pom",
+    "snippet" : "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>assembly-maven-plugin</artifactId>\n  <configuration>\n    <assembly.genai>OpenAI:gpt-5</assembly.genai>\n    <pick.genai>OpenAI:gpt-5-mini</pick.genai>\n    <assembly.prompt.file>project.txt</assembly.prompt.file>\n    <assembly.score>0.9</assembly.score>\n    <bindex.register.url>https://register.project.example</bindex.register.url>\n  </configuration>\n</plugin>",
+    "description" : "Example Maven POM configuration providing parameters via plugin configuration."
+  } ],
+  "dependencies" : [ "org.machanism.machai:bindex-core:0.0.13-SNAPSHOT", "org.apache.maven:maven-plugin-api:3.0", "org.apache.maven.plugin-tools:maven-plugin-annotations:3.4", "org.apache.maven.shared:maven-shared-utils:3.4.2", "org.codehaus.plexus:plexus-interactivity-api:1.5.1", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
+}
