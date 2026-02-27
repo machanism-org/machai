@@ -78,6 +78,12 @@
 			<version>3.4</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-interactivity-api</artifactId>
+			<version>1.5.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -101,7 +107,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<reporting>
 		<plugins>
 			<plugin>
@@ -120,7 +126,7 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	
+
 	<scm>
 		<connection>scm:git:https://github.com/machanism-org/machai.git</connection>
 		<developerConnection>scm:git:https://github.com/machanism-org/machai.git</developerConnection>
