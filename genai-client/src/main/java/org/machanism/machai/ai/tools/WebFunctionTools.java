@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
@@ -159,10 +160,8 @@ public class WebFunctionTools implements FunctionTools {
 		String selector = props.has("selector") ? props.get("selector").asText(null) : null;
 
 		try {
-			HttpURLConnection connection = getConnection(new URL(url), headers, charsetName);
+			HttpURLConnection connection = (HttpURLConnection) getConnection(new URL(url), headers, charsetName);
 			logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
-
-			fillHeader(headers, connection);
 
 			String response = getWebPage(connection, timeout, charsetName);
 
@@ -188,7 +187,7 @@ public class WebFunctionTools implements FunctionTools {
 					StringUtils.abbreviate(response, 80).replace("\n", " ").replace("\r", ""));
 			return response;
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("[WEB {}] IO error during web content fetch", requestId, e);
 			return "IO Error: " + e.getMessage();
 		}
@@ -208,32 +207,30 @@ public class WebFunctionTools implements FunctionTools {
 	 * @return connection
 	 * @throws IOException if opening a connection fails
 	 */
-	private HttpURLConnection getConnection(URL url, String headers, String charsetName) throws IOException {
+	private URLConnection getConnection(URL url, String headers, String charsetName) throws IOException {
 		url = new URL(replace(url.toString(), configurator));
-		try {
-			HttpURLConnection connection;
+		URLConnection connection;
 
-			String userInfo = url.getUserInfo();
-			if (userInfo != null) {
-				String cleanUrl = url.toString().replace("//" + userInfo + "@", "//");
+		String userInfo = url.getUserInfo();
+		if (userInfo != null) {
+			String cleanUrl = url.toString().replace("//" + userInfo + "@", "//");
 
-				url = new URL(cleanUrl);
-				connection = (HttpURLConnection) url.openConnection();
+			url = new URL(cleanUrl);
+			connection = (HttpURLConnection) url.openConnection();
 
-				byte[] bytes = userInfo.getBytes(StandardCharsets.UTF_8);
-				String basicToken = Base64.getEncoder().encodeToString(bytes);
-				connection.setRequestProperty("Authorization", "Basic " + basicToken);
+			byte[] bytes = userInfo.getBytes(StandardCharsets.UTF_8);
+			String basicToken = Base64.getEncoder().encodeToString(bytes);
+			connection.setRequestProperty("Authorization", "Basic " + basicToken);
 
-			} else {
-				connection = (HttpURLConnection) url.openConnection();
-			}
-
-			fillHeader(headers, connection);
-			return connection;
-
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
+		} else {
+			connection = url.openConnection();
 		}
+
+		if (connection instanceof HttpURLConnection) {
+			fillHeader(headers, (HttpURLConnection) connection);
+		}
+
+		return connection;
 	}
 
 	/**
@@ -307,10 +304,8 @@ public class WebFunctionTools implements FunctionTools {
 
 		try {
 			URL callUrl = new URL(url);
-			HttpURLConnection connection = getConnection(callUrl, headers, charsetName);
+			HttpURLConnection connection = (HttpURLConnection) getConnection(callUrl, headers, charsetName);
 			logger.info("[REST {}] URL: {}", requestId, connection.getURL());
-
-			fillHeader(headers, connection);
 
 			connection.setRequestMethod(method);
 			connection.setConnectTimeout(timeout);
@@ -343,7 +338,7 @@ public class WebFunctionTools implements FunctionTools {
 			logger.debug("[REST {}] Received response ({} bytes): {}", requestId, response.length(), result);
 			return result;
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("[REST {}] IO error during REST call: {}", requestId, e.getMessage());
 			return "IO Error: " + e.getMessage();
 		}

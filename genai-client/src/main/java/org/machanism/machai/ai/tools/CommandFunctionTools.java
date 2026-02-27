@@ -245,7 +245,7 @@ public class CommandFunctionTools implements FunctionTools {
 		try {
 			checker.danyCheck(command);
 		} catch (DenyException e) {
-			logger.error("[CMD {}] Invalid or unsafe command: ", e.getMessage());
+			logger.error("[CMD {}] Invalid or unsafe command. {}", commandId, e.getMessage());
 			return "Error: Invalid or unsafe command.";
 		}
 

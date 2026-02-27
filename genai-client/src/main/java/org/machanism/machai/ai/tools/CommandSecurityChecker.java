@@ -136,14 +136,14 @@ public class CommandSecurityChecker {
 
 		for (Pattern pattern : denyPatterns) {
 			if (pattern.matcher(command).find()) {
-				throw new DenyException("Pattern: [" + pattern.pattern() + "], Command: " + command);
+				throw new DenyException("Pattern: " + pattern.pattern());
 			}
 		}
 
 		String lowerCmd = command.toLowerCase();
 		for (String keyword : denyKeywords) {
 			if (lowerCmd.contains(keyword.toLowerCase())) {
-				throw new DenyException("Keyword: [" + keyword + "], Command: " + command);
+				throw new DenyException("Keyword: " + keyword);
 			}
 		}
 	}

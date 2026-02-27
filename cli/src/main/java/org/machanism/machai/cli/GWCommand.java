@@ -10,7 +10,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
-import org.machanism.machai.gw.processor.FileProcessor;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.slf4j.Logger;
 import org.springframework.shell.standard.ShellComponent;
@@ -78,7 +78,7 @@ public class GWCommand {
 			}
 
 			for (String scanDir : dirs) {
-				FileProcessor processor = new FileProcessor(rootDir, genaiValue, config);
+				GuidanceProcessor processor = new GuidanceProcessor(rootDir, genaiValue, config);
 				if (excludesArr != null) {
 					logger.info("Excludes: {}", Arrays.toString(excludesArr));
 					processor.setExcludes(excludesArr);
