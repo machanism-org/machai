@@ -58,17 +58,19 @@ Create an environment variable named `GW_HOME` and set its value to the path of 
 
 Ghostwriter CLI offers flexible configuration using a `gw.properties` file. This file lets you define default options, paths, credentials, and behavior for your Ghostwriter environment.
 
-> The `gw.properties` file is **optional**. It provides default values for configuration settings, but any of these values can be overridden at runtime using Java system properties (e.g., `-Dproperty=value`), environment variables, or command-line options.  
-> **By default,** Ghostwriter loads the configuration file from the directory computed as `gwHomeDir` during startup:
+> The `gw.properties` file is **optional**. It provides default values for configuration settings, but any of these values can be overridden at runtime using Java system properties (e.g., `-Dproperty=value`) or command-line options.
 >
-> - If Java system property `gw.home` is set, it is used as `gwHomeDir`.
-> - Otherwise, the CLI `--root/-r` option (or `gw.rootDir`) is used as `gwHomeDir`.
-> - If neither is set, it falls back to the current working directory (`user.dir`).
+> **Configuration file resolution (`gwHomeDir` and `gw.config`):**
 >
-> The configuration file name is selected by the Java system property `gw.config` (default: `gw.properties`) and is resolved relative to `gwHomeDir`.
+> - `gwHomeDir` is determined in this order:
+>   - Java system property `gw.home` (read via the configurator), if present.
+>   - Otherwise `gw.rootDir` / the CLI `--root/-r` option value, if provided.
+>   - Otherwise the current working directory (`user.dir`).
+> - The config file path is then resolved as:
+>   - `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`
 >
-> To use a custom configuration file, specify its name or relative path using the Java system property `gw.config`, for example:  
-> `java -Dgw.config=custom.properties -jar gw.jar ...`
+> To use a custom configuration file name (resolved relative to `gwHomeDir`), set:
+> `-Dgw.config=custom.properties`
 
 **Where to place it:**  
 Save your `gw.properties` file in the directory selected as `gwHomeDir` (see above).  
@@ -76,19 +78,19 @@ Ghostwriter automatically loads this file at startup.
 
 ## Configuration Properties Reference
 
-The following properties are read by the `Ghostwriter` CLI bootstrap (`src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java`). They can be supplied via `gw.properties` and/or overridden via Java system properties. Some values can also be set via CLI options.
+The following properties are read by the Ghostwriter CLI bootstrap (`src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java`). They can be supplied via `gw.properties` and/or overridden via Java system properties. Some values can also be set via CLI options.
 
 | Property name | Description | Default value | Usage context |
 |---|---|---|---|
-| `gw.config` | Selects the configuration file name/path to load at startup. The file is resolved as `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. | `gw.properties` | Read as a Java system property inside `initializeConfiguration(...)` before scanning begins. |
-| `gw.home` | Overrides the computed `gwHomeDir` (the base directory used to resolve the configuration file). The CLI also sets `System.setProperty("gw.home", gwHomeDir.getAbsolutePath())` after it determines the value. | If not set: `gwHomeDir = rootDir`, else `user.dir` when `rootDir` is not provided. | Read in `initializeConfiguration(...)` before the config file is loaded; used to resolve the configuration file location. |
-| `gw.rootDir` | Root project directory used to resolve and constrain scanning. | `user.dir` (when not set and not provided via `--root/-r`). | Read before `initializeConfiguration(...)` to compute defaults; passed into `new FileProcessor(rootDir, genai, config)` and used as the base for `processor.scanDocuments(rootDir, scanDir)`. Can be overridden by CLI option `-r/--root`. |
-| `gw.genai` | Selects the GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | No default; required (the CLI throws if blank). | Read in `main(...)` after configuration init; passed into `FileProcessor` constructor. Can be overridden by CLI option `-a/--genai`. |
-| `gw.instructions` | System instructions text to apply (may be plain text, URL, or `file:` reference depending on downstream handling). | `null` | Read in `main(...)`; when non-null it is passed to `FileProcessor.setInstructions(instructions)`. Can be overridden by CLI option `-i/--instructions` (if used without a value, the text is read from stdin until EOF). |
-| `gw.excludes` | Comma-separated list of directories/patterns to exclude from processing. | `null` | Read and split on commas and then passed to `FileProcessor.setExcludes(excludes)`. Can be overridden by CLI option `-e/--excludes`. |
-| `gw.guidance` | Default guidance to apply when a file does not contain embedded `@guidance:` directives. | `null` | Read in `main(...)`; when non-null it is passed to `FileProcessor.setDefaultGuidance(defaultGuidance)`. Can be overridden by CLI option `-g/--guidance` (if used without a value, the text is read from stdin until EOF). |
-| `gw.threads` | Enables/disables multi-threaded module processing. | `false` | Read as a boolean and passed to `FileProcessor.setModuleMultiThread(multiThread)`. Can be overridden by CLI option `-t/--threads` (if present without a value, forces `true`; if a value is present, it is parsed as a boolean). |
-| `gw.logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false` | Read as a boolean and passed to `FileProcessor.setLogInputs(logInputs)`. Can be enabled via CLI flag `-l/--logInputs` (always sets to `true` when present). |
+| `gw.config` | Selects the configuration file name/path to load at startup. The file is resolved as `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. | `gw.properties` | Read as a Java system property inside `initializeConfiguration(...)` to locate the config file. |
+| `gw.home` | Base directory (`gwHomeDir`) used to resolve `gw.config`. When not set, Ghostwriter computes `gwHomeDir` (see above) and then sets `System.setProperty("gw.home", gwHomeDir.getAbsolutePath())`. | If not set: computed as `gw.rootDir` (if available) else `user.dir`. | Read in `initializeConfiguration(...)` (via configurator) before loading the config file; used as the base directory for config resolution. |
+| `gw.rootDir` | Root project directory used to constrain scanning and serve as the base for relative scan paths. | `null` initially; if still `null` after option parsing, it falls back to `user.dir`. | Read before `initializeConfiguration(...)` (`config.getFile("gw.rootDir", null)`), may be overridden by CLI `-r/--root`; later passed into `new GuidanceProcessor(rootDir, genai, config)` and used as `projectDir` for `scanDocuments(...)`. |
+| `gw.genai` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | No default; **required** (throws if blank). | Read in `main(...)` after config initialization; passed to `GuidanceProcessor` constructor. Overridable via CLI `-a/--genai`. |
+| `gw.instructions` | Optional system instructions input. | `null` | Read in `main(...)`; if present, passed to `GuidanceProcessor.setInstructions(...)`. Overridable via CLI `-i/--instructions` (if used without a value, read from stdin until EOF). |
+| `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null` | Read in `main(...)`, split on commas, passed to `GuidanceProcessor.setExcludes(...)`. Overridable via CLI `-e/--excludes`. |
+| `gw.guidance` | Default guidance to apply when files do not contain embedded `@guidance:` directives. | `null` | Read in `main(...)`; if present, passed to `GuidanceProcessor.setDefaultGuidance(...)`. Overridable via CLI `-g/--guidance` (if used without a value, read from stdin until EOF). |
+| `gw.threads` | Enables/disables multi-threaded module processing. | `false` | Read as boolean in `main(...)`, passed to `GuidanceProcessor.setModuleMultiThread(...)`. Overridable via CLI `-t/--threads` (flag-only sets `true`; if a value is provided, it is parsed as a boolean). |
+| `gw.logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false` | Read as boolean in `main(...)`, passed to `GuidanceProcessor.setLogInputs(...)`. Overridable via CLI flag `-l/--logInputs` (always sets `true` when present). |
 
 **Sample `gw.properties`:**
 ```properties

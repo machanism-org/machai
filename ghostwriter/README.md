@@ -22,7 +22,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Ghostwriter is Machai’s guidance-driven, repository-scale documentation and transformation engine. It scans your repository (source code, docs, project-site Markdown, build metadata, and other artifacts), extracts embedded `@guidance:` directives, and uses a configured GenAI provider to apply consistent improvements across many files in a repeatable way.
+Ghostwriter is Machai’s guidance-driven, repository-scale documentation and transformation engine. It scans a repository (source code, docs, project-site Markdown, build metadata, and other artifacts), extracts embedded `@guidance:` directives, and uses a configured GenAI provider to apply consistent improvements across many files in a repeatable way.
 
 ## Introduction
 
@@ -78,12 +78,13 @@ java -jar gw.jar src\\main\\java
 | Option | Description | Default |
 |---|---|---|
 | `-h`, `--help` | Show help message and exit. | n/a |
-| `-t`, `--threads[=<true\|false>]` | Enable multi-threaded module processing. If provided without a value, it enables multi-threading. | From config key `threads` (default `false`) |
-| `-a`, `--genai <provider:model>` | GenAI provider/model identifier (example: `OpenAI:gpt-5.1`). | From config key `genai`; otherwise `OpenAI:gpt-5-mini` |
-| `-i`, `--instructions[=<text\|url\|file:...>]` | Global system instructions appended to every prompt; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `instructions`; otherwise none |
-| `-g`, `--guidance[=<text\|url\|file:...>]` | Fallback guidance used when files have no embedded `@guidance:`; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `guidance`; otherwise none |
-| `-e`, `--excludes <csv>` | Comma-separated list of directories/paths/patterns to exclude from processing. | From config key `excludes`; otherwise none |
-| `-l`, `--logInputs` | Log composed LLM inputs to per-file log files under a temp folder. | From config key `logInputs` (default `false`) |
+| `-r`, `--root <path>` | Root directory used as the base for relative scan targets and `file:` includes. | From config key `gw.rootDir`; otherwise current working directory. |
+| `-t`, `--threads[=<true\|false>]` | Enable multi-threaded module processing; if provided without a value, it enables multi-threading. | From config key `gw.threads` (default `false`) |
+| `-a`, `--genai <provider:model>` | GenAI provider/model identifier (example: `OpenAI:gpt-5.1`). | From config key `gw.genai`; otherwise must be provided |
+| `-i`, `--instructions[=<text\|url\|file:...>]` | Global system instructions appended to every prompt; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `gw.instructions`; otherwise none |
+| `-g`, `--guidance[=<text\|url\|file:...>]` | Fallback guidance used when files have no embedded `@guidance:`; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `gw.guidance`; otherwise none |
+| `-e`, `--excludes <csv>` | Comma-separated list of directories/paths/patterns to exclude from processing. | From config key `gw.excludes`; otherwise none |
+| `-l`, `--logInputs` | Log composed LLM inputs to per-file log files under a temp folder. | From config key `gw.logInputs` (default `false`) |
 
 #### Example
 

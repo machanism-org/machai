@@ -32,10 +32,10 @@
   },
   "constructors" : [ {
     "package" : "org.machanism.machai.gw.processor",
-    "signature" : "org.machanism.machai.gw.processor.FileProcessor(java.io.File rootDir, java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator configurator)",
+    "signature" : "org.machanism.machai.gw.processor.GuidanceProcessor(java.io.File rootDir, java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator configurator)",
     "description" : "Creates a Ghostwriter file processor bound to a root directory and a GenAI provider key/model. The processor loads Reviewer implementations via java.util.ServiceLoader, initializes function tools with the provided configurator, and prepares to scan project trees for files containing \"@guidance:\" directives.",
     "examples" : [ {
-      "snippet" : "java.io.File root = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.FileProcessor(root, \"OpenAI:gpt-5.1\", cfg);",
+      "snippet" : "java.io.File root = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.GuidanceProcessor(root, \"OpenAI:gpt-5.1\", cfg);",
       "description" : "Construct a FileProcessor for the current directory and configure it to use a specific GenAI provider/model key as resolved by org.machanism.machai.ai.manager.GenAIProviderManager."
     } ]
   } ],
@@ -45,7 +45,7 @@
     "signature" : "void scanDocuments(java.io.File basedir) throws java.io.IOException",
     "description" : "Scans a project tree rooted at the provided base directory, discovering modules (unless non-recursive) and processing files supported by registered Reviewers. Guidance is extracted per file and prompts are dispatched to the configured GenAI provider.",
     "examples" : [ {
-      "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.FileProcessor(root, \"OpenAI:gpt-5.1\", cfg);\nfp.scanDocuments(root);",
+      "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.GuidanceProcessor(root, \"OpenAI:gpt-5.1\", cfg);\nfp.scanDocuments(root);",
       "description" : "Run a full scan starting at the project root."
     } ]
   }, {
@@ -54,7 +54,7 @@
     "signature" : "void scanDocuments(java.io.File projectDir, java.lang.String scanDir) throws java.io.IOException",
     "description" : "Scans within a project directory using either a relative start directory or a glob:/regex: matcher. When a directory path is provided, it is validated to be within the project root; a matcher is created to constrain processing to matching paths.",
     "examples" : [ {
-      "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.FileProcessor(root, \"OpenAI:gpt-5.1\", cfg);\nfp.scanDocuments(root, \"glob:**/*.java\");",
+      "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.GuidanceProcessor(root, \"OpenAI:gpt-5.1\", cfg);\nfp.scanDocuments(root, \"glob:**/*.java\");",
       "description" : "Scan only Java files anywhere under the project directory using a glob matcher."
     } ]
   }, {
@@ -91,7 +91,7 @@
     "description" : "Customize per-run prompt behavior using FileProcessor.setInstructions(String) and FileProcessor.setDefaultGuidance(String). Both support multi-line text and expansion of lines referencing http(s) URLs or file: paths (with system property substitution for file paths).",
     "type" : "method",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.FileProcessor(new java.io.File(\".\"), \"OpenAI:gpt-5.1\", new org.machanism.macha.core.commons.configurator.PropertiesConfigurator());\nfp.setInstructions(\"file:instructions.txt\");\nfp.setDefaultGuidance(\"Please update module-level documentation.\");",
+      "snippet" : "org.machanism.machai.gw.processor.GuidanceProcessor fp = new org.machanism.machai.gw.processor.GuidanceProcessor(new java.io.File(\".\"), \"OpenAI:gpt-5.1\", new org.machanism.macha.core.commons.configurator.PropertiesConfigurator());\nfp.setInstructions(\"file:instructions.txt\");\nfp.setDefaultGuidance(\"Please update module-level documentation.\");",
       "description" : "Provide global system instructions from a file and a fallback default guidance message."
     } ]
   } ],

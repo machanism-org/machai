@@ -81,7 +81,7 @@
   }, {
     "name" : "Shared scanning and credential configuration",
     "package" : "org.machanism.machai.gw.maven",
-    "signature" : "org.machanism.machai.gw.maven.AbstractGWGoal.scanDocuments(org.machanism.machai.gw.processor.FileProcessor) throws org.apache.maven.plugin.MojoExecutionException",
+    "signature" : "org.machanism.machai.gw.maven.AbstractGWGoal.scanDocuments(org.machanism.machai.gw.processor.GuidanceProcessor) throws org.apache.maven.plugin.MojoExecutionException",
     "description" : "Common scan/execute flow used by goals to configure a FileProcessor, apply excludes, set instructions and default guidance, establish scan root (defaults to Maven execution root directory when gw.scanDir is omitted), optionally log input files (gw.logInputs), and forward optional GenAI credentials read from ~/.m2/settings.xml when gw.genai.serverId is provided.",
     "examples" : [ {
       "snippet" : "mvn gw:gw -Dgw.scanDir=src\\\\site -Dgw.instructions=classpath:gw/instructions.md -Dgw.guidance=\"Keep docs concise\" -Dgw.excludes=**/target/** -Dgw.logInputs=true",

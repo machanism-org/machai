@@ -27,14 +27,13 @@ Ghostwriter supports **all types of project files—including source code, docum
 
   <p>
     Ghostwriter is a command-line utility that scans a project’s filesystem, extracts embedded
-    <code>@guidance:</code> directives from supported file formats, and orchestrates GenAI-driven updates to the
-    files it finds.
+    <code>@guidance:</code> directives from supported file formats, and orchestrates GenAI-driven updates.
   </p>
 
   <p>
-    The tool is intentionally <strong>filesystem-based</strong>: it does not compile sources, execute builds, or
-    resolve dependencies. For multi-module layouts, modules are processed <strong>child-first</strong> so module
-    guidance is applied before the parent project.
+    The tool is intentionally <strong>filesystem-based</strong>: it does not compile sources, execute builds,
+    or resolve dependencies. For multi-module layouts, modules are processed <strong>child-first</strong> so
+    module guidance is applied before the parent project.
   </p>
 </header>
 
@@ -47,7 +46,7 @@ Ghostwriter supports **all types of project files—including source code, docum
   </figure>
 
   <p>
-    Ghostwriter is organized around two cooperating packages:
+    Ghostwriter is organized into two cooperating packages:
   </p>
 
   <dl>
@@ -60,8 +59,9 @@ Ghostwriter supports **all types of project files—including source code, docum
 
     <dt><strong><code>org.machanism.machai.gw.reviewer</code></strong></dt>
     <dd>
-      Reviewer SPI and format-specific implementations used to extract and normalize guidance from project files.
-      Reviewers are loaded via Java’s <code>ServiceLoader</code> and mapped to file extensions.
+      Reviewer SPI and format-specific implementations used to extract and normalize guidance from project
+      files. Reviewers are typically loaded via Java’s <code>ServiceLoader</code> and mapped to file
+      extensions.
     </dd>
   </dl>
 </section>
@@ -70,33 +70,35 @@ Ghostwriter supports **all types of project files—including source code, docum
   <h2><code>org.machanism.machai.gw.processor</code></h2>
 
   <p>
-    This package contains the user-facing CLI and the processing pipeline that turns project files into GenAI
-    prompt runs.
+    The processor package contains the user-facing CLI and the processing pipeline that turns project files
+    into GenAI prompt runs.
   </p>
 
   <ul>
     <li>
-      <strong><code>Ghostwriter</code></strong> — CLI entry point. Loads configuration, parses options (scan target, root,
-      excludes, instructions, default guidance, threading, input logging), and invokes the processing pipeline.
+      <strong><code>Ghostwriter</code></strong> — CLI entry point. Loads configuration, parses options, and invokes the
+      processing pipeline.
     </li>
     <li>
-      <strong><code>FileProcessor</code></strong> — Traverses the filesystem, discovers modules (child-first), delegates file
-      parsing to reviewers, assembles prompts, and dispatches them to the selected GenAI provider.
+      <strong><code>GuidanceProcessor</code></strong> — Walks the filesystem (including child-first modules), delegates
+      file parsing to reviewers, assembles prompts, and dispatches them to the selected provider.
+    </li>
+    <li>
+      <strong><code>FileProcessor</code></strong> — File-discovery and per-file processing support used by the pipeline.
     </li>
   </ul>
 
   <h3>Key behaviors</h3>
   <ul>
     <li><strong>Child-first module traversal</strong>: modules are processed before their parent directory.</li>
-    <li><strong>No dependency resolution</strong>: projects are not built and artifacts are not resolved.</li>
+    <li><strong>No dependency resolution</strong>: projects are not built and dependencies are not resolved.</li>
     <li>
-      <strong>Configurable scan scope</strong>: the scan target may be a directory path or a
-      <code>java.nio.file.FileSystems.getPathMatcher</code> expression (for example, <code>glob:**/*.java</code> or
-      <code>regex:...</code>).
+      <strong>Configurable scan scope</strong>: the scan target may be a directory path or a matcher expression
+      supported by <code>java.nio.file.FileSystems.getPathMatcher</code> (for example, <code>glob:**/*.java</code>
+      or <code>regex:...</code>).
     </li>
     <li>
-      <strong>Optional auditing</strong>: composed prompt inputs may be logged to a temporary directory for debugging
-      and traceability.
+      <strong>Optional auditing</strong>: composed prompt inputs may be logged for debugging and traceability.
     </li>
   </ul>
 
