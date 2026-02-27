@@ -146,7 +146,7 @@ public class ReactorGW extends AbstractGWGoal {
 		GuidanceProcessor documents = new GuidanceProcessor(new File(executionRootDirectory), genai, config) {
 
 			@Override
-			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
 
 				if (projectLayout instanceof MavenProjectLayout) {

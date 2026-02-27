@@ -63,7 +63,7 @@ class ProjectProcessorTest {
 		final java.util.ArrayList<String> processedModules = new java.util.ArrayList<>();
 
 		@Override
-		protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+		public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 			if (layoutToReturn == null) {
 				return super.getProjectLayout(projectDir);
 			}

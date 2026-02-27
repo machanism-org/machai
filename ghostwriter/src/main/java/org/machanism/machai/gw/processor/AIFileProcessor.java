@@ -23,23 +23,24 @@ import org.slf4j.LoggerFactory;
  * {@link GenAIProvider} against project files.
  *
  * <p>
- * This type extends {@link AbstractFileProcessor} with the mechanics required to
- * invoke a GenAI provider:
+ * This type extends {@link AbstractFileProcessor} with the mechanics required
+ * to invoke a GenAI provider:
  * </p>
  * <ul>
  * <li>create a provider using {@link GenAIProviderManager},</li>
  * <li>apply registered function tools via {@link FunctionToolsLoader},</li>
- * <li>optionally log the composed provider inputs for auditing/debugging, and</li>
+ * <li>optionally log the composed provider inputs for auditing/debugging,
+ * and</li>
  * <li>provide helper methods for prompt templates (e.g., project-structure
  * description).</li>
  * </ul>
  *
  * <p>
- * Subclasses typically decide what files to process and how guidance is derived;
- * this class focuses on orchestration and provider execution.
+ * Subclasses typically decide what files to process and how guidance is
+ * derived; this class focuses on orchestration and provider execution.
  * </p>
  */
-public abstract class AIFileProcessor extends AbstractFileProcessor {
+public class AIFileProcessor extends AbstractFileProcessor {
 
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
@@ -86,7 +87,8 @@ public abstract class AIFileProcessor extends AbstractFileProcessor {
 	 * @return provider output
 	 * @throws IOException if creating input logs fails or provider I/O fails
 	 */
-	String process(ProjectLayout projectLayout, File file, String instructions, String guidance) throws IOException {
+	public String process(ProjectLayout projectLayout, File file, String instructions, String guidance)
+			throws IOException {
 		logger.info("Processing file: '{}'", file);
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(genai, getConfigurator());

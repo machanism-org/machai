@@ -160,7 +160,7 @@ public class GW extends AbstractGWGoal {
 		GuidanceProcessor processor = new GuidanceProcessor(basedir, genai, config) {
 
 			@Override
-			protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = super.getProjectLayout(projectDir);
 				projectLayout.projectDir(projectDir);
 

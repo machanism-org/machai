@@ -85,7 +85,7 @@ public abstract class ProjectProcessor {
 	 * @return Detected {@link ProjectLayout}.
 	 * @throws FileNotFoundException If the directory does not exist.
 	 */
-	protected ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+	public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 		return ProjectLayoutManager.detectProjectLayout(projectDir);
 	}
 }
