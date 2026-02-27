@@ -126,7 +126,7 @@ public final class Ghostwriter {
 			return;
 		}
 
-		File rootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
+		File rootDir = null;
 		if (cmd.hasOption(rootDirOpt.getOpt())) {
 			rootDir = new File(cmd.getOptionValue(rootDirOpt.getOpt()));
 		}
@@ -162,8 +162,14 @@ public final class Ghostwriter {
 
 			String[] scanDirs = cmd.getArgs();
 			if (scanDirs == null || scanDirs.length == 0) {
-				scanDirs = new String[] {
-						rootDir != null ? rootDir.getAbsolutePath() : SystemUtils.getUserDir().getAbsolutePath() };
+				File fallbackRootDir = rootDir;
+				if (fallbackRootDir == null) {
+					fallbackRootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
+				}
+				if (fallbackRootDir == null) {
+					fallbackRootDir = SystemUtils.getUserDir();
+				}
+				scanDirs = new String[] { fallbackRootDir.getAbsolutePath() };
 			}
 
 			String[] excludes = StringUtils.split(config.get(GW_EXCLUDES_PROP_NAME, null), ',');
@@ -202,7 +208,10 @@ public final class Ghostwriter {
 			}
 
 			if (rootDir == null) {
-				rootDir = SystemUtils.getUserDir();
+				rootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
+				if (rootDir == null) {
+					rootDir = SystemUtils.getUserDir();
+				}
 			}
 
 			for (String scanDir : scanDirs) {

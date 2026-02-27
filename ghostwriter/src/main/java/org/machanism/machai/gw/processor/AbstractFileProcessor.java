@@ -25,8 +25,8 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * perform work on files and folders.
  *
  * <p>
- * {@code FileProcessor} provides common functionality used by the Ghostwriter
- * CLI such as:
+ * {@code AbstractFileProcessor} provides common functionality used by the
+ * Ghostwriter CLI such as:
  * </p>
  * <ul>
  * <li>collecting files under a project directory while excluding common build
@@ -42,7 +42,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * the filesystem only.
  * </p>
  */
-public abstract class FileProcessor extends ProjectProcessor {
+public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 	/** Prefix for project-layout properties exposed for template substitution. */
 	protected static final String GW_PROJECT_LAYOUT_PROP_PREFIX = "project.";
@@ -81,10 +81,10 @@ public abstract class FileProcessor extends ProjectProcessor {
 	/**
 	 * Creates a new file processor.
 	 *
-	 * @param rootDir       root directory used as a base for relative paths
-	 * @param configurator  configuration source used by implementations
+	 * @param rootDir      root directory used as a base for relative paths
+	 * @param configurator configuration source used by implementations
 	 */
-	public FileProcessor(File rootDir, Configurator configurator) {
+	public AbstractFileProcessor(File rootDir, Configurator configurator) {
 		super();
 		this.rootDir = rootDir;
 		this.configurator = configurator;
@@ -189,17 +189,18 @@ public abstract class FileProcessor extends ProjectProcessor {
 	 * @throws FileNotFoundException if the project layout cannot be created
 	 * @throws IOException           if file reading fails
 	 */
-	protected abstract void processParentFiles(ProjectLayout projectLayout) throws FileNotFoundException, IOException;
+	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
+	};
 
 	/**
 	 * Extracts guidance for a file and, when present, performs provider processing.
 	 *
 	 * @param projectLayout project layout
 	 * @param file          file to process
-	 * @return provider output, or {@code null} if the file is skipped
 	 * @throws IOException if reading the file or provider execution fails
 	 */
-	abstract String processFile(ProjectLayout projectLayout, File file) throws IOException;
+	protected void processFile(ProjectLayout projectLayout, File file) throws IOException {
+	}
 
 	/**
 	 * Recursively lists all files under a directory, excluding known build/tooling
@@ -476,7 +477,7 @@ public abstract class FileProcessor extends ProjectProcessor {
 	 *
 	 * @param maxModuleThreads maximum thread count (values &lt;= 0 are not allowed)
 	 */
-	public void setMaxModuleThreads(int maxModuleThreads, GuidanceProcessor fileProcessor) {
+	public void setMaxModuleThreads(int maxModuleThreads, AIFileProcessor fileProcessor) {
 		if (maxModuleThreads <= 0) {
 			throw new IllegalArgumentException("maxModuleThreads must be > 0");
 		}
@@ -498,7 +499,7 @@ public abstract class FileProcessor extends ProjectProcessor {
 	 *
 	 * @param moduleThreadTimeoutMinutes timeout in minutes
 	 */
-	public void setModuleThreadTimeoutMinutes(long moduleThreadTimeoutMinutes, GuidanceProcessor fileProcessor) {
+	public void setModuleThreadTimeoutMinutes(long moduleThreadTimeoutMinutes, AIFileProcessor fileProcessor) {
 		if (moduleThreadTimeoutMinutes <= 0) {
 			throw new IllegalArgumentException("moduleThreadTimeoutMinutes must be > 0");
 		}

@@ -11,7 +11,6 @@ import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -36,7 +34,6 @@ import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -50,17 +47,12 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * The processor supports single-module and multi-module project layouts. For
- * multi-module builds, modules are processed child-first (each module is scanned
- * before the parent project directory). Processing is traversal-based; it does
- * not attempt to build projects or resolve dependencies.
+ * multi-module builds, modules are processed child-first (each module is
+ * scanned before the parent project directory). Processing is traversal-based;
+ * it does not attempt to build projects or resolve dependencies.
  * </p>
  */
-public class GuidanceProcessor extends FileProcessor {
-
-	/**
-	 * String used in generated output when a value is absent in project metadata.
-	 */
-	public static final String NOT_DEFINED = "not defined";
+public class GuidanceProcessor extends AIFileProcessor {
 
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(GuidanceProcessor.class);
@@ -68,23 +60,11 @@ public class GuidanceProcessor extends FileProcessor {
 	/** Tag name for guidance comments. */
 	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
 
-	/**
-	 * Temporary directory name for documentation inputs under
-	 * {@link #MACHAI_TEMP_DIR}.
-	 */
-	public static final String GW_TEMP_DIR = "docs-inputs";
-
 	/** Resource bundle supplying prompt templates for generators. */
 	final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/** Reviewer associations keyed by file extension. */
 	private final Map<String, Reviewer> reviewerMap = new HashMap<>();
-
-	/** Provider key/name (including model) used when creating GenAI providers. */
-	private final String genai;
-
-	/** Whether to persist the composed inputs to a per-file log. */
-	private boolean logInputs;
 
 	/**
 	 * Optional additional instructions appended to each prompt sent to the GenAI
@@ -106,13 +86,12 @@ public class GuidanceProcessor extends FileProcessor {
 	 * @param configurator configuration source
 	 */
 	public GuidanceProcessor(File rootDir, String genai, Configurator configurator) {
-		super(rootDir, configurator);
+		super(rootDir, configurator, genai);
 		logger.info("File processing root directory: {}", rootDir);
 		logger.info("GenAI: {}", genai);
 
 		FunctionToolsLoader.getInstance().setConfiguration(configurator);
 
-		this.genai = genai;
 		loadReviewers();
 	}
 
@@ -356,11 +335,10 @@ public class GuidanceProcessor extends FileProcessor {
 	 *
 	 * @param projectLayout project layout
 	 * @param file          file to process
-	 * @return provider output, or {@code null} if the file is skipped
 	 * @throws IOException if reading the file or provider execution fails
 	 */
 	@Override
-	String processFile(ProjectLayout projectLayout, File file) throws IOException {
+	protected void processFile(ProjectLayout projectLayout, File file) throws IOException {
 		String perform = null;
 
 		File projectDir = projectLayout.getProjectDir();
@@ -380,61 +358,28 @@ public class GuidanceProcessor extends FileProcessor {
 		if (StringUtils.isNotBlank(perform)) {
 			logger.debug(perform);
 		}
-
-		return perform;
 	}
 
-	/**
-	 * Creates a provider and performs a full prompt run for the given file.
-	 *
-	 * @param projectLayout project layout
-	 * @param file          file being processed (used for logging and templating)
-	 * @param guidance      guidance content to include in the prompt
-	 * @return provider output
-	 * @throws IOException if creating inputs logs fails or provider I/O fails
-	 */
-	String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
-		logger.info("Processing file: '{}'", file);
-
-		GenAIProvider provider = GenAIProviderManager.getProvider(genai, getConfigurator());
-
-		FunctionToolsLoader.getInstance().applyTools(provider);
-
-		File projectDir = projectLayout.getProjectDir();
-		provider.setWorkingDir(projectDir);
-
+	protected String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
 		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), instructions);
-		provider.instructions(effectiveInstructions);
+		String instructions = MessageFormat.format(promptBundle.getString("sys_instructions"), effectiveInstructions);
 
+		StringBuilder guidanceBuilder = new StringBuilder();
 		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
 		String osName = System.getProperty("os.name");
 		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
-		provider.prompt(docsProcessingInstructions);
+		guidanceBuilder.append(docsProcessingInstructions + "\r\n");
 
 		String projectInfo = getProjectStructureDescription(projectLayout);
-		provider.prompt(projectInfo);
+		guidanceBuilder.append(projectInfo + "\r\n");
 
 		String guidanceLines = parseLines(guidance);
+		guidanceBuilder.append(guidanceLines);
 
 		HashMap<String, String> props = getProperties(projectLayout);
-		guidanceLines = StrSubstitutor.replace(guidanceLines, props);
-		provider.prompt(guidanceLines);
+		String finalGuidance = StrSubstitutor.replace(guidanceBuilder.toString(), props);
 
-		if (isLogInputs()) {
-			String inputsFileName = ProjectLayout.getRelativePath(getRootDir(), file);
-			File docsTempDir = new File(getRootDir(), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
-			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
-			File parentDir = inputsFile.getParentFile();
-			if (parentDir != null) {
-				Files.createDirectories(parentDir.toPath());
-			}
-			provider.inputsLog(inputsFile);
-		}
-
-		String perform = provider.perform();
-
-		logger.info("Finished processing file: {}", file.getAbsolutePath());
-		return perform;
+		return super.process(projectLayout, file, instructions, finalGuidance);
 	}
 
 	/**
@@ -459,60 +404,6 @@ public class GuidanceProcessor extends FileProcessor {
 			valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "parentDir", parentDir.getName());
 		}
 		return valueMap;
-	}
-
-	/**
-	 * Builds a human-readable description of the project structure used in prompts.
-	 *
-	 * @param projectLayout current project layout
-	 * @return formatted project information block
-	 * @throws IOException if computing relative paths fails
-	 */
-	private String getProjectStructureDescription(ProjectLayout projectLayout) throws IOException {
-		List<String> content = new ArrayList<>();
-
-		File projectDir = projectLayout.getProjectDir();
-
-		List<String> sources = projectLayout.getSources();
-		List<String> tests = projectLayout.getTests();
-		List<String> documents = projectLayout.getDocuments();
-		List<String> modules = projectLayout.getModules();
-
-		content.add(projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`" : NOT_DEFINED);
-		content.add(projectLayout.getProjectId());
-
-		String relativePath = ProjectLayout.getRelativePath(getRootDir(), projectDir);
-		content.add(relativePath);
-
-		content.add(projectLayout.getProjectLayoutType());
-		content.add(getDirInfoLine(sources, projectDir));
-		content.add(getDirInfoLine(tests, projectDir));
-		content.add(getDirInfoLine(documents, projectDir));
-		content.add(getDirInfoLine(modules, projectDir));
-
-		Object[] array = content.toArray(new String[0]);
-		return MessageFormat.format(promptBundle.getString("project_information"), array);
-	}
-
-	/**
-	 * Produces a formatted list of existing directories from the provided list.
-	 *
-	 * @param sources    directory list from the layout
-	 * @param projectDir project root directory
-	 * @return formatted directory list, or {@link #NOT_DEFINED} if none apply
-	 */
-	private String getDirInfoLine(List<String> sources, File projectDir) {
-		String line = null;
-		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())
-					.map(e -> "`" + e + "`").collect(Collectors.toList());
-			line = StringUtils.join(dirs, ", ");
-		}
-
-		if (StringUtils.isBlank(line)) {
-			line = NOT_DEFINED;
-		}
-		return line;
 	}
 
 	/**
@@ -558,52 +449,10 @@ public class GuidanceProcessor extends FileProcessor {
 	 * @return {@code true} if the directory was deleted, otherwise {@code false}
 	 */
 	public static boolean deleteTempFiles(File basedir) {
-		File file = new File(basedir, GuidanceProcessor.MACHAI_TEMP_DIR + File.separator + GuidanceProcessor.GW_TEMP_DIR);
+		File file = new File(basedir,
+				GuidanceProcessor.MACHAI_TEMP_DIR + File.separator + GuidanceProcessor.GW_TEMP_DIR);
 		logger.info("Removing '{}' inputs log file.", file);
 		return FileUtils.deleteQuietly(file);
-	}
-
-	/**
-	 * Enables or disables multi-threaded module processing.
-	 *
-	 * <p>
-	 * When enabling, this method verifies that the configured provider is
-	 * thread-safe.
-	 * </p>
-	 *
-	 * @param moduleMultiThread {@code true} to enable, {@code false} to disable
-	 * @throws IllegalArgumentException if enabling is requested but the provider is
-	 *                                  not thread-safe
-	 */
-	@Override
-	public void setModuleMultiThread(boolean moduleMultiThread) {
-		if (moduleMultiThread) {
-			GenAIProvider provider = GenAIProviderManager.getProvider(genai, getConfigurator());
-			if (!provider.isThreadSafe()) {
-				throw new IllegalArgumentException(
-						"The provider '" + genai
-								+ "' is not thread-safe and cannot be used in a multi-threaded context.");
-			}
-		}
-		super.setModuleMultiThread(moduleMultiThread);
-	}
-
-	/**
-	 * Returns whether composed prompt inputs are logged to files.
-	 *
-	 * @return {@code true} when input logging is enabled
-	 */
-	public boolean isLogInputs() {
-		return logInputs;
-	}
-
-	/**
-	 * Enables or disables logging of composed prompt inputs.
-	 *
-	 * @param logInputs {@code true} to log inputs, otherwise {@code false}
-	 */
-	public void setLogInputs(boolean logInputs) {
-		this.logInputs = logInputs;
 	}
 
 	/**
