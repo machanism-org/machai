@@ -132,7 +132,7 @@ public class ReactorGW extends AbstractGWGoal {
 	 * If {@code true}, delays processing of the execution-root project until all other reactor
 	 * projects complete.
 	 */
-	@Parameter(property = "gw.rootProjectLast", defaultValue = "false")
+	@Parameter(property = "gw.rootProjectLast", defaultValue = "true")
 	private boolean rootProjectLast;
 
 	@Override

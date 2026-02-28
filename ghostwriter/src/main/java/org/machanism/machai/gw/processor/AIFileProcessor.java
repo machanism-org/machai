@@ -135,19 +135,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			provider.inputsLog(inputsFile);
 		}
 
-		try {
-			String perform = provider.perform();
+		String perform = provider.perform();
 
-			logger.info("Finished processing file: {}", file.getAbsolutePath());
-			return perform;
-
-		} catch (ProcessTerminationException e) {
-			throw e;
-
-		} catch (RuntimeException e) {
-			logger.error("File processing failed: " + file, e);
-			return null;
-		}
+		logger.info("Finished processing file: {}", file.getAbsolutePath());
+		return perform;
 	}
 
 	/**

@@ -122,7 +122,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * <ul>
 	 * <li>A raw directory name (e.g., {@code src}),</li>
 	 * <li>or a pattern string prefixed with {@code glob:} or {@code regex:}, as
-	 * supported by {@link FileSystems#getPathMatcher(String)}.</li>
+	 * supported by
+	 * {@link FileSystems#getDefault() FileSystems.getDefault()}{@code .}{@link java.nio.file.FileSystem#getPathMatcher(String) getPathMatcher(String)}.</li>
 	 * </ul>
 	 *
 	 * <p>

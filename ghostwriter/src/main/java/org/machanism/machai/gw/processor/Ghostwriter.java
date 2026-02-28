@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The {@code <scanDir>} argument may be a directory path (relative to the configured project
  * root), or a {@code glob:} / {@code regex:} expression as supported by
- * {@link FileSystems#getPathMatcher(String)}.
+ * {@link FileSystems#getDefault() FileSystems.getDefault()}{@code .}{@link java.nio.file.FileSystem#getPathMatcher(String) getPathMatcher(String)}.
  * </p>
  */
 public final class Ghostwriter {
@@ -98,10 +98,12 @@ public final class Ghostwriter {
 	 */
 	public Ghostwriter(File rootDir, String genai, PropertiesConfigurator config, AIFileProcessor processor) {
 		String version = Ghostwriter.class.getPackage().getImplementationVersion();
-		if (version != null) {
+		if (version != null && logger != null) {
 			logger.info("Ghostwriter {} (Machai project)", version);
 		}
-		logger.info("Home directory: {}", gwHomeDir);
+		if (logger != null) {
+			logger.info("Home directory: {}", gwHomeDir);
+		}
 
 		if (StringUtils.isBlank(genai)) {
 			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_GENAI_PROP_NAME
@@ -157,6 +159,7 @@ public final class Ghostwriter {
 	 * @return initialized configuration
 	 */
 	private static PropertiesConfigurator initializeConfiguration(File rootDir) {
+		logger = LoggerFactory.getLogger(Ghostwriter.class);
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
 		gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
@@ -168,7 +171,6 @@ public final class Ghostwriter {
 		}
 
 		System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
-		logger = LoggerFactory.getLogger(Ghostwriter.class);
 
 		try {
 			File configFile = new File(gwHomeDir, System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
@@ -439,7 +441,7 @@ public final class Ghostwriter {
 
 			String[] scanDirs = cmd.getArgs();
 			if (scanDirs == null || scanDirs.length == 0) {
-				scanDirs = new String[] { SystemUtils.getUserDir().getAbsolutePath() };
+				scanDirs = new String[] { rootDir.getAbsolutePath() };
 			}
 
 			int exitCode = ghostwriter.perform(scanDirs);

@@ -91,7 +91,7 @@ public class OpenAIProvider implements GenAIProvider {
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
 	/** Default maximum number of tool calls allowed per response. */
-	public static final int MAX_TOOL_CALLS = 100;
+	public static final int MAX_TOOL_CALLS = 200;
 
 	/** Default maximum number of tokens the model may generate. */
 	public static final int MAX_OUTPUT_TOKENS = 100000;
@@ -123,11 +123,6 @@ public class OpenAIProvider implements GenAIProvider {
 	 * Latest usage metrics captured from the most recent {@link #perform()} call.
 	 */
 	private Usage lastUsage = new Usage(0, 0, 0);
-
-	/**
-	 * Builder used to create {@link ResponseCreateParams} for {@link #perform()}.
-	 */
-	private Builder builder;
 
 	/** Optional instructions applied to the request. */
 	private String instructions;
@@ -183,9 +178,6 @@ public class OpenAIProvider implements GenAIProvider {
 						"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
 			}
 		}
-
-		builder = ResponseCreateParams.builder().model(chatModel);
-
 	}
 
 	/**
@@ -253,21 +245,18 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public String perform() {
-		builder.maxToolCalls(maxToolCalls);
-		builder.maxOutputTokens(maxOutputTokens);
-		builder.instructions(instructions);
-		builder.inputOfResponse(inputs);
-
 		logInputs();
+		ResponseCreateParams params = createResponseBuilder();
 
-		ResponseCreateParams responseCreateParams = builder.tools(new ArrayList<Tool>(toolMap.keySet())).build();
 		logger.debug("Sending request to LLM service.");
 
-		Response response = getClient().responses().create(responseCreateParams);
-		logger.debug("Received response from LLM service.");
+		Response response = getClient().responses().create(params);
 		captureUsage(response.usage());
 
-		return parseResponse(response);
+		String result = parseResponse(response);
+		logger.debug("Received response from LLM service.");
+
+		return result;
 	}
 
 	/**
@@ -340,15 +329,26 @@ public class OpenAIProvider implements GenAIProvider {
 				break;
 			}
 
-			builder.inputOfResponse(inputs);
-			builder.instructions(instructions);
-			ResponseCreateParams followUpParams = builder.build();
+			ResponseCreateParams params = createResponseBuilder();
+
 			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
-			current = getClient().responses().create(followUpParams);
+			current = getClient().responses().create(params);
 			captureUsage(current.usage());
 		}
 
 		return text;
+	}
+
+	private ResponseCreateParams createResponseBuilder() {
+		Builder builder = ResponseCreateParams.builder().model(chatModel);
+
+		builder.maxToolCalls(maxToolCalls);
+		builder.maxOutputTokens(maxOutputTokens);
+		builder.instructions(instructions);
+		builder.inputOfResponse(inputs);
+		
+		ResponseCreateParams params = builder.tools(new ArrayList<Tool>(toolMap.keySet())).build();
+		return params;
 	}
 
 	/**
