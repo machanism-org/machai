@@ -246,7 +246,7 @@ public class OpenAIProvider implements GenAIProvider {
 	@Override
 	public String perform() {
 		logInputs();
-		ResponseCreateParams params = createResponseBuilder();
+		ResponseCreateParams params = createResponseBuilder(inputs);
 
 		logger.debug("Sending request to LLM service.");
 
@@ -294,7 +294,7 @@ public class OpenAIProvider implements GenAIProvider {
 	private String parseResponse(Response response) {
 		String text = null;
 		Response current = response;
-
+		List<ResponseInputItem> inputs = new ArrayList<>(this.inputs);
 		while (current != null) {
 			boolean anyToolCalls = false;
 			List<ResponseOutputItem> output = current.output();
@@ -329,7 +329,7 @@ public class OpenAIProvider implements GenAIProvider {
 				break;
 			}
 
-			ResponseCreateParams params = createResponseBuilder();
+			ResponseCreateParams params = createResponseBuilder(inputs);
 
 			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
 			current = getClient().responses().create(params);
@@ -339,14 +339,14 @@ public class OpenAIProvider implements GenAIProvider {
 		return text;
 	}
 
-	private ResponseCreateParams createResponseBuilder() {
+	private ResponseCreateParams createResponseBuilder(List<ResponseInputItem> inputs) {
 		Builder builder = ResponseCreateParams.builder().model(chatModel);
 
 		builder.maxToolCalls(maxToolCalls);
 		builder.maxOutputTokens(maxOutputTokens);
 		builder.instructions(instructions);
 		builder.inputOfResponse(inputs);
-		
+
 		ResponseCreateParams params = builder.tools(new ArrayList<Tool>(toolMap.keySet())).build();
 		return params;
 	}
