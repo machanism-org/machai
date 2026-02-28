@@ -1,9 +1,0 @@
-<Recipe name="Submit Prompt">
-	<About>
-		<description>
-			This recipe is a common point of reference for the process of submitting requests to the GenAI 
-			web interface for various service providers.
-    	</description> 
-	</About> 
-	<Task name="$var{PROMPT_RECIPE_NAME}" /> 
-</Recipe> 
