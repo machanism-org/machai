@@ -23,81 +23,81 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GW Maven Plugin API Overview</title>
+  <title>GW Maven Plugin - API Overview</title>
 </head>
 <body>
 
-<h1>GW Maven Plugin API Overview</h1>
+<h1>GW Maven Plugin</h1>
 
 <p>
-  <strong>GW Maven Plugin</strong> integrates the MachAI Ghostwriter Guided Workflow (GW) document-processing pipeline
-  into a Maven build. The plugin configures and invokes a
-  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> to scan a configurable content tree (commonly
-  <code>src/site</code>) for files that contain embedded <code>@guidance:</code> blocks. When guidance blocks are found,
-  the processor applies the requested transformations and writes updates back to disk.
+  <strong>GW Maven Plugin</strong> is an advanced documentation automation tool for Java projects.
+  It scans, analyzes, and assembles project documentation using embedded <code>@guidance:</code> tags and
+  AI-powered synthesis.
+  The plugin streamlines the creation and maintenance of high-quality, consistent documentation, helping keep
+  documentation aligned with current source and site content across modules.
 </p>
 
-<h2>Package summary</h2>
+<h2>Overview</h2>
 
 <p>
-  The plugin implementation and public goals are provided by:
+  The plugin provides Maven goals (Mojos) that configure and invoke
+  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> to traverse a configurable content tree
+  (commonly <code>src/site</code>) and process files containing one or more <code>@guidance:</code> blocks.
+  The processing model is intentionally content-type agnostic: it can operate on source code, documentation,
+  Maven Site content, and other project files.
 </p>
+
+<h2>Packages</h2>
 
 <ul>
   <li>
-    <code>org.machanism.machai.gw.maven</code> &mdash; Maven goals (Mojos) and shared execution infrastructure.
+    <code>org.machanism.machai.gw.maven</code> &mdash; Maven plugin goals and shared execution infrastructure.
+    See the package documentation for details on configuration parameters and runtime behavior.
   </li>
 </ul>
 
-<p>
-  The package follows a common execution pattern across goals: resolve a scan root, apply include/exclude rules,
-  configure the Ghostwriter processor (provider selection, instructions/default guidance, and optional credentials),
-  then run a guided processing pass.
-</p>
+<h2>Goals</h2>
 
-<h2>Main goals</h2>
+<p>
+  The primary goals exposed by this plugin are:
+</p>
 
 <ul>
   <li>
-    <strong><code>gw:gw</code> (class: <code>org.machanism.machai.gw.maven.GW</code>)</strong>
-    &mdash; Aggregator-style goal that can run without a <code>pom.xml</code>. It processes modules in reverse order
-    (sub-modules first, then parent modules), mirroring the ordering used by the Ghostwriter CLI.
+    <strong><code>gw:gw</code></strong> (<code>org.machanism.machai.gw.maven.GW</code>) &mdash;
+    Aggregator-style goal that can run without a <code>pom.xml</code>. It processes modules in reverse order
+    (sub-modules first, then parent modules), similar to the Ghostwriter CLI.
   </li>
   <li>
-    <strong><code>gw:reactor</code> (class: <code>org.machanism.machai.gw.maven.ReactorGW</code>)</strong>
-    &mdash; Processes projects in standard Maven reactor dependency order and can optionally defer processing of the
+    <strong><code>gw:reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorGW</code>) &mdash;
+    Processes modules using standard Maven reactor dependency ordering, with an option to defer processing of the
     execution-root project.
   </li>
   <li>
-    <strong><code>gw:act</code> (class: <code>org.machanism.machai.gw.maven.Act</code>)</strong>
-    &mdash; Interactive goal for running predefined actions backed by resource bundles.
+    <strong><code>gw:act</code></strong> (<code>org.machanism.machai.gw.maven.Act</code>) &mdash;
+    Interactive goal for running predefined actions backed by resource bundles.
   </li>
   <li>
-    <strong><code>gw:clean</code> (class: <code>org.machanism.machai.gw.maven.Clean</code>)</strong>
-    &mdash; Deletes temporary artifacts created by GW processing (typically bound to Mavens <code>clean</code> lifecycle).
+    <strong><code>gw:clean</code></strong> (<code>org.machanism.machai.gw.maven.Clean</code>) &mdash;
+    Deletes temporary artifacts created by GW processing (typically bound to Maven's <code>clean</code> lifecycle).
   </li>
 </ul>
 
 <h2>Scanning and processing model</h2>
 
 <p>
-  At runtime, each goal determines the scan directory (usually the Maven execution root or a user-provided path) and
-  traverses the directory tree looking for files that contain one or more <code>@guidance:</code> directives. Matched files
-  are then processed by Ghostwriters workflow engine.
-</p>
-
-<p>
-  This model is intentionally content-type agnostic, enabling guided updates across Java source files, documentation,
-  and Maven Site content.
+  At execution time, a goal determines the scan directory (often the Maven execution root or a user-supplied path)
+  and applies include/exclude rules while walking the directory tree. Files containing <code>@guidance:</code> directives
+  are passed to the Ghostwriter workflow engine for guided updates.
 </p>
 
 <h2>Configuration and credentials</h2>
 
 <p>
   In addition to standard Maven plugin parameters (for example, scan directory and exclude patterns), GenAI credentials
-  can be sourced from <code>~/.m2/settings.xml</code> by providing
-  <code>-Dgw.genai.serverId=&lt;serverId&gt;</code>. When configured, the plugin looks up the matching
-  <code>&lt;server&gt;</code> entry and forwards those credentials to the Ghostwriter workflow.
+  can optionally be sourced from <code>~/.m2/settings.xml</code> by providing
+  <code>-Dgw.genai.serverId=&lt;serverId&gt;</code>. When configured, the plugin reads the matching
+  <code>&lt;server&gt;</code> entry and forwards credentials to the workflow.
 </p>
 
 <h2>Class diagram</h2>
