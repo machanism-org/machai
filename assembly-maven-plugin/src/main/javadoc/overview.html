@@ -1,0 +1,114 @@
+<!-- 
+@guidance:
+**IMPORTANT: GENERATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+
+Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
+[PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
+
+- **Write Clear and Concise Descriptions:**
+	- Follow best practices for creating a package overview.
+    - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
+    - Avoid vague or generic statements; be specific about functionality and intent.
+    - Aggregate information from `package-info.java` files from source folders.
+    - Use the class diagram located at `../images/class-diagram.png`.
+    - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Assembly Maven Plugin - Overview</title>
+</head>
+<body>
+
+<h1>Assembly Maven Plugin</h1>
+
+<p>
+  assembly-maven-plugin automates the assembly of projects within the Machanism ecosystem by integrating libraries
+  based on bindex metadata. It streamlines dependency resolution, library selection, and project packaging using
+  GenAI-powered semantic search and metadata-driven workflows.
+</p>
+
+<h2>Architecture</h2>
+
+<p>
+  The following diagram summarizes the main types involved in the plugin and how they relate.
+</p>
+
+<p>
+  <img src="../images/class-diagram.png" alt="Class diagram for the Assembly Maven Plugin" />
+</p>
+
+<h2>Packages</h2>
+
+<h3><code>org.machanism.machai.assembly.maven</code></h3>
+
+<p>
+  Maven plugin entry points for MachAI's AI-assisted project assembly workflow.
+</p>
+
+<p>
+  This package contains the Maven <code>Mojo</code> that exposes the <code>assembly</code> goal and orchestrates a full
+  “prompt → recommend libraries → apply changes” pipeline:
+</p>
+
+<ol>
+  <li>
+    <b>Acquire the prompt</b> from a configured text file (typically <code>project.txt</code>) or by interactively asking
+    the user.
+  </li>
+  <li>
+    <b>Recommend libraries</b> by invoking MachAI’s picker component, which returns candidate libraries described as
+    <code>Bindex</code> metadata entries.
+  </li>
+  <li>
+    <b>Filter recommendations</b> using a minimum score threshold to keep only sufficiently relevant results.
+  </li>
+  <li>
+    <b>Assemble the project</b> by applying the selected libraries to the target directory using the assembly engine.
+  </li>
+</ol>
+
+<h2>Configuration and inputs</h2>
+
+<p>
+  The goal is configured primarily via Maven properties (system properties) and/or plugin configuration. Common
+  parameters include:
+</p>
+
+<ul>
+  <li><code>assembly.genai</code> – GenAI provider identifier used during the assembly phase.</li>
+  <li><code>pick.genai</code> – GenAI provider identifier used during the recommendation (picker) phase.</li>
+  <li><code>assembly.prompt.file</code> – Text file containing the natural-language prompt.</li>
+  <li><code>assembly.score</code> – Minimum score threshold for recommendations.</li>
+  <li><code>bindex.register.url</code> – Optional endpoint used by the picker for metadata lookup/registration.</li>
+</ul>
+
+<h2>Typical usage</h2>
+
+<pre>
+mvn org.machanism.machai:assembly-maven-plugin:assembly
+  -Dassembly.genai=OpenAI:gpt-5
+  -Dpick.genai=OpenAI:gpt-5-mini
+  -Dassembly.prompt.file=project.txt
+  -Dassembly.score=0.9
+</pre>
+
+<p>
+  When <code>assembly.prompt.file</code> does not exist, the goal falls back to interactive prompt entry.
+</p>
+
+<h2>Notes</h2>
+
+<ul>
+  <li>
+    The plugin operates on the Maven execution base directory (<code>${basedir}</code>), applying changes in-place.
+  </li>
+  <li>
+    Recommended libraries are surfaced as bindex entries and may be logged before the assembly phase begins.
+  </li>
+</ul>
+
+</body>
+</html>
