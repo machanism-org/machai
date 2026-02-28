@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * This CLI bootstraps configuration, parses command-line options, and invokes
- * {@link GuidanceProcessor} to scan a directory tree for supported files. For each file,
- * Ghostwriter extracts embedded {@code @guidance:} directives and submits the resulting prompt
- * to the configured GenAI provider.
+ * {@link GuidanceProcessor} to scan a directory tree for supported files. For
+ * each file, Ghostwriter extracts embedded {@code @guidance:} directives and
+ * submits the resulting prompt to the configured GenAI provider.
  * </p>
  *
  * <h2>Usage</h2>
@@ -41,9 +41,11 @@ import org.slf4j.LoggerFactory;
  * }</pre>
  *
  * <p>
- * The {@code <scanDir>} argument may be a directory path (relative to the configured project
- * root), or a {@code glob:} / {@code regex:} expression as supported by
- * {@link FileSystems#getDefault() FileSystems.getDefault()}{@code .}{@link java.nio.file.FileSystem#getPathMatcher(String) getPathMatcher(String)}.
+ * The {@code <scanDir>} argument may be a directory path (relative to the
+ * configured project root), or a {@code glob:} / {@code regex:} expression as
+ * supported by {@link FileSystems#getDefault()
+ * FileSystems.getDefault()}{@code .}{@link java.nio.file.FileSystem#getPathMatcher(String)
+ * getPathMatcher(String)}.
  * </p>
  */
 public final class Ghostwriter {
@@ -90,21 +92,15 @@ public final class Ghostwriter {
 	/**
 	 * Creates a new Ghostwriter CLI instance.
 	 *
-	 * @param rootDir   root directory of the project to scan; if {@code null}, the value is derived
-	 *                  from configuration or defaults to the current working directory
-	 * @param genai     provider key/name (including model), e.g. {@code OpenAI:gpt-5.1}
+	 * @param rootDir   root directory of the project to scan; if {@code null}, the
+	 *                  value is derived from configuration or defaults to the
+	 *                  current working directory
+	 * @param genai     provider key/name (including model), e.g.
+	 *                  {@code OpenAI:gpt-5.1}
 	 * @param config    configuration source
 	 * @param processor processor implementation
 	 */
 	public Ghostwriter(File rootDir, String genai, PropertiesConfigurator config, AIFileProcessor processor) {
-		String version = Ghostwriter.class.getPackage().getImplementationVersion();
-		if (version != null && logger != null) {
-			logger.info("Ghostwriter {} (Machai project)", version);
-		}
-		if (logger != null) {
-			logger.info("Home directory: {}", gwHomeDir);
-		}
-
 		if (StringUtils.isBlank(genai)) {
 			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_GENAI_PROP_NAME
 					+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -a/--genai (e.g., OpenAI:gpt-5.1).");
@@ -151,15 +147,15 @@ public final class Ghostwriter {
 	 * Initializes Ghostwriter configuration.
 	 *
 	 * <p>
-	 * The configuration file defaults to {@link #GW_PROPERTIES_FILE_NAME} in the resolved home
-	 * directory, but can be overridden via the {@link #GW_CONFIG_PROP_NAME} system property.
+	 * The configuration file defaults to {@link #GW_PROPERTIES_FILE_NAME} in the
+	 * resolved home directory, but can be overridden via the
+	 * {@link #GW_CONFIG_PROP_NAME} system property.
 	 * </p>
 	 *
 	 * @param rootDir optional root directory used to resolve the home directory
 	 * @return initialized configuration
 	 */
 	private static PropertiesConfigurator initializeConfiguration(File rootDir) {
-		logger = LoggerFactory.getLogger(Ghostwriter.class);
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
 		gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
@@ -171,6 +167,13 @@ public final class Ghostwriter {
 		}
 
 		System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
+		logger = LoggerFactory.getLogger(Ghostwriter.class);
+
+		String version = Ghostwriter.class.getPackage().getImplementationVersion();
+		if (version != null) {
+			logger.info("Ghostwriter {} (Machai project)", version);
+		}
+		logger.info("Home directory: {}", gwHomeDir);
 
 		try {
 			File configFile = new File(gwHomeDir, System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
@@ -185,8 +188,8 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Prints the Ghostwriter CLI help text, including usage instructions, option descriptions,
-	 * and example commands.
+	 * Prints the Ghostwriter CLI help text, including usage instructions, option
+	 * descriptions, and example commands.
 	 *
 	 * @param options the configured CLI options to display in the help message
 	 */
@@ -250,7 +253,8 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Sets default guidance applied when embedded {@code @guidance} directives are not present.
+	 * Sets default guidance applied when embedded {@code @guidance} directives are
+	 * not present.
 	 *
 	 * @param defaultGuidance default guidance text, URL, or {@code file:} reference
 	 */
@@ -295,7 +299,8 @@ public final class Ghostwriter {
 				.desc("Enable multi-threaded processing to improve performance (default: false).")
 				.hasArg(true).optionalArg(true).build();
 
-		Option rootDirOpt = new Option("r", "root", true, "Specify the path to the root directory for file processing.");
+		Option rootDirOpt = new Option("r", "root", true,
+				"Specify the path to the root directory for file processing.");
 
 		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
@@ -410,7 +415,9 @@ public final class Ghostwriter {
 				String action = cmd.getOptionValue(actOpt.getLongOpt());
 
 				if (action == null) {
-					action = readText("Act:");
+					action = readText("Pleas input your act [When you are done, press "
+							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
+							+ " to finish and signal end of input (EOF):");
 				}
 
 				String name = StringUtils.substringBefore(action, " ");
@@ -451,8 +458,6 @@ public final class Ghostwriter {
 
 		} catch (IOException e) {
 			logger.error("I/O error occurred during file processing: {}", e.getMessage(), e);
-		} finally {
-			GenAIProviderManager.logUsage();
 		}
 	}
 }

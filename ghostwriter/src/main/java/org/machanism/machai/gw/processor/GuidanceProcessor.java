@@ -122,8 +122,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * <ul>
 	 * <li>A raw directory name (e.g., {@code src}),</li>
 	 * <li>or a pattern string prefixed with {@code glob:} or {@code regex:}, as
-	 * supported by
-	 * {@link FileSystems#getDefault() FileSystems.getDefault()}{@code .}{@link java.nio.file.FileSystem#getPathMatcher(String) getPathMatcher(String)}.</li>
+	 * supported by {@link FileSystems#getPathMatcher(String)}.</li>
 	 * </ul>
 	 *
 	 * <p>
@@ -358,7 +357,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @throws IOException if provider execution fails
 	 */
 	protected String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
-		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), getInstructions());
+		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
+				getInstructions());
 		String instructions = MessageFormat.format(promptBundle.getString("sys_instructions"), effectiveInstructions);
 
 		StringBuilder guidanceBuilder = new StringBuilder();
@@ -367,40 +367,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
 		guidanceBuilder.append(docsProcessingInstructions).append("\r\n");
 
-		String projectInfo = getProjectStructureDescription(projectLayout);
-		guidanceBuilder.append(projectInfo).append("\r\n");
-
-		String guidanceLines = parseLines(guidance);
-		guidanceBuilder.append(guidanceLines);
-
-		HashMap<String, String> props = getProperties(projectLayout);
-		String finalGuidance = StrSubstitutor.replace(guidanceBuilder.toString(), props);
-
-		return super.process(projectLayout, file, instructions, finalGuidance);
-	}
-
-	/**
-	 * Collects key project properties from the provided {@link ProjectLayout} and
-	 * returns them as a map.
-	 *
-	 * @param projectLayout the {@link ProjectLayout} instance from which to extract
-	 *                      properties
-	 * @return a {@link HashMap} containing project property keys and their
-	 *         corresponding values
-	 */
-	protected HashMap<String, String> getProperties(ProjectLayout projectLayout) {
-		HashMap<String, String> valueMap = new HashMap<>();
-		valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "id", projectLayout.getProjectId());
-		valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "name", projectLayout.getProjectName());
-		String parentId = projectLayout.getParentId();
-		if (parentId != null) {
-			valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "parentId", parentId);
-		}
-		File parentDir = projectLayout.getProjectDir().getParentFile();
-		if (parentDir != null) {
-			valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "parentDir", parentDir.getName());
-		}
-		return valueMap;
+		return super.process(projectLayout, file, instructions, guidanceBuilder.toString());
 	}
 
 	/**

@@ -12,11 +12,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringSubstitutor;
@@ -122,7 +124,19 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		provider.setWorkingDir(projectDir);
 
 		provider.instructions(instructions);
-		provider.prompt(guidance);
+		
+		String projectInfo = getProjectStructureDescription(projectLayout);
+		
+		StringBuilder guidanceBuilder = new StringBuilder();
+		guidanceBuilder.append(projectInfo).append("\r\n");
+
+		String guidanceLines = parseLines(guidance);
+		guidanceBuilder.append(guidanceLines);
+
+		HashMap<String, String> props = getProperties(projectLayout);
+		String finalGuidance = StrSubstitutor.replace(guidanceBuilder.toString(), props);
+
+		provider.prompt(finalGuidance);
 
 		if (isLogInputs()) {
 			String inputsFileName = ProjectLayout.getRelativePath(getRootDir(), file);
@@ -139,6 +153,30 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		logger.info("Finished processing file: {}", file.getAbsolutePath());
 		return perform;
+	}
+	
+	/**
+	 * Collects key project properties from the provided {@link ProjectLayout} and
+	 * returns them as a map.
+	 *
+	 * @param projectLayout the {@link ProjectLayout} instance from which to extract
+	 *                      properties
+	 * @return a {@link HashMap} containing project property keys and their
+	 *         corresponding values
+	 */
+	protected HashMap<String, String> getProperties(ProjectLayout projectLayout) {
+		HashMap<String, String> valueMap = new HashMap<>();
+		valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "id", projectLayout.getProjectId());
+		valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "name", projectLayout.getProjectName());
+		String parentId = projectLayout.getParentId();
+		if (parentId != null) {
+			valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "parentId", parentId);
+		}
+		File parentDir = projectLayout.getProjectDir().getParentFile();
+		if (parentDir != null) {
+			valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "parentDir", parentDir.getName());
+		}
+		return valueMap;
 	}
 
 	/**
