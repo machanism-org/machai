@@ -231,9 +231,6 @@
 					<hideFields>true</hideFields>
 					<hideMethods>true</hideMethods>
 					<hideClasses>true</hideClasses>
-					<scanPackages>
-						<scanPackage>org.machanism.machai.gw.*</scanPackage>
-					</scanPackages>
 				</configuration>
 				<executions>
 					<execution>

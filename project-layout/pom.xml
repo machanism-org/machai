@@ -24,6 +24,7 @@
 	<properties>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<maven.compiler.release>8</maven.compiler.release>
+		<plantuml-generator.scanPackages>org.machanism.machai.project*</plantuml-generator.scanPackages>
 	</properties>
 
 	<dependencies>
