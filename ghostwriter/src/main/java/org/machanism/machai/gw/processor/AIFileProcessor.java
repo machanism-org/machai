@@ -25,7 +25,6 @@ import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -59,7 +58,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
 	/** Resource bundle supplying prompt templates for generators. */
-	final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
+	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
 	 * String used in generated output when a value is absent in project metadata.
@@ -124,9 +123,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		provider.setWorkingDir(projectDir);
 
 		provider.instructions(instructions);
-		
+
 		String projectInfo = getProjectStructureDescription(projectLayout);
-		
+
 		StringBuilder guidanceBuilder = new StringBuilder();
 		guidanceBuilder.append(projectInfo).append("\r\n");
 
@@ -154,7 +153,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		logger.info("Finished processing file: {}", file.getAbsolutePath());
 		return perform;
 	}
-	
+
 	/**
 	 * Collects key project properties from the provided {@link ProjectLayout} and
 	 * returns them as a map.
@@ -404,7 +403,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
-		String perform = process(projectLayout, getRootDir(), getInstructions(), defaultGuidance);
+		String perform = process(projectLayout, getRootDir(), instructions, defaultGuidance);
 		logger.info(perform);
 	}
 

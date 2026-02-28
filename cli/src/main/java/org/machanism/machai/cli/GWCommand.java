@@ -22,7 +22,6 @@ public class GWCommand {
 
 	private static Logger logger;
 	private static final PropertiesConfigurator config = new PropertiesConfigurator();
-	private static File gwHomeDir;
 
 	@PostConstruct
 	public void init() {
@@ -37,7 +36,6 @@ public class GWCommand {
 			@ShellOption(value = "excludes", help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
 			@ShellOption(value = "logInputs", help = "Log LLM request inputs to dedicated log files", defaultValue = "false") boolean logInputs,
 			@ShellOption(value = "scanDirs", help = "Directories to scan", defaultValue = ShellOption.NULL) String[] scanDirs) {
-		logger.info("GW home dir: {}", gwHomeDir);
 
 		try {
 			File rootDir = config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, SystemUtils.getUserDir());

@@ -3,10 +3,7 @@ package org.machanism.machai.gw.processor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
@@ -385,16 +382,6 @@ public final class Ghostwriter {
 			}
 		}
 
-		String defaultGuidance = config.get(GW_GUIDANCE_PROP_NAME, null);
-		if (cmd.hasOption(guidanceOpt.getOpt())) {
-			defaultGuidance = cmd.getOptionValue(guidanceOpt.getOpt());
-			if (defaultGuidance == null) {
-				defaultGuidance = readText("Please enter the guidance text below. When finished, press "
-						+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
-						+ " to signal end of input (EOF):");
-			}
-		}
-
 		boolean logInputs = config.getBoolean(GW_LOG_INPUTS_PROP_NAME, false);
 		if (cmd.hasOption(logInputsOption.getOpt())) {
 			logInputs = true;
@@ -407,50 +394,31 @@ public final class Ghostwriter {
 			}
 		}
 
+		String defaultGuidance;
 		try {
 			AIFileProcessor processor;
 			if (cmd.hasOption(actOpt.getLongOpt())) {
-				processor = new AIFileProcessor(rootDir, config, genai);
+				processor = new ActProcessor(rootDir, config, genai);
+				defaultGuidance = cmd.getOptionValue(actOpt.getLongOpt());
 
-				String action = cmd.getOptionValue(actOpt.getLongOpt());
-
-				if (action == null) {
-					action = readText("Please input your act [When you are done, press "
+				if (defaultGuidance == null) {
+					defaultGuidance = readText("Please input your act [When you are done, press "
 							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
 							+ " to finish and signal end of input (EOF):");
 				}
-
-				String name = StringUtils.substringBefore(StringUtils.defaultString(action), " ");
-				if (StringUtils.isBlank(name)) {
-					throw new IllegalArgumentException("Act name must not be blank. Usage: --act <name> [prompt]");
-				}
-
-				String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(StringUtils.defaultString(action), " "),
-						StringUtils.defaultString(defaultGuidance));
-
-				ResourceBundle promptBundle;
-				try {
-					promptBundle = ResourceBundle.getBundle("act/" + name);
-				} catch (MissingResourceException e) {
-					throw new IllegalArgumentException(
-							"Unknown act '" + name + "'. Make sure resources/act/" + name + ".properties exists.", e);
-				}
-
-				try {
-					instructions = promptBundle.getString("instructions");
-				} catch (MissingResourceException e) {
-					// do nothing
-				}
-
-				try {
-					defaultGuidance = MessageFormat.format(promptBundle.getString("inputs"), prompt);
-				} catch (MissingResourceException e) {
-					throw new IllegalArgumentException(
-							"Act '" + name + "' is missing required key 'inputs' in its properties file.", e);
-				}
-
+			
 			} else {
 				processor = new GuidanceProcessor(rootDir, genai, config);
+
+				defaultGuidance = config.get(GW_GUIDANCE_PROP_NAME, null);
+				if (cmd.hasOption(guidanceOpt.getOpt())) {
+					defaultGuidance = cmd.getOptionValue(guidanceOpt.getOpt());
+					if (defaultGuidance == null) {
+						defaultGuidance = readText("Please enter the guidance text below. When finished, press "
+								+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
+								+ " to signal end of input (EOF):");
+					}
+				}
 			}
 
 			Ghostwriter ghostwriter = new Ghostwriter(rootDir, genai, config, processor);
