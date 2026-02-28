@@ -35,18 +35,25 @@
  * </p>
  *
  * <p>
- * The provider is responsible for translating MachAI's provider-agnostic contract (prompts, system instructions,
- * tool registration, file attachments, request execution, and usage reporting) into Gemini-specific request and
- * response handling.
+ * The provider adapts MachAI's provider-agnostic contract (prompts, system instructions, tool registration,
+ * file attachments, request execution, and usage reporting) into Gemini-specific request and response handling.
  * </p>
+ *
+ * <h2>Lifecycle</h2>
+ * <p>
+ * The typical lifecycle is:
+ * </p>
+ * <ol>
+ * <li>Initialize the provider via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#init}.</li>
+ * <li>Optionally set system instructions via
+ * {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#instructions}.</li>
+ * <li>Provide prompt content via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#prompt} (and
+ * optionally attach files/tools).</li>
+ * <li>Execute the request via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#perform}.</li>
+ * <li>Read usage information via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#usage}.</li>
+ * </ol>
  *
  * <h2>Usage</h2>
- * <p>
- * Providers are typically created and managed through MachAI's higher-level APIs. When used directly, a
- * {@link org.machanism.machai.ai.provider.gemini.GeminiProvider} instance is initialized with a configurator,
- * supplied with instructions and prompts, and then executed.
- * </p>
- *
  * <pre>
  * Configurator config = ...;
  * GeminiProvider provider = new GeminiProvider();
@@ -57,8 +64,8 @@
  * </pre>
  *
  * <p>
- * Note: this integration may be incomplete; some methods may be implemented as no-ops or may throw
- * {@link org.apache.commons.lang.NotImplementedException} until the adapter is fully implemented.
+ * Note: at present, this integration is a placeholder; several operations are implemented as no-ops and others may
+ * throw {@link org.apache.commons.lang.NotImplementedException} until the adapter is fully implemented.
  * </p>
  */
 package org.machanism.machai.ai.provider.gemini;

@@ -30,19 +30,19 @@
  * OpenAI provider implementation for MachAI.
  *
  * <p>
- * This package contains provider types that adapt the MachAI provider abstraction to the OpenAI APIs. It includes the
- * concrete {@link org.machanism.machai.ai.manager.GenAIProvider} implementation
- * ({@link org.machanism.machai.ai.provider.openai.OpenAIProvider}) and supporting classes for constructing requests,
- * handling tool calling, and mapping OpenAI responses back into MachAI types.
+ * This package contains provider types that adapt MachAI's {@link org.machanism.machai.ai.manager.GenAIProvider}
+ * abstraction to the OpenAI APIs. It includes the concrete provider implementation
+ * ({@link org.machanism.machai.ai.provider.openai.OpenAIProvider}) and supporting classes for building requests,
+ * handling tool calling, and mapping OpenAI responses back into MachAI domain types.
  * </p>
  *
  * <p>
  * Typical responsibilities include:
  * </p>
  * <ul>
- *   <li>Translating system instructions, prompts, and conversation state into OpenAI request payloads.</li>
+ *   <li>Translating instructions, prompts, and conversation state into OpenAI request payloads.</li>
  *   <li>Mapping MachAI tool definitions into OpenAI tool specifications and dispatching tool invocations.</li>
- *   <li>Collecting response metadata (for example token usage) for reporting through
+ *   <li>Capturing response metadata (for example token usage) for reporting through
  *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
  * </ul>
  *
