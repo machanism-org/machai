@@ -16,8 +16,6 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
@@ -30,15 +28,10 @@ import org.machanism.machai.schema.Bindex;
  * </p>
  * <ol>
  *   <li>Acquires a natural-language prompt from {@link #assemblyPromptFile} (if present) or requests it interactively.</li>
- *   <li>Uses {@link #genai} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
+ *   <li>Uses {@link #pickGenai} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
  *   <li>Filters recommendations by {@link #score}.</li>
- *   <li>Runs {@link ApplicationAssembly} with {@link #genai} to apply changes in {@link #basedir}.</li>
+ *   <li>Runs {@link ApplicationAssembly} with {@link #assemblyGenai} to apply changes in {@link #basedir}.</li>
  * </ol>
- *
- * <p>
- * The provider identifiers are resolved by {@link GenAIProviderManager} and augmented with standard function tools via
- * {@link FunctionToolsLoader}.
- * </p>
  *
  * <h2>Plugin parameters</h2>
  * <ul>
@@ -58,6 +51,7 @@ import org.machanism.machai.schema.Bindex;
  * <pre>
  * mvn org.machanism.machai:assembly-maven-plugin:assembly
  *   -Dassembly.genai=OpenAI:gpt-5
+ *   -Dpick.genai=OpenAI:gpt-5-mini
  *   -Dassembly.prompt.file=project.txt
  *   -Dassembly.score=0.9
  * </pre>
@@ -75,11 +69,21 @@ public class Assembly extends AbstractMojo {
 	 * GenAI provider identifier used for the assembly workflow.
 	 *
 	 * <p>
-	 * The value is resolved by {@link GenAIProviderManager} (for example, {@code OpenAI:gpt-5}).
+	 * The value is resolved by the MachAI provider manager (for example, {@code OpenAI:gpt-5}).
 	 * </p>
 	 */
-	@Parameter(property = "assembly.genai", required = true)
-	protected String genai;
+	@Parameter(property = "assembly.genai", defaultValue = "OpenAI:gpt-5", required = true)
+	protected String assemblyGenai;
+
+	/**
+	 * GenAI provider identifier used for the library recommendation (picker) workflow.
+	 *
+	 * <p>
+	 * This provider can be different from {@link #assemblyGenai} to reduce cost or latency during recommendation.
+	 * </p>
+	 */
+	@Parameter(property = "pick.genai", defaultValue = "OpenAI:gpt-5-mini", required = true)
+	protected String pickGenai;
 
 	/**
 	 * Prompt file for the assembly workflow.
@@ -118,8 +122,8 @@ public class Assembly extends AbstractMojo {
 	 * <ol>
 	 *   <li>Read the prompt from {@link #assemblyPromptFile} if it exists; otherwise prompt the user.</li>
 	 *   <li>Create a {@link Configurator} backed by {@code bindex.properties}.</li>
-	 *   <li>Run {@link Picker} using {@link #genai} and log any recommended {@link Bindex} entries.</li>
-	 *   <li>Run {@link ApplicationAssembly} using {@link #genai} to apply changes to {@link #basedir}.</li>
+	 *   <li>Run {@link Picker} using {@link #pickGenai} and log any recommended {@link Bindex} entries.</li>
+	 *   <li>Run {@link ApplicationAssembly} using {@link #assemblyGenai} to apply changes to {@link #basedir}.</li>
 	 * </ol>
 	 *
 	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly workflow fails
@@ -138,7 +142,7 @@ public class Assembly extends AbstractMojo {
 
 			Configurator config = new PropertiesConfigurator("bindex.properties");
 
-			Picker picker = new Picker(genai, registerUrl, config);
+			Picker picker = new Picker(pickGenai, registerUrl, config);
 			picker.setScore(score);
 			List<Bindex> bindexList = picker.pick(query);
 
@@ -154,7 +158,7 @@ public class Assembly extends AbstractMojo {
 				getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
 			}
 
-			ApplicationAssembly assembly = new ApplicationAssembly(genai, config, basedir);
+			ApplicationAssembly assembly = new ApplicationAssembly(assemblyGenai, config, basedir);
 
 			getLog().info("The project directory: " + basedir);
 			assembly.projectDir(basedir);

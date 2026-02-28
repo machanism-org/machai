@@ -34,23 +34,26 @@
  *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
  */
 
-
 /**
- * Maven plugin integration for MachAI's AI-assisted project assembly workflow.
+ * Maven plugin entry points for MachAI's AI-assisted project assembly workflow.
  *
  * <p>
- * This package provides the {@link org.machanism.machai.assembly.maven.Assembly} Maven {@code Mojo} that exposes the
- * {@code assembly} goal. The goal:
+ * This package contains the {@link org.machanism.machai.assembly.maven.Assembly} Maven {@code Mojo}, which exposes the
+ * {@code assembly} goal.
+ * </p>
+ *
+ * <p>
+ * The goal orchestrates the following high-level steps:
  * </p>
  * <ol>
- *   <li>Obtains a natural-language prompt from a configured text file or via interactive input.</li>
- *   <li>Uses MachAI's {@link org.machanism.machai.bindex.Picker} to recommend candidate libraries as
- *   {@link org.machanism.machai.schema.Bindex} entries.</li>
- *   <li>Runs {@link org.machanism.machai.bindex.ApplicationAssembly} to apply changes to a target project directory.</li>
+ *   <li>Obtain a natural-language prompt from a configured text file or via interactive input.</li>
+ *   <li>Use MachAI's {@link org.machanism.machai.bindex.Picker} to recommend candidate libraries as
+ *       {@link org.machanism.machai.schema.Bindex} entries.</li>
+ *   <li>Run {@link org.machanism.machai.bindex.ApplicationAssembly} to apply changes to the target project directory.</li>
  * </ol>
  *
  * <p>
- * The primary inputs are configured via Maven properties and/or plugin configuration (for example,
+ * Inputs are typically supplied via Maven properties and/or plugin configuration (for example,
  * {@code -Dassembly.genai=...} and {@code -Dassembly.prompt.file=...}).
  * </p>
  *

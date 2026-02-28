@@ -8,40 +8,46 @@ canonical: https://machai.machanism.org/assembly-maven-plugin/index.html
 
 ## Introduction
 
-Assembly Maven Plugin is a Maven plugin in the Machai ecosystem that assembles and updates projects using an AI-assisted, metadata-driven workflow.
+Assembly Maven Plugin is a Machai Maven plugin that runs an AI-assisted, metadata-driven workflow to assemble and update a target project directory.
 
-At its core, the `assembly` goal runs an automated workflow against a target project directory (`${basedir}`): it reads a natural-language project prompt (from a file such as `project.txt` or via interactive input), recommends relevant libraries using Bindex metadata, and then applies the resulting changes to the project.
+It provides the `assembly` goal, which executes against the Maven execution base directory (`${basedir}`) and automates a Guided File Processing-style flow:
 
-This approach builds on the same conceptual foundation as [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): a structured, repeatable process that uses guidance plus automation to produce consistent project updates.
+- Acquire a natural-language prompt from `project.txt` (by default) or via interactive console prompting if the file is missing.
+- Use a GenAI-backed picker to recommend relevant libraries expressed as Bindex entries.
+- Filter recommendations by a configurable score threshold.
+- Run the assembly phase to apply the resulting changes directly to the project directory.
+
+This approach builds on the conceptual foundation of [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): a structured, repeatable process that combines guidance and automation to produce consistent project updates.
 
 ## Overview
 
-The plugin helps you go from “what I want to build” to an updated project structure by:
+The plugin helps translate “what I want to build” into concrete changes by combining:
 
-- Accepting a natural-language prompt describing the desired project outcome.
-- Using Machai’s Bindex metadata and AI-assisted selection to recommend candidate libraries.
-- Applying an assembly phase that modifies the project directory to match the intended design.
+- A prompt describing the desired outcome.
+- Bindex metadata and semantic picking to identify candidate libraries.
+- An assembly workflow that applies edits to the target directory based on the prompt and selected recommendations.
 
-This reduces manual dependency discovery and repetitive setup work, and enables a more consistent, prompt-driven workflow for project creation and evolution.
+This reduces manual dependency discovery and boilerplate setup, and enables a more repeatable, prompt-driven workflow for creating and evolving projects.
 
 ## Key Features
 
 - Maven goal `assembly` for prompt-driven project assembly.
 - Prompt acquisition from a file (default `project.txt`) or interactive entry.
-- Bindex-powered library recommendation (via a picker) with configurable score threshold.
-- Optional registration/lookup endpoint for Bindex metadata discovery.
+- Library recommendation via Bindex entries using a configurable picker GenAI provider.
+- Configurable score threshold for recommended libraries.
+- Optional `bindex.register.url` for Bindex metadata discovery/registration.
 - Applies changes directly to the Maven execution base directory (`${basedir}`).
-- Designed to support provider identifiers resolved by Machai’s GenAI provider manager and standard function tools.
+- Supports distinct GenAI provider identifiers for picking and assembly phases.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Maven (to run the plugin).
-- Network access to the configured GenAI provider(s) referenced by `assembly.genai`.
-- A Machai/Bindex configuration file available to the run (the plugin uses `bindex.properties`).
-- (Optional) Access to a Bindex registration/lookup endpoint if you set `bindex.register.url`.
-- If you plan to type prompts interactively, a terminal environment that supports Maven interactive prompting.
+- Maven (to run the plugin goal).
+- A terminal/console that supports interactive prompting (only needed if the prompt file is absent).
+- Network access and credentials for the configured GenAI provider(s).
+- A Machai/Bindex configuration file available at runtime (`bindex.properties`).
+- (Optional) Access to a Bindex registration/lookup endpoint if `bindex.register.url` is configured.
 
 ### Java Version
 
@@ -56,11 +62,11 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 
 ### Typical Workflow
 
-1. Create a prompt file in the project directory (default: `project.txt`) describing what you want assembled.
+1. Create a prompt file in the target project directory (default: `project.txt`) describing what you want assembled.
 2. Run the `assembly` goal.
-3. The plugin reads the prompt (or asks you interactively if the file is missing).
+3. The plugin reads the prompt file (or asks for the prompt interactively if the file is missing).
 4. The picker recommends candidate libraries (Bindex entries), filtered by the configured score threshold.
-5. The assembly phase applies changes to the project directory based on the prompt and the selected recommendations.
+5. The assembly phase applies changes to the project directory (`${basedir}`) using the prompt and recommended libraries.
 
 ## Configuration
 
@@ -68,7 +74,8 @@ Common parameters for the `assembly` goal:
 
 | Parameter | Description | Default |
 |---|---|---|
-| `assembly.genai` | GenAI provider identifier used for the assembly workflow (resolved by Machai provider management). | (Required; no default in the parameter annotation) |
+| `assembly.genai` | GenAI provider identifier used for the assembly phase. | `OpenAI:gpt-5` |
+| `pick.genai` | GenAI provider identifier used for the library recommendation (picker) phase. | `OpenAI:gpt-5-mini` |
 | `assembly.prompt.file` | Prompt file path. If it exists, it will be read as the prompt; otherwise the prompt is requested interactively. | `project.txt` |
 | `assembly.score` | Minimum score required for a recommended library to be listed/used. | `0.9` |
 | `bindex.register.url` | Optional registration/lookup endpoint used by the picker for metadata lookups/registration. | (none) |
