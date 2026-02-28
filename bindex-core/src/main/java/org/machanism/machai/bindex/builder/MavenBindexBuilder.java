@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * Example:
- * 
+ *
  * <pre>{@code
- * Bindex bindex = new MavenBindexBuilder(layout).genAIProvider(provider).build();
+ * Bindex bindex = new MavenBindexBuilder(layout, "openai", config).build();
  * }</pre>
  *
  * @author Viktor Tovstyi
@@ -55,6 +55,9 @@ public class MavenBindexBuilder extends BindexBuilder {
 	 *
 	 * @param projectLayout Maven project layout describing the POM and directory
 	 *                      structure
+	 * @param genai         provider identifier used by
+	 *                      {@link org.machanism.machai.ai.manager.GenAIProviderManager}
+	 * @param config        configuration used to initialize the provider
 	 */
 	public MavenBindexBuilder(MavenProjectLayout projectLayout, String genai, Configurator config) {
 		super(projectLayout, genai, config);
@@ -70,12 +73,11 @@ public class MavenBindexBuilder extends BindexBuilder {
 	 * <li>adds all files from source/resources/test directories configured in the
 	 * POM build section,</li>
 	 * <li>removes non-essential sections from the Maven {@link Model},</li>
-	 * <li>prompts the cleaned POM text,</li>
+	 * <li>adds the cleaned POM text to the prompt,</li>
 	 * <li>adds any additional Maven-specific prompting rules.</li>
 	 * </ol>
-	 * 
-	 * @return
 	 *
+	 * @return a prompt string containing Maven project context
 	 * @throws IOException if source/resource files cannot be read or prompting
 	 *                     fails
 	 */
@@ -83,42 +85,45 @@ public class MavenBindexBuilder extends BindexBuilder {
 	public String projectContext() throws IOException {
 		StringBuilder prompt = new StringBuilder();
 		Build build = projectLayout.getModel().getBuild();
-		if (build != null) {
-			String sourceDirectory = build.getSourceDirectory();
-			prompt.append(addResources(sourceDirectory));
-
-			List<Resource> resourcesDirectory = build.getResources();
-			if (resourcesDirectory != null) {
-				for (Resource resource : resourcesDirectory) {
-					prompt.append(addResources(resource.getDirectory()));
-				}
-			}
-
-			List<Resource> testResourcesDirectory = build.getTestResources();
-			if (testResourcesDirectory != null) {
-				for (Resource resource : testResourcesDirectory) {
-					prompt.append(addResources(resource.getDirectory()));
-				}
-			}
-
-			prompt.append(addResources(build.getTestSourceDirectory()));
-
-			Model model = projectLayout.getModel();
-			removeNotImportantData(model);
-
-			String pom = PomReader.printModel(model);
-			prompt.append(MessageFormat.format(promptBundle.getString("pom_resource_section"), pom));
-			prompt.append(promptBundle.getString("additional_rules"));
+		if (build == null) {
+			return prompt.toString();
 		}
+
+		String sourceDirectory = build.getSourceDirectory();
+		prompt.append(addResources(sourceDirectory));
+
+		List<Resource> resourcesDirectory = build.getResources();
+		if (resourcesDirectory != null) {
+			for (Resource resource : resourcesDirectory) {
+				prompt.append(addResources(resource.getDirectory()));
+			}
+		}
+
+		List<Resource> testResourcesDirectory = build.getTestResources();
+		if (testResourcesDirectory != null) {
+			for (Resource resource : testResourcesDirectory) {
+				prompt.append(addResources(resource.getDirectory()));
+			}
+		}
+
+		prompt.append(addResources(build.getTestSourceDirectory()));
+
+		Model model = projectLayout.getModel();
+		removeNotImportantData(model);
+
+		String pom = PomReader.printModel(model);
+		prompt.append(MessageFormat.format(promptBundle.getString("pom_resource_section"), pom));
+		prompt.append(promptBundle.getString("additional_rules"));
+
 		return prompt.toString();
 	}
 
 	/**
-	 * Prompts the provider with all regular files in the provided directory.
+	 * Adds file prompts for all regular files under the provided directory.
 	 *
 	 * @param directory directory path (as configured in the POM) to scan; ignored
 	 *                  if blank or missing
-	 * @return
+	 * @return prompt content for all discovered files
 	 * @throws IOException if walking the directory fails
 	 */
 	private String addResources(String directory) throws IOException {

@@ -6,10 +6,183 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 [PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
 
 - **Write Clear and Concise Descriptions:**
-	- Follow best practices for creating a package overview.
+    - Follow best practices for creating a package overview.
     - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
     - Avoid vague or generic statements; be specific about functionality and intent.
     - Aggregate information from `package-info.java` files from source folders.
     - Use the class diagram located at `../images/class-diagram.png`.
     - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+
+- **Automatic Fixes for Javadoc Build Issues:**
+    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc, 
+       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GenAI Client - Overview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+
+<h1>GenAI Client</h1>
+
+<p>
+  GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers foundational
+  prompt management and embedding capabilities, enabling AI-powered features across Machai modules. The library
+  simplifies interactions with AI services, supporting advanced use cases such as semantic search, automated content
+  generation, and intelligent project assembly within the Machanism ecosystem.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  GenAI Client provides a provider-neutral API for selecting a generative-AI backend at runtime and interacting with it
+  through a stable contract. It standardizes request construction (instructions, prompts, optional file inputs and
+  function tools), execution, and token-usage reporting.
+</p>
+
+<h2>Architecture at a glance</h2>
+
+<p>
+  The diagram below summarizes the main types and their relationships.
+</p>
+
+<p>
+  <img src="../images/class-diagram.png" alt="Class diagram" />
+</p>
+
+<h2>Packages</h2>
+
+<ul>
+  <li>
+    <p>
+      <strong><code>org.machanism.machai.ai</code></strong> – Public, provider-neutral API for running generative-AI operations.
+    </p>
+    <ul>
+      <li>
+        Defines the top-level workflow: resolve a provider, build a request (instructions/prompts/files/tools), execute,
+        then read the response and usage.
+      </li>
+      <li>
+        Key subpackages:
+        <ul>
+          <li><code>org.machanism.machai.ai.manager</code> – provider SPI, provider/model resolution, and usage aggregation.</li>
+          <li><code>org.machanism.machai.ai.provider.*</code> – concrete provider implementations (OpenAI, Gemini, CodeMie, None, Claude).</li>
+          <li><code>org.machanism.machai.ai.tools</code> – host-side tool discovery and built-in tool sets.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <p>
+      <strong><code>org.machanism.machai.ai.manager</code></strong> – Manager API and SPI for resolving, configuring, and operating
+      provider integrations.
+    </p>
+    <ul>
+      <li>
+        Central abstractions:
+        <ul>
+          <li><code>GenAIProvider</code> – provider contract for prompting, tool registration, execution, and lifecycle.</li>
+          <li><code>GenAIAdapter</code> – base decorator for cross-cutting behavior around a provider.</li>
+          <li><code>GenAIProviderManager</code> – resolves <code>Provider:Model</code> identifiers into initialized providers.</li>
+          <li><code>Usage</code> – per-invocation token/usage metrics suitable for aggregation and reporting.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <p>
+      <strong><code>org.machanism.machai.ai.provider.openai</code></strong> – OpenAI-backed implementation using the OpenAI Java SDK.
+    </p>
+    <ul>
+      <li>Adapts the provider contract to OpenAI requests, including tools and usage capture.</li>
+      <li><strong>Thread-safety:</strong> provider instances keep mutable per-request state and are not thread-safe.</li>
+    </ul>
+  </li>
+
+  <li>
+    <p>
+      <strong><code>org.machanism.machai.ai.provider.gemini</code></strong> – Google Gemini provider adapter.
+    </p>
+    <ul>
+      <li>Translates prompts, tools, and usage reporting into Gemini-specific request/response handling.</li>
+      <li>The current implementation is a scaffold; some operations may be unimplemented.</li>
+    </ul>
+  </li>
+
+  <li>
+    <p>
+      <strong><code>org.machanism.machai.ai.provider.codemie</code></strong> – EPAM CodeMie integration.
+    </p>
+    <ul>
+      <li>Obtains an OAuth 2.0 access token from an OIDC token endpoint and delegates to an OpenAI-compatible backend.</li>
+      <li>Routes requests by model prefix (for example <code>gpt-*</code>, <code>gemini-*</code>, <code>claude-*</code>).</li>
+    </ul>
+  </li>
+
+  <li>
+    <p>
+      <strong><code>org.machanism.machai.ai.provider.none</code></strong> – No-op provider for environments where external model calls are
+      disabled.
+    </p>
+    <ul>
+      <li>Accumulates inputs and can write instructions and prompts to configured log files for auditing.</li>
+      <li>Backend-only capabilities (for example embeddings) throw <code>UnsupportedOperationException</code>.</li>
+    </ul>
+  </li>
+
+  <li>
+    <p>
+      <strong><code>org.machanism.machai.ai.tools</code></strong> – Host-integrated function tools.
+    </p>
+    <ul>
+      <li>
+        Discovers tool installers (typically via <code>ServiceLoader</code>) and applies them to a provider instance.
+      </li>
+      <li>
+        Provides controlled wrappers for common host capabilities such as file access, HTTP/REST calls, and command
+        execution.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2>Typical workflow</h2>
+
+<pre>{@code
+Configurator conf = ...;
+
+// Resolve Provider:Model (for example: "OpenAI:gpt-4o-mini").
+GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
+
+// Optional: expose host-side tools (file/web/command helpers).
+FunctionToolsLoader tools = FunctionToolsLoader.getInstance();
+tools.setConfiguration(conf);
+tools.applyTools(provider);
+
+provider.instructions("You are a helpful assistant.");
+provider.prompt("Summarize this repository.");
+
+String answer = provider.perform();
+Usage usage = provider.usage();
+}</pre>
+
+<h2>Operational notes</h2>
+<ul>
+  <li>
+    Provider instances generally maintain mutable, per-request state. Prefer one provider instance per request (or
+    synchronize externally).
+  </li>
+  <li>
+    Provider/model selection uses <code>Provider:Model</code> identifiers (for example <code>OpenAI:gpt-4o-mini</code>). If the provider
+    prefix is omitted, a default provider may be used.
+  </li>
+</ul>
+
+</body>
+</html>

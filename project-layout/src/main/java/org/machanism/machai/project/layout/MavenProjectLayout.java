@@ -13,10 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A Maven-specific implementation for project layout.
+ * A Maven-specific {@link ProjectLayout} implementation.
  * <p>
- * Supports detection of modules, sources, documents, and tests within Maven
- * projects by parsing <code>pom.xml</code> and its effective model.
+ * This layout reads Maven build metadata from <code>pom.xml</code> to determine:
+ * </p>
+ * <ul>
+ *   <li>modules for multi-module projects (when {@code packaging=pom})</li>
+ *   <li>source and resource directories</li>
+ *   <li>test source and resource directories</li>
+ *   <li>documentation inputs (defaults to <code>src/site</code>)</li>
+ * </ul>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -24,30 +30,31 @@ import org.slf4j.LoggerFactory;
  */
 public class MavenProjectLayout extends ProjectLayout {
 
-	private static Logger logger = LoggerFactory.getLogger(MavenProjectLayout.class);
+	private static final Logger logger = LoggerFactory.getLogger(MavenProjectLayout.class);
 	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
 	private Model model;
 	private boolean effectivePomRequired = true;
 
 	/**
-	 * Checks if the given directory is a Maven project by looking for
-	 * <code>pom.xml</code>.
+	 * Checks whether the given directory appears to be a Maven project.
 	 *
-	 * @param projectDir The directory to check
-	 * @return true if <code>pom.xml</code> exists; false otherwise
+	 * @param projectDir directory to check
+	 * @return {@code true} if a <code>pom.xml</code> file exists in the directory;
+	 *         {@code false} otherwise
 	 */
 	public static boolean isMavenProject(File projectDir) {
 		return new File(projectDir, PROJECT_MODEL_FILE_NAME).exists();
 	}
 
 	/**
-	 * Returns a list of modules for Maven projects if packaging is
-	 * <code>pom</code>.
+	 * Returns a list of modules for multi-module Maven projects.
+	 * <p>
+	 * A project is treated as multi-module when its {@code packaging} is {@code pom}.
+	 * </p>
 	 *
-	 * @return List of module names, or {@code null} if not a multi-module Maven
-	 *         project
-	 * @see PomReader#getProjectModel(File, boolean)
+	 * @return list of module directories (as declared in <code>pom.xml</code>), or
+	 *         {@code null} if the project does not declare modules
 	 */
 	@Override
 	public List<String> getModules() {
@@ -73,10 +80,9 @@ public class MavenProjectLayout extends ProjectLayout {
 	}
 
 	/**
-	 * Returns the current Maven Model (parsed <code>pom.xml</code>).
+	 * Returns the parsed Maven model for the configured project directory.
 	 *
-	 * @return Parsed Maven Model for this project
-	 * @see PomReader#getProjectModel(File)
+	 * @return Maven model
 	 */
 	public Model getModel() {
 		if (model == null) {
@@ -97,10 +103,10 @@ public class MavenProjectLayout extends ProjectLayout {
 	}
 
 	/**
-	 * Sets the Maven Model for chaining configuration.`
-	 * 
-	 * @param model The model to set
-	 * @return this object (for method chaining)
+	 * Sets the Maven model directly.
+	 *
+	 * @param model Maven model
+	 * @return this instance for chaining
 	 */
 	public MavenProjectLayout model(Model model) {
 		this.model = model;
@@ -108,10 +114,11 @@ public class MavenProjectLayout extends ProjectLayout {
 	}
 
 	/**
-	 * Enables/disables effective POM calculation for module resolution.
-	 * 
-	 * @param effectivePomRequired true to enable, false otherwise
-	 * @return this object (for method chaining)
+	 * Enables/disables effective POM calculation when building the model.
+	 *
+	 * @param effectivePomRequired {@code true} to attempt building the effective POM
+	 *                             first; {@code false} to read the raw model only
+	 * @return this instance for chaining
 	 */
 	public MavenProjectLayout effectivePomRequired(boolean effectivePomRequired) {
 		this.effectivePomRequired = effectivePomRequired;
@@ -119,15 +126,14 @@ public class MavenProjectLayout extends ProjectLayout {
 	}
 
 	/**
-	 * Returns a list of source directories by inspecting the Maven build section.
+	 * Returns a list of source directories for the Maven project.
+	 * <p>
+	 * The method inspects the Maven {@code build} section. When source/test source
+	 * directories are not defined, it applies Maven defaults.
+	 * </p>
 	 *
-	 * @return List of source directories defined in Maven <code>pom.xml</code>
-	 * 
-	 *         <pre>
-	 * Example usage:
-	 * MavenProjectLayout layout = new MavenProjectLayout();
-	 * List<String> sources = layout.projectDir(new File("/repo")).getSources();
-	 *         </pre>
+	 * @return list of source and resource directories, expressed as paths relative to
+	 *         the configured project root
 	 */
 	@Override
 	public List<String> getSources() {
@@ -160,22 +166,22 @@ public class MavenProjectLayout extends ProjectLayout {
 	}
 
 	/**
-	 * Returns a list of documentation sources for Maven projects.
+	 * Returns documentation source directories for Maven projects.
 	 *
-	 * @return List of documentation sources (default: <code>src/site</code>)
+	 * @return list containing {@code src/site}
 	 */
 	@Override
 	public List<String> getDocuments() {
 		List<String> docs = new ArrayList<>();
-		String sourceDirectory = "src/site";
-		docs.add(sourceDirectory);
+		docs.add("src/site");
 		return docs;
 	}
 
 	/**
-	 * Returns a list of test directories by inspecting the Maven build section.
+	 * Returns a list of test directories for the Maven project.
 	 *
-	 * @return List of test source directories defined in Maven <code>pom.xml</code>
+	 * @return list of test source and test resource directories, expressed as paths
+	 *         relative to the configured project root
 	 */
 	@Override
 	public List<String> getTests() {
@@ -195,25 +201,46 @@ public class MavenProjectLayout extends ProjectLayout {
 		return sources;
 	}
 
+	/**
+	 * Sets the project directory and narrows the return type for fluent usage.
+	 *
+	 * @param projectDir project root directory
+	 * @return this layout instance
+	 */
 	@Override
 	public MavenProjectLayout projectDir(File projectDir) {
 		return (MavenProjectLayout) super.projectDir(projectDir);
 	}
 
+	/**
+	 * Returns the Maven artifactId as the project identifier.
+	 *
+	 * @return artifactId
+	 */
 	@Override
 	public String getProjectId() {
 		Model model = getModel();
 		return model.getArtifactId();
 	}
 
+	/**
+	 * Returns the Maven project name.
+	 *
+	 * @return name or {@code null} if not defined
+	 */
 	@Override
 	public String getProjectName() {
 		return getModel().getName();
 	}
 
+	/**
+	 * Returns the parent artifactId, if a parent is configured.
+	 *
+	 * @return parent artifactId or {@code null}
+	 */
+	@Override
 	public String getParentId() {
 		Parent parent = getModel().getParent();
-		String artifactId = parent != null ? parent.getArtifactId() : null;
-		return artifactId;
+		return parent != null ? parent.getArtifactId() : null;
 	}
 }

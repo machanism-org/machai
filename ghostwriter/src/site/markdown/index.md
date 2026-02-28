@@ -63,7 +63,7 @@ Let me know if you want it even shorter or tailored for a specific toolset!
 
 Ghostwriter is Machai’s guidance-driven, repository-scale documentation and transformation engine.
 
-It scans your repository (source code, docs, project-site Markdown, build metadata, and other artifacts), extracts embedded `@guidance:` directives, and uses a configured GenAI provider to apply consistent improvements across many files in a repeatable way. This makes it practical to keep documentation, conventions, and refactors aligned across an entire project—especially when changes must be deterministic, reviewable, and CI-friendly.
+It scans your repository (source code, documentation, project-site content under `src/site`, build metadata like `pom.xml`, and other artifacts), extracts embedded `@guidance:` directives, and uses a configured GenAI provider to apply consistent improvements across many files in a repeatable way. This makes it practical to keep documentation, conventions, and refactors aligned across an entire project—especially when changes must be deterministic, reviewable, and CI-friendly.
 
 Ghostwriter is built on **[Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)**: guidance lives next to the content it controls, and the processor composes those local directives—plus any configured defaults—into a structured prompt per file. The result is automation that remains explicit and version-controlled inside the repository.
 
@@ -71,7 +71,7 @@ Ghostwriter is built on **[Guided File Processing](https://www.machanism.org/gui
 
 At a high level, Ghostwriter runs as a CLI that:
 
-1. Resolves the project root and scan target (directory, `glob:...`, or `regex:...`).
+1. Resolves the project root directory and scan target (directory, `glob:...`, or `regex:...`).
 2. Traverses the project (Maven multi-module aware).
 3. For each supported file type, extracts embedded `@guidance:` directives using pluggable reviewers.
 4. Composes an LLM request input that can include:
@@ -122,9 +122,10 @@ Machai Ghostwriter is unique because it makes **version-controlled, per-file gui
 - Extracts embedded `@guidance:` directives via pluggable, file-type-aware reviewers.
 - Supports scan targets as a directory, `glob:` matcher, or `regex:` matcher.
 - Maven multi-module traversal (child modules first).
-- Optional multi-threaded module processing (when the provider is thread-safe).
+- Optional multi-threaded module processing.
 - Optional logging of composed LLM request inputs.
 - Supports global instructions and default guidance loaded from plain text, URLs, or local files.
+- Supports an interactive **Act mode** for executing predefined prompts.
 
 ## Getting Started
 
@@ -132,8 +133,8 @@ Machai Ghostwriter is unique because it makes **version-controlled, per-file gui
 
 - **Java**
   - **Build target:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
-  - **Runtime:** depends on your selected GenAI provider/client; you can run with a newer JRE if required by the provider SDK while still building at the configured release level.
-- **GenAI provider access and credentials** as required by your provider (for example via `GW_HOME\\gw.properties`, environment variables, or provider-specific configuration).
+  - **Runtime:** you can generally run on Java 8+; some GenAI provider/client libraries may require a newer JVM at runtime.
+- **GenAI provider access and credentials** as required by your provider (for example via `${GW_HOME}\\gw.properties`, environment variables, or provider-specific configuration).
 - **Network access** to the provider endpoint (if applicable).
 
 ### Download
@@ -143,7 +144,7 @@ Machai Ghostwriter is unique because it makes **version-controlled, per-file gui
 ### Basic Usage
 
 ```text
-java -jar gw.jar <scanTarget> [options]
+java -jar gw.jar <scanDir> [options]
 ```
 
 Example (scan a folder on Windows):
@@ -156,7 +157,7 @@ java -jar gw.jar src\\main\\java
 
 1. Add `@guidance:` directives to the files you want Ghostwriter to update (Markdown under `src\\site`, Java sources, templates, etc.).
 2. Choose a scan target:
-   - directory path (relative to the project), or
+   - directory path (relative to the configured root directory), or
    - `glob:` matcher (example: `glob:**/*.java`), or
    - `regex:` matcher.
 3. Configure your GenAI provider/model and credentials.
@@ -181,6 +182,7 @@ The CLI options are defined in `org.machanism.machai.gw.processor.Ghostwriter`:
 - `-g`, `--guidance[=<text|url|file:...>]` — Provide default guidance (fallback). When used without a value, you are prompted to enter multi-line text via stdin.
 - `-e`, `--excludes <csv>` — Comma-separated list of directories to exclude from processing.
 - `-l`, `--logInputs` — Log composed LLM request inputs to dedicated log files.
+- `--act[=<text>]` — Run Ghostwriter in Act mode (execute predefined prompts); prompts via stdin if no value.
 
 Notes on `--instructions` and `--guidance` values:
 
@@ -195,12 +197,13 @@ Notes on `--instructions` and `--guidance` values:
 |---|---|---|---|
 | `-h`, `--help` | none | Show help message and exit. | n/a |
 | `-r`, `--root` | `path` | Root directory used as the base for relative scan targets and `file:` includes. | From config key `gw.rootDir`; otherwise current working directory. |
-| `-t`, `--threads` | `true`/`false` (optional) | Enable multi-threaded module processing; if used without a value, it enables it. | From config key `gw.threads` (default `false`). |
-| `-a`, `--genai` | `provider:model` | GenAI provider/model identifier. | From config key `gw.genai`; otherwise must be provided. |
+| `-t`, `--threads` | `true`/`false` (optional) | Enable multi-threaded processing; if used without a value, it enables it. | From config key `gw.threads` (default `false`). |
+| `-a`, `--genai` | `provider:model` | GenAI provider/model identifier (required if not set in config). | From config key `gw.genai`; otherwise required. |
 | `-i`, `--instructions` | text/url/file (optional) | Global system instructions appended to every prompt; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `gw.instructions`; otherwise none. |
 | `-g`, `--guidance` | text/url/file (optional) | Fallback guidance used when files have no embedded `@guidance:`; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `gw.guidance`; otherwise none. |
-| `-e`, `--excludes` | csv | Comma-separated exclude list. | From config key `gw.excludes`; otherwise none. |
+| `-e`, `--excludes` | csv | Comma-separated list of directories/patterns to exclude. | From config key `gw.excludes`; otherwise none. |
 | `-l`, `--logInputs` | none | Log composed LLM inputs to per-file log files. | From config key `gw.logInputs` (default `false`). |
+| `--act` | text (optional) | Act mode: run predefined prompts. The value format is `name prompt...`; if omitted, prompts via stdin. | Disabled. |
 
 ### Example
 
@@ -227,11 +230,11 @@ When Ghostwriter processes a file, it first asks the reviewer for that file type
 ### How it’s set
 
 - CLI: `-g` / `--guidance` (plain text, `http(s)://...`, or `file:...`; supports stdin when provided without a value)
-- API: `FileProcessor#setDefaultGuidance(String)`
+- API: `AIFileProcessor#setDefaultGuidance(String)` / `Ghostwriter#setDefaultGuidance(String)`
 
 ### How it’s interpreted
 
-The value is parsed line-by-line:
+The default guidance value is passed through as a text block to the processor. In Act mode and for other configuration blocks, Ghostwriter/AIFileProcessor supports line-by-line expansion where:
 
 - blank lines are preserved,
 - lines beginning with `http://` or `https://` are fetched and included,

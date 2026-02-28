@@ -27,26 +27,26 @@
  */
 
 /**
- * Provides an OpenAI-backed implementation of MachAI's
- * {@link org.machanism.machai.ai.manager.GenAIProvider} abstraction.
+ * OpenAI provider implementation for MachAI.
  *
  * <p>
- * This package integrates the OpenAI Java SDK with MachAI's provider lifecycle. The primary entry point is
- * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, which assembles and executes requests via the
- * OpenAI Responses API (including system instructions, user prompt content, optional file references, and tool
- * registrations) and returns the assistant's final text.
+ * This package contains provider types that adapt the MachAI provider abstraction to the OpenAI APIs. It includes the
+ * concrete {@link org.machanism.machai.ai.manager.GenAIProvider} implementation
+ * ({@link org.machanism.machai.ai.provider.openai.OpenAIProvider}) and supporting classes for constructing requests,
+ * handling tool calling, and mapping OpenAI responses back into MachAI types.
  * </p>
  *
- * <h2>Responsibilities</h2>
+ * <p>
+ * Typical responsibilities include:
+ * </p>
  * <ul>
- *   <li>Collect per-request inputs such as prompts, instructions, and referenced files.</li>
- *   <li>Register function tools and dispatch model-requested tool calls to application handlers.</li>
- *   <li>Execute requests through OpenAI and expose the final response text.</li>
- *   <li>Capture and report token usage to
+ *   <li>Translating system instructions, prompts, and conversation state into OpenAI request payloads.</li>
+ *   <li>Mapping MachAI tool definitions into OpenAI tool specifications and dispatching tool invocations.</li>
+ *   <li>Collecting response metadata (for example token usage) for reporting through
  *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
  * </ul>
  *
- * <h2>Example</h2>
+ * <h2>Typical usage</h2>
  * <pre>{@code
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
  * provider.instructions("You are a concise assistant.");
@@ -54,10 +54,5 @@
  * String answer = provider.perform();
  * }
  * </pre>
- *
- * <p>
- * <strong>Thread-safety:</strong> provider instances are not thread-safe because they maintain mutable per-request
- * state. Use one instance per request or synchronize externally.
- * </p>
  */
 package org.machanism.machai.ai.provider.openai;

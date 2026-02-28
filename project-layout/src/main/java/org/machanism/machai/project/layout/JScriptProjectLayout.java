@@ -27,33 +27,34 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @since 0.0.2
  */
 public class JScriptProjectLayout extends ProjectLayout {
+
+	/** Name of the JS/TS project model file used to detect this layout. */
 	public static final String PROJECT_MODEL_FILE_NAME = "package.json";
 
 	/**
 	 * Checks if the specified directory contains a <code>package.json</code> file,
 	 * indicating a JS/TS project.
 	 *
-	 * @param projectDir Directory to check
-	 * @return <code>true</code> if <code>package.json</code> is present; otherwise
-	 *         <code>false</code>
+	 * @param projectDir directory to check
+	 * @return {@code true} if <code>package.json</code> is present; otherwise {@code false}
 	 */
 	public static boolean isPackageJsonPresent(File projectDir) {
 		return new File(projectDir, PROJECT_MODEL_FILE_NAME).exists();
 	}
 
 	/**
-	 * Gets workspace modules listed in <code>package.json</code> under the
-	 * "workspaces" key.
+	 * Returns workspace modules listed in <code>package.json</code> under the
+	 * {@code workspaces} key.
 	 *
-	 * @return List of relative module paths, or <code>null</code> if not applicable
-	 * @throws IOException if reading <code>package.json</code> fails
-	 * @see #getPackageJson()
-	 * 
-	 *      <pre>
-	 * Example usage:
-	 * JScriptProjectLayout layout = new JScriptProjectLayout();
-	 * List<String> modules = layout.projectDir(new File("/repo")).getModules();
-	 *      </pre>
+	 * <p>
+	 * When {@code workspaces} is an array of glob patterns, this method searches
+	 * directories under the configured project root and returns those that match a
+	 * workspace pattern and contain a <code>package.json</code>.
+	 * </p>
+	 *
+	 * @return list of relative module paths, or {@code null} when the project does not
+	 *         define workspaces
+	 * @throws IllegalArgumentException if {@code package.json} cannot be read or parsed
 	 */
 	@Override
 	public List<String> getModules() {
@@ -70,22 +71,23 @@ public class JScriptProjectLayout extends ProjectLayout {
 					String globPattern = iterator.next().asText();
 
 					if (Strings.CS.startsWith(globPattern, "./")) {
-						globPattern = StringUtils.substringAfter("./", globPattern);
+						globPattern = StringUtils.substringAfter(globPattern, "./");
 					}
 
-					// Use glob pattern to find matching directories
 					PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
 					File baseDir = getProjectDir();
-
 					List<File> files = ProjectLayout.findDirectories(baseDir);
 
-					if (files != null) {
-						for (File file : files) {
-							String path = ProjectLayout.getRelativePath(getProjectDir(), file, false);
-							Path pathToMatch = new File(path).toPath();
+					for (File file : files) {
+						String path = ProjectLayout.getRelativePath(getProjectDir(), file, false);
+						if (path == null) {
+							continue;
+						}
+						Path pathToMatch = new File(path).toPath();
 
-							if (matcher.matches(pathToMatch) && isPackageJsonPresent(file)) {
-								String relativePath = ProjectLayout.getRelativePath(baseDir, file);
+						if (matcher.matches(pathToMatch) && isPackageJsonPresent(file)) {
+							String relativePath = ProjectLayout.getRelativePath(baseDir, file);
+							if (relativePath != null) {
 								modules.add(relativePath);
 							}
 						}
@@ -101,67 +103,64 @@ public class JScriptProjectLayout extends ProjectLayout {
 	/**
 	 * Loads and parses <code>package.json</code> in the current project directory.
 	 *
-	 * @return JsonNode root of <code>package.json</code>
-	 * @throws IOException if read/parse fails
+	 * @return root JSON node of <code>package.json</code>
+	 * @throws IllegalArgumentException if reading/parsing fails
 	 */
 	private JsonNode getPackageJson() {
 		File packageFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
-		JsonNode packageJson;
 		try {
-			packageJson = new ObjectMapper().readTree(packageFile);
+			return new ObjectMapper().readTree(packageFile);
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
-		return packageJson;
 	}
 
 	/**
-	 * Retrieves source directories for JS/TS projects.
-	 * <p>
-	 * Not implemented in this class.
-	 * </p>
-	 * 
-	 * @return always <code>null</code>
+	 * Returns a list of conventional source directories for JS/TS projects.
+	 *
+	 * @return {@code null}; not currently implemented
 	 */
 	@Override
 	public List<String> getSources() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	/**
-	 * Retrieves documentation sources for JS/TS projects.
-	 * <p>
-	 * Not implemented in this class.
-	 * </p>
-	 * 
-	 * @return always <code>null</code>
+	 * Returns a list of conventional documentation directories for JS/TS projects.
+	 *
+	 * @return {@code null}; not currently implemented
 	 */
 	@Override
 	public List<String> getDocuments() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	/**
-	 * Retrieves test sources for JS/TS projects.
-	 * <p>
-	 * Not implemented in this class.
-	 * </p>
-	 * 
-	 * @return always <code>null</code>
+	 * Returns a list of conventional test directories for JS/TS projects.
+	 *
+	 * @return {@code null}; not currently implemented
 	 */
 	@Override
 	public List<String> getTests() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/**
+	 * Sets the project directory and narrows the return type for fluent usage.
+	 *
+	 * @param projectDir project root directory
+	 * @return this layout instance
+	 */
 	@Override
 	public JScriptProjectLayout projectDir(File projectDir) {
 		return (JScriptProjectLayout) super.projectDir(projectDir);
 	}
 
+	/**
+	 * Returns the package name from <code>package.json</code>.
+	 *
+	 * @return package name
+	 */
 	@Override
 	public String getProjectId() {
 		return getPackageJson().get("name").asText();

@@ -27,35 +27,39 @@ Page Structure:
 
 # Introduction
 
-The **Bindex Maven Plugin** enables automated generation and registration of **bindex metadata** for Maven projects.
-It facilitates library discovery, integration, and assembly by emitting structured, machine-readable metadata that can be indexed and searched—particularly within the Machanism ecosystem’s metadata model and GenAI-assisted semantic search tooling.
+The **Bindex Maven Plugin** generates and (optionally) registers **bindex metadata** for Maven projects. It helps make build outputs easier to discover and integrate by emitting structured, machine-readable metadata derived from the Maven project model.
+
+Downstream tooling (including components in the Machanism ecosystem) can use this metadata to improve library discovery, enrich dependency analysis, and enable GenAI-assisted semantic search and automated assembly workflows.
 
 # Overview
 
-During a Maven build, this plugin reads the project model and emits bindex metadata describing the project and its outputs.
-Downstream tools can index and query that metadata to:
+During a Maven build, the plugin inspects the current project (typically skipping aggregator/parent projects with `pom` packaging) and uses Maven coordinates and model information (packaging, dependencies, and related descriptors) to create or update a local bindex index.
 
-- discover compatible libraries faster,
-- enrich search and dependency analysis with semantic context,
-- support automated assembly and integration workflows.
+When registration is enabled, the plugin can also publish the generated metadata to a registry endpoint so it can be discovered across projects.
+
+Value proposition:
+
+- **Repeatable, automated metadata generation** as part of a standard Maven lifecycle.
+- **Improved discoverability** of artifacts for both humans and tools.
+- **Better integration workflows** by enabling indexing, search, and semantic enrichment based on structured metadata.
 
 # Key Features
 
-- Generates bindex metadata during a standard Maven build.
-- Supports repeatable builds (metadata can be regenerated deterministically from the project model).
-- Can optionally register/publish generated metadata for indexing.
+- Maven goals to **create**, **update**, **clean**, and **register** bindex metadata for a project.
+- Deterministic metadata generation based on the Maven project model.
+- Optional registration/publishing to a configurable registry endpoint.
 
 # Getting Started
 
 ## Prerequisites
 
-- Java 8+ (build runtime)
+- Java 8+
 - Maven 3.x
-- Network access (only required if you register/publish metadata to a remote service)
+- Network access (only required if registration/publishing is enabled and targets a remote service)
 
 ## Environment Variables
 
-This plugin does not require any environment variables for basic metadata generation.
+This plugin does not require environment variables for basic index/metadata generation.
 
 | Environment variable | Required | Description | Default |
 |---|---:|---|---|
@@ -63,7 +67,7 @@ This plugin does not require any environment variables for basic metadata genera
 
 ## Basic Usage
 
-Configure the plugin in your project’s `pom.xml` and run Maven normally:
+Add the plugin to your project’s `pom.xml` and run a goal.
 
 ```xml
 <build>
@@ -75,7 +79,7 @@ Configure the plugin in your project’s `pom.xml` and run Maven normally:
       <executions>
         <execution>
           <goals>
-            <goal>bindex</goal>
+            <goal>create</goal>
           </goals>
         </execution>
       </executions>
@@ -88,27 +92,32 @@ Configure the plugin in your project’s `pom.xml` and run Maven normally:
 mvn verify
 ```
 
+Or run it directly from the command line:
+
+```cmd
+mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5
+```
+
 ## Typical Workflow
 
-1. Add the plugin to your `pom.xml`.
-2. Run your normal build lifecycle (`mvn verify`, `mvn package`, etc.).
-3. Collect the generated bindex metadata from the configured output location.
-4. (Optional) Register/publish the generated metadata so it can be indexed and searched by other tools.
+1. Configure the plugin in your `pom.xml` (or invoke a goal directly).
+2. Run your standard Maven lifecycle (`mvn verify`, `mvn package`, etc.).
+3. Use `create` (first run) or `update` (subsequent runs) to generate/refresh the project’s bindex metadata.
+4. (Optional) Use `register` to publish the metadata to a registry endpoint.
+5. Use downstream tooling to search, analyze, or assemble artifacts based on the indexed metadata.
 
 # Configuration
 
-Common configuration parameters:
-
 | Parameter | Description | Default |
 |---|---|---|
-| `outputDirectory` | Where generated bindex metadata is written. | Plugin-defined |
-| `skip` | Skips bindex generation when `true`. | `false` |
-| `register` | Registers/publishes generated metadata when `true`. | `false` |
+| `bindex.genai` | AI provider/model identifier used for indexing (for example `OpenAI:gpt-5`). | (required) |
+| `bindex.register.url` | Registry endpoint URL used by the `register` goal. | (none) |
+| `update` | When `true`, `register` performs an update while registering. | `true` |
 
-Example with custom parameters:
+Example configuring and running registration:
 
 ```cmd
-mvn -Dbindex.skip=false -Dbindex.register=false verify
+mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
 ```
 
 # Resources

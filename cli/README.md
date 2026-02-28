@@ -35,18 +35,16 @@ Content:
 
 # Machai CLI
 
-A Java CLI application for intelligent library management, GenAI-powered document processing, and automation.
+A Java command-line interface that provides an interactive shell for intelligent library management, GenAI-powered document processing, and project automation.
 
 ## Overview
 
-Machai CLI provides an interactive shell for assembling projects from selected libraries, managing module metadata via bindex files, and running GenAI-assisted document processing.
+Machai CLI helps you:
 
-Key features:
-
-- Modular, guided Java project assembly
-- Bindex file generation and registration for module dependency management
-- Built-in interactive shell for automation and scripting
-- GenAI document processing utilities
+- Assemble projects from a curated/picked set of libraries
+- Generate and register **bindex** files for module metadata and dependency management
+- Automate workflows via an interactive shell with built-in commands and scripting
+- Process documents using GenAI-assisted tooling
 
 ## Installation
 
@@ -72,30 +70,30 @@ mvn -pl cli -am clean install
 
 Example commands (as shown by `help`):
 
-### Assembly command
+### Assemby Command
 
 - `pick`: Picks libraries based on user request.
-- `assembly`: Creates a project via picked library set.
-- `prompt`: Used to request additional GenAI guidance.
+- `assembly`: Creates a project via picked librariy set.
+- `prompt`: Is used for request additional GenAI guidances.
 
-### Bindex command
+### Bindex Command
 
 - `bindex`: Generates bindex files.
 - `register`: Registers bindex file.
 
-### Docs command
+### Docs Command
 
 - `docs`: GenAI document processing command.
 
-### Built-in commands
+### Built-In Commands
 
 - `help`: Display help about available commands
-- `stacktrace`: Display the full stacktrace of the last error
-- `clear`: Clear the shell screen
-- `quit`, `exit`: Exit the shell
+- `stacktrace`: Display the full stacktrace of the last error.
+- `clear`: Clear the shell screen.
+- `quit`, `exit`: Exit the shell.
 - `history`: Display or save the history of previously run commands
 - `version`: Show version info
-- `script`: Read and execute commands from a file
+- `script`: Read and execute commands from a file.
 
 ## Reference
 

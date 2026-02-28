@@ -1,11 +1,8 @@
 package org.machanism.machai.project.layout;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,20 +10,32 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.machai.project.ProjectProcessor;
 
 /**
- * Abstract base class for project layout structures.
- * <p>
- * Defines a common interface and directory exclusion strategy for child layouts
- * like Maven, JS/TS, Python, etc. Provides relative path helpers for consistent
- * path management.
- *
+ * Base abstraction for describing a project's conventional on-disk layout.
  *
  * <p>
- * Example usage:
- * 
- * <pre>
- * ProjectLayout layout = new MavenProjectLayout().projectDir(new File("/workspace"));
- * List<String> sources = layout.getSources();
- * </pre>
+ * A {@code ProjectLayout} implementation is responsible for translating build tool conventions and/or build metadata
+ * into a set of root-relative paths, such as source roots, test roots, documentation roots, and (optionally) module
+ * directories.
+ * </p>
+ *
+ * <p>
+ * Implementations are expected to be configured with a project root via {@link #projectDir(File)} prior to calling any
+ * accessors.
+ * </p>
+ *
+ * <h2>Root-relative paths</h2>
+ * <p>
+ * Paths returned from this API are typically expressed as root-relative strings using {@code /} as a separator.
+ * Callers should resolve them against {@link #getProjectDir()} before accessing the filesystem.
+ * </p>
+ *
+ * <h2>Example</h2>
+ * <pre><code>
+ * java.io.File projectDir = new java.io.File("C:\\repo");
+ * ProjectLayout layout = new MavenProjectLayout().projectDir(projectDir);
+ *
+ * java.util.List&lt;String&gt; sources = layout.getSources();
+ * </code></pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -34,7 +43,7 @@ import org.machanism.machai.project.ProjectProcessor;
 public abstract class ProjectLayout {
 
 	/**
-	 * Standard set of excluded directories for project structure analysis.
+	 * Directory names that should be ignored when scanning projects.
 	 */
 	public static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
 			ProjectProcessor.MACHAI_TEMP_DIR, "target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
@@ -43,10 +52,10 @@ public abstract class ProjectLayout {
 	private File projectDir;
 
 	/**
-	 * Sets the current project directory (used by derived layout implementations).
-	 * 
-	 * @param projectDir the file root for the project
-	 * @return this layout object (for chaining)
+	 * Sets the project root directory used by this layout.
+	 *
+	 * @param projectDir the project root directory
+	 * @return this instance for chaining
 	 */
 	public ProjectLayout projectDir(File projectDir) {
 		this.projectDir = projectDir;
@@ -54,29 +63,33 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Gets the current project directory.
-	 * 
-	 * @return project's root directory as File
+	 * Returns the configured project root directory.
+	 *
+	 * @return the project root directory
 	 */
 	public File getProjectDir() {
 		return projectDir;
 	}
 
 	/**
-	 * Gets a list of project modules.
-	 * 
-	 * @return list of module names or paths
+	 * Returns a list of module directories (or names) within this project.
+	 *
+	 * <p>
+	 * Implementations may return {@code null} or an empty list when the project does not define modules.
+	 * </p>
+	 *
+	 * @return module directories (root-relative) or {@code null}
 	 */
 	public List<String> getModules() {
 		return null;
-	};
+	}
 
 	/**
-	 * Computes relative path from current directory to target file.
-	 * 
-	 * @param basePath Absolute path string
-	 * @param file     Target file
-	 * @return Relative path (string)
+	 * Computes a root-relative path for a file, based on the provided base path.
+	 *
+	 * @param basePath absolute path of the base directory
+	 * @param file     target file
+	 * @return the path of {@code file} relative to {@code basePath}
 	 */
 	public String getRelativePath(String basePath, File file) {
 		String relativePath = file.getAbsolutePath().replace("\\", "/").replace(basePath.replace("\\", "/"), "");
@@ -87,28 +100,33 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * @return List of source directory paths (implementation required)
+	 * Returns the root-relative source directories for production code.
+	 *
+	 * @return list of root-relative source directories
 	 */
 	public abstract List<String> getSources();
 
 	/**
-	 * @return List of document directory paths (implementation required)
+	 * Returns the root-relative documentation directories.
+	 *
+	 * @return list of root-relative documentation directories
 	 */
 	public abstract List<String> getDocuments();
 
 	/**
-	 * @return List of test directory paths (implementation required)
+	 * Returns the root-relative source directories for test code.
+	 *
+	 * @return list of root-relative test source directories
 	 */
 	public abstract List<String> getTests();
 
 	/**
-	 * Computes the relative path from the specified project directory to the target
-	 * file. The result is not prefixed with "./".
+	 * Computes the relative path from the specified project directory to the target file.
+	 * The result is not prefixed with {@code ./}.
 	 *
 	 * @param dir  the base project directory
 	 * @param file the target file for which to compute the relative path
-	 * @return the relative path string, or {@code null} if the target file is not
-	 *         within the project directory
+	 * @return the relative path string, or {@code null} if the target file is not within the project directory
 	 * @see #getRelativePath(File, File, boolean)
 	 */
 	public static String getRelativePath(File dir, File file) {
@@ -116,21 +134,18 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Computes the relative path from the specified project directory to the target
-	 * file. Optionally, the result can be prefixed with "./" if
-	 * {@code addSingleDot} is {@code true}.
+	 * Computes the relative path from the specified project directory to the target file.
+	 * Optionally, the result can be prefixed with {@code ./} if {@code addSingleDot} is {@code true}.
 	 *
 	 * <p>
-	 * If the target file is the same as the project directory, returns ".". If an
-	 * absolute path is provided, it must be located within the project directory.
+	 * If the target file is the same as the project directory, returns {@code .}. If an absolute path is provided, it
+	 * must be located within the project directory.
 	 * </p>
 	 *
 	 * @param dir          the base project directory
 	 * @param file         the target file for which to compute the relative path
-	 * @param addSingleDot if {@code true}, prefixes the result with "./" when
-	 *                     appropriate
-	 * @return the relative path string, or {@code null} if the target file is not
-	 *         within the project directory
+	 * @param addSingleDot if {@code true}, prefixes the result with {@code ./} when appropriate
+	 * @return the relative path string, or {@code null} if the target file is not within the project directory
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		String currentPath = dir.getAbsolutePath().replace("\\", "/");
@@ -153,12 +168,10 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Recursively lists all files under a directory, excluding known build/tooling
-	 * directories.
+	 * Recursively lists all files under a directory, excluding known build/tooling directories.
 	 *
 	 * @param projectDir directory to traverse
-	 * @return files found
-	 * @throws IOException if directory listing fails
+	 * @return files found; never {@code null}
 	 */
 	public static List<File> findFiles(File projectDir) {
 		if (projectDir == null || !projectDir.isDirectory()) {
@@ -186,8 +199,7 @@ public abstract class ProjectLayout {
 	 * Recursively lists all directories, excluding known build/tooling directories.
 	 *
 	 * @param projectDir directory to traverse
-	 * @return dirs found
-	 * @throws IOException if directory listing fails
+	 * @return directories found; never {@code null}
 	 */
 	public static List<File> findDirectories(File projectDir) {
 		if (projectDir == null || !projectDir.isDirectory()) {
@@ -209,19 +221,39 @@ public abstract class ProjectLayout {
 		return result;
 	}
 
+	/**
+	 * Returns a human-friendly project name, when available.
+	 *
+	 * @return the project name or {@code null} if unknown
+	 */
 	public String getProjectName() {
 		return null;
 	}
 
+	/**
+	 * Returns a stable project identifier, when available.
+	 *
+	 * @return the project identifier or {@code null} if unknown
+	 */
 	public String getProjectId() {
 		return null;
 	}
 
+	/**
+	 * Returns the layout type name (derived from the implementing class name).
+	 *
+	 * @return a short layout type name
+	 */
 	public String getProjectLayoutType() {
 		String replace = getClass().getSimpleName().replace(ProjectLayout.class.getSimpleName(), "");
 		return replace;
 	}
 
+	/**
+	 * Returns the parent project identifier, when available.
+	 *
+	 * @return parent project identifier or {@code null} if unknown
+	 */
 	public String getParentId() {
 		return null;
 	}

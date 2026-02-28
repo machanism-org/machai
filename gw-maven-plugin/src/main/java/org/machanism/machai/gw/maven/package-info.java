@@ -1,38 +1,41 @@
 /**
- * Maven plugin goals (Mojos) and shared infrastructure for running MachAI Ghostwriter guided workflow (GW)
- * document processing as part of a Maven build.
+ * Maven plugin goals (Mojos) and supporting infrastructure for running the MachAI Ghostwriter (GW)
+ * document-processing workflow as part of a Maven build.
  *
  * <p>
- * The goals in this package configure a {@link org.machanism.machai.gw.processor.GuidanceProcessor} and then scan a
- * documentation source tree (commonly {@code src/site}). The scan root is typically Maven's execution root directory
- * but can be overridden with {@code -Dgw.scanDir}. During scanning, include/exclude behavior is applied by the
- * processor and, if enabled, the plugin forwards credentials from Maven {@code settings.xml}.
+ * The goals in this package configure and invoke a
+ * {@link org.machanism.machai.gw.processor.GuidanceProcessor} to scan a documentation source tree (commonly
+ * {@code src/site}) for files containing embedded {@code @guidance:} blocks. When guidance blocks are found, the
+ * processor delegates content transformation to the configured GenAI provider.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
  *   <li>
- *     {@link org.machanism.machai.gw.maven.GW} ({@code gw:gw})
- *     - Aggregator goal that can run without a {@code pom.xml}. It processes modules in reverse order (sub-modules
- *     first, then parent modules), similar to the Ghostwriter CLI.
+ *     {@link org.machanism.machai.gw.maven.GW} ({@code gw:gw}) - Aggregator goal that can run without a
+ *     {@code pom.xml}. It processes modules in reverse order (sub-modules first, then parent modules), similar to the
+ *     Ghostwriter CLI.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor})
- *     - Processes modules using standard Maven reactor dependency ordering, with an option to defer processing of the
- *     execution-root project.
+ *     {@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor}) - Processes modules using standard Maven
+ *     reactor dependency ordering, with an option to defer processing of the execution-root project.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean})
- *     - Deletes temporary artifacts created by GW processing (typically bound to Maven's {@code clean} lifecycle).
+ *     {@link org.machanism.machai.gw.maven.Act} ({@code gw:act}) - Interactive goal for running predefined actions
+ *     backed by resource bundles.
+ *   </li>
+ *   <li>
+ *     {@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by GW
+ *     processing (typically bound to Maven's {@code clean} lifecycle).
  *   </li>
  * </ul>
  *
  * <h2>Shared infrastructure</h2>
  * <ul>
  *   <li>
- *     {@link org.machanism.machai.gw.maven.AbstractGWGoal}
- *     - Base class defining shared parameters (for example, instructions, default guidance, scan directory, excludes,
- *     and optional credentials lookup) and the common scan/execute flow.
+ *     {@link org.machanism.machai.gw.maven.AbstractGWGoal} - Base class defining shared parameters (for example,
+ *     provider selection, instructions, default guidance, scan directory, excludes, and optional credentials lookup)
+ *     and the common scan/execute flow.
  *   </li>
  * </ul>
  *

@@ -78,11 +78,6 @@ public class ClaudeProvider implements GenAIProvider {
 	}
 
 	@Override
-	public boolean isThreadSafe() {
-		return false;
-	}
-
-	@Override
 	public List<Double> embedding(String text, long dimensions) {
 		return null;
 	}

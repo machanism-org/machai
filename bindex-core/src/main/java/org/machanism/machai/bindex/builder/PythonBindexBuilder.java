@@ -17,16 +17,16 @@ import org.tomlj.TomlParseResult;
  * {@link BindexBuilder} specialization for Python projects.
  *
  * <p>
- * This builder reads {@code pyproject.toml} from the project root and uses it
- * to discover the project name (from {@code project.name}). It then prompts the
+ * This builder reads {@code pyproject.toml} from the project root and uses it to
+ * discover the project name (from {@code project.name}). It then prompts the
  * configured GenAI provider with the manifest content and any regular files
  * found under the inferred source directory.
  *
  * <p>
  * Example:
- * 
+ *
  * <pre>{@code
- * Bindex bindex = new PythonBindexBuilder(layout).genAIProvider(provider).build();
+ * Bindex bindex = new PythonBindexBuilder(layout, "openai", config).build();
  * }</pre>
  *
  * @author Viktor Tovstyi
@@ -44,6 +44,9 @@ public class PythonBindexBuilder extends BindexBuilder {
 	 *
 	 * @param projectLayout layout describing the project directory and manifest
 	 *                      location
+	 * @param genai         provider identifier used by
+	 *                      {@link org.machanism.machai.ai.manager.GenAIProviderManager}
+	 * @param config        configuration used to initialize the provider
 	 */
 	public PythonBindexBuilder(ProjectLayout projectLayout, String genai, Configurator config) {
 		super(projectLayout, genai, config);
@@ -62,6 +65,7 @@ public class PythonBindexBuilder extends BindexBuilder {
 	 * <li>adds additional prompting rules for Python projects.</li>
 	 * </ol>
 	 *
+	 * @return a prompt string containing Python project context
 	 * @throws IOException if reading the manifest fails or prompting fails
 	 */
 	@Override
@@ -71,8 +75,7 @@ public class PythonBindexBuilder extends BindexBuilder {
 		StringBuilder prompt = new StringBuilder();
 
 		try (FileReader reader = new FileReader(pyprojectTomlFile)) {
-			prompt.append(
-					MessageFormat.format(promptBundle.getString("project_build_section"), IOUtils.toString(reader)));
+			prompt.append(MessageFormat.format(promptBundle.getString("project_build_section"), IOUtils.toString(reader)));
 		}
 
 		TomlParseResult result = Toml.parse(pyprojectTomlFile.toPath());
@@ -89,7 +92,7 @@ public class PythonBindexBuilder extends BindexBuilder {
 
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					promptFile(file, "source_resource_section");
+					prompt.append(promptFile(file, "source_resource_section"));
 				}
 			}
 		}

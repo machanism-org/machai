@@ -6,18 +6,23 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 [PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
 
 - **Write Clear and Concise Descriptions:**
-	- Follow best practices for creating a package overview.
+    - Follow best practices for creating a package overview.
     - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
     - Avoid vague or generic statements; be specific about functionality and intent.
     - Aggregate information from `package-info.java` files from source folders.
     - Use the class diagram located at `../images/class-diagram.png`.
     - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+
+- **Automatic Fixes for Javadoc Build Issues:**
+    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc, 
+       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Assembly Maven Plugin - Overview</title>
 </head>
 <body>
@@ -30,6 +35,36 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   GenAI-powered semantic search and metadata-driven workflows.
 </p>
 
+<h2>Purpose</h2>
+
+<p>
+  Assembly Maven Plugin is a Maven plugin (packaging type <code>maven-plugin</code>) that exposes the
+  <code>assembly</code> goal.
+  The goal takes a natural-language prompt, uses MachAI's bindex metadata to recommend relevant libraries,
+  filters recommendations by a configured minimum score threshold, and applies the selected libraries to the target
+  project directory.
+</p>
+
+<h2>High-level workflow</h2>
+
+<ol>
+  <li>
+    <b>Prompt acquisition</b>: read a prompt from a configured text file (typically <code>project.txt</code>) or request it
+    interactively.
+  </li>
+  <li>
+    <b>Library recommendation</b>: use the MachAI picker to recommend candidate libraries described as
+    <code>Bindex</code> entries.
+  </li>
+  <li>
+    <b>Scoring and filtering</b>: discard candidates below a configured minimum score threshold.
+  </li>
+  <li>
+    <b>Assembly application</b>: apply the selected libraries to the Maven execution base directory
+    (<code>${basedir}</code>) using the assembly engine.
+  </li>
+</ol>
+
 <h2>Architecture</h2>
 
 <p>
@@ -40,7 +75,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <img src="../images/class-diagram.png" alt="Class diagram for the Assembly Maven Plugin" />
 </p>
 
-<h2>Packages</h2>
+<h2>Package overview</h2>
 
 <h3><code>org.machanism.machai.assembly.maven</code></h3>
 
@@ -49,40 +84,36 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </p>
 
 <p>
-  This package contains the Maven <code>Mojo</code> that exposes the <code>assembly</code> goal and orchestrates a full
-  “prompt → recommend libraries → apply changes” pipeline:
+  The main entry point is
+  <code>org.machanism.machai.assembly.maven.Assembly</code>, a Maven {@code Mojo} that orchestrates:
 </p>
 
-<ol>
+<ul>
   <li>
-    <b>Acquire the prompt</b> from a configured text file (typically <code>project.txt</code>) or by interactively asking
-    the user.
+    prompt acquisition (from a configured prompt file or interactive input),
   </li>
   <li>
-    <b>Recommend libraries</b> by invoking MachAI’s picker component, which returns candidate libraries described as
-    <code>Bindex</code> metadata entries.
+    library recommendation via <code>org.machanism.machai.bindex.Picker</code> (as <code>org.machanism.machai.schema.Bindex</code>
+    entries),
   </li>
   <li>
-    <b>Filter recommendations</b> using a minimum score threshold to keep only sufficiently relevant results.
+    and in-place application of changes to <code>${basedir}</code> via
+    <code>org.machanism.machai.bindex.ApplicationAssembly</code>.
   </li>
-  <li>
-    <b>Assemble the project</b> by applying the selected libraries to the target directory using the assembly engine.
-  </li>
-</ol>
+</ul>
 
 <h2>Configuration and inputs</h2>
 
 <p>
-  The goal is configured primarily via Maven properties (system properties) and/or plugin configuration. Common
-  parameters include:
+  The goal can be configured via Maven properties and/or plugin configuration. Common parameters include:
 </p>
 
 <ul>
-  <li><code>assembly.genai</code> – GenAI provider identifier used during the assembly phase.</li>
-  <li><code>pick.genai</code> – GenAI provider identifier used during the recommendation (picker) phase.</li>
-  <li><code>assembly.prompt.file</code> – Text file containing the natural-language prompt.</li>
-  <li><code>assembly.score</code> – Minimum score threshold for recommendations.</li>
-  <li><code>bindex.register.url</code> – Optional endpoint used by the picker for metadata lookup/registration.</li>
+  <li><code>assembly.genai</code> &ndash; GenAI provider identifier used during the assembly phase.</li>
+  <li><code>pick.genai</code> &ndash; GenAI provider identifier used during the recommendation (picker) phase.</li>
+  <li><code>assembly.prompt.file</code> &ndash; Text file containing the natural-language prompt.</li>
+  <li><code>assembly.score</code> &ndash; Minimum score threshold for recommendations.</li>
+  <li><code>bindex.register.url</code> &ndash; Optional endpoint used by the picker for metadata lookup/registration.</li>
 </ul>
 
 <h2>Typical usage</h2>
@@ -96,17 +127,17 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 </pre>
 
 <p>
-  When <code>assembly.prompt.file</code> does not exist, the goal falls back to interactive prompt entry.
+  If <code>assembly.prompt.file</code> does not exist, the goal prompts for interactive input.
 </p>
 
-<h2>Notes</h2>
+<h2>Operational notes</h2>
 
 <ul>
   <li>
-    The plugin operates on the Maven execution base directory (<code>${basedir}</code>), applying changes in-place.
+    The plugin operates on the Maven execution base directory (<code>${basedir}</code>) and applies changes in-place.
   </li>
   <li>
-    Recommended libraries are surfaced as bindex entries and may be logged before the assembly phase begins.
+    Recommended libraries are surfaced as bindex entries and are typically logged before the assembly phase begins.
   </li>
 </ul>
 

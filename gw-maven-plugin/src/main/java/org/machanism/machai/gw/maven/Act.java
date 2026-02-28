@@ -15,16 +15,55 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
+/**
+ * Maven goal that runs an interactive "act" workflow against the current project.
+ *
+ * <p>
+ * The goal prompts the user for an action name followed by an optional free-form prompt. It then loads a
+ * {@link ResourceBundle} from {@code act/<name>} that describes how to execute that action and delegates processing to
+ * {@link AIFileProcessor}.
+ * </p>
+ *
+ * <h2>Input format</h2>
+ * <p>
+ * The interactive input is a single line:
+ * </p>
+ * <ul>
+ *   <li><b>{@code <name>}</b> - identifies the action bundle under {@code act/}.</li>
+ *   <li><b>{@code <prompt>}</b> (optional) - appended after the first whitespace; when omitted the value of
+ *   {@code -Dgw.guidance} (if provided) is used.</li>
+ * </ul>
+ *
+ * <h2>Configuration</h2>
+ * <p>
+ * This goal inherits the common parameters from {@link AbstractGWGoal}:
+ * {@code gw.genai}, {@code gw.instructions}, {@code gw.guidance}, {@code gw.excludes},
+ * {@code gw.genai.serverId}, and {@code gw.logInputs}.
+ * </p>
+ *
+ * <h2>Usage examples</h2>
+ * <pre>
+ * mvn gw:act
+ * </pre>
+ *
+ * <pre>
+ * mvn gw:act -Dgw.guidance="Improve readability"
+ * </pre>
+ */
 @Mojo(name = "act", aggregator = true)
 public class Act extends AbstractGWGoal {
 
 	/**
-	 * Interactive prompt provider used to collect the assembly prompt when
-	 * {@link #assemblyPromptFile} does not exist.
+	 * Interactive prompt provider used to collect the action input.
 	 */
 	@Component
 	protected Prompter prompter;
 
+	/**
+	 * Executes the interactive action.
+	 *
+	 * @throws MojoExecutionException if an I/O failure occurs while processing files
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {

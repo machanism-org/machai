@@ -25,21 +25,17 @@ import com.fasterxml.jackson.databind.JsonNode;
  * Installs file-system tools into a {@link GenAIProvider}.
  *
  * <p>
- * Tools in this installer are intended for host-integrated use where the host
- * controls the base working directory. All paths provided to these tools are
- * interpreted relative to the working directory supplied by the
+ * Tools in this installer are intended for host-integrated use where the host controls the base working
+ * directory. All paths provided to these tools are interpreted relative to the working directory supplied by the
  * provider/runtime.
  * </p>
  *
  * <h2>Installed tools</h2>
  * <ul>
- * <li>{@code read_file_from_file_system} – reads a file as text</li>
- * <li>{@code write_file_to_file_system} – writes a file (creating parent
- * directories as needed)</li>
- * <li>{@code list_files_in_directory} – lists immediate children of a
- * directory</li>
- * <li>{@code get_recursive_file_list} – recursively lists all files under a
- * directory</li>
+ *   <li>{@code read_file_from_file_system} – reads a file as text</li>
+ *   <li>{@code write_file_to_file_system} – writes a file (creating parent directories as needed)</li>
+ *   <li>{@code list_files_in_directory} – lists immediate children of a directory</li>
+ *   <li>{@code get_recursive_file_list} – recursively lists all files under a directory</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -81,13 +77,12 @@ public class FileFunctionTools implements FunctionTools {
 	 * Expected parameters:
 	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
-	 * <li>{@link File} working directory</li>
+	 *   <li>{@link JsonNode} optionally containing {@code dir_path}</li>
+	 *   <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a newline-separated list of project-relative file paths, or a message
-	 *         if no files are found
+	 * @return a newline-separated list of project-relative file paths, or a message if no files are found
 	 */
 	private Object getRecursiveFiles(Object[] params) {
 		String result;
@@ -128,13 +123,13 @@ public class FileFunctionTools implements FunctionTools {
 	 * Expected parameters:
 	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
-	 * <li>{@link File} working directory</li>
+	 *   <li>{@link JsonNode} optionally containing {@code dir_path}</li>
+	 *   <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a comma-separated list of project-relative paths, or a message if the
-	 *         directory does not exist or is empty
+	 * @return a comma-separated list of project-relative paths, or a message if the directory does not exist or is
+	 *         empty
 	 */
 	private Object listFiles(Object[] params) {
 		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
@@ -167,8 +162,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * Expected parameters:
 	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} containing {@code file_path} and {@code text}</li>
-	 * <li>{@link File} working directory</li>
+	 *   <li>{@link JsonNode} containing {@code file_path} and {@code text}</li>
+	 *   <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
@@ -204,8 +199,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * Expected parameters:
 	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} containing {@code file_path}</li>
-	 * <li>{@link File} working directory</li>
+	 *   <li>{@link JsonNode} containing {@code file_path}</li>
+	 *   <li>{@link File} working directory</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
@@ -258,15 +253,14 @@ public class FileFunctionTools implements FunctionTools {
 	 * Computes a project-relative path string.
 	 *
 	 * <p>
-	 * The returned path always uses forward slashes ({@code /}) for consistency
-	 * across platforms.
+	 * The returned path always uses forward slashes ({@code /}) for consistency across platforms.
 	 * </p>
 	 *
 	 * @param dir          base directory used to relativize the {@code file}
 	 * @param file         target file or directory
 	 * @param addSingleDot whether to prefix relative paths with {@code ./}
-	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or
-	 *         {@code null} if {@code file} is not a descendant of {@code dir}
+	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or {@code null} if {@code file} is not a
+	 *         descendant of {@code dir}
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		if (dir == null || file == null) {

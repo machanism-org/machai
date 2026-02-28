@@ -35,41 +35,41 @@
  */
 
 /**
- * Host-integrated function tools that expose a small, auditable set of local capabilities to a
- * {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Host-integrated function tools exposed to a {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
  * <p>
- * The classes in this package register named "tools" (functions) with a provider. These tools are intended to
- * run inside the host application and therefore focus on controlled access patterns, such as:
+ * This package contains a curated, auditable set of tool installers (SPI implementations) that register named
+ * functions with a provider. The tools are executed inside the host application and are designed to keep access
+ * scoped and observable.
  * </p>
+ *
+ * <h2>Responsibilities</h2>
  * <ul>
- *   <li>Reading, writing, and enumerating files relative to a host-supplied working directory</li>
- *   <li>Executing system commands with heuristic deny-list checks, project-root confinement, and bounded output</li>
- *   <li>Fetching web content and invoking REST endpoints with optional header templating and authentication</li>
+ *   <li><b>Tool registration</b>: implementations of {@link org.machanism.machai.ai.tools.FunctionTools} register
+ *       tools via
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.</li>
+ *   <li><b>Discovery and wiring</b>: installers are typically discovered using {@link java.util.ServiceLoader} and
+ *       applied by {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
+ *   <li><b>Controlled access</b>: installers generally interpret paths relative to a host-supplied working
+ *       directory, bound output sizes, and apply deny/validation checks for potentially risky operations.</li>
  * </ul>
- *
- * <h2>Architecture overview</h2>
- * <p>
- * Tool installers implement {@link org.machanism.machai.ai.tools.FunctionTools} and register functions via
- * {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
- * Installers are typically discovered using {@link java.util.ServiceLoader} and applied by
- * {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
- * </p>
  *
  * <h2>Key components</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} – SPI implemented by tool installers</li>
- *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – discovers tool installers via
- *       {@link java.util.ServiceLoader} and applies them to a provider</li>
- *   <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – file-system utilities</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – discovers and applies installers</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – file-system utilities relative to a working directory</li>
  *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution and process termination</li>
- *   <li>{@link org.machanism.machai.ai.tools.WebFunctionTools} – web fetching and REST calls</li>
+ *   <li>{@link org.machanism.machai.ai.tools.WebFunctionTools} – HTTP fetching and REST calls</li>
  * </ul>
  *
  * <h2>Usage</h2>
  * <pre>{@code
+ * Configurator conf = ...;
  * GenAIProvider provider = ...;
- * FunctionToolsLoader.getInstance().applyTools(provider);
+ * FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
+ * loader.setConfiguration(conf);
+ * loader.applyTools(provider);
  * }
  * </pre>
  */

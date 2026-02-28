@@ -27,21 +27,25 @@
  */
 
 /**
- * No-op generative-AI provider implementation.
+ * No-op generative-AI provider.
  *
- * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for deployments where external
- * model calls are disabled or not permitted.
+ * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, an implementation of
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} intended for environments where calls to external model
+ * backends are disabled, unavailable, or not permitted.
  *
  * <h2>Behavior</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)} appends text to an in-memory
- *       buffer.</li>
- *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} optionally writes an
- *       {@code instructions.txt} file (when instructions were provided) and writes the accumulated prompt text to a
- *       configured inputs log file; it then clears the buffer and returns {@code null}.</li>
- *   <li>Capabilities requiring a model backend (for example
- *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String)}) are unsupported and throw
+ *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)} accumulates prompt text in memory.
+ *       Prompts are separated by a blank line.</li>
+ *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} does not call a model. It may persist the
+ *       accumulated prompt to an inputs log configured via
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#inputsLog(java.io.File)}.</li>
+ *   <li>If instructions are configured via
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#instructions(String)}, they are written to an
+ *       {@code instructions.txt} file alongside the inputs log (or in the process working directory when the log file
+ *       has no parent directory).</li>
+ *   <li>Model-dependent features (for example
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String, long)}) are unsupported and throw
  *       {@link java.lang.UnsupportedOperationException}.</li>
  * </ul>
  *

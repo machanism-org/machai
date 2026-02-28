@@ -18,19 +18,18 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 /**
- * Shell command for creating and registering Bindex files using GenAI.
- * <p>
- * Provides CLI access to bindex generation and registration logic.
- * <p>
- * Usage Example:
- * 
+ * Spring Shell command for generating and registering <em>bindex</em> metadata.
+ *
+ * <p>This command is a CLI facade around {@link BindexCreator} (generation) and
+ * {@link BindexRegister} (registration). It reads defaults from the persistent
+ * CLI configuration managed by {@link ConfigCommand}.
+ *
+ * <h2>Typical usage</h2>
  * <pre>
- * {@code
- * BindexCommand cmd = new BindexCommand();
- * cmd.bindex(new File("/myapp/"), true, false);
- * }
+ * bindex --dir .\\my-project
+ * register --dir .\\my-project --registerUrl https://registry.example/api
  * </pre>
- * 
+ *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
@@ -43,16 +42,25 @@ public class BindexCommand {
 	@Lazy
 	LineReader reader;
 
-	private PropertiesConfigurator config = new PropertiesConfigurator();
+	private final PropertiesConfigurator config = new PropertiesConfigurator();
 
 	/**
-	 * Generates bindex files for the given directory using GenAI provider.
-	 * 
-	 * @param dir       The directory to scan for bindex creation
-	 * @param update    Update mode: all saved data will be updated
-	 * @param chatModel GenAI service provider/model (default is
-	 *                  Ghostwriter.CHAT_MODEL)
-	 * @throws IOException if scan or creation fails
+	 * Generates bindex files for a project directory.
+	 *
+	 * <p>If {@code dir} is not provided, the configured default directory is used
+	 * (see {@code config dir ...}). If {@code genai} is not provided, the configured
+	 * default GenAI provider/model is used.
+	 *
+	 * @param dir
+	 *            the project directory to scan; if {@code null}, uses the configured
+	 *            default or the current working directory
+	 * @param update
+	 *            whether to update previously saved metadata
+	 * @param genai
+	 *            GenAI service provider/model identifier (for example,
+	 *            {@code OpenAI:gpt-5.1})
+	 * @throws IOException
+	 *             if scanning or file generation fails
 	 */
 	@ShellMethod("Generates bindex files.")
 	public void bindex(
@@ -78,11 +86,24 @@ public class BindexCommand {
 	}
 
 	/**
-	 * Registers bindex file for the given directory using GenAI provider.
-	 * 
-	 * @param dir    The directory to register bindex from
-	 * @param update Update mode: all saved data will be updated
-	 * @throws IOException if registration fails
+	 * Registers a previously generated bindex file for a project directory.
+	 *
+	 * <p>This command uploads/registers bindex metadata into an external registry
+	 * addressed by {@code registerUrl}.
+	 *
+	 * @param dir
+	 *            the project directory containing bindex metadata; if {@code null},
+	 *            uses the configured default or the current working directory
+	 * @param registerUrl
+	 *            URL of the registry service for storing project metadata
+	 * @param update
+	 *            whether to update previously registered metadata
+	 * @param chatModel
+	 *            GenAI service provider/model identifier used for processing
+	 *            (for example, {@code OpenAI:gpt-5.1}); if {@code null}, uses the
+	 *            configured default
+	 * @throws IOException
+	 *             if scanning or registration fails
 	 */
 	@ShellMethod("Registers bindex file.")
 	public void register(

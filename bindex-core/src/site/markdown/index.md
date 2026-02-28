@@ -108,6 +108,7 @@ mvn -Dmaven.compiler.release=11 -DskipTests=true clean verify
 
 ## Resources
 
+- Project site: <https://machai.machanism.org/>
 - GitHub: <https://github.com/machanism-org/machai>
 - Maven Central: <https://central.sonatype.com/artifact/org.machanism.machai/bindex-core>
 - Issues: <https://github.com/machanism-org/machai/issues>

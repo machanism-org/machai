@@ -23,6 +23,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -104,8 +105,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *
 	 * @param projectLayout project layout
 	 * @param file          file being processed (used for logging and templating)
-	 * @param guidance      guidance content to include in the prompt
 	 * @param instructions  system or execution instructions for the provider
+	 * @param guidance      guidance content to include in the prompt
 	 * @return provider output
 	 * @throws IOException if creating input logs fails or provider I/O fails
 	 */
@@ -134,10 +135,19 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			provider.inputsLog(inputsFile);
 		}
 
-		String perform = provider.perform();
+		try {
+			String perform = provider.perform();
 
-		logger.info("Finished processing file: {}", file.getAbsolutePath());
-		return perform;
+			logger.info("Finished processing file: {}", file.getAbsolutePath());
+			return perform;
+
+		} catch (ProcessTerminationException e) {
+			throw e;
+
+		} catch (RuntimeException e) {
+			logger.error("File processing failed: " + file, e);
+			return null;
+		}
 	}
 
 	/**
@@ -195,31 +205,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Enables or disables multi-threaded module processing.
-	 *
-	 * <p>
-	 * When enabling, this method verifies that the configured provider is
-	 * thread-safe.
-	 * </p>
-	 *
-	 * @param moduleMultiThread {@code true} to enable, {@code false} to disable
-	 * @throws IllegalArgumentException if enabling is requested but the provider is
-	 *                                  not thread-safe
-	 */
-	@Override
-	public void setModuleMultiThread(boolean moduleMultiThread) {
-		if (moduleMultiThread) {
-			GenAIProvider provider = GenAIProviderManager.getProvider(genai, getConfigurator());
-			if (!provider.isThreadSafe()) {
-				throw new IllegalArgumentException(
-						"The provider '" + genai
-								+ "' is not thread-safe and cannot be used in a multi-threaded context.");
-			}
-		}
-		super.setModuleMultiThread(moduleMultiThread);
-	}
-
-	/**
 	 * Returns whether composed prompt inputs are logged to files.
 	 *
 	 * @return {@code true} when input logging is enabled
@@ -259,6 +244,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		this.instructions = parseLines(instructions);
 	}
 
+	/**
+	 * Returns the parsed and expanded instructions.
+	 *
+	 * @return instructions text (never {@code null})
+	 */
 	public String getInstructions() {
 		return instructions;
 	}
@@ -375,12 +365,25 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 	}
 
+	/**
+	 * Scans the project directory and applies the configured default guidance.
+	 *
+	 * @param projectDir project root
+	 * @param scanDir    scan start directory or pattern (currently unused by this
+	 *                   implementation)
+	 * @throws IOException if provider execution fails
+	 */
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		String perform = process(projectLayout, getRootDir(), getInstructions(), defaultGuidance);
 		logger.info(perform);
 	}
 
+	/**
+	 * Returns the default guidance, if configured.
+	 *
+	 * @return default guidance, or {@code null}
+	 */
 	public String getDefaultGuidance() {
 		return defaultGuidance;
 	}

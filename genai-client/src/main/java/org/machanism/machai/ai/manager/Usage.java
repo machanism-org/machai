@@ -5,6 +5,8 @@ package org.machanism.machai.ai.manager;
  *
  * <p>Instances of this class are typically created by provider implementations and aggregated by
  * {@link GenAIProviderManager} to produce a summary log of the application's consumption.
+ *
+ * <p>This is an immutable value object.
  */
 public class Usage {
 
@@ -15,9 +17,9 @@ public class Usage {
 	/**
 	 * Creates a usage record.
 	 *
-	 * @param inputTokens        number of input tokens
-	 * @param inputCachedTokens  number of cached input tokens (provider-specific)
-	 * @param outputTokens       number of output tokens
+	 * @param inputTokens       number of input tokens
+	 * @param inputCachedTokens number of cached input tokens (provider-specific)
+	 * @param outputTokens      number of output tokens
 	 */
 	public Usage(long inputTokens, long inputCachedTokens, long outputTokens) {
 		this.inputTokens = inputTokens;

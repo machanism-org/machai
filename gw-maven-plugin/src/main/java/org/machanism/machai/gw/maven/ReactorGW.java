@@ -33,8 +33,8 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <h2>Parameters</h2>
  * <ul>
  * <li>
- * <b>{@code gw.rootProjectLast}</b> / {@code &lt;rootProjectLast&gt;} ({@link #rootProjectLast}):
- * If {@code true}, delays processing of the execution-root project until all other reactor projects
+ * <b>{@code gw.rootProjectLast}</b> / {@code &lt;rootProjectLast&gt;} ({@link #rootProjectLast}): If
+ * {@code true}, delays processing of the execution-root project until all other reactor projects
  * have completed.
  * <p>
  * Default: {@code false}
@@ -150,9 +150,10 @@ public class ReactorGW extends AbstractGWGoal {
 				ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
 
 				if (projectLayout instanceof MavenProjectLayout) {
-					projectLayout.projectDir(projectDir);
+					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
+					mavenProjectLayout.projectDir(projectDir);
 					Model model = project.getModel();
-					((MavenProjectLayout) projectLayout).model(model);
+					mavenProjectLayout.model(model);
 				}
 
 				return projectLayout;
@@ -170,13 +171,7 @@ public class ReactorGW extends AbstractGWGoal {
 		}
 
 		if (!rootProject || !pomProject || !rootProjectLast) {
-			try {
-				scanDocuments(documents);
-			} catch (ProcessTerminationException e) {
-				LOGGER.error("Process terminated: {} (exit code: {})", e.getMessage(), e.getExitCode());
-				throw new MojoExecutionException(
-						"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
-			}
+			scanDocumentsOrFail(documents);
 			return;
 		}
 
@@ -185,14 +180,7 @@ public class ReactorGW extends AbstractGWGoal {
 				while (!reactorProjects.isEmpty()) {
 					Thread.sleep(500);
 				}
-				try {
-					scanDocuments(documents);
-				} catch (ProcessTerminationException e) {
-					LOGGER.error("Process terminated in deferred execution-root processing: {} (exit code: {})",
-							e.getMessage(), e.getExitCode());
-					throw new RuntimeException(
-							"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
-				}
+				scanDocumentsOrFail(documents);
 			} catch (MojoExecutionException e) {
 				LOGGER.error("Failed to scan documents in deferred execution-root processing.", e);
 			} catch (InterruptedException e) {
@@ -202,5 +190,15 @@ public class ReactorGW extends AbstractGWGoal {
 		}, "gw-reactor-root-last");
 		deferredRootScanThread.setDaemon(true);
 		deferredRootScanThread.start();
+	}
+
+	private void scanDocumentsOrFail(GuidanceProcessor documents) throws MojoExecutionException {
+		try {
+			scanDocuments(documents);
+		} catch (ProcessTerminationException e) {
+			LOGGER.error("Process terminated: {} (exit code: {})", e.getMessage(), e.getExitCode());
+			throw new MojoExecutionException(
+					"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
+		}
 	}
 }

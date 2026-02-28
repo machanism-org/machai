@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * Example:
- * 
+ *
  * <pre>{@code
- * Bindex bindex = new JScriptBindexBuilder(layout).genAIProvider(provider).build();
+ * Bindex bindex = new JScriptBindexBuilder(layout, "openai", config).build();
  * }</pre>
  *
  * @author Viktor Tovstyi
@@ -47,6 +47,9 @@ public class JScriptBindexBuilder extends BindexBuilder {
 	 *
 	 * @param projectLayout layout describing the project directory and manifest
 	 *                      location
+	 * @param genai         provider identifier used by
+	 *                      {@link org.machanism.machai.ai.manager.GenAIProviderManager}
+	 * @param config        configuration used to initialize the provider
 	 */
 	public JScriptBindexBuilder(ProjectLayout projectLayout, String genai, Configurator config) {
 		super(projectLayout, genai, config);
@@ -63,9 +66,8 @@ public class JScriptBindexBuilder extends BindexBuilder {
 	 * {@code .js}/{@code .ts}/{@code .vue} file,</li>
 	 * <li>adds additional prompting rules for JavaScript projects.</li>
 	 * </ol>
-	 * 
-	 * @return
 	 *
+	 * @return a prompt string containing JavaScript project context
 	 * @throws IOException if reading files fails or prompting fails
 	 */
 	@Override
@@ -74,8 +76,7 @@ public class JScriptBindexBuilder extends BindexBuilder {
 
 		File packageFile = new File(getProjectLayout().getProjectDir(), JScriptProjectLayout.PROJECT_MODEL_FILE_NAME);
 		try (FileReader reader = new FileReader(packageFile)) {
-			prompt.append(
-					MessageFormat.format(promptBundle.getString("js_resource_section"), IOUtils.toString(reader)));
+			prompt.append(MessageFormat.format(promptBundle.getString("js_resource_section"), IOUtils.toString(reader)));
 		}
 
 		Path startPath = Paths.get(new File(getProjectLayout().getProjectDir(), "src").getAbsolutePath());
@@ -83,7 +84,7 @@ public class JScriptBindexBuilder extends BindexBuilder {
 			Files.walk(startPath).filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js"))
 					.forEach(f -> {
 						try {
-							promptFile(f.toFile(), "source_resource_section");
+							prompt.append(promptFile(f.toFile(), "source_resource_section"));
 						} catch (IOException e) {
 							logger.warn("File: {} adding failed.", f);
 						}

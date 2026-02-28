@@ -27,17 +27,38 @@
  */
 
 /**
- * Gemini provider integration for the MachAI framework.
+ * Google Gemini provider integration for the MachAI framework.
  *
  * <p>
- * This package contains the implementation details required to communicate with Google's Gemini models,
- * including request/response mapping and any provider-specific configuration that is needed to
- * execute prompts through the framework's abstractions.
+ * This package contains MachAI's {@link org.machanism.machai.ai.manager.GenAIProvider} implementation for Google
+ * Gemini models: {@link org.machanism.machai.ai.provider.gemini.GeminiProvider}.
  * </p>
  *
  * <p>
- * Typical usage is indirect: applications configure MachAI to use the Gemini provider, and then
- * interact with the framework's higher-level APIs to send prompts and receive model outputs.
+ * The provider is responsible for translating MachAI's provider-agnostic contract (prompts, system instructions,
+ * tool registration, file attachments, request execution, and usage reporting) into Gemini-specific request and
+ * response handling.
+ * </p>
+ *
+ * <h2>Usage</h2>
+ * <p>
+ * Providers are typically created and managed through MachAI's higher-level APIs. When used directly, a
+ * {@link org.machanism.machai.ai.provider.gemini.GeminiProvider} instance is initialized with a configurator,
+ * supplied with instructions and prompts, and then executed.
+ * </p>
+ *
+ * <pre>
+ * Configurator config = ...;
+ * GeminiProvider provider = new GeminiProvider();
+ * provider.init(config);
+ * provider.instructions("You are a helpful assistant.");
+ * provider.prompt("Summarize this document.");
+ * String response = provider.perform();
+ * </pre>
+ *
+ * <p>
+ * Note: this integration may be incomplete; some methods may be implemented as no-ops or may throw
+ * {@link org.apache.commons.lang.NotImplementedException} until the adapter is fully implemented.
  * </p>
  */
 package org.machanism.machai.ai.provider.gemini;

@@ -47,7 +47,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <dl>
- * <dt><b>{@code -Dgw.threads}</b> / {@code <threads>}</dt>
+ * <dt><b>{@code -Dgw.threads}</b> / {@code &lt;threads&gt;}</dt>
  * <dd>
  * Enables or disables multi-threaded module processing.
  * <p>
@@ -63,25 +63,25 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <dl>
- * <dt><b>{@code -Dgw.genai}</b> / {@code <genai>}</dt>
+ * <dt><b>{@code -Dgw.genai}</b> / {@code &lt;genai&gt;}</dt>
  * <dd>Provider/model identifier forwarded to the workflow. Example: {@code openai:gpt-4o-mini}.</dd>
  *
- * <dt><b>{@code -Dgw.scanDir}</b> / {@code <scanDir>}</dt>
+ * <dt><b>{@code -Dgw.scanDir}</b> / {@code &lt;scanDir&gt;}</dt>
  * <dd>Optional scan root override. When omitted, defaults to the execution root directory.</dd>
  *
- * <dt><b>{@code -Dgw.instructions}</b> / {@code <instructions>}</dt>
+ * <dt><b>{@code -Dgw.instructions}</b> / {@code &lt;instructions&gt;}</dt>
  * <dd>Instruction locations (for example, file paths or classpath locations) consumed by the workflow.</dd>
  *
- * <dt><b>{@code -Dgw.guidance}</b> / {@code <guidance>}</dt>
+ * <dt><b>{@code -Dgw.guidance}</b> / {@code &lt;guidance&gt;}</dt>
  * <dd>Default guidance text forwarded to the workflow.</dd>
  *
- * <dt><b>{@code -Dgw.excludes}</b> / {@code <excludes>}</dt>
+ * <dt><b>{@code -Dgw.excludes}</b> / {@code &lt;excludes&gt;}</dt>
  * <dd>Exclude patterns/paths to skip when scanning documentation sources.</dd>
  *
- * <dt><b>{@code -Dgw.genai.serverId}</b> / {@code <serverId>}</dt>
- * <dd>{@code settings.xml} {@code <server>} id used to read GenAI credentials.</dd>
+ * <dt><b>{@code -Dgw.genai.serverId}</b> / {@code &lt;serverId&gt;}</dt>
+ * <dd>{@code settings.xml} {@code &lt;server&gt;} id used to read GenAI credentials.</dd>
  *
- * <dt><b>{@code -Dgw.logInputs}</b> / {@code <logInputs>}</dt>
+ * <dt><b>{@code -Dgw.logInputs}</b> / {@code &lt;logInputs&gt;}</dt>
  * <dd>
  * Whether to log the list of input files passed to the workflow.
  * <p>

@@ -1,35 +1,18 @@
 /**
- * APIs for detecting, describing, and working with a repository's on-disk project layout.
+ * Provides APIs to detect, describe, and work with a repository's on-disk project layout.
  *
- * <p>This package provides the {@link org.machanism.machai.project.layout.ProjectLayout} abstraction, which models a
- * project rooted at a configured base directory and exposes conventional locations (relative to that root) such as:
+ * <p>This package models a project as a root directory plus a set of conventional root-relative paths (sources, tests,
+ * resources, documentation) and optionally nested modules. The main entry point is
+ * {@link org.machanism.machai.project.layout.ProjectLayout}, which returns these paths as root-relative strings.
  *
+ * <h2>Key concepts</h2>
  * <ul>
- *   <li>main sources and resources (see {@link org.machanism.machai.project.layout.ProjectLayout#getSources()})</li>
- *   <li>test sources and resources (see {@link org.machanism.machai.project.layout.ProjectLayout#getTests()})</li>
- *   <li>documentation (see {@link org.machanism.machai.project.layout.ProjectLayout#getDocuments()})</li>
- *   <li>optionally nested modules (see {@link org.machanism.machai.project.layout.ProjectLayout#getModules()})</li>
+ *   <li><strong>Root-relative paths:</strong> Layout values are typically expressed relative to the configured project root.</li>
+ *   <li><strong>Build-aware detection:</strong> Implementations may parse build metadata (for example {@code pom.xml}) to
+ *       resolve non-default source sets and discover modules.</li>
+ *   <li><strong>Repository scanning:</strong> Some implementations scan the filesystem to infer structure while excluding
+ *       common build/VCS/IDE directories using {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
  * </ul>
- *
- * <p>Concrete implementations encapsulate ecosystem-specific conventions and configuration sources:
- *
- * <ul>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} parses {@code pom.xml} via
- *       {@link org.machanism.machai.project.layout.PomReader} to resolve sources, tests, and multi-module structure.</li>
- *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} uses the Gradle Tooling API to discover modules
- *       and applies standard Gradle directory conventions.</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} inspects {@code package.json} workspaces to
- *       detect modules in JS/TS monorepos.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} detects Python projects using
- *       {@code pyproject.toml} metadata.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} provides a minimal fallback when no
- *       ecosystem-specific layout is detected.</li>
- * </ul>
- *
- * <h2>Directory scanning and exclusions</h2>
- * <p>Some implementations scan a repository (for example, to discover nested modules). During scanning, common build,
- * VCS, IDE, and environment directories are typically excluded using
- * {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
  *
  * <h2>Typical usage</h2>
  * <pre>
@@ -40,6 +23,20 @@
  * java.util.List&lt;String&gt; tests = layout.getTests();
  * java.util.List&lt;String&gt; docs = layout.getDocuments();
  * </pre>
+ *
+ * <h2>Implementations</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} resolves paths and modules from {@code pom.xml}
+ *       (via {@link org.machanism.machai.project.layout.PomReader}).</li>
+ *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} applies Gradle conventions to determine sources,
+ *       tests, and modules.</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} inspects {@code package.json} workspaces to
+ *       detect JS/TS monorepo modules.</li>
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} detects Python projects using
+ *       {@code pyproject.toml} metadata.</li>
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} provides a minimal fallback layout when no
+ *       specific build metadata is available.</li>
+ * </ul>
  */
 package org.machanism.machai.project.layout;
 

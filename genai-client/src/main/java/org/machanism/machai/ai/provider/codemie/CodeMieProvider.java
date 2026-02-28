@@ -20,34 +20,37 @@ import org.machanism.machai.ai.provider.gemini.GeminiProvider;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 
 /**
- * GenAI provider implementation for EPAM CodeMie.
+ * {@link GenAIProvider} implementation that integrates with EPAM CodeMie.
  *
  * <p>
- * This provider obtains an access token from a configurable OpenID Connect
- * token endpoint and then initializes an OpenAI-compatible client (via
- * {@link OpenAIProvider}) to call the CodeMie Code Assistant REST API.
+ * The provider performs an OpenID Connect (OIDC) token request to obtain an OAuth 2.0 access token and then configures an
+ * OpenAI-compatible backend to call the CodeMie Code Assistant REST API.
+ * </p>
  *
  * <h2>Authentication modes</h2>
- * <p>
- * The authentication mode is selected based on the configured username:
  * <ul>
- * <li>If the username contains {@code "@"}, the password grant is used (typical
- * user e-mail login).</li>
- * <li>Otherwise, the client credentials grant is used
- * (service-to-service).</li>
+ *   <li><b>Password grant</b> is used when {@code GENAI_USERNAME} contains {@code "@"} (typical e-mail login).</li>
+ *   <li><b>Client credentials</b> is used otherwise (service-to-service).</li>
  * </ul>
  *
- * <h2>Delegation</h2>
+ * <h2>Provider delegation</h2>
  * <p>
- * After a token is retrieved, this provider configures the underlying
- * OpenAI-compatible provider by setting:
+ * After retrieving a token, this provider sets the following configuration keys before delegating to a downstream
+ * provider:
+ * </p>
  * <ul>
- * <li>{@code OPENAI_BASE_URL} to {@link #baseUrl}</li>
- * <li>{@code OPENAI_API_KEY} to the retrieved access token</li>
+ *   <li>{@code OPENAI_BASE_URL} to {@link #baseUrl}</li>
+ *   <li>{@code OPENAI_API_KEY} to the retrieved access token</li>
  * </ul>
- * and then delegates requests to either {@link OpenAIProvider} (for
- * {@code gpt-*} models) or {@link GeminiProvider} (for {@code claude-*}
- * models).
+ *
+ * <p>
+ * Delegation is selected based on the configured {@code chatModel} prefix:
+ * </p>
+ * <ul>
+ *   <li>{@code gpt-*} (or blank/unspecified) models delegate to {@link OpenAIProvider}</li>
+ *   <li>{@code gemini-*} models delegate to {@link GeminiProvider}</li>
+ *   <li>{@code claude-*} models delegate to {@link ClaudeProvider}</li>
+ * </ul>
  */
 public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 
@@ -56,6 +59,7 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 *
 	 * <p>
 	 * Can be overridden via the {@code AUTH_URL} configuration key.
+	 * </p>
 	 */
 	public static String authUrl = "https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token";
 
@@ -64,6 +68,7 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 *
 	 * <p>
 	 * This base URL is used to configure the underlying OpenAI-compatible client.
+	 * </p>
 	 */
 	public static String baseUrl = "https://codemie.lab.epam.com/code-assistant-api/v1";
 
@@ -72,22 +77,24 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 *
 	 * <p>
 	 * Required configuration keys:
+	 * </p>
 	 * <ul>
-	 * <li>{@code GENAI_USERNAME} – user e-mail or client id.</li>
-	 * <li>{@code GENAI_PASSWORD} – password or client secret.</li>
-	 * <li>{@code chatModel} – model identifier (for example {@code gpt-4o-mini} or
-	 * {@code claude-3-5-sonnet}).</li>
+	 *   <li>{@code GENAI_USERNAME} – user e-mail or client id.</li>
+	 *   <li>{@code GENAI_PASSWORD} – password or client secret.</li>
+	 *   <li>{@code chatModel} – model identifier (for example {@code gpt-4o-mini}, {@code gemini-1.5-pro},
+	 *       {@code claude-3-5-sonnet}).</li>
 	 * </ul>
 	 *
 	 * <p>
 	 * Optional configuration keys:
+	 * </p>
 	 * <ul>
-	 * <li>{@code AUTH_URL} – token endpoint override.</li>
+	 *   <li>{@code AUTH_URL} – token endpoint override.</li>
 	 * </ul>
 	 *
 	 * @param conf configuration source
-	 * @throws IllegalArgumentException if authorization fails or an unsupported
-	 *                                  model is configured
+	 * @throws IllegalArgumentException if authorization fails, a configuration conflict is detected, or an unsupported model
+	 *                                  is configured
 	 */
 	@Override
 	public void init(Configurator conf) {
@@ -130,21 +137,19 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * Requests an OAuth 2.0 access token from the given token endpoint.
 	 *
 	 * <p>
-	 * The request uses {@code application/x-www-form-urlencoded} and selects the
-	 * grant type based on the {@code username} value:
+	 * The request uses {@code application/x-www-form-urlencoded} and selects the grant type based on the {@code username}
+	 * value:
+	 * </p>
 	 * <ul>
-	 * <li>{@code password} if the username contains {@code "@"}.</li>
-	 * <li>{@code client_credentials} otherwise.</li>
+	 *   <li>{@code password} if the username contains {@code "@"}.</li>
+	 *   <li>{@code client_credentials} otherwise.</li>
 	 * </ul>
 	 *
-	 * @param url      token endpoint URL
-	 * @param username user e-mail (password grant) or client id (client
-	 *                 credentials)
-	 * @param password password (password grant) or client secret (client
-	 *                 credentials)
+	 * @param url token endpoint URL
+	 * @param username user e-mail (password grant) or client id (client credentials)
+	 * @param password password (password grant) or client secret (client credentials)
 	 * @return the {@code access_token} value extracted from the response
-	 * @throws IOException if the HTTP request fails, returns a non-200 response, or
-	 *                     the token cannot be read
+	 * @throws IOException if the HTTP request fails, returns a non-200 response, or the token cannot be read
 	 */
 	public static String getToken(String url, String username, String password) throws IOException {
 		String queryTemplate;
@@ -185,19 +190,16 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	}
 
 	/**
-	 * URL-encodes a value for {@code application/x-www-form-urlencoded} request
-	 * bodies.
+	 * URL-encodes a value for {@code application/x-www-form-urlencoded} request bodies.
 	 *
 	 * @param value value to encode
 	 * @return encoded value using UTF-8
-	 * @throws RuntimeException if UTF-8 is not supported (unexpected on a compliant
-	 *                          JVM)
+	 * @throws RuntimeException if UTF-8 is not supported (unexpected on a compliant JVM)
 	 */
 	private static String urlEncode(String value) {
 		try {
 			return URLEncoder.encode(value, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			// UTF-8 is always supported, but handle exception just in case
 			throw new RuntimeException("UTF-8 encoding not supported", e);
 		}
 	}

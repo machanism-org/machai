@@ -2,12 +2,12 @@
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
  * <p>This package contains the executable entry point and Spring Shell command components that expose Machai
- * functionality through both interactive (REPL) and non-interactive command execution.
+ * capabilities through both interactive (REPL) and non-interactive command execution.
  *
  * <h2>Responsibilities</h2>
  * <ul>
  *   <li>Bootstrapping the CLI application and loading configuration (for example, from {@code machai.properties}).</li>
- *   <li>Managing persistent CLI defaults (for example, the working directory and GenAI provider/model settings).</li>
+ *   <li>Managing persistent CLI defaults (for example, working directory and GenAI provider/model settings).</li>
  *   <li>Executing commands for bindex generation/registration, semantic search and assembly, document processing,
  *       and cleanup of Machai temporary directories.</li>
  * </ul>
@@ -18,7 +18,7 @@
  *       {@code machai.properties} (or from the file provided via the {@code -Dconfig=...} system property).</li>
  *   <li>{@link org.machanism.machai.cli.ConfigCommand} – Manages persistent CLI defaults such as working directory
  *       ({@code dir}), GenAI provider/model ({@code genai}), and semantic-search score threshold ({@code score}).</li>
- *   <li>{@link org.machanism.machai.cli.AssemblyCommand} – Performs library picking (semantic search) and assembles an
+ *   <li>{@link org.machanism.machai.cli.AssembyCommand} – Performs library picking (semantic search) and assembles an
  *       application skeleton using a configured GenAI provider.</li>
  *   <li>{@link org.machanism.machai.cli.BindexCommand} – Generates bindex metadata for projects and registers bindex
  *       files in an external registry.</li>

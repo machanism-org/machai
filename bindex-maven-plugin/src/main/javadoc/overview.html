@@ -6,10 +6,110 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 [PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
 
 - **Write Clear and Concise Descriptions:**
-	- Follow best practices for creating a package overview.
+    - Follow best practices for creating a package overview.
     - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
     - Avoid vague or generic statements; be specific about functionality and intent.
     - Aggregate information from `package-info.java` files from source folders.
     - Use the class diagram located at `../images/class-diagram.png`.
     - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+
+- **Automatic Fixes for Javadoc Build Issues:**
+    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc, 
+       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bindex Maven Plugin - Overview</title>
+</head>
+<body>
+
+<h1>Bindex Maven Plugin</h1>
+
+<p>
+  <strong>Bindex Maven Plugin</strong> enables automated generation and registration of bindex metadata for Maven
+  projects. It facilitates library discovery, integration, and assembly by leveraging structured metadata and
+  GenAI-powered semantic search within the Machanism ecosystem.
+</p>
+
+<h2>Overview</h2>
+
+<p>
+  This module is a Maven plugin (a set of Mojos) that integrates Machai/Bindex operations into a Maven build.
+  Each goal runs in the context of the current Maven module and typically skips projects with
+  <code>pom</code> packaging (aggregator/parent modules), since they do not produce an artifact to index.
+</p>
+
+<h2>Architecture at a glance</h2>
+
+<p>
+  The Mojos in this plugin delegate to the underlying Bindex services provided by
+  <code>bindex-core</code>:
+</p>
+
+<ul>
+  <li>
+    <code>org.machanism.machai.bindex.BindexCreator</code> &ndash; create or refresh a local Bindex index for the current
+    module.
+  </li>
+  <li>
+    <code>org.machanism.machai.bindex.BindexRegister</code> &ndash; scan a project and publish metadata to a registry.
+  </li>
+</ul>
+
+<h2>Packages</h2>
+
+<ul>
+  <li>
+    <code>org.machanism.machai.bindex.maven</code> &ndash; Maven plugin goals (Mojos) that expose Bindex operations.
+    The goals share common behavior through an abstract base Mojo and execute against the current
+    <code>org.apache.maven.project.MavenProject</code>.
+  </li>
+</ul>
+
+<h2>Goals and typical usage</h2>
+
+<ul>
+  <li><strong>create</strong> &ndash; create a new Bindex index for the current module.</li>
+  <li><strong>update</strong> &ndash; refresh an existing Bindex index.</li>
+  <li><strong>register</strong> &ndash; scan the current project and publish metadata to a registry.</li>
+  <li><strong>clean</strong> &ndash; remove plugin-generated temporary artifacts.</li>
+</ul>
+
+<pre>
+mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5
+mvn org.machanism.machai:bindex-maven-plugin:update -Dbindex.genai=OpenAI:gpt-5
+mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
+mvn org.machanism.machai:bindex-maven-plugin:clean
+</pre>
+
+<h2>Configuration model</h2>
+
+<p>
+  The GenAI provider/model is selected via the system property <code>-Dbindex.genai</code> (for example,
+  <code>OpenAI:gpt-5</code>). The <strong>register</strong> goal additionally uses <code>-Dbindex.register.url</code> to
+  choose the registry endpoint.
+</p>
+
+<h2>Class diagram</h2>
+
+<p>
+  The following diagram summarizes how the Mojos relate to each other and to the underlying Bindex services.
+</p>
+
+<p>
+  <img src="../images/class-diagram.png" alt="Class diagram for the Bindex Maven Plugin" />
+</p>
+
+<h2>Where to look next</h2>
+
+<p>
+  For goal-specific behavior, configuration parameters, and execution details, browse the classes in
+  <code>org.machanism.machai.bindex.maven</code>.
+</p>
+
+</body>
+</html>

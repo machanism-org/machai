@@ -14,15 +14,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Shared utilities for working with {@code bindex.json} in project processing workflows.
  *
- * <p>This base class provides helper methods to locate and parse Bindex documents from a project * directory. It is used by concrete processors such as {@link BindexCreator} and * {@link BindexRegister}.
+ * <p>This base class provides helper methods to locate and parse Bindex documents from a project
+ * directory. It is used by concrete processors such as {@link BindexCreator} and
+ * {@link BindexRegister}.
  *
  * <h2>Example</h2>
  *
- * <pre>
+ * <pre>{@code
  * File projectDir = new File("C:\\work\\my-project");
- * Bindex bindex = getBindex(projectDir);
- * File bindexFile = getBindexFile(projectDir);
- * </pre>
+ * BindexProjectProcessor processor = ...;
+ * Bindex bindex = processor.getBindex(projectDir);
+ * File bindexFile = processor.getBindexFile(projectDir);
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -62,8 +65,12 @@ public abstract class BindexProjectProcessor extends ProjectProcessor {
 	 *
 	 * @param projectDir project directory
 	 * @return file pointing to {@code bindex.json}
+	 * @throws IllegalArgumentException if {@code projectDir} is {@code null}
 	 */
 	public File getBindexFile(File projectDir) {
+		if (projectDir == null) {
+			throw new IllegalArgumentException("projectDir must not be null");
+		}
 		return new File(projectDir, BINDEX_FILE_NAME);
 	}
 }

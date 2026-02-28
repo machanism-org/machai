@@ -25,11 +25,11 @@
 
 ## Project Title and Overview
 
-GW Maven Plugin is the Maven integration for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html) and the primary adapter for bringing Ghostwriters guided file processing into Maven-based projects.
+GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html), enabling Machai Ghostwriter’s Guided File Processing inside standard Maven builds and CI pipelines.
 
-It scans all types of project filesincluding source code, documentation, Maven site content, and other relevant artifactsfor embedded `@guidance` directives and runs Ghostwriters processing pipeline as part of a repeatable Maven workflow. This supports local development and CI use cases, integrates with Mavens execution context and multi-module reactor builds, and can optionally resolve GenAI credentials via Maven `settings.xml`.
+It runs Ghostwriter’s guided processing workflow over any guided artifacts in your repository—including source code, documentation, Maven site content, and other project files—by scanning for embedded `@guidance` directives and applying them to generate or update outputs in a repeatable, version-controlled way.
 
-The plugin provides two main goals:
+It provides two main Maven goals:
 
 - **`gw:gw`**: an **aggregator** goal that can run **without a `pom.xml`** (`requiresProject=false`) and processes modules in reverse order (sub-modules first).
 - **`gw:reactor`**: a **reactor-aware** goal that processes modules according to Maven reactor dependency ordering, with an option to defer the execution-root project until other reactor projects complete.
@@ -40,8 +40,8 @@ The plugin provides two main goals:
 
 - Git
 - Java installed
-  - **Build/runtime target in this project:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
-  - **Functional requirement:** depends on the Ghostwriter runtime and the selected GenAI provider; some provider stacks may require a newer Java version.
+  - **Declared build target:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
+  - **Practical runtime requirement:** depends on the Ghostwriter runtime and the GenAI provider/client libraries you use; some provider stacks may require a newer Java version.
 - Apache Maven 3.x
 
 ### Checkout

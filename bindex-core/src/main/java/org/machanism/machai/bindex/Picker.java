@@ -3,7 +3,6 @@ package org.machanism.machai.bindex;
 import static com.mongodb.client.model.search.SearchPath.fieldPath;
 import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSearchOptions;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -53,25 +52,32 @@ import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.InsertOneResult;
 
 /**
- * Picker handles Bindex registration, lookup, and semantic queries using
- * embeddings and MongoDB.
- * <p>
- * Provides registration and query operations for Bindex repositories,
- * supporting classification embedding for semantic retrieval and indexing.
- * <p>
- * Usage example:
- * 
- * <pre>
- * try (Picker picker = new Picker(provider)) {
- * 	List<Bindex> results = picker.pick("search query");
+ * Performs Bindex registration, lookup, and semantic retrieval using embeddings and MongoDB.
+ *
+ * <p>This type supports two primary workflows:
+ *
+ * <ol>
+ *   <li><strong>Registration</strong>: serialize and persist a {@link Bindex} into MongoDB, including
+ *       a classification embedding vector used for semantic search.</li>
+ *   <li><strong>Retrieval</strong>: classify a free-text query into one or more {@link Classification}
+ *       objects using an LLM, then run vector search queries to retrieve relevant Bindexes and expand
+ *       results using transitive dependencies.</li>
+ * </ol>
+ *
+ * <h2>Example</h2>
+ *
+ * <pre>{@code
+ * Configurator config = ...;
+ * try (Picker picker = new Picker("openai", null, config)) {
+ *     List<Bindex> results = picker.pick("Find libraries for server-side logging");
  * }
- * </pre>
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
-public class Picker {
-	private static Logger logger = LoggerFactory.getLogger(Picker.class);
+public class Picker implements AutoCloseable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Picker.class);
 
 	private static final String INSTANCENAME = "machanism";
 	private static final String CONNECTION = "bindex";
@@ -88,63 +94,81 @@ public class Picker {
 	/** Result limit for vector search operations. */
 	private static final int VECTOR_SEARCH_LIMITS = 50;
 
-	private String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+	private final String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private String embeddingModelName = "text-embedding-3-small";
 
+	/** MongoDB field name used to store the serialized Bindex JSON payload. */
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
-	private static ResourceBundle promptBundle = ResourceBundle.getBundle("prompts");
+	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
 
-	private MongoCollection<Document> collection;
-	private MongoClient mongoClient;
+	private final MongoCollection<Document> collection;
+	private final MongoClient mongoClient;
 
-	private GenAIProvider provider;
+	private final GenAIProvider provider;
 
 	private Double score = 0.9;
-	private Map<String, Double> scoreMap = new HashMap<>();
+	private final Map<String, Double> scoreMap = new HashMap<>();
 
 	/**
-	 * Constructs a Picker for registration and semantic search.
+	 * Constructs a {@link Picker} for registration and semantic search.
 	 *
-	 * @param genai GenAIProvider instance used for embedding, schema
-	 *              classification, etc.
-	 * @param uri   database URI. If the value is null, the default value will be
-	 *              used..
-	 * @param config 
-	 * @throws IllegalStateException If the required environment variables are
-	 *                               missing for DB or OpenAI access
+	 * @param genai  GenAI provider identifier used for embedding and classification prompts
+	 * @param uri    MongoDB connection URI; when {@code null}, a default URI is constructed using
+	 *               {@code BINDEX_REG_PASSWORD} when available
+	 * @param config configurator used to initialize the provider
+	 * @throws IllegalArgumentException if {@code genai} or {@code config} is {@code null}
 	 */
 	public Picker(String genai, String uri, Configurator config) {
+		if (genai == null) {
+			throw new IllegalArgumentException("genai must not be null");
+		}
+		if (config == null) {
+			throw new IllegalArgumentException("config must not be null");
+		}
+
 		this.provider = GenAIProviderManager.getProvider(genai, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
-		if (uri == null) {
+		String effectiveUri = uri;
+		if (effectiveUri == null) {
 			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
 			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-				uri = "mongodb+srv://user:user@" + dbUrl;
+				effectiveUri = "mongodb+srv://user:user@" + dbUrl;
 			} else {
-				uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
+				effectiveUri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
 			}
 		}
 
-		mongoClient = MongoClients.create(uri);
+		this.mongoClient = MongoClients.create(effectiveUri);
 		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
-		collection = database.getCollection(CONNECTION);
+		this.collection = database.getCollection(CONNECTION);
 	}
 
 	/**
-	 * Registers (inserts or updates) a Bindex document for the supplied Bindex
-	 * instance.
+	 * Registers (inserts or updates) a Bindex document for the supplied {@link Bindex}.
+	 *
+	 * <p>Registration deletes any existing document with the same {@link Bindex#getId()} and inserts
+	 * a fresh document containing:
+	 *
+	 * <ul>
+	 *   <li>Core identity fields: {@code id}, {@code name}, {@code version}</li>
+	 *   <li>Classification facets: domains, layers, normalized languages, integrations</li>
+	 *   <li>A vector embedding under {@value #CLASSIFICATION_EMBEDDING_PROPERTY_NAME}</li>
+	 * </ul>
 	 *
 	 * @param bindex Bindex instance to register
-	 * @return Generated database ID string
-	 * @throws JsonProcessingException If conversion to JSON string fails or MongoDB
-	 *                                 throws exception
-	 * @throws MongoCommandException   On MongoDB insert or connection errors
+	 * @return generated database ID string
+	 * @throws IllegalArgumentException if {@code bindex} is {@code null}
+	 * @throws JsonProcessingException  if conversion to JSON fails
+	 * @throws MongoCommandException    on MongoDB insert or connection errors
 	 */
 	public String create(Bindex bindex) throws JsonProcessingException {
-		try {
+		if (bindex == null) {
+			throw new IllegalArgumentException("bindex must not be null");
+		}
 
+		try {
 			ObjectMapper objectMapper = new ObjectMapper();
 			String bindexJson = objectMapper.writeValueAsString(bindex);
 
@@ -160,7 +184,7 @@ public class Picker {
 					.collect(Collectors.toSet());
 
 			if (languages.isEmpty()) {
-				logger.warn("WARNING! No language defined for: {}.", id);
+				LOGGER.warn("No language defined for: {}.", id);
 			}
 
 			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson).append("name", bindex.getName())
@@ -177,36 +201,45 @@ public class Picker {
 		} catch (MongoCommandException e) {
 			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
 			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-				logger.error("ERROR: To register  Bindex, the BINDEX_REG_PASSWORD env property is required.");
+				LOGGER.error("To register a Bindex, the BINDEX_REG_PASSWORD env property is required.");
 			}
 			throw e;
 		}
 	}
 
 	/**
-	 * Generates a BSON array representing the embedding of a classification for
-	 * semantic search.
+	 * Generates a BSON array representing the embedding of a classification for semantic search.
 	 *
-	 * @param classification Classification instance
-	 * @param dimensions     Number of vector dimensions
-	 * @return BsonArray of vector values
-	 * @throws JsonProcessingException On embedding or serialization errors
+	 * @param classification classification instance
+	 * @param dimensions     number of vector dimensions
+	 * @return BSON array of vector values
+	 * @throws IllegalArgumentException if {@code classification} is {@code null} or {@code dimensions} is not positive
+	 * @throws JsonProcessingException  on embedding or serialization errors
 	 */
 	BsonArray getEmbeddingBson(Classification classification, int dimensions) throws JsonProcessingException {
-		String text = getClassificationText(classification);
+		if (classification == null) {
+			throw new IllegalArgumentException("classification must not be null");
+		}
+		if (dimensions <= 0) {
+			throw new IllegalArgumentException("dimensions must be > 0");
+		}
 
-		List<Double> descEmbedding = provider.embedding(text, dimensions); // , dimensions);
-		BsonArray bsonArray = new BsonArray(descEmbedding.stream().map(BsonDouble::new).collect(Collectors.toList()));
-		return bsonArray;
+		String text = getClassificationText(classification);
+		List<Double> descEmbedding = provider.embedding(text, dimensions);
+		return new BsonArray(descEmbedding.stream().map(BsonDouble::new).collect(Collectors.toList()));
 	}
 
 	/**
 	 * Looks up the registered database ID for a Bindex (if it exists).
 	 *
 	 * @param bindex Bindex instance
-	 * @return String database ID, or null if not present
+	 * @return MongoDB object id as string, or {@code null} if not present
+	 * @throws IllegalArgumentException if {@code bindex} is {@code null}
 	 */
 	public String getRegistredId(Bindex bindex) {
+		if (bindex == null) {
+			throw new IllegalArgumentException("bindex must not be null");
+		}
 		Document query = new Document("id", bindex.getId());
 		FindIterable<Document> find = collection.find(query);
 		Document document = find.first();
@@ -218,14 +251,18 @@ public class Picker {
 	}
 
 	/**
-	 * Performs a semantic pick/search with a query string, retrieving Bindex
-	 * results and dependencies.
+	 * Performs a semantic pick/search with a query string, retrieving Bindex results and transitive
+	 * dependencies.
 	 *
-	 * @param query Query string
-	 * @return List of Bindex results related to the query (and their dependencies)
-	 * @throws IOException If prompt or IO operation fails
+	 * @param query query string
+	 * @return list of Bindex results related to the query (and their dependencies)
+	 * @throws IllegalArgumentException if {@code query} is {@code null}
+	 * @throws IOException              if classification or database retrieval fails
 	 */
 	public List<Bindex> pick(String query) throws IOException {
+		if (query == null) {
+			throw new IllegalArgumentException("query must not be null");
+		}
 
 		String classificationStr = getClassification(query);
 		if (StringUtils.startsWith(classificationStr, "```json")) {
@@ -240,7 +277,7 @@ public class Picker {
 
 			List<Layer> layers = classification.getLayers();
 			String languagesQuery = StringUtils.join(languages, ", ");
-			logger.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
+			LOGGER.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
 
 			String classificationQuery = getClassificationText(classification);
 
@@ -256,19 +293,19 @@ public class Picker {
 		Set<String> dependencies = new HashSet<>();
 		List<Bindex> pickResult = classificatioResults.stream().map(id -> {
 			Bindex bindex = getBindex(id);
-			List<String> dependencyList = bindex.getDependencies();
-			dependencies.addAll(dependencyList);
+			if (bindex != null) {
+				dependencies.addAll(bindex.getDependencies());
+			}
 			return bindex;
-		}).collect(Collectors.toList());
+		}).filter(b -> b != null).collect(Collectors.toList());
 
 		Set<String> allDependencies = new HashSet<>();
 		for (String bindexId : dependencies) {
 			addDependencies(allDependencies, bindexId);
 		}
 
-		List<Bindex> dependenciesResult = allDependencies.stream().map(id -> {
-			return getBindex(id);
-		}).collect(Collectors.toList());
+		List<Bindex> dependenciesResult = allDependencies.stream().map(this::getBindex).filter(b -> b != null)
+				.collect(Collectors.toList());
 
 		pickResult.addAll(dependenciesResult);
 
@@ -276,21 +313,20 @@ public class Picker {
 	}
 
 	/**
-	 * Generates the classification text for embedding and schema queries.
+	 * Serializes the classification into a stable JSON string used for embedding and schema prompts.
 	 *
-	 * @param classification Classification instance
-	 * @return String JSON value of the classification
-	 * @throws JsonProcessingException If serialization fails
+	 * @param classification classification instance
+	 * @return JSON string value of the classification
+	 * @throws JsonProcessingException if serialization fails
 	 */
 	private String getClassificationText(Classification classification) throws JsonProcessingException {
-		String classificationStr = new ObjectMapper().writeValueAsString(classification);
-		return classificationStr;
+		return new ObjectMapper().writeValueAsString(classification);
 	}
 
 	/**
 	 * Adds all transitive dependencies of a Bindex into the provided set.
 	 *
-	 * @param dependencies HashSet of dependency IDs to accumulate
+	 * @param dependencies set of dependency IDs to accumulate
 	 * @param bindexId     Bindex ID to explore
 	 */
 	void addDependencies(Set<String> dependencies, String bindexId) {
@@ -298,9 +334,8 @@ public class Picker {
 		if (bindex != null) {
 			String id = bindex.getId();
 			if (!dependencies.contains(id)) {
-				List<String> dependencyList = bindex.getDependencies();
 				dependencies.add(id);
-				for (String dependencyId : dependencyList) {
+				for (String dependencyId : bindex.getDependencies()) {
 					addDependencies(dependencies, dependencyId);
 				}
 			}
@@ -308,11 +343,13 @@ public class Picker {
 	}
 
 	/**
-	 * Performs a schema classification prompt using GenAIProvider.
+	 * Performs a schema classification prompt using {@link GenAIProvider}.
 	 *
-	 * @param query Search query string
-	 * @return Classification schema in String form
-	 * @throws IOException, JsonProcessingException, JsonMappingException
+	 * @param query search query string
+	 * @return classification schema as a JSON string
+	 * @throws IOException              if prompt or IO operation fails
+	 * @throws JsonProcessingException  if JSON serialization fails
+	 * @throws JsonMappingException     if JSON mapping fails
 	 */
 	private String getClassification(String query) throws IOException, JsonProcessingException, JsonMappingException {
 		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
@@ -322,24 +359,28 @@ public class Picker {
 		JsonNode jsonNode = schemaJson.get("properties").get("classification");
 		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
 
-		String classificationQuery = MessageFormat.format(promptBundle.getString("classification_instruction"),
+		String classificationQuery = MessageFormat.format(PROMPT_BUNDLE.getString("classification_instruction"),
 				classificationSchema, query);
 		provider.prompt(classificationQuery);
-		String classificationStr = provider.perform();
-		return classificationStr;
+		return provider.perform();
 	}
 
 	/**
-	 * Retrieves a Bindex instance from the database by its ID.
+	 * Retrieves a Bindex instance from the database by its Bindex id.
 	 *
-	 * @param id String identifier
-	 * @return Bindex object, or null if not present in the DB
+	 * @param id Bindex id (the {@code id} field in the stored document)
+	 * @return parsed {@link Bindex}, or {@code null} if not present
+	 * @throws IllegalArgumentException if {@code id} is {@code null} or the stored JSON cannot be parsed
 	 */
 	protected Bindex getBindex(String id) {
+		if (id == null) {
+			throw new IllegalArgumentException("id must not be null");
+		}
+
 		Bindex result = null;
-		Document doc = collection.find(com.mongodb.client.model.Filters.eq("id", id)).first();
+		Document doc = collection.find(Filters.eq("id", id)).first();
 		if (doc != null) {
-			String bindexStr = doc.getString("bindex");
+			String bindexStr = doc.getString(BINDEX_PROPERTY_NAME);
 			try {
 				result = new ObjectMapper().readValue(bindexStr, Bindex.class);
 			} catch (JsonProcessingException e) {
@@ -351,15 +392,15 @@ public class Picker {
 	}
 
 	/**
-	 * Executes a vector search query for Bindexes by semantic embedding using
-	 * MongoDB aggregation pipeline.
+	 * Executes a vector search query for Bindexes by semantic embedding using MongoDB's aggregation
+	 * pipeline.
 	 *
-	 * @param indexName    Index name in MongoDB
-	 * @param propertyPath Embedding property field path
-	 * @param query        Classification query text
-	 * @param dimensions   Number of vector dimensions
-	 * @param bsons        Additional filters (language, layers, etc.)
-	 * @return Collection of result IDs (name:version tuples)
+	 * @param indexName    index name in MongoDB
+	 * @param propertyPath embedding property field path
+	 * @param query        classification query text
+	 * @param dimensions   number of vector dimensions
+	 * @param bsons        additional filters (language, layers, etc.)
+	 * @return collection of result IDs ({@code name:version})
 	 */
 	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
 			Bson... bsons) {
@@ -392,7 +433,7 @@ public class Picker {
 
 			Double score = doc.getDouble("score");
 			scoreMap.put(id, score);
-			logger.debug("BindexId: {}: {}", name, score);
+			LOGGER.debug("BindexId: {}: {}", name, score);
 
 			if (libraryVersionMap.containsKey(name)) {
 				String existsVersion = libraryVersionMap.get(name);
@@ -407,17 +448,15 @@ public class Picker {
 			libraryVersionMap.put(name, version);
 		}
 
-		Collection<String> results = libraryVersionMap.entrySet().stream()
-				.map(entry -> entry.getKey() + ":" + entry.getValue()).collect(Collectors.toList());
-
-		return results;
+		return libraryVersionMap.entrySet().stream().map(entry -> entry.getKey() + ":" + entry.getValue())
+				.collect(Collectors.toList());
 	}
 
 	/**
-	 * Normalizes a Language name for semantic aggregation queries.
+	 * Normalizes a {@link Language} name for semantic aggregation queries.
 	 *
-	 * @param language Language object
-	 * @return Normalized language name string
+	 * @param language language object
+	 * @return normalized language name string
 	 */
 	static String getNormalizedLanguageName(Language language) {
 		String lang = language.getName().toLowerCase().trim();
@@ -426,29 +465,47 @@ public class Picker {
 	}
 
 	/**
-	 * Manually set minimum score for semantic vector search queries.
+	 * Sets the minimum similarity score for semantic vector search queries.
 	 *
-	 * @param score Minimum similarity value
+	 * @param score minimum similarity value
 	 */
 	public void setScore(Double score) {
 		this.score = score;
 	}
 
 	/**
-	 * Retrieves similarity score for a Bindex result by its ID.
+	 * Retrieves the similarity score for a Bindex result by its ID.
 	 *
 	 * @param id Bindex identifier
-	 * @return score value for semantic result
+	 * @return score value for semantic result, or {@code null} if not present
 	 */
 	public Double getScore(String id) {
 		return scoreMap.get(id);
 	}
 
+	/**
+	 * Returns the embedding model name used by the provider.
+	 *
+	 * @return embedding model name
+	 */
 	public String getEmbeddingModelName() {
 		return embeddingModelName;
 	}
 
+	/**
+	 * Sets the embedding model name used by the provider.
+	 *
+	 * @param embeddingModelName embedding model name
+	 */
 	public void setEmbeddingModelName(String embeddingModelName) {
 		this.embeddingModelName = embeddingModelName;
+	}
+
+	/**
+	 * Closes the underlying MongoDB client.
+	 */
+	@Override
+	public void close() {
+		mongoClient.close();
 	}
 }

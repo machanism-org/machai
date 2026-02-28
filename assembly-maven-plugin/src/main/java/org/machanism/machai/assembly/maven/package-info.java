@@ -35,35 +35,26 @@
  */
 
 /**
- * Maven plugin entry points for MachAI's AI-assisted project assembly workflow.
+ * Maven plugin entry point for MachAI's AI-assisted project assembly workflow.
  *
  * <p>
- * This package contains the {@link org.machanism.machai.assembly.maven.Assembly} Maven {@code Mojo}, which exposes the
- * {@code assembly} goal.
+ * This package provides the {@link org.machanism.machai.assembly.maven.Assembly} Maven {@code Mojo} that exposes the
+ * {@code assembly} goal. The goal is intended to be run against a target directory (typically the Maven
+ * {@code ${basedir}}), using a natural-language prompt to guide automated project changes.
  * </p>
  *
- * <p>
- * The goal orchestrates the following high-level steps:
- * </p>
+ * <h2>High-level workflow</h2>
  * <ol>
- *   <li>Obtain a natural-language prompt from a configured text file or via interactive input.</li>
+ *   <li>Acquire a prompt from a configured text file or via interactive input.</li>
  *   <li>Use MachAI's {@link org.machanism.machai.bindex.Picker} to recommend candidate libraries as
- *       {@link org.machanism.machai.schema.Bindex} entries.</li>
+ *       {@link org.machanism.machai.schema.Bindex} entries, filtered by a configured score threshold.</li>
  *   <li>Run {@link org.machanism.machai.bindex.ApplicationAssembly} to apply changes to the target project directory.</li>
  * </ol>
  *
+ * <h2>Configuration</h2>
  * <p>
  * Inputs are typically supplied via Maven properties and/or plugin configuration (for example,
  * {@code -Dassembly.genai=...} and {@code -Dassembly.prompt.file=...}).
  * </p>
- *
- * <h2>Usage</h2>
- * <pre>
- * mvn org.machanism.machai:assembly-maven-plugin:assembly
- *   -Dassembly.genai=OpenAI:gpt-5
- *   -Dpick.genai=OpenAI:gpt-5-mini
- *   -Dassembly.prompt.file=project.txt
- *   -Dassembly.score=0.9
- * </pre>
  */
 package org.machanism.machai.assembly.maven;

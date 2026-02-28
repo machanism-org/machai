@@ -245,6 +245,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 					throw new IllegalStateException("Thread interrupted while processing modules", e);
 				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
+					if (cause instanceof IOException) {
+						throw new IllegalStateException("Module processing failed.", cause);
+					}
 					if (cause instanceof RuntimeException) {
 						throw (RuntimeException) cause;
 					}
@@ -272,12 +275,17 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * When a scan directory or pattern is configured, modules are only processed
 	 * when the module itself matches or contains the scan directory.
 	 * </p>
+	 *
+	 * @param projectDir parent project directory
+	 * @param module     module relative path
+	 * @throws IOException if scanning the module fails
 	 */
 	@Override
 	protected void processModule(File projectDir, String module) throws IOException {
 		if (getScanDir() != null) {
-			String relativePath = ProjectLayout.getRelativePath(new File(projectDir, module), getScanDir());
-			if (match(new File(projectDir, module), projectDir) || relativePath != null) {
+			File moduleDir = new File(projectDir, module);
+			String relativePath = ProjectLayout.getRelativePath(moduleDir, getScanDir());
+			if (match(moduleDir, projectDir) || relativePath != null) {
 				super.processModule(projectDir, module);
 			}
 		} else {
@@ -339,6 +347,15 @@ public class GuidanceProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Composes the final prompt and dispatches it to the configured provider.
+	 *
+	 * @param projectLayout project layout
+	 * @param file          file currently being processed
+	 * @param guidance      extracted guidance and/or default guidance
+	 * @return provider output
+	 * @throws IOException if provider execution fails
+	 */
 	protected String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
 		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"), getInstructions());
 		String instructions = MessageFormat.format(promptBundle.getString("sys_instructions"), effectiveInstructions);
@@ -347,10 +364,10 @@ public class GuidanceProcessor extends AIFileProcessor {
 		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
 		String osName = System.getProperty("os.name");
 		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
-		guidanceBuilder.append(docsProcessingInstructions + "\r\n");
+		guidanceBuilder.append(docsProcessingInstructions).append("\r\n");
 
 		String projectInfo = getProjectStructureDescription(projectLayout);
-		guidanceBuilder.append(projectInfo + "\r\n");
+		guidanceBuilder.append(projectInfo).append("\r\n");
 
 		String guidanceLines = parseLines(guidance);
 		guidanceBuilder.append(guidanceLines);

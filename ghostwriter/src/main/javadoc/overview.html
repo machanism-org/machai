@@ -2,15 +2,20 @@
 @guidance:
 **IMPORTANT: GENERATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
 
-Ghostwriter supports **all types of project files—including source code, documentation, project site content, and other relevant files**.
+Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
+[PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
 
 - **Write Clear and Concise Descriptions:**
-	- Follow best practices for creating a package overview.
+    - Follow best practices for creating a package overview.
     - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
     - Avoid vague or generic statements; be specific about functionality and intent.
     - Aggregate information from `package-info.java` files from source folders.
     - Use the class diagram located at `../images/class-diagram.png`.
     - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+
+- **Automatic Fixes for Javadoc Build Issues:**
+    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc, 
+       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
 -->
 
 <!DOCTYPE html>
@@ -27,17 +32,18 @@ Ghostwriter supports **all types of project files—including source code, docum
   <p>
     Ghostwriter is a filesystem-first command-line utility that scans a project, extracts embedded
     <code>@guidance:</code> directives from supported file formats, and orchestrates GenAI-driven updates.
-    The pipeline does <strong>not</strong> compile sources, execute builds, or resolve dependencies.
+    It operates purely on files (source code, documentation, project site content, and other relevant files)
+    and does not build projects, compile sources, or resolve dependencies as part of processing.
   </p>
 </header>
 
 <section>
-  <h2>What Ghostwriter does</h2>
+  <h2>Scope and goals</h2>
   <p>
-    Ghostwriter turns in-repository guidance (for example, <code>@guidance:</code> blocks in source code,
-    documentation, project site content, and other relevant project files) into provider-ready prompts.
-    Each selected file is reviewed by a format-specific implementation that extracts and normalizes guidance,
-    including project-relative path context.
+    Ghostwriter turns in-repository guidance into provider-ready prompts.
+    Guidance is embedded directly inside project files and is extracted by file-format specific reviewers.
+    Extracted guidance, together with project context (such as relative paths and file content), is combined
+    into prompts that can be submitted to a configured GenAI provider.
   </p>
 </section>
 
@@ -50,23 +56,26 @@ Ghostwriter supports **all types of project files—including source code, docum
   </figure>
 
   <p>
-    The implementation is organized into two cooperating packages:
+    The implementation is organized into a processing pipeline and a set of file-format reviewers:
   </p>
 
   <dl>
     <dt><strong><code>org.machanism.machai.gw.processor</code></strong></dt>
     <dd>
-      Command-line entry point and processing pipeline that performs filesystem traversal, selects reviewers,
-      composes prompts, and invokes a configured GenAI provider.
-      Key behaviors include <strong>child-first module processing</strong> and a deliberate
-      <strong>no dependency resolution</strong> model.
+      Command-line entry point and processing pipeline.
+      Responsibilities include filesystem traversal, scan-target selection (directory paths and
+      <code>glob:</code>/<code>regex:</code> matchers), reviewer selection, prompt composition, and invoking a
+      configured GenAI provider.
+      The processing model is explicitly <strong>child-first</strong> for multi-module project layouts and
+      intentionally performs <strong>no dependency resolution</strong>.
     </dd>
 
     <dt><strong><code>org.machanism.machai.gw.reviewer</code></strong></dt>
     <dd>
       Reviewer service-provider interface (SPI) and format-specific implementations that detect and extract
-      <code>@guidance</code> directives from supported file formats (for example Java, Markdown, HTML/XML,
-      TypeScript, Python, PlantUML, and plain text).
+      embedded <code>@guidance</code> directives using the comment conventions of each supported file type (for
+      example Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and plain text).
+      Reviewers emit normalized prompt fragments for consumption by the processing pipeline.
     </dd>
   </dl>
 </section>
@@ -76,11 +85,11 @@ Ghostwriter supports **all types of project files—including source code, docum
 
   <h3>Filesystem scanning</h3>
   <p>
-    Ghostwriter operates directly on files and directories. It does not build the project; guidance extraction
-    and prompt composition are driven entirely by file content and the declared project layout.
+    Ghostwriter operates directly on directories and files.
+    Guidance extraction and prompt composition are driven entirely by file content and the declared project layout.
   </p>
 
-  <h3>Module traversal</h3>
+  <h3>Module traversal (child-first)</h3>
   <p>
     In multi-module layouts, Ghostwriter processes modules before their parent directory (child-first).
     This ensures module-local guidance is collected and applied prior to any parent-level aggregation.
@@ -99,19 +108,19 @@ Ghostwriter supports **all types of project files—including source code, docum
 
   <h3>Guidance extraction and orchestration</h3>
   <p>
-    For each selected file, Ghostwriter selects an appropriate reviewer based on the file format,
-    extracts embedded guidance, and combines the results with project context to build a provider-ready prompt.
-    The resulting prompt is then submitted to the configured GenAI provider.
+    For each selected file, Ghostwriter chooses an appropriate reviewer based on the file format, extracts any
+    embedded guidance, and combines it with the project context to build a provider-ready prompt.
+    The resulting prompt is then submitted to the configured GenAI provider for execution.
   </p>
 </section>
 
 <section>
-  <h2>Package overview</h2>
+  <h2>Packages</h2>
 
   <h3><code>org.machanism.machai.gw.processor</code></h3>
   <p>
     Command-line project scanning, guidance extraction, and prompt orchestration.
-    This package contains Ghostwriter's CLI entry point and the processing pipeline responsible for:
+    This package contains the CLI entry point and the processing pipeline responsible for:
   </p>
   <ul>
     <li>
@@ -120,18 +129,25 @@ Ghostwriter supports **all types of project files—including source code, docum
     </li>
     <li>
       <strong>Provider orchestration</strong>: creating/configuring the GenAI provider, applying any configured
-      function tools, and optionally logging composed prompt inputs for traceability.
+      function tools, and optionally logging composed inputs for traceability.
     </li>
     <li>
       <strong>Guidance processing</strong>: selecting reviewers by file extension, extracting embedded
       <code>@guidance:</code> directives, composing prompts, and dispatching them to the provider.
     </li>
   </ul>
+  <p>
+    Key behaviors include <strong>child-first module processing</strong> for multi-module projects,
+    <strong>no dependency resolution</strong> (the project is not built and dependencies are not resolved during
+    scanning), and <strong>broad file coverage</strong> across source, documentation, project site content, and other
+    relevant project files.
+  </p>
 
   <h3><code>org.machanism.machai.gw.reviewer</code></h3>
   <p>
-    File-format aware scanners that extract embedded <code>@guidance</code> instructions from project files.
+    File-format-aware scanners that extract embedded <code>@guidance</code> instructions from project files.
     Reviewers implement a small SPI and encapsulate comment parsing and normalization per file format.
+    The normalized guidance output is designed to be consumed by the Ghostwriter processing pipeline.
   </p>
 </section>
 

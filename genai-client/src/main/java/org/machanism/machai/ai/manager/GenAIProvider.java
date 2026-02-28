@@ -12,9 +12,8 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 /**
  * Contract for a generative-AI provider integration.
  *
- * <p>
- * A {@code GenAIProvider} represents a concrete implementation (for example
- * OpenAI, Gemini, local model, etc.) capable of:
+ * <p>A {@code GenAIProvider} represents a concrete implementation (for example OpenAI, Gemini, a local model, etc.)
+ * capable of:
  * <ul>
  * <li>collecting prompts and system instructions for a conversation,</li>
  * <li>attaching local or remote files for provider-side processing,</li>
@@ -22,12 +21,9 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  * <li>registering tool functions that may be invoked during a run.</li>
  * </ul>
  *
- * <p>
- * Implementations may keep session state between calls. Use {@link #clear()} to
- * reset conversation state.
+ * <p>Implementations may keep session state between calls. Use {@link #clear()} to reset conversation state.
  *
  * <h2>Typical usage</h2>
- * 
  * <pre>{@code
  * Configurator conf = ...;
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
@@ -37,7 +33,6 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  * String response = provider.perform();
  *
  * provider.clear();
- * provider.close();
  * }</pre>
  *
  * @author Viktor Tovstyi
@@ -79,7 +74,8 @@ public interface GenAIProvider {
 	/**
 	 * Computes an embedding vector for the provided text.
 	 *
-	 * @param text the input text
+	 * @param text       the input text
+	 * @param dimensions desired embedding dimensionality (provider-specific)
 	 * @return the embedding vector
 	 */
 	List<Double> embedding(String text, long dimensions);
@@ -92,14 +88,11 @@ public interface GenAIProvider {
 	/**
 	 * Registers a custom tool function that the provider may invoke at runtime.
 	 *
-	 * <p>
-	 * The expected argument structure passed to {@code function} is
-	 * provider-specific.
+	 * <p>The expected argument structure passed to {@code function} is provider-specific.
 	 *
 	 * @param name        tool name (unique per provider instance)
 	 * @param description human-readable description of the tool
-	 * @param function    function implementation; receives an argument array and
-	 *                    returns a result
+	 * @param function    function implementation; receives an argument array and returns a result
 	 * @param paramsDesc  parameter descriptors (format is provider-specific)
 	 */
 	void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc);
@@ -112,8 +105,7 @@ public interface GenAIProvider {
 	void instructions(String instructions);
 
 	/**
-	 * Executes the provider to produce a response based on the accumulated prompts
-	 * and state.
+	 * Executes the provider to produce a response based on the accumulated prompts and state.
 	 *
 	 * @return the provider response
 	 */
@@ -134,20 +126,10 @@ public interface GenAIProvider {
 	void setWorkingDir(File workingDir);
 
 	/**
-	 * Returns token usage metrics for the most recent {@link #perform()}
-	 * invocation.
+	 * Returns token usage metrics for the most recent {@link #perform()} invocation.
 	 *
-	 * @return usage metrics; implementations may return zero values if not
-	 *         supported
+	 * @return usage metrics; implementations may return zero values if not supported
 	 */
 	Usage usage();
 
-	/**
-	 * Indicates whether this provider instance is safe for concurrent use.
-	 *
-	 * @return {@code true} if the instance is thread-safe; {@code false} otherwise
-	 */
-	default boolean isThreadSafe() {
-		return true;
-	}
 }

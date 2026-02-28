@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li>No network calls are performed.</li>
  *   <li>{@link #perform()} always returns {@code null}.</li>
- *   <li>Unsupported capabilities (for example, {@link #embedding(String)}) throw
+ *   <li>Unsupported capabilities (for example, {@link #embedding(String, long)}) throw
  *       {@link UnsupportedOperationException}.</li>
  * </ul>
  *
@@ -104,6 +104,7 @@ public class NoneProvider implements GenAIProvider {
 	 * Indicates that embedding generation is not available for this provider.
 	 *
 	 * @param text input text
+	 * @param dimensions requested embedding size
 	 * @return never returns normally
 	 * @throws UnsupportedOperationException always thrown
 	 */
@@ -162,7 +163,10 @@ public class NoneProvider implements GenAIProvider {
 			File parentFile = inputsLog.getParentFile();
 			if (parentFile != null) {
 				if (!parentFile.exists()) {
-					parentFile.mkdirs();
+					boolean created = parentFile.mkdirs();
+					if (!created) {
+						logger.warn("Unable to create directory for inputs log: {}", parentFile);
+					}
 				}
 			} else {
 				parentFile = SystemUtils.getUserDir();
@@ -243,5 +247,4 @@ public class NoneProvider implements GenAIProvider {
 	public void init(Configurator conf) {
 		// No-op.
 	}
-
 }

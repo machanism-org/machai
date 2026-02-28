@@ -27,12 +27,12 @@ Page Structure:
 
 ## Introduction
 
-GenAI Client is a Java library for integrating applications with Generative AI providers via a single, consistent API. It provides foundational capabilities such as prompt/instruction management, optional tool (function) calling, optional file attachments, and (provider-dependent) embeddings.
+GenAI Client is a Java library that provides a single, consistent API for integrating with multiple Generative AI providers. It offers a provider abstraction (`GenAIProvider`), centralized provider selection (`GenAIProviderManager`), and common building blocks such as prompts/instructions, optional tool (function) calling, optional file attachments, and (provider-dependent) embeddings.
 
-The main benefits are:
+Key benefits:
 
 - **Provider portability:** switch or combine backends mostly through configuration rather than rewriting calling code.
-- **A stable abstraction:** use the same `GenAIProvider` interface across OpenAI-compatible APIs, token-brokered gateways (like CodeMie), UI-automation providers, or no-op operation.
+- **Stable abstraction:** use the same `GenAIProvider` interface across OpenAI-compatible APIs, token-brokered gateways like CodeMie, or disable AI entirely via the `None` provider.
 - **Extensibility:** register Java functions as tools so models can request structured actions (provider-dependent).
 
 ## Overview
@@ -68,7 +68,6 @@ This design provides:
 - Provider credentials/configuration (depending on the provider you use):
   - OpenAI-compatible providers: API key/token and (optionally) a base URL override.
   - CodeMie provider: credentials for token acquisition.
-  - Web provider: Anteater workspace recipes/configuration and a supported web UI environment.
 
 ### Environment Variables
 
@@ -81,12 +80,9 @@ This design provides:
 | `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (or a client id if using client_credentials). |
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (or a client secret if using client_credentials). |
 | `AUTH_URL` | No | CodeMie | OAuth2 token endpoint override (defaults to CodeMie Keycloak token URL). |
-| `ANTHROPIC_API_KEY` | Conditional | Claude | API key used to authenticate requests. |
-| `ANTHROPIC_BASE_URL` | No | Claude | Override API base URL (if using a compatible gateway/proxy). |
-| `GEMINI_API_KEY` | Conditional | Gemini | API key used to authenticate requests. |
-| `GEMINI_BASE_URL` | No | Gemini | Override API base URL (if using a compatible gateway/proxy). |
-
-> Note: The Web provider uses Anteater recipes and is typically configured via `model(...)` and JVM system properties (for example, `-Drecipes=...`) rather than environment variables.
+| `GENAI_TIMEOUT` | No | OpenAI / OpenAI-compatible | Request timeout in seconds; when `0` or missing, SDK defaults are used. |
+| `MAX_OUTPUT_TOKENS` | No | OpenAI / OpenAI-compatible | Max output tokens (defaults to `65536`). |
+| `MAX_TOOL_CALLS` | No | OpenAI / OpenAI-compatible | Max tool calls per request (defaults to `100`). |
 
 ### Basic Usage
 
@@ -117,7 +113,7 @@ provider.close();
 | Parameter | Description | Default |
 |---|---|---|
 | Provider spec (`ProviderName:modelOrConfig`) | String passed to `GenAIProviderManager` to select provider and model/config. | None |
-| `model(String)` | Sets the provider model name (OpenAI/CodeMie) or configuration name (Web). | Provider-dependent |
+| `model(String)` | Sets the provider model name (OpenAI/CodeMie) or configuration name. | Provider-dependent |
 | `setWorkingDir(File)` | Sets a working directory used by tools and/or provider workflows. | Not set |
 | `inputsLog(File)` | Enables logging of prompt inputs to a file for auditing/debugging. | Disabled |
 | `instructions(String)` | Sets system-level instructions for the request/session. | Not set |
@@ -147,6 +143,15 @@ and generate the content for this section following net format:
 
 This provider adapts the OpenAI Java SDK to MachAI's provider interface. It accumulates user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools. When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
 
+**Configuration variables consumed by `init(Configurator)`**
+
+- `chatModel`: required model identifier passed to the OpenAI Responses API (for example, `gpt-4.1` or `gpt-4o`).
+- `OPENAI_API_KEY`: required API key used to authenticate with the OpenAI API.
+- `OPENAI_BASE_URL`: optional base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
+- `GENAI_TIMEOUT`: optional request timeout (in seconds). If missing or `0`, the SDK default timeouts are used.
+- `MAX_OUTPUT_TOKENS`: optional maximum number of output tokens (defaults to `65536`).
+- `MAX_TOOL_CALLS`: optional maximum number of tool calls allowed in a single response (defaults to `100`).
+
 **Capabilities**
 
 - Submit prompts and retrieve text responses.
@@ -154,12 +159,6 @@ This provider adapts the OpenAI Java SDK to MachAI's provider interface. It accu
 - Register function tools and dispatch tool calls to application handlers.
 - Create vector embeddings for input text.
 - Report token usage to `GenAIProviderManager`.
-
-**Configuration**
-
-- `OPENAI_API_KEY` (required)
-- `OPENAI_BASE_URL` (optional)
-- `chatModel` (optional; required before `perform()` if not set via configuration)
 
 **Usage example**
 
@@ -189,18 +188,18 @@ After a token is retrieved, this provider configures the underlying OpenAI-compa
 - `OPENAI_BASE_URL` to the CodeMie API base URL
 - `OPENAI_API_KEY` to the retrieved access token
 
-and then delegates requests to:
+and then delegates requests based on the configured model prefix:
 
 - `OpenAIProvider` for `gpt-*` models
 - `GeminiProvider` for `gemini-*` models
 - `ClaudeProvider` for `claude-*` models
 
-**Authentication / configuration**
+**Configuration keys consumed by `init(Configurator)`**
 
-- `GENAI_USERNAME` (required)
-- `GENAI_PASSWORD` (required)
-- `chatModel` (required)
-- `AUTH_URL` (optional; token endpoint override)
+- `GENAI_USERNAME` (required): user e-mail (password grant) or client id (client_credentials).
+- `GENAI_PASSWORD` (required): password (password grant) or client secret (client_credentials).
+- `chatModel` (required): model identifier.
+- `AUTH_URL` (optional): token endpoint override.
 
 **Endpoints (defaults)**
 
@@ -217,9 +216,11 @@ GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
 
 ### Claude
 
-`ClaudeProvider` is intended to be an Anthropic-backed implementation of MachAI's `GenAIProvider` abstraction.
+`ClaudeProvider` is an Anthropic-backed implementation of MachAI's `GenAIProvider` abstraction.
 
-At the moment, this provider is not implemented: `init(Configurator)` throws `NotImplementedException` and the remaining methods are no-ops.
+This provider adapts the Anthropic Java SDK to MachAI's provider interface.
+
+The current implementation is not available yet: `init(Configurator)` throws `NotImplementedException` and other methods are currently placeholders.
 
 **Configuration**
 
@@ -235,9 +236,11 @@ GenAIProvider provider = GenAIProviderManager.getProvider("Claude:claude-...");
 
 ### Gemini
 
-`GeminiProvider` is intended to be a Google Gemini-backed implementation of MachAI's `GenAIProvider` abstraction.
+`GeminiProvider` is a MachAI `GenAIProvider` implementation for Google's Gemini models.
 
-At the moment, this provider is not implemented: `init(Configurator)` throws `NotImplementedException` and the remaining methods are no-ops.
+This provider is responsible for adapting MachAI's provider-agnostic abstractions (prompts, tool definitions, files/attachments, and usage reporting) to Gemini's specific API.
+
+The current implementation is a placeholder: most operations are not yet implemented and will be completed in a future iteration.
 
 **Configuration**
 
@@ -261,7 +264,7 @@ This provider is intended for environments where no external LLM integration sho
 
 - No network calls are performed.
 - `perform()` always returns `null`.
-- Unsupported capabilities (for example, `embedding(String)`) throw `UnsupportedOperationException`.
+- Unsupported capabilities (for example, `embedding(String, long)`) throw `UnsupportedOperationException`.
 
 **Usage example**
 
@@ -274,31 +277,7 @@ provider.perform();
 provider.close();
 ```
 
-**Thread safety:** (not specified; treat as not thread-safe unless documented).
-
-### Web
-
-`WebProvider` is a `GenAIProvider` implementation that obtains model responses by automating a target GenAI service through its web user interface.
-
-Automation is executed via Anteater workspace recipes. The provider loads a workspace configuration (see `model(String)`), initializes the workspace with a project directory (see `setWorkingDir(File)`), and submits the current prompt list by running the `"Submit Prompt"` recipe (see `perform()`).
-
-**Thread safety and lifecycle**
-
-- Not thread-safe.
-- Workspace state is stored in static fields; the working directory cannot be changed once initialized in the current JVM instance.
-- `close()` closes the underlying workspace.
-
-**Usage example**
-
-```java
-GenAIProvider provider = GenAIProviderManager.getProvider("Web:CodeMie");
-provider.model("config.yaml");
-provider.setWorkingDir(new java.io.File("C:\\path\\to\\project"));
-String response = provider.perform();
-provider.close();
-```
-
-**Thread safety:** not thread-safe.
+**Thread safety:** not specified; treat as not thread-safe unless documented.
 
 ## Resources
 

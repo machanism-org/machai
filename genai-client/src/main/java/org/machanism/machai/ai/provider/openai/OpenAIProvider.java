@@ -37,6 +37,7 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
+import com.openai.errors.BadRequestException;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.files.FileCreateParams;
@@ -66,20 +67,21 @@ import com.openai.services.blocking.ModelService;
  * OpenAI-backed {@link GenAIProvider} implementation.
  *
  * <p>
- * Configuration variables used by {@link #init(Configurator)}:
+ * Configuration variables consumed by {@link #init(Configurator)}:
  * </p>
  * <ul>
- * <li>{@code chatModel}: model identifier passed to the OpenAI Responses
- * API.</li>
- * <li>{@code OPENAI_API_KEY}: API key (required).</li>
+ * <li>{@code chatModel}: required model identifier passed to the OpenAI
+ * Responses API (for example, {@code gpt-4.1} or {@code gpt-4o}).</li>
+ * <li>{@code OPENAI_API_KEY}: required API key used to authenticate with the
+ * OpenAI API.</li>
  * <li>{@code OPENAI_BASE_URL}: optional base URL for OpenAI-compatible
- * endpoints.</li>
- * <li>{@code GENAI_TIMEOUT}: optional request timeout (seconds); when {@code 0}
- * or missing, SDK defaults are used.</li>
- * <li>{@code MAX_OUTPUT_TOKENS}: optional max output token limit (defaults to
- * {@link #MAX_OUTPUT_TOKENS}).</li>
- * <li>{@code MAX_TOOL_CALLS}: optional max tool call limit (defaults to
- * {@link #MAX_TOOL_CALLS}).</li>
+ * endpoints. If unset, the SDK default base URL is used.</li>
+ * <li>{@code GENAI_TIMEOUT}: optional request timeout (in seconds). If missing,
+ * {@code 0}, or negative, the SDK default timeouts are used.</li>
+ * <li>{@code MAX_OUTPUT_TOKENS}: optional maximum number of output tokens.
+ * Defaults to {@link #MAX_OUTPUT_TOKENS}.</li>
+ * <li>{@code MAX_TOOL_CALLS}: optional maximum number of tool calls allowed in
+ * a single response. Defaults to {@link #MAX_TOOL_CALLS}.</li>
  * </ul>
  */
 public class OpenAIProvider implements GenAIProvider {
@@ -89,9 +91,13 @@ public class OpenAIProvider implements GenAIProvider {
 	/** Logger instance for this provider. */
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
+	/** Default maximum number of tool calls allowed per response. */
 	public static final int MAX_TOOL_CALLS = 100;
 
-	public static final int MAX_OUTPUT_TOKENS = 65536;
+	/** Default maximum number of tokens the model may generate. */
+	public static final int MAX_OUTPUT_TOKENS = 100000;
+
+	private static final long TIMEOUT_SEC = 1000;
 
 	/** OpenAI client for API interactions. */
 	private static OpenAIClient client;
@@ -100,7 +106,7 @@ public class OpenAIProvider implements GenAIProvider {
 	private String chatModel;
 
 	/** Maps tools to handler functions. */
-	private Map<Tool, Function<Object[], Object>> toolMap = new HashMap<>();
+	private final Map<Tool, Function<Object[], Object>> toolMap = new HashMap<>();
 
 	/** Optional log file for input data. */
 	private File inputsLog;
@@ -112,7 +118,7 @@ public class OpenAIProvider implements GenAIProvider {
 	private long timeoutSec;
 
 	/** Accumulated request input items for the current conversation. */
-	private List<ResponseInputItem> inputs = new ArrayList<ResponseInputItem>();
+	private final List<ResponseInputItem> inputs = new ArrayList<>();
 
 	/**
 	 * Latest usage metrics captured from the most recent {@link #perform()} call.
@@ -127,19 +133,24 @@ public class OpenAIProvider implements GenAIProvider {
 	/** Optional instructions applied to the request. */
 	private String instructions;
 
+	/** Maximum number of output tokens for responses. */
 	private Long maxOutputTokens;
 
+	/** Maximum number of tool calls permitted per response. */
 	private Long maxToolCalls;
 
 	/**
 	 * Initializes the provider from the given configuration.
 	 *
 	 * <p>
-	 * The implementation reads {@code OPENAI_BASE_URL} and {@code OPENAI_API_KEY}
-	 * and creates an {@link OpenAIClient}.
+	 * The implementation reads {@code chatModel}, {@code OPENAI_API_KEY}, and the
+	 * optional {@code OPENAI_BASE_URL} and {@code GENAI_TIMEOUT} values and creates
+	 * a shared {@link OpenAIClient}.
 	 * </p>
 	 *
-	 * @param config provider configuration (must contain {@code OPENAI_API_KEY})
+	 * @param config provider configuration (must contain {@code OPENAI_API_KEY} and
+	 *               {@code chatModel})
+	 * @throws IllegalArgumentException if {@code chatModel} is blank
 	 */
 	@Override
 	public void init(Configurator config) {
@@ -152,7 +163,7 @@ public class OpenAIProvider implements GenAIProvider {
 		if (client == null) {
 			String baseUrl = config.get("OPENAI_BASE_URL");
 			String privateKey = config.get("OPENAI_API_KEY");
-			timeoutSec = config.getLong("GENAI_TIMEOUT", 0);
+			timeoutSec = config.getLong("GENAI_TIMEOUT", TIMEOUT_SEC);
 
 			OpenAIOkHttpClient.Builder clientBuilder = OpenAIOkHttpClient.builder();
 			clientBuilder.apiKey(privateKey);
@@ -254,7 +265,6 @@ public class OpenAIProvider implements GenAIProvider {
 		logger.debug("Sending request to LLM service.");
 
 		Response response = getClient().responses().create(responseCreateParams);
-
 		logger.debug("Received response from LLM service.");
 		captureUsage(response.usage());
 
@@ -346,8 +356,8 @@ public class OpenAIProvider implements GenAIProvider {
 	 * Requests an embedding vector for the given input text.
 	 *
 	 * @param text       input to embed
-	 * @param dimensions
-	 * @return embedding as a list of {@code float} values, or {@code null} when
+	 * @param dimensions number of dimensions requested from the embedding model
+	 * @return embedding as a list of {@code double} values, or {@code null} when
 	 *         {@code text} is {@code null}
 	 */
 	@Override
@@ -559,16 +569,6 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	public void setTimeout(long timeout) {
 		this.timeoutSec = timeout;
-	}
-
-	/**
-	 * Indicates whether the provider instance is safe for concurrent use.
-	 *
-	 * @return {@code false}; this implementation stores per-request mutable state
-	 */
-	@Override
-	public boolean isThreadSafe() {
-		return false;
 	}
 
 }
