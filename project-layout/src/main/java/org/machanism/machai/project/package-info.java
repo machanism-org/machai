@@ -1,7 +1,7 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>This package provides the core APIs used to:
+ * <p>This package provides core types to:
  *
  * <ul>
  *   <li>Detect a project's on-disk convention (for example, Maven or Gradle) and expose it as a
@@ -10,9 +10,9 @@
  *       {@link org.machanism.machai.project.ProjectProcessor}.</li>
  * </ul>
  *
- * <p>In typical usage, a caller detects the {@link org.machanism.machai.project.layout.ProjectLayout} for a project
- * directory using {@link org.machanism.machai.project.ProjectLayoutManager#detectProjectLayout(java.io.File)} and then
- * runs a {@link org.machanism.machai.project.ProjectProcessor} over the project root.
+ * <p>Typical usage is to detect the {@link org.machanism.machai.project.layout.ProjectLayout} for a project directory
+ * using {@link org.machanism.machai.project.ProjectLayoutManager#detectProjectLayout(java.io.File)} and then execute a
+ * {@link org.machanism.machai.project.ProjectProcessor} over the project root.
  *
  * <h2>Typical workflow</h2>
  *

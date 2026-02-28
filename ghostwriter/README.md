@@ -28,9 +28,9 @@ Ghostwriter is Machai’s guidance-driven, repository-scale documentation and tr
 
 Ghostwriter is Machai’s guidance-driven, repository-scale documentation and transformation engine.
 
-It scans your repository (source code, documentation, project-site content under `src/site`, build metadata like `pom.xml`, and other artifacts), extracts embedded `@guidance:` directives, and uses a configured GenAI provider to apply consistent improvements across many files in a repeatable way. This makes it practical to keep documentation, conventions, and refactors aligned across an entire project—especially when changes must be deterministic, reviewable, and CI-friendly.
+It scans your repository (source code, documentation, project-site content under `src/site`, build metadata like `pom.xml`, and other artifacts), extracts embedded `@guidance:` directives, and uses a configured GenAI provider to apply consistent improvements across many files in a repeatable, CI-friendly way. This makes it practical to keep documentation, conventions, and refactors aligned across an entire project—especially when changes must be systematic, reviewable, and version-controlled.
 
-Ghostwriter is built on **[Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)**: guidance lives next to the content it controls, and the processor composes those local directives—plus any configured defaults—into a structured prompt per file. The result is automation that remains explicit and version-controlled inside the repository.
+Ghostwriter is built on **[Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)**: guidance lives next to the content it controls, and the processor composes those local directives—plus any configured defaults—into a structured prompt per file. The result is automation that remains explicit and deterministic because it is defined in the repository itself.
 
 ## Usage
 
@@ -40,8 +40,8 @@ Ghostwriter is built on **[Guided File Processing](https://www.machanism.org/gui
 
 - **Java**
   - **Build target:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
-  - **Runtime:** you can generally run on Java 8+; some GenAI provider/client libraries may require a newer JVM at runtime.
-- **GenAI provider access and credentials** as required by your provider (for example via `GW_HOME\\gw.properties`, environment variables, or provider-specific configuration).
+  - **Runtime:** Java 8+ is typically fine; some GenAI provider/client libraries may require a newer JVM.
+- **GenAI provider access and credentials** as required by your provider (for example via `${GW_HOME}\\gw.properties`, environment variables, or provider-specific configuration).
 - **Network access** to the provider endpoint (if applicable).
 
 #### Download
@@ -64,7 +64,7 @@ java -jar gw.jar src\\main\\java
 
 1. Add `@guidance:` directives to the files you want Ghostwriter to update (Markdown under `src\\site`, Java sources, templates, etc.).
 2. Choose a scan target:
-   - directory path (relative to the project), or
+   - directory path (relative to the configured root directory), or
    - `glob:` matcher (example: `glob:**/*.java`), or
    - `regex:` matcher.
 3. Configure your GenAI provider/model and credentials.
@@ -79,7 +79,7 @@ java -jar gw.jar src\\main\\java
 |---|---|---|
 | `-h`, `--help` | Show help message and exit. | n/a |
 | `-r`, `--root <path>` | Root directory used as the base for relative scan targets and `file:` includes. | From config key `gw.rootDir`; otherwise current working directory. |
-| `-t`, `--threads[=<true\\|false>]` | Enable multi-threaded module processing; if provided without a value, it enables multi-threading. | From config key `gw.threads` (default `false`) |
+| `-t`, `--threads[=<true\\|false>]` | Enable multi-threaded processing; if provided without a value, it enables multi-threading. | From config key `gw.threads` (default `false`) |
 | `-a`, `--genai <provider:model>` | GenAI provider/model identifier (example: `OpenAI:gpt-5.1`). | From config key `gw.genai`; otherwise must be provided |
 | `-i`, `--instructions[=<text\\|url\\|file:...>]` | Global system instructions appended to every prompt; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `gw.instructions`; otherwise none |
 | `-g`, `--guidance[=<text\\|url\\|file:...>]` | Fallback guidance used when files have no embedded `@guidance:`; supports `http(s)://...` and `file:...`; prompts via stdin if no value. | From config key `gw.guidance`; otherwise none |

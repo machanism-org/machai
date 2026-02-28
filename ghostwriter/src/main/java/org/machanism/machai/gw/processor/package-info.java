@@ -39,35 +39,28 @@
  */
 
 /**
- * Command-line project scanning, guidance extraction, and prompt orchestration.
+ * Command-line project scanning and prompt orchestration for Ghostwriter.
  *
  * <p>
- * The {@code org.machanism.machai.gw.processor} package contains Ghostwriter's
- * command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter})
- * and the processors responsible for walking a project tree, extracting embedded
- * guidance directives, and invoking a configured GenAI provider.
+ * The types in {@code org.machanism.machai.gw.processor} implement Ghostwriter's filesystem-based
+ * processing pipeline:
  * </p>
- *
- * <h2>Core types</h2>
  * <ul>
- * <li>{@link org.machanism.machai.gw.processor.AbstractFileProcessor} provides filesystem
- * traversal, include matching ({@code glob:}/{@code regex:}), and exclusion handling.</li>
- * <li>{@link org.machanism.machai.gw.processor.AIFileProcessor} creates/configures the
- * {@link org.machanism.machai.ai.manager.GenAIProvider}, applies function tools, and can
- * log composed inputs for auditing.</li>
+ * <li>{@link org.machanism.machai.gw.processor.Ghostwriter} provides the CLI entry point and
+ * configuration/option parsing.</li>
+ * <li>{@link org.machanism.machai.gw.processor.AbstractFileProcessor} implements directory traversal,
+ * include matching via {@code glob:}/{@code regex:}, and exclusion handling.</li>
+ * <li>{@link org.machanism.machai.gw.processor.AIFileProcessor} creates and configures a
+ * {@link org.machanism.machai.ai.manager.GenAIProvider} and optionally logs the composed inputs.</li>
  * <li>{@link org.machanism.machai.gw.processor.GuidanceProcessor} selects a
- * {@link org.machanism.machai.gw.reviewer.Reviewer} by file extension to extract
- * {@code @guidance:} directives and dispatch the resulting prompt.</li>
+ * {@link org.machanism.machai.gw.reviewer.Reviewer} per file extension to extract embedded
+ * {@code @guidance:} directives and dispatches the resulting prompt.</li>
  * </ul>
  *
- * <h2>Processing model</h2>
- * <ul>
- * <li><b>Child-first module traversal</b>: in multi-module layouts, modules are processed before
- * the parent directory.</li>
- * <li><b>No dependency resolution</b>: processing is filesystem-based only; projects are not built
- * and dependencies are not resolved.</li>
- * <li><b>Broad file coverage</b>: reviewers may support source code, documentation, project site
- * content, and other relevant project files.</li>
- * </ul>
+ * <p>
+ * Ghostwriter works with any file types supported by registered reviewers, including source code,
+ * documentation, and project-site content. Processing is traversal-only: projects are not built and
+ * dependencies are not resolved. For multi-module layouts, modules are processed child-first.
+ * </p>
  */
 package org.machanism.machai.gw.processor;

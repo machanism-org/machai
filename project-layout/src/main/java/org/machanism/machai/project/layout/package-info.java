@@ -1,42 +1,47 @@
 /**
  * Provides APIs to detect, describe, and work with a repository's on-disk project layout.
  *
- * <p>This package models a project as a root directory plus a set of conventional root-relative paths (sources, tests,
- * resources, documentation) and optionally nested modules. The main entry point is
- * {@link org.machanism.machai.project.layout.ProjectLayout}, which returns these paths as root-relative strings.
+ * <p>
+ * This package models a project as a root directory combined with a set of conventional, root-relative paths such as
+ * production sources, test sources, resources, and documentation roots. Some layouts also support nested modules and can
+ * obtain module information by reading build metadata (for example Maven {@code pom.xml}, Gradle build files, or JS
+ * workspace configuration).
+ * </p>
  *
- * <h2>Key concepts</h2>
+ * <h2>Core API</h2>
  * <ul>
- *   <li><strong>Root-relative paths:</strong> Layout values are typically expressed relative to the configured project root.</li>
- *   <li><strong>Build-aware detection:</strong> Implementations may parse build metadata (for example {@code pom.xml}) to
- *       resolve non-default source sets and discover modules.</li>
- *   <li><strong>Repository scanning:</strong> Some implementations scan the filesystem to infer structure while excluding
- *       common build/VCS/IDE directories using {@link org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.</li>
+ *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} is the base abstraction implemented by all concrete
+ *       layout detectors.</li>
+ *   <li>Layout instances are configured with a project root via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.</li>
+ *   <li>Most accessors return root-relative paths (usually using {@code /} separators) that should be resolved against
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getProjectDir()} before filesystem access.</li>
+ * </ul>
+ *
+ * <h2>Implementations</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} reads {@code pom.xml} (via
+ *       {@link org.machanism.machai.project.layout.PomReader}) to determine modules and source/test/resource roots.</li>
+ *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} uses the Gradle Tooling API to detect modules and
+ *       applies common Gradle source/test conventions.</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} parses {@code package.json} workspaces and
+ *       resolves module directories by matching workspace glob patterns.</li>
+ *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} detects Python projects using
+ *       {@code pyproject.toml} metadata.</li>
+ *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} provides a minimal filesystem-based fallback and
+ *       treats immediate subdirectories as potential modules.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
- * <pre>
- * ProjectLayout layout = new MavenProjectLayout().projectDir(new java.io.File("C:\\repo"));
+ * <pre><code>
+ * java.io.File projectDir = new java.io.File("C:\\repo");
  *
+ * ProjectLayout layout = new MavenProjectLayout().projectDir(projectDir);
  * java.util.List&lt;String&gt; modules = layout.getModules();
  * java.util.List&lt;String&gt; sources = layout.getSources();
  * java.util.List&lt;String&gt; tests = layout.getTests();
  * java.util.List&lt;String&gt; docs = layout.getDocuments();
- * </pre>
- *
- * <h2>Implementations</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} resolves paths and modules from {@code pom.xml}
- *       (via {@link org.machanism.machai.project.layout.PomReader}).</li>
- *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} applies Gradle conventions to determine sources,
- *       tests, and modules.</li>
- *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} inspects {@code package.json} workspaces to
- *       detect JS/TS monorepo modules.</li>
- *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} detects Python projects using
- *       {@code pyproject.toml} metadata.</li>
- *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} provides a minimal fallback layout when no
- *       specific build metadata is available.</li>
- * </ul>
+ * </code></pre>
  */
 package org.machanism.machai.project.layout;
 
