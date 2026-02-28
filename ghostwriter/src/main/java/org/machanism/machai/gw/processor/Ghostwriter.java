@@ -415,16 +415,26 @@ public final class Ghostwriter {
 				String action = cmd.getOptionValue(actOpt.getLongOpt());
 
 				if (action == null) {
-					action = readText("Pleas input your act [When you are done, press "
+					action = readText("Please input your act [When you are done, press "
 							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
 							+ " to finish and signal end of input (EOF):");
 				}
 
-				String name = StringUtils.substringBefore(action, " ");
-				String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(action, " "),
+				String name = StringUtils.substringBefore(StringUtils.defaultString(action), " ");
+				if (StringUtils.isBlank(name)) {
+					throw new IllegalArgumentException("Act name must not be blank. Usage: --act <name> [prompt]");
+				}
+
+				String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(StringUtils.defaultString(action), " "),
 						StringUtils.defaultString(defaultGuidance));
 
-				ResourceBundle promptBundle = ResourceBundle.getBundle("act/" + name);
+				ResourceBundle promptBundle;
+				try {
+					promptBundle = ResourceBundle.getBundle("act/" + name);
+				} catch (MissingResourceException e) {
+					throw new IllegalArgumentException(
+							"Unknown act '" + name + "'. Make sure resources/act/" + name + ".properties exists.", e);
+				}
 
 				try {
 					instructions = promptBundle.getString("instructions");
@@ -432,7 +442,12 @@ public final class Ghostwriter {
 					// do nothing
 				}
 
-				defaultGuidance = MessageFormat.format(promptBundle.getString("inputs"), prompt);
+				try {
+					defaultGuidance = MessageFormat.format(promptBundle.getString("inputs"), prompt);
+				} catch (MissingResourceException e) {
+					throw new IllegalArgumentException(
+							"Act '" + name + "' is missing required key 'inputs' in its properties file.", e);
+				}
 
 			} else {
 				processor = new GuidanceProcessor(rootDir, genai, config);

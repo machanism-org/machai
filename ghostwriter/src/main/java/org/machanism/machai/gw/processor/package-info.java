@@ -39,28 +39,35 @@
  */
 
 /**
- * Command-line project scanning and prompt orchestration for Ghostwriter.
+ * Project scanning and prompt orchestration for the Ghostwriter command-line tool.
  *
  * <p>
- * The types in {@code org.machanism.machai.gw.processor} implement Ghostwriter's filesystem-based
- * processing pipeline:
+ * The {@code org.machanism.machai.gw.processor} package contains the CLI entry
+ * point and the processors responsible for scanning a project directory tree,
+ * extracting embedded {@code @guidance:} directives, and invoking the configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider GenAI provider}.
  * </p>
+ *
+ * <h2>Key components</h2>
  * <ul>
- * <li>{@link org.machanism.machai.gw.processor.Ghostwriter} provides the CLI entry point and
- * configuration/option parsing.</li>
- * <li>{@link org.machanism.machai.gw.processor.AbstractFileProcessor} implements directory traversal,
- * include matching via {@code glob:}/{@code regex:}, and exclusion handling.</li>
- * <li>{@link org.machanism.machai.gw.processor.AIFileProcessor} creates and configures a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} and optionally logs the composed inputs.</li>
- * <li>{@link org.machanism.machai.gw.processor.GuidanceProcessor} selects a
- * {@link org.machanism.machai.gw.reviewer.Reviewer} per file extension to extract embedded
- * {@code @guidance:} directives and dispatches the resulting prompt.</li>
+ * <li>{@link org.machanism.machai.gw.processor.Ghostwriter}: command-line entry
+ * point that reads configuration and launches a scan.</li>
+ * <li>{@link org.machanism.machai.gw.processor.GuidanceProcessor}: filesystem
+ * scanner that uses {@code Reviewer}s to extract guidance and processes modules
+ * child-first (modules before the parent directory).</li>
+ * <li>{@link org.machanism.machai.gw.processor.AIFileProcessor}: prompt
+ * composition and provider invocation support (instructions, tools, input
+ * logging).</li>
+ * <li>{@link org.machanism.machai.gw.processor.AbstractFileProcessor}: common
+ * traversal utilities, include/exclude matching, and module handling.</li>
  * </ul>
  *
+ * <h2>Processing model</h2>
  * <p>
- * Ghostwriter works with any file types supported by registered reviewers, including source code,
- * documentation, and project-site content. Processing is traversal-only: projects are not built and
- * dependencies are not resolved. For multi-module layouts, modules are processed child-first.
+ * Processing is strictly filesystem-based: projects are not built and
+ * dependencies are not resolved during scanning. When a path matcher is used
+ * (via {@code glob:} or {@code regex:}), inclusion decisions are made against
+ * project-relative paths and known build/tooling directories are ignored.
  * </p>
  */
 package org.machanism.machai.gw.processor;

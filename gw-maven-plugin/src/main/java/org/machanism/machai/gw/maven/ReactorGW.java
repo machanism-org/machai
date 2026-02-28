@@ -37,7 +37,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * {@code true}, delays processing of the execution-root project until all other reactor projects
  * have completed.
  * <p>
- * Default: {@code false}
+ * Default: {@code true}
  * </p>
  * </li>
  * </ul>

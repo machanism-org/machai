@@ -1,13 +1,14 @@
 /**
  * File-format-aware scanners used by Ghostwriter to discover embedded {@code @guidance} instructions.
  *
- * <p>The primary contract in this package is {@link org.machanism.machai.gw.reviewer.Reviewer}. Concrete
- * implementations typically target a specific file format (for example, Java, Markdown, HTML/XML, TypeScript,
- * Python, PlantUML, and plain text), understand the format's comment conventions, and extract guidance blocks
- * marked with {@link org.machanism.machai.gw.processor.GuidanceProcessor#GUIDANCE_TAG_NAME}.
+ * <p>This package defines the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface (SPI)
+ * and provides concrete implementations for common project artifacts (for example Java, TypeScript, Python,
+ * Markdown, HTML/XML, PlantUML, and plain-text guidance files).
  *
- * <p>When guidance is found, a reviewer returns a normalized prompt fragment (usually including the
- * project-relative file path and relevant source content) for consumption by the Ghostwriter pipeline.
+ * <p>A {@link org.machanism.machai.gw.reviewer.Reviewer} inspects a single file, detects whether it contains the
+ * guidance tag {@link org.machanism.machai.gw.processor.GuidanceProcessor#GUIDANCE_TAG_NAME}, and when present
+ * produces a normalized prompt fragment (typically including the project-relative file path and relevant source
+ * content) for consumption by the Ghostwriter processing pipeline.
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer
  */

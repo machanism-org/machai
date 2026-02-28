@@ -25,8 +25,7 @@ import org.slf4j.LoggerFactory;
  * This class centralizes shared configuration parameters and the common
  * scan/execute flow. Concrete goals typically configure goal-specific behavior
  * (for example, reactor aggregation, processing order, or threading) and then
- * delegate to {@link #scanDocuments()} or
- * {@link #scanDocuments(GuidanceProcessor)}.
+ * delegate to {@link #scanDocuments(GuidanceProcessor)}.
  * </p>
  *
  * <h2>Common parameters</h2>
@@ -56,9 +55,8 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * <h2>Examples</h2>
- * 
  * <pre>
- * mvn gw:std -Dgw.genai=openai:gpt-4o-mini -Dgw.scanDir=src\site -Dgw.logInputs=true
+ * mvn gw:gw -Dgw.genai=openai:gpt-4o-mini -Dgw.scanDir=src\\site -Dgw.logInputs=true
  * </pre>
  */
 public abstract class AbstractGWGoal extends AbstractMojo {
