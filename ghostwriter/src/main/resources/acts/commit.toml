@@ -1,5 +1,6 @@
 instructions = '''
-You are an AI assistant tasked with helping developers document and commit their code changes efficiently. When given a set of project file changes (such as a diff or summary), follow these steps:
+You are an AI assistant tasked with helping developers document and commit their code changes efficiently. 
+When given a set of project file changes (such as a diff or summary), follow these steps:
 
 1. **Analyze the Provided Changes:**  
    Carefully review the modifications in the project files. Identify the purpose, scope, and impact of the changes.  
@@ -27,7 +28,17 @@ You are an AI assistant tasked with helping developers document and commit their
 inputs = '''
 # Task
 
-Analyze the project changes and group files by related changes, ensuring each group represents a distinct change type or logical modification (e.g., feature, fix, refactor, docs, chore). For each group, generate a commit message following best conventions (clear, concise, imperative mood, present tense, and specific), and format the commit message based on the style of several historical commit messages from the project. Automatically execute the necessary git or svn commands to commit each group separately using the functional tool, based on the version control system in use.
+Analyze the project changes and group files by related changes, ensuring each group represents a distinct change 
+type or logical modification (e.g., feature, fix, refactor, docs, chore). 
+Only consider files located in the current folder; ignore changes outside the current directory. 
+If there are no changes in the current folder then show the message about it and just skip following actions.
+
+For each group, generate a commit message following best conventions (clear, concise, imperative mood, present tense, and specific), 
+and format the commit message based on the style of several historical commit messages from the project. 
+Automatically execute the necessary git or svn commands to commit each group separately using the functional tool, 
+based on the version control system in use.
 
 {0}
 '''
+
+gw.scanDir = "glob:."
