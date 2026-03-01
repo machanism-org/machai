@@ -94,7 +94,7 @@ public class GWCommand {
 				if (defaultGuidance != null) {
 					logger.info("Default Guidance: {}",
 							org.apache.commons.lang.StringUtils.abbreviate(defaultGuidance, 60));
-					processor.setDefaultGuidance(defaultGuidance);
+					processor.setDefaultPrompt(defaultGuidance);
 				}
 
 				processor.setLogInputs(logInputs);

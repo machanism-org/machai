@@ -85,10 +85,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	private String instructions = "You are a highly skilled software engineer and developer, with expertise in all major programming languages, frameworks, and platforms.";
 
 	/**
-	 * Default guidance applied when a file does not contain embedded
+	 * Default prompt applied when a file does not contain embedded
 	 * {@code @guidance} directives.
 	 */
-	private String defaultGuidance;
+	private String defaultPrompt;
 
 	/**
 	 * Creates a new processor using the given provider key.
@@ -108,11 +108,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @param projectLayout project layout
 	 * @param file          file being processed (used for logging and templating)
 	 * @param instructions  system or execution instructions for the provider
-	 * @param guidance      guidance content to include in the prompt
+	 * @param prompt      prompt content to include in the prompt
 	 * @return provider output
 	 * @throws IOException if creating input logs fails or provider I/O fails
 	 */
-	public String process(ProjectLayout projectLayout, File file, String instructions, String guidance)
+	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt)
 			throws IOException {
 		logger.info("Processing file: '{}'", file);
 
@@ -127,13 +127,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		String projectInfo = getProjectStructureDescription(projectLayout);
 
-		StringBuilder guidanceBuilder = new StringBuilder();
-		guidanceBuilder.append(projectInfo).append("\r\n");
+		StringBuilder promptBuilder = new StringBuilder();
+		promptBuilder.append(projectInfo).append("\r\n");
 
-		String guidanceLines = parseLines(guidance);
-		guidanceBuilder.append(guidanceLines);
+		String promptLines = parseLines(prompt);
+		promptBuilder.append(promptLines);
 
-		provider.prompt(guidanceBuilder.toString());
+		provider.prompt(promptBuilder.toString());
 
 		if (isLogInputs()) {
 			String inputsFileName = ProjectLayout.getRelativePath(getRootDir(), file);
@@ -373,7 +373,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Scans the project directory and applies the configured default guidance.
+	 * Scans the project directory and applies the configured default prompt.
 	 *
 	 * @param projectDir project root
 	 * @param scanDir    scan start directory or pattern (currently unused by this
@@ -382,28 +382,28 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
-		String perform = process(projectLayout, getRootDir(), instructions, defaultGuidance);
+		String perform = process(projectLayout, getRootDir(), instructions, defaultPrompt);
 		logger.info(perform);
 	}
 
 	/**
-	 * Returns the default guidance, if configured.
+	 * Returns the default prompt, if configured.
 	 *
-	 * @return default guidance, or {@code null}
+	 * @return default prompt, or {@code null}
 	 */
-	public String getDefaultGuidance() {
-		return defaultGuidance;
+	public String getDefaultPrompt() {
+		return defaultPrompt;
 	}
 
 	/**
-	 * Sets the default guidance applied when a file does not contain embedded
+	 * Sets the default prompt applied when a file does not contain embedded
 	 * {@code @guidance} directives.
 	 *
-	 * @param defaultGuidance default guidance input (plain text, URL, or
+	 * @param defaultPrompt default prompt input (plain text, URL, or
 	 *                        {@code file:})
 	 */
-	public void setDefaultGuidance(String defaultGuidance) {
-		this.defaultGuidance = defaultGuidance;
+	public void setDefaultPrompt(String defaultPrompt) {
+		this.defaultPrompt = defaultPrompt;
 	}
 
 }

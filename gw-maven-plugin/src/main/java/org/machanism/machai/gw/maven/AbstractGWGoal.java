@@ -197,7 +197,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 
 			if (guidance != null) {
 				logger.info("Default Guidance: {}", StringUtils.abbreviate(guidance, 60));
-				processor.setDefaultGuidance(guidance);
+				processor.setDefaultPrompt(guidance);
 			}
 
 			File rootDir = new File(session.getExecutionRootDirectory());

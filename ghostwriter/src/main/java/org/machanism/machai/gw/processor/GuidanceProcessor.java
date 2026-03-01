@@ -161,7 +161,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 									+ projectDir.getAbsolutePath());
 				}
 
-				if (getDefaultGuidance() == null) {
+				if (getDefaultPrompt() == null) {
 					scanDir = "glob:" + relativePath + "{,/**}";
 				} else {
 					scanDir = "glob:" + relativePath;
@@ -214,7 +214,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	@Override
 	protected boolean match(File file, File projectDir) {
 		if (getPathMatcher() == null) {
-			return getDefaultGuidance() == null || Objects.equals(file, projectDir);
+			return getDefaultPrompt() == null || Objects.equals(file, projectDir);
 		}
 
 		return super.match(file, projectDir);
@@ -310,9 +310,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 
 		boolean match = match(projectDir, projectDir);
 
-		if (match && getDefaultGuidance() != null) {
+		if (match && getDefaultPrompt() != null) {
 			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), projectDir,
-					getDefaultGuidance());
+					getDefaultPrompt());
 			process(projectLayout, projectDir, defaultGuidanceText);
 		}
 	}
@@ -335,9 +335,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 			if (guidance != null) {
 				perform = process(projectLayout, file, guidance);
 
-			} else if (getDefaultGuidance() != null) {
+			} else if (getDefaultPrompt() != null) {
 				String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), file,
-						getDefaultGuidance());
+						getDefaultPrompt());
 				perform = process(projectLayout, file, defaultGuidanceText);
 			}
 		}

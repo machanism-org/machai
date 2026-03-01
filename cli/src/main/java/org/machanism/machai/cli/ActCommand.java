@@ -33,7 +33,7 @@ public class ActCommand {
 	public void act(@ShellOption(value = "action") String action[]) throws IOException {
 		ActProcessor processor = new ActProcessor(rootDir, config, genai);
 		String act = StringUtils.join(action, " ");
-		processor.setDefaultGuidance(act);
+		processor.setDefaultPrompt(act);
 		try {
 			processor.scanDocuments(rootDir, rootDir.getAbsolutePath());
 		} catch (ProcessTerminationException e) {

@@ -255,10 +255,10 @@ public final class Ghostwriter {
 	 *
 	 * @param defaultGuidance default guidance text, URL, or {@code file:} reference
 	 */
-	public void setDefaultGuidance(String defaultGuidance) {
+	public void setDefaultPrompt(String defaultGuidance) {
 		if (defaultGuidance != null) {
-			logger.info("Default Guidance: {}", StringUtils.abbreviate(defaultGuidance, 60));
-			processor.setDefaultGuidance(defaultGuidance);
+			logger.info("Default Prompt: {}", StringUtils.abbreviate(defaultGuidance, 60));
+			processor.setDefaultPrompt(defaultGuidance);
 		}
 	}
 
@@ -394,27 +394,27 @@ public final class Ghostwriter {
 			}
 		}
 
-		String defaultGuidance;
+		String defaultPrompt;
 		try {
 			AIFileProcessor processor;
 			if (cmd.hasOption(actOpt.getLongOpt())) {
 				processor = new ActProcessor(rootDir, config, genai);
-				defaultGuidance = cmd.getOptionValue(actOpt.getLongOpt());
+				defaultPrompt = cmd.getOptionValue(actOpt.getLongOpt());
 
-				if (defaultGuidance == null) {
-					defaultGuidance = readText("Please input your act [When you are done, press "
+				if (defaultPrompt == null) {
+					defaultPrompt = readText("Please input your act [When you are done, press "
 							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
 							+ " to finish and signal end of input (EOF):");
 				}
-			
+
 			} else {
 				processor = new GuidanceProcessor(rootDir, genai, config);
 
-				defaultGuidance = config.get(GW_GUIDANCE_PROP_NAME, null);
+				defaultPrompt = config.get(GW_GUIDANCE_PROP_NAME, null);
 				if (cmd.hasOption(guidanceOpt.getOpt())) {
-					defaultGuidance = cmd.getOptionValue(guidanceOpt.getOpt());
-					if (defaultGuidance == null) {
-						defaultGuidance = readText("Please enter the guidance text below. When finished, press "
+					defaultPrompt = cmd.getOptionValue(guidanceOpt.getOpt());
+					if (defaultPrompt == null) {
+						defaultPrompt = readText("Please enter the guidance text below. When finished, press "
 								+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
 								+ " to signal end of input (EOF):");
 					}
@@ -426,7 +426,7 @@ public final class Ghostwriter {
 			ghostwriter.setInstructions(instructions);
 			ghostwriter.setExcludes(excludes);
 			ghostwriter.setMultiThread(multiThread);
-			ghostwriter.setDefaultGuidance(defaultGuidance);
+			ghostwriter.setDefaultPrompt(defaultPrompt);
 			ghostwriter.setLogInputs(logInputs);
 
 			String[] scanDirs = cmd.getArgs();

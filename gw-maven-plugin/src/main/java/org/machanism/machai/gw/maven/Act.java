@@ -31,6 +31,9 @@ public class Act extends AbstractGWGoal {
 	@Parameter(property = "gw.act", required = false)
 	private String act;
 
+	@Parameter(property = "gw.acts", required = false)
+	private File acts;
+
 	/**
 	 * Executes the interactive action.
 	 *
@@ -40,7 +43,7 @@ public class Act extends AbstractGWGoal {
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
-			ActProcessor fileProcessor = new ActProcessor(basedir, getConfiguration(), genai) {
+			ActProcessor actProcessor = new ActProcessor(basedir, getConfiguration(), genai) {
 				@Override
 				public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 					ProjectLayout projectLayout = super.getProjectLayout(projectDir);
@@ -63,19 +66,24 @@ public class Act extends AbstractGWGoal {
 				}
 			};
 
-			fileProcessor.setExcludes(excludes);
-			fileProcessor.setLogInputs(logInputs);
+			if (acts != null) {
+				actProcessor.setActDir(acts);
+			}
+			if (excludes != null) {
+				actProcessor.setExcludes(excludes);
+			}
+			actProcessor.setLogInputs(logInputs);
 
 			try {
 				if (act == null) {
 					String action;
 					while (StringUtils.isNoneBlank(action = prompter.prompt("Act"))) {
-						fileProcessor.setDefaultGuidance(action);
-						fileProcessor.scanDocuments(basedir, scanDir);
+						actProcessor.setDefaultPrompt(action);
+						actProcessor.scanDocuments(basedir, scanDir);
 					}
 				} else {
-					fileProcessor.setDefaultGuidance(act);
-					fileProcessor.scanDocuments(basedir, scanDir);
+					actProcessor.setDefaultPrompt(act);
+					actProcessor.scanDocuments(basedir, scanDir);
 				}
 
 			} catch (PrompterException e) {
