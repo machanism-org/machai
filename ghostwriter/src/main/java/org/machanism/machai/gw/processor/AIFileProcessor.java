@@ -117,7 +117,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		logger.info("Processing file: '{}'", file);
 
 		GenAIProvider provider = GenAIProviderManager.getProvider(genai, getConfigurator());
-
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		File projectDir = projectLayout.getProjectDir();

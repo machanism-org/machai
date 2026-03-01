@@ -2,14 +2,10 @@ package org.machanism.machai.gw.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.text.MessageFormat;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.tomlj.Toml;
@@ -39,9 +35,9 @@ public class ActProcessor extends AIFileProcessor {
 		String instructions = null;
 		if (actDir != null) {
 			try {
-				TomlParseResult result = Toml.parse(new File(actDir, name + ".toml").toPath());
-				instructions = result.getString("instructions");
-				defaultPrompt = result.getString("inputs");
+				TomlParseResult toml = Toml.parse(new File(actDir, name + ".toml").toPath());
+				instructions = toml.getString("instructions");
+				defaultPrompt = toml.getString("inputs");
 
 			} catch (IOException e) {
 				// do nothing, the act not found on the custom directory.
@@ -49,29 +45,29 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		if (instructions == null || defaultPrompt == null) {
-			try {
-				ResourceBundle promptBundle = ResourceBundle.getBundle(ACTS_BASENAME_PREFIX + name);
-				if (instructions == null) {
-					try {
-						instructions = promptBundle.getString("instructions");
-					} catch (MissingResourceException e) {
-						// do nothing
+			String path = ACTS_BASENAME_PREFIX + name + ".toml";
+			URL resource = ClassLoader.getSystemResource(path);
+			if (resource != null) {
+				try {
+					String tomlStr = IOUtils.toString(resource, "UTF8");
+					TomlParseResult toml = Toml.parse(tomlStr);
+					if (instructions == null) {
+						instructions = toml.getString("instructions");
 					}
-				}
-				if (defaultPrompt == null) {
-					try {
-						String inputs = promptBundle.getString("inputs");
-						defaultPrompt = MessageFormat.format(inputs, prompt);
-					} catch (MissingResourceException e) {
-						// do nothing
+					if (defaultPrompt == null) {
+						defaultPrompt = toml.getString("inputs");
 					}
+				} catch (IOException e) {
+					throw new IllegalArgumentException(e);
 				}
-			} catch (MissingResourceException e) {
-				throw e;
+			} else {
+				throw new IllegalArgumentException("Act: `" + act + "` not found.");
 			}
 		}
 
 		super.setInstructions(instructions);
+
+		defaultPrompt = MessageFormat.format(defaultPrompt, prompt);
 		super.setDefaultPrompt(defaultPrompt);
 
 	}

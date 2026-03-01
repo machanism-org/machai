@@ -402,9 +402,9 @@ public final class Ghostwriter {
 				defaultPrompt = cmd.getOptionValue(actOpt.getLongOpt());
 
 				if (defaultPrompt == null) {
-					defaultPrompt = readText("Please input your act [When you are done, press "
+					defaultPrompt = readText("Please input your act [When you are done, press ENTER and "
 							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
-							+ " to finish and signal end of input (EOF):");
+							+ " to finish and signal end of input (EOF)]:");
 				}
 
 			} else {
@@ -414,7 +414,7 @@ public final class Ghostwriter {
 				if (cmd.hasOption(guidanceOpt.getOpt())) {
 					defaultPrompt = cmd.getOptionValue(guidanceOpt.getOpt());
 					if (defaultPrompt == null) {
-						defaultPrompt = readText("Please enter the guidance text below. When finished, press "
+						defaultPrompt = readText("Please enter the guidance text below. When finished, press ENTER and "
 								+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
 								+ " to signal end of input (EOF):");
 					}
