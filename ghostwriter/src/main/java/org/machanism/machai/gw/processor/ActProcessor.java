@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.processor;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -11,6 +12,8 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.tomlj.Toml;
+import org.tomlj.TomlParseResult;
 
 public class ActProcessor extends AIFileProcessor {
 
@@ -33,38 +36,44 @@ public class ActProcessor extends AIFileProcessor {
 		String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(StringUtils.defaultString(act), " "),
 				StringUtils.defaultString(defaultPrompt));
 
-		ResourceBundle promptBundle;
+		String instructions = null;
 		if (actDir != null) {
 			try {
-				URL[] urls = { actDir.toURI().toURL() };
-				ClassLoader loader = new URLClassLoader(urls);
+				TomlParseResult result = Toml.parse(new File(actDir, name + ".toml").toPath());
+				instructions = result.getString("instructions");
+				defaultPrompt = result.getString("inputs");
 
-				Locale currentLocale = Locale.getDefault();
-				promptBundle = ResourceBundle.getBundle(name, currentLocale, loader);
-
-			} catch (SecurityException | MalformedURLException e) {
-				throw new IllegalArgumentException(e);
-			} catch (MissingResourceException e) {
-				promptBundle = ResourceBundle.getBundle(ACTS_BASENAME_PREFIX + name);
+			} catch (IOException e) {
+				// do nothing, the act not found on the custom directory.
 			}
-		} else {
-			promptBundle = ResourceBundle.getBundle(ACTS_BASENAME_PREFIX + name);
 		}
 
-		try {
-			String instructions = promptBundle.getString("instructions");
-			super.setInstructions(instructions);
-		} catch (MissingResourceException e) {
-			// do nothing
+		if (instructions == null || defaultPrompt == null) {
+			try {
+				ResourceBundle promptBundle = ResourceBundle.getBundle(ACTS_BASENAME_PREFIX + name);
+				if (instructions == null) {
+					try {
+						instructions = promptBundle.getString("instructions");
+					} catch (MissingResourceException e) {
+						// do nothing
+					}
+				}
+				if (defaultPrompt == null) {
+					try {
+						String inputs = promptBundle.getString("inputs");
+						defaultPrompt = MessageFormat.format(inputs, prompt);
+					} catch (MissingResourceException e) {
+						// do nothing
+					}
+				}
+			} catch (MissingResourceException e) {
+				throw e;
+			}
 		}
 
-		try {
-			String inputs = promptBundle.getString("inputs");
-			defaultPrompt = MessageFormat.format(inputs, prompt);
-			super.setDefaultPrompt(defaultPrompt);
-		} catch (MissingResourceException e) {
-			// do nothing
-		}
+		super.setInstructions(instructions);
+		super.setDefaultPrompt(defaultPrompt);
+
 	}
 
 	public void setActDir(File actDir) {
