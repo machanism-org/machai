@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,8 +38,27 @@ public class ActProcessor extends AIFileProcessor {
 		if (actDir != null) {
 			try {
 				TomlParseResult toml = Toml.parse(new File(actDir, name + ".toml").toPath());
-				instructions = toml.getString("instructions");
-				defaultPrompt = toml.getString("inputs");
+
+				Set<Entry<String, Object>> props = toml.toMap().entrySet();
+				for (Entry<String, Object> entry : props) {
+					String key = entry.getKey();
+					String value = (String) entry.getValue();
+					switch (key) {
+					case "instructions":
+						instructions = value;
+						break;
+
+					case "inputs":
+						defaultPrompt = value;
+						break;
+
+					default:
+						if (getConfigurator().get(key, null) == null) {
+							getConfigurator().set(key, value);
+						}
+						break;
+					}
+				}
 
 			} catch (IOException e) {
 				// do nothing, the act not found on the custom directory.
@@ -51,11 +72,29 @@ public class ActProcessor extends AIFileProcessor {
 				try {
 					String tomlStr = IOUtils.toString(resource, "UTF8");
 					TomlParseResult toml = Toml.parse(tomlStr);
-					if (instructions == null) {
-						instructions = toml.getString("instructions");
-					}
-					if (defaultPrompt == null) {
-						defaultPrompt = toml.getString("inputs");
+					Set<Entry<String, Object>> props = toml.toMap().entrySet();
+					for (Entry<String, Object> entry : props) {
+						String key = entry.getKey();
+						String value = (String) entry.getValue();
+						switch (key) {
+						case "instructions":
+							if (instructions == null) {
+								instructions = value;
+							}
+							break;
+
+						case "inputs":
+							if (defaultPrompt == null) {
+								defaultPrompt = value;
+							}
+							break;
+
+						default:
+							if (getConfigurator().get(key, null) == null) {
+								getConfigurator().set(key, value);
+							}
+							break;
+						}
 					}
 				} catch (IOException e) {
 					throw new IllegalArgumentException(e);
