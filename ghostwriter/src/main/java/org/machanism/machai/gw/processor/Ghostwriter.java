@@ -426,10 +426,15 @@ public final class Ghostwriter {
 			ghostwriter.setInstructions(instructions);
 			ghostwriter.setExcludes(excludes);
 			ghostwriter.setMultiThread(multiThread);
-			ghostwriter.setDefaultPrompt(defaultPrompt);
 			ghostwriter.setLogInputs(logInputs);
 
+			ghostwriter.setDefaultPrompt(defaultPrompt);
+
 			String[] scanDirs = cmd.getArgs();
+			if (scanDirs == null || scanDirs.length == 0) {
+				scanDirs = new String[] { config.get("gw.scanDir", null) };
+			}
+
 			if (scanDirs == null || scanDirs.length == 0) {
 				scanDirs = new String[] { rootDir.getAbsolutePath() };
 			}

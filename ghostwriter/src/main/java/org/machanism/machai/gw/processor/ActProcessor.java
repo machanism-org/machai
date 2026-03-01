@@ -39,24 +39,26 @@ public class ActProcessor extends AIFileProcessor {
 			try {
 				TomlParseResult toml = Toml.parse(new File(actDir, name + ".toml").toPath());
 
-				Set<Entry<String, Object>> props = toml.toMap().entrySet();
+				Set<Entry<String, Object>> props = toml.dottedEntrySet(); 
 				for (Entry<String, Object> entry : props) {
 					String key = entry.getKey();
-					String value = (String) entry.getValue();
-					switch (key) {
-					case "instructions":
-						instructions = value;
-						break;
+					if (entry.getValue() instanceof String) {
+						String value = (String) entry.getValue();
+						switch (key) {
+						case "instructions":
+							instructions = value;
+							break;
 
-					case "inputs":
-						defaultPrompt = value;
-						break;
+						case "inputs":
+							defaultPrompt = value;
+							break;
 
-					default:
-						if (getConfigurator().get(key, null) == null) {
-							getConfigurator().set(key, value);
+						default:
+							if (getConfigurator().get(key, null) == null) {
+								getConfigurator().set(key, value);
+							}
+							break;
 						}
-						break;
 					}
 				}
 
@@ -65,16 +67,16 @@ public class ActProcessor extends AIFileProcessor {
 			}
 		}
 
-		if (instructions == null || defaultPrompt == null) {
-			String path = ACTS_BASENAME_PREFIX + name + ".toml";
-			URL resource = ClassLoader.getSystemResource(path);
-			if (resource != null) {
-				try {
-					String tomlStr = IOUtils.toString(resource, "UTF8");
-					TomlParseResult toml = Toml.parse(tomlStr);
-					Set<Entry<String, Object>> props = toml.toMap().entrySet();
-					for (Entry<String, Object> entry : props) {
-						String key = entry.getKey();
+		String path = ACTS_BASENAME_PREFIX + name + ".toml";
+		URL resource = ClassLoader.getSystemResource(path);
+		if (resource != null) {
+			try {
+				String tomlStr = IOUtils.toString(resource, "UTF8");
+				TomlParseResult toml = Toml.parse(tomlStr);
+				Set<Entry<String, Object>> props = toml.dottedEntrySet(); 
+				for (Entry<String, Object> entry : props) {
+					String key = entry.getKey();
+					if (entry.getValue() instanceof String) {
 						String value = (String) entry.getValue();
 						switch (key) {
 						case "instructions":
@@ -96,12 +98,12 @@ public class ActProcessor extends AIFileProcessor {
 							break;
 						}
 					}
-				} catch (IOException e) {
-					throw new IllegalArgumentException(e);
 				}
-			} else {
-				throw new IllegalArgumentException("Act: `" + act + "` not found.");
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
 			}
+		} else {
+			throw new IllegalArgumentException("Act: `" + act + "` not found.");
 		}
 
 		super.setInstructions(instructions);

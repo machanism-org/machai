@@ -113,67 +113,6 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Scans documents within the specified project root directory and the provided
-	 * start subdirectory or pattern, preparing inputs for documentation generation.
-	 *
-	 * <p>
-	 * The {@code scanDir} parameter can be either:
-	 * </p>
-	 * <ul>
-	 * <li>A raw directory name (e.g., {@code src}),</li>
-	 * <li>or a pattern string prefixed with {@code glob:} or {@code regex:}, as
-	 * supported by {@link java.nio.file.FileSystem#getPathMatcher(String)}.</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * If a directory path is provided, it should be relative to the current
-	 * processing project. If an absolute path is provided, it must be located
-	 * within the {@code projectDir}.
-	 * </p>
-	 *
-	 * @param projectDir the root directory of the project to scan
-	 * @param scanDir    the file glob/regex pattern or start directory to scan;
-	 *                   must be a relative path with respect to the project, or an
-	 *                   absolute path located within {@code projectDir}
-	 * @throws IOException              if an error occurs while reading files
-	 *                                  during the scan
-	 * @throws IllegalArgumentException if the scan path is not located within the
-	 *                                  root project directory
-	 */
-	public void scanDocuments(File projectDir, String scanDir) throws IOException {
-		if (projectDir == null) {
-			throw new IllegalArgumentException("projectDir must not be null");
-		}
-		if (StringUtils.isBlank(scanDir)) {
-			throw new IllegalArgumentException("scanDir must not be blank");
-		}
-
-		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
-
-			logger.info("Scan path: {}", scanDir);
-
-			if (!isPathPattern(scanDir)) {
-				super.setScanDir(new File(scanDir));
-				String relativePath = ProjectLayout.getRelativePath(projectDir, new File(scanDir));
-				if (relativePath == null) {
-					throw new IllegalArgumentException(
-							"Error: The specified scan path must be located within the root project directory: "
-									+ projectDir.getAbsolutePath());
-				}
-
-				if (getDefaultPrompt() == null) {
-					scanDir = "glob:" + relativePath + "{,/**}";
-				} else {
-					scanDir = "glob:" + relativePath;
-				}
-			}
-			super.setPathMatcher(FileSystems.getDefault().getPathMatcher(scanDir));
-		}
-
-		scanFolder(projectDir);
-	}
-
-	/**
 	 * Recursively scans project folders, processing documentation inputs for all
 	 * found modules and files.
 	 *

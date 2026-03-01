@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -108,7 +109,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @param projectLayout project layout
 	 * @param file          file being processed (used for logging and templating)
 	 * @param instructions  system or execution instructions for the provider
-	 * @param prompt      prompt content to include in the prompt
+	 * @param prompt        prompt content to include in the prompt
 	 * @return provider output
 	 * @throws IOException if creating input logs fails or provider I/O fails
 	 */
@@ -372,17 +373,64 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Scans the project directory and applies the configured default prompt.
+	 * Scans documents within the specified project root directory and the provided
+	 * start subdirectory or pattern, preparing inputs for documentation generation.
 	 *
-	 * @param projectDir project root
-	 * @param scanDir    scan start directory or pattern (currently unused by this
-	 *                   implementation)
-	 * @throws IOException if provider execution fails
+	 * <p>
+	 * The {@code scanDir} parameter can be either:
+	 * </p>
+	 * <ul>
+	 * <li>A raw directory name (e.g., {@code src}),</li>
+	 * <li>or a pattern string prefixed with {@code glob:} or {@code regex:}, as
+	 * supported by {@link java.nio.file.FileSystem#getPathMatcher(String)}.</li>
+	 * </ul>
+	 *
+	 * <p>
+	 * If a directory path is provided, it should be relative to the current
+	 * processing project. If an absolute path is provided, it must be located
+	 * within the {@code projectDir}.
+	 * </p>
+	 *
+	 * @param projectDir the root directory of the project to scan
+	 * @param scanDir    the file glob/regex pattern or start directory to scan;
+	 *                   must be a relative path with respect to the project, or an
+	 *                   absolute path located within {@code projectDir}
+	 * @throws IOException              if an error occurs while reading files
+	 *                                  during the scan
+	 * @throws IllegalArgumentException if the scan path is not located within the
+	 *                                  root project directory
 	 */
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
-		ProjectLayout projectLayout = getProjectLayout(projectDir);
-		String perform = process(projectLayout, getRootDir(), instructions, defaultPrompt);
-		logger.info(perform);
+		if (projectDir == null) {
+			throw new IllegalArgumentException("projectDir must not be null");
+		}
+		if (StringUtils.isBlank(scanDir)) {
+			throw new IllegalArgumentException("scanDir must not be blank");
+		}
+
+		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
+
+			logger.info("Scan path: {}", scanDir);
+
+			if (!isPathPattern(scanDir)) {
+				super.setScanDir(new File(scanDir));
+				String relativePath = ProjectLayout.getRelativePath(projectDir, new File(scanDir));
+				if (relativePath == null) {
+					throw new IllegalArgumentException(
+							"Error: The specified scan path must be located within the root project directory: "
+									+ projectDir.getAbsolutePath());
+				}
+
+				if (getDefaultPrompt() == null) {
+					scanDir = "glob:" + relativePath + "{,/**}";
+				} else {
+					scanDir = "glob:" + relativePath;
+				}
+			}
+			super.setPathMatcher(FileSystems.getDefault().getPathMatcher(scanDir));
+		}
+
+		scanFolder(projectDir);
 	}
 
 	/**
@@ -398,11 +446,23 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Sets the default prompt applied when a file does not contain embedded
 	 * {@code @guidance} directives.
 	 *
-	 * @param defaultPrompt default prompt input (plain text, URL, or
-	 *                        {@code file:})
+	 * @param defaultPrompt default prompt input (plain text, URL, or {@code file:})
 	 */
 	public void setDefaultPrompt(String defaultPrompt) {
 		this.defaultPrompt = defaultPrompt;
 	}
 
+	/**
+	 * Processes a project layout for documentation gathering.
+	 *
+	 * @param projectLayout layout describing sources, tests, docs, and modules
+	 */
+	@Override
+	public void processFolder(ProjectLayout projectLayout) {
+		try {
+			process(projectLayout, projectLayout.getProjectDir(), instructions, defaultPrompt);
+		} catch (IOException e) {
+			new IllegalArgumentException(e);
+		}
+	}
 }
