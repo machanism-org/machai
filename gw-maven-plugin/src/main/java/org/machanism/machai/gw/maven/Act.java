@@ -10,6 +10,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
@@ -26,6 +27,9 @@ public class Act extends AbstractGWGoal {
 	 */
 	@Component
 	protected Prompter prompter;
+
+	@Parameter(property = "gw.act", required = false)
+	private String act;
 
 	/**
 	 * Executes the interactive action.
@@ -63,9 +67,14 @@ public class Act extends AbstractGWGoal {
 			fileProcessor.setLogInputs(logInputs);
 
 			try {
-				String action;
-				while (StringUtils.isNoneBlank(action = prompter.prompt("Act"))) {
-					fileProcessor.setDefaultGuidance(action);
+				if (act == null) {
+					String action;
+					while (StringUtils.isNoneBlank(action = prompter.prompt("Act"))) {
+						fileProcessor.setDefaultGuidance(action);
+						fileProcessor.scanDocuments(basedir, scanDir);
+					}
+				} else {
+					fileProcessor.setDefaultGuidance(act);
 					fileProcessor.scanDocuments(basedir, scanDir);
 				}
 
