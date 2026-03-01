@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This CLI bootstraps configuration, parses command-line options, and invokes
  * {@link GuidanceProcessor} to scan a directory tree for supported files. For
- * each file, Ghostwriter extracts embedded {@code @guidance:} directives and
+ * each file, Ghostwriter extracts embedded `guidance` tag directives and
  * submits the resulting prompt to the configured GenAI provider.
  * </p>
  *
@@ -250,7 +250,7 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Sets default guidance applied when embedded {@code @guidance} directives are
+	 * Sets default guidance applied when embedded guidance tag directives are
 	 * not present.
 	 *
 	 * @param defaultGuidance default guidance text, URL, or {@code file:} reference
