@@ -27,7 +27,8 @@ public class ActProcessor extends AIFileProcessor {
 
 		ResourceBundle promptBundle = ResourceBundle.getBundle("act/" + name);
 		try {
-			defaultGuidance = MessageFormat.format(promptBundle.getString("inputs"), prompt);
+			String inputs = promptBundle.getString("inputs");
+			defaultGuidance = MessageFormat.format(inputs, prompt);
 			super.setDefaultGuidance(defaultGuidance);
 		} catch (MissingResourceException e) {
 			throw new IllegalArgumentException(

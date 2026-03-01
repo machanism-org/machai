@@ -13,6 +13,7 @@ import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationExce
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -20,7 +21,7 @@ import org.springframework.shell.standard.ShellOption;
 @ShellComponent
 public class GWCommand {
 
-	private static Logger logger;
+	private static Logger logger = LoggerFactory.getLogger(GWCommand.class);
 	private static final PropertiesConfigurator config = new PropertiesConfigurator();
 
 	@PostConstruct
@@ -103,7 +104,7 @@ public class GWCommand {
 			}
 
 		} catch (ProcessTerminationException e) {
-			logger.error("Process terminated: {}", e.getMessage());
+			logger.error("Process terminated: {}, Exit code: {}", e.getMessage(), e.getExitCode());
 		} catch (Exception e) {
 			logger.error("Unexpected error: " + e.getMessage(), e);
 		} finally {

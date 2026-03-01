@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -132,10 +133,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		String guidanceLines = parseLines(guidance);
 		guidanceBuilder.append(guidanceLines);
 
-		HashMap<String, String> props = getProperties(projectLayout);
-		String finalGuidance = StrSubstitutor.replace(guidanceBuilder.toString(), props);
-
-		provider.prompt(finalGuidance);
+		provider.prompt(guidanceBuilder.toString());
 
 		if (isLogInputs()) {
 			String inputsFileName = ProjectLayout.getRelativePath(getRootDir(), file);
@@ -155,30 +153,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Collects key project properties from the provided {@link ProjectLayout} and
-	 * returns them as a map.
-	 *
-	 * @param projectLayout the {@link ProjectLayout} instance from which to extract
-	 *                      properties
-	 * @return a {@link HashMap} containing project property keys and their
-	 *         corresponding values
-	 */
-	protected HashMap<String, String> getProperties(ProjectLayout projectLayout) {
-		HashMap<String, String> valueMap = new HashMap<>();
-		valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "id", projectLayout.getProjectId());
-		valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "name", projectLayout.getProjectName());
-		String parentId = projectLayout.getParentId();
-		if (parentId != null) {
-			valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "parentId", parentId);
-		}
-		File parentDir = projectLayout.getProjectDir().getParentFile();
-		if (parentDir != null) {
-			valueMap.put(GW_PROJECT_LAYOUT_PROP_PREFIX + "parentDir", parentDir.getName());
-		}
-		return valueMap;
-	}
-
-	/**
 	 * Builds a human-readable description of the project structure used in prompts.
 	 *
 	 * @param projectLayout current project layout
@@ -189,6 +163,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		List<String> content = new ArrayList<>();
 
 		File projectDir = projectLayout.getProjectDir();
+		String parentId = projectLayout.getParentId();
+		File parentDir = projectLayout.getProjectDir().getParentFile();
 
 		List<String> sources = projectLayout.getSources();
 		List<String> tests = projectLayout.getTests();
@@ -197,6 +173,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		content.add(projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`" : NOT_DEFINED);
 		content.add(projectLayout.getProjectId());
+		content.add(projectDir.getName());
+		content.add(Objects.toString(parentId, NOT_DEFINED));
+		content.add(parentDir != null ? parentDir.getName() : NOT_DEFINED);
 
 		String relativePath = ProjectLayout.getRelativePath(getRootDir(), projectDir);
 		content.add(relativePath);

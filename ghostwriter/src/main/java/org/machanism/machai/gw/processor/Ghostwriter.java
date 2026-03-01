@@ -124,7 +124,7 @@ public final class Ghostwriter {
 			}
 
 		} catch (ProcessTerminationException e) {
-			logger.error("Process terminated: {}", e.getMessage());
+			logger.error("Process terminated: {}, Exit code: {}", e.getMessage(), e.getExitCode());
 			exitCode = e.getExitCode();
 		} catch (IllegalArgumentException e) {
 			logger.error("Error: {}", e.getMessage());
