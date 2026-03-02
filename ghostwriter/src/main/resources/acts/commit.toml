@@ -33,11 +33,11 @@ inputs = '''
    - Otherwise: Automatically execute the appropriate git or svn commands to commit each group separately using the functional tool, according to the version control system in use.
 
 2. If changes are present, analyze and group the modified files in the current folder by related change type or logical modification (e.g., feature, fix, refactor, docs, chore).  
-   - Only include files located directly in the current directory (`.`); ignore changes in subdirectories or outside this folder.
+   - Only include files located directly in the current directory (`.`) and changes in sub-directories.
 
 3. For each group, generate a commit message that:
    - Follows best practices (clear, concise, imperative mood, present tense, and specific).
-   - Adopts the style and format of several historical commit messages from the project.
+   - **Adopts the style and format of several historical commit messages from the project.**
 
 %s
 '''

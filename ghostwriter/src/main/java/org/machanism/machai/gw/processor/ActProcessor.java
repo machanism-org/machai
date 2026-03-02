@@ -3,9 +3,8 @@ package org.machanism.machai.gw.processor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.text.MessageFormat;
-import java.util.Map.Entry;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -125,7 +124,7 @@ public class ActProcessor extends AIFileProcessor {
 			process(projectLayout, projectDir, getInstructions(), getDefaultPrompt());
 		}
 	}
-	
+
 	protected void processFile(ProjectLayout projectLayout, File file) throws IOException {
 		process(projectLayout, file, getInstructions(), getDefaultPrompt());
 	}

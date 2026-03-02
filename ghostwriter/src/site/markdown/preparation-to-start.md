@@ -82,29 +82,32 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 
 | Property name | Description | Default value | Usage context |
 |---|---|---|---|
-| `gw.config` | Configuration file name (resolved relative to `gw.home`) to load at startup. | `gw.properties` | Used as a Java system property in `initializeConfiguration(...)` when constructing `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. |
+| `gw.config` | Configuration file name (resolved relative to `gw.home`) to load at startup. | `gw.properties` | Read as a Java system property in `initializeConfiguration(...)` when constructing `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. |
 | `gw.home` | Home directory (`gwHomeDir`) used to resolve `gw.config`. During bootstrap Ghostwriter sets `System.setProperty("gw.home", gwHomeDir.getAbsolutePath())` after resolution. | If not set: CLI `--root/-r` value (if provided); else `user.dir`. | Read via `PropertiesConfigurator#getFile("gw.home", null)` in `initializeConfiguration(...)`. Used as the base directory for the config file location. |
-| `gw.rootDir` | Root project directory used as the base directory for file processing (including the default scan target) and to constrain/validate absolute scan paths. | If not set: `user.dir`. | If the CLI `-r/--root` option is provided, its value is used. Otherwise loaded via `config.getFile("gw.rootDir", null)` and falls back to `SystemUtils.getUserDir()`. Passed into `new AIFileProcessor(rootDir, ...)` and used by `processor.getRootDir()` for scanning. |
-| `gw.genai` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | **No default**; required. | Loaded via `config.get("gw.genai", null)` and optionally overridden by CLI `-a/--genai`. Used to construct `new GuidanceProcessor(rootDir, genai, config)` (normal mode) or `new AIFileProcessor(rootDir, config, genai)` (Act mode). If blank, Ghostwriter throws `IllegalArgumentException`. |
-| `gw.instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null` | Loaded via `config.get("gw.instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin until EOF. Applied via `AIFileProcessor#setInstructions(...)`. In Act mode, may be overridden by `act/<name>.properties` key `instructions`. |
+| `gw.rootDir` | Root project directory used as the base directory for file processing (including scan targets) and to constrain/validate absolute scan paths (enforced downstream by the processor). | If not set: `user.dir`. | If the CLI `-r/--root` option is provided, its value is used. Otherwise loaded via `config.getFile("gw.rootDir", null)` and falls back to `SystemUtils.getUserDir()`. Passed into `new ActProcessor(rootDir, config, genai)` / `new GuidanceProcessor(rootDir, genai, config)`, and later used via `processor.getRootDir()` during scanning. |
+| `gw.genai` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | **No default**; required. | Loaded via `config.get("gw.genai", null)` and optionally overridden by CLI `-a/--genai`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor` / `GuidanceProcessor` construction. |
+| `gw.instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null` | Loaded via `config.get("gw.instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin until EOF. Applied via `AIFileProcessor#setInstructions(...)`. |
 | `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null` | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
-| `gw.guidance` | Default guidance to apply when files do not contain embedded `@guidance:` directives; also used as the default prompt text in `--act` mode when no text follows the act name. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null` | Loaded via `config.get("gw.guidance", null)` and optionally overridden by CLI `-g/--guidance`. If `-g` is specified without a value, guidance is read from stdin until EOF. In normal mode, applied via `AIFileProcessor#setDefaultGuidance(...)`. In Act mode, used as the default prompt text when formatting `act/<name>.properties` `inputs`. |
-| `gw.threads` | Enables/disables multi-threaded module processing. | `false` | Loaded via `config.getBoolean("gw.threads", false)` and optionally overridden by CLI `-t/--threads` (no value forces `true`; otherwise parsed as boolean). Applied via `AIFileProcessor#setModuleMultiThread(...)`. |
+| `gw.guidance` | Default guidance applied when embedded guidance tag directives are not present (normal mode). | `null` | Loaded via `config.get("gw.guidance", null)` and optionally overridden by CLI `-g/--guidance`. If `-g` is specified without a value, guidance is read from stdin until EOF. Applied via `AIFileProcessor#setDefaultPrompt(...)` (via `Ghostwriter#setDefaultPrompt(...)`). |
+| `gw.threads` | Enables/disables multi-threaded module processing. | `null` (when unset) | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads` (no value forces `"true"`; otherwise uses the option value). Parsed via `Boolean.parseBoolean(...)` and applied via `AIFileProcessor#setModuleMultiThread(...)`. |
 | `gw.logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false` | Loaded via `config.getBoolean("gw.logInputs", false)` and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(...)`. |
+| `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | If not set: `user.dir` absolute path. | Read via `config.get("gw.scanDir", null)` only when there are no CLI scanDir args. If still absent, Ghostwriter scans `SystemUtils.getUserDir().getAbsolutePath()`. |
+
+> Note: The CLI option `--acts <dir>` is **not** a `gw.*` property. It is a command-line-only override for the directory containing Act prompt files.
 
 ### Act Mode
 
 Ghostwriter also supports **Act mode**, which loads predefined prompts from classpath resource bundles and executes them interactively.
 
-- CLI option: `--act [<name> [prompt...]]`
+- CLI option: `--act [<prompt...>]`
 - Prompt bundle location: `src/main/resources/act/<name>.properties` (packaged as `act/<name>.properties`)
 
-In Act mode, `gw.guidance` is used as the default prompt text if you only supply the act name.
+In Act mode, the text passed to `--act` (or stdin if omitted) is used as the default prompt.
 
 **Example:**
 
 ```text
-java -jar gw.jar --act refactor "Improve readability and add tests"
+java -jar gw.jar --act "Improve readability and add tests"
 ```
 
 **Sample `gw.properties`:**
@@ -124,7 +127,9 @@ gw.guidance=file:C:\\projects\\MDDA-BPD\\guidance.txt
 # Exclude directories (optional)
 gw.excludes=target,.git
 
-# Enable multi-threaded processing (optional; default is false)
+# Enable multi-threaded processing (optional)
+# NOTE: when unset, the code treats it as "not specified" (null);
+# it is only applied when explicitly set (or -t/--threads is used).
 gw.threads=true
 
 # Override project root directory (optional)
@@ -135,6 +140,9 @@ gw.rootDir=C:\\projects\\machai
 
 # Optional: override gwHomeDir (base directory used to resolve gw.config)
 # gw.home=C:\\machai\\ghostwriter
+
+# Optional: default scan target when no <scanDir> args are provided
+# gw.scanDir=src
 ```
 
 ### Overriding Settings: Command-Line Options

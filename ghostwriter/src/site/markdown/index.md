@@ -125,15 +125,15 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 
 | Option | Description | Default |
 |---|---|---|
-| `-h, --help` | Show help message and exit. | `false` |
-| `-r, --root <path>` | Root directory for file processing. | `gw.rootDir` or current working directory |
-| `-t, --threads[=<true\|false>]` | Enable multi-threaded processing. If used without a value, enables it. | `false` (`gw.threads`) |
-| `-a, --genai <provider:model>` | GenAI provider and model to use. | `gw.genai` |
+| `-h, --help` | Show this help message and exit. | `false` |
+| `-r, --root <path>` | Specify the path to the root directory for file processing. | `gw.rootDir` or current working directory |
+| `-t, --threads[=<true\|false>]` | Enable multi-threaded processing to improve performance. If used without a value, enables it. | `false` (`gw.threads`) |
+| `-a, --genai <provider:model>` | Set the GenAI provider and model. | `gw.genai` |
 | `-i, --instructions[=<text\|url\|file:...>]` | System instructions (plain text, URL, or `file:`). If no value: stdin until EOF. | `gw.instructions` |
 | `-g, --guidance[=<text\|url\|file:...>]` | Default guidance (plain text, URL, or `file:`). If no value: stdin until EOF. | `gw.guidance` |
-| `-e, --excludes <csv>` | Comma-separated excludes. | `gw.excludes` |
-| `-l, --logInputs` | Log provider inputs to files. | `false` (`gw.logInputs`) |
-| `--act[=<...>]` | Act mode prompt execution. | disabled |
+| `-e, --excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` |
+| `-l, --logInputs` | Log LLM request inputs to dedicated log files. | `false` (`gw.logInputs`) |
+| `--act[=<...>]` | Run Ghostwriter in Act mode: an interactive mode for executing predefined prompts. | disabled |
 
 ### Example
 
@@ -143,20 +143,28 @@ This example combines a scan pattern, explicit provider selection, default guida
 java -jar gw.jar "glob:**/*.md" -a OpenAI:gpt-5.1 -g -l
 ```
 
-When `-g/--guidance` (or `-i/--instructions`, or `--act`) is used without a value, Ghostwriter will prompt for multi-line input and you finish input with EOF (`Ctrl+Z` on Windows, `Ctrl+D` on Unix).
+From the built-in help:
+
+- `<scanDir>` may be a relative path (from the current project directory) or a `glob:` / `regex:` matcher.
+- If `-g/--guidance` (or `-i/--instructions`, or `--act`) is used without a value, Ghostwriter will prompt for multi-line input and you finish input with EOF (`Ctrl+Z` on Windows, `Ctrl+D` on Unix).
 
 ## Default Guidance
 
-Ghostwriter supports a *default guidance* string that is applied when embedded `@guidance:` directives are not present (or as a final step at the directory level, depending on scanning behavior).
+Ghostwriter supports a *default guidance* string that is applied when embedded `@guidance:` directives are not present (or applied as a final step for the current scan, depending on processor behavior).
 
 In the CLI, default guidance is configured via:
 
 - Config property: `gw.guidance`
 - CLI option: `-g, --guidance`
 
-At runtime, Ghostwriter applies it by calling `AIFileProcessor.setDefaultGuidance(String defaultGuidance)`.
+At runtime, the CLI passes the value into the processor via `Ghostwriter.setDefaultPrompt(String)` → `AIFileProcessor.setDefaultPrompt(String)`.
 
-`defaultGuidance` accepts plain text, URLs, or `file:` references (the input is parsed line-by-line). This lets you keep reusable organization-wide guidance in a file or remote URL while still running project-specific scans.
+`defaultGuidance` accepts plain text, URLs, or `file:` references, processed line-by-line:
+
+- Blank lines are preserved.
+- Lines starting with `http://` or `https://` are loaded from the URL.
+- Lines starting with `file:` are loaded from the specified file path.
+- Other lines are used as-is.
 
 ## Resources
 
