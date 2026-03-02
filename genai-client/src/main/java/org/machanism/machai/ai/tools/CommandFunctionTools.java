@@ -302,7 +302,7 @@ public class CommandFunctionTools implements FunctionTools {
 			if (!finished) {
 				process.destroyForcibly();
 				output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds))
-						.append(" seconds.").append(System.lineSeparator());
+						.append(" seconds.").append("\n");
 				logger.warn("[CMD {}] Command timed out", commandId);
 			}
 
@@ -311,12 +311,12 @@ public class CommandFunctionTools implements FunctionTools {
 
 			int exitCode = process.exitValue();
 			output.append("Command exited with code: ").append(Integer.toString(exitCode))
-					.append(System.lineSeparator());
+					.append("\n");
 
 			return output.getLastText();
 
 		} catch (TimeoutException e) {
-			output.append("Output reading timed out.").append(System.lineSeparator());
+			output.append("Output reading timed out.").append("\n");
 			logger.error("[CMD {}] Output reading timed out", commandId, e);
 			return output.getLastText();
 
@@ -387,7 +387,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Parses the {@code env} parameter string into a map of environment variables.
 	 *
 	 * <p>
-	 * Lines are separated by {@code \n} (or {@code \r\n}); empty lines and lines
+	 * Lines are separated by {@code \n} (or {@code \n}); empty lines and lines
 	 * starting with {@code #} are ignored.
 	 * </p>
 	 *
@@ -458,7 +458,7 @@ public class CommandFunctionTools implements FunctionTools {
 				new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				output.append(line).append(System.lineSeparator());
+				output.append(line).append("\n");
 				lineConsumer.accept(line);
 			}
 		} catch (IOException e) {

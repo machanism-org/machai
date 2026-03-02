@@ -77,7 +77,7 @@ public class NoneProvider implements GenAIProvider {
 	@Override
 	public void prompt(String text) {
 		prompts.append(text);
-		prompts.append("\r\n\r\n");
+		prompts.append("\n\n");
 	}
 
 	/**

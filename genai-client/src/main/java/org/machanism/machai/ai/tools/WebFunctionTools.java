@@ -158,7 +158,7 @@ public class WebFunctionTools implements FunctionTools {
 				org.jsoup.select.Elements elements = doc.select(selector);
 				StringBuilder selectedContent = new StringBuilder();
 				for (org.jsoup.nodes.Element element : elements) {
-					selectedContent.append(element.outerHtml()).append(System.lineSeparator());
+					selectedContent.append(element.outerHtml()).append("\n");
 				}
 				response = selectedContent.toString().trim();
 			}
@@ -167,7 +167,7 @@ public class WebFunctionTools implements FunctionTools {
 				response = new Source(response)
 						.getRenderer()
 						.setMaxLineLength(180)
-						.setNewLine("\r\n")
+						.setNewLine("\n")
 						.toString();
 			}
 
@@ -240,13 +240,13 @@ public class WebFunctionTools implements FunctionTools {
 
 		int responseCode = connection.getResponseCode();
 		output.append("HTTP ").append(Integer.toString(responseCode)).append(" ")
-				.append(connection.getResponseMessage()).append(System.lineSeparator());
+				.append(connection.getResponseMessage()).append("\n");
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(
 				responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream(), charsetName))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				output.append(line).append(System.lineSeparator());
+				output.append(line).append("\n");
 			}
 		}
 
@@ -304,13 +304,13 @@ public class WebFunctionTools implements FunctionTools {
 			int responseCode = connection.getResponseCode();
 			StringBuilder response = new StringBuilder();
 			response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
-					.append(System.lineSeparator());
+					.append("\n");
 
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(
 					responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream(), charsetName))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					response.append(line).append(System.lineSeparator());
+					response.append(line).append("\n");
 				}
 			}
 
