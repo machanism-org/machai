@@ -30,7 +30,7 @@ inputs = '''
 
 Analyze the project changes and group files by related changes, ensuring each group represents a distinct change 
 type or logical modification (e.g., feature, fix, refactor, docs, chore). 
-Only consider files located in the current folder; ignore changes outside the current directory. 
+Only consider files located in the current folder, path: `.`; ignore changes outside the current directory. 
 If there are no changes in the current folder then show the message about it and just skip following actions.
 
 For each group, generate a commit message following best conventions (clear, concise, imperative mood, present tense, and specific), 
