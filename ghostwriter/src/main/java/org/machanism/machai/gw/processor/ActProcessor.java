@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Map.Entry;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 
@@ -51,7 +53,7 @@ public class ActProcessor extends AIFileProcessor {
 				String tomlStr = IOUtils.toString(resource, "UTF8");
 				TomlParseResult toml = Toml.parse(tomlStr);
 				setActData(prompt, toml);
-				
+
 			} catch (IOException e) {
 				throw new IllegalArgumentException(e);
 			}
@@ -93,5 +95,11 @@ public class ActProcessor extends AIFileProcessor {
 
 	public void setActDir(File actDir) {
 		this.actDir = actDir;
+	}
+
+	@Override
+	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
+		File projectDir = projectLayout.getProjectDir();
+		process(projectLayout, projectDir, getInstructions(), getDefaultPrompt());
 	}
 }

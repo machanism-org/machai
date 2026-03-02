@@ -213,7 +213,9 @@ public final class Ghostwriter {
 	 * @return the entered text, or {@code null} if no content was entered
 	 */
 	private static String readText(String prompt) {
-		System.out.println(prompt);
+		System.out.print(prompt + " (press ENTER and EOF: "
+				+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
+				+ " to complete):");
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (scanner.hasNextLine()) {
@@ -364,9 +366,7 @@ public final class Ghostwriter {
 
 			if (instructions == null) {
 				instructions = readText("No instructions were provided as an option value.\n"
-						+ "Please enter the instructions text below. When you are done, press "
-						+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
-						+ " to finish and signal end of input (EOF):");
+						+ "Please enter the instructions text below.");
 			}
 		}
 
@@ -405,9 +405,7 @@ public final class Ghostwriter {
 				defaultPrompt = cmd.getOptionValue(actOpt.getLongOpt());
 
 				if (defaultPrompt == null) {
-					defaultPrompt = readText("Please input your act [When you are done, press ENTER and "
-							+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
-							+ " to finish and signal end of input (EOF)]:");
+					defaultPrompt = readText("Act");
 				}
 
 				if (cmd.hasOption(actsDirOpt)) {
@@ -425,9 +423,7 @@ public final class Ghostwriter {
 				if (cmd.hasOption(guidanceOpt.getOpt())) {
 					defaultPrompt = cmd.getOptionValue(guidanceOpt.getOpt());
 					if (defaultPrompt == null) {
-						defaultPrompt = readText("Please enter the guidance text below. When finished, press ENTER and "
-								+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
-								+ " to signal end of input (EOF):");
+						defaultPrompt = readText("Please enter the guidance text below.");
 					}
 				}
 
