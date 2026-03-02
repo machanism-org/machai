@@ -47,6 +47,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class Ghostwriter {
 
+	public static final String MULTIPLE_LINES_BREAKER = "\\";
+
 	/** Logger for the Ghostwriter application. */
 	private static Logger logger;
 
@@ -211,18 +213,22 @@ public final class Ghostwriter {
 	 * @param prompt prompt to display before reading
 	 * @return the entered text, or {@code null} if no content was entered
 	 */
-	private static String readText(String prompt) {
-		System.out.print(
-				prompt + " (press Ctrl+" + (SystemUtils.IS_OS_WINDOWS ? "Z" : "D") + " and ENTER to complete): ");
+	public static String readText(String prompt) {
+		System.out.print(prompt + ": ");
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (scanner.hasNextLine()) {
-				sb.append(scanner.nextLine()).append("\n");
+				String nextLine = scanner.nextLine();
+				if (StringUtils.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
+					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append("\n");
+				} else {
+					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER));
+					break;
+				}
 			}
 		}
 
-		System.out.println("Input complete. Processing your text...");
-		return sb.length() > 0 ? sb.deleteCharAt(sb.length() - 1).toString() : null;
+		return sb.toString();
 	}
 
 	/**

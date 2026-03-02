@@ -16,7 +16,7 @@ import org.tomlj.TomlParseResult;
 
 public class ActProcessor extends AIFileProcessor {
 
-	private static final String ACTS_BASENAME_PREFIX = "acts/";
+	private static final String ACTS_BASENAME_PREFIX = "/acts/";
 	private File actDir;
 
 	public ActProcessor(File rootDir, Configurator configurator, String genai) {
@@ -32,11 +32,21 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		String defaultPrompt = getDefaultPrompt();
-		String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(StringUtils.defaultString(act), " "),
-				StringUtils.defaultString(defaultPrompt));
+
+		String prompt = "";
+		java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\s").matcher(act);
+		if (matcher.find()) {
+			int start = matcher.start();
+			String substringAfter = StringUtils.substring(act, start);
+			prompt = StringUtils.defaultIfBlank(substringAfter, StringUtils.defaultString(defaultPrompt));
+
+			name = StringUtils.substring(act, 0, start);
+		} else {
+			name = act;
+		}
 
 		String path = ACTS_BASENAME_PREFIX + name + ".toml";
-		URL resource = ClassLoader.getSystemResource(path);
+		URL resource = Ghostwriter.class.getResource(path);
 		TomlParseResult toml = null;
 		if (resource != null) {
 			try {
@@ -63,7 +73,7 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		if (toml == null) {
-			throw new IllegalArgumentException("Act: `" + act + "` not found.");
+			throw new IllegalArgumentException("Act: `" + name + "` not found.");
 		}
 	}
 

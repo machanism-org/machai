@@ -3,6 +3,7 @@ package org.machanism.machai.gw.maven;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -14,8 +15,10 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -42,8 +45,10 @@ public class Act extends AbstractGWGoal {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
+		PropertiesConfigurator configuration = getConfiguration();
+
 		try {
-			ActProcessor actProcessor = new ActProcessor(basedir, getConfiguration(), genai) {
+			ActProcessor actProcessor = new ActProcessor(basedir, configuration, genai) {
 				@Override
 				public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 					ProjectLayout projectLayout = super.getProjectLayout(projectDir);
@@ -75,16 +80,21 @@ public class Act extends AbstractGWGoal {
 			actProcessor.setLogInputs(logInputs);
 
 			try {
-				logger.info("Starting scan of directory: {}", scanDir);
 				if (act == null) {
 					String action;
-					while (StringUtils.isNoneBlank(action = prompter.prompt("Act"))) {
+					while (StringUtils.isNoneBlank(action = readText("Act"))) {
 						actProcessor.setDefaultPrompt(action);
+						String gwScanDir = configuration.get("gw.scanDir");
+						String scanDir = Objects.toString(super.scanDir, gwScanDir);
+						logger.info("Starting scan of directory: {}", scanDir);
 						actProcessor.scanDocuments(basedir, scanDir);
 					}
 
 				} else {
 					actProcessor.setDefaultPrompt(act);
+					String gwScanDir = configuration.get("gw.scanDir");
+					String scanDir = Objects.toString(super.scanDir, gwScanDir);
+					logger.info("Starting scan of directory: {}", scanDir);
 					actProcessor.scanDocuments(basedir, scanDir);
 				}
 				logger.info("Finished scanning directory: {}", scanDir);
@@ -102,4 +112,19 @@ public class Act extends AbstractGWGoal {
 		}
 	}
 
+	public String readText(String prompt) throws PrompterException {
+		StringBuilder sb = new StringBuilder();
+		String line = null;
+		while ((line = prompter.prompt(prompt)) != null) {
+			prompt = "";
+			if (Strings.CS.endsWith(line, Ghostwriter.MULTIPLE_LINES_BREAKER)) {
+				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER)).append("\n");
+			} else {
+				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER));
+				break;
+			}
+		}
+
+		return sb.toString();
+	}
 }
