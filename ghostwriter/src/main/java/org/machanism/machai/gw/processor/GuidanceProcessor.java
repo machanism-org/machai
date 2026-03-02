@@ -213,7 +213,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
 		String osName = System.getProperty("os.name");
 		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
-		guidanceBuilder.append(docsProcessingInstructions).append("\r\n");
+		guidanceBuilder.append(docsProcessingInstructions).append("\n");
 
 		return super.process(projectLayout, file, instructions, guidanceBuilder.toString());
 	}

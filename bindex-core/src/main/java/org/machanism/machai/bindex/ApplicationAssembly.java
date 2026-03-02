@@ -114,7 +114,7 @@ public class ApplicationAssembly {
 		bindexPrompt.append(assemblyInstructions);
 
 		String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
-		bindexPrompt.append(userPrompt).append("\r\n");
+		bindexPrompt.append(userPrompt).append("\n");
 
 		StringBuilder picked = new StringBuilder();
 		for (Bindex bindex : bindexList) {
@@ -122,13 +122,13 @@ public class ApplicationAssembly {
 				continue;
 			}
 			picked.append("- `").append(bindex.getId()).append("`: `").append(bindex.getDescription())
-					.append("`\r\n");
+					.append("`\n");
 		}
-		bindexPrompt.append("\r\n");
+		bindexPrompt.append("\n");
 
 		String promptStr = MessageFormat.format(PROMPT_BUNDLE.getString("recommended_library_section"),
 				picked.toString());
-		bindexPrompt.append(promptStr).append("\r\n");
+		bindexPrompt.append(promptStr).append("\n");
 
 		provider.prompt(bindexPrompt.toString());
 

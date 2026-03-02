@@ -101,11 +101,11 @@ public class BindexBuilder {
 		if (origin != null) {
 			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
 			String updateBindexPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("update_bindex_prompt"), bindexStr);
-			prompt.append(updateBindexPrompt).append(System.lineSeparator());
+			prompt.append(updateBindexPrompt).append("\n");
 		}
 
-		prompt.append(projectContext()).append(System.lineSeparator());
-		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append(System.lineSeparator());
+		prompt.append(projectContext()).append("\n");
+		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append("\n");
 
 		provider.prompt(prompt.toString());
 
