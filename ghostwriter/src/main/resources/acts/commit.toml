@@ -43,3 +43,4 @@ inputs = '''
 '''
 
 gw.scanDir = "glob:."
+gw.threads = "true"

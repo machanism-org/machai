@@ -215,7 +215,7 @@ public final class Ghostwriter {
 	private static String readText(String prompt) {
 		System.out.print(prompt + " (press ENTER and EOF: "
 				+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
-				+ " to complete):");
+				+ " to complete): ");
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (scanner.hasNextLine()) {
@@ -277,8 +277,11 @@ public final class Ghostwriter {
 	 *
 	 * @param multiThread {@code true} to enable
 	 */
-	public void setMultiThread(boolean multiThread) {
-		processor.setModuleMultiThread(multiThread);
+	public void setMultiThread(String multiThread) {
+		if (multiThread != null) {
+			boolean value = Boolean.parseBoolean(multiThread);
+			processor.setModuleMultiThread(value);
+		}
 	}
 
 	/**
@@ -375,13 +378,13 @@ public final class Ghostwriter {
 			excludes = StringUtils.split(cmd.getOptionValue(excludesOpt.getOpt()), ',');
 		}
 
-		boolean multiThread = config.getBoolean(GW_THREADS_PROP_NAME, false);
+		String multiThread = config.get(GW_THREADS_PROP_NAME, null);
 		if (cmd.hasOption(multiThreadOption.getOpt())) {
 			String opt = cmd.getOptionValue(multiThreadOption.getOpt());
 			if (opt == null) {
-				multiThread = true;
+				multiThread = "true";
 			} else {
-				multiThread = Boolean.parseBoolean(opt);
+				multiThread = opt;
 			}
 		}
 

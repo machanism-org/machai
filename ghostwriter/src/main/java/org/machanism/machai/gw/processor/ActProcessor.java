@@ -36,9 +36,26 @@ public class ActProcessor extends AIFileProcessor {
 		String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(StringUtils.defaultString(act), " "),
 				StringUtils.defaultString(defaultPrompt));
 
+		String path = ACTS_BASENAME_PREFIX + name + ".toml";
+		URL resource = ClassLoader.getSystemResource(path);
+		TomlParseResult toml = null;
+		if (resource != null) {
+			try {
+				String tomlStr = IOUtils.toString(resource, "UTF8");
+				toml = Toml.parse(tomlStr);
+				setActData(prompt, toml);
+
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
+		} else {
+			// do nothing, the act not found on the custom directory.
+		}
+
 		if (actDir != null) {
 			try {
-				TomlParseResult toml = Toml.parse(new File(actDir, name + ".toml").toPath());
+				File file = new File(actDir, name + ".toml");
+				toml = Toml.parse(file.toPath());
 				setActData(prompt, toml);
 
 			} catch (IOException e) {
@@ -46,21 +63,9 @@ public class ActProcessor extends AIFileProcessor {
 			}
 		}
 
-		String path = ACTS_BASENAME_PREFIX + name + ".toml";
-		URL resource = ClassLoader.getSystemResource(path);
-		if (resource != null) {
-			try {
-				String tomlStr = IOUtils.toString(resource, "UTF8");
-				TomlParseResult toml = Toml.parse(tomlStr);
-				setActData(prompt, toml);
-
-			} catch (IOException e) {
-				throw new IllegalArgumentException(e);
-			}
-		} else {
+		if (toml == null) {
 			throw new IllegalArgumentException("Act: `" + act + "` not found.");
 		}
-
 	}
 
 	private void setActData(String prompt, TomlParseResult toml) {
@@ -71,22 +76,28 @@ public class ActProcessor extends AIFileProcessor {
 				String value = (String) entry.getValue();
 				switch (key) {
 				case "instructions":
-					if (super.getInstructions() == null) {
-						super.setInstructions(value);
-					}
+					super.setInstructions(value);
 					break;
 
 				case "inputs":
-					if (super.getDefaultPrompt() == null) {
-						value = String.format(value, prompt);
-						super.setDefaultPrompt(value);
-					}
+					value = String.format(value, prompt);
+					super.setDefaultPrompt(value);
+					break;
+
+				case "gw.threads":
+					super.setModuleMultiThread(Boolean.parseBoolean(value));
+					break;
+
+				case "gw.excludes":
+					super.setExcludes(StringUtils.split(value, ","));
+					break;
+
+				case "gw.nonRecursive":
+					super.setNonRecursive(Boolean.getBoolean(value));
 					break;
 
 				default:
-					if (getConfigurator().get(key, null) == null) {
-						getConfigurator().set(key, value);
-					}
+					getConfigurator().set(key, value);
 					break;
 				}
 			}
