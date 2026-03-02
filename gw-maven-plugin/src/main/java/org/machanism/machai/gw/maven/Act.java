@@ -75,16 +75,19 @@ public class Act extends AbstractGWGoal {
 			actProcessor.setLogInputs(logInputs);
 
 			try {
+				logger.info("Starting scan of directory: {}", scanDir);
 				if (act == null) {
 					String action;
 					while (StringUtils.isNoneBlank(action = prompter.prompt("Act"))) {
 						actProcessor.setDefaultPrompt(action);
 						actProcessor.scanDocuments(basedir, scanDir);
 					}
+
 				} else {
 					actProcessor.setDefaultPrompt(act);
 					actProcessor.scanDocuments(basedir, scanDir);
 				}
+				logger.info("Finished scanning directory: {}", scanDir);
 
 			} catch (PrompterException e) {
 				getLog().error("Error: " + e.getMessage());
