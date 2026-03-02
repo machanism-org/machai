@@ -7,7 +7,7 @@ Ghostwriter is a guided file processing engine for generating and maintaining
 project-wide documentation and code improvements with AI.
 
 It scans a repository (source code, tests, documentation, and other assets),
-discovers embedded "@guidance:" directives, and turns them into actionable
+extracts embedded "@guidance:" directives, and turns them into actionable
 prompts for a configured GenAI provider.
 
 Key features:
@@ -17,7 +17,7 @@ Key features:
 - Supports system instructions and default guidance from plain text, URLs, or
   file: references.
 - Supports excludes (exact paths or glob:/regex: patterns).
-- Optional multi-threaded processing.
+- Optional multi-threaded module processing.
 - Optional logging of provider inputs per processed file.
 - "Act mode" for executing predefined prompts (--act).
 
@@ -64,6 +64,12 @@ Where <scanDir> can be:
 - A matcher expression supported by Java PathMatcher:
   - glob:...   (example: "glob:**/*.md")
   - regex:...  (example: "regex:^.*/[^/]+\\.java$")
+
+<scanDir> notes (from the CLI help):
+- Use a relative path with respect to the current project directory.
+- If an absolute path is provided, it must be located within the root project
+  directory.
+- Supported patterns: raw directory names, glob patterns, or regex patterns.
 
 Configuration can be provided in 3 ways:
 - gw.properties (default)
@@ -116,12 +122,12 @@ These properties may be set in gw.properties and/or overridden with -D...:
 
 - gw.threads
   Description: Enables multi-threaded processing.
-  Default: false.
+  Default: false
   Usage: gw.threads=true
 
 - gw.logInputs
   Description: Logs provider request inputs to dedicated log files.
-  Default: false.
+  Default: false
   Usage: gw.logInputs=true
 
 - gw.scanDir
@@ -161,9 +167,13 @@ These properties may be set in gw.properties and/or overridden with -D...:
 - -l, --logInputs
   Log provider request inputs to dedicated log files.
 
-- --act[=<name and prompt>]
-  Run in Act mode. If used without a value, Ghostwriter reads the action from
-  stdin until EOF.
+- --act[=<...>]
+  Run in Act mode (interactive execution of predefined prompts). If used
+  without a value, Ghostwriter reads the action from stdin until EOF.
+
+- --acts <path>
+  Specify the path to the directory containing predefined act prompt files for
+  processing.
 
 
 3.3 Setting configuration via environment variables or Java properties
