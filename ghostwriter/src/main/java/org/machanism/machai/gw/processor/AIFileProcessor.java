@@ -124,7 +124,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		provider.instructions(instructions);
 
-		String projectInfo = getProjectStructureDescription(projectLayout);
+		String projectInfo = getProjectStructureDescription(projectLayout, file);
 
 		StringBuilder promptBuilder = new StringBuilder();
 		promptBuilder.append(projectInfo).append("\r\n");
@@ -158,7 +158,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @return formatted project information block
 	 * @throws IOException if computing relative paths fails
 	 */
-	public String getProjectStructureDescription(ProjectLayout projectLayout) throws IOException {
+	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) throws IOException {
 		List<String> content = new ArrayList<>();
 
 		File projectDir = projectLayout.getProjectDir();
@@ -185,6 +185,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		content.add(getDirInfoLine(documents, projectDir));
 		content.add(getDirInfoLine(modules, projectDir));
 
+		String relativeFile = ProjectLayout.getRelativePath(projectDir, file);
+		content.add(relativeFile);
+		
 		Object[] array = content.toArray(new String[0]);
 		return MessageFormat.format(promptBundle.getString("project_information"), array) + "\r\n";
 	}

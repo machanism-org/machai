@@ -111,6 +111,23 @@ public class ActProcessor extends AIFileProcessor {
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
-		process(projectLayout, projectDir, getInstructions(), getDefaultPrompt());
+		List<File> children = findFiles(projectDir);
+
+		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
+
+		for (File child : children) {
+			processFile(projectLayout, child);
+		}
+
+		boolean match = match(projectDir, projectDir);
+
+		if (match && getDefaultPrompt() != null) {
+			process(projectLayout, projectDir, getInstructions(), getDefaultPrompt());
+		}
 	}
+	
+	protected void processFile(ProjectLayout projectLayout, File file) throws IOException {
+		process(projectLayout, file, getInstructions(), getDefaultPrompt());
+	}
+
 }

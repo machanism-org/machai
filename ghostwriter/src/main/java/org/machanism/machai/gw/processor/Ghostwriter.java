@@ -89,15 +89,12 @@ public final class Ghostwriter {
 	/**
 	 * Creates a new Ghostwriter CLI instance.
 	 *
-	 * @param rootDir   root directory of the project to scan; if {@code null}, the
-	 *                  value is derived from configuration or defaults to the
-	 *                  current working directory
 	 * @param genai     provider key/name (including model), e.g.
 	 *                  {@code OpenAI:gpt-5.1}
 	 * @param config    configuration source
 	 * @param processor processor implementation
 	 */
-	public Ghostwriter(File rootDir, String genai, PropertiesConfigurator config, AIFileProcessor processor) {
+	public Ghostwriter(String genai, PropertiesConfigurator config, AIFileProcessor processor) {
 		if (StringUtils.isBlank(genai)) {
 			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_GENAI_PROP_NAME
 					+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -a/--genai (e.g., OpenAI:gpt-5.1).");
@@ -118,7 +115,9 @@ public final class Ghostwriter {
 		int exitCode = 0;
 		try {
 			for (String scanDir : scanDirs) {
+				logger.info("Starting scan of directory: {}", scanDir);
 				File projectDir = processor.getRootDir();
+
 				processor.scanDocuments(projectDir, scanDir);
 				logger.info("Finished scanning directory: {}", scanDir);
 			}
@@ -213,9 +212,8 @@ public final class Ghostwriter {
 	 * @return the entered text, or {@code null} if no content was entered
 	 */
 	private static String readText(String prompt) {
-		System.out.print(prompt + " (press ENTER and EOF: "
-				+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
-				+ " to complete): ");
+		System.out.print(
+				prompt + " (press Ctrl+" + (SystemUtils.IS_OS_WINDOWS ? "Z" : "D") + " and ENTER to complete): ");
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (scanner.hasNextLine()) {
@@ -400,6 +398,8 @@ public final class Ghostwriter {
 			}
 		}
 
+		logger.info("Root directory: {}", rootDir);
+
 		String defaultPrompt;
 		try {
 			AIFileProcessor processor;
@@ -435,7 +435,7 @@ public final class Ghostwriter {
 				}
 			}
 
-			Ghostwriter ghostwriter = new Ghostwriter(rootDir, genai, config, processor);
+			Ghostwriter ghostwriter = new Ghostwriter(genai, config, processor);
 
 			ghostwriter.setInstructions(instructions);
 			ghostwriter.setExcludes(excludes);
@@ -453,7 +453,7 @@ public final class Ghostwriter {
 			}
 
 			if (scanDirs == null || scanDirs.length == 0) {
-				scanDirs = new String[] { rootDir.getAbsolutePath() };
+				scanDirs = new String[] { SystemUtils.getUserDir().getAbsolutePath() };
 			}
 
 			int exitCode = ghostwriter.perform(scanDirs);

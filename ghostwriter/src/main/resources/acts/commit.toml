@@ -42,5 +42,6 @@ inputs = '''
 %s
 '''
 
-gw.scanDir = "glob:."
-gw.threads = "true"
+[gw]
+scanDir = "glob:."
+threads = "true"

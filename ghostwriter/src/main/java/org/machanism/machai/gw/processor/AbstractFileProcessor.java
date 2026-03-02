@@ -122,10 +122,6 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 */
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
-		if (getScanDir() != null) {
-			logger.info("Starting scan of directory: {}", getScanDir());
-		}
-
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
 		if (!isNonRecursive()) {
 			List<String> modules = projectLayout.getModules();
@@ -260,7 +256,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 		boolean result = fullMatch || projectMatch;
 		if (!result && scanDir != null && pathMatcher != null) {
-			String relativePath = ProjectLayout.getRelativePath(file, scanDir);
+			String relativePath = ProjectLayout.getRelativePath(scanDir, file);
 			if (relativePath != null) {
 				Path scanFilePath = scanDir.toPath().resolve(relativePath);
 				String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
