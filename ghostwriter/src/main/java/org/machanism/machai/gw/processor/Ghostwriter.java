@@ -257,7 +257,6 @@ public final class Ghostwriter {
 	 */
 	public void setDefaultPrompt(String defaultGuidance) {
 		if (defaultGuidance != null) {
-			logger.info("Default Prompt: {}", StringUtils.abbreviate(defaultGuidance, 60));
 			processor.setDefaultPrompt(defaultGuidance);
 		}
 	}
@@ -415,6 +414,10 @@ public final class Ghostwriter {
 					((ActProcessor) processor).setActDir(new File(actsDirOpt.getValue()));
 				}
 
+				if (defaultPrompt != null) {
+					logger.info("Act: {}", StringUtils.abbreviate(defaultPrompt, 60));
+				}
+
 			} else {
 				processor = new GuidanceProcessor(rootDir, genai, config);
 
@@ -426,6 +429,10 @@ public final class Ghostwriter {
 								+ (SystemUtils.IS_OS_WINDOWS ? "Ctrl + Z" : "Ctrl + D")
 								+ " to signal end of input (EOF):");
 					}
+				}
+
+				if (defaultPrompt != null) {
+					logger.info("Default Prompt: {}", StringUtils.abbreviate(defaultPrompt, 60));
 				}
 			}
 
