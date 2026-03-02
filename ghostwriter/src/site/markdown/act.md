@@ -2,155 +2,150 @@
 canonical: https://machai.machanism.org/ghostwriter/act.html
 ---
 
-## ActProcessor
-
-`ActProcessor` is an `AIFileProcessor` implementation that runs Ghostwriter in **Act mode**. Instead of reading per-file `@guidance` directives, it loads a predefined “act” definition from a TOML file and applies it as the run configuration, including:
-
-- the **system instructions** sent to the GenAI provider,
-- the **default prompt** (optionally parameterized by user input),
-- scan/execution behavior such as **threading**, **excludes**, and **non-recursive** traversal,
-- and any additional configuration properties (via the shared `Configurator`).
-
-Act definitions are searched in two places:
-
-1. Built-in classpath resources: `acts/<name>.toml`
-2. A custom directory configured by `gw.acts` (or set programmatically via `setActDir(...)`).
-
-If the TOML cannot be found in either location, Act mode fails fast with an error.
-
-## How it fits in Ghostwriter
-
-Ghostwriter’s CLI (`org.machanism.machai.gw.processor.Ghostwriter`) chooses the processor implementation:
-
-- Normal mode: `GuidanceProcessor` (processes embedded `@guidance` directives)
-- Act mode (`--act`): `ActProcessor` (loads an act TOML and applies it as the run configuration)
-
-Once configured, `ActProcessor` uses the inherited `AIFileProcessor#process(...)` workflow to:
-
-- create and configure a `GenAIProvider` (`GenAIProviderManager.getProvider(...)`),
-- apply function tools (`FunctionToolsLoader`),
-- prepend the “Project Layout Overview” block to the prompt,
-- and execute the provider.
-
-## Key methods
-
-### `setDefaultPrompt(String act)` (override)
-
-Parses the CLI `--act` argument (format: `--act <name> [prompt]`), loads `<name>.toml`, and applies the act configuration.
-
-Behavior summary:
-
-- Splits the first token as the act **name**.
-- Uses the remainder as the **prompt argument**.
-  - If no remainder is provided, it falls back to the current processor default prompt (if any).
-- Looks up the act definition:
-  - first from `acts/<name>.toml` on the classpath,
-  - then from `<actDir>/<name>.toml` if `actDir` is configured.
-- Calls `setActData(promptArg, toml)` to apply TOML fields.
-- Throws `IllegalArgumentException` if the act cannot be found.
-
-### `setActData(String promptArg, TomlParseResult toml)`
-
-Reads TOML properties using `toml.dottedEntrySet()` and applies recognized keys:
-
-- `instructions`: forwarded to `AIFileProcessor#setInstructions(...)`
-- `inputs`: used as the template for the default prompt
-  - `String.format(value, promptArg)` is used to interpolate the user prompt argument
-- `gw.threads`: forwarded to `AbstractFileProcessor#setModuleMultiThread(boolean)`
-- `gw.excludes`: forwarded to `AbstractFileProcessor#setExcludes(String[])` (comma-separated)
-- `gw.nonRecursive`: forwarded to `AbstractFileProcessor#setNonRecursive(boolean)`
-- any other key: stored into the shared `Configurator` via `getConfigurator().set(key, value)`
-
-### `processParentFiles(ProjectLayout projectLayout)` (override)
-
-Controls what gets processed in Act mode:
-
-1. Collects children under the project directory (recursive list via `findFiles(projectDir)`).
-2. Removes:
-   - module directories (`isModuleDir(projectLayout, child)`), and
-   - any file/dir that does not match the scan include rules (`!match(child, projectDir)`).
-3. Processes each remaining child via `processFile(...)`.
-4. Finally, if the project directory itself matches and a default prompt is set, it runs a final `process(...)` on the project directory.
-
-### `processFile(ProjectLayout projectLayout, File file)`
-
-Thin wrapper that executes the provider using the currently configured instructions and default prompt:
-
-- `process(projectLayout, file, getInstructions(), getDefaultPrompt())`
-
-## Act TOML format (expected keys)
-
-An act is a TOML file named `<name>.toml`. Typical keys:
-
-```toml
-# acts/<name>.toml
-instructions = """
-You are ...
-"""
-
-# Must contain a single `%s` placeholder if you want to inject the user-provided prompt argument.
-inputs = """
-Write release notes for: %s
-"""
-
-# Optional processor controls
-"gw.threads" = "true"
-"gw.excludes" = "target,node_modules"
-"gw.nonRecursive" = "true"
-
-# Any other custom settings consumed elsewhere can be set as strings as well.
-"some.custom.key" = "value"
-```
-
-Notes:
-
-- `ActProcessor` only applies TOML entries whose values are strings.
-- `inputs` is formatted using `String.format(...)`. If it contains `%s`, it will be replaced with the prompt argument.
-
-## Example: using Act mode from the CLI
-
-### 1) Provide an act on the classpath
-
-Create (or package) a resource:
-
-- `src/main/resources/acts/review.toml`
-
-```toml
-instructions = """
-You are a reviewer. Produce a short report.
-"""
-
-inputs = """
-Review the following topic: %s
-Provide risks and improvements.
-"""
-```
-
-### 2) Run Ghostwriter with `--act`
-
-```bash
-java -jar gw.jar . --act "review Dependency upgrades"
-```
-
-What happens:
-
-1. `Ghostwriter` constructs `ActProcessor`.
-2. `ActProcessor.setDefaultPrompt("review Dependency upgrades")` loads `acts/review.toml`.
-3. The user argument (`"Dependency upgrades"`) is inserted into `inputs` via `String.format(...)`.
-4. `ActProcessor` scans and processes matching files/directories under the project root, and finally (if configured) processes the project directory itself with the act prompt.
-
-### 3) Use a custom acts directory
-
-If you don’t want to repackage resources, put `review.toml` in a directory and point Ghostwriter to it:
-
-- set `gw.acts=<path-to-acts-dir>` in `gw.properties`, or
-- call `ActProcessor#setActDir(...)` programmatically (the CLI also supports `--acts <dir>`).
-
 <!--
 @guidance:
-Carefully analyze the `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java` class.  
-- Create a clear and concise description of the main feature(s) and functionality provided by this class.
-- Summarize its purpose, key methods, and how it integrates within the project.
-- Provide step-by-step instructions or an example demonstrating how to use this class in practice.
-- Ensure your description is understandable for developers who may be new to the codebase.
+Create the Act page as a Project Information page for the project.
+
+- Analyze the `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java` class.
+- Write a general description of the Act feature and its main functionality, using clear and simple language suitable for users who may not have prior technical knowledge or experience with the project.
+- Summarize the purpose of the Act feature, its key methods, and how it fits into the overall project.
+- Provide easy-to-follow, step-by-step instructions or a practical example showing how to use the Act feature in real scenarios.
+- Ensure the content is accessible and helpful for all users, including those new to the codebase or without a technical background.
 -->
+
+# Act
+
+## What “Act” means in Ghostwriter
+
+In Ghostwriter, an **Act** is a reusable preset that tells Ghostwriter *how to run* on a set of files.
+
+An Act typically bundles:
+
+- **Instructions**: the high-level rules you want the AI to follow.
+- **Inputs / prompt template**: a prompt (often with a placeholder) that becomes the request sent to the AI.
+- **Run options**: small configuration toggles like exclusions or whether to use multiple threads.
+
+This lets you run the same type of work (for example: “write documentation”, “refactor”, “generate summaries”) consistently across different files or projects by selecting an Act by name.
+
+## Where Acts come from
+
+Ghostwriter looks for Act definitions in two places, in this order:
+
+1. **Built-in Acts packaged with the application** (classpath resources):
+   - `acts/<name>.toml`
+2. **Optional custom Act directory** (configured via `gw.acts`):
+   - `<gw.acts>/<name>.toml`
+
+If the Act is not found in either location, Ghostwriter stops with an error.
+
+## What an Act file contains (TOML)
+
+An Act is defined in a `.toml` file. The `ActProcessor` reads the TOML file and applies its keys.
+
+Common keys used by Ghostwriter:
+
+- `instructions` — the instructions text applied to the AI run.
+- `inputs` — the prompt template. It can contain a placeholder for your extra text (see below).
+- `gw.threads` — enables/disables multi-threading for processing.
+- `gw.excludes` — a comma-separated list of exclude patterns.
+- `gw.nonRecursive` — whether file scanning should avoid recursion.
+
+Any other string key/value pairs in the Act TOML are forwarded into Ghostwriter’s configuration as-is.
+
+### Prompt placeholder
+
+When you run an Act, you can provide extra text after the Act name. Ghostwriter inserts that extra text into the Act’s `inputs` value using `String.format(...)`.
+
+That means `inputs` is usually written like:
+
+```toml
+inputs = "Write documentation for: %s"
+```
+
+…and your provided extra text becomes the `%s`.
+
+## How Act processing works (based on `ActProcessor`)
+
+`ActProcessor` is responsible for loading an Act and applying it before Ghostwriter processes files.
+
+Key behavior:
+
+- **`setDefaultPrompt(String act)`**
+  - Parses `act` as: `<name> [prompt...]`.
+  - Loads `acts/<name>.toml` from built-in resources, then also tries `<gw.acts>/<name>.toml` if configured.
+  - Applies the TOML settings (instructions, inputs, and other configuration keys).
+  - If no Act file is found, throws an error.
+
+- **`setActData(String prompt, TomlParseResult toml)`**
+  - Reads all TOML properties.
+  - Recognizes a few special keys (like `instructions`, `inputs`, `gw.excludes`, etc.).
+  - Everything else is written into the general configuration.
+
+- **`processParentFiles(ProjectLayout projectLayout)`**
+  - Scans the current project directory for files.
+  - Filters out module directories and any files that do not match Ghostwriter’s selection rules.
+  - Processes each matching file.
+  - If the *project directory itself* matches and there is a prompt, it will also run processing at the directory level.
+
+In other words, an Act is the “recipe” that tells Ghostwriter what to do, and `ActProcessor` applies that recipe before the normal file-processing pipeline runs.
+
+## Practical example: create and run a custom Act
+
+This example shows the typical workflow for making an Act that writes or updates documentation.
+
+### Step 1: Create an Act directory
+
+Choose a folder to store your custom Acts, for example:
+
+- `./acts-custom/`
+
+Configure Ghostwriter to use it by setting `gw.acts` to that folder (how you set configuration depends on how you run Ghostwriter in your environment).
+
+### Step 2: Create the Act TOML file
+
+Create:
+
+- `./acts-custom/docs.toml`
+
+Example contents:
+
+```toml
+# High-level rules for the AI
+instructions = "You are a documentation assistant. Keep the writing clear and user-friendly."
+
+# Prompt template; your extra text will be inserted into %s
+inputs = "Update documentation for the following area: %s"
+
+# Optional run settings
+# Use multiple threads (if supported by your run)
+gw.threads = "true"
+
+# Exclude noisy or generated paths (comma-separated)
+gw.excludes = "target,.git,node_modules"
+
+# Whether to avoid scanning subfolders
+# gw.nonRecursive = "false"
+```
+
+### Step 3: Run the Act
+
+Run Ghostwriter with the Act name, and optionally add a short prompt after it.
+
+Conceptually:
+
+- Act name: `docs`
+- Extra prompt text: `the Act feature page`
+
+Ghostwriter will:
+
+1. Load `docs.toml`.
+2. Apply `instructions`.
+3. Build the final prompt by inserting your extra text into `inputs`.
+4. Scan and process matching files under the project directory (respecting excludes and other settings).
+
+## Tips for writing reliable Acts
+
+- Keep `instructions` short and specific: “what good looks like” is more helpful than lots of detail.
+- Make `inputs` a template with exactly one `%s` unless you intentionally want multiple placeholders.
+- Put exclude patterns in `gw.excludes` to avoid processing build output, dependencies, or generated files.
+- Prefer custom Acts in `gw.acts` when you want team-specific or project-specific behavior.

@@ -24,7 +24,7 @@ Ghostwriter is delivered as a CLI entry point (`org.machanism.machai.gw.processo
 - Composes provider inputs including project structure context and optional system instructions.
 - Executes the configured GenAI provider on each matching file.
 
-In addition to per-file guidance, Ghostwriter can apply *default guidance* at the file level or once as a final “project step”, depending on how you invoke it.
+In addition to per-file guidance, Ghostwriter can apply *default guidance* when a file has no embedded `@guidance:` (and/or as a final step for a scan, depending on processor behavior).
 
 ## Machai Ghostwriter vs. Other Tools
 
@@ -113,11 +113,11 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 
 - `-h, --help` — Show help message and exit.
 - `-r, --root <path>` — Root directory for file processing.
-- `-t, --threads[=<true|false>]` — Enable multi-threaded processing to improve performance (default: `false`). If provided with no value, it enables threading.
+- `-t, --threads[=<true|false>]` — Enable multi-threaded processing (default: `false`). If provided with no value, it enables threading.
 - `-a, --genai <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
 - `-i, --instructions[=<text|url|file:...>]` — Provide system instructions. If used without a value, Ghostwriter reads multi-line text from stdin until EOF.
-- `-g, --guidance[=<text|url|file:...>]` — Provide default guidance to apply. If used without a value, Ghostwriter reads multi-line text from stdin until EOF.
-- `-e, --excludes <csv>` — Comma-separated list of directories/paths to exclude.
+- `-g, --guidance[=<text|url|file:...>]` — Provide default guidance. If used without a value, Ghostwriter reads multi-line text from stdin until EOF.
+- `-e, --excludes <csv>` — Comma-separated list of directories to exclude.
 - `-l, --logInputs` — Log LLM request inputs to dedicated log files.
 - `--act[=<name and prompt>]` — Run in Act mode (interactive execution of predefined prompts). If used without a value, Ghostwriter reads the action from stdin until EOF.
 
@@ -150,16 +150,14 @@ From the built-in help:
 
 ## Default Guidance
 
-Ghostwriter supports a *default guidance* string that is applied when embedded `@guidance:` directives are not present (or applied as a final step for the current scan, depending on processor behavior).
+Ghostwriter supports a *default guidance* string which is passed to the processor via `Ghostwriter.setDefaultPrompt(String)` → `AIFileProcessor.setDefaultPrompt(String)`.
 
-In the CLI, default guidance is configured via:
+Default guidance is configured via:
 
 - Config property: `gw.guidance`
 - CLI option: `-g, --guidance`
 
-At runtime, the CLI passes the value into the processor via `Ghostwriter.setDefaultPrompt(String)` → `AIFileProcessor.setDefaultPrompt(String)`.
-
-`defaultGuidance` accepts plain text, URLs, or `file:` references, processed line-by-line:
+When provided, the value may be plain text, URLs, or `file:` references, processed line-by-line:
 
 - Blank lines are preserved.
 - Lines starting with `http://` or `https://` are loaded from the URL.
