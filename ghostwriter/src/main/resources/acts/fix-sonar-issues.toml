@@ -41,5 +41,5 @@ You need to fix SonarQube issues in the project.
      - An explanation of the applied fix, including how it resolves the issue.
      - A reference to the relevant SonarQube rule.
 
-{0}
+%s
 '''

@@ -3,7 +3,6 @@ package org.machanism.machai.gw.processor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,9 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
@@ -68,8 +65,6 @@ public class GuidanceProcessor extends AIFileProcessor {
 		super(rootDir, configurator, genai);
 		logger.info("File processing root directory: {}", rootDir);
 		logger.info("GenAI: {}", genai);
-
-		FunctionToolsLoader.getInstance().setConfiguration(configurator);
 
 		loadReviewers();
 	}

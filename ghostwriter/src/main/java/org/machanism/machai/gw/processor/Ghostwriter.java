@@ -127,7 +127,7 @@ public final class Ghostwriter {
 			logger.error("Process terminated: {}, Exit code: {}", e.getMessage(), e.getExitCode());
 			exitCode = e.getExitCode();
 		} catch (IllegalArgumentException e) {
-			logger.error("Error: {}", e.getMessage());
+			logger.error("Error: {}", e.getMessage(), e);
 			exitCode = 1;
 		} catch (Exception e) {
 			logger.error("Unexpected error: {}", e.getMessage(), e);
@@ -250,8 +250,8 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Sets default guidance applied when embedded guidance tag directives are
-	 * not present.
+	 * Sets default guidance applied when embedded guidance tag directives are not
+	 * present.
 	 *
 	 * @param defaultGuidance default guidance text, URL, or {@code file:} reference
 	 */
@@ -299,6 +299,9 @@ public final class Ghostwriter {
 		Option rootDirOpt = new Option("r", "root", true,
 				"Specify the path to the root directory for file processing.");
 
+		Option actsDirOpt = new Option("acts", true,
+				"Specify the path to the directory containing predefined act prompt files for processing.");
+
 		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt("instructions")
@@ -324,6 +327,7 @@ public final class Ghostwriter {
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
+		options.addOption(actsDirOpt);
 		options.addOption(multiThreadOption);
 		options.addOption(genaiOpt);
 		options.addOption(instructionsOpt);
@@ -407,6 +411,10 @@ public final class Ghostwriter {
 							+ " to finish and signal end of input (EOF)]:");
 				}
 
+				if (cmd.hasOption(actsDirOpt)) {
+					((ActProcessor) processor).setActDir(new File(actsDirOpt.getValue()));
+				}
+
 			} else {
 				processor = new GuidanceProcessor(rootDir, genai, config);
 
@@ -432,7 +440,10 @@ public final class Ghostwriter {
 
 			String[] scanDirs = cmd.getArgs();
 			if (scanDirs == null || scanDirs.length == 0) {
-				scanDirs = new String[] { config.get("gw.scanDir", null) };
+				String gwScanDir = config.get("gw.scanDir", null);
+				if (gwScanDir != null) {
+					scanDirs = new String[] { gwScanDir };
+				}
 			}
 
 			if (scanDirs == null || scanDirs.length == 0) {

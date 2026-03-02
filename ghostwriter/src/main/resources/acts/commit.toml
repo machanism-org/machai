@@ -28,17 +28,18 @@ When given a set of project file changes (such as a diff or summary), follow the
 inputs = '''
 # Task
 
-Analyze the project changes and group files by related changes, ensuring each group represents a distinct change 
-type or logical modification (e.g., feature, fix, refactor, docs, chore). 
-Only consider files located in the current folder, path: `.`; ignore changes outside the current directory. 
-If there are no changes in the current folder then show the message about it and just skip following actions.
+1. Check the status of the current folder (`.`), e.g for git: `git status .`.  
+   - If there are no changes in this directory, display a message indicating that no changes were found and skip all subsequent actions.
+   - Otherwise: Automatically execute the appropriate git or svn commands to commit each group separately using the functional tool, according to the version control system in use.
 
-For each group, generate a commit message following best conventions (clear, concise, imperative mood, present tense, and specific), 
-and format the commit message based on the style of several historical commit messages from the project. 
-Automatically execute the necessary git or svn commands to commit each group separately using the functional tool, 
-based on the version control system in use.
+2. If changes are present, analyze and group the modified files in the current folder by related change type or logical modification (e.g., feature, fix, refactor, docs, chore).  
+   - Only include files located directly in the current directory (`.`); ignore changes in subdirectories or outside this folder.
 
-{0}
+3. For each group, generate a commit message that:
+   - Follows best practices (clear, concise, imperative mood, present tense, and specific).
+   - Adopts the style and format of several historical commit messages from the project.
+
+%s
 '''
 
 gw.scanDir = "glob:."

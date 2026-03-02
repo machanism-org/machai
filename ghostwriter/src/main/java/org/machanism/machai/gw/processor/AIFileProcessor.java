@@ -13,14 +13,12 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringSubstitutor;
@@ -100,6 +98,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	public AIFileProcessor(File rootDir, Configurator configurator, String genai) {
 		super(rootDir, configurator);
+		FunctionToolsLoader.getInstance().setConfiguration(configurator);
 		this.genai = genai;
 	}
 
@@ -187,7 +186,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		content.add(getDirInfoLine(modules, projectDir));
 
 		Object[] array = content.toArray(new String[0]);
-		return MessageFormat.format(promptBundle.getString("project_information"), array);
+		return MessageFormat.format(promptBundle.getString("project_information"), array) + "\r\n";
 	}
 
 	/**

@@ -34,4 +34,4 @@ You are an AI assistant supporting software development tasks. When responding t
    If your answer relies on external information, provide a citation or link to the source.
 '''
 
-inputs = {0}
+inputs = "%s"

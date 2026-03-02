@@ -34,33 +34,10 @@ public class ActProcessor extends AIFileProcessor {
 		String prompt = StringUtils.defaultIfBlank(StringUtils.substringAfter(StringUtils.defaultString(act), " "),
 				StringUtils.defaultString(defaultPrompt));
 
-		String instructions = null;
 		if (actDir != null) {
 			try {
 				TomlParseResult toml = Toml.parse(new File(actDir, name + ".toml").toPath());
-
-				Set<Entry<String, Object>> props = toml.dottedEntrySet(); 
-				for (Entry<String, Object> entry : props) {
-					String key = entry.getKey();
-					if (entry.getValue() instanceof String) {
-						String value = (String) entry.getValue();
-						switch (key) {
-						case "instructions":
-							instructions = value;
-							break;
-
-						case "inputs":
-							defaultPrompt = value;
-							break;
-
-						default:
-							if (getConfigurator().get(key, null) == null) {
-								getConfigurator().set(key, value);
-							}
-							break;
-						}
-					}
-				}
+				setActData(prompt, toml);
 
 			} catch (IOException e) {
 				// do nothing, the act not found on the custom directory.
@@ -73,32 +50,8 @@ public class ActProcessor extends AIFileProcessor {
 			try {
 				String tomlStr = IOUtils.toString(resource, "UTF8");
 				TomlParseResult toml = Toml.parse(tomlStr);
-				Set<Entry<String, Object>> props = toml.dottedEntrySet(); 
-				for (Entry<String, Object> entry : props) {
-					String key = entry.getKey();
-					if (entry.getValue() instanceof String) {
-						String value = (String) entry.getValue();
-						switch (key) {
-						case "instructions":
-							if (instructions == null) {
-								instructions = value;
-							}
-							break;
-
-						case "inputs":
-							if (defaultPrompt == null) {
-								defaultPrompt = value;
-							}
-							break;
-
-						default:
-							if (getConfigurator().get(key, null) == null) {
-								getConfigurator().set(key, value);
-							}
-							break;
-						}
-					}
-				}
+				setActData(prompt, toml);
+				
 			} catch (IOException e) {
 				throw new IllegalArgumentException(e);
 			}
@@ -106,11 +59,36 @@ public class ActProcessor extends AIFileProcessor {
 			throw new IllegalArgumentException("Act: `" + act + "` not found.");
 		}
 
-		super.setInstructions(instructions);
+	}
 
-		defaultPrompt = MessageFormat.format(defaultPrompt, prompt);
-		super.setDefaultPrompt(defaultPrompt);
+	private void setActData(String prompt, TomlParseResult toml) {
+		Set<Entry<String, Object>> props = toml.dottedEntrySet();
+		for (Entry<String, Object> entry : props) {
+			String key = entry.getKey();
+			if (entry.getValue() instanceof String) {
+				String value = (String) entry.getValue();
+				switch (key) {
+				case "instructions":
+					if (super.getInstructions() == null) {
+						super.setInstructions(value);
+					}
+					break;
 
+				case "inputs":
+					if (super.getDefaultPrompt() == null) {
+						value = String.format(value, prompt);
+						super.setDefaultPrompt(value);
+					}
+					break;
+
+				default:
+					if (getConfigurator().get(key, null) == null) {
+						getConfigurator().set(key, value);
+					}
+					break;
+				}
+			}
+		}
 	}
 
 	public void setActDir(File actDir) {
