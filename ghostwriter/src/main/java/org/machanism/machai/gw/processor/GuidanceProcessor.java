@@ -4,25 +4,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -108,37 +101,6 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Recursively scans project folders, processing documentation inputs for all
-	 * found modules and files.
-	 *
-	 * @param projectDir the directory containing the project/module to be scanned
-	 * @throws IOException if an error occurs reading files
-	 */
-	@Override
-	public void scanFolder(File projectDir) throws IOException {
-		if (getScanDir() != null) {
-			logger.info("Starting scan of directory: {}", getScanDir());
-		}
-
-		ProjectLayout projectLayout = getProjectLayout(projectDir);
-		if (!isNonRecursive()) {
-			List<String> modules = projectLayout.getModules();
-
-			if (modules != null && !modules.isEmpty()) {
-				if (isModuleMultiThread()) {
-					processModulesMultiThreaded(projectDir, modules);
-				} else {
-					for (String module : modules) {
-						processModule(projectDir, module);
-					}
-				}
-			}
-		}
-
-		processParentFiles(projectLayout);
-	}
-
-	/**
 	 * Applies matching logic and default-guidance behavior.
 	 *
 	 * @param file       candidate file/directory
@@ -152,54 +114,6 @@ public class GuidanceProcessor extends AIFileProcessor {
 		}
 
 		return super.match(file, projectDir);
-	}
-
-	/**
-	 * Processes all discovered modules concurrently.
-	 *
-	 * @param projectDir the parent project directory
-	 * @param modules    module relative paths
-	 */
-	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
-		ExecutorService executor = Executors.newFixedThreadPool(Math.min(modules.size(), getMaxModuleThreads()));
-		try {
-			List<Future<Void>> futures = new ArrayList<>();
-			for (String module : modules) {
-				futures.add(executor.submit(() -> {
-					processModule(projectDir, module);
-					return null;
-				}));
-			}
-
-			for (Future<Void> future : futures) {
-				try {
-					future.get();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					throw new IllegalStateException("Thread interrupted while processing modules", e);
-				} catch (ExecutionException e) {
-					Throwable cause = e.getCause();
-					if (cause instanceof IOException) {
-						throw new IllegalStateException("Module processing failed.", cause);
-					}
-					if (cause instanceof RuntimeException) {
-						throw (RuntimeException) cause;
-					}
-					throw new IllegalStateException("Module processing failed.", cause);
-				}
-			}
-		} finally {
-			executor.shutdown();
-			try {
-				if (!executor.awaitTermination(getModuleThreadTimeoutMinutes(), TimeUnit.MINUTES)) {
-					executor.shutdownNow();
-				}
-			} catch (InterruptedException e) {
-				executor.shutdownNow();
-				Thread.currentThread().interrupt();
-				throw new IllegalStateException("Thread interrupted while awaiting module termination", e);
-			}
-		}
 	}
 
 	/**
