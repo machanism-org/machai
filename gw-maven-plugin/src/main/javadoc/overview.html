@@ -30,20 +30,19 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>GW Maven Plugin</h1>
 
 <p>
-  <strong>GW Maven Plugin</strong> is an advanced documentation automation tool for Java projects.
-  It scans, analyzes, and assembles project documentation using embedded <code>@guidance:</code> tags and
-  AI-powered synthesis.
-  The plugin streamlines the creation and maintenance of high-quality, consistent documentation, helping keep
-  documentation aligned with current source and site content across modules.
+  <strong>GW Maven Plugin</strong> (Ghostwriter Maven Plugin) is an advanced documentation automation tool for Java
+  projects. It automatically scans, analyzes, and assembles project documentation using embedded guidance tags and
+  AI-powered synthesis. The plugin streamlines the creation and maintenance of high-quality, consistent documentation,
+  ensuring best practices and up-to-date information across all modules.
 </p>
 
-<h2>Overview</h2>
+<h2>What this plugin does</h2>
 
 <p>
-  The plugin provides Maven goals (Mojos) that configure and invoke
-  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> to traverse a configurable content tree
-  (commonly <code>src/site</code>) and process files containing one or more <code>@guidance:</code> blocks.
-  The processing model is intentionally content-type agnostic: it can operate on source code, documentation,
+  This Maven plugin provides goals (Mojos) that configure and invoke the MachAI Ghostwriter workflow.
+  At runtime it scans a configurable directory tree (commonly <code>src/site</code>) for files containing embedded
+  <code>@guidance:</code> blocks and then delegates guided transformations to the configured GenAI provider.
+  The processing model is intentionally content-type agnostic and can be applied to source code, documentation,
   Maven Site content, and other project files.
 </p>
 
@@ -51,16 +50,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <ul>
   <li>
-    <code>org.machanism.machai.gw.maven</code> &mdash; Maven plugin goals and shared execution infrastructure.
-    See the package documentation for details on configuration parameters and runtime behavior.
+    <code>org.machanism.machai.gw.maven</code> &mdash; Maven plugin goals (Mojos) and shared infrastructure for running the
+    Ghostwriter (GW) guided document-processing workflow as part of a Maven build.
   </li>
 </ul>
 
 <h2>Goals</h2>
-
-<p>
-  The primary goals exposed by this plugin are:
-</p>
 
 <ul>
   <li>
@@ -83,19 +78,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   </li>
 </ul>
 
-<h2>Scanning and processing model</h2>
-
-<p>
-  At execution time, a goal determines the scan directory (often the Maven execution root or a user-supplied path)
-  and applies include/exclude rules while walking the directory tree. Files containing <code>@guidance:</code> directives
-  are passed to the Ghostwriter workflow engine for guided updates.
-</p>
-
 <h2>Configuration and credentials</h2>
 
 <p>
-  In addition to standard Maven plugin parameters (for example, scan directory and exclude patterns), GenAI credentials
-  can optionally be sourced from <code>~/.m2/settings.xml</code> by providing
+  In addition to standard Maven plugin parameters (for example, scan directory and exclude patterns), GenAI
+  credentials can optionally be sourced from <code>~/.m2/settings.xml</code> by providing
   <code>-Dgw.genai.serverId=&lt;serverId&gt;</code>. When configured, the plugin reads the matching
   <code>&lt;server&gt;</code> entry and forwards credentials to the workflow.
 </p>

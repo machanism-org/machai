@@ -27,13 +27,14 @@
 
 GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates Ghostwriter’s guided file processing into Maven builds so you can generate and maintain project documentation (and other guided updates) as part of a consistent, repeatable workflow.
 
-The plugin scans your project for files containing embedded `@guidance:` blocks and then delegates transformation/synthesis work to the Machai Ghostwriter engine, based on the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) model.
+At its core, the plugin scans your project for files containing embedded `@guidance:` blocks and then delegates transformation/synthesis work to the Machai Ghostwriter engine, based on the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) model.
 
 It provides multiple Maven goals:
 
 - **`gw:gw`**: an **aggregator** goal that can run **without a `pom.xml`** (`requiresProject=false`) and processes modules in reverse order (sub-modules first).
 - **`gw:reactor`**: a **reactor-aware** goal that processes modules according to Maven reactor dependency ordering, with an option to defer the execution-root project until other reactor projects complete.
 - **`gw:act`**: an **interactive** goal that runs predefined action bundles backed by resource bundles.
+- **`gw:clean`**: deletes temporary artifacts created during processing.
 
 ## Installation Instructions
 
@@ -90,6 +91,12 @@ Interactive actions:
 
 ```cmd
 mvn gw:act
+```
+
+Cleanup temporary processing artifacts:
+
+```cmd
+mvn gw:clean
 ```
 
 Enable multi-threaded module processing (for `gw:gw`):

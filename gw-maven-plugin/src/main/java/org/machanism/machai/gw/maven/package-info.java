@@ -1,12 +1,12 @@
 /**
  * Maven plugin goals (Mojos) and supporting infrastructure for running the MachAI Ghostwriter (GW)
- * document-processing workflow as part of a Maven build.
+ * guided document-processing workflow as part of a Maven build.
  *
  * <p>
- * The goals in this package configure and invoke a
- * {@link org.machanism.machai.gw.processor.GuidanceProcessor} to scan a documentation source tree (commonly
- * {@code src/site}) for files containing embedded {@code @guidance:} blocks. When guidance blocks are found, the
- * processor delegates content transformation to the configured GenAI provider.
+ * The goals in this package configure and invoke {@link org.machanism.machai.gw.processor.GuidanceProcessor} (or a
+ * specialized processor such as {@link org.machanism.machai.gw.processor.ActProcessor}) to scan a documentation source
+ * tree (commonly {@code src/site}) for files containing embedded {@code @guidance:} blocks. When guidance blocks are
+ * found, the processor delegates content transformation to the configured GenAI provider.
  * </p>
  *
  * <h2>Goals</h2>
@@ -21,8 +21,7 @@
  *     reactor dependency ordering, with an option to defer processing of the execution-root project.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.maven.Act} ({@code gw:act}) - Interactive goal for running predefined actions
- *     backed by resource bundles.
+ *     {@link org.machanism.machai.gw.maven.Act} ({@code gw:act}) - Interactive goal for running predefined actions.
  *   </li>
  *   <li>
  *     {@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by GW

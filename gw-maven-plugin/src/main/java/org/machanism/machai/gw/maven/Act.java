@@ -22,26 +22,70 @@ import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
+/**
+ * Maven goal {@code gw:act} that runs an interactive, predefined "action" over a documentation tree.
+ *
+ * <p>
+ * An action is a prompt (typically sourced from a resource bundle or prompt file) that is applied to the scanned
+ * documents. If {@code -Dgw.act} is not provided, the goal prompts the user interactively via Maven's
+ * {@link Prompter} component.
+ * </p>
+ *
+ * <h2>Parameters</h2>
+ * <dl>
+ * <dt><b>{@code -Dgw.act}</b> / {@code &lt;act&gt;}</dt>
+ * <dd>
+ * Action text/prompt to apply. If omitted, the goal reads it interactively.
+ * </dd>
+ *
+ * <dt><b>{@code -Dgw.acts}</b> / {@code &lt;acts&gt;}</dt>
+ * <dd>
+ * Optional directory containing predefined action definitions.
+ * </dd>
+ * </dl>
+ *
+ * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
+ * <p>
+ * This goal also supports all common parameters defined by {@link AbstractGWGoal} (for example {@code -Dgw.model},
+ * {@code -Dgw.scanDir}, {@code -Dgw.excludes}, {@code -Dgw.genai.serverId}, and {@code -Dgw.logInputs}).
+ * </p>
+ *
+ * <h2>Usage examples</h2>
+ * <pre>
+ * mvn gw:act
+ * </pre>
+ * <pre>
+ * mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\\site
+ * </pre>
+ * <pre>
+ * mvn gw:act -Dgw.acts=src\\site\\acts -Dgw.logInputs=true
+ * </pre>
+ */
 @Mojo(name = "act", aggregator = true)
 public class Act extends AbstractGWGoal {
 
 	/**
-	 * Interactive prompt provider used to collect the action input.
+	 * Interactive prompt provider used to collect action input.
 	 */
 	@Component
 	protected Prompter prompter;
 
+	/**
+	 * Action prompt text. If not set, the goal prompts the user interactively.
+	 */
 	@Parameter(property = "gw.act", required = false)
 	private String act;
 
+	/**
+	 * Optional directory containing predefined action definitions.
+	 */
 	@Parameter(property = "gw.acts", required = false)
 	private File acts;
 
 	/**
-	 * Executes the interactive action.
+	 * Executes the interactive action and scans documents using the configured action prompt.
 	 *
-	 * @throws MojoExecutionException if an I/O failure occurs while processing
-	 *                                files
+	 * @throws MojoExecutionException if an I/O failure occurs while processing files
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -104,6 +148,18 @@ public class Act extends AbstractGWGoal {
 		}
 	}
 
+	/**
+	 * Reads multi-line input from the interactive {@link Prompter}.
+	 *
+	 * <p>
+	 * The user can enter multiple lines by ending a line with
+	 * {@link Ghostwriter#MULTIPLE_LINES_BREAKER}. Input collection stops when a line does not end with the breaker.
+	 * </p>
+	 *
+	 * @param prompt the initial prompt label displayed to the user
+	 * @return the collected text
+	 * @throws PrompterException if prompting fails
+	 */
 	public String readText(String prompt) throws PrompterException {
 		StringBuilder sb = new StringBuilder();
 		String line = null;
