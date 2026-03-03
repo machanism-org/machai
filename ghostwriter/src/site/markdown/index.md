@@ -76,7 +76,7 @@ Machai Ghostwriter is unique in how it turns *file-local guidance* into a repeat
 ### Prerequisites
 
 - Java **8** (as configured by `maven.compiler.release` in `pom.xml`).
-- A configured GenAI provider setting (`gw.genai`) or CLI override (`-a/--genai`).
+- A configured GenAI provider setting (`gw.model`) or CLI override (`-a/--genai`).
 - (Optional) A `gw.properties` file to persist configuration.
 
 ### Download
@@ -94,7 +94,7 @@ java -jar gw.jar <scanDir> -a OpenAI:gpt-5.1
 1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document.
 2. Create `gw.properties` (optional) and configure:
    - `gw.rootDir` (project root)
-   - `gw.genai` (provider:model)
+   - `gw.model` (provider:model)
    - `gw.instructions` (optional)
    - `gw.excludes` (optional)
    - `gw.guidance` (optional default guidance)
@@ -103,7 +103,7 @@ java -jar gw.jar <scanDir> -a OpenAI:gpt-5.1
 
 ### Java Version
 
-Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.genai` or `-a/--genai`), otherwise the CLI will fail fast.
+Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.model` or `-a/--genai`), otherwise the CLI will fail fast.
 
 ## Configuration
 
@@ -128,7 +128,7 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 | `-h, --help` | Show this help message and exit. | `false` |
 | `-r, --root <path>` | Specify the path to the root directory for file processing. | `gw.rootDir` or current working directory |
 | `-t, --threads[=<true\|false>]` | Enable multi-threaded processing to improve performance. If used without a value, enables it. | `false` (`gw.threads`) |
-| `-a, --genai <provider:model>` | Set the GenAI provider and model. | `gw.genai` |
+| `-a, --genai <provider:model>` | Set the GenAI provider and model. | `gw.model` |
 | `-i, --instructions[=<text\|url\|file:...>]` | System instructions (plain text, URL, or `file:`). If no value: stdin until EOF. | `gw.instructions` |
 | `-g, --guidance[=<text\|url\|file:...>]` | Default guidance (plain text, URL, or `file:`). If no value: stdin until EOF. | `gw.guidance` |
 | `-e, --excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` |

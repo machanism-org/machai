@@ -65,7 +65,7 @@ public final class Ghostwriter {
 	public static final String GW_ROOTDIR_PROP_NAME = "gw.rootDir";
 
 	/** Configuration key specifying the GenAI provider/model to use. */
-	public static final String GW_GENAI_PROP_NAME = "gw.genai";
+	public static final String GW_GENAI_PROP_NAME = "gw.model";
 
 	/** Configuration key containing optional system instructions. */
 	public static final String GW_INSTRUCTIONS_PROP_NAME = "gw.instructions";
@@ -99,7 +99,7 @@ public final class Ghostwriter {
 	public Ghostwriter(String genai, PropertiesConfigurator config, AIFileProcessor processor) {
 		if (StringUtils.isBlank(genai)) {
 			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_GENAI_PROP_NAME
-					+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -a/--genai (e.g., OpenAI:gpt-5.1).");
+					+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -m/--model (e.g., OpenAI:gpt-5.1).");
 		}
 
 		this.processor = processor;
@@ -308,10 +308,7 @@ public final class Ghostwriter {
 		Option rootDirOpt = new Option("r", "root", true,
 				"Specify the path to the root directory for file processing.");
 
-		Option actsDirOpt = new Option("acts", true,
-				"Specify the path to the directory containing predefined act prompt files for processing.");
-
-		Option genaiOpt = new Option("a", "genai", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
+		Option genaiOpt = new Option("m", "model", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt("instructions")
 				.desc("Specify system instructions as plain text, by URL, or by file path. "
@@ -330,47 +327,50 @@ public final class Ghostwriter {
 						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
 				.hasArg(true).optionalArg(true).build();
 
-		Option actOpt = Option.builder().longOpt("act")
+		Option actsDirOpt = new Option("as", "acts", true,
+				"Specify the path to the directory containing predefined act prompt files for processing.");
+
+		Option actOpt = Option.builder("a").longOpt("act")
 				.desc("Run Ghostwriter in Act mode: an interactive mode for executing predefined prompts.")
 				.hasArg(true).optionalArg(true).build();
 
 		options.addOption(helpOption);
 		options.addOption(rootDirOpt);
-		options.addOption(actsDirOpt);
 		options.addOption(multiThreadOption);
 		options.addOption(genaiOpt);
 		options.addOption(instructionsOpt);
 		options.addOption(guidanceOpt);
 		options.addOption(excludesOpt);
 		options.addOption(logInputsOption);
+		options.addOption(actsDirOpt);
 		options.addOption(actOpt);
 
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = parser.parse(options, args);
 
-		if (cmd.hasOption(helpOption.getOpt())) {
+		if (cmd.hasOption(helpOption)) {
 			help(options);
 			return;
 		}
 
 		File rootDir = null;
-		if (cmd.hasOption(rootDirOpt.getOpt())) {
-			rootDir = new File(cmd.getOptionValue(rootDirOpt.getOpt()));
+		if (cmd.hasOption(rootDirOpt)) {
+			rootDir = new File(cmd.getOptionValue(rootDirOpt));
 		}
 
 		PropertiesConfigurator config = initializeConfiguration(rootDir);
 
 		String genai = config.get(GW_GENAI_PROP_NAME, null);
-		if (cmd.hasOption(genaiOpt.getOpt())) {
-			String opt = StringUtils.trimToNull(cmd.getOptionValue(genaiOpt.getOpt()));
+		if (cmd.hasOption(genaiOpt)) {
+			String opt = StringUtils.trimToNull(cmd.getOptionValue(genaiOpt));
 			if (opt != null) {
 				genai = opt;
 			}
 		}
 
 		String instructions = config.get(GW_INSTRUCTIONS_PROP_NAME, null);
-		if (cmd.hasOption(instructionsOpt.getOpt())) {
-			instructions = cmd.getOptionValue(instructionsOpt.getOpt());
+		if (cmd.hasOption(instructionsOpt)) {
+			instructions = cmd.getOptionValue(instructionsOpt);
 
 			if (instructions == null) {
 				instructions = readText("No instructions were provided as an option value.\n"
@@ -379,13 +379,13 @@ public final class Ghostwriter {
 		}
 
 		String[] excludes = StringUtils.split(config.get(GW_EXCLUDES_PROP_NAME, null), ',');
-		if (cmd.hasOption(excludesOpt.getOpt())) {
-			excludes = StringUtils.split(cmd.getOptionValue(excludesOpt.getOpt()), ',');
+		if (cmd.hasOption(excludesOpt)) {
+			excludes = StringUtils.split(cmd.getOptionValue(excludesOpt), ',');
 		}
 
 		String multiThread = config.get(GW_THREADS_PROP_NAME, null);
-		if (cmd.hasOption(multiThreadOption.getOpt())) {
-			String opt = cmd.getOptionValue(multiThreadOption.getOpt());
+		if (cmd.hasOption(multiThreadOption)) {
+			String opt = cmd.getOptionValue(multiThreadOption);
 			if (opt == null) {
 				multiThread = "true";
 			} else {
@@ -394,7 +394,7 @@ public final class Ghostwriter {
 		}
 
 		boolean logInputs = config.getBoolean(GW_LOG_INPUTS_PROP_NAME, false);
-		if (cmd.hasOption(logInputsOption.getOpt())) {
+		if (cmd.hasOption(logInputsOption)) {
 			logInputs = true;
 		}
 
@@ -410,16 +410,17 @@ public final class Ghostwriter {
 		String defaultPrompt;
 		try {
 			AIFileProcessor processor;
-			if (cmd.hasOption(actOpt.getLongOpt())) {
+			if (cmd.hasOption(actOpt)) {
 				processor = new ActProcessor(rootDir, config, genai);
-				defaultPrompt = cmd.getOptionValue(actOpt.getLongOpt());
+				defaultPrompt = cmd.getOptionValue(actOpt);
 
 				if (defaultPrompt == null) {
 					defaultPrompt = readText("Act");
 				}
 
 				if (cmd.hasOption(actsDirOpt)) {
-					File actDir = new File(actsDirOpt.getValue());
+					String value = cmd.getOptionValue(actsDirOpt);
+					File actDir = new File(value);
 					logger.info("Act directory: {}", actDir);
 					((ActProcessor) processor).setActDir(actDir);
 				}
@@ -432,8 +433,8 @@ public final class Ghostwriter {
 				processor = new GuidanceProcessor(rootDir, genai, config);
 
 				defaultPrompt = config.get(GW_GUIDANCE_PROP_NAME, null);
-				if (cmd.hasOption(guidanceOpt.getOpt())) {
-					defaultPrompt = cmd.getOptionValue(guidanceOpt.getOpt());
+				if (cmd.hasOption(guidanceOpt)) {
+					defaultPrompt = cmd.getOptionValue(guidanceOpt);
 					if (defaultPrompt == null) {
 						defaultPrompt = readText("Please enter the guidance text below.");
 					}

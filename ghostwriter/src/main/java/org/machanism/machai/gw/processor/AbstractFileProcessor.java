@@ -248,20 +248,25 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		String path = relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + "/" + relativeScanDir;
+		String path = relativeProjectDir.isEmpty() ? relativeScanDir
+				: relativeProjectDir + (".".equals(relativeScanDir) ? "" : "/" + relativeScanDir);
 
 		Path pathToMatch = new File(path).toPath();
 		boolean fullMatch = pathMatcher != null && pathMatcher.matches(pathToMatch);
 		boolean projectMatch = pathMatcher != null && pathMatcher.matches(new File(relativeScanDir).toPath());
 
 		boolean result = fullMatch || projectMatch;
-		if (!result && scanDir != null && pathMatcher != null) {
-			String relativePath = ProjectLayout.getRelativePath(scanDir, file);
-			if (relativePath != null) {
-				Path scanFilePath = scanDir.toPath().resolve(relativePath);
-				String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
-				result = relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
+		if (pathMatcher != null) {
+			if (!result && scanDir != null) {
+				String relativePath = ProjectLayout.getRelativePath(scanDir, file);
+				if (relativePath != null) {
+					Path scanFilePath = scanDir.toPath().resolve(relativePath);
+					String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
+					result = relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
+				}
 			}
+		} else {
+			result = Strings.CS.equals(scanDir.getAbsolutePath(), file.getAbsolutePath());
 		}
 
 		return result;

@@ -30,7 +30,7 @@ Supported GenAI providers (examples):
 ----------------------------
 Prerequisites:
 - Java 8
-- A configured GenAI provider/model (gw.genai or -a/--genai)
+- A configured GenAI provider/model (gw.model or -a/--genai)
 - (Optional) a configuration file: gw.properties
 
 Download:
@@ -98,10 +98,10 @@ These properties may be set in gw.properties and/or overridden with -D...:
   Default: gw.rootDir (if set), else current working directory.
   Usage: set in gw.properties or pass -r/--root.
 
-- gw.genai
+- gw.model
   Description: GenAI provider and model (provider:model).
   Default: none (required).
-  Usage: gw.genai=OpenAI:gpt-5.1 or gw.genai=CodeMie:...
+  Usage: gw.model=OpenAI:gpt-5.1 or gw.model=CodeMie:...
 
 - gw.instructions
   Description: System instructions applied to provider execution. Accepts plain
@@ -149,7 +149,7 @@ These properties may be set in gw.properties and/or overridden with -D...:
   If provided with no value, it enables threading.
 
 - -a, --genai <provider:model>
-  GenAI provider/model (required unless configured via gw.genai).
+  GenAI provider/model (required unless configured via gw.model).
 
 - -i, --instructions[=<text|url|file:...>]
   System instructions. Accepts plain text, URL lines, or file: references.
@@ -239,7 +239,7 @@ Unix examples:
 ----------------------------
 Common issues:
 - "No GenAI provider/model configured"
-  Set gw.genai in gw.properties or pass -a/--genai.
+  Set gw.model in gw.properties or pass -a/--genai.
 
 - Authentication errors
   Verify provider credentials are set (GENAI_USERNAME/GENAI_PASSWORD for

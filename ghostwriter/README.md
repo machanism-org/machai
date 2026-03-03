@@ -37,7 +37,7 @@ Its conceptual foundation is [Guided File Processing](https://www.machanism.org/
 #### Prerequisites
 
 - Java **8** (as configured by `maven.compiler.release` in `pom.xml`).
-- A configured GenAI provider setting (`gw.genai`) or CLI override (`-a/--genai`).
+- A configured GenAI provider setting (`gw.model`) or CLI override (`-a/--genai`).
 - (Optional) A `gw.properties` file to persist configuration.
 
 #### Download
@@ -55,7 +55,7 @@ java -jar gw.jar <scanDir> -a OpenAI:gpt-5.1
 1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document.
 2. Create `gw.properties` (optional) and configure:
    - `gw.rootDir` (project root)
-   - `gw.genai` (provider:model)
+   - `gw.model` (provider:model)
    - `gw.instructions` (optional)
    - `gw.excludes` (optional)
    - `gw.guidance` (optional default guidance)
@@ -64,7 +64,7 @@ java -jar gw.jar <scanDir> -a OpenAI:gpt-5.1
 
 #### Java Version
 
-Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.genai` or `-a/--genai`), otherwise the CLI will fail fast.
+Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.model` or `-a/--genai`), otherwise the CLI will fail fast.
 
 ## Resources
 

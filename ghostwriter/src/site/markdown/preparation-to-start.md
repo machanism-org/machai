@@ -85,7 +85,7 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 | `gw.config` | Configuration file name (resolved relative to `gw.home`) to load at startup. | `gw.properties` | Read as a Java system property in `initializeConfiguration(...)` when constructing `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. |
 | `gw.home` | Home directory (`gwHomeDir`) used to resolve `gw.config`. During bootstrap Ghostwriter sets `System.setProperty("gw.home", gwHomeDir.getAbsolutePath())` after resolution. | If not set: CLI `--root/-r` value (if provided); else `user.dir`. | Read via `PropertiesConfigurator#getFile("gw.home", null)` in `initializeConfiguration(...)`. Used as the base directory for the config file location. |
 | `gw.rootDir` | Root project directory used as the base directory for file processing (including scan targets) and to constrain/validate absolute scan paths (enforced downstream by the processor). | If not set: `user.dir`. | If the CLI `-r/--root` option is provided, its value is used. Otherwise loaded via `config.getFile("gw.rootDir", null)` and falls back to `SystemUtils.getUserDir()`. Passed into `new ActProcessor(rootDir, config, genai)` / `new GuidanceProcessor(rootDir, genai, config)`, and later used via `processor.getRootDir()` during scanning. |
-| `gw.genai` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | **No default**; required. | Loaded via `config.get("gw.genai", null)` and optionally overridden by CLI `-a/--genai`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor` / `GuidanceProcessor` construction. |
+| `gw.model` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | **No default**; required. | Loaded via `config.get("gw.model", null)` and optionally overridden by CLI `-a/--genai`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor` / `GuidanceProcessor` construction. |
 | `gw.instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null` | Loaded via `config.get("gw.instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin until EOF. Applied via `AIFileProcessor#setInstructions(...)`. |
 | `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null` | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
 | `gw.guidance` | Default guidance applied when embedded guidance tag directives are not present (normal mode). | `null` | Loaded via `config.get("gw.guidance", null)` and optionally overridden by CLI `-g/--guidance`. If `-g` is specified without a value, guidance is read from stdin until EOF. Applied via `AIFileProcessor#setDefaultPrompt(...)` (via `Ghostwriter#setDefaultPrompt(...)`). |
@@ -115,7 +115,7 @@ java -jar gw.jar --act "Improve readability and add tests"
 ```properties
 # GenAI provider and model
 # (required)
-gw.genai=CodeMie:gpt-5-2-2025-12-11
+gw.model=CodeMie:gpt-5-2-2025-12-11
 
 # Enable logging of input prompts
 gw.logInputs=true

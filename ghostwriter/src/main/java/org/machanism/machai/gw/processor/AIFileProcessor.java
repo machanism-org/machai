@@ -187,7 +187,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		String relativeFile = ProjectLayout.getRelativePath(projectDir, file);
 		content.add(relativeFile);
-		
+
 		Object[] array = content.toArray(new String[0]);
 		return MessageFormat.format(promptBundle.getString("project_information"), array) + "\n";
 	}
@@ -430,6 +430,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 			}
 			super.setPathMatcher(FileSystems.getDefault().getPathMatcher(scanDir));
+		} else {
+			setScanDir(projectDir);
 		}
 
 		scanFolder(projectDir);
