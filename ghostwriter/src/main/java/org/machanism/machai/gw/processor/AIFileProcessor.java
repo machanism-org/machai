@@ -411,9 +411,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 
 		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
-
-			logger.info("Scan path: {}", scanDir);
-
 			if (!isPathPattern(scanDir)) {
 				super.setScanDir(new File(scanDir));
 				String relativePath = ProjectLayout.getRelativePath(projectDir, new File(scanDir));

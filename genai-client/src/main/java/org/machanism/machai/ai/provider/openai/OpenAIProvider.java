@@ -404,7 +404,12 @@ public class OpenAIProvider implements GenAIProvider {
 			Object result = null;
 			for (Entry<Tool, Function<Object[], Object>> entry : entrySet) {
 				if (StringUtils.equals(name, entry.getKey().asFunction().name())) {
-					result = entry.getValue().apply(arguments);
+					try {
+						result = entry.getValue().apply(arguments);
+					} catch (Exception e) {
+						result = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
+								+ e.getMessage();
+					}
 					break;
 				}
 			}
