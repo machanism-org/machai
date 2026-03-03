@@ -46,11 +46,11 @@ public class ConfigCommand {
 	/**
 	 * Sets the default GenAI provider and model identifier.
 	 *
-	 * @param genai provider/model identifier (e.g., {@code OpenAI:gpt-5.1})
+	 * @param model provider/model identifier (e.g., {@code OpenAI:gpt-5.1})
 	 */
 	@ShellMethod("Specifies the GenAI default value for service provider and model (e.g., `OpenAI:gpt-5.1`).")
-	public void model(@ShellOption(value = "", defaultValue = ShellOption.NULL) String genai) {
-		config.set("model", genai);
+	public void model(@ShellOption(value = "", defaultValue = ShellOption.NULL) String model) {
+		config.set("gw.model", model);
 	}
 
 	/**
@@ -59,9 +59,9 @@ public class ConfigCommand {
 	 *
 	 * @param dir default project directory
 	 */
-	@ShellMethod("The default path to the project directory.")
-	public void dir(@ShellOption(value = "", defaultValue = ShellOption.NULL) File dir) {
-		config.set("dir", dir.getAbsolutePath());
+	@ShellMethod("The default path to the root project directory.")
+	public void root(@ShellOption(value = "", defaultValue = ShellOption.NULL) File dir) {
+		config.set("gw.rootDir", dir.getAbsolutePath());
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class ConfigCommand {
 	 */
 	@ShellMethod("Set the default value of minimum similarity threshold for search results.")
 	public void score(@ShellOption(value = "", defaultValue = ShellOption.NULL) Double score) {
-		config.set("score", Double.toString(score));
+		config.set("bindex.score", Double.toString(score));
 	}
 
 	/**
