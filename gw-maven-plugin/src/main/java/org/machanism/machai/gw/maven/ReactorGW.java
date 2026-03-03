@@ -45,7 +45,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
  * <li>
- * <b>{@code gw.genai}</b> / {@code &lt;genai&gt;} ({@code genai}): Provider/model identifier passed to the
+ * <b>{@code gw.model}</b> / {@code &lt;genai&gt;} ({@code genai}): Provider/model identifier passed to the
  * workflow.
  * </li>
  * <li>

@@ -49,8 +49,8 @@ public class ConfigCommand {
 	 * @param genai provider/model identifier (e.g., {@code OpenAI:gpt-5.1})
 	 */
 	@ShellMethod("Specifies the GenAI default value for service provider and model (e.g., `OpenAI:gpt-5.1`).")
-	public void genai(@ShellOption(value = "", defaultValue = ShellOption.NULL) String genai) {
-		config.set("genai", genai);
+	public void model(@ShellOption(value = "", defaultValue = ShellOption.NULL) String genai) {
+		config.set("model", genai);
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class ConfigCommand {
 	@ShellMethod("Show configuration properties.")
 	public void conf() {
 		LOGGER.info("Working directory path: dir = {}", config.get("dir"));
-		LOGGER.info("Default GenAI Service: genai = {}", config.get("genai"));
+		LOGGER.info("Default GenAI Service: genai = {}", config.get("model"));
 		LOGGER.info("Default minimum score for semantic search: score = {}", config.get("score"));
 	}
 }

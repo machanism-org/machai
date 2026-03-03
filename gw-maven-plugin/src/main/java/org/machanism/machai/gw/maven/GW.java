@@ -63,7 +63,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <dl>
- * <dt><b>{@code -Dgw.genai}</b> / {@code &lt;genai&gt;}</dt>
+ * <dt><b>{@code -Dgw.model}</b> / {@code &lt;genai&gt;}</dt>
  * <dd>Provider/model identifier forwarded to the workflow. Example: {@code openai:gpt-4o-mini}.</dd>
  *
  * <dt><b>{@code -Dgw.scanDir}</b> / {@code &lt;scanDir&gt;}</dt>

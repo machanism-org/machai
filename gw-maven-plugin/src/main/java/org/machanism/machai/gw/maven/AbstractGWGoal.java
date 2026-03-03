@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * <h2>Common parameters</h2>
  * <ul>
- * <li>{@code -Dgw.genai} - Provider/model identifier to pass to the
+ * <li>{@code -Dgw.model} - Provider/model identifier to pass to the
  * workflow.</li>
  * <li>{@code -Dgw.scanDir} - Optional scan root override. When omitted,
  * defaults to the module base directory.</li>
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * workflow.</li>
  * <li>{@code -Dgw.excludes} - Exclude patterns/paths to skip while scanning
  * documentation sources.</li>
- * <li>{@code -Dgw.genai.serverId} - {@code settings.xml} {@code &lt;server&gt;}
+ * <li>{@code -Dgw.model.serverId} - {@code settings.xml} {@code &lt;server&gt;}
  * id used to read GenAI credentials.</li>
  * <li>{@code -Dgw.logInputs} (default {@code false}) - Logs the list of input
  * files passed to the workflow.</li>
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  *
  * <h2>Examples</h2>
  * <pre>
- * mvn gw:gw -Dgw.genai=openai:gpt-4o-mini -Dgw.scanDir=src\\site -Dgw.logInputs=true
+ * mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site -Dgw.logInputs=true
  * </pre>
  */
 public abstract class AbstractGWGoal extends AbstractMojo {
@@ -66,7 +66,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * Provider/model identifier to pass to the workflow.
 	 */
-	@Parameter(property = "gw.genai")
+	@Parameter(property = "gw.model")
 	protected String genai;
 	/**
 	 * The Maven module base directory.

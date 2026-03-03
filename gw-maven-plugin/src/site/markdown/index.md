@@ -89,7 +89,7 @@ mvn gw:act
 2. Provide instructions and/or default guidance:
    - `-Dgw.instructions=...` to point at instruction sources.
    - `-Dgw.guidance="..."` for a default prompt when a file needs guidance.
-3. Configure your GenAI provider/model via `-Dgw.genai=...`.
+3. Configure your GenAI provider/model via `-Dgw.model=...`.
 4. (Optional) Configure excludes with `-Dgw.excludes=...`.
 5. Run `mvn gw:gw` (or `mvn gw:reactor`) and review the updated outputs.
 6. Commit the results.
@@ -100,7 +100,7 @@ Common parameters used by the goals in this plugin:
 
 | Parameter | Description | Default |
 |---|---|---|
-| `gw.genai` | GenAI provider/model identifier passed to the workflow. | _(none)_ |
+| `gw.model` | GenAI provider/model identifier passed to the workflow. | _(none)_ |
 | `gw.scanDir` | Scan root override. If omitted, the plugin defaults to the Maven execution root directory. | Maven execution root |
 | `gw.instructions` | Instruction locations consumed by the workflow (e.g., file paths or classpath locations). | _(none)_ |
 | `gw.guidance` | Default guidance text forwarded to the workflow. | _(none)_ |

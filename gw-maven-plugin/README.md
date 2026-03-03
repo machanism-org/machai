@@ -103,13 +103,13 @@ mvn gw:gw -Dgw.threads=true
 Specify a GenAI provider/model:
 
 ```cmd
-mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini
+mvn gw:gw -Dgw.model=openai:gpt-4.1-mini
 ```
 
 If credentials are stored in Maven `settings.xml` under a `<server>` entry:
 
 ```cmd
-mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai
+mvn gw:gw -Dgw.model=openai:gpt-4.1-mini -Dgw.genai.serverId=genai
 ```
 
 ### Configuration example
@@ -135,5 +135,5 @@ mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai
 Command-line override example:
 
 ```cmd
-mvn gw:gw -Dgw.genai=openai:gpt-4.1-mini -Dgw.genai.serverId=genai -Dgw.logInputs=true
+mvn gw:gw -Dgw.model=openai:gpt-4.1-mini -Dgw.genai.serverId=genai -Dgw.logInputs=true
 ```

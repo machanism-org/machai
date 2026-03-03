@@ -34,7 +34,7 @@
     "name" : "gw:gw",
     "package" : "org.machanism.machai.gw.maven",
     "signature" : "org.machanism.machai.gw.maven.GW.execute() throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Runs Ghostwriter guided file processing as an aggregator goal that can execute without a pom.xml (requiresProject=false). Processes modules in reverse order (sub-modules first, then parent modules), similar to the Ghostwriter CLI. Supports optional multi-threaded module processing via gw.threads and inherits shared scanning/configuration parameters (gw.genai, gw.scanDir, gw.instructions, gw.guidance, gw.excludes, gw.genai.serverId, gw.logInputs).",
+    "description" : "Runs Ghostwriter guided file processing as an aggregator goal that can execute without a pom.xml (requiresProject=false). Processes modules in reverse order (sub-modules first, then parent modules), similar to the Ghostwriter CLI. Supports optional multi-threaded module processing via gw.threads and inherits shared scanning/configuration parameters (gw.model, gw.scanDir, gw.instructions, gw.guidance, gw.excludes, gw.genai.serverId, gw.logInputs).",
     "examples" : [ {
       "snippet" : "mvn gw:gw",
       "description" : "Run guided workflow processing in the current directory."
@@ -52,7 +52,7 @@
     "name" : "gw:reactor",
     "package" : "org.machanism.machai.gw.maven",
     "signature" : "org.machanism.machai.gw.maven.ReactorGW.execute() throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Processes documents across a multi-module build using standard Maven reactor dependency ordering. Optionally defers execution-root project processing until other reactor projects have completed using gw.rootProjectLast. Inherits shared scanning/configuration parameters (gw.genai, gw.scanDir, gw.instructions, gw.guidance, gw.excludes, gw.genai.serverId, gw.logInputs).",
+    "description" : "Processes documents across a multi-module build using standard Maven reactor dependency ordering. Optionally defers execution-root project processing until other reactor projects have completed using gw.rootProjectLast. Inherits shared scanning/configuration parameters (gw.model, gw.scanDir, gw.instructions, gw.guidance, gw.excludes, gw.genai.serverId, gw.logInputs).",
     "examples" : [ {
       "snippet" : "mvn gw:reactor",
       "description" : "Run guided workflow processing using Maven reactor ordering."
@@ -136,7 +136,7 @@
     "description" : "Processes documentation under src/site using Maven reactor ordering."
   }, {
     "title" : "Use Maven settings credentials",
-    "snippet" : "mvn gw:gw -Dgw.genai.serverId=my-genai-server -Dgw.genai=openai:gpt-4o-mini",
+    "snippet" : "mvn gw:gw -Dgw.genai.serverId=my-genai-server -Dgw.model=openai:gpt-4o-mini",
     "description" : "Loads credentials from settings.xml and selects a provider/model identifier for the workflow."
   } ],
   "dependencies" : [ "org.machanism.machai:ghostwriter:0.0.13-SNAPSHOT", "org.apache.commons:commons-lang3:3.20.0", "org.apache.maven.shared:maven-shared-utils:3.4.2", "org.apache.maven:maven-core:3.6.0", "org.apache.maven:maven-plugin-api:3.0", "org.apache.maven.plugin-tools:maven-plugin-annotations:3.4", "org.apache.maven.plugin-testing:maven-plugin-testing-harness:3.4.0", "org.slf4j:slf4j-api:2.0.17", "junit:junit:4.13.2", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0" ],

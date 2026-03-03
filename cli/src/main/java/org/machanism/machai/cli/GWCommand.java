@@ -31,7 +31,7 @@ public class GWCommand {
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
 	public void gw(
 			@ShellOption(value = "threads", help = "Enable multi-threaded processing", defaultValue = "false") boolean threads,
-			@ShellOption(value = "genai", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String genai,
+			@ShellOption(value = "model", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
 			@ShellOption(value = "instructions", help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
 			@ShellOption(value = "guidance", help = "Default guidance as text, URL, or file path", defaultValue = ShellOption.NULL) String guidance,
 			@ShellOption(value = "excludes", help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
@@ -42,8 +42,8 @@ public class GWCommand {
 			File rootDir = config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, SystemUtils.getUserDir());
 
 			String genaiValue = config.get(Ghostwriter.GW_GENAI_PROP_NAME, null);
-			if (genai != null) {
-				genaiValue = genai;
+			if (model != null) {
+				genaiValue = model;
 			}
 
 			String instructionsValue = config.get(Ghostwriter.GW_INSTRUCTIONS_PROP_NAME, null);

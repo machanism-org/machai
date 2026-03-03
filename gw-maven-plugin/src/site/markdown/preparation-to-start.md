@@ -101,7 +101,7 @@ You can also specify configuration options to customize the plugin’s behavior:
 
 | Parameter / Property | Description | Default |
 |---|---|---|
-| `gw.genai` | GenAI provider/model identifier passed to Ghostwriter processing. | (none) |
+| `gw.model` | GenAI provider/model identifier passed to Ghostwriter processing. | (none) |
 | `gw.scanDir` | Scan root override; when omitted, scans the Maven execution root directory (or the current module base directory when appropriate). | execution root directory |
 | `gw.instructions` | Instruction locations (file paths or classpath locations) consumed by the workflow. | (none) |
 | `gw.guidance` | Default guidance text forwarded to the workflow. | (none) |
