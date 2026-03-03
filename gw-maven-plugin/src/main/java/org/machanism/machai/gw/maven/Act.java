@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -23,40 +24,44 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Maven goal {@code gw:act} that runs an interactive, predefined "action" over a documentation tree.
+ * Maven goal {@code gw:act} that runs an interactive, predefined "action" over
+ * a documentation tree.
  *
  * <p>
- * An action is a prompt (typically sourced from a resource bundle or prompt file) that is applied to the scanned
- * documents. If {@code -Dgw.act} is not provided, the goal prompts the user interactively via Maven's
+ * An action is a prompt (typically sourced from a resource bundle or prompt
+ * file) that is applied to the scanned documents. If {@code -Dgw.act} is not
+ * provided, the goal prompts the user interactively via Maven's
  * {@link Prompter} component.
  * </p>
  *
  * <h2>Parameters</h2>
  * <dl>
  * <dt><b>{@code -Dgw.act}</b> / {@code &lt;act&gt;}</dt>
- * <dd>
- * Action text/prompt to apply. If omitted, the goal reads it interactively.
+ * <dd>Action text/prompt to apply. If omitted, the goal reads it interactively.
  * </dd>
  *
  * <dt><b>{@code -Dgw.acts}</b> / {@code &lt;acts&gt;}</dt>
- * <dd>
- * Optional directory containing predefined action definitions.
- * </dd>
+ * <dd>Optional directory containing predefined action definitions.</dd>
  * </dl>
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <p>
- * This goal also supports all common parameters defined by {@link AbstractGWGoal} (for example {@code -Dgw.model},
- * {@code -Dgw.scanDir}, {@code -Dgw.excludes}, {@code -Dgw.genai.serverId}, and {@code -Dgw.logInputs}).
+ * This goal also supports all common parameters defined by
+ * {@link AbstractGWGoal} (for example {@code -Dgw.model}, {@code -Dgw.scanDir},
+ * {@code -Dgw.excludes}, {@code -Dgw.genai.serverId}, and
+ * {@code -Dgw.logInputs}).
  * </p>
  *
  * <h2>Usage examples</h2>
+ * 
  * <pre>
  * mvn gw:act
  * </pre>
+ * 
  * <pre>
  * mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\\site
  * </pre>
+ * 
  * <pre>
  * mvn gw:act -Dgw.acts=src\\site\\acts -Dgw.logInputs=true
  * </pre>
@@ -83,38 +88,45 @@ public class Act extends AbstractGWGoal {
 	private File acts;
 
 	/**
-	 * Executes the interactive action and scans documents using the configured action prompt.
+	 * Executes the interactive action and scans documents using the configured
+	 * action prompt.
 	 *
-	 * @throws MojoExecutionException if an I/O failure occurs while processing files
+	 * @throws MojoExecutionException if an I/O failure occurs while processing
+	 *                                files
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
 
-		try {
-			ActProcessor actProcessor = new ActProcessor(basedir, configuration, genai) {
-				@Override
-				public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
-					ProjectLayout projectLayout = super.getProjectLayout(projectDir);
-					projectLayout.projectDir(projectDir);
+		ActProcessor actProcessor = new ActProcessor(basedir, configuration, configuration.get("gw.model", genai)) {
+			@Override
+			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+				ProjectLayout projectLayout = super.getProjectLayout(projectDir);
+				projectLayout.projectDir(projectDir);
 
-					if (projectLayout instanceof MavenProjectLayout) {
-						MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
-						mavenProjectLayout.effectivePomRequired(false);
+				if (projectLayout instanceof MavenProjectLayout) {
+					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
+					mavenProjectLayout.effectivePomRequired(false);
 
-						Model model = mavenProjectLayout.getModel();
-						for (MavenProject mavenProject : session.getAllProjects()) {
-							if (Strings.CS.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
-								mavenProjectLayout.model(mavenProject.getModel());
-								break;
-							}
+					Model model = mavenProjectLayout.getModel();
+					for (MavenProject mavenProject : session.getAllProjects()) {
+						if (Strings.CS.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
+							mavenProjectLayout.model(mavenProject.getModel());
+							break;
 						}
 					}
-
-					return projectLayout;
 				}
-			};
 
+				return projectLayout;
+			}
+		};
+
+		process(configuration, actProcessor);
+	}
+
+	protected void process(PropertiesConfigurator configuration, ActProcessor actProcessor)
+			throws MojoExecutionException {
+		try {
 			if (acts != null) {
 				logger.info("Act directory: {}", acts);
 				actProcessor.setActDir(acts);
@@ -125,8 +137,11 @@ public class Act extends AbstractGWGoal {
 			actProcessor.setLogInputs(logInputs);
 
 			try {
+				Properties userProperties = session.getUserProperties();
+				act = userProperties.getProperty("gw.act");
 				if (act == null) {
 					act = readText("Act");
+					userProperties.setProperty("gw.act", act);
 				}
 				actProcessor.setDefaultPrompt(act);
 				String gwScanDir = configuration.get("gw.scanDir");
@@ -153,7 +168,8 @@ public class Act extends AbstractGWGoal {
 	 *
 	 * <p>
 	 * The user can enter multiple lines by ending a line with
-	 * {@link Ghostwriter#MULTIPLE_LINES_BREAKER}. Input collection stops when a line does not end with the breaker.
+	 * {@link Ghostwriter#MULTIPLE_LINES_BREAKER}. Input collection stops when a
+	 * line does not end with the breaker.
 	 * </p>
 	 *
 	 * @param prompt the initial prompt label displayed to the user
