@@ -24,7 +24,7 @@ Ghostwriter is delivered as a CLI entry point (`org.machanism.machai.gw.processo
 - Composes provider inputs including project structure context and optional system instructions.
 - Executes the configured GenAI provider on each matching file.
 
-In addition to per-file guidance, Ghostwriter can apply *default guidance* when a file has no embedded `@guidance:` (and/or as a final step for a scan, depending on processor behavior).
+In addition to per-file guidance, Ghostwriter can apply *default guidance* when a file has no embedded `@guidance:` and/or can run a folder-level step depending on processor behavior.
 
 ## Machai Ghostwriter vs. Other Tools
 
@@ -76,7 +76,7 @@ Machai Ghostwriter is unique in how it turns *file-local guidance* into a repeat
 ### Prerequisites
 
 - Java **8** (as configured by `maven.compiler.release` in `pom.xml`).
-- A configured GenAI provider setting (`gw.model`) or CLI override (`-a/--genai`).
+- A configured GenAI provider/model setting (`gw.model`) or CLI override (`-m/--model`).
 - (Optional) A `gw.properties` file to persist configuration.
 
 ### Download
@@ -86,7 +86,7 @@ Machai Ghostwriter is unique in how it turns *file-local guidance* into a repeat
 ### Basic Usage
 
 ```bash
-java -jar gw.jar <scanDir> -a OpenAI:gpt-5.1
+java -jar gw.jar <scanDir> -m OpenAI:gpt-5.1
 ```
 
 ### Typical Workflow
@@ -103,7 +103,7 @@ java -jar gw.jar <scanDir> -a OpenAI:gpt-5.1
 
 ### Java Version
 
-Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.model` or `-a/--genai`), otherwise the CLI will fail fast.
+Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.model` or `-m/--model`), otherwise the CLI will fail fast.
 
 ## Configuration
 
@@ -114,12 +114,13 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 - `-h, --help` — Show help message and exit.
 - `-r, --root <path>` — Root directory for file processing.
 - `-t, --threads[=<true|false>]` — Enable multi-threaded processing (default: `false`). If provided with no value, it enables threading.
-- `-a, --genai <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
+- `-m, --model <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
 - `-i, --instructions[=<text|url|file:...>]` — Provide system instructions. If used without a value, Ghostwriter reads multi-line text from stdin until EOF.
 - `-g, --guidance[=<text|url|file:...>]` — Provide default guidance. If used without a value, Ghostwriter reads multi-line text from stdin until EOF.
 - `-e, --excludes <csv>` — Comma-separated list of directories to exclude.
 - `-l, --logInputs` — Log LLM request inputs to dedicated log files.
-- `--act[=<name and prompt>]` — Run in Act mode (interactive execution of predefined prompts). If used without a value, Ghostwriter reads the action from stdin until EOF.
+- `-as, --acts <path>` — Directory containing predefined act prompt files.
+- `-a, --act[=<name and prompt>]` — Run in Act mode (interactive execution of predefined prompts). If used without a value, Ghostwriter reads the action from stdin until EOF.
 
 ### Options Table
 
@@ -128,40 +129,42 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 | `-h, --help` | Show this help message and exit. | `false` |
 | `-r, --root <path>` | Specify the path to the root directory for file processing. | `gw.rootDir` or current working directory |
 | `-t, --threads[=<true\|false>]` | Enable multi-threaded processing to improve performance. If used without a value, enables it. | `false` (`gw.threads`) |
-| `-a, --genai <provider:model>` | Set the GenAI provider and model. | `gw.model` |
+| `-m, --model <provider:model>` | Set the GenAI provider and model. | `gw.model` |
 | `-i, --instructions[=<text\|url\|file:...>]` | System instructions (plain text, URL, or `file:`). If no value: stdin until EOF. | `gw.instructions` |
 | `-g, --guidance[=<text\|url\|file:...>]` | Default guidance (plain text, URL, or `file:`). If no value: stdin until EOF. | `gw.guidance` |
 | `-e, --excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` |
 | `-l, --logInputs` | Log LLM request inputs to dedicated log files. | `false` (`gw.logInputs`) |
-| `--act[=<...>]` | Run Ghostwriter in Act mode: an interactive mode for executing predefined prompts. | disabled |
+| `-as, --acts <path>` | Specify the path to the directory containing predefined act prompt files for processing. | not set |
+| `-a, --act[=<...>]` | Run in Act mode: an interactive mode for executing predefined prompts. | disabled |
 
 ### Example
 
 This example combines a scan pattern, explicit provider selection, default guidance from stdin, and input logging:
 
 ```bash
-java -jar gw.jar "glob:**/*.md" -a OpenAI:gpt-5.1 -g -l
+java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -g -l
 ```
 
 From the built-in help:
 
 - `<scanDir>` may be a relative path (from the current project directory) or a `glob:` / `regex:` matcher.
-- If `-g/--guidance` (or `-i/--instructions`, or `--act`) is used without a value, Ghostwriter will prompt for multi-line input and you finish input with EOF (`Ctrl+Z` on Windows, `Ctrl+D` on Unix).
+- If an option that accepts optional text (`-g/--guidance`, `-i/--instructions`, or `-a/--act`) is used without a value, Ghostwriter reads multi-line input from stdin until EOF.
+- When entering multi-line input interactively, end input with the line-break escape (`\`) and then finish with EOF (`Ctrl+Z` on Windows, `Ctrl+D` on Unix).
 
 ## Default Guidance
 
-Ghostwriter supports a *default guidance* string which is passed to the processor via `Ghostwriter.setDefaultPrompt(String)` → `AIFileProcessor.setDefaultPrompt(String)`.
+Ghostwriter supports *default guidance* (called `defaultPrompt` in code) which is applied when a file does not contain embedded `@guidance:` directives.
 
-Default guidance is configured via:
+You can provide it via:
 
 - Config property: `gw.guidance`
 - CLI option: `-g, --guidance`
 
-When provided, the value may be plain text, URLs, or `file:` references, processed line-by-line:
+When provided through the CLI/config, the value is parsed line-by-line:
 
 - Blank lines are preserved.
 - Lines starting with `http://` or `https://` are loaded from the URL.
-- Lines starting with `file:` are loaded from the specified file path.
+- Lines starting with `file:` are loaded from the specified file path (relative paths resolve from the configured root directory).
 - Other lines are used as-is.
 
 ## Resources

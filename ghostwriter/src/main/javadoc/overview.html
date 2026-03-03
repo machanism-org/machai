@@ -32,22 +32,35 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <p>
     Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project
     documentation using embedded guidance tags and AI-powered synthesis.
-    It operates as a filesystem-first command-line utility and supports all types of project files7including
-    source code, documentation, project site content, and other relevant files.
+    Ghostwriter supports all types of project files—including source code, documentation, project site content,
+    and other relevant files.
   </p>
 </header>
 
 <section>
   <h2>Purpose and scope</h2>
   <p>
-    Ghostwriter walks a project directory tree, discovers embedded <code>@guidance:</code> instructions, and
+    Ghostwriter traverses a project directory tree, discovers embedded <code>@guidance:</code> instructions, and
     orchestrates the creation of provider-ready prompts for a configured GenAI provider.
   </p>
   <ul>
-    <li><strong>Filesystem-only processing</strong>: scanning does not compile code and does not resolve dependencies.</li>
-    <li><strong>Child-first traversal</strong>: when module directories are present, they are processed before the parent.</li>
+    <li><strong>Filesystem-first processing</strong>: scanning does not compile code and does not resolve dependencies.</li>
+    <li><strong>Child-first module handling</strong>: when module directories are present, modules are processed before the parent.</li>
     <li><strong>Format-aware extraction</strong>: guidance is extracted by file-type reviewers (for example Java, Markdown, and HTML).</li>
   </ul>
+</section>
+
+<section>
+  <h2>High-level architecture</h2>
+  <figure>
+    <img src="../images/class-diagram.png" alt="Ghostwriter class diagram" />
+    <figcaption>High-level class relationships in the Ghostwriter processing pipeline.</figcaption>
+  </figure>
+
+  <p>
+    The implementation is organized around (1) a processing pipeline that controls traversal and prompt dispatch and
+    (2) a reviewer SPI with format-specific implementations that extract guidance from individual files.
+  </p>
 </section>
 
 <section>
@@ -65,25 +78,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       conventions of a specific format.
     </dd>
 
-    <dt><strong>Processor pipeline</strong></dt>
+    <dt><strong>Processing pipeline</strong></dt>
     <dd>
       The orchestration layer that traverses the filesystem, selects a reviewer per file, composes prompts from guidance
       and project context, and dispatches the prompts to the configured GenAI provider.
     </dd>
   </dl>
-</section>
-
-<section>
-  <h2>High-level architecture</h2>
-  <figure>
-    <img src="../images/class-diagram.png" alt="Ghostwriter class diagram" />
-    <figcaption>High-level class relationships in the Ghostwriter processing pipeline.</figcaption>
-  </figure>
-
-  <p>
-    Ghostwriter is organized into two primary packages: the processing pipeline and the reviewer SPI with
-    format-specific implementations.
-  </p>
 </section>
 
 <section>
@@ -96,7 +96,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   </p>
   <ul>
     <li>traverses a project directory tree (including multi-module layouts),</li>
-    <li>selects scan targets via explicit directories or <code>glob:</code>/<code>regex:</code> matchers,</li>
+    <li>selects scan targets via explicit directories or <code>glob:</code>/<code>regex:</code> path matchers,</li>
     <li>extracts embedded <code>@guidance:</code> directives via extension-specific reviewers, and</li>
     <li>builds and dispatches prompts to a configured GenAI provider.</li>
   </ul>
@@ -130,7 +130,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <ul>
     <li>Directory path (for example, <code>src/main</code>)</li>
     <li><code>glob:</code> patterns (for example, <code>glob:**/*.java</code>)</li>
-    <li><code>regex:</code> patterns (for example, <code>regex:^.*/[^/]+\\.java$</code>)</li>
+    <li><code>regex:</code> patterns</li>
   </ul>
 
   <h3>Guidance extraction and orchestration</h3>
