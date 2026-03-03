@@ -419,7 +419,9 @@ public final class Ghostwriter {
 				}
 
 				if (cmd.hasOption(actsDirOpt)) {
-					((ActProcessor) processor).setActDir(new File(actsDirOpt.getValue()));
+					File actDir = new File(actsDirOpt.getValue());
+					logger.info("Act directory: {}", actDir);
+					((ActProcessor) processor).setActDir(actDir);
 				}
 
 				if (defaultPrompt != null) {
