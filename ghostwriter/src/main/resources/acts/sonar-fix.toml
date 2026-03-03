@@ -41,5 +41,61 @@ You need to fix SonarQube issues in the project.
      - An explanation of the applied fix, including how it resolves the issue.
      - A reference to the relevant SonarQube rule.
 
+---
+
+## Special Rules for Using @SuppressWarnings in SonarQube Issue Fixes
+
+- **Attempt Code Fix First:**  
+  Always attempt to resolve the SonarQube issue by improving the code before considering suppression.
+
+- **Use Specific Annotation, Not //NOSONAR:**  
+  If suppression is necessary, use the language-specific annotation (e.g., `@SuppressWarnings("<Full_Rule_ID>")` for Java).  
+  Do not use `//NOSONAR` comments under any circumstances.
+
+- **Precede Annotation with a Strictly Formatted Comment:**  
+  Immediately above the `@SuppressWarnings` annotation, insert a comment in one of the following formats:  
+    - Single-line: `// [Type] [Reason/Rationale]`  
+    - Multi-line (Javadoc style):  
+      ```
+      /**
+       * [Type] [Reason/Rationale]
+       * [Continuation if needed]
+       */
+      ```
+    - `[Type]` must be either `FalsePositive` or `Accepted`.  
+    - `[Reason/Rationale]` must be a clear, descriptive explanation of why the suppression is justified (e.g., tool limitation, business requirement, or risk acceptance).
+
+- **Use the Most Specific Scope:**  
+  Apply `@SuppressWarnings` at the narrowest possible scope (e.g., local variable, method, or field), never at the class level unless absolutely necessary.
+
+- **Ensure Correct Rule ID:**  
+  The `<Full_Rule_ID>` must match the exact SonarQube rule key (e.g., `java:S1133`).
+
+- **Document All Suppressions for Auditability:**  
+  Every suppression must include both the annotation and the formatted comment for traceability and compliance.
+
+- **Escalate When Annotation Is Not Allowed:**  
+  If `@SuppressWarnings` cannot be used (e.g., in certain code locations), escalate to a security champion for alternative handling.
+
+- **Do Not Suppress Globally Noisy Rules:**  
+  If a rule is noisy or irrelevant across the codebase, do not suppress it in code. Instead, escalate to the security champion for possible rule disabling in configuration files.
+
+- **Example Template:**  
+  ```java
+  /**
+   * FalsePositive
+   * [Clear explanation of why this is a false positive and why the code is safe.]
+   */
+  @SuppressWarnings("java:SXXXX")
+  ```
+  or
+  ```java
+  /**
+   * Accepted
+   * [Clear explanation of why the risk is accepted and under what conditions.]
+   */
+  @SuppressWarnings("java:SXXXX")
+  ```
+
 %s
 '''

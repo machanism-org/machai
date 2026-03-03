@@ -96,7 +96,7 @@ public class OpenAIProvider implements GenAIProvider {
 	/** Default maximum number of tokens the model may generate. */
 	public static final int MAX_OUTPUT_TOKENS = 100000;
 
-	private static final long TIMEOUT_SEC = 1000;
+	private static final long TIMEOUT_SEC = 600;
 
 	/** OpenAI client for API interactions. */
 	private static OpenAIClient client;
@@ -166,7 +166,8 @@ public class OpenAIProvider implements GenAIProvider {
 			}
 			if (timeoutSec > 0) {
 				Duration ofSeconds = Duration.ofSeconds(timeoutSec);
-				Timeout timeout = Timeout.builder().request(ofSeconds).read(ofSeconds).write(ofSeconds).build();
+				Timeout timeout = Timeout.builder().request(ofSeconds).read(ofSeconds).write(ofSeconds)
+						.connect(ofSeconds).build();
 				clientBuilder.timeout(timeout);
 			}
 			client = clientBuilder.build();
