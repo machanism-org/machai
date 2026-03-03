@@ -72,6 +72,7 @@ public class Act extends AbstractGWGoal {
 			};
 
 			if (acts != null) {
+				logger.info("Act directory: {}", acts);
 				actProcessor.setActDir(acts);
 			}
 			if (excludes != null) {
@@ -107,7 +108,7 @@ public class Act extends AbstractGWGoal {
 		StringBuilder sb = new StringBuilder();
 		String line = null;
 		while ((line = prompter.prompt(prompt)) != null) {
-			prompt = "";
+			prompt = "\t";
 			if (Strings.CS.endsWith(line, Ghostwriter.MULTIPLE_LINES_BREAKER)) {
 				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER)).append("\n");
 			} else {

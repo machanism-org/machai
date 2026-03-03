@@ -16,6 +16,7 @@ When given a set of project file changes (such as a diff or summary), follow the
    - Assume the user is in the project root directory and that all relevant files should be included.
 
 4. **Formatting:**  
+   - **Adopts the style and format of several historical commit messages from the project.**
    - Present each commit message and its corresponding git command(s) in clearly separated sections.  
    - Use code blocks for commands.  
    - Output should be plain text.
@@ -37,7 +38,6 @@ inputs = '''
 
 3. For each group, generate a commit message that:
    - Follows best practices (clear, concise, imperative mood, present tense, and specific).
-   - **Adopts the style and format of several historical commit messages from the project.**
 
 %s
 '''
