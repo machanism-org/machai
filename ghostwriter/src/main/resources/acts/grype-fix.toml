@@ -58,9 +58,7 @@ Analyze the Grype scan results for the project. For each vulnerability with a fi
 
 **Note:** The current directory `.` always refers to the current project root.
 
-
 %s
-```
 '''
 
 gw.scanDir = "glob:."

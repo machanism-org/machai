@@ -98,7 +98,7 @@ public class ActProcessor extends AIFileProcessor {
 		Properties actData = new Properties();
 		loadAct(name, actData);
 		String actPrompt = Objects.toString(super.getDefaultPrompt(),
-				getConfigurator().get("prompt", actData.getProperty("prompt")));
+				getConfigurator().get("prompt", actData.getProperty("inputs")));
 		String value = String.format(actPrompt, StringUtils.defaultString(prompt));
 		super.setDefaultPrompt(value);
 		applyActData(actData);
@@ -164,9 +164,11 @@ public class ActProcessor extends AIFileProcessor {
 			String key = entry.getKey();
 			if (entry.getValue() instanceof String) {
 				String value = (String) entry.getValue();
-				if (properties.getProperty(key) == null) {
-					properties.setProperty(key, value);
+				String inheritValue = properties.getProperty(key);
+				if (inheritValue != null) {
+					value = String.format(inheritValue, value);
 				}
+				properties.setProperty(key, value);
 			}
 		}
 	}
