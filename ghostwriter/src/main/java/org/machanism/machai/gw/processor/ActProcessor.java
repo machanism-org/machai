@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +44,7 @@ import org.tomlj.TomlParseResult;
  */
 public class ActProcessor extends AIFileProcessor {
 
+	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
 	private static final String ACTS_BASENAME_PREFIX = "/acts/";
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
 
@@ -92,19 +95,38 @@ public class ActProcessor extends AIFileProcessor {
 			prompt = defaultPrompt;
 		}
 
-		TomlParseResult toml = tryLoadActFromClasspath(name, prompt);
-		TomlParseResult customToml = tryLoadActFromDirectory(name, prompt);
-
-		String value = String.format(super.getDefaultPrompt(),
-				StringUtils.defaultString(getConfigurator().get("prompt")));
+		Properties actData = new Properties();
+		loadAct(name, actData);
+		String actPrompt = Objects.toString(super.getDefaultPrompt(),
+				getConfigurator().get("prompt", actData.getProperty("prompt")));
+		String value = String.format(actPrompt, StringUtils.defaultString(prompt));
 		super.setDefaultPrompt(value);
+		applyActData(actData);
+	}
+
+	private void loadAct(String name, Properties properties) {
+		TomlParseResult customToml = tryLoadActFromDirectory(properties, name);
+		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
 			throw new IllegalArgumentException("Act: `" + name + "` not found.");
 		}
+
+		String basedOn = null;
+		if (customToml != null) {
+			basedOn = customToml.getString(BASED_ON_PROPERTY_NAME);
+		}
+		if (basedOn == null && toml != null) {
+			basedOn = toml.getString(BASED_ON_PROPERTY_NAME);
+		}
+
+		if (basedOn != null) {
+			loadAct(basedOn, properties);
+			properties.remove(BASED_ON_PROPERTY_NAME);
+		}
 	}
 
-	private TomlParseResult tryLoadActFromClasspath(String name, String prompt) {
+	private TomlParseResult tryLoadActFromClasspath(Properties properties, String name) {
 		String path = ACTS_BASENAME_PREFIX + name + ".toml";
 		URL resource = Ghostwriter.class.getResource(path);
 		if (resource == null) {
@@ -114,14 +136,14 @@ public class ActProcessor extends AIFileProcessor {
 		try {
 			String tomlStr = IOUtils.toString(resource, "UTF8");
 			TomlParseResult toml = Toml.parse(tomlStr);
-			setActData(prompt, toml);
+			setActData(properties, toml);
 			return toml;
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	private TomlParseResult tryLoadActFromDirectory(String name, String prompt) {
+	private TomlParseResult tryLoadActFromDirectory(Properties properties, String name) {
 		if (actDir == null) {
 			return null;
 		}
@@ -129,17 +151,29 @@ public class ActProcessor extends AIFileProcessor {
 		try {
 			File file = new File(actDir, name + ".toml");
 			TomlParseResult toml = Toml.parse(file.toPath());
-			setActData(prompt, toml);
+			setActData(properties, toml);
 			return toml;
 		} catch (IOException e) {
 			return null;
 		}
 	}
 
-	private void setActData(String prompt, TomlParseResult toml) {
+	private void setActData(Properties properties, TomlParseResult toml) {
 		Set<Entry<String, Object>> props = toml.dottedEntrySet();
 		for (Entry<String, Object> entry : props) {
 			String key = entry.getKey();
+			if (entry.getValue() instanceof String) {
+				String value = (String) entry.getValue();
+				if (properties.getProperty(key) == null) {
+					properties.setProperty(key, value);
+				}
+			}
+		}
+	}
+
+	private void applyActData(Properties properties) {
+		for (Entry<Object, Object> entry : properties.entrySet()) {
+			String key = (String) entry.getKey();
 			if (entry.getValue() instanceof String) {
 				String value = (String) entry.getValue();
 				switch (key) {
@@ -148,6 +182,7 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 
 				case "inputs":
+					value = String.format(value, StringUtils.defaultString(properties.getProperty("prompt")));
 					super.setDefaultPrompt(value);
 					break;
 

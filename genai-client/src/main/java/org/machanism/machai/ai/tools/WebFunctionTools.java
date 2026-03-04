@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -37,27 +38,31 @@ import net.htmlparser.jericho.Source;
  * This tool set provides two host-side functions:
  * </p>
  * <ul>
- *   <li>{@code get_web_content} – Fetches web page content over HTTP(S) via GET and optionally returns plain text
- *       or content selected via a CSS selector.</li>
- *   <li>{@code call_rest_api} – Executes a generic REST call using an arbitrary HTTP method with optional headers
- *       and request body.</li>
+ * <li>{@code get_web_content} – Fetches web page content over HTTP(S) via GET
+ * and optionally returns plain text or content selected via a CSS
+ * selector.</li>
+ * <li>{@code call_rest_api} – Executes a generic REST call using an arbitrary
+ * HTTP method with optional headers and request body.</li>
  * </ul>
  *
  * <h2>Header variable placeholders</h2>
  * <p>
- * Header values may include placeholders in the form ${propertyName}. When a {@link Configurator} is provided via
- * {@link #setConfigurator(Configurator)}, those placeholders are resolved at runtime.
+ * Header values may include placeholders in the form ${propertyName}. When a
+ * {@link Configurator} is provided via {@link #setConfigurator(Configurator)},
+ * those placeholders are resolved at runtime.
  * </p>
  *
  * <h2>Authentication</h2>
  * <p>
- * HTTP Basic authentication is supported via the URL {@code userInfo} component (for example
- * {@code https://user:password@host/path}), which is converted into an {@code Authorization: Basic ...} header.
- * You can also specify an explicit {@code Authorization} header.
+ * HTTP Basic authentication is supported via the URL {@code userInfo} component
+ * (for example {@code https://user:password@host/path}), which is converted
+ * into an {@code Authorization: Basic ...} header. You can also specify an
+ * explicit {@code Authorization} header.
  * </p>
  *
  * <p>
- * Outbound network policy (allow/deny lists) is intentionally left to the host application.
+ * Outbound network policy (allow/deny lists) is intentionally left to the host
+ * application.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -73,12 +78,14 @@ public class WebFunctionTools implements FunctionTools {
 	private static final String defaultCharset = "UTF-8";
 
 	/**
-	 * Optional configuration source used to resolve ${...} placeholders in header values.
+	 * Optional configuration source used to resolve ${...} placeholders in header
+	 * values.
 	 */
 	private Configurator configurator;
 
 	/**
-	 * Registers web content and REST API function tools with the provided {@link GenAIProvider}.
+	 * Registers web content and REST API function tools with the provided
+	 * {@link GenAIProvider}.
 	 *
 	 * @param provider the provider to register tools with
 	 */
@@ -107,27 +114,33 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implements {@code get_web_content} by retrieving web content via an HTTP GET request.
+	 * Implements {@code get_web_content} by retrieving web content via an HTTP GET
+	 * request.
 	 *
 	 * <p>
 	 * Parameters are passed in {@code params}:
 	 * </p>
 	 * <ol>
-	 *   <li>{@link JsonNode} containing the tool arguments</li>
-	 *   <li>(optional) additional runtime-supplied arguments, ignored by this tool</li>
+	 * <li>{@link JsonNode} containing the tool arguments</li>
+	 * <li>(optional) additional runtime-supplied arguments, ignored by this
+	 * tool</li>
 	 * </ol>
 	 *
 	 * <p>
 	 * Supported JSON properties:
 	 * </p>
 	 * <ul>
-	 *   <li>{@code url} (required) – target URL</li>
-	 *   <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE} pairs</li>
-	 *   <li>{@code timeout} (optional) – timeout in milliseconds (default {@value #TIMEOUT})</li>
-	 *   <li>{@code charsetName} (optional) – response decoding charset (default {@code UTF-8})</li>
-	 *   <li>{@code textOnly} (optional) – if {@code true}, strips HTML to plain text</li>
-	 *   <li>{@code selector} (optional) – extracts content matching the CSS selector (text or HTML depending on
-	 *       {@code textOnly})</li>
+	 * <li>{@code url} (required) – target URL</li>
+	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE}
+	 * pairs</li>
+	 * <li>{@code timeout} (optional) – timeout in milliseconds (default
+	 * {@value #TIMEOUT})</li>
+	 * <li>{@code charsetName} (optional) – response decoding charset (default
+	 * {@code UTF-8})</li>
+	 * <li>{@code textOnly} (optional) – if {@code true}, strips HTML to plain
+	 * text</li>
+	 * <li>{@code selector} (optional) – extracts content matching the CSS selector
+	 * (text or HTML depending on {@code textOnly})</li>
 	 * </ul>
 	 *
 	 * @param params tool arguments
@@ -139,6 +152,8 @@ public class WebFunctionTools implements FunctionTools {
 
 		JsonNode props = (JsonNode) params[0];
 		String url = props.get("url").asText();
+
+		url = replace(url, configurator);
 
 		String headers = props.has("headers") ? props.get("headers").asText(null) : null;
 		int timeout = props.has("timeout") ? props.get("timeout").asInt(TIMEOUT) : TIMEOUT;
@@ -185,8 +200,8 @@ public class WebFunctionTools implements FunctionTools {
 	 * Creates and configures an {@link HttpURLConnection}.
 	 *
 	 * <p>
-	 * If the URL contains {@code userInfo}, it is removed from the URL and used to set an HTTP Basic
-	 * {@code Authorization} header.
+	 * If the URL contains {@code userInfo}, it is removed from the URL and used to
+	 * set an HTTP Basic {@code Authorization} header.
 	 * </p>
 	 *
 	 * @param url         URL to connect to
@@ -196,7 +211,6 @@ public class WebFunctionTools implements FunctionTools {
 	 * @throws IOException if opening a connection fails
 	 */
 	private URLConnection getConnection(URL url, String headers, String charsetName) throws IOException {
-		url = new URL(replace(url.toString(), configurator));
 		URLConnection connection;
 
 		String userInfo = url.getUserInfo();
@@ -254,22 +268,28 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implements {@code call_rest_api} by executing an HTTP request against the provided endpoint.
+	 * Implements {@code call_rest_api} by executing an HTTP request against the
+	 * provided endpoint.
 	 *
 	 * <p>
 	 * Supported JSON properties:
 	 * </p>
 	 * <ul>
-	 *   <li>{@code url} (required) – endpoint URL</li>
-	 *   <li>{@code method} (optional) – HTTP method (default {@code GET})</li>
-	 *   <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE} pairs</li>
-	 *   <li>{@code body} (optional) – request body (used for POST/PUT/PATCH only)</li>
-	 *   <li>{@code timeout} (optional) – timeout in milliseconds (default {@value #TIMEOUT})</li>
-	 *   <li>{@code charsetName} (optional) – request/response charset (default {@code UTF-8})</li>
+	 * <li>{@code url} (required) – endpoint URL</li>
+	 * <li>{@code method} (optional) – HTTP method (default {@code GET})</li>
+	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE}
+	 * pairs</li>
+	 * <li>{@code body} (optional) – request body (used for POST/PUT/PATCH
+	 * only)</li>
+	 * <li>{@code timeout} (optional) – timeout in milliseconds (default
+	 * {@value #TIMEOUT})</li>
+	 * <li>{@code charsetName} (optional) – request/response charset (default
+	 * {@code UTF-8})</li>
 	 * </ul>
 	 *
 	 * @param params tool arguments
-	 * @return response content including an initial HTTP status line, or an error message
+	 * @return response content including an initial HTTP status line, or an error
+	 *         message
 	 */
 	public String callRestApi(Object[] params) {
 		String requestId = Integer.toHexString(new Random().nextInt());
@@ -277,6 +297,9 @@ public class WebFunctionTools implements FunctionTools {
 
 		JsonNode props = (JsonNode) params[0];
 		String url = props.get("url").asText();
+
+		url = replace(url, configurator);
+
 		String method = props.has("method") ? props.get("method").asText("GET") : "GET";
 		String headers = props.has("headers") ? props.get("headers").asText(null) : null;
 		String body = props.has("body") ? props.get("body").asText(null) : null;
@@ -330,7 +353,8 @@ public class WebFunctionTools implements FunctionTools {
 	 * Applies headers to the connection.
 	 *
 	 * <p>
-	 * Each header line must be in the form {@code NAME=VALUE}. Header values may include ${...} placeholders.
+	 * Each header line must be in the form {@code NAME=VALUE}. Header values may
+	 * include ${...} placeholders.
 	 * </p>
 	 *
 	 * @param headers    newline-separated header definitions
@@ -355,7 +379,8 @@ public class WebFunctionTools implements FunctionTools {
 	 * Resolves ${...} placeholders using the provided configurator.
 	 *
 	 * @param value raw value that may contain placeholders
-	 * @param conf  configurator used for lookup; if {@code null}, the value is returned unchanged
+	 * @param conf  configurator used for lookup; if {@code null}, the value is
+	 *              returned unchanged
 	 * @return resolved value
 	 */
 	private String replace(String value, Configurator conf) {
@@ -375,7 +400,13 @@ public class WebFunctionTools implements FunctionTools {
 			}
 		}
 
-		return StringSubstitutor.replace(value, properties);
+		String replace = StringSubstitutor.replace(value, properties);
+
+		if (Strings.CS.contains(replace, "${")) {
+			replace = replace(replace, conf);
+		}
+
+		return replace;
 	}
 
 	/**

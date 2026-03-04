@@ -414,8 +414,11 @@ public class OpenAIProvider implements GenAIProvider {
 					try {
 						result = entry.getValue().apply(arguments);
 					} catch (Exception e) {
-						result = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
+						String errMsg = "Error: The functional tool call failed while executing '" + name
+								+ "'. Reason: "
 								+ e.getMessage();
+						logger.error(errMsg);
+						result = errMsg;
 					}
 					break;
 				}
