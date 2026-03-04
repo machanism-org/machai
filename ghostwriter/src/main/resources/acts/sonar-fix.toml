@@ -19,9 +19,11 @@ You need to fix SonarQube issues in the project.
 
 # Instructions
 
-- Ensure all fixes are properly tested and do not introduce new issues.
-- If you encounter any build failures, resolve them before proceeding to the next issue.
-
+- Thoroughly test all fixes to ensure they do not introduce new issues.
+- If you encounter any build failures, resolve them completely before proceeding to the next issue.
+	 
+%s	 
+	 
 1. **Select and Review the Appropriate SonarQube Report:**  
    - If the project has `Child Projects`, then no action required, immediately skip all the following steps and complete the task.
    - Use SonarQube Web API to get the `Sonar Report` by url: [SONARQUBE_URL]. 
@@ -96,6 +98,4 @@ You need to fix SonarQube issues in the project.
    */
   @SuppressWarnings("java:SXXXX")
   ```
-
-%s
 '''

@@ -89,11 +89,15 @@ public class ActProcessor extends AIFileProcessor {
 			name = StringUtils.substring(act, 0, start);
 		} else {
 			name = act;
-			prompt = StringUtils.defaultString(defaultPrompt);
+			prompt = defaultPrompt;
 		}
 
 		TomlParseResult toml = tryLoadActFromClasspath(name, prompt);
 		TomlParseResult customToml = tryLoadActFromDirectory(name, prompt);
+
+		String value = String.format(super.getDefaultPrompt(),
+				StringUtils.defaultString(getConfigurator().get("prompt")));
+		super.setDefaultPrompt(value);
 
 		if (toml == null && customToml == null) {
 			throw new IllegalArgumentException("Act: `" + name + "` not found.");
@@ -144,7 +148,6 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 
 				case "inputs":
-					value = String.format(value, prompt);
 					super.setDefaultPrompt(value);
 					break;
 
