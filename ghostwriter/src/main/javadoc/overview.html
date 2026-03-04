@@ -44,9 +44,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     orchestrates the creation of provider-ready prompts for a configured GenAI provider.
   </p>
   <ul>
-    <li><strong>Filesystem-first processing</strong>: scanning does not compile code and does not resolve dependencies.</li>
-    <li><strong>Child-first module handling</strong>: when module directories are present, modules are processed before the parent.</li>
-    <li><strong>Format-aware extraction</strong>: guidance is extracted by file-type reviewers (for example Java, Markdown, and HTML).</li>
+    <li><strong>Filesystem-first processing</strong>: operates on files as they exist on disk; it does not build projects or resolve dependencies.</li>
+    <li><strong>Child-first module handling</strong>: when multi-module layouts are present, modules are processed before parent aggregation.</li>
+    <li><strong>Format-aware guidance extraction</strong>: guidance is extracted using reviewers for Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and text.</li>
   </ul>
 </section>
 
@@ -88,20 +88,24 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <section>
   <h2>Package overview</h2>
+  <p>
+    The Ghostwriter code is primarily organized into two packages: a processing/orchestration pipeline and a set of
+    format-specific reviewers.
+  </p>
 
   <h3><code>org.machanism.machai.gw.processor</code></h3>
   <p>
-    Project scanning and prompt orchestration for the Ghostwriter command-line tool.
-    The processors in this package implement a filesystem-based pipeline that:
+    Project scanning, guidance extraction, and prompt orchestration for the Ghostwriter command-line tool.
+    This package contains the CLI entry point and processors that implement a filesystem-based pipeline.
   </p>
   <ul>
-    <li>traverses a project directory tree (including multi-module layouts),</li>
-    <li>selects scan targets via explicit directories or <code>glob:</code>/<code>regex:</code> path matchers,</li>
-    <li>extracts embedded <code>@guidance:</code> directives via extension-specific reviewers, and</li>
-    <li>builds and dispatches prompts to a configured GenAI provider.</li>
+    <li>Traverses a project directory tree (including multi-module layouts).</li>
+    <li>Selects scan targets via explicit directories or <code>glob:</code>/<code>regex:</code> path matchers.</li>
+    <li>Extracts embedded <code>@guidance:</code> directives via extension-specific reviewers.</li>
+    <li>Builds and dispatches prompts to the configured GenAI provider.</li>
   </ul>
   <p>
-    Processing operates strictly on the filesystem: projects are not built and dependencies are not resolved during scanning.
+    Processing is strictly filesystem-based: projects are not built and dependencies are not resolved during scanning.
     When module directories are present, they are processed child-first so that module content can be handled before
     any parent-level aggregation.
   </p>

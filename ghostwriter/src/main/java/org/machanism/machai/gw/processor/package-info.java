@@ -39,26 +39,31 @@
  */
 
 /**
- * Project scanning and prompt orchestration for the Ghostwriter command-line tool.
+ * Project scanning, guidance extraction, and prompt orchestration for the
+ * Ghostwriter command-line tool.
  *
  * <p>
  * The {@code org.machanism.machai.gw.processor} package contains the CLI entry
  * point and the processors responsible for scanning a project directory tree,
- * extracting embedded {@code @guidance:} directives, and invoking the configured
- * {@link org.machanism.machai.ai.manager.GenAIProvider GenAI provider}.
+ * extracting embedded {@code @guidance:} directives, and invoking the
+ * configured {@link org.machanism.machai.ai.manager.GenAIProvider GenAI
+ * provider}.
  * </p>
  *
  * <h2>Key components</h2>
  * <ul>
- * <li>{@link org.machanism.machai.gw.processor.Ghostwriter}: command-line entry
- * point that reads configuration and launches a scan.</li>
+ * <li>{@link org.machanism.machai.gw.processor.Ghostwriter}: CLI entry point
+ * that reads configuration and launches scans.</li>
  * <li>{@link org.machanism.machai.gw.processor.GuidanceProcessor}: filesystem
- * scanner that uses {@code Reviewer}s to extract guidance and processes modules
- * child-first (modules before the parent directory).</li>
+ * scanner that extracts per-file guidance via
+ * {@link org.machanism.machai.gw.reviewer.Reviewer reviewers} and processes
+ * multi-module projects child-first.</li>
+ * <li>{@link org.machanism.machai.gw.processor.ActProcessor}: executes
+ * predefined TOML-based prompt templates ("acts") against matching files.</li>
  * <li>{@link org.machanism.machai.gw.processor.AIFileProcessor}: prompt
- * composition and provider invocation support (instructions, tools, input
- * logging).</li>
- * <li>{@link org.machanism.machai.gw.processor.AbstractFileProcessor}: common
+ * composition and provider invocation (instructions, project metadata, and
+ * optional input logging).</li>
+ * <li>{@link org.machanism.machai.gw.processor.AbstractFileProcessor}: shared
  * traversal utilities, include/exclude matching, and module handling.</li>
  * </ul>
  *

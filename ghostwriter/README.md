@@ -20,13 +20,15 @@
 
 # Ghostwriter
 
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
+
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 
 > A guided file processing engine for generating and maintaining project-wide documentation and code improvements with AI.
 
 ## Introduction
 
-Machai Ghostwriter is an AI-assisted documentation and review engine that scans your entire project—source code, tests, documentation, and other relevant assets—extracts embedded `@guidance:` directives, and turns them into actionable prompts for a configured GenAI provider.
+Machai Ghostwriter is an AI-assisted documentation and review engine that scans an entire project—source code, tests, documentation, and other relevant assets—extracts embedded `@guidance:` directives, and turns them into actionable prompts for a configured GenAI provider.
 
 Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system, where each file can carry local guidance and the tool orchestrates processing across the project consistently.
 
@@ -37,17 +39,17 @@ Its conceptual foundation is [Guided File Processing](https://www.machanism.org/
 #### Prerequisites
 
 - Java **8** (as configured by `maven.compiler.release` in `pom.xml`).
-- A configured GenAI provider setting (`gw.model`) or CLI override (`-a/--genai`).
+- A configured GenAI provider/model setting (`gw.model`) or CLI override (`-m/--model`).
 - (Optional) A `gw.properties` file to persist configuration.
 
-#### Download
+#### Installation
 
 [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
 
 #### Basic Usage
 
 ```bash
-java -jar gw.jar <scanDir> -a OpenAI:gpt-5.1
+java -jar gw.jar <scanDir> -m OpenAI:gpt-5.1
 ```
 
 #### Typical Workflow
@@ -64,7 +66,7 @@ java -jar gw.jar <scanDir> -a OpenAI:gpt-5.1
 
 #### Java Version
 
-Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.model` or `-a/--genai`), otherwise the CLI will fail fast.
+Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.model` or `-m/--model`), otherwise the CLI will fail fast.
 
 ## Resources
 
