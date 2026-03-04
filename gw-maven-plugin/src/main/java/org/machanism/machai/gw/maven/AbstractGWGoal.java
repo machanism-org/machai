@@ -67,7 +67,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	 * Provider/model identifier to pass to the workflow.
 	 */
 	@Parameter(property = "gw.model")
-	protected String genai;
+	protected String model;
 	/**
 	 * The Maven module base directory.
 	 */

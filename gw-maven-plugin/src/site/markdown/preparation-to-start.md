@@ -81,7 +81,7 @@ You can also specify configuration options to customize the plugin’s behavior:
       <artifactId>gw-maven-plugin</artifactId>
       <version>0.0.11</version>
       <configuration>
-        <genai>CodeMie:gpt-5-2-2025-12-11</genai>
+        <model>CodeMie:gpt-5-2-2025-12-11</model>
         <serverId>CodeMie</serverId>
         <logInputs>true</logInputs>
         <threads>true</threads>

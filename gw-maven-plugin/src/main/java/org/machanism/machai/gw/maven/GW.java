@@ -2,7 +2,10 @@ package org.machanism.machai.gw.maven;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
@@ -63,7 +66,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <dl>
- * <dt><b>{@code -Dgw.model}</b> / {@code &lt;genai&gt;}</dt>
+ * <dt><b>{@code -Dgw.model}</b> / {@code &lt;model&gt;}</dt>
  * <dd>Provider/model identifier forwarded to the workflow. Example: {@code openai:gpt-4o-mini}.</dd>
  *
  * <dt><b>{@code -Dgw.scanDir}</b> / {@code &lt;scanDir&gt;}</dt>
@@ -156,7 +159,7 @@ public class GW extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator config = getConfiguration();
 
-		String genai = config.get(Ghostwriter.GW_GENAI_PROP_NAME, this.genai);
+		String genai = config.get(Ghostwriter.GW_GENAI_PROP_NAME, this.model);
 		GuidanceProcessor processor = new GuidanceProcessor(basedir, genai, config) {
 
 			@Override
@@ -169,11 +172,9 @@ public class GW extends AbstractGWGoal {
 					mavenProjectLayout.effectivePomRequired(false);
 
 					Model model = mavenProjectLayout.getModel();
-					for (MavenProject mavenProject : session.getAllProjects()) {
-						if (StringUtils.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
-							mavenProjectLayout.model(mavenProject.getModel());
-							break;
-						}
+					MavenProject matchingProject = resolveProjectByArtifactId(session.getAllProjects(), model);
+					if (matchingProject != null) {
+						mavenProjectLayout.model(matchingProject.getModel());
 					}
 				}
 
@@ -193,6 +194,54 @@ public class GW extends AbstractGWGoal {
 			throw new MojoExecutionException(
 					"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
 		}
+	}
+
+	private static MavenProject resolveProjectByArtifactId(List<MavenProject> allProjects, Model effectiveModel) {
+		if (allProjects == null || allProjects.isEmpty() || effectiveModel == null) {
+			return null;
+		}
+
+		String effectiveArtifactId = StringUtils.trimToNull(effectiveModel.getArtifactId());
+		if (effectiveArtifactId == null) {
+			return null;
+		}
+
+		Set<String> matching = new HashSet<>();
+		for (MavenProject mavenProject : allProjects) {
+			if (mavenProject == null) {
+				continue;
+			}
+			if (StringUtils.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
+				matching.add(toCoord(mavenProject));
+			}
+		}
+
+		if (matching.isEmpty()) {
+			return null;
+		}
+
+		if (matching.size() > 1) {
+			throw new IllegalStateException(
+					"Multiple Maven projects in session have artifactId='" + effectiveArtifactId + "': " + matching);
+		}
+
+		for (MavenProject mavenProject : allProjects) {
+			if (mavenProject != null && StringUtils.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
+				return mavenProject;
+			}
+		}
+		return null;
+	}
+
+	private static String toCoord(MavenProject project) {
+		if (project == null) {
+			return "<null>";
+		}
+		String groupId = StringUtils.defaultString(project.getGroupId(), "");
+		String artifactId = StringUtils.defaultString(project.getArtifactId(), "");
+		String version = StringUtils.defaultString(project.getVersion(), "");
+		String basedir = Objects.toString(project.getBasedir(), "");
+		return groupId + ":" + artifactId + ":" + version + "@" + basedir;
 	}
 
 }

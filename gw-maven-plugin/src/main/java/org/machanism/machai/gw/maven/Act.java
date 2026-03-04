@@ -98,7 +98,7 @@ public class Act extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
 
-		ActProcessor actProcessor = new ActProcessor(basedir, configuration, configuration.get("gw.model", genai)) {
+		ActProcessor actProcessor = new ActProcessor(basedir, configuration, configuration.get("gw.model", model)) {
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = super.getProjectLayout(projectDir);

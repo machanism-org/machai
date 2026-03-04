@@ -11,7 +11,7 @@
 3. **Usage:**  
    - Explain how to run or use the project and its modules.
    - Provide examples of usage with configuration.
-4. **Other Rules**
+4. **Other Rules
    - Do not use the horizontal rule separator between sections.	
 **Formatting Requirements:**
 - Use Markdown syntax for headings, lists, code blocks, and links.
@@ -27,13 +27,14 @@
 
 GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates Ghostwriter’s guided file processing into Maven builds so you can generate and maintain project documentation (and other guided updates) as part of a consistent, repeatable workflow.
 
-At its core, the plugin scans your project for files containing embedded `@guidance:` blocks and then delegates transformation/synthesis work to the Machai Ghostwriter engine, based on the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) model.
+At its core, the plugin scans your project for files containing embedded `@guidance:` blocks and delegates transformation/synthesis to the Machai Ghostwriter engine. This is based on the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) model: guidance is authored “in place” (close to the content it affects), and the processor uses that guidance to produce coherent, up-to-date results across the project.
 
-It provides multiple Maven goals:
+Key goals provided by this plugin:
 
-- **`gw:gw`**: an **aggregator** goal that can run **without a `pom.xml`** (`requiresProject=false`) and processes modules in reverse order (sub-modules first).
-- **`gw:reactor`**: a **reactor-aware** goal that processes modules according to Maven reactor dependency ordering, with an option to defer the execution-root project until other reactor projects complete.
-- **`gw:act`**: an **interactive** goal that runs predefined action bundles backed by resource bundles.
+- **`gw:gw`**: aggregator goal that can run **without a `pom.xml`** (`requiresProject=false`) and processes modules in reverse order (sub-modules first).
+- **`gw:reactor`**: reactor-aware goal that processes modules according to Maven reactor dependency ordering, with an option to defer the execution-root project until other reactor projects complete.
+- **`gw:act`**: interactive goal that runs predefined action bundles backed by resource bundles.
+- **`gw:act-reactor`**: runs `gw:act` in a reactor-friendly, execution-root context.
 - **`gw:clean`**: deletes temporary artifacts created during processing.
 
 ## Installation Instructions
@@ -41,9 +42,9 @@ It provides multiple Maven goals:
 ### Prerequisites
 
 - Git
-- Java installed
-  - **Declared build target:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
-  - **Practical runtime requirement:** depends on the Ghostwriter runtime and the GenAI provider/client libraries you use; some provider stacks may require a newer Java version.
+- Java
+  - **Build / compilation target:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
+  - **Runtime requirements:** may be newer depending on the Ghostwriter runtime and the GenAI provider/client libraries you use.
 - Apache Maven 3.x
 
 ### Checkout
@@ -93,6 +94,12 @@ Interactive actions:
 mvn gw:act
 ```
 
+Interactive actions (reactor-friendly execution-root context):
+
+```cmd
+mvn gw:act-reactor
+```
+
 Cleanup temporary processing artifacts:
 
 ```cmd
@@ -131,7 +138,7 @@ mvn gw:gw -Dgw.model=openai:gpt-4.1-mini -Dgw.genai.serverId=genai
     <excludes>
       <exclude>**\\.machai\\**</exclude>
     </excludes>
-    <genai>openai:gpt-4.1-mini</genai>
+    <model>openai:gpt-4.1-mini</model>
     <serverId>genai</serverId>
     <threads>true</threads>
     <logInputs>false</logInputs>

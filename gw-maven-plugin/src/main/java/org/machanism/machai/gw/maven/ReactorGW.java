@@ -45,7 +45,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
  * <li>
- * <b>{@code gw.model}</b> / {@code &lt;genai&gt;} ({@code genai}): Provider/model identifier passed to the
+ * <b>{@code gw.model}</b> / {@code &lt;model&gt;} ({@code model}): Provider/model identifier passed to the
  * workflow.
  * </li>
  * <li>
@@ -103,7 +103,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <h3>Use Maven settings credentials for the GenAI provider</h3>
  *
  * <pre>
- * mvn gw:reactor -Dgw.genai.serverId=my-genai-server
+ * mvn gw:reactor -Dgw.genai.serverId=my-model-server
  * </pre>
  *
  * <h3>Plugin configuration</h3>
@@ -143,7 +143,7 @@ public class ReactorGW extends AbstractGWGoal {
 
 		PropertiesConfigurator config = getConfiguration();
 
-		GuidanceProcessor documents = new GuidanceProcessor(new File(executionRootDirectory), genai, config) {
+		GuidanceProcessor documents = new GuidanceProcessor(new File(executionRootDirectory), model, config) {
 
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

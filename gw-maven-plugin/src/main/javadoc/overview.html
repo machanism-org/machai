@@ -30,38 +30,63 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>GW Maven Plugin</h1>
 
 <p>
-  <strong>GW Maven Plugin</strong> (Ghostwriter Maven Plugin) is an advanced documentation automation tool for Java
-  projects. It automatically scans, analyzes, and assembles project documentation using embedded guidance tags and
-  AI-powered synthesis. The plugin streamlines the creation and maintenance of high-quality, consistent documentation,
-  ensuring best practices and up-to-date information across all modules.
+  <strong>GW Maven Plugin</strong> is a Maven plugin that integrates the MachAI <em>Ghostwriter</em> workflow into a
+  Maven build. It scans a configurable directory tree (commonly <code>src/site</code>) for files that contain embedded
+  <code>@guidance:</code> blocks and applies guided transformations using the configured GenAI provider.
 </p>
-
-<h2>What this plugin does</h2>
 
 <p>
-  This Maven plugin provides goals (Mojos) that configure and invoke the MachAI Ghostwriter workflow.
-  At runtime it scans a configurable directory tree (commonly <code>src/site</code>) for files containing embedded
-  <code>@guidance:</code> blocks and then delegates guided transformations to the configured GenAI provider.
-  The processing model is intentionally content-type agnostic and can be applied to source code, documentation,
-  Maven Site content, and other project files.
+  <strong>Description (from POM):</strong>
+  Ghostwriter Maven Plugin is an advanced documentation automation tool
+  for Java projects. It automatically scans, analyzes, and assembles
+  project documentation using embedded guidance tags and AI-powered
+  synthesis. The plugin streamlines the creation and maintenance of
+  high-quality, consistent documentation, ensuring best practices and
+  up-to-date information across all modules.
 </p>
 
-<h2>Packages</h2>
+<h2>How guided processing works</h2>
 
-<ul>
+<ol>
   <li>
-    <code>org.machanism.machai.gw.maven</code> &mdash; Maven plugin goals (Mojos) and shared infrastructure for running the
-    Ghostwriter (GW) guided document-processing workflow as part of a Maven build.
+    The goal determines a scan root (by default the execution root directory; optionally overridden via
+    <code>-Dgw.scanDir</code>).
   </li>
-</ul>
+  <li>
+    The scan walks the directory tree, respecting any configured excludes.
+  </li>
+  <li>
+    When a file contains a <code>@guidance:</code> block, the workflow composes an instruction set
+    (goal parameters, default guidance, and the embedded guidance) and delegates the transformation to the configured
+    GenAI provider.
+  </li>
+  <li>
+    Temporary artifacts created by processing can be removed via <code>gw:clean</code>.
+  </li>
+</ol>
 
-<h2>Goals</h2>
+<h2>Package overview</h2>
+
+<h3><code>org.machanism.machai.gw.maven</code></h3>
+
+<p>
+  Maven plugin goals (Mojos) and supporting infrastructure for running the MachAI Ghostwriter (GW) guided
+  document-processing workflow as part of a Maven build.
+</p>
+
+<p>
+  The goals in this package configure and invoke the Ghostwriter processors (for example,
+  <code>GuidanceProcessor</code> and <code>ActProcessor</code>) to scan a documentation source tree for embedded
+  <code>@guidance:</code> blocks.
+</p>
+
+<h4>Primary goals</h4>
 
 <ul>
   <li>
     <strong><code>gw:gw</code></strong> (<code>org.machanism.machai.gw.maven.GW</code>) &mdash;
-    Aggregator-style goal that can run without a <code>pom.xml</code>. It processes modules in reverse order
-    (sub-modules first, then parent modules), similar to the Ghostwriter CLI.
+    Aggregator-style goal that can run without a <code>pom.xml</code>.
+    It processes modules in reverse order (sub-modules first, then parent modules), similar to the Ghostwriter CLI.
   </li>
   <li>
     <strong><code>gw:reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorGW</code>) &mdash;
@@ -70,11 +95,25 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   </li>
   <li>
     <strong><code>gw:act</code></strong> (<code>org.machanism.machai.gw.maven.Act</code>) &mdash;
-    Interactive goal for running predefined actions backed by resource bundles.
+    Interactive goal for running a predefined action/prompt over the scanned documents.
+  </li>
+  <li>
+    <strong><code>gw:act-reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorAct</code>) &mdash;
+    Reactor-friendly variant of <code>gw:act</code> intended to run in the execution-root project context.
   </li>
   <li>
     <strong><code>gw:clean</code></strong> (<code>org.machanism.machai.gw.maven.Clean</code>) &mdash;
     Deletes temporary artifacts created by GW processing (typically bound to Maven's <code>clean</code> lifecycle).
+  </li>
+</ul>
+
+<h4>Shared infrastructure</h4>
+
+<ul>
+  <li>
+    <strong><code>org.machanism.machai.gw.maven.AbstractGWGoal</code></strong> &mdash;
+    Base class defining shared parameters (provider/model selection, instructions, default guidance, scan directory,
+    excludes, optional credential lookup, and input logging) and the common scan/execute flow.
   </li>
 </ul>
 
@@ -90,7 +129,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Class diagram</h2>
 
 <p>
-  The following diagram summarizes the main goal types and shared infrastructure.
+  The following diagram summarizes the main goals and shared infrastructure.
 </p>
 
 <p>
@@ -99,28 +138,28 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Common usage</h2>
 
-<p>
-  Run guided processing for the current project:
-</p>
+<h3>Run guided processing</h3>
 
 <pre>
 mvn gw:gw
 </pre>
 
-<p>
-  Run reactor-ordered processing in a multi-module build:
-</p>
+<h3>Run reactor-ordered processing in a multi-module build</h3>
 
 <pre>
 mvn gw:reactor
 </pre>
 
-<p>
-  Override the scan root directory (Windows example):
-</p>
+<h3>Override the scan root directory (Windows example)</h3>
 
 <pre>
 mvn gw:reactor -Dgw.scanDir=src\\site
+</pre>
+
+<h3>Use credentials from Maven settings</h3>
+
+<pre>
+mvn gw:gw -Dgw.genai.serverId=my-genai-provider
 </pre>
 
 </body>

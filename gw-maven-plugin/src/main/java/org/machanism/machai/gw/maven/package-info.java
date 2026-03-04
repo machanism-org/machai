@@ -24,6 +24,10 @@
  *     {@link org.machanism.machai.gw.maven.Act} ({@code gw:act}) - Interactive goal for running predefined actions.
  *   </li>
  *   <li>
+ *     {@link org.machanism.machai.gw.maven.ReactorAct} ({@code gw:act-reactor}) - Reactor-friendly variant of
+ *     {@code gw:act} intended to run in the execution-root project context.
+ *   </li>
+ *   <li>
  *     {@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by GW
  *     processing (typically bound to Maven's {@code clean} lifecycle).
  *   </li>

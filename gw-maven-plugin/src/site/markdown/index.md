@@ -14,12 +14,12 @@ It integrates Ghostwriter’s guided file processing into Maven builds so you ca
 At its core, the plugin scans your project for files containing embedded `@guidance:` blocks and then delegates transformation/synthesis to the Machai Ghostwriter engine.
 This is based on the concept of [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): guidance is authored “in place” (close to the content it affects), and the processor uses that guidance to produce coherent, up-to-date results across the project.
 
-The implementation in `src/main/java/org/machanism/machai/gw/maven` provides Maven goals (Mojos) that:
+The Mojos in `src/main/java/org/machanism/machai/gw/maven` provide Maven goals to:
 
-- Configure and run a `GuidanceProcessor` against a scan root (by default the Maven execution root; often `src/site`).
-- Support workflow inputs such as instruction sources, default guidance, and exclusion patterns.
+- Configure and run a `GuidanceProcessor` (and related processors) against a scan root.
+- Feed workflow inputs such as instruction sources, default guidance, and exclusion patterns.
 - Optionally source GenAI credentials from `~/.m2/settings.xml` via a Maven `<server>` entry (`-Dgw.genai.serverId=...`).
-- Offer multiple execution modes: reverse-order module processing (`gw:gw`), Maven-reactor ordering (`gw:reactor`), interactive action prompts (`gw:act`), and temp-file cleanup (`gw:clean`).
+- Support multiple execution modes: aggregator reverse-order module processing (`gw:gw`), Maven-reactor ordering (`gw:reactor`), interactive action prompts (`gw:act` / `gw:act-reactor`), and temp-file cleanup (`gw:clean`).
 
 ## Overview
 
@@ -34,11 +34,12 @@ The main value proposition is:
 
 ## Key Features
 
-- **Guidance scanning and processing** of documentation and project files using Ghostwriter’s guided file processing model.
+- **Guidance scanning and processing** of project files (source code, documentation, site content, and other relevant files) using Ghostwriter’s guided file processing model.
 - **Multiple execution strategies**:
-  - `gw:gw` (aggregator) for reverse-order module processing (sub-modules first, then parent modules), similar to the Ghostwriter CLI. Can run even without a `pom.xml`.
+  - `gw:gw` (aggregator) for reverse-order module processing (sub-modules first, then parent modules), similar to the Ghostwriter CLI; it can run even without a `pom.xml`.
   - `gw:reactor` for Maven-reactor ordering, with an option to defer execution-root processing via `gw.rootProjectLast`.
   - `gw:act` for interactive, predefined “actions” (ad-hoc prompts), optionally sourced from an actions directory.
+  - `gw:act-reactor` for running `gw:act` in a reactor-friendly, execution-root context.
   - `gw:clean` for deleting temporary artifacts created during processing.
 - **Flexible scan root** via `gw.scanDir` to target a specific directory tree.
 - **Credential integration** by reading GenAI credentials from Maven `settings.xml` (`gw.genai.serverId`).
@@ -49,7 +50,7 @@ The main value proposition is:
 ### Prerequisites
 
 - **Maven**: a Maven version compatible with your build.
-- **A GenAI provider/model configuration** supported by Machai Ghostwriter.
+- **A GenAI provider/model configuration** supported by Machai Ghostwriter (provided via `gw.model` or plugin configuration).
   - Optionally supply credentials through Maven `~/.m2/settings.xml` using a `<server>` entry and `-Dgw.genai.serverId=...`.
 - **Project files containing `@guidance:` blocks** (source code, documentation, site content, etc.), depending on what you want Ghostwriter to process.
 
@@ -69,7 +70,7 @@ mvn gw:gw
 Run guided processing for a specific scan root:
 
 ```bash
-mvn gw:gw -Dgw.scanDir=src\site
+mvn gw:gw -Dgw.scanDir=src\\site
 ```
 
 Run the reactor-ordered goal:
@@ -116,8 +117,8 @@ Common parameters used by the goals in this plugin:
 | `gw.logInputs` | Whether to log the list of input files passed to the workflow. | `false` |
 | `gw.threads` | (`gw:gw` only) Enables/disables multi-threaded module processing. | `false` |
 | `gw.rootProjectLast` | (`gw:reactor` only) If `true`, delays processing of the execution-root project until other reactor projects complete. | `true` |
-| `gw.act` | (`gw:act` only) Action prompt text. If omitted, the goal prompts interactively. | _(none)_ |
-| `gw.acts` | (`gw:act` only) Optional directory containing predefined action definitions. | _(none)_ |
+| `gw.act` | (`gw:act` / `gw:act-reactor`) Action prompt text. If omitted, the goal prompts interactively. | _(none)_ |
+| `gw.acts` | (`gw:act` / `gw:act-reactor`) Optional directory containing predefined action definitions. | _(none)_ |
 
 ## Resources
 
