@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 
+import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Model;
@@ -144,8 +145,9 @@ public class Act extends AbstractGWGoal {
 					userProperties.setProperty("gw.act", act);
 				}
 				actProcessor.setDefaultPrompt(act);
-				String gwScanDir = configuration.get("gw.scanDir");
+				String gwScanDir = configuration.get("gw.scanDir", null);
 				String scanDir = Objects.toString(super.scanDir, gwScanDir);
+				scanDir = Objects.toString(scanDir, basedir.getAbsolutePath());
 				logger.info("Starting scan of directory: {}", scanDir);
 				actProcessor.scanDocuments(basedir, scanDir);
 				logger.info("Finished scanning directory: {}", scanDir);
