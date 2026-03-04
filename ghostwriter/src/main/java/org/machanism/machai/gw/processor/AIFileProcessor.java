@@ -412,8 +412,16 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
 			if (!isPathPattern(scanDir)) {
-				super.setScanDir(new File(scanDir));
-				String relativePath = ProjectLayout.getRelativePath(projectDir, new File(scanDir));
+				File scanDirFile = new File(scanDir);
+				if (!scanDirFile.isAbsolute()) {
+					if (".".equals(scanDir)) {
+						scanDirFile = getRootDir();
+					} else {
+						scanDirFile = new File(getRootDir(), scanDir);
+					}
+				}
+				super.setScanDir(scanDirFile);
+				String relativePath = ProjectLayout.getRelativePath(projectDir, scanDirFile);
 				if (relativePath == null) {
 					throw new IllegalArgumentException(
 							"Error: The specified scan path must be located within the root project directory: "

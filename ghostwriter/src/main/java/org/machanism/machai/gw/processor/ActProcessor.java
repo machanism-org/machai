@@ -31,8 +31,9 @@ import org.tomlj.TomlParseResult;
  * </p>
  * <ul>
  * <li>{@code instructions}: provider system instructions</li>
- * <li>{@code inputs}: a prompt template; {@link String#format(String, Object...)}
- * is used to inject the user-provided prompt text</li>
+ * <li>{@code inputs}: a prompt template;
+ * {@link String#format(String, Object...)} is used to inject the user-provided
+ * prompt text</li>
  * <li>{@code gw.threads}: enables module multi-threading</li>
  * <li>{@code gw.excludes}: comma-separated scan exclusions</li>
  * <li>{@code gw.nonRecursive}: disables module recursion</li>
@@ -92,11 +93,9 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		TomlParseResult toml = tryLoadActFromClasspath(name, prompt);
-		if (toml == null) {
-			toml = tryLoadActFromDirectory(name, prompt);
-		}
+		TomlParseResult customToml = tryLoadActFromDirectory(name, prompt);
 
-		if (toml == null) {
+		if (toml == null && customToml == null) {
 			throw new IllegalArgumentException("Act: `" + name + "` not found.");
 		}
 	}
