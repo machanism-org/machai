@@ -19,6 +19,7 @@ public class ReactorAct extends Act {
 	@Override
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
+		File basedir = new File(session.getExecutionRootDirectory());
 
 		ActProcessor actProcessor = new ActProcessor(basedir, configuration, configuration.get("gw.model", genai)) {
 

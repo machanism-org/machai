@@ -170,7 +170,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		List<String> documents = projectLayout.getDocuments();
 		List<String> modules = projectLayout.getModules();
 
-		content.add(projectLayout.getProjectName() != null ? "`" + projectLayout.getProjectName() + "`" : NOT_DEFINED);
+		content.add(projectLayout.getProjectName() != null ? projectLayout.getProjectName() : NOT_DEFINED);
 		content.add(projectLayout.getProjectId());
 		content.add(projectDir.getName());
 		content.add(Objects.toString(parentId, NOT_DEFINED));

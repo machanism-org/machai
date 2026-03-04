@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 
-import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Model;
@@ -143,6 +142,8 @@ public class Act extends AbstractGWGoal {
 				if (act == null) {
 					act = readText("Act");
 					userProperties.setProperty("gw.act", act);
+				} else {
+					logger.info("Act: {}", act);
 				}
 				actProcessor.setDefaultPrompt(act);
 				String gwScanDir = configuration.get("gw.scanDir", null);
