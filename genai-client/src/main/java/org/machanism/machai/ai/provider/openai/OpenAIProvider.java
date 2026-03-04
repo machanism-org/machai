@@ -96,7 +96,7 @@ public class OpenAIProvider implements GenAIProvider {
 	public static final int MAX_TOOL_CALLS = 200;
 
 	/** Default maximum number of tokens the model may generate. */
-	public static final int MAX_OUTPUT_TOKENS = 100000;
+	public static final int MAX_OUTPUT_TOKENS = 300000;
 
 	private static final long TIMEOUT_SEC = 600;
 
@@ -227,32 +227,32 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public String perform() {
-	    logInputs();
-	    ResponseCreateParams params = createResponseBuilder(inputs);
+		logInputs();
+		ResponseCreateParams params = createResponseBuilder(inputs);
 
-	    logger.debug("Sending request to LLM service...");
+		logger.debug("Sending request to LLM service.");
 
-	    String result;
-	    try {
-	        Response response = getClient().responses().create(params);
-	        captureUsage(response.usage());
+		String result;
+		RuntimeException exception = new RuntimeException();
+		for (int i = 0; i < 3; i++) {
+			try {
+				Response response = getClient().responses().create(params);
+				captureUsage(response.usage());
 
-	        result = parseResponse(response);
-	        logger.debug("Received response from LLM service.");
-	    } catch (BadRequestException e) {
-	        logger.error("LLM request failed. Attempting to resend the request.");
+				result = parseResponse(response);
+				logger.debug("Received response from LLM service.");
+				return result;
 
-	        params = createResponseBuilder(inputs);
-	        logger.debug("Resending request to LLM service...");
+			} catch (BadRequestException e) {
+				logger.info("Resending request to LLM service.");
+				client = null;
+				client = getClient();
 
-	        Response response = getClient().responses().create(params);
-	        captureUsage(response.usage());
+				exception = e;
+			}
+		}
 
-	        result = parseResponse(response);
-	        logger.debug("Received response from LLM service after resending.");
-	    }
-
-	    return result;
+		throw exception;
 	}
 
 	/**
@@ -578,6 +578,9 @@ public class OpenAIProvider implements GenAIProvider {
 						.connect(ofSeconds).build();
 				clientBuilder.timeout(timeout);
 			}
+
+			clientBuilder.maxRetries(3);
+
 			client = clientBuilder.build();
 
 			if (StringUtils.isBlank(chatModel)) {
