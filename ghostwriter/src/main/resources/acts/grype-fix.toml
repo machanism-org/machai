@@ -30,6 +30,7 @@ Analyze the Grype scan results for the project. For each vulnerability with a fi
 1. Update the affected dependency to the fixed version or later in the appropriate build file.
 2. Ensure the project builds successfully after the update.
 3. Add comments referencing the vulnerability and the reason for the update.
+4. Use the suppress automatic update of snapshot artifacts from remote repositories feature to speed up the process.
 
 # How to Obtain Grype Scan Results
 
