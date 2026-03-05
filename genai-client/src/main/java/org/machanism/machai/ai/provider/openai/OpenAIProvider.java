@@ -100,9 +100,6 @@ public class OpenAIProvider implements GenAIProvider {
 
 	private static final long TIMEOUT_SEC = 600;
 
-	/** OpenAI client for API interactions. */
-	private OpenAIClient client;
-
 	/** Active model identifier used in {@link #perform()}. */
 	private String chatModel;
 
@@ -152,14 +149,11 @@ public class OpenAIProvider implements GenAIProvider {
 	 */
 	@Override
 	public void init(Configurator config) {
-
 		this.config = config;
 		chatModel = config.get("chatModel");
 
 		maxOutputTokens = config.getLong("MAX_OUTPUT_TOKENS", MAX_OUTPUT_TOKENS);
 		maxToolCalls = config.getLong("MAX_TOOL_CALLS", MAX_TOOL_CALLS);
-
-		client = getClient();
 	}
 
 	/**
@@ -233,26 +227,12 @@ public class OpenAIProvider implements GenAIProvider {
 		logger.debug("Sending request to LLM service.");
 
 		String result;
-		RuntimeException exception = new RuntimeException();
-		for (int i = 0; i < 3; i++) {
-			try {
-				Response response = getClient().responses().create(params);
-				captureUsage(response.usage());
+		Response response = getClient().responses().create(params);
+		captureUsage(response.usage());
 
-				result = parseResponse(response);
-				logger.debug("Received response from LLM service.");
-				return result;
-
-			} catch (BadRequestException e) {
-				logger.info("Resending request to LLM service.");
-				client = null;
-				client = getClient();
-
-				exception = e;
-			}
-		}
-
-		throw exception;
+		result = parseResponse(response);
+		logger.debug("Received response from LLM service.");
+		return result;
 	}
 
 	/**
@@ -565,33 +545,31 @@ public class OpenAIProvider implements GenAIProvider {
 	 * @return OpenAI client
 	 */
 	protected OpenAIClient getClient() {
-		if (client == null) {
-			String baseUrl = config.get("OPENAI_BASE_URL");
-			String privateKey = config.get("OPENAI_API_KEY");
-			timeoutSec = config.getLong("GENAI_TIMEOUT", TIMEOUT_SEC);
+		String baseUrl = config.get("OPENAI_BASE_URL");
+		String privateKey = config.get("OPENAI_API_KEY");
+		timeoutSec = config.getLong("GENAI_TIMEOUT", TIMEOUT_SEC);
 
-			OpenAIOkHttpClient.Builder clientBuilder = OpenAIOkHttpClient.builder();
-			clientBuilder.apiKey(privateKey);
-			if (baseUrl != null) {
-				clientBuilder.baseUrl(baseUrl);
-			}
-			if (timeoutSec > 0) {
-				Duration ofSeconds = Duration.ofSeconds(timeoutSec);
-				Timeout timeout = Timeout.builder().request(ofSeconds).read(ofSeconds).write(ofSeconds)
-						.connect(ofSeconds).build();
-				clientBuilder.timeout(timeout);
-			}
+		OpenAIOkHttpClient.Builder clientBuilder = OpenAIOkHttpClient.builder();
+		clientBuilder.apiKey(privateKey);
+		if (baseUrl != null) {
+			clientBuilder.baseUrl(baseUrl);
+		}
+		if (timeoutSec > 0) {
+			Duration ofSeconds = Duration.ofSeconds(timeoutSec);
+			Timeout timeout = Timeout.builder().request(ofSeconds).read(ofSeconds).write(ofSeconds)
+					.connect(ofSeconds).build();
+			clientBuilder.timeout(timeout);
+		}
 
-			clientBuilder.maxRetries(3);
+		clientBuilder.maxRetries(3);
 
-			client = clientBuilder.build();
+		OpenAIClient client = clientBuilder.build();
 
-			if (StringUtils.isBlank(chatModel)) {
-				ModelService models = client.models();
-				List<String> items = models.list().items().stream().map(i -> i.id()).collect(Collectors.toList());
-				throw new IllegalArgumentException(
-						"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
-			}
+		if (StringUtils.isBlank(chatModel)) {
+			ModelService models = client.models();
+			List<String> items = models.list().items().stream().map(i -> i.id()).collect(Collectors.toList());
+			throw new IllegalArgumentException(
+					"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
 		}
 		return client;
 	}
