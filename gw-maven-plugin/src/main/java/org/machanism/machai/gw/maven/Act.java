@@ -85,7 +85,7 @@ public class Act extends AbstractGWGoal {
 	 * Optional directory containing predefined action definitions.
 	 */
 	@Parameter(property = "gw.acts", required = false)
-	private File acts;
+	private String acts;
 
 	/**
 	 * Executes the interactive action and scans documents using the configured
@@ -98,7 +98,10 @@ public class Act extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
 
-		ActProcessor actProcessor = new ActProcessor(basedir, configuration, configuration.get("gw.model", model)) {
+		String model = configuration.get("gw.model", this.model);
+		logger.info("Model: {}", model);
+
+		ActProcessor actProcessor = new ActProcessor(basedir, configuration, model) {
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = super.getProjectLayout(projectDir);
@@ -128,8 +131,14 @@ public class Act extends AbstractGWGoal {
 			throws MojoExecutionException {
 		try {
 			if (acts != null) {
-				logger.info("Act directory: {}", acts);
-				actProcessor.setActDir(acts);
+				File rootDir = actProcessor.getRootDir();
+				File actsDir = new File(acts);
+				if (!actsDir.isAbsolute()) {
+					actsDir = new File(rootDir, acts);
+				}
+
+				logger.info("Act directory: {}", actsDir);
+				actProcessor.setActDir(actsDir);
 			}
 			if (excludes != null) {
 				actProcessor.setExcludes(excludes);
