@@ -42,6 +42,11 @@ inputs = '''
 %s
 '''
 
+[ft.command]
+denylist = '''
+%s
+'''
+
 [gw]
 scanDir = "glob:."
 threads = "true"

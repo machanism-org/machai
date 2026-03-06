@@ -15,6 +15,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 
@@ -43,6 +45,9 @@ import org.tomlj.TomlParseResult;
  * </ul>
  */
 public class ActProcessor extends AIFileProcessor {
+
+	/** Logger for documentation input processing events. */
+	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
 	private static final String ACTS_BASENAME_PREFIX = "/acts/";
@@ -178,6 +183,10 @@ public class ActProcessor extends AIFileProcessor {
 			String key = (String) entry.getKey();
 			if (entry.getValue() instanceof String) {
 				String value = (String) entry.getValue();
+				String inheritValue = getConfigurator().get(key, null);
+				if (inheritValue != null) {
+					value = String.format(value, StringUtils.defaultString(inheritValue));
+				}
 				switch (key) {
 				case "instructions":
 					super.setInstructions(value);
@@ -214,6 +223,12 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param actDir directory containing {@code *.toml} act files
 	 */
 	public void setActDir(File actDir) {
+		if (actDir != null) {
+			if (!actDir.exists() || !actDir.isDirectory()) {
+				logger.error("Act directory does not exist or not a directory: {}", actDir.getAbsolutePath());
+				return;
+			}
+		}
 		this.actDir = actDir;
 	}
 

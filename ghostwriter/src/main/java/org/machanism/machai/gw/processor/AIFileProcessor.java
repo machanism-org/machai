@@ -98,7 +98,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	public AIFileProcessor(File rootDir, Configurator configurator, String genai) {
 		super(rootDir, configurator);
-		FunctionToolsLoader.getInstance().setConfiguration(configurator);
 		this.genai = genai;
 	}
 
@@ -403,6 +402,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *                                  root project directory
 	 */
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
+		FunctionToolsLoader.getInstance().setConfiguration(getConfigurator());
+
 		if (projectDir == null) {
 			throw new IllegalArgumentException("projectDir must not be null");
 		}
