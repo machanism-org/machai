@@ -19,6 +19,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,20 +115,6 @@ public class CommandFunctionTools implements FunctionTools {
 		 */
 		public int getExitCode() {
 			return exitCode;
-		}
-	}
-
-	/**
-	 * Creates a tool installer and initializes the default deny-lists.
-	 *
-	 * @throws IllegalArgumentException if deny-list resources cannot be loaded
-	 */
-	public CommandFunctionTools() {
-		super();
-		try {
-			checker = new CommandSecurityChecker();
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
 		}
 	}
 
@@ -463,6 +450,15 @@ public class CommandFunctionTools implements FunctionTools {
 			}
 		} catch (IOException e) {
 			errorConsumer.accept(e);
+		}
+	}
+	
+	@Override
+	public void setConfigurator(Configurator configurator) {
+		try {
+			checker = new CommandSecurityChecker(configurator);
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
 		}
 	}
 }
