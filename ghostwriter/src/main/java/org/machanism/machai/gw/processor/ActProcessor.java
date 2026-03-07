@@ -101,15 +101,21 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		Properties actData = new Properties();
-		loadAct(name, actData);
-		String actPrompt = Objects.toString(super.getDefaultPrompt(),
-				getConfigurator().get("prompt", actData.getProperty("inputs")));
-		String value = String.format(actPrompt, StringUtils.defaultString(prompt).trim());
-		super.setDefaultPrompt(value);
-		applyActData(actData);
+		try {
+			loadAct(name, actData);
+			String actPrompt = Objects.toString(super.getDefaultPrompt(),
+					getConfigurator().get("prompt", actData.getProperty("inputs")));
+			String value = String.format(actPrompt, StringUtils.defaultString(prompt).trim());
+			
+			super.setDefaultPrompt(value);
+			applyActData(actData);
+			
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
-	private void loadAct(String name, Properties properties) {
+	private void loadAct(String name, Properties properties) throws IOException {
 		TomlParseResult customToml = tryLoadActFromDirectory(properties, name);
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
@@ -131,36 +137,31 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
-	private TomlParseResult tryLoadActFromClasspath(Properties properties, String name) {
+	private TomlParseResult tryLoadActFromClasspath(Properties properties, String name) throws IOException {
 		String path = ACTS_BASENAME_PREFIX + name + ".toml";
 		URL resource = Ghostwriter.class.getResource(path);
 		if (resource == null) {
 			return null;
 		}
 
-		try {
-			String tomlStr = IOUtils.toString(resource, "UTF8");
-			TomlParseResult toml = Toml.parse(tomlStr);
-			setActData(properties, toml);
-			return toml;
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
+		String tomlStr = IOUtils.toString(resource, "UTF8");
+		TomlParseResult toml = Toml.parse(tomlStr);
+		setActData(properties, toml);
+		return toml;
 	}
 
-	private TomlParseResult tryLoadActFromDirectory(Properties properties, String name) {
+	private TomlParseResult tryLoadActFromDirectory(Properties properties, String name) throws IOException {
 		if (actDir == null) {
 			return null;
 		}
 
-		try {
-			File file = new File(actDir, name + ".toml");
-			TomlParseResult toml = Toml.parse(file.toPath());
+		File file = new File(actDir, name + ".toml");
+		TomlParseResult toml = null;
+		if (file.exists()) {
+			toml = Toml.parse(file.toPath());
 			setActData(properties, toml);
-			return toml;
-		} catch (IOException e) {
-			return null;
 		}
+		return toml;
 	}
 
 	private void setActData(Properties properties, TomlParseResult toml) {

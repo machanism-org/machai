@@ -45,33 +45,51 @@ Follow these steps:
 inputs = '''
 # Task
 
-Analyze the Grype scan results for the project. For each vulnerability with a fix available:
-1. Update the affected dependency to the fixed version or later in the appropriate build file.
-2. Ensure the project builds successfully after the update.
-3. Add comments referencing the vulnerability and the reason for the update.
+Analyze the Grype vulnerability scan results for this Maven project. For each vulnerability where a fix is available, perform the following steps:
+
+1. **Update Dependencies:**  
+   - Identify the affected dependency and update it to the fixed version (or later) in the appropriate Maven build file (e.g., `pom.xml`).
+   - If multiple build files are present (multi-module project), ensure all relevant files are updated.
+
+2. **Verify Build Success:**  
+   - After updating dependencies, build the project using Maven (e.g., `mvn clean install`).
+   - If the build fails, attempt to resolve dependency conflicts or issues. If unresolved, clearly document the failure and the steps taken.
+
+3. **Document Changes:**  
+   - In the build file, add a comment next to each updated dependency specifying:
+     - The Grype vulnerability identifier (e.g., CVE number).
+     - The reason for the update (e.g., “Fixes CVE-2023-XXXX as reported by Grype”).
+
+4. **Assumptions:**  
+   - The build output folder is usually `target` for Maven projects.
+   - The current directory `.` always refers to the project root.
 
 # How to Obtain Grype Scan Results
 
 - **Generate an SBOM:**  
-  First, create a Software Bill of Materials (SBOM) for your Maven project using a tool like Syft.  
-  Run the following command in your root project directory via system command:  
+  Create a Software Bill of Materials (SBOM) for the project using Syft.  
+  Run in the project root:
   ```
-  syft dir:. -o syft-json=[BUILD_FOLDER]/project-sbom.json
+  syft dir:. -o syft-json=target/project-sbom.json
   ```
-  This will generate an SBOM file (e.g. `project-sbom.json`).
+  This generates `project-sbom.json` in the `target` folder.
 
-- **Using a Functional Tool:**  
-  If a Grype integration or API is available as a functional tool, use it to programmatically retrieve the latest vulnerability scan results for the project.
+- **Retrieve Grype Results:**  
+  - If a Grype integration or API is available as a functional tool, use it to obtain the latest vulnerability scan results.
+  - Otherwise, run in the project root:
+    ```
+    grype sbom:target/project-sbom.json -o table
+    ```
+  Use the Grype output to identify vulnerabilities and available fixes.
 
-- **Using a System Command:**  
-  If no functional tool is available, run the following system command in the project root to generate the Grype scan result in table format:  
-  ```
-  grype sbom:[BUILD_FOLDER]/project-sbom.json -o table 
-  ```
-  
-  Use the gryp output as the basis for identifying and fixing vulnerabilities.
+# Output Requirements
 
-**Note:** The current directory `.` always refers to the current project root.
+- For each fixed vulnerability, provide:
+  - The dependency name and updated version.
+  - The exact file and line changed.
+  - The comment added.
+- Summarize any vulnerabilities that could not be fixed, with reasons.
+- If the build fails after updates, include error messages and troubleshooting steps taken.
 
 %s
 '''
