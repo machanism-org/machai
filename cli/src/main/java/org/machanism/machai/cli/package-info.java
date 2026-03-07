@@ -1,40 +1,41 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains the executable entry point and Spring Shell command components that expose Machai
- * capabilities through both interactive (REPL) and non-interactive command execution.
+ * <p>This package contains the Spring Boot entry point and Spring Shell command components that expose Machai
+ * functionality through both interactive (REPL) and non-interactive command execution.
  *
- * <h2>Responsibilities</h2>
+ * <h2>Command groups</h2>
  * <ul>
- *   <li>Bootstrapping the CLI application and loading configuration (for example, from {@code machai.properties}).</li>
- *   <li>Managing persistent CLI defaults (for example, working directory and GenAI provider/model settings).</li>
- *   <li>Executing commands for bindex generation/registration, semantic search and assembly, document processing,
- *       and cleanup of Machai temporary directories.</li>
+ *   <li><strong>Configuration</strong> – {@link org.machanism.machai.cli.ConfigCommand} persists defaults (for example,
+ *       working directory and GenAI provider/model) in {@code machai.properties}.</li>
+ *   <li><strong>Indexing and registration</strong> – {@link org.machanism.machai.cli.BindexCommand} generates and
+ *       registers bindex metadata for projects.</li>
+ *   <li><strong>Picking and assembly</strong> – {@link org.machanism.machai.cli.AssembyCommand} performs semantic
+ *       search (“pick”) and assembles a project skeleton using a configured GenAI provider.</li>
+ *   <li><strong>Document processing</strong> – {@link org.machanism.machai.cli.GWCommand} scans folders and processes
+ *       files using the Ghostwriter pipeline; {@link org.machanism.machai.cli.ActCommand} runs an interactive
+ *       predefined action/prompt in “Act mode”.</li>
+ *   <li><strong>Cleanup</strong> – {@link org.machanism.machai.cli.CleanCommand} removes Machai temporary directories
+ *       (for example, {@code .machai}) under a selected root directory.</li>
  * </ul>
  *
- * <h2>Key types</h2>
+ * <h2>How configuration is resolved</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.cli.MachaiCLI} – Boots the application and loads optional system properties from
- *       {@code machai.properties} (or from the file provided via the {@code -Dconfig=...} system property).</li>
- *   <li>{@link org.machanism.machai.cli.ConfigCommand} – Manages persistent CLI defaults such as working directory
- *       ({@code dir}), GenAI provider/model ({@code genai}), and semantic-search score threshold ({@code score}).</li>
- *   <li>{@link org.machanism.machai.cli.AssembyCommand} – Performs library picking (semantic search) and assembles an
- *       application skeleton using a configured GenAI provider.</li>
- *   <li>{@link org.machanism.machai.cli.BindexCommand} – Generates bindex metadata for projects and registers bindex
- *       files in an external registry.</li>
- *   <li>{@link org.machanism.machai.cli.GWCommand} – Processes documents/files using the Ghostwriter pipeline.</li>
- *   <li>{@link org.machanism.machai.cli.CleanCommand} – Deletes Machai temporary directories (for example,
- *       {@code .machai}) under a selected root directory.</li>
+ *   <li>The application entry point {@link org.machanism.machai.cli.MachaiCLI} loads optional system properties from
+ *       {@code machai.properties} or from a file provided via {@code -Dconfig=...}.</li>
+ *   <li>Most commands use defaults persisted by {@link org.machanism.machai.cli.ConfigCommand} when an option (such as
+ *       {@code --dir} or {@code --genai}) is not provided.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>
- * config genai OpenAI:gpt-5.1
- * config dir .\\my-project
+ * config model OpenAI:gpt-5.1
+ * config root .\\my-project
  * bindex --dir .\\my-project
  * pick --query "Create a web app" --score 0.9
  * assembly --dir .\\out
- * gw --dir .\\my-project --scan .\\my-project\\docs
+ * gw --scanDirs .\\my-project --excludes target,.git
+ * act --action "Summarize the architecture"
  * clean --dir .\\my-project
  * </pre>
  */

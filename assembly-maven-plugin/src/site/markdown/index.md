@@ -15,7 +15,7 @@ Conceptually, it follows the same structured pattern as [Guided File Processing]
 When executed, the goal:
 
 - Acquires a natural-language prompt by reading `assembly.prompt.file` (default: `project.txt`) when present, or by prompting interactively via the Maven console.
-- Creates a `bindex.properties`-backed configuration (`PropertiesConfigurator`).
+- Loads configuration from `bindex.properties` using `PropertiesConfigurator`.
 - Uses a GenAI-backed picker (`pick.genai`) to recommend candidate libraries expressed as Bindex entries (`Picker`; optionally using `bindex.register.url`).
 - Filters recommendations by a configurable score threshold (`assembly.score`).
 - Runs the assembly phase (`assembly.genai`) to apply changes to the project directory (`${basedir}`) using `ApplicationAssembly`, the prompt, and the selected libraries.
@@ -68,7 +68,7 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
 2. Run the `assembly` goal.
 3. The plugin reads the prompt file (or requests the prompt interactively if the file is missing).
 4. The picker recommends candidate libraries (Bindex entries), filtered by the configured score threshold.
-5. The assembly phase applies changes to the project directory (`${basedir}`) using the prompt and recommended libraries.
+5. The plugin logs recommended libraries and then runs the assembly phase to apply changes to the project directory (`${basedir}`).
 
 ## Configuration
 

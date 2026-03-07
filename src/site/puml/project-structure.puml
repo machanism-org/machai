@@ -57,6 +57,6 @@ machai_cli --> ghostwriter
 bindex_maven_plugin --> bindex_core
 assembly_maven_plugin --> bindex_core
 
- gw_maven_plugin --> ghostwriter
+gw_maven_plugin --> ghostwriter
 
 @enduml

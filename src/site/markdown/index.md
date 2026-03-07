@@ -34,7 +34,7 @@ Generate a content:
 
 # Machai Project
 
-Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins that unify access to multiple GenAI providers, generate and consume bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate documentation updates from embedded guidance using Ghostwriter.
+Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins that unify access to multiple GenAI providers, generate and consume bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate repository-scale documentation updates from embedded guidance using Ghostwriter.
 
 Key capabilities include:
 
@@ -51,13 +51,13 @@ Key capabilities include:
 
 | Name | Description |
 | --- | --- |
-| [Project Layout](project-layout/) | Utility Java library for describing and working with conventional project directory layouts (sources, resources, tests, docs, and site content) in a consistent way. It centralizes folder conventions so build tools and plugins can resolve well-known paths reliably across projects and avoid hard-coded directories and duplicated logic. |
+| [Project Layout](project-layout/) | Java utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, and site content) in a consistent way. It centralizes folder conventions so build tools and plugins can resolve well-known paths reliably and avoid hard-coded directories and duplicated path logic. |
 | [GenAI Client](genai-client/) | Java library that provides a single, consistent API for integrating with multiple Generative AI providers. It offers centralized provider selection, prompt and instruction management, optional tool (function) calling, optional file attachments, and provider-dependent embeddings, and is used as the GenAI abstraction across Machai modules. |
 | [Bindex Core](bindex-core/) | Foundational Java library for working with bindex metadata in the Machanism ecosystem. It defines the canonical metadata model and provides utilities for generating, reading, validating, merging, and aggregating bindex descriptors to support discovery, selection, registration, and metadata-driven project assembly workflows. |
-| [Machai CLI](machai-cli/) | Spring Boot and Spring Shell command-line application that orchestrates bindex and Ghostwriter workflows. It can generate and register bindex metadata, perform semantic library picking, assemble project skeletons from selected libraries, run Ghostwriter-guided processing over project files, and clean temporary `.machai` folders. |
+| [Machai CLI](machai-cli/) | Spring Boot and Spring Shell command-line application that orchestrates Bindex and Ghostwriter workflows. It can generate and register bindex metadata, perform semantic library picking, assemble project skeletons from selected libraries, run Ghostwriter-guided processing over project files, and clean temporary `.machai` folders. |
 | [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and optionally registers bindex metadata during the build. It derives consistent machine-readable descriptors from the Maven project model so artifacts can be indexed and discovered, and provides goals for creating, updating, cleaning, and registering bindex metadata. |
 | [Assembly Maven Plugin](assembly-maven-plugin/) | Maven plugin that performs prompt-driven, metadata-assisted project assembly. It reads a prompt (default `project.txt`), uses GenAI-backed semantic picking over bindex entries to recommend libraries above a score threshold, and applies resulting changes directly to the Maven execution base directory (`${basedir}`) as part of a repeatable goal. |
-| [Ghostwriter](ghostwriter/) | Guidance-driven documentation and transformation engine (CLI and library) that scans project files (source, docs, site content, and other artifacts), extracts embedded `@guidance:` directives, and uses a configured GenAI provider to synthesize and apply updates. It supports Maven multi-module traversal, directory and pattern-based scanning, optional multi-threading, and optional request input logging. |
+| [Ghostwriter](ghostwriter/) | Guidance-driven documentation and transformation engine (CLI and library) that scans project files, extracts embedded `@guidance:` directives, and uses a configured GenAI provider to synthesize and apply updates. It supports Maven multi-module traversal, directory and pattern-based scanning, optional multi-threading, and optional request input logging. |
 | [GW Maven Plugin](gw-maven-plugin/) | Maven plugin that integrates Ghostwriter Guided File Processing into Maven builds. It scans project files for embedded `@guidance:` directives and runs the Ghostwriter pipeline as a Maven goal, supporting reactor-aware processing, optional multi-threading, excludes, optional input logging, and optional credential loading from Maven `settings.xml`. |
 
 ## Installation

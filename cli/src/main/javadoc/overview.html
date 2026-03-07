@@ -30,9 +30,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>Machai CLI</h1>
 
 <p>
-  Machai CLI is a command-line tool for generating, registering, and managing library metadata within the
-  Machanism ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient
-  library discovery and integration.
+  Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism
+  ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library
+  discovery and integration.
 </p>
 
 <h2>Purpose and scope</h2>
@@ -46,15 +46,16 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <ul>
   <li>
-    <strong>Entry point:</strong> <code>org.machanism.machai.cli.MachaiCLI</code> bootstraps Spring Shell.
+    <strong>Entry point:</strong> <code>org.machanism.machai.cli.MachaiCLI</code> bootstraps the application and starts the
+    Spring Shell command runtime.
   </li>
   <li>
-    <strong>Configuration loading:</strong> optional system properties are loaded from <code>machai.properties</code>, or from the
-    file specified via <code>-Dconfig=...</code>.
+    <strong>Configuration:</strong> default settings can be loaded from <code>machai.properties</code> or from a file specified via
+    <code>-Dconfig=...</code>; the CLI also provides commands to persist commonly used defaults.
   </li>
   <li>
-    <strong>Commands:</strong> Spring Shell command components expose configuration management, bindex operations,
-    assembly workflows, document processing, and cleanup.
+    <strong>Commands:</strong> Spring Shell components expose configuration management, bindex operations, semantic search
+    (“pick”) and assembly workflows, document processing (Ghostwriter), “Act mode”, and cleanup.
   </li>
 </ul>
 
@@ -68,34 +69,39 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li>
     <strong><code>org.machanism.machai.cli</code></strong> – Spring Shell-based command-line interface (CLI) for Machai.
     <ul>
-      <li>Bootstraps the CLI application and loads configuration (for example, from <code>machai.properties</code>).</li>
-      <li>Manages persistent CLI defaults (for example, working directory and GenAI provider/model settings).</li>
-      <li>
-        Executes commands for bindex generation/registration, semantic search and assembly, document processing,
-        and cleanup of Machai temporary directories.
-      </li>
+      <li>Bootstraps the CLI application and loads optional system properties.</li>
+      <li>Exposes Spring Shell commands for configuration, indexing/registration, picking/assembly, document
+        processing, and cleanup.</li>
+      <li>Persists CLI defaults (for example, working directory and GenAI provider/model settings) to simplify repeated
+        workflows.</li>
     </ul>
   </li>
 </ul>
 
-<h3>Key types</h3>
+<h3>Key types and responsibilities</h3>
 
 <ul>
-  <li><code>MachaiCLI</code> – Boots the application and loads optional system properties.</li>
+  <li><code>MachaiCLI</code> – Application entry point; loads optional system properties and initializes Spring Shell.</li>
   <li>
-    <code>ConfigCommand</code> – Manages persistent defaults such as working directory (<code>dir</code>), GenAI provider/model
-    (<code>genai</code>), and semantic-search score threshold (<code>score</code>).
+    <code>ConfigCommand</code> – Manages persistent defaults (for example, working directory, GenAI provider/model, and score
+    threshold) stored in <code>machai.properties</code>.
   </li>
   <li>
-    <code>AssemblyCommand</code> – Performs library picking (semantic search) and assembles an application skeleton using a
-    configured GenAI provider.
+    <code>BindexCommand</code> – Generates bindex metadata for projects and optionally registers bindex files with an
+    external registry.
   </li>
   <li>
-    <code>BindexCommand</code> – Generates bindex metadata for projects and registers bindex files in an external registry.
+    <code>AssembyCommand</code> – Performs semantic search (“pick”) and assembles a project skeleton using a configured GenAI
+    provider.
   </li>
-  <li><code>GWCommand</code> – Processes documents/files using the Ghostwriter pipeline.</li>
   <li>
-    <code>CleanCommand</code> – Deletes Machai temporary directories (for example, <code>.machai</code>) under a selected root
+    <code>GWCommand</code> – Scans folders and processes documents/files using the Ghostwriter pipeline.
+  </li>
+  <li>
+    <code>ActCommand</code> – Runs a predefined interactive action/prompt (“Act mode”) against a selected working context.
+  </li>
+  <li>
+    <code>CleanCommand</code> – Removes Machai temporary directories (for example, <code>.machai</code>) under a selected root
     directory.
   </li>
 </ul>
@@ -114,17 +120,18 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   The following example illustrates a common workflow: configure defaults, generate/register metadata, discover
-  libraries via semantic search, assemble an output project, process documentation, and finally clean temporary
-  artifacts.
+  libraries via semantic search, assemble an output project, process documentation, run an interactive action, and
+  finally clean temporary artifacts.
 </p>
 
 <pre>
-config genai OpenAI:gpt-5.1
-config dir .\\my-project
+config model OpenAI:gpt-5.1
+config root .\\my-project
 bindex --dir .\\my-project
 pick --query "Create a web app" --score 0.9
 assembly --dir .\\out
-gw --dir .\\my-project --scan .\\my-project\\docs
+gw --scanDirs .\\my-project --excludes target,.git
+act --action "Summarize the architecture"
 clean --dir .\\my-project
 </pre>
 
@@ -132,7 +139,8 @@ clean --dir .\\my-project
 
 <ul>
   <li>
-    The <code>.machai</code> directory is used for temporary artifacts generated by Machai workflows.
+    The <code>.machai</code> directory is used for temporary artifacts generated by Machai workflows. Clean-up is supported by
+    the <code>clean</code> command.
   </li>
   <li>
     Command names and options are defined by the Spring Shell components in <code>org.machanism.machai.cli</code>; consult

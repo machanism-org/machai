@@ -14,23 +14,21 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Creates or updates a project's {@code bindex.json} file using a
- * {@link GenAIProvider}.
+ * Creates or updates a project's {@code bindex.json} file using an AI-assisted {@link BindexBuilder}.
  *
- * <p>
- * The actual Bindex content is produced by a {@link BindexBuilder} selected by
- * {@link BindexBuilderFactory} based on the provided {@link ProjectLayout}.
+ * <p>The Bindex content is produced by a {@link BindexBuilder} selected by
+ * {@link BindexBuilderFactory} based on the supplied {@link ProjectLayout}.
  *
  * <h2>Example</h2>
  *
- * <pre>
- * GenAIProvider genai = ...;
+ * <pre>{@code
+ * Configurator config = ...;
  * ProjectLayout layout = ...;
  *
- * new BindexCreator(genai)
+ * new BindexCreator("openai", config)
  *     .update(true)
  *     .processFolder(layout);
- * </pre>
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -41,37 +39,46 @@ public class BindexCreator extends BindexProjectProcessor {
 	/** Logger instance for the BindexCreator class. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BindexCreator.class);
 
-	/** ChatModel used to generate or enrich the Bindex. */
+	/** Provider identifier used for AI-assisted Bindex creation. */
 	private final String genai;
+
+	/** Configurator used by builders and providers. */
+	private final Configurator config;
 
 	/** Whether an existing Bindex should be overwritten. */
 	private boolean update;
 
-	private Configurator config;
-
 	/**
 	 * Creates a {@link BindexCreator}.
 	 *
-	 * @param genai genai used for AI-assisted Bindex creation
+	 * @param genai  GenAI provider identifier used for AI-assisted Bindex creation
+	 * @param config configurator used to initialize the provider and builders
+	 * @throws IllegalArgumentException if {@code genai} or {@code config} is {@code null}
 	 */
 	public BindexCreator(String genai, Configurator config) {
+		if (genai == null) {
+			throw new IllegalArgumentException("genai must not be null");
+		}
+		if (config == null) {
+			throw new IllegalArgumentException("config must not be null");
+		}
 		this.genai = genai;
 		this.config = config;
 	}
 
 	/**
-	 * Creates or updates {@code bindex.json} in the project directory described by
-	 * the given layout.
+	 * Creates or updates {@code bindex.json} in the project directory described by the given layout.
 	 *
-	 * <p>
-	 * If {@link #update(boolean)} is enabled, any existing Bindex file will be
-	 * regenerated. If update is disabled, an existing file is left unchanged.
+	 * <p>If {@link #update(boolean)} is enabled, any existing Bindex file will be regenerated. If	 * update is disabled, an existing file is left unchanged.
 	 *
 	 * @param projectLayout project layout to inspect
-	 * @throws IllegalArgumentException if an I/O error occurs while reading or
-	 *                                  writing the Bindex
+	 * @throws IllegalArgumentException if {@code projectLayout} is {@code null} or an I/O error occurs
 	 */
 	public void processFolder(ProjectLayout projectLayout) {
+		if (projectLayout == null) {
+			throw new IllegalArgumentException("projectLayout must not be null");
+		}
+
 		try {
 			BindexBuilder bindexBuilder = BindexBuilderFactory.create(projectLayout, genai, config);
 
@@ -102,8 +109,7 @@ public class BindexCreator extends BindexProjectProcessor {
 	/**
 	 * Enables or disables update mode.
 	 *
-	 * @param update {@code true} to overwrite an existing {@code bindex.json};
-	 *               {@code false} to only create when absent
+	 * @param update {@code true} to overwrite an existing {@code bindex.json}; {@code false} to only	 *               create when absent
 	 * @return this instance for chaining
 	 */
 	public BindexCreator update(boolean update) {

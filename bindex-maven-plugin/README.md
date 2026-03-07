@@ -24,9 +24,11 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-The **Bindex Maven Plugin** generates and (optionally) registers **bindex metadata** for Maven projects. During a Maven build, it inspects the current Maven project model (coordinates, packaging, dependencies, and related descriptors) and emits structured, machine-readable metadata that can be indexed locally and, when enabled, published to a registry for cross-project discovery.
+The **Bindex Maven Plugin** enables automated generation and (optionally) registration of **bindex metadata** for Maven projects.
 
-Downstream tooling (including components in the Machanism ecosystem) can use this metadata to improve library discoverability, enrich dependency analysis, and enable GenAI-assisted semantic search and automated assembly workflows.
+During a Maven build, the plugin inspects the current project (typically skipping aggregator/parent projects with `pom` packaging) and uses Maven coordinates and model information (packaging, dependencies, and related descriptors) to create or update a local bindex index.
+
+When registration is enabled, the plugin can also publish the generated metadata to a registry endpoint so it can be discovered across projects.
 
 ## Installation Instructions
 
@@ -97,7 +99,7 @@ mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5
 
 ### Configuration examples
 
-Example using command-line properties:
+Example configuring and running registration:
 
 ```cmd
 mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080

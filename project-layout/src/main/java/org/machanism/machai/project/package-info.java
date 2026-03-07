@@ -1,33 +1,32 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>This package provides core types to:
+ * <p>This package provides the high-level orchestration for:
  *
  * <ul>
- *   <li>Detect a project's on-disk convention (for example, Maven or Gradle) and expose it as a
- *       {@link org.machanism.machai.project.layout.ProjectLayout}.</li>
- *   <li>Traverse a project root (and any nested modules) and invoke a per-project processing hook via
- *       {@link org.machanism.machai.project.ProjectProcessor}.</li>
+ *   <li>Detecting a project's on-disk convention (for example Maven, Gradle, JavaScript, or Python) and exposing it as a
+ *       {@link org.machanism.machai.project.layout.ProjectLayout} via
+ *       {@link org.machanism.machai.project.ProjectLayoutManager#detectProjectLayout(java.io.File)}.</li>
+ *   <li>Scanning a project root, optionally recursing into nested modules, and delegating per-project processing logic
+ *       to a {@link org.machanism.machai.project.ProjectProcessor} implementation.</li>
  * </ul>
  *
- * <p>Typical usage is to detect the {@link org.machanism.machai.project.layout.ProjectLayout} for a project directory
- * using {@link org.machanism.machai.project.ProjectLayoutManager#detectProjectLayout(java.io.File)} and then execute a
- * {@link org.machanism.machai.project.ProjectProcessor} over the project root.
+ * <p>The detected {@link org.machanism.machai.project.layout.ProjectLayout} is used to locate conventional directories
+ * such as sources, tests, resources, and documentation roots.
  *
  * <h2>Typical workflow</h2>
- *
  * <ol>
  *   <li>Detect a layout for a project directory using
  *       {@link org.machanism.machai.project.ProjectLayoutManager#detectProjectLayout(java.io.File)}.</li>
- *   <li>Provide a {@link org.machanism.machai.project.ProjectProcessor} implementation (or use a provided one).</li>
+ *   <li>Provide a {@link org.machanism.machai.project.ProjectProcessor} that implements
+ *       {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}.</li>
  *   <li>Invoke {@link org.machanism.machai.project.ProjectProcessor#scanFolder(java.io.File)} on the project root.
- *       The processor will recurse into modules when the selected layout reports them.</li>
+ *       If the layout reports modules, each module is scanned recursively; otherwise the root is processed directly.</li>
  * </ol>
  *
  * <h2>Example</h2>
- *
  * <pre>{@code
- * File projectDir = new File("C:\\path\\to\\project");
+ * java.io.File projectDir = new java.io.File("C:\\path\\to\\project");
  * ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
  * }</pre>

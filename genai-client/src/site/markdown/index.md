@@ -81,8 +81,8 @@ This design provides:
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (or a client secret if using client_credentials). |
 | `AUTH_URL` | No | CodeMie | OAuth2 token endpoint override (defaults to CodeMie Keycloak token URL). |
 | `GENAI_TIMEOUT` | No | OpenAI / OpenAI-compatible | Request timeout in seconds; when `0` or missing, SDK defaults are used. |
-| `MAX_OUTPUT_TOKENS` | No | OpenAI / OpenAI-compatible | Max output tokens (defaults to `65536`). |
-| `MAX_TOOL_CALLS` | No | OpenAI / OpenAI-compatible | Max tool calls per request (defaults to `100`). |
+| `MAX_OUTPUT_TOKENS` | No | OpenAI / OpenAI-compatible | Max output tokens (provider default applies if not set). |
+| `MAX_TOOL_CALLS` | No | OpenAI / OpenAI-compatible | Max tool calls per request (provider default applies if not set). |
 
 ### Basic Usage
 
@@ -145,12 +145,12 @@ This provider adapts the OpenAI Java SDK to MachAI's provider interface. It accu
 
 **Configuration variables consumed by `init(Configurator)`**
 
-- `chatModel`: required model identifier passed to the OpenAI Responses API (for example, `gpt-4.1` or `gpt-4o`).
-- `OPENAI_API_KEY`: required API key used to authenticate with the OpenAI API.
-- `OPENAI_BASE_URL`: optional base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
-- `GENAI_TIMEOUT`: optional request timeout (in seconds). If missing or `0`, the SDK default timeouts are used.
-- `MAX_OUTPUT_TOKENS`: optional maximum number of output tokens (defaults to `65536`).
-- `MAX_TOOL_CALLS`: optional maximum number of tool calls allowed in a single response (defaults to `100`).
+- `chatModel` (required): model identifier passed to the OpenAI Responses API (for example, `gpt-4.1` or `gpt-4o`).
+- `OPENAI_API_KEY` (required): API key used to authenticate with the OpenAI API.
+- `OPENAI_BASE_URL` (optional): base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
+- `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, SDK defaults are used.
+- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to provider constant.
+- `MAX_TOOL_CALLS` (optional): maximum number of tool calls allowed in a single response. Defaults to provider constant.
 
 **Capabilities**
 
@@ -170,41 +170,34 @@ GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 
 ### CodeMie
 
-`CodeMieProvider` is a GenAI provider implementation for EPAM CodeMie.
+`CodeMieProvider` is a `GenAIProvider` implementation that integrates with EPAM CodeMie.
 
-This provider obtains an access token from a configurable OpenID Connect token endpoint and then initializes an OpenAI-compatible client (via `OpenAIProvider`) to call the CodeMie Code Assistant REST API.
+The provider performs an OpenID Connect (OIDC) token request to obtain an OAuth 2.0 access token and then configures an OpenAI-compatible backend to call the CodeMie Code Assistant REST API.
 
 **Authentication modes**
 
-The authentication mode is selected based on the configured username:
+- **Password grant** is used when `GENAI_USERNAME` contains `@` (typical e-mail login).
+- **Client credentials** is used otherwise (service-to-service).
 
-- If the username contains `@`, the password grant is used (typical user e-mail login).
-- Otherwise, the client credentials grant is used (service-to-service).
+**Provider delegation**
 
-**Delegation**
+After retrieving a token, this provider sets:
 
-After a token is retrieved, this provider configures the underlying OpenAI-compatible provider by setting:
-
-- `OPENAI_BASE_URL` to the CodeMie API base URL
+- `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
 - `OPENAI_API_KEY` to the retrieved access token
 
-and then delegates requests based on the configured model prefix:
+Delegation is selected based on the configured `chatModel` prefix:
 
-- `OpenAIProvider` for `gpt-*` models
-- `GeminiProvider` for `gemini-*` models
-- `ClaudeProvider` for `claude-*` models
+- `gpt-*` (or blank/unspecified) models delegate to `OpenAIProvider`
+- `gemini-*` models delegate to `GeminiProvider`
+- `claude-*` models delegate to `ClaudeProvider`
 
 **Configuration keys consumed by `init(Configurator)`**
 
-- `GENAI_USERNAME` (required): user e-mail (password grant) or client id (client_credentials).
-- `GENAI_PASSWORD` (required): password (password grant) or client secret (client_credentials).
+- `GENAI_USERNAME` (required): user e-mail or client id.
+- `GENAI_PASSWORD` (required): password or client secret.
 - `chatModel` (required): model identifier.
 - `AUTH_URL` (optional): token endpoint override.
-
-**Endpoints (defaults)**
-
-- Token endpoint: `https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token` (override with `AUTH_URL`)
-- OpenAI-compatible base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`
 
 **Usage example**
 
@@ -220,11 +213,13 @@ GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
 
 This provider adapts the Anthropic Java SDK to MachAI's provider interface.
 
+**Status**
+
 The current implementation is not available yet: `init(Configurator)` throws `NotImplementedException` and other methods are currently placeholders.
 
 **Configuration**
 
-- Not available yet.
+Not available yet.
 
 **Usage example**
 
@@ -240,11 +235,13 @@ GenAIProvider provider = GenAIProviderManager.getProvider("Claude:claude-...");
 
 This provider is responsible for adapting MachAI's provider-agnostic abstractions (prompts, tool definitions, files/attachments, and usage reporting) to Gemini's specific API.
 
-The current implementation is a placeholder: most operations are not yet implemented and will be completed in a future iteration.
+**Status**
+
+The current implementation is a placeholder. Most operations are not yet implemented and will be completed in a future iteration.
 
 **Configuration**
 
-- Not available yet.
+Not available yet.
 
 **Usage example**
 

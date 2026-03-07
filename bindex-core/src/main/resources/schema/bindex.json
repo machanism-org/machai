@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bindex",
+  "description": "Schema for MachAI Bindex documents.",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "object",
+      "properties": {
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "signature": {
+                "type": "string",
+                "description": "The complete method signature, where all parameter and exception types are fully qualified with their package names (e.g., 'java.util.List&lt;java.lang.String&gt; methodName(java.lang.String param) throws java.io.IOException')."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

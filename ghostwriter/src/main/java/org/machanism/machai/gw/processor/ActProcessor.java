@@ -104,7 +104,7 @@ public class ActProcessor extends AIFileProcessor {
 		loadAct(name, actData);
 		String actPrompt = Objects.toString(super.getDefaultPrompt(),
 				getConfigurator().get("prompt", actData.getProperty("inputs")));
-		String value = String.format(actPrompt, StringUtils.defaultString(prompt));
+		String value = String.format(actPrompt, StringUtils.defaultString(prompt).trim());
 		super.setDefaultPrompt(value);
 		applyActData(actData);
 	}
@@ -193,7 +193,7 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 
 				case "inputs":
-					value = String.format(value, StringUtils.defaultString(properties.getProperty("prompt")));
+					value = String.format(value, StringUtils.defaultString(getDefaultPrompt()));
 					super.setDefaultPrompt(value);
 					break;
 

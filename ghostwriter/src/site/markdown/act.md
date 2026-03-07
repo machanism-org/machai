@@ -6,7 +6,7 @@ canonical: https://machai.machanism.org/ghostwriter/act.html
 @guidance:
 Create the Act page as a Project Information page for the project.
 
-- Analyze the `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java` class.
+- Analyze the `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java` class and `src/main/resources/acts` files as toml act file examples.
 - Write a general description of the Act feature and its main functionality, using clear and simple language suitable for users who may not have prior technical knowledge or experience with the project.
 - Clearly describe how inherited values are processed within the file:
   - Explain the mechanism by which values can be inherited from parent sections, templates, or defaults.
@@ -19,197 +19,230 @@ Create the Act page as a Project Information page for the project.
 
 # Act
 
-Act is a way to run Ghostwriter with a pre-made “recipe” (an **act**) instead of typing or configuring everything every time. An act is stored as a small **TOML** file (`.toml`) that defines:
+Ghostwriter “Act” mode lets you run Ghostwriter using a reusable, named prompt template called an **act**.
+An act is stored in a small **TOML** file (`.toml`) and can:
 
-- what instructions Ghostwriter should follow,
-- what prompt text should be sent,
-- and a few Ghostwriter options (like threading and scan exclusions).
+- set the AI provider instructions (the “system” style rules)
+- provide an input template that wraps your own prompt text
+- optionally set some Ghostwriter options (threads, excludes, recursion)
+- pass additional configuration keys through to Ghostwriter’s configurator
 
-This makes repeated tasks—like “write documentation for this folder”, “summarize changes”, or “review code for style issues”—easy and consistent.
+Acts are intended to make common workflows repeatable (for example: writing release notes, generating unit tests, preparing a commit message, etc.).
 
-## What an act file contains
+## Where act files come from
 
-Act files are TOML documents that can contain the following common keys:
+Ghostwriter can load acts from two places:
 
-- `instructions`
-  - The system/provider instructions to use for the run.
-- `inputs`
-  - A prompt template. The user-provided prompt is inserted into this template using Java’s `String.format(...)`.
-- `gw.threads`
-  - Enables/disables module multi-threading.
-- `gw.excludes`
-  - A comma-separated list of scan exclusions.
-- `gw.nonRecursive`
-  - Disables module recursion.
-- Any other key
-  - Forwarded into Ghostwriter’s configuration (via the configurator), so acts can set normal configuration values too.
+1. **Built-in acts** bundled with the application, located on the classpath under:
+   - `src/main/resources/acts/*.toml` (packaged at runtime as `/acts/*.toml`)
+2. **Your own acts directory** (optional), configured by:
+   - `gw.acts = <directory>`
 
-Acts can be loaded from:
+If an act exists in both places, the processor loads both; the result is effectively “merged” (see inheritance and overrides below).
 
-- **Built-in** acts bundled with the application (classpath resources under `/acts/<name>.toml`), and/or
-- **Custom** acts from a user directory configured as `gw.acts`.
+## Act TOML format
 
-## How Act chooses the prompt you run
+Act files are parsed as TOML. Ghostwriter looks for these keys:
 
-When you run an act, you typically provide:
+- `instructions` — the provider/assistant instructions used for the run
+- `inputs` — a template used to build the final prompt
+- `basedOn` — optional: name of another act to inherit from (for example `basedOn = "task"`)
+- `gw.threads` — `true`/`false` to enable module multi-threading
+- `gw.excludes` — comma-separated scan exclusions
+- `gw.nonRecursive` — `true`/`false` to disable module recursion
+- any other keys — forwarded into the underlying configuration (via the project configurator)
 
-- the act name, and optionally
-- additional prompt text.
+Most bundled acts follow a common pattern:
 
-The `--act` argument supports this shape:
+- `instructions` contains the long, “how to behave” rules.
+- `inputs` contains the “Task” template and usually includes a `%s` placeholder.
 
-- `--act <name> [prompt]`
+## How prompts are built (the `%s` placeholder)
 
-If you include extra text after the act name, that text becomes the **prompt** inserted into the act’s template. If you do not include extra text, Ghostwriter uses its normal default prompt (`getDefaultPrompt()`).
+When you run an act, you normally provide:
 
-Inside the processor:
+- an **act name**, and
+- optional **prompt text** after the first whitespace.
 
-1. It splits the first “word” as the act name.
-2. Everything after the first whitespace is treated as the optional prompt text.
-3. It loads the act’s TOML into a `Properties` map.
-4. It builds the final prompt using `String.format(...)`.
+Ghostwriter then produces a final prompt by inserting your text into a template.
+Internally this uses Java’s `String.format(...)`.
 
-## Inheritance: how values are inherited and overridden
+Example idea:
 
-Act supports two kinds of inheritance/overlay behavior:
+- you run: `--act task Fix the failing build`
+- act file has:
+  - `inputs = '''\n# Task\n\n%s\n'''`
+- the final prompt becomes:
 
-1. **Act-to-act inheritance (`basedOn`)**: start from another act, then override.
-2. **String-template inheritance for repeated keys**: combine parent and child values using `String.format(...)`.
+```text
+# Task
 
-These work together to let you build small specialized acts on top of general ones.
-
-### 1) Act-to-act inheritance using `basedOn`
-
-An act file may include:
-
-- `basedOn = "<otherActName>"`
-
-When present, Ghostwriter loads the base act first, then loads the current act.
-
-Important details from `ActProcessor.loadAct(...)`:
-
-- Ghostwriter tries to load the act from the **custom directory** first, and also tries the **bundled classpath** copy.
-- It reads `basedOn` from the custom TOML if available; otherwise it reads it from the classpath TOML.
-- If `basedOn` is set, it recursively loads the base act and merges settings into the same `Properties` object.
-- After the inheritance chain is processed, `basedOn` is removed so it doesn’t get applied as a normal configuration key.
-
-In plain terms: **the base act provides defaults**, and **the child act can override them**.
-
-### 2) Inheriting/combining string values with `String.format`
-
-When Ghostwriter loads TOML keys into the `Properties` map, it merges string values like this:
-
-- If a key does not exist yet: it is set directly.
-- If a key already exists (inherited from a base act loaded earlier):
-  - the existing value is treated like a *format string*,
-  - and the new value is inserted into it using `String.format(inheritValue, value)`.
-
-This allows the parent act to define a “wrapper” and the child act to provide the inserted content.
-
-Example:
-
-**base.toml**
-
-```toml
-instructions = "You are a helpful assistant. Follow these rules: %s"
-inputs = "Task: %s"
+Fix the failing build
 ```
 
-**child.toml**
+If you do not provide any prompt text after the act name, Ghostwriter falls back to its normal default prompt.
+
+## Inheritance and “inherited values” processing
+
+Acts support inheritance in two related ways:
+
+1. **Act-to-act inheritance via `basedOn`**
+2. **Value inheritance/combination via string templating (`String.format`)**
+
+These two mechanisms are what make it possible to have a “base” act (for example, `task`) and then create specialized acts that extend it.
+
+### 1) `basedOn`: inherit from another act
+
+An act can declare:
 
 ```toml
-basedOn = "base"
-instructions = "Always respond in Markdown."
-inputs = "Summarize the following: %s"
+basedOn = "task"
 ```
 
-Resulting merged values:
+When this is present, Ghostwriter:
 
-- `instructions` becomes:
-  - `"You are a helpful assistant. Follow these rules: Always respond in Markdown."`
-- `inputs` becomes:
-  - `"Task: Summarize the following: %s"`
+1. loads the `task` act first
+2. then loads the current act
+3. the child act’s keys override the parent act’s keys when they are the same key
 
-Then, at run time, the user’s prompt text is inserted into the final `inputs` template.
+This is implemented in `ActProcessor.loadAct(...)` as a recursive load.
 
-### When inherited values are applied (and how overriding works)
+Important details:
 
-- Inheritance is applied **during act loading**, before Ghostwriter starts processing files.
-- The `basedOn` chain is loaded **first**, so base settings are in place before child settings are read.
-- For string keys, if both base and child define the same key, the base string is used as the format/wrapper and the child value is inserted.
-- For non-string values, the loader currently only copies keys whose TOML value is a string.
+- `basedOn` is read from the loaded TOML (custom directory first; built-in second).
+- Once the base act has been loaded, `basedOn` is removed from the final property set.
 
-## What Act actually does during execution
+### 2) Inheriting/combining values using templates (string formatting)
 
-After loading and merging the act values, `ActProcessor.applyActData(...)` applies each property:
+Ghostwriter also supports “inheritance” where one value is used as a template that wraps another value.
+This happens in two phases.
 
-- `instructions` → sets the provider/system instructions used for the run.
-- `inputs` → formats the template with the current `prompt` value (if present) and sets the final default prompt.
-- `gw.threads` → toggles module multi-threading.
-- `gw.excludes` → sets scan exclusions (split on commas).
-- `gw.nonRecursive` → disables recursion.
-- Any other key → stored in the main configurator as a normal configuration value.
+#### Phase A: combining act values across loads
 
-Finally, Ghostwriter processes files according to the project layout. In Act mode it can process:
+While loading an act into an in-memory `Properties` map, Ghostwriter uses this rule for **string** values:
 
-- files under the project directory (excluding module directories and non-matching paths), and
-- the project directory itself, if it matches the scan rules and there is a prompt to run.
+- if a key already exists, the older value is treated as a **format template**
+- the newly loaded value becomes the **argument**
 
-## Key methods (mapped to what you care about)
+In code (simplified):
 
-- `setDefaultPrompt(String act)`
-  - Entry point for Act mode: parses the `--act` value, loads the act, builds the final prompt, and applies act configuration.
-- `loadAct(String name, Properties properties)`
-  - Loads a TOML act (custom and/or bundled), handles `basedOn` inheritance, and accumulates merged values.
-- `setActData(Properties properties, TomlParseResult toml)`
-  - Copies TOML string keys into the properties map and performs the string “inherit/format” merge when a key already exists.
-- `applyActData(Properties properties)`
-  - Applies special Ghostwriter keys (`instructions`, `inputs`, `gw.*`) and forwards all other keys to the configurator.
-
-## Practical, step-by-step usage
-
-### 1) Create an act file
-
-Create a file named `review.toml` in your acts directory (the directory configured as `gw.acts`):
-
-```toml
-instructions = "You are a careful reviewer. Output actionable feedback."
-inputs = "Please review the following and suggest improvements:\n\n%s"
-
-gw.excludes = "target,.git"
+```java
+if (existingValue != null) {
+  value = String.format(existingValue, value);
+}
 ```
 
-### 2) Run Ghostwriter with the act
+What this means in practice:
 
-Run with just the act name (uses Ghostwriter’s default prompt as the inserted text):
+- A base act can define something like:
+  - `instructions = "<base instructions>\n\n%s"`
+- A child act can define:
+  - `instructions = "<extra rules>"`
+- The resulting instructions become:
+  - `<base instructions> <extra rules>`
 
-- `--act review`
+For this to work, the “parent” value must contain a `%s` placeholder.
+If it does not, the child value is effectively ignored when combining (because formatting has nowhere to insert it).
 
-Or include prompt text after the act name (this is what gets inserted into `inputs`):
+#### Phase B: combining act values with existing runtime configuration
 
-- `--act review Review src/main/java for correctness and readability.`
+After loading all act properties, Ghostwriter applies them.
+During this step, for **string** values it may combine the act value with an already-configured value from the configurator:
 
-### 3) Build a specialized act using `basedOn`
+- if there is an existing configurator value for the same key, it is inserted into the act value using `String.format(actValue, existingValue)`
 
-Create a second act that builds on the first:
+This is mainly useful when an act’s value is designed to wrap or incorporate a configurable default.
 
-```toml
-basedOn = "review"
-instructions = "Focus on security risks and input validation."
-```
+### Override rules (when values win)
 
-Now run:
+Putting it together, the effective behavior is:
 
-- `--act securityReview Check the API endpoints for potential injection issues.`
-
-Because `instructions` is inherited via formatting, you can create a base “wrapper” act that enforces global rules, and child acts that supply a focused add-on.
+- `basedOn` loads the base act first
+- then the child act is loaded
+- for each key:
+  - if the key is new, it is added
+  - if the key already exists and is a string, the old value can wrap the new one (if it uses `%s`)
+- finally, when applying:
+  - special keys are handled directly (`instructions`, `inputs`, and `gw.*` keys)
+  - other keys are written into the configurator
 
 ## How Act fits into Ghostwriter
 
-Ghostwriter can operate in different processing modes. Act mode is the “preset-driven” mode:
+Act mode is implemented by `ActProcessor`.
+At a high level it:
 
-- It packages instructions, prompt templates, and runtime configuration into reusable TOML files.
-- It supports building a library of acts (built-in and user-defined).
-- It supports inheritance so teams can standardize baseline instructions and customize for specific tasks.
+1. parses the `--act` argument into an act name and optional prompt
+2. loads and merges act data (including `basedOn` inheritance)
+3. builds the final prompt (using `inputs` and your provided text)
+4. applies act settings (instructions, scanning options, and other configuration)
+5. runs Ghostwriter processing using those defaults
 
-The overall purpose is to make Ghostwriter runs **repeatable**, **shareable**, and **easy to use**—even if you don’t know the internal configuration details.
+Key methods (from `ActProcessor`):
+
+- `setDefaultPrompt(String act)` — entry point for “use this act”; parses the act argument, loads the act, formats the prompt, and applies configuration
+- `loadAct(String name, Properties properties)` — loads an act and its `basedOn` chain
+- `tryLoadActFromClasspath(...)` / `tryLoadActFromDirectory(...)` — load `.toml` act definitions from built-in resources or a configured external directory
+- `setActData(Properties, TomlParseResult)` — merges TOML string values into the in-memory properties (including template-style inheritance)
+- `applyActData(Properties)` — applies properties to Ghostwriter runtime settings and configurator
+
+## Practical step-by-step: run a built-in act
+
+### 1) Pick an act
+
+Built-in examples are in `src/main/resources/acts` (for example: `task`, `unit-tests`, `release-notes`, `sonar-fix`).
+
+### 2) Run Ghostwriter with the act name and your prompt text
+
+Conceptually (exact CLI flags may vary by your environment):
+
+```text
+ghostwriter --act task "Describe what you want Ghostwriter to do"
+```
+
+### 3) What happens
+
+- Ghostwriter loads `task.toml`
+- it takes your provided text and inserts it into `inputs`
+- it sets `instructions`
+- it runs the processor over the project using the act’s scanning configuration
+
+## Practical example: make your own act that extends another
+
+Create a new file like `my-acts/my-review.toml`:
+
+```toml
+basedOn = "task"
+
+# Base act provides general behavior; we add extra, specific behavior.
+# This works best if the base instructions include a "%s" placeholder.
+instructions = '''
+When reviewing changes:
+- focus on correctness and readability
+- suggest minimal, safe improvements
+'''
+
+# Wrap the user prompt in a standard structure.
+inputs = '''
+# Review Request
+
+%s
+'''
+
+[gw]
+excludes = "target,.git"
+threads = "true"
+```
+
+Then point Ghostwriter to your acts directory (for example via configuration):
+
+```text
+gw.acts = my-acts
+```
+
+And run:
+
+```text
+ghostwriter --act my-review "Review the new Act documentation page"
+```
+
+If `basedOn` is used, Ghostwriter loads `task` first and then layers `my-review` on top, applying the inheritance rules described above.

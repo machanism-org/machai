@@ -55,7 +55,7 @@ This provider adapts the Anthropic Java SDK to MachAI's provider interface.
 
 Status
 
-The current implementation is a placeholder: `init(Configurator)` throws `NotImplementedException`, and most operations are stubs.
+The current implementation is a placeholder: `init(Configurator)` throws `NotImplementedException`, and most operations return `null` or are no-ops.
 
 Thread-safety
 
@@ -63,46 +63,39 @@ Instances are not thread-safe.
 
 ### CodeMie
 
-GenAI provider implementation for EPAM CodeMie.
+`GenAIProvider` implementation that integrates with EPAM CodeMie.
 
-This provider obtains an access token from a configurable OpenID Connect token endpoint and then initializes an OpenAI-compatible client (via `OpenAIProvider`) to call the CodeMie Code Assistant REST API.
+The provider performs an OpenID Connect (OIDC) token request to obtain an OAuth 2.0 access token and then configures an OpenAI-compatible backend to call the CodeMie Code Assistant REST API.
 
 Authentication modes
 
-The authentication mode is selected based on the configured username:
+- Password grant is used when `GENAI_USERNAME` contains `"@"` (typical e-mail login).
+- Client credentials is used otherwise (service-to-service).
 
-- If the username contains `"@"`, the password grant is used (typical user e-mail login).
-- Otherwise, the client credentials grant is used (service-to-service).
+Provider delegation
 
-Delegation
-
-After a token is retrieved, this provider configures the underlying OpenAI-compatible provider by setting:
+After retrieving a token, this provider sets the following configuration keys before delegating to a downstream provider:
 
 - `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
 - `OPENAI_API_KEY` to the retrieved access token
 
-It then delegates requests based on the configured model prefix:
+Delegation is selected based on the configured `chatModel` prefix:
 
-- `gpt-*` (or blank model) → `OpenAIProvider`
-- `gemini-*` → `GeminiProvider`
-- `claude-*` → `ClaudeProvider`
+- `gpt-*` (or blank/unspecified) models delegate to OpenAI.
+- `gemini-*` models delegate to Gemini.
+- `claude-*` models delegate to Claude.
 
 Configuration
 
 Required configuration keys:
 
-- `GENAI_USERNAME` – user e-mail (password grant) or client id (client credentials grant).
-- `GENAI_PASSWORD` – password (password grant) or client secret (client credentials grant).
-- `chatModel` – model identifier (for example `gpt-4o-mini` or `claude-3-5-sonnet`).
+- `GENAI_USERNAME` – user e-mail or client id.
+- `GENAI_PASSWORD` – password or client secret.
+- `chatModel` – model identifier (for example `gpt-4o-mini`, `gemini-1.5-pro`, `claude-3-5-sonnet`).
 
 Optional configuration keys:
 
 - `AUTH_URL` – token endpoint override.
-
-Built-in endpoints
-
-- Token URL (default): `https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token`
-- Base URL: `https://codemie.lab.epam.com/code-assistant-api/v1`
 
 ### Gemini
 
@@ -112,7 +105,7 @@ This provider adapts MachAI's provider-agnostic abstractions (prompts, tool defi
 
 Status
 
-The current implementation is a placeholder. Most operations are not yet implemented and will be completed in a future iteration. `init(Configurator)`, `perform()`, and `embedding(...)` currently throw `NotImplementedException`.
+The current implementation is a placeholder. `init(Configurator)`, `perform()`, and `embedding(...)` throw `NotImplementedException`; most other operations are TODO/no-ops.
 
 Thread-safety
 
@@ -153,7 +146,7 @@ Configuration variables consumed by `init(Configurator)`:
 - `chatModel`: required model identifier passed to the OpenAI Responses API (for example, `gpt-4.1` or `gpt-4o`).
 - `OPENAI_API_KEY`: required API key used to authenticate with the OpenAI API.
 - `OPENAI_BASE_URL`: optional base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
-- `GENAI_TIMEOUT`: optional request timeout (in seconds). If missing or `0`, the SDK default timeouts are used.
+- `GENAI_TIMEOUT`: optional request timeout (in seconds). If missing, `0`, or negative, the SDK default timeouts are used.
 - `MAX_OUTPUT_TOKENS`: optional maximum number of output tokens. Defaults to `OpenAIProvider.MAX_OUTPUT_TOKENS`.
 - `MAX_TOOL_CALLS`: optional maximum number of tool calls allowed in a single response. Defaults to `OpenAIProvider.MAX_TOOL_CALLS`.
 

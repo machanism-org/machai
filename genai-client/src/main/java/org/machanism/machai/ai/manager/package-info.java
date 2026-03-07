@@ -30,16 +30,16 @@
  * Manager API and service-provider interface (SPI) for resolving, configuring, and operating generative-AI provider
  * integrations.
  *
- * <p>This package defines the core abstraction ({@link org.machanism.machai.ai.manager.GenAIProvider}) used to interact
- * with different AI backends through a uniform contract. It also provides a manager for resolving providers from a
- * model identifier and aggregating usage.
+ * <p>This package defines the primary abstraction, {@link org.machanism.machai.ai.manager.GenAIProvider}, used to
+ * interact with different AI backends through a uniform contract. It also provides a manager for resolving provider
+ * implementations from a model identifier and aggregating token usage.
  *
  * <h2>Key types</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.ai.manager.GenAIProvider} – provider contract exposing a common interaction surface
- *   (prompts/instructions, file inputs, embeddings, tool registration and execution).</li>
+ *   (instructions/prompts, file inputs, embeddings, tool registration and execution).</li>
  *   <li>{@link org.machanism.machai.ai.manager.GenAIProviderManager} – resolves and instantiates providers based on a
- *   model identifier and aggregates {@link org.machanism.machai.ai.manager.Usage} metrics.</li>
+ *   model identifier and aggregates {@link org.machanism.machai.ai.manager.Usage}.</li>
  *   <li>{@link org.machanism.machai.ai.manager.GenAIAdapter} – forwards calls to an underlying provider to enable
  *   wrapper implementations (logging, metrics, retries, request shaping).</li>
  *   <li>{@link org.machanism.machai.ai.manager.Usage} – value object capturing token usage for a single provider

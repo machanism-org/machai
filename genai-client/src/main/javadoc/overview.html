@@ -36,61 +36,60 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   generation, and intelligent project assembly within the Machanism ecosystem.
 </p>
 
-<h2>Purpose</h2>
-
-<p>
-  GenAI Client provides a provider-neutral API for selecting a generative-AI backend at runtime and interacting with it
-  through a stable contract. It standardizes request construction (instructions, prompts, optional file inputs and
-  function tools), execution, and token-usage reporting.
-</p>
+<h2>What this module provides</h2>
+<ul>
+  <li>
+    A provider-neutral contract for building and executing requests against LLM/GenAI backends (instructions, prompts,
+    optional files, and host-side function tools).
+  </li>
+  <li>
+    Provider resolution from <code>Provider:Model</code> identifiers (for example <code>OpenAI:gpt-4o-mini</code>), with support for
+    resolving either short provider names or fully-qualified provider classes.
+  </li>
+  <li>
+    A small set of built-in providers (OpenAI, Gemini, CodeMie, Claude, and a no-op provider) plus token usage
+    collection via a common <code>Usage</code> value object.
+  </li>
+  <li>
+    A curated tool system that can expose controlled host capabilities (file access, HTTP/REST calls, command
+    execution) to model tool-calls.
+  </li>
+</ul>
 
 <h2>Architecture at a glance</h2>
-
 <p>
   The diagram below summarizes the main types and their relationships.
 </p>
-
 <p>
   <img src="../images/class-diagram.png" alt="Class diagram" />
 </p>
 
-<h2>Packages</h2>
+<h2>Package overview</h2>
 
 <ul>
   <li>
     <p>
-      <strong><code>org.machanism.machai.ai</code></strong> – Public, provider-neutral API for running generative-AI operations.
+      <strong><code>org.machanism.machai.ai</code></strong> – root namespace for MachAI's generative-AI integration layer.
     </p>
     <ul>
-      <li>
-        Defines the top-level workflow: resolve a provider, build a request (instructions/prompts/files/tools), execute,
-        then read the response and usage.
-      </li>
-      <li>
-        Key subpackages:
-        <ul>
-          <li><code>org.machanism.machai.ai.manager</code> – provider SPI, provider/model resolution, and usage aggregation.</li>
-          <li><code>org.machanism.machai.ai.provider.*</code> – concrete provider implementations (OpenAI, Gemini, CodeMie, None, Claude).</li>
-          <li><code>org.machanism.machai.ai.tools</code> – host-side tool discovery and built-in tool sets.</li>
-        </ul>
-      </li>
+      <li>Provides a stable, provider-agnostic surface for invoking LLM/GenAI backends.</li>
+      <li>Organizes built-in providers and host-side tools under well-defined subpackages.</li>
     </ul>
   </li>
 
   <li>
     <p>
-      <strong><code>org.machanism.machai.ai.manager</code></strong> – Manager API and SPI for resolving, configuring, and operating
+      <strong><code>org.machanism.machai.ai.manager</code></strong> – manager API and SPI for selecting, configuring and operating
       provider integrations.
     </p>
     <ul>
       <li>
-        Central abstractions:
-        <ul>
-          <li><code>GenAIProvider</code> – provider contract for prompting, tool registration, execution, and lifecycle.</li>
-          <li><code>GenAIAdapter</code> – base decorator for cross-cutting behavior around a provider.</li>
-          <li><code>GenAIProviderManager</code> – resolves <code>Provider:Model</code> identifiers into initialized providers.</li>
-          <li><code>Usage</code> – per-invocation token/usage metrics suitable for aggregation and reporting.</li>
-        </ul>
+        Defines the core provider contract (<code>GenAIProvider</code>), an adapter base class (<code>GenAIAdapter</code>), provider
+        resolution (<code>GenAIProviderManager</code>), and the per-invocation usage model (<code>Usage</code>).
+      </li>
+      <li>
+        Provider resolution commonly uses the <code>Provider:Model</code> form; if the provider prefix is omitted, a default
+        provider may be used.
       </li>
     </ul>
   </li>
@@ -100,8 +99,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       <strong><code>org.machanism.machai.ai.provider.openai</code></strong> – OpenAI-backed implementation using the OpenAI Java SDK.
     </p>
     <ul>
-      <li>Adapts the provider contract to OpenAI requests, including tools and usage capture.</li>
-      <li><strong>Thread-safety:</strong> provider instances keep mutable per-request state and are not thread-safe.</li>
+      <li>Translates prompts, tools and usage reporting to OpenAI request/response types.</li>
+      <li>Supports embeddings via the provider contract.</li>
     </ul>
   </li>
 
@@ -110,8 +109,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       <strong><code>org.machanism.machai.ai.provider.gemini</code></strong> – Google Gemini provider adapter.
     </p>
     <ul>
-      <li>Translates prompts, tools, and usage reporting into Gemini-specific request/response handling.</li>
-      <li>The current implementation is a scaffold; some operations may be unimplemented.</li>
+      <li>Adapts the same provider contract to Gemini models.</li>
+      <li>Current implementation is a scaffold; some operations are unimplemented.</li>
     </ul>
   </li>
 
@@ -120,29 +119,29 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       <strong><code>org.machanism.machai.ai.provider.codemie</code></strong> – EPAM CodeMie integration.
     </p>
     <ul>
-      <li>Obtains an OAuth 2.0 access token from an OIDC token endpoint and delegates to an OpenAI-compatible backend.</li>
-      <li>Routes requests by model prefix (for example <code>gpt-*</code>, <code>gemini-*</code>, <code>claude-*</code>).</li>
+      <li>Authenticates via an OIDC token endpoint, then delegates to an OpenAI-compatible backend.</li>
+      <li>Routes to OpenAI/Gemini/Claude implementations based on model prefix.</li>
     </ul>
   </li>
 
   <li>
     <p>
-      <strong><code>org.machanism.machai.ai.provider.none</code></strong> – No-op provider for environments where external model calls are
+      <strong><code>org.machanism.machai.ai.provider.none</code></strong> – no-op provider for environments where external model calls are
       disabled.
     </p>
     <ul>
-      <li>Accumulates inputs and can write instructions and prompts to configured log files for auditing.</li>
-      <li>Backend-only capabilities (for example embeddings) throw <code>UnsupportedOperationException</code>.</li>
+      <li>Accumulates inputs and can persist prompts/instructions to log files for auditing.</li>
+      <li>Model-dependent features (for example embeddings) are unsupported.</li>
     </ul>
   </li>
 
   <li>
     <p>
-      <strong><code>org.machanism.machai.ai.tools</code></strong> – Host-integrated function tools.
+      <strong><code>org.machanism.machai.ai.tools</code></strong> – host-integrated function tools.
     </p>
     <ul>
       <li>
-        Discovers tool installers (typically via <code>ServiceLoader</code>) and applies them to a provider instance.
+        Discovers tool installers (typically via <code>ServiceLoader</code>) and applies them to provider instances.
       </li>
       <li>
         Provides controlled wrappers for common host capabilities such as file access, HTTP/REST calls, and command
@@ -153,6 +152,10 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </ul>
 
 <h2>Typical workflow</h2>
+<p>
+  The example below shows the common flow: resolve a provider, optionally expose tools, set instructions/prompts,
+  execute, then read usage.
+</p>
 
 <pre>{@code
 Configurator conf = ...;
@@ -179,8 +182,12 @@ Usage usage = provider.usage();
     synchronize externally).
   </li>
   <li>
-    Provider/model selection uses <code>Provider:Model</code> identifiers (for example <code>OpenAI:gpt-4o-mini</code>). If the provider
-    prefix is omitted, a default provider may be used.
+    Tool execution happens in the host process. Apply tools selectively and configure security checks (for example
+    allowed commands/paths) according to your deployment environment.
+  </li>
+  <li>
+    Usage aggregation is supported via <code>GenAIProviderManager</code>; applications can add each invocation's
+    <code>Usage</code> and log aggregated totals.
   </li>
 </ul>
 

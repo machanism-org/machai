@@ -39,10 +39,13 @@
  * file attachments, request execution, and usage reporting) into Gemini-specific request and response handling.
  * </p>
  *
- * <h2>Lifecycle</h2>
+ * <h2>Implementation status</h2>
  * <p>
- * The typical lifecycle is:
+ * The current implementation is a scaffold: many operations are no-ops and several methods throw
+ * {@link org.apache.commons.lang.NotImplementedException} until the Gemini adapter is fully implemented.
  * </p>
+ *
+ * <h2>Typical lifecycle</h2>
  * <ol>
  * <li>Initialize the provider via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#init}.</li>
  * <li>Optionally set system instructions via
@@ -53,7 +56,7 @@
  * <li>Read usage information via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#usage}.</li>
  * </ol>
  *
- * <h2>Usage</h2>
+ * <h2>Example</h2>
  * <pre>
  * Configurator config = ...;
  * GeminiProvider provider = new GeminiProvider();
@@ -62,10 +65,5 @@
  * provider.prompt("Summarize this document.");
  * String response = provider.perform();
  * </pre>
- *
- * <p>
- * Note: at present, this integration is a placeholder; several operations are implemented as no-ops and others may
- * throw {@link org.apache.commons.lang.NotImplementedException} until the adapter is fully implemented.
- * </p>
  */
 package org.machanism.machai.ai.provider.gemini;

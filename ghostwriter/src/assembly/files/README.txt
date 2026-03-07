@@ -1,248 +1,187 @@
 Ghostwriter CLI
 
-================
 Application Overview
-================
+- Ghostwriter is a guided file processing engine for generating and maintaining project-wide documentation and code improvements with AI.
+- It scans a repository (source, tests, docs, and other assets), extracts embedded @guidance: directives, and turns them into actionable prompts for a configured GenAI provider.
+- Key features:
+  - Scan directories or match patterns using glob: / regex:
+  - Per-file-type guidance extraction via reviewer registry (keyed by file extension)
+  - Adds project layout/context into provider prompts
+  - Optional system instructions and default guidance (text, URL, or file:)
+  - Excludes via exact paths or glob:/regex: patterns
+  - Optional multi-threaded module processing
+  - Optional logging of provider request inputs per processed file
+  - Act mode for executing predefined prompts (--act)
+- Supported GenAI providers:
+  - CodeMie
+  - OpenAI-compatible services (including OpenAI)
 
-Ghostwriter is a guided, project-wide file processing engine for generating and maintaining documentation and code improvements with AI.
-
-It scans a repository (source code, tests, documentation, and other relevant assets), extracts embedded `@guidance:` directives, and turns them into actionable prompts executed by a configured GenAI provider.
-
-Key features
-- Repository-aware scanning (directory paths, `glob:` patterns, or `regex:` matchers)
-- File-type reviewers that extract embedded `@guidance:` directives
-- Project-structure context injected into prompts
-- Optional system instructions and default guidance from plain text, URLs, or `file:` references
-- Excludes via exact paths or `glob:` / `regex:` patterns
-- Optional multi-threaded module processing
-- Optional logging of provider inputs per processed file
-- “Act mode” (`--act`) for executing predefined prompts
-
-Typical use cases
-- Generate or refresh project documentation (README files, site pages, etc.)
-- Apply consistent repo-wide improvements driven by file-local guidance
-- Run scripted or CI/CD-friendly review/update passes
-
-Supported GenAI providers
-- CodeMie
-- OpenAI-compatible services (including OpenAI)
-
-
-========================
 Installation Instructions
-========================
-
 Prerequisites
 - Java 8
-- A configured GenAI provider/model (required): `gw.model` or `-m/--model` (example: `OpenAI:gpt-5.1`)
-- Optional: `gw.properties` to persist configuration
+- A configured GenAI provider/model (gw.model) or a CLI override (-m/--model)
+- (Optional) A gw.properties file to persist configuration
 
-Download / Install
-- Obtain the Ghostwriter distribution (for example: `gw.jar` plus `gw.properties`).
-- Place `gw.properties` alongside `gw.jar`, or override its location with `-Dgw.config=...`.
+Install / Build
+- Download the packaged CLI (see project resources) or build from source using Maven.
+- Provide a gw.properties file alongside the executable (or point to it with -Dgw.config=...).
 
-Example `gw.properties`
-- See: `src/assembly/files/gw.properties`
-
-
-==========
 How to Run
-==========
-
-Entry point
-- `org.machanism.machai.gw.processor.Ghostwriter`
-
 Basic usage
+- Syntax:
+  java -jar gw.jar <scanDir> [options]
 
-    java -jar gw.jar <scanDir> [options]
+Scan targets
+- <scanDir> may be:
+  - A directory path (relative to the current project directory), OR
+  - A glob: pattern (e.g., "glob:**/*.java"), OR
+  - A regex: pattern (e.g., "regex:^.*/[^/]+\\.java$")
 
-Scan target (`<scanDir>`)
-- May be:
-  - A directory path (relative to the current project directory), or
-  - A Java PathMatcher expression:
-    - `glob:` (example: `"glob:**/*.md"`)
-    - `regex:` (example: `"regex:^.*/[^/]+\\.java$"`)
-- If an absolute path is provided, it must be located within the root project directory.
+Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
+- gw.config
+  - Description: System property that overrides the Ghostwriter configuration file path.
+  - Default: gw.properties (resolved under gw.home)
+  - Usage: -Dgw.config=path\to\gw.properties
 
+- gw.home
+  - Description: System property indicating the Ghostwriter home directory; used to resolve gw.properties and relative config file references.
+  - Default: gw.rootDir if provided; otherwise current working directory (user.dir)
+  - Usage: -Dgw.home=path\to\home
 
------------------------------------------
-Configuration properties (Ghostwriter.java)
------------------------------------------
-
-Where settings can come from
-- Java system properties (`-D...`) for JVM-level settings
-- `gw.properties` for persistent configuration
-- CLI options (override `gw.properties` where applicable)
-
-Properties
-- `gw.config` (system property)
-  - Description: Override the configuration file path/name used by the CLI.
-  - Default: `gw.properties` (in the resolved home directory)
-  - Usage: `-Dgw.config=path\\to\\gw.properties`
-
-- `gw.home` (system property)
-  - Description: Sets the Ghostwriter home directory used as the execution base for relative configuration files.
-  - Default: If not set, uses `--root` if provided; otherwise the current working directory.
-  - Usage: `-Dgw.home=path\\to\\home`
-
-- `gw.rootDir`
+- gw.rootDir
   - Description: Root directory for file processing.
-  - Default: current working directory (if not set and not provided via `--root`)
-  - Usage: `gw.rootDir=...` in `gw.properties` or `-r/--root`
+  - Default: current working directory (user.dir)
+  - Usage: set in gw.properties or via -r/--root
 
-- `gw.model`
-  - Description: GenAI provider and model in the form `provider:model`.
-  - Default: none (required; Ghostwriter fails fast if missing)
-  - Usage: `gw.model=OpenAI:gpt-5.1` or `-m/--model OpenAI:gpt-5.1`
+- gw.model
+  - Description: GenAI provider/model in provider:model form.
+  - Default: none (required)
+  - Usage: set in gw.properties or via -m/--model (e.g., OpenAI:gpt-5.1)
 
-- `gw.instructions`
-  - Description: Optional system instructions. Value may be plain text, URL(s), or `file:` references.
+- gw.instructions
+  - Description: Optional system instructions (plain text, URL, or file: reference). Parsed line-by-line:
+    - Blank lines preserved
+    - http:// or https:// lines are fetched from the URL
+    - file: lines load content from a file (relative paths resolve from the configured root directory)
+    - Other lines used as-is
   - Default: not set
-  - Usage: `gw.instructions=...` or `-i/--instructions`
+  - Usage: set in gw.properties or via -i/--instructions
 
-- `gw.guidance`
-  - Description: Default guidance applied when a file has no embedded `@guidance:` directives.
+- gw.guidance
+  - Description: Default guidance applied when a file has no embedded @guidance: directives; may also trigger a folder-level step depending on processor behavior. Same parsing rules as gw.instructions.
   - Default: not set
-  - Usage: `gw.guidance=...` or `-g/--guidance`
+  - Usage: set in gw.properties or via -g/--guidance
 
-- `gw.excludes`
-  - Description: Comma-separated list of directories/files/patterns to exclude.
+- gw.excludes
+  - Description: Comma-separated list of directories/files to exclude from processing.
   - Default: not set
-  - Usage: `gw.excludes=target,.git` or `-e/--excludes target,.git`
+  - Usage: set in gw.properties or via -e/--excludes
 
-- `gw.threads`
-  - Description: Enable multi-threaded module processing.
-  - Default: `false`
-  - Usage: `gw.threads=true` or `-t/--threads[=<true|false>]`
+- gw.threads
+  - Description: Enable/disable multi-threaded module processing.
+  - Default: false
+  - Usage: set in gw.properties or via -t/--threads[=<true|false>] (if provided with no value, enables)
 
-- `gw.logInputs`
-  - Description: Log LLM request inputs to dedicated log files.
-  - Default: `false`
-  - Usage: `gw.logInputs=true` or `-l/--logInputs`
+- gw.logInputs
+  - Description: Enable logging of provider request inputs to dedicated log files.
+  - Default: false
+  - Usage: set in gw.properties or via -l/--logInputs
 
-- `gw.scanDir`
-  - Description: Default scan directory/pattern when no `<scanDir>` argument is provided.
-  - Default: not set (falls back to current working directory)
-  - Usage: `gw.scanDir=src`
+- gw.scanDir
+  - Description: Default scan target if no <scanDir> arguments are provided.
+  - Default: not set (if also missing, defaults to current working directory)
+  - Usage: set in gw.properties
 
-
---------------------------------
-How to provide instructions/guidance
---------------------------------
-
-`-i/--instructions` and `-g/--guidance` accept:
-- Plain text (as the option value)
-- A URL (lines beginning with `http://` or `https://`)
-- A `file:` reference (lines beginning with `file:`)
-
-If used without a value, Ghostwriter reads multi-line input from stdin using a trailing backslash (`\\`) to continue to the next line; input ends when a line does not end with `\\`.
-
-
---------------------
 Command-line options
---------------------
+- -h, --help
+  - Show help message and exit.
 
-- `-h, --help`
-  - Show this help message and exit.
+- -r, --root <path>
+  - Root directory for file processing.
+  - Default: gw.rootDir or current working directory.
 
-- `-r, --root <path>`
-  - Specify the path to the root directory for file processing.
-  - Default: `gw.rootDir` or current working directory.
+- -t, --threads[=<true|false>]
+  - Enable multi-threaded processing (default: false).
+  - If provided with no value, threading is enabled.
 
-- `-t, --threads[=<true|false>]`
-  - Enable multi-threaded processing to improve performance.
-  - Default: `false` (`gw.threads`). If provided with no value, enables it.
+- -m, --model <provider:model>
+  - Set GenAI provider and model (e.g., OpenAI:gpt-5.1).
 
-- `-m, --model <provider:model>`
-  - Set the GenAI provider and model (example: `OpenAI:gpt-5.1`).
-  - Default: `gw.model` (required if not set elsewhere).
+- -i, --instructions[=<text|url|file:...>]
+  - Provide system instructions.
+  - If used without a value, Ghostwriter prompts for multi-line input from stdin.
 
-- `-i, --instructions[=<text|url|file:...>]`
-  - Specify system instructions as plain text, by URL, or by file path.
-  - If used without a value, you will be prompted to enter instruction text via stdin.
+- -g, --guidance[=<text|url|file:...>]
+  - Provide default guidance.
+  - If used without a value, Ghostwriter prompts for multi-line input from stdin.
 
-- `-g, --guidance[=<text|url|file:...>]`
-  - Specify default guidance as plain text, by URL, or by file path.
-  - If used without a value, you will be prompted to enter the guidance text via stdin.
+- -e, --excludes <csv>
+  - Comma-separated exclusions.
 
-- `-e, --excludes <csv>`
-  - Specify a comma-separated list of directories to exclude from processing.
-
-- `-l, --logInputs`
+- -l, --logInputs
   - Log LLM request inputs to dedicated log files.
 
-- `-as, --acts <path>`
-  - Specify the path to the directory containing predefined act prompt files.
+- -as, --acts <path>
+  - Directory containing predefined act prompt files.
 
-- `-a, --act[=<...>]`
-  - Run Ghostwriter in Act mode: an interactive mode for executing predefined prompts.
+- -a, --act[=<name and prompt>]
+  - Run in Act mode (interactive execution of predefined prompts).
   - If used without a value, Ghostwriter reads the action from stdin.
 
+Setting environment variables and Java system properties
+- Java system properties:
+  - Use -Dkey=value
+  - Examples:
+    - -Dgw.config=gw.properties
+    - -Dgw.home=.
+- Provider credentials are typically provided via environment variables referenced by the provider implementation.
+  - See src/assembly/files/gw.properties for example variables for CodeMie and OpenAI-compatible providers.
 
---------
 Examples
---------
-
 Windows (cmd.exe)
+- Basic scan:
+  java -jar gw.jar src -m OpenAI:gpt-5.1
 
-- Scan a directory:
+- Glob scan:
+  java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1
 
-    java -jar gw.jar src -m OpenAI:gpt-5.1
+- Default guidance from stdin (end input when a line does not end with a trailing backslash):
+  java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -g
 
-- Scan with a glob pattern, provide guidance via stdin, and log inputs:
-
-    java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -g -l
-
-- Provide instructions from a file and exclude folders:
-
-    java -jar gw.jar src -m OpenAI:gpt-5.1 -i file:instructions.txt -e target,.git
-
-- Use a specific properties file:
-
-    java -Dgw.config=src\\assembly\\files\\gw.properties -jar gw.jar src
+- Use configuration file override:
+  java -Dgw.config=src\assembly\files\gw.properties -jar gw.jar src
 
 Unix (sh)
+- Basic scan:
+  java -jar gw.jar src -m OpenAI:gpt-5.1
 
-- Scan a directory:
+- Glob scan:
+  java -jar gw.jar 'glob:**/*.java' -m OpenAI:gpt-5.1
 
-    java -jar gw.jar src -m OpenAI:gpt-5.1
+- Default guidance from stdin:
+  java -jar gw.jar 'glob:**/*.md' -m OpenAI:gpt-5.1 -g
 
-- Scan with a glob pattern, provide guidance via stdin, and log inputs:
+- Use configuration file override:
+  java -Dgw.config=src/assembly/files/gw.properties -jar gw.jar src
 
-    java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -g -l
-
-- Provide instructions from a file and exclude folders:
-
-    java -jar gw.jar src -m OpenAI:gpt-5.1 -i file:instructions.txt -e target,.git
-
-
-=========================
 Troubleshooting & Support
-=========================
-
-Common issues
-- "No GenAI provider/model configured":
-  - Set `gw.model` in `gw.properties` or pass `-m/--model` (example: `OpenAI:gpt-5.1`).
+- Missing model/provider:
+  - Error: No GenAI provider/model configured
+  - Fix: set gw.model in gw.properties or pass -m/--model.
 
 - Authentication errors:
-  - Ensure required provider environment variables are set (see `src/assembly/files/gw.properties`):
-    - CodeMie: `GENAI_USERNAME` / `GENAI_PASSWORD`
-    - OpenAI-compatible: `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL`)
+  - Ensure provider credentials are set (e.g., CodeMie username/password or OPENAI_API_KEY).
+  - Confirm any base URL configuration for OpenAI-compatible services.
 
-- Missing or unexpected scan results:
-  - Verify `<scanDir>` (directory vs `glob:`/`regex:` matcher).
-  - Check excludes (`gw.excludes` / `-e`).
-  - Confirm `--root` points at the intended repository root.
+- Scan finds no files:
+  - Verify <scanDir> is correct and rooted within the project root.
+  - For patterns, ensure you include the glob: or regex: prefix.
 
-Logs and debugging
-- Standard logs are emitted via SLF4J.
-- If `-l/--logInputs` (or `gw.logInputs=true`) is enabled, Ghostwriter writes provider input payloads to dedicated log files for each processed file.
+- Enable more diagnostics / locate logs:
+  - Use -l/--logInputs to write LLM request inputs to dedicated log files.
+  - Standard logs are emitted via the configured SLF4J backend.
 
-
-=======================
 Contact & Documentation
-=======================
-
 - Project site: https://machai.machanism.org/ghostwriter/index.html
 - GitHub repository (Machai mono-repo): https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter

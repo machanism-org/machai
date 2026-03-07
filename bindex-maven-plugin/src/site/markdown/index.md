@@ -27,9 +27,9 @@ Page Structure:
 
 # Introduction
 
-The **Bindex Maven Plugin** generates and (optionally) registers **bindex metadata** for Maven projects. It helps make build outputs easier to discover and integrate by emitting structured, machine-readable metadata derived from the Maven project model.
+The **Bindex Maven Plugin** enables automated generation and (optionally) registration of **bindex metadata** for Maven projects.
 
-Downstream tooling (including components in the Machanism ecosystem) can use this metadata to improve library discovery, enrich dependency analysis, and enable GenAI-assisted semantic search and automated assembly workflows.
+It facilitates library discovery, integration, and assembly by leveraging structured metadata and GenAI-powered semantic search within the Machanism ecosystem.
 
 # Overview
 

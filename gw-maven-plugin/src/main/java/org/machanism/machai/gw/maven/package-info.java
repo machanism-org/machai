@@ -1,9 +1,9 @@
 /**
- * Maven plugin goals (Mojos) and supporting infrastructure for running the MachAI Ghostwriter (GW)
- * guided document-processing workflow as part of a Maven build.
+ * Maven goals (Mojos) for running the MachAI Ghostwriter (GW) guided document-processing workflow as part of a Maven
+ * build.
  *
  * <p>
- * The goals in this package configure and invoke {@link org.machanism.machai.gw.processor.GuidanceProcessor} (or a
+ * Goals in this package configure and invoke {@link org.machanism.machai.gw.processor.GuidanceProcessor} (or a
  * specialized processor such as {@link org.machanism.machai.gw.processor.ActProcessor}) to scan a documentation source
  * tree (commonly {@code src/site}) for files containing embedded {@code @guidance:} blocks. When guidance blocks are
  * found, the processor delegates content transformation to the configured GenAI provider.

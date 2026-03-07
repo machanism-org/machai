@@ -86,7 +86,7 @@ mvn clean verify
 
 1. Add `bindex-core` as a dependency to the tool/plugin or application that needs to produce or consume bindex metadata.
 2. Produce bindex metadata during your build (typically via a Maven plugin or other build integration).
-3. Publish produced metadata so it can be discovered and used by downstream tooling.
+3. Publish produced metadata so it can be be discovered and used by downstream tooling.
 4. Load, validate, and merge metadata from multiple modules/artifacts.
 5. Apply selection and assembly logic using the resulting metadata.
 

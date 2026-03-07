@@ -35,55 +35,88 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   to locate well-known folders reliably across different projects.
 </p>
 
-<h2>Scope and concepts</h2>
+<h2>What the library provides</h2>
 
 <p>
-  A <em>project layout</em> describes how a repository is organized on disk: where production sources and tests live,
-  where resources and documentation are located, and how to discover nested modules (sub-projects) when a build system
-  defines them.
+  The library models a repository as a <em>project root directory</em> combined with a set of conventional,
+  root-relative folders such as production sources, test sources, resources, documentation roots, and optional nested
+  modules. Layout implementations can infer these folders by reading build metadata (for example Maven
+  <code>pom.xml</code>, Gradle settings/build files, JavaScript workspace configuration, or Python
+  <code>pyproject.toml</code>) and may use filesystem scanning as a fallback.
 </p>
 
 <p>
-  This library models those conventions as root-relative paths associated with a project root directory. Consumers can
-  resolve the returned strings against the project root to access the filesystem.
+  Consumers typically detect the appropriate layout for a given directory and then resolve the returned root-relative
+  paths against that directory when performing filesystem operations.
 </p>
 
-<h2>Packages and responsibilities</h2>
+<h2>Packages</h2>
 
 <h3><code>org.machanism.machai.project</code></h3>
 
 <p>
   Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
-  The primary entry point is
-  {@code org.machanism.machai.project.ProjectLayoutManager#detectProjectLayout(java.io.File)}, which selects an
-  appropriate {@code org.machanism.machai.project.layout.ProjectLayout} implementation for a given directory.
+  It provides orchestration for detecting a layout and scanning a repository (including nested modules) while
+  delegating per-project behavior to a processor.
 </p>
 
-<p>
-  For repository-wide traversal, extend {@code org.machanism.machai.project.ProjectProcessor}. The processor scans a
-  root directory and recurses into module roots as reported by the selected layout.
-</p>
+<ul>
+  <li>
+    Detect a project’s on-disk convention and expose it as a
+    <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a> via
+    <a href="org/machanism/machai/project/ProjectLayoutManager.html#detectProjectLayout-java.io.File-">ProjectLayoutManager.detectProjectLayout(File)</a>.
+  </li>
+  <li>
+    Traverse a project root and invoke a per-project hook via
+    <a href="org/machanism/machai/project/ProjectProcessor.html">ProjectProcessor</a>.
+  </li>
+</ul>
 
 <h3><code>org.machanism.machai.project.layout</code></h3>
 
 <p>
-  Abstractions and implementations for build-ecosystem-specific conventions. The central type is
-  {@code org.machanism.machai.project.layout.ProjectLayout}, which exposes conventional directories for sources, tests,
-  resources, documentation, and optional module directories.
+  APIs to describe a repository's on-disk layout. The central type is
+  <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a>, which exposes conventional directories
+  for sources, tests, resources, documentation, and optional module directories.
 </p>
 
 <p>
-  Implementations may consult build metadata (for example Maven {@code pom.xml}, Gradle settings, JavaScript
-  {@code package.json} workspaces, or Python {@code pyproject.toml}) and may also use filesystem scanning. Most layout
-  scanners exclude common build/VCS/IDE directories; see {@code ProjectLayout#EXCLUDE_DIRS}.
+  Concrete implementations provide build-ecosystem-specific conventions, including:
 </p>
+
+<ul>
+  <li>
+    <a href="org/machanism/machai/project/layout/MavenProjectLayout.html">MavenProjectLayout</a>
+    (reads <code>pom.xml</code> via <a href="org/machanism/machai/project/layout/PomReader.html">PomReader</a>)
+  </li>
+  <li>
+    <a href="org/machanism/machai/project/layout/GragleProjectLayout.html">GragleProjectLayout</a>
+    (uses the Gradle Tooling API)
+  </li>
+  <li>
+    <a href="org/machanism/machai/project/layout/JScriptProjectLayout.html">JScriptProjectLayout</a>
+    (parses <code>package.json</code> workspaces)
+  </li>
+  <li>
+    <a href="org/machanism/machai/project/layout/PythonProjectLayout.html">PythonProjectLayout</a>
+    (reads <code>pyproject.toml</code> metadata)
+  </li>
+  <li>
+    <a href="org/machanism/machai/project/layout/DefaultProjectLayout.html">DefaultProjectLayout</a>
+    (filesystem-based fallback)
+  </li>
+</ul>
 
 <h2>Typical workflow</h2>
 
 <ol>
-  <li>Pick or detect a {@code ProjectLayout} for a project root directory.</li>
+  <li>Detect a <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a> for a project root directory.</li>
   <li>Query the layout for conventional directories (returned as root-relative paths).</li>
-  <li>Optionally traverse a repository and process each discovered project/module via a {@code ProjectProcessor}.</li>
+  <li>Resolve root-relative paths against the project root before filesystem access.</li>
+  <li>
+    Optionally traverse a repository and process each discovered project/module using a
+    <a href="org/machanism/machai/project/ProjectProcessor.html">ProjectProcessor</a>.
+  </li>
 </ol>
 
 <h2>Examples</h2>
@@ -129,12 +162,12 @@ processor.scanFolder(repoDir);
 
 <ul>
   <li>
-    Some layouts infer modules from build metadata (for example Maven modules from {@code pom.xml}); others use
+    Some layouts infer modules from build metadata (for example Maven modules from <code>pom.xml</code>); others use
     filesystem scanning as a fallback.
   </li>
   <li>
     Layout detectors typically ignore common build, VCS, IDE, and environment directories. Refer to
-    {@code org.machanism.machai.project.layout.ProjectLayout#EXCLUDE_DIRS}.
+    <a href="org/machanism/machai/project/layout/ProjectLayout.html#EXCLUDE_DIRS">ProjectLayout.EXCLUDE_DIRS</a>.
   </li>
 </ul>
 

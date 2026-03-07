@@ -38,30 +38,28 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Purpose</h2>
 
 <p>
-  Assembly Maven Plugin is a Maven plugin (packaging type <code>maven-plugin</code>) that exposes the
-  <code>assembly</code> goal.
-  The goal takes a natural-language prompt, uses MachAI's bindex metadata to recommend relevant libraries,
-  filters recommendations by a configured minimum score threshold, and applies the selected libraries to the target
-  project directory.
+  Assembly Maven Plugin is a Maven plugin (packaging type <code>maven-plugin</code>) that provides the
+  <code>assembly</code> goal. The goal uses a natural-language prompt to select relevant libraries from MachAI's
+  bindex metadata and applies the selected libraries and related project changes to the target project directory.
 </p>
 
 <h2>High-level workflow</h2>
 
 <ol>
   <li>
-    <b>Prompt acquisition</b>: read a prompt from a configured text file (typically <code>project.txt</code>) or request it
-    interactively.
+    <strong>Prompt acquisition</strong>: read a prompt from a configured text file (typically
+    <code>project.txt</code>) or request it interactively.
   </li>
   <li>
-    <b>Library recommendation</b>: use the MachAI picker to recommend candidate libraries described as
-    <code>Bindex</code> entries.
+    <strong>Library recommendation</strong>: use the MachAI picker to recommend candidate libraries described as
+    bindex entries.
   </li>
   <li>
-    <b>Scoring and filtering</b>: discard candidates below a configured minimum score threshold.
+    <strong>Scoring and filtering</strong>: discard candidates below a configured minimum score threshold.
   </li>
   <li>
-    <b>Assembly application</b>: apply the selected libraries to the Maven execution base directory
-    (<code>${basedir}</code>) using the assembly engine.
+    <strong>Assembly application</strong>: run the assembly engine to apply changes in-place to the Maven execution
+    base directory (<code>${basedir}</code>).
   </li>
 </ol>
 
@@ -81,25 +79,25 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   Maven plugin entry points for MachAI's AI-assisted project assembly workflow.
-</p>
-
-<p>
-  The main entry point is
-  <code>org.machanism.machai.assembly.maven.Assembly</code>, a Maven {@code Mojo} that orchestrates:
+  This package contains the Mojo implementation and the minimal orchestration logic that:
 </p>
 
 <ul>
-  <li>
-    prompt acquisition (from a configured prompt file or interactive input),
-  </li>
-  <li>
-    library recommendation via <code>org.machanism.machai.bindex.Picker</code> (as <code>org.machanism.machai.schema.Bindex</code>
-    entries),
-  </li>
-  <li>
-    and in-place application of changes to <code>${basedir}</code> via
-    <code>org.machanism.machai.bindex.ApplicationAssembly</code>.
-  </li>
+  <li>obtains a natural-language prompt (file-based or interactive),</li>
+  <li>invokes the MachAI picker to recommend libraries as bindex entries (filtered by score), and</li>
+  <li>invokes the application assembly engine to apply changes to the target project directory.</li>
+</ul>
+
+<p>
+  The primary entry point is <code>org.machanism.machai.assembly.maven.Assembly</code>, a Maven Mojo that:
+</p>
+
+<ul>
+  <li>reads <code>assembly.prompt.file</code> (or prompts the user),</li>
+  <li>runs <code>org.machanism.machai.bindex.Picker</code> to produce recommended
+      <code>org.machanism.machai.schema.Bindex</code> entries, and</li>
+  <li>runs <code>org.machanism.machai.bindex.ApplicationAssembly</code> to apply the assembly to
+      <code>${basedir}</code>.</li>
 </ul>
 
 <h2>Configuration and inputs</h2>
@@ -137,7 +135,7 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
     The plugin operates on the Maven execution base directory (<code>${basedir}</code>) and applies changes in-place.
   </li>
   <li>
-    Recommended libraries are surfaced as bindex entries and are typically logged before the assembly phase begins.
+    Library recommendations are produced from bindex metadata and are typically logged before the assembly phase begins.
   </li>
 </ul>
 

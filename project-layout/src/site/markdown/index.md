@@ -38,7 +38,7 @@ Supported layouts include Maven, Gradle, JavaScript, Python, plus a default layo
 - Standardized representation of common project folders (sources, resources, tests, docs)
 - Built-in layout definitions:
   - Maven (`MavenProjectLayout`)
-  - Gradle (`GragleProjectLayout`)
+  - Gradle (`GradleProjectLayout`)
   - JavaScript (`JScriptProjectLayout`)
   - Python (`PythonProjectLayout`)
   - Default (`DefaultProjectLayout`)
@@ -68,7 +68,7 @@ Add the dependency:
 ## Typical Workflow
 
 1. Add `project-layout` as a dependency to your build/tooling project.
-2. Select a layout definition that matches your target project type (for example `MavenProjectLayout` or `GragleProjectLayout`).
+2. Select a layout definition that matches your target project type (for example `MavenProjectLayout` or `GradleProjectLayout`).
 3. Provide a base directory and resolve the directories you need (main sources, test sources, resources, docs).
 4. Use the resolved paths in your build/tooling logic (scanners, generators, compilers, packagers).
 

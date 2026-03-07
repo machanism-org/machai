@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
 /**
  * No-op implementation of {@link GenAIProvider}.
  *
- * <p>This provider is intended for environments where no external LLM integration should be used. It accumulates
- * prompt text in memory and can optionally write instructions and prompts to local files when
- * {@link #inputsLog(File)} has been configured.
+ * <p>This provider is intended for environments where no external LLM integration should be used.
+ * It accumulates prompt text in memory and can optionally write instructions and prompts to local
+ * files when {@link #inputsLog(File)} has been configured.
  *
  * <h2>Key characteristics</h2>
  * <ul>
@@ -126,10 +126,10 @@ public class NoneProvider implements GenAIProvider {
 	 *
 	 * <p>This provider does not support tools; the registration is ignored.
 	 *
-	 * @param name        tool name
+	 * @param name tool name
 	 * @param description tool description
-	 * @param function    tool implementation
-	 * @param paramsDesc  optional parameter descriptions
+	 * @param function tool implementation
+	 * @param paramsDesc optional parameter descriptions
 	 */
 	@Override
 	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {

@@ -30,21 +30,35 @@
  * OpenAI provider implementation for MachAI.
  *
  * <p>
- * This package contains provider types that adapt MachAI's {@link org.machanism.machai.ai.manager.GenAIProvider}
- * abstraction to the OpenAI APIs. It includes the concrete provider implementation
- * ({@link org.machanism.machai.ai.provider.openai.OpenAIProvider}) and supporting classes for building requests,
- * handling tool calling, and mapping OpenAI responses back into MachAI domain types.
+ * This package adapts MachAI's {@link org.machanism.machai.ai.manager.GenAIProvider} abstraction to the
+ * OpenAI Java SDK, primarily via {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}.
  * </p>
  *
  * <p>
- * Typical responsibilities include:
+ * Responsibilities include:
  * </p>
  * <ul>
- *   <li>Translating instructions, prompts, and conversation state into OpenAI request payloads.</li>
- *   <li>Mapping MachAI tool definitions into OpenAI tool specifications and dispatching tool invocations.</li>
- *   <li>Capturing response metadata (for example token usage) for reporting through
+ *   <li>Creating OpenAI Responses API requests from prompts, instructions, files, and conversation state.</li>
+ *   <li>Registering function tools, translating MachAI tool definitions to OpenAI tool schemas, and dispatching
+ *       tool calls to locally provided handlers.</li>
+ *   <li>Extracting usage information (input, cached, and output tokens) and reporting it via
  *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *   <li>Obtaining embedding vectors for text via {@link org.machanism.machai.ai.provider.openai.OpenAIProvider#embedding(String, long)}.</li>
  * </ul>
+ *
+ * <h2>Configuration</h2>
+ * <p>
+ * The provider is initialized from a {@link org.machanism.macha.core.commons.configurator.Configurator} and
+ * expects at minimum:
+ * </p>
+ * <ul>
+ *   <li>{@code chatModel}: model identifier passed to the OpenAI Responses API.</li>
+ *   <li>{@code OPENAI_API_KEY}: API key for authenticating requests.</li>
+ * </ul>
+ * <p>
+ * Optional settings include {@code OPENAI_BASE_URL}, {@code GENAI_TIMEOUT}, {@code MAX_OUTPUT_TOKENS}, and
+ * {@code MAX_TOOL_CALLS}.
+ * </p>
  *
  * <h2>Typical usage</h2>
  * <pre>{@code

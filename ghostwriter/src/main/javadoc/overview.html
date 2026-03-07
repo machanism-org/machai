@@ -30,8 +30,10 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <header>
   <h1>Ghostwriter</h1>
   <p>
-    Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project
-    documentation using embedded guidance tags and AI-powered synthesis.
+    Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles
+    project documentation using embedded guidance tags and AI-powered synthesis.
+  </p>
+  <p>
     Ghostwriter supports all types of project files—including source code, documentation, project site content,
     and other relevant files.
   </p>
@@ -40,13 +42,15 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <section>
   <h2>Purpose and scope</h2>
   <p>
-    Ghostwriter traverses a project directory tree, discovers embedded <code>@guidance:</code> instructions, and
-    orchestrates the creation of provider-ready prompts for a configured GenAI provider.
+    Ghostwriter is a filesystem-first tool that traverses a project directory tree, discovers embedded
+    <code>@guidance:</code> instructions, and orchestrates the creation of provider-ready prompts for a configured
+    GenAI provider.
   </p>
   <ul>
-    <li><strong>Filesystem-first processing</strong>: operates on files as they exist on disk; it does not build projects or resolve dependencies.</li>
-    <li><strong>Child-first module handling</strong>: when multi-module layouts are present, modules are processed before parent aggregation.</li>
-    <li><strong>Format-aware guidance extraction</strong>: guidance is extracted using reviewers for Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and text.</li>
+    <li><strong>Filesystem-based processing:</strong> scans files as they exist on disk; it does not build projects.</li>
+    <li><strong>No dependency resolution:</strong> scanning does not resolve Maven/Gradle dependencies.</li>
+    <li><strong>Child-first processing:</strong> for multi-module layouts, child projects are processed before parent aggregation.</li>
+    <li><strong>Format-aware guidance extraction:</strong> guidance is extracted using reviewers for multiple file formats.</li>
   </ul>
 </section>
 
@@ -58,8 +62,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   </figure>
 
   <p>
-    The implementation is organized around (1) a processing pipeline that controls traversal and prompt dispatch and
-    (2) a reviewer SPI with format-specific implementations that extract guidance from individual files.
+    The implementation is organized around an orchestration pipeline (project traversal, matching, prompt
+    composition, dispatch) and a reviewer SPI (format-specific guidance extractors).
   </p>
 </section>
 
@@ -68,97 +72,78 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <dl>
     <dt><strong>Guidance</strong></dt>
     <dd>
-      A mandatory <code>@guidance:</code> block embedded in a file comment. Guidance is treated as file-scoped instructions
-      that can be extracted and included in a prompt.
+      A mandatory <code>@guidance:</code> block embedded in a file comment. Guidance is treated as file-scoped
+      instructions that can be extracted and included in a prompt.
     </dd>
 
     <dt><strong>Reviewer</strong></dt>
     <dd>
-      A file-format-aware scanner that locates and extracts <code>@guidance:</code> blocks according to the comment
-      conventions of a specific format.
+      A file-format-aware scanner that locates and extracts <code>@guidance:</code> blocks according to
+      the comment conventions of a specific format.
     </dd>
 
     <dt><strong>Processing pipeline</strong></dt>
     <dd>
-      The orchestration layer that traverses the filesystem, selects a reviewer per file, composes prompts from guidance
-      and project context, and dispatches the prompts to the configured GenAI provider.
+      The orchestration layer that traverses the filesystem, selects a reviewer per file, composes prompts from
+      guidance and project context, and dispatches prompts to a GenAI provider.
+    </dd>
+
+    <dt><strong>Scan target</strong></dt>
+    <dd>
+      A directory path (typically relative to the project root) or a
+      <code>java.nio.file.FileSystems.getPathMatcher</code> expression (for example, <code>glob:</code> or <code>regex:</code>).
     </dd>
   </dl>
 </section>
 
 <section>
   <h2>Package overview</h2>
-  <p>
-    The Ghostwriter code is primarily organized into two packages: a processing/orchestration pipeline and a set of
-    format-specific reviewers.
-  </p>
 
   <h3><code>org.machanism.machai.gw.processor</code></h3>
   <p>
     Project scanning, guidance extraction, and prompt orchestration for the Ghostwriter command-line tool.
-    This package contains the CLI entry point and processors that implement a filesystem-based pipeline.
+    The processors implement a filesystem-based pipeline: traversing project trees, extracting embedded guidance
+    from supported file formats, and invoking the configured GenAI provider.
   </p>
   <ul>
-    <li>Traverses a project directory tree (including multi-module layouts).</li>
-    <li>Selects scan targets via explicit directories or <code>glob:</code>/<code>regex:</code> path matchers.</li>
-    <li>Extracts embedded <code>@guidance:</code> directives via extension-specific reviewers.</li>
-    <li>Builds and dispatches prompts to the configured GenAI provider.</li>
+    <li><strong>Entry point:</strong> the CLI launches scans and processing runs.</li>
+    <li><strong>Traversal and selection:</strong> files are included via directory targets and/or <code>glob:</code>/<code>regex:</code> matchers.</li>
+    <li><strong>Guidance extraction:</strong> per-file <code>@guidance:</code> blocks are located by format-specific reviewers.</li>
+    <li><strong>Prompt composition:</strong> guidance + project context are assembled into provider-ready prompts.</li>
+    <li><strong>Execution:</strong> prompts are dispatched to the configured GenAI provider.</li>
   </ul>
   <p>
-    Processing is strictly filesystem-based: projects are not built and dependencies are not resolved during scanning.
-    When module directories are present, they are processed child-first so that module content can be handled before
-    any parent-level aggregation.
+    Processing is strictly filesystem-based: projects are not built and dependencies are not resolved.
+    Multi-module layouts are processed child-first.
   </p>
 
   <h3><code>org.machanism.machai.gw.reviewer</code></h3>
   <p>
-    File-format-aware scanners used by Ghostwriter to discover embedded <code>@guidance</code> instructions.
-    This package defines the reviewer SPI and includes concrete implementations for common project artifacts such as Java,
-    TypeScript, Python, Markdown, HTML/XML, PlantUML, and plain-text files.
-  </p>
-  <p>
-    A reviewer inspects an individual file, detects whether it contains the guidance tag, and if present produces a
-    normalized prompt fragment (typically including the project-relative file path and relevant content) for
-    consumption by the processing pipeline.
-  </p>
-</section>
-
-<section>
-  <h2>Processing model</h2>
-
-  <h3>Scan targets and matchers</h3>
-  <p>
-    A scan target can be a directory path (typically relative to the project root) or a matcher expression supported by
-    <code>java.nio.file.FileSystems.getPathMatcher</code>.
+    File-format-aware scanners used to discover embedded <code>@guidance</code> instructions and convert them
+    into normalized prompt fragments.
   </p>
   <ul>
-    <li>Directory path (for example, <code>src/main</code>)</li>
-    <li><code>glob:</code> patterns (for example, <code>glob:**/*.java</code>)</li>
-    <li><code>regex:</code> patterns</li>
+    <li>Defines the reviewer SPI and selects implementations based on supported file extensions.</li>
+    <li>Implements guidance extraction for common formats such as Java, Markdown, HTML/XML, TypeScript, Python,
+      PlantUML, and plain-text guidance files.</li>
+    <li>Returns prompt fragments that include project-relative path context to improve provider responses.</li>
   </ul>
-
-  <h3>Guidance extraction and orchestration</h3>
-  <p>
-    For each selected file, Ghostwriter chooses an appropriate reviewer based on the file format, extracts any embedded
-    guidance blocks, and combines them with project context (such as the project-relative file path and relevant content)
-    to build a provider-ready prompt.
-  </p>
 </section>
 
 <section>
   <h2>Typical usage</h2>
   <pre><code>java -jar gw.jar &lt;scanTarget&gt; [options]</code></pre>
   <p>
-    The <code>&lt;scanTarget&gt;</code> argument can be a relative directory path or a matcher expression supported by
-    <code>java.nio.file.FileSystems.getPathMatcher</code>.
+    The <code>&lt;scanTarget&gt;</code> argument can be a relative directory path (for example, <code>src/main</code>) or a matcher
+    expression supported by <code>java.nio.file.FileSystems.getPathMatcher</code> (for example, <code>glob:**/*.java</code>).
   </p>
 </section>
 
 <section>
   <h2>See also</h2>
   <ul>
-    <li><a href="org/machanism/machai/gw/processor/package-summary.html">Processor package</a></li>
-    <li><a href="org/machanism/machai/gw/reviewer/package-summary.html">Reviewer package</a></li>
+    <li><a href="org/machanism/machai/gw/processor/package-summary.html">org.machanism.machai.gw.processor</a></li>
+    <li><a href="org/machanism/machai/gw/reviewer/package-summary.html">org.machanism.machai.gw.reviewer</a></li>
   </ul>
 </section>
 

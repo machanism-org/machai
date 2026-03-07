@@ -82,12 +82,15 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Architecture</h2>
 <p>
-  Bindex Core is organized around public, project-level orchestration APIs and specialized builder implementations.
+  Bindex Core is organized around orchestration APIs in <code>org.machanism.machai.bindex</code> and specialized builders in
+  <code>org.machanism.machai.bindex.builder</code>.
   Builders generate <code>org.machanism.machai.schema.Bindex</code> documents by combining:
 </p>
 <ul>
   <li>a schema-driven JSON output target,</li>
-  <li>project context (for example <code>pom.xml</code>, <code>package.json</code>, or <code>pyproject.toml</code>, plus selected source/resource files), and</li>
+  <li>
+    project context (for example <code>pom.xml</code>, <code>package.json</code>, or <code>pyproject.toml</code>, plus selected source/resource files), and
+  </li>
   <li>a configured GenAI provider.</li>
 </ul>
 
@@ -101,32 +104,18 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li>
     <code>org.machanism.machai.bindex</code>
     <div>
-      Generates, persists, registers, and retrieves MachAI Bindex documents.
-      It supports local project workflows (create/update <code>bindex.json</code>) and registry workflows (store/search Bindexes in MongoDB),
-      plus semantic retrieval with dependency expansion and prompt assembly.
+      Generates, persists, registers, and retrieves MachAI Bindex documents. It supports local project workflows
+      (create/update <code>bindex.json</code>) and registry workflows (store/search Bindexes in MongoDB), plus semantic retrieval with
+      dependency expansion and prompt assembly.
     </div>
-    <ul>
-      <li><strong>BindexCreator</strong> – creates or updates a project's <code>bindex.json</code> from project context.</li>
-      <li><strong>BindexBuilderFactory</strong> – selects a builder based on detected project layout.</li>
-      <li><strong>BindexRegister</strong> – registers a local <code>bindex.json</code> in the registry (insert/update).</li>
-      <li><strong>BindexRepository</strong> – MongoDB persistence primitives used by higher-level components.</li>
-      <li><strong>Picker</strong> – semantic search over the registry with dependency expansion.</li>
-      <li><strong>ApplicationAssembly</strong> – builds deterministic prompt inputs from selected Bindexes.</li>
-      <li><strong>Function tools</strong> – provider-callable helpers to fetch Bindex documents and schemas on demand.</li>
-    </ul>
   </li>
   <li>
     <code>org.machanism.machai.bindex.builder</code>
     <div>
-      Provides <code>org.machanism.machai.schema.Bindex</code> generation builders that assemble project context and prompt a configured
-      GenAI provider.
+      Builders that generate <code>org.machanism.machai.schema.Bindex</code> documents by collecting project context and prompting a
+      configured GenAI provider. Concrete builders tailor the collected context for Maven, JavaScript/TypeScript, and
+      Python layouts.
     </div>
-    <ul>
-      <li><strong>BindexBuilder</strong> – shared builder workflow for producing a <code>Bindex</code> (supports incremental updates via an origin document).</li>
-      <li><strong>MavenBindexBuilder</strong> – reads and sanitizes <code>pom.xml</code> and includes Maven source/resource/test structure.</li>
-      <li><strong>JScriptBindexBuilder</strong> – reads <code>package.json</code> and includes <code>.js</code>, <code>.ts</code>, and <code>.vue</code> under <code>src</code>.</li>
-      <li><strong>PythonBindexBuilder</strong> – reads <code>pyproject.toml</code> and includes files under an inferred source directory.</li>
-    </ul>
   </li>
 </ul>
 
@@ -152,7 +141,7 @@ new BindexRegister("openai", null, config)
     .processFolder(layout);
 }</pre>
 
-<h3>Pick libraries semantically and assemble prompt inputs</h3>
+<h3>Pick libraries and assemble prompt inputs</h3>
 <pre>{@code
 Configurator config = ...;
 ProjectLayout layout = ...;

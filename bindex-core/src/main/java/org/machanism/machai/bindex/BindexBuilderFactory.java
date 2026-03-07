@@ -13,18 +13,18 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.project.layout.PythonProjectLayout;
 
 /**
- * Factory class for creating BindexBuilder instances based on specific
- * ProjectLayout types.
- * <p>
- * Usage example:
- * 
- * <pre>
- *     ProjectLayout layout = ...;
- *     BindexBuilder builder = BindexBuilderFactory.create(layout);
- * </pre>
- * 
- * Depending on the layout type, returns an appropriate builder instance, or
- * throws if directory is missing.
+ * Creates {@link BindexBuilder} instances appropriate for a given {@link ProjectLayout}.
+ *
+ * <p>The factory selects a specialized builder when the layout is recognized (for example Maven, * JavaScript, or Python). When the layout is not recognized but the project directory exists, * a generic {@link BindexBuilder} is returned.
+ *
+ * <h2>Example</h2>
+ *
+ * <pre>{@code
+ * ProjectLayout layout = ...;
+ * Configurator config = ...;
+ *
+ * BindexBuilder builder = BindexBuilderFactory.create(layout, "openai", config);
+ * }</pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -32,30 +32,40 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
 public class BindexBuilderFactory {
 
 	/**
-	 * Creates a BindexBuilder suitable for the given ProjectLayout type.
+	 * Creates a {@link BindexBuilder} suitable for the supplied project layout.
 	 *
-	 * @param projectLayout the project layout to analyze (Maven, JScript, Python,
-	 *                      or generic)
-	 * @param genai
-	 * @param configurator
-	 * @return a suitable BindexBuilder implementation
-	 * @throws FileNotFoundException if the project directory does not exist
+	 * @param projectLayout project layout to analyze
+	 * @param genai         GenAI provider identifier passed to the created builder
+	 * @param configurator  configurator used by the created builder
+	 * @return a suitable {@link BindexBuilder} implementation
+	 * @throws FileNotFoundException if {@code projectLayout}'s project directory does not exist
+	 * @throws IllegalArgumentException if any argument is {@code null}
 	 */
 	public static BindexBuilder create(ProjectLayout projectLayout, String genai, Configurator configurator)
 			throws FileNotFoundException {
-		BindexBuilder bindexBuilder;
-		if (projectLayout instanceof MavenProjectLayout) {
-			bindexBuilder = new MavenBindexBuilder((MavenProjectLayout) projectLayout, genai, configurator);
-		} else if (projectLayout instanceof JScriptProjectLayout) {
-			bindexBuilder = new JScriptBindexBuilder((JScriptProjectLayout) projectLayout, genai, configurator);
-		} else if (projectLayout instanceof PythonProjectLayout) {
-			bindexBuilder = new PythonBindexBuilder((PythonProjectLayout) projectLayout, genai, configurator);
-		} else if (projectLayout.getProjectDir().exists()) {
-			bindexBuilder = new BindexBuilder(projectLayout, genai, configurator);
-		} else {
-			throw new FileNotFoundException(projectLayout.getProjectDir().getAbsolutePath());
+		if (projectLayout == null) {
+			throw new IllegalArgumentException("projectLayout must not be null");
 		}
-		return bindexBuilder;
+		if (genai == null) {
+			throw new IllegalArgumentException("genai must not be null");
+		}
+		if (configurator == null) {
+			throw new IllegalArgumentException("configurator must not be null");
+		}
+
+		if (projectLayout instanceof MavenProjectLayout) {
+			return new MavenBindexBuilder((MavenProjectLayout) projectLayout, genai, configurator);
+		}
+		if (projectLayout instanceof JScriptProjectLayout) {
+			return new JScriptBindexBuilder((JScriptProjectLayout) projectLayout, genai, configurator);
+		}
+		if (projectLayout instanceof PythonProjectLayout) {
+			return new PythonBindexBuilder((PythonProjectLayout) projectLayout, genai, configurator);
+		}
+		if (projectLayout.getProjectDir().exists()) {
+			return new BindexBuilder(projectLayout, genai, configurator);
+		}
+		throw new FileNotFoundException(projectLayout.getProjectDir().getAbsolutePath());
 	}
 
 }

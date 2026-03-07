@@ -31,8 +31,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   <strong>GW Maven Plugin</strong> is a Maven plugin that integrates the MachAI <em>Ghostwriter</em> workflow into a
-  Maven build. It scans a configurable directory tree (commonly <code>src/site</code>) for files that contain embedded
-  <code>@guidance:</code> blocks and applies guided transformations using the configured GenAI provider.
+  Maven build.
 </p>
 
 <p>
@@ -45,20 +44,35 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   up-to-date information across all modules.
 </p>
 
+<h2>What the plugin does</h2>
+
+<ul>
+  <li>
+    Scans a configurable directory tree (commonly <code>src/site</code>) for files containing embedded
+    <code>@guidance:</code> blocks.
+  </li>
+  <li>
+    Executes the Ghostwriter processors (for example, <code>GuidanceProcessor</code> and <code>ActProcessor</code>)
+    to apply guided, AI-assisted transformations using the configured GenAI provider.
+  </li>
+  <li>
+    Provides goals suitable for both single-module and multi-module (reactor) builds.
+  </li>
+</ul>
+
 <h2>How guided processing works</h2>
 
 <ol>
   <li>
-    The goal determines a scan root (by default the execution root directory; optionally overridden via
+    A goal determines a scan root (by default the Maven execution root; optionally overridden via
     <code>-Dgw.scanDir</code>).
   </li>
   <li>
     The scan walks the directory tree, respecting any configured excludes.
   </li>
   <li>
-    When a file contains a <code>@guidance:</code> block, the workflow composes an instruction set
-    (goal parameters, default guidance, and the embedded guidance) and delegates the transformation to the configured
-    GenAI provider.
+    When a file contains a <code>@guidance:</code> block, the workflow composes an instruction set (goal parameters,
+    default guidance, and the embedded guidance) and delegates transformation to the configured GenAI provider.
   </li>
   <li>
     Temporary artifacts created by processing can be removed via <code>gw:clean</code>.
@@ -74,19 +88,13 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   document-processing workflow as part of a Maven build.
 </p>
 
-<p>
-  The goals in this package configure and invoke the Ghostwriter processors (for example,
-  <code>GuidanceProcessor</code> and <code>ActProcessor</code>) to scan a documentation source tree for embedded
-  <code>@guidance:</code> blocks.
-</p>
-
-<h4>Primary goals</h4>
+<h4>Main goals</h4>
 
 <ul>
   <li>
     <strong><code>gw:gw</code></strong> (<code>org.machanism.machai.gw.maven.GW</code>) &mdash;
-    Aggregator-style goal that can run without a <code>pom.xml</code>.
-    It processes modules in reverse order (sub-modules first, then parent modules), similar to the Ghostwriter CLI.
+    Aggregator-style goal that can run without a <code>pom.xml</code>. It processes modules in reverse order
+    (sub-modules first, then parent modules), similar to the Ghostwriter CLI.
   </li>
   <li>
     <strong><code>gw:reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorGW</code>) &mdash;
@@ -112,18 +120,17 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <ul>
   <li>
     <strong><code>org.machanism.machai.gw.maven.AbstractGWGoal</code></strong> &mdash;
-    Base class defining shared parameters (provider/model selection, instructions, default guidance, scan directory,
-    excludes, optional credential lookup, and input logging) and the common scan/execute flow.
+    Base class defining shared parameters (for example, provider/model selection, instructions, default guidance,
+    scan directory, excludes, optional credential lookup, and input logging) and the common scan/execute flow.
   </li>
 </ul>
 
 <h2>Configuration and credentials</h2>
 
 <p>
-  In addition to standard Maven plugin parameters (for example, scan directory and exclude patterns), GenAI
-  credentials can optionally be sourced from <code>~/.m2/settings.xml</code> by providing
-  <code>-Dgw.genai.serverId=&lt;serverId&gt;</code>. When configured, the plugin reads the matching
-  <code>&lt;server&gt;</code> entry and forwards credentials to the workflow.
+  In addition to standard Maven plugin parameters, GenAI credentials can optionally be sourced from
+  <code>~/.m2/settings.xml</code> by providing <code>-Dgw.genai.serverId=&lt;serverId&gt;</code>. When configured,
+  the plugin reads the matching <code>&lt;server&gt;</code> entry and forwards credentials to the workflow.
 </p>
 
 <h2>Class diagram</h2>

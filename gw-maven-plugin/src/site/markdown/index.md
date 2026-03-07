@@ -2,6 +2,52 @@
 canonical: https://machai.machanism.org/gw-maven-plugin/index.html
 ---
 
+<!-- @guidance:
+**VERY IMPORTANT NOTE:** Ghostwriter works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
+Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
+**GW Maven Plugin is the primary adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html).**  
+It serves as the main integration point, enabling Ghostwriter’s features and automation within Maven-based projects.
+# Page Structure
+1. Header
+   - **Project Title:**  
+     - Automatically extract the project title from `pom.xml`.
+   - **Maven Central Badge:**  
+     - Display the Maven Central badge using the following Markdown:  
+       `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
+     - Replace `[groupId]` and `[artifactId]` with values from `pom.xml`.
+2. Introduction
+   - Provide a comprehensive description of the GW Maven plugin, including its purpose and benefits.
+   - Analyze java files in the `/src/main/java/org/machanism/machai/gw/maven` to inform the description.
+   - Reference [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
+3. Overview
+   - Clearly explain the main functions and value proposition of the GW Maven plugin.
+   - Summarize how the plugin enhances project workflows and documentation.
+4. Key Features
+   - Present a bulleted list of the primary capabilities and unique features of the plugin.
+5. Getting Started
+   - **Prerequisites:**  
+     - List all required software, services, and environment settings needed to use the plugin.
+   - **Java Version:**  
+     Note that the required Java version is defined in `pom.xml`, but actual functional requirements may differ. Clearly state both.
+   - **Basic Usage:**  
+     - Provide an example command for running the plugin.
+   - **Typical Workflow:**  
+     - Outline the step-by-step process for using the plugin and its artifacts.
+6. Configuration
+   - Include a table of common configuration parameters, with columns for parameter name, description, and default value.
+   - Ensure descriptions are clear and concise.
+7. Resources
+   - Provide a list of relevant links, including:
+     - Official platform or documentation site
+     - GitHub repository
+     - Maven Central page
+     - Any other useful resources
+# General Instructions     
+**Formatting Requirements:**
+- Use Markdown syntax for headings, lists, tables, code blocks, and links.
+- Ensure clarity, conciseness, and easy navigation throughout the page.
+-->
+
 # GW Maven Plugin
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
@@ -127,48 +173,3 @@ Common parameters used by the goals in this plugin:
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin
 - GitHub (SCM): https://github.com/machanism-org/machai
 
-<!-- @guidance:
-**VERY IMPORTANT NOTE:** Ghostwriter works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
-Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
-**GW Maven Plugin is the primary adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html).**  
-It serves as the main integration point, enabling Ghostwriter’s features and automation within Maven-based projects.
-# Page Structure
-1. Header
-   - **Project Title:**  
-     - Automatically extract the project title from `pom.xml`.
-   - **Maven Central Badge:**  
-     - Display the Maven Central badge using the following Markdown:  
-       `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
-     - Replace `[groupId]` and `[artifactId]` with values from `pom.xml`.
-2. Introduction
-   - Provide a comprehensive description of the GW Maven plugin, including its purpose and benefits.
-   - Analyze java files in the `/src/main/java/org/machanism/machai/gw/maven` to inform the description.
-   - Reference [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
-3. Overview
-   - Clearly explain the main functions and value proposition of the GW Maven plugin.
-   - Summarize how the plugin enhances project workflows and documentation.
-4. Key Features
-   - Present a bulleted list of the primary capabilities and unique features of the plugin.
-5. Getting Started
-   - **Prerequisites:**  
-     - List all required software, services, and environment settings needed to use the plugin.
-   - **Java Version:**  
-     Note that the required Java version is defined in `pom.xml`, but actual functional requirements may differ. Clearly state both.
-   - **Basic Usage:**  
-     - Provide an example command for running the plugin.
-   - **Typical Workflow:**  
-     - Outline the step-by-step process for using the plugin and its artifacts.
-6. Configuration
-   - Include a table of common configuration parameters, with columns for parameter name, description, and default value.
-   - Ensure descriptions are clear and concise.
-7. Resources
-   - Provide a list of relevant links, including:
-     - Official platform or documentation site
-     - GitHub repository
-     - Maven Central page
-     - Any other useful resources
-# General Instructions     
-**Formatting Requirements:**
-- Use Markdown syntax for headings, lists, tables, code blocks, and links.
-- Ensure clarity, conciseness, and easy navigation throughout the page.
--->

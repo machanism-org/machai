@@ -2,10 +2,10 @@
  * Provides APIs to detect, describe, and work with a repository's on-disk project layout.
  *
  * <p>
- * This package models a project as a root directory combined with a set of conventional, root-relative paths such as
- * production sources, test sources, resources, and documentation roots. Some layouts also support nested modules and can
- * obtain module information by reading build metadata (for example Maven {@code pom.xml}, Gradle build files, or JS
- * workspace configuration).
+ * The types in this package model a project as a root directory combined with a set of conventional, root-relative
+ * paths such as production sources, test sources, resources, and documentation roots. Some layouts also support nested
+ * modules and can obtain module information by reading build metadata (for example Maven {@code pom.xml}, Gradle build
+ * files, or JavaScript workspace configuration).
  * </p>
  *
  * <h2>Core API</h2>
