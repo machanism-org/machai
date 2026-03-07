@@ -1,3 +1,12 @@
+# =========================
+# AI Assistant Instructions
+# =========================
+# instructions:
+#   - Multi-line string containing comprehensive guidelines for the AI assistant.
+#   - Defines the process for generating high-quality unit tests for software projects.
+#   - Outlines steps for understanding the code under test, following best practices, ensuring test coverage, and using assertions.
+#   - Specifies requirements for clarity, maintainability, output format, and respecting the project’s structure and conventions.
+#   - Emphasizes not modifying production code unless explicitly instructed.
 instructions = '''
 You are an AI assistant tasked with generating high-quality unit tests for software projects. When asked to create unit tests, follow these steps:
 
@@ -34,6 +43,15 @@ You are an AI assistant tasked with generating high-quality unit tests for softw
    - Only create or update test files unless explicitly instructed to change production code.
 '''
 
+# =========================
+# Input Data for Assistant
+# =========================
+# inputs:
+#   - Multi-line string describing the specific task for the AI assistant.
+#   - Instructs the assistant to analyze the provided code and generate unit tests that verify its functionality.
+#   - Specifies the use of the appropriate unit testing framework, coverage of various cases, and adherence to best practices.
+#   - Directs the assistant to place test files in the correct location and present the code in a code block with a summary.
+#   - Supports dynamic content insertion (e.g., "%s" for variable replacement).
 inputs = '''
 Analyze the provided code and generate unit tests to verify its functionality.  
 - Use the appropriate unit testing framework for the project’s programming language.  
@@ -44,4 +62,3 @@ Analyze the provided code and generate unit tests to verify its functionality.
 
 %s
 '''
-

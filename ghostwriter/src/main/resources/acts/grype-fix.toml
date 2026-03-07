@@ -1,3 +1,15 @@
+# basedOn:
+#   - Specifies the configuration profile or template that this configuration is derived from.
+#   - Useful for inheritance or extending base settings, allowing you to override or add to the base configuration as needed.
+
+# basedOn = 
+# =========================
+# AI Assistant Instructions
+# =========================
+
+# Multi-line string containing step-by-step instructions for the AI assistant.
+# Guides the assistant on how to analyze Grype scan results, update dependencies,
+# verify fixes, and document changes.
 instructions = '''
 You are an AI assistant tasked with helping developers automatically fix vulnerabilities detected by Grype in their project dependencies.
 
@@ -23,6 +35,13 @@ Follow these steps:
    - Avoid unnecessary explanations unless clarification is requested.
 '''
 
+# =========================
+# Inputs Section
+# =========================
+
+# Multi-line string describing the input workflow for the assistant.
+# Outlines the steps for analyzing Grype scan results, updating dependencies,
+# verifying the build, and documenting changes.
 inputs = '''
 # Task
 
@@ -57,4 +76,28 @@ Analyze the Grype scan results for the project. For each vulnerability with a fi
 %s
 '''
 
-gw.scanDir = "glob:."
+# =========================
+# Ghostwriter (gw) Section
+# =========================
+# This section contains configuration options for the Ghostwriter (gw) component.
+# - scanDir: Specifies the directory pattern to scan for changes.
+#            "glob:." means the current directory and all subdirectories will be included.
+#            This is useful for tools that need to analyze or process files within the project structure.
+
+[gw]
+scanDir = "glob:."
+# rootDir = 
+# excludes = 
+
+# =========================
+# Other System Properties 
+# =========================
+# This section is reserved for additional system properties that control functional tool behavior.
+#
+# ft.command.denylist:
+#   - Specifies a list of patterns, keywords, or file names to be excluded from processing by functional tools.
+#   - The value should be a string or multi-line string containing the denylist entries.
+#   - Example usage: Exclude certain files, directories, or commands from automated actions.
+#
+# Uncomment and set the value as needed:
+# ft.command.denylist = "%s"

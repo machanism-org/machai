@@ -1,3 +1,12 @@
+# =========================
+# AI Assistant Instructions
+# =========================
+# instructions:
+#   - Multi-line string containing step-by-step guidelines for the AI assistant.
+#   - Defines the process for analyzing a SonarQube JSON report and generating precise, minimal, and effective code fixes for each detected issue.
+#   - Outlines how to identify the file, line number, rule, and message for each issue, explain the root cause, and provide corrected code snippets.
+#   - Specifies when to include additional context, how to handle false positives, and the importance of not changing code style or logic beyond what is necessary.
+#   - Ensures all fixes follow best practices and SonarQube recommendations.
 instructions = '''
 You are an expert Java developer and security engineer.  
 You are given a SonarQube report in JSON format, which lists code issues detected in a Java project.  
@@ -12,6 +21,15 @@ Your task is to generate precise, minimal, and effective code fixes for each iss
 - Do not change code style or logic beyond what is necessary to fix the issue.
 '''
 
+# =========================
+# Input Data for Assistant
+# =========================
+# inputs:
+#   - Multi-line string describing the specific task for the AI assistant.
+#   - Details the workflow for selecting and reviewing the SonarQube report, fixing issues, and creating a report for each fix.
+#   - Specifies how to handle child projects, error handling, and the build process after each fix.
+#   - Includes special rules for using @SuppressWarnings, with strict formatting and documentation requirements for auditability and compliance.
+#   - Supports dynamic content insertion (e.g., "%s" for variable replacement).
 inputs = '''
 # Task  
 

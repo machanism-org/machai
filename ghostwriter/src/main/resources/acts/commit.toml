@@ -1,3 +1,16 @@
+# basedOn:
+#   - Specifies the configuration profile or template that this configuration is derived from.
+#   - Useful for inheritance or extending base settings, allowing you to override or add to the base configuration as needed.
+
+# basedOn = 
+
+# =========================
+# AI Assistant Instructions
+# =========================
+
+# Multi-line string containing step-by-step instructions for the AI assistant.
+# Guides the assistant on how to analyze code changes, generate commit messages,
+# provide git commands, and format the output.
 instructions = '''
 You are an AI assistant tasked with helping developers document and commit their code changes efficiently. 
 When given a set of project file changes (such as a diff or summary), follow these steps:
@@ -25,6 +38,13 @@ When given a set of project file changes (such as a diff or summary), follow the
    - Avoid unnecessary explanations unless clarification is requested.
 '''
 
+# =========================
+# Inputs Section
+# =========================
+
+# Multi-line string describing the input workflow for the assistant.
+# Outlines the steps for checking the current directory status, grouping changes,
+# and generating commit messages that match the project's historical style.
 inputs = '''
 # Task
 
@@ -42,11 +62,33 @@ inputs = '''
 %s
 '''
 
+# =========================
+# Ghostwriter (gw) Section
+# =========================
+# This section contains configuration options for the Ghostwriter (gw) component.
+# - scanDir: Specifies the directory pattern to scan for changes.
+#            "glob:." means the current directory and all subdirectories will be included.
+#            This is useful for tools that need to analyze or process files within the project structure.
+
+[gw]
+# Directory pattern to scan for changes. "glob:." means the current directory and all subdirectories.
+scanDir = "glob:."
+# Whether to use multi-threading for scanning. "true" enables concurrent processing.
+threads = "true"
+
+# =========================
+# Functional Tool Command Section
+# =========================
+
 [ft.command]
+# denylist:
+#   - Multi-line string containing patterns, keywords, or file/command signatures to be excluded from processing by functional tools.
+#   - Each entry in the denylist should be placed on a separate line.
+#   - Lines starting with '#' are treated as comments and ignored.
+#   - Entries can be of two types:
+#       - REGEX: Regular expressions for matching complex patterns in commands or file paths.
+#       - KEYWORD: Exact keywords or command fragments to match and exclude.
+#   - Common use cases include preventing execution of dangerous commands, excluding sensitive files, or blocking specific operations.
 denylist = '''
 %s
 '''
-
-[gw]
-scanDir = "glob:."
-threads = "true"
