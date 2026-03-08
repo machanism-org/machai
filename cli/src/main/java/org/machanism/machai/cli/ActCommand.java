@@ -6,7 +6,6 @@ import java.io.IOException;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.slf4j.Logger;
@@ -15,42 +14,66 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
+/**
+ * Spring Shell command that runs Ghostwriter "Act mode".
+ *
+ * <p>The command scans the configured project folder and then executes a
+ * predefined action/prompt interactively via {@link ActProcessor}.
+ *
+ * <h2>Examples</h2>
+ * <pre>
+ * act commit
+ * act commit "and push"
+ * act sonar-fix --model OpenAI:gpt-5.1
+ * </pre>
+ */
 @ShellComponent
 public class ActCommand {
 
-	private static Logger logger = LoggerFactory.getLogger(ActCommand.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ActCommand.class);
 
 	@PostConstruct
 	public void init() {
+		// Spring lifecycle hook (kept for future initialization).
 	}
 
+	/**
+	 * Interactively executes a predefined action/prompt using Act mode.
+	 *
+	 * <p>The default root directory and model are resolved from the persisted
+	 * configuration managed by {@link ConfigCommand}.
+	 *
+	 * @param action
+	 *            the name of the predefined action to execute
+	 * @param prompt
+	 *            optional extra prompt text appended to {@code action}
+	 * @param model
+	 *            optional GenAI provider/model identifier (for example,
+	 *            {@code OpenAI:gpt-5.1}); if {@code null}, uses the configured default
+	 * @throws IOException
+	 *             if scanning documents fails
+	 */
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
-	public void act(@ShellOption(value = "action") String action[],
-			@ShellOption(value = "model", help = "Set the GenAI provider and model") String model)
+	public void act(@ShellOption(value = "action") String action,
+			@ShellOption(value = "prompt", defaultValue = "") String prompt,
+			@ShellOption(value = "model", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
 		File rootDir = ConfigCommand.config.getFile("gw.rootDir", SystemUtils.getUserDir());
+		PropertiesConfigurator configurator = new PropertiesConfigurator(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);
 
-		PropertiesConfigurator configurator = new PropertiesConfigurator();
-
-		model = model == null ? ConfigCommand.config.get("gw.model") : model;
-
-		ActProcessor processor = new ActProcessor(rootDir, configurator, model);
-		String act = StringUtils.join(action, " ");
-		processor.setDefaultPrompt(act);
+		String resolvedModel = model == null ? ConfigCommand.config.get("gw.model") : model;
+		ActProcessor processor = new ActProcessor(rootDir, configurator, resolvedModel);
+		processor.setDefaultPrompt(action + " " + prompt);
 
 		String scanDir = ConfigCommand.config.get("gw.scanDir", null);
-
 		if (scanDir == null) {
-			if (rootDir != null) {
-				scanDir = rootDir.getAbsolutePath();
-			} else {
-				scanDir = SystemUtils.getUserDir().getAbsolutePath();
-			}
+			scanDir = (rootDir != null ? rootDir : SystemUtils.getUserDir()).getAbsolutePath();
 		}
-		logger.info("Starting scan of directory: {}", scanDir);
+
+		LOGGER.info("Starting scan of directory: {}", scanDir);
 		File projectDir = processor.getRootDir();
 		processor.scanDocuments(projectDir, scanDir);
-		logger.info("Finished scanning directory: {}", scanDir);
+		LOGGER.info("Finished scanning directory: {}", scanDir);
 	}
 }

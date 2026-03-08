@@ -39,7 +39,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   This module produces an executable, Spring Shell-based command-line interface for Machai workflows. It supports
-  both interactive usage (REPL) and non-interactive invocation.
+  interactive usage (REPL) as well as non-interactive invocation from scripts and CI pipelines.
 </p>
 
 <h2>Architecture at a glance</h2>
@@ -47,15 +47,16 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <ul>
   <li>
     <strong>Entry point:</strong> <code>org.machanism.machai.cli.MachaiCLI</code> bootstraps the application and starts the
-    Spring Shell command runtime.
+    Spring Shell runtime.
   </li>
   <li>
-    <strong>Configuration:</strong> default settings can be loaded from <code>machai.properties</code> or from a file specified via
-    <code>-Dconfig=...</code>; the CLI also provides commands to persist commonly used defaults.
+    <strong>Command components:</strong> Spring Shell <em>commands</em> implement the primary user-facing operations, including
+    configuration, bindex generation/registration, semantic search (“pick”), project assembly, document processing
+    (Ghostwriter), Act mode, and cleanup.
   </li>
   <li>
-    <strong>Commands:</strong> Spring Shell components expose configuration management, bindex operations, semantic search
-    (“pick”) and assembly workflows, document processing (Ghostwriter), “Act mode”, and cleanup.
+    <strong>Configuration:</strong> defaults can be loaded from <code>machai.properties</code> (or from a file specified via
+    <code>-Dconfig=...</code>) and are also manageable via the CLI.
   </li>
 </ul>
 
@@ -69,11 +70,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li>
     <strong><code>org.machanism.machai.cli</code></strong> – Spring Shell-based command-line interface (CLI) for Machai.
     <ul>
-      <li>Bootstraps the CLI application and loads optional system properties.</li>
-      <li>Exposes Spring Shell commands for configuration, indexing/registration, picking/assembly, document
-        processing, and cleanup.</li>
-      <li>Persists CLI defaults (for example, working directory and GenAI provider/model settings) to simplify repeated
-        workflows.</li>
+      <li>Contains the Spring Boot entry point and Spring Shell command components.</li>
+      <li>Supports both interactive REPL usage and one-shot command execution.</li>
+      <li>Provides command groups for configuration, bindex operations, picking/assembly, document processing, Act mode,
+        and cleanup.</li>
+      <li>Loads optional system properties from <code>machai.properties</code> or from a file referenced by <code>-Dconfig=...</code>.</li>
     </ul>
   </li>
 </ul>
@@ -95,15 +96,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     provider.
   </li>
   <li>
-    <code>GWCommand</code> – Scans folders and processes documents/files using the Ghostwriter pipeline.
-  </li>
+    <code>GWCommand</code> – Scans folders and processes documents/files using the Ghostwriter pipeline.</li>
   <li>
-    <code>ActCommand</code> – Runs a predefined interactive action/prompt (“Act mode”) against a selected working context.
-  </li>
+    <code>ActCommand</code> – Runs a predefined interactive action/prompt (“Act mode”) against a selected working context.</li>
   <li>
     <code>CleanCommand</code> – Removes Machai temporary directories (for example, <code>.machai</code>) under a selected root
-    directory.
-  </li>
+    directory.</li>
 </ul>
 
 <h2>Class diagram</h2>
@@ -143,8 +141,8 @@ clean --dir .\\my-project
     the <code>clean</code> command.
   </li>
   <li>
-    Command names and options are defined by the Spring Shell components in <code>org.machanism.machai.cli</code>; consult
-    each command type’s Javadoc for details.
+    Command names and options are defined by Spring Shell components in <code>org.machanism.machai.cli</code>; consult each
+    command type’s Javadoc for details.
   </li>
 </ul>
 

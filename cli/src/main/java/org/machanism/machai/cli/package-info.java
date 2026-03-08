@@ -1,17 +1,18 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains the Spring Boot entry point and Spring Shell command components that expose Machai
- * functionality through both interactive (REPL) and non-interactive command execution.
+ * <p>This package contains the Spring Boot entry point and Spring Shell command
+ * components that expose Machai functionality through both interactive (REPL)
+ * and non-interactive command execution.
  *
  * <h2>Command groups</h2>
  * <ul>
- *   <li><strong>Configuration</strong> – {@link org.machanism.machai.cli.ConfigCommand} persists defaults (for example,
- *       working directory and GenAI provider/model) in {@code machai.properties}.</li>
- *   <li><strong>Indexing and registration</strong> – {@link org.machanism.machai.cli.BindexCommand} generates and
- *       registers bindex metadata for projects.</li>
- *   <li><strong>Picking and assembly</strong> – {@link org.machanism.machai.cli.AssembyCommand} performs semantic
- *       search (“pick”) and assembles a project skeleton using a configured GenAI provider.</li>
+ *   <li><strong>Configuration</strong> – {@link org.machanism.machai.cli.ConfigCommand} persists defaults
+ *       (for example, working directory and GenAI provider/model) in {@code machai.properties}.</li>
+ *   <li><strong>Indexing and registration</strong> – {@link org.machanism.machai.cli.BindexCommand} generates
+ *       and registers bindex metadata for projects.</li>
+ *   <li><strong>Picking and assembly</strong> – {@link org.machanism.machai.cli.AssembyCommand} performs
+ *       semantic search (“pick”) and assembles a project skeleton using a configured GenAI provider.</li>
  *   <li><strong>Document processing</strong> – {@link org.machanism.machai.cli.GWCommand} scans folders and processes
  *       files using the Ghostwriter pipeline; {@link org.machanism.machai.cli.ActCommand} runs an interactive
  *       predefined action/prompt in “Act mode”.</li>
@@ -23,8 +24,8 @@
  * <ul>
  *   <li>The application entry point {@link org.machanism.machai.cli.MachaiCLI} loads optional system properties from
  *       {@code machai.properties} or from a file provided via {@code -Dconfig=...}.</li>
- *   <li>Most commands use defaults persisted by {@link org.machanism.machai.cli.ConfigCommand} when an option (such as
- *       {@code --dir} or {@code --genai}) is not provided.</li>
+ *   <li>Most commands use defaults persisted by {@link org.machanism.machai.cli.ConfigCommand} when an option
+ *       (such as {@code --dir} or {@code --genai}) is not provided.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

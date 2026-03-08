@@ -36,6 +36,8 @@ Key benefits:
 - **Semantic library picking** using natural-language prompts and similarity scoring.
 - **Guided project assembly** to bootstrap a project skeleton from chosen libraries.
 - **Ghostwriter pipeline** for scanning and processing documents/files with GenAI guidance.
+- **Interactive Act mode** to run predefined actions/prompts on scanned project content.
+- **Cleanup utilities** to remove temporary `.machai` folders created during processing.
 
 ## Overview
 
@@ -45,7 +47,7 @@ Machai CLI boots a Spring Shell environment (REPL-style) and exposes several com
   - `MachaiCLI` loads system properties from `machai.properties` (or from the file specified by `-Dconfig=...`) and starts Spring Boot / Spring Shell.
 
 - **Persisted defaults (configuration)**
-  - `ConfigCommand` reads/writes common defaults into `machai.properties` via `PropertiesConfigurator` (e.g., default `genai`, `dir`, and `score`).
+  - `ConfigCommand` persists and reads key/value defaults in `machai.properties` via `PropertiesConfigurator`. Other commands use these defaults when flags are omitted.
 
 - **Bindex metadata generation and registration**
   - `BindexCommand`
@@ -54,13 +56,15 @@ Machai CLI boots a Spring Shell environment (REPL-style) and exposes several com
 
 - **Semantic search (picking) and project assembly**
   - `AssembyCommand`
-    - `pick`: selects libraries matching a prompt (or prompt file) using similarity scoring.
-    - `assembly`: creates a project skeleton from picked libraries (optionally reuses the previous pick if `--query` is omitted).
-    - `prompt`: sends an ad-hoc prompt to the configured GenAI provider (useful for guidance).
+    - `pick`: selects libraries matching a prompt (or prompt file) using similarity scoring and an optional registry backend.
+    - `assembly`: creates a project skeleton from picked libraries (optionally reusing the previous pick if `--query` is omitted).
+    - `prompt`: sends an ad-hoc prompt to the configured GenAI provider.
 
 - **Ghostwriter document/file processing**
   - `GWCommand`
-    - `gw`: scans one or more directories and processes files using GenAI guidance and optional instructions.
+    - `gw`: scans directories and processes files using GenAI guidance/instructions.
+  - `ActCommand`
+    - `act`: scans project content and runs an interactive “Act mode” action/prompt via Ghostwriter.
 
 - **Cleanup utility**
   - `CleanCommand`
@@ -104,19 +108,19 @@ Machai CLI boots a Spring Shell environment (REPL-style) and exposes several com
 
 ## Configuration
 
-Machai CLI stores common defaults in `machai.properties`. You can manage these values interactively using `config` commands.
+Machai CLI stores common defaults in `machai.properties`. You can manage these values interactively using `set` (see `help set` in the shell).
 
 ### Common configuration parameters
 
 | Key | Description | Default |
 |---|---|---|
-| `genai` | Default GenAI provider/model identifier when `--genai` is omitted | `CodeMie:gpt-5-2-2025-12-11` |
+| `genai` | Default GenAI provider/model identifier when `--genai`/`--model` is omitted | (not set; commands often fall back to `CodeMie:gpt-5-2-2025-12-11`) |
 | `dir` | Default working/project directory when `--dir` is omitted | Current user directory |
 | `score` | Default minimum similarity threshold used by semantic picking | `0.90` |
 | `registerUrl` | Default registry URL used by `register` and (optionally) by `pick/assembly` | (not set) |
-| `GW_ROOTDIR` | Root directory used by Ghostwriter when scanning (property key used by `Ghostwriter.GW_ROOTDIR_PROP_NAME`) | Current user directory |
-| `GW_INSTRUCTIONS` | Default Ghostwriter instructions (property key used by `Ghostwriter.GW_INSTRUCTIONS_PROP_NAME`) | (not set) |
-| `GW_GUIDANCE` | Default Ghostwriter guidance (property key used by `Ghostwriter.GW_GUIDANCE_PROP_NAME`) | (not set) |
+| `GW_ROOTDIR` | Root directory used by Ghostwriter scanning (constant: `Ghostwriter.GW_ROOTDIR_PROP_NAME`) | Current user directory |
+| `GW_INSTRUCTIONS` | Default Ghostwriter instructions (constant: `Ghostwriter.GW_INSTRUCTIONS_PROP_NAME`) | (not set) |
+| `GW_GUIDANCE` | Default Ghostwriter guidance (constant: `Ghostwriter.GW_GUIDANCE_PROP_NAME`) | (not set) |
 
 > Exact Ghostwriter property keys are defined by constants in `org.machanism.machai.gw.processor.Ghostwriter`.
 
@@ -125,9 +129,9 @@ Machai CLI stores common defaults in `machai.properties`. You can manage these v
 1. **Set defaults** (optional):
 
    ```text
-   config genai CodeMie:gpt-5-2-2025-12-11
-   config dir C:\\work\\my-project
-   config score 0.90
+   set genai CodeMie:gpt-5-2-2025-12-11
+   set dir C:\\work\\my-project
+   set score 0.90
    ```
 
 2. **Generate Bindex metadata**:
@@ -154,34 +158,46 @@ Machai CLI stores common defaults in `machai.properties`. You can manage these v
    assembly --dir C:\\work\\out
    ```
 
+6. **Process files with Ghostwriter** (optional):
+
+   ```text
+   gw --scanDirs C:\\work\\my-project\\docs --excludes target,.git
+   ```
+
+7. **Clean temporary folders** (optional):
+
+   ```text
+   clean --dir C:\\work\\my-project
+   ```
+
 ## Usage
 
-Machai CLI is typically used in an interactive Spring Shell session. The commands below are the primary user-facing operations.
+Machai CLI is typically used in an interactive Spring Shell session.
+
+Start the CLI:
+
+```bat
+java -Dconfig=machai.properties -jar machai.jar
+```
+
+Then use `help` to discover available commands:
+
+```text
+help
+help bindex
+help pick
+help gw
+```
 
 ### Configure defaults
 
-- Set default GenAI provider/model:
+- Set/get a persisted property:
 
   ```text
-  config genai CodeMie:gpt-5-2-2025-12-11
-  ```
-
-- Set default working directory:
-
-  ```text
-  config dir C:\\work\\my-project
-  ```
-
-- Set default semantic-search score:
-
-  ```text
-  config score 0.90
-  ```
-
-- Display current configuration:
-
-  ```text
-  config conf
+  set genai CodeMie:gpt-5-2-2025-12-11
+  set dir C:\\work\\my-project
+  set score 0.90
+  set score
   ```
 
 ### Generate and register Bindex
@@ -206,7 +222,7 @@ Machai CLI is typically used in an interactive Spring Shell session. The command
   pick --query "Create a web app" --score 0.90 --genai CodeMie:gpt-5-2-2025-12-11
   ```
 
-- Assemble a project in a directory:
+- Assemble a project in a directory (reusing last pick if `--query` is omitted):
 
   ```text
   assembly --dir C:\\work\\out --genai CodeMie:gpt-5-2-2025-12-11
@@ -224,13 +240,27 @@ Machai CLI is typically used in an interactive Spring Shell session. The command
 - Scan and process one or more directories:
 
   ```text
-  gw --genai CodeMie:gpt-5-2-2025-12-11 --threads false --scanDirs C:\\work\\my-project\\docs
+  gw --model CodeMie:gpt-5-2-2025-12-11 --threads false --scanDirs C:\\work\\my-project\\docs
   ```
 
 - Provide inline instructions/guidance (empty value triggers interactive input):
 
   ```text
   gw --instructions "" --guidance "" --scanDirs C:\\work\\my-project
+  ```
+
+### Run Act mode
+
+- Scan the current project and run an action:
+
+  ```text
+  act --action "Summarize the architecture"
+  ```
+
+- Add extra prompt text:
+
+  ```text
+  act --action "Review" --prompt "Focus on security"
   ```
 
 ### Clean temporary folders
@@ -250,12 +280,14 @@ java -Dconfig=machai.properties -jar machai.jar
 Then, in the shell:
 
 ```text
-config genai CodeMie:gpt-5-2-2025-12-11
-config dir C:\\work\\demo
-config score 0.85
+set genai CodeMie:gpt-5-2-2025-12-11
+set dir C:\\work\\demo
+set score 0.85
 bindex
 pick --query "Generate a Spring Boot REST service"
 assembly --dir C:\\work\\demo\\generated
+gw --scanDirs C:\\work\\demo --excludes target,.git
+clean --dir C:\\work\\demo
 ```
 
 ## Resources
