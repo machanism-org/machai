@@ -3,6 +3,7 @@ package org.machanism.machai.gw.processor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -49,10 +50,13 @@ public class ActProcessor extends AIFileProcessor {
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
+	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
+
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
 
+	/** Optional directory containing external {@code *.toml} act files. */
 	private File actDir;
 
 	/**
@@ -115,6 +119,15 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Loads an act into the provided {@link Properties}, supporting inheritance via
+	 * {@code basedOn}.
+	 *
+	 * @param name       act name (without {@code .toml})
+	 * @param properties destination for parsed dotted properties
+	 * @param actDir     optional directory for user-defined acts
+	 * @throws IOException if reading act content fails
+	 */
 	public static void loadAct(String name, Properties properties, File actDir) throws IOException {
 		TomlParseResult customToml = tryLoadActFromDirectory(properties, name, actDir);
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
@@ -137,6 +150,14 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Attempts to load an act definition from classpath resources.
+	 *
+	 * @param properties destination for parsed dotted properties
+	 * @param name       act name (without {@code .toml})
+	 * @return parsed TOML result, or {@code null} when the act is not found
+	 * @throws IOException if the resource cannot be read
+	 */
 	public static TomlParseResult tryLoadActFromClasspath(Properties properties, String name) throws IOException {
 		String path = ACTS_BASENAME_PREFIX + name + ".toml";
 		URL resource = Ghostwriter.class.getResource(path);
@@ -144,12 +165,22 @@ public class ActProcessor extends AIFileProcessor {
 			return null;
 		}
 
-		String tomlStr = IOUtils.toString(resource, "UTF8");
+		String tomlStr = IOUtils.toString(resource, StandardCharsets.UTF_8);
 		TomlParseResult toml = Toml.parse(tomlStr);
 		setActData(properties, toml);
 		return toml;
 	}
 
+	/**
+	 * Attempts to load an act definition from a user-defined directory.
+	 *
+	 * @param properties destination for parsed dotted properties
+	 * @param name       act name (without {@code .toml})
+	 * @param actDir     directory containing {@code *.toml} act files (may be
+	 *                   {@code null})
+	 * @return parsed TOML result, or {@code null} when not found
+	 * @throws IOException if the file cannot be read
+	 */
 	public static TomlParseResult tryLoadActFromDirectory(Properties properties, String name, File actDir)
 			throws IOException {
 		if (actDir == null) {
@@ -165,6 +196,17 @@ public class ActProcessor extends AIFileProcessor {
 		return toml;
 	}
 
+	/**
+	 * Copies dotted-string keys from the TOML parse result into {@code properties}.
+	 *
+	 * <p>
+	 * If a key already exists in {@code properties}, the new value is formatted
+	 * into the old value using {@link String#format(String, Object...)}.
+	 * </p>
+	 *
+	 * @param properties properties destination
+	 * @param toml       TOML parse result
+	 */
 	private static void setActData(Properties properties, TomlParseResult toml) {
 		Set<Entry<String, Object>> props = toml.dottedEntrySet();
 		for (Entry<String, Object> entry : props) {
@@ -208,7 +250,7 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 
 				case "gw.nonRecursive":
-					super.setNonRecursive(Boolean.getBoolean(value));
+					super.setNonRecursive(Boolean.parseBoolean(value));
 					break;
 
 				default:

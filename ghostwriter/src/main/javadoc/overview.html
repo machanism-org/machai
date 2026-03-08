@@ -30,11 +30,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <header>
   <h1>Ghostwriter</h1>
   <p>
-    Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles
-    project documentation using embedded guidance tags and AI-powered synthesis.
+    Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project
+    documentation using embedded guidance tags and AI-powered synthesis.
   </p>
   <p>
-    Ghostwriter supports all types of project files—including source code, documentation, project site content,
+    Ghostwriter supports all types of project filesincluding source code, documentation, project site content,
     and other relevant files.
   </p>
 </header>
@@ -49,7 +49,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <ul>
     <li><strong>Filesystem-based processing:</strong> scans files as they exist on disk; it does not build projects.</li>
     <li><strong>No dependency resolution:</strong> scanning does not resolve Maven/Gradle dependencies.</li>
-    <li><strong>Child-first processing:</strong> for multi-module layouts, child projects are processed before parent aggregation.</li>
+    <li><strong>Child-first processing:</strong> multi-module layouts are processed child-first before parent aggregation.</li>
     <li><strong>Format-aware guidance extraction:</strong> guidance is extracted using reviewers for multiple file formats.</li>
   </ul>
 </section>
@@ -63,7 +63,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
   <p>
     The implementation is organized around an orchestration pipeline (project traversal, matching, prompt
-    composition, dispatch) and a reviewer SPI (format-specific guidance extractors).
+    composition, and dispatch) and a reviewer SPI (format-specific guidance extractors).
   </p>
 </section>
 
@@ -78,8 +78,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
     <dt><strong>Reviewer</strong></dt>
     <dd>
-      A file-format-aware scanner that locates and extracts <code>@guidance:</code> blocks according to
-      the comment conventions of a specific format.
+      A file-format-aware scanner that locates and extracts <code>@guidance:</code> blocks according to the comment
+      conventions of a specific format.
     </dd>
 
     <dt><strong>Processing pipeline</strong></dt>
@@ -91,43 +91,33 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <dt><strong>Scan target</strong></dt>
     <dd>
       A directory path (typically relative to the project root) or a
-      <code>java.nio.file.FileSystems.getPathMatcher</code> expression (for example, <code>glob:</code> or <code>regex:</code>).
+      <code>java.nio.file.FileSystems.getPathMatcher</code> expression (for example, <code>glob:</code> or
+      <code>regex:</code>).
     </dd>
   </dl>
 </section>
 
 <section>
-  <h2>Package overview</h2>
+  <h2>Packages</h2>
+  <p>
+    The API is organized into two main packages.
+  </p>
 
   <h3><code>org.machanism.machai.gw.processor</code></h3>
   <p>
-    Project scanning, guidance extraction, and prompt orchestration for the Ghostwriter command-line tool.
-    The processors implement a filesystem-based pipeline: traversing project trees, extracting embedded guidance
-    from supported file formats, and invoking the configured GenAI provider.
-  </p>
-  <ul>
-    <li><strong>Entry point:</strong> the CLI launches scans and processing runs.</li>
-    <li><strong>Traversal and selection:</strong> files are included via directory targets and/or <code>glob:</code>/<code>regex:</code> matchers.</li>
-    <li><strong>Guidance extraction:</strong> per-file <code>@guidance:</code> blocks are located by format-specific reviewers.</li>
-    <li><strong>Prompt composition:</strong> guidance + project context are assembled into provider-ready prompts.</li>
-    <li><strong>Execution:</strong> prompts are dispatched to the configured GenAI provider.</li>
-  </ul>
-  <p>
-    Processing is strictly filesystem-based: projects are not built and dependencies are not resolved.
-    Multi-module layouts are processed child-first.
+    Project scanning, guidance extraction, and prompt orchestration for the Ghostwriter command-line tool. This
+    package provides the CLI entry point, processors that traverse project trees, extract embedded guidance from
+    supported formats, compose prompts, and invoke a configured GenAI provider. Processing is strictly
+    filesystem-based: projects are not built and dependencies are not resolved. For multi-module layouts,
+    processing is performed child-first.
   </p>
 
   <h3><code>org.machanism.machai.gw.reviewer</code></h3>
   <p>
-    File-format-aware scanners used to discover embedded <code>@guidance</code> instructions and convert them
-    into normalized prompt fragments.
+    File-format-aware scanners used to discover embedded <code>@guidance</code> instructions and convert them into
+    normalized prompt fragments for downstream processing. Implementations scan formats such as Java, Markdown,
+    HTML/XML, TypeScript, Python, PlantUML, and plain-text guidance files.
   </p>
-  <ul>
-    <li>Defines the reviewer SPI and selects implementations based on supported file extensions.</li>
-    <li>Implements guidance extraction for common formats such as Java, Markdown, HTML/XML, TypeScript, Python,
-      PlantUML, and plain-text guidance files.</li>
-    <li>Returns prompt fragments that include project-relative path context to improve provider responses.</li>
-  </ul>
 </section>
 
 <section>
@@ -135,7 +125,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <pre><code>java -jar gw.jar &lt;scanTarget&gt; [options]</code></pre>
   <p>
     The <code>&lt;scanTarget&gt;</code> argument can be a relative directory path (for example, <code>src/main</code>) or a matcher
-    expression supported by <code>java.nio.file.FileSystems.getPathMatcher</code> (for example, <code>glob:**/*.java</code>).
+    expression supported by <code>java.nio.file.FileSystems.getPathMatcher</code> (for example,
+    <code>glob:**/*.java</code>).
   </p>
 </section>
 

@@ -115,12 +115,12 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 - `-r, --root <path>` — Root directory for file processing.
 - `-t, --threads[=<true|false>]` — Enable multi-threaded processing (default: `false`). If provided with no value, it enables threading.
 - `-m, --model <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
-- `-i, --instructions[=<text|url|file:...>]` — Provide system instructions. If used without a value, Ghostwriter reads multi-line text from stdin.
-- `-g, --guidance[=<text|url|file:...>]` — Provide default guidance. If used without a value, Ghostwriter reads multi-line text from stdin.
+- `-i, --instructions[=<text|url|file:...>]` — System instructions (plain text, URL, or `file:`). If no value: stdin using `\\` as a line-continuation marker.
+- `-g, --guidance[=<text|url|file:...>]` — Default guidance (plain text, URL, or `file:`). If no value: stdin using `\\` as a line-continuation marker.
 - `-e, --excludes <csv>` — Comma-separated list of directories to exclude.
 - `-l, --logInputs` — Log LLM request inputs to dedicated log files.
 - `-as, --acts <path>` — Directory containing predefined act prompt files.
-- `-a, --act[=<name and prompt>]` — Run in Act mode (interactive execution of predefined prompts). If used without a value, Ghostwriter reads the action from stdin.
+- `-a, --act[=<name and prompt>]` — Run in Act mode (interactive execution of predefined prompts). If no value: stdin using `\\` as a line-continuation marker.
 
 ### Options Table
 
@@ -130,8 +130,8 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 | `-r, --root <path>` | Specify the path to the root directory for file processing. | `gw.rootDir` or current working directory |
 | `-t, --threads[=<true\|false>]` | Enable multi-threaded processing. If used without a value, enables it. | `false` (`gw.threads`) |
 | `-m, --model <provider:model>` | Set the GenAI provider and model. | `gw.model` |
-| `-i, --instructions[=<text\|url\|file:...>]` | System instructions (plain text, URL, or `file:`). If no value: stdin until EOF. | `gw.instructions` |
-| `-g, --guidance[=<text\|url\|file:...>]` | Default guidance (plain text, URL, or `file:`). If no value: stdin until EOF. | `gw.guidance` |
+| `-i, --instructions[=<text\|url\|file:...>]` | System instructions (plain text, URL, or `file:`). If no value: stdin until a line does not end with `\\`. | `gw.instructions` |
+| `-g, --guidance[=<text\|url\|file:...>]` | Default guidance (plain text, URL, or `file:`). If no value: stdin until a line does not end with `\\`. | `gw.guidance` |
 | `-e, --excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` |
 | `-l, --logInputs` | Log LLM request inputs to dedicated log files. | `false` (`gw.logInputs`) |
 | `-as, --acts <path>` | Specify the path to the directory containing predefined act prompt files. | not set |
@@ -148,8 +148,8 @@ java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -g -l
 From the built-in help:
 
 - `<scanDir>` may be a relative path (from the current project directory) or a `glob:` / `regex:` matcher.
-- If an option that accepts optional text (`-g/--guidance`, `-i/--instructions`, or `-a/--act`) is used without a value, Ghostwriter reads multi-line input from stdin until EOF.
-- When entering multi-line input interactively, end input by typing a trailing backslash (`\\`) to continue to the next line; input ends when a line does not end with `\\`.
+- If an option that accepts optional text (`-g/--guidance`, `-i/--instructions`, or `-a/--act`) is used without a value, Ghostwriter reads multi-line input from stdin.
+- When entering multi-line input interactively, end input when a line does not end with `\\` (a trailing backslash continues the next line).
 
 ## Default Guidance
 
@@ -167,7 +167,7 @@ When provided through the CLI/config, the value is parsed line-by-line:
 - Lines starting with `file:` are loaded from the specified file path (relative paths resolve from the configured root directory).
 - Other lines are used as-is.
 
-Additionally, when default guidance is configured, Ghostwriter may run a folder-level processing step (depending on processor behavior) by sending the default guidance prompt against the scanned folder context.
+Additionally, when default guidance is configured, Ghostwriter may run a folder-level processing step (via `AIFileProcessor.processFolder(ProjectLayout)`), sending the default guidance prompt against the scanned folder context.
 
 ## Resources
 

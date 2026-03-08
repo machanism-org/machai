@@ -94,7 +94,6 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 | `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | `null` (when unset); if still unset at runtime, the CLI scans `user.dir` absolute path. | Read via `config.get("gw.scanDir", null)` only when there are no CLI scanDir args. If still absent, Ghostwriter scans `SystemUtils.getUserDir().getAbsolutePath()`. |
 
 > Notes:
-> - `gw.config` is a **system property** only; it is not read from `gw.properties`.
 > - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself reads `gw.home` as a **system property**.
 > - The CLI option `--acts <dir>` is **not** a `gw.*` property. It is a command-line-only override for the directory containing Act prompt files.
 
@@ -138,14 +137,16 @@ gw.threads=true
 # Override project root directory (optional)
 gw.rootDir=C:\\projects\\machai
 
-# Optional: choose a different properties file name (resolved relative to gw.home)
-# gw.config=custom.properties
-
-# Optional: override gwHomeDir (base directory used to resolve gw.config)
-# gw.home=C:\\machai\\ghostwriter
-
 # Optional: default scan target when no <scanDir> args are provided
 # gw.scanDir=src
+
+# Optional: choose a different properties file name (resolved relative to gw.home)
+# (set as a Java system property; not read from gw.properties)
+# -Dgw.config=custom.properties
+
+# Optional: override gwHomeDir (base directory used to resolve gw.config)
+# (set as a Java system property; not read from gw.properties)
+# -Dgw.home=C:\\machai\\ghostwriter
 ```
 
 ### Overriding Settings: Command-Line Options
