@@ -80,8 +80,8 @@ public class ConfigCommand {
 	 */
 	@ShellMethod("Show configuration properties.")
 	public void conf() {
-		LOGGER.info("Working directory path: dir = {}", config.get("dir"));
-		LOGGER.info("Default GenAI Service: genai = {}", config.get("model"));
-		LOGGER.info("Default minimum score for semantic search: score = {}", config.get("score"));
+		LOGGER.info("Working directory path: dir = {}", config.get("gw.rootDir", null));
+		LOGGER.info("Default GenAI Service: genai = {}", config.get("gw.model", null));
+		LOGGER.info("Default minimum score for semantic search: score = {}", config.get("bindex.score", null));
 	}
 }

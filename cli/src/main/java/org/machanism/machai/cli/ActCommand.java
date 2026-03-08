@@ -26,20 +26,27 @@ public class ActCommand {
 
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
 	public void act(@ShellOption(value = "action") String action[],
-			@ShellOption(value = "model", help = "Set the GenAI provider and model", defaultValue = "CodeMie:gpt-5-2-2025-12-11") String model)
+			@ShellOption(value = "model", help = "Set the GenAI provider and model") String model)
 			throws IOException {
 
 		File rootDir = ConfigCommand.config.getFile("gw.rootDir", SystemUtils.getUserDir());
 
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
+
+		model = model == null ? ConfigCommand.config.get("gw.model") : model;
+
 		ActProcessor processor = new ActProcessor(rootDir, configurator, model);
 		String act = StringUtils.join(action, " ");
 		processor.setDefaultPrompt(act);
 
-		String scanDir = configurator.get("gw.scanDir",
-				ConfigCommand.config.getFile("gw.scanDir", rootDir).getAbsolutePath());
+		String scanDir = ConfigCommand.config.get("gw.scanDir", null);
+
 		if (scanDir == null) {
-			scanDir = SystemUtils.getUserDir().getAbsolutePath();
+			if (rootDir != null) {
+				scanDir = rootDir.getAbsolutePath();
+			} else {
+				scanDir = SystemUtils.getUserDir().getAbsolutePath();
+			}
 		}
 		logger.info("Starting scan of directory: {}", scanDir);
 		File projectDir = processor.getRootDir();
