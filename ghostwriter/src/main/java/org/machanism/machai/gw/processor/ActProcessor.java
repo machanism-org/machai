@@ -49,8 +49,8 @@ public class ActProcessor extends AIFileProcessor {
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
+	public static final String ACTS_BASENAME_PREFIX = "/acts/";
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
-	private static final String ACTS_BASENAME_PREFIX = "/acts/";
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
 
 	private File actDir;
@@ -102,21 +102,21 @@ public class ActProcessor extends AIFileProcessor {
 
 		Properties actData = new Properties();
 		try {
-			loadAct(name, actData);
+			loadAct(name, actData, actDir);
 			String actPrompt = Objects.toString(super.getDefaultPrompt(),
 					getConfigurator().get("prompt", actData.getProperty("inputs")));
 			String value = String.format(actPrompt, StringUtils.defaultString(prompt).trim());
-			
+
 			super.setDefaultPrompt(value);
 			applyActData(actData);
-			
+
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
-	private void loadAct(String name, Properties properties) throws IOException {
-		TomlParseResult customToml = tryLoadActFromDirectory(properties, name);
+	public static void loadAct(String name, Properties properties, File actDir) throws IOException {
+		TomlParseResult customToml = tryLoadActFromDirectory(properties, name, actDir);
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
@@ -132,12 +132,12 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		if (basedOn != null) {
-			loadAct(basedOn, properties);
+			loadAct(basedOn, properties, actDir);
 			properties.remove(BASED_ON_PROPERTY_NAME);
 		}
 	}
 
-	private TomlParseResult tryLoadActFromClasspath(Properties properties, String name) throws IOException {
+	public static TomlParseResult tryLoadActFromClasspath(Properties properties, String name) throws IOException {
 		String path = ACTS_BASENAME_PREFIX + name + ".toml";
 		URL resource = Ghostwriter.class.getResource(path);
 		if (resource == null) {
@@ -150,7 +150,8 @@ public class ActProcessor extends AIFileProcessor {
 		return toml;
 	}
 
-	private TomlParseResult tryLoadActFromDirectory(Properties properties, String name) throws IOException {
+	public static TomlParseResult tryLoadActFromDirectory(Properties properties, String name, File actDir)
+			throws IOException {
 		if (actDir == null) {
 			return null;
 		}
@@ -164,7 +165,7 @@ public class ActProcessor extends AIFileProcessor {
 		return toml;
 	}
 
-	private void setActData(Properties properties, TomlParseResult toml) {
+	private static void setActData(Properties properties, TomlParseResult toml) {
 		Set<Entry<String, Object>> props = toml.dottedEntrySet();
 		for (Entry<String, Object> entry : props) {
 			String key = entry.getKey();

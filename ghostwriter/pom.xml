@@ -91,6 +91,9 @@
 								</goals>
 								<configuration>
 									<appendAssemblyId>false</appendAssemblyId>
+									<descriptors>
+										<descriptor>src/assembly/assembly-jar.xml</descriptor>
+									</descriptors>
 									<outputDirectory>${project.build.directory}</outputDirectory>
 									<archive>
 										<manifestEntries>
@@ -99,9 +102,6 @@
 												${project.version}</Implementation-Version>
 										</manifestEntries>
 									</archive>
-									<descriptorRefs>
-										<descriptorRef>jar-with-dependencies</descriptorRef>
-									</descriptorRefs>
 								</configuration>
 							</execution>
 							<execution>
