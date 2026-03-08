@@ -305,7 +305,7 @@ public class OpenAIProvider implements GenAIProvider {
 							String candidate = content.outputText().get().text();
 							if (StringUtils.isNotBlank(candidate)) {
 								text = candidate;
-								logger.debug("LLM Response: {}", text);
+								logger.info("LLM Response: {}", text);
 							}
 						}
 					}
