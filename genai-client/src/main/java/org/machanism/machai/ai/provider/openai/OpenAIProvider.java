@@ -92,10 +92,10 @@ public class OpenAIProvider implements GenAIProvider {
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
 	/** Default maximum number of tool calls allowed per response. */
-	public static final int MAX_TOOL_CALLS = 200;
+	public static final long MAX_TOOL_CALLS = 200;
 
 	/** Default maximum number of tokens the model may generate. */
-	public static final int MAX_OUTPUT_TOKENS = 300000;
+	public static final long MAX_OUTPUT_TOKENS = 300000;
 
 	private static final long TIMEOUT_SEC = 600;
 
