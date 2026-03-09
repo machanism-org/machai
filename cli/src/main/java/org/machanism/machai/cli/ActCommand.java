@@ -1,6 +1,7 @@
 package org.machanism.machai.cli;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.annotation.PostConstruct;
@@ -17,10 +18,12 @@ import org.springframework.shell.standard.ShellOption;
 /**
  * Spring Shell command that runs Ghostwriter "Act mode".
  *
- * <p>The command scans the configured project folder and then executes a
+ * <p>
+ * The command scans the configured project folder and then executes a
  * predefined action/prompt interactively via {@link ActProcessor}.
  *
  * <h2>Examples</h2>
+ * 
  * <pre>
  * act commit
  * act commit "and push"
@@ -40,18 +43,16 @@ public class ActCommand {
 	/**
 	 * Interactively executes a predefined action/prompt using Act mode.
 	 *
-	 * <p>The default root directory and model are resolved from the persisted
+	 * <p>
+	 * The default root directory and model are resolved from the persisted
 	 * configuration managed by {@link ConfigCommand}.
 	 *
-	 * @param action
-	 *            the name of the predefined action to execute
-	 * @param prompt
-	 *            optional extra prompt text appended to {@code action}
-	 * @param model
-	 *            optional GenAI provider/model identifier (for example,
-	 *            {@code OpenAI:gpt-5.1}); if {@code null}, uses the configured default
-	 * @throws IOException
-	 *             if scanning documents fails
+	 * @param action the name of the predefined action to execute
+	 * @param prompt optional extra prompt text appended to {@code action}
+	 * @param model  optional GenAI provider/model identifier (for example,
+	 *               {@code OpenAI:gpt-5.1}); if {@code null}, uses the configured
+	 *               default
+	 * @throws IOException if scanning documents fails
 	 */
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
 	public void act(@ShellOption(value = "action") String action,
@@ -60,8 +61,12 @@ public class ActCommand {
 			throws IOException {
 
 		File rootDir = ConfigCommand.config.getFile("gw.rootDir", SystemUtils.getUserDir());
-		PropertiesConfigurator configurator = new PropertiesConfigurator(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);
-
+		PropertiesConfigurator configurator = new PropertiesConfigurator();
+		try {
+			configurator.setConfiguration(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);
+		} catch (FileNotFoundException e) {
+			// configuration file not found.
+		}
 		String resolvedModel = model == null ? ConfigCommand.config.get("gw.model") : model;
 		ActProcessor processor = new ActProcessor(rootDir, configurator, resolvedModel);
 		processor.setDefaultPrompt(action + " " + prompt);
