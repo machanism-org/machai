@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.0.0" date="2026-03-09">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Initial release of the GW Maven Plugin, providing the <code>gw</code> goal for AI-assisted project processing and code/documentation generation.</li>
+  <li>GenAI provider support and configuration (including OpenAI-compatible providers and CodeMie integration), with request timeouts and usage logging.</li>
+  <li>Instruction and guidance support via files and CLI properties/options, with default guidance handling and path matching/glob/regex support.</li>
+  <li>Multi-threaded module processing with configurable timeouts and improved command execution/output handling.</li>
+  <li>Packaging and distribution improvements (delivery pack/zip and Maven assembly packaging profiles).</li>
+</ul>
+
+<h2>Fixes</h2>
+<ul>
+  <li>Resolved numerous path/root-directory and scanning issues (scanDir processing, root project execution, file ordering/sorting, exclusion handling, and non-path pattern matching).</li>
+  <li>Fixed null handling and NPEs in configuration and processing flows; improved error and log messages.</li>
+  <li>Corrected CLI/help text and option processing (threads, guidance, instructions/excludes parsing, serverId optionality).</li>
+  <li>Improved provider robustness (OpenAI request timeout, CodeMie authUrl handling, synchronized web calls).</li>
+</ul>
+
+<h2>Refactoring</h2>
+<ul>
+  <li>Extracted and reorganized components (project layout handling, function tools, provider interfaces/manager) and cleaned up dependencies/imports.</li>
+  <li>Renamed and standardized modules/goals/packages (e.g., plugin goal to <code>gw</code>, package renames, configurator usage).</li>
+</ul>
+
+<h2>Documentation</h2>
+<ul>
+  <li>Added and updated extensive documentation (README/site pages, Javadoc, guidance examples, prompt templates) and improved download/help references.</li>
+</ul>
+
+<h2>Chores</h2>
+<ul>
+  <li>Version bumps and release preparations across multiple snapshot/release iterations leading to 1.0.0.</li>
+  <li>Build/test maintenance (test updates/disablements, pack profile adjustments, logging output tweaks).</li>
+</ul>
+        ]]>
+      </action>
+    </release>
+  </body>
+</document>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.0.0" date="2026-03-09">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Provide the <code>assembly</code> Maven goal (Assembly Maven Plugin) with configurable defaults.</li>
+</ul>
+<h2>Documentation</h2>
+<ul>
+  <li>Publish initial project site structure and documentation updates (site.xml, index.md, generated docs).</li>
+  <li>Add and refine Javadoc and package documentation (overview, <code>package-info.java</code>).</li>
+</ul>
+<h2>Chores</h2>
+<ul>
+  <li>Set and update project versions leading up to the 1.0.0 release.</li>
+  <li>Update build/site resources (icons, links, manifests) and generated outputs.</li>
+</ul>
+]]></action>
+    </release>
+  </body>
+</document>

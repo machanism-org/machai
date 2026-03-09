@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.0.0" date="2026-03-09">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Initial Machai CLI release, including core commands and configuration support.</li>
+  <li>Act workflow: run Acts from built-in and custom act directories, with TOML-based act templates, inheritance, placeholders, defaults, and improved error handling.</li>
+  <li>AI/GenAI provider integrations and tooling: OpenAI provider improvements (timeouts, BadRequest recovery, logging, token/tool limit fixes), plus provider stubs (Claude/Gemini) and CodeMie integration updates.</li>
+  <li>Function tools framework: ServiceLoader-based discovery, REST and web-page fetch tools (incl. basic auth and text-only extraction), command execution tooling, and process termination support.</li>
+  <li>Project layout and scanning improvements: better rootDir/scanDir handling, Maven/Gradle/JS layouts, deterministic processing, module traversal, and denylist-based command security checks.</li>
+  <li>Assembly and packaging: assembly command and descriptors, delivery pack/zip creation, and Maven plugin goals and defaults.</li>
+  <li>Bindex capabilities: schema, repositories and function tools, generation/search improvements, layering and scoring, and builders for multiple project types.</li>
+</ul>
+
+<h2>Fixes</h2>
+<ul>
+  <li>Improved robustness for act processing (template parsing, defaults, inherit placeholders, missing config handling) and scanning behavior.</li>
+  <li>Security and vulnerability fixes, including Grype-reported CVEs (GHSA-j288-q9x7-2f5v / CVE-2025-48924 and GHSA-2f88-5hg8-9x2x / CVE-2021-26291).</li>
+  <li>Multiple CLI/plugin fixes across options, logging, packaging, and provider request handling (e.g., follow-up requests, timeouts, and token refresh).</li>
+</ul>
+
+<h2>Refactoring</h2>
+<ul>
+  <li>Refined Act prompt flow and normalized tool output/newlines; improved shared module processing in file processors.</li>
+  <li>Provider and tooling refactors (e.g., OpenAI client handling and adapter extraction) to simplify integration points.</li>
+</ul>
+
+<h2>Documentation</h2>
+<ul>
+  <li>Expanded CLI, plugin, and Act documentation with practical examples; updated site content, navigation, icons, and manifests.</li>
+  <li>Improved Javadoc guidance and generated documentation structure across modules.</li>
+</ul>
+
+<h2>Chores</h2>
+<ul>
+  <li>Version and dependency updates leading to the 1.0.0 release; packaging and build configuration cleanups.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
+  </body>
+</document>

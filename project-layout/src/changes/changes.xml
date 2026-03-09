@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.0.0" date="2026-03-09">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Initial CLI capabilities, including <code>conf</code>, <code>process</code>/<code>docs</code, <code>prompt</code>, <code>bindex</code>, and <code>assembly</code> workflows.</li>
+  <li>Maven plugin support (gw-maven-plugin) with goals for running Ghostwriter/Acts, plus assembly and packaging defaults.</li>
+  <li>Act/TOML template system with inheritance (<code>basedOn</code>), placeholders, deterministic property application, custom <code>actDir</code>, non-interactive mode, and improved error handling.</li>
+  <li>GenAI provider integrations and tooling (OpenAI, CodeMie; placeholders for Claude/Gemini) with function tools (web fetch, REST calls, bindex schema) and usage logging.</li>
+  <li>Project layout detection and processing for Maven, Gradle, JavaScript, and default layouts, including module discovery and improved root/scanDir handling.</li>
+  <li>Documentation site and guides (README/site docs), including updated CLI usage examples and Act authoring guidance.</li>
+</ul>
+
+<h2>Fixes</h2>
+<ul>
+  <li>Security and dependency fixes reported by Grype (including CVE/GHSA findings) and improved command denylist enforcement.</li>
+  <li>Stability improvements across scanning and processing (rootDir/scanDir defaults, path matching, ordering, and null handling).</li>
+  <li>Provider reliability fixes (OpenAI follow-up requests/timeouts/BadRequest handling; CodeMie token refresh).</li>
+</ul>
+
+<h2>Refactoring</h2>
+<ul>
+  <li>Refined prompt and tool output normalization (LF line endings, newline normalization) and simplified Act prompt flow.</li>
+  <li>Shared module/file processing logic and reorganized tool/provider APIs for maintainability.</li>
+</ul>
+
+<h2>Documentation</h2>
+<ul>
+  <li>Expanded documentation for Acts, CLI options, defaults, and project processing behavior; multiple site updates (icons, manifest, navigation).</li>
+</ul>
+
+<h2>Chores</h2>
+<ul>
+  <li>Project bootstrap tasks: version bumps through snapshots/releases, packaging/assembly descriptor updates, and test/doc maintenance.</li>
+</ul>
+]]></action>
+    </release>
+  </body>
+</document>

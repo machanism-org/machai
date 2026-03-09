@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.0.0" date="2026-03-09">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h2>Features</h2>
+<ul>
+  <li><strong>Bindex core:</strong> generate and register Bindex metadata with CLI support (create/update/search), including layered picking and integration-aware search.</li>
+  <li><strong>Project layout support:</strong> detect and process Maven, JavaScript, Python and Gradle project structures; handle recursive sub-modules and parent projects.</li>
+  <li><strong>Vector/semantic search:</strong> classification- and description-based embeddings with score thresholds and configurable limits; improved result output and filtering (language/domains/integrations).</li>
+  <li><strong>Assembly workflows:</strong> added “assembly” command and prompt generation (assemble.txt / project.txt), plus tooling and defaults for assembly prompting.</li>
+  <li><strong>GenAI integration:</strong> pluggable providers/adapters (OpenAI-compatible and others), function tools (REST/web/system/terminate), and configurable request timeouts and limits.</li>
+  <li><strong>Ghostwriter (GW):</strong> file processing and review automation with guidance/instructions support, multi-threaded module processing, and Act-based workflows with TOML templates.</li>
+  <li><strong>Maven plugins:</strong> introduced bindex-maven-plugin, assembly-maven-plugin, and gw-maven-plugin with goals/options for non-interactive runs and configuration via properties.</li>
+  <li><strong>Packaging &amp; distribution:</strong> delivery pack creation and improved build profiles; added site docs, diagrams and assets.</li>
+</ul>
+
+<h2>Fixes</h2>
+<ul>
+  <li>Stabilized scanning/root directory handling and related-path resolution across CLI and Maven plugin runs.</li>
+  <li>Improved prompt/template processing (guidance handling, markdown formatting edge cases, prompt substitutions and line ending normalization).</li>
+  <li>Hardened function tool execution: better command denylist checks, safer command execution, and improved error handling for multi-call and configuration initialization.</li>
+  <li>Resolved provider/runtime issues (OpenAI BadRequest follow-ups, token refresh, timeouts, NPEs, logging and configuration defaults).</li>
+  <li>Fixed bindex generation/schema issues (required fields, JS/Python builders, temp/debug location under <code>.machai</code>).</li>
+</ul>
+
+<h2>Refactoring</h2>
+<ul>
+  <li>Extracted and reorganized modules and interfaces (project-layout module, GenAIProvider/Adapter abstractions, shared processor logic, function tools discovery via ServiceLoader).</li>
+  <li>Renamed and normalized options/properties and package/module names (e.g., ghostwriter to gw, property prefixes, goal naming).</li>
+  <li>Cleaned up dependencies/build configuration and improved import organization and logging consistency.</li>
+</ul>
+
+<h2>Documentation</h2>
+<ul>
+  <li>Expanded README and site documentation, including CLI/plugin usage, Act templates, processing guides, and additional pages/assets.</li>
+  <li>Added and improved Javadoc across modules; updated diagrams and screenshots.</li>
+</ul>
+
+<h2>Chores</h2>
+<ul>
+  <li>Versioning and release metadata updates; added release-related POM tags and build tooling updates.</li>
+  <li>Added tests and test resources; adjusted defaults for compatibility (Java 8/9/11 where applicable).</li>
+  <li>Security maintenance fixes (Grype-reported issues and command/tooling hardening).</li>
+</ul>
+        ]]>
+      </action>
+    </release>
+  </body>
+</document>

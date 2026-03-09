@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.0.0" date="2026-03-09">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Add bindex builder classes.</li>
+  <li>Add MongoDB integration and EmbeddingProvider.</li>
+  <li>Add BindexCommand and improve CLI behavior (debug/overwrite flags).</li>
+  <li>Add “assembly” command and ApplicationAssembly; implement assemble.txt prompt generation.</li>
+  <li>Support recursive sub-module processing.</li>
+  <li>Add search-bindex diagram.</li>
+</ul>
+<h2>Fixes</h2>
+<ul>
+  <li>Fix CLI issues; ensure FileInputStream is properly closed.</li>
+  <li>Fix GenAIProvider debug mode and improve find result output.</li>
+</ul>
+<h2>Refactoring</h2>
+<ul>
+  <li>Extract AssemblyCommand into a separate class; remove unused file(s).</li>
+</ul>
+<h2>Documentation</h2>
+<ul>
+  <li>Add and iteratively update README; add/update project logo and documentation assets.</li>
+</ul>
+<h2>Chores</h2>
+<ul>
+  <li>Add Maven assembly plugin configuration.</li>
+  <li>Introduce default user DB for read access.</li>
+  <li>Add LICENSE file.</li>
+</ul>
+]]></action>
+    </release>
+  </body>
+</document>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.0.0" date="2026-03-09">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Initial release of Machai: a modular toolkit for GenAI-enabled developer automation (Java libraries, CLI, and Maven plugins).</li>
+  <li>Provider-agnostic GenAI client with pluggable providers (OpenAI, Gemini, Claude, CodeMie, None) and function-tool support (file/web/command), including safety denylist checks.</li>
+  <li>Bindex metadata tooling to generate/consume library discovery indexes (schema + repository + builders) with Maven plugin and CLI integration.</li>
+  <li>Ghostwriter automation for repo-scale documentation updates driven by embedded <code>@guidance</code>, with file processors and language reviewers (Java/Markdown/HTML/Python/TypeScript/PUML).</li>
+  <li>Act system for reusable automation templates (TOML-based), including built-in acts such as commit, prompt, unit-tests, release-notes, sonar-fix, and grype-fix; supports custom act directories and non-interactive execution.</li>
+  <li>Maven plugins for Ghostwriter/Acts (including reactor goals) and assembly support, plus project-layout detection for Maven/JS/Gradle-style projects.</li>
+  <li>Project documentation site with module guides, Javadoc overviews, and generated diagrams/resources.</li>
+</ul>
+
+<h2>Fixes</h2>
+<ul>
+  <li>Improved OpenAI provider robustness (follow-up tool-call handling, timeout handling, BadRequest recovery, and corrected token/tool limit constants).</li>
+  <li>Hardened command execution tools (denylist configuration/init fixes, improved checks, and clearer errors).</li>
+  <li>Fixed act processing and defaults (scanDir/rootDir handling, act template loading/parsing, inheritance/placeholders, and CLI/maven non-interactive configuration).</li>
+  <li>Addressed Grype-reported security issues (CVE-2025-48924 / GHSA-j288-q9x7-2f5v and CVE-2021-26291 / GHSA-2f88-5hg8-9x2x).</li>
+</ul>
+
+<h2>Refactoring</h2>
+<ul>
+  <li>Refined Ghostwriter processing pipeline (shared module processing in an abstract processor, deterministic template application, and normalized prompt/tool output line endings).</li>
+  <li>Streamlined Bindex prompt/build flows and updated APIs for clarity and maintainability.</li>
+</ul>
+
+<h2>Documentation</h2>
+<ul>
+  <li>Expanded and refreshed CLI, Maven plugin, Act, and Ghostwriter documentation (usage examples, troubleshooting, configuration semantics, and site navigation).</li>
+  <li>Added/updated Javadoc overview pages across modules and improved generated site assets (icons, manifests, links).</li>
+</ul>
+
+<h2>Chores</h2>
+<ul>
+  <li>Project setup and packaging updates across modules, including configurator/version alignment and assembly descriptor improvements.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
+  </body>
+</document>
