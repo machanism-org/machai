@@ -1,3 +1,82 @@
+# GW Maven Plugin
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
+
+[GW Maven Plugin](https://machai.machanism.org/gw-maven-plugin/index.html)
+
+## Project Overview
+
+GW Maven Plugin is the primary Maven adapter for the MachAI [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings Ghostwriter’s Guided File Processing approach directly into Maven builds so documentation (and other project content) can be generated, updated, and kept consistent as part of a normal developer workflow.
+
+At a high level, the plugin scans a project’s working tree for files containing embedded `@guidance:` blocks (for example in Markdown, Java, or other project artifacts). Those guidance blocks act as in-place requirements for how a file should be created or updated. The plugin then delegates transformation/synthesis to the configured GenAI provider via Ghostwriter, producing updated outputs while preserving the guidance markers.
+
+## Installation Instructions
+
+### Prerequisites
+
+- Java installed and available on `PATH`.
+  - Build-level requirement (from `pom.xml`): compiled with `maven.compiler.release=8`.
+  - Practical runtime requirement: a newer LTS JDK may be needed depending on your GenAI provider and TLS/runtime environment.
+- Maven 3.x
+- Network access and credentials for your chosen GenAI provider (optionally via Maven `settings.xml`).
+
+### Checkout
+
+```bash
+git clone https://github.com/machanism-org/machai.git
+cd machai
+```
+
+### Build
+
+```bash
+mvn -pl gw-maven-plugin -am clean verify
+```
+
+## Usage
+
+GW Maven Plugin provides Maven goals (Mojos) that orchestrate Ghostwriter processors:
+
+- `gw:gw`: aggregator goal; processes modules in reverse order (sub-modules first, then parents) and can run without a `pom.xml`.
+- `gw:reactor`: processes modules using Maven reactor dependency ordering; can optionally defer execution-root processing.
+- `gw:act`: interactive action prompt applied across scanned documents.
+- `gw:act-reactor`: reactor-friendly variant of `gw:act` for execution-root processing.
+- `gw:clean`: deletes temporary artifacts created during GW processing.
+
+### Examples
+
+Run guided processing using the aggregator goal:
+
+```bash
+mvn gw:gw
+```
+
+Run against a specific scan root (for example, Maven Site sources):
+
+```bash
+mvn gw:gw -Dgw.scanDir=src\\site
+```
+
+Load GenAI credentials from Maven `settings.xml`:
+
+```bash
+mvn gw:gw -Dgw.genai.serverId=my-genai-server
+```
+
+Apply a one-off action across scanned files:
+
+```bash
+mvn gw:act -Dgw.act="rewrite headings for clarity"
+```
+
+## Resources
+
+- Project site: https://machai.machanism.org/gw-maven-plugin/index.html
+- Ghostwriter: https://machai.machanism.org/ghostwriter/index.html
+- Guided File Processing (concept): https://www.machanism.org/guided-file-processing/index.html
+- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin
+- GitHub (SCM): https://github.com/machanism-org/machai
+
 <!--
 @guidance:
 **ADD FOLLOWING SECTIONS TO THIS README FILE:**
@@ -5,149 +84,18 @@
    - Provide the project name and a brief description based on `src/site/markdown/index.md` content summary.
    - Use `src/site/markdown/index.md` as the primary source of information for generating the project description. Summarize and adapt its content as needed for clarity and conciseness.
    - Add `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])` after the title as a new paragraph. [groupId] and [artifactId] need to use from pom.xml.
+   - Add a clickable link to the project site: [GW Maven Plugin](https://machai.machanism.org/[artifactId]/index.html).
 2. **Installation Instructions:**  
    - Describe how to checkout the repository and build the project using Maven.
    - Include prerequisites such as Java version and build tools.
 3. **Usage:**  
    - Explain how to run or use the project and its modules.
    - Provide examples of usage with configuration.
-4. **Other Rules
+4. **Other Rules:**
    - Do not use the horizontal rule separator between sections.	
+
 **Formatting Requirements:**
 - Use Markdown syntax for headings, lists, code blocks, and links.
 - Ensure clarity and conciseness in each section.
 - Organize the README for easy navigation and readability.
 -->
-
-# GW Maven Plugin
-
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
-
-## Project Title and Overview
-
-GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates Ghostwriter’s guided file processing into Maven builds so you can generate and maintain project documentation (and other guided updates) as part of a consistent, repeatable workflow.
-
-At its core, the plugin scans your project for files containing embedded `@guidance:` blocks and delegates transformation/synthesis to the Machai Ghostwriter engine. This is based on the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) model: guidance is authored “in place” (close to the content it affects), and the processor uses that guidance to produce coherent, up-to-date results across the project.
-
-Key goals provided by this plugin:
-
-- **`gw:gw`**: aggregator goal that can run **without a `pom.xml`** (`requiresProject=false`) and processes modules in reverse order (sub-modules first).
-- **`gw:reactor`**: reactor-aware goal that processes modules according to Maven reactor dependency ordering, with an option to defer the execution-root project until other reactor projects complete.
-- **`gw:act`**: interactive goal that runs predefined action bundles backed by resource bundles.
-- **`gw:act-reactor`**: runs `gw:act` in a reactor-friendly, execution-root context.
-- **`gw:clean`**: deletes temporary artifacts created during processing.
-
-## Installation Instructions
-
-### Prerequisites
-
-- Git
-- Java
-  - **Build / compilation target:** Java **8** (from `pom.xml`: `maven.compiler.release=8`).
-  - **Runtime requirements:** may be newer depending on the Ghostwriter runtime and the GenAI provider/client libraries you use.
-- Apache Maven 3.x
-
-### Checkout
-
-```cmd
-git clone https://github.com/machanism-org/machai.git
-cd machai
-```
-
-### Build
-
-```cmd
-mvn -U clean install
-```
-
-## Usage
-
-### Add the plugin to your project
-
-Add the plugin to your project `pom.xml`:
-
-```xml
-<plugin>
-  <groupId>org.machanism.machai</groupId>
-  <artifactId>gw-maven-plugin</artifactId>
-  <version>REPLACE_WITH_LATEST_VERSION</version>
-</plugin>
-```
-
-### Run the plugin
-
-Guided file processing for the current directory (module order: sub-modules first):
-
-```cmd
-mvn gw:gw
-```
-
-Reactor-ordered processing in a multi-module build:
-
-```cmd
-mvn gw:reactor
-```
-
-Interactive actions:
-
-```cmd
-mvn gw:act
-```
-
-Interactive actions (reactor-friendly execution-root context):
-
-```cmd
-mvn gw:act-reactor
-```
-
-Cleanup temporary processing artifacts:
-
-```cmd
-mvn gw:clean
-```
-
-Enable multi-threaded module processing (for `gw:gw`):
-
-```cmd
-mvn gw:gw -Dgw.threads=true
-```
-
-### GenAI provider and credentials examples
-
-Specify a GenAI provider/model:
-
-```cmd
-mvn gw:gw -Dgw.model=openai:gpt-4.1-mini
-```
-
-If credentials are stored in Maven `settings.xml` under a `<server>` entry:
-
-```cmd
-mvn gw:gw -Dgw.model=openai:gpt-4.1-mini -Dgw.genai.serverId=genai
-```
-
-### Configuration example
-
-```xml
-<plugin>
-  <groupId>org.machanism.machai</groupId>
-  <artifactId>gw-maven-plugin</artifactId>
-  <version>REPLACE_WITH_LATEST_VERSION</version>
-  <configuration>
-    <scanDir>${project.basedir}\\src\\site</scanDir>
-    <excludes>
-      <exclude>**\\.machai\\**</exclude>
-    </excludes>
-    <model>openai:gpt-4.1-mini</model>
-    <serverId>genai</serverId>
-    <threads>true</threads>
-    <logInputs>false</logInputs>
-  </configuration>
-</plugin>
-```
-
-Command-line override example:
-
-```cmd
-mvn gw:gw -Dgw.model=openai:gpt-4.1-mini -Dgw.genai.serverId=genai -Dgw.logInputs=true
-```

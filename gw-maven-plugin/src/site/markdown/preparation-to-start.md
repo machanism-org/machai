@@ -79,7 +79,7 @@ You can also specify configuration options to customize the plugin’s behavior:
     <plugin>
       <groupId>org.machanism.machai</groupId>
       <artifactId>gw-maven-plugin</artifactId>
-      <version>0.0.11</version>
+      <version>1.0.0</version>
       <configuration>
         <model>CodeMie:gpt-5-2-2025-12-11</model>
         <serverId>CodeMie</serverId>
@@ -97,19 +97,29 @@ You can also specify configuration options to customize the plugin’s behavior:
 </build>
 ```
 
-### Configuration
+### Defining the OSS Sonatype Maven Central Repository
 
-| Parameter / Property | Description | Default |
-|---|---|---|
-| `gw.model` | GenAI provider/model identifier passed to Ghostwriter processing. | (none) |
-| `gw.scanDir` | Scan root override; when omitted, scans the Maven execution root directory (or the current module base directory when appropriate). | execution root directory |
-| `gw.instructions` | Instruction locations (file paths or classpath locations) consumed by the workflow. | (none) |
-| `gw.guidance` | Default guidance text forwarded to the workflow. | (none) |
-| `gw.excludes` | Exclude patterns/paths to skip while scanning. | (none) |
-| `gw.genai.serverId` | `settings.xml` `<server>` id used to load `GENAI_USERNAME`/`GENAI_PASSWORD`. | (none) |
-| `gw.logInputs` | If `true`, logs the list of input files passed to the workflow. | `false` |
-| `gw.threads` | Enables/disables multi-threaded module processing for `gw:gw`. | `false` |
-| `gw.rootProjectLast` | For `gw:reactor`, delays processing of the execution-root project until all other reactor projects complete. | `false` |
+To ensure Maven can always retrieve the latest version of the GW Maven Plugin, add the OSS Sonatype repository to your `<repositories>` section in your `pom.xml`:
+
+```xml
+<repositories>
+  <repository>
+    <id>plugin-oss</id>
+    <url>https://oss.sonatype.org/content/repositories/releases/</url>
+    <releases>
+      <enabled>true</enabled>
+    </releases>
+    <snapshots>
+      <enabled>false</enabled>
+    </snapshots>
+  </repository>
+</repositories>
+```
+
+This configuration allows Maven to download plugin releases directly from the OSS Sonatype repository, which hosts artifacts before they are fully synchronized to Maven Central. This is especially useful for accessing the latest plugin versions that may not yet be available in Maven Central.
+
+**Tip:**  
+Always check [Maven Central](https://search.maven.org/search?q=g:org.machanism.machai%20AND%20a:gw-maven-plugin) for the most recent stable plugin versions. If you need a version that is not yet available there, the OSS Sonatype repository will provide access.
 
 **Maven Settings Integration:**
 - If you specify `<serverId>`, the plugin will look up credentials in your Maven `settings.xml` under the corresponding `<server>` entry.
