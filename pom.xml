@@ -12,7 +12,12 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins that unify access to multiple GenAI providers, generate and consume bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate repository-scale documentation updates from embedded guidance using Ghostwriter.</description>
+	<description>Machai is a modular toolkit for GenAI-enabled developer
+		automation. It provides Java libraries, a command line application, and
+		Maven plugins that unify access to multiple GenAI providers, generate
+		and consume bindex metadata for library discovery and reuse, assemble
+		projects using metadata-driven updates, and automate repository-scale
+		documentation updates from embedded guidance using Ghostwriter.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -211,14 +216,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.11.2</version>
-				<configuration>
-					<show>package</show>
-				</configuration>
-			</plugin>
-			<plugin>
 				<artifactId>plantuml-generator-maven-plugin</artifactId>
 				<groupId>de.elnarion.maven</groupId>
 				<version>3.0.1</version>
@@ -327,11 +324,27 @@
 				<configuration>
 					<doclint>none</doclint>
 					<show>package</show>
-					
+
 					<useStandardDocletOptions>true</useStandardDocletOptions>
 					<bottom><![CDATA[&copy;2025-2026 Machanism.org. All Rights Reserved.]]></bottom>
 					<header><![CDATA[<h1><a href="${project.url}">${project.name}</a></h1>]]></header>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changes-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<configuration>
+					<escapeText>false</escapeText>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>changes</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 		</plugins>
 	</reporting>

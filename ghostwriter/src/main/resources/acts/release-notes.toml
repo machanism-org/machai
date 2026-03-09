@@ -14,6 +14,7 @@ Follow these steps:
 
 1. **Collect Commit Messages:**  
    - Gather all relevant git commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and [RELEASE_VERSION].
+   - Only include files located directly in the current directory (`.`) and changes in sub-directories.
    - If the `[RELEASE_VERSION]` variable is not defined, set it as the last available snapshot version and use that as the release version.
 
 2. **Analyze and Group Changes:**  
@@ -28,14 +29,43 @@ Follow these steps:
    - Ensure the release notes are easy to read and provide a clear summary of the changes for end users and developers.
 
 4. **Save the Release Notes:**  
-   - Save the generated markdown content to a file named `release-notes.md` in the current directory.
+   - If the file `src/changes/changes.xml` does not exist, create a new XML document using the schema `https://maven.apache.org/xsd/changes-2.0.0.xsd`. 
+      The root element should be `<document>` with a single `<body>` child element.
+   - Add a new `<release>` element inside `<body>`, with the following attributes:
+     - `version="[RELEASE_VERSION]"`
+     - `date="[CURRENT_DATE:YYYY-MM-DD]"`
+   - Inside the `<release>` element, add an `<action>` element with the following attributes:
+     - `dev="dev"`
+     - `type="add"`
+     - If `ISSUE_ID` is defined, add `issue="[ISSUE_ID]"`. If `ISSUE_ID` is not defined, do not include the `issue` attribute.
+   - The text content of the `<action>` element should be `[RELEASE_NOTES]`.
+   - `RELEASE_NOTES` should have HTML format.
 
-5. **Formatting:**  
-   - Use markdown syntax for headings, lists, and emphasis.
-   - Begin with a top-level heading indicating the release version (`[RELEASE_VERSION]`) and the release date (if provided).
-   - Output only the markdown content for the release notes.
+   **Example structure for a new file:**
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <document xmlns="http://maven.apache.org/changes/2.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+     <body>
+      <release version="[RELEASE_VERSION]" date="[CURRENT_DATE:YYYY-MM-DD]">
+        <action dev="dev" type="add"[IF_ISSUE_ID_PRESENT: issue="[ISSUE_ID]"]>
+   <![CDATA[
+        [RELEASE_NOTES]
+   ]]>
+        </action>
+      </release>
+     </body>
+   </document>
+   
+   **If the file already exists:**
+   - Insert the new `<release>` element as the last child of the `<body>` element, following the same structure as above.
 
-6. **Clarity and Brevity:**  
+   **Important:**
+   - Do not include the `issue` attribute if `ISSUE_ID` is not defined.
+   - Ensure the XML remains well-formed and valid according to the schema.
+
+5. **Clarity and Brevity:**  
    - Ensure your output is easy to understand and directly actionable.
    - Avoid unnecessary explanations unless clarification is requested.
 '''
@@ -51,15 +81,22 @@ Follow these steps:
 inputs = '''
 # Task
 
-Analyze the commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit, create release notes for version `[RELEASE_VERSION]`, and save them to a file called `release-notes.md`.
+Analyze the commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit, create release notes for version `[RELEASE_VERSION]`.
 
 - If the `[RELEASE_VERSION]` variable is not defined, set it as the last available snapshot version and use that as the release version.
+
 1. Collect all commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit.
 2. Analyze and group the commit messages by change type (e.g., Features, Fixes, Refactoring, Documentation, Chores).
 3. For each group, create a markdown section with a heading and list the changes as bullet points.
 4. Ensure the release notes are clear, concise, and follow best practices for markdown formatting.
+5. If `ISSUE_ID` is not provided or is undefined for a given action, do not include or set the `ISSUE_ID` field in your output for that action.
 
+Add the release notes to the file `src/changes/changes.xml` as a new `<release>` record.
+
+Instructions:
+```
 %s
+```
 '''
 
-prompt = "Save the release notes to `src/site/markdown/docs/[RELEASE_VERSION]/release-notes.md`."
+gw.scanDir="glob:."
