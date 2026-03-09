@@ -1,7 +1,7 @@
 /**
  * Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
  *
- * <p>This package provides the high-level orchestration for:
+ * <p>This package provides high-level orchestration for:
  *
  * <ul>
  *   <li>Detecting a project's on-disk convention (for example Maven, Gradle, JavaScript, or Python) and exposing it as a

@@ -38,7 +38,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Purpose and scope</h2>
 
 <p>
-  This module produces an executable, Spring Shell-based command-line interface for Machai workflows. It supports
+  Machai CLI produces an executable, Spring Shell-based command-line interface for Machai workflows. It supports
   interactive usage (REPL) as well as non-interactive invocation from scripts and CI pipelines.
 </p>
 
@@ -46,24 +46,20 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <ul>
   <li>
-    <strong>Entry point:</strong> <code>org.machanism.machai.cli.MachaiCLI</code> bootstraps the application and starts the
-    Spring Shell runtime.
+    <strong>Entry point:</strong> <code>org.machanism.machai.cli.MachaiCLI</code> bootstraps the application, loads optional
+    configuration from <code>machai.properties</code> (or a file specified via <code>-Dconfig=...</code>), and starts the Spring Shell
+    runtime.
   </li>
   <li>
-    <strong>Command components:</strong> Spring Shell <em>commands</em> implement the primary user-facing operations, including
-    configuration, bindex generation/registration, semantic search (“pick”), project assembly, document processing
-    (Ghostwriter), Act mode, and cleanup.
-  </li>
-  <li>
-    <strong>Configuration:</strong> defaults can be loaded from <code>machai.properties</code> (or from a file specified via
-    <code>-Dconfig=...</code>) and are also manageable via the CLI.
+    <strong>Command components:</strong> Spring Shell commands provide the user-facing operations (configuration, bindex
+    generation/registration, semantic search and assembly, document processing, Act mode, and cleanup).
   </li>
 </ul>
 
 <h2>Package overview</h2>
 
 <p>
-  The public API surface for this module is concentrated in a single package:
+  The module’s public API surface is concentrated in a single package:
 </p>
 
 <ul>
@@ -72,36 +68,34 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <ul>
       <li>Contains the Spring Boot entry point and Spring Shell command components.</li>
       <li>Supports both interactive REPL usage and one-shot command execution.</li>
-      <li>Provides command groups for configuration, bindex operations, picking/assembly, document processing, Act mode,
-        and cleanup.</li>
-      <li>Loads optional system properties from <code>machai.properties</code> or from a file referenced by <code>-Dconfig=...</code>.</li>
+      <li>
+        Command groups include:
+        <ul>
+          <li><strong>Configuration</strong> – persists defaults (for example, working directory and GenAI provider/model).</li>
+          <li><strong>Indexing and registration</strong> – generates and registers bindex metadata.</li>
+          <li><strong>Picking and assembly</strong> – performs semantic search (“pick”) and assembles an output project.</li>
+          <li><strong>Document processing</strong> – processes files via Ghostwriter; runs predefined interactive actions (“Act mode”).</li>
+          <li><strong>Cleanup</strong> – removes Machai temporary artifacts (for example, <code>.machai</code>).</li>
+        </ul>
+      </li>
     </ul>
   </li>
 </ul>
 
-<h3>Key types and responsibilities</h3>
+<h2>Key types and responsibilities</h2>
 
 <ul>
   <li><code>MachaiCLI</code> – Application entry point; loads optional system properties and initializes Spring Shell.</li>
+  <li><code>ConfigCommand</code> – Manages persisted defaults in <code>machai.properties</code>.</li>
+  <li><code>BindexCommand</code> – Generates bindex metadata for projects and optionally registers bindex files.</li>
   <li>
-    <code>ConfigCommand</code> – Manages persistent defaults (for example, working directory, GenAI provider/model, and score
-    threshold) stored in <code>machai.properties</code>.
+    <code>AssembyCommand</code> – Performs semantic search (“pick”) and assembles an output project using a configured GenAI provider.
   </li>
+  <li><code>GWCommand</code> – Scans folders and processes documents/files using the Ghostwriter pipeline.</li>
+  <li><code>ActCommand</code> – Runs a predefined interactive action/prompt (“Act mode”) against a selected working context.</li>
   <li>
-    <code>BindexCommand</code> – Generates bindex metadata for projects and optionally registers bindex files with an
-    external registry.
+    <code>CleanCommand</code> – Removes Machai temporary directories (for example, <code>.machai</code>) under a selected root directory.
   </li>
-  <li>
-    <code>AssembyCommand</code> – Performs semantic search (“pick”) and assembles a project skeleton using a configured GenAI
-    provider.
-  </li>
-  <li>
-    <code>GWCommand</code> – Scans folders and processes documents/files using the Ghostwriter pipeline.</li>
-  <li>
-    <code>ActCommand</code> – Runs a predefined interactive action/prompt (“Act mode”) against a selected working context.</li>
-  <li>
-    <code>CleanCommand</code> – Removes Machai temporary directories (for example, <code>.machai</code>) under a selected root
-    directory.</li>
 </ul>
 
 <h2>Class diagram</h2>
@@ -137,12 +131,12 @@ clean --dir .\\my-project
 
 <ul>
   <li>
-    The <code>.machai</code> directory is used for temporary artifacts generated by Machai workflows. Clean-up is supported by
-    the <code>clean</code> command.
+    The <code>.machai</code> directory is used for temporary artifacts generated by Machai workflows; cleanup is supported by the
+    <code>clean</code> command.
   </li>
   <li>
     Command names and options are defined by Spring Shell components in <code>org.machanism.machai.cli</code>; consult each
-    command type’s Javadoc for details.
+    command class’ Javadoc for details.
   </li>
 </ul>
 

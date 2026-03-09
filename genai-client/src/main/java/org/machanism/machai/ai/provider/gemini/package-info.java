@@ -35,14 +35,15 @@
  * </p>
  *
  * <p>
- * The provider adapts MachAI's provider-agnostic contract (prompts, system instructions, tool registration,
- * file attachments, request execution, and usage reporting) into Gemini-specific request and response handling.
+ * The provider is responsible for translating MachAI's provider-agnostic contract (prompt accumulation,
+ * system instructions, tool registration, file attachments, request execution, and usage reporting) into
+ * Gemini-specific request/response handling.
  * </p>
  *
  * <h2>Implementation status</h2>
  * <p>
- * The current implementation is a scaffold: many operations are no-ops and several methods throw
- * {@link org.apache.commons.lang.NotImplementedException} until the Gemini adapter is fully implemented.
+ * The current implementation is a scaffold: several methods are no-ops and others throw
+ * {@link org.apache.commons.lang.NotImplementedException} until the Gemini adapter is completed.
  * </p>
  *
  * <h2>Typical lifecycle</h2>
@@ -50,8 +51,8 @@
  * <li>Initialize the provider via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#init}.</li>
  * <li>Optionally set system instructions via
  * {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#instructions}.</li>
- * <li>Provide prompt content via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#prompt} (and
- * optionally attach files/tools).</li>
+ * <li>Provide prompt content via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#prompt} and
+ * optionally attach files and tools.</li>
  * <li>Execute the request via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#perform}.</li>
  * <li>Read usage information via {@link org.machanism.machai.ai.provider.gemini.GeminiProvider#usage}.</li>
  * </ol>

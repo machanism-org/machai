@@ -44,15 +44,15 @@ machai_root ..> assembly_maven_plugin : module
 machai_root ..> ghostwriter : module
 machai_root ..> gw_maven_plugin : module
 
-' Dependencies from module pom.xml files
+' Dependencies between modules (from module pom.xml)
 bindex_core --> project_layout
 bindex_core --> genai_client
 
-ghostwriter --> project_layout
-ghostwriter --> genai_client
-
 machai_cli --> bindex_core
 machai_cli --> ghostwriter
+
+ghostwriter --> project_layout
+ghostwriter --> genai_client
 
 bindex_maven_plugin --> bindex_core
 assembly_maven_plugin --> bindex_core

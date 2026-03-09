@@ -18,12 +18,10 @@ import org.springframework.shell.standard.ShellOption;
 /**
  * Spring Shell command that runs Ghostwriter "Act mode".
  *
- * <p>
- * The command scans the configured project folder and then executes a
+ * <p>The command scans the configured project folder and then executes a
  * predefined action/prompt interactively via {@link ActProcessor}.
  *
  * <h2>Examples</h2>
- * 
  * <pre>
  * act commit
  * act commit "and push"
@@ -35,16 +33,18 @@ public class ActCommand {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ActCommand.class);
 
+	/**
+	 * Spring lifecycle hook.
+	 */
 	@PostConstruct
 	public void init() {
-		// Spring lifecycle hook (kept for future initialization).
+		// Kept for future initialization.
 	}
 
 	/**
 	 * Interactively executes a predefined action/prompt using Act mode.
 	 *
-	 * <p>
-	 * The default root directory and model are resolved from the persisted
+	 * <p>The default root directory and model are resolved from the persisted
 	 * configuration managed by {@link ConfigCommand}.
 	 *
 	 * @param action the name of the predefined action to execute

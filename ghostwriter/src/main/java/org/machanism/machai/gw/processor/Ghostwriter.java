@@ -25,10 +25,10 @@ import org.slf4j.LoggerFactory;
  * Command-line entry point for Ghostwriter.
  *
  * <p>
- * This CLI bootstraps configuration, parses command-line options, and invokes
- * {@link GuidanceProcessor} to scan a directory tree for supported files. For
- * each file, Ghostwriter extracts embedded `guidance` tag directives and
- * submits the resulting prompt to the configured GenAI provider.
+ * This CLI bootstraps configuration, parses command-line options, and invokes a
+ * processor to scan a directory tree for supported files. For each file,
+ * Ghostwriter extracts embedded {@code @guidance:} directives and submits the
+ * resulting prompt to the configured GenAI provider.
  * </p>
  *
  * <h2>Usage</h2>
@@ -40,13 +40,15 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The {@code <scanDir>} argument may be a directory path (relative to the
  * configured project root), or a {@code glob:} / {@code regex:} expression as
- * supported by {@link FileSystems#getDefault()
- * FileSystems.getDefault()}{@code .}{@link java.nio.file.FileSystem#getPathMatcher(String)
- * getPathMatcher(String)}.
+ * supported by {@link java.nio.file.FileSystem#getPathMatcher(String)}.
  * </p>
  */
 public final class Ghostwriter {
 
+	/**
+	 * Continuation marker used by {@link #readText(String)} to allow users to enter
+	 * multi-line values via standard input.
+	 */
 	public static final String MULTIPLE_LINES_BREAKER = "\\";
 
 	/** Logger for the Ghostwriter application. */
@@ -81,6 +83,9 @@ public final class Ghostwriter {
 
 	/** Configuration key enabling request input logging. */
 	public static final String GW_LOG_INPUTS_PROP_NAME = "gw.logInputs";
+
+	/** Configuration key specifying a default scan directory/pattern. */
+	public static final String GW_SCAN_DIR_PROP_NAME = "gw.scanDir";
 
 	/** Directory used as the execution base for relative configuration files. */
 	private static File gwHomeDir;
@@ -208,10 +213,15 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Reads multi-line text from standard input until EOF.
+	 * Reads multi-line text from standard input.
+	 *
+	 * <p>
+	 * Input is read until a line does not end with {@link #MULTIPLE_LINES_BREAKER}
+	 * or until EOF.
+	 * </p>
 	 *
 	 * @param prompt prompt to display before reading
-	 * @return the entered text, or {@code null} if no content was entered
+	 * @return the entered text (never {@code null})
 	 */
 	public static String readText(String prompt) {
 		System.out.print(prompt + ": ");
@@ -407,9 +417,9 @@ public final class Ghostwriter {
 
 		logger.info("Root directory: {}", rootDir);
 
-		String defaultPrompt;
 		try {
 			AIFileProcessor processor;
+			String defaultPrompt;
 			if (cmd.hasOption(actOpt)) {
 				processor = new ActProcessor(rootDir, config, genai);
 				defaultPrompt = cmd.getOptionValue(actOpt);
@@ -456,7 +466,7 @@ public final class Ghostwriter {
 
 			String[] scanDirs = cmd.getArgs();
 			if (scanDirs == null || scanDirs.length == 0) {
-				String gwScanDir = config.get("gw.scanDir", null);
+				String gwScanDir = config.get(GW_SCAN_DIR_PROP_NAME, null);
 				if (gwScanDir != null) {
 					scanDirs = new String[] { gwScanDir };
 				}

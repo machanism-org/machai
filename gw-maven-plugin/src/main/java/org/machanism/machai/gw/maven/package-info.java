@@ -1,12 +1,16 @@
 /**
- * Maven goals (Mojos) for running the MachAI Ghostwriter (GW) guided document-processing workflow as part of a Maven
- * build.
+ * Maven plugin goals (Mojos) that integrate MachAI Ghostwriter (GW) guided document-processing into Maven builds.
  *
  * <p>
  * Goals in this package configure and invoke {@link org.machanism.machai.gw.processor.GuidanceProcessor} (or a
  * specialized processor such as {@link org.machanism.machai.gw.processor.ActProcessor}) to scan a documentation source
- * tree (commonly {@code src/site}) for files containing embedded {@code @guidance:} blocks. When guidance blocks are
- * found, the processor delegates content transformation to the configured GenAI provider.
+ * tree (commonly {@code src/site}) for files containing embedded {@code @guidance:} blocks.
+ * </p>
+ *
+ * <p>
+ * When guidance blocks are found, the processor delegates content transformation to the configured GenAI provider.
+ * Provider credentials can optionally be sourced from {@code ~/.m2/settings.xml} by providing
+ * {@code -Dgw.genai.serverId=&lt;serverId&gt;}.
  * </p>
  *
  * <h2>Goals</h2>
@@ -21,7 +25,8 @@
  *     reactor dependency ordering, with an option to defer processing of the execution-root project.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.maven.Act} ({@code gw:act}) - Interactive goal for running predefined actions.
+ *     {@link org.machanism.machai.gw.maven.Act} ({@code gw:act}) - Interactive goal for running a predefined action
+ *     prompt over scanned documents.
  *   </li>
  *   <li>
  *     {@link org.machanism.machai.gw.maven.ReactorAct} ({@code gw:act-reactor}) - Reactor-friendly variant of
@@ -32,22 +37,6 @@
  *     processing (typically bound to Maven's {@code clean} lifecycle).
  *   </li>
  * </ul>
- *
- * <h2>Shared infrastructure</h2>
- * <ul>
- *   <li>
- *     {@link org.machanism.machai.gw.maven.AbstractGWGoal} - Base class defining shared parameters (for example,
- *     provider selection, instructions, default guidance, scan directory, excludes, and optional credentials lookup)
- *     and the common scan/execute flow.
- *   </li>
- * </ul>
- *
- * <h2>Configuration and credentials</h2>
- * <p>
- * In addition to standard Maven plugin parameters, GenAI credentials can optionally be sourced from
- * {@code ~/.m2/settings.xml} by providing {@code -Dgw.genai.serverId=&lt;serverId&gt;}. When configured,
- * the goal reads the matching {@code &lt;server&gt;} credentials and forwards them to the workflow.
- * </p>
  *
  * <h2>Usage examples</h2>
  * <pre>

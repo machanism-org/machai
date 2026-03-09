@@ -17,18 +17,15 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 /**
- * Provides shell commands for cleaning up Machai temporary folders.
- * <p>
- * The {@code CleanCommand} class includes methods for removing all ".machai"
- * template folders within a specified root directory.
- * <p>
- * Usage Example:
- * 
+ * Spring Shell command that removes Machai temporary folders from a directory
+ * tree.
+ *
+ * <p>The primary target is the {@value #MACHAI_TEMP_DIR} directory, which is used
+ * to store intermediate artifacts produced by Machai workflows.
+ *
+ * <h2>Example</h2>
  * <pre>
- * {@code
- * CleanCommand cleanCmd = new CleanCommand();
- * cleanCmd.clean(new File("/path/to/root"));
- * }
+ * clean --dir .\\my-project
  * </pre>
  *
  * @author Viktor Tovstyi
@@ -36,16 +33,17 @@ import org.springframework.shell.standard.ShellOption;
  */
 @ShellComponent
 public class CleanCommand {
-	private static Logger logger = LoggerFactory.getLogger(CleanCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(CleanCommand.class);
 
 	/** Name of the Machai temporary directory. */
 	public static final String MACHAI_TEMP_DIR = ".machai";
 
 	/**
-	 * Removes all ".machai" template folders from the provided root directory.
+	 * Removes all {@value #MACHAI_TEMP_DIR} directories from the provided root
+	 * directory.
 	 *
-	 * @param dir The path to the project directory. If null, uses the user
-	 *            directory.
+	 * @param dir the root directory to clean; if {@code null}, uses the configured
+	 *            default or the current working directory
 	 * @throws IOException if the cleanup process fails
 	 */
 	@ShellMethod("Removes all " + MACHAI_TEMP_DIR + " template folders from the root directory.")
@@ -62,18 +60,16 @@ public class CleanCommand {
 	/**
 	 * Removes all directories with the specified name from the given root path.
 	 *
-	 * @param rootPath The root directory to start the search.
-	 * @param dirName  The name of directories to remove.
-	 * @throws IOException If an I/O error occurs.
+	 * @param rootPath the root directory to start the search
+	 * @param dirName  the directory name to remove
+	 * @throws IOException if an I/O error occurs
 	 */
 	public static void removeAllDirectoriesByName(Path rootPath, String dirName) throws IOException {
 		Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 				if (dir.getFileName().toString().equals(dirName)) {
-					// Recursively delete the directory and its contents
 					deleteDirectoryRecursively(dir);
-					// Skip visiting entries in this directory since it's deleted
 					return FileVisitResult.SKIP_SUBTREE;
 				}
 				return FileVisitResult.CONTINUE;
@@ -83,16 +79,9 @@ public class CleanCommand {
 
 	/**
 	 * Recursively deletes a directory and all its contents.
-	 * 
-	 * <pre>
-	 * Example:
-	 * {@code
-	 * CleanCommand.deleteDirectoryRecursively(Paths.get("/tmp/.machai"));
-	 * }
-	 * </pre>
-	 * 
-	 * @param dir The directory to delete.
-	 * @throws IOException If an I/O error occurs.
+	 *
+	 * @param dir the directory to delete
+	 * @throws IOException if an I/O error occurs
 	 */
 	private static void deleteDirectoryRecursively(Path dir) throws IOException {
 		Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {

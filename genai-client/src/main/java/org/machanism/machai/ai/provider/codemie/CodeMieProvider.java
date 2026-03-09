@@ -25,8 +25,8 @@ import com.openai.client.OpenAIClient;
  * {@link GenAIProvider} implementation that integrates with EPAM CodeMie.
  *
  * <p>
- * The provider performs an OpenID Connect (OIDC) token request to obtain an OAuth 2.0 access token
- * and then configures an OpenAI-compatible backend to call the CodeMie Code Assistant REST API.
+ * The provider performs an OpenID Connect (OIDC) token request to obtain an OAuth 2.0 access token and then configures an
+ * OpenAI-compatible backend to call the CodeMie Code Assistant REST API.
  * </p>
  *
  * <h2>Authentication modes</h2>
@@ -37,8 +37,8 @@ import com.openai.client.OpenAIClient;
  *
  * <h2>Provider delegation</h2>
  * <p>
- * After retrieving a token, this provider sets the following configuration keys before delegating
- * to a downstream provider:
+ * After retrieving a token, this provider sets the following configuration keys before delegating to a downstream
+ * provider:
  * </p>
  * <ul>
  * <li>{@code OPENAI_BASE_URL} to {@link #baseUrl}</li>
@@ -95,8 +95,8 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * </ul>
 	 *
 	 * @param conf configuration source
-	 * @throws IllegalArgumentException if a configuration conflict is detected, authorization fails, or an
-	 *                                  unsupported model is configured
+	 * @throws IllegalArgumentException if a configuration conflict is detected, authorization fails, or an unsupported model
+	 *                                  is configured
 	 */
 	@Override
 	public void init(Configurator conf) {
@@ -109,13 +109,14 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 
 		conf.set("OPENAI_BASE_URL", baseUrl);
 
+		String username = conf.get("GENAI_USERNAME");
+		String password = conf.get("GENAI_PASSWORD");
+		String resolvedAuthUrl = conf.get("AUTH_URL", CodeMieProvider.authUrl);
+
 		if (Strings.CS.startsWithAny(chatModel, "gpt-") || StringUtils.isBlank(chatModel)) {
 			provider = new OpenAIProvider() {
 				@Override
 				protected OpenAIClient getClient() {
-					String username = conf.get("GENAI_USERNAME");
-					String password = conf.get("GENAI_PASSWORD");
-					String resolvedAuthUrl = conf.get("AUTH_URL", CodeMieProvider.authUrl);
 					try {
 						String token = getToken(resolvedAuthUrl, username, password);
 						conf.set("OPENAI_API_KEY", token);
@@ -128,9 +129,11 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 			};
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(chatModel, "gemini-")) {
+			conf.set("OPENAI_API_KEY", authorize(resolvedAuthUrl, username, password));
 			provider = new GeminiProvider();
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(chatModel, "claude-")) {
+			conf.set("OPENAI_API_KEY", authorize(resolvedAuthUrl, username, password));
 			provider = new ClaudeProvider();
 			setProvider(provider);
 		} else {
@@ -141,11 +144,28 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	}
 
 	/**
+	 * Resolves an access token and rethrows failures as {@link IllegalArgumentException}.
+	 *
+	 * @param resolvedAuthUrl token endpoint URL
+	 * @param username user e-mail (password grant) or client id (client credentials)
+	 * @param password password (password grant) or client secret (client credentials)
+	 * @return access token
+	 * @throws IllegalArgumentException if authorization fails
+	 */
+	private static String authorize(String resolvedAuthUrl, String username, String password) {
+		try {
+			return getToken(resolvedAuthUrl, username, password);
+		} catch (IOException e) {
+			throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
+		}
+	}
+
+	/**
 	 * Requests an OAuth 2.0 access token from the given token endpoint.
 	 *
 	 * <p>
-	 * The request uses {@code application/x-www-form-urlencoded} and selects the grant type based on the
-	 * {@code username} value:
+	 * The request uses {@code application/x-www-form-urlencoded} and selects the grant type based on the {@code username}
+	 * value:
 	 * </p>
 	 * <ul>
 	 * <li>{@code password} if the username contains {@code "@"}.</li>

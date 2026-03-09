@@ -24,11 +24,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-The **Bindex Maven Plugin** enables automated generation and (optionally) registration of **bindex metadata** for Maven projects.
-
-During a Maven build, the plugin inspects the current project (typically skipping aggregator/parent projects with `pom` packaging) and uses Maven coordinates and model information (packaging, dependencies, and related descriptors) to create or update a local bindex index.
-
-When registration is enabled, the plugin can also publish the generated metadata to a registry endpoint so it can be discovered across projects.
+The **Bindex Maven Plugin** is a Maven plugin that automates generation and (optionally) registration of **bindex metadata** for Maven projects. It supports library discovery, integration, and assembly by producing structured metadata that can be used for indexing and GenAI-powered semantic search within the Machanism ecosystem.
 
 ## Installation Instructions
 
@@ -99,16 +95,16 @@ mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5
 
 ### Configuration examples
 
-Example configuring and running registration:
-
-```cmd
-mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
-```
-
 Common configuration parameters:
 
 | Parameter | Description | Default |
 |---|---|---|
 | `bindex.genai` | AI provider/model identifier used for indexing (for example `OpenAI:gpt-5`). | (required) |
 | `bindex.register.url` | Registry endpoint URL used by the `register` goal. | (none) |
-| `update` | When `true`, `register` performs an update while registering. | `true` |
+| `bindex.register.update` | When `true`, `register` performs an update while registering. | `true` |
+
+Example configuring and running registration:
+
+```cmd
+mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080 -Dbindex.register.update=true
+```

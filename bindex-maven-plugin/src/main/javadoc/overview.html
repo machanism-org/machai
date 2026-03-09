@@ -30,34 +30,34 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>Bindex Maven Plugin</h1>
 
 <p>
-  <strong>Bindex Maven Plugin</strong> enables automated generation and registration of bindex metadata for Maven
-  projects. It facilitates library discovery, integration, and assembly by leveraging structured metadata and
+  <strong>Bindex Maven Plugin</strong> enables automated generation and registration of
+  bindex metadata for Maven projects. It facilitates library discovery,
+  integration, and assembly by leveraging structured metadata and
   GenAI-powered semantic search within the Machanism ecosystem.
 </p>
 
-<h2>What this module provides</h2>
+<h2>Purpose</h2>
 
 <p>
-  This project is a Maven plugin (a set of Mojos) that integrates Machai/Bindex operations into a Maven build.
-  Goals execute in the context of the current Maven module and generally skip projects with
-  <code>pom</code> packaging (aggregator/parent modules), since they do not produce an artifact to index.
+  This module provides a Maven plugin (a set of Mojos) that bridges Maven builds to the Machai/Bindex tooling.
+  The plugin operates on the current Maven module and typically skips projects with <code>pom</code> packaging
+  (parent/aggregator modules), since they do not produce an artifact to index.
 </p>
 
 <h2>Packages</h2>
 
 <ul>
   <li>
-    <code>org.machanism.machai.bindex.maven</code> &ndash; Maven plugin goals (Mojos) that expose Bindex operations.
-    The goals share common behavior through an abstract base Mojo and execute against the current
+    <code>org.machanism.machai.bindex.maven</code> &ndash; Maven plugin goals (Mojos) that integrate Bindex operations into a Maven
+    build. The goals share configuration and behavior through a common abstract base Mojo and execute against the current
     <code>org.apache.maven.project.MavenProject</code>.
   </li>
 </ul>
 
-<h2>Architecture at a glance</h2>
+<h2>How it fits together</h2>
 
 <p>
-  The Mojos in this plugin delegate to the underlying Bindex services provided by
-  <code>bindex-core</code>:
+  The Mojos in this plugin delegate the core work to services provided by <code>bindex-core</code>:
 </p>
 
 <ul>
@@ -86,7 +86,7 @@ mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-
 mvn org.machanism.machai:bindex-maven-plugin:clean
 </pre>
 
-<h2>Configuration model</h2>
+<h2>Configuration</h2>
 
 <p>
   The GenAI provider/model is selected via the system property <code>-Dbindex.genai</code> (for example,
@@ -107,7 +107,7 @@ mvn org.machanism.machai:bindex-maven-plugin:clean
 <h2>Where to look next</h2>
 
 <p>
-  For goal-specific behavior, configuration parameters, and execution details, browse the classes in
+  For goal-specific behavior and execution details, browse the classes in
   <code>org.machanism.machai.bindex.maven</code>.
 </p>
 

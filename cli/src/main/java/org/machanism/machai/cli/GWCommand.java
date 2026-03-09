@@ -38,32 +38,28 @@ public class GWCommand {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GWCommand.class);
 
+	/**
+	 * Spring lifecycle hook.
+	 */
 	@PostConstruct
 	public void init() {
-		// Spring lifecycle hook (kept for future initialization).
+		// Kept for future initialization.
 	}
 
 	/**
 	 * Scans and processes directories or files using the configured GenAI model and
 	 * guidance.
 	 *
-	 * @param threads
-	 *            whether to enable multi-threaded processing
-	 * @param model
-	 *            optional GenAI provider/model identifier; if {@code null}, uses the
-	 *            configured default
-	 * @param instructions
-	 *            optional system instructions (text/URL/path). If provided as an empty
-	 *            string, the user is prompted to input the full text via stdin.
-	 * @param guidance
-	 *            optional default guidance (text/URL/path). If provided as an empty
-	 *            string, the user is prompted to input the full text via stdin.
-	 * @param excludes
-	 *            optional comma-separated list of directory names to exclude
-	 * @param logInputs
-	 *            whether to log LLM request inputs to dedicated log files
-	 * @param scanDirs
-	 *            directories to scan; if omitted, scans the configured root directory
+	 * @param threads      whether to enable multi-threaded processing
+	 * @param model        optional GenAI provider/model identifier; if {@code null}, uses the
+	 *                     configured default
+	 * @param instructions optional system instructions (text/URL/path). If provided as an empty
+	 *                     string, the user is prompted to input the full text via stdin.
+	 * @param guidance     optional default guidance (text/URL/path). If provided as an empty
+	 *                     string, the user is prompted to input the full text via stdin.
+	 * @param excludes     optional comma-separated list of directory names to exclude
+	 * @param logInputs    whether to log LLM request inputs to dedicated log files
+	 * @param scanDirs     directories to scan; if omitted, scans the configured root directory
 	 */
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
 	public void gw(
@@ -149,6 +145,12 @@ public class GWCommand {
 		}
 	}
 
+	/**
+	 * Reads multi-line text from stdin until EOF is reached.
+	 *
+	 * @param prompt message to show before reading input
+	 * @return the entered text, or {@code null} if no content was provided
+	 */
 	private String readText(String prompt) {
 		System.out.println(prompt);
 		StringBuilder sb = new StringBuilder();

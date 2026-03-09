@@ -6,19 +6,19 @@
  * (SPI). Implementations in this package scan a specific file format using that format's comment conventions and
  * return a prompt fragment that can be fed into the Ghostwriter processing pipeline.
  *
- * <p>Each {@code Reviewer} typically:
+ * <p>Reviewers typically:
  * <ul>
- *   <li>Reads the target file as UTF-8.</li>
- *   <li>Detects occurrences of {@code @guidance} using the file format's comment syntax.</li>
- *   <li>Formats the result with project-relative path context using
+ *   <li>Read the target file as UTF-8.</li>
+ *   <li>Detect occurrences of {@code @guidance} using the file format's comment syntax.</li>
+ *   <li>Format the result with project-relative path context using
  *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}.</li>
  * </ul>
  *
- * <p>Reviewers are usually selected by file extension via
+ * <p>Selection is usually performed by file extension via
  * {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()}.
  *
- * <p>Formats handled by this package include Java sources, Markdown, HTML/XML, TypeScript, Python, PlantUML, and
- * plain-text {@code @guidance.txt} files.
+ * <p>Supported formats include Java sources, Markdown, HTML/XML, TypeScript, Python, PlantUML, and plain-text
+ * {@code @guidance.txt} files.
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer
  */

@@ -12,7 +12,7 @@ Assembly Maven Plugin is a Machai Maven plugin that implements the `assembly` go
 
 Conceptually, it follows the same structured pattern as [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): acquire guidance (a prompt), use metadata to inform decisions (Bindex), and apply repeatable automation (project edits).
 
-When executed, the goal:
+At a high level, the goal:
 
 - Acquires a natural-language prompt by reading `assembly.prompt.file` (default: `project.txt`) when present, or by prompting interactively via the Maven console.
 - Loads configuration from `bindex.properties` using `PropertiesConfigurator`.

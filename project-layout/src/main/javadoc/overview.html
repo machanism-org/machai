@@ -35,29 +35,25 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   to locate well-known folders reliably across different projects.
 </p>
 
-<h2>What the library provides</h2>
+<h2>Concepts</h2>
 
-<p>
-  The library models a repository as a <em>project root directory</em> combined with a set of conventional,
-  root-relative folders such as production sources, test sources, resources, documentation roots, and optional nested
-  modules. Layout implementations can infer these folders by reading build metadata (for example Maven
-  <code>pom.xml</code>, Gradle settings/build files, JavaScript workspace configuration, or Python
-  <code>pyproject.toml</code>) and may use filesystem scanning as a fallback.
-</p>
-
-<p>
-  Consumers typically detect the appropriate layout for a given directory and then resolve the returned root-relative
-  paths against that directory when performing filesystem operations.
-</p>
+<ul>
+  <li><strong>Project root</strong>: the filesystem directory that contains a project’s build metadata and top-level
+    folders.</li>
+  <li><strong>Root-relative folders</strong>: conventional paths such as <code>src/main/java</code>,
+    <code>src/test/java</code>, or documentation roots. Accessors return these as strings that should be resolved
+    against the detected project root before performing IO.</li>
+  <li><strong>Modules</strong>: optional nested projects (for example Maven multi-module builds) that can be discovered
+    from build metadata or inferred by filesystem scanning.</li>
+</ul>
 
 <h2>Packages</h2>
 
 <h3><code>org.machanism.machai.project</code></h3>
 
 <p>
-  Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
-  It provides orchestration for detecting a layout and scanning a repository (including nested modules) while
-  delegating per-project behavior to a processor.
+  High-level orchestration for detecting a project layout and scanning a repository tree. This package focuses on the
+  <em>workflow</em>: detect a layout for a root directory and delegate processing to a consumer-provided processor.
 </p>
 
 <ul>
@@ -67,7 +63,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <a href="org/machanism/machai/project/ProjectLayoutManager.html#detectProjectLayout-java.io.File-">ProjectLayoutManager.detectProjectLayout(File)</a>.
   </li>
   <li>
-    Traverse a project root and invoke a per-project hook via
+    Scan a project root (and optionally its modules) and run per-project logic via
     <a href="org/machanism/machai/project/ProjectProcessor.html">ProjectProcessor</a>.
   </li>
 </ul>
@@ -75,13 +71,13 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h3><code>org.machanism.machai.project.layout</code></h3>
 
 <p>
-  APIs to describe a repository's on-disk layout. The central type is
-  <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a>, which exposes conventional directories
-  for sources, tests, resources, documentation, and optional module directories.
+  APIs for detecting, describing, and working with a repository's on-disk project layout. The central abstraction is
+  <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a>, which models a project root and a set
+  of conventional, root-relative directories for sources, tests, resources, documentation, and modules.
 </p>
 
 <p>
-  Concrete implementations provide build-ecosystem-specific conventions, including:
+  Layout implementations cover common build ecosystems:
 </p>
 
 <ul>
@@ -114,14 +110,14 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li>Query the layout for conventional directories (returned as root-relative paths).</li>
   <li>Resolve root-relative paths against the project root before filesystem access.</li>
   <li>
-    Optionally traverse a repository and process each discovered project/module using a
+    Optionally scan a repository and process each discovered project/module using a
     <a href="org/machanism/machai/project/ProjectProcessor.html">ProjectProcessor</a>.
   </li>
 </ol>
 
 <h2>Examples</h2>
 
-<h3>Detect a layout and access conventional folders</h3>
+<h3>Detect a layout and resolve conventional folders</h3>
 
 <pre><code>java.io.File projectDir = new java.io.File("C:\\path\\to\\project");
 
@@ -130,13 +126,11 @@ org.machanism.machai.project.layout.ProjectLayout layout =
 
 java.util.List&lt;String&gt; sources = layout.getSources();
 java.util.List&lt;String&gt; tests = layout.getTests();
-java.util.List&lt;String&gt; documents = layout.getDocuments();
-java.util.List&lt;String&gt; modules = layout.getModules();
+java.util.List&lt;String&gt; docs = layout.getDocuments();
 
-// Resolve root-relative paths against the project directory before filesystem access.
 for (String rel : sources) {
   java.io.File dir = new java.io.File(projectDir, rel);
-  // ...
+  // ... work with dir
 }</code></pre>
 
 <h3>Scan a repository tree with a processor</h3>
@@ -146,7 +140,7 @@ for (String rel : sources) {
 org.machanism.machai.project.ProjectProcessor processor = /* your implementation */ null;
 processor.scanFolder(repoDir);
 
-// The per-project hook is invoked for the root and for each discovered module.</code></pre>
+// The processor hook is invoked for the root and for each discovered module.</code></pre>
 
 <h2>Class diagram</h2>
 
@@ -162,8 +156,8 @@ processor.scanFolder(repoDir);
 
 <ul>
   <li>
-    Some layouts infer modules from build metadata (for example Maven modules from <code>pom.xml</code>); others use
-    filesystem scanning as a fallback.
+    Module discovery depends on the detected layout. For example, Maven modules can be read from a parent
+    <code>pom.xml</code>, while the default layout may infer modules by scanning the filesystem.
   </li>
   <li>
     Layout detectors typically ignore common build, VCS, IDE, and environment directories. Refer to

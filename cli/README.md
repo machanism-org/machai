@@ -70,7 +70,7 @@ mvn -pl cli -am clean install
 
 Example commands (as shown by `help`):
 
-### Assemby Command
+### Assembly Command
 
 - `pick`: Picks libraries based on user request.
 - `assembly`: Creates a project via picked librariy set.

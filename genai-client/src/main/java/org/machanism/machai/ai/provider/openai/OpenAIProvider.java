@@ -67,20 +67,28 @@ import com.openai.services.blocking.ModelService;
  * OpenAI-backed {@link GenAIProvider} implementation.
  *
  * <p>
- * Configuration variables consumed by {@link #init(Configurator)}:
+ * This provider adapts the MachAI provider abstraction to the OpenAI Java SDK
+ * Responses API. It supports prompting, file inputs, tool/function calling, and
+ * embedding generation.
+ * </p>
+ *
+ * <h2>Configuration</h2>
+ * <p>
+ * Configuration values are read from the {@link Configurator} passed to
+ * {@link #init(Configurator)}. The following keys are used:
  * </p>
  * <ul>
- * <li>{@code chatModel}: required model identifier passed to the OpenAI
+ * <li>{@code chatModel} (required): model identifier passed to the OpenAI
  * Responses API (for example, {@code gpt-4.1} or {@code gpt-4o}).</li>
- * <li>{@code OPENAI_API_KEY}: required API key used to authenticate with the
+ * <li>{@code OPENAI_API_KEY} (required): API key used to authenticate with the
  * OpenAI API.</li>
- * <li>{@code OPENAI_BASE_URL}: optional base URL for OpenAI-compatible
+ * <li>{@code OPENAI_BASE_URL} (optional): base URL for OpenAI-compatible
  * endpoints. If unset, the SDK default base URL is used.</li>
- * <li>{@code GENAI_TIMEOUT}: optional request timeout (in seconds). If missing,
+ * <li>{@code GENAI_TIMEOUT} (optional): request timeout in seconds. If missing,
  * {@code 0}, or negative, the SDK default timeouts are used.</li>
- * <li>{@code MAX_OUTPUT_TOKENS}: optional maximum number of output tokens.
+ * <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum number of output tokens.
  * Defaults to {@link #MAX_OUTPUT_TOKENS}.</li>
- * <li>{@code MAX_TOOL_CALLS}: optional maximum number of tool calls allowed in
+ * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls allowed in
  * a single response. Defaults to {@link #MAX_TOOL_CALLS}.</li>
  * </ul>
  */
@@ -136,15 +144,8 @@ public class OpenAIProvider implements GenAIProvider {
 	/**
 	 * Initializes the provider from the given configuration.
 	 *
-	 * <p>
-	 * The implementation reads {@code chatModel}, {@code OPENAI_API_KEY}, and the
-	 * optional {@code OPENAI_BASE_URL} and {@code GENAI_TIMEOUT} values and creates
-	 * a shared {@link OpenAIClient}.
-	 * </p>
-	 *
 	 * @param config provider configuration (must contain {@code OPENAI_API_KEY} and
 	 *               {@code chatModel})
-	 * @throws IllegalArgumentException if {@code chatModel} is blank
 	 */
 	@Override
 	public void init(Configurator config) {
@@ -225,11 +226,10 @@ public class OpenAIProvider implements GenAIProvider {
 
 		logger.debug("Sending request to LLM service.");
 
-		String result;
 		Response response = getClient().responses().create(params);
 		captureUsage(response.usage());
 
-		result = parseResponse(response);
+		String result = parseResponse(response);
 		logger.debug("Received response from LLM service.");
 		return result;
 	}
@@ -354,9 +354,6 @@ public class OpenAIProvider implements GenAIProvider {
 					.dimensions(dimensions).build();
 			CreateEmbeddingResponse response = getClient().embeddings().create(params);
 
-			// com.openai.models.embeddings.CreateEmbeddingResponse.Usage usage =
-			// response.usage();
-
 			embedding = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
 		}
 
@@ -394,8 +391,7 @@ public class OpenAIProvider implements GenAIProvider {
 						result = entry.getValue().apply(arguments);
 					} catch (Exception e) {
 						String errMsg = "Error: The functional tool call failed while executing '" + name
-								+ "'. Reason: "
-								+ e.getMessage();
+								+ "'. Reason: " + e.getMessage();
 						logger.error(errMsg);
 						result = errMsg;
 					}

@@ -26,27 +26,18 @@
  */
 
 /**
- * Builders for generating {@link org.machanism.machai.schema.Bindex} documents by collecting project context and
- * prompting a configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Builds {@link org.machanism.machai.schema.Bindex} documents by collecting project context and prompting a
+ * configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <p>The base type, {@link org.machanism.machai.bindex.builder.BindexBuilder}, assembles a prompt that can include:
+ * <p>The package provides a small hierarchy of builders:
  * <ul>
- *   <li>an optional <em>origin</em> {@code Bindex} to request an incremental update,</li>
- *   <li>package-specific project context produced by {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()},</li>
- *   <li>a generation instruction that asks the provider to return JSON conforming to the Bindex schema.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.BindexBuilder} assembles the overall prompt, optionally including
+ *       an <em>origin</em> {@code Bindex} for incremental updates, and performs generation/deserialization.</li>
+ *   <li>Specializations contribute ecosystem-specific context via {@code projectContext()} (for example Maven,
+ *       JavaScript, or Python project layouts).</li>
  * </ul>
  *
- * <p>Concrete builders tailor context collection for different ecosystems:
- * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: scans Maven build source/resource/test paths
- *       and includes a sanitized {@code pom.xml} model.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}: includes {@code package.json} and
- *       JavaScript/TypeScript/Vue sources under {@code src}.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder}: includes {@code pyproject.toml} and files
- *       from a source directory inferred from {@code project.name}.</li>
- * </ul>
- *
- * <p>Example:
+ * <p>Typical usage:
  * <pre>{@code
  * Bindex bindex = new MavenBindexBuilder(layout, "openai", config)
  *     .origin(previousBindex)

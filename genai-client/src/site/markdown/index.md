@@ -141,30 +141,26 @@ and generate the content for this section following net format:
 
 `OpenAIProvider` is an OpenAI-backed implementation of MachAI's `GenAIProvider` abstraction.
 
-This provider adapts the OpenAI Java SDK to MachAI's provider interface. It accumulates user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools. When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
+This provider adapts the MachAI provider abstraction to the OpenAI Java SDK Responses API. It supports prompting, file inputs, tool/function calling, and embedding generation.
 
-**Configuration variables consumed by `init(Configurator)`**
+**Configuration**
+
+Configuration values are read from the `Configurator` passed to `init(Configurator)`:
 
 - `chatModel` (required): model identifier passed to the OpenAI Responses API (for example, `gpt-4.1` or `gpt-4o`).
 - `OPENAI_API_KEY` (required): API key used to authenticate with the OpenAI API.
 - `OPENAI_BASE_URL` (optional): base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
-- `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, SDK defaults are used.
+- `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, the SDK default timeouts are used.
 - `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to provider constant.
 - `MAX_TOOL_CALLS` (optional): maximum number of tool calls allowed in a single response. Defaults to provider constant.
 
 **Capabilities**
 
-- Submit prompts and retrieve text responses.
-- Upload local files or attach files by URL for use in a request.
-- Register function tools and dispatch tool calls to application handlers.
-- Create vector embeddings for input text.
-- Report token usage to `GenAIProviderManager`.
-
-**Usage example**
-
-```java
-GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
-```
+- Prompting and text responses via `perform()`.
+- Optional attachments: local file upload and URL-based attachment.
+- Optional function tools with iterative tool-call resolution.
+- Text embeddings via `embedding(String, long)`.
+- Usage reporting to `GenAIProviderManager`.
 
 **Thread safety:** not thread-safe.
 
@@ -181,7 +177,7 @@ The provider performs an OpenID Connect (OIDC) token request to obtain an OAuth 
 
 **Provider delegation**
 
-After retrieving a token, this provider sets:
+After retrieving a token, this provider sets the following configuration keys before delegating to a downstream provider:
 
 - `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
 - `OPENAI_API_KEY` to the retrieved access token
@@ -192,18 +188,14 @@ Delegation is selected based on the configured `chatModel` prefix:
 - `gemini-*` models delegate to `GeminiProvider`
 - `claude-*` models delegate to `ClaudeProvider`
 
-**Configuration keys consumed by `init(Configurator)`**
+**Configuration**
+
+Configuration values are read from the `Configurator` passed to `init(Configurator)`:
 
 - `GENAI_USERNAME` (required): user e-mail or client id.
 - `GENAI_PASSWORD` (required): password or client secret.
 - `chatModel` (required): model identifier.
 - `AUTH_URL` (optional): token endpoint override.
-
-**Usage example**
-
-```java
-GenAIProvider provider = GenAIProviderManager.getProvider("CodeMie:gpt-5.1");
-```
 
 **Thread safety:** not thread-safe.
 
@@ -215,17 +207,7 @@ This provider adapts the Anthropic Java SDK to MachAI's provider interface.
 
 **Status**
 
-The current implementation is not available yet: `init(Configurator)` throws `NotImplementedException` and other methods are currently placeholders.
-
-**Configuration**
-
-Not available yet.
-
-**Usage example**
-
-```java
-GenAIProvider provider = GenAIProviderManager.getProvider("Claude:claude-...");
-```
+Not implemented yet: `init(Configurator)` throws `NotImplementedException` and other methods are placeholders.
 
 **Thread safety:** not thread-safe.
 
@@ -233,21 +215,11 @@ GenAIProvider provider = GenAIProviderManager.getProvider("Claude:claude-...");
 
 `GeminiProvider` is a MachAI `GenAIProvider` implementation for Google's Gemini models.
 
-This provider is responsible for adapting MachAI's provider-agnostic abstractions (prompts, tool definitions, files/attachments, and usage reporting) to Gemini's specific API.
+This provider adapts MachAI's provider-agnostic abstractions (prompts, tool definitions, files/attachments, and usage reporting) to Gemini's API.
 
 **Status**
 
-The current implementation is a placeholder. Most operations are not yet implemented and will be completed in a future iteration.
-
-**Configuration**
-
-Not available yet.
-
-**Usage example**
-
-```java
-GenAIProvider provider = GenAIProviderManager.getProvider("Gemini:gemini-...");
-```
+Not implemented yet: `init(Configurator)` / `perform()` / `embedding(...)` throw `NotImplementedException` and other methods are placeholders.
 
 **Thread safety:** not thread-safe.
 
@@ -263,18 +235,7 @@ This provider is intended for environments where no external LLM integration sho
 - `perform()` always returns `null`.
 - Unsupported capabilities (for example, `embedding(String, long)`) throw `UnsupportedOperationException`.
 
-**Usage example**
-
-```java
-GenAIProvider provider = GenAIProviderManager.getProvider("None:");
-provider.inputsLog(new java.io.File(".\\inputsLog\\inputs.txt"));
-provider.instructions("You are a helpful assistant.");
-provider.prompt("Describe the weather.");
-provider.perform();
-provider.close();
-```
-
-**Thread safety:** not specified; treat as not thread-safe unless documented.
+**Thread safety:** treat as not thread-safe.
 
 ## Resources
 

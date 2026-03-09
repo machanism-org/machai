@@ -47,7 +47,7 @@ Machai CLI boots a Spring Shell environment (REPL-style) and exposes several com
   - `MachaiCLI` loads system properties from `machai.properties` (or from the file specified by `-Dconfig=...`) and starts Spring Boot / Spring Shell.
 
 - **Persisted defaults (configuration)**
-  - `ConfigCommand` persists and reads key/value defaults in `machai.properties` via `PropertiesConfigurator`. Other commands use these defaults when flags are omitted.
+  - `ConfigCommand` exposes the `set` command to persist and read key/value defaults in `machai.properties` via `PropertiesConfigurator`.
 
 - **Bindex metadata generation and registration**
   - `BindexCommand`
@@ -57,7 +57,7 @@ Machai CLI boots a Spring Shell environment (REPL-style) and exposes several com
 - **Semantic search (picking) and project assembly**
   - `AssembyCommand`
     - `pick`: selects libraries matching a prompt (or prompt file) using similarity scoring and an optional registry backend.
-    - `assembly`: creates a project skeleton from picked libraries (optionally reusing the previous pick if `--query` is omitted).
+    - `assembly`: creates a project skeleton from picked libraries (reusing the previous pick if `--query` is omitted).
     - `prompt`: sends an ad-hoc prompt to the configured GenAI provider.
 
 - **Ghostwriter document/file processing**
@@ -114,7 +114,7 @@ Machai CLI stores common defaults in `machai.properties`. You can manage these v
 
 | Key | Description | Default |
 |---|---|---|
-| `genai` | Default GenAI provider/model identifier when `--genai`/`--model` is omitted | (not set; commands often fall back to `CodeMie:gpt-5-2-2025-12-11`) |
+| `genai` | Default GenAI provider/model identifier when `--genai`/`--model` is omitted | (not set; commands may fall back to `CodeMie:gpt-5-2-2025-12-11`) |
 | `dir` | Default working/project directory when `--dir` is omitted | Current user directory |
 | `score` | Default minimum similarity threshold used by semantic picking | `0.90` |
 | `registerUrl` | Default registry URL used by `register` and (optionally) by `pick/assembly` | (not set) |

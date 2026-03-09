@@ -47,9 +47,9 @@ public class BindexCommand {
 	/**
 	 * Generates bindex files for a project directory.
 	 *
-	 * <p>If {@code dir} is not provided, the configured default directory is used
-	 * (see {@code config dir ...}). If {@code genai} is not provided, the configured
-	 * default GenAI provider/model is used.
+	 * <p>If {@code dir} is not provided, the configured default directory is used.
+	 * If {@code genai} is not provided, the configured default GenAI provider/model
+	 * is used.
 	 *
 	 * @param dir
 	 *            the project directory to scan; if {@code null}, uses the configured

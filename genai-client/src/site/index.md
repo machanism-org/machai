@@ -105,11 +105,7 @@ This provider adapts MachAI's provider-agnostic abstractions (prompts, tool defi
 
 Status
 
-The current implementation is a placeholder. `init(Configurator)`, `perform()`, and `embedding(...)` throw `NotImplementedException`; most other operations are TODO/no-ops.
-
-Thread-safety
-
-Instances are not thread-safe.
+The current implementation is a placeholder. Most operations are not yet implemented and will be completed in a future iteration. `init(Configurator)`, `perform()`, and `embedding(...)` throw `NotImplementedException`.
 
 ### None
 
@@ -137,18 +133,18 @@ provider.perform();
 
 OpenAI-backed `GenAIProvider` implementation.
 
-This provider integrates the OpenAI Java SDK with MachAI by assembling and executing requests via the OpenAI Responses API. It accumulates user inputs (text prompts and optional file references), optional system-level instructions, and an optional set of function tools. When `perform()` is invoked, the provider calls the OpenAI Responses API, processes the model output (including iterative function tool calls), and returns the final assistant text.
+This provider adapts the MachAI provider abstraction to the OpenAI Java SDK Responses API. It supports prompting, file inputs, tool/function calling, and embedding generation.
 
 Configuration
 
-Configuration variables consumed by `init(Configurator)`:
+Configuration values are read from the `Configurator` passed to `init(Configurator)`.
 
-- `chatModel`: required model identifier passed to the OpenAI Responses API (for example, `gpt-4.1` or `gpt-4o`).
-- `OPENAI_API_KEY`: required API key used to authenticate with the OpenAI API.
-- `OPENAI_BASE_URL`: optional base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
-- `GENAI_TIMEOUT`: optional request timeout (in seconds). If missing, `0`, or negative, the SDK default timeouts are used.
-- `MAX_OUTPUT_TOKENS`: optional maximum number of output tokens. Defaults to `OpenAIProvider.MAX_OUTPUT_TOKENS`.
-- `MAX_TOOL_CALLS`: optional maximum number of tool calls allowed in a single response. Defaults to `OpenAIProvider.MAX_TOOL_CALLS`.
+- `chatModel` (required): model identifier passed to the OpenAI Responses API (for example, `gpt-4.1` or `gpt-4o`).
+- `OPENAI_API_KEY` (required): API key used to authenticate with the OpenAI API.
+- `OPENAI_BASE_URL` (optional): base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
+- `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, the SDK default timeouts are used.
+- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens.
+- `MAX_TOOL_CALLS` (optional): maximum number of tool calls allowed in a single response.
 
 Capabilities
 

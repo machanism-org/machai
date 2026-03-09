@@ -38,9 +38,9 @@
  * Host-integrated function tools exposed to a {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
  * <p>
- * This package contains a curated, auditable set of tool installers (SPI implementations) that register named
- * functions with a provider. The tools are executed inside the host application and are designed to keep access
- * scoped and observable.
+ * This package contains a curated set of tool installers (SPI implementations) that register named functions
+ * with a provider. The tools are executed inside the host application and are designed to keep access scoped
+ * and observable.
  * </p>
  *
  * <h2>Responsibilities</h2>
@@ -50,8 +50,8 @@
  *       {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.</li>
  *   <li><b>Discovery and wiring</b>: installers are typically discovered using {@link java.util.ServiceLoader} and
  *       applied by {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
- *   <li><b>Controlled access</b>: installers generally interpret paths relative to a host-supplied working
- *       directory, bound output sizes, and apply deny/validation checks for potentially risky operations.</li>
+ *   <li><b>Scoped execution</b>: tools interpret paths relative to a host-supplied working directory, bound output
+ *       sizes, and apply validation/deny checks for potentially risky operations.</li>
  * </ul>
  *
  * <h2>Key components</h2>

@@ -25,44 +25,43 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 /**
- * Shell command for application assembly and library picking operations via
- * GenAI.
- * <p>
- * Provides functionality to query, pick libraries, and assemble projects using
- * AI-assisted logic.
- * <p>
- * Usage Example:
- * 
+ * Spring Shell command that performs semantic search (“pick”) and assembles a
+ * project based on the selected libraries.
+ *
+ * <p>This command is a CLI facade over the bindex module:
+ * {@link Picker} is used to retrieve candidate libraries ({@link Bindex}) for a
+ * query, and {@link ApplicationAssembly} is used to generate/assemble an output
+ * project from the selected set.
+ *
+ * <h2>Example</h2>
  * <pre>
- * {@code
- * AssembyCommand command = new AssembyCommand();
- * command.pick("Create a web app", 0.8);
- * }
+ * pick --query "Create a web app" --score 0.9
+ * assembly --dir .\\out
  * </pre>
- * 
+ *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
 @ShellComponent
 public class AssembyCommand {
 
-	private static Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
 
 	private static final double DEFAULT_SCORE_VALUE = 0.90;
 	private static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
 
-	/** List of picked Bindex objects matching the search query. */
+	/** List of picked Bindex objects matching the last search query. */
 	private List<Bindex> bindexList;
 	/** Last query (search string) used for picking. */
 	private String findQuery;
 
-	/** JLine line reader for shell interaction. */
+	/** JLine line reader for shell interaction (optional). */
 	LineReader reader;
 
-	private PropertiesConfigurator config;
+	private final PropertiesConfigurator config;
 
 	/**
-	 * Default constructor.
+	 * Creates a new command instance.
 	 */
 	public AssembyCommand() {
 		super();
@@ -76,11 +75,19 @@ public class AssembyCommand {
 	}
 
 	/**
-	 * Picks libraries based on user request.
-	 * 
-	 * @param query The application assembly prompt or path to query file.
-	 * @param score The minimum similarity threshold for search results.
-	 * @throws IOException if reading file or picking fails
+	 * Picks libraries based on the user request.
+	 *
+	 * <p>The provided {@code query} may be a literal prompt or a path to a text file
+	 * containing the prompt.
+	 *
+	 * @param query       the application assembly prompt or the name of a prompt file
+	 * @param registerUrl optional URL of a registry service used by the picker
+	 * @param score       minimum similarity threshold for search results; if {@code null},
+	 *                    uses the configured default
+	 * @param genai       optional GenAI provider/model identifier (for example,
+	 *                    {@code OpenAI:gpt-5.1}); if {@code null}, uses the configured
+	 *                    default
+	 * @throws IOException if reading the query file or calling the picker fails
 	 */
 	@ShellMethod("Picks libraries based on user request.")
 	public void pick(
@@ -109,10 +116,11 @@ public class AssembyCommand {
 
 	/**
 	 * Gets query text from file if input is a file path.
-	 * 
+	 *
 	 * @param query query text or file path
-	 * @return String containing the query
-	 * @throws IOException if file read fails
+	 * @return the resolved query text
+	 * @throws FileNotFoundException if the file exists but cannot be opened
+	 * @throws IOException           if the file cannot be read
 	 */
 	private String getQueryFromFile(String query) throws IOException, FileNotFoundException {
 		File queryFile = new File(query);
@@ -125,16 +133,20 @@ public class AssembyCommand {
 	}
 
 	/**
-	 * Creates a project via picked library set.
-	 * 
-	 * @param query     The application assembly prompt (may be null to reuse last
-	 *                  query)
-	 * @param dir       The directory for the assembled project
-	 * @param score     Minimum similarity threshold
-	 * @param genai GenAI service provider/model (default is
-	 *                  Ghostwriter.CHAT_MODEL)
-	 * @throws IOException              if an error occurs
-	 * @throws IllegalArgumentException if query or bindexList is missing
+	 * Creates a project from the picked library set.
+	 *
+	 * <p>If {@code query} is omitted, the last query from {@link #pick(String, String, Double, String)}
+	 * is reused.
+	 *
+	 * @param query       the application assembly prompt (or prompt file); may be {@code null}
+	 * @param dir         the directory where the assembled project will be created; if {@code null},
+	 *                    uses the configured default or the current working directory
+	 * @param registerUrl optional URL of a registry service used by the picker
+	 * @param score       minimum similarity threshold; if {@code null}, uses the configured default
+	 * @param genai       optional GenAI provider/model identifier (for example,
+	 *                    {@code OpenAI:gpt-5.1}); if {@code null}, uses the configured default
+	 * @throws IOException              if picking or assembly fails
+	 * @throws IllegalArgumentException if the query is missing and no previous pick results exist
 	 */
 	@ShellMethod("Creates a project via picked librariy set.")
 	public void assembly(@ShellOption(value = { "-q",
@@ -180,9 +192,13 @@ public class AssembyCommand {
 	}
 
 	/**
-	 * Sends a user prompt to the GenAI provider for guidance.
-	 * 
-	 * @param query The prompt supplied by the user.
+	 * Sends a user prompt to the GenAI provider.
+	 *
+	 * @param query     the prompt supplied by the user
+	 * @param chatModel GenAI provider/model identifier (for example, {@code OpenAI:gpt-5.1});
+	 *                 if {@code null}, uses the configured default
+	 * @param dir       working directory used by the provider; if {@code null}, uses the configured
+	 *                 default or the current working directory
 	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(@ShellOption(value = { "-q", "--query" }, help = "The user prompt to GenAI.") String query,
@@ -212,22 +228,20 @@ public class AssembyCommand {
 	}
 
 	/**
-	 * Picks bricks (libraries) using a Picker service and scores them.
-	 * 
-	 * @param query     The query string describing requirements
-	 * @param score     Minimum similarity score
-	 * @param url
-	 * @param genai
-	 * 
-	 * @return List< Bindex> found matching libraries
+	 * Picks bricks (libraries) using a {@link Picker} service.
+	 *
+	 * @param query the query string describing requirements
+	 * @param score minimum similarity score
+	 * @param url   optional registry URL used by the picker
+	 * @param genai GenAI provider/model identifier
+	 * @return a list of matching libraries
 	 * @throws IOException if picking fails
 	 */
 	private List<Bindex> pickBricks(String query, Double score, String url, String genai)
 			throws IOException {
-		List<Bindex> bindexList = null;
 		Picker picker = new Picker(genai, url, config);
 		picker.setScore(score);
-		bindexList = picker.pick(query);
+		List<Bindex> bindexList = picker.pick(query);
 		logger.info("Search results for libraries matching the requested query:");
 		printFindResult(bindexList, picker);
 		return bindexList;
@@ -235,9 +249,9 @@ public class AssembyCommand {
 
 	/**
 	 * Prints search results for picked libraries.
-	 * 
-	 * @param bindexList List of picked libraries
-	 * @param picker     Picker used for scoring
+	 *
+	 * @param bindexList list of picked libraries
+	 * @param picker     picker used for scoring
 	 */
 	private void printFindResult(List<Bindex> bindexList, Picker picker) {
 		if (!bindexList.isEmpty()) {

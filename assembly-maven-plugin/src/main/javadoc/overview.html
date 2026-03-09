@@ -35,31 +35,31 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   GenAI-powered semantic search and metadata-driven workflows.
 </p>
 
-<h2>Purpose</h2>
+<h2>What this plugin does</h2>
 
 <p>
   Assembly Maven Plugin is a Maven plugin (packaging type <code>maven-plugin</code>) that provides the
-  <code>assembly</code> goal. The goal uses a natural-language prompt to select relevant libraries from MachAI's
-  bindex metadata and applies the selected libraries and related project changes to the target project directory.
+  <code>assembly</code> goal. The goal takes a natural-language prompt describing the desired project outcome,
+  recommends relevant libraries from MachAI bindex metadata, and applies the resulting project changes directly to the
+  Maven execution base directory (<code>${basedir}</code>).
 </p>
 
 <h2>High-level workflow</h2>
 
 <ol>
   <li>
-    <strong>Prompt acquisition</strong>: read a prompt from a configured text file (typically
-    <code>project.txt</code>) or request it interactively.
+    <strong>Prompt acquisition</strong>: read the prompt from a configured file (default
+    <code>project.txt</code>) or collect it interactively.
   </li>
   <li>
-    <strong>Library recommendation</strong>: use the MachAI picker to recommend candidate libraries described as
-    bindex entries.
+    <strong>Library recommendation</strong>: use MachAI's picker to recommend candidate libraries described as bindex
+    entries.
   </li>
   <li>
     <strong>Scoring and filtering</strong>: discard candidates below a configured minimum score threshold.
   </li>
   <li>
-    <strong>Assembly application</strong>: run the assembly engine to apply changes in-place to the Maven execution
-    base directory (<code>${basedir}</code>).
+    <strong>Assembly application</strong>: run the assembly engine to apply updates to the project directory in-place.
   </li>
 </ol>
 
@@ -135,7 +135,7 @@ mvn org.machanism.machai:assembly-maven-plugin:assembly
     The plugin operates on the Maven execution base directory (<code>${basedir}</code>) and applies changes in-place.
   </li>
   <li>
-    Library recommendations are produced from bindex metadata and are typically logged before the assembly phase begins.
+    Recommended libraries are produced from bindex metadata and are typically logged before the assembly phase begins.
   </li>
 </ul>
 

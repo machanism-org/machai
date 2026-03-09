@@ -32,7 +32,7 @@
  * reusable library. It captures:
  * <ul>
  *   <li>Identity (for example {@code id}, {@code name}, {@code version})</li>
- *   <li>Classification data (domains, layers, languages, integrations) used for semantic retrieval</li>
+ *   <li>Classification facets (domains, layers, languages, integrations) used for semantic retrieval</li>
  *   <li>Dependencies to other Bindexes to enable transitive expansion</li>
  * </ul>
  *

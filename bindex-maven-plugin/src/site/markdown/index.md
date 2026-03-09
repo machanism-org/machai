@@ -112,12 +112,12 @@ mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5
 |---|---|---|
 | `bindex.genai` | AI provider/model identifier used for indexing (for example `OpenAI:gpt-5`). | (required) |
 | `bindex.register.url` | Registry endpoint URL used by the `register` goal. | (none) |
-| `update` | When `true`, `register` performs an update while registering. | `true` |
+| `bindex.register.update` | When `true`, `register` performs an update while registering. | `true` |
 
 Example configuring and running registration:
 
 ```cmd
-mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
+mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080 -Dbindex.register.update=true
 ```
 
 # Resources

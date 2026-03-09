@@ -10,16 +10,14 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 /**
- * Shell command for reading and writing persistent Machai CLI configuration.
+ * Spring Shell command for reading and writing persistent Machai CLI configuration.
  *
- * <p>
- * The command stores values in {@code machai.properties} (when available) via
+ * <p>The command stores values in {@code machai.properties} (when available) via
  * {@link PropertiesConfigurator} and exposes helpers for configuring defaults
- * used by other commands (e.g., the default GenAI provider/model, the default
- * working directory, and the default semantic-search score threshold).
+ * used by other commands (for example, the default GenAI provider/model, the
+ * default working directory, and the default semantic-search score threshold).
  *
  * <h2>Examples</h2>
- *
  * <pre>
  * config genai OpenAI:gpt-5.1
  * config dir ./my-project
@@ -29,6 +27,7 @@ import org.springframework.shell.standard.ShellOption;
  */
 @ShellComponent
 public class ConfigCommand {
+	/** Default configuration file name used by this CLI. */
 	public static final String MACHAI_PROPERTIES_FILE_NAME = "machai.properties";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigCommand.class);
@@ -47,17 +46,15 @@ public class ConfigCommand {
 	}
 
 	/**
-	 * Shell command to set or get a configuration property.
+	 * Sets or gets a configuration property.
 	 *
-	 * <p>
-	 * If a value is provided, updates the configuration property with the given key
-	 * and saves the change. If the value is not provided (null), outputs the
-	 * current value of the specified key.
-	 * </p>
+	 * <p>If {@code value} is provided, updates the configuration property with the
+	 * given {@code key} and saves the change. If {@code value} is omitted, outputs
+	 * the current value for {@code key}.
 	 *
 	 * @param key   the configuration property key to set or get
-	 * @param value the value to assign to the specified key; if null, the current
-	 *              value is displayed
+	 * @param value the value to assign to the specified key; if {@code null}, the
+	 *              current value is displayed
 	 * @throws IOException if an error occurs while saving the properties file
 	 */
 	@ShellMethod(value = "Set or get a configuration property. If value is omitted, displays the current value.", key = "set")

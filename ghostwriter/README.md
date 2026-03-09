@@ -4,7 +4,7 @@
 1. **Project Title and Overview:**  
    - Provide the project name and a brief description based on `src\\site\\markdown\\index.md` content summary.
    - Add `![](src/site/resources/images/machai-ghostwriter-logo.png)` before the title.
-   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)` after the title as a new paragraph.
+   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)` after the title as a new paragraph.
 3. **Introduction**
    - Use from documentation folder: site/markdown/index.md
 2. **Usage:**  
@@ -20,8 +20,6 @@
 
 # Ghostwriter
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
-
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 
 > A guided file processing engine for generating and maintaining project-wide documentation and code improvements with AI.
@@ -30,7 +28,9 @@
 
 Machai Ghostwriter is an AI-assisted documentation and review engine that scans an entire project—source code, tests, documentation, and other relevant assets—extracts embedded `@guidance:` directives, and turns them into actionable prompts for a configured GenAI provider.
 
-Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system, where each file can carry local guidance and the tool orchestrates processing across the project consistently.
+It is built around the concept of [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system, where each file can carry local guidance and the tool orchestrates processing across the project consistently.
+
+Ghostwriter is delivered as a Java CLI entry point (`org.machanism.machai.gw.processor.Ghostwriter`) that loads configuration (for example from `gw.properties`), scans directories and patterns, and runs a configured GenAI provider across matching files.
 
 ## Introduction
 

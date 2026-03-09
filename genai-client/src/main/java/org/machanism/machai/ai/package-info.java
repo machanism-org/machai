@@ -18,8 +18,17 @@
 /**
  * Root package for MachAI's generative-AI client integration layer.
  *
- * <p>This namespace provides a provider-agnostic API for invoking LLM/GenAI backends, plus a set of built-in
- * provider implementations and host-executed function tools.
+ * <p>This package defines a provider-agnostic API for invoking LLM/GenAI backends, along with built-in provider
+ * implementations and host-executed tools.
+ *
+ * <h2>Key responsibilities</h2>
+ * <ul>
+ *   <li>Provide a consistent interface to configure instructions, prompts, and attachments regardless of the
+ *       underlying vendor.</li>
+ *   <li>Centralize provider discovery/selection and aggregate per-request usage accounting.</li>
+ *   <li>Expose a controlled tool surface (for example file, command, and web operations) that providers can call
+ *       when tool/function calling is enabled.</li>
+ * </ul>
  *
  * <h2>Package structure</h2>
  * <ul>
@@ -28,16 +37,16 @@
  *       {@link org.machanism.machai.ai.manager.Usage}.</li>
  *   <li>{@code org.machanism.machai.ai.provider.*} – concrete provider integrations (for example OpenAI, Gemini,
  *       CodeMie, Anthropic/Claude) and a {@code none} provider for disabled/offline environments.</li>
- *   <li>{@code org.machanism.machai.ai.tools} – host-integrated function tools that can be registered with a provider
- *       to enable controlled file, command, and web operations.</li>
+ *   <li>{@code org.machanism.machai.ai.tools} – host-integrated tools that can be registered with a provider to enable
+ *       controlled file, command, and web operations.</li>
  * </ul>
  *
  * <h2>Typical flow</h2>
  * <ol>
- *   <li>Resolve a provider using {@link org.machanism.machai.ai.manager.GenAIProviderManager} and a model identifier
- *       such as {@code OpenAI:gpt-4o-mini}.</li>
- *   <li>Set system instructions and prompts, optionally attach files and register tools.</li>
- *   <li>Execute the request and capture the response and usage.</li>
+ *   <li>Select a provider through {@link org.machanism.machai.ai.manager.GenAIProviderManager} using a provider/model
+ *       identifier (for example {@code OpenAI:gpt-4o-mini}).</li>
+ *   <li>Configure system instructions and prompts; optionally attach input files and register tools.</li>
+ *   <li>Execute the request, then record the response and associated usage.</li>
  * </ol>
  *
  * <h2>Example</h2>

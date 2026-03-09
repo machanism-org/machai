@@ -11,17 +11,20 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Main entry point for the Machai CLI application.
- * <p>
- * Boots and runs the Spring Boot CLI shell, enabling user access to
- * GenAI-powered commands such as assembly, bindex, and file processing. Usage
- * Example:
- * 
+ *
+ * <p>Bootstraps Spring Boot and starts the Spring Shell runtime.
+ *
+ * <p>At startup, the application attempts to load additional system properties
+ * from {@code machai.properties}. A different configuration file can be provided
+ * via {@code -Dconfig=/path/to/file}.
+ *
+ * <h2>Example</h2>
  * <pre>
  * {@code
  * MachaiCLI.main(new String[] {});
  * }
  * </pre>
- * 
+ *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
@@ -32,13 +35,21 @@ public class MachaiCLI {
 	 * Starts the Machai CLI application.
 	 *
 	 * @param args command-line arguments
-	 * @throws IOException
+	 * @throws IOException if loading the optional configuration file fails
 	 */
 	public static void main(String[] args) throws IOException {
 		loadSystemProperties();
 		System.exit(SpringApplication.exit(SpringApplication.run(MachaiCLI.class, args)));
 	}
 
+	/**
+	 * Loads properties from {@code machai.properties} (or from the file specified
+	 * by the {@code config} system property) and merges them into the current JVM
+	 * system properties.
+	 *
+	 * @throws FileNotFoundException if the specified config file path does not exist
+	 * @throws IOException           if reading the properties file fails
+	 */
 	private static void loadSystemProperties() throws FileNotFoundException, IOException {
 		String configFIle = System.getProperty("config");
 		File conf;
@@ -49,11 +60,11 @@ public class MachaiCLI {
 		}
 
 		if (conf.exists()) {
-			FileInputStream propFile = new FileInputStream(conf);
-			Properties p = new Properties(System.getProperties());
-			p.load(propFile);
-			propFile.close();
-			System.setProperties(p);
+			try (FileInputStream propFile = new FileInputStream(conf)) {
+				Properties p = new Properties(System.getProperties());
+				p.load(propFile);
+				System.setProperties(p);
+			}
 		}
 	}
 }
