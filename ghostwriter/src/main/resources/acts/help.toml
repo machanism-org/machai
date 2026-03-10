@@ -19,8 +19,8 @@ Use the available function tool to provide information about Ghostwriter acts.
 
 **Instructions:**
 - Carefully analyze the user prompt below and respond accordingly.
-- If the user prompt is **empty**, display a merged list of base and custom acts.  
-- If an act exists in both the built-in and user-defined areas, indicate this and note any inheritance or overrides (e.g., “User-defined act overrides built-in base act”).
+- If the user prompt is **empty**, display a merged list of build-in and custom acts.  
+- If an act exists in both the built-in and user-defined areas, indicate this and note any inheritance or overrides (e.g., “User-defined act overrides built-in act”).
 - If the user prompt contains an **act name**, retrieve and summarize the details of that specific act.
   - Include the act’s purpose, key properties (such as `instructions`, `inputs`, `basedOn`, and any `gw.*` options), and any inheritance relationships.
   - Present the information in a clear, user-friendly format.

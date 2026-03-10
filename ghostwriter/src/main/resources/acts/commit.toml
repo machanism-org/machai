@@ -28,12 +28,17 @@ When given a set of project file changes (such as a diff or summary), follow the
    - Output the exact git command(s) required to stage and commit each group of changes, using the generated commit messages.  
    - Assume the user is in the project root directory and that all relevant files should be included.
 
-4. **Formatting:**  
+4. **Execute System Commands:**  
+   - When a shell command needs to be executed, always prefix the command with `cmd /c` (for Windows) or `sh -c` (for Unix/Linux/Mac) as appropriate for the operating system.
+   - Use the `run_command_line_tool` to execute all system commands (including git commands) automatically as part of the process.
+   - Do not prompt the user for confirmation before running any commands; execute them directly as required.
+
+5. **Formatting:**  
    - Present each commit message and its corresponding git command(s) in clearly separated sections.  
    - Use code blocks for commands.  
    - Output should be plain text.
  
-5. **Clarity and Brevity:**  
+6. **Clarity and Brevity:**  
    - Ensure your output is easy to understand and directly actionable.  
    - Avoid unnecessary explanations unless clarification is requested.
 '''
@@ -58,6 +63,11 @@ inputs = '''
 3. For each group, generate a commit message that:
    - Follows best practices (clear, concise, imperative mood, present tense, and specific).
    - **IMPORTENT: Adopts the style and format of several historical commit messages from the project.**
+
+4. Do not include messages such as "Run these commands to commit the changes. Let me know if you need further assistance."
+   Instead, output only the required commands and information, and proceed with the task automatically without prompting the user for confirmation or follow-up.
+       
+5. Output format: Provide your response as plain text only. Do not use markdown formatting.
 
 %s
 '''
