@@ -126,7 +126,7 @@ public class CommandSecurityChecker {
 	 * @param command shell command to check
 	 * @throws DenyException if the command matches a deny-list rule
 	 */
-	public void danyCheck(String command) throws DenyException {
+	public void denyCheck(String command) throws DenyException {
 		for (Pattern pattern : denyPatterns) {
 			if (pattern.matcher(command).find()) {
 				throw new DenyException("Pattern: " + pattern.pattern());

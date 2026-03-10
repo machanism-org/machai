@@ -109,7 +109,7 @@ public class ActFunctionTools implements FunctionTools {
 	private Object getActDetails(Object... params) {
 		JsonNode props = (JsonNode) params[0];
 		String actName = props.get("actName").asText();
-		String custom = props.get("custom").asText();
+		String custom = props.has("custom") ? props.get("custom").asText() : null;
 
 		Properties properties = new Properties();
 		try {

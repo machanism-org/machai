@@ -84,6 +84,7 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	@Override
 	public void setDefaultPrompt(String act) {
+		act = StringUtils.defaultIfBlank(act, "help");
 		String name = StringUtils.substringBefore(StringUtils.defaultString(act), " ");
 		if (StringUtils.isBlank(name)) {
 			throw new IllegalArgumentException("Act name must not be blank. Usage: --act <name> [prompt]");
@@ -108,7 +109,7 @@ public class ActProcessor extends AIFileProcessor {
 		try {
 			loadAct(name, actData, actDir);
 			String actPrompt = Objects.toString(super.getDefaultPrompt(),
-					getConfigurator().get("prompt", actData.getProperty("inputs")));
+					getConfigurator().get("prompt", actData.getProperty("inputs", "%s")));
 			String value = String.format(actPrompt, StringUtils.defaultString(prompt).trim());
 
 			super.setDefaultPrompt(value);
@@ -120,29 +121,41 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Loads an act definition into the provided {@link Properties} object, supporting inheritance via
-	 * the {@code basedOn} property.
+	 * Loads an act definition into the provided {@link Properties} object,
+	 * supporting inheritance via the {@code basedOn} property.
 	 * <p>
-	 * This method attempts to load the specified act from both a user-defined directory (custom act)
-	 * and the built-in classpath resources. If both are present, the custom act wraps (overrides)
-	 * the built-in act, allowing for extension or modification of base act behavior.
+	 * This method attempts to load the specified act from both a user-defined
+	 * directory (custom act) and the built-in classpath resources. If both are
+	 * present, the custom act wraps (overrides) the built-in act, allowing for
+	 * extension or modification of base act behavior.
 	 * <p>
-	 * If the act specifies a {@code basedOn} property, the parent act is loaded first (recursively),
-	 * and its properties are merged. The child act's properties then override or extend the parent,
-	 * following inheritance rules.
+	 * If the act specifies a {@code basedOn} property, the parent act is loaded
+	 * first (recursively), and its properties are merged. The child act's
+	 * properties then override or extend the parent, following inheritance rules.
 	 *
-	 * @param name       the name of the act to load (without the {@code .toml} extension)
-	 * @param properties the destination {@link Properties} object to populate with parsed act properties
-	 * @param actDir     optional directory containing user-defined (custom) act files; may be {@code null}
+	 * @param name       the name of the act to load (without the {@code .toml}
+	 *                   extension)
+	 * @param properties the destination {@link Properties} object to populate with
+	 *                   parsed act properties
+	 * @param actDir     optional directory containing user-defined (custom) act
+	 *                   files; may be {@code null}
 	 * @throws IOException              if reading act content fails
-	 * @throws IllegalArgumentException if the specified act cannot be found in either location
+	 * @throws IllegalArgumentException if the specified act cannot be found in
+	 *                                  either location
 	 *
-	 * <p><b>Inheritance and Overrides:</b></p>
-	 * <ul>
-	 *   <li>If a custom act and a built-in act with the same name exist, the custom act wraps the built-in act.</li>
-	 *   <li>If the act defines {@code basedOn}, the parent act is loaded first, and its properties are merged recursively.</li>
-	 *   <li>Child act properties override or extend parent properties as appropriate.</li>
-	 * </ul>
+	 *                                  <p>
+	 *                                  <b>Inheritance and Overrides:</b>
+	 *                                  </p>
+	 *                                  <ul>
+	 *                                  <li>If a custom act and a built-in act with
+	 *                                  the same name exist, the custom act wraps
+	 *                                  the built-in act.</li>
+	 *                                  <li>If the act defines {@code basedOn}, the
+	 *                                  parent act is loaded first, and its
+	 *                                  properties are merged recursively.</li>
+	 *                                  <li>Child act properties override or extend
+	 *                                  parent properties as appropriate.</li>
+	 *                                  </ul>
 	 */
 	public static void loadAct(String name, Properties properties, File actDir) throws IOException {
 		TomlParseResult customToml = tryLoadActFromDirectory(properties, name, actDir);
