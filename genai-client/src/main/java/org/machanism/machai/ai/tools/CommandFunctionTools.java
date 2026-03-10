@@ -229,13 +229,6 @@ public class CommandFunctionTools implements FunctionTools {
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
 
-		try {
-			checker.danyCheck(command);
-		} catch (DenyException e) {
-			logger.error("[CMD {}] Invalid or unsafe command. {}", commandId, e.getMessage());
-			return "Error: Invalid or unsafe command.";
-		}
-
 		String dir = props.has("dir") ? props.get("dir").asText(".") : ".";
 
 		File projectDir = (File) params[1];
@@ -265,6 +258,14 @@ public class CommandFunctionTools implements FunctionTools {
 
 		try {
 			String[] commandParts = CommandLineUtils.translateCommandline(command);
+			try {
+				for (String commandPart : commandParts) {
+					checker.denyCheck(commandPart);
+				}
+			} catch (DenyException e) {
+				logger.error("[CMD {}] Invalid or unsafe command. {}", commandId, e.getMessage());
+				return "Error: Invalid or unsafe command.";
+			}
 
 			ProcessBuilder pb = new ProcessBuilder(commandParts);
 			pb.directory(workingDir);
@@ -452,7 +453,7 @@ public class CommandFunctionTools implements FunctionTools {
 			errorConsumer.accept(e);
 		}
 	}
-	
+
 	@Override
 	public void setConfigurator(Configurator configurator) {
 		try {
