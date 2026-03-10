@@ -2,7 +2,6 @@ package org.machanism.machai.gw.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Scanner;
 
