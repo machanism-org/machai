@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -67,7 +68,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act -Dgw.acts=src\\site\\acts -Dgw.logInputs=true
  * </pre>
  */
-@Mojo(name = "act", aggregator = true)
+@Mojo(name = "act", aggregator = true, threadSafe = true)
 public class Act extends AbstractGWGoal {
 
 	/**
@@ -128,7 +129,13 @@ public class Act extends AbstractGWGoal {
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		actProcessor.setNonRecursive(nonRecursive);
-		
+
+		boolean isParallel = session.isParallel();
+		if (isParallel) {
+			int data = session.getRequest().getDegreeOfConcurrency();
+			actProcessor.setDegreeOfConcurrency(data);
+		}
+
 		process(configuration, actProcessor);
 	}
 

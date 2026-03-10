@@ -164,7 +164,6 @@ public class ReactorGW extends AbstractGWGoal {
 				// No-op for this implementation
 			}
 		};
-		documents.setModuleMultiThread(false);
 
 		if (scanDir == null) {
 			scanDir = basedir.getAbsolutePath();

@@ -104,7 +104,6 @@ public class ReactorAct extends Act {
 			}
 		};
 		actProcessor.setNonRecursive(true);
-		actProcessor.setModuleMultiThread(false);
 
 		process(configuration, actProcessor);
 	}

@@ -30,29 +30,32 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 
 /**
- * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a project.
+ * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a
+ * project.
  *
  * <p>
- * This goal is an aggregator and can be executed even when a {@code pom.xml} is not present in the current directory
- * (it sets {@code requiresProject=false}).
+ * This goal is an aggregator and can be executed even when a {@code pom.xml} is
+ * not present in the current directory (it sets {@code requiresProject=false}).
  * </p>
  *
  * <h2>Processing order</h2>
  * <p>
- * The {@code gw:gw} goal processes files in reverse order, similar to the Ghostwriter CLI: sub-modules are processed
- * first, followed by parent modules. For more details, see:
- * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided file processing</a>.
+ * The {@code gw:gw} goal processes files in reverse order, similar to the
+ * Ghostwriter CLI: sub-modules are processed first, followed by parent modules.
+ * For more details, see:
+ * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided
+ * file processing</a>.
  * </p>
  *
  * <h2>Parameters</h2>
  * <p>
- * This goal defines the following parameter in addition to those inherited from {@link AbstractGWGoal}.
+ * This goal defines the following parameter in addition to those inherited from
+ * {@link AbstractGWGoal}.
  * </p>
  *
  * <dl>
  * <dt><b>{@code -Dgw.threads}</b> / {@code &lt;threads&gt;}</dt>
- * <dd>
- * Enables or disables multi-threaded module processing.
+ * <dd>Enables or disables multi-threaded module processing.
  * <p>
  * Default: {@code false}
  * </p>
@@ -61,19 +64,23 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <p>
- * The following parameters are defined on {@link AbstractGWGoal} and are available to this goal.
- * Refer to {@link AbstractGWGoal} for the authoritative list and exact semantics.
+ * The following parameters are defined on {@link AbstractGWGoal} and are
+ * available to this goal. Refer to {@link AbstractGWGoal} for the authoritative
+ * list and exact semantics.
  * </p>
  *
  * <dl>
  * <dt><b>{@code -Dgw.model}</b> / {@code &lt;model&gt;}</dt>
- * <dd>Provider/model identifier forwarded to the workflow. Example: {@code openai:gpt-4o-mini}.</dd>
+ * <dd>Provider/model identifier forwarded to the workflow. Example:
+ * {@code openai:gpt-4o-mini}.</dd>
  *
  * <dt><b>{@code -Dgw.scanDir}</b> / {@code &lt;scanDir&gt;}</dt>
- * <dd>Optional scan root override. When omitted, defaults to the execution root directory.</dd>
+ * <dd>Optional scan root override. When omitted, defaults to the execution root
+ * directory.</dd>
  *
  * <dt><b>{@code -Dgw.instructions}</b> / {@code &lt;instructions&gt;}</dt>
- * <dd>Instruction locations (for example, file paths or classpath locations) consumed by the workflow.</dd>
+ * <dd>Instruction locations (for example, file paths or classpath locations)
+ * consumed by the workflow.</dd>
  *
  * <dt><b>{@code -Dgw.guidance}</b> / {@code &lt;guidance&gt;}</dt>
  * <dd>Default guidance text forwarded to the workflow.</dd>
@@ -82,11 +89,11 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>Exclude patterns/paths to skip when scanning documentation sources.</dd>
  *
  * <dt><b>{@code -Dgw.genai.serverId}</b> / {@code &lt;serverId&gt;}</dt>
- * <dd>{@code settings.xml} {@code &lt;server&gt;} id used to read GenAI credentials.</dd>
+ * <dd>{@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
+ * credentials.</dd>
  *
  * <dt><b>{@code -Dgw.logInputs}</b> / {@code &lt;logInputs&gt;}</dt>
- * <dd>
- * Whether to log the list of input files passed to the workflow.
+ * <dd>Whether to log the list of input files passed to the workflow.
  * <p>
  * Default: {@code false}
  * </p>
@@ -141,20 +148,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
 @Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false)
 public class GW extends AbstractGWGoal {
 
-	/**
-	 * Enables or disables multi-threaded module processing.
-	 *
-	 * <p>
-	 * When enabled, modules may be processed concurrently.
-	 * </p>
-	 *
-	 * <p>
-	 * Can be set via {@code -Dgw.threads=true}.
-	 * </p>
-	 */
-	@Parameter(property = "gw.threads", defaultValue = "false")
-	private boolean threads;
-
 	@Override
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator config = getConfiguration();
@@ -186,7 +179,12 @@ public class GW extends AbstractGWGoal {
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		processor.setNonRecursive(nonRecursive);
 
-		processor.setModuleMultiThread(threads);
+		boolean isParallel = session.isParallel();
+		if (isParallel) {
+			int data = session.getRequest().getDegreeOfConcurrency();
+			processor.setDegreeOfConcurrency(data);
+		}
+
 		try {
 			scanDocuments(processor);
 		} catch (ProcessTerminationException e) {

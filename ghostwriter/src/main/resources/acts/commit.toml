@@ -83,8 +83,6 @@ inputs = '''
 [gw]
 # Directory pattern to scan for changes. "glob:." means the current directory and all subdirectories.
 scanDir = "glob:."
-# Whether to use multi-threading for scanning. "true" enables concurrent processing.
-threads = "true"
 
 # =========================
 # Functional Tool Command Section

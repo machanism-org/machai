@@ -271,7 +271,7 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 
 				case "gw.threads":
-					super.setModuleMultiThread(Boolean.parseBoolean(value));
+					super.setDegreeOfConcurrency(Integer.parseInt(value));
 					break;
 
 				case "gw.excludes":

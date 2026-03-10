@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
@@ -56,11 +57,16 @@ public class ActCommand {
 	 */
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
 	public void act(@ShellOption(value = "action") String action,
-			@ShellOption(value = "prompt", defaultValue = "") String prompt,
-			@ShellOption(value = "model", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model)
+			@ShellOption(value = "p", defaultValue = "") String prompt,
+			@ShellOption(value = "r", help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File rootDir,
+			@ShellOption(value = "m", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
-		File rootDir = ConfigCommand.config.getFile("gw.rootDir", SystemUtils.getUserDir());
+		if (rootDir == null) {
+			rootDir = SystemUtils.getUserDir();
+		}
+		rootDir = ConfigCommand.config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, rootDir);
+		
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		try {
 			configurator.setConfiguration(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);

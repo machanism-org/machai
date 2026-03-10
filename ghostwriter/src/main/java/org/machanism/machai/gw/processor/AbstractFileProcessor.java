@@ -68,7 +68,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	private File scanDir;
 
 	/** Whether module processing is executed concurrently. */
-	private boolean moduleMultiThread;
+	private int degreeOfConcurrency;
 
 	/** Whether module discovery/recursion is disabled for the current run. */
 	private boolean nonRecursive;
@@ -81,9 +81,6 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 	/** Configuration source used to initialize providers. */
 	private final Configurator configurator;
-
-	/** Maximum number of threads used for module processing. */
-	private int maxModuleThreads = Math.max(1, Runtime.getRuntime().availableProcessors());
 
 	/** Timeout for module processing worker pool shutdown. */
 	private long moduleThreadTimeoutMinutes = 60;
@@ -127,7 +124,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			List<String> modules = projectLayout.getModules();
 
 			if (modules != null && !modules.isEmpty()) {
-				if (isModuleMultiThread()) {
+				if (degreeOfConcurrency > 1) {
 					processModulesMultiThreaded(projectDir, modules);
 				} else {
 					for (String module : modules) {
@@ -147,7 +144,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param modules    module relative paths
 	 */
 	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
-		ExecutorService executor = Executors.newFixedThreadPool(Math.min(modules.size(), getMaxModuleThreads()));
+		ExecutorService executor = Executors.newFixedThreadPool(degreeOfConcurrency);
 		try {
 			List<Future<Void>> futures = new ArrayList<>();
 			for (String module : modules) {
@@ -485,10 +482,10 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Enables or disables multi-threaded module processing.
 	 *
-	 * @param moduleMultiThread {@code true} to enable, {@code false} to disable
+	 * @param data {@code true} to enable, {@code false} to disable
 	 */
-	public void setModuleMultiThread(boolean moduleMultiThread) {
-		this.moduleMultiThread = moduleMultiThread;
+	public void setDegreeOfConcurrency(int data) {
+		this.degreeOfConcurrency = data;
 	}
 
 	/**
@@ -536,42 +533,12 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Returns whether module processing is executed concurrently.
-	 *
-	 * @return {@code true} if multi-threaded module processing is enabled
-	 */
-	public boolean isModuleMultiThread() {
-		return moduleMultiThread;
-	}
-
-	/**
 	 * Returns whether recursion into modules/subdirectories is disabled.
 	 *
 	 * @return {@code true} when non-recursive mode is enabled
 	 */
 	public boolean isNonRecursive() {
 		return nonRecursive;
-	}
-
-	/**
-	 * Returns the maximum number of worker threads used for module processing.
-	 *
-	 * @return maximum module thread count
-	 */
-	public int getMaxModuleThreads() {
-		return maxModuleThreads;
-	}
-
-	/**
-	 * Sets the maximum number of worker threads used for module processing.
-	 *
-	 * @param maxModuleThreads maximum thread count (values &lt;= 0 are not allowed)
-	 */
-	public void setMaxModuleThreads(int maxModuleThreads) {
-		if (maxModuleThreads <= 0) {
-			throw new IllegalArgumentException("maxModuleThreads must be > 0");
-		}
-		this.maxModuleThreads = maxModuleThreads;
 	}
 
 	/**

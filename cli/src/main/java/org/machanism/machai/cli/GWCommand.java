@@ -22,11 +22,14 @@ import org.springframework.shell.standard.ShellOption;
  * Spring Shell command that scans files/directories and runs the Ghostwriter
  * guidance pipeline.
  *
- * <p>The command resolves defaults (root directory, GenAI model, guidance and
- * instructions) from the persisted configuration managed by {@link ConfigCommand},
- * and then delegates processing to {@link GuidanceProcessor}.
+ * <p>
+ * The command resolves defaults (root directory, GenAI model, guidance and
+ * instructions) from the persisted configuration managed by
+ * {@link ConfigCommand}, and then delegates processing to
+ * {@link GuidanceProcessor}.
  *
  * <h2>Examples</h2>
+ * 
  * <pre>
  * gw --scanDirs .\\my-project --excludes target,.git
  * gw --model OpenAI:gpt-5.1 --guidance "Refactor for clarity"
@@ -51,28 +54,36 @@ public class GWCommand {
 	 * guidance.
 	 *
 	 * @param threads      whether to enable multi-threaded processing
-	 * @param model        optional GenAI provider/model identifier; if {@code null}, uses the
-	 *                     configured default
-	 * @param instructions optional system instructions (text/URL/path). If provided as an empty
-	 *                     string, the user is prompted to input the full text via stdin.
-	 * @param guidance     optional default guidance (text/URL/path). If provided as an empty
-	 *                     string, the user is prompted to input the full text via stdin.
-	 * @param excludes     optional comma-separated list of directory names to exclude
+	 * @param model        optional GenAI provider/model identifier; if
+	 *                     {@code null}, uses the configured default
+	 * @param instructions optional system instructions (text/URL/path). If provided
+	 *                     as an empty string, the user is prompted to input the
+	 *                     full text via stdin.
+	 * @param guidance     optional default guidance (text/URL/path). If provided as
+	 *                     an empty string, the user is prompted to input the full
+	 *                     text via stdin.
+	 * @param excludes     optional comma-separated list of directory names to
+	 *                     exclude
 	 * @param logInputs    whether to log LLM request inputs to dedicated log files
-	 * @param scanDirs     directories to scan; if omitted, scans the configured root directory
+	 * @param scanDirs     directories to scan; if omitted, scans the configured
+	 *                     root directory
 	 */
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
 	public void gw(
-			@ShellOption(value = "threads", help = "Enable multi-threaded processing", defaultValue = "false") boolean threads,
-			@ShellOption(value = "model", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
-			@ShellOption(value = "instructions", help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
-			@ShellOption(value = "guidance", help = "Default guidance as text, URL, or file path", defaultValue = ShellOption.NULL) String guidance,
-			@ShellOption(value = "excludes", help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
-			@ShellOption(value = "logInputs", help = "Log LLM request inputs to dedicated log files", defaultValue = "false") boolean logInputs,
-			@ShellOption(value = "scanDirs", help = "Directories to scan", defaultValue = ShellOption.NULL) String[] scanDirs) {
+			@ShellOption(value = "s", help = "Directories to scan", defaultValue = ShellOption.NULL) String[] scanDirs,
+			@ShellOption(value = "t", help = "Sets the number of threads for concurrent processing.", defaultValue = "1") int threads,
+			@ShellOption(value = "m", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
+			@ShellOption(value = "i", help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
+			@ShellOption(value = "g", help = "Default guidance as text, URL, or file path", defaultValue = ShellOption.NULL) String guidance,
+			@ShellOption(value = "e", help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
+			@ShellOption(value = "l", help = "Log LLM request inputs to dedicated log files", defaultValue = "false") boolean logInputs,
+			@ShellOption(value = "r", help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File rootDir) {
 
 		try {
-			File rootDir = ConfigCommand.config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, SystemUtils.getUserDir());
+			if (rootDir == null) {
+				rootDir = SystemUtils.getUserDir();
+			}
+			rootDir = ConfigCommand.config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, rootDir);
 
 			String genaiValue = ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, null);
 			if (model != null) {
@@ -98,8 +109,6 @@ public class GWCommand {
 				excludesArr = excludes.split(",");
 			}
 
-			boolean multiThread = threads;
-
 			String defaultGuidance = ConfigCommand.config.get(Ghostwriter.GW_GUIDANCE_PROP_NAME, null);
 			if (guidance != null) {
 				defaultGuidance = guidance;
@@ -119,14 +128,16 @@ public class GWCommand {
 				}
 
 				if (instructionsValue != null) {
-					LOGGER.info("Instructions: {}", org.apache.commons.lang.StringUtils.abbreviate(instructionsValue, 60));
+					LOGGER.info("Instructions: {}",
+							org.apache.commons.lang.StringUtils.abbreviate(instructionsValue, 60));
 					processor.setInstructions(instructionsValue);
 				}
 
-				processor.setModuleMultiThread(multiThread);
+				processor.setDegreeOfConcurrency(threads);
 
 				if (defaultGuidance != null) {
-					LOGGER.info("Default Guidance: {}", org.apache.commons.lang.StringUtils.abbreviate(defaultGuidance, 60));
+					LOGGER.info("Default Guidance: {}",
+							org.apache.commons.lang.StringUtils.abbreviate(defaultGuidance, 60));
 					processor.setDefaultPrompt(defaultGuidance);
 				}
 

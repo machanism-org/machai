@@ -291,10 +291,10 @@ public final class Ghostwriter {
 	 *
 	 * @param multiThread {@code true} to enable
 	 */
-	public void setMultiThread(String multiThread) {
-		if (multiThread != null) {
-			boolean value = Boolean.parseBoolean(multiThread);
-			processor.setModuleMultiThread(value);
+	public void setDegreeOfConcurrency(String multiThreadCount) {
+		if (multiThreadCount != null) {
+			int value = Integer.parseInt(multiThreadCount);
+			processor.setDegreeOfConcurrency(value);
 		}
 	}
 
@@ -311,8 +311,8 @@ public final class Ghostwriter {
 		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
-				.desc("Enable multi-threaded processing to improve performance (default: false).")
-				.hasArg(true).optionalArg(true).build();
+				.desc("The degree of concurrency for the processing to improve performance.")
+				.hasArg(true).build();
 
 		Option rootDirOpt = new Option("r", "root", true,
 				"Specify the path to the root directory for file processing.");
@@ -395,11 +395,7 @@ public final class Ghostwriter {
 		String multiThread = config.get(GW_THREADS_PROP_NAME, null);
 		if (cmd.hasOption(multiThreadOption)) {
 			String opt = cmd.getOptionValue(multiThreadOption);
-			if (opt == null) {
-				multiThread = "true";
-			} else {
-				multiThread = opt;
-			}
+			multiThread = opt;
 		}
 
 		boolean logInputs = config.getBoolean(GW_LOG_INPUTS_PROP_NAME, false);
@@ -458,7 +454,7 @@ public final class Ghostwriter {
 
 			ghostwriter.setInstructions(instructions);
 			ghostwriter.setExcludes(excludes);
-			ghostwriter.setMultiThread(multiThread);
+			ghostwriter.setDegreeOfConcurrency(multiThread);
 			ghostwriter.setLogInputs(logInputs);
 
 			ghostwriter.setDefaultPrompt(defaultPrompt);
