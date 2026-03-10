@@ -3,6 +3,7 @@ package org.machanism.machai.gw.maven;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -124,6 +125,10 @@ public class Act extends AbstractGWGoal {
 			}
 		};
 
+		List<MavenProject> modules = session.getAllProjects();
+		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
+		actProcessor.setNonRecursive(nonRecursive);
+		
 		process(configuration, actProcessor);
 	}
 
