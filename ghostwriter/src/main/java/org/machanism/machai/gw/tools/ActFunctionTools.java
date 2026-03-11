@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
@@ -82,10 +83,16 @@ public class ActFunctionTools implements FunctionTools {
 			File file = new File(jarFilePath);
 			try (ZipFile jarFile = new ZipFile(file)) {
 				jarFile.stream().forEach(entry -> {
-					String name = entry.getName();
-					if (Strings.CS.startsWith(name, "acts/")
-							&& Strings.CS.endsWith(name, ".toml")) {
-						result.add(StringUtils.substringBetween(name, "acts/", ".toml"));
+					String actName = StringUtils.substringBetween(entry.getName(), "acts/", ".toml");
+					Map<String, Object> properties = new HashMap<>();
+					if (actName != null) {
+						try {
+							ActProcessor.tryLoadActFromClasspath(properties, actName);
+							result.add("`" + actName + "`: "
+									+ Objects.toString(properties.get("description")));
+						} catch (IOException e) {
+							throw new IllegalArgumentException(e);
+						}
 					}
 				});
 			}
@@ -102,7 +109,15 @@ public class ActFunctionTools implements FunctionTools {
 		File[] files = acts.listFiles((dir, name) -> name.endsWith(".toml"));
 		Set<String> result = new HashSet<>();
 		for (File file : files) {
-			result.add(StringUtils.substringBefore(file.getName(), ".toml"));
+			String actName = file.getName();
+			Map<String, Object> properties = new HashMap<>();
+			try {
+				ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
+				result.add("`" + StringUtils.substringBefore(actName, ".toml") + "`: "
+						+ Objects.toString(properties.get("description")));
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
 		}
 		return result;
 	}

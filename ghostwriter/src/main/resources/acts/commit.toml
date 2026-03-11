@@ -1,7 +1,10 @@
+description = '''
+This act automates the process of documenting and committing code changes in a project. It analyzes file modifications, groups them by change type, generates clear and concise commit messages that follow the project's historical style, and provides the exact git or svn commands needed to commit each group. The act ensures all actions are executed automatically, without prompting the user for confirmation, and outputs results in plain text for easy integration. 
+'''
+
 # basedOn:
 #   - Specifies the configuration profile or template that this configuration is derived from.
 #   - Useful for inheritance or extending base settings, allowing you to override or add to the base configuration as needed.
-
 # basedOn = 
 
 # =========================

@@ -1,8 +1,14 @@
+description = '''
+This act automates the process of identifying and fixing vulnerabilities in project dependencies based on Grype scan results. It reviews detected issues, updates affected dependencies to secure versions, verifies successful builds, and documents all changes for traceability. The act is designed to work efficiently in multi-module Maven projects, ensuring only relevant modules are updated and child projects are excluded from scanning. Its goal is to streamline vulnerability remediation, maintain project integrity, and provide clear, actionable output for developers.
+
+Note: Syft and Grype must be preinstalled and available in the system environment for this act to function correctly.
+'''
+
 # basedOn:
 #   - Specifies the configuration profile or template that this configuration is derived from.
 #   - Useful for inheritance or extending base settings, allowing you to override or add to the base configuration as needed.
-
 # basedOn = 
+
 # =========================
 # AI Assistant Instructions
 # =========================

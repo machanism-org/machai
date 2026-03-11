@@ -1,3 +1,7 @@
+description = '''
+This act serves as a minimal, generic template for executing user prompts within the project context. It provides basic structure and instructions for the AI assistant, without any predefined prologue or epilogue actions. Use this act when you want the AI to process a custom task or request, relying solely on the user’s input and the current project environment, without additional automated steps or inherited behaviors.
+'''
+
 # =========================
 # Configuration Profile Reference
 # =========================

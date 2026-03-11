@@ -1,3 +1,7 @@
+description = '''
+This act automates the generation of well-structured release notes in markdown format based on git commit messages. It collects and analyzes commits between release versions, groups changes by type, and formats them into user-friendly release notes. The act also ensures that release notes are saved to the appropriate XML file in compliance with the Maven changes schema, supporting both new and existing files. 
+'''
+
 # =========================
 # AI Assistant Instructions
 # =========================
