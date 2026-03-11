@@ -56,7 +56,7 @@ public class BindexCommand {
 	 *            default or the current working directory
 	 * @param update
 	 *            whether to update previously saved metadata
-	 * @param genai
+	 * @param model
 	 *            GenAI service provider/model identifier (for example,
 	 *            {@code OpenAI:gpt-5.1})
 	 * @throws IOException
@@ -68,14 +68,14 @@ public class BindexCommand {
 					"--dir" }, help = "The path to the project  directory.", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(value = { "-u",
 					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "false") boolean update,
-			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String genai)
+			@ShellOption(value = { "-m",
+					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
 		try {
-			genai = Optional.ofNullable(genai)
+			model = Optional.ofNullable(model)
 					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-			BindexCreator register = new BindexCreator(genai, config);
+			BindexCreator register = new BindexCreator(model, config);
 			register.update(update);
 			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 			register.scanFolder(dir);

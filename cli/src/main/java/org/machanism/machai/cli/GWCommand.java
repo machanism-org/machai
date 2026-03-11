@@ -1,17 +1,19 @@
 package org.machanism.machai.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
-import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
@@ -70,14 +72,22 @@ public class GWCommand {
 	 */
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
 	public void gw(
-			@ShellOption(value = "s", help = "Directories to scan", defaultValue = ShellOption.NULL) String[] scanDirs,
-			@ShellOption(value = "t", help = "Sets the number of threads for concurrent processing.", defaultValue = "1") int threads,
-			@ShellOption(value = "m", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
-			@ShellOption(value = "i", help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
-			@ShellOption(value = "g", help = "Default guidance as text, URL, or file path", defaultValue = ShellOption.NULL) String guidance,
-			@ShellOption(value = "e", help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
-			@ShellOption(value = "l", help = "Log LLM request inputs to dedicated log files", defaultValue = "false") boolean logInputs,
-			@ShellOption(value = "r", help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File rootDir) {
+			@ShellOption(value = { "-t",
+					"--threads" }, help = "Sets the number of threads for concurrent processing.", defaultValue = "1") int threads,
+			@ShellOption(value = { "-m",
+					"--model" }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
+			@ShellOption(value = { "-i",
+					"--instructions" }, help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
+			@ShellOption(value = { "-g",
+					"--guidance" }, help = "Default guidance as text, URL, or file path", defaultValue = ShellOption.NULL) String guidance,
+			@ShellOption(value = { "-e",
+					"--excludes" }, help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
+			@ShellOption(value = { "-l",
+					"--logInputs" }, help = "Log LLM request inputs to dedicated log files", defaultValue = ShellOption.NULL) Boolean logInputs,
+			@ShellOption(value = { "-r",
+					"--rootDir" }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File rootDir,
+			@ShellOption(value = { "-s",
+					"--scanDir" }, help = "Directories to scan.", defaultValue = ShellOption.NULL) String[] scanDirs) {
 
 		try {
 			if (rootDir == null) {
@@ -89,6 +99,8 @@ public class GWCommand {
 			if (model != null) {
 				genaiValue = model;
 			}
+
+			logInputs = ConfigCommand.config.getBoolean(Ghostwriter.GW_LOG_INPUTS_PROP_NAME, logInputs);
 
 			String instructionsValue = ConfigCommand.config.get(Ghostwriter.GW_INSTRUCTIONS_PROP_NAME, null);
 			if (instructions != null) {
@@ -118,8 +130,14 @@ public class GWCommand {
 				}
 			}
 
+			PropertiesConfigurator config = new PropertiesConfigurator();
+			try {
+				config.setConfiguration(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);
+			} catch (IOException e) {
+				// The property file is not defined, ignore.
+			}
+
 			for (String scanDir : dirs) {
-				PropertiesConfigurator config = new PropertiesConfigurator(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);
 				GuidanceProcessor processor = new GuidanceProcessor(rootDir, genaiValue, config);
 
 				if (excludesArr != null) {
@@ -141,7 +159,7 @@ public class GWCommand {
 					processor.setDefaultPrompt(defaultGuidance);
 				}
 
-				processor.setLogInputs(logInputs);
+				processor.setLogInputs(ObjectUtils.getIfNull(logInputs, false));
 				processor.scanDocuments(rootDir, scanDir);
 				LOGGER.info("Finished scanning directory: {}", scanDir);
 			}

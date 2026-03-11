@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
@@ -19,10 +20,12 @@ import org.springframework.shell.standard.ShellOption;
 /**
  * Spring Shell command that runs Ghostwriter "Act mode".
  *
- * <p>The command scans the configured project folder and then executes a
+ * <p>
+ * The command scans the configured project folder and then executes a
  * predefined action/prompt interactively via {@link ActProcessor}.
  *
  * <h2>Examples</h2>
+ * 
  * <pre>
  * act commit
  * act commit "and push"
@@ -45,7 +48,8 @@ public class ActCommand {
 	/**
 	 * Interactively executes a predefined action/prompt using Act mode.
 	 *
-	 * <p>The default root directory and model are resolved from the persisted
+	 * <p>
+	 * The default root directory and model are resolved from the persisted
 	 * configuration managed by {@link ConfigCommand}.
 	 *
 	 * @param action the name of the predefined action to execute
@@ -57,16 +61,18 @@ public class ActCommand {
 	 */
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
 	public void act(@ShellOption(value = "action") String action,
-			@ShellOption(value = "p", defaultValue = "") String prompt,
-			@ShellOption(value = "r", help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File rootDir,
-			@ShellOption(value = "m", help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model)
+			@ShellOption(value = { "-p", "--prompt" }, defaultValue = "") String prompt,
+			@ShellOption(value = { "-r",
+					"--rootDir" }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File rootDir,
+			@ShellOption(value = { "-m",
+					"--model" }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
 		if (rootDir == null) {
 			rootDir = SystemUtils.getUserDir();
 		}
 		rootDir = ConfigCommand.config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, rootDir);
-		
+
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		try {
 			configurator.setConfiguration(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);
@@ -76,6 +82,9 @@ public class ActCommand {
 		String resolvedModel = model == null ? ConfigCommand.config.get("gw.model") : model;
 		ActProcessor processor = new ActProcessor(rootDir, configurator, resolvedModel);
 		processor.setDefaultPrompt(action + " " + prompt);
+
+		Boolean logInputs = ConfigCommand.config.getBoolean(Ghostwriter.GW_LOG_INPUTS_PROP_NAME, false);
+		processor.setLogInputs(logInputs);
 
 		String scanDir = ConfigCommand.config.get("gw.scanDir", null);
 		if (scanDir == null) {

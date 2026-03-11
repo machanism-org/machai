@@ -84,7 +84,7 @@ public class AssembyCommand {
 	 * @param registerUrl optional URL of a registry service used by the picker
 	 * @param score       minimum similarity threshold for search results; if {@code null},
 	 *                    uses the configured default
-	 * @param genai       optional GenAI provider/model identifier (for example,
+	 * @param model       optional GenAI provider/model identifier (for example,
 	 *                    {@code OpenAI:gpt-5.1}); if {@code null}, uses the configured
 	 *                    default
 	 * @throws IOException if reading the query file or calling the picker fails
@@ -98,17 +98,17 @@ public class AssembyCommand {
 			@ShellOption(value = { "-s",
 					"--score" }, help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.", defaultValue = ShellOption.NULL) Double score,
 			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String genai)
+					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
 		try {
 			query = getQueryFromFile(query);
 
 			findQuery = query;
-			genai = Optional.ofNullable(genai)
+			model = Optional.ofNullable(model)
 					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
 			score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", 0.90));
-			bindexList = pickBricks(query, score, registerUrl, genai);
+			bindexList = pickBricks(query, score, registerUrl, model);
 		} finally {
 			GenAIProviderManager.logUsage();
 		}

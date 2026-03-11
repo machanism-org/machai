@@ -59,8 +59,8 @@ public class ConfigCommand {
 	 */
 	@ShellMethod(value = "Set or get a configuration property. If value is omitted, displays the current value.", key = "set")
 	public void set(
-			@ShellOption(value = "key", help = "The configuration property key to set or get.") String key,
-			@ShellOption(value = "value", help = "The value to assign to the specified key. If omitted, displays the current value.", defaultValue = ShellOption.NULL) String value)
+			@ShellOption(value = "--key", help = "The configuration property key to set or get.") String key,
+			@ShellOption(value = "--value", help = "The value to assign to the specified key. If omitted, displays the current value.", defaultValue = ShellOption.NULL) String value)
 			throws IOException {
 		if (value == null) {
 			String currentValue = config.get(key);
