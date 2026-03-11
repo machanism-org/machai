@@ -2,20 +2,18 @@
  * APIs for detecting, describing, and working with a repository's on-disk project layout.
  *
  * <p>
- * A {@code ProjectLayout} models a project as a root directory combined with sets of conventional, root-relative paths,
- * such as production sources, test sources, resources, and documentation roots. Some layouts also support nested
- * modules and derive module metadata by inspecting build configuration files (for example Maven {@code pom.xml}, Gradle
- * build files, or JavaScript workspace configuration).
+ * The central abstraction is {@link org.machanism.machai.project.layout.ProjectLayout}, which models a project as a
+ * root directory plus sets of conventional, root-relative paths such as production sources, test sources, resources,
+ * and documentation roots. Some implementations also support nested modules and derive module metadata by inspecting
+ * build configuration files (for example, Maven {@code pom.xml}, Gradle build files, or JavaScript workspace
+ * configuration).
  * </p>
  *
- * <h2>Core API</h2>
+ * <h2>Common conventions</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.project.layout.ProjectLayout} is the base abstraction implemented by concrete layout
- *       detectors.</li>
- *   <li>Layout instances are configured with a project root via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.</li>
- *   <li>Most accessors return root-relative paths (typically using {@code /} separators) that should be resolved against
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getProjectDir()} before filesystem access.</li>
+ *   <li>Returned paths are typically root-relative and should be resolved against
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getProjectDir()} before performing filesystem access.</li>
+ *   <li>Layouts may be able to enumerate modules, and module paths are generally expressed relative to the project root.</li>
  * </ul>
  *
  * <h2>Implementations</h2>
