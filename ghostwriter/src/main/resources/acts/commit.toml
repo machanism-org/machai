@@ -66,11 +66,8 @@ inputs = '''
 3. For each group, generate a commit message that:
    - Follows best practices (clear, concise, imperative mood, present tense, and specific).
    - **IMPORTENT: Adopts the style and format of several historical commit messages from the project.**
-
-4. Do not include messages such as "Run these commands to commit the changes. Let me know if you need further assistance."
-   Instead, output only the required commands and information, and proceed with the task automatically without prompting the user for confirmation or follow-up.
        
-5. Output format: Provide your response as plain text only. Do not use markdown formatting.
+4. Output format: Provide your response as plain text only. Do not use markdown formatting.
 
 %s
 '''
