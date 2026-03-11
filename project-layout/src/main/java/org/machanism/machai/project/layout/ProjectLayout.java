@@ -52,9 +52,10 @@ public abstract class ProjectLayout {
 	/**
 	 * Directory names that should be ignored when scanning projects.
 	 */
-	public static String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
-			ProjectProcessor.MACHAI_TEMP_DIR, "target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
-			".classpath", ".settings", ".settings", ".project", ".m2" };
+	// Sonar java:S1104/java:S2386/java:S1444/java:S3008 - avoid non-constant public mutable fields.
+	protected static final String[] excludeDirs = { "node_modules", ".git", ".nx", ".svn", ProjectProcessor.MACHAI_TEMP_DIR,
+			"target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info", ".classpath", ".settings", ".settings",
+			".project", ".m2" };
 
 	private File projectDir;
 
@@ -198,7 +199,7 @@ public abstract class ProjectLayout {
 		List<File> result = new ArrayList<>();
 		if (files != null) {
 			for (File file : files) {
-				if (!Strings.CS.startsWithAny(file.getName(), EXCLUDE_DIRS)) {
+				if (!Strings.CS.startsWithAny(file.getName(), excludeDirs)) {
 					result.add(file);
 					if (file.isDirectory()) {
 						result.addAll(findFiles(file));
@@ -226,7 +227,7 @@ public abstract class ProjectLayout {
 		List<File> result = new ArrayList<>();
 		if (files != null) {
 			for (File file : files) {
-				if (file.isDirectory() && !Strings.CS.startsWithAny(file.getName(), EXCLUDE_DIRS)) {
+				if (file.isDirectory() && !Strings.CS.startsWithAny(file.getName(), excludeDirs)) {
 					result.add(file);
 					result.addAll(findDirectories(file));
 				}

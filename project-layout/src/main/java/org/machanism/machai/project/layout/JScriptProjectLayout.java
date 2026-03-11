@@ -67,38 +67,54 @@ public class JScriptProjectLayout extends ProjectLayout {
 		}
 
 		Set<String> modules = new HashSet<>();
-
 		if (workspacesNode.isArray()) {
-			Iterator<JsonNode> iterator = workspacesNode.iterator();
-			while (iterator.hasNext()) {
-				String globPattern = iterator.next().asText();
-
-				if (Strings.CS.startsWith(globPattern, "./")) {
-					globPattern = StringUtils.substringAfter(globPattern, "./");
-				}
-
-				PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
-				File baseDir = getProjectDir();
-				List<File> files = ProjectLayout.findDirectories(baseDir);
-
-				for (File file : files) {
-					String path = ProjectLayout.getRelativePath(getProjectDir(), file, false);
-					if (path == null) {
-						continue;
-					}
-					Path pathToMatch = new File(path).toPath();
-
-					if (matcher.matches(pathToMatch) && isPackageJsonPresent(file)) {
-						String relativePath = ProjectLayout.getRelativePath(baseDir, file);
-						if (relativePath != null) {
-							modules.add(relativePath);
-						}
-					}
-				}
-			}
+			collectWorkspaceModules(workspacesNode, modules);
 		}
 
 		return new ArrayList<>(modules);
+	}
+
+	/**
+	 * Collects workspace module directories matching glob patterns listed in the
+	 * {@code workspaces} array.
+	 */
+	private void collectWorkspaceModules(JsonNode workspacesNode, Set<String> modules) {
+		File baseDir = getProjectDir();
+		List<File> directories = ProjectLayout.findDirectories(baseDir);
+
+		Iterator<JsonNode> iterator = workspacesNode.iterator();
+		while (iterator.hasNext()) {
+			String globPattern = iterator.next().asText();
+			String normalizedPattern = normalizeWorkspaceGlob(globPattern);
+			PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + normalizedPattern);
+			collectMatchingModules(directories, matcher, baseDir, modules);
+		}
+	}
+
+	// Sonar java:S3776 - split complex method into smaller helpers to reduce cognitive complexity.
+	private static String normalizeWorkspaceGlob(String globPattern) {
+		String normalized = globPattern;
+		if (Strings.CS.startsWith(normalized, "./")) {
+			normalized = StringUtils.substringAfter(normalized, "./");
+		}
+		return normalized;
+	}
+
+	private static void collectMatchingModules(List<File> directories, PathMatcher matcher, File baseDir, Set<String> modules) {
+		for (File dir : directories) {
+			String relativePath = ProjectLayout.getRelativePath(baseDir, dir, false);
+			if (relativePath == null) {
+				continue;
+			}
+
+			if (!matcher.matches(new File(relativePath).toPath())) {
+				continue;
+			}
+
+			if (isPackageJsonPresent(dir)) {
+				modules.add(relativePath);
+			}
+		}
 	}
 
 	/**

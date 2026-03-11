@@ -13,7 +13,7 @@ import org.apache.commons.lang3.Strings;
  *
  * <p>
  * This layout performs a lightweight filesystem inspection and treats each immediate subdirectory of the configured
- * project root as a potential module (excluding entries listed in {@link ProjectLayout#EXCLUDE_DIRS}). It does not try
+ * project root as a potential module (excluding entries listed in {@link ProjectLayout#excludeDirs}). It does not try
  * to infer language-specific source, test or documentation roots; those accessors return {@code null}.
  * </p>
  *
@@ -48,7 +48,7 @@ public class DefaultProjectLayout extends ProjectLayout {
 			// Sonar java:S1604 - replace anonymous FileFilter with a lambda.
 			File[] listFiles = projectDir == null ? null
 					: projectDir.listFiles((FileFilter) pathname -> pathname.isDirectory()
-							&& !Strings.CS.startsWithAny(pathname.getName(), EXCLUDE_DIRS));
+							&& !Strings.CS.startsWithAny(pathname.getName(), excludeDirs));
 
 			if (listFiles != null) {
 				for (File file : listFiles) {

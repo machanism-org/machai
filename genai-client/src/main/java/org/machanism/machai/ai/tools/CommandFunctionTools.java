@@ -226,7 +226,6 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @return command output bounded to the configured tail size
 	 */
 	public String executeCommand(Object[] params) {
-		// SonarQube java:S2119 - Save and re-use this "Random".
 		String commandId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 		logger.info("Run shell command [{}]: {}", commandId, Arrays.toString(params));
 
@@ -271,7 +270,6 @@ public class CommandFunctionTools implements FunctionTools {
 			final Process process = pb.start();
 			prc = process;
 
-			// SonarQube java:S2095 - Ensure ExecutorService is closed.
 			try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 					Executors.newFixedThreadPool(2))) {
 				LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
@@ -319,7 +317,8 @@ public class CommandFunctionTools implements FunctionTools {
 			return output.append("IO Error: ").append(e.getMessage()).toString();
 
 		} catch (CommandLineException e) {
-			return "Error: " + e.getMessage();
+			// SonarQube java:S2139 - Provide contextual information when rethrowing exceptions.
+			throw new IllegalArgumentException("[CMD " + commandId + "] Failed to parse command line", e);
 
 		} finally {
 			if (prc != null && prc.isAlive()) {
@@ -328,7 +327,6 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 	}
 
-	// SonarQube java:S1141 - Extract nested try block into a separate method.
 	private String[] validateAndTranslateCommand(String commandId, String command) throws CommandLineException {
 		String[] commandParts = CommandLineUtils.translateCommandline(command);
 		for (String commandPart : commandParts) {

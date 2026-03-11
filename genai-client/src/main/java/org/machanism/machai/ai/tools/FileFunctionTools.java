@@ -142,7 +142,8 @@ public class FileFunctionTools implements FunctionTools {
 		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
 		String filePath = dirNode == null ? null : dirNode.asText();
 		File workingDir = (File) params[1];
-		logger.info("List files: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
+		// SonarQube java:S2629 - Invoke method(s) only conditionally.
+		logger.info("List files: [{}, {}]", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH), workingDir);
 		logger.debug("List files: [{}, {}]", params[0], workingDir);
 
 		File directory = new File(workingDir, StringUtils.defaultIfBlank(filePath, "."));
@@ -183,8 +184,9 @@ public class FileFunctionTools implements FunctionTools {
 		String text = props.get("text").asText();
 		String charsetName = props.has(PARAM_CHARSET_NAME) ? props.get(PARAM_CHARSET_NAME).asText() : DEFAULT_CHARSET;
 		File workingDir = (File) params[1];
-		logger.info("Write file: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
-		logger.debug("Write file: [{}, {}]", params[0].toString(), workingDir);
+		// SonarQube java:S2629 - Invoke method(s) only conditionally.
+		logger.info("Write file: [{}, {}]", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH), workingDir);
+		logger.debug("Write file: [{}, {}]", String.valueOf(params[0]), workingDir);
 
 		File file = new File(workingDir, filePath);
 		if (file.getParentFile() != null) {
