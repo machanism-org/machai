@@ -105,7 +105,7 @@ public class ReactorAct extends Act {
 		};
 		actProcessor.setNonRecursive(true);
 
-		process(configuration, actProcessor);
+		process(actProcessor);
 	}
 
 }

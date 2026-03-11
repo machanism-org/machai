@@ -135,10 +135,10 @@ public class Act extends AbstractGWGoal {
 			actProcessor.setDegreeOfConcurrency(data);
 		}
 
-		process(configuration, actProcessor);
+		process(actProcessor);
 	}
 
-	protected void process(PropertiesConfigurator configuration, ActProcessor actProcessor)
+	protected void process(ActProcessor actProcessor)
 			throws MojoExecutionException {
 		try {
 			if (acts != null) {
@@ -166,7 +166,7 @@ public class Act extends AbstractGWGoal {
 					logger.info("Act: {}", act);
 				}
 				actProcessor.setDefaultPrompt(act);
-				String gwScanDir = configuration.get("gw.scanDir", null);
+				String gwScanDir = actProcessor.getConfigurator().get("gw.scanDir", null);
 				String scanDir = Objects.toString(super.scanDir, gwScanDir);
 				scanDir = Objects.toString(scanDir, basedir.getAbsolutePath());
 				logger.info("Starting scan of directory: {}", scanDir);
