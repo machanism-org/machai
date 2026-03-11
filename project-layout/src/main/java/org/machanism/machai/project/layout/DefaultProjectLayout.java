@@ -3,6 +3,7 @@ package org.machanism.machai.project.layout;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.Strings;
@@ -64,31 +65,34 @@ public class DefaultProjectLayout extends ProjectLayout {
 	/**
 	 * Returns a list of source roots for this layout.
 	 *
-	 * @return {@code null}; not inferred by the default layout
+	 * @return empty list; not inferred by the default layout
 	 */
 	@Override
 	public List<String> getSources() {
-		return null;
+		// Sonar java:S1168 - return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**
 	 * Returns a list of documentation roots for this layout.
 	 *
-	 * @return {@code null}; not inferred by the default layout
+	 * @return empty list; not inferred by the default layout
 	 */
 	@Override
 	public List<String> getDocuments() {
-		return null;
+		// Sonar java:S1168 - return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**
 	 * Returns a list of test source roots for this layout.
 	 *
-	 * @return {@code null}; not inferred by the default layout
+	 * @return empty list; not inferred by the default layout
 	 */
 	@Override
 	public List<String> getTests() {
-		return null;
+		// Sonar java:S1168 - return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	@Override

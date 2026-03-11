@@ -269,7 +269,7 @@ public class OpenAIProvider implements GenAIProvider {
 	private String parseResponse(Response response) {
 		String text = null;
 		Response current = response;
-		List<ResponseInputItem> inputs = new ArrayList<>(this.inputs);
+		List<ResponseInputItem> responseInputs = new ArrayList<>(this.inputs);
 		while (current != null) {
 			boolean anyToolCalls = false;
 			List<ResponseOutputItem> output = current.output();
@@ -277,18 +277,18 @@ public class OpenAIProvider implements GenAIProvider {
 				if (item.isFunctionCall()) {
 					anyToolCalls = true;
 					ResponseFunctionToolCall functionCall = item.asFunctionCall();
-					inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
+					responseInputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
 					Object value = callFunction(functionCall);
 					Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
 
-					inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
+					responseInputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
 							.callId(functionCall.callId()).outputAsJson(callFunction).build()));
 				}
 				if (item.isReasoning()) {
 					ResponseReasoningItem reasoningItem = item.asReasoning();
 					List<com.openai.models.responses.ResponseReasoningItem.Content> contentList = reasoningItem
-							.content().get();
+							.content().orElseGet(java.util.Collections::emptyList);
 					for (com.openai.models.responses.ResponseReasoningItem.Content content : contentList) {
 						String reasoning = content.text();
 						if (StringUtils.isNotBlank(reasoning)) {
@@ -316,7 +316,7 @@ public class OpenAIProvider implements GenAIProvider {
 				break;
 			}
 
-			ResponseCreateParams params = createResponseBuilder(inputs);
+			ResponseCreateParams params = createResponseBuilder(responseInputs);
 
 			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
 			current = getClient().responses().create(params);
@@ -334,7 +334,7 @@ public class OpenAIProvider implements GenAIProvider {
 		builder.instructions(instructions);
 		builder.inputOfResponse(inputs);
 
-		ResponseCreateParams params = builder.tools(new ArrayList<Tool>(toolMap.keySet())).build();
+		ResponseCreateParams params = builder.tools(new ArrayList<>(toolMap.keySet())).build();
 		return params;
 	}
 

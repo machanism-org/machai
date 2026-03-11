@@ -1,7 +1,6 @@
 package org.machanism.machai.bindex.builder;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -83,12 +82,8 @@ public class PythonBindexBuilder extends BindexBuilder {
 		if (projectName != null) {
 			File sourceDir = new File(getProjectLayout().getProjectDir(), projectName.replace(".", "/"));
 
-			File[] listFiles = sourceDir.listFiles(new FileFilter() {
-				@Override
-				public boolean accept(File pathname) {
-					return pathname.isFile();
-				}
-			});
+			// Sonar java:S1604 - prefer lambda over anonymous FileFilter.
+			File[] listFiles = sourceDir.listFiles(pathname -> pathname.isFile());
 
 			if (listFiles != null) {
 				for (File file : listFiles) {

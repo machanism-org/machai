@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.machai.project.ProjectProcessor;
@@ -80,6 +82,7 @@ public abstract class ProjectLayout {
 	 *
 	 * @return module directories (root-relative) or {@code null}
 	 */
+	@Nullable
 	public List<String> getModules() {
 		return null;
 	}
@@ -245,8 +248,8 @@ public abstract class ProjectLayout {
 	 * @return a short layout type name
 	 */
 	public String getProjectLayoutType() {
-		String replace = getClass().getSimpleName().replace(ProjectLayout.class.getSimpleName(), "");
-		return replace;
+		// Sonar java:S1488 - immediately return the expression instead of a temporary variable.
+		return getClass().getSimpleName().replace(ProjectLayout.class.getSimpleName(), "");
 	}
 
 	/**

@@ -21,7 +21,9 @@ class PomReaderTest {
 		File pom = new File("target\\test-data\\" + UUID.randomUUID(), "pom.xml");
 
 		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> new PomReader().getProjectModel(pom, false));
+		// Sonar java:S5778 - keep only one potentially-throwing invocation inside the lambda.
+		PomReader reader = new PomReader();
+		assertThrows(IllegalArgumentException.class, () -> reader.getProjectModel(pom, false));
 	}
 
 	@Test

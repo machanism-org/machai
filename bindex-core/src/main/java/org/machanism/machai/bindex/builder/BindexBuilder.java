@@ -3,6 +3,7 @@ package org.machanism.machai.bindex.builder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -47,7 +48,8 @@ public class BindexBuilder {
 	public static final String BINDEX_TEMP_DIR = ".machai/bindex-inputs.txt";
 
 	/** Classpath resource path to the Bindex JSON schema. */
-	public static String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
+	// Sonar java:S1444 - prevent reassignment of a public static resource path.
+	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 
 	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
 
@@ -188,7 +190,8 @@ public class BindexBuilder {
 	public String promptFile(File file, String bundleMessageName) throws IOException {
 		String type = FilenameUtils.getExtension(file.getName());
 		try (FileInputStream input = new FileInputStream(file)) {
-			String fileData = IOUtils.toString(input, "UTF8");
+			// Sonar java:S4719 - prefer StandardCharsets over charset name literals.
+			String fileData = IOUtils.toString(input, StandardCharsets.UTF_8);
 			if (bundleMessageName == null) {
 				return fileData;
 			}

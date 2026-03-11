@@ -56,6 +56,9 @@ import com.openai.client.OpenAIClient;
  */
 public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 
+	// SonarQube java:S1192 - Define a constant instead of duplicating this literal.
+	private static final String OPENAI_API_KEY = "OPENAI_API_KEY";
+
 	/**
 	 * Default OpenID Connect token endpoint for CodeMie.
 	 *
@@ -63,7 +66,8 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * Can be overridden via the {@code AUTH_URL} configuration key.
 	 * </p>
 	 */
-	public static String authUrl = "https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token";
+	// SonarQube java:S1444 / java:S1104 - Make this field a static final constant.
+	public static final String authUrl = "https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token";
 
 	/**
 	 * Base URL for the CodeMie Code Assistant API.
@@ -72,7 +76,8 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * This base URL is used to configure the underlying OpenAI-compatible client.
 	 * </p>
 	 */
-	public static String baseUrl = "https://codemie.lab.epam.com/code-assistant-api/v1";
+	// SonarQube java:S1444 / java:S1104 - Make this field a static final constant.
+	public static final String baseUrl = "https://codemie.lab.epam.com/code-assistant-api/v1";
 
 	/**
 	 * Initializes the provider using configuration values.
@@ -102,7 +107,7 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	public void init(Configurator conf) {
 		String chatModel = conf.get("chatModel");
 
-		if (System.getenv("OPENAI_API_KEY") != null) {
+		if (System.getenv(OPENAI_API_KEY) != null) {
 			throw new IllegalArgumentException(
 					"Configuration conflict detected: Please unset the 'OPENAI_API_KEY' environment variable to avoid conflicts with the current configuration.");
 		}
@@ -119,7 +124,7 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 				protected OpenAIClient getClient() {
 					try {
 						String token = getToken(resolvedAuthUrl, username, password);
-						conf.set("OPENAI_API_KEY", token);
+						conf.set(OPENAI_API_KEY, token);
 					} catch (IOException e) {
 						throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
 					}
@@ -129,11 +134,11 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 			};
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(chatModel, "gemini-")) {
-			conf.set("OPENAI_API_KEY", authorize(resolvedAuthUrl, username, password));
+			conf.set(OPENAI_API_KEY, authorize(resolvedAuthUrl, username, password));
 			provider = new GeminiProvider();
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(chatModel, "claude-")) {
-			conf.set("OPENAI_API_KEY", authorize(resolvedAuthUrl, username, password));
+			conf.set(OPENAI_API_KEY, authorize(resolvedAuthUrl, username, password));
 			provider = new ClaudeProvider();
 			setProvider(provider);
 		} else {
