@@ -410,12 +410,19 @@ public class Picker implements AutoCloseable {
 	 */
 	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
 			Bson... bsons) {
-		// Sonar java:S2629 - do not perform embedding computation when DEBUG is disabled (only needed for logging).
+		// Sonar java:S2629 - invoke expensive embedding computation only when DEBUG is enabled for logging.
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Vector search query: {}", query);
+			Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
+			return getResultsInternal(indexName, propertyPath, queryEmbedding, bsons);
 		}
-		Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
 
+		Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
+		return getResultsInternal(indexName, propertyPath, queryEmbedding, bsons);
+	}
+
+	private Collection<String> getResultsInternal(String indexName, String propertyPath, Iterable<Double> queryEmbedding,
+			Bson... bsons) {
 		List<Bson> pipeline = new ArrayList<>();
 
 		pipeline.add(Aggregates.vectorSearch(fieldPath(propertyPath), queryEmbedding, indexName, VECTOR_SEARCH_LIMITS,

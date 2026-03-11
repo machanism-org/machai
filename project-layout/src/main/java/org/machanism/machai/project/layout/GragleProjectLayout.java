@@ -157,8 +157,7 @@ public class GragleProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public String getProjectName() {
-		// Sonar java:S2259 - avoid potential NPE if Gradle model cannot be loaded.
-		GradleProject gradleProject = getProject();
-		return gradleProject != null ? gradleProject.getName() : null;
+		// Sonar java:S4144 - delegate to getProjectId() to avoid duplicate implementations.
+		return getProjectId();
 	}
 }

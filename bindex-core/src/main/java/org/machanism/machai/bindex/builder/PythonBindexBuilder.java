@@ -82,8 +82,8 @@ public class PythonBindexBuilder extends BindexBuilder {
 		if (projectName != null) {
 			File sourceDir = new File(getProjectLayout().getProjectDir(), projectName.replace(".", "/"));
 
-			// Sonar java:S1604 - prefer lambda over anonymous FileFilter.
-			File[] listFiles = sourceDir.listFiles(pathname -> pathname.isFile());
+			// Sonar java:S1612 - use method reference when possible.
+			File[] listFiles = sourceDir.listFiles(File::isFile);
 
 			if (listFiles != null) {
 				for (File file : listFiles) {

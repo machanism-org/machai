@@ -301,11 +301,17 @@ public class OpenAIProvider implements GenAIProvider {
 					ResponseOutputMessage outMessage = item.asMessage();
 					List<Content> contentList = outMessage.content();
 					for (Content content : contentList) {
+						content.outputText().ifPresent(outText -> {
+							// SonarQube java:S3655 - Avoid Optional#get() without presence check.
+							String candidate = outText.text();
+							if (StringUtils.isNotBlank(candidate)) {
+								logger.info("LLM Response: {}", candidate);
+							}
+						});
 						if (content.outputText().isPresent()) {
 							String candidate = content.outputText().get().text();
 							if (StringUtils.isNotBlank(candidate)) {
 								text = candidate;
-								logger.info("LLM Response: {}", text);
 							}
 						}
 					}
@@ -334,8 +340,8 @@ public class OpenAIProvider implements GenAIProvider {
 		builder.instructions(instructions);
 		builder.inputOfResponse(inputs);
 
-		ResponseCreateParams params = builder.tools(new ArrayList<>(toolMap.keySet())).build();
-		return params;
+		// SonarQube java:S1488 - Immediately return instead of using a temporary variable.
+		return builder.tools(new ArrayList<>(toolMap.keySet())).build();
 	}
 
 	/**
@@ -563,6 +569,7 @@ public class OpenAIProvider implements GenAIProvider {
 		if (StringUtils.isBlank(chatModel)) {
 			ModelService models = client.models();
 			List<String> items = models.list().items().stream().map(i -> i.id()).collect(Collectors.toList());
+			// SonarQube java:S1612 - Use method reference.
 			throw new IllegalArgumentException(
 					"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
 		}

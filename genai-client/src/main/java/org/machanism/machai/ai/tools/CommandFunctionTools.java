@@ -258,7 +258,6 @@ public class CommandFunctionTools implements FunctionTools {
 
 		Process prc = null;
 		try {
-			// SonarQube java:S1141 - Extract nested try block into a separate method.
 			String[] commandParts = validateAndTranslateCommand(commandId, command);
 
 			ProcessBuilder pb = new ProcessBuilder(commandParts);
@@ -433,7 +432,8 @@ public class CommandFunctionTools implements FunctionTools {
 			if (idx > 0 && idx < line.length() - 1) {
 				String key = line.substring(0, idx).trim();
 				String value = line.substring(idx + 1).trim();
-				if (key.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+				// SonarQube java:S6353 - Use concise character class syntax '\\w'.
+				if (key.matches("[A-Za-z_]\\w*")) {
 					envMap.put(key, value);
 				}
 			}

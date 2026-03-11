@@ -194,7 +194,12 @@ public class PomReader {
 		DefaultModelBuilder modelBuilder = (DefaultModelBuilder) container
 				.lookup(org.apache.maven.model.building.ModelBuilder.class);
 
-		// Sonar java:S1874 - keep existing deprecated interpolator due to Maven dependency constraints in this module.
+		/**
+		 * Accepted
+		 * This module is built against a Maven version where the recommended replacement is not available at compile-time.
+		 * Keeping the existing interpolator preserves compatibility; revisit when updating Maven dependencies.
+		 */
+		@SuppressWarnings("java:S1874")
 		StringSearchModelInterpolator modelInterpolator = new StringSearchModelInterpolator();
 		modelInterpolator.setPathTranslator(new DefaultPathTranslator());
 		modelInterpolator.setUrlNormalizer(new DefaultUrlNormalizer());

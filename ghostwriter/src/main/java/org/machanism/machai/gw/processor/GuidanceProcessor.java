@@ -1,7 +1,6 @@
 package org.machanism.machai.gw.processor;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -146,7 +145,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * modules).
 	 */
 	@Override
-	protected void processParentFiles(ProjectLayout projectLayout) throws FileNotFoundException, IOException {
+	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
 		List<File> children = findFiles(projectDir);
 

@@ -44,11 +44,18 @@ public class FileFunctionTools implements FunctionTools {
 
 	private static final int MAXWIDTH = 120;
 
+	/**
+	 * SonarQube java:S115 - Rename this constant name to match the regular expression.
+	 */
+	private static final String DEFAULT_CHARSET = "UTF-8";
+
+	/**
+	 * SonarQube java:S1192 - Define a constant instead of duplicating this literal.
+	 */
+	private static final String PARAM_CHARSET_NAME = "charsetName";
+
 	/** Logger for file tool operations and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
-
-	/** Default character set used to decode/encode file content. */
-	private static final String defaultCharset = "UTF-8";
 
 	/**
 	 * Registers file read/write/list tools into the provided provider.
@@ -58,11 +65,11 @@ public class FileFunctionTools implements FunctionTools {
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool("read_file_from_file_system", "Read the contents of a file from the disk.", this::readFile,
 				"file_path:string:required:The path to the file to be read.",
-				"charsetName:string:optional:the name of the requested charset, default: " + defaultCharset);
+				"charsetName:string:optional:the name of the requested charset, default: " + DEFAULT_CHARSET);
 		provider.addTool("write_file_to_file_system", "Write changes to a file on the file system.", this::writeFile,
 				"file_path:string:required:The path to the file you want to write to or create.",
 				"text:string:required:The content to be written into the file (text, code, etc.).",
-				"charsetName:string:optional:the name of the requested charset, default: " + defaultCharset);
+				"charsetName:string:optional:the name of the requested charset, default: " + DEFAULT_CHARSET);
 		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
 				this::listFiles, "dir_path:string:optional:The path to the directory to list contents of.");
 		provider.addTool("get_recursive_file_list",
@@ -174,7 +181,7 @@ public class FileFunctionTools implements FunctionTools {
 		JsonNode props = (JsonNode) params[0];
 		String filePath = props.get("file_path").asText();
 		String text = props.get("text").asText();
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText() : defaultCharset;
+		String charsetName = props.has(PARAM_CHARSET_NAME) ? props.get(PARAM_CHARSET_NAME).asText() : DEFAULT_CHARSET;
 		File workingDir = (File) params[1];
 		logger.info("Write file: [{}, {}]", StringUtils.abbreviate(params[0].toString(), MAXWIDTH), workingDir);
 		logger.debug("Write file: [{}, {}]", params[0].toString(), workingDir);
@@ -210,8 +217,8 @@ public class FileFunctionTools implements FunctionTools {
 	private Object readFile(Object[] params) {
 		JsonNode props = (JsonNode) params[0];
 		String filePath = props.get("file_path").asText();
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
-				: defaultCharset;
+		String charsetName = props.has(PARAM_CHARSET_NAME) ? props.get(PARAM_CHARSET_NAME).asText(DEFAULT_CHARSET)
+				: DEFAULT_CHARSET;
 
 		logger.info("Read file: {}", Arrays.toString(params));
 		File workingDir = (File) params[1];

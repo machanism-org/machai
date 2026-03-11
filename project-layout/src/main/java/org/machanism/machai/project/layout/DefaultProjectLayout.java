@@ -45,12 +45,10 @@ public class DefaultProjectLayout extends ProjectLayout {
 			modules = new ArrayList<>();
 
 			File projectDir = getProjectDir();
-			File[] listFiles = projectDir == null ? null : projectDir.listFiles(new FileFilter() {
-				@Override
-				public boolean accept(File pathname) {
-					return pathname.isDirectory() && !Strings.CS.startsWithAny(pathname.getName(), EXCLUDE_DIRS);
-				}
-			});
+			// Sonar java:S1604 - replace anonymous FileFilter with a lambda.
+			File[] listFiles = projectDir == null ? null
+					: projectDir.listFiles((FileFilter) pathname -> pathname.isDirectory()
+							&& !Strings.CS.startsWithAny(pathname.getName(), EXCLUDE_DIRS));
 
 			if (listFiles != null) {
 				for (File file : listFiles) {
