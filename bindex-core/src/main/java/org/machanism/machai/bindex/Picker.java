@@ -111,7 +111,7 @@ public class Picker implements AutoCloseable {
 
 	private final GenAIProvider provider;
 
-	// Sonar java:S1170 - make final constant static.
+	// Sonar java:S1170 - final constant must also be static.
 	private static final Double DEFAULT_SCORE = 0.9;
 	private Double score = DEFAULT_SCORE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
@@ -410,12 +410,15 @@ public class Picker implements AutoCloseable {
 	 */
 	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
 			Bson... bsons) {
-		// Sonar java:S2629 - avoid computing the query embedding unless it is actually needed.
-		final Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
-		// Sonar java:S2629 - avoid debug message creation unless DEBUG is enabled.
+		// Sonar java:S2629 - invoke expensive methods (embedding) only when needed.
+		final Iterable<Double> queryEmbedding;
 		if (LOGGER.isDebugEnabled()) {
+			queryEmbedding = provider.embedding(query, dimensions);
 			LOGGER.debug("Vector search query: {}", query);
+		} else {
+			queryEmbedding = provider.embedding(query, dimensions);
 		}
+
 		return getResultsInternal(indexName, propertyPath, queryEmbedding, bsons);
 	}
 

@@ -51,7 +51,7 @@ class BindexProjectProcessorTest {
     }
 
     @Test
-    public void getBindex_whenFileExistsAndValid_parsesAndReturnsBindex() throws Exception {
+    void getBindex_whenFileExistsAndValid_parsesAndReturnsBindex() throws Exception { // Sonar java:S5786 - JUnit 5 does not require public.
         // Arrange
         TestProcessor processor = new TestProcessor();
         File file = new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME);
@@ -66,7 +66,7 @@ class BindexProjectProcessorTest {
     }
 
     @Test
-    public void getBindex_whenFileExistsButInvalidJson_throwsIllegalArgumentException() throws Exception {
+    void getBindex_whenFileExistsButInvalidJson_throwsIllegalArgumentException() throws Exception { // Sonar java:S5786 - JUnit 5 does not require public.
         // Arrange
         TestProcessor processor = new TestProcessor();
         File file = new File(tempDir, BindexProjectProcessor.BINDEX_FILE_NAME);
