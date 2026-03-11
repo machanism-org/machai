@@ -82,20 +82,20 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 
 | Property name | Description | Default value | Usage context |
 |---|---|---|---|
-| `gw.config` | Properties file name to load at startup (resolved relative to `gw.home`). | `gw.properties` | Used in `initializeConfiguration(...)` when creating `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. This is a **Java system property** (not read from `gw.properties`). |
+| `gw.config` | Properties file name to load at startup (resolved relative to `gw.home`). | `gw.properties` | Used in `initializeConfiguration(...)` when creating `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. **System property only** (not read from `gw.properties`). |
 | `gw.home` | Ghostwriter home directory used to resolve `gw.config`. During bootstrap Ghostwriter sets `System.setProperty("gw.home", gwHomeDir.getAbsolutePath())` after resolution. | If not set: CLI `--root/-r` value (if provided); else `user.dir`. | Read via `PropertiesConfigurator#getFile("gw.home", null)` in `initializeConfiguration(...)`. Acts as the base directory when locating the configuration file. |
-| `gw.rootDir` | Root project directory used as the base directory for scanning/processing and to constrain absolute scan paths (enforced downstream by the processor). | If not set: `user.dir`. | If the CLI `-r/--root` option is provided, its value is used. Otherwise loaded via `config.getFile("gw.rootDir", null)` and falls back to `SystemUtils.getUserDir()`. Passed into `new ActProcessor(rootDir, config, genai)` / `new GuidanceProcessor(rootDir, genai, config)`, and later used via `processor.getRootDir()` during scanning. |
-| `gw.model` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | **No default**; required. | Loaded via `config.get("gw.model", null)` and optionally overridden by CLI `-m/--model`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor` / `GuidanceProcessor` construction. |
-| `gw.instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null` | Loaded via `config.get("gw.instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin until EOF. Applied via `AIFileProcessor#setInstructions(...)`. |
-| `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null` | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
-| `gw.guidance` | Default guidance applied when embedded guidance tag directives are not present (normal mode). | `null` | Loaded via `config.get("gw.guidance", null)` and optionally overridden by CLI `-g/--guidance`. If `-g` is specified without a value, guidance is read from stdin until EOF. Applied via `AIFileProcessor#setDefaultPrompt(...)` (via `Ghostwriter#setDefaultPrompt(...)`). |
-| `gw.threads` | Enables/disables multi-threaded module processing. | `null` (when unset) | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads` (no value forces `"true"`; otherwise uses the option value). Parsed via `Boolean.parseBoolean(...)` and applied via `AIFileProcessor#setModuleMultiThread(...)`. |
-| `gw.logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false` | Loaded via `config.getBoolean("gw.logInputs", false)` and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(...)`. |
-| `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | `null` (when unset); if still unset at runtime, the CLI scans `user.dir` absolute path. | Read via `config.get("gw.scanDir", null)` only when there are no CLI scanDir args. If still absent, Ghostwriter scans `SystemUtils.getUserDir().getAbsolutePath()`. |
+| `gw.rootDir` | Root project directory used as the base directory for scanning/processing. | If not set: `user.dir`. | If CLI `-r/--root` is provided, its value is used. Otherwise loaded via `config.getFile("gw.rootDir", null)` and falls back to `SystemUtils.getUserDir()`. Passed into `new ActProcessor(rootDir, config, genai)` / `new GuidanceProcessor(rootDir, genai, config)`, and later used via `processor.getRootDir()` during scanning. |
+| `gw.model` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | None (required). | Loaded via `config.get("gw.model", null)` and optionally overridden by CLI `-m/--model`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor` / `GuidanceProcessor` construction. |
+| `gw.instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null`. | Loaded via `config.get("gw.instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin until EOF or until a line not ending with `\` (see `MULTIPLE_LINES_BREAKER`). Applied via `AIFileProcessor#setInstructions(...)`. |
+| `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null`. | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
+| `gw.guidance` | Default guidance applied when embedded `@guidance:` directives are not present (normal mode). | `null`. | Loaded via `config.get("gw.guidance", null)` and optionally overridden by CLI `-g/--guidance`. If `-g` is specified without a value, guidance is read from stdin (see `readText(...)`). Applied via `AIFileProcessor#setDefaultPrompt(...)`. |
+| `gw.threads` | Degree of concurrency for processing. | `null` (unset). | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads <count>`. Parsed as an integer and applied via `AIFileProcessor#setDegreeOfConcurrency(int)`. |
+| `gw.logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("gw.logInputs", false)` and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
+| `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | `null` (unset); if still unset at runtime, the CLI scans `user.dir` absolute path. | Read via `config.get("gw.scanDir", null)` only when there are no CLI scanDir args. If still absent, Ghostwriter scans `SystemUtils.getUserDir().getAbsolutePath()`. |
 
 > Notes:
-> - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself reads `gw.home` as a **system property**.
-> - The CLI option `--acts <dir>` is **not** a `gw.*` property. It is a command-line-only override for the directory containing Act prompt files.
+> - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself resolves `gw.home` via configuration/system properties.
+> - The CLI option `--acts <dir>` is not a `gw.*` property; it is a command-line-only override for the directory containing act prompt files.
 
 ### Act Mode
 
@@ -129,10 +129,10 @@ gw.guidance=file:C:\\projects\\MDDA-BPD\\guidance.txt
 # Exclude directories (optional)
 gw.excludes=target,.git
 
-# Enable multi-threaded processing (optional)
+# Degree of concurrency (optional)
 # NOTE: when unset, the code treats it as "not specified" (null);
 # it is only applied when explicitly set (or -t/--threads is used).
-gw.threads=true
+gw.threads=4
 
 # Override project root directory (optional)
 gw.rootDir=C:\\projects\\machai
@@ -204,8 +204,8 @@ Options:
                            'OpenAI:gpt-5.1').
  -r,--root <arg>           Specify the path to the root directory for file
                            processing.
- -t,--threads <arg>        Enable multi-threaded processing to improve
-                           performance (default: false).
+ -t,--threads <arg>        The degree of concurrency for the processing to
+                           improve performance.
 
 Examples:
   java -jar gw.jar C:\projects\project

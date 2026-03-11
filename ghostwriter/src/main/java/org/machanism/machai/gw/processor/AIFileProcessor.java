@@ -115,7 +115,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			throws IOException {
 		logger.info("Processing file: '{}'", file);
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(genai, getConfigurator());
+		GenAIProvider provider = GenAIProviderManager.getProvider(getModel(), getConfigurator());
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		File projectDir = projectLayout.getProjectDir();
@@ -475,4 +475,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			new IllegalArgumentException(e);
 		}
 	}
+
+	public String getModel() {
+		return genai;
+	}
+
 }

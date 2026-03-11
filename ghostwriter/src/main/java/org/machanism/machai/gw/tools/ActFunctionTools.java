@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
@@ -40,7 +41,7 @@ public class ActFunctionTools implements FunctionTools {
 				this::getActDetails,
 				"actName:string:required:The name of the Act to load.",
 				"custom:boolean:optional:If true, retrieves the Act definition only from the user-defined (custom) acts directory. "
-				+ "If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts.");
+						+ "If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts.");
 	}
 
 	/**
@@ -111,7 +112,7 @@ public class ActFunctionTools implements FunctionTools {
 		String actName = props.get("actName").asText();
 		String custom = props.has("custom") ? props.get("custom").asText() : null;
 
-		Properties properties = new Properties();
+		Map<String, Object> properties = new HashMap<>();
 		try {
 			File acts = configurator.getFile("gw.acts", null);
 			if (custom == null) {

@@ -232,7 +232,7 @@ public final class Ghostwriter {
 					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append("\n");
 					System.out.print("\t");
 				} else {
-					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER));
+					sb.append(nextLine);
 					break;
 				}
 			}
@@ -289,7 +289,7 @@ public final class Ghostwriter {
 	/**
 	 * Enables or disables multi-threaded module processing.
 	 *
-	 * @param multiThread {@code true} to enable
+	 * @param multiThreadCount the configured worker count
 	 */
 	public void setDegreeOfConcurrency(String multiThreadCount) {
 		if (multiThreadCount != null) {

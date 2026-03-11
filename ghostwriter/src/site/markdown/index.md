@@ -67,7 +67,7 @@ Machai Ghostwriter is unique in how it turns *file-local guidance* into a repeat
 - Adds project structure context to prompts.
 - Supports system instructions and default guidance from plain text, URLs, or `file:` references.
 - Supports excludes (exact paths or `glob:` / `regex:` patterns).
-- Optional multi-threaded module processing.
+- Optional multi-threaded processing.
 - Optional logging of provider inputs per processed file.
 - “Act mode” for executing predefined prompts (`--act`).
 
@@ -113,7 +113,7 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 
 - `-h, --help` — Show help message and exit.
 - `-r, --root <path>` — Root directory for file processing.
-- `-t, --threads[=<true|false>]` — Enable multi-threaded processing (default: `false`). If provided with no value, it enables threading.
+- `-t, --threads <count>` — Degree of concurrency for processing.
 - `-m, --model <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
 - `-i, --instructions[=<text|url|file:...>]` — System instructions (plain text, URL, or `file:`). If no value: stdin using `\\` as a line-continuation marker.
 - `-g, --guidance[=<text|url|file:...>]` — Default guidance (plain text, URL, or `file:`). If no value: stdin using `\\` as a line-continuation marker.
@@ -128,14 +128,14 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 |---|---|---|
 | `-h, --help` | Show this help message and exit. | `false` |
 | `-r, --root <path>` | Specify the path to the root directory for file processing. | `gw.rootDir` or current working directory |
-| `-t, --threads[=<true\|false>]` | Enable multi-threaded processing. If used without a value, enables it. | `false` (`gw.threads`) |
+| `-t, --threads <count>` | Degree of concurrency for processing. | `gw.threads` or unset |
 | `-m, --model <provider:model>` | Set the GenAI provider and model. | `gw.model` |
 | `-i, --instructions[=<text\|url\|file:...>]` | System instructions (plain text, URL, or `file:`). If no value: stdin until a line does not end with `\\`. | `gw.instructions` |
 | `-g, --guidance[=<text\|url\|file:...>]` | Default guidance (plain text, URL, or `file:`). If no value: stdin until a line does not end with `\\`. | `gw.guidance` |
-| `-e, --excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` |
+| `-e, --excludes <csv>` | Comma-separated list of directories to exclude from processing. | `gw.excludes` |
 | `-l, --logInputs` | Log LLM request inputs to dedicated log files. | `false` (`gw.logInputs`) |
-| `-as, --acts <path>` | Specify the path to the directory containing predefined act prompt files. | not set |
-| `-a, --act[=<...>]` | Run in Act mode: an interactive mode for executing predefined prompts. | disabled |
+| `-as, --acts <path>` | Directory containing predefined act prompt files. | not set |
+| `-a, --act[=<...>]` | Act mode (interactive execution of predefined prompts). | disabled |
 
 ### Example
 
@@ -153,21 +153,21 @@ From the built-in help:
 
 ## Default Guidance
 
-Ghostwriter supports *default guidance* (called `defaultPrompt` in code) which is applied when a file does not contain embedded `@guidance:` directives.
+Ghostwriter supports *default guidance* (stored as `defaultPrompt`) which is applied when a file does not contain embedded `@guidance:` directives.
 
 You can provide it via:
 
 - Config property: `gw.guidance`
 - CLI option: `-g, --guidance`
 
-When provided through the CLI/config, the value is parsed line-by-line:
+When provided through the CLI/config, the value is parsed line-by-line (see `AIFileProcessor.parseLines(String)`):
 
 - Blank lines are preserved.
-- Lines starting with `http://` or `https://` are loaded from the URL.
-- Lines starting with `file:` are loaded from the specified file path (relative paths resolve from the configured root directory).
+- Lines starting with `http://` or `https://` are loaded from the URL and included.
+- Lines starting with `file:` are loaded from the referenced file path (relative paths resolve from the configured root directory).
 - Other lines are used as-is.
 
-Additionally, when default guidance is configured, Ghostwriter may run a folder-level processing step (via `AIFileProcessor.processFolder(ProjectLayout)`), sending the default guidance prompt against the scanned folder context.
+Additionally, when default guidance is configured, Ghostwriter may run a folder-level processing step (via `AIFileProcessor.processFolder(ProjectLayout)`), executing the default guidance prompt against the scanned folder context.
 
 ## Resources
 
@@ -221,5 +221,4 @@ Let me know if you want it even shorter or tailored for a specific toolset!
 - Ensure clarity, completeness, and accuracy in each section.
 - Use information from project files and source code as specified.
 - Structure the documentation for easy navigation and practical use.
-- Use Markdown syntax for headings, lists, tables, code blocks, and links.
 -->
