@@ -2,6 +2,7 @@ package org.machanism.machai.ai.tools;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -200,7 +201,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param url         URL to connect to
-	 * @param headers optional headers (newline-separated {@code NAME=VALUE})
+	 * @param headers     optional headers (newline-separated {@code NAME=VALUE})
 	 * @param charsetName charset name (currently unused, but kept for API symmetry)
 	 * @return connection
 	 * @throws IOException if opening a connection fails
@@ -251,8 +252,8 @@ public class WebFunctionTools implements FunctionTools {
 		output.append("HTTP ").append(Integer.toString(responseCode)).append(" ")
 				.append(connection.getResponseMessage()).append("\n");
 
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-				responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream(), charsetName))) {
+		try (InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in, charsetName))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append("\n");
@@ -324,22 +325,28 @@ public class WebFunctionTools implements FunctionTools {
 			response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
 					.append("\n");
 
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-					responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream(), charsetName))) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					response.append(line).append("\n");
+			String result;
+			InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
+			if (in != null) {
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, charsetName))) {
+					String line;
+					while ((line = reader.readLine()) != null) {
+						response.append(line).append("\n");
+					}
 				}
+
+				result = response.toString();
+				logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
+						StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
+				logger.debug("[REST {}] Received response ({} bytes): {}", requestId, response.length(), result);
+			} else {
+				result = "ResponseCode: " + connection.getResponseCode() + " " + connection.getRequestMethod();
 			}
 
-			String result = response.toString();
-			logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
-					StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
-			logger.debug("[REST {}] Received response ({} bytes): {}", requestId, response.length(), result);
 			return result;
 
 		} catch (Exception e) {
-			logger.error("[REST {}] IO error during REST call: {}", requestId, e.getMessage());
+			logger.error("[REST {}] IO error during REST call: {}", requestId, e.getMessage(), e);
 			return "IO Error: " + e.getMessage();
 		}
 	}
