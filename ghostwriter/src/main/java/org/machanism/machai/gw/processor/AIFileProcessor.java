@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
@@ -169,6 +171,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		List<String> documents = projectLayout.getDocuments();
 		List<String> modules = projectLayout.getModules();
 
+		content.add(SystemUtils.OS_NAME);
 		content.add(projectLayout.getProjectName() != null ? projectLayout.getProjectName() : NOT_DEFINED);
 		content.add(projectLayout.getProjectId());
 		content.add(projectDir.getName());
@@ -283,17 +286,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					continue;
 				}
 
-				try {
-					String content = tryToGetInstructionsFromReference(normalizedLine);
-					if (content != null) {
-						sb.append(content);
-					}
-					sb.append("\n");
-				} catch (IOException e) {
-					throw new IllegalArgumentException(e);
+				String content = tryToGetInstructionsFromReference(normalizedLine);
+				if (content != null) {
+					sb.append(content);
 				}
+				sb.append("\n");
 			}
 		} catch (IOException e) {
+			// Sonar java:S1141 - remove nested try/catch by letting IOException flow to one handler.
 			throw new IllegalArgumentException(e);
 		}
 
@@ -342,7 +342,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @throws IOException if an I/O error occurs
 	 */
 	private static String readFromHttpUrl(String urlString) throws IOException {
-		URL url = new URL(urlString);
+		// Sonar java:S1874 - avoid deprecated URL(String); use URI -> URL.
+		URL url = URI.create(urlString).toURL();
 		try (InputStream in = url.openStream()) {
 			String result = IOUtils.toString(in, StandardCharsets.UTF_8);
 			logger.info("Included: `{}`", urlString);
@@ -413,27 +414,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
 			if (!isPathPattern(scanDir)) {
-				File scanDirFile = new File(scanDir);
-				if (!scanDirFile.isAbsolute()) {
-					if (".".equals(scanDir)) {
-						scanDirFile = getRootDir();
-					} else {
-						scanDirFile = new File(getRootDir(), scanDir);
-					}
-				}
-				super.setScanDir(scanDirFile);
-				String relativePath = ProjectLayout.getRelativePath(projectDir, scanDirFile);
-				if (relativePath == null) {
-					throw new IllegalArgumentException(
-							"Error: The specified scan path must be located within the root project directory: "
-									+ projectDir.getAbsolutePath());
-				}
-
-				if (getDefaultPrompt() == null) {
-					scanDir = "glob:" + relativePath + "{,/**}";
-				} else {
-					scanDir = "glob:" + relativePath;
-				}
+				scanDir = parseScanDir(projectDir, scanDir);
 			}
 			super.setPathMatcher(FileSystems.getDefault().getPathMatcher(scanDir));
 		} else {
@@ -441,6 +422,31 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 
 		scanFolder(projectDir);
+	}
+
+	private String parseScanDir(File projectDir, String scanDir) {
+		File scanDirFile = new File(scanDir);
+		if (!scanDirFile.isAbsolute()) {
+			if (".".equals(scanDir)) {
+				scanDirFile = getRootDir();
+			} else {
+				scanDirFile = new File(getRootDir(), scanDir);
+			}
+		}
+		super.setScanDir(scanDirFile);
+		String relativePath = ProjectLayout.getRelativePath(projectDir, scanDirFile);
+		if (relativePath == null) {
+			throw new IllegalArgumentException(
+					"Error: The specified scan path must be located within the root project directory: "
+							+ projectDir.getAbsolutePath());
+		}
+
+		if (getDefaultPrompt() == null) {
+			scanDir = "glob:" + relativePath + "{,/**}";
+		} else {
+			scanDir = "glob:" + relativePath;
+		}
+		return scanDir;
 	}
 
 	/**
@@ -472,7 +478,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		try {
 			process(projectLayout, projectLayout.getProjectDir(), instructions, defaultPrompt);
 		} catch (IOException e) {
-			new IllegalArgumentException(e);
+			// Fix for Sonar java:S3984 - previously created an exception without throwing it.
+			throw new IllegalArgumentException(e);
 		}
 	}
 

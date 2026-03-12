@@ -1,7 +1,6 @@
 package org.machanism.machai.gw.processor;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -17,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.gw.reviewer.Reviewer;
+import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,7 +146,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * modules).
 	 */
 	@Override
-	protected void processParentFiles(ProjectLayout projectLayout) throws FileNotFoundException, IOException {
+	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
 		List<File> children = findFiles(projectDir);
 
@@ -261,8 +261,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @return {@code true} if the directory was deleted, otherwise {@code false}
 	 */
 	public static boolean deleteTempFiles(File basedir) {
-		File file = new File(basedir,
-				GuidanceProcessor.MACHAI_TEMP_DIR + File.separator + GuidanceProcessor.GW_TEMP_DIR);
+		// Sonar java:S3252 - use static access for inherited static fields (ProjectProcessor.MACHAI_TEMP_DIR)
+		// and static fields from another class (AIFileProcessor.GW_TEMP_DIR).
+		File file = new File(basedir, ProjectProcessor.MACHAI_TEMP_DIR + File.separator + AIFileProcessor.GW_TEMP_DIR);
 		logger.info("Removing '{}' inputs log file.", file);
 		return FileUtils.deleteQuietly(file);
 	}

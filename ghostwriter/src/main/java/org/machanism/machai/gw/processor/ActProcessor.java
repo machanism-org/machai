@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,6 +62,9 @@ public class ActProcessor extends AIFileProcessor {
 
 	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
+
+	// Sonar java:S1192 - avoid duplicating string literals.
+	private static final String TOML_EXTENSION = ".toml";
 
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
@@ -239,7 +241,7 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public static TomlParseResult tryLoadActFromClasspath(Map<String, Object> properties, String name)
 			throws IOException {
-		String path = ACTS_BASENAME_PREFIX + name + ".toml";
+		String path = ACTS_BASENAME_PREFIX + name + TOML_EXTENSION;
 		URL resource = Ghostwriter.class.getResource(path);
 		if (resource == null) {
 			return null;
@@ -267,7 +269,7 @@ public class ActProcessor extends AIFileProcessor {
 			return null;
 		}
 
-		File file = new File(actDir, name + ".toml");
+		File file = new File(actDir, name + TOML_EXTENSION);
 		TomlParseResult toml = null;
 		if (file.exists()) {
 			toml = Toml.parse(file.toPath());
@@ -389,19 +391,18 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
-		File projectDir = projectLayout.getProjectDir();
-		List<File> children = findFiles(projectDir);
+		File scanRootDir = projectLayout.getProjectDir();
+		List<File> children = findFiles(scanRootDir);
 
-		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
+		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, scanRootDir));
 
 		for (File child : children) {
 			processFile(projectLayout, child);
 		}
 
-		boolean match = match(projectDir, projectDir);
-
-		if (match && getDefaultPrompt() != null) {
-			process(projectLayout, projectDir, getInstructions(), getDefaultPrompt());
+		// Sonar java:S1066 - merge nested if statements.
+		if (match(scanRootDir, scanRootDir) && getDefaultPrompt() != null) {
+			process(projectLayout, scanRootDir, getInstructions(), getDefaultPrompt());
 		}
 	}
 

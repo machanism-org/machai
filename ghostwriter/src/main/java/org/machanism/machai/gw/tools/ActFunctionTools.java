@@ -27,6 +27,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class ActFunctionTools implements FunctionTools {
 
+	// Sonar java:S1192 - avoid duplicating string literals.
+	private static final String TOML_EXTENSION = ".toml";
+
 	private Configurator configurator;
 
 	@Override
@@ -83,7 +86,7 @@ public class ActFunctionTools implements FunctionTools {
 			File file = new File(jarFilePath);
 			try (ZipFile jarFile = new ZipFile(file)) {
 				jarFile.stream().forEach(entry -> {
-					String actName = StringUtils.substringBetween(entry.getName(), "acts/", ".toml");
+					String actName = StringUtils.substringBetween(entry.getName(), "acts/", TOML_EXTENSION);
 					Map<String, Object> properties = new HashMap<>();
 					if (actName != null) {
 						try {
@@ -106,14 +109,14 @@ public class ActFunctionTools implements FunctionTools {
 		if (acts == null || !acts.exists() || !acts.isDirectory()) {
 			return Collections.emptySet();
 		}
-		File[] files = acts.listFiles((dir, name) -> name.endsWith(".toml"));
+		File[] files = acts.listFiles((dir, name) -> name.endsWith(TOML_EXTENSION));
 		Set<String> result = new HashSet<>();
 		for (File file : files) {
 			String actName = file.getName();
 			Map<String, Object> properties = new HashMap<>();
 			try {
 				ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
-				result.add("`" + StringUtils.substringBefore(actName, ".toml") + "`: "
+				result.add("`" + StringUtils.substringBefore(actName, TOML_EXTENSION) + "`: "
 						+ Objects.toString(properties.get("description")));
 			} catch (IOException e) {
 				throw new IllegalArgumentException(e);

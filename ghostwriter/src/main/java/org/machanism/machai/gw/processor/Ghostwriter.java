@@ -86,9 +86,6 @@ public final class Ghostwriter {
 	/** Configuration key specifying a default scan directory/pattern. */
 	public static final String GW_SCAN_DIR_PROP_NAME = "gw.scanDir";
 
-	/** Directory used as the execution base for relative configuration files. */
-	private static File gwHomeDir;
-
 	/** Processor implementation used by this CLI instance. */
 	private final AIFileProcessor processor;
 
@@ -97,10 +94,9 @@ public final class Ghostwriter {
 	 *
 	 * @param genai     provider key/name (including model), e.g.
 	 *                  {@code OpenAI:gpt-5.1}
-	 * @param config    configuration source
 	 * @param processor processor implementation
 	 */
-	public Ghostwriter(String genai, PropertiesConfigurator config, AIFileProcessor processor) {
+	public Ghostwriter(String genai, AIFileProcessor processor) {
 		if (StringUtils.isBlank(genai)) {
 			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_GENAI_PROP_NAME
 					+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -m/--model (e.g., OpenAI:gpt-5.1).");
@@ -114,10 +110,9 @@ public final class Ghostwriter {
 	 *
 	 * @param scanDirs scan directory arguments
 	 * @return exit code (0 for success)
-	 * @throws IOException    if scanning fails while reading files
-	 * @throws ParseException if parsing-related failures occur
+	 * @throws IOException if scanning fails while reading files
 	 */
-	public int perform(String[] scanDirs) throws IOException, ParseException {
+	public int perform(String[] scanDirs) throws IOException {
 		int exitCode = 0;
 		try {
 			for (String scanDir : scanDirs) {
@@ -160,7 +155,7 @@ public final class Ghostwriter {
 	private static PropertiesConfigurator initializeConfiguration(File rootDir) {
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
-		gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
+		File gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
 		if (gwHomeDir == null) {
 			gwHomeDir = rootDir;
 			if (gwHomeDir == null) {
@@ -223,14 +218,16 @@ public final class Ghostwriter {
 	 * @return the entered text (never {@code null})
 	 */
 	public static String readText(String prompt) {
-		System.out.print(prompt + ": ");
+		// Sonar java:S106 - avoid using System.out; use a logger.
+		logger.info("{}: ", prompt);
+
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (scanner.hasNextLine()) {
 				String nextLine = scanner.nextLine();
 				if (StringUtils.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
 					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append("\n");
-					System.out.print("\t");
+					logger.info("\t");
 				} else {
 					sb.append(nextLine);
 					break;
@@ -260,7 +257,10 @@ public final class Ghostwriter {
 	 */
 	public void setInstructions(String instructions) {
 		if (instructions != null) {
-			logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
+			// Sonar java:S2629 - avoid eager evaluation; abbreviate() is executed only when info is enabled.
+			if (logger.isInfoEnabled()) {
+				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
+			}
 			processor.setInstructions(instructions);
 		}
 	}
@@ -296,6 +296,76 @@ public final class Ghostwriter {
 			int value = Integer.parseInt(multiThreadCount);
 			processor.setDegreeOfConcurrency(value);
 		}
+	}
+
+	private static AIFileProcessor createProcessor(CommandLine cmd, Options options, File rootDir,
+			PropertiesConfigurator config, String genai) {
+		AIFileProcessor processor;
+		String defaultPrompt;
+		if (cmd.hasOption("act")) {
+			processor = createActProcessor(cmd, rootDir, config, genai);
+			defaultPrompt = resolveActPrompt(cmd);
+			logDefaultPrompt("Act", defaultPrompt);
+		} else {
+			processor = new GuidanceProcessor(rootDir, genai, config);
+			defaultPrompt = resolveGuidancePrompt(cmd, config);
+			logDefaultPrompt("Default Prompt", defaultPrompt);
+		}
+		processor.setDefaultPrompt(defaultPrompt);
+		return processor;
+	}
+
+	private static AIFileProcessor createActProcessor(CommandLine cmd, File rootDir, PropertiesConfigurator config,
+			String genai) {
+		ActProcessor processor = new ActProcessor(rootDir, config, genai);
+		if (cmd.hasOption("acts")) {
+			String value = cmd.getOptionValue("acts");
+			File actDir = new File(value);
+			logger.info("Act directory: {}", actDir);
+			processor.setActDir(actDir);
+		}
+		return processor;
+	}
+
+	private static String resolveActPrompt(CommandLine cmd) {
+		String defaultPrompt = cmd.getOptionValue("act");
+		if (defaultPrompt == null) {
+			defaultPrompt = readText("Act");
+		}
+		return defaultPrompt;
+	}
+
+	private static String resolveGuidancePrompt(CommandLine cmd, PropertiesConfigurator config) {
+		String defaultPrompt = config.get(GW_GUIDANCE_PROP_NAME, null);
+		if (cmd.hasOption("guidance")) {
+			defaultPrompt = cmd.getOptionValue("guidance");
+			if (defaultPrompt == null) {
+				defaultPrompt = readText("Please enter the guidance text below.");
+			}
+		}
+		return defaultPrompt;
+	}
+
+	// Sonar java:S3776 - reduce cognitive complexity by extracting prompt logging.
+	private static void logDefaultPrompt(String label, String prompt) {
+		// Sonar java:S1066 - merge nested if statements.
+		if (prompt != null && logger.isInfoEnabled()) {
+			logger.info("{}: {}", label, StringUtils.abbreviate(prompt, 60));
+		}
+	}
+
+	private static String[] resolveScanDirs(CommandLine cmd, PropertiesConfigurator config) {
+		String[] scanDirs = cmd.getArgs();
+		if (scanDirs == null || scanDirs.length == 0) {
+			String gwScanDir = config.get(GW_SCAN_DIR_PROP_NAME, null);
+			if (gwScanDir != null) {
+				scanDirs = new String[] { gwScanDir };
+			}
+		}
+		if (scanDirs == null || scanDirs.length == 0) {
+			scanDirs = new String[] { SystemUtils.getUserDir().getAbsolutePath() };
+		}
+		return scanDirs;
 	}
 
 	/**
@@ -413,63 +483,17 @@ public final class Ghostwriter {
 		logger.info("Root directory: {}", rootDir);
 
 		try {
-			AIFileProcessor processor;
-			String defaultPrompt;
-			if (cmd.hasOption(actOpt)) {
-				processor = new ActProcessor(rootDir, config, genai);
-				defaultPrompt = cmd.getOptionValue(actOpt);
+			AIFileProcessor processor = createProcessor(cmd, options, rootDir, config, genai);
 
-				if (defaultPrompt == null) {
-					defaultPrompt = readText("Act");
-				}
-
-				if (cmd.hasOption(actsDirOpt)) {
-					String value = cmd.getOptionValue(actsDirOpt);
-					File actDir = new File(value);
-					logger.info("Act directory: {}", actDir);
-					((ActProcessor) processor).setActDir(actDir);
-				}
-
-				if (defaultPrompt != null) {
-					logger.info("Act: {}", StringUtils.abbreviate(defaultPrompt, 60));
-				}
-
-			} else {
-				processor = new GuidanceProcessor(rootDir, genai, config);
-
-				defaultPrompt = config.get(GW_GUIDANCE_PROP_NAME, null);
-				if (cmd.hasOption(guidanceOpt)) {
-					defaultPrompt = cmd.getOptionValue(guidanceOpt);
-					if (defaultPrompt == null) {
-						defaultPrompt = readText("Please enter the guidance text below.");
-					}
-				}
-
-				if (defaultPrompt != null) {
-					logger.info("Default Prompt: {}", StringUtils.abbreviate(defaultPrompt, 60));
-				}
-			}
-
-			Ghostwriter ghostwriter = new Ghostwriter(genai, config, processor);
+			// Sonar java:S1172 - removed unused parameter 'config' from constructor.
+			Ghostwriter ghostwriter = new Ghostwriter(genai, processor);
 
 			ghostwriter.setInstructions(instructions);
 			ghostwriter.setExcludes(excludes);
 			ghostwriter.setDegreeOfConcurrency(multiThread);
 			ghostwriter.setLogInputs(logInputs);
 
-			ghostwriter.setDefaultPrompt(defaultPrompt);
-
-			String[] scanDirs = cmd.getArgs();
-			if (scanDirs == null || scanDirs.length == 0) {
-				String gwScanDir = config.get(GW_SCAN_DIR_PROP_NAME, null);
-				if (gwScanDir != null) {
-					scanDirs = new String[] { gwScanDir };
-				}
-			}
-
-			if (scanDirs == null || scanDirs.length == 0) {
-				scanDirs = new String[] { SystemUtils.getUserDir().getAbsolutePath() };
-			}
+			String[] scanDirs = resolveScanDirs(cmd, config);
 
 			int exitCode = ghostwriter.perform(scanDirs);
 			if (exitCode != 0) {

@@ -2,6 +2,7 @@ package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
@@ -22,8 +23,7 @@ public class MarkdownReviewer implements Reviewer {
 	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Returns the file extensions supported by this reviewer. This reviewer handles
-	 * files with the 'md' extension.
+	 * Returns the file extensions supported by this reviewer. This reviewer handles	 * files with the 'md' extension.
 	 *
 	 * @return an array of supported file extension strings
 	 */
@@ -42,7 +42,8 @@ public class MarkdownReviewer implements Reviewer {
 	 * @throws IOException if an error occurs reading the file
 	 */
 	public String perform(File projectDir, File guidancesFile) throws IOException {
-		String content = IOUtils.toString(guidancesFile.toURI(), "utf-8");
+		// Sonar java:S4719 - prefer StandardCharsets constants over charset name strings.
+		String content = IOUtils.toString(guidancesFile.toURI(), StandardCharsets.UTF_8);
 
 		Pattern pattern = Pattern.compile("<!--.*?" + GuidanceProcessor.GUIDANCE_TAG_NAME + "(.*?)(?:-->|\\Z)",
 				Pattern.DOTALL);

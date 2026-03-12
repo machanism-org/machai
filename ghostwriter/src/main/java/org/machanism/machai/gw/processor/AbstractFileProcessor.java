@@ -24,8 +24,6 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Base implementation for processors that traverse a project directory and
@@ -50,9 +48,6 @@ import org.slf4j.LoggerFactory;
  * </p>
  */
 public abstract class AbstractFileProcessor extends ProjectProcessor {
-
-	/** Logger for documentation input processing events. */
-	private static final Logger logger = LoggerFactory.getLogger(AbstractFileProcessor.class);
 
 	/** Prefix for project-layout properties exposed for template substitution. */
 	protected static final String GW_PROJECT_LAYOUT_PROP_PREFIX = "project.";
@@ -91,7 +86,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param rootDir      root directory used as a base for relative paths
 	 * @param configurator configuration source used by implementations
 	 */
-	public AbstractFileProcessor(File rootDir, Configurator configurator) {
+	protected AbstractFileProcessor(File rootDir, Configurator configurator) {
 		super();
 		this.rootDir = rootDir;
 		this.configurator = configurator;
@@ -172,16 +167,33 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 				}
 			}
 		} finally {
-			executor.shutdown();
-			try {
-				if (!executor.awaitTermination(getModuleThreadTimeoutMinutes(), TimeUnit.MINUTES)) {
-					executor.shutdownNow();
-				}
-			} catch (InterruptedException e) {
+			// Sonar java:S2095 - ensure ExecutorService is always shut down.
+			shutdownExecutor(executor);
+		}
+	}
+
+	/**
+	 * Shuts down an ExecutorService safely without throwing from a finally block.
+	 * 
+	 * <p>
+	 * Sonar java:S1143/java:S1163 - do not throw from finally blocks; preserve the
+	 * thread interruption status.
+	 * </p>
+	 *
+	 * @param executor executor to stop (may be {@code null})
+	 */
+	private void shutdownExecutor(ExecutorService executor) {
+		if (executor == null) {
+			return;
+		}
+		executor.shutdown();
+		try {
+			if (!executor.awaitTermination(getModuleThreadTimeoutMinutes(), TimeUnit.MINUTES)) {
 				executor.shutdownNow();
-				Thread.currentThread().interrupt();
-				throw new IllegalStateException("Thread interrupted while awaiting module termination", e);
 			}
+		} catch (InterruptedException e) {
+			executor.shutdownNow();
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -234,7 +246,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		if (Strings.CI.containsAny(file.getAbsolutePath(), ProjectLayout.EXCLUDE_DIRS)) {
+		if (Strings.CI.containsAny(file.getAbsolutePath(), ProjectLayout.getExcludeDirs())) {
 			return false;
 		}
 
@@ -245,28 +257,32 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		String path = relativeProjectDir.isEmpty() ? relativeScanDir
-				: relativeProjectDir + (".".equals(relativeScanDir) ? "" : "/" + relativeScanDir);
+		return matchPath(projectDir, file, relativeProjectDir, relativeScanDir);
+	}
 
-		Path pathToMatch = new File(path).toPath();
-		boolean fullMatch = pathMatcher != null && pathMatcher.matches(pathToMatch);
-		boolean projectMatch = pathMatcher != null && pathMatcher.matches(new File(relativeScanDir).toPath());
+	// Sonar java:S3776 - reduce cognitive complexity by extracting matching logic.
+	private boolean matchPath(File projectDir, File file, String relativeProjectDir, String relativeScanDir) {
+		String relativeScanPart = ".".equals(relativeScanDir) ? "" : File.separator + relativeScanDir;
+		String path = relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + relativeScanPart;
 
-		boolean result = fullMatch || projectMatch;
-		if (pathMatcher != null) {
-			if (!result && scanDir != null) {
-				String relativePath = ProjectLayout.getRelativePath(scanDir, file);
-				if (relativePath != null) {
-					Path scanFilePath = scanDir.toPath().resolve(relativePath);
-					String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
-					result = relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
-				}
-			}
-		} else {
-			result = Strings.CS.equals(scanDir.getAbsolutePath(), file.getAbsolutePath());
+		if (pathMatcher == null) {
+			return scanDir != null && Strings.CS.equals(scanDir.getAbsolutePath(), file.getAbsolutePath());
 		}
 
-		return result;
+		Path pathToMatch = new File(path).toPath();
+		boolean result = pathMatcher.matches(pathToMatch) || pathMatcher.matches(new File(relativeScanDir).toPath());
+		if (result || scanDir == null) {
+			return result;
+		}
+
+		String relativePath = ProjectLayout.getRelativePath(scanDir, file);
+		if (relativePath == null) {
+			return false;
+		}
+
+		Path scanFilePath = scanDir.toPath().resolve(relativePath);
+		String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
+		return relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
 	}
 
 	/**
@@ -316,12 +332,14 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			}
 			Path relativePath = new File(relativePathString).toPath();
 
-			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(relativePath)) {
-				continue;
-			}
-			result.add(file);
-			if (file.isDirectory()) {
-				result.addAll(findFiles(file));
+			// Sonar java:S135 - reduce break/continue statements by using a guard boolean.
+			boolean excluded = Strings.CI.equalsAny(name, ProjectLayout.getExcludeDirs())
+					|| shouldExcludePath(relativePath);
+			if (!excluded) {
+				result.add(file);
+				if (file.isDirectory()) {
+					result.addAll(findFiles(file));
+				}
 			}
 		}
 
@@ -434,7 +452,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 				continue;
 			}
 
-			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS)
+			if (Strings.CI.containsAny(path, ProjectLayout.getExcludeDirs())
 					|| shouldExcludePath(new File(path).toPath())) {
 				continue;
 			}
