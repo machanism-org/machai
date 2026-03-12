@@ -11,7 +11,6 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.gw.processor.Ghostwriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -38,11 +37,14 @@ public class BindexCommand {
 	private static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
 
 	/** JLine line reader for shell interaction. */
-	@Autowired
-	@Lazy
-	LineReader reader;
+	private final LineReader reader;
 
 	private final PropertiesConfigurator config = new PropertiesConfigurator();
+
+	// Sonar java:S6813 - prefer constructor injection over field injection.
+	public BindexCommand(@Lazy LineReader reader) {
+		this.reader = reader;
+	}
 
 	/**
 	 * Generates bindex files for a project directory.

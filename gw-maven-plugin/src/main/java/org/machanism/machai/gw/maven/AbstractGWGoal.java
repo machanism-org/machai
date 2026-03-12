@@ -132,7 +132,8 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	@Parameter(defaultValue = "${reactorProjects}", readonly = true)
 	protected List<MavenProject> reactorProjects;
 
-	public AbstractGWGoal() {
+	// Sonar java:S5993 - abstract classes should expose a protected constructor.
+	protected AbstractGWGoal() {
 		super();
 	}
 
@@ -182,21 +183,28 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	 */
 	protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
 
-		File basedir = project.getBasedir();
-		if (basedir == null) {
-			basedir = SystemUtils.getUserDir();
+		// Sonar java:S1117 - do not hide the field 'basedir'; use a different local variable name.
+		File projectBasedir = project.getBasedir();
+		if (projectBasedir == null) {
+			projectBasedir = SystemUtils.getUserDir();
 		}
 
 		processor.setExcludes(excludes);
 
 		try {
 			if (instructions != null) {
-				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
+				// Sonar java:S2629 - avoid calling abbreviate when log level may discard the message.
+				if (logger.isInfoEnabled()) {
+					logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
+				}
 				processor.setInstructions(instructions);
 			}
 
 			if (guidance != null) {
-				logger.info("Default Guidance: {}", StringUtils.abbreviate(guidance, 60));
+				// Sonar java:S2629 - avoid calling abbreviate when log level may discard the message.
+				if (logger.isInfoEnabled()) {
+					logger.info("Default Guidance: {}", StringUtils.abbreviate(guidance, 60));
+				}
 				processor.setDefaultPrompt(guidance);
 			}
 
@@ -207,7 +215,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 				scanDir = rootDir.getAbsolutePath();
 			}
 
-			processor.scanDocuments(basedir, scanDir);
+			processor.scanDocuments(projectBasedir, scanDir);
 			logger.info("Scanning finished.");
 
 		} catch (Exception e) {

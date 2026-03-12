@@ -80,7 +80,7 @@ public class Act extends AbstractGWGoal {
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
 	@Parameter(property = "gw.act", required = false)
-	private String act;
+	private String actPrompt;
 
 	/**
 	 * Optional directory containing predefined action definitions.
@@ -138,8 +138,7 @@ public class Act extends AbstractGWGoal {
 		process(actProcessor);
 	}
 
-	protected void process(ActProcessor actProcessor)
-			throws MojoExecutionException {
+	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
 			if (acts != null) {
 				File rootDir = actProcessor.getRootDir();
@@ -156,26 +155,8 @@ public class Act extends AbstractGWGoal {
 			}
 			actProcessor.setLogInputs(logInputs);
 
-			try {
-				Properties userProperties = session.getUserProperties();
-				act = userProperties.getProperty("gw.act");
-				if (act == null) {
-					act = readText("Act");
-					userProperties.setProperty("gw.act", act);
-				} else {
-					logger.info("Act: {}", act);
-				}
-				actProcessor.setDefaultPrompt(act);
-				String gwScanDir = actProcessor.getConfigurator().get("gw.scanDir", null);
-				String scanDir = Objects.toString(super.scanDir, gwScanDir);
-				scanDir = Objects.toString(scanDir, basedir.getAbsolutePath());
-				logger.info("Starting scan of directory: {}", scanDir);
-				actProcessor.scanDocuments(basedir, scanDir);
-				logger.info("Finished scanning directory: {}", scanDir);
-
-			} catch (PrompterException e) {
-				getLog().error("Error: " + e.getMessage());
-			}
+			// Sonar java:S1141 - extract nested try/catch into a separate method to improve readability.
+			configureAndScan(actProcessor);
 
 		} catch (IOException e) {
 			getLog().error("I/O error occurred during file processing: " + e.getMessage());
@@ -183,6 +164,29 @@ public class Act extends AbstractGWGoal {
 
 		} finally {
 			GenAIProviderManager.logUsage();
+		}
+	}
+
+	private void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
+		try {
+			Properties userProperties = session.getUserProperties();
+			actPrompt = userProperties.getProperty("gw.act");
+			if (actPrompt == null) {
+				actPrompt = readText("Act");
+				userProperties.setProperty("gw.act", actPrompt);
+			} else {
+				logger.info("Act: {}", actPrompt);
+			}
+			actProcessor.setDefaultPrompt(actPrompt);
+			String gwScanDir = actProcessor.getConfigurator().get("gw.scanDir", null);
+			String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
+			resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
+			logger.info("Starting scan of directory: {}", resolvedScanDir);
+			actProcessor.scanDocuments(basedir, resolvedScanDir);
+			logger.info("Finished scanning directory: {}", resolvedScanDir);
+		} catch (PrompterException e) {
+			// Sonar: avoid swallowing; rethrow with context so build fails appropriately.
+			throw new MojoExecutionException("Failed to read 'gw.act' prompt interactively.", e);
 		}
 	}
 

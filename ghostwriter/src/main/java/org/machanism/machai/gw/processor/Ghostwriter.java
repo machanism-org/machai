@@ -50,6 +50,9 @@ public final class Ghostwriter {
 	 */
 	public static final String MULTIPLE_LINES_BREAKER = "\\";
 
+	// Sonar java:S1192 - avoid duplicating string literals.
+	private static final String GUIDANCE_OPTION = "guidance";
+
 	/** Logger for the Ghostwriter application. */
 	private static Logger logger;
 
@@ -298,8 +301,8 @@ public final class Ghostwriter {
 		}
 	}
 
-	private static AIFileProcessor createProcessor(CommandLine cmd, Options options, File rootDir,
-			PropertiesConfigurator config, String genai) {
+	private static AIFileProcessor createProcessor(CommandLine cmd, File rootDir, PropertiesConfigurator config,
+			String genai) {
 		AIFileProcessor processor;
 		String defaultPrompt;
 		if (cmd.hasOption("act")) {
@@ -337,8 +340,8 @@ public final class Ghostwriter {
 
 	private static String resolveGuidancePrompt(CommandLine cmd, PropertiesConfigurator config) {
 		String defaultPrompt = config.get(GW_GUIDANCE_PROP_NAME, null);
-		if (cmd.hasOption("guidance")) {
-			defaultPrompt = cmd.getOptionValue("guidance");
+		if (cmd.hasOption(GUIDANCE_OPTION)) {
+			defaultPrompt = cmd.getOptionValue(GUIDANCE_OPTION);
 			if (defaultPrompt == null) {
 				defaultPrompt = readText("Please enter the guidance text below.");
 			}
@@ -399,7 +402,7 @@ public final class Ghostwriter {
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a comma-separated list of directories to exclude from processing.");
 
-		Option guidanceOpt = Option.builder("g").longOpt("guidance")
+		Option guidanceOpt = Option.builder("g").longOpt(GUIDANCE_OPTION)
 				.desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
@@ -483,9 +486,9 @@ public final class Ghostwriter {
 		logger.info("Root directory: {}", rootDir);
 
 		try {
-			AIFileProcessor processor = createProcessor(cmd, options, rootDir, config, genai);
+			AIFileProcessor processor = createProcessor(cmd, rootDir, config, genai);
 
-			// Sonar java:S1172 - removed unused parameter 'config' from constructor.
+			// Sonar java:S1172 - removed unused parameter 'options' from createProcessor().
 			Ghostwriter ghostwriter = new Ghostwriter(genai, processor);
 
 			ghostwriter.setInstructions(instructions);

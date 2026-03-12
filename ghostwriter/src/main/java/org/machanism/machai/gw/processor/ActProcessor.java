@@ -314,7 +314,6 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param properties properties loaded from TOML acts
 	 */
-	@SuppressWarnings("unchecked")
 	private void applyActData(Map<String, Object> properties) {
 		for (Entry<String, Object> entry : properties.entrySet()) {
 			String key = entry.getKey();
@@ -352,8 +351,9 @@ public class ActProcessor extends AIFileProcessor {
 				}
 			}
 			if (entry.getValue() instanceof List) {
-				List<Object> value = (List<Object>) entry.getValue();
-				List<String> stringList = value.stream().map(Object::toString).collect(Collectors.toList());
+				// Sonar java:S3740 - use a type-safe check instead of suppressing unchecked warnings.
+				List<?> rawList = (List<?>) entry.getValue();
+				List<String> stringList = rawList.stream().map(Object::toString).collect(Collectors.toList());
 
 				switch (key) {
 				case "prologue":

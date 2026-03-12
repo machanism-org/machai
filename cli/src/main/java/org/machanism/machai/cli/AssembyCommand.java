@@ -1,7 +1,6 @@
 package org.machanism.machai.cli;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -119,14 +118,14 @@ public class AssembyCommand {
 	 *
 	 * @param query query text or file path
 	 * @return the resolved query text
-	 * @throws FileNotFoundException if the file exists but cannot be opened
-	 * @throws IOException           if the file cannot be read
+	 * @throws IOException if the file cannot be read
 	 */
-	private String getQueryFromFile(String query) throws IOException, FileNotFoundException {
+	private String getQueryFromFile(String query) throws IOException {
 		File queryFile = new File(query);
 		if (queryFile.exists()) {
-			try (FileReader reader = new FileReader(queryFile)) {
-				query = IOUtils.toString(reader);
+			// Sonar java:S1130 - don't declare FileNotFoundException (subclass of IOException).
+			try (FileReader fileReader = new FileReader(queryFile)) {
+				query = IOUtils.toString(fileReader);
 			}
 		}
 		return query;
@@ -239,12 +238,14 @@ public class AssembyCommand {
 	 */
 	private List<Bindex> pickBricks(String query, Double score, String url, String genai)
 			throws IOException {
-		Picker picker = new Picker(genai, url, config);
-		picker.setScore(score);
-		List<Bindex> bindexList = picker.pick(query);
-		logger.info("Search results for libraries matching the requested query:");
-		printFindResult(bindexList, picker);
-		return bindexList;
+		// Sonar java:S2095 - ensure Picker is closed via try-with-resources.
+		try (Picker picker = new Picker(genai, url, config)) {
+			picker.setScore(score);
+			List<Bindex> pickedBindexes = picker.pick(query);
+			logger.info("Search results for libraries matching the requested query:");
+			printFindResult(pickedBindexes, picker);
+			return pickedBindexes;
+		}
 	}
 
 	/**

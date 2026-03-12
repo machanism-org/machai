@@ -2,7 +2,6 @@ package org.machanism.machai.cli;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -47,10 +46,9 @@ public class MachaiCLI {
 	 * by the {@code config} system property) and merges them into the current JVM
 	 * system properties.
 	 *
-	 * @throws FileNotFoundException if the specified config file path does not exist
-	 * @throws IOException           if reading the properties file fails
+	 * @throws IOException if reading the properties file fails
 	 */
-	private static void loadSystemProperties() throws FileNotFoundException, IOException {
+	private static void loadSystemProperties() throws IOException {
 		String configFIle = System.getProperty("config");
 		File conf;
 		if (configFIle != null) {

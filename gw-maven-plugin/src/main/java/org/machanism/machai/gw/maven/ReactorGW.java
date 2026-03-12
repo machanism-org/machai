@@ -126,7 +126,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
 public class ReactorGW extends AbstractGWGoal {
 
 	/** Logger for this class. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(ReactorGW.class);
+	private static final Logger log = LoggerFactory.getLogger(ReactorGW.class);
 
 	/**
 	 * If {@code true}, delays processing of the execution-root project until all other reactor
@@ -181,10 +181,10 @@ public class ReactorGW extends AbstractGWGoal {
 				}
 				scanDocumentsOrFail(documents);
 			} catch (MojoExecutionException e) {
-				LOGGER.error("Failed to scan documents in deferred execution-root processing.", e);
+				log.error("Failed to scan documents in deferred execution-root processing.", e);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				LOGGER.error("Deferred execution-root processing was interrupted.", e);
+				log.error("Deferred execution-root processing was interrupted.", e);
 			}
 		}, "gw-reactor-root-last");
 		deferredRootScanThread.setDaemon(true);
@@ -195,9 +195,10 @@ public class ReactorGW extends AbstractGWGoal {
 		try {
 			scanDocuments(documents);
 		} catch (ProcessTerminationException e) {
-			LOGGER.error("Process terminated: {} (exit code: {})", e.getMessage(), e.getExitCode());
+			// Sonar java:S2139 - don't both log and throw without adding context; include the cause.
 			throw new MojoExecutionException(
-					"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
+					"Process terminated while scanning documents: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")",
+					e);
 		}
 	}
 }

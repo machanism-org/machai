@@ -2,7 +2,6 @@ package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -19,9 +18,11 @@ class PomReaderTest {
 	void getProjectModel_whenPomMissing_throwsIllegalArgumentException() {
 		// Arrange
 		File pom = new File("target\\test-data\\" + UUID.randomUUID(), "pom.xml");
+		PomReader reader = new PomReader();
 
 		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> new PomReader().getProjectModel(pom, false));
+		// Sonar(java:S5778): keep only one potentially-throwing invocation inside the assertThrows lambda.
+		org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> reader.getProjectModel(pom, false));
 	}
 
 	@Test
