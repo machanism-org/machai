@@ -77,6 +77,8 @@ public class CommandFunctionTools implements FunctionTools {
 	/** Checker that rejects known-dangerous command fragments. */
 	private CommandSecurityChecker checker;
 
+	private Configurator configurator;
+
 	/**
 	 * Runtime exception used by {@code terminate_process} to signal early
 	 * termination to the host.
@@ -229,6 +231,8 @@ public class CommandFunctionTools implements FunctionTools {
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
 
+		command = replace(command, configurator);
+
 		String dir = props.has("dir") ? props.get("dir").asText(".") : ".";
 
 		File projectDir = (File) params[1];
@@ -258,7 +262,7 @@ public class CommandFunctionTools implements FunctionTools {
 
 		try {
 			String[] commandParts = CommandLineUtils.translateCommandline(command);
-			try {
+		try {
 				for (String commandPart : commandParts) {
 					checker.denyCheck(commandPart);
 				}
@@ -280,28 +284,28 @@ public class CommandFunctionTools implements FunctionTools {
 
 			Future<?> stdoutFuture = executor.submit(() -> readStream(process.getInputStream(), charsetName, output,
 					line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
-					e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
+						e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
 
 			Future<?> stderrFuture = executor.submit(() -> readStream(process.getErrorStream(), charsetName, output,
 					line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
-					e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
+						e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
 
-			boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
-			if (!finished) {
-				process.destroyForcibly();
-				output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds))
-						.append(" seconds.").append("\n");
-				logger.warn("[CMD {}] Command timed out", commandId);
-			}
+				boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
+				if (!finished) {
+					process.destroyForcibly();
+					output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds))
+							.append(" seconds.").append("\n");
+					logger.warn("[CMD {}] Command timed out", commandId);
+				}
 
-			stdoutFuture.get(5, TimeUnit.SECONDS);
-			stderrFuture.get(5, TimeUnit.SECONDS);
+				stdoutFuture.get(5, TimeUnit.SECONDS);
+				stderrFuture.get(5, TimeUnit.SECONDS);
 
-			int exitCode = process.exitValue();
+				int exitCode = process.exitValue();
 			output.append("Command exited with code: ").append(Integer.toString(exitCode))
 					.append("\n");
 
-			return output.getLastText();
+				return output.getLastText();
 
 		} catch (TimeoutException e) {
 			output.append("Output reading timed out.").append("\n");
@@ -456,6 +460,7 @@ public class CommandFunctionTools implements FunctionTools {
 
 	@Override
 	public void setConfigurator(Configurator configurator) {
+		this.configurator = configurator;
 		try {
 			checker = new CommandSecurityChecker(configurator);
 		} catch (IOException e) {

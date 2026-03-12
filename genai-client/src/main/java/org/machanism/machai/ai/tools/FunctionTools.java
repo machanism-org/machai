@@ -1,20 +1,29 @@
 package org.machanism.machai.ai.tools;
 
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.Strings;
+import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 
 /**
- * Service-provider interface (SPI) for installing host-provided function tools into a {@link GenAIProvider}.
+ * Service-provider interface (SPI) for installing host-provided function tools
+ * into a {@link GenAIProvider}.
  *
  * <p>
  * Implementations contribute one or more named tools via
- * {@link GenAIProvider#addTool(String, String, java.util.function.Function, String...)}. Tools are typically
- * discovered via {@link java.util.ServiceLoader} and applied at runtime by {@link FunctionToolsLoader}.
+ * {@link GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.
+ * Tools are typically discovered via {@link java.util.ServiceLoader} and
+ * applied at runtime by {@link FunctionToolsLoader}.
  * </p>
  *
  * <p>
- * Implementations may optionally accept a {@link Configurator} via {@link #setConfigurator(Configurator)} to
- * resolve runtime configuration (for example, API tokens for web calls).
+ * Implementations may optionally accept a {@link Configurator} via
+ * {@link #setConfigurator(Configurator)} to resolve runtime configuration (for
+ * example, API tokens for web calls).
  * </p>
  */
 public interface FunctionTools {
@@ -39,4 +48,37 @@ public interface FunctionTools {
 		// no-op
 	}
 
+	/**
+	 * Resolves ${...} placeholders using the provided configurator.
+	 *
+	 * @param value raw value that may contain placeholders
+	 * @param conf  configurator used for lookup; if {@code null}, the value is
+	 *              returned unchanged
+	 * @return resolved value
+	 */
+	default String replace(String value, Configurator conf) {
+		if (value == null || conf == null) {
+			return value;
+		}
+
+		Properties properties = new Properties();
+
+		Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
+		Matcher matcher = pattern.matcher(value);
+		while (matcher.find()) {
+			String propName = matcher.group(1);
+			String propValue = conf.get(propName);
+			if (propValue != null) {
+				properties.put(propName, propValue);
+			}
+		}
+
+		String replace = StringSubstitutor.replace(value, properties);
+
+		if (Strings.CS.contains(replace, "${")) {
+			replace = replace(replace, conf);
+		}
+
+		return replace;
+	}
 }

@@ -13,14 +13,9 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Properties;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
-import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
@@ -205,7 +200,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param url         URL to connect to
-	 * @param headers     optional headers (newline-separated {@code NAME=VALUE})
+	 * @param headers optional headers (newline-separated {@code NAME=VALUE})
 	 * @param charsetName charset name (currently unused, but kept for API symmetry)
 	 * @return connection
 	 * @throws IOException if opening a connection fails
@@ -373,40 +368,6 @@ public class WebFunctionTools implements FunctionTools {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Resolves ${...} placeholders using the provided configurator.
-	 *
-	 * @param value raw value that may contain placeholders
-	 * @param conf  configurator used for lookup; if {@code null}, the value is
-	 *              returned unchanged
-	 * @return resolved value
-	 */
-	private String replace(String value, Configurator conf) {
-		if (value == null || conf == null) {
-			return value;
-		}
-
-		Properties properties = new Properties();
-
-		Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
-		Matcher matcher = pattern.matcher(value);
-		while (matcher.find()) {
-			String propName = matcher.group(1);
-			String propValue = conf.get(propName);
-			if (propValue != null) {
-				properties.put(propName, propValue);
-			}
-		}
-
-		String replace = StringSubstitutor.replace(value, properties);
-
-		if (Strings.CS.contains(replace, "${")) {
-			replace = replace(replace, conf);
-		}
-
-		return replace;
 	}
 
 	/**
