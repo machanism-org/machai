@@ -2,6 +2,7 @@ package org.machanism.machai.bindex.ai.tools;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -78,7 +79,10 @@ public class BindexFunctionTools implements FunctionTools {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			String bindexJson = objectMapper.writeValueAsString(bindex);
-			logger.info("Bindex: {}", StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
+			// Sonar java:S2629 - avoid eager abbreviate/replace when INFO is disabled.
+			if (logger.isInfoEnabled()) {
+				logger.info("Bindex: {}", StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
+			}
 			return bindexJson;
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);
@@ -92,10 +96,14 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @return the Bindex schema resource content as JSON string
 	 */
 	private String getBindexSchema(Object[] params) {
-		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
+		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE_PATH);
 		try {
-			String schema = IOUtils.toString(systemResource, "UTF8");
-			logger.info("Bindex schema: {}", StringUtils.abbreviate(schema, 120).replace("\n", " ").replace("\r", ""));
+			// Sonar java:S4719 - use StandardCharsets.UTF_8 instead of charset name.
+			String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
+			// Sonar java:S2629 - avoid eager replace/abbreviate work when INFO is disabled.
+			if (logger.isInfoEnabled()) {
+				logger.info("Bindex schema: {}", StringUtils.abbreviate(schema, 120).replace("\n", " ").replace("\r", ""));
+			}
 			return schema;
 
 		} catch (IOException e) {

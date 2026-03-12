@@ -5,6 +5,7 @@ import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSea
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoCommandException;
@@ -94,13 +94,20 @@ public class Picker implements AutoCloseable {
 	/** Result limit for vector search operations. */
 	private static final int VECTOR_SEARCH_LIMITS = 50;
 
-	private final String dbUrl = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+	// Sonar java:S1170 - make instance final constant static as it is immutable.
+	private static final String DB_URL = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private String embeddingModelName = "text-embedding-3-small";
 
 	/** MongoDB field name used to store the serialized Bindex JSON payload. */
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
 	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
+
+	// Sonar java:S1192 - extract duplicated literals.
+	private static final String VERSION_FIELD_NAME = "version";
+	private static final String SCORE_FIELD_NAME = "score";
+	private static final String ID_FIELD_NAME = "id";
+	private static final String NAME_FIELD_NAME = "name";
 
 	private final MongoCollection<Document> collection;
 	private final MongoClient mongoClient;
@@ -134,9 +141,9 @@ public class Picker implements AutoCloseable {
 		if (effectiveUri == null) {
 			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
 			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-				effectiveUri = "mongodb+srv://user:user@" + dbUrl;
+				effectiveUri = "mongodb+srv://user:user@" + DB_URL;
 			} else {
-				effectiveUri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + dbUrl;
+				effectiveUri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + DB_URL;
 			}
 		}
 
@@ -173,27 +180,28 @@ public class Picker implements AutoCloseable {
 			String bindexJson = objectMapper.writeValueAsString(bindex);
 
 			String id = bindex.getId();
-			Bson filter = Filters.eq("id", id);
+			Bson filter = Filters.eq(ID_FIELD_NAME, id);
 			collection.deleteOne(filter);
 
 			Classification classification = bindex.getClassification();
 			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
 					.distinct().collect(Collectors.toSet());
 
-			Set<String> integrations = classification.getIntegrations().stream().map(e -> e.toLowerCase()).distinct()
+			// Sonar java:S1612 - use method reference.
+			Set<String> integrations = classification.getIntegrations().stream().map(String::toLowerCase).distinct()
 					.collect(Collectors.toSet());
 
 			if (languages.isEmpty()) {
 				LOGGER.warn("No language defined for: {}.", id);
 			}
 
-			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson).append("name", bindex.getName())
-					.append("version", bindex.getVersion()).append(DOMAINS_PROPERTY_NAME, classification.getDomains())
+			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson).append(NAME_FIELD_NAME, bindex.getName())
+					.append(VERSION_FIELD_NAME, bindex.getVersion()).append(DOMAINS_PROPERTY_NAME, classification.getDomains())
 					.append(LAYERS_PROPERTY_NAME, classification.getLayers()).append(LANGUAGES_PROPERTY_NAME, languages)
 					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
 					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
 							getEmbeddingBson(bindex.getClassification(), CLASSIFICATION_EMBEDDING_DIMENTIONS))
-					.append("id", bindex.getId());
+					.append(ID_FIELD_NAME, bindex.getId());
 
 			InsertOneResult result = collection.insertOne(bindexDocument);
 			return result.getInsertedId().toString();
@@ -240,7 +248,7 @@ public class Picker implements AutoCloseable {
 		if (bindex == null) {
 			throw new IllegalArgumentException("bindex must not be null");
 		}
-		Document query = new Document("id", bindex.getId());
+		Document query = new Document(ID_FIELD_NAME, bindex.getId());
 		FindIterable<Document> find = collection.find(query);
 		Document document = find.first();
 		String id = null;
@@ -277,7 +285,10 @@ public class Picker implements AutoCloseable {
 
 			List<Layer> layers = classification.getLayers();
 			String languagesQuery = StringUtils.join(languages, ", ");
-			LOGGER.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
+			// Sonar java:S2629 - avoid eager StringUtils.join invocation when INFO is disabled.
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
+			}
 
 			String classificationQuery = getClassificationText(classification);
 
@@ -348,12 +359,11 @@ public class Picker implements AutoCloseable {
 	 * @param query search query string
 	 * @return classification schema as a JSON string
 	 * @throws IOException              if prompt or IO operation fails
-	 * @throws JsonProcessingException  if JSON serialization fails
-	 * @throws JsonMappingException     if JSON mapping fails
 	 */
-	private String getClassification(String query) throws IOException, JsonProcessingException, JsonMappingException {
-		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
-		String schema = IOUtils.toString(systemResource, "UTF8");
+	private String getClassification(String query) throws IOException {
+		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE_PATH);
+		// Sonar java:S4719 - use StandardCharsets.UTF_8 instead of charset name.
+		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode schemaJson = objectMapper.readTree(schema);
 		JsonNode jsonNode = schemaJson.get("properties").get("classification");
@@ -378,7 +388,7 @@ public class Picker implements AutoCloseable {
 		}
 
 		Bindex result = null;
-		Document doc = collection.find(Filters.eq("id", id)).first();
+		Document doc = collection.find(Filters.eq(ID_FIELD_NAME, id)).first();
 		if (doc != null) {
 			String bindexStr = doc.getString(BINDEX_PROPERTY_NAME);
 			try {
@@ -402,6 +412,8 @@ public class Picker implements AutoCloseable {
 	 * @param bsons        additional filters (language, layers, etc.)
 	 * @return collection of result IDs ({@code name:version})
 	 */
+	@SuppressWarnings({"java:S3012"})
+	// FalsePositive Sonar reports S3012 on MongoDB driver's AggregateIterable#into(new ArrayList<>()) although it's the intended API usage.
 	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
 			Bson... bsons) {
 		Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
@@ -418,22 +430,25 @@ public class Picker implements AutoCloseable {
 		}
 
 		pipeline.add(Aggregates.project(
-				Projections.fields(Projections.exclude("_id"), Projections.include("id"), Projections.include("name"),
-						Projections.include("version"), Projections.metaVectorSearchScore("score"))));
+				Projections.fields(Projections.exclude("_id"), Projections.include(ID_FIELD_NAME), Projections.include(NAME_FIELD_NAME),
+						Projections.include(VERSION_FIELD_NAME), Projections.metaVectorSearchScore(SCORE_FIELD_NAME))));
 
-		pipeline.add(Aggregates.match(Filters.gte("score", score)));
+		pipeline.add(Aggregates.match(Filters.gte(SCORE_FIELD_NAME, score)));
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
 		Map<String, String> libraryVersionMap = new HashMap<>();
 		for (Document doc : docs) {
-			String id = doc.getString("id");
-			String name = doc.getString("name");
-			String version = doc.getString("version");
+			String id = doc.getString(ID_FIELD_NAME);
+			String name = doc.getString(NAME_FIELD_NAME);
+			String version = doc.getString(VERSION_FIELD_NAME);
 
-			Double score = doc.getDouble("score");
-			scoreMap.put(id, score);
-			LOGGER.debug("BindexId: {}: {}", name, score);
+			Double docScore = doc.getDouble(SCORE_FIELD_NAME);
+			scoreMap.put(id, docScore);
+			// Sonar java:S2629 - avoid eager debug formatting.
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("BindexId: {}: {}", name, docScore);
+			}
 
 			if (libraryVersionMap.containsKey(name)) {
 				String existsVersion = libraryVersionMap.get(name);
@@ -467,10 +482,10 @@ public class Picker implements AutoCloseable {
 	/**
 	 * Sets the minimum similarity score for semantic vector search queries.
 	 *
-	 * @param score minimum similarity value
+	 * @param minScore minimum similarity value
 	 */
-	public void setScore(Double score) {
-		this.score = score;
+	public void setScore(Double minScore) {
+		this.score = minScore;
 	}
 
 	/**

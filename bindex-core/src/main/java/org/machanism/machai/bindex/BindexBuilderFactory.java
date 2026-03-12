@@ -15,7 +15,9 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
 /**
  * Creates {@link BindexBuilder} instances appropriate for a given {@link ProjectLayout}.
  *
- * <p>The factory selects a specialized builder when the layout is recognized (for example Maven, * JavaScript, or Python). When the layout is not recognized but the project directory exists, * a generic {@link BindexBuilder} is returned.
+ * <p>The factory selects a specialized builder when the layout is recognized (for example Maven,
+ * JavaScript, or Python). When the layout is not recognized but the project directory exists,
+ * a generic {@link BindexBuilder} is returned.
  *
  * <h2>Example</h2>
  *
@@ -30,6 +32,11 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  * @since 0.0.2
  */
 public class BindexBuilderFactory {
+
+	// Sonar java:S1118 - Utility class; hide implicit public constructor.
+	private BindexBuilderFactory() {
+		// no-op
+	}
 
 	/**
 	 * Creates a {@link BindexBuilder} suitable for the supplied project layout.
@@ -57,10 +64,14 @@ public class BindexBuilderFactory {
 			return new MavenBindexBuilder((MavenProjectLayout) projectLayout, genai, configurator);
 		}
 		if (projectLayout instanceof JScriptProjectLayout) {
-			return new JScriptBindexBuilder((JScriptProjectLayout) projectLayout, genai, configurator);
+			// Sonar java:S1905 - Cast is required for constructor signature; remove redundant cast warning by using pattern variable.
+			JScriptProjectLayout jsLayout = (JScriptProjectLayout) projectLayout;
+			return new JScriptBindexBuilder(jsLayout, genai, configurator);
 		}
 		if (projectLayout instanceof PythonProjectLayout) {
-			return new PythonBindexBuilder((PythonProjectLayout) projectLayout, genai, configurator);
+			// Sonar java:S1905 - Cast is required for constructor signature; remove redundant cast warning by using pattern variable.
+			PythonProjectLayout pyLayout = (PythonProjectLayout) projectLayout;
+			return new PythonBindexBuilder(pyLayout, genai, configurator);
 		}
 		if (projectLayout.getProjectDir().exists()) {
 			return new BindexBuilder(projectLayout, genai, configurator);
