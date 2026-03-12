@@ -11,6 +11,8 @@ import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.schema.Bindex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Assembles prompt inputs for downstream LLM-assisted workflows using a set of selected
@@ -44,6 +46,8 @@ import org.machanism.machai.schema.Bindex;
  */
 public class ApplicationAssembly {
 
+	/** Logger instance for the class. */
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationAssembly.class);
 	/** ResourceBundle for prompt configuration. */
 	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
 

@@ -1,6 +1,7 @@
 package org.machanism.machai.ai.manager;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -63,14 +64,12 @@ public class GenAIAdapter implements GenAIProvider {
 	}
 
 	@Override
-	public void addFile(File file) throws IOException {
-		// SonarQube java:S1130 - Remove redundant FileNotFoundException (subclass of IOException).
+	public void addFile(File file) throws IOException, FileNotFoundException {
 		provider.addFile(file);
 	}
 
 	@Override
-	public void addFile(URL fileUrl) throws IOException {
-		// SonarQube java:S1130 - Remove redundant FileNotFoundException (subclass of IOException).
+	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
 		provider.addFile(fileUrl);
 	}
 

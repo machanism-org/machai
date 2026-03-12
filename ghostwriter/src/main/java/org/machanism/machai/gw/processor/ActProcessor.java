@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -266,10 +267,10 @@ public class ActProcessor extends AIFileProcessor {
 			return null;
 		}
 
-		File actFile = new File(actDir, name + ".toml");
+		File file = new File(actDir, name + ".toml");
 		TomlParseResult toml = null;
-		if (actFile.exists()) {
-			toml = Toml.parse(actFile.toPath());
+		if (file.exists()) {
+			toml = Toml.parse(file.toPath());
 			setActData(properties, toml);
 		}
 		return toml;

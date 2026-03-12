@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URI;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -41,7 +41,7 @@ import com.openai.client.OpenAIClient;
  * provider:
  * </p>
  * <ul>
- * <li>{@code OPENAI_BASE_URL} to {@link #BASE_URL}</li>
+ * <li>{@code OPENAI_BASE_URL} to {@link #baseUrl}</li>
  * <li>{@code OPENAI_API_KEY} to the retrieved access token</li>
  * </ul>
  *
@@ -56,9 +56,6 @@ import com.openai.client.OpenAIClient;
  */
 public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 
-	// SonarQube java:S1192 - Define a constant instead of duplicating this literal.
-	private static final String OPENAI_API_KEY = "OPENAI_API_KEY";
-
 	/**
 	 * Default OpenID Connect token endpoint for CodeMie.
 	 *
@@ -66,7 +63,7 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * Can be overridden via the {@code AUTH_URL} configuration key.
 	 * </p>
 	 */
-	public static final String AUTH_URL = "https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token";
+	public static String authUrl = "https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token";
 
 	/**
 	 * Base URL for the CodeMie Code Assistant API.
@@ -75,7 +72,7 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * This base URL is used to configure the underlying OpenAI-compatible client.
 	 * </p>
 	 */
-	public static final String BASE_URL = "https://codemie.lab.epam.com/code-assistant-api/v1";
+	public static String baseUrl = "https://codemie.lab.epam.com/code-assistant-api/v1";
 
 	/**
 	 * Initializes the provider using configuration values.
@@ -105,16 +102,16 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	public void init(Configurator conf) {
 		String chatModel = conf.get("chatModel");
 
-		if (System.getenv(OPENAI_API_KEY) != null) {
+		if (System.getenv("OPENAI_API_KEY") != null) {
 			throw new IllegalArgumentException(
 					"Configuration conflict detected: Please unset the 'OPENAI_API_KEY' environment variable to avoid conflicts with the current configuration.");
 		}
 
-		conf.set("OPENAI_BASE_URL", BASE_URL);
+		conf.set("OPENAI_BASE_URL", baseUrl);
 
 		String username = conf.get("GENAI_USERNAME");
 		String password = conf.get("GENAI_PASSWORD");
-		String resolvedAuthUrl = conf.get("AUTH_URL", AUTH_URL);
+		String resolvedAuthUrl = conf.get("AUTH_URL", CodeMieProvider.authUrl);
 
 		if (Strings.CS.startsWithAny(chatModel, "gpt-") || StringUtils.isBlank(chatModel)) {
 			provider = new OpenAIProvider() {
@@ -122,7 +119,7 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 				protected OpenAIClient getClient() {
 					try {
 						String token = getToken(resolvedAuthUrl, username, password);
-						conf.set(OPENAI_API_KEY, token);
+						conf.set("OPENAI_API_KEY", token);
 					} catch (IOException e) {
 						throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
 					}
@@ -132,11 +129,11 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 			};
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(chatModel, "gemini-")) {
-			conf.set(OPENAI_API_KEY, authorize(resolvedAuthUrl, username, password));
+			conf.set("OPENAI_API_KEY", authorize(resolvedAuthUrl, username, password));
 			provider = new GeminiProvider();
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(chatModel, "claude-")) {
-			conf.set(OPENAI_API_KEY, authorize(resolvedAuthUrl, username, password));
+			conf.set("OPENAI_API_KEY", authorize(resolvedAuthUrl, username, password));
 			provider = new ClaudeProvider();
 			setProvider(provider);
 		} else {
@@ -192,7 +189,8 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 		String urlParameters = String.format(queryTemplate, urlEncode(username), urlEncode(password));
 		byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
-		HttpURLConnection conn = (HttpURLConnection) URI.create(url).toURL().openConnection();
+		URL obj = new URL(url);
+		HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
 		conn.setRequestMethod("POST");
 		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 		conn.setDoOutput(true);
@@ -223,13 +221,13 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 *
 	 * @param value value to encode
 	 * @return encoded value using UTF-8
+	 * @throws RuntimeException if UTF-8 is not supported (unexpected on a compliant JVM)
 	 */
 	private static String urlEncode(String value) {
 		try {
 			return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
-		} catch (IOException e) {
-			// SonarQube java:S112 - Replace generic exceptions with specific library exceptions.
-			throw new UncheckedIOException("UTF-8 encoding not supported", e);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException("UTF-8 encoding not supported", e);
 		}
 	}
 }

@@ -86,6 +86,9 @@ public final class Ghostwriter {
 	/** Configuration key specifying a default scan directory/pattern. */
 	public static final String GW_SCAN_DIR_PROP_NAME = "gw.scanDir";
 
+	/** Directory used as the execution base for relative configuration files. */
+	private static File gwHomeDir;
+
 	/** Processor implementation used by this CLI instance. */
 	private final AIFileProcessor processor;
 
@@ -111,9 +114,10 @@ public final class Ghostwriter {
 	 *
 	 * @param scanDirs scan directory arguments
 	 * @return exit code (0 for success)
-	 * @throws IOException if scanning fails while reading files
+	 * @throws IOException    if scanning fails while reading files
+	 * @throws ParseException if parsing-related failures occur
 	 */
-	public int perform(String[] scanDirs) throws IOException {
+	public int perform(String[] scanDirs) throws IOException, ParseException {
 		int exitCode = 0;
 		try {
 			for (String scanDir : scanDirs) {
@@ -156,25 +160,25 @@ public final class Ghostwriter {
 	private static PropertiesConfigurator initializeConfiguration(File rootDir) {
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
-		File homeDir = config.getFile(GW_HOME_PROP_NAME, null);
-		if (homeDir == null) {
-			homeDir = rootDir;
-			if (homeDir == null) {
-				homeDir = SystemUtils.getUserDir();
+		gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
+		if (gwHomeDir == null) {
+			gwHomeDir = rootDir;
+			if (gwHomeDir == null) {
+				gwHomeDir = SystemUtils.getUserDir();
 			}
 		}
 
-		System.setProperty(GW_HOME_PROP_NAME, homeDir.getAbsolutePath());
+		System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
 		logger = LoggerFactory.getLogger(Ghostwriter.class);
 
 		String version = Ghostwriter.class.getPackage().getImplementationVersion();
 		if (version != null) {
 			logger.info("Ghostwriter {} (Machai project)", version);
 		}
-		logger.info("Home directory: {}", homeDir);
+		logger.info("Home directory: {}", gwHomeDir);
 
 		try {
-			File configFile = new File(homeDir, System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
+			File configFile = new File(gwHomeDir, System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
 			config.setConfiguration(configFile.getAbsolutePath());
 		} catch (IOException e) {
 			// The property file is not defined, ignore.

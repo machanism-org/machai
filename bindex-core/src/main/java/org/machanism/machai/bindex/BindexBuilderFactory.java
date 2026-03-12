@@ -15,9 +15,7 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
 /**
  * Creates {@link BindexBuilder} instances appropriate for a given {@link ProjectLayout}.
  *
- * <p>The factory selects a specialized builder when the layout is recognized (for example Maven,
- * JavaScript, or Python). When the layout is not recognized but the project directory exists,
- * a generic {@link BindexBuilder} is returned.
+ * <p>The factory selects a specialized builder when the layout is recognized (for example Maven, * JavaScript, or Python). When the layout is not recognized but the project directory exists, * a generic {@link BindexBuilder} is returned.
  *
  * <h2>Example</h2>
  *
@@ -32,11 +30,6 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  * @since 0.0.2
  */
 public class BindexBuilderFactory {
-
-	// Sonar java:S1118 - hide implicit public constructor for utility class.
-	private BindexBuilderFactory() {
-		// utility class
-	}
 
 	/**
 	 * Creates a {@link BindexBuilder} suitable for the supplied project layout.
@@ -64,10 +57,10 @@ public class BindexBuilderFactory {
 			return new MavenBindexBuilder((MavenProjectLayout) projectLayout, genai, configurator);
 		}
 		if (projectLayout instanceof JScriptProjectLayout) {
-			return new JScriptBindexBuilder(projectLayout, genai, configurator);
+			return new JScriptBindexBuilder((JScriptProjectLayout) projectLayout, genai, configurator);
 		}
 		if (projectLayout instanceof PythonProjectLayout) {
-			return new PythonBindexBuilder(projectLayout, genai, configurator);
+			return new PythonBindexBuilder((PythonProjectLayout) projectLayout, genai, configurator);
 		}
 		if (projectLayout.getProjectDir().exists()) {
 			return new BindexBuilder(projectLayout, genai, configurator);

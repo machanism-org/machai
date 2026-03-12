@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URI;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -68,31 +71,11 @@ public class WebFunctionTools implements FunctionTools {
 
 	private static final int TIMEOUT = 10000;
 
-	/**
-	 * SonarQube java:S115 - Rename this constant name to match the regular expression.
-	 */
-	private static final String DEFAULT_CHARSET = "UTF-8";
-
-	/**
-	 * SonarQube java:S1192 - Define a constant instead of duplicating this literal.
-	 */
-	private static final String PARAM_HEADERS = "headers";
-
-	/**
-	 * SonarQube java:S1192 - Define a constant instead of duplicating this literal.
-	 */
-	private static final String PARAM_TIMEOUT = "timeout";
-
-	/**
-	 * SonarQube java:S1192 - Define a constant instead of duplicating this literal.
-	 */
-	private static final String PARAM_CHARSET_NAME = "charsetName";
-
-	// SonarQube java:S2119 - Save and re-use this "Random".
-	private static final Random REQUEST_ID_RANDOM = new Random();
-
 	/** Logger for web fetch tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(WebFunctionTools.class);
+
+	/** Default character set for decoding responses and encoding request bodies. */
+	private static final String defaultCharset = "UTF-8";
 
 	/**
 	 * Optional configuration source used to resolve ${...} placeholders in header
@@ -114,7 +97,7 @@ public class WebFunctionTools implements FunctionTools {
 				"headers:string:optional:Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\n). If null, no additional headers are sent.",
 				"timeout:integer:optional:The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.",
 				"charsetName:string:optional:The name of the character set to use when decoding the response content. Default: "
-						+ DEFAULT_CHARSET,
+						+ defaultCharset,
 				"textOnly:boolean:optional:If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.",
 				"selector:string:optional:If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.");
 
@@ -127,7 +110,7 @@ public class WebFunctionTools implements FunctionTools {
 				"body:string:optional:The request body to send (for POST, PUT, PATCH, etc.).",
 				"timeout:integer:optional:The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.",
 				"charsetName:string:optional:The name of the character set to use when decoding the response content. Default: "
-						+ DEFAULT_CHARSET);
+						+ defaultCharset);
 	}
 
 	/**
@@ -164,8 +147,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @return response content or an error message
 	 */
 	public String getWebContent(Object[] params) {
-		// SonarQube java:S2119 - Save and re-use this "Random".
-		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
+		String requestId = Integer.toHexString(new Random().nextInt());
 		logger.info("Fetching web content [{}]: {}", requestId, Arrays.toString(params));
 
 		JsonNode props = (JsonNode) params[0];
@@ -173,15 +155,15 @@ public class WebFunctionTools implements FunctionTools {
 
 		url = replace(url, configurator);
 
-		String headers = props.has(PARAM_HEADERS) ? props.get(PARAM_HEADERS).asText(null) : null;
-		int timeout = props.has(PARAM_TIMEOUT) ? props.get(PARAM_TIMEOUT).asInt(TIMEOUT) : TIMEOUT;
-		String charsetName = props.has(PARAM_CHARSET_NAME) ? props.get(PARAM_CHARSET_NAME).asText(DEFAULT_CHARSET)
-				: DEFAULT_CHARSET;
+		String headers = props.has("headers") ? props.get("headers").asText(null) : null;
+		int timeout = props.has("timeout") ? props.get("timeout").asInt(TIMEOUT) : TIMEOUT;
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
+				: defaultCharset;
 		boolean textOnly = props.has("textOnly") && props.get("textOnly").asBoolean(false);
 		String selector = props.has("selector") ? props.get("selector").asText(null) : null;
 
 		try {
-			HttpURLConnection connection = (HttpURLConnection) getConnection(URI.create(url), headers);
+			HttpURLConnection connection = (HttpURLConnection) getConnection(new URL(url), headers, charsetName);
 			logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
 
 			String response = getWebPage(connection, timeout, charsetName);
@@ -222,23 +204,28 @@ public class WebFunctionTools implements FunctionTools {
 	 * set an HTTP Basic {@code Authorization} header.
 	 * </p>
 	 *
-	 * @param uri     URI to connect to
-	 * @param headers optional headers (newline-separated {@code NAME=VALUE})
+	 * @param url         URL to connect to
+	 * @param headers     optional headers (newline-separated {@code NAME=VALUE})
+	 * @param charsetName charset name (currently unused, but kept for API symmetry)
 	 * @return connection
 	 * @throws IOException if opening a connection fails
 	 */
-	private URLConnection getConnection(URI uri, String headers) throws IOException {
+	private URLConnection getConnection(URL url, String headers, String charsetName) throws IOException {
 		URLConnection connection;
 
-		String userInfo = uri.getUserInfo();
-		URI cleanUri = userInfo == null ? uri : URI.create(uri.toString().replace("//" + userInfo + "@", "//"));
+		String userInfo = url.getUserInfo();
+		if (userInfo != null) {
+			String cleanUrl = url.toString().replace("//" + userInfo + "@", "//");
 
-		connection = cleanUri.toURL().openConnection();
+			url = new URL(cleanUrl);
+			connection = (HttpURLConnection) url.openConnection();
 
-		if (userInfo != null && connection instanceof HttpURLConnection) {
 			byte[] bytes = userInfo.getBytes(StandardCharsets.UTF_8);
 			String basicToken = Base64.getEncoder().encodeToString(bytes);
 			connection.setRequestProperty("Authorization", "Basic " + basicToken);
+
+		} else {
+			connection = url.openConnection();
 		}
 
 		if (connection instanceof HttpURLConnection) {
@@ -257,7 +244,8 @@ public class WebFunctionTools implements FunctionTools {
 	 * @return response content including an initial status line
 	 * @throws IOException if the request cannot be executed
 	 */
-	private String getWebPage(HttpURLConnection connection, int timeout, String charsetName) throws IOException {
+	private String getWebPage(HttpURLConnection connection, int timeout, String charsetName)
+			throws IOException, MalformedURLException, ProtocolException, UnsupportedEncodingException {
 		StringBuilder output = new StringBuilder();
 
 		connection.setRequestMethod("GET");
@@ -304,8 +292,7 @@ public class WebFunctionTools implements FunctionTools {
 	 *         message
 	 */
 	public String callRestApi(Object[] params) {
-		// SonarQube java:S2119 - Save and re-use this "Random".
-		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
+		String requestId = Integer.toHexString(new Random().nextInt());
 		logger.info("Executing REST call [{}]: {}", requestId, Arrays.toString(params));
 
 		JsonNode props = (JsonNode) params[0];
@@ -314,14 +301,15 @@ public class WebFunctionTools implements FunctionTools {
 		url = replace(url, configurator);
 
 		String method = props.has("method") ? props.get("method").asText("GET") : "GET";
-		String headers = props.has(PARAM_HEADERS) ? props.get(PARAM_HEADERS).asText(null) : null;
+		String headers = props.has("headers") ? props.get("headers").asText(null) : null;
 		String body = props.has("body") ? props.get("body").asText(null) : null;
-		int timeout = props.has(PARAM_TIMEOUT) ? props.get(PARAM_TIMEOUT).asInt(TIMEOUT) : TIMEOUT;
-		String charsetName = props.has(PARAM_CHARSET_NAME) ? props.get(PARAM_CHARSET_NAME).asText(DEFAULT_CHARSET)
-				: DEFAULT_CHARSET;
+		int timeout = props.has("timeout") ? props.get("timeout").asInt(TIMEOUT) : TIMEOUT;
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
+				: defaultCharset;
 
 		try {
-			HttpURLConnection connection = (HttpURLConnection) getConnection(URI.create(url), headers);
+			URL callUrl = new URL(url);
+			HttpURLConnection connection = (HttpURLConnection) getConnection(callUrl, headers, charsetName);
 			logger.info("[REST {}] URL: {}", requestId, connection.getURL());
 
 			connection.setRequestMethod(method);
@@ -356,8 +344,7 @@ public class WebFunctionTools implements FunctionTools {
 			return result;
 
 		} catch (Exception e) {
-			// SonarQube java:S2629 - Invoke method(s) only conditionally.
-			logger.error("[REST {}] IO error during REST call", requestId, e);
+			logger.error("[REST {}] IO error during REST call: {}", requestId, e.getMessage());
 			return "IO Error: " + e.getMessage();
 		}
 	}

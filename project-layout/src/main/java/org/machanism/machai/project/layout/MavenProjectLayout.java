@@ -71,9 +71,9 @@ public class MavenProjectLayout extends ProjectLayout {
 			}
 		}
 
-		Model currentModel = getModel();
-		if ("pom".equals(currentModel.getPackaging())) {
-			modules = currentModel.getModules();
+		Model model = getModel();
+		if ("pom".equals(model.getPackaging())) {
+			modules = model.getModules();
 		}
 
 		return modules;
@@ -139,11 +139,11 @@ public class MavenProjectLayout extends ProjectLayout {
 	public List<String> getSources() {
 		List<String> sources = new ArrayList<>();
 
-		Model currentModel = getModel();
-		Build build = currentModel.getBuild();
+		Model model = getModel();
+		Build build = model.getBuild();
 		if (build == null) {
 			build = new Build();
-			currentModel.setBuild(build);
+			model.setBuild(build);
 		}
 
 		if (build.getSourceDirectory() == null) {
@@ -158,9 +158,7 @@ public class MavenProjectLayout extends ProjectLayout {
 			sources.add(ProjectLayout.getRelativePath(getProjectDir(), new File(sourceDirectory)));
 		}
 		if (build.getResources() != null) {
-			sources.addAll(build.getResources().stream()
-					// Sonar java:S1612 - replace lambda with method reference.
-					.map(org.apache.maven.model.FileSet::getDirectory)
+			sources.addAll(build.getResources().stream().map(r -> r.getDirectory())
 					.map(p -> ProjectLayout.getRelativePath(getProjectDir(), new File(p)))
 					.collect(Collectors.toList()));
 		}
@@ -188,16 +186,14 @@ public class MavenProjectLayout extends ProjectLayout {
 	@Override
 	public List<String> getTests() {
 		List<String> sources = new ArrayList<>();
-		Model currentModel = getModel();
-		Build build = currentModel.getBuild();
+		Model model = getModel();
+		Build build = model.getBuild();
 		if (build != null) {
 			if (build.getTestSourceDirectory() != null) {
 				sources.add(ProjectLayout.getRelativePath(getProjectDir(), new File(build.getTestSourceDirectory())));
 			}
 			if (build.getTestResources() != null) {
-				sources.addAll(build.getTestResources().stream()
-						// Sonar java:S1612 - replace lambda with method reference.
-						.map(org.apache.maven.model.FileSet::getDirectory)
+				sources.addAll(build.getTestResources().stream().map(r -> r.getDirectory())
 						.map(p -> ProjectLayout.getRelativePath(getProjectDir(), new File(p)))
 						.collect(Collectors.toList()));
 			}
@@ -223,8 +219,8 @@ public class MavenProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public String getProjectId() {
-		Model currentModel = getModel();
-		return currentModel.getArtifactId();
+		Model model = getModel();
+		return model.getArtifactId();
 	}
 
 	/**

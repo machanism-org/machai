@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
@@ -68,8 +69,7 @@ public class BindexCreator extends BindexProjectProcessor {
 	/**
 	 * Creates or updates {@code bindex.json} in the project directory described by the given layout.
 	 *
-	 * <p>If {@link #update(boolean)} is enabled, any existing Bindex file will be regenerated. If
-	 * update is disabled, an existing file is left unchanged.
+	 * <p>If {@link #update(boolean)} is enabled, any existing Bindex file will be regenerated. If	 * update is disabled, an existing file is left unchanged.
 	 *
 	 * @param projectLayout project layout to inspect
 	 * @throws IllegalArgumentException if {@code projectLayout} is {@code null} or an I/O error occurs
@@ -109,8 +109,7 @@ public class BindexCreator extends BindexProjectProcessor {
 	/**
 	 * Enables or disables update mode.
 	 *
-	 * @param update {@code true} to overwrite an existing {@code bindex.json}; {@code false} to only
-	 *               create when absent
+	 * @param update {@code true} to overwrite an existing {@code bindex.json}; {@code false} to only	 *               create when absent
 	 * @return this instance for chaining
 	 */
 	public BindexCreator update(boolean update) {

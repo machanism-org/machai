@@ -2,7 +2,6 @@ package org.machanism.machai.bindex.ai.tools;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -79,10 +78,7 @@ public class BindexFunctionTools implements FunctionTools {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			String bindexJson = objectMapper.writeValueAsString(bindex);
-			// Sonar java:S2629 - avoid calling expensive JSON serialization unless INFO is enabled.
-			if (logger.isInfoEnabled()) {
-				logger.info("Bindex: {}", StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
-			}
+			logger.info("Bindex: {}", StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
 			return bindexJson;
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);
@@ -98,12 +94,8 @@ public class BindexFunctionTools implements FunctionTools {
 	private String getBindexSchema(Object[] params) {
 		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
 		try {
-			String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
-			// Sonar java:S2629 - avoid logging potentially large schema unless INFO is enabled.
-			if (logger.isInfoEnabled()) {
-				logger.info("Bindex schema: {}",
-						StringUtils.abbreviate(schema, 120).replace("\n", " ").replace("\r", ""));
-			}
+			String schema = IOUtils.toString(systemResource, "UTF8");
+			logger.info("Bindex schema: {}", StringUtils.abbreviate(schema, 120).replace("\n", " ").replace("\r", ""));
 			return schema;
 
 		} catch (IOException e) {

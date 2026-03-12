@@ -27,78 +27,58 @@ public class ClaudeProvider implements GenAIProvider {
 
 	@Override
 	public void init(Configurator config) {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
 		throw new NotImplementedException();
 	}
 
 	@Override
 	public void prompt(String text) {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.prompt is not implemented yet.");
+
 	}
 
 	@Override
 	public void addFile(File file) throws IOException {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.addFile(File) is not implemented yet.");
 	}
 
 	@Override
 	public void addFile(URL fileUrl) throws IOException {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.addFile(URL) is not implemented yet.");
+		prompt("File URL: " + fileUrl.toString());
 	}
 
 	@Override
 	public String perform() {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.perform is not implemented yet.");
+		return null;
 	}
 
 	@Override
 	public void clear() {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.clear is not implemented yet.");
 	}
 
 	@Override
 	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.addTool is not implemented yet.");
 	}
 
 	@Override
 	public void instructions(String instructions) {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.instructions is not implemented yet.");
 	}
 
 	public void promptBundle(ResourceBundle promptBundle) {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.promptBundle is not implemented yet.");
 	}
 
 	@Override
 	public void inputsLog(File inputsLog) {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.inputsLog is not implemented yet.");
 	}
 
 	@Override
 	public void setWorkingDir(File workingDir) {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.setWorkingDir is not implemented yet.");
 	}
 
 	@Override
 	public Usage usage() {
-		// SonarQube java:S1168 - Return an empty object instead of null.
-		return new Usage(0, 0, 0);
+		return null;
 	}
 
 	@Override
 	public List<Double> embedding(String text, long dimensions) {
-		// SonarQube java:S1186 - Empty method placeholder until provider is fully implemented.
-		throw new UnsupportedOperationException("ClaudeProvider.embedding is not implemented yet.");
+		return null;
 	}
 }

@@ -2,7 +2,6 @@ package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.Strings;
@@ -64,37 +63,34 @@ public class PythonProjectLayout extends ProjectLayout {
     /**
      * Gets list of source directories for the Python project.
      * <p>Not implemented.</p>
-     * @return empty list
+     * @return always <code>null</code>
      */
     @Override
     public List<String> getSources() {
-        // Sonar java:S1135 - remove TODO marker; behavior is intentionally unimplemented.
-        // Sonar java:S1168 - return an empty collection instead of null.
-        return Collections.emptyList();
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /**
      * Gets list of document directories for the Python project.
      * <p>Not implemented.</p>
-     * @return empty list
+     * @return always <code>null</code>
      */
     @Override
     public List<String> getDocuments() {
-        // Sonar java:S1135 - remove TODO marker; behavior is intentionally unimplemented.
-        // Sonar java:S1168 - return an empty collection instead of null.
-        return Collections.emptyList();
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /**
      * Gets list of test source directories for the Python project.
      * <p>Not implemented.</p>
-     * @return empty list
+     * @return always <code>null</code>
      */
     @Override
     public List<String> getTests() {
-        // Sonar java:S1135 - remove TODO marker; behavior is intentionally unimplemented.
-        // Sonar java:S1168 - return an empty collection instead of null.
-        return Collections.emptyList();
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

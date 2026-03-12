@@ -64,7 +64,7 @@ public class GeminiProvider implements GenAIProvider {
 	 *             if the file cannot be found
 	 */
 	@Override
-	public void addFile(File file) throws IOException {
+	public void addFile(File file) throws IOException, FileNotFoundException {
 		// TODO Implement file upload/attachment.
 	}
 
@@ -79,7 +79,7 @@ public class GeminiProvider implements GenAIProvider {
 	 *             if the remote file cannot be found
 	 */
 	@Override
-	public void addFile(URL fileUrl) throws IOException {
+	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
 		// TODO Implement URL-based attachment.
 	}
 
@@ -172,12 +172,12 @@ public class GeminiProvider implements GenAIProvider {
 	/**
 	 * Returns usage information (for example, token counts) for the last request.
 	 *
-	 * @return usage details, never {@code null}
+	 * @return usage details, or {@code null} if not available
 	 */
 	@Override
 	public Usage usage() {
-		// SonarQube java:S1168 - Return an empty collection/object instead of null.
-		return new Usage(0, 0, 0);
+		// TODO Return provider usage once implemented.
+		return null;
 	}
 
 	/**

@@ -58,18 +58,14 @@ public class GragleProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getModules() {
-		// Sonar java:S2259 - avoid potential NPE if Gradle model cannot be loaded.
-		GradleProject gradleProject = getProject();
-		if (gradleProject == null) {
-			return null;
-		}
+		List<String> modules = null;
 
-		DomainObjectSet<? extends GradleProject> children = gradleProject.getChildren();
+		DomainObjectSet<? extends GradleProject> children = getProject().getChildren();
 		if (!children.isEmpty()) {
-			return children.getAll().stream().map(GradleProject::getName).collect(Collectors.toList());
+			modules = children.getAll().stream().map(GradleProject::getName).collect(Collectors.toList());
 		}
 
-		return null;
+		return modules;
 	}
 
 	/**
@@ -145,9 +141,7 @@ public class GragleProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public String getProjectId() {
-		// Sonar java:S2259 - avoid potential NPE if Gradle model cannot be loaded.
-		GradleProject gradleProject = getProject();
-		return gradleProject != null ? gradleProject.getName() : null;
+		return getProject().getName();
 	}
 
 	/**
@@ -157,7 +151,6 @@ public class GragleProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public String getProjectName() {
-		// Sonar java:S4144 - delegate to getProjectId() to avoid duplicate implementations.
-		return getProjectId();
+		return getProject().getName();
 	}
 }
