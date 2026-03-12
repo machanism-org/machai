@@ -146,20 +146,24 @@ public class Assembly extends AbstractMojo {
 
 			Configurator config = new PropertiesConfigurator("bindex.properties");
 
-			Picker picker = new Picker(pickGenai, registerUrl, config);
-			picker.setScore(score);
-			List<Bindex> bindexList = picker.pick(query);
+			List<Bindex> bindexList;
+			// Sonar java:S2095 - ensure Picker is always closed to avoid resource leaks.
+			try (Picker picker = new Picker(pickGenai, registerUrl, config)) {
+				picker.setScore(score);
+				bindexList = picker.pick(query);
 
-			if (bindexList.isEmpty()) {
-				getLog().info("No libraries were recommended by the picker.");
-				return;
-			}
+				if (bindexList.isEmpty()) {
+					getLog().info("No libraries were recommended by the picker.");
+					return;
+				}
 
-			int i = 1;
-			getLog().info("Recommended libraries:");
-			for (Bindex bindex : bindexList) {
-				String scoreStr = picker.getScore(bindex.getId()) != null ? picker.getScore(bindex.getId()).toString() : "";
-				getLog().info(String.format("%2$3s. %1s %3s", bindex.getId(), i++, scoreStr));
+				int i = 1;
+				getLog().info("Recommended libraries:");
+				for (Bindex bindex : bindexList) {
+					String scoreStr = picker.getScore(bindex.getId()) != null ? picker.getScore(bindex.getId()).toString() : "";
+					// Sonar java:S3457 - ensure all String.format arguments are used (use %3$s for scoreStr).
+					getLog().info(String.format("%2$3s. %1$s %3$s", bindex.getId(), i++, scoreStr));
+				}
 			}
 
 			ApplicationAssembly assembly = new ApplicationAssembly(assemblyGenai, config, basedir);
