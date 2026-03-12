@@ -1,0 +1,27 @@
+inputs = '''
+# Context
+
+- The main source and resource files are located in: `[Main Source & Resource Folders]`.
+- Determine the correct value for [COMPONENT_KEYS] based on the `Project Layout` parameters:
+  - If [Child Projects]: `not defined`: set [COMPONENT_KEYS] to `[Project Identifier]`
+    else set [COMPONENT_KEYS] to `[Project Identifier]`.
+- Construct the `SONARQUBE_URL` as follows:  
+  `${sonar.url}/api/issues/search?issueStatuses=OPEN&severities=${severities}&componentKeys=org.machanism.machai:[COMPONENT_KEYS]:src&ps=10`
+- Use this URL to retrieve SonarQube issues for the relevant project component.
+- When processing source code, the path from the Sonar issue report to the source file should be used starting with `src/`; characters before it should be removed.
+
+# Additional Instruction
+
+- Ensure all fixes are applied to the correct source files and are properly tested.
+— Re-run the Sonar plugin command: `mvn clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=http://192.168.0.177:9000`.
+- If sonar reports still have issues, continue iterating issue-by-issue (applying a fix, building, and re-running sonar each time) until the report is clean.
+
+%s
+
+'''
+
+gw.scanDir="glob:."
+severities="CRITICAL,BLOCKER,MAJOR,INFO,MINOR"
+sonar.url="http://${sonar.token}:@192.168.0.177:9000"
+sonar.token="sqa_1ca2fc4cb0449e8a70c08933bb8a82cba89d91df"
+
