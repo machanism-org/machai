@@ -2,7 +2,6 @@ package org.machanism.machai.ai.provider.openai;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -125,9 +124,7 @@ public class OpenAIProvider implements GenAIProvider {
 	/** Accumulated request input items for the current conversation. */
 	private final List<ResponseInputItem> inputs = new ArrayList<>();
 
-	/**
-	 * Latest usage metrics captured from the most recent {@link #perform()} call.
-	 */
+	/** Latest usage metrics captured from the most recent {@link #perform()} call. */
 	private Usage lastUsage = new Usage(0, 0, 0);
 
 	/** Optional instructions applied to the request. */
@@ -141,12 +138,6 @@ public class OpenAIProvider implements GenAIProvider {
 
 	private Configurator config;
 
-	/**
-	 * Initializes the provider from the given configuration.
-	 *
-	 * @param config provider configuration (must contain {@code OPENAI_API_KEY} and
-	 *               {@code chatModel})
-	 */
 	@Override
 	public void init(Configurator config) {
 		this.config = config;
@@ -156,11 +147,6 @@ public class OpenAIProvider implements GenAIProvider {
 		maxToolCalls = config.getLong("MAX_TOOL_CALLS", MAX_TOOL_CALLS);
 	}
 
-	/**
-	 * Adds a text prompt to the current request input.
-	 *
-	 * @param text the prompt string
-	 */
 	@Override
 	public void prompt(String text) {
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
@@ -168,16 +154,8 @@ public class OpenAIProvider implements GenAIProvider {
 		inputs.add(ResponseInputItem.ofMessage(message));
 	}
 
-	/**
-	 * Uploads a file to OpenAI and adds its server-side reference to the current
-	 * request inputs.
-	 *
-	 * @param file local file to upload
-	 * @throws IOException           if reading file fails
-	 * @throws FileNotFoundException if file is missing
-	 */
 	@Override
-	public void addFile(File file) throws IOException, FileNotFoundException {
+	public void addFile(File file) throws IOException {
 		try (FileInputStream input = new FileInputStream(file)) {
 			FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input))
 					.purpose(FilePurpose.USER_DATA).build();
@@ -191,15 +169,8 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 	}
 
-	/**
-	 * Adds a file input by URL.
-	 *
-	 * @param fileUrl the URL of the input file
-	 * @throws IOException           on network error
-	 * @throws FileNotFoundException if the file cannot be found
-	 */
 	@Override
-	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
+	public void addFile(URL fileUrl) throws IOException {
 		ResponseInputFile.Builder inputFileBuilder = ResponseInputFile.builder().fileUrl(fileUrl.toString());
 
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
@@ -207,18 +178,6 @@ public class OpenAIProvider implements GenAIProvider {
 		inputs.add(ResponseInputItem.ofMessage(message));
 	}
 
-	/**
-	 * Executes a request using the currently configured model, inputs, and tools.
-	 *
-	 * <p>
-	 * If the response contains tool calls, the provider executes the matching tool
-	 * handlers and continues the conversation until a final text response is
-	 * produced.
-	 * </p>
-	 *
-	 * @return the final model response text (may be {@code null} if no text was
-	 *         produced)
-	 */
 	@Override
 	public String perform() {
 		logInputs();
@@ -234,11 +193,6 @@ public class OpenAIProvider implements GenAIProvider {
 		return result;
 	}
 
-	/**
-	 * Extracts token usage from the response and stores it as {@link #usage()}.
-	 *
-	 * @param usage optional usage information from the OpenAI response
-	 */
 	private void captureUsage(Optional<ResponseUsage> usage) {
 		if (usage.isPresent()) {
 			ResponseUsage responseUsage = usage.get();
@@ -253,23 +207,10 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 	}
 
-	/**
-	 * Parses the given response and handles function tool calls.
-	 *
-	 * <p>
-	 * Tool calls are executed via {@link #callFunction(ResponseFunctionToolCall)}.
-	 * If tool calls are present, the method creates and sends a follow-up request
-	 * with both the tool call and tool output attached, and repeats until the model
-	 * returns a final message.
-	 * </p>
-	 *
-	 * @param response response object
-	 * @return response string, potentially after one or more tool call iterations
-	 */
 	private String parseResponse(Response response) {
 		String text = null;
 		Response current = response;
-		List<ResponseInputItem> inputs = new ArrayList<>(this.inputs);
+		List<ResponseInputItem> responseInputs = new ArrayList<>(this.inputs);
 		while (current != null) {
 			boolean anyToolCalls = false;
 			List<ResponseOutputItem> output = current.output();
@@ -277,18 +218,18 @@ public class OpenAIProvider implements GenAIProvider {
 				if (item.isFunctionCall()) {
 					anyToolCalls = true;
 					ResponseFunctionToolCall functionCall = item.asFunctionCall();
-					inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
+					responseInputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
 					Object value = callFunction(functionCall);
 					Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
 
-					inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
+					responseInputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
 							.callId(functionCall.callId()).outputAsJson(callFunction).build()));
 				}
 				if (item.isReasoning()) {
 					ResponseReasoningItem reasoningItem = item.asReasoning();
 					List<com.openai.models.responses.ResponseReasoningItem.Content> contentList = reasoningItem
-							.content().get();
+							.content().orElseGet(java.util.Collections::emptyList);
 					for (com.openai.models.responses.ResponseReasoningItem.Content content : contentList) {
 						String reasoning = content.text();
 						if (StringUtils.isNotBlank(reasoning)) {
@@ -301,13 +242,15 @@ public class OpenAIProvider implements GenAIProvider {
 					ResponseOutputMessage outMessage = item.asMessage();
 					List<Content> contentList = outMessage.content();
 					for (Content content : contentList) {
-						if (content.outputText().isPresent()) {
-							String candidate = content.outputText().get().text();
+						content.outputText().ifPresent(outText -> {
+							String candidate = outText.text();
 							if (StringUtils.isNotBlank(candidate)) {
-								text = candidate;
-								logger.info("LLM Response: {}", text);
+								logger.info("LLM Response: {}", candidate);
 							}
-						}
+						});
+						// SonarQube java:S3655 - Avoid Optional#get() without presence check.
+						text = content.outputText().map(outText -> outText.text()).filter(StringUtils::isNotBlank)
+								.orElse(text);
 					}
 				}
 			}
@@ -316,7 +259,7 @@ public class OpenAIProvider implements GenAIProvider {
 				break;
 			}
 
-			ResponseCreateParams params = createResponseBuilder(inputs);
+			ResponseCreateParams params = createResponseBuilder(responseInputs);
 
 			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
 			current = getClient().responses().create(params);
@@ -334,18 +277,9 @@ public class OpenAIProvider implements GenAIProvider {
 		builder.instructions(instructions);
 		builder.inputOfResponse(inputs);
 
-		ResponseCreateParams params = builder.tools(new ArrayList<Tool>(toolMap.keySet())).build();
-		return params;
+		return builder.tools(new ArrayList<>(toolMap.keySet())).build();
 	}
 
-	/**
-	 * Requests an embedding vector for the given input text.
-	 *
-	 * @param text       input to embed
-	 * @param dimensions number of dimensions requested from the embedding model
-	 * @return embedding as a list of {@code double} values, or {@code null} when
-	 *         {@code text} is {@code null}
-	 */
 	@Override
 	public List<Double> embedding(String text, long dimensions) {
 		List<Double> embedding = null;
@@ -360,23 +294,6 @@ public class OpenAIProvider implements GenAIProvider {
 		return embedding;
 	}
 
-	/**
-	 * Executes a function tool call by finding a registered tool with the same name
-	 * and delegating to its handler.
-	 *
-	 * <p>
-	 * The handler is invoked with an {@code Object[]} of length 2:
-	 * </p>
-	 * <ol>
-	 * <li>index {@code 0}: parsed JSON arguments as a Jackson {@link JsonNode}</li>
-	 * <li>index {@code 1}: the configured {@link #setWorkingDir(File)} value</li>
-	 * </ol>
-	 *
-	 * @param functionCall call details
-	 * @return result from function handler, or {@code null} if no matching tool is
-	 *         registered
-	 * @throws IllegalArgumentException if the tool call arguments cannot be parsed
-	 */
 	private Object callFunction(ResponseFunctionToolCall functionCall) {
 		String name = functionCall.name();
 		Object[] arguments = new Object[2];
@@ -404,10 +321,6 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 	}
 
-	/**
-	 * Writes the current request inputs to {@link #inputsLog} when logging is
-	 * enabled.
-	 */
 	private void logInputs() {
 		if (inputsLog != null) {
 			File parentFile = inputsLog.getParentFile();
@@ -442,29 +355,11 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 	}
 
-	/**
-	 * Clears all accumulated inputs for the next request.
-	 */
 	@Override
 	public void clear() {
 		inputs.clear();
 	}
 
-	/**
-	 * Registers a function tool for the current provider instance.
-	 *
-	 * <p>
-	 * The {@code paramsDesc} entries must follow the format
-	 * {@code name:type:required:description}. The parameter schema passed to OpenAI
-	 * is a JSON Schema object of type {@code object}.
-	 * </p>
-	 *
-	 * @param name        tool function name
-	 * @param description tool description
-	 * @param function    handler callback for tool execution
-	 * @param paramsDesc  parameter descriptors in the format
-	 *                    {@code name:type:required:description}
-	 */
 	@Override
 	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
 		Map<String, Map<String, String>> fromValue = new HashMap<>();
@@ -493,52 +388,26 @@ public class OpenAIProvider implements GenAIProvider {
 		toolMap.put(tool, function);
 	}
 
-	/**
-	 * Sets system-level instructions applied to subsequent requests.
-	 *
-	 * @param instructions instruction text (may be {@code null} to clear)
-	 */
 	@Override
 	public void instructions(String instructions) {
 		this.instructions = instructions;
 	}
 
-	/**
-	 * Enables request input logging to the given file.
-	 *
-	 * @param inputsLog file for input logging (may be {@code null} to disable)
-	 */
 	@Override
 	public void inputsLog(File inputsLog) {
 		this.inputsLog = inputsLog;
 	}
 
-	/**
-	 * Sets the working directory passed to tool handlers.
-	 *
-	 * @param workingDir working directory (may be {@code null})
-	 */
 	@Override
 	public void setWorkingDir(File workingDir) {
 		this.workingDir = workingDir;
 	}
 
-	/**
-	 * Returns token usage metrics captured from the most recent {@link #perform()}
-	 * call.
-	 *
-	 * @return usage metrics; never {@code null}
-	 */
 	@Override
 	public Usage usage() {
 		return lastUsage;
 	}
 
-	/**
-	 * Returns the underlying OpenAI client.
-	 *
-	 * @return OpenAI client
-	 */
 	protected OpenAIClient getClient() {
 		String baseUrl = config.get("OPENAI_BASE_URL");
 		String privateKey = config.get("OPENAI_API_KEY");
@@ -563,26 +432,17 @@ public class OpenAIProvider implements GenAIProvider {
 		if (StringUtils.isBlank(chatModel)) {
 			ModelService models = client.models();
 			List<String> items = models.list().items().stream().map(i -> i.id()).collect(Collectors.toList());
+			// SonarQube java:S1612 - Replace lambda with method reference.
 			throw new IllegalArgumentException(
 					"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
 		}
 		return client;
 	}
 
-	/**
-	 * Returns the configured request timeout.
-	 *
-	 * @return timeout in seconds; {@code 0} indicates the SDK default
-	 */
 	public long getTimeout() {
 		return timeoutSec;
 	}
 
-	/**
-	 * Sets a request timeout (in seconds) for new clients created by this provider.
-	 *
-	 * @param timeout timeout in seconds; use {@code 0} to use SDK defaults
-	 */
 	public void setTimeout(long timeout) {
 		this.timeoutSec = timeout;
 	}

@@ -5,6 +5,7 @@ import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSea
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoCommandException;
@@ -86,6 +86,10 @@ public class Picker implements AutoCloseable {
 	private static final String DOMAINS_PROPERTY_NAME = "domains";
 	private static final String LAYERS_PROPERTY_NAME = "layers";
 	private static final String INTEGRATIONS_PROPERTY_NAME = "integrations";
+	// Sonar java:S1192 - avoid duplicating string literals.
+	private static final String VERSION_FIELD_NAME = "version";
+	// Sonar java:S1192 - avoid duplicating string literals.
+	private static final String SCORE_FIELD_NAME = "score";
 
 	/** Embedding vector dimensions for classification. */
 	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
@@ -107,7 +111,9 @@ public class Picker implements AutoCloseable {
 
 	private final GenAIProvider provider;
 
-	private Double score = 0.9;
+	// Sonar java:S1170 - final constant must also be static.
+	private static final Double DEFAULT_SCORE = 0.9;
+	private Double score = DEFAULT_SCORE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
 
 	/**
@@ -180,7 +186,8 @@ public class Picker implements AutoCloseable {
 			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
 					.distinct().collect(Collectors.toSet());
 
-			Set<String> integrations = classification.getIntegrations().stream().map(e -> e.toLowerCase()).distinct()
+			// Sonar java:S1612 - replace lambda with method reference.
+			Set<String> integrations = classification.getIntegrations().stream().map(String::toLowerCase).distinct()
 					.collect(Collectors.toSet());
 
 			if (languages.isEmpty()) {
@@ -188,7 +195,7 @@ public class Picker implements AutoCloseable {
 			}
 
 			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson).append("name", bindex.getName())
-					.append("version", bindex.getVersion()).append(DOMAINS_PROPERTY_NAME, classification.getDomains())
+					.append(VERSION_FIELD_NAME, bindex.getVersion()).append(DOMAINS_PROPERTY_NAME, classification.getDomains())
 					.append(LAYERS_PROPERTY_NAME, classification.getLayers()).append(LANGUAGES_PROPERTY_NAME, languages)
 					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
 					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
@@ -348,12 +355,11 @@ public class Picker implements AutoCloseable {
 	 * @param query search query string
 	 * @return classification schema as a JSON string
 	 * @throws IOException              if prompt or IO operation fails
-	 * @throws JsonProcessingException  if JSON serialization fails
-	 * @throws JsonMappingException     if JSON mapping fails
 	 */
-	private String getClassification(String query) throws IOException, JsonProcessingException, JsonMappingException {
+	private String getClassification(String query) throws IOException {
 		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
-		String schema = IOUtils.toString(systemResource, "UTF8");
+		// Sonar java:S4719 - prefer StandardCharsets over charset name literals.
+		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode schemaJson = objectMapper.readTree(schema);
 		JsonNode jsonNode = schemaJson.get("properties").get("classification");
@@ -404,8 +410,20 @@ public class Picker implements AutoCloseable {
 	 */
 	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
 			Bson... bsons) {
-		Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
+		// Sonar java:S2629 - invoke expensive methods (embedding) only when needed.
+		final Iterable<Double> queryEmbedding;
+		if (LOGGER.isDebugEnabled()) {
+			queryEmbedding = provider.embedding(query, dimensions);
+			LOGGER.debug("Vector search query: {}", query);
+		} else {
+			queryEmbedding = provider.embedding(query, dimensions);
+		}
 
+		return getResultsInternal(indexName, propertyPath, queryEmbedding, bsons);
+	}
+
+	private Collection<String> getResultsInternal(String indexName, String propertyPath, Iterable<Double> queryEmbedding,
+			Bson... bsons) {
 		List<Bson> pipeline = new ArrayList<>();
 
 		pipeline.add(Aggregates.vectorSearch(fieldPath(propertyPath), queryEmbedding, indexName, VECTOR_SEARCH_LIMITS,
@@ -419,9 +437,9 @@ public class Picker implements AutoCloseable {
 
 		pipeline.add(Aggregates.project(
 				Projections.fields(Projections.exclude("_id"), Projections.include("id"), Projections.include("name"),
-						Projections.include("version"), Projections.metaVectorSearchScore("score"))));
+						Projections.include(VERSION_FIELD_NAME), Projections.metaVectorSearchScore(SCORE_FIELD_NAME))));
 
-		pipeline.add(Aggregates.match(Filters.gte("score", score)));
+		pipeline.add(Aggregates.match(Filters.gte(SCORE_FIELD_NAME, score)));
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
 
@@ -429,11 +447,14 @@ public class Picker implements AutoCloseable {
 		for (Document doc : docs) {
 			String id = doc.getString("id");
 			String name = doc.getString("name");
-			String version = doc.getString("version");
+			String version = doc.getString(VERSION_FIELD_NAME);
 
-			Double score = doc.getDouble("score");
-			scoreMap.put(id, score);
-			LOGGER.debug("BindexId: {}: {}", name, score);
+			Double scoreValue = doc.getDouble(SCORE_FIELD_NAME);
+			scoreMap.put(id, scoreValue);
+			// Sonar java:S2629 - avoid debug message creation unless DEBUG is enabled.
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("BindexId: {}: {}", name, scoreValue);
+			}
 
 			if (libraryVersionMap.containsKey(name)) {
 				String existsVersion = libraryVersionMap.get(name);

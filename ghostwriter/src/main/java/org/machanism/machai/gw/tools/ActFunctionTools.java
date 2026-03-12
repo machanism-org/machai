@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
@@ -25,6 +27,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class ActFunctionTools implements FunctionTools {
 
+	// Sonar(java:S1192): avoid duplicating string literals.
+	private static final String TOML_EXTENSION = ".toml";
+
 	private Configurator configurator;
 
 	@Override
@@ -40,7 +45,7 @@ public class ActFunctionTools implements FunctionTools {
 				this::getActDetails,
 				"actName:string:required:The name of the Act to load.",
 				"custom:boolean:optional:If true, retrieves the Act definition only from the user-defined (custom) acts directory. "
-				+ "If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts.");
+						+ "If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts.");
 	}
 
 	/**
@@ -81,10 +86,16 @@ public class ActFunctionTools implements FunctionTools {
 			File file = new File(jarFilePath);
 			try (ZipFile jarFile = new ZipFile(file)) {
 				jarFile.stream().forEach(entry -> {
-					String name = entry.getName();
-					if (Strings.CS.startsWith(name, "acts/")
-							&& Strings.CS.endsWith(name, ".toml")) {
-						result.add(StringUtils.substringBetween(name, "acts/", ".toml"));
+					String actName = StringUtils.substringBetween(entry.getName(), "acts/", TOML_EXTENSION);
+					Map<String, Object> properties = new HashMap<>();
+					if (actName != null) {
+						try {
+							ActProcessor.tryLoadActFromClasspath(properties, actName);
+							result.add("`" + actName + "`: "
+									+ Objects.toString(properties.get("description")));
+						} catch (IOException e) {
+							throw new IllegalArgumentException(e);
+						}
 					}
 				});
 			}
@@ -98,10 +109,18 @@ public class ActFunctionTools implements FunctionTools {
 		if (acts == null || !acts.exists() || !acts.isDirectory()) {
 			return Collections.emptySet();
 		}
-		File[] files = acts.listFiles((dir, name) -> name.endsWith(".toml"));
+		File[] files = acts.listFiles((dir, name) -> name.endsWith(TOML_EXTENSION));
 		Set<String> result = new HashSet<>();
 		for (File file : files) {
-			result.add(StringUtils.substringBefore(file.getName(), ".toml"));
+			String actName = file.getName();
+			Map<String, Object> properties = new HashMap<>();
+			try {
+				ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
+				result.add("`" + StringUtils.substringBefore(actName, TOML_EXTENSION) + "`: "
+						+ Objects.toString(properties.get("description")));
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
 		}
 		return result;
 	}
@@ -111,7 +130,7 @@ public class ActFunctionTools implements FunctionTools {
 		String actName = props.get("actName").asText();
 		String custom = props.has("custom") ? props.get("custom").asText() : null;
 
-		Properties properties = new Properties();
+		Map<String, Object> properties = new HashMap<>();
 		try {
 			File acts = configurator.getFile("gw.acts", null);
 			if (custom == null) {

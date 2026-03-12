@@ -24,8 +24,6 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Base implementation for processors that traverse a project directory and
@@ -51,8 +49,12 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractFileProcessor extends ProjectProcessor {
 
-	/** Logger for documentation input processing events. */
-	private static final Logger logger = LoggerFactory.getLogger(AbstractFileProcessor.class);
+	/**
+	 * Directory names that should be ignored when scanning projects.
+	 */
+	protected static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
+			ProjectProcessor.MACHAI_TEMP_DIR, "target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
+			".classpath", ".settings", ".settings", ".project", ".m2" };
 
 	/** Prefix for project-layout properties exposed for template substitution. */
 	protected static final String GW_PROJECT_LAYOUT_PROP_PREFIX = "project.";
@@ -91,7 +93,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param rootDir      root directory used as a base for relative paths
 	 * @param configurator configuration source used by implementations
 	 */
-	public AbstractFileProcessor(File rootDir, Configurator configurator) {
+	protected AbstractFileProcessor(File rootDir, Configurator configurator) {
 		super();
 		this.rootDir = rootDir;
 		this.configurator = configurator;
@@ -144,6 +146,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param modules    module relative paths
 	 */
 	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
+		// Sonar(java:S2095): ensure ExecutorService is always shutdown.
 		ExecutorService executor = Executors.newFixedThreadPool(degreeOfConcurrency);
 		try {
 			List<Future<Void>> futures = new ArrayList<>();
@@ -234,7 +237,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		if (Strings.CI.containsAny(file.getAbsolutePath(), ProjectLayout.EXCLUDE_DIRS)) {
+		if (Strings.CI.containsAny(file.getAbsolutePath(), EXCLUDE_DIRS)) {
 			return false;
 		}
 
@@ -245,8 +248,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		String path = relativeProjectDir.isEmpty() ? relativeScanDir
-				: relativeProjectDir + (".".equals(relativeScanDir) ? "" : "/" + relativeScanDir);
+		String path = buildPathForMatching(relativeProjectDir, relativeScanDir);
 
 		Path pathToMatch = new File(path).toPath();
 		boolean fullMatch = pathMatcher != null && pathMatcher.matches(pathToMatch);
@@ -267,6 +269,13 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		}
 
 		return result;
+	}
+
+	private static String buildPathForMatching(String relativeProjectDir, String relativeScanDir) {
+		// Sonar(java:S3358, java:S1075): avoid nested ternary and hard-coded path
+		// delimiter.
+		String suffix = ".".equals(relativeScanDir) ? "" : File.separator + relativeScanDir;
+		return relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + suffix;
 	}
 
 	/**
@@ -316,7 +325,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			}
 			Path relativePath = new File(relativePathString).toPath();
 
-			if (Strings.CI.equalsAny(name, ProjectLayout.EXCLUDE_DIRS) || shouldExcludePath(relativePath)) {
+			if (Strings.CI.equalsAny(name, EXCLUDE_DIRS) || shouldExcludePath(relativePath)) {
 				continue;
 			}
 			result.add(file);
@@ -434,7 +443,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 				continue;
 			}
 
-			if (Strings.CI.containsAny(path, ProjectLayout.EXCLUDE_DIRS)
+			if (Strings.CI.containsAny(path, EXCLUDE_DIRS)
 					|| shouldExcludePath(new File(path).toPath())) {
 				continue;
 			}

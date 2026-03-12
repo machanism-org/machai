@@ -115,7 +115,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			throws IOException {
 		logger.info("Processing file: '{}'", file);
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(genai, getConfigurator());
+		GenAIProvider provider = GenAIProviderManager.getProvider(getModel(), getConfigurator());
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		File projectDir = projectLayout.getProjectDir();
@@ -472,7 +472,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		try {
 			process(projectLayout, projectLayout.getProjectDir(), instructions, defaultPrompt);
 		} catch (IOException e) {
-			new IllegalArgumentException(e);
+			// Sonar(java:S3984): do not ignore created exceptions.
+			throw new IllegalArgumentException(e);
 		}
 	}
+
+	public String getModel() {
+		return genai;
+	}
+
 }

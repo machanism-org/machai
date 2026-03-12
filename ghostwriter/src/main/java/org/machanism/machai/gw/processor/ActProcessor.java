@@ -4,13 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,15 +20,16 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tomlj.Toml;
+import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
 
 /**
  * Processor that runs Ghostwriter in "Act" mode.
  *
  * <p>
- * An act is a predefined prompt template stored as a {@code .toml} file. Act
- * files can be loaded from bundled classpath resources (under {@code /acts})
- * and/or from a user-specified directory.
+ * An <em>act</em> is a predefined prompt template stored as a {@code .toml}
+ * file. Act files can be loaded from bundled classpath resources (under
+ * {@code /acts}) and/or from a user-specified directory.
  * </p>
  *
  * <h2>Act format</h2>
@@ -37,13 +39,21 @@ import org.tomlj.TomlParseResult;
  * <ul>
  * <li>{@code instructions}: provider system instructions</li>
  * <li>{@code inputs}: a prompt template;
- * {@link String#format(String, Object...)} is used to inject the user-provided
+ * {@link String#format(String, Object...)} is used to inject user-provided
  * prompt text</li>
  * <li>{@code gw.threads}: enables module multi-threading</li>
  * <li>{@code gw.excludes}: comma-separated scan exclusions</li>
  * <li>{@code gw.nonRecursive}: disables module recursion</li>
  * <li>any other key is forwarded to the underlying configuration</li>
  * </ul>
+ *
+ * <h2>Execution</h2>
+ * <p>
+ * When executing an act, Ghostwriter will scan matching files and run the act's
+ * composed prompt against each file. Acts may also declare a {@code prologue}
+ * and/or {@code epilogue} list of related acts to run before/after the main
+ * scan.
+ * </p>
  */
 public class ActProcessor extends AIFileProcessor {
 
@@ -59,6 +69,18 @@ public class ActProcessor extends AIFileProcessor {
 	/** Optional directory containing external {@code *.toml} act files. */
 	private File actDir;
 
+	/** Acts to run before the current act scan. */
+	private List<String> prologue;
+
+	/** Acts to run after the current act scan. */
+	private List<String> epilogue;
+
+	/** Project directory used for a scan run (cached for prologue/epilogue). */
+	private File projectDir;
+
+	/** Scan directory/pattern used for a scan run (cached for prologue/epilogue). */
+	private String scanDir;
+
 	/**
 	 * Creates an act processor.
 	 *
@@ -72,12 +94,54 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
+	 * Runs the configured act over the given project directory and scan directory
+	 * (or pattern).
+	 *
+	 * <p>
+	 * If the currently loaded act defines {@code prologue} and/or {@code epilogue}
+	 * acts, those are executed before/after the scan respectively.
+	 * </p>
+	 *
+	 * @param projectDir project root directory
+	 * @param scanDir    scan start directory or {@code glob:}/{@code regex:}
+	 *                  pattern
+	 * @throws IOException if scanning fails
+	 */
+	@Override
+	public void scanDocuments(File projectDir, String scanDir) throws IOException {
+		this.projectDir = projectDir;
+		this.scanDir = scanDir;
+		runRelatedActs(prologue);
+		super.scanDocuments(projectDir, scanDir);
+		runRelatedActs(epilogue);
+	}
+
+	/**
+	 * Executes the provided act names as separate scans, using the current scan
+	 * context.
+	 *
+	 * @param acts related act names to run (may be {@code null})
+	 * @throws IOException if a related act scan fails
+	 */
+	private void runRelatedActs(List<String> acts) throws IOException {
+		if (acts != null) {
+			for (String act : acts) {
+				logger.info("Running related act: {}", act);
+
+				ActProcessor actProcessor = new ActProcessor(getRootDir(), getConfigurator(), getModel());
+				actProcessor.setDefaultPrompt(act);
+				actProcessor.scanDocuments(projectDir, scanDir);
+			}
+		}
+	}
+
+	/**
 	 * Loads an act definition and applies it as the current execution defaults.
 	 *
 	 * <p>
-	 * The {@code act} argument supports the form {@code <name> [prompt]}, where the
-	 * optional prompt portion is inserted into the act's {@code inputs} template.
-	 * If no prompt is provided, {@link #getDefaultPrompt()} is used.
+	 * The {@code act} argument supports the form {@code <name> [prompt]}, where
+	 * the optional prompt portion is inserted into the act's {@code inputs}
+	 * template. If no prompt is provided, {@link #getDefaultPrompt()} is used.
 	 * </p>
 	 *
 	 * @param act act name plus optional prompt text
@@ -105,14 +169,10 @@ public class ActProcessor extends AIFileProcessor {
 			prompt = defaultPrompt;
 		}
 
-		Properties actData = new Properties();
+		Map<String, Object> actData = new HashMap<>();
 		try {
 			loadAct(name, actData, actDir);
-			String actPrompt = Objects.toString(super.getDefaultPrompt(),
-					getConfigurator().get("prompt", actData.getProperty("inputs", "%s")));
-			String value = String.format(actPrompt, StringUtils.defaultString(prompt).trim());
-
-			super.setDefaultPrompt(value);
+			super.setDefaultPrompt(StringUtils.defaultString(prompt).trim());
 			applyActData(actData);
 
 		} catch (IOException e) {
@@ -121,43 +181,32 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Loads an act definition into the provided {@link Properties} object,
-	 * supporting inheritance via the {@code basedOn} property.
+	 * Loads an act definition into the provided map, supporting inheritance via
+	 * the {@code basedOn} property.
+	 *
 	 * <p>
 	 * This method attempts to load the specified act from both a user-defined
 	 * directory (custom act) and the built-in classpath resources. If both are
 	 * present, the custom act wraps (overrides) the built-in act, allowing for
 	 * extension or modification of base act behavior.
+	 * </p>
+	 *
 	 * <p>
 	 * If the act specifies a {@code basedOn} property, the parent act is loaded
 	 * first (recursively), and its properties are merged. The child act's
-	 * properties then override or extend the parent, following inheritance rules.
+	 * properties then override or extend the parent.
+	 * </p>
 	 *
 	 * @param name       the name of the act to load (without the {@code .toml}
 	 *                   extension)
-	 * @param properties the destination {@link Properties} object to populate with
-	 *                   parsed act properties
+	 * @param properties destination map to populate with parsed act properties
 	 * @param actDir     optional directory containing user-defined (custom) act
 	 *                   files; may be {@code null}
 	 * @throws IOException              if reading act content fails
 	 * @throws IllegalArgumentException if the specified act cannot be found in
 	 *                                  either location
-	 *
-	 *                                  <p>
-	 *                                  <b>Inheritance and Overrides:</b>
-	 *                                  </p>
-	 *                                  <ul>
-	 *                                  <li>If a custom act and a built-in act with
-	 *                                  the same name exist, the custom act wraps
-	 *                                  the built-in act.</li>
-	 *                                  <li>If the act defines {@code basedOn}, the
-	 *                                  parent act is loaded first, and its
-	 *                                  properties are merged recursively.</li>
-	 *                                  <li>Child act properties override or extend
-	 *                                  parent properties as appropriate.</li>
-	 *                                  </ul>
 	 */
-	public static void loadAct(String name, Properties properties, File actDir) throws IOException {
+	public static void loadAct(String name, Map<String, Object> properties, File actDir) throws IOException {
 		TomlParseResult customToml = tryLoadActFromDirectory(properties, name, actDir);
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
@@ -187,7 +236,8 @@ public class ActProcessor extends AIFileProcessor {
 	 * @return parsed TOML result, or {@code null} when the act is not found
 	 * @throws IOException if the resource cannot be read
 	 */
-	public static TomlParseResult tryLoadActFromClasspath(Properties properties, String name) throws IOException {
+	public static TomlParseResult tryLoadActFromClasspath(Map<String, Object> properties, String name)
+			throws IOException {
 		String path = ACTS_BASENAME_PREFIX + name + ".toml";
 		URL resource = Ghostwriter.class.getResource(path);
 		if (resource == null) {
@@ -210,16 +260,16 @@ public class ActProcessor extends AIFileProcessor {
 	 * @return parsed TOML result, or {@code null} when not found
 	 * @throws IOException if the file cannot be read
 	 */
-	public static TomlParseResult tryLoadActFromDirectory(Properties properties, String name, File actDir)
+	public static TomlParseResult tryLoadActFromDirectory(Map<String, Object> properties, String name, File actDir)
 			throws IOException {
 		if (actDir == null) {
 			return null;
 		}
 
-		File file = new File(actDir, name + ".toml");
+		File actFile = new File(actDir, name + ".toml");
 		TomlParseResult toml = null;
-		if (file.exists()) {
-			toml = Toml.parse(file.toPath());
+		if (actFile.exists()) {
+			toml = Toml.parse(actFile.toPath());
 			setActData(properties, toml);
 		}
 		return toml;
@@ -236,24 +286,35 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param properties properties destination
 	 * @param toml       TOML parse result
 	 */
-	private static void setActData(Properties properties, TomlParseResult toml) {
+	private static void setActData(Map<String, Object> properties, TomlParseResult toml) {
 		Set<Entry<String, Object>> props = toml.dottedEntrySet();
 		for (Entry<String, Object> entry : props) {
 			String key = entry.getKey();
 			if (entry.getValue() instanceof String) {
 				String value = (String) entry.getValue();
-				String inheritValue = properties.getProperty(key);
-				if (inheritValue != null) {
-					value = String.format(inheritValue, value);
+				Object inheritValue = properties.get(key);
+				if (inheritValue instanceof String) {
+					value = String.format((String) inheritValue, value);
 				}
-				properties.setProperty(key, value);
+				properties.put(key, value);
+			}
+			if (entry.getValue() instanceof TomlArray) {
+				List<Object> value = ((TomlArray) entry.getValue()).toList();
+				properties.put(key, value);
 			}
 		}
 	}
 
-	private void applyActData(Properties properties) {
-		for (Entry<Object, Object> entry : properties.entrySet()) {
-			String key = (String) entry.getKey();
+	/**
+	 * Applies loaded act data to this processor's configuration and runtime
+	 * settings.
+	 *
+	 * @param properties properties loaded from TOML acts
+	 */
+	@SuppressWarnings("unchecked")
+	private void applyActData(Map<String, Object> properties) {
+		for (Entry<String, Object> entry : properties.entrySet()) {
+			String key = entry.getKey();
 			if (entry.getValue() instanceof String) {
 				String value = (String) entry.getValue();
 				String inheritValue = getConfigurator().get(key, null);
@@ -287,7 +348,23 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 				}
 			}
+			if (entry.getValue() instanceof List) {
+				List<Object> value = (List<Object>) entry.getValue();
+				List<String> stringList = value.stream().map(Object::toString).collect(Collectors.toList());
+
+				switch (key) {
+				case "prologue":
+					setPrologue(stringList);
+					break;
+				case "epilogue":
+					setEpilogue(stringList);
+					break;
+				default:
+					break;
+				}
+			}
 		}
+
 	}
 
 	/**
@@ -305,6 +382,10 @@ public class ActProcessor extends AIFileProcessor {
 		this.actDir = actDir;
 	}
 
+	/**
+	 * Processes non-module files and directories directly under the project
+	 * directory.
+	 */
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
@@ -330,8 +411,26 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param file          file to process
 	 * @throws IOException if provider execution fails
 	 */
+	@Override
 	protected void processFile(ProjectLayout projectLayout, File file) throws IOException {
 		process(projectLayout, file, getInstructions(), getDefaultPrompt());
 	}
 
+	/**
+	 * Sets acts to run before the current act scan.
+	 *
+	 * @param prologue act names (may be {@code null})
+	 */
+	public void setPrologue(List<String> prologue) {
+		this.prologue = prologue;
+	}
+
+	/**
+	 * Sets acts to run after the current act scan.
+	 *
+	 * @param epilogue act names (may be {@code null})
+	 */
+	public void setEpilogue(List<String> epilogue) {
+		this.epilogue = epilogue;
+	}
 }

@@ -63,6 +63,9 @@ public class CommandFunctionTools implements FunctionTools {
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
 
+	// SonarQube java:S2119 - Save and re-use this "Random".
+	private static final Random REQUEST_ID_RANDOM = new Random();
+
 	/**
 	 * Default maximum number of characters to return from captured process output.
 	 */
@@ -223,7 +226,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @return command output bounded to the configured tail size
 	 */
 	public String executeCommand(Object[] params) {
-		String commandId = Integer.toHexString(new Random().nextInt());
+		String commandId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 		logger.info("Run shell command [{}]: {}", commandId, Arrays.toString(params));
 
 		JsonNode props = (JsonNode) params[0];
@@ -253,19 +256,8 @@ public class CommandFunctionTools implements FunctionTools {
 				: defaultCharset;
 
 		Process prc = null;
-		ExecutorService executor = Executors.newFixedThreadPool(2);
-		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
-
 		try {
-			String[] commandParts = CommandLineUtils.translateCommandline(command);
-			try {
-				for (String commandPart : commandParts) {
-					checker.denyCheck(commandPart);
-				}
-			} catch (DenyException e) {
-				logger.error("[CMD {}] Invalid or unsafe command. {}", commandId, e.getMessage());
-				return "Error: Invalid or unsafe command.";
-			}
+			String[] commandParts = validateAndTranslateCommand(commandId, command);
 
 			ProcessBuilder pb = new ProcessBuilder(commandParts);
 			pb.directory(workingDir);
@@ -278,52 +270,92 @@ public class CommandFunctionTools implements FunctionTools {
 			final Process process = pb.start();
 			prc = process;
 
-			Future<?> stdoutFuture = executor.submit(() -> readStream(process.getInputStream(), charsetName, output,
-					line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
-					e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
+			try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
+					Executors.newFixedThreadPool(2))) {
+				LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
 
-			Future<?> stderrFuture = executor.submit(() -> readStream(process.getErrorStream(), charsetName, output,
-					line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
-					e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
+				Future<?> stdoutFuture = executor.get().submit(() -> readStream(process.getInputStream(), charsetName,
+						output, line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
+						e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
 
-			boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
-			if (!finished) {
-				process.destroyForcibly();
-				output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds))
-						.append(" seconds.").append("\n");
-				logger.warn("[CMD {}] Command timed out", commandId);
+				Future<?> stderrFuture = executor.get().submit(() -> readStream(process.getErrorStream(), charsetName,
+						output, line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
+						e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
+
+				boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
+				if (!finished) {
+					process.destroyForcibly();
+					output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds))
+							.append(" seconds.").append("\n");
+					logger.warn("[CMD {}] Command timed out", commandId);
+				}
+
+				stdoutFuture.get(5, TimeUnit.SECONDS);
+				stderrFuture.get(5, TimeUnit.SECONDS);
+
+				int exitCode = process.exitValue();
+				output.append("Command exited with code: ").append(Integer.toString(exitCode)).append("\n");
+
+				return output.getLastText();
 			}
 
-			stdoutFuture.get(5, TimeUnit.SECONDS);
-			stderrFuture.get(5, TimeUnit.SECONDS);
-
-			int exitCode = process.exitValue();
-			output.append("Command exited with code: ").append(Integer.toString(exitCode))
-					.append("\n");
-
-			return output.getLastText();
-
 		} catch (TimeoutException e) {
+			LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
 			output.append("Output reading timed out.").append("\n");
 			logger.error("[CMD {}] Output reading timed out", commandId, e);
 			return output.getLastText();
 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+			LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
 			logger.error("[CMD {}] Command execution interrupted", commandId, e);
 			return output.append("Interrupted: ").append(e.getMessage()).toString();
 
 		} catch (IOException | ExecutionException e) {
+			LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
 			logger.error("[CMD {}] IO error during command execution", commandId, e);
 			return output.append("IO Error: ").append(e.getMessage()).toString();
 
 		} catch (CommandLineException e) {
-			return "Error: " + e.getMessage();
+			// SonarQube java:S2139 - Provide contextual information when rethrowing exceptions.
+			throw new IllegalArgumentException("[CMD " + commandId + "] Failed to parse command line", e);
 
 		} finally {
 			if (prc != null && prc.isAlive()) {
 				prc.destroyForcibly();
 			}
+		}
+	}
+
+	private String[] validateAndTranslateCommand(String commandId, String command) throws CommandLineException {
+		String[] commandParts = CommandLineUtils.translateCommandline(command);
+		for (String commandPart : commandParts) {
+			try {
+				checker.denyCheck(commandPart);
+			} catch (DenyException e) {
+				logger.error("[CMD {}] Invalid or unsafe command. {}", commandId, e.getMessage());
+				throw new IllegalArgumentException("Error: Invalid or unsafe command.", e);
+			}
+		}
+		return commandParts;
+	}
+
+	/**
+	 * Small adapter to manage {@link ExecutorService} lifecycle via try-with-resources.
+	 */
+	private static final class ExecutorServiceAutoCloseable implements AutoCloseable {
+		private final ExecutorService executor;
+
+		private ExecutorServiceAutoCloseable(ExecutorService executor) {
+			this.executor = executor;
+		}
+
+		private ExecutorService get() {
+			return executor;
+		}
+
+		@Override
+		public void close() {
 			executor.shutdownNow();
 		}
 	}
@@ -398,7 +430,8 @@ public class CommandFunctionTools implements FunctionTools {
 			if (idx > 0 && idx < line.length() - 1) {
 				String key = line.substring(0, idx).trim();
 				String value = line.substring(idx + 1).trim();
-				if (key.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+				// SonarQube java:S6353 - Use concise character class syntax '\\w'.
+				if (key.matches("[A-Za-z_]\\w*")) {
 					envMap.put(key, value);
 				}
 			}

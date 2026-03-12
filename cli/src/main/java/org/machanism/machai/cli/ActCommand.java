@@ -7,7 +7,7 @@ import java.io.IOException;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
@@ -60,18 +60,9 @@ public class ActCommand {
 	 * @throws IOException if scanning documents fails
 	 */
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
-	public void act(@ShellOption(value = "action") String action,
-			@ShellOption(value = { "-p", "--prompt" }, defaultValue = "") String prompt,
-			@ShellOption(value = { "-r",
-					"--rootDir" }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File rootDir,
-			@ShellOption(value = { "-m",
-					"--model" }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model)
-			throws IOException {
+	public void act(@ShellOption(value = "", defaultValue = ShellOption.NULL) String[] act) throws IOException {
 
-		if (rootDir == null) {
-			rootDir = SystemUtils.getUserDir();
-		}
-		rootDir = ConfigCommand.config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, rootDir);
+		File rootDir = ConfigCommand.config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, SystemUtils.getUserDir());
 
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		try {
@@ -79,20 +70,22 @@ public class ActCommand {
 		} catch (FileNotFoundException e) {
 			// configuration file not found.
 		}
-		String resolvedModel = model == null ? ConfigCommand.config.get("gw.model") : model;
+		String resolvedModel = ConfigCommand.config.get("gw.model");
 		ActProcessor processor = new ActProcessor(rootDir, configurator, resolvedModel);
-		processor.setDefaultPrompt(action + " " + prompt);
+		String prompt = StringUtils.join(act, " ");
+		processor.setDefaultPrompt(prompt);
 
 		Boolean logInputs = ConfigCommand.config.getBoolean(Ghostwriter.GW_LOG_INPUTS_PROP_NAME, false);
 		processor.setLogInputs(logInputs);
 
-		String scanDir = ConfigCommand.config.get("gw.scanDir", null);
+		String scanDir = processor.getConfigurator().get("gw.scanDir", null);
 		if (scanDir == null) {
 			scanDir = (rootDir != null ? rootDir : SystemUtils.getUserDir()).getAbsolutePath();
 		}
 
 		LOGGER.info("Starting scan of directory: {}", scanDir);
 		File projectDir = processor.getRootDir();
+
 		processor.scanDocuments(projectDir, scanDir);
 		LOGGER.info("Finished scanning directory: {}", scanDir);
 	}

@@ -3,6 +3,7 @@ package org.machanism.machai.project.layout;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.Strings;
@@ -12,7 +13,7 @@ import org.apache.commons.lang3.Strings;
  *
  * <p>
  * This layout performs a lightweight filesystem inspection and treats each immediate subdirectory of the configured
- * project root as a potential module (excluding entries listed in {@link ProjectLayout#EXCLUDE_DIRS}). It does not try
+ * project root as a potential module (excluding entries listed in {@link ProjectLayout#excludeDirs}). It does not try
  * to infer language-specific source, test or documentation roots; those accessors return {@code null}.
  * </p>
  *
@@ -44,12 +45,10 @@ public class DefaultProjectLayout extends ProjectLayout {
 			modules = new ArrayList<>();
 
 			File projectDir = getProjectDir();
-			File[] listFiles = projectDir == null ? null : projectDir.listFiles(new FileFilter() {
-				@Override
-				public boolean accept(File pathname) {
-					return pathname.isDirectory() && !Strings.CS.startsWithAny(pathname.getName(), EXCLUDE_DIRS);
-				}
-			});
+			// Sonar java:S1604 - replace anonymous FileFilter with a lambda.
+			File[] listFiles = projectDir == null ? null
+					: projectDir.listFiles((FileFilter) pathname -> pathname.isDirectory()
+							&& !Strings.CS.startsWithAny(pathname.getName(), excludeDirs));
 
 			if (listFiles != null) {
 				for (File file : listFiles) {
@@ -64,31 +63,34 @@ public class DefaultProjectLayout extends ProjectLayout {
 	/**
 	 * Returns a list of source roots for this layout.
 	 *
-	 * @return {@code null}; not inferred by the default layout
+	 * @return empty list; not inferred by the default layout
 	 */
 	@Override
 	public List<String> getSources() {
-		return null;
+		// Sonar java:S1168 - return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**
 	 * Returns a list of documentation roots for this layout.
 	 *
-	 * @return {@code null}; not inferred by the default layout
+	 * @return empty list; not inferred by the default layout
 	 */
 	@Override
 	public List<String> getDocuments() {
-		return null;
+		// Sonar java:S1168 - return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**
 	 * Returns a list of test source roots for this layout.
 	 *
-	 * @return {@code null}; not inferred by the default layout
+	 * @return empty list; not inferred by the default layout
 	 */
 	@Override
 	public List<String> getTests() {
-		return null;
+		// Sonar java:S1168 - return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	@Override

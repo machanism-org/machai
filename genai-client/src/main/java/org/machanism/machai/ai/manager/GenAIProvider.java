@@ -1,7 +1,6 @@
 package org.machanism.machai.ai.manager;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -57,19 +56,17 @@ public interface GenAIProvider {
 	 * Adds a local file resource for provider processing.
 	 *
 	 * @param file the file to add
-	 * @throws IOException           for I/O errors
-	 * @throws FileNotFoundException if the file cannot be found
+	 * @throws IOException for I/O errors (includes file-not-found)
 	 */
-	void addFile(File file) throws IOException, FileNotFoundException;
+	void addFile(File file) throws IOException;
 
 	/**
 	 * Adds a remote file resource for provider processing.
 	 *
 	 * @param fileUrl the URL of the file
-	 * @throws IOException           for I/O errors
-	 * @throws FileNotFoundException if the remote file cannot be found
+	 * @throws IOException for I/O errors (includes file-not-found)
 	 */
-	void addFile(URL fileUrl) throws IOException, FileNotFoundException;
+	void addFile(URL fileUrl) throws IOException;
 
 	/**
 	 * Computes an embedding vector for the provided text.

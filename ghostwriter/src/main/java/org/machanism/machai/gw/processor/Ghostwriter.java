@@ -86,9 +86,6 @@ public final class Ghostwriter {
 	/** Configuration key specifying a default scan directory/pattern. */
 	public static final String GW_SCAN_DIR_PROP_NAME = "gw.scanDir";
 
-	/** Directory used as the execution base for relative configuration files. */
-	private static File gwHomeDir;
-
 	/** Processor implementation used by this CLI instance. */
 	private final AIFileProcessor processor;
 
@@ -114,10 +111,9 @@ public final class Ghostwriter {
 	 *
 	 * @param scanDirs scan directory arguments
 	 * @return exit code (0 for success)
-	 * @throws IOException    if scanning fails while reading files
-	 * @throws ParseException if parsing-related failures occur
+	 * @throws IOException if scanning fails while reading files
 	 */
-	public int perform(String[] scanDirs) throws IOException, ParseException {
+	public int perform(String[] scanDirs) throws IOException {
 		int exitCode = 0;
 		try {
 			for (String scanDir : scanDirs) {
@@ -160,25 +156,25 @@ public final class Ghostwriter {
 	private static PropertiesConfigurator initializeConfiguration(File rootDir) {
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
-		gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
-		if (gwHomeDir == null) {
-			gwHomeDir = rootDir;
-			if (gwHomeDir == null) {
-				gwHomeDir = SystemUtils.getUserDir();
+		File homeDir = config.getFile(GW_HOME_PROP_NAME, null);
+		if (homeDir == null) {
+			homeDir = rootDir;
+			if (homeDir == null) {
+				homeDir = SystemUtils.getUserDir();
 			}
 		}
 
-		System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
+		System.setProperty(GW_HOME_PROP_NAME, homeDir.getAbsolutePath());
 		logger = LoggerFactory.getLogger(Ghostwriter.class);
 
 		String version = Ghostwriter.class.getPackage().getImplementationVersion();
 		if (version != null) {
 			logger.info("Ghostwriter {} (Machai project)", version);
 		}
-		logger.info("Home directory: {}", gwHomeDir);
+		logger.info("Home directory: {}", homeDir);
 
 		try {
-			File configFile = new File(gwHomeDir, System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
+			File configFile = new File(homeDir, System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
 			config.setConfiguration(configFile.getAbsolutePath());
 		} catch (IOException e) {
 			// The property file is not defined, ignore.
@@ -232,7 +228,7 @@ public final class Ghostwriter {
 					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append("\n");
 					System.out.print("\t");
 				} else {
-					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER));
+					sb.append(nextLine);
 					break;
 				}
 			}
@@ -289,7 +285,7 @@ public final class Ghostwriter {
 	/**
 	 * Enables or disables multi-threaded module processing.
 	 *
-	 * @param multiThread {@code true} to enable
+	 * @param multiThreadCount the configured worker count
 	 */
 	public void setDegreeOfConcurrency(String multiThreadCount) {
 		if (multiThreadCount != null) {

@@ -2,6 +2,7 @@ package org.machanism.machai.ai.tools;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -75,7 +76,9 @@ public class CommandSecurityChecker {
 
 		ClassLoader classLoader = getClass().getClassLoader();
 		URL systemResource = classLoader.getResource(resourcePath);
-		String denylist = IOUtils.toString(systemResource, "UTF8");
+
+		// SonarQube java:S4719 - Replace charset name argument with StandardCharsets.UTF_8.
+		String denylist = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 
 		String denylistValue = configurator.get(DENYLIST_PROP_NAME, null);
 		if (denylistValue != null) {

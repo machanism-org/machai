@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -81,14 +82,16 @@ public class JScriptBindexBuilder extends BindexBuilder {
 
 		Path startPath = Paths.get(new File(getProjectLayout().getProjectDir(), "src").getAbsolutePath());
 		if (Files.exists(startPath)) {
-			Files.walk(startPath).filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js"))
-					.forEach(f -> {
-						try {
-							prompt.append(promptFile(f.toFile(), "source_resource_section"));
-						} catch (IOException e) {
-							logger.warn("File: {} adding failed.", f);
-						}
-					});
+			// Sonar java:S2095 - ensure the stream from Files.walk is closed.
+			try (Stream<Path> stream = Files.walk(startPath)) {
+				stream.filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js")).forEach(f -> {
+					try {
+						prompt.append(promptFile(f.toFile(), "source_resource_section"));
+					} catch (IOException e) {
+						logger.warn("File: {} adding failed.", f);
+					}
+				});
+			}
 		}
 
 		prompt.append(promptBundle.getString("additional_rules"));

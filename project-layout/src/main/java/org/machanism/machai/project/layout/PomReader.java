@@ -4,8 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -93,10 +95,15 @@ public class PomReader {
 
 			} else {
 				MavenXpp3Reader reader = new MavenXpp3Reader();
-				FileReader fileReader = new FileReader(pomFile);
-				String pomStr = IOUtils.toString(fileReader);
-				pomStr = replaceProperty(pomStr);
-				model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
+				try (Reader fileReader = new FileReader(pomFile)) {
+					String pomStr = IOUtils.toString(fileReader);
+					pomStr = replaceProperty(pomStr);
+					// Sonar java:S2259 - ensure pomStr is non-null before dereferencing.
+					if (pomStr == null) {
+						pomStr = "";
+					}
+					model = reader.read(new ByteArrayInputStream(pomStr.getBytes(StandardCharsets.UTF_8)), false);
+				}
 			}
 		} catch (Exception e) {
 			throw new IllegalArgumentException("POM file: " + pomFile, e);
@@ -187,6 +194,12 @@ public class PomReader {
 		DefaultModelBuilder modelBuilder = (DefaultModelBuilder) container
 				.lookup(org.apache.maven.model.building.ModelBuilder.class);
 
+		/**
+		 * Accepted
+		 * This module is built against a Maven version where the recommended replacement is not available at compile-time.
+		 * Keeping the existing interpolator preserves compatibility; revisit when updating Maven dependencies.
+		 */
+		@SuppressWarnings("java:S1874")
 		StringSearchModelInterpolator modelInterpolator = new StringSearchModelInterpolator();
 		modelInterpolator.setPathTranslator(new DefaultPathTranslator());
 		modelInterpolator.setUrlNormalizer(new DefaultUrlNormalizer());

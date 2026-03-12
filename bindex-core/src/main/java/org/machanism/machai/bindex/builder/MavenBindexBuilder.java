@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Build;
@@ -137,13 +138,16 @@ public class MavenBindexBuilder extends BindexBuilder {
 			return prompt.toString();
 		}
 
-		Files.walk(startPath).filter(Files::isRegularFile).forEach(f -> {
-			try {
-				prompt.append(promptFile(f.toFile(), "source_resource_section"));
-			} catch (IOException e) {
-				logger.warn("File: {} adding failed.", f);
-			}
-		});
+		// Sonar java:S2095 - ensure Files.walk stream is closed.
+		try (Stream<Path> paths = Files.walk(startPath)) {
+			paths.filter(Files::isRegularFile).forEach(f -> {
+				try {
+					prompt.append(promptFile(f.toFile(), "source_resource_section"));
+				} catch (IOException e) {
+					logger.warn("File: {} adding failed.", f);
+				}
+			});
+		}
 
 		return prompt.toString();
 	}

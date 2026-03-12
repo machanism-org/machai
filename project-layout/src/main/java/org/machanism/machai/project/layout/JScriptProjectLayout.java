@@ -6,6 +6,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -58,46 +59,62 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getModules() {
-		List<String> result = null;
-
 		JsonNode packageJson = getPackageJson();
 		JsonNode workspacesNode = packageJson.get("workspaces");
-		if (workspacesNode != null) {
-			Set<String> modules = new HashSet<>();
-
-			if (workspacesNode.isArray()) {
-				Iterator<JsonNode> iterator = workspacesNode.iterator();
-				while (iterator.hasNext()) {
-					String globPattern = iterator.next().asText();
-
-					if (Strings.CS.startsWith(globPattern, "./")) {
-						globPattern = StringUtils.substringAfter(globPattern, "./");
-					}
-
-					PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
-					File baseDir = getProjectDir();
-					List<File> files = ProjectLayout.findDirectories(baseDir);
-
-					for (File file : files) {
-						String path = ProjectLayout.getRelativePath(getProjectDir(), file, false);
-						if (path == null) {
-							continue;
-						}
-						Path pathToMatch = new File(path).toPath();
-
-						if (matcher.matches(pathToMatch) && isPackageJsonPresent(file)) {
-							String relativePath = ProjectLayout.getRelativePath(baseDir, file);
-							if (relativePath != null) {
-								modules.add(relativePath);
-							}
-						}
-					}
-				}
-				result = new ArrayList<>(modules);
-			}
+		if (workspacesNode == null) {
+			// Sonar java:S1168 - return an empty collection instead of null (kept as null for backward compatibility).
+			return null;
 		}
 
-		return result;
+		Set<String> modules = new HashSet<>();
+		if (workspacesNode.isArray()) {
+			collectWorkspaceModules(workspacesNode, modules);
+		}
+
+		return new ArrayList<>(modules);
+	}
+
+	/**
+	 * Collects workspace module directories matching glob patterns listed in the
+	 * {@code workspaces} array.
+	 */
+	private void collectWorkspaceModules(JsonNode workspacesNode, Set<String> modules) {
+		File baseDir = getProjectDir();
+		List<File> directories = ProjectLayout.findDirectories(baseDir);
+
+		Iterator<JsonNode> iterator = workspacesNode.iterator();
+		while (iterator.hasNext()) {
+			String globPattern = iterator.next().asText();
+			String normalizedPattern = normalizeWorkspaceGlob(globPattern);
+			PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + normalizedPattern);
+			collectMatchingModules(directories, matcher, baseDir, modules);
+		}
+	}
+
+	// Sonar java:S3776 - split complex method into smaller helpers to reduce cognitive complexity.
+	private static String normalizeWorkspaceGlob(String globPattern) {
+		String normalized = globPattern;
+		if (Strings.CS.startsWith(normalized, "./")) {
+			normalized = StringUtils.substringAfter(normalized, "./");
+		}
+		return normalized;
+	}
+
+	private static void collectMatchingModules(List<File> directories, PathMatcher matcher, File baseDir, Set<String> modules) {
+		for (File dir : directories) {
+			String relativePath = ProjectLayout.getRelativePath(baseDir, dir, false);
+			if (relativePath == null) {
+				continue;
+			}
+
+			if (!matcher.matches(new File(relativePath).toPath())) {
+				continue;
+			}
+
+			if (isPackageJsonPresent(dir)) {
+				modules.add(relativePath);
+			}
+		}
 	}
 
 	/**
@@ -118,31 +135,34 @@ public class JScriptProjectLayout extends ProjectLayout {
 	/**
 	 * Returns a list of conventional source directories for JS/TS projects.
 	 *
-	 * @return {@code null}; not currently implemented
+	 * @return empty list; not currently implemented
 	 */
 	@Override
 	public List<String> getSources() {
-		return null;
+		// Sonar java:S1168 - return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**
 	 * Returns a list of conventional documentation directories for JS/TS projects.
 	 *
-	 * @return {@code null}; not currently implemented
+	 * @return empty list; not currently implemented
 	 */
 	@Override
 	public List<String> getDocuments() {
-		return null;
+		// Sonar java:S1168 - return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**
 	 * Returns a list of conventional test directories for JS/TS projects.
 	 *
-	 * @return {@code null}; not currently implemented
+	 * @return empty list; not currently implemented
 	 */
 	@Override
 	public List<String> getTests() {
-		return null;
+		// Sonar java:S1168 - return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**

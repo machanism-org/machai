@@ -1,3 +1,7 @@
+description = '''
+This act automates the creation of high-quality unit tests for software projects. It analyzes the target code, identifies key behaviors and edge cases, and generates comprehensive test cases using the appropriate unit testing framework for the project's language. The act ensures tests are clear, maintainable, and follow best practices, including proper naming, structure, and placement within the project layout. It is designed to improve test coverage and reliability without modifying production code unless explicitly instructed.
+'''
+
 # =========================
 # AI Assistant Instructions
 # =========================

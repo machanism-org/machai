@@ -1,3 +1,7 @@
+description = '''
+This act serves as a minimal, generic template for executing user prompts within the project context. It provides basic structure and instructions for the AI assistant, without any predefined prologue or epilogue actions. Use this act when you want the AI to process a custom task or request, relying solely on the user’s input and the current project environment, without additional automated steps or inherited behaviors.
+'''
+
 # =========================
 # Configuration Profile Reference
 # =========================
@@ -58,3 +62,19 @@ inputs = '''
 
 %s
 '''
+
+# =========================
+# Prologue Acts
+# =========================
+# prologue:
+#   - List of act to be performed before the main act execution.
+#   - Example: prologue = ["sonar-fix", "grype-fix"]
+prologue = []
+
+# =========================
+# Epilogue Acts
+# =========================
+# epilogue:
+#   - List of acts to be performed after the main task execution.
+#   - Example: ["commit and push"]
+epilogue = []

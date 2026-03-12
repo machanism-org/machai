@@ -1,3 +1,7 @@
+description = '''
+This act is designed to automate the review and remediation of code issues detected by SonarQube in Java projects. It analyzes SonarQube JSON reports, generates precise and minimal code fixes for each issue, and documents all changes according to best practices and SonarQube recommendations. The act also enforces strict rules for using @SuppressWarnings annotations, ensuring that suppressions are properly justified, documented, and applied at the most specific scope. To enable seamless integration with your specific SonarQube environment, you need to create a custom act that provides the necessary context and configuration for accessing SonarQube data. 
+'''
+
 # =========================
 # AI Assistant Instructions
 # =========================
