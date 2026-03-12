@@ -5,16 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -67,11 +64,21 @@ public class WebFunctionTools implements FunctionTools {
 
 	private static final int TIMEOUT = 10000;
 
+	// Sonar java:S115 - constant should follow naming convention
+	private static final String DEFAULT_CHARSET = "UTF-8";
+
+	// Sonar java:S1192 - avoid duplicating string literals
+	private static final String HEADERS_FIELD = "headers";
+	private static final String TIMEOUT_FIELD = "timeout";
+	private static final String CHARSET_NAME_FIELD = "charsetName";
+	private static final String TEXT_ONLY_FIELD = "textOnly";
+	private static final String SELECTOR_FIELD = "selector";
+
+	// Sonar java:S2119 - save and re-use Random instead of creating new instances
+	private static final SecureRandom REQUEST_ID_RANDOM = new SecureRandom();
+
 	/** Logger for web fetch tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(WebFunctionTools.class);
-
-	/** Default character set for decoding responses and encoding request bodies. */
-	private static final String defaultCharset = "UTF-8";
 
 	/**
 	 * Optional configuration source used to resolve ${...} placeholders in header
@@ -93,7 +100,7 @@ public class WebFunctionTools implements FunctionTools {
 				"headers:string:optional:Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\n). If null, no additional headers are sent.",
 				"timeout:integer:optional:The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.",
 				"charsetName:string:optional:The name of the character set to use when decoding the response content. Default: "
-						+ defaultCharset,
+						+ DEFAULT_CHARSET,
 				"textOnly:boolean:optional:If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.",
 				"selector:string:optional:If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.");
 
@@ -106,7 +113,7 @@ public class WebFunctionTools implements FunctionTools {
 				"body:string:optional:The request body to send (for POST, PUT, PATCH, etc.).",
 				"timeout:integer:optional:The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.",
 				"charsetName:string:optional:The name of the character set to use when decoding the response content. Default: "
-						+ defaultCharset);
+						+ DEFAULT_CHARSET);
 	}
 
 	/**
@@ -143,47 +150,37 @@ public class WebFunctionTools implements FunctionTools {
 	 * @return response content or an error message
 	 */
 	public String getWebContent(Object[] params) {
-		String requestId = Integer.toHexString(new Random().nextInt());
-		logger.info("Fetching web content [{}]: {}", requestId, Arrays.toString(params));
+		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
+		// Sonar java:S2629 - avoid eager toString() evaluation when log level is disabled
+		if (logger.isInfoEnabled()) {
+			logger.info("Fetching web content [{}]: {}", requestId, Arrays.toString(params));
+		}
 
 		JsonNode props = (JsonNode) params[0];
 		String url = props.get("url").asText();
 
 		url = replace(url, configurator);
 
-		String headers = props.has("headers") ? props.get("headers").asText(null) : null;
-		int timeout = props.has("timeout") ? props.get("timeout").asInt(TIMEOUT) : TIMEOUT;
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
-				: defaultCharset;
-		boolean textOnly = props.has("textOnly") && props.get("textOnly").asBoolean(false);
-		String selector = props.has("selector") ? props.get("selector").asText(null) : null;
+		String headers = props.has(HEADERS_FIELD) ? props.get(HEADERS_FIELD).asText(null) : null;
+		int timeout = props.has(TIMEOUT_FIELD) ? props.get(TIMEOUT_FIELD).asInt(TIMEOUT) : TIMEOUT;
+		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
+				: DEFAULT_CHARSET;
+		boolean textOnly = props.has(TEXT_ONLY_FIELD) && props.get(TEXT_ONLY_FIELD).asBoolean(false);
+		String selector = props.has(SELECTOR_FIELD) ? props.get(SELECTOR_FIELD).asText(null) : null;
 
 		try {
-			HttpURLConnection connection = (HttpURLConnection) getConnection(new URL(url), headers, charsetName);
+			HttpURLConnection connection = getConnection(URI.create(url), headers);
 			logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
 
 			String response = getWebPage(connection, timeout, charsetName);
+			response = applySelectorIfPresent(selector, response);
+			response = renderTextOnlyIfRequested(textOnly, response);
 
-			if (selector != null && !selector.isEmpty()) {
-				org.jsoup.nodes.Document doc = Jsoup.parse(response);
-				org.jsoup.select.Elements elements = doc.select(selector);
-				StringBuilder selectedContent = new StringBuilder();
-				for (org.jsoup.nodes.Element element : elements) {
-					selectedContent.append(element.outerHtml()).append("\n");
-				}
-				response = selectedContent.toString().trim();
+			// Sonar java:S2629 - abbreviate and replace only when INFO is enabled
+			if (logger.isInfoEnabled()) {
+				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
+						StringUtils.abbreviate(response, 80).replace("\n", " ").replace("\r", ""));
 			}
-
-			if (textOnly) {
-				response = new Source(response)
-						.getRenderer()
-						.setMaxLineLength(180)
-						.setNewLine("\n")
-						.toString();
-			}
-
-			logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
-					StringUtils.abbreviate(response, 80).replace("\n", " ").replace("\r", ""));
 			return response;
 
 		} catch (Exception e) {
@@ -192,42 +189,60 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
+	// Sonar java:S3776 - extracted to reduce cognitive complexity of getWebContent
+	private String applySelectorIfPresent(String selector, String response) {
+		if (StringUtils.isBlank(selector)) {
+			return response;
+		}
+
+		org.jsoup.nodes.Document doc = Jsoup.parse(response);
+		org.jsoup.select.Elements elements = doc.select(selector);
+		StringBuilder selectedContent = new StringBuilder();
+		for (org.jsoup.nodes.Element element : elements) {
+			selectedContent.append(element.outerHtml()).append("\n");
+		}
+		return selectedContent.toString().trim();
+	}
+
+	// Sonar java:S3776 - extracted to reduce cognitive complexity of getWebContent
+	private String renderTextOnlyIfRequested(boolean textOnly, String response) {
+		if (!textOnly) {
+			return response;
+		}
+		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine("\n").toString();
+	}
+
 	/**
 	 * Creates and configures an {@link HttpURLConnection}.
 	 *
 	 * <p>
-	 * If the URL contains {@code userInfo}, it is removed from the URL and used to
+	 * If the URI contains {@code userInfo}, it is removed from the request URI and used to
 	 * set an HTTP Basic {@code Authorization} header.
 	 * </p>
 	 *
-	 * @param url         URL to connect to
-	 * @param headers     optional headers (newline-separated {@code NAME=VALUE})
-	 * @param charsetName charset name (currently unused, but kept for API symmetry)
+	 * @param uri     URI to connect to
+	 * @param headers optional headers (newline-separated {@code NAME=VALUE})
 	 * @return connection
 	 * @throws IOException if opening a connection fails
 	 */
-	private URLConnection getConnection(URL url, String headers, String charsetName) throws IOException {
-		URLConnection connection;
+	private HttpURLConnection getConnection(URI uri, String headers) throws IOException {
+		URI cleanUri = uri;
+		HttpURLConnection connection;
 
-		String userInfo = url.getUserInfo();
+		String userInfo = uri.getUserInfo();
 		if (userInfo != null) {
-			String cleanUrl = url.toString().replace("//" + userInfo + "@", "//");
-
-			url = new URL(cleanUrl);
-			connection = (HttpURLConnection) url.openConnection();
-
+			// Sonar java:S1874 - URL is deprecated; use URI and convert to URL only when opening the connection
+			cleanUri = URI.create(uri.toString().replace("//" + userInfo + "@", "//"));
 			byte[] bytes = userInfo.getBytes(StandardCharsets.UTF_8);
 			String basicToken = Base64.getEncoder().encodeToString(bytes);
+
+			connection = (HttpURLConnection) cleanUri.toURL().openConnection();
 			connection.setRequestProperty("Authorization", "Basic " + basicToken);
-
 		} else {
-			connection = url.openConnection();
+			connection = (HttpURLConnection) cleanUri.toURL().openConnection();
 		}
 
-		if (connection instanceof HttpURLConnection) {
-			fillHeader(headers, (HttpURLConnection) connection);
-		}
-
+		fillHeader(headers, connection);
 		return connection;
 	}
 
@@ -240,8 +255,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @return response content including an initial status line
 	 * @throws IOException if the request cannot be executed
 	 */
-	private String getWebPage(HttpURLConnection connection, int timeout, String charsetName)
-			throws IOException, MalformedURLException, ProtocolException, UnsupportedEncodingException {
+	private String getWebPage(HttpURLConnection connection, int timeout, String charsetName) throws IOException {
 		StringBuilder output = new StringBuilder();
 
 		connection.setRequestMethod("GET");
@@ -253,7 +267,7 @@ public class WebFunctionTools implements FunctionTools {
 				.append(connection.getResponseMessage()).append("\n");
 
 		try (InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in, charsetName))) {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append("\n");
@@ -288,8 +302,11 @@ public class WebFunctionTools implements FunctionTools {
 	 *         message
 	 */
 	public String callRestApi(Object[] params) {
-		String requestId = Integer.toHexString(new Random().nextInt());
-		logger.info("Executing REST call [{}]: {}", requestId, Arrays.toString(params));
+		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
+		// Sonar java:S2629 - avoid eager toString() evaluation when log level is disabled
+		if (logger.isInfoEnabled()) {
+			logger.info("Executing REST call [{}]: {}", requestId, Arrays.toString(params));
+		}
 
 		JsonNode props = (JsonNode) params[0];
 		String url = props.get("url").asText();
@@ -297,15 +314,14 @@ public class WebFunctionTools implements FunctionTools {
 		url = replace(url, configurator);
 
 		String method = props.has("method") ? props.get("method").asText("GET") : "GET";
-		String headers = props.has("headers") ? props.get("headers").asText(null) : null;
+		String headers = props.has(HEADERS_FIELD) ? props.get(HEADERS_FIELD).asText(null) : null;
 		String body = props.has("body") ? props.get("body").asText(null) : null;
-		int timeout = props.has("timeout") ? props.get("timeout").asInt(TIMEOUT) : TIMEOUT;
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
-				: defaultCharset;
+		int timeout = props.has(TIMEOUT_FIELD) ? props.get(TIMEOUT_FIELD).asInt(TIMEOUT) : TIMEOUT;
+		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
+				: DEFAULT_CHARSET;
 
 		try {
-			URL callUrl = new URL(url);
-			HttpURLConnection connection = (HttpURLConnection) getConnection(callUrl, headers, charsetName);
+			HttpURLConnection connection = getConnection(URI.create(url), headers);
 			logger.info("[REST {}] URL: {}", requestId, connection.getURL());
 
 			connection.setRequestMethod(method);
@@ -328,7 +344,7 @@ public class WebFunctionTools implements FunctionTools {
 			String result;
 			InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
 			if (in != null) {
-				try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, charsetName))) {
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 					String line;
 					while ((line = reader.readLine()) != null) {
 						response.append(line).append("\n");
@@ -336,8 +352,11 @@ public class WebFunctionTools implements FunctionTools {
 				}
 
 				result = response.toString();
-				logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
-						StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
+				// Sonar java:S2629 - avoid eager result.replaceAll() when INFO is disabled
+				if (logger.isInfoEnabled()) {
+					logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
+							StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
+				}
 				logger.debug("[REST {}] Received response ({} bytes): {}", requestId, response.length(), result);
 			} else {
 				result = "ResponseCode: " + connection.getResponseCode() + " " + connection.getRequestMethod();

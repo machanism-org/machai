@@ -2,7 +2,6 @@ package org.machanism.machai.ai.provider.openai;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -42,6 +41,7 @@ import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.files.FileCreateParams;
 import com.openai.models.files.FileObject;
 import com.openai.models.files.FilePurpose;
+import com.openai.models.models.Model;
 import com.openai.models.responses.FunctionTool;
 import com.openai.models.responses.FunctionTool.Parameters;
 import com.openai.models.responses.Response;
@@ -173,11 +173,10 @@ public class OpenAIProvider implements GenAIProvider {
 	 * request inputs.
 	 *
 	 * @param file local file to upload
-	 * @throws IOException           if reading file fails
-	 * @throws FileNotFoundException if file is missing
+	 * @throws IOException if reading file fails
 	 */
 	@Override
-	public void addFile(File file) throws IOException, FileNotFoundException {
+	public void addFile(File file) throws IOException {
 		try (FileInputStream input = new FileInputStream(file)) {
 			FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input))
 					.purpose(FilePurpose.USER_DATA).build();
@@ -195,11 +194,10 @@ public class OpenAIProvider implements GenAIProvider {
 	 * Adds a file input by URL.
 	 *
 	 * @param fileUrl the URL of the input file
-	 * @throws IOException           on network error
-	 * @throws FileNotFoundException if the file cannot be found
+	 * @throws IOException on network error
 	 */
 	@Override
-	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
+	public void addFile(URL fileUrl) throws IOException {
 		ResponseInputFile.Builder inputFileBuilder = ResponseInputFile.builder().fileUrl(fileUrl.toString());
 
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
@@ -267,63 +265,114 @@ public class OpenAIProvider implements GenAIProvider {
 	 * @return response string, potentially after one or more tool call iterations
 	 */
 	private String parseResponse(Response response) {
-		String text = null;
 		Response current = response;
-		List<ResponseInputItem> inputs = new ArrayList<>(this.inputs);
+		List<ResponseInputItem> currentInputs = new ArrayList<>(this.inputs);
 		while (current != null) {
-			boolean anyToolCalls = false;
-			List<ResponseOutputItem> output = current.output();
-			for (ResponseOutputItem item : output) {
-				if (item.isFunctionCall()) {
-					anyToolCalls = true;
-					ResponseFunctionToolCall functionCall = item.asFunctionCall();
-					inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
-
-					Object value = callFunction(functionCall);
-					Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
-
-					inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
-							.callId(functionCall.callId()).outputAsJson(callFunction).build()));
-				}
-				if (item.isReasoning()) {
-					ResponseReasoningItem reasoningItem = item.asReasoning();
-					List<com.openai.models.responses.ResponseReasoningItem.Content> contentList = reasoningItem
-							.content().get();
-					for (com.openai.models.responses.ResponseReasoningItem.Content content : contentList) {
-						String reasoning = content.text();
-						if (StringUtils.isNotBlank(reasoning)) {
-							text = reasoning;
-							logger.info("LLM Reasoning: {}", text);
-						}
-					}
-				}
-				if (item.isMessage()) {
-					ResponseOutputMessage outMessage = item.asMessage();
-					List<Content> contentList = outMessage.content();
-					for (Content content : contentList) {
-						if (content.outputText().isPresent()) {
-							String candidate = content.outputText().get().text();
-							if (StringUtils.isNotBlank(candidate)) {
-								text = candidate;
-								logger.info("LLM Response: {}", text);
-							}
-						}
-					}
-				}
+			// Sonar java:S3776 - reduce cognitive complexity by extracting per-item handling
+			ToolHandlingResult handlingResult = handleResponseOutput(current.output(), currentInputs);
+			if (!handlingResult.anyToolCalls) {
+				return handlingResult.text;
 			}
 
-			if (!anyToolCalls) {
-				break;
-			}
-
-			ResponseCreateParams params = createResponseBuilder(inputs);
+			ResponseCreateParams params = createResponseBuilder(currentInputs);
 
 			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
 			current = getClient().responses().create(params);
 			captureUsage(current.usage());
 		}
 
-		return text;
+		return null;
+	}
+
+	/**
+	 * Holds processing results for a response output iteration.
+	 */
+	private static final class ToolHandlingResult {
+		private final boolean anyToolCalls;
+		private final String text;
+
+		private ToolHandlingResult(boolean anyToolCalls, String text) {
+			this.anyToolCalls = anyToolCalls;
+			this.text = text;
+		}
+	}
+
+	/**
+	 * Processes response output items, executing tool calls and extracting text.
+	 *
+	 * @param output        response output items
+	 * @param currentInputs list of accumulated inputs (will be mutated with tool call items)
+	 * @return tool handling result
+	 */
+	private ToolHandlingResult handleResponseOutput(List<ResponseOutputItem> output, List<ResponseInputItem> currentInputs) {
+		boolean anyToolCalls = false;
+		String text = null;
+
+		for (ResponseOutputItem item : output) {
+			if (item.isFunctionCall()) {
+				anyToolCalls = true;
+				handleFunctionCall(item.asFunctionCall(), currentInputs);
+			}
+			String reasoning = extractReasoningText(item);
+			if (StringUtils.isNotBlank(reasoning)) {
+				text = reasoning;
+			}
+			String messageText = extractMessageText(item);
+			if (StringUtils.isNotBlank(messageText)) {
+				text = messageText;
+				logger.info("LLM Response: {}", text);
+			}
+		}
+
+		return new ToolHandlingResult(anyToolCalls, text);
+	}
+
+	private void handleFunctionCall(ResponseFunctionToolCall functionCall, List<ResponseInputItem> currentInputs) {
+		currentInputs.add(ResponseInputItem.ofFunctionCall(functionCall));
+
+		Object value = callFunction(functionCall);
+		Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
+
+		currentInputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
+				.callId(functionCall.callId()).outputAsJson(callFunction).build()));
+	}
+
+	private String extractReasoningText(ResponseOutputItem item) {
+		if (!item.isReasoning()) {
+			return null;
+		}
+		ResponseReasoningItem reasoningItem = item.asReasoning();
+		Optional<List<com.openai.models.responses.ResponseReasoningItem.Content>> maybeContent = reasoningItem.content();
+		// Sonar java:S3655 - avoid calling Optional#get() without a presence check
+		return maybeContent.map(this::firstNonBlankReasoning).orElse(null);
+	}
+
+	// Sonar java:S3655 - extracted to keep Optional handling safe and readable
+	private String firstNonBlankReasoning(List<com.openai.models.responses.ResponseReasoningItem.Content> contents) {
+		for (com.openai.models.responses.ResponseReasoningItem.Content content : contents) {
+			String reasoning = content.text();
+			if (StringUtils.isNotBlank(reasoning)) {
+				logger.info("LLM Reasoning: {}", reasoning);
+				return reasoning;
+			}
+		}
+		return null;
+	}
+
+	private String extractMessageText(ResponseOutputItem item) {
+		if (!item.isMessage()) {
+			return null;
+		}
+		ResponseOutputMessage outMessage = item.asMessage();
+		for (Content content : outMessage.content()) {
+			Optional<com.openai.models.responses.ResponseOutputText> maybeOutputText = content.outputText();
+			// Sonar java:S3655 - avoid calling Optional#get() without a presence check
+			String candidate = maybeOutputText.map(com.openai.models.responses.ResponseOutputText::text).orElse(null);
+			if (StringUtils.isNotBlank(candidate)) {
+				return candidate;
+			}
+		}
+		return null;
 	}
 
 	private ResponseCreateParams createResponseBuilder(List<ResponseInputItem> inputs) {
@@ -334,8 +383,9 @@ public class OpenAIProvider implements GenAIProvider {
 		builder.instructions(instructions);
 		builder.inputOfResponse(inputs);
 
-		ResponseCreateParams params = builder.tools(new ArrayList<Tool>(toolMap.keySet())).build();
-		return params;
+		// Sonar java:S2293 - use diamond operator
+		// Sonar java:S1488 - return expression directly instead of assigning to temporary variable
+		return builder.tools(new ArrayList<>(toolMap.keySet())).build();
 	}
 
 	/**
@@ -387,20 +437,25 @@ public class OpenAIProvider implements GenAIProvider {
 			Object result = null;
 			for (Entry<Tool, Function<Object[], Object>> entry : entrySet) {
 				if (StringUtils.equals(name, entry.getKey().asFunction().name())) {
-					try {
-						result = entry.getValue().apply(arguments);
-					} catch (Exception e) {
-						String errMsg = "Error: The functional tool call failed while executing '" + name
-								+ "'. Reason: " + e.getMessage();
-						logger.error(errMsg);
-						result = errMsg;
-					}
+					result = safelyInvokeTool(name, entry.getValue(), arguments);
 					break;
 				}
 			}
 			return result;
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);
+		}
+	}
+
+	// Sonar java:S1141 - extracted nested try/catch into a dedicated method
+	private Object safelyInvokeTool(String name, Function<Object[], Object> tool, Object[] arguments) {
+		try {
+			return tool.apply(arguments);
+		} catch (Exception e) {
+			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
+					+ e.getMessage();
+			logger.error(errMsg);
+			return errMsg;
 		}
 	}
 
@@ -524,8 +579,7 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Returns token usage metrics captured from the most recent {@link #perform()}
-	 * call.
+	 * Returns token usage metrics captured from the most recent {@link #perform()} call.
 	 *
 	 * @return usage metrics; never {@code null}
 	 */
@@ -562,7 +616,8 @@ public class OpenAIProvider implements GenAIProvider {
 
 		if (StringUtils.isBlank(chatModel)) {
 			ModelService models = client.models();
-			List<String> items = models.list().items().stream().map(i -> i.id()).collect(Collectors.toList());
+			// Sonar java:S1612 - use method reference for clarity
+			List<String> items = models.list().items().stream().map(Model::id).collect(Collectors.toList());
 			throw new IllegalArgumentException(
 					"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
 		}

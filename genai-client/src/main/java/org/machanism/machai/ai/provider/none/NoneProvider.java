@@ -160,37 +160,49 @@ public class NoneProvider implements GenAIProvider {
 	@Override
 	public String perform() {
 		if (inputsLog != null) {
-			File parentFile = inputsLog.getParentFile();
-			if (parentFile != null) {
-				if (!parentFile.exists()) {
-					boolean created = parentFile.mkdirs();
-					if (!created) {
-						logger.warn("Unable to create directory for inputs log: {}", parentFile);
-					}
-				}
-			} else {
-				parentFile = SystemUtils.getUserDir();
-			}
+			File parentFile = prepareInputsLogParent(inputsLog);
 
 			if (instructions != null) {
-				File file = new File(parentFile, "instructions.txt");
-				try (Writer streamWriter = new FileWriter(file, false)) {
-					streamWriter.write(instructions);
-					logger.debug("LLM Instruction: {}", file);
-				} catch (IOException e) {
-					logger.error("Failed to save LLM instructions to file: {}", file, e);
-				}
+				writeInstructions(parentFile);
 			}
 
-			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
-				streamWriter.write(prompts.toString());
-				logger.info("LLM Inputs: {}", inputsLog);
-			} catch (IOException e) {
-				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
-			}
+			writePrompts();
 		}
 		clear();
 		return null;
+	}
+
+	// Sonar java:S3776 - extracted to reduce cognitive complexity of perform()
+	private File prepareInputsLogParent(File inputsLog) {
+		File parentFile = inputsLog.getParentFile();
+		if (parentFile != null && !parentFile.exists()) {
+			boolean created = parentFile.mkdirs();
+			if (!created) {
+				logger.warn("Unable to create directory for inputs log: {}", parentFile);
+			}
+		}
+		return parentFile != null ? parentFile : SystemUtils.getUserDir();
+	}
+
+	// Sonar java:S3776 - extracted to reduce cognitive complexity of perform()
+	private void writeInstructions(File parentFile) {
+		File file = new File(parentFile, "instructions.txt");
+		try (Writer streamWriter = new FileWriter(file, false)) {
+			streamWriter.write(instructions);
+			logger.debug("LLM Instruction: {}", file);
+		} catch (IOException e) {
+			logger.error("Failed to save LLM instructions to file: {}", file, e);
+		}
+	}
+
+	// Sonar java:S3776 - extracted to reduce cognitive complexity of perform()
+	private void writePrompts() {
+		try (Writer streamWriter = new FileWriter(inputsLog, false)) {
+			streamWriter.write(prompts.toString());
+			logger.info("LLM Inputs: {}", inputsLog);
+		} catch (IOException e) {
+			logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
+		}
 	}
 
 	/**

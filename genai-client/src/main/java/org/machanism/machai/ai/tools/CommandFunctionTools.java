@@ -66,10 +66,12 @@ public class CommandFunctionTools implements FunctionTools {
 	/**
 	 * Default maximum number of characters to return from captured process output.
 	 */
-	private static int defaultResultTailSize = 1024;
+	// Sonar java:S115 - constants should be named like ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$
+	private static final int DEFAULT_RESULT_TAIL_SIZE = 1024;
 
 	/** Default character set used to decode process output streams. */
-	private static final String defaultCharset = "UTF-8";
+	// Sonar java:S115 - constants should be named like ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$
+	private static final String DEFAULT_CHARSET = "UTF-8";
 
 	/** Maximum time to wait for a started process to complete. */
 	private int processTimeoutSeconds = 600;
@@ -78,6 +80,12 @@ public class CommandFunctionTools implements FunctionTools {
 	private CommandSecurityChecker checker;
 
 	private Configurator configurator;
+
+	/**
+	 * Reusable Random instance.
+	 */
+	// Sonar java:S2119 - save and reuse Random
+	private static final Random RANDOM = new Random();
 
 	/**
 	 * Runtime exception used by {@code terminate_process} to signal early
@@ -138,9 +146,9 @@ public class CommandFunctionTools implements FunctionTools {
 	 * directory; defaults to {@code .}.</li>
 	 * <li><b>tailResultSize</b> (integer, optional): Maximum number of characters
 	 * to return from captured output; defaults to
-	 * {@code defaultResultTailSize}.</li>
+	 * {@code DEFAULT_RESULT_TAIL_SIZE}.</li>
 	 * <li><b>charsetName</b> (string, optional): Character set used to decode
-	 * process output; defaults to {@code defaultCharset}.</li>
+	 * process output; defaults to {@code DEFAULT_CHARSET}.</li>
 	 * </ul>
 	 * </li>
 	 * <li><b>terminate_process</b> – Throws an exception to immediately terminate
@@ -162,16 +170,16 @@ public class CommandFunctionTools implements FunctionTools {
 		provider.addTool("run_command_line_tool",
 				"Executes a system command using Java's ProcessBuilder for controlled and secure execution."
 						+ " Only explicitly allowed commands can be executed for security reasons. "
-						+ "The tool supports setting environment variables, working directory, output tail size, and character encoding.",
+						+ "The tool supports setting environment variables, working directory, output tail size, and character encoding. "
+						+ "Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.",
 				this::executeCommand,
-				"command:string:required:The system command to execute. When running system commands or scripts, use the correct Windows command prompt (`cmd.exe`) or PowerShell syntax. "
-						+ "Do not use Unix/Linux shell features such as heredoc (`<<`), semicolon-separated commands, or Unix-style path separators. Use Windows-style commands and path separators (e.g., `\\\\`).",
+				"command:string:required:...",
 				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). If omitted, the subprocess inherits the current process environment.",
 				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. If omitted, the current project directory is used.",
 				"tailResultSize:integer:optional:The maximum number of characters to display from the end of the command output. If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
-						+ defaultResultTailSize,
+						+ DEFAULT_RESULT_TAIL_SIZE,
 				"charsetName:string:optional:The character encoding to use for reading command output. Default: "
-						+ defaultCharset);
+						+ DEFAULT_CHARSET);
 
 		provider.addTool("terminate_process",
 				"Throws an exception to immediately terminate the process. Useful for signaling fatal errors or controlled shutdowns from within a function tool. Supports specifying a custom exit code.",
@@ -225,8 +233,11 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @return command output bounded to the configured tail size
 	 */
 	public String executeCommand(Object[] params) {
-		String commandId = Integer.toHexString(new Random().nextInt());
-		logger.info("Run shell command [{}]: {}", commandId, Arrays.toString(params));
+		String commandId = Integer.toHexString(RANDOM.nextInt());
+		// Sonar java:S2629 - avoid building expensive log message when INFO is disabled
+		if (logger.isInfoEnabled()) {
+			logger.info("Run shell command [{}]: {}", commandId, Arrays.toString(params));
+		}
 
 		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
@@ -251,27 +262,20 @@ public class CommandFunctionTools implements FunctionTools {
 			return "Error: Unable to resolve working directory.";
 		}
 
-		Integer tailResultSize = props.has("tailResultSize") ? props.get("tailResultSize").asInt(defaultResultTailSize)
-				: defaultResultTailSize;
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(defaultCharset)
-				: defaultCharset;
+		Integer tailResultSize = props.has("tailResultSize") ? props.get("tailResultSize").asInt(DEFAULT_RESULT_TAIL_SIZE)
+				: DEFAULT_RESULT_TAIL_SIZE;
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(DEFAULT_CHARSET)
+				: DEFAULT_CHARSET;
 
 		Process prc = null;
-		ExecutorService executor = Executors.newFixedThreadPool(2);
 		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
 
-		try {
-			String[] commandParts = CommandLineUtils.translateCommandline(command);
-		try {
-				for (String commandPart : commandParts) {
-					checker.denyCheck(commandPart);
-				}
-			} catch (DenyException e) {
-				logger.error("[CMD {}] Invalid or unsafe command. {}", commandId, e.getMessage());
-				return "Error: Invalid or unsafe command.";
-			}
+		// Sonar java:S2095 - ensure ExecutorService is closed
+		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(Executors.newFixedThreadPool(2))) {
 
-			ProcessBuilder pb = new ProcessBuilder(commandParts);
+			runDenyChecks(command);
+
+			ProcessBuilder pb = new ProcessBuilder(CommandLineUtils.translateCommandline(command));
 			pb.directory(workingDir);
 
 			if (props.has("env")) {
@@ -282,30 +286,19 @@ public class CommandFunctionTools implements FunctionTools {
 			final Process process = pb.start();
 			prc = process;
 
-			Future<?> stdoutFuture = executor.submit(() -> readStream(process.getInputStream(), charsetName, output,
+			Future<?> stdoutFuture = executor.get().submit(() -> readStream(process.getInputStream(), charsetName, output,
 					line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
-						e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
+					e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
 
-			Future<?> stderrFuture = executor.submit(() -> readStream(process.getErrorStream(), charsetName, output,
+			Future<?> stderrFuture = executor.get().submit(() -> readStream(process.getErrorStream(), charsetName, output,
 					line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
-						e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
+					e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
 
-				boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
-				if (!finished) {
-					process.destroyForcibly();
-					output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds))
-							.append(" seconds.").append("\n");
-					logger.warn("[CMD {}] Command timed out", commandId);
-				}
+			return waitAndCollect(process, stdoutFuture, stderrFuture, output, commandId);
 
-				stdoutFuture.get(5, TimeUnit.SECONDS);
-				stderrFuture.get(5, TimeUnit.SECONDS);
-
-				int exitCode = process.exitValue();
-			output.append("Command exited with code: ").append(Integer.toString(exitCode))
-					.append("\n");
-
-				return output.getLastText();
+		} catch (DenyException e) {
+			logger.error("[CMD {}] Invalid or unsafe command. {}", commandId, e.getMessage());
+			return "Error: Invalid or unsafe command.";
 
 		} catch (TimeoutException e) {
 			output.append("Output reading timed out.").append("\n");
@@ -328,8 +321,34 @@ public class CommandFunctionTools implements FunctionTools {
 			if (prc != null && prc.isAlive()) {
 				prc.destroyForcibly();
 			}
-			executor.shutdownNow();
 		}
+	}
+
+	private void runDenyChecks(String command) throws CommandLineException, DenyException {
+		// Sonar java:S3776 - extract deny-list validation to reduce cognitive complexity
+		String[] commandParts = CommandLineUtils.translateCommandline(command);
+		for (String commandPart : commandParts) {
+			checker.denyCheck(commandPart);
+		}
+	}
+
+	private String waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture,
+			LimitedStringBuilder output, String commandId) throws InterruptedException, TimeoutException, ExecutionException {
+		// Sonar java:S3776 - extract waiting/collection logic to reduce cognitive complexity
+		boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
+		if (!finished) {
+			process.destroyForcibly();
+			output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds)).append(" seconds.")
+					.append("\n");
+			logger.warn("[CMD {}] Command timed out", commandId);
+		}
+
+		stdoutFuture.get(5, TimeUnit.SECONDS);
+		stderrFuture.get(5, TimeUnit.SECONDS);
+
+		int exitCode = process.exitValue();
+		output.append("Command exited with code: ").append(Integer.toString(exitCode)).append("\n");
+		return output.getLastText();
 	}
 
 	/**
@@ -402,7 +421,8 @@ public class CommandFunctionTools implements FunctionTools {
 			if (idx > 0 && idx < line.length() - 1) {
 				String key = line.substring(0, idx).trim();
 				String value = line.substring(idx + 1).trim();
-				if (key.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+				// Sonar java:S6353 - use concise character class \w
+				if (key.matches("[A-Za-z_]\\w*")) {
 					envMap.put(key, value);
 				}
 			}
@@ -465,6 +485,27 @@ public class CommandFunctionTools implements FunctionTools {
 			checker = new CommandSecurityChecker(configurator);
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
+		}
+	}
+
+	/**
+	 * Auto-closeable wrapper for {@link ExecutorService} so it can be used with
+	 * try-with-resources.
+	 */
+	private static final class ExecutorServiceAutoCloseable implements AutoCloseable {
+		private final ExecutorService executor;
+
+		private ExecutorServiceAutoCloseable(ExecutorService executor) {
+			this.executor = executor;
+		}
+
+		private ExecutorService get() {
+			return executor;
+		}
+
+		@Override
+		public void close() {
+			executor.shutdownNow();
 		}
 	}
 }

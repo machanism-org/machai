@@ -1,7 +1,6 @@
 package org.machanism.machai.ai.provider.gemini;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -60,11 +59,10 @@ public class GeminiProvider implements GenAIProvider {
 	 *            file to attach
 	 * @throws IOException
 	 *             if the file cannot be read or uploaded
-	 * @throws FileNotFoundException
-	 *             if the file cannot be found
 	 */
 	@Override
-	public void addFile(File file) throws IOException, FileNotFoundException {
+	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass of IOException)
+	public void addFile(File file) throws IOException {
 		// TODO Implement file upload/attachment.
 	}
 
@@ -75,11 +73,10 @@ public class GeminiProvider implements GenAIProvider {
 	 *            URL of the file to attach
 	 * @throws IOException
 	 *             if the file cannot be read or uploaded
-	 * @throws FileNotFoundException
-	 *             if the remote file cannot be found
 	 */
 	@Override
-	public void addFile(URL fileUrl) throws IOException, FileNotFoundException {
+	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass of IOException)
+	public void addFile(URL fileUrl) throws IOException {
 		// TODO Implement URL-based attachment.
 	}
 
