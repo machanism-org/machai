@@ -31,6 +31,11 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  */
 public class ProjectLayoutManager {
 
+	// Sonar(java:S1118): utility class; prevent instantiation.
+	private ProjectLayoutManager() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	/**
 	 * Detects the project layout based on the contents of the specified directory.
 	 * Supports Maven, Node.js (package.json), Python, or a default layout.

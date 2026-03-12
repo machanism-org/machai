@@ -22,11 +22,8 @@ import org.apache.maven.model.building.DefaultModelBuilder;
 import org.apache.maven.model.building.DefaultModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuildingResult;
-import org.apache.maven.model.interpolation.StringSearchModelInterpolator;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
-import org.apache.maven.model.path.DefaultPathTranslator;
-import org.apache.maven.model.path.DefaultUrlNormalizer;
 import org.apache.maven.model.resolution.ModelResolver;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectModelResolver;
@@ -86,8 +83,7 @@ public class PomReader {
 		Model model = null;
 		try {
 			if (effective) {
-				DefaultModelBuilder modelBuilder;
-				modelBuilder = getModelBuilder(request);
+				DefaultModelBuilder modelBuilder = getModelBuilder(request);
 				ModelBuildingResult result = modelBuilder.build(request);
 				model = result.getEffectiveModel();
 
@@ -96,6 +92,10 @@ public class PomReader {
 				FileReader fileReader = new FileReader(pomFile);
 				String pomStr = IOUtils.toString(fileReader);
 				pomStr = replaceProperty(pomStr);
+				if (pomStr == null) {
+					// Sonar(java:S2259): avoid possible NPE; replaceProperty may return null.
+					throw new IllegalArgumentException("POM content could not be read: " + pomFile);
+				}
 				model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
 			}
 		} catch (Exception e) {
@@ -184,14 +184,8 @@ public class PomReader {
 		request.setTwoPhaseBuilding(false);
 
 		PlexusContainer container = new DefaultPlexusContainer();
-		DefaultModelBuilder modelBuilder = (DefaultModelBuilder) container
-				.lookup(org.apache.maven.model.building.ModelBuilder.class);
-
-		StringSearchModelInterpolator modelInterpolator = new StringSearchModelInterpolator();
-		modelInterpolator.setPathTranslator(new DefaultPathTranslator());
-		modelInterpolator.setUrlNormalizer(new DefaultUrlNormalizer());
-		modelBuilder.setModelInterpolator(modelInterpolator);
-		return modelBuilder;
+		// Sonar(java:S1488): return expression directly instead of using a temporary variable.
+		return (DefaultModelBuilder) container.lookup(org.apache.maven.model.building.ModelBuilder.class);
 	}
 
 	/**

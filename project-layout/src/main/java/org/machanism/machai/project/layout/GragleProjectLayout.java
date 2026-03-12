@@ -2,7 +2,9 @@ package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -54,27 +56,35 @@ public class GragleProjectLayout extends ProjectLayout {
 	/**
 	 * Returns a list of child module names for multi-project Gradle builds.
 	 *
-	 * @return list of child project names (root-relative module identifiers), or {@code null} if the build has no children
+	 * @return list of child project names (root-relative module identifiers), or empty list if the build has no children
 	 */
 	@Override
 	public List<String> getModules() {
-		List<String> modules = null;
-
-		DomainObjectSet<? extends GradleProject> children = getProject().getChildren();
-		if (!children.isEmpty()) {
-			modules = children.getAll().stream().map(GradleProject::getName).collect(Collectors.toList());
+		// Sonar(java:S2259): avoid potential NPE when project model cannot be built.
+		GradleProject gradleProject = getProject();
+		if (gradleProject == null) {
+			return Collections.emptyList();
 		}
 
-		return modules;
+		DomainObjectSet<? extends GradleProject> children = gradleProject.getChildren();
+		if (children.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		return children.getAll().stream().map(GradleProject::getName).collect(Collectors.toList());
 	}
 
 	/**
 	 * Loads (and caches) the Gradle project model for the configured project directory.
 	 *
-	 * @return Gradle project model
+	 * @return Gradle project model, or {@code null} if model building fails
 	 */
 	private GradleProject getProject() {
 		File projectDir = getProjectDir();
+		if (projectDir == null) {
+			return null;
+		}
+
 		File buildFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
 		if (project == null) {
 			try (ProjectConnection connection = GradleConnector.newConnector().forProjectDirectory(buildFile.getParentFile())
@@ -137,20 +147,22 @@ public class GragleProjectLayout extends ProjectLayout {
 	/**
 	 * Returns the Gradle project name as a stable identifier.
 	 *
-	 * @return project name
+	 * @return project name or empty string if the model cannot be loaded
 	 */
 	@Override
 	public String getProjectId() {
-		return getProject().getName();
+		// Sonar(java:S2259): avoid dereferencing a possibly-null GradleProject.
+		return Optional.ofNullable(getProject()).map(GradleProject::getName).orElse("");
 	}
 
 	/**
 	 * Returns the Gradle project name.
 	 *
-	 * @return project name
+	 * @return project name or empty string if the model cannot be loaded
 	 */
 	@Override
 	public String getProjectName() {
-		return getProject().getName();
+		// Sonar(java:S2259): avoid dereferencing a possibly-null GradleProject.
+		return Optional.ofNullable(getProject()).map(GradleProject::getName).orElse("");
 	}
 }

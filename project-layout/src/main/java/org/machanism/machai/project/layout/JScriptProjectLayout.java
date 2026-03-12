@@ -6,6 +6,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -52,52 +53,61 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * workspace pattern and contain a <code>package.json</code>.
 	 * </p>
 	 *
-	 * @return list of relative module paths, or {@code null} when the project does not
+	 * @return list of relative module paths, or empty list when the project does not
 	 *         define workspaces
 	 * @throws IllegalArgumentException if {@code package.json} cannot be read or parsed
 	 */
 	@Override
 	public List<String> getModules() {
-		List<String> result = null;
-
 		JsonNode packageJson = getPackageJson();
 		JsonNode workspacesNode = packageJson.get("workspaces");
-		if (workspacesNode != null) {
-			Set<String> modules = new HashSet<>();
-
-			if (workspacesNode.isArray()) {
-				Iterator<JsonNode> iterator = workspacesNode.iterator();
-				while (iterator.hasNext()) {
-					String globPattern = iterator.next().asText();
-
-					if (Strings.CS.startsWith(globPattern, "./")) {
-						globPattern = StringUtils.substringAfter(globPattern, "./");
-					}
-
-					PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
-					File baseDir = getProjectDir();
-					List<File> files = ProjectLayout.findDirectories(baseDir);
-
-					for (File file : files) {
-						String path = ProjectLayout.getRelativePath(getProjectDir(), file, false);
-						if (path == null) {
-							continue;
-						}
-						Path pathToMatch = new File(path).toPath();
-
-						if (matcher.matches(pathToMatch) && isPackageJsonPresent(file)) {
-							String relativePath = ProjectLayout.getRelativePath(baseDir, file);
-							if (relativePath != null) {
-								modules.add(relativePath);
-							}
-						}
-					}
-				}
-				result = new ArrayList<>(modules);
-			}
+		if (workspacesNode == null) {
+			// Sonar(java:S1168): return an empty collection instead of null.
+			return Collections.emptyList();
 		}
 
-		return result;
+		return parseWorkspaceModules(workspacesNode);
+	}
+
+	// Sonar(java:S3776): extract logic to reduce cognitive complexity.
+	private List<String> parseWorkspaceModules(JsonNode workspacesNode) {
+		Set<String> modules = new HashSet<>();
+		if (workspacesNode.isArray()) {
+			Iterator<JsonNode> iterator = workspacesNode.iterator();
+			while (iterator.hasNext()) {
+				String globPattern = normalizeWorkspaceGlob(iterator.next().asText());
+				collectMatchingModules(modules, globPattern);
+			}
+		}
+		return new ArrayList<>(modules);
+	}
+
+	private static String normalizeWorkspaceGlob(String globPattern) {
+		if (Strings.CS.startsWith(globPattern, "./")) {
+			return StringUtils.substringAfter(globPattern, "./");
+		}
+		return globPattern;
+	}
+
+	private void collectMatchingModules(Set<String> modules, String globPattern) {
+		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
+		File baseDir = getProjectDir();
+		List<File> files = ProjectLayout.findDirectories(baseDir);
+
+		for (File file : files) {
+			String path = ProjectLayout.getRelativePath(getProjectDir(), file, false);
+			if (path == null) {
+				continue;
+			}
+			Path pathToMatch = new File(path).toPath();
+
+			if (matcher.matches(pathToMatch) && isPackageJsonPresent(file)) {
+				String relativePath = ProjectLayout.getRelativePath(baseDir, file);
+				if (relativePath != null) {
+					modules.add(relativePath);
+				}
+			}
+		}
 	}
 
 	/**
@@ -107,7 +117,13 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * @throws IllegalArgumentException if reading/parsing fails
 	 */
 	private JsonNode getPackageJson() {
-		File packageFile = new File(getProjectDir(), PROJECT_MODEL_FILE_NAME);
+		File projectDir = getProjectDir();
+		if (projectDir == null) {
+			// Sonar(java:S2259): avoid NPE if layout is used without setting projectDir.
+			throw new IllegalStateException("projectDir must be set before reading package.json");
+		}
+
+		File packageFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
 		try {
 			return new ObjectMapper().readTree(packageFile);
 		} catch (IOException e) {
@@ -118,31 +134,34 @@ public class JScriptProjectLayout extends ProjectLayout {
 	/**
 	 * Returns a list of conventional source directories for JS/TS projects.
 	 *
-	 * @return {@code null}; not currently implemented
+	 * @return empty list; not currently implemented
 	 */
 	@Override
 	public List<String> getSources() {
-		return null;
+		// Sonar(java:S1168): return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**
 	 * Returns a list of conventional documentation directories for JS/TS projects.
 	 *
-	 * @return {@code null}; not currently implemented
+	 * @return empty list; not currently implemented
 	 */
 	@Override
 	public List<String> getDocuments() {
-		return null;
+		// Sonar(java:S1168): return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**
 	 * Returns a list of conventional test directories for JS/TS projects.
 	 *
-	 * @return {@code null}; not currently implemented
+	 * @return empty list; not currently implemented
 	 */
 	@Override
 	public List<String> getTests() {
-		return null;
+		// Sonar(java:S1168): return an empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**

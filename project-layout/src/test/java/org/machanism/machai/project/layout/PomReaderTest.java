@@ -124,6 +124,7 @@ class PomReaderTest {
 		PomReader reader = new PomReader();
 
 		// Act
+		// Sonar(java:S5778): avoid multiple exception sources inside the assertThrows lambda.
 		Model model = reader.getProjectModel(pom);
 
 		// Assert

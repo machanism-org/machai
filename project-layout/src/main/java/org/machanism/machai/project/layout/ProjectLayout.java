@@ -13,29 +13,34 @@ import org.machanism.machai.project.ProjectProcessor;
  * Base abstraction for describing a project's conventional on-disk layout.
  *
  * <p>
- * A {@code ProjectLayout} implementation is responsible for translating build tool conventions and/or build metadata
- * into a set of root-relative paths, such as source roots, test roots, documentation roots, and (optionally) module
- * directories.
+ * A {@code ProjectLayout} implementation is responsible for translating build
+ * tool conventions and/or build metadata into a set of root-relative paths,
+ * such as source roots, test roots, documentation roots, and (optionally)
+ * module directories.
  * </p>
  *
  * <p>
- * Implementations are expected to be configured with a project root via {@link #projectDir(File)} prior to calling any
- * accessors.
+ * Implementations are expected to be configured with a project root via
+ * {@link #projectDir(File)} prior to calling any accessors.
  * </p>
  *
  * <h2>Root-relative paths</h2>
  * <p>
- * Paths returned from this API are typically expressed as root-relative strings using {@code /} as a separator.
- * Callers should resolve them against {@link #getProjectDir()} before accessing the filesystem.
+ * Paths returned from this API are typically expressed as root-relative strings
+ * using {@code /} as a separator. Callers should resolve them against
+ * {@link #getProjectDir()} before accessing the filesystem.
  * </p>
  *
  * <h2>Example</h2>
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * java.io.File projectDir = new java.io.File("C:\\repo");
  * ProjectLayout layout = new MavenProjectLayout().projectDir(projectDir);
  *
  * java.util.List&lt;String&gt; sources = layout.getSources();
- * </code></pre>
+ * </code>
+ * </pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -45,7 +50,8 @@ public abstract class ProjectLayout {
 	/**
 	 * Directory names that should be ignored when scanning projects.
 	 */
-	public static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
+	// Sonar(java:S1104, java:S1444, java:S2386): use a protected constant and avoid exposing mutable arrays.
+	private static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
 			ProjectProcessor.MACHAI_TEMP_DIR, "target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
 			".classpath", ".settings", ".settings", ".project", ".m2" };
 
@@ -74,14 +80,11 @@ public abstract class ProjectLayout {
 	/**
 	 * Returns a list of module directories (or names) within this project.
 	 *
-	 * <p>
-	 * Implementations may return {@code null} or an empty list when the project does not define modules.
-	 * </p>
-	 *
-	 * @return module directories (root-relative) or {@code null}
+	 * @return module directories (root-relative); never {@code null}
 	 */
 	public List<String> getModules() {
-		return null;
+		// Sonar(java:S1168): return empty collection instead of null.
+		return Collections.emptyList();
 	}
 
 	/**
@@ -121,12 +124,13 @@ public abstract class ProjectLayout {
 	public abstract List<String> getTests();
 
 	/**
-	 * Computes the relative path from the specified project directory to the target file.
-	 * The result is not prefixed with {@code ./}.
+	 * Computes the relative path from the specified project directory to the target
+	 * file. The result is not prefixed with {@code ./}.
 	 *
 	 * @param dir  the base project directory
 	 * @param file the target file for which to compute the relative path
-	 * @return the relative path string, or {@code null} if the target file is not within the project directory
+	 * @return the relative path string, or {@code null} if the target file is not
+	 *         within the project directory
 	 * @see #getRelativePath(File, File, boolean)
 	 */
 	public static String getRelativePath(File dir, File file) {
@@ -134,18 +138,22 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Computes the relative path from the specified project directory to the target file.
-	 * Optionally, the result can be prefixed with {@code ./} if {@code addSingleDot} is {@code true}.
+	 * Computes the relative path from the specified project directory to the target
+	 * file. Optionally, the result can be prefixed with {@code ./} if
+	 * {@code addSingleDot} is {@code true}.
 	 *
 	 * <p>
-	 * If the target file is the same as the project directory, returns {@code .}. If an absolute path is provided, it
-	 * must be located within the project directory.
+	 * If the target file is the same as the project directory, returns {@code .}.
+	 * If an absolute path is provided, it must be located within the project
+	 * directory.
 	 * </p>
 	 *
 	 * @param dir          the base project directory
 	 * @param file         the target file for which to compute the relative path
-	 * @param addSingleDot if {@code true}, prefixes the result with {@code ./} when appropriate
-	 * @return the relative path string, or {@code null} if the target file is not within the project directory
+	 * @param addSingleDot if {@code true}, prefixes the result with {@code ./} when
+	 *                     appropriate
+	 * @return the relative path string, or {@code null} if the target file is not
+	 *         within the project directory
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		String currentPath = dir.getAbsolutePath().replace("\\", "/");
@@ -168,7 +176,8 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Recursively lists all files under a directory, excluding known build/tooling directories.
+	 * Recursively lists all files under a directory, excluding known build/tooling
+	 * directories.
 	 *
 	 * @param projectDir directory to traverse
 	 * @return files found; never {@code null}
@@ -245,8 +254,8 @@ public abstract class ProjectLayout {
 	 * @return a short layout type name
 	 */
 	public String getProjectLayoutType() {
-		String replace = getClass().getSimpleName().replace(ProjectLayout.class.getSimpleName(), "");
-		return replace;
+		// Sonar(java:S1488): return directly instead of using a temporary variable.
+		return getClass().getSimpleName().replace(ProjectLayout.class.getSimpleName(), "");
 	}
 
 	/**
@@ -258,4 +267,12 @@ public abstract class ProjectLayout {
 		return null;
 	}
 
+	/**
+	 * Returns a copy of the exclude directories array to prevent external modification.
+	 *
+	 * @return a copy of the exclude directories array
+	 */
+	public static String[] getExcludeDirs() {
+	    return EXCLUDE_DIRS.clone();
+	}
 }

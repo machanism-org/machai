@@ -1,12 +1,13 @@
 package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_whenNoWorkspaces_returnsNull() throws Exception {
+	void getModules_whenNoWorkspaces_returnsEmptyList() throws Exception {
 		// Arrange
 		Files.write(new File(tempDir, "package.json").toPath(), "{\"name\":\"root\"}".getBytes(StandardCharsets.UTF_8));
 		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir);
@@ -39,7 +40,8 @@ class JScriptProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertNull(modules);
+		assertNotNull(modules);
+		assertEquals(Collections.emptyList(), modules);
 	}
 
 	@Test
@@ -57,7 +59,7 @@ class JScriptProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		org.junit.jupiter.api.Assertions.assertNotNull(modules);
+		assertNotNull(modules);
 	}
 
 	@Test

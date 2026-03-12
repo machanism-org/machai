@@ -2,11 +2,11 @@ package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.model.Build;
@@ -53,7 +53,7 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_whenPackagingNotPom_returnsNull() {
+	void getModules_whenPackagingNotPom_returnsEmptyList() {
 		// Arrange
 		Model model = new Model();
 		model.setModelVersion("4.0.0");
@@ -69,7 +69,8 @@ class MavenProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertNull(modules);
+		assertNotNull(modules);
+		assertEquals(Collections.emptyList(), modules);
 	}
 
 	@Test

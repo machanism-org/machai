@@ -2,12 +2,13 @@ package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.List;
 
 import org.gradle.tooling.model.DomainObjectSet;
@@ -29,7 +30,7 @@ class GragleProjectLayoutTest {
 		boolean result = GragleProjectLayout.isGradleProject(tempDir);
 
 		// Assert
-		org.junit.jupiter.api.Assertions.assertTrue(result);
+		assertTrue(result);
 	}
 
 	@Test
@@ -41,7 +42,7 @@ class GragleProjectLayoutTest {
 		List<String> sources = layout.getSources();
 
 		// Assert
-		assertEquals(java.util.Collections.singletonList("src/main"), sources);
+		assertEquals(Collections.singletonList("src/main"), sources);
 	}
 
 	@Test
@@ -53,7 +54,7 @@ class GragleProjectLayoutTest {
 		List<String> tests = layout.getTests();
 
 		// Assert
-		assertEquals(java.util.Collections.singletonList("src/test"), tests);
+		assertEquals(Collections.singletonList("src/test"), tests);
 	}
 
 	@Test
@@ -65,7 +66,7 @@ class GragleProjectLayoutTest {
 		List<String> docs = layout.getDocuments();
 
 		// Assert
-		assertEquals(java.util.Collections.singletonList("src/site"), docs);
+		assertEquals(Collections.singletonList("src/site"), docs);
 	}
 
 	@Test
@@ -89,12 +90,12 @@ class GragleProjectLayoutTest {
 		// Assert
 		assertNotNull(modules);
 		assertEquals(2, modules.size());
-		org.junit.jupiter.api.Assertions.assertTrue(modules.contains("child-a"));
-		org.junit.jupiter.api.Assertions.assertTrue(modules.contains("child-b"));
+		assertTrue(modules.contains("child-a"));
+		assertTrue(modules.contains("child-b"));
 	}
 
 	@Test
-	void getModules_whenGradleProjectHasNoChildren_returnsNull() throws Exception {
+	void getModules_whenGradleProjectHasNoChildren_returnsEmptyList() throws Exception {
 		// Arrange
 		Files.write(new File(tempDir, "build.gradle").toPath(), "plugins {}".getBytes(StandardCharsets.UTF_8));
 
@@ -108,6 +109,7 @@ class GragleProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertNull(modules);
+		assertNotNull(modules);
+		assertEquals(Collections.emptyList(), modules);
 	}
 }
