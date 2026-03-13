@@ -30,13 +30,13 @@ inputs = '''
 
 - **Before starting, build the project:**  
   Run `mvn clean install` to ensure all code compiles and dependencies are resolved.
-- **Review and update all existing unit tests** in `[Test Source & Resource Folders]`, ensuring each test file is correctly related to its corresponding source code location.
-- **Create new, high-quality unit tests as needed** to ensure every public and package-private class and method in the required source folder is fully tested.
-- **Ensure that overall test coverage for the required source folder is at least 90%%.**
 - **Use the Maven JaCoCo plugin to measure test coverage:**
   - Run the Maven JaCoCo plugin to generate a coverage report (typically at `target/site/jacoco/jacoco.xml`).
-  - Read and analyze the JaCoCo report to identify uncovered or under-covered classes and methods.
-  - Focus test creation and updates on areas highlighted by the JaCoCo report as lacking sufficient coverage.
+  - Analyze the JaCoCo report to identify uncovered or under-covered classes and methods.
+  - Prioritize test creation and updates for areas highlighted as lacking sufficient coverage.
+- **Review and update all existing unit tests** in `[Test Source & Resource Folders]`, ensuring each test file is correctly related to its corresponding source code location.
+- **Create new, high-quality unit tests as needed** to ensure every public and package-private class and method in the required source folder is fully tested.
+- **Ensure that overall test coverage for the required source folder is at least 90%.**
 - Achieve comprehensive coverage of all core logic, edge cases, and error handling scenarios.
 - Refactor or enhance existing tests to improve clarity, maintainability, and coverage where necessary.
 - If necessary to achieve coverage, refactor production code for improved testability, but do not change its functionality.
@@ -45,7 +45,7 @@ inputs = '''
 - Mock dependencies where appropriate to isolate the units under test.
 - Place all test files in this directory, mirroring the package structure of the source files.
 - **Do not remove any existing tests unless they are redundant or incorrect; instead, update or supplement them as needed.**
-- **Run the Sonar Maven plugin:**  
+- **After test creation or updates are complete—either because the coverage threshold is met or further improvement is not possible—run the Sonar Maven plugin:**  
   Execute:  
   ```
   mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
