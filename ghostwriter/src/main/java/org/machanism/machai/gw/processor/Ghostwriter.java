@@ -323,9 +323,8 @@ public final class Ghostwriter {
 		ActProcessor processor = new ActProcessor(rootDir, config, genai);
 		if (cmd.hasOption("acts")) {
 			String value = cmd.getOptionValue("acts");
-			File actDir = new File(value);
-			logger.info("Act directory: {}", actDir);
-			processor.setActDir(actDir);
+			logger.info("Act directory: {}", value);
+			processor.setActDir(value);
 		}
 		return processor;
 	}

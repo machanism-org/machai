@@ -141,14 +141,8 @@ public class Act extends AbstractGWGoal {
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
 			if (acts != null) {
-				File rootDir = actProcessor.getRootDir();
-				File actsDir = new File(acts);
-				if (!actsDir.isAbsolute()) {
-					actsDir = new File(rootDir, acts);
-				}
-
-				logger.info("Act directory: {}", actsDir);
-				actProcessor.setActDir(actsDir);
+				logger.info("Act directory: {}", acts);
+				actProcessor.setActDir(acts);
 			}
 			if (excludes != null) {
 				actProcessor.setExcludes(excludes);

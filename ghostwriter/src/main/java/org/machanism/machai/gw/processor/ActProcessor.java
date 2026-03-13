@@ -2,6 +2,7 @@ package org.machanism.machai.gw.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -72,7 +74,7 @@ public class ActProcessor extends AIFileProcessor {
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
 
 	/** Optional directory containing external {@code *.toml} act files. */
-	private File actDir;
+	private String actsLocation;
 
 	/** Acts to run before the current act scan. */
 	private List<String> prologue;
@@ -97,7 +99,7 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public ActProcessor(File rootDir, Configurator configurator, String genai) {
 		super(rootDir, configurator, genai);
-		actDir = configurator.getFile("gw.acts", null);
+		actsLocation = configurator.get("gw.acts", null);
 	}
 
 	/**
@@ -178,7 +180,7 @@ public class ActProcessor extends AIFileProcessor {
 
 		Map<String, Object> actData = new HashMap<>();
 		try {
-			loadAct(name, actData, actDir);
+			loadAct(name, actData, actsLocation);
 			super.setDefaultPrompt(StringUtils.defaultString(prompt).trim());
 			applyActData(actData);
 
@@ -204,17 +206,17 @@ public class ActProcessor extends AIFileProcessor {
 	 * properties then override or extend the parent.
 	 * </p>
 	 *
-	 * @param name       the name of the act to load (without the {@code .toml}
-	 *                   extension)
-	 * @param properties destination map to populate with parsed act properties
-	 * @param actDir     optional directory containing user-defined (custom) act
-	 *                   files; may be {@code null}
+	 * @param name         the name of the act to load (without the {@code .toml}
+	 *                     extension)
+	 * @param properties   destination map to populate with parsed act properties
+	 * @param actsLocation optional directory containing user-defined (custom) act
+	 *                     files; may be {@code null}
 	 * @throws IOException              if reading act content fails
 	 * @throws IllegalArgumentException if the specified act cannot be found in
 	 *                                  either location
 	 */
-	public static void loadAct(String name, Map<String, Object> properties, File actDir) throws IOException {
-		TomlParseResult customToml = tryLoadActFromDirectory(properties, name, actDir);
+	public static void loadAct(String name, Map<String, Object> properties, String actsLocation2) throws IOException {
+		TomlParseResult customToml = tryLoadActFromDirectory(properties, name, actsLocation2);
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
@@ -230,7 +232,7 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		if (basedOn != null) {
-			loadAct(basedOn, properties, actDir);
+			loadAct(basedOn, properties, actsLocation2);
 			properties.remove(BASED_ON_PROPERTY_NAME);
 		}
 	}
@@ -260,25 +262,32 @@ public class ActProcessor extends AIFileProcessor {
 	/**
 	 * Attempts to load an act definition from a user-defined directory.
 	 *
-	 * @param properties destination for parsed dotted properties
-	 * @param name       act name (without {@code .toml})
-	 * @param actDir     directory containing {@code *.toml} act files (may be
-	 *                   {@code null})
+	 * @param properties   destination for parsed dotted properties
+	 * @param name         act name (without {@code .toml})
+	 * @param actsLocation directory containing {@code *.toml} act files (may be
+	 *                     {@code null})
 	 * @return parsed TOML result, or {@code null} when not found
 	 * @throws IOException if the file cannot be read
 	 */
-	public static TomlParseResult tryLoadActFromDirectory(Map<String, Object> properties, String name, File actDir)
+	public static TomlParseResult tryLoadActFromDirectory(Map<String, Object> properties, String name,
+			String actsLocation)
 			throws IOException {
-		if (actDir == null) {
+		if (actsLocation == null) {
 			return null;
 		}
 
-		File file = new File(actDir, name + TOML_EXTENSION);
 		TomlParseResult toml = null;
-		if (file.exists()) {
-			toml = Toml.parse(file.toPath());
-			setActData(properties, toml);
+		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
+			File file = new File(actsLocation, name + TOML_EXTENSION);
+			if (file.exists()) {
+				toml = Toml.parse(file.toPath());
+			}
+		} else {
+			URI uri = URI.create(actsLocation + "/" + name + TOML_EXTENSION);
+			toml = Toml.parse(uri.toURL().openStream());
 		}
+		setActData(properties, toml);
+
 		return toml;
 	}
 
@@ -388,16 +397,19 @@ public class ActProcessor extends AIFileProcessor {
 	/**
 	 * Sets the directory used for loading external act definition files.
 	 *
-	 * @param actDir directory containing {@code *.toml} act files
+	 * @param actsLocation directory containing {@code *.toml} act files
 	 */
-	public void setActDir(File actDir) {
-		if (actDir != null) {
-			if (!actDir.exists() || !actDir.isDirectory()) {
-				logger.error("Act directory does not exist or not a directory: {}", actDir.getAbsolutePath());
-				return;
+	public void setActDir(String actsLocation) {
+		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
+			File actDir = new File(actsLocation);
+			if (actDir != null) {
+				if (!actDir.exists() || !actDir.isDirectory()) {
+					logger.error("Act directory does not exist or not a directory: {}", actDir.getAbsolutePath());
+					return;
+				}
 			}
 		}
-		this.actDir = actDir;
+		this.actsLocation = actsLocation;
 	}
 
 	/**
