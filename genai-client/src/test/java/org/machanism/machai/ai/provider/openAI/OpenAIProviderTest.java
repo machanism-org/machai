@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.List;
 
@@ -37,6 +38,23 @@ class OpenAIProviderTest {
 		// Assert
 		assertEquals(OpenAIProvider.MAX_OUTPUT_TOKENS, getField("maxOutputTokens"));
 		assertEquals(OpenAIProvider.MAX_TOOL_CALLS, getField("maxToolCalls"));
+	}
+
+	@Test
+	void init_shouldLoadConfiguredOverrides() {
+		// Arrange
+		Configurator config = TestConfigurators.mapBacked();
+		config.set("chatModel", "gpt-test");
+		config.set("OPENAI_API_KEY", "dummy");
+		config.set("MAX_OUTPUT_TOKENS", "42");
+		config.set("MAX_TOOL_CALLS", "7");
+
+		// Act
+		provider.init(config);
+
+		// Assert
+		assertEquals(42L, getField("maxOutputTokens"));
+		assertEquals(7L, getField("maxToolCalls"));
 	}
 
 	@Test
@@ -144,6 +162,18 @@ class OpenAIProviderTest {
 		assertEquals(1, inputs.size());
 	}
 
+	@Test
+	void setTimeout_shouldUpdateTimeout_andGetTimeoutShouldReturnSame() {
+		// Arrange
+		provider.init(minimalConfig());
+
+		// Act
+		provider.setTimeout(123L);
+
+		// Assert
+		assertEquals(123L, provider.getTimeout());
+	}
+
 	private Configurator minimalConfig() {
 		Configurator config = TestConfigurators.mapBacked();
 		config.set("chatModel", "gpt-test");
@@ -153,7 +183,7 @@ class OpenAIProviderTest {
 
 	private Object getField(String name) {
 		try {
-			java.lang.reflect.Field f = OpenAIProvider.class.getDeclaredField(name);
+			Field f = OpenAIProvider.class.getDeclaredField(name);
 			f.setAccessible(true);
 			return f.get(provider);
 		} catch (Exception e) {
