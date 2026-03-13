@@ -1,10 +1,11 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -13,41 +14,88 @@ import org.junit.jupiter.api.io.TempDir;
 class DefaultProjectLayoutTest {
 
 	@TempDir
-	File tempDir;
+	Path tempDir;
 
 	@Test
-	void getModules_filtersExcludedDirectoriesAndCachesResult() throws Exception {
+	void getModules_shouldReturnImmediateSubdirectoriesExcludingKnownDirectories() throws IOException {
 		// Arrange
-		Files.createDirectories(new File(tempDir, "moduleA").toPath());
-		Files.createDirectories(new File(tempDir, "moduleB").toPath());
-		Files.createDirectories(new File(tempDir, "target").toPath());
-		Files.createDirectories(new File(tempDir, ".git").toPath());
+		Files.createDirectories(tempDir.resolve("module-a"));
+		Files.createDirectories(tempDir.resolve("module-b"));
+		Files.createDirectories(tempDir.resolve("target"));
+		Files.createDirectories(tempDir.resolve(".git"));
+		Files.createFile(tempDir.resolve("file.txt"));
 
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir);
+		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
-		List<String> first = layout.getModules();
-		Files.createDirectories(new File(tempDir, "moduleC").toPath());
-		List<String> second = layout.getModules();
+		List<String> modules = layout.getModules();
 
 		// Assert
-		assertEquals(2, first.size());
-		org.junit.jupiter.api.Assertions.assertTrue(first.contains("moduleA"));
-		org.junit.jupiter.api.Assertions.assertTrue(first.contains("moduleB"));
-		assertSame(first, second);
-		org.junit.jupiter.api.Assertions.assertFalse(second.contains("moduleC"));
+		assertEquals(2, modules.size());
+		assertTrue(modules.contains("module-a"));
+		assertTrue(modules.contains("module-b"));
+		assertFalse(modules.contains("target"));
+		assertFalse(modules.contains(".git"));
 	}
 
 	@Test
-	void projectDir_returnsSameTypeForChaining() {
+	void getModules_shouldReturnCachedListAndNotRescanAfterDirectoryChanges() throws IOException {
+		// Arrange
+		Files.createDirectories(tempDir.resolve("module-a"));
+		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
+		List<String> first = layout.getModules();
+		assertTrue(first.contains("module-a"));
+
+		Files.createDirectories(tempDir.resolve("module-added-later"));
+
+		// Act
+		List<String> second = layout.getModules();
+
+		// Assert
+		assertSame(first, second);
+		assertFalse(second.contains("module-added-later"));
+	}
+
+	@Test
+	void getModules_shouldReturnEmptyListWhenProjectDirNotSet() {
 		// Arrange
 		DefaultProjectLayout layout = new DefaultProjectLayout();
 
 		// Act
-		DefaultProjectLayout chained = layout.projectDir(tempDir);
+		List<String> modules = layout.getModules();
 
 		// Assert
-		assertSame(layout, chained);
-		assertEquals(tempDir.getAbsolutePath(), chained.getProjectDir().getAbsolutePath());
+		assertNotNull(modules);
+		assertTrue(modules.isEmpty());
+	}
+
+	@Test
+	void projectDir_shouldReturnDefaultProjectLayoutForFluentChaining() {
+		// Arrange
+		DefaultProjectLayout layout = new DefaultProjectLayout();
+		File dir = tempDir.toFile();
+
+		// Act
+		DefaultProjectLayout returned = layout.projectDir(dir);
+
+		// Assert
+		assertSame(layout, returned);
+		assertEquals(dir, returned.getProjectDir());
+	}
+
+	@Test
+	void getSources_getDocuments_getTests_shouldReturnEmptyLists() {
+		// Arrange
+		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
+
+		// Act
+		assertNotNull(layout.getSources());
+		assertNotNull(layout.getDocuments());
+		assertNotNull(layout.getTests());
+
+		// Assert
+		assertTrue(layout.getSources().isEmpty());
+		assertTrue(layout.getDocuments().isEmpty());
+		assertTrue(layout.getTests().isEmpty());
 	}
 }

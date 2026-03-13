@@ -1,13 +1,9 @@
 package org.machanism.machai.project;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,96 +15,122 @@ class ProjectProcessorTest {
 	File tempDir;
 
 	@Test
-	void scanFolder_whenModulesPresent_processesEachModule() throws Exception {
+	void scanFolder_shouldInvokeProcessFolderWhenModulesNull() throws Exception {
 		// Arrange
-		RecordingProcessor processor = new RecordingProcessor();
-		processor.layoutToReturn = new FixedModulesLayout(Arrays.asList("a", "b"));
+		TestProcessor processor = new TestProcessor();
+		processor.layoutToReturn = new TestLayout(tempDir, null);
 
 		// Act
 		processor.scanFolder(tempDir);
 
 		// Assert
-		assertEquals(Arrays.asList("a", "b"), processor.processedModules);
-		assertEquals(0, processor.processFolderInvocations);
+		assertEquals(1, processor.processFolderCalls);
+		assertSame(processor.layoutToReturn, processor.lastProcessedLayout);
 	}
 
 	@Test
-	void scanFolder_whenNoModules_callsProcessFolder() throws Exception {
+	void scanFolder_shouldInvokeProcessModuleForEachModuleWhenModulesNonNull() throws Exception {
 		// Arrange
-		RecordingProcessor processor = new RecordingProcessor();
-		processor.layoutToReturn = new FixedModulesLayout(null);
+		TestProcessor processor = new TestProcessor();
+		processor.layoutToReturn = new TestLayout(tempDir, java.util.Arrays.asList("m1", "m2"));
 
 		// Act
 		processor.scanFolder(tempDir);
 
 		// Assert
-		assertEquals(1, processor.processFolderInvocations);
-		assertEquals(0, processor.processedModules.size());
+		assertEquals(java.util.Arrays.asList("m1", "m2"), processor.processedModules);
+		assertEquals(0, processor.processFolderCalls);
 	}
 
 	@Test
-	void getProjectLayout_whenDirectoryMissing_propagatesFileNotFoundException() {
+	void getProjectLayout_shouldDelegateToProjectLayoutManager() throws Exception {
 		// Arrange
-		RecordingProcessor processor = new RecordingProcessor();
-		File missing = new File(tempDir, "missing");
+		TestProcessor processor = new TestProcessor();
 
-		// Act + Assert
-		assertThrows(FileNotFoundException.class, () -> processor.getProjectLayout(missing));
+		// Act
+		ProjectLayout layout = processor.getProjectLayout(tempDir);
+
+		// Assert
+		assertNotNull(layout);
+		assertEquals(tempDir, layout.getProjectDir());
 	}
 
-	static final class RecordingProcessor extends ProjectProcessor {
-		ProjectLayout layoutToReturn;
-		int processFolderInvocations;
-		boolean throwInProcessFolder;
-		final java.util.ArrayList<String> processedModules = new java.util.ArrayList<>();
+	@Test
+	void scanFolder_shouldPropagateFileNotFoundExceptionFromGetProjectLayout() {
+		// Arrange
+		TestProcessor processor = new TestProcessor();
+		processor.throwFromGetProjectLayout = true;
 
-		@Override
-		public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
-			if (layoutToReturn == null) {
-				return super.getProjectLayout(projectDir);
-			}
-			return layoutToReturn.projectDir(projectDir);
-		}
+		// Act
+		FileNotFoundException ex = assertThrows(FileNotFoundException.class, () -> processor.scanFolder(tempDir));
 
-		@Override
-		protected void processModule(File projectDir, String module) throws IOException {
-			processedModules.add(module);
-		}
+		// Assert
+		assertEquals("boom", ex.getMessage());
+	}
+
+	private static class TestProcessor extends ProjectProcessor {
+		int processFolderCalls;
+		ProjectLayout lastProcessedLayout;
+		final java.util.List<String> processedModules = new java.util.ArrayList<String>();
+		TestLayout layoutToReturn;
+		boolean throwFromGetProjectLayout;
 
 		@Override
 		public void processFolder(ProjectLayout processor) {
-			processFolderInvocations++;
-			if (throwInProcessFolder) {
-				throw new RuntimeException("boom");
+			processFolderCalls++;
+			lastProcessedLayout = processor;
+		}
+
+		@Override
+		protected void processModule(File projectDir, String module) {
+			processedModules.add(module);
+			// Intentionally do not delegate to super.processModule to avoid recursive scanFolder calls.
+		}
+
+		@Override
+		public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+			if (throwFromGetProjectLayout) {
+				throw new FileNotFoundException("boom");
 			}
+			if (layoutToReturn != null) {
+				return layoutToReturn;
+			}
+			return super.getProjectLayout(projectDir);
 		}
 	}
 
-	static final class FixedModulesLayout extends ProjectLayout {
-		private final List<String> modules;
+	private static class TestLayout extends ProjectLayout {
+		private final File dir;
+		private final java.util.List<String> modules;
 
-		FixedModulesLayout(List<String> modules) {
+		private TestLayout(File dir, java.util.List<String> modules) {
+			this.dir = dir;
 			this.modules = modules;
 		}
 
 		@Override
-		public List<String> getModules() {
+		public File getProjectDir() {
+			return dir;
+		}
+
+		@Override
+		public java.util.List<String> getModules() {
 			return modules;
 		}
 
 		@Override
-		public List<String> getSources() {
-			throw new UnsupportedOperationException();
+		public java.util.List<String> getSources() {
+			return java.util.Collections.emptyList();
 		}
 
 		@Override
-		public List<String> getDocuments() {
-			throw new UnsupportedOperationException();
+		public java.util.List<String> getDocuments() {
+			return java.util.Collections.emptyList();
 		}
 
 		@Override
-		public List<String> getTests() {
-			throw new UnsupportedOperationException();
+		public java.util.List<String> getTests() {
+			return java.util.Collections.emptyList();
 		}
 	}
 }

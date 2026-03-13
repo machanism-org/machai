@@ -1,11 +1,11 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -13,56 +13,90 @@ import org.junit.jupiter.api.io.TempDir;
 class PythonProjectLayoutTest {
 
 	@TempDir
-	File tempDir;
+	Path tempDir;
 
 	@Test
-	void isPythonProject_whenValidPyProjectAndNotPrivate_returnsTrue() throws Exception {
+	void isPythonProject_shouldReturnTrueWhenPyprojectHasNameAndNotPrivate() throws IOException {
 		// Arrange
-		String toml = "[project]\n" + "name = \"demo\"\n" + "classifiers = [\"License :: OSI Approved\"]\n";
-		Files.write(new File(tempDir, "pyproject.toml").toPath(), toml.getBytes(StandardCharsets.UTF_8));
+		Files.write(tempDir.resolve("pyproject.toml"),
+				("[project]\n" +
+						"name = \"myproj\"\n" +
+						"classifiers = [\"Development Status :: 4 - Beta\"]\n")
+						.getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = PythonProjectLayout.isPythonProject(tempDir);
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
 
 		// Assert
 		assertTrue(result);
 	}
 
 	@Test
-	void isPythonProject_whenPrivateClassifierPresent_returnsFalse() throws Exception {
+	void isPythonProject_shouldReturnFalseWhenPyprojectMissing() {
 		// Arrange
-		String toml = "[project]\n" + "name = \"demo\"\n" + "classifiers = [\"Private :: Do Not Publish\"]\n";
-		Files.write(new File(tempDir, "pyproject.toml").toPath(), toml.getBytes(StandardCharsets.UTF_8));
+		// no pyproject.toml
 
 		// Act
-		boolean result = PythonProjectLayout.isPythonProject(tempDir);
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
 
 		// Assert
 		assertFalse(result);
 	}
 
 	@Test
-	void isPythonProject_whenMissingName_returnsFalse() throws Exception {
+	void isPythonProject_shouldReturnFalseWhenClassifiersContainPrivate_caseInsensitive() throws IOException {
 		// Arrange
-		String toml = "[project]\n" + "classifiers = [\"License :: OSI Approved\"]\n";
-		Files.write(new File(tempDir, "pyproject.toml").toPath(), toml.getBytes(StandardCharsets.UTF_8));
+		Files.write(tempDir.resolve("pyproject.toml"),
+				("[project]\n" +
+						"name = \"myproj\"\n" +
+						"classifiers = [\"Private :: Do Not Publish\"]\n")
+						.getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = PythonProjectLayout.isPythonProject(tempDir);
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
 
 		// Assert
 		assertFalse(result);
 	}
 
 	@Test
-	void isPythonProject_whenTomlUnreadable_returnsFalse() throws Exception {
+	void isPythonProject_shouldReturnFalseWhenProjectNameMissing() throws IOException {
 		// Arrange
-		Files.createDirectories(new File(tempDir, "pyproject.toml").toPath());
+		Files.write(tempDir.resolve("pyproject.toml"),
+				("[project]\n" +
+						"classifiers = [\"Development Status :: 4 - Beta\"]\n")
+						.getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = PythonProjectLayout.isPythonProject(tempDir);
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
 
 		// Assert
 		assertFalse(result);
+	}
+
+	@Test
+	void isPythonProject_shouldReturnFalseWhenPyprojectIsInvalidToml() throws IOException {
+		// Arrange
+		Files.write(tempDir.resolve("pyproject.toml"), "this is not toml =".getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		boolean result = PythonProjectLayout.isPythonProject(tempDir.toFile());
+
+		// Assert
+		assertFalse(result);
+	}
+
+	@Test
+	void getSources_getDocuments_getTests_shouldReturnEmptyLists() {
+		// Arrange
+		PythonProjectLayout layout = new PythonProjectLayout();
+
+		// Act / Assert
+		assertNotNull(layout.getSources());
+		assertNotNull(layout.getDocuments());
+		assertNotNull(layout.getTests());
+		assertTrue(layout.getSources().isEmpty());
+		assertTrue(layout.getDocuments().isEmpty());
+		assertTrue(layout.getTests().isEmpty());
 	}
 }

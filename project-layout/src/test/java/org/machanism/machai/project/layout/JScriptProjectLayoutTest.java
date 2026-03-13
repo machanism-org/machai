@@ -1,13 +1,12 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Collections;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -16,72 +15,115 @@ import org.junit.jupiter.api.io.TempDir;
 class JScriptProjectLayoutTest {
 
 	@TempDir
-	File tempDir;
+	Path tempDir;
 
 	@Test
-	void isPackageJsonPresent_whenPackageJsonExists_returnsTrue() throws Exception {
+	void isPackageJsonPresent_shouldReturnTrueWhenPackageJsonExists() throws IOException {
 		// Arrange
-		Files.write(new File(tempDir, "package.json").toPath(), "{}".getBytes(StandardCharsets.UTF_8));
+		Files.write(tempDir.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = JScriptProjectLayout.isPackageJsonPresent(tempDir);
+		boolean present = JScriptProjectLayout.isPackageJsonPresent(tempDir.toFile());
 
 		// Assert
-		org.junit.jupiter.api.Assertions.assertTrue(result);
+		assertTrue(present);
 	}
 
 	@Test
-	void getModules_whenNoWorkspaces_returnsEmptyList() throws Exception {
+	void isPackageJsonPresent_shouldReturnFalseWhenPackageJsonMissing() {
 		// Arrange
-		Files.write(new File(tempDir, "package.json").toPath(), "{\"name\":\"root\"}".getBytes(StandardCharsets.UTF_8));
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir);
+		File dir = tempDir.toFile();
 
 		// Act
-		List<String> modules = layout.getModules();
+		boolean present = JScriptProjectLayout.isPackageJsonPresent(dir);
 
 		// Assert
-		assertNotNull(modules);
-		assertEquals(Collections.emptyList(), modules);
+		assertFalse(present);
 	}
 
 	@Test
-	void getModules_whenWorkspacesArray_returnsListOrEmptyButNotNull() throws Exception {
+	void getModules_shouldReturnEmptyListWhenNoWorkspacesKey() throws IOException {
 		// Arrange
-		Files.createDirectories(new File(tempDir, "packages\\a").toPath());
-		Files.createDirectories(new File(tempDir, "packages\\b").toPath());
-
-		String packageJson = "{\n" + "  \"name\": \"root\",\n" + "  \"workspaces\": [\"packages/*\"]\n" + "}";
-		Files.write(new File(tempDir, "package.json").toPath(), packageJson.getBytes(StandardCharsets.UTF_8));
-
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir);
+		Files.write(tempDir.resolve("package.json"), "{\"name\":\"root\"}".getBytes(StandardCharsets.UTF_8));
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
 		List<String> modules = layout.getModules();
 
 		// Assert
 		assertNotNull(modules);
+		assertTrue(modules.isEmpty());
 	}
 
 	@Test
-	void getProjectId_readsNameFromPackageJson() throws Exception {
+	void getModules_shouldResolveWorkspaceGlobsAndReturnRelativeModulePaths() throws IOException {
 		// Arrange
-		Files.write(new File(tempDir, "package.json").toPath(), "{\"name\":\"my-app\"}".getBytes(StandardCharsets.UTF_8));
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir);
+		Files.write(tempDir.resolve("package.json"),
+				("{\"name\":\"root\",\"workspaces\":[\"packages/*\",\"./apps/*\"]}")
+						.getBytes(StandardCharsets.UTF_8));
+
+		Path packages = Files.createDirectories(tempDir.resolve("packages"));
+		Path apps = Files.createDirectories(tempDir.resolve("apps"));
+		Path p1 = Files.createDirectories(packages.resolve("p1"));
+		Path p2 = Files.createDirectories(packages.resolve("p2"));
+		Path app1 = Files.createDirectories(apps.resolve("app1"));
+
+		Files.write(p1.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
+		Files.write(p2.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
+		Files.write(app1.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
+
+		// Directory matches glob but missing package.json -> should not be included.
+		Files.createDirectories(packages.resolve("no-package-json"));
+
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
+
+		// Act
+		List<String> modules = layout.getModules();
+
+		// Assert
+		assertEquals(3, modules.size());
+		assertTrue(modules.contains("packages/p1"));
+		assertTrue(modules.contains("packages/p2"));
+		assertTrue(modules.contains("apps/app1"));
+	}
+
+	@Test
+	void getProjectId_shouldReturnNameFromPackageJson() throws IOException {
+		// Arrange
+		Files.write(tempDir.resolve("package.json"), "{\"name\":\"my-package\"}".getBytes(StandardCharsets.UTF_8));
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
 		String id = layout.getProjectId();
 
 		// Assert
-		assertEquals("my-app", id);
+		assertEquals("my-package", id);
 	}
 
 	@Test
-	void getModules_whenPackageJsonInvalid_throwsIllegalArgumentException() throws Exception {
+	void getModules_shouldThrowIllegalStateExceptionWhenProjectDirNotSet() {
 		// Arrange
-		Files.write(new File(tempDir, "package.json").toPath(), "{invalid".getBytes(StandardCharsets.UTF_8));
-		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir);
+		JScriptProjectLayout layout = new JScriptProjectLayout();
 
-		// Act + Assert
-		assertThrows(IllegalArgumentException.class, layout::getModules);
+		// Act
+		IllegalStateException ex = assertThrows(IllegalStateException.class, layout::getModules);
+
+		// Assert
+		assertTrue(ex.getMessage().contains("projectDir"));
+	}
+
+	@Test
+	void getSources_getDocuments_getTests_shouldReturnEmptyLists() throws IOException {
+		// Arrange
+		Files.write(tempDir.resolve("package.json"), "{\"name\":\"root\"}".getBytes(StandardCharsets.UTF_8));
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
+
+		// Act / Assert
+		assertNotNull(layout.getSources());
+		assertNotNull(layout.getDocuments());
+		assertNotNull(layout.getTests());
+		assertTrue(layout.getSources().isEmpty());
+		assertTrue(layout.getDocuments().isEmpty());
+		assertTrue(layout.getTests().isEmpty());
 	}
 }

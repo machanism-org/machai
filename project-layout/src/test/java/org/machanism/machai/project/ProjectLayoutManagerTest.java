@@ -1,15 +1,13 @@
 package org.machanism.machai.project;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,106 +21,127 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
 class ProjectLayoutManagerTest {
 
 	@TempDir
-	File tempDir;
+	Path tempDir;
 
 	@Test
-	void detectProjectLayout_whenDirectoryDoesNotExist_throwsFileNotFoundException() {
+	void constructor_shouldThrowIllegalStateException() throws Exception {
 		// Arrange
-		File missing = new File(tempDir, "missing");
+		java.lang.reflect.Constructor<ProjectLayoutManager> ctor = ProjectLayoutManager.class.getDeclaredConstructor();
+		ctor.setAccessible(true);
+
+		// Act
+		Exception ex = assertThrows(Exception.class, ctor::newInstance);
+
+		// Assert
+		Throwable cause = ex.getCause();
+		assertNotNull(cause);
+		assertInstanceOf(IllegalStateException.class, cause);
+		assertEquals("Utility class", cause.getMessage());
+	}
+
+	@Test
+	void detectProjectLayout_shouldThrowFileNotFoundExceptionWhenDirDoesNotExist() {
+		// Arrange
+		File missing = tempDir.resolve("missing").toFile();
 
 		// Act
 		FileNotFoundException ex = assertThrows(FileNotFoundException.class,
 				() -> ProjectLayoutManager.detectProjectLayout(missing));
 
 		// Assert
-		assertEquals(missing.getAbsolutePath(), ex.getMessage());
+		assertTrue(ex.getMessage().endsWith("missing"));
 	}
 
 	@Test
-	void detectProjectLayout_whenMavenPomPresent_returnsMavenLayoutAndSetsProjectDir() throws Exception {
+	void detectProjectLayout_shouldReturnMavenLayoutWhenPomXmlPresent() throws Exception {
 		// Arrange
-		File dir = new File(tempDir, "maven");
-		Files.createDirectories(dir.toPath());
-		Files.write(new File(dir, "pom.xml").toPath(), minimalPom("jar").getBytes(StandardCharsets.UTF_8));
+		Files.write(tempDir.resolve("pom.xml"), "<project/>".getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
+		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir.toFile());
 
 		// Assert
 		assertInstanceOf(MavenProjectLayout.class, layout);
-		assertEquals(dir.getAbsolutePath(), layout.getProjectDir().getAbsolutePath());
+		assertEquals(tempDir.toFile(), layout.getProjectDir());
+		assertTrue(MavenProjectLayout.isMavenProject(tempDir.toFile()));
 	}
 
 	@Test
-	void detectProjectLayout_whenGradleBuildPresent_returnsGradleLayoutAndSetsProjectDir() throws Exception {
+	void detectProjectLayout_shouldReturnGradleLayoutWhenBuildGradlePresentAndNoPom() throws Exception {
 		// Arrange
-		File dir = new File(tempDir, "gradle");
-		Files.createDirectories(dir.toPath());
-		Files.write(new File(dir, "build.gradle").toPath(), "plugins {}".getBytes(StandardCharsets.UTF_8));
+		Files.write(tempDir.resolve("build.gradle"), "".getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
+		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir.toFile());
 
 		// Assert
 		assertInstanceOf(GragleProjectLayout.class, layout);
-		assertEquals(dir.getAbsolutePath(), layout.getProjectDir().getAbsolutePath());
+		assertEquals(tempDir.toFile(), layout.getProjectDir());
+		assertTrue(GragleProjectLayout.isGradleProject(tempDir.toFile()));
+		assertFalse(MavenProjectLayout.isMavenProject(tempDir.toFile()));
 	}
 
 	@Test
-	void detectProjectLayout_whenPackageJsonPresent_returnsJScriptLayoutAndSetsProjectDir() throws IOException {
+	void detectProjectLayout_shouldReturnJScriptLayoutWhenPackageJsonPresentAndNoPomOrGradle() throws Exception {
 		// Arrange
-		File dir = new File(tempDir, "js");
-		Files.createDirectories(dir.toPath());
-		Files.write(new File(dir, "package.json").toPath(), "{}".getBytes(StandardCharsets.UTF_8));
+		Files.write(tempDir.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
+		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir.toFile());
 
 		// Assert
 		assertInstanceOf(JScriptProjectLayout.class, layout);
-		assertEquals(dir.getAbsolutePath(), layout.getProjectDir().getAbsolutePath());
+		assertEquals(tempDir.toFile(), layout.getProjectDir());
+		assertTrue(JScriptProjectLayout.isPackageJsonPresent(tempDir.toFile()));
+		assertFalse(GragleProjectLayout.isGradleProject(tempDir.toFile()));
+		assertFalse(MavenProjectLayout.isMavenProject(tempDir.toFile()));
 	}
 
 	@Test
-	void detectProjectLayout_whenPyProjectTomlPresentAndNonPrivate_returnsPythonLayoutAndSetsProjectDir() throws IOException {
+	void detectProjectLayout_shouldReturnPythonLayoutWhenPyprojectTomlPresentAndPublic() throws Exception {
 		// Arrange
-		File dir = new File(tempDir, "py");
-		Files.createDirectories(dir.toPath());
-		String toml = "[project]\nname = \"demo\"\n";
-		Files.write(new File(dir, "pyproject.toml").toPath(), toml.getBytes(StandardCharsets.UTF_8));
+		String pyproject = "[project]\nname = 'demo'\nclassifiers = ['Development Status :: 4 - Beta']\n";
+		Files.write(tempDir.resolve("pyproject.toml"), pyproject.getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
+		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir.toFile());
 
 		// Assert
 		assertInstanceOf(PythonProjectLayout.class, layout);
-		assertEquals(dir.getAbsolutePath(), layout.getProjectDir().getAbsolutePath());
+		assertEquals(tempDir.toFile(), layout.getProjectDir());
+		assertTrue(PythonProjectLayout.isPythonProject(tempDir.toFile()));
+		assertFalse(JScriptProjectLayout.isPackageJsonPresent(tempDir.toFile()));
+		assertFalse(GragleProjectLayout.isGradleProject(tempDir.toFile()));
+		assertFalse(MavenProjectLayout.isMavenProject(tempDir.toFile()));
 	}
 
 	@Test
-	void detectProjectLayout_whenNoMarkersButExists_returnsDefaultLayoutAndSetsProjectDir() throws Exception {
+	void detectProjectLayout_shouldReturnDefaultLayoutWhenDirExistsAndNoMarkers() throws Exception {
 		// Arrange
-		File dir = new File(tempDir, "default");
-		Files.createDirectories(dir.toPath());
+		// tempDir exists but has no marker files
 
 		// Act
-		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
+		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir.toFile());
 
 		// Assert
-		assertNotNull(layout);
 		assertInstanceOf(DefaultProjectLayout.class, layout);
-		assertEquals(dir.getAbsolutePath(), layout.getProjectDir().getAbsolutePath());
+		assertEquals(tempDir.toFile(), layout.getProjectDir());
+		assertFalse(MavenProjectLayout.isMavenProject(tempDir.toFile()));
+		assertFalse(GragleProjectLayout.isGradleProject(tempDir.toFile()));
+		assertFalse(JScriptProjectLayout.isPackageJsonPresent(tempDir.toFile()));
+		assertFalse(PythonProjectLayout.isPythonProject(tempDir.toFile()));
 	}
 
-	private static String minimalPom(String packaging) {
-		return "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
-				+ "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
-				+ "  <modelVersion>4.0.0</modelVersion>\n"
-				+ "  <groupId>org.example</groupId>\n"
-				+ "  <artifactId>demo</artifactId>\n"
-				+ "  <version>1.0.0</version>\n"
-				+ "  <packaging>" + packaging + "</packaging>\n"
-				+ "</project>\n";
+	@Test
+	void detectProjectLayout_shouldPreferMavenOverGradleWhenBothPresent() throws IOException {
+		// Arrange
+		Files.write(tempDir.resolve("pom.xml"), "<project/>".getBytes(StandardCharsets.UTF_8));
+		Files.write(tempDir.resolve("build.gradle"), "".getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		ProjectLayout layout = assertDoesNotThrow(() -> ProjectLayoutManager.detectProjectLayout(tempDir.toFile()));
+
+		// Assert
+		assertInstanceOf(MavenProjectLayout.class, layout);
 	}
 }
