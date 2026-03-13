@@ -46,8 +46,16 @@ public class BindexRegister extends BindexProjectProcessor {
 	 * @param genai GenAI provider identifier used by {@link Picker}
 	 * @param url   MongoDB connection URI to use; when {@code null}, {@link Picker} chooses a default
 	 * @param conf  configurator used to initialize the provider
+	 * @throws IllegalArgumentException if {@code genai} or {@code conf} is {@code null}
 	 */
 	public BindexRegister(String genai, String url, Configurator conf) {
+		if (genai == null) {
+			throw new IllegalArgumentException("genai must not be null");
+		}
+		if (conf == null) {
+			throw new IllegalArgumentException("conf must not be null");
+		}
+
 		this.picker = new Picker(genai, url, conf);
 	}
 
@@ -84,7 +92,8 @@ public class BindexRegister extends BindexProjectProcessor {
 	/**
 	 * Enables or disables update mode.
 	 *
-	 * @param overwrite {@code true} to overwrite existing registrations; {@code false} to only	 *                  register when missing
+	 * @param overwrite {@code true} to overwrite existing registrations; {@code false} to only
+	 *                  register when missing
 	 * @return this instance for chaining
 	 */
 	public BindexRegister update(boolean overwrite) {
