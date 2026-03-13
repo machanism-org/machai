@@ -336,7 +336,7 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 	}
 
-	private String waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture,
+	String waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture,
 			LimitedStringBuilder output, String commandId)
 			throws InterruptedException, TimeoutException, ExecutionException {
 		// Sonar java:S3776 - extract waiting/collection logic to reduce cognitive

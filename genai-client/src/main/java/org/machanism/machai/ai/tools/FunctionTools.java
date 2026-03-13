@@ -51,6 +51,10 @@ public interface FunctionTools {
 	/**
 	 * Resolves ${...} placeholders using the provided configurator.
 	 *
+	 * <p>
+	 * Unresolvable placeholders are left as-is.
+	 * </p>
+	 *
 	 * @param value raw value that may contain placeholders
 	 * @param conf  configurator used for lookup; if {@code null}, the value is
 	 *              returned unchanged
@@ -61,24 +65,27 @@ public interface FunctionTools {
 			return value;
 		}
 
-		Properties properties = new Properties();
+		String current = value;
+		for (int i = 0; i < 10; i++) {
+			Properties properties = new Properties();
 
-		Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
-		Matcher matcher = pattern.matcher(value);
-		while (matcher.find()) {
-			String propName = matcher.group(1);
-			String propValue = conf.get(propName);
-			if (propValue != null) {
-				properties.put(propName, propValue);
+			Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
+			Matcher matcher = pattern.matcher(current);
+			while (matcher.find()) {
+				String propName = matcher.group(1);
+				String propValue = conf.get(propName);
+				if (propValue != null) {
+					properties.put(propName, propValue);
+				}
 			}
+
+			String replaced = StringSubstitutor.replace(current, properties);
+			if (replaced.equals(current) || !Strings.CS.contains(replaced, "${")) {
+				return replaced;
+			}
+			current = replaced;
 		}
 
-		String replace = StringSubstitutor.replace(value, properties);
-
-		if (Strings.CS.contains(replace, "${")) {
-			replace = replace(replace, conf);
-		}
-
-		return replace;
+		return current;
 	}
 }

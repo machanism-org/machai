@@ -11,6 +11,7 @@ package org.machanism.machai.ai.tools;
 public class LimitedStringBuilder {
 	private final int maxSize;
 	private final StringBuilder sb;
+	private boolean truncated;
 
 	/**
 	 * Creates a builder that keeps at most {@code maxSize} characters.
@@ -24,6 +25,7 @@ public class LimitedStringBuilder {
 		}
 		this.maxSize = maxSize;
 		this.sb = new StringBuilder();
+		this.truncated = false;
 	}
 
 	/**
@@ -42,6 +44,7 @@ public class LimitedStringBuilder {
 		int excess = sb.length() - maxSize;
 		if (excess > 0) {
 			sb.delete(0, excess);
+			truncated = true;
 		}
 
 		return this;
@@ -57,7 +60,7 @@ public class LimitedStringBuilder {
 	 * @return retained text (possibly with a truncation prefix)
 	 */
 	public String getLastText() {
-		String prefix = (sb.length() == maxSize) ? "(Previous content has been truncated)..." : "";
+		String prefix = truncated ? "(Previous content has been truncated)..." : "";
 		return prefix + sb.toString();
 	}
 
@@ -75,5 +78,6 @@ public class LimitedStringBuilder {
 	 */
 	public void clear() {
 		sb.setLength(0);
+		truncated = false;
 	}
 }

@@ -190,7 +190,7 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	// Sonar java:S3776 - extracted to reduce cognitive complexity of getWebContent
-	private String applySelectorIfPresent(String selector, String response) {
+	String applySelectorIfPresent(String selector, String response) {
 		if (StringUtils.isBlank(selector)) {
 			return response;
 		}
@@ -225,7 +225,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @return connection
 	 * @throws IOException if opening a connection fails
 	 */
-	private HttpURLConnection getConnection(URI uri, String headers) throws IOException {
+	HttpURLConnection getConnection(URI uri, String headers) throws IOException {
 		URI cleanUri = uri;
 		HttpURLConnection connection;
 
@@ -255,7 +255,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @return response content including an initial status line
 	 * @throws IOException if the request cannot be executed
 	 */
-	private String getWebPage(HttpURLConnection connection, int timeout, String charsetName) throws IOException {
+	String getWebPage(HttpURLConnection connection, int timeout, String charsetName) throws IOException {
 		StringBuilder output = new StringBuilder();
 
 		connection.setRequestMethod("GET");
@@ -381,7 +381,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param headers    newline-separated header definitions
 	 * @param connection connection to configure
 	 */
-	private void fillHeader(String headers, HttpURLConnection connection) {
+	void fillHeader(String headers, HttpURLConnection connection) {
 		if (headers != null) {
 			for (String headerLine : headers.split("\\R")) {
 				int idx = headerLine.indexOf('=');
