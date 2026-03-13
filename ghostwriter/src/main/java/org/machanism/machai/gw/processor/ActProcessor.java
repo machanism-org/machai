@@ -286,7 +286,11 @@ public class ActProcessor extends AIFileProcessor {
 			URI uri = URI.create(actsLocation + "/" + name + TOML_EXTENSION);
 			toml = Toml.parse(uri.toURL().openStream());
 		}
-		setActData(properties, toml);
+
+		// Sonar java:S2259 - avoid NPE when act is not found in a custom directory.
+		if (toml != null) {
+			setActData(properties, toml);
+		}
 
 		return toml;
 	}
@@ -401,11 +405,10 @@ public class ActProcessor extends AIFileProcessor {
 	public void setActDir(String actsLocation) {
 		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
 			File actDir = new File(actsLocation);
-			if (actDir != null) {
-				if (!actDir.exists() || !actDir.isDirectory()) {
-					logger.error("Act directory does not exist or not a directory: {}", actDir.getAbsolutePath());
-					return;
-				}
+			// Sonar java:S2589 - new File(...) never returns null.
+			if (!actDir.exists() || !actDir.isDirectory()) {
+				logger.error("Act directory does not exist or not a directory: {}", actDir.getAbsolutePath());
+				return;
 			}
 		}
 		this.actsLocation = actsLocation;
