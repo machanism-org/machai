@@ -117,6 +117,26 @@ public class Assembly extends AbstractMojo {
 	protected File basedir;
 
 	/**
+	 * Factory method for creating a {@link Picker}.
+	 * <p>
+	 * Extracted for testability.
+	 * </p>
+	 */
+	protected Picker createPicker(Configurator config) {
+		return new Picker(pickGenai, registerUrl, config);
+	}
+
+	/**
+	 * Factory method for creating an {@link ApplicationAssembly}.
+	 * <p>
+	 * Extracted for testability.
+	 * </p>
+	 */
+	protected ApplicationAssembly createAssembly(Configurator config) {
+		return new ApplicationAssembly(assemblyGenai, config, basedir);
+	}
+
+	/**
 	 * Executes the {@code assembly} goal.
 	 *
 	 * <p>
@@ -148,7 +168,7 @@ public class Assembly extends AbstractMojo {
 
 			List<Bindex> bindexList;
 			// Sonar java:S2095 - ensure Picker is always closed to avoid resource leaks.
-			try (Picker picker = new Picker(pickGenai, registerUrl, config)) {
+			try (Picker picker = createPicker(config)) {
 				picker.setScore(score);
 				bindexList = picker.pick(query);
 
@@ -166,7 +186,7 @@ public class Assembly extends AbstractMojo {
 				}
 			}
 
-			ApplicationAssembly assembly = new ApplicationAssembly(assemblyGenai, config, basedir);
+			ApplicationAssembly assembly = createAssembly(config);
 
 			getLog().info("The project directory: " + basedir);
 			assembly.projectDir(basedir);
