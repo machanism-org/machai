@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -117,13 +117,14 @@ class GenAIAdapterTest {
 	}
 
 	@Test
-	void allMethods_delegateToUnderlyingProvider() throws IOException, MalformedURLException {
+	void allMethods_delegateToUnderlyingProvider() throws IOException {
 		// Arrange
 		RecordingProvider provider = new RecordingProvider();
 		GenAIProvider adapter = new TestAdapter(provider);
 		Configurator conf = null;
 		File file = new File("test.txt");
-		URL url = new URL("https://example.test/file");
+		// Sonar java:S1874 - URL is deprecated; build via URI and convert only when needed.
+		URL url = URI.create("https://example.test/file").toURL();
 		GenAIProvider.ToolFunction fn = params -> "done";
 
 		// Act

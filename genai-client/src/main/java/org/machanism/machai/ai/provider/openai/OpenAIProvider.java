@@ -450,7 +450,8 @@ public class OpenAIProvider implements GenAIProvider {
 	private Object safelyInvokeTool(String name, ToolFunction tool, Object[] arguments) {
 		try {
 			return tool.apply(arguments);
-		} catch (Exception e) {
+		} catch (IOException e) {
+			// Sonar java:S112 - return a safe error result rather than propagating generic exceptions.
 			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 					+ e.getMessage();
 			logger.error(errMsg);
@@ -462,38 +463,45 @@ public class OpenAIProvider implements GenAIProvider {
 	 * Writes the current request inputs to {@link #inputsLog} when logging is
 	 * enabled.
 	 */
-	private void logInputs() {
+	void logInputs() {
 		if (inputsLog != null) {
 			File parentFile = inputsLog.getParentFile();
 			if (parentFile != null && !parentFile.exists()) {
 				parentFile.mkdirs();
 			}
 			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
-				streamWriter.write(StringUtils.defaultString(instructions));
-
-				for (ResponseInputItem responseInputItem : inputs) {
-					String inputText = "";
-					if (responseInputItem.isMessage()) {
-						ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
-						if (responseInputContent.isValid()) {
-							if (responseInputContent.isInputText()) {
-								inputText = responseInputContent.inputText().get().text();
-							} else if (responseInputContent.isInputFile()) {
-								inputText = "Add resource by URL: "
-										+ responseInputContent.inputFile().get().fileUrl().get();
-							}
-						} else {
-							inputText = "Data invalid: " + responseInputItem;
-						}
-						streamWriter.write(inputText);
-						streamWriter.write("\n\n");
-					}
-				}
-				logger.debug("LLM Inputs: {}", inputsLog);
+				logInputs(streamWriter);
 			} catch (IOException e) {
 				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
 			}
 		}
+	}
+
+	private void logInputs(Writer streamWriter) throws IOException {
+		streamWriter.write(StringUtils.defaultString(instructions));
+
+		for (ResponseInputItem responseInputItem : inputs) {
+			String inputText = "";
+			if (responseInputItem.isMessage()) {
+				ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
+				if (responseInputContent.isValid()) {
+					if (responseInputContent.isInputText()) {
+						// Sonar java:S3655 - avoid calling Optional#get() without a presence check
+						inputText = responseInputContent.inputText().map(t -> t.text()).orElse(StringUtils.EMPTY);
+					} else if (responseInputContent.isInputFile()) {
+						// Sonar java:S3655 - avoid calling Optional#get() without a presence check
+						String url = responseInputContent.inputFile().flatMap(ResponseInputFile::fileUrl)
+								.orElse(StringUtils.EMPTY);
+						inputText = "Add resource by URL: " + url;
+					}
+				} else {
+					inputText = "Data invalid: " + responseInputItem;
+				}
+				streamWriter.write(inputText);
+				streamWriter.write("\n\n");
+			}
+		}
+		logger.debug("LLM Inputs: {}", inputsLog);
 	}
 
 	/**

@@ -151,7 +151,8 @@ public class WebFunctionTools implements FunctionTools {
 	 */
 	public String getWebContent(Object[] params) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
-		// Sonar java:S2629 - avoid eager toString() evaluation when log level is disabled
+		// Sonar java:S2629 - avoid eager toString() evaluation when log level is
+		// disabled
 		if (logger.isInfoEnabled()) {
 			logger.info("Fetching web content [{}]: {}", requestId, Arrays.toString(params));
 		}
@@ -216,8 +217,8 @@ public class WebFunctionTools implements FunctionTools {
 	 * Creates and configures an {@link HttpURLConnection}.
 	 *
 	 * <p>
-	 * If the URI contains {@code userInfo}, it is removed from the request URI and used to
-	 * set an HTTP Basic {@code Authorization} header.
+	 * If the URI contains {@code userInfo}, it is removed from the request URI and
+	 * used to set an HTTP Basic {@code Authorization} header.
 	 * </p>
 	 *
 	 * @param uri     URI to connect to
@@ -231,7 +232,8 @@ public class WebFunctionTools implements FunctionTools {
 
 		String userInfo = uri.getUserInfo();
 		if (userInfo != null) {
-			// Sonar java:S1874 - URL is deprecated; use URI and convert to URL only when opening the connection
+			// Sonar java:S1874 - URL is deprecated; use URI and convert to URL only when
+			// opening the connection
 			cleanUri = URI.create(uri.toString().replace("//" + userInfo + "@", "//"));
 			byte[] bytes = userInfo.getBytes(StandardCharsets.UTF_8);
 			String basicToken = Base64.getEncoder().encodeToString(bytes);
@@ -303,7 +305,8 @@ public class WebFunctionTools implements FunctionTools {
 	 */
 	public String callRestApi(Object[] params) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
-		// Sonar java:S2629 - avoid eager toString() evaluation when log level is disabled
+		// Sonar java:S2629 - avoid eager toString() evaluation when log level is
+		// disabled
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing REST call [{}]: {}", requestId, Arrays.toString(params));
 		}
@@ -313,61 +316,74 @@ public class WebFunctionTools implements FunctionTools {
 
 		url = replace(url, configurator);
 
-		String method = props.has("method") ? props.get("method").asText("GET") : "GET";
-		String headers = props.has(HEADERS_FIELD) ? props.get(HEADERS_FIELD).asText(null) : null;
-		String body = props.has("body") ? props.get("body").asText(null) : null;
-		int timeout = props.has(TIMEOUT_FIELD) ? props.get(TIMEOUT_FIELD).asInt(TIMEOUT) : TIMEOUT;
-		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
-				: DEFAULT_CHARSET;
-
 		try {
-			HttpURLConnection connection = getConnection(URI.create(url), headers);
-			logger.info("[REST {}] URL: {}", requestId, connection.getURL());
+			String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
+					: DEFAULT_CHARSET;
 
-			connection.setRequestMethod(method);
-			connection.setConnectTimeout(timeout);
-			connection.setReadTimeout(timeout);
-
-			if (body != null && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
-					|| "PATCH".equalsIgnoreCase(method))) {
-				connection.setDoOutput(true);
-				try (OutputStream os = connection.getOutputStream()) {
-					os.write(body.getBytes(charsetName));
-				}
-			}
+			HttpURLConnection connection = getConnection(requestId, props, url, charsetName);
 
 			int responseCode = connection.getResponseCode();
 			StringBuilder response = new StringBuilder();
 			response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
 					.append("\n");
 
-			String result;
-			InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
-			if (in != null) {
-				try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
-					String line;
-					while ((line = reader.readLine()) != null) {
-						response.append(line).append("\n");
-					}
-				}
-
-				result = response.toString();
-				// Sonar java:S2629 - avoid eager result.replaceAll() when INFO is disabled
-				if (logger.isInfoEnabled()) {
-					logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
-							StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
-				}
-				logger.debug("[REST {}] Received response ({} bytes): {}", requestId, response.length(), result);
-			} else {
-				result = "ResponseCode: " + connection.getResponseCode() + " " + connection.getRequestMethod();
-			}
-
-			return result;
+			return parseResult(requestId, charsetName, connection, responseCode, response);
 
 		} catch (Exception e) {
 			logger.error("[REST {}] IO error during REST call: {}", requestId, e.getMessage(), e);
 			return "IO Error: " + e.getMessage();
 		}
+	}
+
+	private String parseResult(String requestId, String charsetName, HttpURLConnection connection, int responseCode,
+			StringBuilder response) throws IOException {
+		InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
+		if (in != null) {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					response.append(line).append("\n");
+				}
+			}
+
+			String result = response.toString();
+			// Sonar java:S1488 - immediately return this expression instead of assigning it to a temporary variable
+			// "result".
+			// Sonar java:S2629 - avoid eager result.replaceAll() when INFO is disabled
+			if (logger.isInfoEnabled()) {
+				logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
+						StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
+			}
+			logger.debug("[REST {}] Received response ({} bytes): {}", requestId, response.length(), result);
+			return result;
+		}
+
+		// Sonar java:S1488 - return expression directly.
+		return "ResponseCode: " + connection.getResponseCode() + " " + connection.getRequestMethod();
+	}
+
+	private HttpURLConnection getConnection(String requestId, JsonNode props, String url, String charsetName)
+			throws IOException {
+		String method = props.has("method") ? props.get("method").asText("GET") : "GET";
+		String headers = props.has(HEADERS_FIELD) ? props.get(HEADERS_FIELD).asText(null) : null;
+		String body = props.has("body") ? props.get("body").asText(null) : null;
+		int timeout = props.has(TIMEOUT_FIELD) ? props.get(TIMEOUT_FIELD).asInt(TIMEOUT) : TIMEOUT;
+
+		HttpURLConnection connection = getConnection(URI.create(url), headers);
+		logger.info("[REST {}] URL: {}", requestId, connection.getURL());
+
+		connection.setRequestMethod(method);
+		connection.setConnectTimeout(timeout);
+		connection.setReadTimeout(timeout);
+
+		if (body != null && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
+				|| "PATCH".equalsIgnoreCase(method))) {
+			connection.setDoOutput(true);
+			try (OutputStream os = connection.getOutputStream()) {
+				os.write(body.getBytes(charsetName));
+			}
+		}
+		return connection;
 	}
 
 	/**

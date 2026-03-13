@@ -43,7 +43,8 @@ public interface GenAIProvider {
 
 	@FunctionalInterface
 	public interface ToolFunction {
-		Object apply(Object[] params) throws Exception;
+		// Sonar java:S112 - avoid declaring overly generic exceptions.
+		Object apply(Object[] params) throws IOException;
 	}
 
 	/**

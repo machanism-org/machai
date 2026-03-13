@@ -185,5 +185,9 @@ class CommandFunctionToolsAdditionalTest {
 		// Assert
 		assertTrue(result.contains("Command timed out"));
 		assertTrue(result.contains("Command exited with code:"));
+
+		if (process.isAlive()) {
+			process.destroyForcibly();
+		}
 	}
 }

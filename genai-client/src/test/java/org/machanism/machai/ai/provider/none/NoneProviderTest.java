@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -69,11 +70,12 @@ class NoneProviderTest {
 	}
 
 	@Test
-	void addFile_url_isNoOp() throws Exception {
+	void addFile_url_isNoOp() {
 		// Arrange
 		NoneProvider provider = new NoneProvider();
 		provider.prompt("x");
-		URL url = new URL("https://example.com");
+		// Sonar java:S1874 - URL is deprecated; build via URI and convert only when needed.
+		URL url = assertDoesNotThrow(() -> URI.create("https://example.com").toURL());
 
 		// Act + Assert
 		assertDoesNotThrow(() -> provider.addFile(url));
@@ -115,7 +117,7 @@ class NoneProviderTest {
 	}
 
 	@Test
-	void perform_withoutInputsLogConfigured_clearsPromptsButDoesNotWrite(@TempDir Path tempDir) throws Exception {
+	void perform_withoutInputsLogConfigured_clearsPromptsButDoesNotWrite(@TempDir Path tempDir) {
 		// Arrange
 		NoneProvider provider = new NoneProvider();
 		provider.instructions("I");

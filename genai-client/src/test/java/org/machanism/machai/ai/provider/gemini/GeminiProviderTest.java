@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.ListResourceBundle;
@@ -145,10 +145,11 @@ class GeminiProviderTest {
 	}
 
 	@Test
-	void addFile_url_shouldNotThrow() throws MalformedURLException {
+	void addFile_url_shouldNotThrow() throws Exception {
 		// Arrange
 		GeminiProvider provider = new GeminiProvider();
-		URL url = new URL("https://example.com/file.txt");
+		// Sonar java:S1874 - URL is deprecated; build via URI and convert only when needed.
+		URL url = URI.create("https://example.com/file.txt").toURL();
 
 		// Act + Assert
 		assertDoesNotThrow(() -> provider.addFile(url));

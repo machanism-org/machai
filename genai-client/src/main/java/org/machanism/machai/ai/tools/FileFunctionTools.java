@@ -226,10 +226,6 @@ public class FileFunctionTools implements FunctionTools {
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
 				: DEFAULT_CHARSET;
 
-		// Sonar java:S2629 - avoid eager Arrays.toString() when INFO is disabled
-		if (logger.isInfoEnabled()) {
-			logger.info("Read file: {}", Arrays.toString(params));
-		}
 		File workingDir = (File) params[1];
 		String result;
 		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
@@ -239,6 +235,18 @@ public class FileFunctionTools implements FunctionTools {
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
+
+		// Sonar java:S2629 - invoke method(s) only conditionally.
+		// Keep the expensive Arrays.toString(params) behind isInfoEnabled.
+		if (logger.isInfoEnabled()) {
+			logger.info("Read file: {}", Arrays.toString(params));
+		}
+
+		// Sonar java:S2629 - avoid evaluating Arrays.toString(params) when DEBUG is disabled.
+		if (logger.isDebugEnabled()) {
+			logger.debug("Read file: {}", Arrays.toString(params));
+		}
+
 		return result;
 	}
 

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
@@ -152,7 +153,8 @@ class OpenAIProviderTest {
 	void addFile_byUrl_shouldAddUserMessageInput_withoutNetwork() throws Exception {
 		// Arrange
 		provider.init(minimalConfig());
-		URL url = new URL("https://example.com/file.txt");
+		// Sonar java:S1874 - URL is deprecated; build via URI and convert only when needed.
+		URL url = URI.create("https://example.com/file.txt").toURL();
 
 		// Act
 		provider.addFile(url);

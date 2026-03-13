@@ -195,7 +195,7 @@ class WebFunctionToolsTest {
 	void fillHeader_whenHeadersNull_doesNothing() throws Exception {
 		// Arrange
 		WebFunctionTools tools = new WebFunctionTools();
-		FakeHttpURLConnection conn = new FakeHttpURLConnection(new URL("http://example.com"));
+		FakeHttpURLConnection conn = new FakeHttpURLConnection(URI.create("http://example.com").toURL());
 
 		// Act
 		tools.fillHeader(null, conn);
@@ -212,7 +212,7 @@ class WebFunctionToolsTest {
 		map.put("token", "abc");
 		tools.setConfigurator(new MapConfigurator(map));
 
-		FakeHttpURLConnection conn = new FakeHttpURLConnection(new URL("http://example.com"));
+		FakeHttpURLConnection conn = new FakeHttpURLConnection(URI.create("http://example.com").toURL());
 
 		// Act
 		tools.fillHeader("Authorization=Bearer ${token}\nX-Test=1", conn);
@@ -226,7 +226,7 @@ class WebFunctionToolsTest {
 	void getWebPage_whenErrorCode_usesErrorStreamAndPrefixesStatusLine() throws Exception {
 		// Arrange
 		WebFunctionTools tools = new WebFunctionTools();
-		FakeHttpURLConnection conn = new FakeHttpURLConnection(new URL("http://example.com"));
+		FakeHttpURLConnection conn = new FakeHttpURLConnection(URI.create("http://example.com").toURL());
 		conn.setResponseCodeAndMessage(404, "Not Found");
 
 		// Act
