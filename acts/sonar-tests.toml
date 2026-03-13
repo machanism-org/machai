@@ -1,0 +1,64 @@
+description = '''
+Unit Test Generation.
+'''
+
+instructions = '''
+You are an AI agent tasked with improving test coverage for a software project by generating high-quality unit tests.  
+Your workflow is as follows:
+
+1. **Generate Unit Tests:**  
+   - For each uncovered or under-covered method, generate meaningful unit tests that exercise core logic, edge cases, and error handling.
+   - Ensure that the generated tests are compatible with the project’s testing framework (e.g., JUnit for Java).
+   - Use descriptive test method names and clear assertions.
+   - Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
+
+2. **Test Quality and Coverage:**  
+   - Aim to maximize code coverage, but prioritize meaningful and maintainable tests over superficial coverage.
+   - Avoid duplicating existing tests.
+
+3. **Formatting and Placement:**  
+   - Place generated test files in the appropriate test source directory, following the project’s package structure.
+   - Adhere to the code style and conventions defined in the project.
+   - Do not change variable plaiceholder `${...}`, it will be change by the application.
+
+4. **Reporting:**  
+   - Summarize the coverage improvements and list the files/classes/methods for which tests were generated.
+'''
+
+inputs = '''
+# Task
+
+- **Before starting, build the project:**  
+  Run `mvn clean install` to ensure all code compiles and dependencies are resolved.
+- **Review and update all existing unit tests** in `[Test Source & Resource Folders]`, ensuring each test file is correctly related to its corresponding source code location.
+- **Create new, high-quality unit tests as needed** to ensure every public and package-private class and method in the required source folder is fully tested.
+- **Ensure that overall test coverage for the required source folder is at least 90%%.**
+- **Use the Maven JaCoCo plugin to measure test coverage:**
+  - Run the Maven JaCoCo plugin to generate a coverage report (typically at `target/site/jacoco/jacoco.xml`).
+  - Read and analyze the JaCoCo report to identify uncovered or under-covered classes and methods.
+  - Focus test creation and updates on areas highlighted by the JaCoCo report as lacking sufficient coverage.
+- Achieve comprehensive coverage of all core logic, edge cases, and error handling scenarios.
+- Refactor or enhance existing tests to improve clarity, maintainability, and coverage where necessary.
+- If necessary to achieve coverage, refactor production code for improved testability, but do not change its functionality.
+- Use descriptive test method names and meaningful assertions.
+- Follow the Arrange-Act-Assert (AAA) structure in each test.
+- Mock dependencies where appropriate to isolate the units under test.
+- Place all test files in this directory, mirroring the package structure of the source files.
+- **Do not remove any existing tests unless they are redundant or incorrect; instead, update or supplement them as needed.**
+- **Run the Sonar Maven plugin:**  
+  Execute:  
+  ```
+  mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+    -Dsonar.token=${sonar.token} \
+    -Dsonar.host.url=http://192.168.0.177:9000 \
+    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+  ```
+'''
+
+gw.scanDir="glob:**/test/java"
+severities="LOW,MEDIUM,HIGH,BLOCKER"
+sonar.host="192.168.0.177:9000"
+sonar.token="sqa_1ca2fc4cb0449e8a70c08933bb8a82cba89d91df"
+
+epilogue=["sonar-fix"]
+
