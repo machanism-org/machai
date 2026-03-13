@@ -343,7 +343,6 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 
 				case "inputs":
-					value = String.format(value, StringUtils.defaultString(getDefaultPrompt()));
 					super.setDefaultPrompt(value);
 					break;
 
