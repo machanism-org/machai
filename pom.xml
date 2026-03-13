@@ -28,7 +28,7 @@
 		<gw.acts>
 			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</gw.acts>
 		<gw.model>CodeMie:gpt-5-2-2025-12-11</gw.model>
-		<gw.serverId>CodeMie</gw.serverId>
+		<gw.genai.serverId>CodeMie</gw.genai.serverId>
 	</properties>
 
 	<profiles>

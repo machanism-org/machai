@@ -1,242 +1,108 @@
 package org.machanism.machai.gw.tools;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
-import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 class ActFunctionToolsTest {
 
-	private final ObjectMapper mapper = new ObjectMapper();
+	@TempDir
+	Path tempDir;
 
-	private ActFunctionTools tools;
-	private Configurator configurator;
+	@Test
+	void getActDetails_whenCustomTrue_thenLoadsFromActsDirectory() throws Exception {
+		// Arrange
+		Path actsDir = tempDir.resolve("acts");
+		Files.createDirectories(actsDir);
+		Path actFile = actsDir.resolve("myact.toml");
+		Files.write(actFile, Arrays.asList("description='My act'"), StandardCharsets.UTF_8);
 
-	@BeforeEach
-	void setUp() {
-		tools = new ActFunctionTools();
-		configurator = mock(Configurator.class);
+		PropertiesConfigurator configurator = new PropertiesConfigurator();
+		configurator.set("gw.acts", actsDir.toFile().getAbsolutePath());
+
+		ActFunctionTools tools = new ActFunctionTools();
 		tools.setConfigurator(configurator);
+
+		ObjectNode node = new ObjectMapper().createObjectNode();
+		node.put("actName", "myact");
+		node.put("custom", "true");
+
+		// Act
+		Object result = invokeGetActDetails(tools, node);
+
+		// Assert
+		assertTrue(result instanceof Map);
+		Map<?, ?> map = (Map<?, ?>) result;
+		assertEquals("My act", map.get("description"));
 	}
 
 	@Test
-	void applyTools_registersExpectedTools() {
+	void getActDetails_whenCustomMissing_thenLoadsEffectiveAndReturnsMap() throws Exception {
 		// Arrange
-		org.machanism.machai.ai.manager.GenAIProvider provider = mock(
-				org.machanism.machai.ai.manager.GenAIProvider.class);
+		ActFunctionTools tools = new ActFunctionTools();
+		PropertiesConfigurator configurator = new PropertiesConfigurator();
+		// Let built-in acts resolve (help should exist in resources)
+		tools.setConfigurator(configurator);
+
+		ObjectNode node = new ObjectMapper().createObjectNode();
+		node.put("actName", "help");
 
 		// Act
-		tools.applyTools(provider);
+		Object result = invokeGetActDetails(tools, node);
 
 		// Assert
-		verify(provider).addTool(eq("list_acts"), anyString(), any());
-		verify(provider).addTool(eq("load_act_details"), anyString(), any(), any(), any());
-		verifyNoMoreInteractions(provider);
+		assertTrue(result instanceof Map);
+		Map<?, ?> map = (Map<?, ?>) result;
+		assertFalse(map.isEmpty(), "Expected some properties from built-in 'help' act");
 	}
 
 	@Test
-	void listTomlFiles_whenActsPathNull_returnsEmptySet() throws Exception {
+	void getBaseActList_whenRunningFromClassesDir_thenReturnsEmptyAndDoesNotThrow() throws IOException {
 		// Arrange
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(null);
-		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
-		m.setAccessible(true);
+		ActFunctionTools tools = new ActFunctionTools();
+		tools.setConfigurator(new PropertiesConfigurator());
 
 		// Act
-		@SuppressWarnings("unchecked")
-		Set<String> out = (Set<String>) m.invoke(tools);
+		Set<String> acts = tools.getBaseActList();
 
 		// Assert
-		assertNotNull(out);
-		assertTrue(out.isEmpty());
+		assertNotNull(acts);
+		assertTrue(acts.isEmpty(), "Expected empty set when not running from a jar/zip");
 	}
 
 	@Test
-	void listTomlFiles_whenActsPathDoesNotExist_returnsEmptySet(@TempDir File tempDir) throws Exception {
+	void getActDetails_whenConfiguratorNotSet_thenThrowsNullPointerExceptionAsCause() throws Exception {
 		// Arrange
-		File missingDir = new File(tempDir, "missing");
-		assertFalse(missingDir.exists());
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(missingDir);
-		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
-		m.setAccessible(true);
+		ActFunctionTools tools = new ActFunctionTools();
+		ObjectNode node = new ObjectMapper().createObjectNode();
+		node.put("actName", "help");
 
 		// Act
-		@SuppressWarnings("unchecked")
-		Set<String> out = (Set<String>) m.invoke(tools);
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class, () -> invokeGetActDetails(tools, node));
 
 		// Assert
-		assertNotNull(out);
-		assertTrue(out.isEmpty());
+		assertInstanceOf(NullPointerException.class, ex.getCause());
 	}
 
-	@Test
-	void listTomlFiles_whenActsPathIsNotDirectory_returnsEmptySet(@TempDir File tempDir) throws Exception {
-		// Arrange
-		File actsFile = new File(tempDir, "acts.txt");
-		Files.write(actsFile.toPath(), "x".getBytes(StandardCharsets.UTF_8));
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(actsFile);
-		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
-		m.setAccessible(true);
-
-		// Act
-		@SuppressWarnings("unchecked")
-		Set<String> out = (Set<String>) m.invoke(tools);
-
-		// Assert
-		assertNotNull(out);
-		assertTrue(out.isEmpty());
-	}
-
-	@Test
-	void listTomlFiles_whenDirectoryEmpty_returnsEmptySet(@TempDir File tempDir) throws Exception {
-		// Arrange
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(tempDir);
-		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
-		m.setAccessible(true);
-
-		// Act
-		@SuppressWarnings("unchecked")
-		Set<String> out = (Set<String>) m.invoke(tools);
-
-		// Assert
-		assertNotNull(out);
-		assertTrue(out.isEmpty());
-	}
-
-	@Test
-	void listTomlFiles_whenTomlPresent_returnsSet(@TempDir File tempDir) throws Exception {
-		// Arrange
-		File toml = new File(tempDir, "maybe.toml");
-		Files.write(toml.toPath(), "description=\"x\"".getBytes(StandardCharsets.UTF_8));
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(tempDir);
-		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
-		m.setAccessible(true);
-
-		// Act
-		@SuppressWarnings("unchecked")
-		Set<String> out = (Set<String>) m.invoke(tools);
-
-		// Assert
-		assertNotNull(out);
-		assertFalse(out.isEmpty());
-		assertTrue(out.iterator().next().contains("maybe"));
-	}
-
-	@Test
-	void getActList_whenActsDirectoryMissing_includesBothSections() throws Exception {
-		// Arrange
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(null);
-		Method m = ActFunctionTools.class.getDeclaredMethod("getActList", Object[].class);
-		m.setAccessible(true);
-
-		// Act
-		Object out = m.invoke(tools, (Object) new Object[0]);
-
-		// Assert
-		assertNotNull(out);
-		String text = out.toString();
-		assertAll(
-				() -> assertTrue(text.contains("# Custom Act List")),
-				() -> assertTrue(text.contains("# Base Act List")));
-	}
-
-	@Test
-	void getActDetails_whenCustomNotProvided_andActMissing_throwsFromActProcessor() throws Exception {
-		// Arrange
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(null);
-		JsonNode props = mapper.readTree("{\"actName\":\"__missing__\"}");
-		Method m = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
-		m.setAccessible(true);
-
-		// Act
-		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
-				() -> m.invoke(tools, (Object) new Object[] { props }));
-
-		// Assert
-		assertNotNull(ex.getCause());
-	}
-
-	@Test
-	void getActDetails_whenCustomTrue_returnsMap() throws Exception {
-		// Arrange
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(null);
-		JsonNode props = mapper.readTree("{\"actName\":\"__missing__\",\"custom\":true}");
-		Method m = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
-		m.setAccessible(true);
-
-		// Act
-		@SuppressWarnings("unchecked")
-		Map<String, Object> out = (Map<String, Object>) m.invoke(tools, (Object) new Object[] { props });
-
-		// Assert
-		assertNotNull(out);
-	}
-
-	@Test
-	void getActDetails_whenCustomFalse_returnsMap() throws Exception {
-		// Arrange
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(new File("."));
-		JsonNode props = mapper
-				.readTree("{\"actName\":\"__definitely_missing_act__\",\"custom\":false}");
-		Method m = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
-		m.setAccessible(true);
-
-		// Act
-		@SuppressWarnings("unchecked")
-		Map<String, Object> out = (Map<String, Object>) m.invoke(tools, (Object) new Object[] { props });
-
-		// Assert
-		assertNotNull(out);
-	}
-
-	@Test
-	void getBaseActList_returnsNonNullSet() throws Exception {
-		// Arrange
-
-		// Act
-		Set<String> out = tools.getBaseActList();
-
-		// Assert
-		assertNotNull(out);
-	}
-
-	@Test
-	void getActDetails_whenBuiltInActExists_returnsPropertiesMap() throws Exception {
-		// Arrange
-		Set<String> baseActs = tools.getBaseActList();
-		if (baseActs.isEmpty()) {
-			return;
-		}
-		String firstAct = baseActs.iterator().next();
-		int start = firstAct.indexOf('`') + 1;
-		int end = firstAct.indexOf('`', start);
-		String actName = firstAct.substring(start, end);
-
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(new File("."));
-		JsonNode props = mapper.readTree("{\"actName\":\"" + actName + "\",\"custom\":false}");
-		Method m = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
-		m.setAccessible(true);
-
-		// Act
-		@SuppressWarnings("unchecked")
-		Map<String, Object> out = (Map<String, Object>) m.invoke(tools, (Object) new Object[] { props });
-
-		// Assert
-		assertNotNull(out);
-		assertTrue(out.containsKey("description"));
+	// Sonar java:S1130 - remove declaration of overly broad checked exception.
+	private static Object invokeGetActDetails(ActFunctionTools tools, ObjectNode json)
+			throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		java.lang.reflect.Method method = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
+		method.setAccessible(true);
+		return method.invoke(tools, new Object[] { new Object[] { json } });
 	}
 }

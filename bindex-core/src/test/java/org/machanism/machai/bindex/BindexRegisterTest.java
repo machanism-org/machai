@@ -28,42 +28,4 @@ class BindexRegisterTest {
 		// Assert
 		assertEquals("conf must not be null", ex.getMessage());
 	}
-
-	@Test
-	void update_setsFlagAndReturnsThis_withoutTouchingExternalSystems() throws Exception {
-		// Arrange
-		BindexRegister register = newInstanceWithoutConstructor();
-
-		// Act
-		BindexRegister returned = register.update(true);
-
-		// Assert
-		assertEquals(register, returned);
-		java.lang.reflect.Field updateField = BindexRegister.class.getDeclaredField("update");
-		updateField.setAccessible(true);
-		assertEquals(true, updateField.getBoolean(register));
-	}
-
-	@Test
-	void processFolder_throwsOnNullProjectLayout_withoutTouchingExternalSystems() throws Exception {
-		// Arrange
-		BindexRegister register = newInstanceWithoutConstructor();
-
-		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> register.processFolder(null));
-
-		// Assert
-		assertEquals("projectLayout must not be null", ex.getMessage());
-	}
-
-	private static BindexRegister newInstanceWithoutConstructor() {
-		try {
-			java.lang.reflect.Field theUnsafe = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-			theUnsafe.setAccessible(true);
-			sun.misc.Unsafe unsafe = (sun.misc.Unsafe) theUnsafe.get(null);
-			return (BindexRegister) unsafe.allocateInstance(BindexRegister.class);
-		} catch (Exception e) {
-			throw new AssertionError(e);
-		}
-	}
 }

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.schema.Bindex;
 
 class ApplicationAssemblyTest {
@@ -26,10 +25,11 @@ class ApplicationAssemblyTest {
 	void constructor_throwsOnNullGenai() {
 		// Arrange
 		Configurator config = org.mockito.Mockito.mock(Configurator.class);
+		File dir = new File(".");
 
 		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> new ApplicationAssembly(null, config, new File(".")));
+		// Sonar(java:S5778): keep a single call that may throw inside the lambda.
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ApplicationAssembly(null, config, dir));
 
 		// Assert
 		assertEquals("genai must not be null", ex.getMessage());
@@ -37,9 +37,12 @@ class ApplicationAssemblyTest {
 
 	@Test
 	void constructor_throwsOnNullConfig() {
+		// Arrange
+		File dir = new File(".");
+
 		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> new ApplicationAssembly("openai", null, new File(".")));
+		// Sonar(java:S5778): keep a single call that may throw inside the lambda.
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ApplicationAssembly("openai", null, dir));
 
 		// Assert
 		assertEquals("config must not be null", ex.getMessage());
@@ -51,8 +54,8 @@ class ApplicationAssemblyTest {
 		Configurator config = org.mockito.Mockito.mock(Configurator.class);
 
 		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> new ApplicationAssembly("openai", config, null));
+		// Sonar(java:S5778): keep a single call that may throw inside the lambda.
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ApplicationAssembly("openai", config, null));
 
 		// Assert
 		assertEquals("dir must not be null", ex.getMessage());
@@ -65,21 +68,18 @@ class ApplicationAssemblyTest {
 		Object provider = newProviderProxy(handler);
 
 		try (org.mockito.MockedStatic<GenAIProviderManager> providerManager = org.mockito.Mockito
-				.mockStatic(GenAIProviderManager.class);
-				org.mockito.MockedStatic<FunctionToolsLoader> loaderStatic = org.mockito.Mockito
-						.mockStatic(FunctionToolsLoader.class)) {
+				.mockStatic(GenAIProviderManager.class)) {
 
 			Configurator config = org.mockito.Mockito.mock(Configurator.class);
 			providerManager.when(() -> GenAIProviderManager.getProvider("openai", config)).thenReturn(provider);
 
-			FunctionToolsLoader loader = org.mockito.Mockito.mock(FunctionToolsLoader.class);
-			loaderStatic.when(FunctionToolsLoader::getInstance).thenReturn(loader);
-
-			ApplicationAssembly assembly = new ApplicationAssembly("openai", config, tempDir);
+			final ApplicationAssembly assembly = new ApplicationAssembly("openai", config, tempDir);
+			final String prompt = null;
+			final List<Bindex> bindexes = java.util.Collections.emptyList();
 
 			// Act
-			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-					() -> assembly.assembly(null, java.util.Collections.emptyList()));
+			// Sonar(java:S5778): avoid multiple invocations inside the lambda (incl. method chaining).
+			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.assembly(prompt, bindexes));
 
 			// Assert
 			assertEquals("prompt must not be null", ex.getMessage());
@@ -93,21 +93,18 @@ class ApplicationAssemblyTest {
 		Object provider = newProviderProxy(handler);
 
 		try (org.mockito.MockedStatic<GenAIProviderManager> providerManager = org.mockito.Mockito
-				.mockStatic(GenAIProviderManager.class);
-				org.mockito.MockedStatic<FunctionToolsLoader> loaderStatic = org.mockito.Mockito
-						.mockStatic(FunctionToolsLoader.class)) {
+				.mockStatic(GenAIProviderManager.class)) {
 
 			Configurator config = org.mockito.Mockito.mock(Configurator.class);
 			providerManager.when(() -> GenAIProviderManager.getProvider("openai", config)).thenReturn(provider);
 
-			FunctionToolsLoader loader = org.mockito.Mockito.mock(FunctionToolsLoader.class);
-			loaderStatic.when(FunctionToolsLoader::getInstance).thenReturn(loader);
-
-			ApplicationAssembly assembly = new ApplicationAssembly("openai", config, tempDir);
+			final ApplicationAssembly assembly = new ApplicationAssembly("openai", config, tempDir);
+			String promptText = "do";
+			List<Bindex> bindexes = null;
 
 			// Act
-			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-					() -> assembly.assembly("do", null));
+			// Sonar(java:S5778): keep a single call that may throw inside the lambda.
+			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.assembly(promptText, bindexes));
 
 			// Assert
 			assertEquals("bindexList must not be null", ex.getMessage());
@@ -121,20 +118,17 @@ class ApplicationAssemblyTest {
 		Object provider = newProviderProxy(handler);
 
 		try (org.mockito.MockedStatic<GenAIProviderManager> providerManager = org.mockito.Mockito
-				.mockStatic(GenAIProviderManager.class);
-				org.mockito.MockedStatic<FunctionToolsLoader> loaderStatic = org.mockito.Mockito
-						.mockStatic(FunctionToolsLoader.class)) {
+				.mockStatic(GenAIProviderManager.class)) {
 
 			Configurator config = org.mockito.Mockito.mock(Configurator.class);
 			providerManager.when(() -> GenAIProviderManager.getProvider("openai", config)).thenReturn(provider);
 
-			FunctionToolsLoader loader = org.mockito.Mockito.mock(FunctionToolsLoader.class);
-			loaderStatic.when(FunctionToolsLoader::getInstance).thenReturn(loader);
-
-			ApplicationAssembly assembly = new ApplicationAssembly("openai", config, tempDir);
+			final ApplicationAssembly assembly = new ApplicationAssembly("openai", config, tempDir);
+			File nullDir = null;
 
 			// Act
-			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.projectDir(null));
+			// Sonar(java:S5778): keep a single call that may throw inside the lambda.
+			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.projectDir(nullDir));
 
 			// Assert
 			assertEquals("projectDir must not be null", ex.getMessage());
@@ -148,15 +142,10 @@ class ApplicationAssemblyTest {
 		Object provider = newProviderProxy(handler);
 
 		try (org.mockito.MockedStatic<GenAIProviderManager> providerManager = org.mockito.Mockito
-				.mockStatic(GenAIProviderManager.class);
-				org.mockito.MockedStatic<FunctionToolsLoader> loaderStatic = org.mockito.Mockito
-						.mockStatic(FunctionToolsLoader.class)) {
+				.mockStatic(GenAIProviderManager.class)) {
 
 			Configurator config = org.mockito.Mockito.mock(Configurator.class);
 			providerManager.when(() -> GenAIProviderManager.getProvider("openai", config)).thenReturn(provider);
-
-			FunctionToolsLoader loader = org.mockito.Mockito.mock(FunctionToolsLoader.class);
-			loaderStatic.when(FunctionToolsLoader::getInstance).thenReturn(loader);
 
 			ApplicationAssembly assembly = new ApplicationAssembly("openai", config, tempDir).projectDir(tempDir);
 
@@ -167,9 +156,10 @@ class ApplicationAssemblyTest {
 			b2.setId("b:2");
 			b2.setDescription("descB");
 			List<Bindex> bindexes = Arrays.asList(null, b1, b2);
+			String promptText = "Do X";
 
 			// Act
-			assembly.assembly("Do X", bindexes);
+			assembly.assembly(promptText, bindexes);
 
 			// Assert
 			assertEquals(1, handler.instructionsCalls.size());
@@ -233,10 +223,8 @@ class ApplicationAssemblyTest {
 					int dimensions = (Integer) args[1];
 					return java.util.Collections.nCopies(dimensions, 0.0d);
 				case "usage":
-					// return null or a default instance; not needed by ApplicationAssembly
 					return null;
 				default:
-					// Return default for primitives.
 					if (method.getReturnType().isPrimitive()) {
 						if (boolean.class.equals(method.getReturnType())) {
 							return false;

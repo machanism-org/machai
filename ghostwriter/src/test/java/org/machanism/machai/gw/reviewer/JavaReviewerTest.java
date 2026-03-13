@@ -101,60 +101,27 @@ class JavaReviewerTest {
 		assertNull(result);
 	}
 
+	// Sonar java:S5976 - consolidate similar test cases (kept in one test to avoid adding junit-jupiter-params dependency).
 	@Test
-	void perform_returnsFormattedOutputWhenGuidancePresentInLineComment() throws IOException {
-		// Arrange
+	void perform_returnsFormattedOutputWhenGuidancePresent_variants() throws IOException {
+		assertGuidanceIsExtracted("src/main/java/A.java",
+				"// " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\npublic class A {}\n");
+		assertGuidanceIsExtracted("A.java",
+				"/*\n * header\n * " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\n */\npublic class A {}\n");
+		assertGuidanceIsExtracted("src/main/java/org/example/package-info.java",
+				"/* " + GuidanceProcessor.GUIDANCE_TAG_NAME + " package docs */\npackage org.example;\n");
+	}
+
+	private void assertGuidanceIsExtracted(String relativePath, String fileContent) throws IOException {
 		JavaReviewer reviewer = new JavaReviewer();
 
 		Path project = tempDir.resolve("project");
 		Files.createDirectories(project);
-		Path file = project.resolve("src").resolve("main").resolve("java").resolve("A.java");
+		Path file = project.resolve(relativePath);
 		Files.createDirectories(file.getParent());
-		Files.write(file, ("// " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\npublic class A {}\n")
-				.getBytes(StandardCharsets.UTF_8));
+		Files.write(file, fileContent.getBytes(StandardCharsets.UTF_8));
 
-		// Act
 		String result = reviewer.perform(project.toFile(), file.toFile());
-
-		// Assert
-		assertNotNull(result);
-	}
-
-	@Test
-	void perform_returnsFormattedOutputWhenGuidancePresentInBlockComment() throws IOException {
-		// Arrange
-		JavaReviewer reviewer = new JavaReviewer();
-
-		Path project = tempDir.resolve("project");
-		Files.createDirectories(project);
-		Path file = project.resolve("A.java");
-		Files.write(file, ("/*\n * header\n * " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\n */\npublic class A {}\n")
-				.getBytes(StandardCharsets.UTF_8));
-
-		// Act
-		String result = reviewer.perform(project.toFile(), file.toFile());
-
-		// Assert
-		assertNotNull(result);
-	}
-
-	@Test
-	void perform_formatsPackageInfoWhenGuidancePresent() throws IOException {
-		// Arrange
-		JavaReviewer reviewer = new JavaReviewer();
-
-		Path project = tempDir.resolve("project");
-		Files.createDirectories(project);
-		Path pkg = project.resolve("src").resolve("main").resolve("java").resolve("org").resolve("example");
-		Files.createDirectories(pkg);
-		Path file = pkg.resolve("package-info.java");
-		Files.write(file, ("/* " + GuidanceProcessor.GUIDANCE_TAG_NAME + " package docs */\npackage org.example;\n")
-				.getBytes(StandardCharsets.UTF_8));
-
-		// Act
-		String result = reviewer.perform(project.toFile(), file.toFile());
-
-		// Assert
 		assertNotNull(result);
 	}
 

@@ -5,11 +5,38 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.project.layout.ProjectLayout;
 
 class BindexBuilderFactoryTest {
+
+	private static ProjectLayout projectLayout(File projectDir) {
+		return new ProjectLayout() {
+			@Override
+			public File getProjectDir() {
+				return projectDir;
+			}
+
+			@Override
+			public List<String> getSources() {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public List<String> getDocuments() {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public List<String> getTests() {
+				return Collections.emptyList();
+			}
+		};
+	}
 
 	@Test
 	void create_throwsOnNullProjectLayout() {
@@ -27,8 +54,7 @@ class BindexBuilderFactoryTest {
 	@Test
 	void create_throwsOnNullGenai() {
 		// Arrange
-		org.machanism.machai.project.layout.ProjectLayout layout = org.mockito.Mockito
-				.mock(org.machanism.machai.project.layout.ProjectLayout.class);
+		ProjectLayout layout = projectLayout(new File("."));
 		Configurator configurator = org.mockito.Mockito.mock(Configurator.class);
 
 		// Act
@@ -42,8 +68,7 @@ class BindexBuilderFactoryTest {
 	@Test
 	void create_throwsOnNullConfigurator() {
 		// Arrange
-		org.machanism.machai.project.layout.ProjectLayout layout = org.mockito.Mockito
-				.mock(org.machanism.machai.project.layout.ProjectLayout.class);
+		ProjectLayout layout = projectLayout(new File("."));
 
 		// Act
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -54,11 +79,9 @@ class BindexBuilderFactoryTest {
 	}
 
 	@Test
-	void create_throwsFileNotFoundForUnknownLayoutWhenProjectDirDoesNotExist() throws Exception {
+	void create_throwsFileNotFoundForUnknownLayoutWhenProjectDirDoesNotExist() {
 		// Arrange
-		org.machanism.machai.project.layout.ProjectLayout layout = org.mockito.Mockito
-				.mock(org.machanism.machai.project.layout.ProjectLayout.class);
-		org.mockito.Mockito.when(layout.getProjectDir()).thenReturn(new File("target/does-not-exist-12345"));
+		ProjectLayout layout = projectLayout(new File("target/does-not-exist-12345"));
 		Configurator configurator = org.mockito.Mockito.mock(Configurator.class);
 
 		// Act
