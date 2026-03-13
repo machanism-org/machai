@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +83,9 @@ public class ActProcessor extends AIFileProcessor {
 	/** Project directory used for a scan run (cached for prologue/epilogue). */
 	private File projectDir;
 
-	/** Scan directory/pattern used for a scan run (cached for prologue/epilogue). */
+	/**
+	 * Scan directory/pattern used for a scan run (cached for prologue/epilogue).
+	 */
 	private String scanDir;
 
 	/**
@@ -107,7 +111,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param projectDir project root directory
 	 * @param scanDir    scan start directory or {@code glob:}/{@code regex:}
-	 *                  pattern
+	 *                   pattern
 	 * @throws IOException if scanning fails
 	 */
 	@Override
@@ -128,12 +132,12 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	void runRelatedActs(List<String> acts) throws IOException {
 		if (acts != null) {
-			for (String act : acts) {
+			List<String> actList = new ArrayList<>(acts);
+			acts.clear();
+			for (String act : actList) {
 				logger.info("Running related act: {}", act);
-
-				ActProcessor actProcessor = new ActProcessor(getRootDir(), getConfigurator(), getModel());
-				actProcessor.setDefaultPrompt(act);
-				actProcessor.scanDocuments(projectDir, scanDir);
+				setDefaultPrompt(act);
+				scanDocuments(projectDir, scanDir);
 			}
 		}
 	}
@@ -142,9 +146,9 @@ public class ActProcessor extends AIFileProcessor {
 	 * Loads an act definition and applies it as the current execution defaults.
 	 *
 	 * <p>
-	 * The {@code act} argument supports the form {@code <name> [prompt]}, where
-	 * the optional prompt portion is inserted into the act's {@code inputs}
-	 * template. If no prompt is provided, {@link #getDefaultPrompt()} is used.
+	 * The {@code act} argument supports the form {@code <name> [prompt]}, where the
+	 * optional prompt portion is inserted into the act's {@code inputs} template.
+	 * If no prompt is provided, {@link #getDefaultPrompt()} is used.
 	 * </p>
 	 *
 	 * @param act act name plus optional prompt text
@@ -184,8 +188,8 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Loads an act definition into the provided map, supporting inheritance via
-	 * the {@code basedOn} property.
+	 * Loads an act definition into the provided map, supporting inheritance via the
+	 * {@code basedOn} property.
 	 *
 	 * <p>
 	 * This method attempts to load the specified act from both a user-defined
@@ -317,8 +321,9 @@ public class ActProcessor extends AIFileProcessor {
 	void applyActData(Map<String, Object> properties) {
 		for (Entry<String, Object> entry : properties.entrySet()) {
 			String key = entry.getKey();
-			if (entry.getValue() instanceof String) {
-				String value = (String) entry.getValue();
+			Object valueObj = entry.getValue();
+			if (valueObj instanceof String) {
+				String value = (String) valueObj;
 				String inheritValue = getConfigurator().get(key, null);
 				if (inheritValue != null) {
 					value = String.format(value, StringUtils.defaultString(inheritValue));
@@ -341,6 +346,14 @@ public class ActProcessor extends AIFileProcessor {
 					super.setExcludes(StringUtils.split(value, ","));
 					break;
 
+				case "epilogue":
+					setEpilogue(Arrays.asList(value));
+					break;
+
+				case "prologue":
+					setPrologue(Arrays.asList(value));
+					break;
+
 				case "gw.nonRecursive":
 					super.setNonRecursive(Boolean.parseBoolean(value));
 					break;
@@ -349,19 +362,21 @@ public class ActProcessor extends AIFileProcessor {
 					getConfigurator().set(key, value);
 					break;
 				}
-			}
-			if (entry.getValue() instanceof List) {
-				// Sonar java:S3740 - use a type-safe check instead of suppressing unchecked warnings.
-				List<?> rawList = (List<?>) entry.getValue();
+			} else if (valueObj instanceof List) {
+				// Sonar java:S3740 - use a type-safe check instead of suppressing unchecked
+				// warnings.
+				List<?> rawList = (List<?>) valueObj;
 				List<String> stringList = rawList.stream().map(Object::toString).collect(Collectors.toList());
 
 				switch (key) {
 				case "prologue":
 					setPrologue(stringList);
 					break;
+
 				case "epilogue":
 					setEpilogue(stringList);
 					break;
+
 				default:
 					break;
 				}
