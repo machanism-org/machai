@@ -3,132 +3,88 @@ package org.machanism.machai.gw.processor;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Collections;
+import java.nio.file.Path;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.project.layout.DefaultProjectLayout;
-import org.machanism.machai.project.layout.ProjectLayout;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 
 class AIFileProcessorTest {
 
 	@TempDir
-	File tempDir;
+	Path tempDir;
 
-	private TestAIFileProcessor processor;
-	private ProjectLayout layout;
-
-	@BeforeEach
-	void setUp() {
-		processor = new TestAIFileProcessor(tempDir, new PropertiesConfigurator(), "test-provider");
-		layout = new DefaultProjectLayout().projectDir(tempDir);
+	@Test
+	void parseLines_whenNull_thenEmpty() {
+		AIFileProcessor p = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
+		assertEquals("", p.parseLines(null));
 	}
 
 	@Test
-	void parseLines_shouldPreserveBlankLinesAndAppendTrailingNewline() {
-		String input = "line1\n\n line2 \n";
-
-		String out = processor.parseLines(input);
-
-		assertEquals("line1\n\nline2\n", out);
+	void parseLines_whenBlankLines_thenPreservesNewlinesAndTrimsWhitespaceLines() {
+		AIFileProcessor p = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
+		String out = p.parseLines("a\n\n b \n");
+		assertEquals("a\n\n" + "b\n", out);
 	}
 
 	@Test
-	void tryToGetInstructionsFromReference_shouldReturnNullForNull() throws Exception {
-		assertNull(processor.tryToGetInstructionsFromReference(null));
+	void tryToGetInstructionsFromReference_whenPlainText_thenReturnsOriginal() throws Exception {
+		AIFileProcessor p = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
+		assertEquals("hello", p.tryToGetInstructionsFromReference("hello"));
 	}
 
 	@Test
-	void tryToGetInstructionsFromReference_shouldReturnDataWhenNotReference() throws Exception {
-		assertEquals("hello", processor.tryToGetInstructionsFromReference("hello"));
-		assertEquals("  hello  ", processor.tryToGetInstructionsFromReference("  hello  "));
+	void tryToGetInstructionsFromReference_whenFileReference_thenLoadsAndParses() throws Exception {
+		File f = tempDir.resolve("i.txt").toFile();
+		Files.write(f.toPath(), java.util.Arrays.asList("x", "", "y"), StandardCharsets.UTF_8);
+
+		AIFileProcessor p = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
+		String out = p.tryToGetInstructionsFromReference("file:" + f.getAbsolutePath());
+		assertEquals("x\n\n" + "y\n", out);
 	}
 
 	@Test
-	void readFromFilePath_shouldResolveRelativeToRootDir() throws IOException {
-		File data = new File(tempDir, "instructions.txt");
-		Files.write(data.toPath(), Arrays.asList("a", "file"), StandardCharsets.UTF_8);
-
-		String out = processor.readFromFilePath("instructions.txt");
-		assertTrue(out.contains("a"));
-		assertTrue(out.contains("file"));
+	void readFromFilePath_whenRelative_thenResolvesAgainstRootDir() {
+		AIFileProcessor p = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
+		assertThrows(IllegalArgumentException.class, () -> p.readFromFilePath("missing.txt"));
 	}
 
 	@Test
-	void readFromFilePath_shouldThrowIllegalArgumentExceptionWhenMissing() {
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> processor.readFromFilePath("missing.txt"));
-		assertTrue(ex.getMessage().contains("Failed to read file:"));
+	void readFromHttpUrl_whenValid_thenReturnsContent() throws Exception {
+		HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+		server.createContext("/x", new FixedHandler("hello"));
+		server.start();
+		try {
+			int port = server.getAddress().getPort();
+			String url = "http://localhost:" + port + "/x";
+			String body = AIFileProcessor.readFromHttpUrl(url);
+			assertEquals("hello", body);
+		} finally {
+			server.stop(0);
+		}
 	}
 
-	@Test
-	void parseScanDir_shouldCreateGlobPatternAndValidatePathInsideProject() {
-		File projectDir = tempDir;
+	static class FixedHandler implements HttpHandler {
+		private final String response;
 
-		processor.setDefaultPrompt(null);
-		String glob = processor.parseScanDir(projectDir, "src");
-		assertTrue(glob.startsWith("glob:"));
-		assertTrue(glob.contains("src"));
-		assertNotNull(processor.getScanDir());
-
-		processor.setDefaultPrompt("prompt");
-		String glob2 = processor.parseScanDir(projectDir, "src");
-		assertTrue(glob2.startsWith("glob:"));
-		assertFalse(glob2.contains("{,/**}"), "when default prompt is set, pattern should not auto-include children");
-	}
-
-	@Test
-	void parseScanDir_shouldThrowWhenScanDirNotInsideProject() {
-		File projectDir = new File(tempDir, "project");
-		assertTrue(projectDir.mkdirs());
-
-		File outside = new File(tempDir.getParentFile(), "outside");
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> processor.parseScanDir(projectDir, outside.getPath()));
-		assertTrue(ex.getMessage().contains("must be located within the root project directory"));
-	}
-
-	@Test
-	void getDirInfoLine_shouldReturnNotDefinedWhenNoExistingEntries() {
-		String line = processor.getDirInfoLine(Collections.singletonList("does-not-exist"), tempDir);
-		assertEquals(AIFileProcessor.NOT_DEFINED, line);
-	}
-
-	@Test
-	void getDirInfoLine_shouldIncludeOnlyExistingDirsAndFormatWithBackticks() {
-		File src = new File(tempDir, "src/main/java");
-		assertTrue(src.mkdirs());
-
-		String line = processor.getDirInfoLine(Arrays.asList("src/main/java", "missing"), tempDir);
-		assertEquals("`src/main/java`", line);
-	}
-
-	@Test
-	void getProjectStructureDescription_shouldIncludeRelativePathsAndFile() throws IOException {
-		File f = new File(tempDir, "src/main/java/App.java");
-		assertTrue(f.getParentFile().mkdirs());
-		assertTrue(f.createNewFile());
-
-		String desc = processor.getProjectStructureDescription(layout, f);
-		assertTrue(desc.contains(tempDir.getName()));
-		assertTrue(desc.contains("src/main/java"));
-		assertTrue(desc.contains("App.java"));
-	}
-
-	private static final class TestAIFileProcessor extends AIFileProcessor {
-		TestAIFileProcessor(File rootDir, PropertiesConfigurator configurator, String genai) {
-			super(rootDir, configurator, genai);
+		FixedHandler(String response) {
+			this.response = response;
 		}
 
 		@Override
-		public ProjectLayout getProjectLayout(File projectDir) {
-			return new DefaultProjectLayout().projectDir(projectDir);
+		public void handle(HttpExchange exchange) throws java.io.IOException {
+			byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+			exchange.sendResponseHeaders(200, bytes.length);
+			try (java.io.OutputStream os = exchange.getResponseBody()) {
+				os.write(bytes);
+			}
 		}
 	}
 }

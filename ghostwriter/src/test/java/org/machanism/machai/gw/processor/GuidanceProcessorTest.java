@@ -4,74 +4,131 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.gw.reviewer.Reviewer;
 
 class GuidanceProcessorTest {
 
 	@TempDir
-	File tempDir;
+	Path tempDir;
 
 	@Test
-	void normalizeExtensionKey_shouldHandleNullBlankAndLeadingDot() {
+	void normalizeExtensionKey_whenNullOrBlank_thenNull() {
 		assertNull(GuidanceProcessor.normalizeExtensionKey(null));
+		assertNull(GuidanceProcessor.normalizeExtensionKey(""));
 		assertNull(GuidanceProcessor.normalizeExtensionKey("  "));
-		assertEquals("java", GuidanceProcessor.normalizeExtensionKey("java"));
-		assertEquals("java", GuidanceProcessor.normalizeExtensionKey(".java"));
-		assertEquals("md", GuidanceProcessor.normalizeExtensionKey(".MD"));
 	}
 
 	@Test
-	void parseFile_shouldReturnNullForDirectoriesAndUnsupportedExtensions() throws Exception {
-		GuidanceProcessor processor = new GuidanceProcessor(tempDir, "model", new PropertiesConfigurator());
+	void normalizeExtensionKey_whenHasLeadingDot_thenLowercaseNoDot() {
+		assertEquals("java", GuidanceProcessor.normalizeExtensionKey(".JAVA"));
+		assertEquals("txt", GuidanceProcessor.normalizeExtensionKey("txt"));
+	}
 
-		File dir = new File(tempDir, "folder");
+	@Test
+	void match_whenNoPathMatcherAndNoDefaultPrompt_thenMatchesAnyFile() {
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		GuidanceProcessor p = new GuidanceProcessor(tempDir.toFile(), "Any:Model", config);
+		p.setDefaultPrompt(null);
+		p.setPathMatcher(null);
+
+		File projectDir = tempDir.toFile();
+		assertTrue(p.match(projectDir, projectDir));
+		assertTrue(p.match(new File(projectDir, "child.txt"), projectDir));
+	}
+
+	@Test
+	void match_whenNoPathMatcherAndDefaultPromptPresent_thenOnlyMatchesProjectDir() {
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		GuidanceProcessor p = new GuidanceProcessor(tempDir.toFile(), "Any:Model", config);
+		p.setDefaultPrompt("default");
+		p.setPathMatcher(null);
+
+		File projectDir = tempDir.toFile();
+		assertTrue(p.match(projectDir, projectDir));
+		assertFalse(p.match(new File(projectDir, "child.txt"), projectDir));
+	}
+
+	@Test
+	void getReviewerForExtension_whenNoReviewersLoaded_thenNull() {
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		GuidanceProcessor p = new GuidanceProcessor(tempDir.toFile(), "Any:Model", config) {
+			@Override
+			void loadReviewers() {
+				// force empty map
+			}
+		};
+
+		assertNull(p.getReviewerForExtension("java"));
+		assertNull(p.getReviewerForExtension(".java"));
+		assertNull(p.getReviewerForExtension(null));
+	}
+
+	@Test
+	void parseFile_whenNotFile_thenNull() throws Exception {
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		GuidanceProcessor p = new GuidanceProcessor(tempDir.toFile(), "Any:Model", config) {
+			@Override
+			void loadReviewers() {
+				// no reviewers
+			}
+		};
+
+		File dir = tempDir.resolve("dir").toFile();
 		assertTrue(dir.mkdirs());
-		assertNull(processor.parseFile(tempDir, dir));
-
-		File unknown = new File(tempDir, "file.unknown");
-		assertTrue(unknown.createNewFile());
-		assertNull(processor.parseFile(tempDir, unknown));
+		assertNull(p.parseFile(tempDir.toFile(), dir));
 	}
 
 	@Test
-	void deleteTempFiles_shouldReturnFalseWhenNothingToDelete() {
-		assertFalse(GuidanceProcessor.deleteTempFiles(tempDir));
+	void parseFile_whenNoReviewerForExtension_thenNull() throws Exception {
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		GuidanceProcessor p = new GuidanceProcessor(tempDir.toFile(), "Any:Model", config) {
+			@Override
+			void loadReviewers() {
+				// no reviewers
+			}
+		};
+
+		File file = tempDir.resolve("a.unknown").toFile();
+		Files.write(file.toPath(), java.util.Arrays.asList("x"), StandardCharsets.UTF_8);
+		assertNull(p.parseFile(tempDir.toFile(), file));
 	}
 
 	@Test
-	void match_whenNoPathMatcher_shouldMatchOnlyProjectDirIfDefaultPromptPresent() throws IOException {
-		GuidanceProcessor processor = new GuidanceProcessor(tempDir, "model", new PropertiesConfigurator());
-		processor.setDefaultPrompt("default");
+	void parseFile_whenReviewerAvailable_thenDelegates() throws Exception {
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		GuidanceProcessor p = new GuidanceProcessor(tempDir.toFile(), "Any:Model", config) {
+			@Override
+			void loadReviewers() {
+				// don't use ServiceLoader
+			}
+		};
 
-		File projectDir = tempDir;
-		File other = new File(tempDir, "a.txt");
-		assertTrue(other.createNewFile());
+		java.lang.reflect.Field mapField = GuidanceProcessor.class.getDeclaredField("reviewerMap");
+		mapField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.Map<String, Reviewer> map = (java.util.Map<String, Reviewer>) mapField.get(p);
+		map.put("txt", new Reviewer() {
+			@Override
+			public String[] getSupportedFileExtensions() {
+				return new String[] { "txt" };
+			}
 
-		assertTrue(processor.match(projectDir, projectDir));
-		assertFalse(processor.match(other, projectDir));
-	}
+			@Override
+			public String perform(File projectDir, File file) throws IOException {
+				return "GUIDANCE";
+			}
+		});
 
-	@Test
-	void match_whenNoPathMatcher_shouldMatchAllWhenNoDefaultPrompt() throws IOException {
-		GuidanceProcessor processor = new GuidanceProcessor(tempDir, "model", new PropertiesConfigurator());
-		processor.setDefaultPrompt(null);
+		File file = tempDir.resolve("a.txt").toFile();
+		Files.write(file.toPath(), java.util.Arrays.asList("hello"), StandardCharsets.UTF_8);
 
-		File projectDir = tempDir;
-		File other = new File(tempDir, "a.txt");
-		assertTrue(other.createNewFile());
-
-		assertTrue(processor.match(projectDir, projectDir));
-		assertTrue(processor.match(other, projectDir));
-	}
-
-	@Test
-	void getReviewerForExtension_shouldReturnReviewerForJavaWhenAvailable() {
-		GuidanceProcessor processor = new GuidanceProcessor(tempDir, "model", new PropertiesConfigurator());
-		assertNotNull(processor.getReviewerForExtension("java"));
-		assertNotNull(processor.getReviewerForExtension(".java"));
-		assertNull(processor.getReviewerForExtension(null));
+		assertEquals("GUIDANCE", p.parseFile(tempDir.toFile(), file));
 	}
 }

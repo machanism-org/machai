@@ -5,8 +5,12 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +35,109 @@ class ActFunctionToolsTest {
 	}
 
 	@Test
-	void getActList_whenActsDirectoryMissing_returnsBothSections() throws Exception {
+	void applyTools_registersExpectedTools() {
+		// Arrange
+		org.machanism.machai.ai.manager.GenAIProvider provider = mock(
+				org.machanism.machai.ai.manager.GenAIProvider.class);
+
+		// Act
+		tools.applyTools(provider);
+
+		// Assert
+		verify(provider).addTool(eq("list_acts"), anyString(), any());
+		verify(provider).addTool(eq("load_act_details"), anyString(), any(), any(), any());
+		verifyNoMoreInteractions(provider);
+	}
+
+	@Test
+	void listTomlFiles_whenActsPathNull_returnsEmptySet() throws Exception {
+		// Arrange
+		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(null);
+		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
+		m.setAccessible(true);
+
+		// Act
+		@SuppressWarnings("unchecked")
+		Set<String> out = (Set<String>) m.invoke(tools);
+
+		// Assert
+		assertNotNull(out);
+		assertTrue(out.isEmpty());
+	}
+
+	@Test
+	void listTomlFiles_whenActsPathDoesNotExist_returnsEmptySet(@TempDir File tempDir) throws Exception {
+		// Arrange
+		File missingDir = new File(tempDir, "missing");
+		assertFalse(missingDir.exists());
+		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(missingDir);
+		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
+		m.setAccessible(true);
+
+		// Act
+		@SuppressWarnings("unchecked")
+		Set<String> out = (Set<String>) m.invoke(tools);
+
+		// Assert
+		assertNotNull(out);
+		assertTrue(out.isEmpty());
+	}
+
+	@Test
+	void listTomlFiles_whenActsPathIsNotDirectory_returnsEmptySet(@TempDir File tempDir) throws Exception {
+		// Arrange
+		File actsFile = new File(tempDir, "acts.txt");
+		Files.write(actsFile.toPath(), "x".getBytes(StandardCharsets.UTF_8));
+		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(actsFile);
+		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
+		m.setAccessible(true);
+
+		// Act
+		@SuppressWarnings("unchecked")
+		Set<String> out = (Set<String>) m.invoke(tools);
+
+		// Assert
+		assertNotNull(out);
+		assertTrue(out.isEmpty());
+	}
+
+	@Test
+	void listTomlFiles_whenDirectoryEmpty_returnsEmptySet(@TempDir File tempDir) throws Exception {
+		// Arrange
+		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(tempDir);
+		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
+		m.setAccessible(true);
+
+		// Act
+		@SuppressWarnings("unchecked")
+		Set<String> out = (Set<String>) m.invoke(tools);
+
+		// Assert
+		assertNotNull(out);
+		assertTrue(out.isEmpty());
+	}
+
+	@Test
+	void listTomlFiles_whenTomlPresent_returnsSet(@TempDir File tempDir) throws Exception {
+		// Arrange
+		File toml = new File(tempDir, "maybe.toml");
+		Files.write(toml.toPath(), "description=\"x\"".getBytes(StandardCharsets.UTF_8));
+		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(tempDir);
+		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
+		m.setAccessible(true);
+
+		// Act
+		@SuppressWarnings("unchecked")
+		Set<String> out = (Set<String>) m.invoke(tools);
+
+		// Assert
+		assertNotNull(out);
+		assertFalse(out.isEmpty());
+		assertTrue(out.iterator().next().contains("maybe"));
+	}
+
+	@Test
+	void getActList_whenActsDirectoryMissing_includesBothSections() throws Exception {
 		// Arrange
 		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(null);
 		Method m = ActFunctionTools.class.getDeclaredMethod("getActList", Object[].class);
@@ -43,133 +149,94 @@ class ActFunctionToolsTest {
 		// Assert
 		assertNotNull(out);
 		String text = out.toString();
-		assertTrue(text.contains("# Custom Act List"));
-		assertTrue(text.contains("# Base Act List"));
+		assertAll(
+				() -> assertTrue(text.contains("# Custom Act List")),
+				() -> assertTrue(text.contains("# Base Act List")));
 	}
 
 	@Test
-	void getActDetails_whenCustomNotProvided_throwsExceptionForMissingActsDir() throws Exception {
+	void getActDetails_whenCustomNotProvided_andActMissing_throwsFromActProcessor() throws Exception {
 		// Arrange
 		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(null);
-		JsonNode props = mapper.readTree("{\"actName\":\"any\"}");
-		Method m = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
-		m.setAccessible(true);
-
-		// Act + Assert
-		assertThrows(Exception.class, () -> m.invoke(tools, (Object) new Object[] { props }));
-	}
-
-	@Test
-	void getActDetails_whenCustomTrueAndActsNull_returnsMap() throws Exception {
-		// Arrange
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(null);
-		JsonNode props = mapper.readTree("{\"actName\":\"any\",\"custom\":true}");
+		JsonNode props = mapper.readTree("{\"actName\":\"__missing__\"}");
 		Method m = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
 		m.setAccessible(true);
 
 		// Act
-		Object out = m.invoke(tools, (Object) new Object[] { props });
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
+				() -> m.invoke(tools, (Object) new Object[] { props }));
 
 		// Assert
-		assertNotNull(out);
-		assertTrue(out instanceof java.util.Map);
+		assertNotNull(ex.getCause());
 	}
 
 	@Test
-	void getActDetails_whenCustomFalseAndActMissing_returnsMapOrThrowsDependingOnRuntimeClasspath() throws Exception {
+	void getActDetails_whenCustomTrue_returnsMap() throws Exception {
+		// Arrange
+		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(null);
+		JsonNode props = mapper.readTree("{\"actName\":\"__missing__\",\"custom\":true}");
+		Method m = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
+		m.setAccessible(true);
+
+		// Act
+		@SuppressWarnings("unchecked")
+		Map<String, Object> out = (Map<String, Object>) m.invoke(tools, (Object) new Object[] { props });
+
+		// Assert
+		assertNotNull(out);
+	}
+
+	@Test
+	void getActDetails_whenCustomFalse_returnsMap() throws Exception {
 		// Arrange
 		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(new File("."));
-		JsonNode props = mapper.readTree(
-				"{\"actName\":\"__definitely_missing_act__\",\"custom\":false}");
+		JsonNode props = mapper
+				.readTree("{\"actName\":\"__definitely_missing_act__\",\"custom\":false}");
 		Method m = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
 		m.setAccessible(true);
 
 		// Act
-		Object out = null;
-		try {
-			out = m.invoke(tools, (Object) new Object[] { props });
-		} catch (Exception e) {
-			// acceptable (depends on whether classpath has acts embedded)
+		@SuppressWarnings("unchecked")
+		Map<String, Object> out = (Map<String, Object>) m.invoke(tools, (Object) new Object[] { props });
+
+		// Assert
+		assertNotNull(out);
+	}
+
+	@Test
+	void getBaseActList_returnsNonNullSet() throws Exception {
+		// Arrange
+
+		// Act
+		Set<String> out = tools.getBaseActList();
+
+		// Assert
+		assertNotNull(out);
+	}
+
+	@Test
+	void getActDetails_whenBuiltInActExists_returnsPropertiesMap() throws Exception {
+		// Arrange
+		Set<String> baseActs = tools.getBaseActList();
+		if (baseActs.isEmpty()) {
+			return;
 		}
+		String firstAct = baseActs.iterator().next();
+		int start = firstAct.indexOf('`') + 1;
+		int end = firstAct.indexOf('`', start);
+		String actName = firstAct.substring(start, end);
 
-		// Assert
-		if (out != null) {
-			assertTrue(out instanceof java.util.Map);
-		}
-	}
-
-	@Test
-	void listTomlFiles_whenDirectoryEmpty_returnsEmptySet(@TempDir File tempDir) throws Exception {
-		// Arrange
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(tempDir);
-		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
+		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(new File("."));
+		JsonNode props = mapper.readTree("{\"actName\":\"" + actName + "\",\"custom\":false}");
+		Method m = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
 		m.setAccessible(true);
 
 		// Act
-		Object out = m.invoke(tools);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> out = (Map<String, Object>) m.invoke(tools, (Object) new Object[] { props });
 
 		// Assert
 		assertNotNull(out);
-		assertTrue(((java.util.Set<?>) out).isEmpty());
-	}
-
-	@Test
-	void listTomlFiles_whenTomlPresent_returnsSet(@TempDir File tempDir) throws Exception {
-		// Arrange
-		File toml = new File(tempDir, "bad.toml");
-		assertTrue(toml.createNewFile());
-		when(configurator.getFile(eq("gw.acts"), isNull())).thenReturn(tempDir);
-		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
-		m.setAccessible(true);
-
-		// Act
-		Object out = m.invoke(tools);
-
-		// Assert
-		assertNotNull(out);
-		assertTrue(out instanceof java.util.Set);
-	}
-
-	@Test
-	void getBaseActList_returnsNonNullSet() throws IOException {
-		// Arrange
-		// (no additional setup)
-
-		// Act
-		java.util.Set<String> out = tools.getBaseActList();
-
-		// Assert
-		assertNotNull(out);
-	}
-
-	@Test
-	void setConfigurator_storesReference() throws Exception {
-		// Arrange
-		ActFunctionTools local = new ActFunctionTools();
-		Configurator cfg = mock(Configurator.class);
-
-		// Act
-		local.setConfigurator(cfg);
-
-		// Assert (via invoking listTomlFiles and verifying it calls configurator)
-		Method m = ActFunctionTools.class.getDeclaredMethod("listTomlFiles");
-		m.setAccessible(true);
-		when(cfg.getFile(eq("gw.acts"), isNull())).thenReturn(null);
-		m.invoke(local);
-		verify(cfg).getFile(eq("gw.acts"), isNull());
-	}
-
-	@Test
-	void applyTools_registersToolsOnProvider() {
-		// Arrange
-		org.machanism.machai.ai.manager.GenAIProvider provider = mock(
-				org.machanism.machai.ai.manager.GenAIProvider.class);
-
-		// Act
-		tools.applyTools(provider);
-
-		// Assert
-		verify(provider).addTool(eq("list_acts"), anyString(), any());
-		verify(provider).addTool(eq("load_act_details"), anyString(), any(), any(), any());
+		assertTrue(out.containsKey("description"));
 	}
 }

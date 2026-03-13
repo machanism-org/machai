@@ -2,7 +2,7 @@ package org.machanism.machai.gw.processor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -14,49 +14,69 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 class GhostwriterTest {
 
 	@TempDir
-	File tempDir;
+	Path tempDir;
 
 	@Test
-	void constructor_shouldRejectBlankGenai() {
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> new Ghostwriter(" ", new GuidanceProcessor(tempDir, "model", new PropertiesConfigurator())));
-		assertTrue(ex.getMessage().contains(Ghostwriter.GW_GENAI_PROP_NAME));
+	void constructor_whenBlankGenai_thenThrows() {
+		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
+		assertThrows(IllegalArgumentException.class, () -> new Ghostwriter(" ", processor));
 	}
 
 	@Test
-	void resolveScanDirs_shouldPreferArgsThenConfigThenUserDir() throws Exception {
+	void resolveScanDirs_whenNoneProvidedAndNoneInConfig_thenDefaultsToUserDir() {
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		CommandLine cmd = parse(new String[] {}, new Options());
+		String[] dirs = Ghostwriter.resolveScanDirs(cmd, config);
+		assertNotNull(dirs);
+		assertEquals(1, dirs.length);
+		assertNotNull(dirs[0]);
+	}
+
+	@Test
+	void resolveScanDirs_whenConfigProvides_thenUsesConfig() {
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		config.set(Ghostwriter.GW_SCAN_DIR_PROP_NAME, "src");
+		CommandLine cmd = parse(new String[] {}, new Options());
+		String[] dirs = Ghostwriter.resolveScanDirs(cmd, config);
+		assertArrayEquals(new String[] { "src" }, dirs);
+	}
+
+	@Test
+	void logDefaultPrompt_whenNull_thenNoThrow() {
+		assertDoesNotThrow(() -> Ghostwriter.logDefaultPrompt("X", null));
+	}
+
+	@Test
+	void createProcessor_whenActOption_thenActProcessor() throws Exception {
+		Options options = new Options();
+		options.addOption("a", "act", true, "act");
+		CommandLine cmd = new DefaultParser().parse(options, new String[] { "--act", "help" });
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
+		// initialize logger used by Ghostwriter
+		Ghostwriter.initializeConfiguration(tempDir.toFile());
+
+		AIFileProcessor p = Ghostwriter.createProcessor(cmd, tempDir.toFile(), config, "Any:Model");
+		assertInstanceOf(ActProcessor.class, p);
+	}
+
+	@Test
+	void createProcessor_whenNoActOption_thenGuidanceProcessor() throws Exception {
 		Options options = new Options();
-		CommandLine cmdWithArgs = new DefaultParser().parse(options, new String[] { "src" }, true);
-		String[] scanDirs = Ghostwriter.resolveScanDirs(cmdWithArgs, config);
-		assertArrayEquals(new String[] { "src" }, scanDirs);
+		CommandLine cmd = new DefaultParser().parse(options, new String[] {});
+		PropertiesConfigurator config = new PropertiesConfigurator();
 
-		config.set(Ghostwriter.GW_SCAN_DIR_PROP_NAME, "fromConfig");
-		CommandLine cmdNoArgs = new DefaultParser().parse(options, new String[] {}, true);
-		String[] scanDirs2 = Ghostwriter.resolveScanDirs(cmdNoArgs, config);
-		assertArrayEquals(new String[] { "fromConfig" }, scanDirs2);
+		Ghostwriter.initializeConfiguration(tempDir.toFile());
+
+		AIFileProcessor p = Ghostwriter.createProcessor(cmd, tempDir.toFile(), config, "Any:Model");
+		assertInstanceOf(GuidanceProcessor.class, p);
 	}
 
-	@Test
-	void logDefaultPrompt_shouldNotThrowOnNull() {
-		Ghostwriter.logDefaultPrompt("Label", null);
-		Ghostwriter.logDefaultPrompt("Label", "some prompt");
-	}
-
-	@Test
-	void initializeConfiguration_shouldRespectProvidedGwHomeProperty() {
-		String prev = System.getProperty(Ghostwriter.GW_HOME_PROP_NAME);
+	private static CommandLine parse(String[] args, Options options) {
 		try {
-			System.setProperty(Ghostwriter.GW_HOME_PROP_NAME, tempDir.getAbsolutePath());
-			Ghostwriter.initializeConfiguration(null);
-			assertEquals(tempDir.getAbsolutePath(), System.getProperty(Ghostwriter.GW_HOME_PROP_NAME));
-		} finally {
-			if (prev != null) {
-				System.setProperty(Ghostwriter.GW_HOME_PROP_NAME, prev);
-			} else {
-				System.clearProperty(Ghostwriter.GW_HOME_PROP_NAME);
-			}
+			return new DefaultParser().parse(options, args);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 	}
 }

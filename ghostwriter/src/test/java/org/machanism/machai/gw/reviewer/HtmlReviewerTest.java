@@ -19,12 +19,16 @@ class HtmlReviewerTest {
 
 	@Test
 	void getSupportedFileExtensions_returnsHtmlHtmXml() {
+		// Arrange
 		HtmlReviewer reviewer = new HtmlReviewer();
+
+		// Act + Assert
 		assertArrayEquals(new String[] { "html", "htm", "xml" }, reviewer.getSupportedFileExtensions());
 	}
 
 	@Test
 	void perform_returnsNullWhenNoGuidanceCommentPresent() throws IOException {
+		// Arrange
 		HtmlReviewer reviewer = new HtmlReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -32,11 +36,16 @@ class HtmlReviewerTest {
 		Path file = project.resolve("index.html");
 		Files.write(file, "<html></html>".getBytes(StandardCharsets.UTF_8));
 
-		assertNull(reviewer.perform(project.toFile(), file.toFile()));
+		// Act
+		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
+		assertNull(result);
 	}
 
 	@Test
 	void perform_formatsHtmlWhenGuidanceCommentPresent() throws IOException {
+		// Arrange
 		HtmlReviewer reviewer = new HtmlReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -46,7 +55,10 @@ class HtmlReviewerTest {
 		String content = "<!-- @guidance: include -->\n<html><body>Hi</body></html>\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
+		// Act
 		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
 		assertNotNull(result);
 	}
 }

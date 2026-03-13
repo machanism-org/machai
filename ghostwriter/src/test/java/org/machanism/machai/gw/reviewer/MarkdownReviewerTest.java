@@ -19,12 +19,16 @@ class MarkdownReviewerTest {
 
 	@Test
 	void getSupportedFileExtensions_returnsMd() {
+		// Arrange
 		MarkdownReviewer reviewer = new MarkdownReviewer();
+
+		// Act + Assert
 		assertArrayEquals(new String[] { "md" }, reviewer.getSupportedFileExtensions());
 	}
 
 	@Test
 	void perform_returnsNullWhenNoGuidanceTag() throws IOException {
+		// Arrange
 		MarkdownReviewer reviewer = new MarkdownReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -32,11 +36,16 @@ class MarkdownReviewerTest {
 		Path file = project.resolve("README.md");
 		Files.write(file, "# Title".getBytes(StandardCharsets.UTF_8));
 
-		assertNull(reviewer.perform(project.toFile(), file.toFile()));
+		// Act
+		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
+		assertNull(result);
 	}
 
 	@Test
 	void perform_formatsMarkdownWhenGuidanceCommentPresent() throws IOException {
+		// Arrange
 		MarkdownReviewer reviewer = new MarkdownReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -46,9 +55,10 @@ class MarkdownReviewerTest {
 		String content = "<!-- @guidance: explain -->\n# Guide\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
+		// Act
 		String result = reviewer.perform(project.toFile(), file.toFile());
-		assertNotNull(result);
-		// formatted output should include relative path and full content
+
+		// Assert
 		assertNotNull(result);
 	}
 }
