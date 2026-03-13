@@ -138,7 +138,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param projectDir the parent project directory
 	 * @param modules    module relative paths
 	 */
-	private void processModulesMultiThreaded(File projectDir, List<String> modules) {
+	void processModulesMultiThreaded(File projectDir, List<String> modules) {
 		ExecutorService executor = Executors.newFixedThreadPool(degreeOfConcurrency);
 		try {
 			List<Future<Void>> futures = new ArrayList<>();
@@ -182,7 +182,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param executor executor to stop (may be {@code null})
 	 */
-	private void shutdownExecutor(ExecutorService executor) {
+	void shutdownExecutor(ExecutorService executor) {
 		if (executor == null) {
 			return;
 		}
@@ -261,7 +261,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	// Sonar java:S3776 - reduce cognitive complexity by extracting matching logic.
-	private boolean matchPath(File projectDir, File file, String relativeProjectDir, String relativeScanDir) {
+	boolean matchPath(File projectDir, File file, String relativeProjectDir, String relativeScanDir) {
 		String relativeScanPart = ".".equals(relativeScanDir) ? "" : File.separator + relativeScanDir;
 		String path = relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + relativeScanPart;
 
@@ -354,7 +354,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param path project-relative path
 	 * @return {@code true} when excluded
 	 */
-	private boolean shouldExcludePath(Path path) {
+	boolean shouldExcludePath(Path path) {
 		if (path != null && excludes != null) {
 			for (String exclude : excludes) {
 				PathMatcher matcher = getPatternPath(exclude);
@@ -392,7 +392,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param path pattern candidate
 	 * @return matcher or {@code null} when {@code path} is not a pattern
 	 */
-	protected static PathMatcher getPatternPath(String path) {
+	static PathMatcher getPatternPath(String path) {
 		if (StringUtils.isNotBlank(path) && isPathPattern(path)) {
 			return FileSystems.getDefault().getPathMatcher(path);
 		}
@@ -471,7 +471,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param path input path
 	 * @return number of path segments
 	 */
-	protected static int pathDepth(String path) {
+	static int pathDepth(String path) {
 		if (StringUtils.isBlank(path)) {
 			return 0;
 		}

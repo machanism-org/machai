@@ -201,7 +201,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @param projectDir project root directory
 	 * @return formatted directory list, or {@link #NOT_DEFINED} if none apply
 	 */
-	private String getDirInfoLine(List<String> sources, File projectDir) {
+	String getDirInfoLine(List<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
 			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())
@@ -315,7 +315,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @return content read from the URL/file, or the original input
 	 * @throws IOException if reading referenced content fails
 	 */
-	private String tryToGetInstructionsFromReference(String data) throws IOException {
+	String tryToGetInstructionsFromReference(String data) throws IOException {
 		if (data == null) {
 			return null;
 		}
@@ -341,7 +341,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @return response body
 	 * @throws IOException if an I/O error occurs
 	 */
-	private static String readFromHttpUrl(String urlString) throws IOException {
+	static String readFromHttpUrl(String urlString) throws IOException {
 		// Sonar java:S1874 - avoid deprecated URL(String); use URI -> URL.
 		URL url = URI.create(urlString).toURL();
 		try (InputStream in = url.openStream()) {
@@ -358,7 +358,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *                 URI)
 	 * @return file content
 	 */
-	private String readFromFilePath(String filePath) {
+	String readFromFilePath(String filePath) {
 		File file = new File(filePath);
 		if (!file.isAbsolute()) {
 			file = new File(getRootDir(), filePath);
@@ -424,7 +424,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		scanFolder(projectDir);
 	}
 
-	private String parseScanDir(File projectDir, String scanDir) {
+	String parseScanDir(File projectDir, String scanDir) {
 		File scanDirFile = new File(scanDir);
 		if (!scanDirFile.isAbsolute()) {
 			if (".".equals(scanDir)) {

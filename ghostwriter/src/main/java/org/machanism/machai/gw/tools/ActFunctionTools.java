@@ -54,21 +54,16 @@ public class ActFunctionTools implements FunctionTools {
 	 * 
 	 * @throws IOException
 	 */
-	private Object getActList(Object... args) {
-		try {
-			StringBuilder result = new StringBuilder();
-			result.append("# Custom Act List\n\n");
-			List<String> collect = listTomlFiles().stream().map(line -> "- `" + line).collect(Collectors.toList());
-			result.append(StringUtils.join(collect, "\n"));
-			result.append("\n\n# Base Act List\n\n");
-			List<String> collect2 = getBaseActList().stream().map(line -> "- `" + line).collect(Collectors.toList());
-			result.append(StringUtils.join(collect2, "\n"));
+	private Object getActList(Object... args) throws IOException {
+		StringBuilder result = new StringBuilder();
+		result.append("# Custom Act List\n\n");
+		List<String> collect = listTomlFiles().stream().map(line -> "- `" + line).collect(Collectors.toList());
+		result.append(StringUtils.join(collect, "\n"));
+		result.append("\n\n# Base Act List\n\n");
+		List<String> collect2 = getBaseActList().stream().map(line -> "- `" + line).collect(Collectors.toList());
+		result.append(StringUtils.join(collect2, "\n"));
 
-			return result.toString();
-
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
+		return result.toString();
 	}
 
 	public Set<String> getBaseActList() throws IOException {
@@ -125,25 +120,21 @@ public class ActFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	private Object getActDetails(Object... params) {
+	private Object getActDetails(Object... params) throws IOException {
 		JsonNode props = (JsonNode) params[0];
 		String actName = props.get("actName").asText();
 		String custom = props.has("custom") ? props.get("custom").asText() : null;
 
 		Map<String, Object> properties = new HashMap<>();
-		try {
-			File acts = configurator.getFile("gw.acts", null);
-			if (custom == null) {
-				ActProcessor.loadAct(actName, properties, acts);
+		File acts = configurator.getFile("gw.acts", null);
+		if (custom == null) {
+			ActProcessor.loadAct(actName, properties, acts);
+		} else {
+			if ("true".equals(custom)) {
+				ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
 			} else {
-				if ("true".equals(custom)) {
-					ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
-				} else {
-					ActProcessor.tryLoadActFromClasspath(properties, actName);
-				}
+				ActProcessor.tryLoadActFromClasspath(properties, actName);
 			}
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
 		}
 
 		return properties;

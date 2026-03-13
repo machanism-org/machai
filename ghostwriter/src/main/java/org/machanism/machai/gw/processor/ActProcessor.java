@@ -126,7 +126,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param acts related act names to run (may be {@code null})
 	 * @throws IOException if a related act scan fails
 	 */
-	private void runRelatedActs(List<String> acts) throws IOException {
+	void runRelatedActs(List<String> acts) throws IOException {
 		if (acts != null) {
 			for (String act : acts) {
 				logger.info("Running related act: {}", act);
@@ -289,7 +289,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param properties properties destination
 	 * @param toml       TOML parse result
 	 */
-	private static void setActData(Map<String, Object> properties, TomlParseResult toml) {
+	static void setActData(Map<String, Object> properties, TomlParseResult toml) {
 		Set<Entry<String, Object>> props = toml.dottedEntrySet();
 		for (Entry<String, Object> entry : props) {
 			String key = entry.getKey();
@@ -314,7 +314,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param properties properties loaded from TOML acts
 	 */
-	private void applyActData(Map<String, Object> properties) {
+	void applyActData(Map<String, Object> properties) {
 		for (Entry<String, Object> entry : properties.entrySet()) {
 			String key = entry.getKey();
 			if (entry.getValue() instanceof String) {

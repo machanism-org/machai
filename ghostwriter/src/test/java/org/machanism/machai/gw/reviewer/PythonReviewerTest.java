@@ -12,38 +12,38 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class TypeScriptReviewerTest {
+class PythonReviewerTest {
 
 	@TempDir
 	Path tempDir;
 
 	@Test
-	void getSupportedFileExtensions_returnsTs() {
-		TypeScriptReviewer reviewer = new TypeScriptReviewer();
-		assertArrayEquals(new String[] { "ts" }, reviewer.getSupportedFileExtensions());
+	void getSupportedFileExtensions_returnsPy() {
+		PythonReviewer reviewer = new PythonReviewer();
+		assertArrayEquals(new String[] { "py" }, reviewer.getSupportedFileExtensions());
 	}
 
 	@Test
 	void perform_returnsNullWhenNoGuidanceTag() throws IOException {
-		TypeScriptReviewer reviewer = new TypeScriptReviewer();
+		PythonReviewer reviewer = new PythonReviewer();
 
 		Path project = tempDir.resolve("project");
 		Files.createDirectories(project);
-		Path file = project.resolve("a.ts");
-		Files.write(file, "const x = 1;\n".getBytes(StandardCharsets.UTF_8));
+		Path file = project.resolve("a.py");
+		Files.write(file, "print('hi')\n".getBytes(StandardCharsets.UTF_8));
 
 		assertNull(reviewer.perform(project.toFile(), file.toFile()));
 	}
 
 	@Test
 	void perform_formatsWhenGuidancePresentInLineComment() throws IOException {
-		TypeScriptReviewer reviewer = new TypeScriptReviewer();
+		PythonReviewer reviewer = new PythonReviewer();
 
 		Path project = tempDir.resolve("project");
 		Files.createDirectories(project);
-		Path file = project.resolve("src").resolve("a.ts");
+		Path file = project.resolve("src").resolve("a.py");
 		Files.createDirectories(file.getParent());
-		String content = "// @guidance: keep\nconst x = 1;\n";
+		String content = "# @guidance: keep\nprint('hi')\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
 		String result = reviewer.perform(project.toFile(), file.toFile());
@@ -51,13 +51,13 @@ class TypeScriptReviewerTest {
 	}
 
 	@Test
-	void perform_formatsWhenGuidancePresentInBlockComment() throws IOException {
-		TypeScriptReviewer reviewer = new TypeScriptReviewer();
+	void perform_formatsWhenGuidancePresentInTripleQuotedString() throws IOException {
+		PythonReviewer reviewer = new PythonReviewer();
 
 		Path project = tempDir.resolve("project");
 		Files.createDirectories(project);
-		Path file = project.resolve("b.ts");
-		String content = "/* @guidance: keep */\nconst x = 1;\n";
+		Path file = project.resolve("b.py");
+		String content = "\"\"\" @guidance: doc \"\"\"\nprint('hi')\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
 		String result = reviewer.perform(project.toFile(), file.toFile());

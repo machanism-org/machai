@@ -155,7 +155,7 @@ public final class Ghostwriter {
 	 * @param rootDir optional root directory used to resolve the home directory
 	 * @return initialized configuration
 	 */
-	private static PropertiesConfigurator initializeConfiguration(File rootDir) {
+	static PropertiesConfigurator initializeConfiguration(File rootDir) {
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
 		File gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
@@ -193,7 +193,7 @@ public final class Ghostwriter {
 	 *
 	 * @param options the configured CLI options to display in the help message
 	 */
-	private static void help(Options options) {
+	static void help(Options options) {
 		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n\n"
 				+ "Usage:\n  java -jar gw.jar <scanDir> [options]\n\n"
 				+ "  <scanDir> specifies the scanning path or pattern.\n"
@@ -301,7 +301,7 @@ public final class Ghostwriter {
 		}
 	}
 
-	private static AIFileProcessor createProcessor(CommandLine cmd, File rootDir, PropertiesConfigurator config,
+	static AIFileProcessor createProcessor(CommandLine cmd, File rootDir, PropertiesConfigurator config,
 			String genai) {
 		AIFileProcessor processor;
 		String defaultPrompt;
@@ -318,7 +318,7 @@ public final class Ghostwriter {
 		return processor;
 	}
 
-	private static AIFileProcessor createActProcessor(CommandLine cmd, File rootDir, PropertiesConfigurator config,
+	static AIFileProcessor createActProcessor(CommandLine cmd, File rootDir, PropertiesConfigurator config,
 			String genai) {
 		ActProcessor processor = new ActProcessor(rootDir, config, genai);
 		if (cmd.hasOption("acts")) {
@@ -330,7 +330,7 @@ public final class Ghostwriter {
 		return processor;
 	}
 
-	private static String resolveActPrompt(CommandLine cmd) {
+	static String resolveActPrompt(CommandLine cmd) {
 		String defaultPrompt = cmd.getOptionValue("act");
 		if (defaultPrompt == null) {
 			defaultPrompt = readText("Act");
@@ -338,7 +338,7 @@ public final class Ghostwriter {
 		return defaultPrompt;
 	}
 
-	private static String resolveGuidancePrompt(CommandLine cmd, PropertiesConfigurator config) {
+	static String resolveGuidancePrompt(CommandLine cmd, PropertiesConfigurator config) {
 		String defaultPrompt = config.get(GW_GUIDANCE_PROP_NAME, null);
 		if (cmd.hasOption(GUIDANCE_OPTION)) {
 			defaultPrompt = cmd.getOptionValue(GUIDANCE_OPTION);
@@ -350,14 +350,14 @@ public final class Ghostwriter {
 	}
 
 	// Sonar java:S3776 - reduce cognitive complexity by extracting prompt logging.
-	private static void logDefaultPrompt(String label, String prompt) {
+	static void logDefaultPrompt(String label, String prompt) {
 		// Sonar java:S1066 - merge nested if statements.
 		if (prompt != null && logger.isInfoEnabled()) {
 			logger.info("{}: {}", label, StringUtils.abbreviate(prompt, 60));
 		}
 	}
 
-	private static String[] resolveScanDirs(CommandLine cmd, PropertiesConfigurator config) {
+	static String[] resolveScanDirs(CommandLine cmd, PropertiesConfigurator config) {
 		String[] scanDirs = cmd.getArgs();
 		if (scanDirs == null || scanDirs.length == 0) {
 			String gwScanDir = config.get(GW_SCAN_DIR_PROP_NAME, null);

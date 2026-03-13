@@ -66,7 +66,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping
 	 * supported file extensions to a reviewer.
 	 */
-	private void loadReviewers() {
+	void loadReviewers() {
 		reviewerMap.clear();
 
 		ServiceLoader<Reviewer> reviewerServiceLoader = ServiceLoader.load(Reviewer.class);
@@ -89,7 +89,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 *                  {@code ".java"})
 	 * @return normalized key, or {@code null} if the input is blank
 	 */
-	private static String normalizeExtensionKey(String extension) {
+	static String normalizeExtensionKey(String extension) {
 		String value = StringUtils.trimToNull(extension);
 		if (value == null) {
 			return null;
@@ -226,7 +226,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @return guidance text, or {@code null} if the file type is not supported
 	 * @throws IOException if the file cannot be read
 	 */
-	private String parseFile(File projectDir, File file) throws IOException {
+	String parseFile(File projectDir, File file) throws IOException {
 		if (!file.isFile()) {
 			return null;
 		}
@@ -246,7 +246,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @param extension file extension (with or without a dot)
 	 * @return reviewer, or {@code null} if none is registered for that extension
 	 */
-	private Reviewer getReviewerForExtension(String extension) {
+	Reviewer getReviewerForExtension(String extension) {
 		String key = normalizeExtensionKey(extension);
 		if (key == null) {
 			return null;
