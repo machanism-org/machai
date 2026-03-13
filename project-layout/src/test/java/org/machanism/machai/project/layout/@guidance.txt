@@ -1,10 +1,10 @@
-- Create high-quality unit tests in this folder for all public and package-private classes and methods located in the required source folder.
-- The `required source folder` is located in `[Project Path]/src/main/java/[Package Path]`.
-- The `Package Path` is a `Current Folder` path without prefix `src/test/java`.
+- **Review and update all existing unit tests to maximize coverage and quality in this folder for package: `org.machanism.machai.project.layout` only, sub-packages should be skipped.**
+- **Create new, high-quality unit tests as needed to ensure that every public and package-private class and method in the required source folder is fully tested.**
 - **Ensure that the overall test coverage for the required source folder is at least 90%.**
-- Ensure comprehensive coverage of all core logic, edge cases, and error handling.
+- Achieve comprehensive coverage of all core logic, edge cases, and error handling scenarios.
+- Refactor or enhance existing tests to improve clarity, maintainability, and coverage where necessary.
 - Use descriptive test method names and meaningful assertions.
 - Follow the Arrange-Act-Assert (AAA) structure in each test.
-- Mock dependencies where appropriate to isolate units under test.
-- Place test files in this directory, mirroring the package structure of the source files.
-- **Use the Java version specified in the project's `pom.xml` for all test code and configuration.**
+- Mock dependencies where appropriate to isolate the units under test.
+- Place all test files in this directory, mirroring the package structure of the source files.
+- **Do not remove any existing tests unless they are redundant or incorrect; instead, update or supplement them as needed.**
