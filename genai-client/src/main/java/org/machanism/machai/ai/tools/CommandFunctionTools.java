@@ -66,11 +66,13 @@ public class CommandFunctionTools implements FunctionTools {
 	/**
 	 * Default maximum number of characters to return from captured process output.
 	 */
-	// Sonar java:S115 - constants should be named like ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$
+	// Sonar java:S115 - constants should be named like
+	// ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$
 	private static final int DEFAULT_RESULT_TAIL_SIZE = 1024;
 
 	/** Default character set used to decode process output streams. */
-	// Sonar java:S115 - constants should be named like ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$
+	// Sonar java:S115 - constants should be named like
+	// ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
 	/** Maximum time to wait for a started process to complete. */
@@ -231,8 +233,9 @@ public class CommandFunctionTools implements FunctionTools {
 	 *
 	 * @param params tool arguments
 	 * @return command output bounded to the configured tail size
+	 * @throws IOException 
 	 */
-	public String executeCommand(Object[] params) {
+	public String executeCommand(Object[] params) throws IOException {
 		String commandId = Integer.toHexString(RANDOM.nextInt());
 		// Sonar java:S2629 - avoid building expensive log message when INFO is disabled
 		if (logger.isInfoEnabled()) {
@@ -252,17 +255,14 @@ public class CommandFunctionTools implements FunctionTools {
 			return "Error: Invalid working directory.";
 		}
 
-		try {
-			Path projectPath = projectDir.toPath().toRealPath();
-			Path workingPath = workingDir.toPath().toRealPath();
-			if (!workingPath.startsWith(projectPath)) {
-				return "Error: Working directory must be within project directory.";
-			}
-		} catch (IOException e) {
-			return "Error: Unable to resolve working directory.";
+		Path projectPath = projectDir.toPath().toRealPath();
+		Path workingPath = workingDir.toPath().toRealPath();
+		if (!workingPath.startsWith(projectPath)) {
+			return "Error: Working directory must be within project directory.";
 		}
 
-		Integer tailResultSize = props.has("tailResultSize") ? props.get("tailResultSize").asInt(DEFAULT_RESULT_TAIL_SIZE)
+		Integer tailResultSize = props.has("tailResultSize")
+				? props.get("tailResultSize").asInt(DEFAULT_RESULT_TAIL_SIZE)
 				: DEFAULT_RESULT_TAIL_SIZE;
 		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(DEFAULT_CHARSET)
 				: DEFAULT_CHARSET;
@@ -271,7 +271,8 @@ public class CommandFunctionTools implements FunctionTools {
 		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
 
 		// Sonar java:S2095 - ensure ExecutorService is closed
-		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(Executors.newFixedThreadPool(2))) {
+		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
+				Executors.newFixedThreadPool(2))) {
 
 			runDenyChecks(command);
 
@@ -286,13 +287,15 @@ public class CommandFunctionTools implements FunctionTools {
 			final Process process = pb.start();
 			prc = process;
 
-			Future<?> stdoutFuture = executor.get().submit(() -> readStream(process.getInputStream(), charsetName, output,
-					line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
-					e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
+			Future<?> stdoutFuture = executor.get()
+					.submit(() -> readStream(process.getInputStream(), charsetName, output,
+							line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
+							e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
 
-			Future<?> stderrFuture = executor.get().submit(() -> readStream(process.getErrorStream(), charsetName, output,
-					line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
-					e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
+			Future<?> stderrFuture = executor.get()
+					.submit(() -> readStream(process.getErrorStream(), charsetName, output,
+							line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
+							e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
 
 			return waitAndCollect(process, stdoutFuture, stderrFuture, output, commandId);
 
@@ -325,7 +328,8 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	private void runDenyChecks(String command) throws CommandLineException, DenyException {
-		// Sonar java:S3776 - extract deny-list validation to reduce cognitive complexity
+		// Sonar java:S3776 - extract deny-list validation to reduce cognitive
+		// complexity
 		String[] commandParts = CommandLineUtils.translateCommandline(command);
 		for (String commandPart : commandParts) {
 			checker.denyCheck(commandPart);
@@ -333,8 +337,10 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	private String waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture,
-			LimitedStringBuilder output, String commandId) throws InterruptedException, TimeoutException, ExecutionException {
-		// Sonar java:S3776 - extract waiting/collection logic to reduce cognitive complexity
+			LimitedStringBuilder output, String commandId)
+			throws InterruptedException, TimeoutException, ExecutionException {
+		// Sonar java:S3776 - extract waiting/collection logic to reduce cognitive
+		// complexity
 		boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
 		if (!finished) {
 			process.destroyForcibly();

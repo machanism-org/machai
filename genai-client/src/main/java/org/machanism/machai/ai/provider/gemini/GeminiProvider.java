@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.Function;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -117,7 +116,7 @@ public class GeminiProvider implements GenAIProvider {
 	 *            parameter descriptors (provider/framework specific format)
 	 */
 	@Override
-	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		// TODO Implement tool registration and invocation routing.
 	}
 

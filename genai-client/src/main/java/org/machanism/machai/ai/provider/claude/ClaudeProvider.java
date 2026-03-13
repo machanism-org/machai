@@ -6,7 +6,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.Function;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
@@ -62,7 +61,7 @@ public class ClaudeProvider implements GenAIProvider {
 	}
 
 	@Override
-	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}

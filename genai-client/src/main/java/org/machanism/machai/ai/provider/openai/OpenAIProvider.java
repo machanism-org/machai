@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -111,7 +110,7 @@ public class OpenAIProvider implements GenAIProvider {
 	private String chatModel;
 
 	/** Maps tools to handler functions. */
-	private final Map<Tool, Function<Object[], Object>> toolMap = new HashMap<>();
+	private final Map<Tool, ToolFunction> toolMap = new HashMap<>();
 
 	/** Optional log file for input data. */
 	private File inputsLog;
@@ -433,9 +432,9 @@ public class OpenAIProvider implements GenAIProvider {
 		try {
 			arguments[0] = new ObjectMapper().readTree(functionCall.arguments());
 			arguments[1] = workingDir;
-			Set<Entry<Tool, Function<Object[], Object>>> entrySet = toolMap.entrySet();
+			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
 			Object result = null;
-			for (Entry<Tool, Function<Object[], Object>> entry : entrySet) {
+			for (Entry<Tool, ToolFunction> entry : entrySet) {
 				if (StringUtils.equals(name, entry.getKey().asFunction().name())) {
 					result = safelyInvokeTool(name, entry.getValue(), arguments);
 					break;
@@ -448,7 +447,7 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	// Sonar java:S1141 - extracted nested try/catch into a dedicated method
-	private Object safelyInvokeTool(String name, Function<Object[], Object> tool, Object[] arguments) {
+	private Object safelyInvokeTool(String name, ToolFunction tool, Object[] arguments) {
 		try {
 			return tool.apply(arguments);
 		} catch (Exception e) {
@@ -521,7 +520,7 @@ public class OpenAIProvider implements GenAIProvider {
 	 *                    {@code name:type:required:description}
 	 */
 	@Override
-	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		Map<String, Map<String, String>> fromValue = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
 		ArrayNode requiredProps = mapper.createArrayNode();

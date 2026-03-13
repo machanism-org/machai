@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.function.Function;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 
@@ -85,7 +84,7 @@ public class GenAIAdapter implements GenAIProvider {
 	}
 
 	@Override
-	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		provider.addTool(name, description, function, paramsDesc);
 	}
 

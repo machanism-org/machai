@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
 import java.util.List;
-import java.util.function.Function;
 
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -132,7 +131,7 @@ public class NoneProvider implements GenAIProvider {
 	 * @param paramsDesc optional parameter descriptions
 	 */
 	@Override
-	public void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		// No-op in NoneProvider
 	}
 

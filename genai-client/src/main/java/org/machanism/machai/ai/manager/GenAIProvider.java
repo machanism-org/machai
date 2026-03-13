@@ -4,15 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.function.Function;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 
 /**
  * Contract for a generative-AI provider integration.
  *
- * <p>A {@code GenAIProvider} represents a concrete implementation (for example OpenAI, Gemini, a local model, etc.)
- * capable of:
+ * <p>
+ * A {@code GenAIProvider} represents a concrete implementation (for example
+ * OpenAI, Gemini, a local model, etc.) capable of:
  * <ul>
  * <li>collecting prompts and system instructions for a conversation,</li>
  * <li>attaching local or remote files for provider-side processing,</li>
@@ -20,9 +20,12 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  * <li>registering tool functions that may be invoked during a run.</li>
  * </ul>
  *
- * <p>Implementations may keep session state between calls. Use {@link #clear()} to reset conversation state.
+ * <p>
+ * Implementations may keep session state between calls. Use {@link #clear()} to
+ * reset conversation state.
  *
  * <h2>Typical usage</h2>
+ * 
  * <pre>{@code
  * Configurator conf = ...;
  * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
@@ -37,6 +40,11 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  * @author Viktor Tovstyi
  */
 public interface GenAIProvider {
+
+	@FunctionalInterface
+	public interface ToolFunction {
+		Object apply(Object[] params) throws Exception;
+	}
 
 	/**
 	 * Initializes the provider with application configuration.
@@ -58,7 +66,8 @@ public interface GenAIProvider {
 	 * @param file the file to add
 	 * @throws IOException for I/O errors (including file-not-found)
 	 */
-	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass of IOException)
+	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass
+	// of IOException)
 	void addFile(File file) throws IOException;
 
 	/**
@@ -67,7 +76,8 @@ public interface GenAIProvider {
 	 * @param fileUrl the URL of the file
 	 * @throws IOException for I/O errors (including file-not-found)
 	 */
-	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass of IOException)
+	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass
+	// of IOException)
 	void addFile(URL fileUrl) throws IOException;
 
 	/**
@@ -87,14 +97,17 @@ public interface GenAIProvider {
 	/**
 	 * Registers a custom tool function that the provider may invoke at runtime.
 	 *
-	 * <p>The expected argument structure passed to {@code function} is provider-specific.
+	 * <p>
+	 * The expected argument structure passed to {@code function} is
+	 * provider-specific.
 	 *
 	 * @param name        tool name (unique per provider instance)
 	 * @param description human-readable description of the tool
-	 * @param function    function implementation; receives an argument array and returns a result
+	 * @param function    function implementation; receives an argument array and
+	 *                    returns a result
 	 * @param paramsDesc  parameter descriptors (format is provider-specific)
 	 */
-	void addTool(String name, String description, Function<Object[], Object> function, String... paramsDesc);
+	void addTool(String name, String description, ToolFunction function, String... paramsDesc);
 
 	/**
 	 * Sets system/session instructions for the current conversation.
@@ -104,7 +117,8 @@ public interface GenAIProvider {
 	void instructions(String instructions);
 
 	/**
-	 * Executes the provider to produce a response based on the accumulated prompts and state.
+	 * Executes the provider to produce a response based on the accumulated prompts
+	 * and state.
 	 *
 	 * @return the provider response
 	 */
@@ -125,9 +139,11 @@ public interface GenAIProvider {
 	void setWorkingDir(File workingDir);
 
 	/**
-	 * Returns token usage metrics for the most recent {@link #perform()} invocation.
+	 * Returns token usage metrics for the most recent {@link #perform()}
+	 * invocation.
 	 *
-	 * @return usage metrics; implementations may return zero values if not supported
+	 * @return usage metrics; implementations may return zero values if not
+	 *         supported
 	 */
 	Usage usage();
 
