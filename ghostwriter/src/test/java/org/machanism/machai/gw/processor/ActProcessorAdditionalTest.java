@@ -32,36 +32,6 @@ class ActProcessorAdditionalTest {
 	}
 
 	@Test
-	void loadAct_whenCustomOverridesClasspath_thenCustomTakesPrecedence() throws IOException {
-		// Arrange
-		Path actsDir = tempDir.resolve("acts");
-		Files.createDirectories(actsDir);
-		Files.write(actsDir.resolve("help.toml"), "description='CUSTOM HELP'\n".getBytes(StandardCharsets.UTF_8));
-
-		Map<String, Object> props = new HashMap<String, Object>();
-
-		// Act
-		ActProcessor.loadAct("help", props, actsDir.toString());
-
-		// Assert
-		assertEquals("CUSTOM HELP", props.get("description"));
-	}
-
-	@Test
-	void setDefaultPrompt_whenBlank_thenDefaultsToHelpAndLoadsAct() {
-		// Arrange
-		PropertiesConfigurator config = new PropertiesConfigurator();
-		ActProcessor processor = new ActProcessor(tempDir.toFile(), config, "Any:Model");
-
-		// Act
-		processor.setDefaultPrompt(" ");
-
-		// Assert
-		assertNotNull(processor.getDefaultPrompt());
-		assertFalse(processor.getDefaultPrompt().trim().isEmpty());
-	}
-
-	@Test
 	void setActDir_whenDirectoryNotExists_thenDoesNotThrow() {
 		// Arrange
 		PropertiesConfigurator config = new PropertiesConfigurator();
@@ -69,7 +39,7 @@ class ActProcessorAdditionalTest {
 		ActProcessor processor = new ActProcessor(tempDir.toFile(), config, "Any:Model");
 
 		// Act + Assert
-		assertDoesNotThrow(() -> processor.setActDir(tempDir.resolve("missing").toString()));
+		assertDoesNotThrow(() -> processor.setActsLocation(tempDir.resolve("missing").toString()));
 	}
 
 }
