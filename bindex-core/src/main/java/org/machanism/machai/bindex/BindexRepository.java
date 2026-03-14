@@ -71,6 +71,17 @@ public class BindexRepository {
 	}
 
 	/**
+	 * Package-private constructor used for tests to avoid MongoDB driver initialization.
+	 */
+	BindexRepository(MongoCollection<Document> collection) {
+		if (collection == null) {
+			throw new IllegalArgumentException("collection must not be null");
+		}
+		this.collection = collection;
+		this.mongoClient = null;
+	}
+
+	/**
 	 * Looks up the registered database ID for a Bindex (if it exists).
 	 *
 	 * @param bindex Bindex instance
@@ -82,8 +93,7 @@ public class BindexRepository {
 			throw new IllegalArgumentException("bindex must not be null");
 		}
 		Document query = new Document("id", bindex.getId());
-		FindIterable<Document> find = collection.find(query);
-		Document document = find.first();
+		Document document = findFirst(query);
 		if (document == null) {
 			return null;
 		}
@@ -102,7 +112,7 @@ public class BindexRepository {
 			throw new IllegalArgumentException("id must not be null");
 		}
 
-		Document doc = collection.find(Filters.eq("id", id)).first();
+		Document doc = findFirst(Filters.eq("id", id));
 		if (doc == null) {
 			return null;
 		}
@@ -130,6 +140,19 @@ public class BindexRepository {
 		Bson filter = Filters.eq("id", id);
 		collection.deleteOne(filter);
 		return id;
+	}
+
+	/**
+	 * Single overridable seam for querying the first matching document.
+	 */
+	Document findFirst(Bson filter) {
+		FindIterable<Document> find = collection.find(filter);
+		return find.first();
+	}
+
+	Document findFirst(Document filter) {
+		FindIterable<Document> find = collection.find(filter);
+		return find.first();
 	}
 
 }
