@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,6 +68,7 @@ public class ActProcessor extends AIFileProcessor {
 
 	// Sonar java:S1192 - avoid duplicating string literals.
 	private static final String TOML_EXTENSION = ".toml";
+	private static final String INPUTS_PROPERTY_NAME = "inputs";
 
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
@@ -121,10 +123,16 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		Map<String, Object> actData = new HashMap<>();
-		actData.put("inputs", StringUtils.defaultString(prompt).trim());
 
 		try {
 			loadAct(name, actData, actsLocation);
+
+			Object mainValue = actData.get(INPUTS_PROPERTY_NAME);
+			if (mainValue instanceof String) {
+				String value = String.format((String) mainValue, Objects.toString(prompt));
+				actData.put(INPUTS_PROPERTY_NAME, value);
+			}
+
 			applyActData(actData);
 
 		} catch (IOException e) {
@@ -259,9 +267,9 @@ public class ActProcessor extends AIFileProcessor {
 			String key = entry.getKey();
 			if (entry.getValue() instanceof String) {
 				String value = (String) entry.getValue();
-				Object inheritValue = properties.get(key);
-				if (inheritValue instanceof String) {
-					value = String.format(value, (String) inheritValue);
+				Object mainValue = properties.get(key);
+				if (mainValue instanceof String) {
+					value = String.format((String) mainValue, value);
 				}
 				properties.put(key, value);
 			}
@@ -293,7 +301,8 @@ public class ActProcessor extends AIFileProcessor {
 					super.setInstructions(value);
 					break;
 
-				case "inputs":
+				case INPUTS_PROPERTY_NAME:
+					// Sonar java:S1192 - reuse constant for property name.
 					super.setDefaultPrompt(value);
 					break;
 

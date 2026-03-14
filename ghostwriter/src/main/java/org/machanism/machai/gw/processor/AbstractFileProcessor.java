@@ -323,11 +323,14 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
-			if (shouldIncludeInFindFiles(projectDir, file)) {
-				result.add(file);
-				if (file.isDirectory()) {
-					result.addAll(findFiles(file));
-				}
+			// Sonar java:S135 - keep loop simple by avoiding multiple continue statements.
+			if (!shouldIncludeInFindFiles(projectDir, file)) {
+				continue;
+			}
+
+			result.add(file);
+			if (file.isDirectory()) {
+				result.addAll(findFiles(file));
 			}
 		}
 
