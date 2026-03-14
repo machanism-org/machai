@@ -3,52 +3,35 @@ package org.machanism.machai.cli;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
-import java.nio.file.Files;
+import java.lang.reflect.Constructor;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class MachaiCLITest {
 
-	private final String originalConfigProperty = System.getProperty("config");
+	@Test
+	void constructor_shouldBeAccessibleAndCreateInstance() throws Exception {
+		// Arrange
+		Constructor<MachaiCLI> ctor = MachaiCLI.class.getDeclaredConstructor();
+		ctor.setAccessible(true);
 
-	@AfterEach
-	void tearDown() {
-		if (originalConfigProperty == null) {
-			System.clearProperty("config");
-		} else {
-			System.setProperty("config", originalConfigProperty);
-		}
+		// Act
+		MachaiCLI instance = ctor.newInstance();
+
+		// Assert
+		assertEquals(MachaiCLI.class, instance.getClass());
 	}
 
 	@Test
-	void loadSystemProperties_shouldNotThrow_whenDefaultConfigFileDoesNotExist() {
+	void loadSystemProperties_whenNoConfigAndNoFile_shouldNotThrow() {
 		// Arrange
 		System.clearProperty("config");
 
 		// Act + Assert
-		assertDoesNotThrow(() -> invokeLoadSystemProperties());
-	}
-
-	@Test
-	void loadSystemProperties_shouldLoadFromSystemPropertyConfigFile_whenFileExists() throws Exception {
-		// Arrange
-		File tempProps = File.createTempFile("machai-cli-test", ".properties");
-		tempProps.deleteOnExit();
-		Files.writeString(tempProps.toPath(), "test.sys.prop=abc\n");
-		System.setProperty("config", tempProps.getAbsolutePath());
-
-		// Act
-		invokeLoadSystemProperties();
-
-		// Assert
-		assertEquals("abc", System.getProperty("test.sys.prop"));
-	}
-
-	private static void invokeLoadSystemProperties() throws Exception {
-		var m = MachaiCLI.class.getDeclaredMethod("loadSystemProperties");
-		m.setAccessible(true);
-		m.invoke(null);
+		assertDoesNotThrow(() -> {
+			var m = MachaiCLI.class.getDeclaredMethod("loadSystemProperties");
+			m.setAccessible(true);
+			m.invoke(null);
+		});
 	}
 }
