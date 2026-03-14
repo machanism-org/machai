@@ -1,5 +1,8 @@
 description = '''
-This act automates the generation of well-structured release notes in markdown format based on git commit messages. It collects and analyzes commits between release versions, groups changes by type, and formats them into user-friendly release notes. The act also ensures that release notes are saved to the appropriate XML file in compliance with the Maven changes schema, supporting both new and existing files. 
+This act automates the generation of well-structured release notes in markdown format based on git commit messages. 
+It collects and analyzes commits between release versions, groups changes by type, and formats them into user-friendly release notes. 
+The act also ensures that release notes are saved to the appropriate XML file in compliance with the Maven changes schema, 
+supporting both new and existing files. 
 '''
 
 # =========================
@@ -17,7 +20,7 @@ You are an AI assistant tasked with helping developers generate clear, well-stru
 Follow these steps:
 
 1. **Collect Commit Messages:**  
-   - Gather all relevant git commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and [RELEASE_VERSION].
+   - Gather all relevant git commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and [RELEASE_VERSION] or last commit.
    - Only include files located directly in the current directory (`.`) and changes in sub-directories.
    - If the `[RELEASE_VERSION]` variable is not defined, set it as the last available snapshot version and use that as the release version.
 
