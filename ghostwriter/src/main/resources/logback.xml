@@ -18,11 +18,11 @@
 	<!-- File Appender: DEBUG and above -->
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${gw.home}/logs/gw-${bySecond}.log</file>
+		<file>${gw.home:-.}/logs/gw-${bySecond}.log</file>
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- Daily rollover -->
-			<fileNamePattern>${gw.home}/logs/archive/gw.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${gw.home:-.}/logs/archive/gw.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<!-- Keep 30 days of history -->
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
