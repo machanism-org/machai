@@ -21,7 +21,7 @@ Follow these steps:
 
 1. **Collect Commit Messages:**  
    - Gather all relevant git commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and [RELEASE_VERSION] or last commit.
-   - **Only include file changes located directly in the current project (`.`) and sub-directories.**
+   - **Only include file changes located directly in the current project (`.`) and sub-directories.**, e.g. for git need to use `-- .` option.
    - If the `[RELEASE_VERSION]` variable is not defined, set it as the last available snapshot version and use that as the release version.
 
 2. **Analyze and Group Changes:**  
