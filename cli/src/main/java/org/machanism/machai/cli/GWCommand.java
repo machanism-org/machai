@@ -245,7 +245,7 @@ public class GWCommand {
 
 		instructionsValue = instructions;
 		if (instructionsValue.isEmpty()) {
-			instructionsValue = readText("No instructions were provided as an option value.\n"
+			instructionsValue = readText("No instructions were provided as an option value.%n"
 					+ "Please enter the instructions text below.");
 		}
 		return instructionsValue;
@@ -290,7 +290,10 @@ public class GWCommand {
 		GuidanceProcessor processor = new GuidanceProcessor(ctx.rootDir, ctx.genaiValue, ctx.config);
 
 		if (ctx.excludesArr != null) {
-			LOGGER.info("Excludes: {}", Arrays.toString(ctx.excludesArr));
+			// Sonar java:S2629 - invoke Arrays.toString(..) only when INFO log is enabled.
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("Excludes: {}", Arrays.toString(ctx.excludesArr));
+			}
 			processor.setExcludes(ctx.excludesArr);
 		}
 
@@ -328,8 +331,8 @@ public class GWCommand {
 	 * @return the entered text, or {@code null} if no content was provided
 	 */
 	private String readText(String prompt) {
-		// Sonar java:S106 - use logger instead of System.out.
-		LOGGER.info(prompt + ": ");
+		// Sonar java:S3457/java:S2629 - use built-in formatting and parameterized logging to avoid string concatenation.
+		LOGGER.info("{}:", prompt);
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (scanner.hasNextLine()) {
