@@ -21,5 +21,18 @@
 </ul>
 ]]></action>
     </release>
+
+    <release version="1.0.1" date="2026-03-14">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Fixes</h2>
+<ul>
+  <li>Apply Sonar-related fixes and code quality corrections.</li>
+</ul>
+<h2>Tests</h2>
+<ul>
+  <li>Add additional automated tests.</li>
+</ul>
+]]></action>
+    </release>
   </body>
 </document>

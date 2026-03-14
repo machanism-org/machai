@@ -49,5 +49,35 @@
         ]]>
       </action>
     </release>
+
+    <release version="1.0.1" date="2026-03-14">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h2>Fixes</h2>
+<ul>
+  <li>Require <code>genai</code> configuration and remove the deprecated <code>pickChatModel</code> property.</li>
+</ul>
+
+<h2>Refactoring</h2>
+<ul>
+  <li>Simplify GenAI configuration by using <code>genai</code> as a string in Picker/ApplicationAssembly.</li>
+  <li>Remove Closeable from Picker/BindexRegister and improve prompt construction using <code>StringBuilder</code>.</li>
+</ul>
+
+<h2>Documentation</h2>
+<ul>
+  <li>Update site configuration/assets (icons, manifest links) and add MachAI YouTube playlist link.</li>
+  <li>Add Javadoc output folders and update PlantUML <code>scanPackages</code> configuration.</li>
+</ul>
+
+<h2>Chores</h2>
+<ul>
+  <li>Add <code>changes.xml</code> to site metadata.</li>
+  <li>Project version bumps through 0.0.14–1.0.1-SNAPSHOT.</li>
+  <li>Miscellaneous GW automated maintenance updates.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
   </body>
 </document>

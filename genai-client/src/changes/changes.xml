@@ -35,5 +35,31 @@
 </ul>
 ]]></action>
     </release>
+
+    <release version="1.0.1" date="2026-03-14">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Add command-line properties replacement support (CommandFunctionTools).</li>
+  <li>Introduce <code>ToolFunction</code> interface.</li>
+  <li>Add unit-test creation guidance tag.</li>
+</ul>
+<h2>Fixes</h2>
+<ul>
+  <li>Apply deny-check per command part instead of the entire command line.</li>
+  <li>Handle error responses correctly in <code>callRestApi</code>.</li>
+  <li>Fix prompt default selection, method naming, and <code>custom</code> parameter processing.</li>
+</ul>
+<h2>Refactoring</h2>
+<ul>
+  <li>Relax method visibility from <code>private</code> to package-private where needed.</li>
+  <li>Miscellaneous Sonar-driven cleanups.</li>
+</ul>
+<h2>Tests</h2>
+<ul>
+  <li>Add and expand automated test coverage.</li>
+</ul>
+]]></action>
+    </release>
   </body>
 </document>

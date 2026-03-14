@@ -43,5 +43,43 @@
         ]]>
       </action>
     </release>
+    <release version="1.0.1" date="2026-03-14">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Added <code>conf</code> command and persistent configuration support (save/load system properties).</li>
+  <li>Added AeProvider and bundled AE recipes into the distribution/JAR; moved recipes into <code>genai-client</code> resources.</li>
+  <li>Improved guidance-driven file processing (process files based on <code>@guidance</code> tags) and added <code>--dir</code>/<code>--root</code> options (plus <code>--clean</code>) to the processing workflow.</li>
+  <li>Added URL registration parameter support to Picker.</li>
+</ul>
+
+<h2>Fixes</h2>
+<ul>
+  <li>Improved compatibility with OpenAI-compatible providers; fixed prompts/model settings for CodeMie + gpt-4o-2024-08-06.</li>
+  <li>Fixed path/property issues (e.g., <code>&lt;ae.dir&gt;</code>/<code>&lt;aeDir&gt;</code>) and adjusted plugin execution safety (set threadSafe=false; fixed parent project processing).</li>
+  <li>Resolved template/guidance formatting issues (removed extra tags; fixed <code>---</code> handling) and corrected file path usage in markdown reviewing.</li>
+</ul>
+
+<h2>Refactoring</h2>
+<ul>
+  <li>Package and naming cleanups (e.g., BIndex -&gt; Bindex) and general import/output message polish.</li>
+  <li>Embedding logic improvements to better support non-OpenAPI services.</li>
+</ul>
+
+<h2>Documentation</h2>
+<ul>
+  <li>Updated README and site docs; refreshed AE recipes documentation and generated docs via gw process.</li>
+  <li>Added/updated <code>package-info.java</code> across packages for improved API documentation.</li>
+  <li>Renamed <code>docs</code> command to <code>process</code> and updated documentation accordingly.</li>
+</ul>
+
+<h2>Chores</h2>
+<ul>
+  <li>Routine documentation regeneration and repository maintenance commits (gw process updates).</li>
+</ul>
+        ]]>
+      </action>
+    </release>
   </body>
 </document>

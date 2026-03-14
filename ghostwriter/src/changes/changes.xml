@@ -39,5 +39,38 @@
         ]]>
       </action>
     </release>
+
+    <release version="1.0.1" date="2026-03-14">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Added support for loading Acts from URL locations.</li>
+  <li>Added built-in Act listing tool and improved Act discovery/logging.</li>
+  <li>Improved CLI help and Act listing output (including Act descriptions).</li>
+  <li>Added unit-test creation guidance and expanded unit-test Act templates.</li>
+</ul>
+<h2>Fixes</h2>
+<ul>
+  <li>Fixed NPE and corrected handling of Act properties (inputs formatting, inheritance, and placeholder processing).</li>
+  <li>Fixed log path handling.</li>
+  <li>Fixed prompt defaults, a method name, and <code>custom</code> parameter processing.</li>
+</ul>
+<h2>Refactoring</h2>
+<ul>
+  <li>Removed unsupported <code>prologue</code>/<code>epilogue</code> Act properties after initial experimentation.</li>
+</ul>
+<h2>Documentation</h2>
+<ul>
+  <li>Updated release-notes Act template and refined guidance/rules (including Windows <code>cmd /c</code> usage).</li>
+</ul>
+<h2>Chores</h2>
+<ul>
+  <li>Improved GW/Act concurrency and updated CLI options for <code>ActCommand</code> and <code>GWCommand</code>.</li>
+  <li>Added JUnit Jupiter params dependency and expanded test coverage.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
   </body>
 </document>

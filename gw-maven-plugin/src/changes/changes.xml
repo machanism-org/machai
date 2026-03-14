@@ -42,5 +42,29 @@
         ]]>
       </action>
     </release>
+
+    <release version="1.0.1" date="2026-03-14">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Added support for loading <code>acts</code> locations from URLs.</li>
+  <li>Improved concurrency handling for GW/Act execution and extended CLI options for <code>ActCommand</code> and <code>GWCommand</code>.</li>
+</ul>
+
+<h2>Fixes</h2>
+<ul>
+  <li>Fixed <code>nonRecursive</code> mode processing.</li>
+  <li>Improved Act prompt parsing and <code>scanDir</code> resolution.</li>
+  <li>Sonar-related fixes applied via <code>gw:act</code> (<code>sonar-fix</code>).</li>
+</ul>
+
+<h2>Chores</h2>
+<ul>
+  <li>Aligned the Maven Act goal option naming/behavior for <code>acts</code> location and performed minor import optimizations.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
   </body>
 </document>

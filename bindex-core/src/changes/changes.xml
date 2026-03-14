@@ -35,5 +35,18 @@
 </ul>
 ]]></action>
     </release>
+    <release version="1.0.1" date="2026-03-14">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Fixes</h2>
+<ul>
+  <li>Applied Sonar-driven fixes and cleanups.</li>
+  <li>Improved test coverage and addressed Sonar test findings.</li>
+</ul>
+<h2>Refactoring</h2>
+<ul>
+  <li>Adopted the <code>ToolFunction</code> interface.</li>
+</ul>
+]]></action>
+    </release>
   </body>
 </document>

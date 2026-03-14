@@ -39,5 +39,28 @@
 </ul>
 ]]></action>
     </release>
+    <release version="1.0.1" date="2026-03-14">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Add unit test creation guidance tag.</li>
+</ul>
+
+<h2>Fixes</h2>
+<ul>
+  <li>Apply multiple Sonar-related fixes (via <code>sonar-fix</code> act), including a revert of an earlier attempt.</li>
+</ul>
+
+<h2>Documentation</h2>
+<ul>
+  <li>Update Javadocs.</li>
+</ul>
+
+<h2>Chores</h2>
+<ul>
+  <li>Add tests (generated via <code>gw:gw</code>).</li>
+</ul>
+]]></action>
+    </release>
   </body>
 </document>
