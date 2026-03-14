@@ -246,7 +246,7 @@ public class GWCommand {
 		instructionsValue = instructions;
 		if (instructionsValue.isEmpty()) {
 			instructionsValue = readText("No instructions were provided as an option value.\n"
-					+ "Please enter the instructions text below. When you are done, press Ctrl+D (or Ctrl+Z on Windows) to finish:");
+					+ "Please enter the instructions text below.");
 		}
 		return instructionsValue;
 	}
@@ -329,7 +329,7 @@ public class GWCommand {
 	 */
 	private String readText(String prompt) {
 		// Sonar java:S106 - use logger instead of System.out.
-		LOGGER.info(prompt);
+		LOGGER.info(prompt + ": ");
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (scanner.hasNextLine()) {
