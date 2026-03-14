@@ -56,9 +56,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	private File rootDir;
 
 	/**
-	 * Specifies a special scanning path or path pattern. This should be a relative
-	 * path with respect to the current processing project. If an absolute path is
-	 * provided, it must be located within the {@code rootDir}.
+	 * Specifies a special scanning path or path pattern. This should be a relative	 * path with respect to the current processing project. If an absolute path is	 * provided, it must be located within the {@code rootDir}.
 	 */
 	private File scanDir;
 
@@ -325,17 +323,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
-			String name = file.getName();
-			String relativePathString = ProjectLayout.getRelativePath(projectDir, file);
-			if (relativePathString == null) {
-				continue;
-			}
-			Path relativePath = new File(relativePathString).toPath();
-
-			// Sonar java:S135 - reduce break/continue statements by using a guard boolean.
-			boolean excluded = Strings.CI.equalsAny(name, ProjectLayout.getExcludeDirs())
-					|| shouldExcludePath(relativePath);
-			if (!excluded) {
+			if (shouldIncludeInFindFiles(projectDir, file)) {
 				result.add(file);
 				if (file.isDirectory()) {
 					result.addAll(findFiles(file));
@@ -348,6 +336,29 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
+	 * Determines whether an entry found in {@link #findFiles(File)} should be
+	 * included.
+	 *
+	 * <p>
+	 * Sonar java:S135 - reduce break/continue statements by isolating filtering.
+	 * </p>
+	 *
+	 * @param projectDir project directory being traversed
+	 * @param file       candidate entry
+	 * @return {@code true} when the entry should be included
+	 */
+	boolean shouldIncludeInFindFiles(File projectDir, File file) {
+		String name = file.getName();
+		String relativePathString = ProjectLayout.getRelativePath(projectDir, file);
+		if (relativePathString == null) {
+			return false;
+		}
+		Path relativePath = new File(relativePathString).toPath();
+
+		return !Strings.CI.equalsAny(name, ProjectLayout.getExcludeDirs()) && !shouldExcludePath(relativePath);
+	}
+
+	/**
 	 * Determines whether a relative path should be excluded according to
 	 * {@link #excludes}.
 	 *
@@ -355,19 +366,22 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @return {@code true} when excluded
 	 */
 	boolean shouldExcludePath(Path path) {
-		if (path != null && excludes != null) {
-			for (String exclude : excludes) {
-				PathMatcher matcher = getPatternPath(exclude);
-				if (matcher != null) {
-					if (matcher.matches(path)) {
-						return true;
-					}
-				} else {
-					String relative = path.toString();
-					if (Strings.CS.equals(relative, exclude)
-							|| Strings.CS.equals(path.getFileName().toString(), exclude)) {
-						return true;
-					}
+		if (path == null || excludes == null) {
+			return false;
+		}
+		for (String exclude : excludes) {
+			if (exclude == null) {
+				continue;
+			}
+			PathMatcher matcher = getPatternPath(exclude);
+			if (matcher != null) {
+				if (matcher.matches(path)) {
+					return true;
+				}
+			} else {
+				String relative = path.toString();
+				if (Strings.CS.equals(relative, exclude) || Strings.CS.equals(path.getFileName().toString(), exclude)) {
+					return true;
 				}
 			}
 		}
@@ -452,8 +466,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 				continue;
 			}
 
-			if (Strings.CI.containsAny(path, ProjectLayout.getExcludeDirs())
-					|| shouldExcludePath(new File(path).toPath())) {
+			if (Strings.CI.containsAny(path, ProjectLayout.getExcludeDirs()) || shouldExcludePath(new File(path).toPath())) {
 				continue;
 			}
 

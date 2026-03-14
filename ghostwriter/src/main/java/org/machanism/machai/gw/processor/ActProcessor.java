@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +12,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -76,20 +73,6 @@ public class ActProcessor extends AIFileProcessor {
 	/** Optional directory containing external {@code *.toml} act files. */
 	private String actsLocation;
 
-	/** Acts to run before the current act scan. */
-	private List<String> prologue;
-
-	/** Acts to run after the current act scan. */
-	private List<String> epilogue;
-
-	/** Project directory used for a scan run (cached for prologue/epilogue). */
-	private File projectDir;
-
-	/**
-	 * Scan directory/pattern used for a scan run (cached for prologue/epilogue).
-	 */
-	private String scanDir;
-
 	/**
 	 * Creates an act processor.
 	 *
@@ -100,48 +83,6 @@ public class ActProcessor extends AIFileProcessor {
 	public ActProcessor(File rootDir, Configurator configurator, String genai) {
 		super(rootDir, configurator, genai);
 		actsLocation = configurator.get("gw.acts", null);
-	}
-
-	/**
-	 * Runs the configured act over the given project directory and scan directory
-	 * (or pattern).
-	 *
-	 * <p>
-	 * If the currently loaded act defines {@code prologue} and/or {@code epilogue}
-	 * acts, those are executed before/after the scan respectively.
-	 * </p>
-	 *
-	 * @param projectDir project root directory
-	 * @param scanDir    scan start directory or {@code glob:}/{@code regex:}
-	 *                   pattern
-	 * @throws IOException if scanning fails
-	 */
-	@Override
-	public void scanDocuments(File projectDir, String scanDir) throws IOException {
-		this.projectDir = projectDir;
-		this.scanDir = scanDir;
-		runRelatedActs(prologue);
-		super.scanDocuments(projectDir, scanDir);
-		runRelatedActs(epilogue);
-	}
-
-	/**
-	 * Executes the provided act names as separate scans, using the current scan
-	 * context.
-	 *
-	 * @param acts related act names to run (may be {@code null})
-	 * @throws IOException if a related act scan fails
-	 */
-	void runRelatedActs(List<String> acts) throws IOException {
-		if (acts != null) {
-			List<String> actList = new ArrayList<>(acts);
-			acts.clear();
-			for (String act : actList) {
-				logger.info("Running related act: {}", act);
-				setDefaultPrompt(act);
-				scanDocuments(projectDir, scanDir);
-			}
-		}
 	}
 
 	/**
@@ -358,38 +299,12 @@ public class ActProcessor extends AIFileProcessor {
 					super.setExcludes(StringUtils.split(value, ","));
 					break;
 
-				case "epilogue":
-					setEpilogue(Arrays.asList(value));
-					break;
-
-				case "prologue":
-					setPrologue(Arrays.asList(value));
-					break;
-
 				case "gw.nonRecursive":
 					super.setNonRecursive(Boolean.parseBoolean(value));
 					break;
 
 				default:
 					getConfigurator().set(key, value);
-					break;
-				}
-			} else if (valueObj instanceof List) {
-				// Sonar java:S3740 - use a type-safe check instead of suppressing unchecked
-				// warnings.
-				List<?> rawList = (List<?>) valueObj;
-				List<String> stringList = rawList.stream().map(Object::toString).collect(Collectors.toList());
-
-				switch (key) {
-				case "prologue":
-					setPrologue(stringList);
-					break;
-
-				case "epilogue":
-					setEpilogue(stringList);
-					break;
-
-				default:
 					break;
 				}
 			}
@@ -447,21 +362,4 @@ public class ActProcessor extends AIFileProcessor {
 		process(projectLayout, file, getInstructions(), getDefaultPrompt());
 	}
 
-	/**
-	 * Sets acts to run before the current act scan.
-	 *
-	 * @param prologue act names (may be {@code null})
-	 */
-	public void setPrologue(List<String> prologue) {
-		this.prologue = prologue;
-	}
-
-	/**
-	 * Sets acts to run after the current act scan.
-	 *
-	 * @param epilogue act names (may be {@code null})
-	 */
-	public void setEpilogue(List<String> epilogue) {
-		this.epilogue = epilogue;
-	}
 }
