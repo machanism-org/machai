@@ -142,7 +142,7 @@ public class Act extends AbstractGWGoal {
 		try {
 			if (acts != null) {
 				logger.info("Act directory: {}", acts);
-				actProcessor.setActDir(acts);
+				actProcessor.setActsLocation(acts);
 			}
 			if (excludes != null) {
 				actProcessor.setExcludes(excludes);
