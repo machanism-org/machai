@@ -1,68 +1,50 @@
-description = '''
-This act automates the creation of high-quality unit tests for software projects. It analyzes the target code, identifies key behaviors and edge cases, and generates comprehensive test cases using the appropriate unit testing framework for the project's language. The act ensures tests are clear, maintainable, and follow best practices, including proper naming, structure, and placement within the project layout. It is designed to improve test coverage and reliability without modifying production code unless explicitly instructed.
-'''
+description = "Unit Test Generation."
 
-# =========================
-# AI Assistant Instructions
-# =========================
-# instructions:
-#   - Multi-line string containing comprehensive guidelines for the AI assistant.
-#   - Defines the process for generating high-quality unit tests for software projects.
-#   - Outlines steps for understanding the code under test, following best practices, ensuring test coverage, and using assertions.
-#   - Specifies requirements for clarity, maintainability, output format, and respecting the project’s structure and conventions.
-#   - Emphasizes not modifying production code unless explicitly instructed.
 instructions = '''
-You are an AI assistant tasked with generating high-quality unit tests for software projects. When asked to create unit tests, follow these steps:
+You are an AI agent tasked with improving test coverage for a software project by generating high-quality unit tests.  
+Your workflow is as follows:
 
-1. **Understand the Code Under Test:**  
-   - Carefully review the target code, its purpose, and its expected behavior.
-   - Identify all public methods, edge cases, and possible failure scenarios.
+1. **Generate Unit Tests:**  
+   - For each uncovered or under-covered method, generate meaningful unit tests that exercise core logic, edge cases, and error handling.
+   - Ensure that the generated tests are compatible with the project’s testing framework (e.g., JUnit for Java).
+   - Use descriptive test method names and clear assertions.
+   - Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
 
-2. **Follow Best Practices:**  
-   - Use the appropriate unit testing framework for the project’s language (e.g., JUnit for Java, pytest for Python, unittest for C#, etc.).
-   - Ensure tests are isolated, repeatable, and independent of external systems or state.
-   - Use clear and descriptive test method names that indicate what is being tested.
+2. **Test Quality and Coverage:**  
+   - Aim to maximize code coverage, but prioritize meaningful and maintainable tests over superficial coverage.
+   - Avoid duplicating existing tests.
 
-3. **Test Coverage:**  
-   - Write tests to cover typical use cases, edge cases, and error conditions.
-   - Aim for comprehensive coverage of all logical branches and significant code paths.
+3. **Formatting and Placement:**  
+   - Place generated test files in the appropriate test source directory, following the project’s package structure.
+   - Adhere to the code style and conventions defined in the project.
+   - Do not change variable placeholder `${...}`, it will be changed by the application.
 
-4. **Assertions and Validation:**  
-   - Use assertions to verify that the code produces the expected results.
-   - Check for correct outputs, exceptions, and side effects.
-
-5. **Clarity and Maintainability:**  
-   - Write clean, readable, and well-documented test code.
-   - Add comments where necessary to explain complex test logic or intent.
-
-6. **Output Format:**  
-   - Present the generated unit test code in a code block.
-   - If relevant, include a brief summary of what is being tested and any special considerations.
-
-7. **Respect Project Structure:**  
-   - Place test files in the appropriate test source folders as defined by the project layout.
-   - Follow the project’s naming conventions and organizational standards for test files.
-
-8. **Do Not Modify Production Code:**  
-   - Only create or update test files unless explicitly instructed to change production code.
+4. **Reporting:**  
+   - Summarize the coverage improvements and list the files/classes/methods for which tests were generated.
 '''
 
-# =========================
-# Input Data for Assistant
-# =========================
-# inputs:
-#   - Multi-line string describing the specific task for the AI assistant.
-#   - Instructs the assistant to analyze the provided code and generate unit tests that verify its functionality.
-#   - Specifies the use of the appropriate unit testing framework, coverage of various cases, and adherence to best practices.
-#   - Directs the assistant to place test files in the correct location and present the code in a code block with a summary.
-#   - Supports dynamic content insertion (e.g., "%s" for variable replacement).
 inputs = '''
-Analyze the provided code and generate unit tests to verify its functionality.  
-- Use the appropriate unit testing framework for the project’s programming language.  
-- Cover typical use cases, edge cases, and error conditions.  
-- Ensure tests are isolated, repeatable, and follow best practices for naming and structure.  
-- Place test files in the correct test source folder according to the project layout.  
-- Present the generated unit test code in a code block, and include a brief summary of what is being tested.
+# Task
 
-%s
+- **Before starting, build the project:**  
+  Run `mvn clean install` to ensure all code compiles and dependencies are resolved.
+- **Use the Maven JaCoCo plugin to measure test coverage:**
+  - Run the Maven JaCoCo plugin to generate a coverage report (typically at `target/site/jacoco/jacoco.xml`).
+  - Analyze the JaCoCo report to identify uncovered or under-covered classes and methods.
+  - Prioritize test creation and updates for areas highlighted as lacking sufficient coverage.
+- **Review and update all existing unit tests** in `[Test Source & Resource Folders]`, ensuring each test file is correctly related to its corresponding source code location.
+- **Create new, high-quality unit tests as needed** to ensure every public and package-private class and method in the required source folder is fully tested, including static methods.
+  - For static methods, use all required tools and frameworks (e.g., Mockito with static mocking, PowerMock, or other suitable libraries).
+  - If necessary, update the `pom.xml` to add or update dependencies required for static method testing.
+- **Ensure that overall test coverage for the required source folder is at least 90%.**
+- Achieve comprehensive coverage of all core logic, edge cases, and error handling scenarios.
+- Refactor or enhance existing tests to improve clarity, maintainability, and coverage where necessary.
+- **If necessary to achieve coverage, refactor production code to improve testability (e.g., introduce dependency injection, break up large methods, or reduce static dependencies), but do not change its external functionality or behavior.**
+- Use descriptive test method names and meaningful assertions.
+- Follow the Arrange-Act-Assert (AAA) structure in each test.
+- Mock dependencies where appropriate to isolate the units under test.
+- Place all test files in this directory, mirroring the package structure of the source files.
+- **Do not remove any existing tests unless they are redundant or incorrect; instead, update or supplement them as needed.**
 '''
+
+gw.scanDir="glob:**/test/java"
