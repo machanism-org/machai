@@ -156,8 +156,8 @@ public class ActProcessor extends AIFileProcessor {
 	 * @throws IllegalArgumentException if the specified act cannot be found in
 	 *                                  either location
 	 */
-	public static void loadAct(String name, Map<String, Object> properties, String actsLocation2) throws IOException {
-		TomlParseResult customToml = tryLoadActFromDirectory(properties, name, actsLocation2);
+	public static void loadAct(String name, Map<String, Object> properties, String actsLocation) throws IOException {
+		TomlParseResult customToml = tryLoadActFromDirectory(properties, name, actsLocation);
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
@@ -173,7 +173,7 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		if (basedOn != null) {
-			loadAct(basedOn, properties, actsLocation2);
+			loadAct(basedOn, properties, actsLocation);
 			properties.remove(BASED_ON_PROPERTY_NAME);
 		}
 	}

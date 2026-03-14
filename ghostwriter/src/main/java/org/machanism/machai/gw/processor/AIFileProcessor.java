@@ -156,6 +156,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Builds a human-readable description of the project structure used in prompts.
 	 *
 	 * @param projectLayout current project layout
+	 * @param file          file currently being processed (used for project-relative path)
 	 * @return formatted project information block
 	 * @throws IOException if computing relative paths fails
 	 */

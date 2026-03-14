@@ -30,6 +30,18 @@ Machai Ghostwriter is an AI-assisted documentation and review engine that scans 
 
 Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system, where each file can carry local guidance and the tool orchestrates processing across the project consistently.
 
+## Overview
+
+Ghostwriter is delivered as a Java CLI entry point (`org.machanism.machai.gw.processor.Ghostwriter`) that:
+
+- Loads configuration from `gw.properties` (or an override via `-Dgw.config=...`).
+- Sets the project root directory and scan targets (directory paths or `glob:` / `regex:` matchers).
+- Discovers supported file types and uses per-type reviewers to extract embedded `@guidance:` directives.
+- Composes provider inputs including project structure context and optional system instructions.
+- Executes the configured GenAI provider across matching files (or in Act mode).
+
+In addition to per-file guidance, Ghostwriter can apply *default guidance* when a file has no embedded `@guidance:` and can also perform a folder-level step (processor-dependent).
+
 ## Usage
 
 ### Getting Started
