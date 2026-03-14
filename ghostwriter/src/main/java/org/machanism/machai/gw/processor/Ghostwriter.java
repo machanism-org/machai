@@ -324,7 +324,7 @@ public final class Ghostwriter {
 		if (cmd.hasOption("acts")) {
 			String value = cmd.getOptionValue("acts");
 			logger.info("Act directory: {}", value);
-			processor.setActDir(value);
+			processor.setActsLocation(value);
 		}
 		return processor;
 	}

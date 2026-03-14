@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.processor;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -120,9 +121,10 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		Map<String, Object> actData = new HashMap<>();
+		actData.put("inputs", StringUtils.defaultString(prompt).trim());
+
 		try {
 			loadAct(name, actData, actsLocation);
-			super.setDefaultPrompt(StringUtils.defaultString(prompt).trim());
 			applyActData(actData);
 
 		} catch (IOException e) {
@@ -225,7 +227,11 @@ public class ActProcessor extends AIFileProcessor {
 			}
 		} else {
 			URI uri = URI.create(actsLocation + "/" + name + TOML_EXTENSION);
-			toml = Toml.parse(uri.toURL().openStream());
+			try {
+				toml = Toml.parse(uri.toURL().openStream());
+			} catch (FileNotFoundException e) {
+				// the custom act file not found.
+			}
 		}
 
 		// Sonar java:S2259 - avoid NPE when act is not found in a custom directory.
@@ -255,7 +261,7 @@ public class ActProcessor extends AIFileProcessor {
 				String value = (String) entry.getValue();
 				Object inheritValue = properties.get(key);
 				if (inheritValue instanceof String) {
-					value = String.format((String) inheritValue, value);
+					value = String.format(value, (String) inheritValue);
 				}
 				properties.put(key, value);
 			}
@@ -317,7 +323,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param actsLocation directory containing {@code *.toml} act files
 	 */
-	public void setActDir(String actsLocation) {
+	public void setActsLocation(String actsLocation) {
 		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
 			File actDir = new File(actsLocation);
 			// Sonar java:S2589 - new File(...) never returns null.
@@ -327,6 +333,7 @@ public class ActProcessor extends AIFileProcessor {
 			}
 		}
 		this.actsLocation = actsLocation;
+		getConfigurator().set("gw.acts", actsLocation);
 	}
 
 	/**

@@ -6,9 +6,11 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
@@ -32,12 +34,29 @@ public class ActFunctionTools implements FunctionTools {
 	@Override
 	public void applyTools(GenAIProvider provider) {
 		provider.addTool(
+				"build_in_list_acts",
+				"Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable prompt templates stored as TOML files, "
+						+ "which define instructions and input templates for common workflows.",
+				this::getActList);
+
+		provider.addTool(
 				"load_act_details",
 				"Loads the details of a specific Act template, including its instructions, input template, and configuration options. Useful for inspecting or editing Act definitions.",
 				this::getActDetails,
 				"actName:string:required:The name of the Act to load.",
 				"custom:boolean:optional:If true, retrieves the Act definition only from the user-defined (custom) acts directory. "
 						+ "If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts.");
+	}
+
+	/**
+	 * Lists all available Act TOML files in the specified directory or built-in
+	 * directory.
+	 * 
+	 * @throws IOException
+	 */
+	private Object getActList(Object... args) throws IOException {
+		List<String> result = getBaseActList().stream().map(line -> "- `" + line).collect(Collectors.toList());
+		return StringUtils.join(result, "\n");
 	}
 
 	public Set<String> getBaseActList() throws IOException {
