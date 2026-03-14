@@ -14,6 +14,8 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 
 class JavaReviewerTest {
@@ -30,40 +32,18 @@ class JavaReviewerTest {
 		assertArrayEquals(new String[] { "java" }, reviewer.getSupportedFileExtensions());
 	}
 
-	@Test
-	void extractPackageName_returnsPackageWhenPresent() {
-		// Arrange
-		String content = "/* some header */\npackage org.example.test;\n// tail";
-
+	@ParameterizedTest
+	@CsvSource({
+			"'/* some header */\npackage org.example.test;\n// tail', org.example.test",
+			"'// no package here\npublic class X {}', <default package>",
+			"'package org.exa_mple.v2;', org.exa_mple.v2"
+	})
+	void extractPackageName_variousCases(String content, String expected) {
 		// Act
 		String result = JavaReviewer.extractPackageName(content);
 
 		// Assert
-		assertEquals("org.example.test", result);
-	}
-
-	@Test
-	void extractPackageName_returnsDefaultWhenMissing() {
-		// Arrange
-		String content = "// no package here\npublic class X {}";
-
-		// Act
-		String result = JavaReviewer.extractPackageName(content);
-
-		// Assert
-		assertEquals("<default package>", result);
-	}
-
-	@Test
-	void extractPackageName_supportsUnderscoreAndDigits() {
-		// Arrange
-		String content = "package org.exa_mple.v2;";
-
-		// Act
-		String result = JavaReviewer.extractPackageName(content);
-
-		// Assert
-		assertEquals("org.exa_mple.v2", result);
+		assertEquals(expected, result);
 	}
 
 	@Test
@@ -101,15 +81,16 @@ class JavaReviewerTest {
 		assertNull(result);
 	}
 
-	// Sonar java:S5976 - consolidate similar test cases (kept in one test to avoid adding junit-jupiter-params dependency).
-	@Test
-	void perform_returnsFormattedOutputWhenGuidancePresent_variants() throws IOException {
-		assertGuidanceIsExtracted("src/main/java/A.java",
-				"// " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\npublic class A {}\n");
-		assertGuidanceIsExtracted("A.java",
-				"/*\n * header\n * " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\n */\npublic class A {}\n");
-		assertGuidanceIsExtracted("src/main/java/org/example/package-info.java",
-				"/* " + GuidanceProcessor.GUIDANCE_TAG_NAME + " package docs */\npackage org.example;\n");
+	// Sonar java:S5976 - merge similar tests into a single parameterized test.
+	@ParameterizedTest
+	@CsvSource({
+			"'src/main/java/A.java', '// " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\npublic class A {}\n'",
+			"'A.java', '/*\n * header\n * " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\n */\npublic class A {}\n'",
+			"'src/main/java/org/example/package-info.java', '/* " + GuidanceProcessor.GUIDANCE_TAG_NAME
+					+ " package docs */\npackage org.example;\n'"
+	})
+	void perform_returnsFormattedOutputWhenGuidancePresent(String relativePath, String fileContent) throws IOException {
+		assertGuidanceIsExtracted(relativePath, fileContent);
 	}
 
 	private void assertGuidanceIsExtracted(String relativePath, String fileContent) throws IOException {

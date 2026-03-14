@@ -149,7 +149,8 @@ public class Act extends AbstractGWGoal {
 			}
 			actProcessor.setLogInputs(logInputs);
 
-			// Sonar java:S1141 - extract nested try/catch into a separate method to improve readability.
+			// Sonar java:S1141 - extract nested try/catch into a separate method to improve
+			// readability.
 			configureAndScan(actProcessor);
 
 		} catch (IOException e) {

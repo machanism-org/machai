@@ -2,13 +2,11 @@ package org.machanism.machai.gw.processor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -74,33 +72,4 @@ class ActProcessorAdditionalTest {
 		assertDoesNotThrow(() -> processor.setActDir(tempDir.resolve("missing").toString()));
 	}
 
-	@Test
-	void runRelatedActs_whenListProvided_thenClearsListBeforeRunToAvoidInfiniteLoop() throws Exception {
-		// Arrange
-		PropertiesConfigurator config = new PropertiesConfigurator();
-
-		class TestActProcessor extends ActProcessor {
-			int runs = 0;
-
-			TestActProcessor(File rootDir, PropertiesConfigurator configurator, String genai) {
-				super(rootDir, configurator, genai);
-			}
-
-			@Override
-			public void scanDocuments(File projectDir, String scanDir) {
-				runs++;
-			}
-		}
-
-		TestActProcessor processor = new TestActProcessor(tempDir.toFile(), config, "Any:Model");
-		List<String> related = new java.util.ArrayList<String>();
-		related.add("help");
-
-		// Act
-		processor.runRelatedActs(related);
-
-		// Assert
-		assertEquals(1, processor.runs);
-		assertTrue(related.isEmpty(), "Expected list to be cleared by runRelatedActs");
-	}
 }

@@ -85,7 +85,7 @@ class ActFunctionToolsTest {
 	}
 
 	@Test
-	void getActDetails_whenConfiguratorNotSet_thenThrowsNullPointerExceptionAsCause() throws Exception {
+	void getActDetails_whenConfiguratorNotSet_thenThrowsNullPointerExceptionAsCause() {
 		// Arrange
 		ActFunctionTools tools = new ActFunctionTools();
 		ObjectNode node = new ObjectMapper().createObjectNode();
@@ -98,7 +98,7 @@ class ActFunctionToolsTest {
 		assertInstanceOf(NullPointerException.class, ex.getCause());
 	}
 
-	// Sonar java:S1130 - remove declaration of overly broad checked exception.
+	// Sonar java:S1130 - removed redundant 'throws Exception' (only reflection exceptions are possible).
 	private static Object invokeGetActDetails(ActFunctionTools tools, ObjectNode json)
 			throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
 		java.lang.reflect.Method method = ActFunctionTools.class.getDeclaredMethod("getActDetails", Object[].class);
