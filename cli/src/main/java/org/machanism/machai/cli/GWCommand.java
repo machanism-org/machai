@@ -115,6 +115,8 @@ public class GWCommand {
 	 * guidance.
 	 */
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
+	// FalsePositive Method signature is dictated by Spring Shell option binding; grouping would reduce CLI UX.
+	@SuppressWarnings("java:S107")
 	public void gw(
 			@ShellOption(value = { "-t",
 					"--threads" }, help = "Sets the number of threads for concurrent processing.", defaultValue = "1") int threads,
@@ -138,9 +140,12 @@ public class GWCommand {
 		try {
 			runGw(options);
 		} catch (ProcessTerminationException e) {
-			LOGGER.error("Process terminated: {}, Exit code: {}", e.getMessage(), e.getExitCode());
+			// Sonar java:S2629 - avoid calling expensive methods in disabled log levels.
+			if (LOGGER.isErrorEnabled()) {
+				LOGGER.error("Process terminated: {}, Exit code: {}", e.getMessage(), e.getExitCode());
+			}
 		} catch (Exception e) {
-			// Sonar java:S2629 - avoid eager string concatenation in logs.
+			// Sonar java:S2629 - avoid eager String concatenation/interpolation in logs.
 			LOGGER.error("Unexpected error: {}", e.getMessage(), e);
 		} finally {
 			GenAIProviderManager.logUsage();
@@ -290,7 +295,7 @@ public class GWCommand {
 		}
 
 		if (ctx.prompts.instructionsValue != null) {
-			// Sonar java:S2629 - abbreviate only when INFO is enabled.
+			// Sonar java:S2629 - invoke abbreviate() only when the INFO log is enabled.
 			if (LOGGER.isInfoEnabled()) {
 				String abbreviated = org.apache.commons.lang.StringUtils.abbreviate(ctx.prompts.instructionsValue,
 						LOG_PREVIEW_LEN);
@@ -302,7 +307,7 @@ public class GWCommand {
 		processor.setDegreeOfConcurrency(ctx.execution.threads);
 
 		if (ctx.prompts.defaultGuidance != null) {
-			// Sonar java:S2629 - abbreviate only when INFO is enabled.
+			// Sonar java:S2629 - invoke abbreviate() only when the INFO log is enabled.
 			if (LOGGER.isInfoEnabled()) {
 				String abbreviated = org.apache.commons.lang.StringUtils.abbreviate(ctx.prompts.defaultGuidance,
 						LOG_PREVIEW_LEN);
