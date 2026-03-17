@@ -32,7 +32,6 @@ Your task is to generate precise, minimal, and effective code fixes for each iss
 # inputs:
 #   - Multi-line string describing the specific task for the AI assistant.
 #   - Details the workflow for selecting and reviewing the SonarQube report, fixing issues, and creating a report for each fix.
-#   - Specifies how to handle child projects, error handling, and the build process after each fix.
 #   - Includes special rules for using @SuppressWarnings, with strict formatting and documentation requirements for auditability and compliance.
 #   - Supports dynamic content insertion (e.g., "%s" for variable replacement).
 inputs = '''
@@ -48,7 +47,7 @@ You need to fix SonarQube issues in the project.
 %s	 
 	 
 1. **Select and Review the Appropriate SonarQube Report:**  
-   - If the project has `Child Projects`, then no action required, immediately skip all the following steps and complete the task.
+   - If the project has `Child Projects`, then skip next steps for current project and continue.
    - Use SonarQube Web API to get the `Sonar Report` by url: [SONARQUBE_URL]. 
    - If the response returns an error, the process is terminated using the Function tool and the exit code `500` is returned.
    - If the response is not successfully, then immediately skip all the following steps and complete the task.
@@ -58,7 +57,6 @@ You need to fix SonarQube issues in the project.
    - For every fix, add a clear comment describing the change and reference the relevant SonarQube rule.
    - **Follow best practices and adhere to all relevant coding standards when implementing fixes. Ensure your solutions are robust, maintainable, and consistent with industry standards.**
    - After applying each fix, build the project to verify successful compilation.
-   — Re-run the Sonar plugin command to check the result of the fix.
 
 3. Make sure all sonar detected issues are fixed.
 ---

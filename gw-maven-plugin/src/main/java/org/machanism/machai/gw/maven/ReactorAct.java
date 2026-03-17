@@ -71,18 +71,18 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act-reactor -Dgw.act="Rewrite headings" -Dgw.scanDir=src\\site
  * </pre>
  */
-@Mojo(name = "act-reactor", threadSafe = true)
+@Mojo(name = "act-reactor", aggregator = false, threadSafe = true)
 public class ReactorAct extends Act {
 
 	@Override
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
-		File basedir = new File(session.getExecutionRootDirectory());
+		File rootDir = new File(session.getExecutionRootDirectory());
 
 		String model = configuration.get("gw.model", this.model);
 		logger.info("Model: {}", model);
 
-		ActProcessor actProcessor = new ActProcessor(basedir, configuration, model) {
+		ActProcessor actProcessor = new ActProcessor(rootDir, configuration, model) {
 
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

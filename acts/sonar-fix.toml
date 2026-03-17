@@ -22,6 +22,7 @@ inputs = '''
 
 %s
 
+— Re-run the Sonar plugin command to check the result of the fix.
 '''
 
 gw.scanDir="glob:."
