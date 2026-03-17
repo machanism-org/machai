@@ -10,7 +10,7 @@ inputs = '''
   ```
   mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
     -Dsonar.token=${sonar.token} \
-    -Dsonar.host.url=http://192.168.0.177:9000 \
+    -Dsonar.host.url=http://${sonar.host} \
     -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
   ```
 '''
