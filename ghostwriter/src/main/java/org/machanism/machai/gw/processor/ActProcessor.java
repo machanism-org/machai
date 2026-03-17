@@ -129,7 +129,7 @@ public class ActProcessor extends AIFileProcessor {
 
 			Object mainValue = actData.get(INPUTS_PROPERTY_NAME);
 			if (mainValue instanceof String) {
-				String value = String.format((String) mainValue, Objects.toString(prompt));
+				String value = String.format((String) mainValue, Objects.toString(prompt, ""));
 				actData.put(INPUTS_PROPERTY_NAME, value);
 			}
 
@@ -269,7 +269,7 @@ public class ActProcessor extends AIFileProcessor {
 				String value = (String) entry.getValue();
 				Object mainValue = properties.get(key);
 				if (mainValue instanceof String) {
-					value = String.format((String) mainValue, value);
+					value = String.format((String) mainValue, Objects.toString(value, "%s"));
 				}
 				properties.put(key, value);
 			}
