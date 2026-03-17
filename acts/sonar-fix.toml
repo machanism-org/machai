@@ -8,7 +8,7 @@ inputs = '''
   - If [Child Projects]: `not defined`: set [COMPONENT_KEYS] to `[Project Identifier]`
     else set [COMPONENT_KEYS] to `[Project Identifier]`.
 - Construct the `SONARQUBE_URL` as follows: 
-`http://${sonar.token}:@192.168.0.177:9000/api/issues/search?issueStatuses=OPEN&impactSeverities=${severities}&componentKeys=org.machanism.machai:[COMPONENT_KEYS]&ps=30`
+`http://${sonar.token}:@${sonar.token}/api/issues/search?issueStatuses=OPEN&impactSeverities=${severities}&componentKeys=org.machanism.machai:[COMPONENT_KEYS]&ps=30`
 - Use this URL to retrieve SonarQube issues for the relevant project component.
 - When processing source code, the path from the Sonar issue report to the source file should be used starting with `src/`; characters before it should be removed.
 - If remaining (still OPEN) issues requiring further iteration: continue with the next iteration and address these remaining items one-by-one (including fetching next pages if possible or needed). 
@@ -16,7 +16,7 @@ inputs = '''
 # Additional Instruction
 
 - Ensure all fixes are applied to the correct source files and are properly tested.
-— Re-run the Sonar plugin command: `mvn clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=http://192.168.0.177:9000`.
+— Re-run the Sonar plugin command: `mvn clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=http://${sonar.token}`.
 - If After re-running the API query, Sonar still reports issues. the next iteration should fetch the next pages (or increase `ps`) and continue fixing issue-by-issue.
 
 %s
