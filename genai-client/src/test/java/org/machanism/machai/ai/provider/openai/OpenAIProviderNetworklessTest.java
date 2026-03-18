@@ -231,30 +231,7 @@ class OpenAIProviderNetworklessTest {
         return m.invoke(target, args);
     }
 
-    private static final class TestableOpenAIProvider extends OpenAIProvider {
-        @Override
-        protected com.openai.client.OpenAIClient getClient() {
-            InvocationHandler handler = new InvocationHandler() {
-                @Override
-                public Object invoke(Object proxy, Method method, Object[] args) {
-                    if ("models".equals(method.getName())) {
-                        return fakeModelService(Collections.singletonList("m1"));
-                    }
-                    if ("responses".equals(method.getName()) || "embeddings".equals(method.getName())
-                            || "files".equals(method.getName())) {
-                        throw new UnsupportedOperationException("Network call not allowed in unit tests");
-                    }
-                    return defaultValue(method.getReturnType());
-                }
-            };
-            return (com.openai.client.OpenAIClient) Proxy.newProxyInstance(
-                    TestableOpenAIProvider.class.getClassLoader(),
-                    new Class<?>[] { com.openai.client.OpenAIClient.class },
-                    handler);
-        }
-    }
-
-    private static Object fakeModelService(List<String> modelIds) {
+    static Object fakeModelService(List<String> modelIds) {
         try {
             Class<?> modelServiceType = Class.forName("com.openai.services.blocking.ModelService");
             return Proxy.newProxyInstance(OpenAIProviderNetworklessTest.class.getClassLoader(),
@@ -310,7 +287,7 @@ class OpenAIProviderNetworklessTest {
         }
     }
 
-    private static Object defaultValue(Class<?> returnType) {
+    static Object defaultValue(Class<?> returnType) {
         if (returnType.equals(boolean.class)) {
             return false;
         }
@@ -330,5 +307,28 @@ class OpenAIProviderNetworklessTest {
             return Optional.empty();
         }
         return null;
+    }
+
+    private static final class TestableOpenAIProvider extends OpenAIProvider {
+        @Override
+        protected com.openai.client.OpenAIClient getClient() {
+            InvocationHandler handler = new InvocationHandler() {
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) {
+                    if ("models".equals(method.getName())) {
+                        return fakeModelService(Collections.singletonList("m1"));
+                    }
+                    if ("responses".equals(method.getName()) || "embeddings".equals(method.getName())
+                            || "files".equals(method.getName())) {
+                        throw new UnsupportedOperationException("Network call not allowed in unit tests");
+                    }
+                    return defaultValue(method.getReturnType());
+                }
+            };
+            return (com.openai.client.OpenAIClient) Proxy.newProxyInstance(
+                    TestableOpenAIProvider.class.getClassLoader(),
+                    new Class<?>[] { com.openai.client.OpenAIClient.class },
+                    handler);
+        }
     }
 }
