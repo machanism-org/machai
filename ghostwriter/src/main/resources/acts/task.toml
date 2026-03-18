@@ -62,19 +62,3 @@ inputs = '''
 
 %s
 '''
-
-# =========================
-# Prologue Acts
-# =========================
-# prologue:
-#   - List of act to be performed before the main act execution.
-#   - Example: prologue = ["sonar-fix", "grype-fix"]
-prologue = []
-
-# =========================
-# Epilogue Acts
-# =========================
-# epilogue:
-#   - List of acts to be performed after the main task execution.
-#   - Example: ["commit and push"]
-epilogue = []
