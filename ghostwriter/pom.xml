@@ -19,6 +19,35 @@
 		<junit.jupiter.version>5.10.2</junit.jupiter.version>
 	</properties>
 
+	<!--
+		Security overrides (as reported by Grype SBOM scan)
+		- GHSA-7r82-7xv7-xcpj: org.apache.httpcomponents:httpclient fixed in 4.5.13+
+		- GHSA-qqpg-mvqg-649v: ch.qos.logback:logback-core fixed in 1.5.25+
+		- GHSA-72hv-8253-57qq: com.fasterxml.jackson.core:jackson-core fixed in 2.21.1+
+	-->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.13</version>
+				<!-- GHSA-7r82-7xv7-xcpj: Fixes vulnerable httpclient 4.5.6 as reported by Grype -->
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>1.5.25</version>
+				<!-- GHSA-qqpg-mvqg-649v: Fixes vulnerable logback-core 1.3.16 as reported by Grype -->
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>2.21.1</version>
+				<!-- GHSA-72hv-8253-57qq: Fixes vulnerable jackson-core 2.20.1 as reported by Grype -->
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<profiles>
 		<profile>
 			<id>pack</id>
