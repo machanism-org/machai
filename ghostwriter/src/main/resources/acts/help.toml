@@ -21,7 +21,7 @@ Provide your response as plain text only. Do not use markdown formatting.
 inputs = '''
 # Task
 
-Use the available function tool to provide information about Ghostwriter acts: `load_act_details` and `build_in_list_acts`.
+Use the available function tool to provide information about Ghostwriter acts.
 
 **Instructions:**
 - Carefully analyze the user prompt below and respond accordingly.
@@ -35,6 +35,17 @@ Use the available function tool to provide information about Ghostwriter acts: `
   - Include the act’s purpose, key properties (such as `instructions`, `inputs`, `basedOn`, and any `gw.*` options), and any inheritance relationships.
   - Present the information in a clear, user-friendly format.
 
+**How to construct an act command:**
+- To run an act, use the following syntax:
+  ```
+  --act <name> [your request text]
+  ```
+- If you provide request text after the act name, Ghostwriter uses it; otherwise, it uses the processor’s current default prompt.
+- Ghostwriter then formats the act’s `inputs` using your request text:
+  ```
+  finalPrompt = String.format(inputsTemplate, requestText)
+  ```
+- The `finalPrompt`, together with the act’s `instructions`, is sent to the AI for processing.
 '''
 
 gw.scanDir="."
