@@ -1,6 +1,7 @@
 package org.machanism.machai.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -49,7 +50,7 @@ class AssembyCommandTest {
 	}
 
 	@Test
-	void getQueryFromFile_shouldThrowIOException_whenFileIsNotReadableDirectory() throws Exception {
+	void getQueryFromFile_shouldThrowIOException_whenPathIsDirectory() throws Exception {
 		// Arrange
 		AssembyCommand cmd = new AssembyCommand();
 		Method m = AssembyCommand.class.getDeclaredMethod("getQueryFromFile", String.class);
@@ -71,6 +72,6 @@ class AssembyCommandTest {
 		}
 
 		// Assert
-		org.junit.jupiter.api.Assertions.assertNotNull(ex);
+		assertNotNull(ex);
 	}
 }

@@ -10,6 +10,12 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Additional coverage tests for {@link AssembyCommand}.
+ *
+ * Note: This class intentionally targets hard-to-reach branches without invoking
+ * external services.
+ */
 class AssembyCommandCoverageTest {
 
 	@TempDir
@@ -44,5 +50,18 @@ class AssembyCommandCoverageTest {
 
 		// Assert
 		assertEquals("not-a-real-file-path-123", result);
+	}
+
+	@Test
+	void assembly_whenQueryIsNullAndNoPreviousPick_shouldThrowIllegalArgumentException() {
+		// Arrange
+		AssembyCommand cmd = new AssembyCommand();
+
+		// Act
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> cmd.assembly(null, null, null, null, null));
+
+		// Assert
+		assertEquals("The query is empty.", ex.getMessage());
 	}
 }
