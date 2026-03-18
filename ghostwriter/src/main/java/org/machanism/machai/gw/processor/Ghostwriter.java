@@ -342,7 +342,7 @@ public final class Ghostwriter {
 		if (cmd.hasOption(GUIDANCE_OPTION)) {
 			defaultPrompt = cmd.getOptionValue(GUIDANCE_OPTION);
 			if (defaultPrompt == null) {
-				defaultPrompt = readText("Please enter the guidance text below.");
+				defaultPrompt = readText("Guidance");
 			}
 		}
 		return defaultPrompt;

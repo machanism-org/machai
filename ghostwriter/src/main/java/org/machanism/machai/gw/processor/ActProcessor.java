@@ -221,24 +221,15 @@ public class ActProcessor extends AIFileProcessor {
 	 * @throws IOException if the file cannot be read
 	 */
 	public static TomlParseResult tryLoadActFromDirectory(Map<String, Object> properties, String name,
-			String actsLocation)
-			throws IOException {
-		if (actsLocation == null) {
-			return null;
-		}
+			String actsLocation) throws IOException {
 
 		TomlParseResult toml = null;
-		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
-			File file = new File(actsLocation, name + TOML_EXTENSION);
-			if (file.exists()) {
-				toml = Toml.parse(file.toPath());
-			}
+		if (isAbsolute(name)) {
+			toml = loadActToml(name);
 		} else {
-			URI uri = URI.create(actsLocation + "/" + name + TOML_EXTENSION);
-			try {
-				toml = Toml.parse(uri.toURL().openStream());
-			} catch (FileNotFoundException e) {
-				// the custom act file not found.
+			if (actsLocation != null) {
+				String absolutePath = getAssolutePath(name, actsLocation);
+				toml = loadActToml(absolutePath);
 			}
 		}
 
@@ -248,6 +239,52 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		return toml;
+	}
+
+	private static String getAssolutePath(String name, String actsLocation) throws IOException {
+		String path = null;
+		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
+			File file = new File(name);
+			if (!file.isAbsolute()) {
+				file = new File(actsLocation, name + TOML_EXTENSION);
+				path = file.getAbsolutePath();
+			} else {
+				if (!file.exists()) {
+					throw new IOException("The act not found: " + name);
+				}
+				path = file.getAbsolutePath();
+			}
+
+		} else {
+			URI uri;
+			if (Strings.CS.endsWith(name, TOML_EXTENSION)) {
+				uri = URI.create(name);
+
+			} else {
+				uri = URI.create(actsLocation + "/" + name + TOML_EXTENSION);
+				path = uri.toURL().toString();
+			}
+		}
+
+		return path;
+	}
+
+	private static TomlParseResult loadActToml(String name) throws IOException {
+		TomlParseResult toml = null;
+		if (!Strings.CS.startsWithAny(name, "http://", "https://")) {
+			File file = new File(name);
+			if (file.exists()) {
+				toml = Toml.parse(file.toPath());
+			}
+		} else {
+			URI uri = URI.create(name);
+			toml = Toml.parse(uri.toURL().openStream());
+		}
+		return toml;
+	}
+
+	private static boolean isAbsolute(String name) {
+		return Strings.CS.endsWith(name, TOML_EXTENSION);
 	}
 
 	/**
