@@ -94,7 +94,7 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 | `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | `null` (unset); if still unset at runtime, the CLI scans `user.dir` absolute path. | Read via `config.get("gw.scanDir", null)` only when there are no CLI scanDir args. If still absent, Ghostwriter scans `SystemUtils.getUserDir().getAbsolutePath()`. |
 
 > Notes:
-> - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself resolves `gw.home` via configuration/system properties.
+> - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself resolves `gw.home` via configuration/system properties (it does not read `GW_HOME` directly).
 > - The CLI option `--acts <dir>` is not a `gw.*` property; it is a command-line-only override for the directory containing act prompt files.
 > - Act mode is enabled via `--act` and is also a command-line-only option (not a `gw.*` property).
 
