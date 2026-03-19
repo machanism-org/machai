@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -122,6 +123,74 @@ class BindexBuilderTest {
 			assertEquals("n", result.getName());
 			assertEquals("1", result.getVersion());
 			Mockito.verify(provider).inputsLog(new File(projectDir, BindexBuilder.BINDEX_TEMP_DIR));
+		}
+	}
+
+	@Test
+	void build_whenProviderReturnsPlainJson_parsesBindex() throws Exception {
+		File projectDir = new File(".");
+		ProjectLayout layout = TestProjectLayouts.projectLayout(projectDir);
+
+		GenAIProvider provider = Mockito.mock(GenAIProvider.class);
+		Mockito.when(provider.perform()).thenReturn("{\"id\":\"abc\",\"name\":\"n\",\"version\":\"1\"}");
+		Configurator config = Mockito.mock(Configurator.class);
+
+		try (MockedStatic<org.machanism.machai.ai.manager.GenAIProviderManager> mocked = Mockito
+				.mockStatic(org.machanism.machai.ai.manager.GenAIProviderManager.class)) {
+			mocked.when(() -> org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(Mockito.anyString(),
+					Mockito.same(config))).thenReturn(provider);
+
+			BindexBuilder builder = new BindexBuilder(layout, "provider", config);
+			Bindex result = builder.build();
+
+			assertNotNull(result);
+			assertEquals("abc", result.getId());
+			Mockito.verify(provider).inputsLog(new File(projectDir, BindexBuilder.BINDEX_TEMP_DIR));
+		}
+	}
+
+	@Test
+	void build_whenOriginProvided_includesUpdatePromptAndSerializesOrigin() throws Exception {
+		File projectDir = new File(".");
+		ProjectLayout layout = TestProjectLayouts.projectLayout(projectDir);
+
+		GenAIProvider provider = Mockito.mock(GenAIProvider.class);
+		Mockito.when(provider.perform()).thenReturn("{\"id\":\"abc\",\"name\":\"n\",\"version\":\"1\"}");
+		Configurator config = Mockito.mock(Configurator.class);
+
+		try (MockedStatic<org.machanism.machai.ai.manager.GenAIProviderManager> mocked = Mockito
+				.mockStatic(org.machanism.machai.ai.manager.GenAIProviderManager.class)) {
+			mocked.when(() -> org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(Mockito.anyString(),
+					Mockito.same(config))).thenReturn(provider);
+
+			Bindex origin = new Bindex();
+			origin.setId("origin-id");
+			origin.setName("origin-name");
+			origin.setVersion("0");
+
+			BindexBuilder builder = new BindexBuilder(layout, "provider", config).origin(origin);
+			builder.build();
+
+			Mockito.verify(provider).prompt(Mockito.argThat(p -> p.contains("origin-id") && p.contains("origin-name")));
+		}
+	}
+
+	@Test
+	void build_whenJsonFenceWithoutClosingDelimiter_throws() throws Exception {
+		File projectDir = new File(".");
+		ProjectLayout layout = TestProjectLayouts.projectLayout(projectDir);
+
+		GenAIProvider provider = Mockito.mock(GenAIProvider.class);
+		Mockito.when(provider.perform()).thenReturn("```json\n{\"id\":\"abc\",\"name\":\"n\",\"version\":\"1\"}");
+		Configurator config = Mockito.mock(Configurator.class);
+
+		try (MockedStatic<org.machanism.machai.ai.manager.GenAIProviderManager> mocked = Mockito
+				.mockStatic(org.machanism.machai.ai.manager.GenAIProviderManager.class)) {
+			mocked.when(() -> org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(Mockito.anyString(),
+					Mockito.same(config))).thenReturn(provider);
+
+			BindexBuilder builder = new BindexBuilder(layout, "provider", config);
+			assertThrows(Exception.class, builder::build);
 		}
 	}
 

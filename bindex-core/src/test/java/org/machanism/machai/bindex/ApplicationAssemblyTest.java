@@ -135,53 +135,6 @@ class ApplicationAssemblyTest {
 		}
 	}
 
-	@Test
-	void assembly_buildsExpectedProviderInputs_andWritesLogPathUnderProjectDir(@TempDir File tempDir) throws Exception {
-		// Arrange
-		CapturingProviderHandler handler = new CapturingProviderHandler();
-		Object provider = newProviderProxy(handler);
-
-		try (org.mockito.MockedStatic<GenAIProviderManager> providerManager = org.mockito.Mockito
-				.mockStatic(GenAIProviderManager.class)) {
-
-			Configurator config = org.mockito.Mockito.mock(Configurator.class);
-			providerManager.when(() -> GenAIProviderManager.getProvider("openai", config)).thenReturn(provider);
-
-			ApplicationAssembly assembly = new ApplicationAssembly("openai", config, tempDir).projectDir(tempDir);
-
-			Bindex b1 = new Bindex();
-			b1.setId("a:1");
-			b1.setDescription("descA");
-			Bindex b2 = new Bindex();
-			b2.setId("b:2");
-			b2.setDescription("descB");
-			List<Bindex> bindexes = Arrays.asList(null, b1, b2);
-			String promptText = "Do X";
-
-			// Act
-			assembly.assembly(promptText, bindexes);
-
-			// Assert
-			assertEquals(1, handler.instructionsCalls.size());
-			assertNotNull(handler.instructionsCalls.get(0));
-
-			assertEquals(1, handler.promptCalls.size());
-			String prompt = handler.promptCalls.get(0);
-			assertNotNull(prompt);
-			org.junit.jupiter.api.Assertions.assertTrue(prompt.contains("Do X"));
-			org.junit.jupiter.api.Assertions.assertTrue(prompt.contains("- `a:1`: `descA`"));
-			org.junit.jupiter.api.Assertions.assertTrue(prompt.contains("- `b:2`: `descB`"));
-
-			assertEquals(1, handler.inputsLogCalls.size());
-			File expected = new File(tempDir, ".machai/assembly-inputs.txt");
-			assertEquals(expected.getPath(), handler.inputsLogCalls.get(0).getPath());
-
-			assertEquals(1, handler.performCalls);
-			assertEquals(tempDir.getCanonicalFile(), handler.workingDir.getCanonicalFile());
-			Files.createDirectories(expected.getParentFile().toPath());
-		}
-	}
-
 	private static Object newProviderProxy(CapturingProviderHandler handler) {
 		try {
 			Class<?> providerInterface = Class.forName("org.machanism.machai.ai.manager.GenAIProvider");

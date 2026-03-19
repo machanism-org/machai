@@ -1,6 +1,10 @@
 package org.machanism.machai.bindex.ai.tools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,10 +23,11 @@ class BindexFunctionToolsAdditionalTest {
 		ObjectNode args = new ObjectMapper().createObjectNode().put("id", "any");
 
 		// Act + Assert
-		java.lang.reflect.Method m = BindexFunctionTools.class.getDeclaredMethod("getBindex", Object[].class);
+		Method m = BindexFunctionTools.class.getDeclaredMethod("getBindex", Object[].class);
 		m.setAccessible(true);
 
 		Exception ex = assertThrows(Exception.class, () -> m.invoke(tools, (Object) new Object[] { args }));
+		assertNotNull(ex.getCause());
 		assertTrue(ex.getCause() instanceof IllegalStateException);
 		assertTrue(ex.getCause().getMessage().contains("setConfigurator"));
 	}
