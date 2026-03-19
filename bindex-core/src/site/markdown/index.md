@@ -33,7 +33,7 @@ Using Bindex Core, tools can reliably describe produced artifacts and their capa
 
 ## Overview
 
-Bindex Core defines the versioned schema/model for bindex metadata and offers utilities and services that other Machanism components build upon.
+Bindex Core provides core functionality for bindex metadata management, including generation, registration, library selection, and project assembly. It enables automated handling of library metadata to support efficient discovery, integration, and assembly workflows within the Machanism ecosystem.
 
 It is typically used to:
 
@@ -74,7 +74,7 @@ Add it to your `pom.xml`:
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>bindex-core</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.2-SNAPSHOT</version>
 </dependency>
 ```
 

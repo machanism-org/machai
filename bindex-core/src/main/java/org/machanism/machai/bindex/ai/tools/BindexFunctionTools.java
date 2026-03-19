@@ -3,6 +3,7 @@ package org.machanism.machai.bindex.ai.tools;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -85,7 +86,7 @@ public class BindexFunctionTools implements FunctionTools {
 		String bindexJson = objectMapper.writeValueAsString(bindex);
 		// Sonar java:S2629 - avoid eager abbreviate/replace when INFO is disabled.
 		if (logger.isInfoEnabled()) {
-			logger.info("Bindex: {}", StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
+			logger.info("Retrieved bindex: {}", StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
 		}
 		return bindexJson;
 	}
@@ -95,7 +96,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 *
 	 * @param params tool invocation parameters (not used)
 	 * @return the Bindex schema resource content as JSON string
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private String getBindexSchema(Object[] params) throws IOException {
 		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE_PATH);
@@ -103,7 +104,7 @@ public class BindexFunctionTools implements FunctionTools {
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		// Sonar java:S2629 - avoid eager replace/abbreviate work when INFO is disabled.
 		if (logger.isInfoEnabled()) {
-			logger.info("Bindex schema: {}",
+			logger.debug("Bindex schema: {}",
 					StringUtils.abbreviate(schema, 120).replace("\n", " ").replace("\r", ""));
 		}
 		return schema;

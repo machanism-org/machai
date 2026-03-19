@@ -26,30 +26,22 @@
  */
 
 /**
- * Builds {@link org.machanism.machai.schema.Bindex} documents by extracting project context and prompting a
- * configured {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Builders that generate {@link org.machanism.machai.schema.Bindex} documents for a project by assembling a
+ * prompt (schema + project context) and delegating generation to a configured
+ * {@link org.machanism.machai.ai.manager.GenAIProvider}.
  *
- * <p>The core entry point is {@link org.machanism.machai.bindex.builder.BindexBuilder}, which assembles a prompt
- * containing project context and generation instructions, invokes a provider, and deserializes the returned JSON
- * into a {@code Bindex} instance. Implementations specialize the context gathering step for particular ecosystems
- * (for example, reading manifests/build descriptors and including relevant source/resource files).
+ * <p>The base {@link org.machanism.machai.bindex.builder.BindexBuilder} composes the prompt, optionally includes an
+ * existing (origin) {@code Bindex} for incremental updates, invokes the provider, and deserializes the resulting
+ * JSON into a {@code Bindex}.
  *
- * <h2>Key concepts</h2>
+ * <h2>Provided implementations</h2>
  * <ul>
- *   <li><strong>Origin Bindex</strong>: an optional existing {@code Bindex} that can be supplied to request an
- *       incremental update rather than a full regeneration.</li>
- *   <li><strong>Project context</strong>: a text payload assembled from build files and selected project files,
- *       produced by {@link org.machanism.machai.bindex.builder.BindexBuilder#projectContext()}.</li>
- * </ul>
- *
- * <h2>Implementations</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: reads {@code pom.xml}, walks Maven-configured
- *       source/resource/test directories, and includes a sanitized POM representation.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}: reads {@code package.json} and walks the
- *       {@code src} tree for {@code .js}/{@code .ts}/{@code .vue} sources.</li>
- *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder}: reads {@code pyproject.toml}, infers a
- *       module directory from {@code project.name}, and includes files from that directory.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: collects Maven build context from
+ *       {@code pom.xml} and includes files from the Maven-configured source/resource/test directories.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}: reads {@code package.json} and includes
+ *       {@code .js}/{@code .ts}/{@code .vue} sources under {@code src}.</li>
+ *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder}: reads {@code pyproject.toml} and includes
+ *       files under a source directory inferred from {@code project.name}.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

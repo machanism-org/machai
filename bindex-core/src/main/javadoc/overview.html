@@ -41,6 +41,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     }
     h1, h2, h3 { line-height: 1.2; }
     .muted { color: #555; }
+    img { max-width: 100%; height: auto; }
   </style>
 </head>
 <body>
@@ -57,29 +58,29 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>What is a Bindex?</h2>
 <p>
   A <strong>Bindex</strong> is a JSON document (typically named <code>bindex.json</code>) that describes a software
-  project or reusable library.
+  project or reusable library and is used as a unit of discovery and reuse.
 </p>
 <ul>
   <li><strong>Identity</strong> (for example <code>id</code>, <code>name</code>, <code>version</code>).</li>
-  <li><strong>Classification facets</strong> (domains, layers, languages, integrations) used for semantic retrieval.</li>
+  <li><strong>Facets</strong> (domains, layers, languages, integrations) used for semantic retrieval.</li>
   <li><strong>Dependencies</strong> to other Bindexes to enable transitive expansion.</li>
 </ul>
 
 <h2>High-level workflow</h2>
 <ol>
   <li><strong>Generate</strong> or <strong>update</strong> a local <code>bindex.json</code> from detected project layout and representative files.</li>
-  <li><strong>Register</strong> the document in a MongoDB-backed registry for reuse.</li>
+  <li><strong>Register</strong> the document in a MongoDB-backed registry for reuse and team sharing.</li>
   <li><strong>Pick</strong> relevant libraries for a query using semantic retrieval (embeddings), then <strong>expand dependencies</strong>.</li>
   <li><strong>Assemble</strong> selected Bindexes into prompt-ready inputs for downstream AI workflows.</li>
 </ol>
 
 <h2>Architecture and structure</h2>
 <p>
-  The primary orchestration APIs live in <code>org.machanism.machai.bindex</code>, while AI-assisted builder
-  implementations are located in <code>org.machanism.machai.bindex.builder</code>.
-  Builders generate <code>org.machanism.machai.schema.Bindex</code> documents by combining project context
-  (for example <code>pom.xml</code>, <code>package.json</code>, or <code>pyproject.toml</code> plus selected files)
-  with a configured GenAI provider.
+  The primary orchestration APIs are provided by the <code>org.machanism.machai.bindex</code> package. AI-assisted
+  builder implementations are located in <code>org.machanism.machai.bindex.builder</code>. Builders create
+  <code>org.machanism.machai.schema.Bindex</code> documents by combining project context (for example
+  <code>pom.xml</code>, <code>package.json</code>, or <code>pyproject.toml</code> plus selected files) with a configured
+  GenAI provider.
 </p>
 
 <p>

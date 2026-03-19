@@ -118,22 +118,20 @@ public class ApplicationAssembly {
 				SystemUtils.OS_NAME);
 		bindexPrompt.append(assemblyInstructions);
 
-		String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
-		bindexPrompt.append(userPrompt).append("\n");
-
 		StringBuilder picked = new StringBuilder();
 		for (Bindex bindex : bindexList) {
-			if (bindex == null) {
-				continue;
+			if (bindex != null) {
+				picked.append("- ").append(bindex.getId()).append("\n");
 			}
-			picked.append("- `").append(bindex.getId()).append("`: `").append(bindex.getDescription())
-					.append("`\n");
 		}
 		bindexPrompt.append("\n");
 
 		String promptStr = MessageFormat.format(PROMPT_BUNDLE.getString("recommended_library_section"),
 				picked.toString());
-		bindexPrompt.append(promptStr).append("\n");
+		bindexPrompt.append(promptStr).append("\n\n");
+
+		String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
+		bindexPrompt.append(userPrompt).append("\n\n");
 
 		provider.prompt(bindexPrompt.toString());
 
