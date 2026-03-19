@@ -167,7 +167,12 @@ public class ActProcessor extends AIFileProcessor {
 	 *                                  either location
 	 */
 	public static void loadAct(String name, Map<String, Object> properties, String actsLocation) throws IOException {
-		TomlParseResult customToml = tryLoadActFromDirectory(properties, name, actsLocation);
+		TomlParseResult customToml = null;
+		try {
+			customToml = tryLoadActFromDirectory(properties, name, actsLocation);
+		} catch (IOException e) {
+			// User-defined act not found.
+		}
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
