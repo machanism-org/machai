@@ -153,21 +153,37 @@ From the built-in help:
 
 ## Default Guidance
 
-Ghostwriter supports *default guidance* (stored as `defaultPrompt`) which is applied when a file does not contain embedded `@guidance:` directives.
+Ghostwriter supports *default guidance* via `AIFileProcessor.setDefaultPrompt(String)` (referred to in configuration/CLI as `gw.guidance`). Default guidance is used when a file contains no embedded `@guidance:` directives, and it can also be used for an optional folder-level processing step.
 
-You can provide it via:
+### Purpose
 
-- Config property: `gw.guidance`
-- CLI option: `-g, --guidance`
+- Provide a baseline instruction set for files that do not carry their own embedded `@guidance:` blocks.
+- Allow centralized, repeatable prompting for a scan run (for example: “summarize all Markdown files”, “modernize headers”, “add missing Javadoc”).
+- Optionally run a folder-level prompt against the scanned folder/project context (via `AIFileProcessor.processFolder(ProjectLayout)`), depending on processor behavior.
 
-When provided through the CLI/config, the value is parsed line-by-line (see `AIFileProcessor.parseLines(String)`):
+### How it works
+
+Default guidance is stored on the processor as `defaultPrompt` and is passed to the GenAI provider when:
+
+- a processed file has no embedded `@guidance:`; and/or
+- the processor performs a folder-level step.
+
+When the guidance value is supplied, it is expanded line-by-line using `AIFileProcessor.parseLines(String)`:
 
 - Blank lines are preserved.
-- Lines starting with `http://` or `https://` are loaded from the URL and included.
-- Lines starting with `file:` are loaded from the referenced file path (relative paths resolve from the configured root directory).
-- Other lines are used as-is.
+- Lines starting with `http://` or `https://` are fetched and included.
+- Lines starting with `file:` are loaded from the referenced file.
+  - If the file path is relative, it is resolved from the configured root directory.
+- Other lines are included as-is.
 
-Additionally, when default guidance is configured, Ghostwriter may run a folder-level processing step (via `AIFileProcessor.processFolder(ProjectLayout)`), executing the default guidance prompt against the scanned folder context.
+### Configuring default guidance
+
+You can set default guidance via:
+
+- Property: `gw.guidance`
+- CLI: `-g, --guidance[=<text|url|file:...>]`
+
+If `-g/--guidance` is provided without a value, Ghostwriter reads multi-line text from stdin; a trailing `\\` continues input on the next line.
 
 ## Resources
 
