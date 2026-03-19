@@ -3,7 +3,6 @@ package org.machanism.machai.cli;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Scanner;
 
 import javax.annotation.PostConstruct;
 
@@ -31,15 +30,14 @@ import org.springframework.shell.standard.ShellOption;
  * {@link GuidanceProcessor}.
  *
  * <h2>Examples</h2>
- * 
  * <pre>
- * gw --scanDirs .\\my-project --excludes target,.git
+ * gw --scanDir .\\my-project --excludes target,.git
  * gw --model OpenAI:gpt-5.1 --guidance "Refactor for clarity"
  * gw --instructions "You are a strict code reviewer" --logInputs true
  * </pre>
  */
 @ShellComponent
-public class GWCommand {
+public class GWCommand extends Command {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GWCommand.class);
 
@@ -53,8 +51,8 @@ public class GWCommand {
 		// Kept for future initialization.
 	}
 
-	// Sonar java:S107 - group parameters into a request object to avoid long parameter
-	// lists.
+	// Sonar java:S107 - group parameters into a request object to avoid long
+	// parameter lists.
 	private static final class GwOptions {
 		private int threads;
 		private String model;
@@ -113,9 +111,27 @@ public class GWCommand {
 	/**
 	 * Scans and processes directories or files using the configured GenAI model and
 	 * guidance.
+	 *
+	 * @param threads      number of threads for concurrent processing
+	 * @param model        GenAI provider and model identifier (for example,
+	 *                     {@code OpenAI:gpt-5.1}); if {@code null}, uses the
+	 *                     configured default
+	 * @param instructions system instructions as text, URL, or file path; if
+	 *                     {@code null}, uses the configured default
+	 * @param guidance     default guidance as text, URL, or file path; if
+	 *                     {@code null}, uses the configured default
+	 * @param excludes     comma-separated list of directories to exclude; may be
+	 *                     {@code null}
+	 * @param logInputs    whether to log LLM request inputs to dedicated log files;
+	 *                     if {@code null}, uses the configured default
+	 * @param rootDir      root directory for file processing; if {@code null}, uses
+	 *                     the configured default or the current working directory
+	 * @param scanDirs     directories to scan; if {@code null} or empty, scans the
+	 *                     resolved {@code rootDir}
 	 */
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
-	// FalsePositive Method signature is dictated by Spring Shell option binding; grouping would reduce CLI UX.
+	// FalsePositive Method signature is dictated by Spring Shell option binding;
+	// grouping would reduce CLI UX.
 	@SuppressWarnings("java:S107")
 	public void gw(
 			@ShellOption(value = { "-t",
@@ -245,8 +261,7 @@ public class GWCommand {
 
 		instructionsValue = instructions;
 		if (instructionsValue.isEmpty()) {
-			instructionsValue = readText("No instructions were provided as an option value.%n"
-					+ "Please enter the instructions text below.");
+			instructionsValue = readText("Instructions");
 		}
 		return instructionsValue;
 	}
@@ -259,8 +274,7 @@ public class GWCommand {
 
 		defaultGuidance = guidance;
 		if (defaultGuidance.isEmpty()) {
-			defaultGuidance = readText(
-					"Please enter the guidance text below. When finished, press Ctrl+D (or Ctrl+Z on Windows) to signal end of input:");
+			defaultGuidance = readText("Guidance");
 		}
 		return defaultGuidance;
 	}
@@ -324,23 +338,4 @@ public class GWCommand {
 		LOGGER.info("Finished scanning directory: {}", ctx.scanDir);
 	}
 
-	/**
-	 * Reads multi-line text from stdin until EOF is reached.
-	 *
-	 * @param prompt message to show before reading input
-	 * @return the entered text, or {@code null} if no content was provided
-	 */
-	private String readText(String prompt) {
-		// Sonar java:S3457/java:S2629 - use built-in formatting and parameterized logging to avoid string concatenation.
-		LOGGER.info("{}:", prompt);
-		StringBuilder sb = new StringBuilder();
-		try (Scanner scanner = new Scanner(System.in)) {
-			while (scanner.hasNextLine()) {
-				sb.append(scanner.nextLine()).append("\n");
-			}
-		}
-		LOGGER.info("Input complete. Processing your text...");
-		// Sonar java:S7158 - use isEmpty() for StringBuilder emptiness.
-		return !sb.isEmpty() ? sb.deleteCharAt(sb.length() - 1).toString() : null;
-	}
 }

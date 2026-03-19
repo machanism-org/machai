@@ -1,9 +1,8 @@
 /**
  * Spring Shell-based command-line interface (CLI) for Machai.
  *
- * <p>This package contains the Spring Boot entry point and Spring Shell command
- * components that expose Machai functionality through both interactive (REPL)
- * and non-interactive command execution.
+ * <p>This package provides the Spring Boot entry point and Spring Shell command components that expose
+ * Machai functionality through both interactive (REPL) and non-interactive command execution.
  *
  * <h2>Command groups</h2>
  * <ul>
@@ -25,18 +24,18 @@
  *   <li>The application entry point {@link org.machanism.machai.cli.MachaiCLI} loads optional system properties from
  *       {@code machai.properties} or from a file provided via {@code -Dconfig=...}.</li>
  *   <li>Most commands use defaults persisted by {@link org.machanism.machai.cli.ConfigCommand} when an option
- *       (such as {@code --dir} or {@code --genai}) is not provided.</li>
+ *       (such as {@code --dir} or {@code --model}) is not provided.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>
- * config model OpenAI:gpt-5.1
- * config root .\\my-project
+ * config genai OpenAI:gpt-5.1
+ * config dir .\\my-project
  * bindex --dir .\\my-project
- * pick --query "Create a web app" --score 0.9
+ * pick --query "Create a web app" --score 0.8
  * assembly --dir .\\out
- * gw --scanDirs .\\my-project --excludes target,.git
- * act --action "Summarize the architecture"
+ * gw --scanDir .\\my-project --excludes target,.git
+ * act commit "and push"
  * clean --dir .\\my-project
  * </pre>
  */

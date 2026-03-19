@@ -21,7 +21,7 @@ import org.springframework.shell.standard.ShellOption;
  * <pre>
  * config genai OpenAI:gpt-5.1
  * config dir ./my-project
- * config score 0.9
+ * config score 0.8
  * config conf
  * </pre>
  */

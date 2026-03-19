@@ -4,6 +4,12 @@ import java.util.Scanner;
 
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * Base class for Spring Shell commands in this module.
+ *
+ * <p>
+ * Provides small utility helpers shared by multiple commands.
+ */
 public class Command {
 
 	/**
@@ -13,10 +19,16 @@ public class Command {
 	public static final String MULTIPLE_LINES_BREAKER = "\\";
 
 	/**
-	 * Reads multi-line text from stdin until EOF is reached.
+	 * Reads multi-line text from stdin.
+	 *
+	 * <p>
+	 * The first line is prompted via {@code prompt + ": "}. If a line ends with
+	 * {@link #MULTIPLE_LINES_BREAKER}, the marker is removed and the input continues
+	 * on the next line.
 	 *
 	 * @param prompt message to show before reading input
-	 * @return the entered text, or {@code null} if no content was provided
+	 * @return the entered text (possibly empty), or {@code null} if no content was
+	 *         provided
 	 */
 	public String readText(String prompt) {
 		System.out.print(prompt + ": ");

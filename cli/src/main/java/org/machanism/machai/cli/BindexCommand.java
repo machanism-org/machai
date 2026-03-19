@@ -19,7 +19,8 @@ import org.springframework.shell.standard.ShellOption;
 /**
  * Spring Shell command for generating and registering <em>bindex</em> metadata.
  *
- * <p>This command is a CLI facade around {@link BindexCreator} (generation) and
+ * <p>
+ * This command is a CLI facade around {@link BindexCreator} (generation) and
  * {@link BindexRegister} (registration). It reads defaults from the persistent
  * CLI configuration managed by {@link ConfigCommand}.
  *
@@ -39,8 +40,15 @@ public class BindexCommand {
 	/** JLine line reader for shell interaction. */
 	private final LineReader reader;
 
+	/** Configuration used by bindex creator/register operations. */
 	private final PropertiesConfigurator config = new PropertiesConfigurator();
 
+	/**
+	 * Creates a new bindex command.
+	 *
+	 * @param reader JLine line reader used for interactive prompts (may be lazily
+	 *               injected)
+	 */
 	// Sonar java:S6813 - prefer constructor injection over field injection.
 	public BindexCommand(@Lazy LineReader reader) {
 		this.reader = reader;
@@ -49,20 +57,17 @@ public class BindexCommand {
 	/**
 	 * Generates bindex files for a project directory.
 	 *
-	 * <p>If {@code dir} is not provided, the configured default directory is used.
-	 * If {@code genai} is not provided, the configured default GenAI provider/model
-	 * is used.
+	 * <p>
+	 * If {@code dir} is not provided, the configured default directory is used. If
+	 * {@code model} is not provided, the configured default GenAI provider/model is
+	 * used.
 	 *
-	 * @param dir
-	 *            the project directory to scan; if {@code null}, uses the configured
-	 *            default or the current working directory
-	 * @param update
-	 *            whether to update previously saved metadata
-	 * @param model
-	 *            GenAI service provider/model identifier (for example,
-	 *            {@code OpenAI:gpt-5.1})
-	 * @throws IOException
-	 *             if scanning or file generation fails
+	 * @param dir    the project directory to scan; if {@code null}, uses the
+	 *               configured default or the current working directory
+	 * @param update whether to update previously saved metadata
+	 * @param model  GenAI service provider/model identifier (for example,
+	 *               {@code OpenAI:gpt-5.1})
+	 * @throws IOException if scanning or file generation fails
 	 */
 	@ShellMethod("Generates bindex files.")
 	public void bindex(
@@ -90,22 +95,19 @@ public class BindexCommand {
 	/**
 	 * Registers a previously generated bindex file for a project directory.
 	 *
-	 * <p>This command uploads/registers bindex metadata into an external registry
+	 * <p>
+	 * This command uploads/registers bindex metadata into an external registry
 	 * addressed by {@code registerUrl}.
 	 *
-	 * @param dir
-	 *            the project directory containing bindex metadata; if {@code null},
-	 *            uses the configured default or the current working directory
-	 * @param registerUrl
-	 *            URL of the registry service for storing project metadata
-	 * @param update
-	 *            whether to update previously registered metadata
-	 * @param chatModel
-	 *            GenAI service provider/model identifier used for processing
-	 *            (for example, {@code OpenAI:gpt-5.1}); if {@code null}, uses the
-	 *            configured default
-	 * @throws IOException
-	 *             if scanning or registration fails
+	 * @param dir         the project directory containing bindex metadata; if
+	 *                    {@code null}, uses the configured default or the current
+	 *                    working directory
+	 * @param registerUrl URL of the registry service for storing project metadata
+	 * @param update      whether to update previously registered metadata
+	 * @param chatModel   GenAI service provider/model identifier used for processing
+	 *                    (for example, {@code OpenAI:gpt-5.1}); if {@code null},
+	 *                    uses the configured default
+	 * @throws IOException if scanning or registration fails
 	 */
 	@ShellMethod("Registers bindex file.")
 	public void register(

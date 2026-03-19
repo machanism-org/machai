@@ -36,7 +36,7 @@ import org.springframework.shell.standard.ShellOption;
  * <h2>Example</h2>
  * 
  * <pre>
- * pick --query "Create a web app" --score 0.9
+ * pick --query "Create a web app" --score 0.8
  * assembly --dir .\\out
  * </pre>
  *
@@ -44,12 +44,9 @@ import org.springframework.shell.standard.ShellOption;
  * @since 0.0.2
  */
 @ShellComponent
-public class AssembyCommand {
+public class AssembyCommand extends Command {
 
 	private static final Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
-
-	private static final double DEFAULT_SCORE_VALUE = 0.80;
-	private static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
 
 	/** List of picked Bindex objects matching the last search query. */
 	private List<Bindex> bindexList;
@@ -95,7 +92,7 @@ public class AssembyCommand {
 	@ShellMethod("Picks libraries based on user request.")
 	public void pick(
 			@ShellOption(value = { "-q",
-					"--query" }, help = "The application assembly prompt or the name of a prompt file.") String query,
+					"--query" }, help = "The application assembly prompt or the name of a prompt file.", defaultValue = ShellOption.NULL) String query,
 			@ShellOption(value = { "-r",
 					"--registerUrl" }, defaultValue = ShellOption.NULL, help = "URL of the registration database for storing project metadata.") String registerUrl,
 			@ShellOption(value = { "-s",
@@ -105,12 +102,18 @@ public class AssembyCommand {
 			throws IOException {
 
 		try {
+			if (query == null) {
+				query = readText("Prompt");
+			}
+
 			query = getQueryFromFile(query);
 
 			findQuery = query;
 			model = Optional.ofNullable(model)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-			score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", DEFAULT_SCORE_VALUE));
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME,
+							ApplicationAssembly.DEFAULT_GENAI_VALUE));
+			score = Optional.ofNullable(score)
+					.orElse(ConfigCommand.config.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE));
 			try (Picker picker = new Picker(model, registerUrl, config)) {
 				picker.setScore(score);
 				bindexList = picker.pick(query);
@@ -177,8 +180,13 @@ public class AssembyCommand {
 			throws IOException {
 
 		try {
+			if (query == null) {
+				query = readText("Project assembly prompt");
+			}
+
 			genai = Optional.ofNullable(genai)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME,
+							ApplicationAssembly.DEFAULT_GENAI_VALUE));
 
 			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
 			logger.info("The project directory: {}", dir);
@@ -191,7 +199,8 @@ public class AssembyCommand {
 				prompt = this.findQuery;
 			} else {
 				query = getQueryFromFile(query);
-				score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", DEFAULT_SCORE_VALUE));
+				score = Optional.ofNullable(score)
+						.orElse(ConfigCommand.config.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE));
 				try (Picker picker = new Picker(genai, registerUrl, config)) {
 					picker.setScore(score);
 					bindexList = picker.pick(query);
@@ -228,7 +237,8 @@ public class AssembyCommand {
 
 		try {
 			chatModel = Optional.ofNullable(chatModel)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME,
+							ApplicationAssembly.DEFAULT_GENAI_VALUE));
 			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 
 			FunctionToolsLoader.getInstance().applyTools(provider);

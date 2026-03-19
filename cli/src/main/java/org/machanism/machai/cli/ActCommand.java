@@ -21,11 +21,10 @@ import org.springframework.shell.standard.ShellOption;
  * Spring Shell command that runs Ghostwriter "Act mode".
  *
  * <p>
- * The command scans the configured project folder and then executes a
- * predefined action/prompt interactively via {@link ActProcessor}.
+ * The command scans the configured project folder and then executes a predefined
+ * action/prompt interactively via {@link ActProcessor}.
  *
  * <h2>Examples</h2>
- * 
  * <pre>
  * act commit
  * act commit "and push"
@@ -52,11 +51,8 @@ public class ActCommand {
 	 * The default root directory and model are resolved from the persisted
 	 * configuration managed by {@link ConfigCommand}.
 	 *
-	 * @param action the name of the predefined action to execute
-	 * @param prompt optional extra prompt text appended to {@code action}
-	 * @param model  optional GenAI provider/model identifier (for example,
-	 *               {@code OpenAI:gpt-5.1}); if {@code null}, uses the configured
-	 *               default
+	 * @param act words composing the action name and optional extra prompt text
+	 *            passed to Act mode
 	 * @throws IOException if scanning documents fails
 	 */
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
