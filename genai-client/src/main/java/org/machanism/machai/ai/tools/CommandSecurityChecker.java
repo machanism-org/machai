@@ -72,7 +72,7 @@ public class CommandSecurityChecker {
 					"No denylist defined for operating system: `" + SystemUtils.OS_NAME + "`.");
 		}
 
-		logger.info("Loading denylist for OS `{}` from resource: {}", SystemUtils.OS_NAME, resourcePath);
+		logger.debug("Loading denylist for OS `{}` from resource: {}", SystemUtils.OS_NAME, resourcePath);
 
 		ClassLoader classLoader = getClass().getClassLoader();
 		URL systemResource = classLoader.getResource(resourcePath);
