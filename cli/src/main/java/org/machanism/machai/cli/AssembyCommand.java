@@ -27,12 +27,14 @@ import org.springframework.shell.standard.ShellOption;
  * Spring Shell command that performs semantic search (“pick”) and assembles a
  * project based on the selected libraries.
  *
- * <p>This command is a CLI facade over the bindex module:
- * {@link Picker} is used to retrieve candidate libraries ({@link Bindex}) for a
- * query, and {@link ApplicationAssembly} is used to generate/assemble an output
- * project from the selected set.
+ * <p>
+ * This command is a CLI facade over the bindex module: {@link Picker} is used
+ * to retrieve candidate libraries ({@link Bindex}) for a query, and
+ * {@link ApplicationAssembly} is used to generate/assemble an output project
+ * from the selected set.
  *
  * <h2>Example</h2>
+ * 
  * <pre>
  * pick --query "Create a web app" --score 0.9
  * assembly --dir .\\out
@@ -76,16 +78,18 @@ public class AssembyCommand {
 	/**
 	 * Picks libraries based on the user request.
 	 *
-	 * <p>The provided {@code query} may be a literal prompt or a path to a text file
+	 * <p>
+	 * The provided {@code query} may be a literal prompt or a path to a text file
 	 * containing the prompt.
 	 *
-	 * @param query       the application assembly prompt or the name of a prompt file
+	 * @param query       the application assembly prompt or the name of a prompt
+	 *                    file
 	 * @param registerUrl optional URL of a registry service used by the picker
-	 * @param score       minimum similarity threshold for search results; if {@code null},
-	 *                    uses the configured default
+	 * @param score       minimum similarity threshold for search results; if
+	 *                    {@code null}, uses the configured default
 	 * @param model       optional GenAI provider/model identifier (for example,
-	 *                    {@code OpenAI:gpt-5.1}); if {@code null}, uses the configured
-	 *                    default
+	 *                    {@code OpenAI:gpt-5.1}); if {@code null}, uses the
+	 *                    configured default
 	 * @throws IOException if reading the query file or calling the picker fails
 	 */
 	@ShellMethod("Picks libraries based on user request.")
@@ -106,8 +110,13 @@ public class AssembyCommand {
 			findQuery = query;
 			model = Optional.ofNullable(model)
 					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-			score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", 0.90));
-			bindexList = pickBricks(query, score, registerUrl, model);
+			score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", DEFAULT_SCORE_VALUE));
+			try (Picker picker = new Picker(model, registerUrl, config)) {
+				picker.setScore(score);
+				bindexList = picker.pick(query);
+				printFindResult(bindexList, picker);
+			}
+
 		} finally {
 			GenAIProviderManager.logUsage();
 		}
@@ -123,7 +132,8 @@ public class AssembyCommand {
 	private String getQueryFromFile(String query) throws IOException {
 		File queryFile = new File(query);
 		if (queryFile.exists()) {
-			// Sonar java:S1130 - don't declare FileNotFoundException (subclass of IOException).
+			// Sonar java:S1130 - don't declare FileNotFoundException (subclass of
+			// IOException).
 			try (FileReader fileReader = new FileReader(queryFile)) {
 				query = IOUtils.toString(fileReader);
 			}
@@ -134,18 +144,24 @@ public class AssembyCommand {
 	/**
 	 * Creates a project from the picked library set.
 	 *
-	 * <p>If {@code query} is omitted, the last query from {@link #pick(String, String, Double, String)}
-	 * is reused.
+	 * <p>
+	 * If {@code query} is omitted, the last query from
+	 * {@link #pick(String, String, Double, String)} is reused.
 	 *
-	 * @param query       the application assembly prompt (or prompt file); may be {@code null}
-	 * @param dir         the directory where the assembled project will be created; if {@code null},
-	 *                    uses the configured default or the current working directory
+	 * @param query       the application assembly prompt (or prompt file); may be
+	 *                    {@code null}
+	 * @param dir         the directory where the assembled project will be created;
+	 *                    if {@code null}, uses the configured default or the
+	 *                    current working directory
 	 * @param registerUrl optional URL of a registry service used by the picker
-	 * @param score       minimum similarity threshold; if {@code null}, uses the configured default
+	 * @param score       minimum similarity threshold; if {@code null}, uses the
+	 *                    configured default
 	 * @param genai       optional GenAI provider/model identifier (for example,
-	 *                    {@code OpenAI:gpt-5.1}); if {@code null}, uses the configured default
+	 *                    {@code OpenAI:gpt-5.1}); if {@code null}, uses the
+	 *                    configured default
 	 * @throws IOException              if picking or assembly fails
-	 * @throws IllegalArgumentException if the query is missing and no previous pick results exist
+	 * @throws IllegalArgumentException if the query is missing and no previous pick
+	 *                                  results exist
 	 */
 	@ShellMethod("Creates a project via picked librariy set.")
 	public void assembly(@ShellOption(value = { "-q",
@@ -176,7 +192,10 @@ public class AssembyCommand {
 			} else {
 				query = getQueryFromFile(query);
 				score = Optional.ofNullable(score).orElse(ConfigCommand.config.getDouble("score", DEFAULT_SCORE_VALUE));
-				bindexList = pickBricks(query, score, registerUrl, genai);
+				try (Picker picker = new Picker(genai, registerUrl, config)) {
+					picker.setScore(score);
+					bindexList = picker.pick(query);
+				}
 			}
 
 			if (!bindexList.isEmpty()) {
@@ -194,10 +213,11 @@ public class AssembyCommand {
 	 * Sends a user prompt to the GenAI provider.
 	 *
 	 * @param query     the prompt supplied by the user
-	 * @param chatModel GenAI provider/model identifier (for example, {@code OpenAI:gpt-5.1});
-	 *                 if {@code null}, uses the configured default
-	 * @param dir       working directory used by the provider; if {@code null}, uses the configured
-	 *                 default or the current working directory
+	 * @param chatModel GenAI provider/model identifier (for example,
+	 *                  {@code OpenAI:gpt-5.1}); if {@code null}, uses the
+	 *                  configured default
+	 * @param dir       working directory used by the provider; if {@code null},
+	 *                  uses the configured default or the current working directory
 	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(@ShellOption(value = { "-q", "--query" }, help = "The user prompt to GenAI.") String query,
@@ -227,34 +247,13 @@ public class AssembyCommand {
 	}
 
 	/**
-	 * Picks bricks (libraries) using a {@link Picker} service.
-	 *
-	 * @param query the query string describing requirements
-	 * @param score minimum similarity score
-	 * @param url   optional registry URL used by the picker
-	 * @param genai GenAI provider/model identifier
-	 * @return a list of matching libraries
-	 * @throws IOException if picking fails
-	 */
-	private List<Bindex> pickBricks(String query, Double score, String url, String genai)
-			throws IOException {
-		// Sonar java:S2095 - ensure Picker is closed via try-with-resources.
-		try (Picker picker = new Picker(genai, url, config)) {
-			picker.setScore(score);
-			List<Bindex> pickedBindexes = picker.pick(query);
-			logger.info("Search results for libraries matching the requested query:");
-			printFindResult(pickedBindexes, picker);
-			return pickedBindexes;
-		}
-	}
-
-	/**
 	 * Prints search results for picked libraries.
 	 *
 	 * @param bindexList list of picked libraries
 	 * @param picker     picker used for scoring
 	 */
 	private void printFindResult(List<Bindex> bindexList, Picker picker) {
+		logger.debug("Search results for libraries matching the requested query:");
 		if (!bindexList.isEmpty()) {
 			int i = 1;
 			for (Bindex bindex : bindexList) {
