@@ -129,7 +129,8 @@ public class ActProcessor extends AIFileProcessor {
 
 			Object mainValue = actData.get(INPUTS_PROPERTY_NAME);
 			if (mainValue instanceof String) {
-				String value = String.format((String) mainValue, Objects.toString(prompt, ""));
+				String actPrompt = Objects.toString((String) actData.get("prompt"), "");
+				String value = String.format((String) mainValue, Objects.toString(prompt, actPrompt));
 				actData.put(INPUTS_PROPERTY_NAME, value);
 			}
 

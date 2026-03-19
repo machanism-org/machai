@@ -206,7 +206,7 @@ public class Act extends AbstractGWGoal {
 			if (Strings.CS.endsWith(line, Ghostwriter.MULTIPLE_LINES_BREAKER)) {
 				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER)).append("\n");
 			} else {
-				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER));
+				sb.append(line);
 				break;
 			}
 		}
