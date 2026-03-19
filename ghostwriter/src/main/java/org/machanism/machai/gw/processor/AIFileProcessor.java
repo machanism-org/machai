@@ -147,6 +147,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 
 		String perform = provider.perform();
+		logger.info(">>> {}", perform);
 
 		logger.info("Finished processing file: {}", file.getAbsolutePath());
 		return perform;
