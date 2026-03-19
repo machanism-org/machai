@@ -13,20 +13,23 @@ import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.schema.Bindex;
 
 /**
- * Assembles prompt inputs for downstream LLM-assisted workflows using a set of selected
- * {@link Bindex} documents.
+ * Assembles prompt inputs for downstream LLM-assisted workflows using a set of
+ * selected {@link Bindex} documents.
  *
- * <p>The assembled conversation is sent to a {@link GenAIProvider} in a deterministic order:
+ * <p>
+ * The assembled conversation is sent to a {@link GenAIProvider} in a
+ * deterministic order:
  *
  * <ol>
- *   <li>System instructions</li>
- *   <li>Assembly instructions</li>
- *   <li>User prompt</li>
- *   <li>Recommended library section derived from the selected Bindexes</li>
+ * <li>System instructions</li>
+ * <li>Assembly instructions</li>
+ * <li>User prompt</li>
+ * <li>Recommended library section derived from the selected Bindexes</li>
  * </ol>
  *
- * <p>The provider inputs can optionally be logged to {@code .machai/assembly-inputs.txt} under
- * the configured project directory.
+ * <p>
+ * The provider inputs can optionally be logged to
+ * {@code .machai/assembly-inputs.txt} under the configured project directory.
  *
  * <h2>Example</h2>
  *
@@ -48,7 +51,8 @@ public class ApplicationAssembly {
 	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
 
 	/**
-	 * Relative path (from {@link #projectDir}) where the provider input log is written.
+	 * Relative path (from {@link #projectDir}) where the provider input log is
+	 * written.
 	 */
 	private static final String ASSEMBLY_TEMP_DIR = ".machai/assembly-inputs.txt";
 
@@ -58,7 +62,9 @@ public class ApplicationAssembly {
 	/**
 	 * Creates an instance that uses the configured GenAI provider.
 	 *
-	 * <p>The provider is configured with available function tools and a working directory.
+	 * <p>
+	 * The provider is configured with available function tools and a working
+	 * directory.
 	 *
 	 * @param genai  provider identifier understood by {@link GenAIProviderManager}
 	 * @param config configurator used to initialize the provider and tools
@@ -83,15 +89,17 @@ public class ApplicationAssembly {
 	}
 
 	/**
-	 * Builds and executes an assembly prompt using the supplied user prompt and a list of relevant
-	 * {@link Bindex} documents.
+	 * Builds and executes an assembly prompt using the supplied user prompt and a
+	 * list of relevant {@link Bindex} documents.
 	 *
-	 * <p>The provider input log is written to {@code .machai/assembly-inputs.txt} under the current
-	 * {@linkplain #projectDir(File) project directory}.
+	 * <p>
+	 * The provider input log is written to {@code .machai/assembly-inputs.txt}
+	 * under the current {@linkplain #projectDir(File) project directory}.
 	 *
 	 * @param prompt     user prompt describing the desired assembly/result
 	 * @param bindexList list of Bindex documents to include as context
-	 * @throws IllegalArgumentException if {@code prompt} or {@code bindexList} is {@code null}
+	 * @throws IllegalArgumentException if {@code prompt} or {@code bindexList} is
+	 *                                  {@code null}
 	 */
 	public void assembly(final String prompt, List<Bindex> bindexList) {
 		if (prompt == null) {
@@ -106,7 +114,8 @@ public class ApplicationAssembly {
 
 		StringBuilder bindexPrompt = new StringBuilder();
 
-		String assemblyInstructions = PROMPT_BUNDLE.getString("assembly_instructions");
+		String assemblyInstructions = MessageFormat.format(PROMPT_BUNDLE.getString("assembly_instructions"),
+				SystemUtils.OS_NAME);
 		bindexPrompt.append(assemblyInstructions);
 
 		String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
@@ -134,7 +143,8 @@ public class ApplicationAssembly {
 	}
 
 	/**
-	 * Sets the project directory used when writing local artifacts (such as provider input logs).
+	 * Sets the project directory used when writing local artifacts (such as
+	 * provider input logs).
 	 *
 	 * @param projectDir project directory to use
 	 * @return this instance for chaining
