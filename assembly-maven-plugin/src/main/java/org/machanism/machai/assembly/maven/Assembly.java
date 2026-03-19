@@ -40,7 +40,7 @@ import org.machanism.machai.schema.Bindex;
  * phase.</li>
  * <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; File containing the prompt; if absent, the prompt
  * is requested interactively.</li>
- * <li>{@code assembly.score} (default {@code 0.9}) &ndash; Minimum score required for a recommended library to be
+ * <li>{@code assembly.score} (default {@code 0.8}) &ndash; Minimum score required for a recommended library to be
  * listed/used.</li>
  * <li>{@code bindex.register.url} (optional) &ndash; Registration/lookup endpoint used by the picker.</li>
  * </ul>
@@ -56,7 +56,7 @@ import org.machanism.machai.schema.Bindex;
  *   -Dassembly.genai=OpenAI:gpt-5
  *   -Dpick.genai=OpenAI:gpt-5-mini
  *   -Dassembly.prompt.file=project.txt
- *   -Dassembly.score=0.9
+ *   -Dassembly.score=0.8
  * </pre>
  */
 @Mojo(name = "assembly", requiresProject = false, requiresDependencyCollection = ResolutionScope.NONE)
@@ -101,8 +101,8 @@ public class Assembly extends AbstractMojo {
 	/**
 	 * Minimum score threshold for recommended libraries.
 	 */
-	@Parameter(property = "assembly.score", defaultValue = "0.9")
-	protected Double score;
+	@Parameter(property = "assembly.score")
+	protected Double score = ApplicationAssembly.DEFAULT_SCORE_VALUE;
 
 	/**
 	 * Optional registration URL used by the picker for metadata lookups/registration.
@@ -169,7 +169,7 @@ public class Assembly extends AbstractMojo {
 					query = IOUtils.toString(reader);
 				}
 			} else {
-				query = prompter.prompt("Please enter the project assembly prompt or specify the file name");
+				query = prompter.prompt("Project assembly prompt or specify the file name");
 			}
 
 			Configurator config = new PropertiesConfigurator("bindex.properties");
