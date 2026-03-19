@@ -147,7 +147,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 
 		String perform = provider.perform();
-		logger.info(">>> {}", perform);
+		if (perform != null) {
+			logger.info(">>> {}", perform);
+		}
 
 		logger.info("Finished processing file: {}", file.getAbsolutePath());
 		return perform;
@@ -157,7 +159,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Builds a human-readable description of the project structure used in prompts.
 	 *
 	 * @param projectLayout current project layout
-	 * @param file          file currently being processed (used for project-relative path)
+	 * @param file          file currently being processed (used for
+	 *                      project-relative path)
 	 * @return formatted project information block
 	 * @throws IOException if computing relative paths fails
 	 */
@@ -295,7 +298,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				sb.append("\n");
 			}
 		} catch (IOException e) {
-			// Sonar java:S1141 - remove nested try/catch by letting IOException flow to one handler.
+			// Sonar java:S1141 - remove nested try/catch by letting IOException flow to one
+			// handler.
 			throw new IllegalArgumentException(e);
 		}
 
@@ -480,7 +484,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		try {
 			process(projectLayout, projectLayout.getProjectDir(), instructions, defaultPrompt);
 		} catch (IOException e) {
-			// Fix for Sonar java:S3984 - previously created an exception without throwing it.
+			// Fix for Sonar java:S3984 - previously created an exception without throwing
+			// it.
 			throw new IllegalArgumentException(e);
 		}
 	}
