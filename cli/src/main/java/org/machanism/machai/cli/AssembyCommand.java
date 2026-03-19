@@ -46,7 +46,7 @@ public class AssembyCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
 
-	private static final double DEFAULT_SCORE_VALUE = 0.90;
+	private static final double DEFAULT_SCORE_VALUE = 0.80;
 	private static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
 
 	/** List of picked Bindex objects matching the last search query. */
@@ -218,7 +218,7 @@ public class AssembyCommand {
 			provider.prompt(query);
 			String response = provider.perform();
 			if (response != null) {
-				logger.info(response);
+				logger.info(">>> {}", response);
 			}
 		} finally {
 			GenAIProviderManager.logUsage();
