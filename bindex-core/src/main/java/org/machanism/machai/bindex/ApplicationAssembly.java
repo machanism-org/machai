@@ -50,6 +50,10 @@ public class ApplicationAssembly {
 	/** ResourceBundle for prompt configuration. */
 	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
 
+	public static final double DEFAULT_SCORE_VALUE = 0.80;
+
+	public static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
+	
 	/**
 	 * Relative path (from {@link #projectDir}) where the provider input log is
 	 * written.

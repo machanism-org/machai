@@ -114,7 +114,7 @@ public class Picker implements AutoCloseable {
 
 	private final GenAIProvider provider;
 
-	private Double score = 0.9;
+	private Double score = ApplicationAssembly.DEFAULT_SCORE_VALUE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
 
 	/**
