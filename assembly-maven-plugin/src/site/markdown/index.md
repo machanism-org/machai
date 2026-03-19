@@ -10,14 +10,14 @@ canonical: https://machai.machanism.org/assembly-maven-plugin/index.html
 
 Assembly Maven Plugin is a Machai Maven plugin that implements the `assembly` goal. It runs an AI-assisted, metadata-driven workflow against the Maven execution base directory (`${basedir}`) to help assemble or update a target project directory in-place.
 
-Conceptually, it follows the same structured pattern as [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): acquire guidance (a prompt), use metadata to inform decisions (Bindex), and apply repeatable automation (project edits).
+The plugin is built around a Guided File Processing style loop: acquire guidance (your natural-language prompt), use metadata to inform decisions (Bindex), and apply repeatable automation (project edits). See [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) for the conceptual foundation.
 
-At a high level, the goal:
+Concretely, the `assembly` goal:
 
 - Acquires a natural-language prompt by reading `assembly.prompt.file` (default: `project.txt`) when present, or by prompting interactively via the Maven console.
 - Loads configuration from `bindex.properties` using `PropertiesConfigurator`.
 - Uses a GenAI-backed picker (`pick.genai`) to recommend candidate libraries expressed as Bindex entries (`Picker`; optionally using `bindex.register.url`).
-- Filters recommendations by a configurable score threshold (`assembly.score`).
+- Filters recommendations by a configurable score threshold (`assembly.score`) and logs the recommended library ids and scores.
 - Runs the assembly phase (`assembly.genai`) to apply changes to the project directory (`${basedir}`) using `ApplicationAssembly`, the prompt, and the selected libraries.
 
 ## Overview

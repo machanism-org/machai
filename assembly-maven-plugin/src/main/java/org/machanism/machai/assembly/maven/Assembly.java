@@ -118,9 +118,13 @@ public class Assembly extends AbstractMojo {
 
 	/**
 	 * Factory method for creating a {@link Picker}.
+	 *
 	 * <p>
 	 * Extracted for testability.
 	 * </p>
+	 *
+	 * @param config configuration source to be passed to the picker
+	 * @return a new picker instance
 	 */
 	protected Picker createPicker(Configurator config) {
 		return new Picker(pickGenai, registerUrl, config);
@@ -128,9 +132,13 @@ public class Assembly extends AbstractMojo {
 
 	/**
 	 * Factory method for creating an {@link ApplicationAssembly}.
+	 *
 	 * <p>
 	 * Extracted for testability.
 	 * </p>
+	 *
+	 * @param config configuration source to be passed to the assembly
+	 * @return a new assembly instance
 	 */
 	protected ApplicationAssembly createAssembly(Configurator config) {
 		return new ApplicationAssembly(assemblyGenai, config, basedir);
@@ -180,9 +188,11 @@ public class Assembly extends AbstractMojo {
 				int i = 1;
 				getLog().info("Recommended libraries:");
 				for (Bindex bindex : bindexList) {
-					String scoreStr = picker.getScore(bindex.getId()) != null ? picker.getScore(bindex.getId()).toString() : "";
+					String bindexId = bindex.getId();
+					Double bindexScore = picker.getScore(bindexId);
+					String scoreStr = bindexScore != null ? bindexScore.toString() : "";
 					// Sonar java:S3457 - ensure all String.format arguments are used (use %3$s for scoreStr).
-					getLog().info(String.format("%2$3s. %1$s %3$s", bindex.getId(), i++, scoreStr));
+					getLog().info(String.format("%2$3s. %1$s %3$s", bindexId, i++, scoreStr));
 				}
 			}
 

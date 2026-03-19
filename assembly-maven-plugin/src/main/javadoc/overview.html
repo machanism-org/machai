@@ -35,20 +35,20 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   GenAI-powered semantic search and metadata-driven workflows.
 </p>
 
-<h2>What this plugin does</h2>
+<h2>What this project provides</h2>
 
 <p>
-  Assembly Maven Plugin is a Maven plugin (packaging type <code>maven-plugin</code>) that provides the
-  <code>assembly</code> goal. The goal takes a natural-language prompt describing the desired project outcome,
-  recommends relevant libraries from MachAI bindex metadata, and applies the resulting project changes directly to the
-  Maven execution base directory (<code>${basedir}</code>).
+  <strong>Assembly Maven Plugin</strong> is a Maven plugin (packaging type <code>maven-plugin</code>) that exposes an
+  <code>assembly</code> goal. The goal uses a natural-language prompt to drive an AI-assisted workflow that recommends
+  relevant libraries (from bindex metadata) and applies the resulting project changes directly to the Maven execution
+  base directory (<code>${basedir}</code>).
 </p>
 
 <h2>High-level workflow</h2>
 
 <ol>
   <li>
-    <strong>Prompt acquisition</strong>: read the prompt from a configured file (default
+    <strong>Prompt acquisition</strong>: read the prompt from a configured file (for example
     <code>project.txt</code>) or collect it interactively.
   </li>
   <li>
@@ -56,7 +56,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     entries.
   </li>
   <li>
-    <strong>Scoring and filtering</strong>: discard candidates below a configured minimum score threshold.
+    <strong>Scoring and filtering</strong>: optionally discard candidates below a configured minimum score threshold.
   </li>
   <li>
     <strong>Assembly application</strong>: run the assembly engine to apply updates to the project directory in-place.
@@ -66,7 +66,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Architecture</h2>
 
 <p>
-  The following diagram summarizes the main types involved in the plugin and how they relate.
+  The following diagram summarizes the primary types involved in the plugin and how they relate.
 </p>
 
 <p>
@@ -78,26 +78,25 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h3><code>org.machanism.machai.assembly.maven</code></h3>
 
 <p>
-  Maven plugin entry points for MachAI's AI-assisted project assembly workflow.
-  This package contains the Mojo implementation and the minimal orchestration logic that:
+  Maven plugin entry point for MachAI's AI-assisted project assembly workflow. This package contains the Mojo
+  implementation and the minimal orchestration logic needed to:
 </p>
 
 <ul>
-  <li>obtains a natural-language prompt (file-based or interactive),</li>
-  <li>invokes the MachAI picker to recommend libraries as bindex entries (filtered by score), and</li>
-  <li>invokes the application assembly engine to apply changes to the target project directory.</li>
+  <li>obtain a natural-language prompt (file-based or interactive),</li>
+  <li>invoke MachAI's <code>Picker</code> to recommend libraries as bindex entries (optionally filtered by score), and</li>
+  <li>invoke the application assembly engine to apply changes to the target project directory.</li>
 </ul>
 
 <p>
-  The primary entry point is <code>org.machanism.machai.assembly.maven.Assembly</code>, a Maven Mojo that:
+  The primary entry point is <code>org.machanism.machai.assembly.maven.Assembly</code>, a Maven Mojo that coordinates:
 </p>
 
 <ul>
-  <li>reads <code>assembly.prompt.file</code> (or prompts the user),</li>
-  <li>runs <code>org.machanism.machai.bindex.Picker</code> to produce recommended
+  <li>prompt input via the <code>assembly.prompt.file</code> setting (or interactive input),</li>
+  <li>recommendations produced by <code>org.machanism.machai.bindex.Picker</code> as
       <code>org.machanism.machai.schema.Bindex</code> entries, and</li>
-  <li>runs <code>org.machanism.machai.bindex.ApplicationAssembly</code> to apply the assembly to
-      <code>${basedir}</code>.</li>
+  <li>in-place changes applied by <code>org.machanism.machai.bindex.ApplicationAssembly</code> to <code>${basedir}</code>.</li>
 </ul>
 
 <h2>Configuration and inputs</h2>
