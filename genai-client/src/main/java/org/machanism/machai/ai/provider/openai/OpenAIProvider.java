@@ -319,7 +319,6 @@ public class OpenAIProvider implements GenAIProvider {
 			String messageText = extractMessageText(item);
 			if (StringUtils.isNotBlank(messageText)) {
 				text = messageText;
-				logger.info("LLM Response: {}", text);
 			}
 		}
 
