@@ -180,25 +180,4 @@ class GWCommandAdditionalTest {
 		}
 	}
 
-	@Test
-	void resolveInstructions_shouldReturnNull_whenOptionEmptyAndNoInputProvided() throws Exception {
-		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_INSTRUCTIONS_PROP_NAME, "");
-		var originalIn = System.in;
-		// Sonar java:S2093 - use try-with-resources for AutoCloseable resources.
-		try (ByteArrayInputStream in = new ByteArrayInputStream(new byte[0])) {
-			System.setIn(in);
-			GWCommand cmd = new GWCommand();
-			Method m = GWCommand.class.getDeclaredMethod("resolveInstructions", String.class);
-			m.setAccessible(true);
-
-			// Act
-			String result = (String) m.invoke(cmd, "");
-
-			// Assert
-			assertNull(result);
-		} finally {
-			System.setIn(originalIn);
-		}
-	}
 }

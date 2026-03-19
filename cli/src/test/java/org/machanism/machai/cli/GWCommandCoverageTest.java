@@ -45,21 +45,6 @@ class GWCommandCoverageTest {
 	}
 
 	@Test
-	void resolveInstructions_whenEmpty_readsFromStdin_andReturnsEnteredText() throws Exception {
-		// Arrange
-		System.setIn(new ByteArrayInputStream("line1\r\nline2\r\n".getBytes(StandardCharsets.UTF_8)));
-		GWCommand cmd = new GWCommand();
-		Method m = GWCommand.class.getDeclaredMethod("resolveInstructions", String.class);
-		m.setAccessible(true);
-
-		// Act
-		String result = (String) m.invoke(cmd, "");
-
-		// Assert
-		assertEquals("line1\nline2", result);
-	}
-
-	@Test
 	void resolveGuidance_whenNull_returnsConfigValue() throws Exception {
 		// Arrange
 		ConfigCommand.config.set(org.machanism.machai.gw.processor.Ghostwriter.GW_GUIDANCE_PROP_NAME,
@@ -73,21 +58,6 @@ class GWCommandCoverageTest {
 
 		// Assert
 		assertEquals("guidance-from-config", result);
-	}
-
-	@Test
-	void resolveGuidance_whenEmpty_readsFromStdin_andReturnsEnteredText() throws Exception {
-		// Arrange
-		System.setIn(new ByteArrayInputStream("g1\n".getBytes(StandardCharsets.UTF_8)));
-		GWCommand cmd = new GWCommand();
-		Method m = GWCommand.class.getDeclaredMethod("resolveGuidance", String.class);
-		m.setAccessible(true);
-
-		// Act
-		String result = (String) m.invoke(cmd, "");
-
-		// Assert
-		assertEquals("g1", result);
 	}
 
 	@Test

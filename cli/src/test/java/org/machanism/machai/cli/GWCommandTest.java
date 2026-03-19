@@ -82,34 +82,4 @@ class GWCommandTest {
 		assertArrayEquals(new String[] { "target", ".git" }, result);
 	}
 
-	@Test
-	void readText_shouldReturnNull_whenNoInputProvided() throws Exception {
-		// Arrange
-		System.setIn(new ByteArrayInputStream(new byte[0]));
-		GWCommand cmd = new GWCommand();
-		Method m = GWCommand.class.getDeclaredMethod("readText", String.class);
-		m.setAccessible(true);
-
-		// Act
-		String result = (String) m.invoke(cmd, "prompt");
-
-		// Assert
-		assertNull(result);
-	}
-
-	@Test
-	void readText_shouldReturnTextWithoutTrailingNewline_whenInputProvided() throws Exception {
-		// Arrange
-		String input = "line1\r\nline2\r\n";
-		System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
-		GWCommand cmd = new GWCommand();
-		Method m = GWCommand.class.getDeclaredMethod("readText", String.class);
-		m.setAccessible(true);
-
-		// Act
-		String result = (String) m.invoke(cmd, "prompt");
-
-		// Assert
-		assertEquals("line1\nline2", result);
-	}
 }

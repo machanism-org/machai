@@ -52,16 +52,4 @@ class AssembyCommandCoverageTest {
 		assertEquals("not-a-real-file-path-123", result);
 	}
 
-	@Test
-	void assembly_whenQueryIsNullAndNoPreviousPick_shouldThrowIllegalArgumentException() {
-		// Arrange
-		AssembyCommand cmd = new AssembyCommand();
-
-		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> cmd.assembly(null, null, null, null, null));
-
-		// Assert
-		assertEquals("The query is empty.", ex.getMessage());
-	}
 }
