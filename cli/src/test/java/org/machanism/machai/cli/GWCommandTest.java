@@ -1,16 +1,15 @@
 package org.machanism.machai.cli;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 
+import org.jline.reader.LineReader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class GWCommandTest {
 
@@ -24,7 +23,8 @@ class GWCommandTest {
 	@Test
 	void resolveScanDirs_shouldReturnRootDirAbsolutePath_whenNullOrEmpty() throws Exception {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		File rootDir = new File(".").getAbsoluteFile();
 		Method m = GWCommand.class.getDeclaredMethod("resolveScanDirs", String[].class, File.class);
 		m.setAccessible(true);
@@ -41,7 +41,8 @@ class GWCommandTest {
 	@Test
 	void resolveScanDirs_shouldReturnProvidedScanDirs_whenNotEmpty() throws Exception {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		File rootDir = new File(".").getAbsoluteFile();
 		String[] scanDirs = new String[] { "a", "b" };
 		Method m = GWCommand.class.getDeclaredMethod("resolveScanDirs", String[].class, File.class);
@@ -57,7 +58,8 @@ class GWCommandTest {
 	@Test
 	void splitExcludes_shouldReturnNull_whenExcludesIsNull() throws Exception {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("splitExcludes", String.class);
 		m.setAccessible(true);
 
@@ -71,7 +73,8 @@ class GWCommandTest {
 	@Test
 	void splitExcludes_shouldSplitByComma_whenExcludesIsProvided() throws Exception {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("splitExcludes", String.class);
 		m.setAccessible(true);
 

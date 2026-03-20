@@ -1,14 +1,16 @@
 package org.machanism.machai.cli;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+import org.jline.reader.LineReader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mockito;
 
 /**
  * Additional coverage tests for {@link AssembyCommand}.
@@ -27,7 +29,8 @@ class AssembyCommandCoverageTest {
 		File queryFile = new File(tempDir, "q.txt");
 		Files.writeString(queryFile.toPath(), "hello from file", StandardCharsets.UTF_8);
 
-		AssembyCommand cmd = new AssembyCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		AssembyCommand cmd = new AssembyCommand(reader);
 		Method m = AssembyCommand.class.getDeclaredMethod("getQueryFromFile", String.class);
 		m.setAccessible(true);
 
@@ -41,7 +44,8 @@ class AssembyCommandCoverageTest {
 	@Test
 	void getQueryFromFile_whenPathDoesNotExist_returnsOriginalString() throws Exception {
 		// Arrange
-		AssembyCommand cmd = new AssembyCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		AssembyCommand cmd = new AssembyCommand(reader);
 		Method m = AssembyCommand.class.getDeclaredMethod("getQueryFromFile", String.class);
 		m.setAccessible(true);
 

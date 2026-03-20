@@ -11,19 +11,10 @@ import org.mockito.Mockito;
 class BindexCommandTest {
 
 	@Test
-	void constructor_shouldStoreLineReader() {
-		// Arrange
-		LineReader reader = Mockito.mock(LineReader.class);
-
-		// Act + Assert
-		assertDoesNotThrow(() -> new BindexCommand(reader));
-	}
-
-	@Test
 	void bindex_shouldAlwaysLogUsage_evenWhenScanFolderFails() {
 		// Arrange
 		LineReader reader = Mockito.mock(LineReader.class);
-		BindexCommand cmd = new BindexCommand(reader);
+		BindexCommand cmd = new BindexCommand();
 		File nonExistingDir = new File("target/does-not-exist-dir-12345");
 
 		// Act + Assert
@@ -39,8 +30,7 @@ class BindexCommandTest {
 	@Test
 	void register_shouldAlwaysLogUsage_evenWhenScanFolderFails() {
 		// Arrange
-		LineReader reader = Mockito.mock(LineReader.class);
-		BindexCommand cmd = new BindexCommand(reader);
+		BindexCommand cmd = new BindexCommand();
 		File nonExistingDir = new File("target/does-not-exist-dir-54321");
 
 		// Act + Assert

@@ -1,6 +1,6 @@
 package org.machanism.machai.cli;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.FileOutputStream;

@@ -1,17 +1,22 @@
 package org.machanism.machai.cli;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 
+import org.jline.reader.LineReader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
+import org.mockito.Mockito;
 
 /**
  * Additional focused tests to cover package-private/private logic in {@link GWCommand}.
@@ -32,7 +37,8 @@ class GWCommandCoverageTest {
 	void resolveInstructions_whenNull_returnsConfigValue() throws Exception {
 		// Arrange
 		ConfigCommand.config.set(org.machanism.machai.gw.processor.Ghostwriter.GW_INSTRUCTIONS_PROP_NAME, "from-config");
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 
 		Method m = GWCommand.class.getDeclaredMethod("resolveInstructions", String.class);
 		m.setAccessible(true);
@@ -49,7 +55,8 @@ class GWCommandCoverageTest {
 		// Arrange
 		ConfigCommand.config.set(org.machanism.machai.gw.processor.Ghostwriter.GW_GUIDANCE_PROP_NAME,
 				"guidance-from-config");
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveGuidance", String.class);
 		m.setAccessible(true);
 
@@ -63,7 +70,8 @@ class GWCommandCoverageTest {
 	@Test
 	void splitExcludes_whenNull_returnsNull_andWhenCsv_splits() throws Exception {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("splitExcludes", String.class);
 		m.setAccessible(true);
 
@@ -79,7 +87,8 @@ class GWCommandCoverageTest {
 	@Test
 	void resolveScanDirs_whenNullOrEmpty_returnsRootDirAbsolutePath() throws Exception {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveScanDirs", String[].class, File.class);
 		m.setAccessible(true);
 		File rootDir = new File(".").getAbsoluteFile();
@@ -96,7 +105,8 @@ class GWCommandCoverageTest {
 	@Test
 	void loadMachaiPropertiesConfig_whenFileMissing_doesNotThrow_andReturnsNonNullConfig() throws Exception {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("loadMachaiPropertiesConfig");
 		m.setAccessible(true);
 
@@ -160,7 +170,8 @@ class GWCommandCoverageTest {
 	@Test
 	void init_isNoOpButCallable() {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 
 		// Act/Assert
 		assertDoesNotThrow(cmd::init);
@@ -169,7 +180,8 @@ class GWCommandCoverageTest {
 	@Test
 	void gw_whenDownstreamThrowsException_isHandledAndDoesNotThrow() {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 
 		// Act/Assert
 		// Use a clearly invalid scan path to increase the likelihood of downstream IOException.

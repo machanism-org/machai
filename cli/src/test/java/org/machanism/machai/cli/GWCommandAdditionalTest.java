@@ -3,14 +3,14 @@ package org.machanism.machai.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.lang.reflect.Method;
 
+import org.jline.reader.LineReader;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.gw.processor.Ghostwriter;
+import org.mockito.Mockito;
 
 class GWCommandAdditionalTest {
 
@@ -18,7 +18,8 @@ class GWCommandAdditionalTest {
 	void resolveModel_shouldReturnConfiguredValue_whenOptionIsNull() throws Exception {
 		// Arrange
 		ConfigCommand.config.set(Ghostwriter.GW_GENAI_PROP_NAME, "Configured:Model");
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveModel", String.class);
 		m.setAccessible(true);
 
@@ -33,7 +34,8 @@ class GWCommandAdditionalTest {
 	void resolveModel_shouldPreferOptionValue_whenProvided() throws Exception {
 		// Arrange
 		ConfigCommand.config.set(Ghostwriter.GW_GENAI_PROP_NAME, "Configured:Model");
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveModel", String.class);
 		m.setAccessible(true);
 
@@ -48,7 +50,8 @@ class GWCommandAdditionalTest {
 	void resolveLogInputs_shouldReturnFalse_whenConfigValueIsEmptyString() throws Exception {
 		// Arrange
 		ConfigCommand.config.set(Ghostwriter.GW_LOG_INPUTS_PROP_NAME, "");
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveLogInputs", Boolean.class);
 		m.setAccessible(true);
 
@@ -63,7 +66,8 @@ class GWCommandAdditionalTest {
 	void resolveLogInputs_shouldReturnConfiguredValue_whenPresent() throws Exception {
 		// Arrange
 		ConfigCommand.config.set(Ghostwriter.GW_LOG_INPUTS_PROP_NAME, "false");
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveLogInputs", Boolean.class);
 		m.setAccessible(true);
 
@@ -78,7 +82,8 @@ class GWCommandAdditionalTest {
 	void resolveRootDir_shouldReturnNonNull_whenArgumentNull() throws Exception {
 		// Arrange
 		ConfigCommand.config.set(Ghostwriter.GW_ROOTDIR_PROP_NAME, "");
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveRootDir", File.class);
 		m.setAccessible(true);
 
@@ -94,7 +99,8 @@ class GWCommandAdditionalTest {
 		// Arrange
 		File configured = new File("target").getAbsoluteFile();
 		ConfigCommand.config.set(Ghostwriter.GW_ROOTDIR_PROP_NAME, configured.getAbsolutePath());
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveRootDir", File.class);
 		m.setAccessible(true);
 
@@ -109,7 +115,8 @@ class GWCommandAdditionalTest {
 	void resolveInstructions_shouldReturnConfiguredValue_whenOptionIsNull() throws Exception {
 		// Arrange
 		ConfigCommand.config.set(Ghostwriter.GW_INSTRUCTIONS_PROP_NAME, "cfg-instr");
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveInstructions", String.class);
 		m.setAccessible(true);
 
@@ -124,7 +131,8 @@ class GWCommandAdditionalTest {
 	void resolveGuidance_shouldReturnConfiguredValue_whenOptionIsNull() throws Exception {
 		// Arrange
 		ConfigCommand.config.set(Ghostwriter.GW_GUIDANCE_PROP_NAME, "cfg-guidance");
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveGuidance", String.class);
 		m.setAccessible(true);
 
@@ -138,7 +146,8 @@ class GWCommandAdditionalTest {
 	@Test
 	void splitExcludes_shouldReturnSingleEntry_whenNoComma() throws Exception {
 		// Arrange
-		GWCommand cmd = new GWCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("splitExcludes", String.class);
 		m.setAccessible(true);
 
@@ -164,7 +173,8 @@ class GWCommandAdditionalTest {
 		}
 
 		try {
-			GWCommand cmd = new GWCommand();
+			LineReader reader = Mockito.mock(LineReader.class);
+			GWCommand cmd = new GWCommand(reader);
 			Method m = GWCommand.class.getDeclaredMethod("loadMachaiPropertiesConfig");
 			m.setAccessible(true);
 

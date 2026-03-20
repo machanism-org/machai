@@ -9,8 +9,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.jline.reader.LineReader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mockito;
 
 class AssembyCommandTest {
 
@@ -20,7 +22,8 @@ class AssembyCommandTest {
 	@Test
 	void getQueryFromFile_shouldReturnOriginalQuery_whenFileDoesNotExist() throws Exception {
 		// Arrange
-		AssembyCommand cmd = new AssembyCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		AssembyCommand cmd = new AssembyCommand(reader);
 		Method m = AssembyCommand.class.getDeclaredMethod("getQueryFromFile", String.class);
 		m.setAccessible(true);
 		String query = tempDir.resolve("missing-file.txt").toString();
@@ -35,7 +38,8 @@ class AssembyCommandTest {
 	@Test
 	void getQueryFromFile_shouldLoadContents_whenFileExists() throws Exception {
 		// Arrange
-		AssembyCommand cmd = new AssembyCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		AssembyCommand cmd = new AssembyCommand(reader);
 		Method m = AssembyCommand.class.getDeclaredMethod("getQueryFromFile", String.class);
 		m.setAccessible(true);
 
@@ -52,7 +56,8 @@ class AssembyCommandTest {
 	@Test
 	void getQueryFromFile_shouldThrowIOException_whenPathIsDirectory() throws Exception {
 		// Arrange
-		AssembyCommand cmd = new AssembyCommand();
+		LineReader reader = Mockito.mock(LineReader.class);
+		AssembyCommand cmd = new AssembyCommand(reader);
 		Method m = AssembyCommand.class.getDeclaredMethod("getQueryFromFile", String.class);
 		m.setAccessible(true);
 
