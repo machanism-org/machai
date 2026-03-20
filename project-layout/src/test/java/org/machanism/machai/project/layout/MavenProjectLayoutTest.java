@@ -77,8 +77,7 @@ class MavenProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertNotNull(modules);
-		assertTrue(modules.isEmpty());
+		assertNull(modules);
 	}
 
 	@Test

@@ -17,7 +17,7 @@ class BindexCreatorTest {
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new BindexCreator(null, config));
 
 		// Assert
-		assertEquals("genai must not be null", ex.getMessage());
+		assertEquals("model must not be null", ex.getMessage());
 	}
 
 	@Test
