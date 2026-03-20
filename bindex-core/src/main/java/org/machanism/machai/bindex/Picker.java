@@ -109,6 +109,9 @@ public class Picker implements AutoCloseable {
 	private static final String ID_FIELD_NAME = "id";
 	private static final String NAME_FIELD_NAME = "name";
 
+	public static final String MODEL_PROP_NAME = "pick.model";
+	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
+
 	private final MongoCollection<Document> collection;
 	private final MongoClient mongoClient;
 

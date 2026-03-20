@@ -52,13 +52,17 @@ public class ApplicationAssembly {
 
 	public static final double DEFAULT_SCORE_VALUE = 0.80;
 
-	public static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
+	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
 	
 	/**
 	 * Relative path (from {@link #projectDir}) where the provider input log is
 	 * written.
 	 */
 	private static final String ASSEMBLY_TEMP_DIR = ".machai/assembly-inputs.txt";
+
+	public static final String MODEL_PROP_NAME = "assembly.model";
+
+	public static final String PRG_DIR_PROP_NAME = "assembly.dir";
 
 	private final GenAIProvider provider;
 	private File projectDir = SystemUtils.getUserDir();
