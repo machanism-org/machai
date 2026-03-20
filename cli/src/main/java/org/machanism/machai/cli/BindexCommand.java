@@ -10,6 +10,8 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.gw.processor.Ghostwriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -23,6 +25,7 @@ import org.springframework.shell.standard.ShellOption;
  * CLI configuration managed by {@link ConfigCommand}.
  *
  * <h2>Typical usage</h2>
+ * 
  * <pre>
  * bindex --dir .\\my-project
  * register --dir .\\my-project --registerUrl https://registry.example/api
@@ -33,7 +36,7 @@ import org.springframework.shell.standard.ShellOption;
  */
 @ShellComponent
 public class BindexCommand {
-	private static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
+	private static final Logger logger = LoggerFactory.getLogger(BindexCommand.class);
 
 	/** Configuration used by bindex creator/register operations. */
 	private final PropertiesConfigurator config = new PropertiesConfigurator();
@@ -60,17 +63,22 @@ public class BindexCommand {
 			@ShellOption(value = { "-u",
 					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "false") boolean update,
 			@ShellOption(value = { "-m",
-					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String model)
+					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `"
+							+ BindexCreator.DEFAULT_MODEL + "`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
 		try {
 			model = Optional.ofNullable(model)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
+					.orElse(ConfigCommand.config.get(BindexCreator.MODEL_PROP_NAME, BindexCreator.DEFAULT_MODEL));
 			BindexCreator register = new BindexCreator(model, config);
 			register.update(update);
-			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-			register.scanFolder(dir);
+			dir = Optional.ofNullable(dir).orElse(
+					ConfigCommand.config.getFile(BindexCreator.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 
+			logger.info("The project directory: {}", dir);
+			logger.info("GenAI model: {}", model);
+
+			register.scanFolder(dir);
 		} finally {
 			GenAIProviderManager.logUsage();
 		}
@@ -88,9 +96,9 @@ public class BindexCommand {
 	 *                    working directory
 	 * @param registerUrl URL of the registry service for storing project metadata
 	 * @param update      whether to update previously registered metadata
-	 * @param chatModel   GenAI service provider/model identifier used for processing
-	 *                    (for example, {@code OpenAI:gpt-5.1}); if {@code null},
-	 *                    uses the configured default
+	 * @param model       GenAI service provider/model identifier used for
+	 *                    processing (for example, {@code OpenAI:gpt-5.1}); if
+	 *                    {@code null}, uses the configured default
 	 * @throws IOException if scanning or registration fails
 	 */
 	@ShellMethod("Registers bindex file.")
@@ -102,14 +110,19 @@ public class BindexCommand {
 			@ShellOption(value = { "-u",
 					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "true") boolean update,
 			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String chatModel)
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
 		try {
-			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-			chatModel = Optional.ofNullable(chatModel)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, DEFAULT_GENAI_VALUE));
-			BindexRegister register = new BindexRegister(chatModel, registerUrl, config);
+			dir = Optional.ofNullable(dir).orElse(
+					ConfigCommand.config.getFile(BindexCreator.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
+			model = Optional.ofNullable(model)
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, BindexCreator.DEFAULT_MODEL));
+
+			logger.info("The project directory: {}", dir);
+			logger.info("GenAI model: {}", model);
+
+			BindexRegister register = new BindexRegister(model, registerUrl, config);
 			register.update(update);
 			register.scanFolder(dir);
 		} finally {
