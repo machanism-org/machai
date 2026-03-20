@@ -1,6 +1,8 @@
 package org.machanism.machai.bindex.ai.tools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 
@@ -29,7 +31,7 @@ class BindexFunctionToolsErrorHandlingTest {
 		// Assert
 		Throwable cause = ex.getCause();
 		assertNotNull(cause);
-		assertInstanceOf(IllegalStateException.class, cause);
+		assertTrue(cause instanceof IllegalStateException);
 		assertTrue(cause.getMessage().contains("setConfigurator"));
 	}
 }

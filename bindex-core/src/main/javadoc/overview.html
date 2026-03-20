@@ -32,16 +32,26 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       margin: 1.5rem auto;
       padding: 0 1rem;
     }
+
     code, pre { font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace; }
+
     pre {
       background: #f7f7f7;
       padding: 0.75rem;
       overflow-x: auto;
       border: 1px solid #e5e5e5;
     }
+
     h1, h2, h3 { line-height: 1.2; }
+
     .muted { color: #555; }
-    img { max-width: 100%; height: auto; }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #e5e5e5;
+      background: #fff;
+    }
   </style>
 </head>
 <body>
@@ -55,15 +65,18 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   Machanism ecosystem.
 </p>
 
-<h2>What is a Bindex?</h2>
+<h2>Concepts</h2>
+
+<h3>What is a Bindex?</h3>
 <p>
   A <strong>Bindex</strong> is a JSON document (typically named <code>bindex.json</code>) that describes a software
-  project or reusable library and is used as a unit of discovery and reuse.
+  project or reusable library. It captures identity, classification facets used for semantic retrieval, and a
+  dependency graph to enable transitive expansion.
 </p>
 <ul>
   <li><strong>Identity</strong> (for example <code>id</code>, <code>name</code>, <code>version</code>).</li>
-  <li><strong>Facets</strong> (domains, layers, languages, integrations) used for semantic retrieval.</li>
-  <li><strong>Dependencies</strong> to other Bindexes to enable transitive expansion.</li>
+  <li><strong>Facets</strong> (domains, layers, languages, integrations) used for semantic search.</li>
+  <li><strong>Dependencies</strong> to other Bindexes, enabling transitive selection.</li>
 </ul>
 
 <h2>High-level workflow</h2>
@@ -74,15 +87,23 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li><strong>Assemble</strong> selected Bindexes into prompt-ready inputs for downstream AI workflows.</li>
 </ol>
 
-<h2>Architecture and structure</h2>
+<h2>Architecture</h2>
 <p>
-  The primary orchestration APIs are provided by the <code>org.machanism.machai.bindex</code> package. AI-assisted
-  builder implementations are located in <code>org.machanism.machai.bindex.builder</code>. Builders create
-  <code>org.machanism.machai.schema.Bindex</code> documents by combining project context (for example
-  <code>pom.xml</code>, <code>package.json</code>, or <code>pyproject.toml</code> plus selected files) with a configured
-  GenAI provider.
+  Bindex Core centers around orchestration APIs in <code>org.machanism.machai.bindex</code> and builder implementations
+  in <code>org.machanism.machai.bindex.builder</code>. Builders generate
+  <code>org.machanism.machai.schema.Bindex</code> documents by combining:
+</p>
+<ul>
+  <li>a schema and prompt template,</li>
+  <li>project metadata (for example <code>pom.xml</code>, <code>package.json</code>, or <code>pyproject.toml</code>), and</li>
+  <li>selected source/resource/test files discovered via the project layout.</li>
+</ul>
+<p>
+  The resulting Bindex can be written to disk, registered in MongoDB, retrieved via semantic search, and assembled
+  into prompt-ready inputs for downstream LLM-assisted workflows.
 </p>
 
+<h3>Class diagram</h3>
 <p>
   <img src="../images/class-diagram.png" alt="Bindex Core class diagram" />
 </p>
@@ -92,16 +113,16 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li>
     <code>org.machanism.machai.bindex</code>
     <div>
-      Generates, persists, registers, and retrieves MachAI Bindex documents. Supports local workflows
-      (create/update <code>bindex.json</code>), registry workflows (store/search in MongoDB), semantic retrieval
-      with dependency expansion, and assembly of prompt inputs for downstream LLM-assisted tasks.
+      Generates, persists, registers, and retrieves MachAI Bindex documents. Supports local workflows (create/update
+      <code>bindex.json</code>), registry workflows (store/search in MongoDB), semantic retrieval with dependency
+      expansion, and assembly of prompt inputs for downstream LLM-assisted tasks.
     </div>
   </li>
   <li>
     <code>org.machanism.machai.bindex.builder</code>
     <div>
-      Builds <code>org.machanism.machai.schema.Bindex</code> documents by collecting project context and prompting a
-      configured GenAI provider. Concrete builders tailor context collection for Maven, JavaScript/TypeScript,
+      Generates <code>org.machanism.machai.schema.Bindex</code> documents by collecting project context and delegating
+      to a configured GenAI provider. Concrete builders tailor context collection for Maven, JavaScript/TypeScript,
       and Python project layouts.
     </div>
   </li>
@@ -142,7 +163,7 @@ new ApplicationAssembly("openai", config, layout.getProjectDir())
     .assembly("Create a minimal sample using the selected libraries", selected);
 }</pre>
 
-<h2>Notes</h2>
+<h2>Operational notes</h2>
 <ul>
   <li>Source compatibility targets Java 8 (see <code>maven.compiler.release</code>).</li>
   <li>The registry uses MongoDB; connection settings are provided via configuration and environment variables.</li>

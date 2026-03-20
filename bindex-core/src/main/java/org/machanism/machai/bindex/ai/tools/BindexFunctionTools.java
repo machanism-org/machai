@@ -3,7 +3,6 @@ package org.machanism.machai.bindex.ai.tools;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,7 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class BindexFunctionTools implements FunctionTools {
 
-	private static final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BindexFunctionTools.class);
 
 	private BindexRepository bindexRepository;
 
@@ -71,7 +70,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 *
 	 * @param params tool invocation parameters; the first element is expected to be
 	 *               a JSON node containing the tool arguments
-	 * @return the serialized {@link Bindex} as JSON, or {@code null} if not found
+	 * @return the serialized {@link Bindex} as JSON, or the literal {@code null} when not found
 	 * @throws JsonProcessingException
 	 * @throws IllegalStateException   if the repository has not been configured yet
 	 */
@@ -83,9 +82,10 @@ public class BindexFunctionTools implements FunctionTools {
 		String id = props.get("id").asText();
 		Bindex bindex = bindexRepository.getBindex(id);
 		ObjectMapper objectMapper = new ObjectMapper();
-		String bindexJson = objectMapper.writeValueAsString(bindex);
-		if (logger.isInfoEnabled()) {
-			logger.info("Retrieved bindex: {}", StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
+		String bindexJson = bindex == null ? "null" : objectMapper.writeValueAsString(bindex);
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("Retrieved bindex: {}",
+					StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
 		}
 		return bindexJson;
 	}
@@ -100,8 +100,8 @@ public class BindexFunctionTools implements FunctionTools {
 	private String getBindexSchema(Object[] params) throws IOException {
 		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE_PATH);
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
-		if (logger.isInfoEnabled()) {
-			logger.debug("Bindex schema: {}",
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Bindex schema: {}",
 					StringUtils.abbreviate(schema, 120).replace("\n", " ").replace("\r", ""));
 		}
 		return schema;

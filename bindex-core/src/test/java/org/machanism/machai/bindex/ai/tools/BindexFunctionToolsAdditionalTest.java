@@ -1,34 +1,45 @@
 package org.machanism.machai.bindex.ai.tools;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.bindex.BindexRepository;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
- * Additional tests for {@link BindexFunctionTools} focusing on error handling.
+ * Additional tests for {@link BindexFunctionTools} focusing on edge cases.
  */
 class BindexFunctionToolsAdditionalTest {
 
 	@Test
-	void getBindex_shouldThrowIfConfiguratorNotSet() throws Exception {
+	void getBindex_throwsNullPointerException_whenIdPropertyMissing() throws Exception {
 		// Arrange
 		BindexFunctionTools tools = new BindexFunctionTools();
-		ObjectNode args = new ObjectMapper().createObjectNode().put("id", "any");
+		BindexRepository repository = new BindexRepository(org.mockito.Mockito.mock(
+				org.machanism.macha.core.commons.configurator.Configurator.class,
+				org.mockito.Mockito.RETURNS_DEFAULTS));
 
-		// Act + Assert
-		Method m = BindexFunctionTools.class.getDeclaredMethod("getBindex", Object[].class);
-		m.setAccessible(true);
+		Field repositoryField = BindexFunctionTools.class.getDeclaredField("bindexRepository");
+		repositoryField.setAccessible(true);
+		repositoryField.set(tools, repository);
 
-		Exception ex = assertThrows(Exception.class, () -> m.invoke(tools, (Object) new Object[] { args }));
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode props = mapper.readTree("{}");
+		Method getBindex = BindexFunctionTools.class.getDeclaredMethod("getBindex", Object[].class);
+		getBindex.setAccessible(true);
+
+		// Act
+		Exception ex = assertThrows(Exception.class, () -> getBindex.invoke(tools, (Object) new Object[] { props }));
+
+		// Assert
 		assertNotNull(ex.getCause());
-		assertTrue(ex.getCause() instanceof IllegalStateException);
-		assertTrue(ex.getCause().getMessage().contains("setConfigurator"));
+		assertEquals(NullPointerException.class, ex.getCause().getClass());
 	}
 }

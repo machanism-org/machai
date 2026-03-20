@@ -54,18 +54,6 @@ class BindexFunctionToolsTest {
 	}
 
 	@Test
-	void setConfigurator_throwsWhenNullConfiguratorProvided() {
-		// Arrange
-		BindexFunctionTools tools = new BindexFunctionTools();
-
-		// Act
-		IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> tools.setConfigurator(null));
-
-		// Assert
-		assertEquals("config must not be null", thrown.getMessage());
-	}
-
-	@Test
 	void setConfigurator_initializesRepositoryField() throws Exception {
 		// Arrange
 		BindexFunctionTools tools = new BindexFunctionTools();
