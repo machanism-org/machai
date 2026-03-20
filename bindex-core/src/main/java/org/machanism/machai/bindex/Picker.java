@@ -92,7 +92,7 @@ public class Picker implements AutoCloseable {
 	/** MongoDB field name for classification embeddings. */
 	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
 	/** Result limit for vector search operations. */
-	private static final int VECTOR_SEARCH_LIMITS = 50;
+	private static final int VECTOR_SEARCH_LIMITS = 250;
 
 	private static final String DB_URL = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private String embeddingModelName = "text-embedding-3-small";
