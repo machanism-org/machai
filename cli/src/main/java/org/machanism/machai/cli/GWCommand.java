@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.jline.reader.LineReader;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
@@ -15,6 +16,7 @@ import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -30,6 +32,7 @@ import org.springframework.shell.standard.ShellOption;
  * {@link GuidanceProcessor}.
  *
  * <h2>Examples</h2>
+ * 
  * <pre>
  * gw --scanDir .\\my-project --excludes target,.git
  * gw --model OpenAI:gpt-5.1 --guidance "Refactor for clarity"
@@ -37,11 +40,18 @@ import org.springframework.shell.standard.ShellOption;
  * </pre>
  */
 @ShellComponent
-public class GWCommand extends Command {
+public class GWCommand {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GWCommand.class);
 
 	private static final int LOG_PREVIEW_LEN = 60;
+
+	private LineReader lineReader;
+
+	public GWCommand(@Lazy LineReader lineReader) {
+		super();
+		this.lineReader = lineReader;
+	}
 
 	/**
 	 * Spring lifecycle hook.
@@ -251,7 +261,7 @@ public class GWCommand extends Command {
 
 		instructionsValue = instructions;
 		if (instructionsValue.isEmpty()) {
-			instructionsValue = readText("Instructions");
+			instructionsValue = lineReader.readLine("Instructions: ");
 		}
 		return instructionsValue;
 	}
@@ -264,7 +274,7 @@ public class GWCommand extends Command {
 
 		defaultGuidance = guidance;
 		if (defaultGuidance.isEmpty()) {
-			defaultGuidance = readText("Guidance");
+			defaultGuidance = lineReader.readLine("Guidance: ");
 		}
 		return defaultGuidance;
 	}

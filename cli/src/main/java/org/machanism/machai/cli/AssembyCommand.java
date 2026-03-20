@@ -19,6 +19,7 @@ import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -44,7 +45,7 @@ import org.springframework.shell.standard.ShellOption;
  * @since 0.0.2
  */
 @ShellComponent
-public class AssembyCommand extends Command {
+public class AssembyCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(AssembyCommand.class);
 
@@ -58,11 +59,15 @@ public class AssembyCommand extends Command {
 
 	private final PropertiesConfigurator config;
 
+	private LineReader lineReader;
+
 	/**
 	 * Creates a new command instance.
 	 */
-	public AssembyCommand() {
+	public AssembyCommand(@Lazy LineReader lineReader) {
 		super();
+		this.lineReader = lineReader;
+
 		config = new PropertiesConfigurator();
 		String configFileName = "machai.properties";
 		try {
@@ -104,7 +109,7 @@ public class AssembyCommand extends Command {
 
 		try {
 			if (query == null) {
-				query = readText("Prompt");
+				query = lineReader.readLine("Prompt: ");
 			}
 
 			query = getQueryFromFile(query);
@@ -190,7 +195,7 @@ public class AssembyCommand extends Command {
 			logger.info("GenAI model: {}", model);
 
 			if (query == null) {
-				query = readText("Project assembly prompt");
+				query = lineReader.readLine("Project assembly prompt: ");
 			}
 
 			if (query == null) {

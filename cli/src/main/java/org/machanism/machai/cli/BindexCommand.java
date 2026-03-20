@@ -5,13 +5,11 @@ import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.commons.lang.SystemUtils;
-import org.jline.reader.LineReader;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.gw.processor.Ghostwriter;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -37,21 +35,8 @@ import org.springframework.shell.standard.ShellOption;
 public class BindexCommand {
 	private static final String DEFAULT_GENAI_VALUE = "CodeMie:gpt-5-2-2025-12-11";
 
-	/** JLine line reader for shell interaction. */
-	private final LineReader reader;
-
 	/** Configuration used by bindex creator/register operations. */
 	private final PropertiesConfigurator config = new PropertiesConfigurator();
-
-	/**
-	 * Creates a new bindex command.
-	 *
-	 * @param reader JLine line reader used for interactive prompts (may be lazily
-	 *               injected)
-	 */
-	public BindexCommand(@Lazy LineReader reader) {
-		this.reader = reader;
-	}
 
 	/**
 	 * Generates bindex files for a project directory.
