@@ -62,7 +62,7 @@ public class ApplicationAssembly {
 
 	public static final String MODEL_PROP_NAME = "assembly.model";
 
-	public static final String PRG_DIR_PROP_NAME = "assembly.dir";
+	public static final String PRG_DIR_PROP_NAME = "project.dir";
 
 	private final GenAIProvider provider;
 	private File projectDir = SystemUtils.getUserDir();

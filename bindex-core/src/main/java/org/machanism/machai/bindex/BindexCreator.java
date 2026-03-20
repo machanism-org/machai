@@ -38,7 +38,7 @@ public class BindexCreator extends BindexProjectProcessor {
 	/** Logger instance for the BindexCreator class. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BindexCreator.class);
 
-	public static final String PROJECT_DIR_PROP_NAME = "bindex.dir";
+	public static final String PROJECT_DIR_PROP_NAME = "project.dir";
 
 	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
 
