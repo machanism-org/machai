@@ -162,7 +162,7 @@
     "steps" : [ "pick --query \"Create a web app with REST API and persistence\" --score 0.9 --registerUrl http://localhost:8080", "assembly --dir ./out" ]
   }, {
     "scenario" : "Run Ghostwriter processing",
-    "steps" : [ "gw --genai CodeMie:gpt-5-2-2025-12-11 --excludes target,.git --scanDirs ./docs" ]
+    "steps" : [ "gw --model CodeMie:gpt-5-2-2025-12-11 --excludes target,.git --scanDirs ./docs" ]
   }, {
     "scenario" : "Clean temporary Machai folders",
     "steps" : [ "clean --dir ./my-project" ]

@@ -114,7 +114,7 @@ Machai CLI stores common defaults in `machai.properties`. You can manage these v
 
 | Key | Description | Default |
 |---|---|---|
-| `genai` | Default GenAI provider/model identifier when `--genai`/`--model` is omitted | (not set; commands may fall back to a built-in default) |
+| `model` | Default GenAI provider/model identifier when `--model` is omitted | (not set; commands may fall back to a built-in default) |
 | `dir` | Default working/project directory when `--dir` is omitted | Current user directory |
 | `score` | Default minimum similarity threshold used by semantic picking | `0.90` |
 | `registerUrl` | Default registry URL used by `register` and (optionally) by `pick/assembly` | (not set) |
@@ -205,13 +205,13 @@ help gw
 - Generate Bindex files:
 
   ```text
-  bindex --dir C:\\work\\my-project --genai CodeMie:gpt-5-2-2025-12-11 --update false
+  bindex --dir C:\\work\\my-project --model CodeMie:gpt-5-2-2025-12-11 --update false
   ```
 
 - Register Bindex files:
 
   ```text
-  register --dir C:\\work\\my-project --registerUrl https://your-registry.example/api --update true --genai CodeMie:gpt-5-2-2025-12-11
+  register --dir C:\\work\\my-project --registerUrl https://your-registry.example/api --update true --model CodeMie:gpt-5-2-2025-12-11
   ```
 
 ### Pick libraries and assemble a project
@@ -219,13 +219,13 @@ help gw
 - Pick libraries from a prompt:
 
   ```text
-  pick --query "Create a web app" --score 0.90 --genai CodeMie:gpt-5-2-2025-12-11
+  pick --query "Create a web app" --score 0.90 --model CodeMie:gpt-5-2-2025-12-11
   ```
 
 - Assemble a project in a directory (reusing last pick if `--query` is omitted):
 
   ```text
-  assembly --dir C:\\work\\out --genai CodeMie:gpt-5-2-2025-12-11
+  assembly --dir C:\\work\\out --model CodeMie:gpt-5-2-2025-12-11
   ```
 
 - Use a prompt file instead of inline text:

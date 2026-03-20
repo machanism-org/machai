@@ -35,6 +35,7 @@ import org.springframework.shell.standard.ShellOption;
  * from the selected set.
  *
  * <h2>Example</h2>
+ * 
  * <pre>
  * pick --query "Create a web app" --score 0.8
  * assembly --dir .\\out
@@ -180,8 +181,8 @@ public class AssembyCommand {
 					"--registerUrl" }, defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.") String registerUrl,
 			@ShellOption(value = { "-s",
 					"--score" }, help = "Minimum similarity threshold for search results.", defaultValue = ShellOption.NULL) Double score,
-			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `"
+			@ShellOption(value = { "-m",
+					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `"
 							+ ApplicationAssembly.DEFAULT_MODEL + "`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
@@ -243,8 +244,8 @@ public class AssembyCommand {
 	 */
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(@ShellOption(value = { "-q", "--query" }, help = "The user prompt to GenAI.") String query,
-			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `"
+			@ShellOption(value = { "-m",
+					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `"
 							+ ApplicationAssembly.DEFAULT_MODEL + "`).") String chatModel,
 			@ShellOption(value = { "-d",
 					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
