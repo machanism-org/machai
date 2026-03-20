@@ -36,8 +36,8 @@ class AssemblyExecuteFlowTest {
 		mojo.assemblyPromptFile = promptPath.toFile();
 		mojo.basedir = tempDir.toFile();
 		mojo.prompter = throwingPrompter(new PrompterException("should not be called"));
-		mojo.pickGenai = "OpenAI:gpt-5-mini";
-		mojo.assemblyGenai = "OpenAI:gpt-5";
+		mojo.pickModel = "OpenAI:gpt-5-mini";
+		mojo.assemblyModel = "OpenAI:gpt-5";
 
 		// Act + Assert
 		MojoExecutionException ex = assertThrows(MojoExecutionException.class, mojo::execute);
@@ -51,8 +51,8 @@ class AssemblyExecuteFlowTest {
 		mojo.assemblyPromptFile = tempDir.resolve("missing.txt").toFile();
 		mojo.basedir = tempDir.toFile();
 		mojo.prompter = throwingPrompter(new PrompterException("boom"));
-		mojo.pickGenai = "OpenAI:gpt-5-mini";
-		mojo.assemblyGenai = "OpenAI:gpt-5";
+		mojo.pickModel = "OpenAI:gpt-5-mini";
+		mojo.assemblyModel = "OpenAI:gpt-5";
 
 		// Act + Assert
 		MojoExecutionException ex = assertThrows(MojoExecutionException.class, mojo::execute);

@@ -21,7 +21,7 @@ class AssemblyFactoryMethodsTest {
 	void createPicker_createsInstance() {
 		// Arrange
 		Assembly mojo = new Assembly();
-		mojo.pickGenai = "OpenAI:gpt-5-mini";
+		mojo.pickModel = "OpenAI:gpt-5-mini";
 		// Avoid provider-side parsing failures: supply a syntactically valid mongodb URI.
 		mojo.registerUrl = "mongodb://localhost:27017";
 
@@ -36,7 +36,7 @@ class AssemblyFactoryMethodsTest {
 	void createAssembly_createsInstance() {
 		// Arrange
 		Assembly mojo = new Assembly();
-		mojo.assemblyGenai = "OpenAI:gpt-5";
+		mojo.assemblyModel = "OpenAI:gpt-5";
 		mojo.basedir = new File(".");
 
 		// Act

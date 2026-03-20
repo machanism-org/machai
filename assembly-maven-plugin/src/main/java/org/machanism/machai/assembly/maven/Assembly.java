@@ -28,9 +28,9 @@ import org.machanism.machai.schema.Bindex;
  * </p>
  * <ol>
  * <li>Acquires a natural-language prompt from {@link #assemblyPromptFile} (if present) or requests it interactively.</li>
- * <li>Uses {@link #pickGenai} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
+ * <li>Uses {@link #pickModel} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
  * <li>Filters recommendations by {@link #score}.</li>
- * <li>Runs {@link ApplicationAssembly} with {@link #assemblyGenai} to apply changes in {@link #basedir}.</li>
+ * <li>Runs {@link ApplicationAssembly} with {@link #assemblyModel} to apply changes in {@link #basedir}.</li>
  * </ol>
  *
  * <h2>Plugin parameters</h2>
@@ -75,18 +75,18 @@ public class Assembly extends AbstractMojo {
 	 * The value is resolved by the MachAI provider manager (for example, {@code OpenAI:gpt-5}).
 	 * </p>
 	 */
-	@Parameter(property = "assembly.genai", defaultValue = "OpenAI:gpt-5", required = true)
-	protected String assemblyGenai;
+	@Parameter(property = ApplicationAssembly.MODEL_PROP_NAME, defaultValue = ApplicationAssembly.DEFAULT_MODEL, required = true)
+	protected String assemblyModel;
 
 	/**
 	 * GenAI provider identifier used for the library recommendation (picker) workflow.
 	 *
 	 * <p>
-	 * This provider can be different from {@link #assemblyGenai} to reduce cost or latency during recommendation.
+	 * This provider can be different from {@link #assemblyModel} to reduce cost or latency during recommendation.
 	 * </p>
 	 */
-	@Parameter(property = "pick.genai", defaultValue = "OpenAI:gpt-5-mini", required = true)
-	protected String pickGenai;
+	@Parameter(property = Picker.MODEL_PROP_NAME, defaultValue = Picker.DEFAULT_MODEL, required = true)
+	protected String pickModel;
 
 	/**
 	 * Prompt file for the assembly workflow.
@@ -127,7 +127,7 @@ public class Assembly extends AbstractMojo {
 	 * @return a new picker instance
 	 */
 	protected Picker createPicker(Configurator config) {
-		return new Picker(pickGenai, registerUrl, config);
+		return new Picker(pickModel, registerUrl, config);
 	}
 
 	/**
@@ -141,7 +141,7 @@ public class Assembly extends AbstractMojo {
 	 * @return a new assembly instance
 	 */
 	protected ApplicationAssembly createAssembly(Configurator config) {
-		return new ApplicationAssembly(assemblyGenai, config, basedir);
+		return new ApplicationAssembly(assemblyModel, config, basedir);
 	}
 
 	/**
@@ -153,8 +153,8 @@ public class Assembly extends AbstractMojo {
 	 * <ol>
 	 * <li>Read the prompt from {@link #assemblyPromptFile} if it exists; otherwise prompt the user.</li>
 	 * <li>Create a {@link Configurator} backed by {@code bindex.properties}.</li>
-	 * <li>Run {@link Picker} using {@link #pickGenai} and log any recommended {@link Bindex} entries.</li>
-	 * <li>Run {@link ApplicationAssembly} using {@link #assemblyGenai} to apply changes to {@link #basedir}.</li>
+	 * <li>Run {@link Picker} using {@link #pickModel} and log any recommended {@link Bindex} entries.</li>
+	 * <li>Run {@link ApplicationAssembly} using {@link #assemblyModel} to apply changes to {@link #basedir}.</li>
 	 * </ol>
 	 *
 	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly workflow
