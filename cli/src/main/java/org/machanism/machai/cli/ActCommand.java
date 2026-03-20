@@ -58,7 +58,7 @@ public class ActCommand {
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
 	public void act(@ShellOption(value = "", defaultValue = ShellOption.NULL) String[] act) throws IOException {
 
-		File rootDir = ConfigCommand.config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, SystemUtils.getUserDir());
+		File projectDir = ConfigCommand.config.getFile(Ghostwriter.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir());
 
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		try {
@@ -67,7 +67,7 @@ public class ActCommand {
 			// configuration file not found.
 		}
 		String resolvedModel = ConfigCommand.config.get("gw.model");
-		ActProcessor processor = new ActProcessor(rootDir, configurator, resolvedModel);
+		ActProcessor processor = new ActProcessor(projectDir, configurator, resolvedModel);
 		String prompt = StringUtils.join(act, " ");
 		processor.setDefaultPrompt(prompt);
 
@@ -76,11 +76,11 @@ public class ActCommand {
 
 		String scanDir = processor.getConfigurator().get("gw.scanDir", null);
 		if (scanDir == null) {
-			scanDir = (rootDir != null ? rootDir : SystemUtils.getUserDir()).getAbsolutePath();
+			scanDir = (projectDir != null ? projectDir : SystemUtils.getUserDir()).getAbsolutePath();
 		}
 
 		LOGGER.info("Starting scan of directory: {}", scanDir);
-		File projectDir = processor.getRootDir();
+		projectDir = processor.getProjectDir();
 
 		processor.scanDocuments(projectDir, scanDir);
 		LOGGER.info("Finished scanning directory: {}", scanDir);

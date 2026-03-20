@@ -68,7 +68,7 @@ public class GWCommand {
 		private String guidance;
 		private String excludes;
 		private Boolean logInputs;
-		private File rootDir;
+		private File projectDir;
 		private String[] scanDirs;
 
 		private GwOptions() {
@@ -105,8 +105,8 @@ public class GWCommand {
 			return this;
 		}
 
-		private GwOptions rootDir(File rootDir) {
-			this.rootDir = rootDir;
+		private GwOptions projectDir(File projectDir) {
+			this.projectDir = projectDir;
 			return this;
 		}
 
@@ -132,10 +132,10 @@ public class GWCommand {
 	 *                     {@code null}
 	 * @param logInputs    whether to log LLM request inputs to dedicated log files;
 	 *                     if {@code null}, uses the configured default
-	 * @param rootDir      root directory for file processing; if {@code null}, uses
+	 * @param projectDir      root directory for file processing; if {@code null}, uses
 	 *                     the configured default or the current working directory
 	 * @param scanDirs     directories to scan; if {@code null} or empty, scans the
-	 *                     resolved {@code rootDir}
+	 *                     resolved {@code projectDir}
 	 */
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
 	// FalsePositive Method signature is dictated by Spring Shell option binding;
@@ -154,13 +154,13 @@ public class GWCommand {
 					"--excludes" }, help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
 			@ShellOption(value = { "-l",
 					"--logInputs" }, help = "Log LLM request inputs to dedicated log files", defaultValue = ShellOption.NULL) Boolean logInputs,
-			@ShellOption(value = { "-r",
-					"--rootDir" }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File rootDir,
+			@ShellOption(value = { "-d",
+					"--projectDir" }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File projectDir,
 			@ShellOption(value = { "-s",
 					"--scanDir" }, help = "Directories to scan.", defaultValue = ShellOption.NULL) String[] scanDirs) {
 
 		GwOptions options = new GwOptions().threads(threads).model(model).instructions(instructions).guidance(guidance)
-				.excludes(excludes).logInputs(logInputs).rootDir(rootDir).scanDirs(scanDirs);
+				.excludes(excludes).logInputs(logInputs).projectDir(projectDir).scanDirs(scanDirs);
 		try {
 			runGw(options);
 		} catch (ProcessTerminationException e) {
@@ -176,16 +176,16 @@ public class GWCommand {
 	}
 
 	private void runGw(GwOptions options) throws IOException {
-		File rootDir = resolveRootDir(options.rootDir);
+		File projectDir = resolveProjectDir(options.projectDir);
 		String genaiValue = resolveModel(options.model);
 		Boolean logInputs = resolveLogInputs(options.logInputs);
 		PromptContext prompts = resolvePrompts(options.instructions, options.guidance);
-		String[] dirs = resolveScanDirs(options.scanDirs, rootDir);
+		String[] dirs = resolveScanDirs(options.scanDirs, projectDir);
 		String[] excludesArr = splitExcludes(options.excludes);
 		PropertiesConfigurator config = loadMachaiPropertiesConfig();
 
 		for (String scanDir : dirs) {
-			ProcessingContext ctx = new ProcessingContext(rootDir, scanDir, genaiValue, config, excludesArr, prompts,
+			ProcessingContext ctx = new ProcessingContext(projectDir, scanDir, genaiValue, config, excludesArr, prompts,
 					new ExecutionContext(options.threads, logInputs));
 			processSingleScanDir(ctx);
 		}
@@ -196,7 +196,7 @@ public class GWCommand {
 	}
 
 	private static final class ProcessingContext {
-		private final File rootDir;
+		private final File projectDir;
 		private final String scanDir;
 		private final String genaiValue;
 		private final PropertiesConfigurator config;
@@ -204,9 +204,9 @@ public class GWCommand {
 		private final PromptContext prompts;
 		private final ExecutionContext execution;
 
-		private ProcessingContext(File rootDir, String scanDir, String genaiValue, PropertiesConfigurator config,
+		private ProcessingContext(File projectDir, String scanDir, String genaiValue, PropertiesConfigurator config,
 				String[] excludesArr, PromptContext prompts, ExecutionContext execution) {
-			this.rootDir = rootDir;
+			this.projectDir = projectDir;
 			this.scanDir = scanDir;
 			this.genaiValue = genaiValue;
 			this.config = config;
@@ -236,12 +236,12 @@ public class GWCommand {
 		}
 	}
 
-	private File resolveRootDir(File rootDir) {
-		File effectiveRootDir = rootDir;
-		if (effectiveRootDir == null) {
-			effectiveRootDir = SystemUtils.getUserDir();
+	private File resolveProjectDir(File projectDir) {
+		File effectiveProjectDir = projectDir;
+		if (effectiveProjectDir == null) {
+			effectiveProjectDir = SystemUtils.getUserDir();
 		}
-		return ConfigCommand.config.getFile(Ghostwriter.GW_ROOTDIR_PROP_NAME, effectiveRootDir);
+		return ConfigCommand.config.getFile(Ghostwriter.PROJECT_DIR_PROP_NAME, effectiveProjectDir);
 	}
 
 	private String resolveModel(String model) {
@@ -279,9 +279,9 @@ public class GWCommand {
 		return defaultGuidance;
 	}
 
-	private String[] resolveScanDirs(String[] scanDirs, File rootDir) {
+	private String[] resolveScanDirs(String[] scanDirs, File projectDir) {
 		if (scanDirs == null || scanDirs.length == 0) {
-			return new String[] { rootDir.getAbsolutePath() };
+			return new String[] { projectDir.getAbsolutePath() };
 		}
 		return scanDirs;
 	}
@@ -301,7 +301,7 @@ public class GWCommand {
 	}
 
 	private void processSingleScanDir(ProcessingContext ctx) throws IOException {
-		GuidanceProcessor processor = new GuidanceProcessor(ctx.rootDir, ctx.genaiValue, ctx.config);
+		GuidanceProcessor processor = new GuidanceProcessor(ctx.projectDir, ctx.genaiValue, ctx.config);
 
 		if (ctx.excludesArr != null) {
 			if (LOGGER.isInfoEnabled()) {
@@ -331,7 +331,7 @@ public class GWCommand {
 		}
 
 		processor.setLogInputs(ObjectUtils.getIfNull(ctx.execution.logInputs, false));
-		processor.scanDocuments(ctx.rootDir, ctx.scanDir);
+		processor.scanDocuments(ctx.projectDir, ctx.scanDir);
 		LOGGER.info("Finished scanning directory: {}", ctx.scanDir);
 	}
 
