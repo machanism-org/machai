@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
@@ -16,13 +18,14 @@ import org.slf4j.LoggerFactory;
 /**
  * A Maven-specific {@link ProjectLayout} implementation.
  * <p>
- * This layout reads Maven build metadata from <code>pom.xml</code> to determine:
+ * This layout reads Maven build metadata from <code>pom.xml</code> to
+ * determine:
  * </p>
  * <ul>
- *   <li>modules for multi-module projects (when {@code packaging=pom})</li>
- *   <li>source and resource directories</li>
- *   <li>test source and resource directories</li>
- *   <li>documentation inputs (defaults to <code>src/site</code>)</li>
+ * <li>modules for multi-module projects (when {@code packaging=pom})</li>
+ * <li>source and resource directories</li>
+ * <li>test source and resource directories</li>
+ * <li>documentation inputs (defaults to <code>src/site</code>)</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -51,13 +54,15 @@ public class MavenProjectLayout extends ProjectLayout {
 	/**
 	 * Returns a list of modules for multi-module Maven projects.
 	 * <p>
-	 * A project is treated as multi-module when its {@code packaging} is {@code pom}.
+	 * A project is treated as multi-module when its {@code packaging} is
+	 * {@code pom}.
 	 * </p>
 	 *
 	 * @return list of module directories (as declared in <code>pom.xml</code>), or
 	 *         empty list if the project does not declare modules
 	 */
 	@Override
+	@Nullable
 	public List<String> getModules() {
 		File projectDir = getProjectDir();
 		File pomFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
@@ -74,7 +79,7 @@ public class MavenProjectLayout extends ProjectLayout {
 		if (mavenModel != null && "pom".equals(mavenModel.getPackaging())) {
 			return mavenModel.getModules();
 		}
-		return Collections.emptyList();
+		return null;
 	}
 
 	/**
@@ -114,8 +119,9 @@ public class MavenProjectLayout extends ProjectLayout {
 	/**
 	 * Enables/disables effective POM calculation when building the model.
 	 *
-	 * @param effectivePomRequired {@code true} to attempt building the effective POM
-	 *                             first; {@code false} to read the raw model only
+	 * @param effectivePomRequired {@code true} to attempt building the effective
+	 *                             POM first; {@code false} to read the raw model
+	 *                             only
 	 * @return this instance for chaining
 	 */
 	public MavenProjectLayout effectivePomRequired(boolean effectivePomRequired) {
@@ -130,8 +136,8 @@ public class MavenProjectLayout extends ProjectLayout {
 	 * directories are not defined, it applies Maven defaults.
 	 * </p>
 	 *
-	 * @return list of source and resource directories, expressed as paths relative to
-	 *         the configured project root
+	 * @return list of source and resource directories, expressed as paths relative
+	 *         to the configured project root
 	 */
 	@Override
 	public List<String> getSources() {
