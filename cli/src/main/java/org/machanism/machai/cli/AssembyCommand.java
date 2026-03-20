@@ -98,7 +98,8 @@ public class AssembyCommand extends Command {
 			@ShellOption(value = { "-s",
 					"--score" }, help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.", defaultValue = ShellOption.NULL) Double score,
 			@ShellOption(value = { "-g",
-					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String model)
+					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `"
+							+ ApplicationAssembly.DEFAULT_MODEL + "`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
 		try {
@@ -111,7 +112,7 @@ public class AssembyCommand extends Command {
 			findQuery = query;
 			model = Optional.ofNullable(model)
 					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME,
-							ApplicationAssembly.DEFAULT_GENAI_VALUE));
+							ApplicationAssembly.DEFAULT_MODEL));
 			score = Optional.ofNullable(score)
 					.orElse(ConfigCommand.config.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE));
 			try (Picker picker = new Picker(model, registerUrl, config)) {
@@ -159,7 +160,7 @@ public class AssembyCommand extends Command {
 	 * @param registerUrl optional URL of a registry service used by the picker
 	 * @param score       minimum similarity threshold; if {@code null}, uses the
 	 *                    configured default
-	 * @param genai       optional GenAI provider/model identifier (for example,
+	 * @param model       optional GenAI provider/model identifier (for example,
 	 *                    {@code OpenAI:gpt-5.1}); if {@code null}, uses the
 	 *                    configured default
 	 * @throws IOException              if picking or assembly fails
@@ -176,41 +177,49 @@ public class AssembyCommand extends Command {
 			@ShellOption(value = { "-s",
 					"--score" }, help = "Minimum similarity threshold for search results.", defaultValue = ShellOption.NULL) Double score,
 			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String genai)
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `"
+							+ ApplicationAssembly.DEFAULT_MODEL + "`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
 		try {
+			model = Optional.ofNullable(model)
+					.orElse(ConfigCommand.config.get(ApplicationAssembly.MODEL_PROP_NAME,
+							ApplicationAssembly.DEFAULT_MODEL));
+
+			dir = Optional.ofNullable(dir).orElse(
+					ConfigCommand.config.getFile(ApplicationAssembly.PRG_DIR_PROP_NAME, SystemUtils.getUserDir()));
+			logger.info("The project directory: {}", dir);
+			logger.info("GenAI model: {}", model);
+
 			if (query == null) {
 				query = readText("Project assembly prompt");
 			}
 
-			genai = Optional.ofNullable(genai)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME,
-							ApplicationAssembly.DEFAULT_GENAI_VALUE));
-
-			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
-			logger.info("The project directory: {}", dir);
-
-			String prompt = query;
 			if (query == null) {
 				if (bindexList == null) {
 					throw new IllegalArgumentException("The query is empty.");
 				}
-				prompt = this.findQuery;
+				query = this.findQuery;
+				logger.info("Project assembly prompt: {}", query);
+
 			} else {
 				query = getQueryFromFile(query);
 				score = Optional.ofNullable(score)
 						.orElse(ConfigCommand.config.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE));
-				try (Picker picker = new Picker(genai, registerUrl, config)) {
+				try (Picker picker = new Picker(model, registerUrl, config)) {
 					picker.setScore(score);
 					bindexList = picker.pick(query);
+					this.findQuery = query;
 				}
 			}
 
 			if (!bindexList.isEmpty()) {
-				ApplicationAssembly assembly = new ApplicationAssembly(genai, config, dir);
+				ApplicationAssembly assembly = new ApplicationAssembly(model, config, dir);
 				assembly.projectDir(dir);
-				assembly.assembly(prompt, bindexList);
+				assembly.assembly(query, bindexList);
+			} else {
+				logger.error(
+						"No libraries related to the user prompt were found. Please refine your query or ensure the relevant libraries are available.");
 			}
 		} finally {
 			GenAIProviderManager.logUsage();
@@ -231,14 +240,15 @@ public class AssembyCommand extends Command {
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(@ShellOption(value = { "-q", "--query" }, help = "The user prompt to GenAI.") String query,
 			@ShellOption(value = { "-g",
-					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).") String chatModel,
+					"--genai" }, help = "Specifies the GenAI service provider and model (e.g., `"
+							+ ApplicationAssembly.DEFAULT_MODEL + "`).") String chatModel,
 			@ShellOption(value = { "-d",
 					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
 
 		try {
 			chatModel = Optional.ofNullable(chatModel)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME,
-							ApplicationAssembly.DEFAULT_GENAI_VALUE));
+					.orElse(ConfigCommand.config.get(ApplicationAssembly.MODEL_PROP_NAME,
+							ApplicationAssembly.DEFAULT_MODEL));
 			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 
 			FunctionToolsLoader.getInstance().applyTools(provider);
