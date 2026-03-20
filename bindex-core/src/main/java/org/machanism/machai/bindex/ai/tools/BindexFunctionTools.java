@@ -84,7 +84,6 @@ public class BindexFunctionTools implements FunctionTools {
 		Bindex bindex = bindexRepository.getBindex(id);
 		ObjectMapper objectMapper = new ObjectMapper();
 		String bindexJson = objectMapper.writeValueAsString(bindex);
-		// Sonar java:S2629 - avoid eager abbreviate/replace when INFO is disabled.
 		if (logger.isInfoEnabled()) {
 			logger.info("Retrieved bindex: {}", StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
 		}
@@ -100,9 +99,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 */
 	private String getBindexSchema(Object[] params) throws IOException {
 		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE_PATH);
-		// Sonar java:S4719 - use StandardCharsets.UTF_8 instead of charset name.
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
-		// Sonar java:S2629 - avoid eager replace/abbreviate work when INFO is disabled.
 		if (logger.isInfoEnabled()) {
 			logger.debug("Bindex schema: {}",
 					StringUtils.abbreviate(schema, 120).replace("\n", " ").replace("\r", ""));

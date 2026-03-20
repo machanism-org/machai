@@ -43,7 +43,6 @@ public interface GenAIProvider {
 
 	@FunctionalInterface
 	public interface ToolFunction {
-		// Sonar java:S112 - avoid declaring overly generic exceptions.
 		Object apply(Object[] params) throws IOException;
 	}
 
@@ -67,8 +66,6 @@ public interface GenAIProvider {
 	 * @param file the file to add
 	 * @throws IOException for I/O errors (including file-not-found)
 	 */
-	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass
-	// of IOException)
 	void addFile(File file) throws IOException;
 
 	/**
@@ -77,8 +74,6 @@ public interface GenAIProvider {
 	 * @param fileUrl the URL of the file
 	 * @throws IOException for I/O errors (including file-not-found)
 	 */
-	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass
-	// of IOException)
 	void addFile(URL fileUrl) throws IOException;
 
 	/**

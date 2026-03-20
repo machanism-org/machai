@@ -26,78 +26,65 @@ public class ClaudeProvider implements GenAIProvider {
 
 	@Override
 	public void init(Configurator config) {
-		// Sonar java:S1186 - this provider is a placeholder; fail fast until implemented.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public void prompt(String text) {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public void addFile(File file) throws IOException {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public void addFile(URL fileUrl) throws IOException {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public String perform() {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public void clear() {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public void instructions(String instructions) {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	public void promptBundle(ResourceBundle promptBundle) {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public void inputsLog(File inputsLog) {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public void setWorkingDir(File workingDir) {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public Usage usage() {
-		// Sonar java:S1186 - not implemented yet.
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 
 	@Override
 	public List<Double> embedding(String text, long dimensions) {
-		// Sonar java:S1168 - return empty collection instead of null
 		return Collections.emptyList();
 	}
 }

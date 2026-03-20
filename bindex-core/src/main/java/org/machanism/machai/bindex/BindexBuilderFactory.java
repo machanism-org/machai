@@ -33,7 +33,6 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  */
 public class BindexBuilderFactory {
 
-	// Sonar java:S1118 - Utility class; hide implicit public constructor.
 	private BindexBuilderFactory() {
 		// no-op
 	}
@@ -64,12 +63,10 @@ public class BindexBuilderFactory {
 			return new MavenBindexBuilder((MavenProjectLayout) projectLayout, genai, configurator);
 		}
 		if (projectLayout instanceof JScriptProjectLayout) {
-			// Sonar java:S1905 - Cast is required for constructor signature; remove redundant cast warning by using pattern variable.
 			JScriptProjectLayout jsLayout = (JScriptProjectLayout) projectLayout;
 			return new JScriptBindexBuilder(jsLayout, genai, configurator);
 		}
 		if (projectLayout instanceof PythonProjectLayout) {
-			// Sonar java:S1905 - Cast is required for constructor signature; remove redundant cast warning by using pattern variable.
 			PythonProjectLayout pyLayout = (PythonProjectLayout) projectLayout;
 			return new PythonBindexBuilder(pyLayout, genai, configurator);
 		}

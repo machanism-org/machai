@@ -156,7 +156,6 @@ public class MavenProjectLayout extends ProjectLayout {
 			sources.add(ProjectLayout.getRelativePath(getProjectDir(), new File(sourceDirectory)));
 		}
 		if (build.getResources() != null) {
-			// Sonar(java:S1612): use method reference.
 			sources.addAll(build.getResources().stream().map(org.apache.maven.model.FileSet::getDirectory)
 					.map(p -> ProjectLayout.getRelativePath(getProjectDir(), new File(p)))
 					.collect(Collectors.toList()));
@@ -192,7 +191,6 @@ public class MavenProjectLayout extends ProjectLayout {
 				testPaths.add(ProjectLayout.getRelativePath(getProjectDir(), new File(build.getTestSourceDirectory())));
 			}
 			if (build.getTestResources() != null) {
-				// Sonar(java:S1612): use method reference.
 				testPaths.addAll(build.getTestResources().stream().map(org.apache.maven.model.FileSet::getDirectory)
 						.map(p -> ProjectLayout.getRelativePath(getProjectDir(), new File(p)))
 						.collect(Collectors.toList()));

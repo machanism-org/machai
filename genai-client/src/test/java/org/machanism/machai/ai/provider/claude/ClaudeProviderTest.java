@@ -59,7 +59,6 @@ class ClaudeProviderTest {
 	void addFile_url_shouldThrowUnsupportedOperationException_withExpectedMessage() throws Exception {
 		// Arrange
 		ClaudeProvider provider = new ClaudeProvider();
-		// Sonar java:S1874 - URL is deprecated; build via URI and convert only when needed.
 		URL url = URI.create("file:some-file.txt").toURL();
 
 		// Act

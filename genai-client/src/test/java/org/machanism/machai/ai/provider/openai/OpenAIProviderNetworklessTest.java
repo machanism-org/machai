@@ -78,7 +78,6 @@ class OpenAIProviderNetworklessTest {
         // Act/Assert
         provider.logInputs();
 
-        // Sonar java:S2699 - Add at least one assertion to this test case.
         assertTrue(dirAsFile.isDirectory());
     }
 
@@ -135,7 +134,6 @@ class OpenAIProviderNetworklessTest {
         provider.logInputs();
 
         // Assert
-        // Sonar java:S2699 - Add at least one assertion to this test case.
         assertTrue(true);
     }
 

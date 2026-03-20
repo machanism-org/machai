@@ -51,8 +51,6 @@ public class GWCommand extends Command {
 		// Kept for future initialization.
 	}
 
-	// Sonar java:S107 - group parameters into a request object to avoid long
-	// parameter lists.
 	private static final class GwOptions {
 		private int threads;
 		private String model;
@@ -156,12 +154,10 @@ public class GWCommand extends Command {
 		try {
 			runGw(options);
 		} catch (ProcessTerminationException e) {
-			// Sonar java:S2629 - avoid calling expensive methods in disabled log levels.
 			if (LOGGER.isErrorEnabled()) {
 				LOGGER.error("Process terminated: {}, Exit code: {}", e.getMessage(), e.getExitCode());
 			}
 		} catch (Exception e) {
-			// Sonar java:S2629 - avoid eager String concatenation/interpolation in logs.
 			LOGGER.error("Unexpected error: {}", e.getMessage(), e);
 		} finally {
 			GenAIProviderManager.logUsage();
@@ -169,8 +165,6 @@ public class GWCommand extends Command {
 		}
 	}
 
-	// Sonar java:S3776/java:S1141 - extract complex/nested try logic into focused
-	// helpers.
 	private void runGw(GwOptions options) throws IOException {
 		File rootDir = resolveRootDir(options.rootDir);
 		String genaiValue = resolveModel(options.model);
@@ -181,7 +175,6 @@ public class GWCommand extends Command {
 		PropertiesConfigurator config = loadMachaiPropertiesConfig();
 
 		for (String scanDir : dirs) {
-			// Sonar java:S107 - avoid long parameter list by using a context object.
 			ProcessingContext ctx = new ProcessingContext(rootDir, scanDir, genaiValue, config, excludesArr, prompts,
 					new ExecutionContext(options.threads, logInputs));
 			processSingleScanDir(ctx);
@@ -192,7 +185,6 @@ public class GWCommand extends Command {
 		return new PromptContext(resolveInstructions(instructions), resolveGuidance(guidance));
 	}
 
-	// Sonar java:S107 - group processing parameters into a context object.
 	private static final class ProcessingContext {
 		private final File rootDir;
 		private final String scanDir;
@@ -214,7 +206,6 @@ public class GWCommand extends Command {
 		}
 	}
 
-	// Sonar java:S107 - avoid constructors with too many parameters by grouping.
 	private static final class PromptContext {
 		private final String instructionsValue;
 		private final String defaultGuidance;
@@ -225,7 +216,6 @@ public class GWCommand extends Command {
 		}
 	}
 
-	// Sonar java:S107 - avoid constructors with too many parameters by grouping.
 	private static final class ExecutionContext {
 		private final int threads;
 		private final Boolean logInputs;
@@ -304,7 +294,6 @@ public class GWCommand extends Command {
 		GuidanceProcessor processor = new GuidanceProcessor(ctx.rootDir, ctx.genaiValue, ctx.config);
 
 		if (ctx.excludesArr != null) {
-			// Sonar java:S2629 - invoke Arrays.toString(..) only when INFO log is enabled.
 			if (LOGGER.isInfoEnabled()) {
 				LOGGER.info("Excludes: {}", Arrays.toString(ctx.excludesArr));
 			}
@@ -312,7 +301,6 @@ public class GWCommand extends Command {
 		}
 
 		if (ctx.prompts.instructionsValue != null) {
-			// Sonar java:S2629 - invoke abbreviate() only when the INFO log is enabled.
 			if (LOGGER.isInfoEnabled()) {
 				String abbreviated = org.apache.commons.lang.StringUtils.abbreviate(ctx.prompts.instructionsValue,
 						LOG_PREVIEW_LEN);
@@ -324,7 +312,6 @@ public class GWCommand extends Command {
 		processor.setDegreeOfConcurrency(ctx.execution.threads);
 
 		if (ctx.prompts.defaultGuidance != null) {
-			// Sonar java:S2629 - invoke abbreviate() only when the INFO log is enabled.
 			if (LOGGER.isInfoEnabled()) {
 				String abbreviated = org.apache.commons.lang.StringUtils.abbreviate(ctx.prompts.defaultGuidance,
 						LOG_PREVIEW_LEN);

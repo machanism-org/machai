@@ -195,7 +195,6 @@ public class ReactorGW extends AbstractGWGoal {
 		try {
 			scanDocuments(documents);
 		} catch (ProcessTerminationException e) {
-			// Sonar java:S2139 - don't both log and throw without adding context; include the cause.
 			throw new MojoExecutionException(
 					"Process terminated while scanning documents: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")",
 					e);

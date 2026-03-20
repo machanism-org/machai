@@ -44,10 +44,8 @@ public class FileFunctionTools implements FunctionTools {
 
 	private static final int MAXWIDTH = 120;
 
-	// Sonar java:S115 - constant should follow naming convention
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
-	// Sonar java:S1192 - avoid duplicating string literals
 	private static final String CHARSET_NAME_FIELD = "charsetName";
 
 	/** Logger for file tool operations and diagnostics. */
@@ -113,7 +111,6 @@ public class FileFunctionTools implements FunctionTools {
 			content.append("No files found in directory.");
 		}
 		result = content.toString();
-		// Sonar java:S2629 - avoid eager string building when INFO is disabled
 		if (logger.isInfoEnabled()) {
 			logger.info("List files recursively: {}, Result: {}", Arrays.toString(params),
 					StringUtils.abbreviate(result, 60).replace("\n", ""));
@@ -141,7 +138,6 @@ public class FileFunctionTools implements FunctionTools {
 		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
 		String filePath = dirNode == null ? null : dirNode.asText();
 		File workingDir = (File) params[1];
-		// Sonar java:S2629 - avoid eager toString() when INFO is disabled
 		if (logger.isInfoEnabled()) {
 			logger.info("List files: [{}, {}]", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH), workingDir);
 		}
@@ -185,11 +181,9 @@ public class FileFunctionTools implements FunctionTools {
 		String text = props.get("text").asText();
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText() : DEFAULT_CHARSET;
 		File workingDir = (File) params[1];
-		// Sonar java:S2629 - avoid eager toString() when INFO is disabled
 		if (logger.isInfoEnabled()) {
 			logger.info("Write file: [{}, {}]", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH), workingDir);
 		}
-		// Sonar java:S3457 - no need to call toString() explicitly for logging
 		logger.debug("Write file: [{}, {}]", params[0], workingDir);
 
 		File file = new File(workingDir, filePath);
@@ -236,13 +230,10 @@ public class FileFunctionTools implements FunctionTools {
 			throw new IllegalArgumentException(e);
 		}
 
-		// Sonar java:S2629 - invoke method(s) only conditionally.
-		// Keep the expensive Arrays.toString(params) behind isInfoEnabled.
 		if (logger.isInfoEnabled()) {
 			logger.info("Read file: {}", Arrays.toString(params));
 		}
 
-		// Sonar java:S2629 - avoid evaluating Arrays.toString(params) when DEBUG is disabled.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Read file: {}", Arrays.toString(params));
 		}

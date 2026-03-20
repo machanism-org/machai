@@ -63,13 +63,11 @@ public class GenAIAdapter implements GenAIProvider {
 
 	@Override
 	public void addFile(File file) throws IOException {
-		// Sonar java:S1130 - remove redundant FileNotFoundException (subclass of IOException)
 		provider.addFile(file);
 	}
 
 	@Override
 	public void addFile(URL fileUrl) throws IOException {
-		// Sonar java:S1130 - remove redundant FileNotFoundException (subclass of IOException)
 		provider.addFile(fileUrl);
 	}
 

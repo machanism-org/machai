@@ -35,7 +35,6 @@ public class ConfigCommand {
 	/**
 	 * Shared configuration instance used by commands in this package.
 	 */
-	// Sonar java:S1104 / java:S1444 - avoid non-final public static fields; keep it immutable.
 	public static final PropertiesConfigurator config = new PropertiesConfigurator();
 
 	static {
@@ -65,12 +64,10 @@ public class ConfigCommand {
 			throws IOException {
 		if (value == null) {
 			String currentValue = config.get(key);
-			// Sonar java:S3457/java:S2629 - use built-in formatting, avoid eager concatenation.
 			LOGGER.info("Current value for '{}': {}", key, currentValue);
 		} else {
 			config.set(key, value);
 			config.save(MACHAI_PROPERTIES_FILE_NAME);
-			// Sonar java:S3457/java:S2629 - use built-in formatting, avoid eager concatenation.
 			LOGGER.info("Set '{}' to '{}' and saved.", key, value);
 		}
 	}

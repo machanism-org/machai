@@ -153,7 +153,6 @@ class OpenAIProviderTest {
 	void addFile_byUrl_shouldAddUserMessageInput_withoutNetwork() throws Exception {
 		// Arrange
 		provider.init(minimalConfig());
-		// Sonar java:S1874 - URL is deprecated; build via URI and convert only when needed.
 		URL url = URI.create("https://example.com/file.txt").toURL();
 
 		// Act

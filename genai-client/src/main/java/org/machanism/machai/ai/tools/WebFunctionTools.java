@@ -64,17 +64,14 @@ public class WebFunctionTools implements FunctionTools {
 
 	private static final int TIMEOUT = 10000;
 
-	// Sonar java:S115 - constant should follow naming convention
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
-	// Sonar java:S1192 - avoid duplicating string literals
 	private static final String HEADERS_FIELD = "headers";
 	private static final String TIMEOUT_FIELD = "timeout";
 	private static final String CHARSET_NAME_FIELD = "charsetName";
 	private static final String TEXT_ONLY_FIELD = "textOnly";
 	private static final String SELECTOR_FIELD = "selector";
 
-	// Sonar java:S2119 - save and re-use Random instead of creating new instances
 	private static final SecureRandom REQUEST_ID_RANDOM = new SecureRandom();
 
 	/** Logger for web fetch tool execution and diagnostics. */
@@ -151,8 +148,6 @@ public class WebFunctionTools implements FunctionTools {
 	 */
 	public String getWebContent(Object[] params) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
-		// Sonar java:S2629 - avoid eager toString() evaluation when log level is
-		// disabled
 		if (logger.isInfoEnabled()) {
 			logger.info("Fetching web content [{}]: {}", requestId, Arrays.toString(params));
 		}
@@ -177,7 +172,6 @@ public class WebFunctionTools implements FunctionTools {
 			response = applySelectorIfPresent(selector, response);
 			response = renderTextOnlyIfRequested(textOnly, response);
 
-			// Sonar java:S2629 - abbreviate and replace only when INFO is enabled
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
 						StringUtils.abbreviate(response, 80).replace("\n", " ").replace("\r", ""));
@@ -190,7 +184,6 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
-	// Sonar java:S3776 - extracted to reduce cognitive complexity of getWebContent
 	String applySelectorIfPresent(String selector, String response) {
 		if (StringUtils.isBlank(selector)) {
 			return response;
@@ -205,7 +198,6 @@ public class WebFunctionTools implements FunctionTools {
 		return selectedContent.toString().trim();
 	}
 
-	// Sonar java:S3776 - extracted to reduce cognitive complexity of getWebContent
 	private String renderTextOnlyIfRequested(boolean textOnly, String response) {
 		if (!textOnly) {
 			return response;
@@ -232,8 +224,6 @@ public class WebFunctionTools implements FunctionTools {
 
 		String userInfo = uri.getUserInfo();
 		if (userInfo != null) {
-			// Sonar java:S1874 - URL is deprecated; use URI and convert to URL only when
-			// opening the connection
 			cleanUri = URI.create(uri.toString().replace("//" + userInfo + "@", "//"));
 			byte[] bytes = userInfo.getBytes(StandardCharsets.UTF_8);
 			String basicToken = Base64.getEncoder().encodeToString(bytes);
@@ -305,8 +295,6 @@ public class WebFunctionTools implements FunctionTools {
 	 */
 	public String callRestApi(Object[] params) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
-		// Sonar java:S2629 - avoid eager toString() evaluation when log level is
-		// disabled
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing REST call [{}]: {}", requestId, Arrays.toString(params));
 		}
@@ -347,9 +335,6 @@ public class WebFunctionTools implements FunctionTools {
 			}
 
 			String result = response.toString();
-			// Sonar java:S1488 - immediately return this expression instead of assigning it to a temporary variable
-			// "result".
-			// Sonar java:S2629 - avoid eager result.replaceAll() when INFO is disabled
 			if (logger.isInfoEnabled()) {
 				logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
 						StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
@@ -358,7 +343,6 @@ public class WebFunctionTools implements FunctionTools {
 			return result;
 		}
 
-		// Sonar java:S1488 - return expression directly.
 		return "ResponseCode: " + connection.getResponseCode() + " " + connection.getRequestMethod();
 	}
 

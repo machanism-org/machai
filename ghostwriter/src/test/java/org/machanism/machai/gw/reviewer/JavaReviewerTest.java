@@ -81,7 +81,6 @@ class JavaReviewerTest {
 		assertNull(result);
 	}
 
-	// Sonar java:S5976 - merge similar tests into a single parameterized test.
 	@ParameterizedTest
 	@CsvSource({
 			"'src/main/java/A.java', '// " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\npublic class A {}\n'",

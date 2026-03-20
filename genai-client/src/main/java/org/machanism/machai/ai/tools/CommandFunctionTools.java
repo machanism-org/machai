@@ -66,13 +66,9 @@ public class CommandFunctionTools implements FunctionTools {
 	/**
 	 * Default maximum number of characters to return from captured process output.
 	 */
-	// Sonar java:S115 - constants should be named like
-	// ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$
 	private static final int DEFAULT_RESULT_TAIL_SIZE = 1024;
 
 	/** Default character set used to decode process output streams. */
-	// Sonar java:S115 - constants should be named like
-	// ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
 	/** Maximum time to wait for a started process to complete. */
@@ -86,7 +82,6 @@ public class CommandFunctionTools implements FunctionTools {
 	/**
 	 * Reusable Random instance.
 	 */
-	// Sonar java:S2119 - save and reuse Random
 	private static final SecureRandom RANDOM = new SecureRandom();
 
 	/**
@@ -237,7 +232,6 @@ public class CommandFunctionTools implements FunctionTools {
 	 */
 	public String executeCommand(Object[] params) throws IOException {
 		String commandId = Integer.toHexString(RANDOM.nextInt());
-		// Sonar java:S2629 - avoid building expensive log message when INFO is disabled
 		if (logger.isInfoEnabled()) {
 			logger.info("Run shell command [{}]: {}", commandId, Arrays.toString(params));
 		}
@@ -270,7 +264,6 @@ public class CommandFunctionTools implements FunctionTools {
 		Process prc = null;
 		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
 
-		// Sonar java:S2095 - ensure ExecutorService is closed
 		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 				Executors.newFixedThreadPool(2))) {
 
@@ -328,8 +321,6 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	private void runDenyChecks(String command) throws CommandLineException, DenyException {
-		// Sonar java:S3776 - extract deny-list validation to reduce cognitive
-		// complexity
 		String[] commandParts = CommandLineUtils.translateCommandline(command);
 		for (String commandPart : commandParts) {
 			checker.denyCheck(commandPart);
@@ -339,8 +330,6 @@ public class CommandFunctionTools implements FunctionTools {
 	String waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture,
 			LimitedStringBuilder output, String commandId)
 			throws InterruptedException, TimeoutException, ExecutionException {
-		// Sonar java:S3776 - extract waiting/collection logic to reduce cognitive
-		// complexity
 		boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
 		if (!finished) {
 			process.destroyForcibly();
@@ -427,7 +416,6 @@ public class CommandFunctionTools implements FunctionTools {
 			if (idx > 0 && idx < line.length() - 1) {
 				String key = line.substring(0, idx).trim();
 				String value = line.substring(idx + 1).trim();
-				// Sonar java:S6353 - use concise character class \w
 				if (key.matches("[A-Za-z_]\\w*")) {
 					envMap.put(key, value);
 				}

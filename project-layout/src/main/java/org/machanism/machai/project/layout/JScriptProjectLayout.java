@@ -62,14 +62,12 @@ public class JScriptProjectLayout extends ProjectLayout {
 		JsonNode packageJson = getPackageJson();
 		JsonNode workspacesNode = packageJson.get("workspaces");
 		if (workspacesNode == null) {
-			// Sonar(java:S1168): return an empty collection instead of null.
 			return Collections.emptyList();
 		}
 
 		return parseWorkspaceModules(workspacesNode);
 	}
 
-	// Sonar(java:S3776): extract logic to reduce cognitive complexity.
 	private List<String> parseWorkspaceModules(JsonNode workspacesNode) {
 		Set<String> modules = new HashSet<>();
 		if (workspacesNode.isArray()) {
@@ -119,7 +117,6 @@ public class JScriptProjectLayout extends ProjectLayout {
 	private JsonNode getPackageJson() {
 		File projectDir = getProjectDir();
 		if (projectDir == null) {
-			// Sonar(java:S2259): avoid NPE if layout is used without setting projectDir.
 			throw new IllegalStateException("projectDir must be set before reading package.json");
 		}
 
@@ -138,7 +135,6 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getSources() {
-		// Sonar(java:S1168): return an empty collection instead of null.
 		return Collections.emptyList();
 	}
 
@@ -149,7 +145,6 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getDocuments() {
-		// Sonar(java:S1168): return an empty collection instead of null.
 		return Collections.emptyList();
 	}
 
@@ -160,7 +155,6 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getTests() {
-		// Sonar(java:S1168): return an empty collection instead of null.
 		return Collections.emptyList();
 	}
 

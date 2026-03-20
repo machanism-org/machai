@@ -207,7 +207,6 @@ class GenAIProviderManagerTest {
 		Configurator conf = new MapConfigurator();
 
 		// Act
-		// Sonar java:S5778 - only one invocation in the lambda may throw a runtime exception.
 		String modelName = "my-model";
 		org.junit.jupiter.api.function.Executable call = () -> GenAIProviderManager.getProvider(modelName, conf);
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, call);
@@ -223,7 +222,6 @@ class GenAIProviderManagerTest {
 		Configurator conf = new MapConfigurator();
 
 		// Act
-		// Sonar java:S5778 - only one invocation in the lambda may throw a runtime exception.
 		String providerName = "com.example.DoesNotExist:model";
 		org.junit.jupiter.api.function.Executable call = () -> GenAIProviderManager.getProvider(providerName, conf);
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, call);
@@ -274,7 +272,6 @@ class GenAIProviderManagerTest {
 		GenAIProviderManager.logUsage();
 
 		// Assert
-		// Sonar java:S2699/java:S5863/java:S3415 - assert on observable side effect instead of comparing literals.
 		assertThrows(NoSuchFieldException.class, () -> GenAIProviderManager.class.getDeclaredField("__never_exists__"));
 	}
 
@@ -288,7 +285,6 @@ class GenAIProviderManagerTest {
 		GenAIProviderManager.logUsage();
 
 		// Assert
-		// Sonar java:S2699/java:S5863/java:S3415 - assert on observable side effect instead of comparing literals.
 		assertThrows(NoSuchFieldException.class, () -> GenAIProviderManager.class.getDeclaredField("__never_exists__"));
 	}
 

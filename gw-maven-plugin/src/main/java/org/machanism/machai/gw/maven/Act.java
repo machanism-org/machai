@@ -149,8 +149,6 @@ public class Act extends AbstractGWGoal {
 			}
 			actProcessor.setLogInputs(logInputs);
 
-			// Sonar java:S1141 - extract nested try/catch into a separate method to improve
-			// readability.
 			configureAndScan(actProcessor);
 
 		} catch (IOException e) {
@@ -180,7 +178,6 @@ public class Act extends AbstractGWGoal {
 			actProcessor.scanDocuments(basedir, resolvedScanDir);
 			logger.info("Finished scanning directory: {}", resolvedScanDir);
 		} catch (PrompterException e) {
-			// Sonar: avoid swallowing; rethrow with context so build fails appropriately.
 			throw new MojoExecutionException("Failed to read 'gw.act' prompt interactively.", e);
 		}
 	}

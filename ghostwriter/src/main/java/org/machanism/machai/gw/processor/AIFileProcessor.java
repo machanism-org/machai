@@ -298,8 +298,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				sb.append("\n");
 			}
 		} catch (IOException e) {
-			// Sonar java:S1141 - remove nested try/catch by letting IOException flow to one
-			// handler.
 			throw new IllegalArgumentException(e);
 		}
 
@@ -348,7 +346,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @throws IOException if an I/O error occurs
 	 */
 	static String readFromHttpUrl(String urlString) throws IOException {
-		// Sonar java:S1874 - avoid deprecated URL(String); use URI -> URL.
 		URL url = URI.create(urlString).toURL();
 		try (InputStream in = url.openStream()) {
 			String result = IOUtils.toString(in, StandardCharsets.UTF_8);

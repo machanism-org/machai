@@ -94,7 +94,6 @@ public class Picker implements AutoCloseable {
 	/** Result limit for vector search operations. */
 	private static final int VECTOR_SEARCH_LIMITS = 50;
 
-	// Sonar java:S1170 - make instance final constant static as it is immutable.
 	private static final String DB_URL = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private String embeddingModelName = "text-embedding-3-small";
 
@@ -103,7 +102,6 @@ public class Picker implements AutoCloseable {
 
 	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
 
-	// Sonar java:S1192 - extract duplicated literals.
 	private static final String VERSION_FIELD_NAME = "version";
 	private static final String SCORE_FIELD_NAME = "score";
 	private static final String ID_FIELD_NAME = "id";
@@ -190,7 +188,6 @@ public class Picker implements AutoCloseable {
 			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
 					.distinct().collect(Collectors.toSet());
 
-			// Sonar java:S1612 - use method reference.
 			Set<String> integrations = classification.getIntegrations().stream().map(String::toLowerCase).distinct()
 					.collect(Collectors.toSet());
 
@@ -288,7 +285,6 @@ public class Picker implements AutoCloseable {
 
 			List<Layer> layers = classification.getLayers();
 			String languagesQuery = StringUtils.join(languages, ", ");
-			// Sonar java:S2629 - avoid eager StringUtils.join invocation when INFO is disabled.
 			if (LOGGER.isInfoEnabled()) {
 				LOGGER.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
 			}
@@ -365,7 +361,6 @@ public class Picker implements AutoCloseable {
 	 */
 	private String getClassification(String query) throws IOException {
 		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE_PATH);
-		// Sonar java:S4719 - use StandardCharsets.UTF_8 instead of charset name.
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode schemaJson = objectMapper.readTree(schema);
@@ -448,7 +443,6 @@ public class Picker implements AutoCloseable {
 
 			Double docScore = doc.getDouble(SCORE_FIELD_NAME);
 			scoreMap.put(id, docScore);
-			// Sonar java:S2629 - avoid eager debug formatting.
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("BindexId: {}: {}", name, docScore);
 			}

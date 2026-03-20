@@ -50,7 +50,6 @@ public class DefaultProjectLayout extends ProjectLayout {
 			modules = new ArrayList<>();
 
 			File projectDir = getProjectDir();
-			// Sonar(java:S1604): prefer lambda over anonymous inner class.
 			FileFilter filter = pathname -> pathname.isDirectory()
 					&& !Strings.CS.startsWithAny(pathname.getName(), getExcludeDirs());
 			File[] listFiles = projectDir == null ? null : projectDir.listFiles(filter);
@@ -72,7 +71,6 @@ public class DefaultProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getSources() {
-		// Sonar(java:S1168): return an empty collection instead of null.
 		return Collections.emptyList();
 	}
 
@@ -83,7 +81,6 @@ public class DefaultProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getDocuments() {
-		// Sonar(java:S1168): return an empty collection instead of null.
 		return Collections.emptyList();
 	}
 
@@ -94,7 +91,6 @@ public class DefaultProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getTests() {
-		// Sonar(java:S1168): return an empty collection instead of null.
 		return Collections.emptyList();
 	}
 

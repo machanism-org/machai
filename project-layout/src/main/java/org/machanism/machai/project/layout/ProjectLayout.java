@@ -50,7 +50,6 @@ public abstract class ProjectLayout {
 	/**
 	 * Directory names that should be ignored when scanning projects.
 	 */
-	// Sonar(java:S1104, java:S1444, java:S2386): use a protected constant and avoid exposing mutable arrays.
 	private static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
 			ProjectProcessor.MACHAI_TEMP_DIR, "target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
 			".classpath", ".settings", ".settings", ".project", ".m2" };
@@ -83,7 +82,6 @@ public abstract class ProjectLayout {
 	 * @return module directories (root-relative); never {@code null}
 	 */
 	public List<String> getModules() {
-		// Sonar(java:S1168): return empty collection instead of null.
 		return Collections.emptyList();
 	}
 
@@ -254,7 +252,6 @@ public abstract class ProjectLayout {
 	 * @return a short layout type name
 	 */
 	public String getProjectLayoutType() {
-		// Sonar(java:S1488): return directly instead of using a temporary variable.
 		return getClass().getSimpleName().replace(ProjectLayout.class.getSimpleName(), "");
 	}
 

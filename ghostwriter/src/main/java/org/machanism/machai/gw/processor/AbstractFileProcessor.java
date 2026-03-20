@@ -56,7 +56,9 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	private File rootDir;
 
 	/**
-	 * Specifies a special scanning path or path pattern. This should be a relative	 * path with respect to the current processing project. If an absolute path is	 * provided, it must be located within the {@code rootDir}.
+	 * Specifies a special scanning path or path pattern. This should be a relative
+	 * path with respect to the current processing project. If an absolute path is
+	 * provided, it must be located within the {@code rootDir}.
 	 */
 	private File scanDir;
 
@@ -165,7 +167,6 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 				}
 			}
 		} finally {
-			// Sonar java:S2095 - ensure ExecutorService is always shut down.
 			shutdownExecutor(executor);
 		}
 	}
@@ -258,7 +259,6 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		return matchPath(projectDir, file, relativeProjectDir, relativeScanDir);
 	}
 
-	// Sonar java:S3776 - reduce cognitive complexity by extracting matching logic.
 	boolean matchPath(File projectDir, File file, String relativeProjectDir, String relativeScanDir) {
 		String relativeScanPart = ".".equals(relativeScanDir) ? "" : File.separator + relativeScanDir;
 		String path = relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + relativeScanPart;
@@ -323,7 +323,6 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
-			// Sonar java:S135 - keep loop simple by avoiding multiple continue statements.
 			if (!shouldIncludeInFindFiles(projectDir, file)) {
 				continue;
 			}

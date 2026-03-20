@@ -76,7 +76,6 @@ public class CommandSecurityChecker {
 
 		ClassLoader classLoader = getClass().getClassLoader();
 		URL systemResource = classLoader.getResource(resourcePath);
-		// Sonar java:S4719 - use StandardCharsets instead of String charset name
 		String denylist = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 
 		String denylistValue = configurator.get(DENYLIST_PROP_NAME, null);

@@ -66,7 +66,6 @@ public class ActProcessor extends AIFileProcessor {
 	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
 
-	// Sonar java:S1192 - avoid duplicating string literals.
 	private static final String TOML_EXTENSION = ".toml";
 	private static final String INPUTS_PROPERTY_NAME = "inputs";
 
@@ -239,7 +238,6 @@ public class ActProcessor extends AIFileProcessor {
 			}
 		}
 
-		// Sonar java:S2259 - avoid NPE when act is not found in a custom directory.
 		if (toml != null) {
 			setActData(properties, toml);
 		}
@@ -345,7 +343,6 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 
 				case INPUTS_PROPERTY_NAME:
-					// Sonar java:S1192 - reuse constant for property name.
 					super.setDefaultPrompt(value);
 					break;
 
@@ -378,7 +375,6 @@ public class ActProcessor extends AIFileProcessor {
 	public void setActsLocation(String actsLocation) {
 		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
 			File actDir = new File(actsLocation);
-			// Sonar java:S2589 - new File(...) never returns null.
 			if (!actDir.exists() || !actDir.isDirectory()) {
 				logger.error("Act directory does not exist or not a directory: {}", actDir.getAbsolutePath());
 				return;
@@ -403,7 +399,6 @@ public class ActProcessor extends AIFileProcessor {
 			processFile(projectLayout, child);
 		}
 
-		// Sonar java:S1066 - merge nested if statements.
 		if (match(scanRootDir, scanRootDir) && getDefaultPrompt() != null) {
 			process(projectLayout, scanRootDir, getInstructions(), getDefaultPrompt());
 		}

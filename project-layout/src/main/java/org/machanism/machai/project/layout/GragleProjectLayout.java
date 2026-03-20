@@ -60,7 +60,6 @@ public class GragleProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getModules() {
-		// Sonar(java:S2259): avoid potential NPE when project model cannot be built.
 		GradleProject gradleProject = getProject();
 		if (gradleProject == null) {
 			return Collections.emptyList();
@@ -151,7 +150,6 @@ public class GragleProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public String getProjectId() {
-		// Sonar(java:S2259): avoid dereferencing a possibly-null GradleProject.
 		return Optional.ofNullable(getProject()).map(GradleProject::getName).orElse("");
 	}
 
@@ -162,7 +160,6 @@ public class GragleProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public String getProjectName() {
-		// Sonar(java:S2259): avoid dereferencing a possibly-null GradleProject.
 		return Optional.ofNullable(getProject()).map(GradleProject::getName).orElse("");
 	}
 }

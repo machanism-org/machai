@@ -31,7 +31,6 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  */
 public class ProjectLayoutManager {
 
-	// Sonar(java:S1118): utility class; prevent instantiation.
 	private ProjectLayoutManager() {
 		throw new IllegalStateException("Utility class");
 	}

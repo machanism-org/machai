@@ -24,7 +24,6 @@ class AIFileProcessorAdditionalTest {
 		String scanDir = ".";
 
 		// Act
-		// Sonar java:S5778 - keep a single invocation potentially throwing in the lambda.
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> processor.scanDocuments(null, scanDir));
 
 		// Assert
@@ -39,7 +38,6 @@ class AIFileProcessorAdditionalTest {
 		String scanDir = "  ";
 
 		// Act
-		// Sonar java:S5778 - keep a single invocation potentially throwing in the lambda.
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> processor.scanDocuments(projectDir, scanDir));
 
 		// Assert

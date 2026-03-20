@@ -175,7 +175,6 @@ public class Assembly extends AbstractMojo {
 			Configurator config = new PropertiesConfigurator("bindex.properties");
 
 			List<Bindex> bindexList;
-			// Sonar java:S2095 - ensure Picker is always closed to avoid resource leaks.
 			try (Picker picker = createPicker(config)) {
 				picker.setScore(score);
 				bindexList = picker.pick(query);
@@ -191,7 +190,6 @@ public class Assembly extends AbstractMojo {
 					String bindexId = bindex.getId();
 					Double bindexScore = picker.getScore(bindexId);
 					String scoreStr = bindexScore != null ? bindexScore.toString() : "";
-					// Sonar java:S3457 - ensure all String.format arguments are used (use %3$s for scoreStr).
 					getLog().info(String.format("%2$3s. %1$s %3$s", bindexId, i++, scoreStr));
 				}
 			}

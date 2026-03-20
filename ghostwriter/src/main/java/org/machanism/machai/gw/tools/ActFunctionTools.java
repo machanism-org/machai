@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class ActFunctionTools implements FunctionTools {
 
-	// Sonar java:S1192 - avoid duplicating string literals.
 	private static final String TOML_EXTENSION = ".toml";
 
 	private Configurator configurator;

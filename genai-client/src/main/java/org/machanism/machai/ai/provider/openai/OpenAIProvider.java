@@ -267,7 +267,6 @@ public class OpenAIProvider implements GenAIProvider {
 		Response current = response;
 		List<ResponseInputItem> currentInputs = new ArrayList<>(this.inputs);
 		while (current != null) {
-			// Sonar java:S3776 - reduce cognitive complexity by extracting per-item handling
 			ToolHandlingResult handlingResult = handleResponseOutput(current.output(), currentInputs);
 			if (!handlingResult.anyToolCalls) {
 				return handlingResult.text;
@@ -341,11 +340,9 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 		ResponseReasoningItem reasoningItem = item.asReasoning();
 		Optional<List<com.openai.models.responses.ResponseReasoningItem.Content>> maybeContent = reasoningItem.content();
-		// Sonar java:S3655 - avoid calling Optional#get() without a presence check
 		return maybeContent.map(this::firstNonBlankReasoning).orElse(null);
 	}
 
-	// Sonar java:S3655 - extracted to keep Optional handling safe and readable
 	private String firstNonBlankReasoning(List<com.openai.models.responses.ResponseReasoningItem.Content> contents) {
 		for (com.openai.models.responses.ResponseReasoningItem.Content content : contents) {
 			String reasoning = content.text();
@@ -364,7 +361,6 @@ public class OpenAIProvider implements GenAIProvider {
 		ResponseOutputMessage outMessage = item.asMessage();
 		for (Content content : outMessage.content()) {
 			Optional<com.openai.models.responses.ResponseOutputText> maybeOutputText = content.outputText();
-			// Sonar java:S3655 - avoid calling Optional#get() without a presence check
 			String candidate = maybeOutputText.map(com.openai.models.responses.ResponseOutputText::text).orElse(null);
 			if (StringUtils.isNotBlank(candidate)) {
 				return candidate;
@@ -381,8 +377,6 @@ public class OpenAIProvider implements GenAIProvider {
 		builder.instructions(instructions);
 		builder.inputOfResponse(inputs);
 
-		// Sonar java:S2293 - use diamond operator
-		// Sonar java:S1488 - return expression directly instead of assigning to temporary variable
 		return builder.tools(new ArrayList<>(toolMap.keySet())).build();
 	}
 
@@ -445,12 +439,10 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 	}
 
-	// Sonar java:S1141 - extracted nested try/catch into a dedicated method
 	private Object safelyInvokeTool(String name, ToolFunction tool, Object[] arguments) {
 		try {
 			return tool.apply(arguments);
 		} catch (IOException e) {
-			// Sonar java:S112 - return a safe error result rather than propagating generic exceptions.
 			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 					+ e.getMessage();
 			logger.error(errMsg);
@@ -485,10 +477,8 @@ public class OpenAIProvider implements GenAIProvider {
 				ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
 				if (responseInputContent.isValid()) {
 					if (responseInputContent.isInputText()) {
-						// Sonar java:S3655 - avoid calling Optional#get() without a presence check
 						inputText = responseInputContent.inputText().map(t -> t.text()).orElse(StringUtils.EMPTY);
 					} else if (responseInputContent.isInputFile()) {
-						// Sonar java:S3655 - avoid calling Optional#get() without a presence check
 						String url = responseInputContent.inputFile().flatMap(ResponseInputFile::fileUrl)
 								.orElse(StringUtils.EMPTY);
 						inputText = "Add resource by URL: " + url;
@@ -622,7 +612,6 @@ public class OpenAIProvider implements GenAIProvider {
 
 		if (StringUtils.isBlank(chatModel)) {
 			ModelService models = client.models();
-			// Sonar java:S1612 - use method reference for clarity
 			List<String> items = models.list().items().stream().map(Model::id).collect(Collectors.toList());
 			throw new IllegalArgumentException(
 					"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));

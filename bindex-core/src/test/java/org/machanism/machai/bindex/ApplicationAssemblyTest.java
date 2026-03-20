@@ -28,7 +28,6 @@ class ApplicationAssemblyTest {
 		File dir = new File(".");
 
 		// Act
-		// Sonar(java:S5778): keep a single call that may throw inside the lambda.
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ApplicationAssembly(null, config, dir));
 
 		// Assert
@@ -41,7 +40,6 @@ class ApplicationAssemblyTest {
 		File dir = new File(".");
 
 		// Act
-		// Sonar(java:S5778): keep a single call that may throw inside the lambda.
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ApplicationAssembly("openai", null, dir));
 
 		// Assert
@@ -54,7 +52,6 @@ class ApplicationAssemblyTest {
 		Configurator config = org.mockito.Mockito.mock(Configurator.class);
 
 		// Act
-		// Sonar(java:S5778): keep a single call that may throw inside the lambda.
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ApplicationAssembly("openai", config, null));
 
 		// Assert
@@ -78,7 +75,6 @@ class ApplicationAssemblyTest {
 			final List<Bindex> bindexes = java.util.Collections.emptyList();
 
 			// Act
-			// Sonar(java:S5778): avoid multiple invocations inside the lambda (incl. method chaining).
 			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.assembly(prompt, bindexes));
 
 			// Assert
@@ -103,7 +99,6 @@ class ApplicationAssemblyTest {
 			List<Bindex> bindexes = null;
 
 			// Act
-			// Sonar(java:S5778): keep a single call that may throw inside the lambda.
 			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.assembly(promptText, bindexes));
 
 			// Assert
@@ -127,7 +122,6 @@ class ApplicationAssemblyTest {
 			File nullDir = null;
 
 			// Act
-			// Sonar(java:S5778): keep a single call that may throw inside the lambda.
 			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.projectDir(nullDir));
 
 			// Assert

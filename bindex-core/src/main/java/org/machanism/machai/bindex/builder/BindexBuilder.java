@@ -48,10 +48,8 @@ public class BindexBuilder {
 	public static final String BINDEX_TEMP_DIR = ".machai/bindex-inputs.txt";
 
 	/** Classpath resource path to the Bindex JSON schema. */
-	// Sonar java:S1104/java:S1444 - keep it immutable and non-public; provide accessor.
 	private static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 
-	// Sonar java:S115 - constant should be UPPER_SNAKE_CASE.
 	public static final String BINDEX_SCHEMA_RESOURCE_PATH = BINDEX_SCHEMA_RESOURCE;
 
 	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
@@ -193,7 +191,6 @@ public class BindexBuilder {
 	public String promptFile(File file, String bundleMessageName) throws IOException {
 		String type = FilenameUtils.getExtension(file.getName());
 		try (FileInputStream input = new FileInputStream(file)) {
-			// Sonar java:S4719 - use StandardCharsets.UTF_8.
 			String fileData = IOUtils.toString(input, StandardCharsets.UTF_8);
 			if (bundleMessageName == null) {
 				return fileData;

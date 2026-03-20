@@ -28,6 +28,5 @@ class ActFunctionToolsApplyToolsTest {
 				eq("actName:string:required:The name of the Act to load."),
 				eq("custom:boolean:optional:If true, retrieves the Act definition only from the user-defined (custom) acts directory. "
 						+ "If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts."));
-		// Sonar java:S1128 - removed unused import.
 	}
 }

@@ -74,7 +74,6 @@ class NoneProviderTest {
 		// Arrange
 		NoneProvider provider = new NoneProvider();
 		provider.prompt("x");
-		// Sonar java:S1874 - URL is deprecated; build via URI and convert only when needed.
 		URL url = assertDoesNotThrow(() -> URI.create("https://example.com").toURL());
 
 		// Act + Assert

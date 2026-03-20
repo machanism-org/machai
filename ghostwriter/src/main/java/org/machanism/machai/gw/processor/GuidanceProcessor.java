@@ -261,8 +261,6 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @return {@code true} if the directory was deleted, otherwise {@code false}
 	 */
 	public static boolean deleteTempFiles(File basedir) {
-		// Sonar java:S3252 - use static access for inherited static fields (ProjectProcessor.MACHAI_TEMP_DIR)
-		// and static fields from another class (AIFileProcessor.GW_TEMP_DIR).
 		File file = new File(basedir, ProjectProcessor.MACHAI_TEMP_DIR + File.separator + AIFileProcessor.GW_TEMP_DIR);
 		logger.info("Removing '{}' inputs log file.", file);
 		return FileUtils.deleteQuietly(file);

@@ -171,7 +171,6 @@ public class NoneProvider implements GenAIProvider {
 		return null;
 	}
 
-	// Sonar java:S3776 - extracted to reduce cognitive complexity of perform()
 	private File prepareInputsLogParent(File inputsLog) {
 		File parentFile = inputsLog.getParentFile();
 		if (parentFile != null && !parentFile.exists()) {
@@ -183,7 +182,6 @@ public class NoneProvider implements GenAIProvider {
 		return parentFile != null ? parentFile : SystemUtils.getUserDir();
 	}
 
-	// Sonar java:S3776 - extracted to reduce cognitive complexity of perform()
 	private void writeInstructions(File parentFile) {
 		File file = new File(parentFile, "instructions.txt");
 		try (Writer streamWriter = new FileWriter(file, false)) {
@@ -194,7 +192,6 @@ public class NoneProvider implements GenAIProvider {
 		}
 	}
 
-	// Sonar java:S3776 - extracted to reduce cognitive complexity of perform()
 	private void writePrompts() {
 		try (Writer streamWriter = new FileWriter(inputsLog, false)) {
 			streamWriter.write(prompts.toString());

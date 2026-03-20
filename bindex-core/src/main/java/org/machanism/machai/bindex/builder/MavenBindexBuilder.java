@@ -138,7 +138,6 @@ public class MavenBindexBuilder extends BindexBuilder {
 			return prompt.toString();
 		}
 
-		// Sonar java:S2095 - ensure the returned Stream from Files.walk(...) is closed.
 		try (Stream<Path> walk = Files.walk(startPath)) {
 			walk.filter(Files::isRegularFile).forEach(f -> {
 				try {

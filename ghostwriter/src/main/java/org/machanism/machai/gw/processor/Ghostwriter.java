@@ -50,7 +50,6 @@ public final class Ghostwriter {
 	 */
 	public static final String MULTIPLE_LINES_BREAKER = "\\";
 
-	// Sonar java:S1192 - avoid duplicating string literals.
 	private static final String GUIDANCE_OPTION = "guidance";
 
 	/** Logger for the Ghostwriter application. */
@@ -260,7 +259,6 @@ public final class Ghostwriter {
 	 */
 	public void setInstructions(String instructions) {
 		if (instructions != null) {
-			// Sonar java:S2629 - avoid eager evaluation; abbreviate() is executed only when info is enabled.
 			if (logger.isInfoEnabled()) {
 				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
 			}
@@ -348,9 +346,7 @@ public final class Ghostwriter {
 		return defaultPrompt;
 	}
 
-	// Sonar java:S3776 - reduce cognitive complexity by extracting prompt logging.
 	static void logDefaultPrompt(String label, String prompt) {
-		// Sonar java:S1066 - merge nested if statements.
 		if (prompt != null && logger.isInfoEnabled()) {
 			logger.info("{}: {}", label, StringUtils.abbreviate(prompt, 60));
 		}
@@ -487,7 +483,6 @@ public final class Ghostwriter {
 		try {
 			AIFileProcessor processor = createProcessor(cmd, rootDir, config, genai);
 
-			// Sonar java:S1172 - removed unused parameter 'options' from createProcessor().
 			Ghostwriter ghostwriter = new Ghostwriter(genai, processor);
 
 			ghostwriter.setInstructions(instructions);

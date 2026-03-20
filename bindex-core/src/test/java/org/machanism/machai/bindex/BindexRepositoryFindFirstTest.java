@@ -80,7 +80,6 @@ class BindexRepositoryFindFirstTest {
 		return iterable;
 	}
 
-	// Sonar java:S119 - name must match ^[A-Z][0-9]?$.
 	private static final class F implements Bson {
 		@Override
 		public <TDocument> org.bson.BsonDocument toBsonDocument(Class<TDocument> documentClass,

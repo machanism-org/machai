@@ -60,7 +60,6 @@ public class GeminiProvider implements GenAIProvider {
 	 *             if the file cannot be read or uploaded
 	 */
 	@Override
-	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass of IOException)
 	public void addFile(File file) throws IOException {
 		// TODO Implement file upload/attachment.
 	}
@@ -74,7 +73,6 @@ public class GeminiProvider implements GenAIProvider {
 	 *             if the file cannot be read or uploaded
 	 */
 	@Override
-	// Sonar java:S1130 - remove redundant throws of FileNotFoundException (subclass of IOException)
 	public void addFile(URL fileUrl) throws IOException {
 		// TODO Implement URL-based attachment.
 	}

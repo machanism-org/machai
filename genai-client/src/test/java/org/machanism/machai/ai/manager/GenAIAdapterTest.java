@@ -123,7 +123,6 @@ class GenAIAdapterTest {
 		GenAIProvider adapter = new TestAdapter(provider);
 		Configurator conf = null;
 		File file = new File("test.txt");
-		// Sonar java:S1874 - URL is deprecated; build via URI and convert only when needed.
 		URL url = URI.create("https://example.test/file").toURL();
 		GenAIProvider.ToolFunction fn = params -> "done";
 

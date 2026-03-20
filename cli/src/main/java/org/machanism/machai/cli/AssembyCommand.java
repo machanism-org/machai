@@ -136,8 +136,6 @@ public class AssembyCommand extends Command {
 	private String getQueryFromFile(String query) throws IOException {
 		File queryFile = new File(query);
 		if (queryFile.exists()) {
-			// Sonar java:S1130 - don't declare FileNotFoundException (subclass of
-			// IOException).
 			try (FileReader fileReader = new FileReader(queryFile)) {
 				query = IOUtils.toString(fileReader);
 			}

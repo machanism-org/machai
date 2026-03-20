@@ -82,7 +82,6 @@ public class JScriptBindexBuilder extends BindexBuilder {
 
 		Path startPath = Paths.get(new File(getProjectLayout().getProjectDir(), "src").getAbsolutePath());
 		if (Files.exists(startPath)) {
-			// Sonar java:S2095 - ensure the returned Stream from Files.walk(...) is closed.
 			try (Stream<Path> walk = Files.walk(startPath)) {
 				walk.filter(f -> FilenameUtils.isExtension(f.toFile().getName(), "ts", "vue", "js")).forEach(f -> {
 					try {

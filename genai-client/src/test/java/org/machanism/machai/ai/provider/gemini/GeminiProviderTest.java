@@ -148,7 +148,6 @@ class GeminiProviderTest {
 	void addFile_url_shouldNotThrow() throws Exception {
 		// Arrange
 		GeminiProvider provider = new GeminiProvider();
-		// Sonar java:S1874 - URL is deprecated; build via URI and convert only when needed.
 		URL url = URI.create("https://example.com/file.txt").toURL();
 
 		// Act + Assert

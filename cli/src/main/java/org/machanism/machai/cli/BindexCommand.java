@@ -49,7 +49,6 @@ public class BindexCommand {
 	 * @param reader JLine line reader used for interactive prompts (may be lazily
 	 *               injected)
 	 */
-	// Sonar java:S6813 - prefer constructor injection over field injection.
 	public BindexCommand(@Lazy LineReader reader) {
 		this.reader = reader;
 	}

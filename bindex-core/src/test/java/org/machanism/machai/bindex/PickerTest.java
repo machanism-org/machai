@@ -101,7 +101,6 @@ class PickerTest {
 		Picker picker = allocateWithoutConstructor(Picker.class);
 
 		// Act + Assert
-		// Sonar java:S5778 - keep only one exception-throwing invocation in each lambda.
 		assertThrows(IllegalArgumentException.class, () -> picker.getEmbeddingBson(null, 1));
 
 		Classification classification = new Classification();

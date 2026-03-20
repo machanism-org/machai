@@ -148,7 +148,6 @@ class SchemaPojoTest {
 		assertEquals("Alice", bindex.getAuthors().get(0).getName());
 		assertEquals("Java", bindex.getClassification().getLanguages().get(0).getName());
 		assertEquals(Arrays.asList("dep:1"), bindex.getDependencies());
-		// Sonar java:S3415 - JUnit assertions expect (expected, actual) order.
 		assertEquals(123, bindex.getAdditionalProperties().get("p"));
 		assertNotEquals(bindex, null);
 		assertNotEquals(bindex, new Object());
@@ -165,7 +164,6 @@ class SchemaPojoTest {
 		// Assert
 		assertSame(Layer.INTERACTORS, parsed);
 		assertThrows(IllegalArgumentException.class, () -> Layer.fromValue("does-not-exist"));
-		// Sonar java:S3415 - use (expected, actual).
 		assertEquals("Interactors", Layer.INTERACTORS.toString());
 	}
 

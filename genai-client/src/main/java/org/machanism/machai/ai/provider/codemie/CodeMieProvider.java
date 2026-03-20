@@ -66,7 +66,6 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * Can be overridden via the {@code AUTH_URL} configuration key.
 	 * </p>
 	 */
-	// Sonar java:S1104/java:S1444 - exposed constant should be static final (and preferably non-public if not required)
 	public static final String AUTH_URL = "https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token";
 
 	/**
@@ -76,7 +75,6 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 	 * This base URL is used to configure the underlying OpenAI-compatible client.
 	 * </p>
 	 */
-	// Sonar java:S1104/java:S1444 - exposed constant should be static final (and preferably non-public if not required)
 	public static final String BASE_URL = "https://codemie.lab.epam.com/code-assistant-api/v1";
 
 	/**
@@ -194,7 +192,6 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 		String urlParameters = String.format(queryTemplate, urlEncode(username), urlEncode(password));
 		byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
-		// Sonar java:S1874 - java.net.URL(String) is deprecated; prefer URI for parsing/validation
 		HttpURLConnection conn = (HttpURLConnection) URI.create(url).toURL().openConnection();
 		conn.setRequestMethod("POST");
 		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -231,7 +228,6 @@ public class CodeMieProvider extends GenAIAdapter implements GenAIProvider {
 		try {
 			return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
-			// Sonar java:S112 - avoid throwing generic RuntimeException; use a specific unchecked exception
 			throw new UncheckedIOException("UTF-8 encoding not supported", new IOException(e));
 		}
 	}

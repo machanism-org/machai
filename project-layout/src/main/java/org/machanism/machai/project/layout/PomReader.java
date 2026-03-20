@@ -93,7 +93,6 @@ public class PomReader {
 				String pomStr = IOUtils.toString(fileReader);
 				pomStr = replaceProperty(pomStr);
 				if (pomStr == null) {
-					// Sonar(java:S2259): avoid possible NPE; replaceProperty may return null.
 					throw new IllegalArgumentException("POM content could not be read: " + pomFile);
 				}
 				model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
@@ -184,7 +183,6 @@ public class PomReader {
 		request.setTwoPhaseBuilding(false);
 
 		PlexusContainer container = new DefaultPlexusContainer();
-		// Sonar(java:S1488): return expression directly instead of using a temporary variable.
 		return (DefaultModelBuilder) container.lookup(org.apache.maven.model.building.ModelBuilder.class);
 	}
 
