@@ -66,7 +66,7 @@ java -jar gw.jar <scanDir> -m OpenAI:gpt-5.1
 
 1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document.
 2. Create `gw.properties` (optional) and configure:
-   - `gw.rootDir` (project root)
+   - `project.dir` (project root)
    - `gw.model` (provider:model)
    - `gw.instructions` (optional)
    - `gw.excludes` (optional)

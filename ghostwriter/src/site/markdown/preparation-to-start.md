@@ -64,7 +64,7 @@ Ghostwriter CLI offers flexible configuration using a `gw.properties` file. This
 >
 > - `gw.home` (home directory) is resolved in this order:
 >   - Configuration value read by `PropertiesConfigurator#getFile("gw.home", null)` (typically provided via `-Dgw.home=...`).
->   - Otherwise the CLI `--root/-r` option value, if provided.
+>   - Otherwise the CLI `--projectDir/-d` option value, if provided.
 >   - Otherwise the current working directory (`user.dir`).
 > - The config file path is then resolved as:
 >   - `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`
@@ -83,15 +83,15 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 | Property name | Description | Default value | Usage context |
 |---|---|---|---|
 | `gw.config` | Properties file name to load at startup (resolved relative to `gw.home`). | `gw.properties` | Used in `initializeConfiguration(...)` when creating `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. **System property only** (not read from `gw.properties`). |
-| `gw.home` | Ghostwriter home directory used to resolve `gw.config`. Ghostwriter also sets `System.setProperty("gw.home", gwHomeDir.getAbsolutePath())` after resolving it. | If not set: CLI `--root/-r` value (if provided); else `user.dir`. | Read via `PropertiesConfigurator#getFile("gw.home", null)` in `initializeConfiguration(...)`. Acts as the base directory when locating the configuration file. |
-| `gw.rootDir` | Root directory used as the base directory for scanning/processing. | If not set: CLI `--root/-r` value (if provided); else `user.dir`. | When `-r/--root` is not provided, Ghostwriter loads it via `config.getFile("project.dir", null)` and falls back to `SystemUtils.getUserDir()`. It is passed to `ActProcessor` / `GuidanceProcessor` and later used via `processor.getRootDir()` as the base for `scanDocuments(...)`. |
-| `gw.model` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | `null` (required; must be non-blank). | Loaded via `config.get("gw.model", null)` and optionally overridden by CLI `-m/--model`. If blank, Ghostwriter throws `IllegalArgumentException`. Used when creating processors (`new ActProcessor(..., genai)` / `new GuidanceProcessor(..., genai, ...)`). |
+| `gw.home` | Ghostwriter home directory used to resolve `gw.config`. Ghostwriter also sets `System.setProperty("gw.home", gwHomeDir.getAbsolutePath())` after resolving it. | If not set: CLI `--projectDir/-d` value (if provided); else `user.dir`. | Read via `PropertiesConfigurator#getFile("gw.home", null)` in `initializeConfiguration(...)`. Acts as the base directory when locating the configuration file. |
+| `project.dir` | Root directory used as the base directory for scanning/processing when CLI `--projectDir/-d` is not provided. | If not set: `user.dir`. | When `-d/--projectDir` is not provided, Ghostwriter loads it via `config.getFile("project.dir", null)` and falls back to `SystemUtils.getUserDir()`. It is passed to `ActProcessor` / `GuidanceProcessor` and used as the base for `scanDocuments(projectDir, scanDir)`. |
+| `gw.model` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | `null` (required; must be non-blank). | Loaded via `config.get("gw.model", null)` and optionally overridden by CLI `-m/--model`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor` / `GuidanceProcessor`. |
 | `gw.instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null`. | Loaded via `config.get("gw.instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin via `readText(...)` (multi-line supported with `\\` line continuation). Applied via `AIFileProcessor#setInstructions(...)`. |
 | `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null`. | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
-| `gw.guidance` | Default guidance applied when embedded `@guidance:` directives are not present (normal mode). | `null`. | Loaded via `config.get("gw.guidance", null)`. Optionally overridden by CLI `-g/--guidance`; if `-g` is specified without a value, guidance is read from stdin via `readText(...)`. Applied via `AIFileProcessor#setDefaultPrompt(...)` (via `resolveGuidancePrompt(...)`). |
+| `gw.guidance` | Default guidance applied when embedded `@guidance:` directives are not present (non-Act mode). | `null`. | Loaded via `config.get("gw.guidance", null)`. Optionally overridden by CLI `-g/--guidance`; if `-g` is specified without a value, guidance is read from stdin via `readText(...)`. Used to compute the default prompt (`resolveGuidancePrompt(...)`) and applied via `AIFileProcessor#setDefaultPrompt(...)`. |
 | `gw.threads` | Degree of concurrency for processing. | `null` (unset). | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads <count>`. Parsed as an integer and applied via `AIFileProcessor#setDegreeOfConcurrency(int)` (via `Ghostwriter#setDegreeOfConcurrency(String)`). |
 | `gw.logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("gw.logInputs", false)` and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
-| `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | `null` (unset); if still unset at runtime, defaults to `user.dir` absolute path. | When there are no CLI scanDir args, Ghostwriter reads `config.get("gw.scanDir", null)`. If absent, it scans `SystemUtils.getUserDir().getAbsolutePath()` (see `resolveScanDirs(...)`). |
+| `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | If unset: `user.dir` absolute path. | When there are no CLI scanDir args, Ghostwriter reads `config.get("gw.scanDir", null)`. If absent, it scans `SystemUtils.getUserDir().getAbsolutePath()` (see `resolveScanDirs(...)`). |
 
 > Notes:
 > - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself resolves `gw.home` via configuration/system properties (it does not read `GW_HOME` directly).
@@ -135,9 +135,9 @@ gw.excludes=target,.git
 # it is only applied when explicitly set (or -t/--threads is used).
 gw.threads=4
 
-# Override project root directory (optional)
-# Used when -r/--root is not provided.
-gw.rootDir=C:\\projects\\machai
+# Root directory (optional)
+# Used when -d/--projectDir is not provided.
+project.dir=C:\\projects\\machai
 
 # Optional: default scan target when no <scanDir> args are provided
 # gw.scanDir=src
@@ -160,7 +160,7 @@ To view all available command-line options, run:
 ```text
 C:\projects\machanism.org\machai>java -jar \opt\gw\gw.jar -h
 usage: java -jar gw.jar <scanDir> [options] [-e <arg>] [-g
-       <arg>] [-h] [-i <arg>] [-l] [-m <arg>] [-r <arg>] [-t <arg>]
+       <arg>] [-h] [-i <arg>] [-l] [-m <arg>] [-d <arg>] [-t <arg>]
 
 Ghostwriter CLI - Scan and process directories or files using GenAI
 guidance.
@@ -204,7 +204,7 @@ Options:
  -l,--logInputs            Log LLM request inputs to dedicated log files.
  -m,--model <arg>          Set the GenAI provider and model (e.g.,
                            'OpenAI:gpt-5.1').
- -r,--root <arg>           Specify the path to the root directory for file
+ -d,--projectDir <arg>     Specify the path to the root directory for file
                            processing.
  -t,--threads <arg>        The degree of concurrency for the processing to
                            improve performance.

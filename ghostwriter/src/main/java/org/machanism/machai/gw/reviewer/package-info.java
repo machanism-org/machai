@@ -2,18 +2,17 @@
  * File-format-aware scanners that locate embedded {@code @guidance} instructions in project files and convert them
  * into normalized prompt fragments for Ghostwriter's downstream processing pipeline.
  *
- * <p>The package is centered around the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface
- * (SPI). Each {@code Reviewer} implementation targets a particular file type (for example Java sources, Markdown,
- * HTML/XML, TypeScript, Python, PlantUML, or plain-text {@code @guidance.txt} files), understands that format's
- * comment conventions, and returns a prompt fragment that can be assembled into a single request for the LLM.
+ * <p>The central abstraction is the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface
+ * (SPI). Each {@code Reviewer} targets a specific file type (for example Java sources, Markdown, HTML/XML,
+ * TypeScript, Python, PlantUML, or plain-text {@code @guidance.txt} files), understands that format's comment
+ * conventions, and returns a formatted fragment that can be assembled into a single request for the LLM.
  *
- * <p>Reviewers typically:
+ * <p>A typical fragment includes:
  * <ul>
- *   <li>advertise supported extensions via
- *       {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()}</li>
- *   <li>compute project-relative context paths via
+ *   <li>the project-relative path computed using
  *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}</li>
- *   <li>extract guidance blocks containing {@code @guidance} using file-format-specific parsing rules</li>
+ *   <li>the original file content or an extracted guidance block containing {@code @guidance}</li>
+ *   <li>a prompt template sourced from the {@code document-prompts} resource bundle</li>
  * </ul>
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer

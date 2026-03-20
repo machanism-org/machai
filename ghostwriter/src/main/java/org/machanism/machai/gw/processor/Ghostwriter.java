@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This CLI bootstraps configuration, parses command-line options, and invokes a
  * processor to scan a directory tree for supported files. For each file,
- * Ghostwriter extracts embedded {@code @guidance:} directives and submits the
+ * Ghostwriter extracts embedded {@code @guidance} directives and submits the
  * resulting prompt to the configured GenAI provider.
  * </p>
  *

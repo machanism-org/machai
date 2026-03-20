@@ -30,9 +30,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <header>
   <h1>Ghostwriter</h1>
   <p>
-    Ghostwriter is an advanced documentation engine that automatically
-    scans, analyzes, and assembles project documentation using embedded
-    guidance tags and AI-powered synthesis.
+    Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project
+    documentation using embedded guidance tags and AI-powered synthesis.
   </p>
   <p>
     Ghostwriter supports all types of project files—including source code, documentation, project site content,
@@ -41,17 +40,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </header>
 
 <section>
-  <h2>Purpose and scope</h2>
+  <h2>Overview</h2>
   <p>
-    Ghostwriter is a filesystem-first tool that traverses a project directory tree, discovers embedded
-    <code>@guidance:</code> instructions, and orchestrates provider-ready prompts for a configured GenAI provider.
-    It is designed to update or generate documentation in-place based on per-file directives.
+    Ghostwriter is a filesystem-first tool for generating and updating documentation in-place.
+    It traverses a project directory tree, discovers embedded <code>@guidance:</code> instructions, and orchestrates
+    provider-ready prompts for a configured GenAI provider.
   </p>
-  <ul>
-    <li><strong>Filesystem-based processing:</strong> operates on files as they exist on disk; it does not build projects or resolve dependencies.</li>
-    <li><strong>Child-first processing:</strong> for multi-module layouts, child modules are processed before parent aggregation.</li>
-    <li><strong>Format-aware guidance extraction:</strong> guidance is extracted using file-format reviewers (Java, Markdown, HTML/XML, and more).</li>
-  </ul>
 </section>
 
 <section>
@@ -62,9 +56,36 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   </figure>
 
   <p>
-    The implementation is organized around an orchestration pipeline (project traversal, matching, prompt
-    composition, and dispatch) and a reviewer SPI (format-specific guidance extractors).
+    The implementation is organized around an orchestration pipeline (project traversal, guidance extraction,
+    prompt composition, and dispatch) and a reviewer SPI (format-specific guidance extractors).
   </p>
+</section>
+
+<section>
+  <h2>Core concepts</h2>
+  <dl>
+    <dt><strong>Guidance</strong></dt>
+    <dd>
+      File-embedded instructions (usually introduced by <code>@guidance:</code>) that describe what should be generated
+      or updated.
+    </dd>
+
+    <dt><strong>Reviewer</strong></dt>
+    <dd>
+      A file-format-aware extractor that locates guidance blocks and builds normalized prompt fragments.
+    </dd>
+
+    <dt><strong>Processor</strong></dt>
+    <dd>
+      An orchestration component that scans the filesystem, selects files, invokes reviewers, composes prompts,
+      and applies results.
+    </dd>
+
+    <dt><strong>Act</strong></dt>
+    <dd>
+      A predefined TOML-based prompt template that can be applied to matching files.
+    </dd>
+  </dl>
 </section>
 
 <section>
@@ -72,32 +93,35 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <ol>
     <li><strong>Select scan targets</strong> (directory roots and/or path matchers such as <code>glob:</code> and <code>regex:</code>).</li>
     <li><strong>Traverse the filesystem</strong> and select files to process using include/exclude rules.</li>
-    <li><strong>Extract guidance</strong> from file comments using a format-specific <em>reviewer</em>.</li>
+    <li><strong>Extract guidance</strong> from file comments using a format-specific reviewer.</li>
     <li><strong>Compose prompts</strong> using project metadata and extracted guidance (acts/templates may also be applied).</li>
-    <li><strong>Dispatch</strong> the prompt to the configured GenAI provider and apply the result (for example, updated documentation).</li>
+    <li><strong>Dispatch</strong> the prompt to the configured GenAI provider and apply the result.</li>
   </ol>
+  <p>
+    Processing is strictly filesystem-based: projects are not built and dependencies are not resolved during scanning.
+    For multi-module layouts, processing is performed child-first.
+  </p>
 </section>
 
 <section>
   <h2>Packages</h2>
   <p>
-    Ghostwriter is organized around the following core packages:
+    The Ghostwriter module is organized around the following core packages:
   </p>
 
   <h3><code>org.machanism.machai.gw.processor</code></h3>
   <p>
     Project scanning, guidance extraction, and prompt orchestration for the Ghostwriter command-line tool.
-    This package contains the CLI entry point and processors responsible for scanning a project directory tree,
+    This package contains the CLI entry point and the processors responsible for scanning a project directory tree,
     extracting embedded <code>@guidance:</code> directives, and invoking the configured GenAI provider.
-    Processing is strictly filesystem-based (projects are not built and dependencies are not resolved).
-    For multi-module layouts, processing is performed child-first.
+    Processing is strictly filesystem-based, and multi-module projects are handled child-first.
   </p>
 
   <h3><code>org.machanism.machai.gw.reviewer</code></h3>
   <p>
-    File-format-aware scanners that locate embedded <code>@guidance</code> instructions and convert them into normalized
-    prompt fragments for Ghostwriter's downstream processing pipeline.
-    Implementations understand format-specific comment conventions and handle common file types such as Java,
+    File-format-aware scanners that locate embedded <code>@guidance</code> instructions in project files and convert them
+    into normalized prompt fragments for Ghostwriter's downstream processing pipeline.
+    Reviewers understand format-specific comment conventions and can handle common file types such as Java,
     Markdown, HTML/XML, TypeScript, Python, PlantUML, and plain text.
   </p>
 </section>

@@ -93,7 +93,7 @@ java -jar gw.jar <scanDir> -m OpenAI:gpt-5.1
 
 1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document.
 2. Create `gw.properties` (optional) and configure:
-   - `gw.rootDir` (project root)
+   - `project.dir` (project root)
    - `gw.model` (provider:model)
    - `gw.instructions` (optional)
    - `gw.excludes` (optional)
@@ -112,7 +112,7 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 ### Command-Line Options
 
 - `-h, --help` — Show help message and exit.
-- `-r, --root <path>` — Root directory for file processing.
+- `-d, --projectDir <path>` — Root directory for file processing.
 - `-t, --threads <count>` — Degree of concurrency for processing.
 - `-m, --model <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
 - `-i, --instructions[=<text|url|file:...>]` — System instructions (plain text, URL, or `file:`). If no value: stdin using `\\` as a line-continuation marker.
@@ -127,7 +127,7 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 | Option | Description | Default |
 |---|---|---|
 | `-h, --help` | Show this help message and exit. | `false` |
-| `-r, --root <path>` | Specify the path to the root directory for file processing. | `gw.rootDir` or current working directory |
+| `-d, --projectDir <path>` | Specify the path to the root directory for file processing. | `project.dir` or current working directory |
 | `-t, --threads <count>` | Degree of concurrency for processing. | `gw.threads` or unset |
 | `-m, --model <provider:model>` | Set the GenAI provider and model. | `gw.model` |
 | `-i, --instructions[=<text\|url\|file:...>]` | System instructions (plain text, URL, or `file:`). If no value: stdin until a line does not end with `\\`. | `gw.instructions` |
@@ -148,42 +148,36 @@ java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -g -l
 From the built-in help:
 
 - `<scanDir>` may be a relative path (from the current project directory) or a `glob:` / `regex:` matcher.
+- If an absolute scan path is provided, it must be located within the root project directory.
 - If an option that accepts optional text (`-g/--guidance`, `-i/--instructions`, or `-a/--act`) is used without a value, Ghostwriter reads multi-line input from stdin.
 - When entering multi-line input interactively, end input when a line does not end with `\\` (a trailing backslash continues the next line).
 
 ## Default Guidance
 
-Ghostwriter supports *default guidance* via `AIFileProcessor.setDefaultPrompt(String)` (referred to in configuration/CLI as `gw.guidance`). Default guidance is used when a file contains no embedded `@guidance:` directives, and it can also be used for an optional folder-level processing step.
+Ghostwriter supports default guidance via `Ghostwriter#setDefaultPrompt(String)` (configured as `gw.guidance` / `-g, --guidance`). Default guidance is used when a file contains no embedded `@guidance:` directives (and can also be used by processor implementations for an optional folder-level processing step).
 
 ### Purpose
 
 - Provide a baseline instruction set for files that do not carry their own embedded `@guidance:` blocks.
 - Allow centralized, repeatable prompting for a scan run (for example: “summarize all Markdown files”, “modernize headers”, “add missing Javadoc”).
-- Optionally run a folder-level prompt against the scanned folder/project context (via `AIFileProcessor.processFolder(ProjectLayout)`), depending on processor behavior.
+- Enable prompting when running in Act mode (where the act prompt is treated as the processor’s default prompt).
 
 ### How it works
 
-Default guidance is stored on the processor as `defaultPrompt` and is passed to the GenAI provider when:
+Default guidance (a.k.a. the processor’s `defaultPrompt`) is resolved in this order:
 
-- a processed file has no embedded `@guidance:`; and/or
-- the processor performs a folder-level step.
+1. `gw.guidance` from `gw.properties`.
+2. If `-g/--guidance` is present, its option value.
+3. If `-g/--guidance` is present without a value, Ghostwriter reads multi-line text from stdin.
 
-When the guidance value is supplied, it is expanded line-by-line using `AIFileProcessor.parseLines(String)`:
+When provided via the CLI/property, each line is processed as follows:
 
 - Blank lines are preserved.
 - Lines starting with `http://` or `https://` are fetched and included.
-- Lines starting with `file:` are loaded from the referenced file.
-  - If the file path is relative, it is resolved from the configured root directory.
+- Lines starting with `file:` are loaded from the referenced file path.
 - Other lines are included as-is.
 
-### Configuring default guidance
-
-You can set default guidance via:
-
-- Property: `gw.guidance`
-- CLI: `-g, --guidance[=<text|url|file:...>]`
-
-If `-g/--guidance` is provided without a value, Ghostwriter reads multi-line text from stdin; a trailing `\\` continues input on the next line.
+Multi-line stdin input ends when a line does not end with `\\`.
 
 ## Resources
 
