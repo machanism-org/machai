@@ -36,11 +36,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   <strong>Description (from POM):</strong>
-  Ghostwriter Maven Plugin is an advanced documentation automation tool
-  for Java projects. It automatically scans, analyzes, and assembles
-  project documentation using embedded guidance tags and AI-powered
-  synthesis. The plugin streamlines the creation and maintenance of
-  high-quality, consistent documentation, ensuring best practices and
+  Ghostwriter Maven Plugin is an advanced documentation automation tool for Java projects. It automatically scans,
+  analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. The plugin
+  streamlines the creation and maintenance of high-quality, consistent documentation, ensuring best practices and
   up-to-date information across all modules.
 </p>
 
@@ -49,14 +47,15 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <dl>
   <dt><strong>Guidance blocks</strong></dt>
   <dd>
-    Embedded <code>@guidance:</code> sections inside project files (for example, documentation pages) that define
-    requirements and constraints for content generation or transformation.
+    Embedded <code>@guidance:</code> sections inside project files that define requirements and constraints for content
+    generation or transformation.
   </dd>
 
   <dt><strong>Processors</strong></dt>
   <dd>
     The plugin delegates to the MachAI Ghostwriter engine (for example,
-    <code>GuidanceProcessor</code> and <code>ActProcessor</code>) to interpret guidance blocks and apply changes.
+    <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> and
+    <code>org.machanism.machai.gw.processor.ActProcessor</code>) to interpret guidance blocks and apply changes.
   </dd>
 
   <dt><strong>Scan root</strong></dt>
@@ -105,18 +104,19 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Packages</h2>
 
-<p>
-  This module primarily exposes a single Maven plugin package:
-</p>
-
 <h3><code>org.machanism.machai.gw.maven</code></h3>
 
 <p>
-  Maven plugin goals (Mojos) and supporting infrastructure for running MachAI Ghostwriter (GW) guided document
-  processing as part of a Maven build. Goals in this package configure and invoke Ghostwriter processors to scan a
-  documentation source tree (commonly <code>src/site</code>) for files containing embedded <code>@guidance:</code> blocks.
-  When guidance blocks are found, content transformation is delegated to the configured GenAI provider. Provider
-  credentials can optionally be sourced from <code>~/.m2/settings.xml</code> by providing
+  Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document processing as part of Maven builds.
+  The goals in this package configure and invoke
+  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> (or specialized processors such as
+  <code>org.machanism.machai.gw.processor.ActProcessor</code>) to scan a documentation source tree (commonly
+  <code>src/site</code>) for files containing embedded <code>@guidance:</code> blocks.
+</p>
+
+<p>
+  When guidance blocks are found, the processor delegates content transformation to the configured GenAI provider.
+  Provider credentials can optionally be sourced from <code>~/.m2/settings.xml</code> by providing
   <code>-Dgw.genai.serverId=&lt;serverId&gt;</code>.
 </p>
 

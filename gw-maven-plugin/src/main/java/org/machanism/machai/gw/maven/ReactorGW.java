@@ -45,8 +45,8 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
  * <li>
- * <b>{@code gw.model}</b> / {@code &lt;model&gt;} ({@code model}): Provider/model identifier passed to the
- * workflow.
+ * <b>{@code gw.model}</b> / {@code &lt;model&gt;} ({@code model}): Provider/model identifier to pass to
+ * the workflow.
  * </li>
  * <li>
  * <b>${basedir}</b> ({@code basedir}): Maven module base directory.
@@ -138,8 +138,8 @@ public class ReactorGW extends AbstractGWGoal {
 	@Override
 	public void execute() throws MojoExecutionException {
 		String executionRootDirectory = session.getExecutionRootDirectory();
-		boolean rootProject = executionRootDirectory.equals(basedir.getAbsolutePath());
-		boolean pomProject = "pom".equals(project.getPackaging());
+		boolean isExecutionRootProject = executionRootDirectory.equals(basedir.getAbsolutePath());
+		boolean isPomPackaging = "pom".equals(project.getPackaging());
 
 		PropertiesConfigurator config = getConfiguration();
 
@@ -169,7 +169,7 @@ public class ReactorGW extends AbstractGWGoal {
 			scanDir = basedir.getAbsolutePath();
 		}
 
-		if (!rootProject || !pomProject || !rootProjectLast) {
+		if (!isExecutionRootProject || !isPomPackaging || !rootProjectLast) {
 			scanDocumentsOrFail(documents);
 			return;
 		}

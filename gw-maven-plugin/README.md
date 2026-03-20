@@ -6,9 +6,12 @@
 
 ## Project Overview
 
-GW Maven Plugin is the primary Maven adapter for the MachAI [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings Ghostwriter’s Guided File Processing approach directly into Maven builds so documentation (and other project content) can be generated, updated, and kept consistent as part of a normal developer workflow.
+GW Maven Plugin is the primary Maven adapter for the MachAI [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds so project artifacts—documentation, source code, and other files—can be scanned, evaluated against embedded `@guidance:` blocks, and updated consistently as part of a normal developer workflow.
 
-At a high level, the plugin scans a project’s working tree for files containing embedded `@guidance:` blocks (for example in Markdown, Java, or other project artifacts). Those guidance blocks act as in-place requirements for how a file should be created or updated. The plugin then delegates transformation/synthesis to the configured GenAI provider via Ghostwriter, producing updated outputs while preserving the guidance markers.
+The plugin exposes Maven goals (Mojos) that configure and invoke Ghostwriter processors for two main modes:
+
+- **Guided processing** (`gw:gw`, `gw:reactor`) to scan a working tree (commonly `src/site`) and apply guidance-driven updates.
+- **Action processing** (`gw:act`, `gw:act-reactor`) to apply an interactive or predefined “act” prompt across a scanned document set.
 
 ## Installation Instructions
 
