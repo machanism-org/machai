@@ -152,7 +152,7 @@ class GWCommandCoverageTest {
 		assertEquals(3, getField(execCtx, "threads"));
 		assertEquals(Boolean.TRUE, getField(execCtx, "logInputs"));
 
-		assertEquals(root, getField(processingCtx, "rootDir"));
+		assertEquals(root, getField(processingCtx, "projectDir"));
 		assertEquals(scanDir, getField(processingCtx, "scanDir"));
 		assertEquals(genai, getField(processingCtx, "genaiValue"));
 		assertSame(propsCfg, getField(processingCtx, "config"));

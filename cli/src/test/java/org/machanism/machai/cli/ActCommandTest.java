@@ -22,7 +22,7 @@ class ActCommandTest {
 	void act_whenGenAiProviderIsNotAvailable_shouldPropagateError() {
 		// Arrange
 		ActCommand cmd = new ActCommand();
-		ConfigCommand.config.set("gw.rootDir", new File(".").getAbsolutePath());
+		ConfigCommand.config.set("project.dir", new File(".").getAbsolutePath());
 		ConfigCommand.config.set("gw.model", "TestProvider");
 
 		// Act + Assert

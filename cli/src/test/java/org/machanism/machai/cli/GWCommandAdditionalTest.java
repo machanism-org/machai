@@ -81,10 +81,10 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveRootDir_shouldReturnNonNull_whenArgumentNull() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_ROOTDIR_PROP_NAME, "");
+		ConfigCommand.config.set(Ghostwriter.PROJECT_DIR_PROP_NAME, "");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
-		Method m = GWCommand.class.getDeclaredMethod("resolveRootDir", File.class);
+		Method m = GWCommand.class.getDeclaredMethod("resolveProjectDir", File.class);
 		m.setAccessible(true);
 
 		// Act
@@ -98,10 +98,10 @@ class GWCommandAdditionalTest {
 	void resolveRootDir_shouldReturnConfiguredRootDir_whenPresent() throws Exception {
 		// Arrange
 		File configured = new File("target").getAbsoluteFile();
-		ConfigCommand.config.set(Ghostwriter.GW_ROOTDIR_PROP_NAME, configured.getAbsolutePath());
+		ConfigCommand.config.set(Ghostwriter.PROJECT_DIR_PROP_NAME, configured.getAbsolutePath());
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
-		Method m = GWCommand.class.getDeclaredMethod("resolveRootDir", File.class);
+		Method m = GWCommand.class.getDeclaredMethod("resolveProjectDir", File.class);
 		m.setAccessible(true);
 
 		// Act
