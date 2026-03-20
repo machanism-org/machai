@@ -38,8 +38,14 @@ public class BindexCreator extends BindexProjectProcessor {
 	/** Logger instance for the BindexCreator class. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BindexCreator.class);
 
+	public static final String PROJECT_DIR_PROP_NAME = "bindex.dir";
+
+	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
+
+	public static String MODEL_PROP_NAME = "bindex.model";
+
 	/** Provider identifier used for AI-assisted Bindex creation. */
-	private final String genai;
+	private final String model;
 
 	/** Configurator used by builders and providers. */
 	private final Configurator config;
@@ -50,18 +56,18 @@ public class BindexCreator extends BindexProjectProcessor {
 	/**
 	 * Creates a {@link BindexCreator}.
 	 *
-	 * @param genai  GenAI provider identifier used for AI-assisted Bindex creation
+	 * @param model  GenAI provider identifier used for AI-assisted Bindex creation
 	 * @param config configurator used to initialize the provider and builders
-	 * @throws IllegalArgumentException if {@code genai} or {@code config} is {@code null}
+	 * @throws IllegalArgumentException if {@code model} or {@code config} is {@code null}
 	 */
 	public BindexCreator(String genai, Configurator config) {
 		if (genai == null) {
-			throw new IllegalArgumentException("genai must not be null");
+			throw new IllegalArgumentException("model must not be null");
 		}
 		if (config == null) {
 			throw new IllegalArgumentException("config must not be null");
 		}
-		this.genai = genai;
+		this.model = genai;
 		this.config = config;
 	}
 
@@ -80,7 +86,7 @@ public class BindexCreator extends BindexProjectProcessor {
 		}
 
 		try {
-			BindexBuilder bindexBuilder = BindexBuilderFactory.create(projectLayout, genai, config);
+			BindexBuilder bindexBuilder = BindexBuilderFactory.create(projectLayout, model, config);
 
 			File projectDir = bindexBuilder.getProjectLayout().getProjectDir();
 			Bindex origin = getBindex(projectDir);
