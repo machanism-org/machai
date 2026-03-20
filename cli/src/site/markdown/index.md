@@ -27,7 +27,7 @@ Page Structure:
 
 ## Introduction
 
-Machai CLI is a Spring Boot + Spring Shell command-line application for generating, registering, and managing library metadata (Bindex) within the Machanism ecosystem. It also supports GenAI-assisted semantic search (library picking), project assembly from selected libraries, and Ghostwriter-based document/file processing.
+Machai CLI is a Spring Boot + Spring Shell command-line application for generating, registering, and managing library metadata (Bindex) within the Machanism ecosystem. It supports GenAI-assisted semantic search (library picking), project assembly from selected libraries, and Ghostwriter-based document/file processing.
 
 Key benefits:
 
@@ -114,7 +114,7 @@ Machai CLI stores common defaults in `machai.properties`. You can manage these v
 
 | Key | Description | Default |
 |---|---|---|
-| `genai` | Default GenAI provider/model identifier when `--genai`/`--model` is omitted | (not set; commands may fall back to `CodeMie:gpt-5-2-2025-12-11`) |
+| `genai` | Default GenAI provider/model identifier when `--genai`/`--model` is omitted | (not set; commands may fall back to a built-in default) |
 | `dir` | Default working/project directory when `--dir` is omitted | Current user directory |
 | `score` | Default minimum similarity threshold used by semantic picking | `0.90` |
 | `registerUrl` | Default registry URL used by `register` and (optionally) by `pick/assembly` | (not set) |

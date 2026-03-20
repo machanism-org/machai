@@ -73,13 +73,13 @@ Example commands (as shown by `help`):
 ### Assembly Command
 
 - `pick`: Picks libraries based on user request.
-- `assembly`: Creates a project via picked librariy set.
-- `prompt`: Is used for request additional GenAI guidances.
+- `assembly`: Creates a project via picked library set.
+- `prompt`: Is used to request additional GenAI guidance.
 
 ### Bindex Command
 
 - `bindex`: Generates bindex files.
-- `register`: Registers bindex file.
+- `register`: Registers a bindex file.
 
 ### Docs Command
 

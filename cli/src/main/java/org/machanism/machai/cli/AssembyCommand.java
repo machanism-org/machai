@@ -35,7 +35,6 @@ import org.springframework.shell.standard.ShellOption;
  * from the selected set.
  *
  * <h2>Example</h2>
- * 
  * <pre>
  * pick --query "Create a web app" --score 0.8
  * assembly --dir .\\out
@@ -59,10 +58,12 @@ public class AssembyCommand {
 
 	private final PropertiesConfigurator config;
 
-	private LineReader lineReader;
+	private final LineReader lineReader;
 
 	/**
 	 * Creates a new command instance.
+	 *
+	 * @param lineReader JLine reader used to prompt the user in interactive mode
 	 */
 	public AssembyCommand(@Lazy LineReader lineReader) {
 		super();

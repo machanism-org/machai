@@ -32,7 +32,6 @@ import org.springframework.shell.standard.ShellOption;
  * {@link GuidanceProcessor}.
  *
  * <h2>Examples</h2>
- * 
  * <pre>
  * gw --scanDir .\\my-project --excludes target,.git
  * gw --model OpenAI:gpt-5.1 --guidance "Refactor for clarity"
@@ -46,8 +45,13 @@ public class GWCommand {
 
 	private static final int LOG_PREVIEW_LEN = 60;
 
-	private LineReader lineReader;
+	private final LineReader lineReader;
 
+	/**
+	 * Creates a new command instance.
+	 *
+	 * @param lineReader JLine reader used to prompt the user in interactive mode
+	 */
 	public GWCommand(@Lazy LineReader lineReader) {
 		super();
 		this.lineReader = lineReader;
@@ -61,6 +65,9 @@ public class GWCommand {
 		// Kept for future initialization.
 	}
 
+	/**
+	 * Internal option container used to avoid a long parameter list between methods.
+	 */
 	private static final class GwOptions {
 		private int threads;
 		private String model;
@@ -132,7 +139,7 @@ public class GWCommand {
 	 *                     {@code null}
 	 * @param logInputs    whether to log LLM request inputs to dedicated log files;
 	 *                     if {@code null}, uses the configured default
-	 * @param projectDir      root directory for file processing; if {@code null}, uses
+	 * @param projectDir   root directory for file processing; if {@code null}, uses
 	 *                     the configured default or the current working directory
 	 * @param scanDirs     directories to scan; if {@code null} or empty, scans the
 	 *                     resolved {@code projectDir}
@@ -195,6 +202,9 @@ public class GWCommand {
 		return new PromptContext(resolveInstructions(instructions), resolveGuidance(guidance));
 	}
 
+	/**
+	 * Per-scan directory processing context.
+	 */
 	private static final class ProcessingContext {
 		private final File projectDir;
 		private final String scanDir;
@@ -216,6 +226,9 @@ public class GWCommand {
 		}
 	}
 
+	/**
+	 * Pair of prompts used by Ghostwriter.
+	 */
 	private static final class PromptContext {
 		private final String instructionsValue;
 		private final String defaultGuidance;
@@ -226,6 +239,9 @@ public class GWCommand {
 		}
 	}
 
+	/**
+	 * Execution settings for Ghostwriter processing.
+	 */
 	private static final class ExecutionContext {
 		private final int threads;
 		private final Boolean logInputs;
