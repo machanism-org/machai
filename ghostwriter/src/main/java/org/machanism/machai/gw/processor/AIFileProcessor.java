@@ -94,12 +94,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	/**
 	 * Creates a new processor using the given provider key.
 	 *
-	 * @param rootDir      root directory used as a base for relative paths
+	 * @param projectDir      root directory used as a base for relative paths
 	 * @param configurator configuration source
 	 * @param genai        provider key/name (including model)
 	 */
-	public AIFileProcessor(File rootDir, Configurator configurator, String genai) {
-		super(rootDir, configurator);
+	public AIFileProcessor(File projectDir, Configurator configurator, String genai) {
+		super(projectDir, configurator);
 		this.genai = genai;
 	}
 
@@ -136,8 +136,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		provider.prompt(promptBuilder.toString());
 
 		if (isLogInputs()) {
-			String inputsFileName = ProjectLayout.getRelativePath(getRootDir(), file);
-			File docsTempDir = new File(getRootDir(), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
+			String inputsFileName = ProjectLayout.getRelativePath(getProjectDir(), file);
+			File docsTempDir = new File(getProjectDir(), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
 			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 			File parentDir = inputsFile.getParentFile();
 			if (parentDir != null) {
@@ -183,7 +183,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		content.add(Objects.toString(parentId, NOT_DEFINED));
 		content.add(parentDir != null ? parentDir.getName() : NOT_DEFINED);
 
-		String relativePath = ProjectLayout.getRelativePath(getRootDir(), projectDir);
+		String relativePath = ProjectLayout.getRelativePath(getProjectDir(), projectDir);
 		content.add(relativePath);
 
 		content.add(projectLayout.getProjectLayoutType());
@@ -364,7 +364,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	String readFromFilePath(String filePath) {
 		File file = new File(filePath);
 		if (!file.isAbsolute()) {
-			file = new File(getRootDir(), filePath);
+			file = new File(getProjectDir(), filePath);
 		}
 
 		try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
@@ -431,9 +431,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		File scanDirFile = new File(scanDir);
 		if (!scanDirFile.isAbsolute()) {
 			if (".".equals(scanDir)) {
-				scanDirFile = getRootDir();
+				scanDirFile = getProjectDir();
 			} else {
-				scanDirFile = new File(getRootDir(), scanDir);
+				scanDirFile = new File(getProjectDir(), scanDir);
 			}
 		}
 		super.setScanDir(scanDirFile);

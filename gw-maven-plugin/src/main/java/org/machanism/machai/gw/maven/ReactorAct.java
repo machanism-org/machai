@@ -77,12 +77,12 @@ public class ReactorAct extends Act {
 	@Override
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
-		File rootDir = new File(session.getExecutionRootDirectory());
+		File projectDir = new File(session.getExecutionRootDirectory());
 
 		String model = configuration.get("gw.model", this.model);
 		logger.info("Model: {}", model);
 
-		ActProcessor actProcessor = new ActProcessor(rootDir, configuration, model) {
+		ActProcessor actProcessor = new ActProcessor(projectDir, configuration, model) {
 
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

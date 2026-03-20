@@ -78,12 +78,12 @@ public class ActProcessor extends AIFileProcessor {
 	/**
 	 * Creates an act processor.
 	 *
-	 * @param rootDir      root directory used as a base for relative paths
+	 * @param projectDir      root directory used as a base for relative paths
 	 * @param configurator configuration source
 	 * @param genai        provider key/name (including model)
 	 */
-	public ActProcessor(File rootDir, Configurator configurator, String genai) {
-		super(rootDir, configurator, genai);
+	public ActProcessor(File projectDir, Configurator configurator, String genai) {
+		super(projectDir, configurator, genai);
 		actsLocation = configurator.get("gw.acts", null);
 	}
 
@@ -390,17 +390,17 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
-		File scanRootDir = projectLayout.getProjectDir();
-		List<File> children = findFiles(scanRootDir);
+		File scanProjectDir = projectLayout.getProjectDir();
+		List<File> children = findFiles(scanProjectDir);
 
-		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, scanRootDir));
+		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, scanProjectDir));
 
 		for (File child : children) {
 			processFile(projectLayout, child);
 		}
 
-		if (match(scanRootDir, scanRootDir) && getDefaultPrompt() != null) {
-			process(projectLayout, scanRootDir, getInstructions(), getDefaultPrompt());
+		if (match(scanProjectDir, scanProjectDir) && getDefaultPrompt() != null) {
+			process(projectLayout, scanProjectDir, getInstructions(), getDefaultPrompt());
 		}
 	}
 

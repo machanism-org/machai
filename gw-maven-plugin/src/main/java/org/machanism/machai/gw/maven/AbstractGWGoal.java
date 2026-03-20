@@ -204,11 +204,11 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 				processor.setDefaultPrompt(guidance);
 			}
 
-			File rootDir = new File(session.getExecutionRootDirectory());
+			File projectDir = new File(session.getExecutionRootDirectory());
 			processor.setLogInputs(logInputs);
 
 			if (scanDir == null) {
-				scanDir = rootDir.getAbsolutePath();
+				scanDir = projectDir.getAbsolutePath();
 			}
 
 			processor.scanDocuments(projectBasedir, scanDir);

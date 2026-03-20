@@ -65,7 +65,7 @@ public final class Ghostwriter {
 	public static final String GW_HOME_PROP_NAME = "gw.home";
 
 	/** Configuration key for the root directory to scan. */
-	public static final String GW_ROOTDIR_PROP_NAME = "gw.rootDir";
+	public static final String PROJECT_DIR_PROP_NAME = "project.dir";
 
 	/** Configuration key specifying the GenAI provider/model to use. */
 	public static final String GW_GENAI_PROP_NAME = "gw.model";
@@ -119,7 +119,7 @@ public final class Ghostwriter {
 		try {
 			for (String scanDir : scanDirs) {
 				logger.info("Starting scan of directory: {}", scanDir);
-				File projectDir = processor.getRootDir();
+				File projectDir = processor.getProjectDir();
 
 				processor.scanDocuments(projectDir, scanDir);
 				logger.info("Finished scanning directory: {}", scanDir);
@@ -151,15 +151,15 @@ public final class Ghostwriter {
 	 * {@link #GW_CONFIG_PROP_NAME} system property.
 	 * </p>
 	 *
-	 * @param rootDir optional root directory used to resolve the home directory
+	 * @param projectDir optional root directory used to resolve the home directory
 	 * @return initialized configuration
 	 */
-	static PropertiesConfigurator initializeConfiguration(File rootDir) {
+	static PropertiesConfigurator initializeConfiguration(File projectDir) {
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
 		File gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
 		if (gwHomeDir == null) {
-			gwHomeDir = rootDir;
+			gwHomeDir = projectDir;
 			if (gwHomeDir == null) {
 				gwHomeDir = SystemUtils.getUserDir();
 			}
@@ -299,16 +299,16 @@ public final class Ghostwriter {
 		}
 	}
 
-	static AIFileProcessor createProcessor(CommandLine cmd, File rootDir, PropertiesConfigurator config,
+	static AIFileProcessor createProcessor(CommandLine cmd, File projectDir, PropertiesConfigurator config,
 			String genai) {
 		AIFileProcessor processor;
 		String defaultPrompt;
 		if (cmd.hasOption("act")) {
-			processor = createActProcessor(cmd, rootDir, config, genai);
+			processor = createActProcessor(cmd, projectDir, config, genai);
 			defaultPrompt = resolveActPrompt(cmd);
 			logDefaultPrompt("Act", defaultPrompt);
 		} else {
-			processor = new GuidanceProcessor(rootDir, genai, config);
+			processor = new GuidanceProcessor(projectDir, genai, config);
 			defaultPrompt = resolveGuidancePrompt(cmd, config);
 			logDefaultPrompt("Default Prompt", defaultPrompt);
 		}
@@ -316,9 +316,9 @@ public final class Ghostwriter {
 		return processor;
 	}
 
-	static AIFileProcessor createActProcessor(CommandLine cmd, File rootDir, PropertiesConfigurator config,
+	static AIFileProcessor createActProcessor(CommandLine cmd, File projectDir, PropertiesConfigurator config,
 			String genai) {
-		ActProcessor processor = new ActProcessor(rootDir, config, genai);
+		ActProcessor processor = new ActProcessor(projectDir, config, genai);
 		if (cmd.hasOption("acts")) {
 			String value = cmd.getOptionValue("acts");
 			logger.info("Act directory: {}", value);
@@ -382,7 +382,7 @@ public final class Ghostwriter {
 				.desc("The degree of concurrency for the processing to improve performance.")
 				.hasArg(true).build();
 
-		Option rootDirOpt = new Option("r", "root", true,
+		Option projectDirOpt = new Option("d", "projectDir", true,
 				"Specify the path to the root directory for file processing.");
 
 		Option genaiOpt = new Option("m", "model", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
@@ -412,7 +412,7 @@ public final class Ghostwriter {
 				.hasArg(true).optionalArg(true).build();
 
 		options.addOption(helpOption);
-		options.addOption(rootDirOpt);
+		options.addOption(projectDirOpt);
 		options.addOption(multiThreadOption);
 		options.addOption(genaiOpt);
 		options.addOption(instructionsOpt);
@@ -430,12 +430,12 @@ public final class Ghostwriter {
 			return;
 		}
 
-		File rootDir = null;
-		if (cmd.hasOption(rootDirOpt)) {
-			rootDir = new File(cmd.getOptionValue(rootDirOpt));
+		File projectDir = null;
+		if (cmd.hasOption(projectDirOpt)) {
+			projectDir = new File(cmd.getOptionValue(projectDirOpt));
 		}
 
-		PropertiesConfigurator config = initializeConfiguration(rootDir);
+		PropertiesConfigurator config = initializeConfiguration(projectDir);
 
 		String genai = config.get(GW_GENAI_PROP_NAME, null);
 		if (cmd.hasOption(genaiOpt)) {
@@ -471,17 +471,17 @@ public final class Ghostwriter {
 			logInputs = true;
 		}
 
-		if (rootDir == null) {
-			rootDir = config.getFile(GW_ROOTDIR_PROP_NAME, null);
-			if (rootDir == null) {
-				rootDir = SystemUtils.getUserDir();
+		if (projectDir == null) {
+			projectDir = config.getFile(PROJECT_DIR_PROP_NAME, null);
+			if (projectDir == null) {
+				projectDir = SystemUtils.getUserDir();
 			}
 		}
 
-		logger.info("Root directory: {}", rootDir);
+		logger.info("Root directory: {}", projectDir);
 
 		try {
-			AIFileProcessor processor = createProcessor(cmd, rootDir, config, genai);
+			AIFileProcessor processor = createProcessor(cmd, projectDir, config, genai);
 
 			Ghostwriter ghostwriter = new Ghostwriter(genai, processor);
 

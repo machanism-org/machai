@@ -53,12 +53,12 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	protected static final String GW_PROJECT_LAYOUT_PROP_PREFIX = "project.";
 
 	/** Root scanning directory for the current documentation run. */
-	private File rootDir;
+	private File projectDir;
 
 	/**
 	 * Specifies a special scanning path or path pattern. This should be a relative
 	 * path with respect to the current processing project. If an absolute path is
-	 * provided, it must be located within the {@code rootDir}.
+	 * provided, it must be located within the {@code projectDir}.
 	 */
 	private File scanDir;
 
@@ -83,12 +83,12 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Creates a new file processor.
 	 *
-	 * @param rootDir      root directory used as a base for relative paths
+	 * @param projectDir      root directory used as a base for relative paths
 	 * @param configurator configuration source used by implementations
 	 */
-	protected AbstractFileProcessor(File rootDir, Configurator configurator) {
+	protected AbstractFileProcessor(File projectDir, Configurator configurator) {
 		super();
-		this.rootDir = rootDir;
+		this.projectDir = projectDir;
 		this.configurator = configurator;
 	}
 
@@ -101,7 +101,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File basedir) throws IOException {
-		rootDir = basedir;
+		projectDir = basedir;
 		scanFolder(basedir);
 	}
 
@@ -249,7 +249,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		String relativeProjectDir = ProjectLayout.getRelativePath(getRootDir(), projectDir);
+		String relativeProjectDir = ProjectLayout.getRelativePath(getProjectDir(), projectDir);
 		String relativeScanDir = ProjectLayout.getRelativePath(projectDir, file);
 
 		if (relativeProjectDir == null || relativeScanDir == null) {
@@ -561,8 +561,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @return root directory
 	 */
-	public File getRootDir() {
-		return rootDir;
+	public File getProjectDir() {
+		return projectDir;
 	}
 
 	/**
