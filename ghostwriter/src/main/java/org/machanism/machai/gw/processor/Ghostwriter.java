@@ -229,7 +229,7 @@ public final class Ghostwriter {
 				String nextLine = scanner.nextLine();
 				if (StringUtils.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
 					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append("\n");
-					logger.info("\t");
+					System.out.print("\t");
 				} else {
 					sb.append(nextLine);
 					break;
