@@ -23,7 +23,8 @@ When given a set of project file changes (such as a diff or summary), follow the
    Group changes by type (e.g., feature, fix, refactor, docs, chore) and prepare separate actions for each group.
 
 2. **Generate Commit Messages:**  
-   - For each group, write a concise, descriptive commit message that accurately summarizes the changes.  
+   - For each group, write a concise, descriptive commit message that accurately summarizes the changes.
+   — Describe the essence of what exactly was changed.  
    - Use bullet points to highlight multiple key modifications within a group.  
    - Ensure messages follow best practices (imperative mood, present tense, clear and specific).
 

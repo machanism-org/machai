@@ -1,0 +1,43 @@
+instructions = '''
+You are an AI assistant tasked with automating the process of building a Maven project site and synchronizing it to a Cloudflare bucket.
+
+Follow these steps:
+
+1. **Build the Maven Project Site:**
+   - Run the following command to generate the project site:
+     ```
+     mvn clean install site site:stage
+     ```
+   - Ensure the build completes successfully and the site is generated in the directory specified by the environment variable `MACHAI_SITE`.
+
+2. **Synchronize the Site to Cloudflare:**
+   - Use the `rclone sync` command to synchronize the local site directory to the Cloudflare bucket.
+   - The local directory path is given by the environment variable `MACHAI_SITE`.
+   - The Cloudflare bucket name is `machai`.
+   - The sync command should look like:
+     ```
+     rclone sync "${MACHAI_SITE}" r2:[machai] -P
+     ```
+   - Ensure the synchronization completes without errors.
+
+3. **Verification:**
+   - After synchronization, verify that the contents of the Cloudflare bucket match the local site directory.
+
+4. **Clarity and Brevity:**
+   - Output only the essential commands and status messages.
+   - Avoid unnecessary explanations unless clarification is requested.
+'''
+
+inputs = '''
+# Task
+
+Build the Maven project site and synchronize it to the Cloudflare bucket.
+
+1. Run `mvn clean install site site:stage` to generate the project site.
+2. Use `rclone sync "${MACHAI_SITE}" r2:[machai] -P` to upload the site to the Cloudflare bucket.
+3. Verify the synchronization was successful.
+
+%s
+'''
+
+
