@@ -53,7 +53,7 @@ public class ApplicationAssembly {
 	public static final double DEFAULT_SCORE_VALUE = 0.80;
 
 	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
-	
+
 	/**
 	 * Relative path (from {@link #projectDir}) where the provider input log is
 	 * written.
@@ -125,18 +125,18 @@ public class ApplicationAssembly {
 		String assemblyInstructions = MessageFormat.format(PROMPT_BUNDLE.getString("assembly_instructions"),
 				SystemUtils.OS_NAME);
 		bindexPrompt.append(assemblyInstructions);
+		bindexPrompt.append("\n");
 
 		StringBuilder picked = new StringBuilder();
 		for (Bindex bindex : bindexList) {
 			if (bindex != null) {
-				picked.append("- ").append(bindex.getId()).append("\n");
+				picked.append("| ").append(bindex.getId()).append(" | ").append(bindex.getDescription()).append(" |\n");
 			}
 		}
-		bindexPrompt.append("\n");
 
-		String promptStr = MessageFormat.format(PROMPT_BUNDLE.getString("recommended_library_section"),
-				picked.toString());
-		bindexPrompt.append(promptStr).append("\n\n");
+		String promptStr = PROMPT_BUNDLE.getString("recommended_library_section");
+
+		bindexPrompt.append(promptStr).append(picked.toString()).append("\n\n");
 
 		String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
 		bindexPrompt.append(userPrompt).append("\n\n");

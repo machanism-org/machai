@@ -52,16 +52,20 @@ import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.InsertOneResult;
 
 /**
- * Performs Bindex registration, lookup, and semantic retrieval using embeddings and MongoDB.
+ * Performs Bindex registration, lookup, and semantic retrieval using embeddings
+ * and MongoDB.
  *
- * <p>This type supports two primary workflows:
+ * <p>
+ * This type supports two primary workflows:
  *
  * <ol>
- *   <li><strong>Registration</strong>: serialize and persist a {@link Bindex} into MongoDB, including
- *       a classification embedding vector used for semantic search.</li>
- *   <li><strong>Retrieval</strong>: classify a free-text query into one or more {@link Classification}
- *       objects using an LLM, then run vector search queries to retrieve relevant Bindexes and expand
- *       results using transitive dependencies.</li>
+ * <li><strong>Registration</strong>: serialize and persist a {@link Bindex}
+ * into MongoDB, including a classification embedding vector used for semantic
+ * search.</li>
+ * <li><strong>Retrieval</strong>: classify a free-text query into one or more
+ * {@link Classification} objects using an LLM, then run vector search queries
+ * to retrieve relevant Bindexes and expand results using transitive
+ * dependencies.</li>
  * </ol>
  *
  * <h2>Example</h2>
@@ -121,11 +125,13 @@ public class Picker implements AutoCloseable {
 	/**
 	 * Constructs a {@link Picker} for registration and semantic search.
 	 *
-	 * @param genai  GenAI provider identifier used for embedding and classification prompts
-	 * @param uri    MongoDB connection URI; when {@code null}, a default URI is constructed using
-	 *               {@code BINDEX_REG_PASSWORD} when available
+	 * @param genai  GenAI provider identifier used for embedding and classification
+	 *               prompts
+	 * @param uri    MongoDB connection URI; when {@code null}, a default URI is
+	 *               constructed using {@code BINDEX_REG_PASSWORD} when available
 	 * @param config configurator used to initialize the provider
-	 * @throws IllegalArgumentException if {@code genai} or {@code config} is {@code null}
+	 * @throws IllegalArgumentException if {@code genai} or {@code config} is
+	 *                                  {@code null}
 	 */
 	public Picker(String genai, String uri, Configurator config) {
 		if (genai == null) {
@@ -154,15 +160,19 @@ public class Picker implements AutoCloseable {
 	}
 
 	/**
-	 * Registers (inserts or updates) a Bindex document for the supplied {@link Bindex}.
+	 * Registers (inserts or updates) a Bindex document for the supplied
+	 * {@link Bindex}.
 	 *
-	 * <p>Registration deletes any existing document with the same {@link Bindex#getId()} and inserts
-	 * a fresh document containing:
+	 * <p>
+	 * Registration deletes any existing document with the same
+	 * {@link Bindex#getId()} and inserts a fresh document containing:
 	 *
 	 * <ul>
-	 *   <li>Core identity fields: {@code id}, {@code name}, {@code version}</li>
-	 *   <li>Classification facets: domains, layers, normalized languages, integrations</li>
-	 *   <li>A vector embedding under {@value #CLASSIFICATION_EMBEDDING_PROPERTY_NAME}</li>
+	 * <li>Core identity fields: {@code id}, {@code name}, {@code version}</li>
+	 * <li>Classification facets: domains, layers, normalized languages,
+	 * integrations</li>
+	 * <li>A vector embedding under
+	 * {@value #CLASSIFICATION_EMBEDDING_PROPERTY_NAME}</li>
 	 * </ul>
 	 *
 	 * @param bindex Bindex instance to register
@@ -195,8 +205,10 @@ public class Picker implements AutoCloseable {
 				LOGGER.warn("No language defined for: {}.", id);
 			}
 
-			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson).append(NAME_FIELD_NAME, bindex.getName())
-					.append(VERSION_FIELD_NAME, bindex.getVersion()).append(DOMAINS_PROPERTY_NAME, classification.getDomains())
+			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson)
+					.append(NAME_FIELD_NAME, bindex.getName())
+					.append(VERSION_FIELD_NAME, bindex.getVersion())
+					.append(DOMAINS_PROPERTY_NAME, classification.getDomains())
 					.append(LAYERS_PROPERTY_NAME, classification.getLayers()).append(LANGUAGES_PROPERTY_NAME, languages)
 					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
 					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
@@ -216,12 +228,14 @@ public class Picker implements AutoCloseable {
 	}
 
 	/**
-	 * Generates a BSON array representing the embedding of a classification for semantic search.
+	 * Generates a BSON array representing the embedding of a classification for
+	 * semantic search.
 	 *
 	 * @param classification classification instance
 	 * @param dimensions     number of vector dimensions
 	 * @return BSON array of vector values
-	 * @throws IllegalArgumentException if {@code classification} is {@code null} or {@code dimensions} is not positive
+	 * @throws IllegalArgumentException if {@code classification} is {@code null} or
+	 *                                  {@code dimensions} is not positive
 	 * @throws JsonProcessingException  on embedding or serialization errors
 	 */
 	BsonArray getEmbeddingBson(Classification classification, int dimensions) throws JsonProcessingException {
@@ -259,13 +273,14 @@ public class Picker implements AutoCloseable {
 	}
 
 	/**
-	 * Performs a semantic pick/search with a query string, retrieving Bindex results and transitive
-	 * dependencies.
+	 * Performs a semantic pick/search with a query string, retrieving Bindex
+	 * results and transitive dependencies.
 	 *
 	 * @param query query string
 	 * @return list of Bindex results related to the query (and their dependencies)
 	 * @throws IllegalArgumentException if {@code query} is {@code null}
-	 * @throws IOException              if classification or database retrieval fails
+	 * @throws IOException              if classification or database retrieval
+	 *                                  fails
 	 */
 	public List<Bindex> pick(String query) throws IOException {
 		if (query == null) {
@@ -300,30 +315,16 @@ public class Picker implements AutoCloseable {
 			}
 		}
 
-		Set<String> dependencies = new HashSet<>();
 		List<Bindex> pickResult = classificatioResults.stream().map(id -> {
-			Bindex bindex = getBindex(id);
-			if (bindex != null) {
-				dependencies.addAll(bindex.getDependencies());
-			}
-			return bindex;
+			return getBindex(id);
 		}).filter(b -> b != null).collect(Collectors.toList());
-
-		Set<String> allDependencies = new HashSet<>();
-		for (String bindexId : dependencies) {
-			addDependencies(allDependencies, bindexId);
-		}
-
-		List<Bindex> dependenciesResult = allDependencies.stream().map(this::getBindex).filter(b -> b != null)
-				.collect(Collectors.toList());
-
-		pickResult.addAll(dependenciesResult);
 
 		return pickResult;
 	}
 
 	/**
-	 * Serializes the classification into a stable JSON string used for embedding and schema prompts.
+	 * Serializes the classification into a stable JSON string used for embedding
+	 * and schema prompts.
 	 *
 	 * @param classification classification instance
 	 * @return JSON string value of the classification
@@ -357,7 +358,7 @@ public class Picker implements AutoCloseable {
 	 *
 	 * @param query search query string
 	 * @return classification schema as a JSON string
-	 * @throws IOException              if prompt or IO operation fails
+	 * @throws IOException if prompt or IO operation fails
 	 */
 	private String getClassification(String query) throws IOException {
 		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE_PATH);
@@ -378,7 +379,8 @@ public class Picker implements AutoCloseable {
 	 *
 	 * @param id Bindex id (the {@code id} field in the stored document)
 	 * @return parsed {@link Bindex}, or {@code null} if not present
-	 * @throws IllegalArgumentException if {@code id} is {@code null} or the stored JSON cannot be parsed
+	 * @throws IllegalArgumentException if {@code id} is {@code null} or the stored
+	 *                                  JSON cannot be parsed
 	 */
 	protected Bindex getBindex(String id) {
 		if (id == null) {
@@ -400,8 +402,8 @@ public class Picker implements AutoCloseable {
 	}
 
 	/**
-	 * Executes a vector search query for Bindexes by semantic embedding using MongoDB's aggregation
-	 * pipeline.
+	 * Executes a vector search query for Bindexes by semantic embedding using
+	 * MongoDB's aggregation pipeline.
 	 *
 	 * @param indexName    index name in MongoDB
 	 * @param propertyPath embedding property field path
@@ -410,8 +412,10 @@ public class Picker implements AutoCloseable {
 	 * @param bsons        additional filters (language, layers, etc.)
 	 * @return collection of result IDs ({@code name:version})
 	 */
-	@SuppressWarnings({"java:S3012"})
-	// FalsePositive Sonar reports S3012 on MongoDB driver's AggregateIterable#into(new ArrayList<>()) although it's the intended API usage.
+	@SuppressWarnings({ "java:S3012" })
+	// FalsePositive Sonar reports S3012 on MongoDB driver's
+	// AggregateIterable#into(new ArrayList<>()) although it's the intended API
+	// usage.
 	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
 			Bson... bsons) {
 		Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
@@ -428,7 +432,8 @@ public class Picker implements AutoCloseable {
 		}
 
 		pipeline.add(Aggregates.project(
-				Projections.fields(Projections.exclude("_id"), Projections.include(ID_FIELD_NAME), Projections.include(NAME_FIELD_NAME),
+				Projections.fields(Projections.exclude("_id"), Projections.include(ID_FIELD_NAME),
+						Projections.include(NAME_FIELD_NAME),
 						Projections.include(VERSION_FIELD_NAME), Projections.metaVectorSearchScore(SCORE_FIELD_NAME))));
 
 		pipeline.add(Aggregates.match(Filters.gte(SCORE_FIELD_NAME, score)));
