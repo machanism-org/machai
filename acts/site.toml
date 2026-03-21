@@ -11,7 +11,7 @@ Follow these steps:
    - Ensure the build completes successfully and the site is generated in the directory specified by the environment variable `MACHAI_SITE`.
 
 2. **Synchronize the Site to Cloudflare:**
-   - Do not change variable plaiceholder `${...}`, it will be change by the application.
+   - Do not change the placeholder variable `${...}`, it will be changed by the application.
    - Use the `rclone sync` command to synchronize the local site directory to the Cloudflare bucket.
    - The local directory path is given by the environment variable `MACHAI_SITE`.
    - The Cloudflare bucket name is `machai`.
