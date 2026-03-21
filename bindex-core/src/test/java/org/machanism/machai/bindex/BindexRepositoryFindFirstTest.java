@@ -1,6 +1,7 @@
 package org.machanism.machai.bindex;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;

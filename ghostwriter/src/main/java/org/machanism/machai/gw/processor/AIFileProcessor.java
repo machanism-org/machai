@@ -128,7 +128,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		String projectInfo = getProjectStructureDescription(projectLayout, file);
 
 		StringBuilder promptBuilder = new StringBuilder();
-		promptBuilder.append(projectInfo).append("\n");
+		promptBuilder.append(projectInfo).append(StringUtils.LF);
 
 		String promptLines = parseLines(prompt);
 		promptBuilder.append(promptLines);
@@ -196,7 +196,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		content.add(relativeFile);
 
 		Object[] array = content.toArray(new String[0]);
-		return MessageFormat.format(promptBundle.getString("project_information"), array) + "\n";
+		return MessageFormat.format(promptBundle.getString("project_information"), array) + StringUtils.LF;
 	}
 
 	/**
@@ -287,7 +287,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			while ((line = reader.readLine()) != null) {
 				String normalizedLine = StringUtils.stripToNull(line);
 				if (normalizedLine == null) {
-					sb.append("\n");
+					sb.append(StringUtils.LF);
 					continue;
 				}
 
@@ -295,7 +295,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				if (content != null) {
 					sb.append(content);
 				}
-				sb.append("\n");
+				sb.append(StringUtils.LF);
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);

@@ -201,7 +201,7 @@ public class Act extends AbstractGWGoal {
 		while ((line = prompter.prompt(prompt)) != null) {
 			prompt = "\t";
 			if (Strings.CS.endsWith(line, Ghostwriter.MULTIPLE_LINES_BREAKER)) {
-				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER)).append("\n");
+				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER)).append(StringUtils.LF);
 			} else {
 				sb.append(line);
 				break;

@@ -55,7 +55,7 @@ public class ActFunctionTools implements FunctionTools {
 	 */
 	private Object getActList(Object... args) throws IOException {
 		List<String> result = getBaseActList().stream().map(line -> "- `" + line).collect(Collectors.toList());
-		return StringUtils.join(result, "\n");
+		return StringUtils.join(result, StringUtils.LF);
 	}
 
 	public Set<String> getBaseActList() throws IOException {

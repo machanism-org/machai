@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
@@ -104,11 +104,11 @@ public class BindexBuilder {
 		if (origin != null) {
 			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
 			String updateBindexPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("update_bindex_prompt"), bindexStr);
-			prompt.append(updateBindexPrompt).append("\n");
+			prompt.append(updateBindexPrompt).append(StringUtils.LF);
 		}
 
-		prompt.append(projectContext()).append("\n");
-		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append("\n");
+		prompt.append(projectContext()).append(StringUtils.LF);
+		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append(StringUtils.LF);
 
 		provider.prompt(prompt.toString());
 

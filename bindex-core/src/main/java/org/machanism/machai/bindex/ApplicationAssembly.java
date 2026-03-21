@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
@@ -125,7 +126,7 @@ public class ApplicationAssembly {
 		String assemblyInstructions = MessageFormat.format(PROMPT_BUNDLE.getString("assembly_instructions"),
 				SystemUtils.OS_NAME);
 		bindexPrompt.append(assemblyInstructions);
-		bindexPrompt.append("\n");
+		bindexPrompt.append(StringUtils.LF);
 
 		StringBuilder picked = new StringBuilder();
 		for (Bindex bindex : bindexList) {

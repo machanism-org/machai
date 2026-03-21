@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +105,7 @@ public class FileFunctionTools implements FunctionTools {
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
 				String relativePath = getRelativePath(workingDir, file, true);
-				content.append(relativePath).append("\n");
+				content.append(relativePath).append(StringUtils.LF);
 			}
 		} else {
 			content.append("No files found in directory.");
@@ -113,7 +113,7 @@ public class FileFunctionTools implements FunctionTools {
 		result = content.toString();
 		if (logger.isInfoEnabled()) {
 			logger.info("List files recursively: {}, Result: {}", Arrays.toString(params),
-					StringUtils.abbreviate(result, 60).replace("\n", ""));
+					StringUtils.abbreviate(result, 60).replace(StringUtils.LF, ""));
 		}
 		logger.debug("List files recursively: {}, Result: {}", Arrays.toString(params), result);
 		return result;

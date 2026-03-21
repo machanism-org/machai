@@ -174,7 +174,7 @@ public class WebFunctionTools implements FunctionTools {
 
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
-						StringUtils.abbreviate(response, 80).replace("\n", " ").replace("\r", ""));
+						StringUtils.abbreviate(response, 80).replace(StringUtils.LF, " ").replace("\r", ""));
 			}
 			return response;
 
@@ -193,7 +193,7 @@ public class WebFunctionTools implements FunctionTools {
 		org.jsoup.select.Elements elements = doc.select(selector);
 		StringBuilder selectedContent = new StringBuilder();
 		for (org.jsoup.nodes.Element element : elements) {
-			selectedContent.append(element.outerHtml()).append("\n");
+			selectedContent.append(element.outerHtml()).append(StringUtils.LF);
 		}
 		return selectedContent.toString().trim();
 	}
@@ -202,7 +202,7 @@ public class WebFunctionTools implements FunctionTools {
 		if (!textOnly) {
 			return response;
 		}
-		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine("\n").toString();
+		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(StringUtils.LF).toString();
 	}
 
 	/**
@@ -256,13 +256,13 @@ public class WebFunctionTools implements FunctionTools {
 
 		int responseCode = connection.getResponseCode();
 		output.append("HTTP ").append(Integer.toString(responseCode)).append(" ")
-				.append(connection.getResponseMessage()).append("\n");
+				.append(connection.getResponseMessage()).append(StringUtils.LF);
 
 		try (InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				output.append(line).append("\n");
+				output.append(line).append(StringUtils.LF);
 			}
 		}
 
@@ -313,7 +313,7 @@ public class WebFunctionTools implements FunctionTools {
 			int responseCode = connection.getResponseCode();
 			StringBuilder response = new StringBuilder();
 			response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
-					.append("\n");
+					.append(StringUtils.LF);
 
 			return parseResult(requestId, charsetName, connection, responseCode, response);
 
@@ -330,7 +330,7 @@ public class WebFunctionTools implements FunctionTools {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					response.append(line).append("\n");
+					response.append(line).append(StringUtils.LF);
 				}
 			}
 

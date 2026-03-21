@@ -1,6 +1,10 @@
 package org.machanism.machai.gw.processor;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
@@ -138,6 +143,6 @@ class AIFileProcessorAdditionalTest {
 		// Assert
 		assertTrue(out.contains("hello"));
 		assertTrue(out.contains("world"));
-		assertTrue(out.endsWith("\n"), "parseLines should append newline after each input line");
+		assertTrue(out.endsWith(StringUtils.LF), "parseLines should append newline after each input line");
 	}
 }

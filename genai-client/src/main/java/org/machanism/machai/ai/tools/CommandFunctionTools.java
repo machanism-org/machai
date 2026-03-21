@@ -17,6 +17,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -297,7 +298,7 @@ public class CommandFunctionTools implements FunctionTools {
 			return "Error: Invalid or unsafe command.";
 
 		} catch (TimeoutException e) {
-			output.append("Output reading timed out.").append("\n");
+			output.append("Output reading timed out.").append(StringUtils.LF);
 			logger.error("[CMD {}] Output reading timed out", commandId, e);
 			return output.getLastText();
 
@@ -334,7 +335,7 @@ public class CommandFunctionTools implements FunctionTools {
 		if (!finished) {
 			process.destroyForcibly();
 			output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds)).append(" seconds.")
-					.append("\n");
+					.append(StringUtils.LF);
 			logger.warn("[CMD {}] Command timed out", commandId);
 		}
 
@@ -342,7 +343,7 @@ public class CommandFunctionTools implements FunctionTools {
 		stderrFuture.get(5, TimeUnit.SECONDS);
 
 		int exitCode = process.exitValue();
-		output.append("Command exited with code: ").append(Integer.toString(exitCode)).append("\n");
+		output.append("Command exited with code: ").append(Integer.toString(exitCode)).append(StringUtils.LF);
 		return output.getLastText();
 	}
 
@@ -464,7 +465,7 @@ public class CommandFunctionTools implements FunctionTools {
 				new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				output.append(line).append("\n");
+				output.append(line).append(StringUtils.LF);
 				lineConsumer.accept(line);
 			}
 		} catch (IOException e) {

@@ -5,7 +5,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -85,7 +85,7 @@ public class BindexFunctionTools implements FunctionTools {
 		String bindexJson = bindex == null ? "null" : objectMapper.writeValueAsString(bindex);
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("Retrieved bindex: {}",
-					StringUtils.abbreviate(bindexJson, 120).replace("\n", " ").replace("\r", ""));
+					StringUtils.abbreviate(bindexJson, 120).replace(StringUtils.LF, " ").replace("\r", ""));
 		}
 		return bindexJson;
 	}
@@ -102,7 +102,7 @@ public class BindexFunctionTools implements FunctionTools {
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Bindex schema: {}",
-					StringUtils.abbreviate(schema, 120).replace("\n", " ").replace("\r", ""));
+					StringUtils.abbreviate(schema, 120).replace(StringUtils.LF, " ").replace("\r", ""));
 		}
 		return schema;
 	}

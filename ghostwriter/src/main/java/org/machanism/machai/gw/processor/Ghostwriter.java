@@ -12,8 +12,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
@@ -228,7 +228,7 @@ public final class Ghostwriter {
 			while (scanner.hasNextLine()) {
 				String nextLine = scanner.nextLine();
 				if (StringUtils.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
-					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append("\n");
+					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(StringUtils.LF);
 					System.out.print("\t");
 				} else {
 					sb.append(nextLine);
