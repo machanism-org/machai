@@ -40,4 +40,4 @@ Build the Maven project site and synchronize it to the Cloudflare bucket.
 %s
 '''
 
-
+gw.nonRecursive = "true"
