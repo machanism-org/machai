@@ -87,8 +87,8 @@ import com.openai.services.blocking.ModelService;
  * {@code 0}, or negative, the SDK default timeouts are used.</li>
  * <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum number of output tokens.
  * Defaults to {@link #MAX_OUTPUT_TOKENS}.</li>
- * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls allowed in
- * a single response. Defaults to {@link #MAX_TOOL_CALLS}.</li>
+ * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls allowed
+ * in a single response. Defaults to {@link #MAX_TOOL_CALLS}.</li>
  * </ul>
  */
 public class OpenAIProvider implements GenAIProvider {
@@ -267,9 +267,25 @@ public class OpenAIProvider implements GenAIProvider {
 		Response current = response;
 		List<ResponseInputItem> currentInputs = new ArrayList<>(this.inputs);
 		while (current != null) {
-			ToolHandlingResult handlingResult = handleResponseOutput(current.output(), currentInputs);
-			if (!handlingResult.anyToolCalls) {
-				return handlingResult.text;
+			boolean anyToolCalls = false;
+			String text = null;
+			for (ResponseOutputItem item : current.output()) {
+				if (item.isFunctionCall()) {
+					anyToolCalls = true;
+					handleFunctionCall(item.asFunctionCall(), currentInputs);
+				}
+				String reasoning = extractReasoningText(item);
+				if (StringUtils.isNotBlank(reasoning)) {
+					text = reasoning;
+				}
+				String messageText = extractMessageText(item);
+				if (StringUtils.isNotBlank(messageText)) {
+					text = messageText;
+				}
+			}
+
+			if (!anyToolCalls) {
+				return text;
 			}
 
 			ResponseCreateParams params = createResponseBuilder(currentInputs);
@@ -295,35 +311,6 @@ public class OpenAIProvider implements GenAIProvider {
 		}
 	}
 
-	/**
-	 * Processes response output items, executing tool calls and extracting text.
-	 *
-	 * @param output        response output items
-	 * @param currentInputs list of accumulated inputs (will be mutated with tool call items)
-	 * @return tool handling result
-	 */
-	private ToolHandlingResult handleResponseOutput(List<ResponseOutputItem> output, List<ResponseInputItem> currentInputs) {
-		boolean anyToolCalls = false;
-		String text = null;
-
-		for (ResponseOutputItem item : output) {
-			if (item.isFunctionCall()) {
-				anyToolCalls = true;
-				handleFunctionCall(item.asFunctionCall(), currentInputs);
-			}
-			String reasoning = extractReasoningText(item);
-			if (StringUtils.isNotBlank(reasoning)) {
-				text = reasoning;
-			}
-			String messageText = extractMessageText(item);
-			if (StringUtils.isNotBlank(messageText)) {
-				text = messageText;
-			}
-		}
-
-		return new ToolHandlingResult(anyToolCalls, text);
-	}
-
 	private void handleFunctionCall(ResponseFunctionToolCall functionCall, List<ResponseInputItem> currentInputs) {
 		currentInputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
@@ -339,7 +326,8 @@ public class OpenAIProvider implements GenAIProvider {
 			return null;
 		}
 		ResponseReasoningItem reasoningItem = item.asReasoning();
-		Optional<List<com.openai.models.responses.ResponseReasoningItem.Content>> maybeContent = reasoningItem.content();
+		Optional<List<com.openai.models.responses.ResponseReasoningItem.Content>> maybeContent = reasoningItem
+				.content();
 		return maybeContent.map(this::firstNonBlankReasoning).orElse(null);
 	}
 
@@ -575,7 +563,8 @@ public class OpenAIProvider implements GenAIProvider {
 	}
 
 	/**
-	 * Returns token usage metrics captured from the most recent {@link #perform()} call.
+	 * Returns token usage metrics captured from the most recent {@link #perform()}
+	 * call.
 	 *
 	 * @return usage metrics; never {@code null}
 	 */
