@@ -10,7 +10,6 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
-import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,20 +105,21 @@ public class BindexCommand {
 	@ShellMethod("Registers bindex file.")
 	public void register(
 			@ShellOption(value = { "-d",
-					"--dir" }, help = "The path to the project  directory.", defaultValue = ShellOption.NULL) File dir,
+					ProjectLayout.PROJECT_DIR_PROP_NAME }, help = "The path to the project  directory.", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(value = { "-r",
 					"--registerUrl" }, defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.") String registerUrl,
 			@ShellOption(value = { "-u",
 					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "true") boolean update,
 			@ShellOption(value = { "-m",
-					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `OpenAI:gpt-5.1`).", defaultValue = ShellOption.NULL) String model)
+					BindexCreator.MODEL_PROP_NAME }, help = "Specifies the GenAI service provider and model (e.g., `"
+							+ BindexCreator.DEFAULT_MODEL + "`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
 		try {
 			dir = Optional.ofNullable(dir).orElse(
 					ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 			model = Optional.ofNullable(model)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_MODEL_PROP_NAME, BindexCreator.DEFAULT_MODEL));
+					.orElse(ConfigCommand.config.get(BindexCreator.MODEL_PROP_NAME, BindexCreator.DEFAULT_MODEL));
 
 			logger.info("The project directory: {}", dir);
 			logger.info("GenAI model: {}", model);

@@ -245,10 +245,10 @@ public class AssembyCommand {
 	@ShellMethod("Is used for request additional GenAI guidances.")
 	public void prompt(@ShellOption(value = { "-q", "--query" }, help = "The user prompt to GenAI.") String query,
 			@ShellOption(value = { "-m",
-					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `"
+					ApplicationAssembly.MODEL_PROP_NAME }, help = "Specifies the GenAI service provider and model (e.g., `"
 							+ ApplicationAssembly.DEFAULT_MODEL + "`).") String chatModel,
 			@ShellOption(value = { "-d",
-					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
+					ProjectLayout.PROJECT_DIR_PROP_NAME }, defaultValue = ShellOption.NULL, help = "Path to the working directory.") File dir) {
 
 		try {
 			chatModel = Optional.ofNullable(chatModel)
@@ -257,7 +257,8 @@ public class AssembyCommand {
 			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
 
 			FunctionToolsLoader.getInstance().applyTools(provider);
-			dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+			dir = Optional.ofNullable(dir).orElse(
+					ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 			provider.setWorkingDir(dir);
 
 			provider.prompt(query);

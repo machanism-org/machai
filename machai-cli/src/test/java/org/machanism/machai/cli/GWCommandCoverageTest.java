@@ -141,10 +141,10 @@ class GWCommandCoverageTest {
 		String[] excludes = new String[] { "a", "b" };
 		File root = new File(".");
 		String scanDir = "src";
-		String genai = "X:Y";
+		String model = "X:Y";
 
 		// Act
-		Object processingCtx = processingCtor.newInstance(root, scanDir, genai, propsCfg, excludes, promptCtx, execCtx);
+		Object processingCtx = processingCtor.newInstance(root, scanDir, model, propsCfg, excludes, promptCtx, execCtx);
 
 		// Assert (via reflective field reads)
 		assertEquals("instr", getField(promptCtx, "instructionsValue"));
@@ -154,7 +154,7 @@ class GWCommandCoverageTest {
 
 		assertEquals(root, getField(processingCtx, "projectDir"));
 		assertEquals(scanDir, getField(processingCtx, "scanDir"));
-		assertEquals(genai, getField(processingCtx, "genaiValue"));
+		assertEquals(model, getField(processingCtx, "genaiValue"));
 		assertSame(propsCfg, getField(processingCtx, "config"));
 		assertArrayEquals(excludes, (String[]) getField(processingCtx, "excludesArr"));
 		assertSame(promptCtx, getField(processingCtx, "prompts"));

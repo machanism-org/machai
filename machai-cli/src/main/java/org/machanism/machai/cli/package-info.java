@@ -1,25 +1,8 @@
 /**
- * Command-line interface (CLI) layer for Machai.
+ * Command-line interface (CLI) entry points and supporting components for the Machai tool.
  *
- * <p>
- * This package contains Spring Shell commands that expose Machai capabilities as
- * interactive CLI operations. Commands typically:
- *
- * <ul>
- * <li>Read defaults from the persisted configuration managed by {@link org.machanism.machai.cli.ConfigCommand}.</li>
- * <li>Resolve the working/project directory and related options.</li>
- * <li>Delegate the heavy lifting to the underlying Machai modules (Ghostwriter,
- * bindex/picker, and project assembly).</li>
- * </ul>
- *
- * <h2>Usage</h2>
- * <pre>
- * gw --scanDir .\\my-project --model OpenAI:gpt-5.1
- * act commit "and push"
- * pick --query "Create a web app" --score 0.8
- * assembly --dir .\\out
- * clean --dir .\\my-project
- * </pre>
+ * <p>This package provides the public-facing CLI surface area, including command definitions, option parsing,
+ * and console I/O coordination.
  */
 package org.machanism.machai.cli;
 
