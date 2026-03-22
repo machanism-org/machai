@@ -98,7 +98,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws IOException
 	 */
 	private String getBindexSchema(Object[] params) throws IOException {
-		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE_PATH);
+		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Bindex schema: {}",

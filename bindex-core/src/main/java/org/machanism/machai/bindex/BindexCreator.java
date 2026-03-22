@@ -40,7 +40,7 @@ public class BindexCreator extends BindexProjectProcessor {
 
 	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
 
-	public static String MODEL_PROP_NAME = "bindex.model";
+	public static final String MODEL_PROP_NAME = "bindex.model";
 
 	/** Provider identifier used for AI-assisted Bindex creation. */
 	private final String model;

@@ -10,9 +10,11 @@ import java.util.ResourceBundle;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
 
@@ -24,7 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <ul>
  * <li>the Bindex JSON schema,</li>
  * <li>project-specific context supplied by subclasses, and</li>
- * <li>optional prior (origin) {@code Bindex} content for incremental updates.</li>
+ * <li>optional prior (origin) {@code Bindex} content for incremental
+ * updates.</li>
  * </ul>
  *
  * <p>
@@ -48,13 +51,13 @@ public class BindexBuilder {
 	public static final String BINDEX_TEMP_DIR = ".machai/bindex-inputs.txt";
 
 	/** Classpath resource path to the Bindex JSON schema. */
-	private static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
-
-	public static final String BINDEX_SCHEMA_RESOURCE_PATH = BINDEX_SCHEMA_RESOURCE;
+	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 
 	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
 
-	/** Optional origin {@link Bindex} from which the builder can request an update. */
+	/**
+	 * Optional origin {@link Bindex} from which the builder can request an update.
+	 */
 	private Bindex origin;
 
 	/** Project layout used to locate files and contextual data for generation. */
@@ -74,6 +77,7 @@ public class BindexBuilder {
 	public BindexBuilder(ProjectLayout projectLayout, String genai, Configurator config) {
 		this.projectLayout = projectLayout;
 		this.provider = GenAIProviderManager.getProvider(genai, config);
+		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		String systemPrompt = PROMPT_BUNDLE.getString("bindex_system_instructions");
 		provider.instructions(systemPrompt);
@@ -88,7 +92,8 @@ public class BindexBuilder {
 	 * <li>optionally adds an update request if {@link #origin(Bindex)} was
 	 * provided,</li>
 	 * <li>adds project context via {@link #projectContext()},</li>
-	 * <li>issues the generation prompt and calls {@link GenAIProvider#perform()},</li>
+	 * <li>issues the generation prompt and calls
+	 * {@link GenAIProvider#perform()},</li>
 	 * <li>deserializes the provider output into a {@link Bindex}.</li>
 	 * </ol>
 	 *
@@ -103,12 +108,14 @@ public class BindexBuilder {
 
 		if (origin != null) {
 			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
-			String updateBindexPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("update_bindex_prompt"), bindexStr);
+			String updateBindexPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("update_bindex_prompt"),
+					bindexStr);
 			prompt.append(updateBindexPrompt).append(StringUtils.LF);
 		}
 
-		prompt.append(projectContext()).append(StringUtils.LF);
-		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append(StringUtils.LF);
+		prompt.append(projectContext()).append(StringUtils.LF).append(StringUtils.LF);
+		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append(StringUtils.LF)
+				.append(StringUtils.LF);
 
 		provider.prompt(prompt.toString());
 
@@ -121,9 +128,10 @@ public class BindexBuilder {
 		}
 
 		String normalizedOutput = output;
-		if (StringUtils.startsWith(normalizedOutput, "```json")) {
+		if (Strings.CS.startsWith(normalizedOutput, "```json")) {
 			normalizedOutput = StringUtils.substringBetween(normalizedOutput, "```json", "```");
 		}
+
 		return new ObjectMapper().readValue(normalizedOutput, Bindex.class);
 	}
 
