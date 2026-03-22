@@ -1,18 +1,18 @@
 {
-  "id" : "org.machanism.machai:ghostwriter:0.0.13-SNAPSHOT",
+  "id" : "org.machanism.machai:ghostwriter:1.0.2",
   "name" : "org.machanism.machai:ghostwriter",
-  "version" : "0.0.13-SNAPSHOT",
+  "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
-    "repositoryUrl" : "https://repo.maven.apache.org/maven2",
+    "repositoryUrl" : "https://central.sonatype.com/repository/maven-snapshots",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "ghostwriter",
-      "version" : "0.0.13-SNAPSHOT",
+      "version" : "1.0.2",
       "extension" : "jar"
     }
   },
-  "description" : "Ghostwriter is a Java library and CLI for automated documentation and content generation across project repositories using embedded \"@guidance:\" directives and GenAI-powered synthesis. It scans single-module or multi-module Maven project trees (child-first traversal), discovers supported files via a pluggable ServiceLoader-based Reviewer SPI, and extracts per-file guidance from comment syntaxes for different formats (Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and special @guidance.txt files). For each matched file, Ghostwriter composes a prompt that includes environment context, project layout metadata (sources/tests/docs/modules), and the extracted guidance (with template substitution from project properties), then dispatches it to a configured GenAI provider through machai genai-client (GenAIProvider/GenAIProviderManager) with optional function tools. The CLI supports include patterns (glob:/regex:), exclude patterns, optional default guidance applied to the current directory when files lack embedded directives, configurable system instructions that can be loaded from text/URL/file references, and optional per-file input logging to a temporary .machai/docs-inputs area. The tool is designed for documentation automation pipelines and repository-wide content operations (source code Javadoc maintenance, docs/site updates, and diagram/markdown enrichment) without building projects or resolving dependencies during scanning.",
+  "description" : "Ghostwriter is a Java library and command-line tool (CLI) for automated project-wide documentation and content generation driven by embedded \"@guidance:\" directives and GenAI-powered synthesis. It scans single-module or multi-module Maven project trees (child-first traversal via ProjectLayout modules), discovers supported file types through a pluggable ServiceLoader-based Reviewer SPI, and extracts guidance from different comment syntaxes across Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and special \"@guidance.txt\" files. Ghostwriter composes per-file GenAI prompts that include local environment information, a standardized project layout description (sources/tests/docs/modules, parent metadata, and project-relative paths), and either extracted guidance fragments or default prompts. It then dispatches requests to a configured GenAI provider through machai genai-client (GenAIProvider/GenAIProviderManager) and can apply optional function tools via FunctionToolsLoader. The CLI supports scan directory arguments that can be raw paths or glob:/regex: matchers, optional excludes (exact paths or matchers), optional non-recursive module traversal, configurable multi-threaded module processing, and optional prompt-input logging under .machai/docs-inputs for auditing. Ghostwriter also supports an \"Act\" mode: predefined TOML-based prompt templates (acts) loaded from built-in resources and/or a user directory/URL, with inheritance via basedOn, forwarding of additional keys into runtime configuration, and act-related function tools for listing and inspecting available acts. The tool operates strictly on the filesystem (no builds or dependency resolution during scanning) and is intended for documentation automation pipelines, repository-wide content operations, and prompt orchestration in Maven-based repositories.",
   "authors" : [ {
     "name" : "Viktor Tovstyi",
     "email" : "viktor.tovstyi@gmail.com",
@@ -21,40 +21,49 @@
   "license" : "Apache License, Version 2.0",
   "classification" : {
     "type" : "library",
-    "domains" : [ "Documentation", "Developer Tools", "Build Tooling", "GenAI Integration", "Static Analysis", "Code Generation" ],
+    "domains" : [ "Documentation", "Developer Tools", "Build Tooling", "GenAI Integration", "Prompt Orchestration", "Repository Scanning", "Static Analysis", "Code Generation" ],
     "languages" : [ {
-      "name" : "Java"
+      "name" : "Java",
+      "version" : "not defined"
     } ],
     "layers" : [ "Interactors", "Adapters", "Infrastructure" ],
-    "usageContext" : [ "CLI", "Library API", "Maven-based projects", "Repository scanning", "Documentation generation pipeline", "Prompt orchestration", "Multi-module project traversal", "Template substitution", "Optional multi-threaded module processing", "Input auditing via prompt input logs" ],
+    "usageContext" : [ "CLI", "Library API", "Maven-based projects", "Multi-module project traversal (child-first)", "Filesystem-only scanning (no build/dependency resolution)", "Guidance extraction via embedded @guidance directives", "Act mode (TOML prompt templates with inheritance)", "Prompt input logging/auditing" ],
     "targetEnvironment" : [ "Java" ],
     "integrations" : [ "Maven" ]
   },
   "constructors" : [ {
     "package" : "org.machanism.machai.gw.processor",
-    "signature" : "org.machanism.machai.gw.processor.GuidanceProcessor(java.io.File rootDir, java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator configurator)",
-    "description" : "Creates a Ghostwriter file processor bound to a root directory and a GenAI provider key/model. The processor loads Reviewer implementations via java.util.ServiceLoader, initializes function tools with the provided configurator, and prepares to scan project trees for files containing \"@guidance:\" directives.",
+    "signature" : "org.machanism.machai.gw.processor.GuidanceProcessor(java.io.File projectDir, java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator configurator)",
+    "description" : "Creates a guidance-driven processor bound to a project root directory and a GenAI provider/model key. The processor initializes Reviewer implementations via java.util.ServiceLoader, and prepares to traverse the project layout (including child modules) to extract embedded \"@guidance:\" directives and dispatch prompts to the configured GenAI provider.",
     "examples" : [ {
-      "snippet" : "java.io.File root = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.GuidanceProcessor(root, \"OpenAI:gpt-5.1\", cfg);",
-      "description" : "Construct a FileProcessor for the current directory and configure it to use a specific GenAI provider/model key as resolved by org.machanism.machai.ai.manager.GenAIProviderManager."
+      "snippet" : "java.io.File root = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(root, \"OpenAI:gpt-5.1\", cfg);",
+      "description" : "Construct a GuidanceProcessor for the current directory with a specific provider/model key."
+    } ]
+  }, {
+    "package" : "org.machanism.machai.gw.processor",
+    "signature" : "org.machanism.machai.gw.processor.ActProcessor(java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator, java.lang.String genai)",
+    "description" : "Creates an Act-mode processor bound to a project root directory and a GenAI provider/model key. Acts are TOML templates loaded from built-in resources and/or a user-specified directory/URL and can configure instructions, prompt inputs, concurrency, excludes, and non-recursive traversal.",
+    "examples" : [ {
+      "snippet" : "java.io.File root = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(root, cfg, \"OpenAI:gpt-5.1\");",
+      "description" : "Construct an ActProcessor for the current directory with a specific provider/model key."
     } ]
   } ],
   "features" : [ {
     "name" : "scanDocuments",
     "package" : "org.machanism.machai.gw.processor",
     "signature" : "void scanDocuments(java.io.File basedir) throws java.io.IOException",
-    "description" : "Scans a project tree rooted at the provided base directory, discovering modules (unless non-recursive) and processing files supported by registered Reviewers. Guidance is extracted per file and prompts are dispatched to the configured GenAI provider.",
+    "description" : "Scans a project tree rooted at the provided base directory using the project layout, discovers modules (unless non-recursive) and processes supported files. Subclasses decide how to build prompts (e.g., extracted guidance vs. act template) and invoke the configured GenAI provider.",
     "examples" : [ {
-      "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.GuidanceProcessor(root, \"OpenAI:gpt-5.1\", cfg);\nfp.scanDocuments(root);",
-      "description" : "Run a full scan starting at the project root."
+      "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(root, \"OpenAI:gpt-5.1\", cfg);\nprocessor.scanDocuments(root);",
+      "description" : "Run a full project scan starting at the project root."
     } ]
   }, {
     "name" : "scanDocuments",
     "package" : "org.machanism.machai.gw.processor",
     "signature" : "void scanDocuments(java.io.File projectDir, java.lang.String scanDir) throws java.io.IOException",
-    "description" : "Scans within a project directory using either a relative start directory or a glob:/regex: matcher. When a directory path is provided, it is validated to be within the project root; a matcher is created to constrain processing to matching paths.",
+    "description" : "Scans within a project directory using either a relative start directory or a glob:/regex: matcher. If a directory path is provided, it must be within the project root; a PathMatcher is created to constrain processing to matching paths. Applies function tool configuration initialization before scanning.",
     "examples" : [ {
-      "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.FileProcessor fp = new org.machanism.machai.gw.processor.GuidanceProcessor(root, \"OpenAI:gpt-5.1\", cfg);\nfp.scanDocuments(root, \"glob:**/*.java\");",
+      "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.macha.core.commons.configurator.Configurator cfg = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator();\norg.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(root, \"OpenAI:gpt-5.1\", cfg);\nprocessor.scanDocuments(root, \"glob:**/*.java\");",
       "description" : "Scan only Java files anywhere under the project directory using a glob matcher."
     } ]
   }, {
@@ -64,55 +73,56 @@
     "description" : "Pluggable SPI for file-type specific scanners that extract embedded \"@guidance:\" directives and produce normalized prompt fragments. Implementations are discovered via java.util.ServiceLoader and mapped by supported file extensions.",
     "examples" : [ {
       "snippet" : "java.util.ServiceLoader<org.machanism.machai.gw.reviewer.Reviewer> sl = java.util.ServiceLoader.load(org.machanism.machai.gw.reviewer.Reviewer.class);\nfor (org.machanism.machai.gw.reviewer.Reviewer r : sl) {\n  java.lang.String[] exts = r.getSupportedFileExtensions();\n}",
-      "description" : "Discover installed Reviewer implementations using ServiceLoader (the same mechanism used by FileProcessor)."
+      "description" : "Discover installed Reviewer implementations using ServiceLoader."
     } ]
   }, {
     "name" : "CLI entry point",
     "package" : "org.machanism.machai.gw.processor",
-    "signature" : "static void main(java.lang.String[] args) throws java.io.IOException",
-    "description" : "Command-line interface that loads configuration (gw.properties), parses options (root directory, GenAI provider/model, instructions, default guidance, excludes, multi-threading, and input logging), and runs FileProcessor scans for one or more scan paths/patterns.",
+    "signature" : "static void main(java.lang.String[] args) throws java.io.IOException, org.apache.commons.cli.ParseException",
+    "description" : "Command-line interface that loads configuration (gw.properties), parses options (projectDir, model, instructions, guidance/act, excludes, threads, input logging, acts directory), resolves scan paths/patterns, and runs scans. Supports default scanDir configuration and interactive input when options are provided without values.",
     "examples" : [ {
-      "snippet" : "java.lang.String[] args = new java.lang.String[] {\"glob:**/*.md\", \"-r\", \".\", \"-a\", \"OpenAI:gpt-5.1\", \"-l\"};\norg.machanism.machai.gw.processor.Ghostwriter.main(args);",
+      "snippet" : "java.lang.String[] args = new java.lang.String[] {\"glob:**/*.md\", \"-d\", \".\", \"-m\", \"OpenAI:gpt-5.1\", \"-l\"};\norg.machanism.machai.gw.processor.Ghostwriter.main(args);",
       "description" : "Invoke the CLI programmatically to scan Markdown files under the current directory and enable input logging."
     } ]
   } ],
   "customizations" : [ {
     "name" : "Reviewer",
     "package" : "org.machanism.machai.gw.reviewer",
-    "description" : "Extension point for adding support for additional file formats or custom guidance extraction rules. Implement org.machanism.machai.gw.reviewer.Reviewer and register it via Java ServiceLoader so FileProcessor can discover it and map it by file extension.",
+    "description" : "Extension point for adding support for additional file formats or custom guidance extraction rules. Implement org.machanism.machai.gw.reviewer.Reviewer and register it via Java ServiceLoader so GuidanceProcessor can discover it and map it by file extension.",
     "type" : "interface",
     "examples" : [ {
-      "snippet" : "public final class MyReviewer implements org.machanism.machai.gw.reviewer.Reviewer {\n  public java.lang.String perform(java.io.File projectDir, java.io.File file) throws java.io.IOException {\n    return null;\n  }\n  public java.lang.String[] getSupportedFileExtensions() {\n    return new java.lang.String[] {\"adoc\"};\n  }\n}",
+      "snippet" : "public final class MyReviewer implements org.machanism.machai.gw.reviewer.Reviewer {\n  @Override\n  public java.lang.String perform(java.io.File projectDir, java.io.File file) throws java.io.IOException {\n    return null;\n  }\n\n  @Override\n  public java.lang.String[] getSupportedFileExtensions() {\n    return new java.lang.String[] {\"adoc\"};\n  }\n}",
       "description" : "Define a custom Reviewer (e.g., for AsciiDoc) and register it under META-INF/services/org.machanism.machai.gw.reviewer.Reviewer."
     } ]
   }, {
-    "name" : "System instructions and default guidance loading",
+    "name" : "Act templates (TOML) and inheritance",
     "package" : "org.machanism.machai.gw.processor",
-    "description" : "Customize per-run prompt behavior using FileProcessor.setInstructions(String) and FileProcessor.setDefaultGuidance(String). Both support multi-line text and expansion of lines referencing http(s) URLs or file: paths (with system property substitution for file paths).",
-    "type" : "method",
+    "description" : "Customize prompt orchestration by creating TOML-based acts loaded from classpath (/acts) and/or a user directory/URL (gw.acts). Acts support basedOn inheritance, instructions, inputs templates (String.format), and gw.* runtime options such as threads/excludes/nonRecursive, plus forwarding of other keys into configuration.",
+    "type" : "configuration property",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.gw.processor.GuidanceProcessor fp = new org.machanism.machai.gw.processor.GuidanceProcessor(new java.io.File(\".\"), \"OpenAI:gpt-5.1\", new org.machanism.macha.core.commons.configurator.PropertiesConfigurator());\nfp.setInstructions(\"file:instructions.txt\");\nfp.setDefaultGuidance(\"Please update module-level documentation.\");",
-      "description" : "Provide global system instructions from a file and a fallback default guidance message."
+      "snippet" : "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), new org.machanism.macha.core.commons.configurator.PropertiesConfigurator(), \"OpenAI:gpt-5.1\");\nprocessor.setActsLocation(\"/path/to/acts\");\nprocessor.setDefaultPrompt(\"help How do acts work?\");",
+      "description" : "Configure Act mode to load external acts and execute the built-in help act with a custom prompt."
     } ]
   } ],
   "studs" : [ {
     "name" : "org.machanism.machai.gw.reviewer.Reviewer",
     "package" : "org.machanism.machai.gw.reviewer",
     "type" : "interface",
-    "description" : "SPI for file reviewers that extract \"@guidance\" directives and produce formatted prompt fragments for Ghostwriter processing. Implementations declare supported file extensions and are discovered via ServiceLoader.",
+    "description" : "SPI for file reviewers that extract \"@guidance:\" directives and produce formatted prompt fragments for Ghostwriter processing. Implementations declare supported file extensions and are discovered via ServiceLoader.",
     "examples" : [ {
       "snippet" : "public interface Reviewer {\n  java.lang.String perform(java.io.File projectDir, java.io.File file) throws java.io.IOException;\n  java.lang.String[] getSupportedFileExtensions();\n}",
-      "description" : "Core SPI surface used by FileProcessor to support multiple file formats."
+      "description" : "Core SPI surface used by GuidanceProcessor to support multiple file formats."
     } ],
     "methods" : [ ]
   } ],
   "examples" : [ {
     "name" : "CLI scan with glob include and excludes",
-    "command" : "java -jar gw.jar \"glob:**/*.java\" -r . -a \"OpenAI:gpt-5.1\" -e target,.git -l",
+    "command" : "java -jar gw.jar \"glob:**/*.java\" -d . -m \"OpenAI:gpt-5.1\" -e target,.git -l",
     "description" : "Scan Java files under the current directory, exclude build and VCS folders, run with a configured GenAI provider/model, and log composed prompt inputs."
   }, {
-    "name" : "Library usage with constrained scanDir",
-    "description" : "Use FileProcessor directly to scan a subset of the project using a glob matcher and enable multi-threaded module processing when the provider supports it."
+    "name" : "Act mode execution",
+    "command" : "java -jar gw.jar \"glob:.\" -d . -m \"OpenAI:gpt-5.1\" --act \"help How do I create an act?\"",
+    "description" : "Run Ghostwriter in Act mode using the built-in help act and a custom prompt, scanning the current project directory."
   } ],
-  "dependencies" : [ "org.machanism.machai:project-layout:0.0.13-SNAPSHOT", "org.machanism.machai:genai-client:0.0.13-SNAPSHOT", "commons-cli:commons-cli:1.9.0", "commons-lang:commons-lang:2.6", "org.apache.maven:maven-model:3.6.0", "org.apache.maven:maven-plugin-api:3.6.0", "org.apache.maven:maven-core:3.6.0", "org.apache.maven.resolver:maven-resolver-connector-basic:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-file:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-http:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-wagon:1.3.3", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
+  "dependencies" : [ "org.machanism.machai:project-layout:1.0.2", "org.machanism.machai:genai-client:1.0.2", "commons-cli:commons-cli:1.9.0", "org.apache.commons:commons-lang3:3.18.0", "org.junit.jupiter:junit-jupiter-params:5.10.2", "org.apache.maven:maven-model:3.8.1", "org.apache.maven:maven-plugin-api:3.8.1", "org.apache.maven:maven-core:3.8.1", "org.apache.maven.resolver:maven-resolver-connector-basic:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-file:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-http:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-wagon:1.3.3", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
 }
