@@ -1,14 +1,14 @@
 {
-  "id" : "org.machanism.machai:bindex-maven-plugin:1.0.2-SNAPSHOT",
+  "id" : "org.machanism.machai:bindex-maven-plugin:1.0.2",
   "name" : "org.machanism.machai:bindex-maven-plugin",
-  "version" : "1.0.2-SNAPSHOT",
+  "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
     "repositoryUrl" : "https://repo1.maven.org/maven2/",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "bindex-maven-plugin",
-      "version" : "1.0.2-SNAPSHOT",
+      "version" : "1.0.2",
       "extension" : "maven-plugin"
     }
   },
@@ -189,5 +189,5 @@
     "snippet" : "mvn org.machanism.machai:bindex-maven-plugin:clean",
     "notes" : "Removes .machai/bindex-inputs.txt if present."
   } ],
-  "dependencies" : [ "org.machanism.machai:bindex-core:1.0.2-SNAPSHOT", "org.apache.maven.shared:maven-shared-utils:3.4.2", "org.apache.maven:maven-core:3.8.1", "org.apache.maven:maven-plugin-api:3.0", "org.apache.maven.plugin-tools:maven-plugin-annotations:3.4", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
+  "dependencies" : [ "org.machanism.machai:bindex-core:1.0.2", "org.apache.maven.shared:maven-shared-utils:3.4.2", "org.apache.maven:maven-core:3.8.1", "org.apache.maven:maven-plugin-api:3.0", "org.apache.maven.plugin-tools:maven-plugin-annotations:3.4", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
 }

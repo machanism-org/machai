@@ -1,14 +1,14 @@
 {
-  "id" : "org.machanism.machai:genai-client:1.0.2-SNAPSHOT",
+  "id" : "org.machanism.machai:genai-client:1.0.2",
   "name" : "org.machanism.machai:genai-client",
-  "version" : "1.0.2-SNAPSHOT",
+  "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
     "repositoryUrl" : "https://central.sonatype.com/repository/maven-snapshots",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "genai-client",
-      "version" : "1.0.2-SNAPSHOT",
+      "version" : "1.0.2",
       "extension" : "jar"
     }
   },

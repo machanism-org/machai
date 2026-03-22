@@ -1,14 +1,14 @@
 {
-  "id" : "org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT",
+  "id" : "org.machanism.machai:assembly-maven-plugin:1.0.2",
   "name" : "org.machanism.machai:assembly-maven-plugin",
-  "version" : "1.0.2-SNAPSHOT",
+  "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
     "repositoryUrl" : "https://repo1.maven.org/maven2/",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "assembly-maven-plugin",
-      "version" : "1.0.2-SNAPSHOT",
+      "version" : "1.0.2",
       "extension" : "maven-plugin"
     }
   },
@@ -34,7 +34,7 @@
     "signature" : "public org.machanism.machai.assembly.maven.Assembly()",
     "description" : "Creates a new Maven Mojo instance for the \"assembly\" goal. Configuration is injected via Maven @Parameter fields and system properties; at execution time the Mojo reads a natural-language assembly prompt from a file or via interactive prompting, runs a Picker phase to recommend libraries as Bindex entries, filters by a score threshold, then runs ApplicationAssembly to apply changes to the target project directory.",
     "examples" : [ {
-      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly -Dassembly.genai=OpenAI:gpt-5 -Dpick.genai=OpenAI:gpt-5-mini -Dassembly.prompt.file=project.txt -Dassembly.score=0.8",
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dassembly.genai=OpenAI:gpt-5 -Dpick.genai=OpenAI:gpt-5-mini -Dassembly.prompt.file=project.txt -Dassembly.score=0.8",
       "description" : "Runs the \"assembly\" goal from the command line, configuring separate GenAI providers for picking and assembly, reading the prompt from project.txt, and requiring a minimum recommendation score of 0.8."
     } ]
   } ],
@@ -44,13 +44,13 @@
     "signature" : "public void execute() throws org.apache.maven.plugin.MojoExecutionException",
     "description" : "Implements the Maven \"assembly\" goal. Reads an assembly prompt from the configured file (property \"assembly.prompt.file\", default \"project.txt\") or requests it interactively using org.codehaus.plexus.components.interactivity.Prompter. Creates a configuration source backed by bindex.properties (org.machanism.macha.core.commons.configurator.PropertiesConfigurator). Initializes org.machanism.machai.bindex.Picker using the pick model property (Picker.MODEL_PROP_NAME / \"pick.genai\") and optional bindex.register.url, sets the score threshold (property \"assembly.score\", default ApplicationAssembly.DEFAULT_SCORE_VALUE), and calls picker.pick(query) to obtain recommended org.machanism.machai.schema.Bindex entries. Logs recommended library ids and their scores (via picker.getScore(id)); if no libraries are recommended, logs and exits. Then initializes org.machanism.machai.bindex.ApplicationAssembly using the assembly model property (ApplicationAssembly.MODEL_PROP_NAME / \"assembly.genai\") and runs assembly.assembly(query, bindexList) against the Maven basedir (project directory), applying AI-assisted changes. Wraps IO and prompting errors into MojoExecutionException.",
     "examples" : [ {
-      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly -Dassembly.genai=OpenAI:gpt-5 -Dpick.genai=OpenAI:gpt-5-mini -Dassembly.prompt.file=project.txt -Dassembly.score=0.8",
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dassembly.genai=OpenAI:gpt-5 -Dpick.genai=OpenAI:gpt-5-mini -Dassembly.prompt.file=project.txt -Dassembly.score=0.8",
       "description" : "Runs the plugin goal with explicit providers for picking and assembly, reads the prompt from project.txt, and filters recommendations with score >= 0.8."
     }, {
-      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly -Dassembly.prompt.file=missing.txt",
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dassembly.prompt.file=missing.txt",
       "description" : "If the prompt file does not exist, the Mojo requests the prompt interactively from the user using the Maven/plexus prompter."
     }, {
-      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly -Dbindex.register.url=https://register.project.example",
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dbindex.register.url=https://register.project.example",
       "description" : "Runs the picker with an optional registration/lookup endpoint to resolve or register bindex metadata during library recommendation."
     } ]
   } ],
@@ -60,7 +60,7 @@
     "description" : "System property / plugin configuration parameter selecting the GenAI provider id for the assembly phase (used to apply changes to the project). Bound to ApplicationAssembly.MODEL_PROP_NAME; default is ApplicationAssembly.DEFAULT_MODEL (documented as OpenAI:gpt-5).",
     "type" : "configuration property",
     "examples" : [ {
-      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly -Dassembly.genai=OpenAI:gpt-5",
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dassembly.genai=OpenAI:gpt-5",
       "description" : "Sets the GenAI provider used for the assembly phase."
     } ]
   }, {
@@ -69,7 +69,7 @@
     "description" : "System property / plugin configuration parameter selecting the GenAI provider id for the picker phase (used to recommend candidate libraries as Bindex entries). Bound to Picker.MODEL_PROP_NAME; default is Picker.DEFAULT_MODEL (documented as OpenAI:gpt-5-mini).",
     "type" : "configuration property",
     "examples" : [ {
-      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly -Dpick.genai=OpenAI:gpt-5-mini",
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dpick.genai=OpenAI:gpt-5-mini",
       "description" : "Sets the GenAI provider used for the recommendation (picker) phase."
     } ]
   }, {
@@ -78,7 +78,7 @@
     "description" : "System property / plugin configuration parameter specifying the text file that contains the natural-language assembly prompt. If the file does not exist, the prompt is requested interactively via org.codehaus.plexus.components.interactivity.Prompter. Default: project.txt.",
     "type" : "configuration property",
     "examples" : [ {
-      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly -Dassembly.prompt.file=project.txt",
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dassembly.prompt.file=project.txt",
       "description" : "Reads the assembly prompt from project.txt."
     } ]
   }, {
@@ -87,7 +87,7 @@
     "description" : "System property / plugin configuration parameter specifying the minimum score threshold for recommended libraries produced by org.machanism.machai.bindex.Picker. Default: 0.8 (ApplicationAssembly.DEFAULT_SCORE_VALUE).",
     "type" : "configuration property",
     "examples" : [ {
-      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly -Dassembly.score=0.95",
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dassembly.score=0.95",
       "description" : "Requires recommendations to have a score of at least 0.95."
     } ]
   }, {
@@ -96,19 +96,19 @@
     "description" : "Optional system property / plugin configuration parameter providing a registration/lookup endpoint used by org.machanism.machai.bindex.Picker to look up and/or register bindex metadata during the recommendation phase.",
     "type" : "configuration property",
     "examples" : [ {
-      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly -Dbindex.register.url=https://register.project.example",
+      "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dbindex.register.url=https://register.project.example",
       "description" : "Configures the picker to use a remote registry endpoint for bindex metadata lookup/registration."
     } ]
   } ],
   "studs" : [ ],
   "examples" : [ {
     "type" : "cli",
-    "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2-SNAPSHOT:assembly\n  -Dassembly.genai=OpenAI:gpt-5\n  -Dpick.genai=OpenAI:gpt-5-mini\n  -Dassembly.prompt.file=project.txt\n  -Dassembly.score=0.8",
+    "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly\n  -Dassembly.genai=OpenAI:gpt-5\n  -Dpick.genai=OpenAI:gpt-5-mini\n  -Dassembly.prompt.file=project.txt\n  -Dassembly.score=0.8",
     "description" : "Command-line invocation configuring both phases and using a prompt file."
   }, {
     "type" : "pom",
-    "snippet" : "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>assembly-maven-plugin</artifactId>\n  <version>1.0.2-SNAPSHOT</version>\n  <configuration>\n    <assembly.genai>OpenAI:gpt-5</assembly.genai>\n    <pick.genai>OpenAI:gpt-5-mini</pick.genai>\n    <assembly.prompt.file>project.txt</assembly.prompt.file>\n    <assembly.score>0.8</assembly.score>\n    <bindex.register.url>https://register.project.example</bindex.register.url>\n  </configuration>\n</plugin>",
+    "snippet" : "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>assembly-maven-plugin</artifactId>\n  <version>1.0.2</version>\n  <configuration>\n    <assembly.genai>OpenAI:gpt-5</assembly.genai>\n    <pick.genai>OpenAI:gpt-5-mini</pick.genai>\n    <assembly.prompt.file>project.txt</assembly.prompt.file>\n    <assembly.score>0.8</assembly.score>\n    <bindex.register.url>https://register.project.example</bindex.register.url>\n  </configuration>\n</plugin>",
     "description" : "Example Maven POM configuration providing parameters via plugin configuration."
   } ],
-  "dependencies" : [ "org.machanism.machai:bindex-core:1.0.2-SNAPSHOT", "org.apache.maven:maven-plugin-api:3.0", "org.apache.maven.plugin-tools:maven-plugin-annotations:3.4", "org.apache.maven.shared:maven-shared-utils:3.4.2", "org.codehaus.plexus:plexus-interactivity-api:1.5.1", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
+  "dependencies" : [ "org.machanism.machai:bindex-core:1.0.2", "org.apache.maven:maven-plugin-api:3.0", "org.apache.maven.plugin-tools:maven-plugin-annotations:3.4", "org.apache.maven.shared:maven-shared-utils:3.4.2", "org.codehaus.plexus:plexus-interactivity-api:1.5.1", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
 }

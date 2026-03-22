@@ -1,14 +1,14 @@
 {
-  "id" : "org.machanism.machai:project-layout:1.0.2-SNAPSHOT",
+  "id" : "org.machanism.machai:project-layout:1.0.2",
   "name" : "org.machanism.machai:project-layout",
-  "version" : "1.0.2-SNAPSHOT",
+  "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
     "repositoryUrl" : "https://repo1.maven.org/maven2/",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "project-layout",
-      "version" : "1.0.2-SNAPSHOT",
+      "version" : "1.0.2",
       "extension" : "jar"
     }
   },
