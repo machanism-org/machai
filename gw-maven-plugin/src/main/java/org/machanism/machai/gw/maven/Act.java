@@ -110,7 +110,6 @@ public class Act extends AbstractGWGoal {
 
 				if (projectLayout instanceof MavenProjectLayout) {
 					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
-					mavenProjectLayout.effectivePomRequired(false);
 
 					Model model = mavenProjectLayout.getModel();
 					for (MavenProject mavenProject : session.getAllProjects()) {

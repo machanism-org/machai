@@ -161,7 +161,6 @@ public class GW extends AbstractGWGoal {
 
 				if (projectLayout instanceof MavenProjectLayout) {
 					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
-					mavenProjectLayout.effectivePomRequired(false);
 
 					Model model = mavenProjectLayout.getModel();
 					MavenProject matchingProject = resolveProjectByArtifactId(session.getAllProjects(), model);
