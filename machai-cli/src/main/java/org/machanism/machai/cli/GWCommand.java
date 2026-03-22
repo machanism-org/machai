@@ -14,6 +14,7 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -152,7 +153,7 @@ public class GWCommand {
 			@ShellOption(value = { "-t",
 					"--threads" }, help = "Sets the number of threads for concurrent processing.", defaultValue = "1") int threads,
 			@ShellOption(value = { "-m",
-					"--model" }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
+					Ghostwriter.GW_MODEL_PROP_NAME }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
 			@ShellOption(value = { "-i",
 					"--instructions" }, help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
 			@ShellOption(value = { "-g",
@@ -162,7 +163,7 @@ public class GWCommand {
 			@ShellOption(value = { "-l",
 					"--logInputs" }, help = "Log LLM request inputs to dedicated log files", defaultValue = ShellOption.NULL) Boolean logInputs,
 			@ShellOption(value = { "-d",
-					"--projectDir" }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File projectDir,
+					ProjectLayout.PROJECT_DIR_PROP_NAME }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File projectDir,
 			@ShellOption(value = { "-s",
 					"--scanDir" }, help = "Directories to scan.", defaultValue = ShellOption.NULL) String[] scanDirs) {
 
@@ -257,7 +258,7 @@ public class GWCommand {
 		if (effectiveProjectDir == null) {
 			effectiveProjectDir = SystemUtils.getUserDir();
 		}
-		return ConfigCommand.config.getFile(Ghostwriter.PROJECT_DIR_PROP_NAME, effectiveProjectDir);
+		return ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, effectiveProjectDir);
 	}
 
 	private String resolveModel(String model) {

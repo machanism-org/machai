@@ -7,9 +7,11 @@ import java.util.Optional;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
@@ -59,11 +61,11 @@ public class BindexCommand {
 	@ShellMethod("Generates bindex files.")
 	public void bindex(
 			@ShellOption(value = { "-d",
-					"--dir" }, help = "The path to the project  directory.", defaultValue = ShellOption.NULL) File dir,
+					ProjectLayout.PROJECT_DIR_PROP_NAME }, help = "The path to the project  directory.", defaultValue = ShellOption.NULL) File dir,
 			@ShellOption(value = { "-u",
 					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "false") boolean update,
 			@ShellOption(value = { "-m",
-					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `"
+					ApplicationAssembly.MODEL_PROP_NAME }, help = "Specifies the GenAI service provider and model (e.g., `"
 							+ BindexCreator.DEFAULT_MODEL + "`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
@@ -73,7 +75,7 @@ public class BindexCommand {
 			BindexCreator register = new BindexCreator(model, config);
 			register.update(update);
 			dir = Optional.ofNullable(dir).orElse(
-					ConfigCommand.config.getFile(BindexCreator.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
+					ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 
 			logger.info("The project directory: {}", dir);
 			logger.info("GenAI model: {}", model);
@@ -115,7 +117,7 @@ public class BindexCommand {
 
 		try {
 			dir = Optional.ofNullable(dir).orElse(
-					ConfigCommand.config.getFile(BindexCreator.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
+					ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 			model = Optional.ofNullable(model)
 					.orElse(ConfigCommand.config.get(Ghostwriter.GW_MODEL_PROP_NAME, BindexCreator.DEFAULT_MODEL));
 

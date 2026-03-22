@@ -15,7 +15,7 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
-import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +105,7 @@ public class AssembyCommand {
 			@ShellOption(value = { "-s",
 					"--score" }, help = "Minimum similarity threshold for search results. Only results with a score equal to or above this value will be returned.", defaultValue = ShellOption.NULL) Double score,
 			@ShellOption(value = { "-g",
-					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `"
+					ApplicationAssembly.MODEL_PROP_NAME }, help = "Specifies the GenAI service provider and model (e.g., `"
 							+ ApplicationAssembly.DEFAULT_MODEL + "`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
@@ -176,13 +176,13 @@ public class AssembyCommand {
 	public void assembly(@ShellOption(value = { "-q",
 			"--query" }, defaultValue = ShellOption.NULL, help = "The prompt for application assembly. If omitted, the result from the previous 'find' command will be used, if available.") String query,
 			@ShellOption(value = { "-d",
-					"--dir" }, defaultValue = ShellOption.NULL, help = "Path to the directory where the assembled project will be created.") File dir,
+					ProjectLayout.PROJECT_DIR_PROP_NAME }, defaultValue = ShellOption.NULL, help = "Path to the directory where the assembled project will be created.") File dir,
 			@ShellOption(value = { "-r",
 					"--registerUrl" }, defaultValue = ShellOption.NULL, help = "URL of the register database for storing project metadata.") String registerUrl,
 			@ShellOption(value = { "-s",
 					"--score" }, help = "Minimum similarity threshold for search results.", defaultValue = ShellOption.NULL) Double score,
 			@ShellOption(value = { "-m",
-					"--model" }, help = "Specifies the GenAI service provider and model (e.g., `"
+					ApplicationAssembly.MODEL_PROP_NAME }, help = "Specifies the GenAI service provider and model (e.g., `"
 							+ ApplicationAssembly.DEFAULT_MODEL + "`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 
@@ -192,7 +192,7 @@ public class AssembyCommand {
 							ApplicationAssembly.DEFAULT_MODEL));
 
 			dir = Optional.ofNullable(dir).orElse(
-					ConfigCommand.config.getFile(ApplicationAssembly.PRG_DIR_PROP_NAME, SystemUtils.getUserDir()));
+					ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 			logger.info("The project directory: {}", dir);
 			logger.info("GenAI model: {}", model);
 

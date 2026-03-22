@@ -10,6 +10,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
 
 import org.apache.commons.lang.SystemUtils;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
@@ -49,9 +50,9 @@ public class CleanCommand {
 	@ShellMethod("Removes all " + MACHAI_TEMP_DIR + " template folders from the root directory.")
 	public void clean(
 			@ShellOption(value = { "-d",
-					"--dir" }, help = "The path fo the project directory.", defaultValue = ShellOption.NULL) File dir)
+					ProjectLayout.PROJECT_DIR_PROP_NAME }, help = "The path fo the project directory.", defaultValue = ShellOption.NULL) File dir)
 			throws IOException {
-		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile("dir", SystemUtils.getUserDir()));
+		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 		logger.info("Starting cleanup: Removing all '{}' temporary folders in {}.", MACHAI_TEMP_DIR, dir);
 		removeAllDirectoriesByName(dir.toPath(), MACHAI_TEMP_DIR);
 		logger.info("Cleanup process finished.");

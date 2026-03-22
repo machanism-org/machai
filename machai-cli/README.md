@@ -35,7 +35,7 @@ Content:
 
 # Machai CLI
 
-A Java command-line interface providing an interactive shell for intelligent library management, GenAI-assisted document processing, and project automation.
+A Java command-line interface that provides an interactive shell for intelligent library management, GenAI-assisted document processing, and project automation.
 
 ## Overview
 
@@ -74,7 +74,7 @@ Example commands (as shown by `help`):
 
 - `pick`: Picks libraries based on user request.
 - `assembly`: Creates a project via picked library set.
-- `prompt`: Is used to request additional GenAI guidance.
+- `prompt`: Used to request additional GenAI guidance.
 
 ### Bindex Command
 

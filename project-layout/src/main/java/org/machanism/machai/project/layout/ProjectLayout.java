@@ -54,6 +54,8 @@ public abstract class ProjectLayout {
 			ProjectProcessor.MACHAI_TEMP_DIR, "target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
 			".classpath", ".settings", ".settings", ".project", ".m2" };
 
+	public static final String PROJECT_DIR_PROP_NAME = "project.dir";
+	
 	private File projectDir;
 
 	/**

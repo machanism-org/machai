@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.shell.standard.ShellComponent;
@@ -58,7 +59,7 @@ public class ActCommand {
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
 	public void act(@ShellOption(value = "", defaultValue = ShellOption.NULL) String[] act) throws IOException {
 
-		File projectDir = ConfigCommand.config.getFile(Ghostwriter.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir());
+		File projectDir = ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir());
 
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		try {

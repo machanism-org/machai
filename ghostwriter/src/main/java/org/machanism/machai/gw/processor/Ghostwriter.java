@@ -17,6 +17,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +64,6 @@ public final class Ghostwriter {
 
 	/** System property key indicating the Ghostwriter home directory. */
 	public static final String GW_HOME_PROP_NAME = "gw.home";
-
-	/** Configuration key for the root directory to scan. */
-	public static final String PROJECT_DIR_PROP_NAME = "project.dir";
 
 	/** Configuration key specifying the GenAI provider/model to use. */
 	public static final String GW_MODEL_PROP_NAME = "gw.model";
@@ -472,7 +470,7 @@ public final class Ghostwriter {
 		}
 
 		if (projectDir == null) {
-			projectDir = config.getFile(PROJECT_DIR_PROP_NAME, null);
+			projectDir = config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, null);
 			if (projectDir == null) {
 				projectDir = SystemUtils.getUserDir();
 			}

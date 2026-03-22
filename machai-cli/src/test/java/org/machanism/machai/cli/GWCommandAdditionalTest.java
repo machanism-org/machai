@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import org.jline.reader.LineReader;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.mockito.Mockito;
 
 class GWCommandAdditionalTest {
@@ -81,7 +82,7 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveRootDir_shouldReturnNonNull_whenArgumentNull() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.PROJECT_DIR_PROP_NAME, "");
+		ConfigCommand.config.set(ProjectLayout.PROJECT_DIR_PROP_NAME, "");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveProjectDir", File.class);
@@ -98,7 +99,7 @@ class GWCommandAdditionalTest {
 	void resolveRootDir_shouldReturnConfiguredRootDir_whenPresent() throws Exception {
 		// Arrange
 		File configured = new File("target").getAbsoluteFile();
-		ConfigCommand.config.set(Ghostwriter.PROJECT_DIR_PROP_NAME, configured.getAbsolutePath());
+		ConfigCommand.config.set(ProjectLayout.PROJECT_DIR_PROP_NAME, configured.getAbsolutePath());
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveProjectDir", File.class);

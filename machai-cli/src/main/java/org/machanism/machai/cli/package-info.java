@@ -2,28 +2,20 @@
  * Command-line interface (CLI) layer for Machai.
  *
  * <p>
- * This package provides the Spring Shell commands and application bootstrap used
- * to run Machai workflows from an interactive terminal. Commands typically read
- * defaults from {@code machai.properties} via {@link org.machanism.macha.core.commons.configurator.PropertiesConfigurator}
- * (see {@link org.machanism.machai.cli.ConfigCommand}) and delegate the heavy
- * lifting to modules such as Ghostwriter guidance processing and bindex-based
- * library picking/assembly.
+ * This package contains Spring Shell commands that expose Machai capabilities as
+ * interactive CLI operations. Commands typically:
  *
- * <h2>What is included</h2>
  * <ul>
- *   <li>Application bootstrap: {@link org.machanism.machai.cli.MachaiCLI}</li>
- *   <li>Ghostwriter pipeline execution: {@link org.machanism.machai.cli.GWCommand} and {@link org.machanism.machai.cli.ActCommand}</li>
- *   <li>bindex operations: {@link org.machanism.machai.cli.BindexCommand} and {@link org.machanism.machai.cli.AssembyCommand}</li>
- *   <li>Local workspace cleanup: {@link org.machanism.machai.cli.CleanCommand}</li>
- *   <li>Persistent CLI configuration: {@link org.machanism.machai.cli.ConfigCommand}</li>
+ * <li>Read defaults from the persisted configuration managed by {@link org.machanism.machai.cli.ConfigCommand}.</li>
+ * <li>Resolve the working/project directory and related options.</li>
+ * <li>Delegate the heavy lifting to the underlying Machai modules (Ghostwriter,
+ * bindex/picker, and project assembly).</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Usage</h2>
  * <pre>
- * config set --key gw.model --value OpenAI:gpt-5.1
- * gw --scanDir .\\my-project --excludes target,.git
+ * gw --scanDir .\\my-project --model OpenAI:gpt-5.1
  * act commit "and push"
- * bindex --dir .\\my-project
  * pick --query "Create a web app" --score 0.8
  * assembly --dir .\\out
  * clean --dir .\\my-project
