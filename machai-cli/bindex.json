@@ -1,18 +1,18 @@
 {
-  "id" : "org.machanism.machai:machai-cli:0.0.13-SNAPSHOT",
+  "id" : "org.machanism.machai:machai-cli:1.0.2-SNAPSHOT",
   "name" : "org.machanism.machai:machai-cli",
-  "version" : "0.0.13-SNAPSHOT",
+  "version" : "1.0.2-SNAPSHOT",
   "location" : {
     "repositoryType" : "Maven",
-    "repositoryUrl" : "https://repo.maven.apache.org/maven2",
+    "repositoryUrl" : "https://repo1.maven.org/maven2/",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "machai-cli",
-      "version" : "0.0.13-SNAPSHOT",
+      "version" : "1.0.2-SNAPSHOT",
       "extension" : "jar"
     }
   },
-  "description" : "Machai CLI (org.machanism.machai:machai-cli) is a Spring Boot + Spring Shell based Java command-line application (interactive REPL and non-interactive execution) in the Machanism/Machai ecosystem. It provides developer tooling to (1) generate bindex metadata for projects and artifacts, (2) register bindex files into an external registry, (3) perform GenAI-assisted semantic search to pick relevant libraries (\"bricks\") based on a natural-language prompt and a similarity score threshold, and (4) assemble an application skeleton by combining a user prompt with the picked bindex set. It integrates with Machai components such as bindex-core (bindex creation, registry, picker, application assembly) and ghostwriter (file/document processing pipeline), and supports configurable GenAI provider/model selection via machai.properties, including default settings for working directory and score threshold. Operational commands include: bindex (scan a directory and create/update bindex.json descriptors), register (upload/register bindex to a registry URL), pick (semantic-search libraries using a GenAI provider and optional registry URL), assembly (generate an app/project into a target directory using the previously picked libraries), prompt (send an arbitrary prompt to the provider and print response), gw (scan/process directories or files using Ghostwriter with optional instructions/guidance/excludes and multi-threading), and clean (remove Machai temporary \".machai\" folders under a root directory). The CLI also uses Maven APIs and Maven Resolver transports to inspect, resolve, and work with Maven artifacts and repositories, and uses Gson for JSON serialization/deserialization and Logback/SLF4J for logging.",
+  "description" : "Machai CLI (org.machanism.machai:machai-cli) is a Spring Boot + Spring Shell based Java command-line application (interactive REPL) for developer tooling in the Machanism/Machai ecosystem. It provides commands to (1) generate bindex metadata (bindex.json) for projects via directory scanning, (2) register generated bindex metadata into an external registry endpoint, (3) perform GenAI-assisted semantic search to pick relevant libraries by natural-language prompt and similarity score threshold, (4) assemble/scaffold an application skeleton into a target directory based on the prompt and selected bindex set, and (5) run Ghostwriter pipelines to scan and process files/directories using GenAI guidance. The CLI includes Ghostwriter \"guidance\" mode (gw) with configurable concurrency, excludes, instructions, guidance, and logging of LLM request inputs; and Ghostwriter \"Act mode\" (act) to run predefined interactive actions/prompts using ActProcessor. Configuration defaults are persisted via machai.properties (for example: default working/project directory, GenAI provider/model identifier such as OpenAI:gpt-5.1, semantic search score threshold, Ghostwriter properties like model/instructions/guidance/logInputs/scanDir), and an alternate properties file can be loaded at startup via -Dconfig. The CLI integrates with Machai bindex-core (BindexCreator, BindexRegister, Picker, ApplicationAssembly) and ghostwriter (GuidanceProcessor, ActProcessor) components, uses Maven libraries/resolver transports for artifact analysis, and uses SLF4J/Logback for logging. Typical operational workflows: bindex (scan/create/update metadata), register (upload metadata to registry), pick (semantic-search libraries), assembly (generate project using picked set), prompt (send ad-hoc prompt to provider), gw (scan/process with Ghostwriter guidance), act (interactive predefined actions), and clean (remove .machai temporary folders under a root directory).",
   "authors" : [ {
     "name" : "Viktor Tovstyi",
     "email" : "viktor.tovstyi@gmail.com"
@@ -22,33 +22,34 @@
     "type" : "application",
     "domains" : [ "Developer Tools", "CLI", "GenAI Tooling", "Semantic Search", "Metadata Management", "Library Discovery", "Project Scaffolding", "Code Generation", "Document Processing", "Maven Artifact Analysis" ],
     "languages" : [ {
-      "name" : "Java"
+      "name" : "Java",
+      "version" : "11+"
     } ],
     "layers" : [ "Adapters", "Infrastructure" ],
-    "usageContext" : [ "Interactive Spring Shell REPL", "Non-interactive command execution in CI/CD", "Generating bindex.json metadata for artifacts/projects", "Registering bindex metadata to an external registry database", "Semantic search and similarity-threshold based library picking", "GenAI-assisted application assembly/scaffolding using selected libraries", "Ghostwriter-based file/document scanning and processing with optional instructions/guidance", "Local workspace cleanup of Machai temporary .machai folders", "Maven repository inspection and dependency/artifact coordinate resolution" ],
+    "usageContext" : [ "Interactive Spring Shell REPL", "Non-interactive command execution (invoked via Spring Shell command methods)", "Generating bindex.json metadata for artifacts/projects (directory scanning)", "Registering bindex metadata to an external registry database/service", "Semantic search and similarity-threshold based library picking using GenAI", "GenAI-assisted application assembly/scaffolding using selected libraries", "Ghostwriter guidance pipeline: scan/process directories or files with instructions/guidance, concurrency, and excludes", "Ghostwriter Act mode: run predefined interactive actions/prompts using ActProcessor", "Local workspace cleanup of Machai temporary .machai folders", "Maven repository inspection and dependency/artifact coordinate resolution" ],
     "targetEnvironment" : [ "Java" ],
-    "integrations" : [ "Maven Central" ]
+    "integrations" : [ "Machai bindex-core", "Machai ghostwriter", "Spring Boot", "Spring Shell", "Maven" ]
   },
   "constructors" : [ {
     "package" : "org.machanism.machai.cli",
-    "signature" : "org.machanism.machai.cli.AssembyCommand()",
-    "description" : "Creates the Assembly command component and attempts to load CLI configuration from a machai.properties file via org.machanism.macha.core.commons.configurator.PropertiesConfigurator. If the configuration file is not found, it proceeds with defaults.",
+    "signature" : "org.machanism.machai.cli.AssembyCommand(org.jline.reader.LineReader)",
+    "description" : "Creates the command component for semantic search (pick), application assembly (assembly), and ad-hoc prompting (prompt). Initializes a PropertiesConfigurator and attempts to load machai.properties from the working directory; if not found, defaults are used. A LineReader is injected (lazy) for interactive prompting when query/instructions are omitted.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.cli.AssembyCommand cmd = new org.machanism.machai.cli.AssembyCommand();",
-      "description" : "Creates the command instance (typically managed by Spring Shell) and initializes configuration loading."
+      "snippet" : "org.jline.reader.LineReader lr = null;\norg.machanism.machai.cli.AssembyCommand cmd = new org.machanism.machai.cli.AssembyCommand(lr);",
+      "description" : "Creates the command instance (typically managed by Spring Shell); when used outside Spring, a LineReader may be null but interactive prompting will then not work."
     } ]
   }, {
     "package" : "org.machanism.machai.cli",
     "signature" : "org.machanism.machai.cli.BindexCommand()",
-    "description" : "Creates the Bindex command component used to generate and register bindex files. The command relies on injected org.jline.reader.LineReader when run under Spring Shell and uses a PropertiesConfigurator for provider configuration.",
+    "description" : "Creates the bindex command facade that generates bindex files and registers them into an external registry. Uses a PropertiesConfigurator instance for bindex-core operations; defaults are resolved from the shared ConfigCommand configuration.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.cli.BindexCommand cmd = new org.machanism.machai.cli.BindexCommand();",
-      "description" : "Creates the command instance (typically managed by Spring Shell) for generating/registering bindex metadata."
+      "description" : "Creates the command instance (typically managed by Spring Shell) for generating and registering bindex metadata."
     } ]
   }, {
     "package" : "org.machanism.machai.cli",
     "signature" : "org.machanism.machai.cli.CleanCommand()",
-    "description" : "Creates the Clean command component used to remove Machai temporary directories (for example, \".machai\") under a selected root directory.",
+    "description" : "Creates the clean command component used to remove Machai temporary directories named \".machai\" under a root directory resolved from configuration or the current user directory.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.cli.CleanCommand cmd = new org.machanism.machai.cli.CleanCommand();",
       "description" : "Creates the command instance (typically managed by Spring Shell) for cleaning temporary folders."
@@ -56,70 +57,78 @@
   }, {
     "package" : "org.machanism.machai.cli",
     "signature" : "org.machanism.machai.cli.ConfigCommand()",
-    "description" : "Creates the Config command component. A shared static org.machanism.macha.core.commons.configurator.PropertiesConfigurator is initialized to read/write persistent CLI defaults from machai.properties when available.",
+    "description" : "Creates the configuration command component that reads/writes persistent CLI defaults to machai.properties via a shared static PropertiesConfigurator instance.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.cli.ConfigCommand cmd = new org.machanism.machai.cli.ConfigCommand();",
       "description" : "Creates the command instance (typically managed by Spring Shell) that manages persistent configuration defaults."
     } ]
   }, {
     "package" : "org.machanism.machai.cli",
-    "signature" : "org.machanism.machai.cli.GWCommand()",
-    "description" : "Creates the Ghostwriter command component that scans and processes directories or files using the Ghostwriter pipeline and a configured GenAI provider/model.",
+    "signature" : "org.machanism.machai.cli.GWCommand(org.jline.reader.LineReader)",
+    "description" : "Creates the Ghostwriter guidance command component. Uses an injected (lazy) LineReader to prompt for instructions/guidance when options are provided but empty. Resolves defaults from ConfigCommand and loads machai.properties via PropertiesConfigurator when available.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.cli.GWCommand cmd = new org.machanism.machai.cli.GWCommand();",
-      "description" : "Creates the command instance (typically managed by Spring Shell) for running Ghostwriter processing."
+      "snippet" : "org.jline.reader.LineReader lr = null;\norg.machanism.machai.cli.GWCommand cmd = new org.machanism.machai.cli.GWCommand(lr);",
+      "description" : "Creates the command instance (typically managed by Spring Shell) for running Ghostwriter guidance processing."
+    } ]
+  }, {
+    "package" : "org.machanism.machai.cli",
+    "signature" : "org.machanism.machai.cli.ActCommand()",
+    "description" : "Creates the Ghostwriter Act mode command component which runs predefined interactive actions/prompts through ActProcessor. It loads machai.properties when available and resolves the project directory and model from persisted configuration.",
+    "examples" : [ {
+      "snippet" : "org.machanism.machai.cli.ActCommand cmd = new org.machanism.machai.cli.ActCommand();",
+      "description" : "Creates the command instance (typically managed by Spring Shell) for executing Act mode actions."
     } ]
   } ],
   "features" : [ {
     "name" : "pick",
     "package" : "org.machanism.machai.cli",
-    "signature" : "void pick(java.lang.String query, java.lang.String registerUrl, java.lang.Double score, java.lang.String chatModel) throws java.io.IOException",
-    "description" : "Performs GenAI-assisted semantic search to pick libraries (bindex artifacts) matching a natural-language query. Accepts either a prompt string or a file path containing the prompt, supports an optional registry URL for querying/storing metadata, and applies a similarity score threshold. Uses org.machanism.machai.ai.manager.GenAIProvider via org.machanism.machai.ai.manager.GenAIProviderManager and delegates picking to org.machanism.machai.bindex.Picker.",
+    "signature" : "void pick(java.lang.String query, java.lang.String registerUrl, java.lang.Double score, java.lang.String model) throws java.io.IOException",
+    "description" : "Performs GenAI-assisted semantic search to pick libraries (bindex artifacts) matching a natural-language query. If query is null, prompts interactively; if query points to an existing file, reads the prompt from that file. Uses a GenAI provider/model identifier resolved from configuration and delegates search to org.machanism.machai.bindex.Picker; prints matched bindex IDs with similarity scores. Optionally uses a registry URL.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.cli.AssembyCommand cmd = new org.machanism.machai.cli.AssembyCommand();\ncmd.pick(\"Create a web app\", null, java.lang.Double.valueOf(0.9d), \"CodeMie:gpt-5-2-2025-12-11\");",
-      "description" : "Runs semantic search to pick libraries for the prompt with a minimum similarity score of 0.9 using the specified provider/model identifier."
+      "snippet" : "org.machanism.machai.cli.AssembyCommand cmd = new org.machanism.machai.cli.AssembyCommand((org.jline.reader.LineReader) null);\ncmd.pick(\"Create a web app with REST and persistence\", \"http://localhost:8080\", java.lang.Double.valueOf(0.9d), \"OpenAI:gpt-5.1\");",
+      "description" : "Runs semantic search to pick libraries for the prompt with a minimum similarity score and an optional registry service."
     } ]
   }, {
     "name" : "assembly",
     "package" : "org.machanism.machai.cli",
-    "signature" : "void assembly(java.lang.String query, java.io.File dir, java.lang.String registerUrl, java.lang.Double score, java.lang.String chatModel) throws java.io.IOException",
-    "description" : "Assembles an application/project in the target directory using a GenAI provider and a picked set of bindex artifacts. If the query is omitted, it reuses the last pick query and results; otherwise it performs a new pick and then assembles. Delegates generation/scaffolding to org.machanism.machai.bindex.ApplicationAssembly and loads provider tools via org.machanism.machai.ai.tools.FunctionToolsLoader.",
+    "signature" : "void assembly(java.lang.String query, java.io.File dir, java.lang.String registerUrl, java.lang.Double score, java.lang.String model) throws java.io.IOException",
+    "description" : "Assembles an application/project in the target directory using a GenAI provider and a picked set of bindex artifacts. If query is omitted, reuses the last pick query and results; otherwise performs a new pick and then assembles. Delegates generation/scaffolding to org.machanism.machai.bindex.ApplicationAssembly.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.cli.AssembyCommand cmd = new org.machanism.machai.cli.AssembyCommand();\ncmd.pick(\"Create a web app\", null, java.lang.Double.valueOf(0.9d), \"CodeMie:gpt-5-2-2025-12-11\");\ncmd.assembly(null, new java.io.File(\"./out\"), null, null, \"CodeMie:gpt-5-2-2025-12-11\");",
-      "description" : "First picks libraries for the prompt, then assembles a project into ./out using the previously picked bindex list."
+      "snippet" : "org.machanism.machai.cli.AssembyCommand cmd = new org.machanism.machai.cli.AssembyCommand((org.jline.reader.LineReader) null);\ncmd.pick(\"Create a web app\", null, java.lang.Double.valueOf(0.8d), \"OpenAI:gpt-5.1\");\ncmd.assembly(null, new java.io.File(\"./out\"), null, null, \"OpenAI:gpt-5.1\");",
+      "description" : "Picks libraries for a prompt, then assembles a project into ./out using the previously picked bindex list."
     } ]
   }, {
     "name" : "prompt",
     "package" : "org.machanism.machai.cli",
     "signature" : "void prompt(java.lang.String query, java.lang.String chatModel, java.io.File dir)",
-    "description" : "Sends a free-form prompt to the configured GenAI provider/model, optionally sets a working directory, and prints the response. Useful for quick guidance within the CLI without running pick/assembly workflows.",
+    "description" : "Sends a free-form prompt to the configured GenAI provider/model, optionally sets a working directory, and prints the response. Loads provider tools via org.machanism.machai.ai.tools.FunctionToolsLoader.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.cli.AssembyCommand cmd = new org.machanism.machai.cli.AssembyCommand();\ncmd.prompt(\"Suggest a module structure for a Spring Boot app\", \"CodeMie:gpt-5-2-2025-12-11\", new java.io.File(\".\"));",
+      "snippet" : "org.machanism.machai.cli.AssembyCommand cmd = new org.machanism.machai.cli.AssembyCommand((org.jline.reader.LineReader) null);\ncmd.prompt(\"Suggest a module structure for a Spring Boot app\", \"OpenAI:gpt-5.1\", new java.io.File(\".\"));",
       "description" : "Requests guidance from the GenAI provider and logs the returned response."
     } ]
   }, {
     "name" : "bindex",
     "package" : "org.machanism.machai.cli",
-    "signature" : "void bindex(java.io.File dir, boolean update, java.lang.String genai) throws java.io.IOException",
+    "signature" : "void bindex(java.io.File dir, boolean update, java.lang.String model) throws java.io.IOException",
     "description" : "Scans a project directory and generates bindex metadata files, optionally updating previously saved data. Uses org.machanism.machai.bindex.BindexCreator configured with a provider/model identifier and a PropertiesConfigurator.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.cli.BindexCommand cmd = new org.machanism.machai.cli.BindexCommand();\ncmd.bindex(new java.io.File(\"./my-project\"), true, \"CodeMie:gpt-5-2-2025-12-11\");",
+      "snippet" : "org.machanism.machai.cli.BindexCommand cmd = new org.machanism.machai.cli.BindexCommand();\ncmd.bindex(new java.io.File(\"./my-project\"), true, \"OpenAI:gpt-5.1\");",
       "description" : "Generates (and updates) bindex files for ./my-project using the specified GenAI provider/model."
     } ]
   }, {
     "name" : "register",
     "package" : "org.machanism.machai.cli",
-    "signature" : "void register(java.io.File dir, java.lang.String registerUrl, boolean update, java.lang.String chatModel) throws java.io.IOException",
-    "description" : "Registers bindex files found under a directory to an external registry database endpoint. Uses org.machanism.machai.bindex.BindexRegister with a GenAI provider instance to support enrichment/processing and supports update mode.",
+    "signature" : "void register(java.io.File dir, java.lang.String registerUrl, boolean update, java.lang.String model) throws java.io.IOException",
+    "description" : "Registers bindex files found under a directory to an external registry database endpoint. Uses org.machanism.machai.bindex.BindexRegister and supports update mode.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.cli.BindexCommand cmd = new org.machanism.machai.cli.BindexCommand();\ncmd.register(new java.io.File(\"./my-project\"), \"http://localhost:8080\", true, \"CodeMie:gpt-5-2-2025-12-11\");",
+      "snippet" : "org.machanism.machai.cli.BindexCommand cmd = new org.machanism.machai.cli.BindexCommand();\ncmd.register(new java.io.File(\"./my-project\"), \"http://localhost:8080\", true, \"OpenAI:gpt-5.1\");",
       "description" : "Registers bindex metadata from ./my-project into the registry service at the provided URL."
     } ]
   }, {
     "name" : "clean",
     "package" : "org.machanism.machai.cli",
     "signature" : "void clean(java.io.File dir) throws java.io.IOException",
-    "description" : "Deletes all Machai temporary directories named \".machai\" under the specified root directory (defaults to the user directory if not provided). Useful for cleaning template/work directories created during assembly or processing.",
+    "description" : "Deletes all Machai temporary directories named \".machai\" under the specified root directory (defaults to the configured directory or the user directory). Useful for cleaning template/work directories created during assembly or processing.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.cli.CleanCommand cmd = new org.machanism.machai.cli.CleanCommand();\ncmd.clean(new java.io.File(\"./my-project\"));",
       "description" : "Removes any \".machai\" directories under ./my-project."
@@ -127,26 +136,44 @@
   }, {
     "name" : "gw",
     "package" : "org.machanism.machai.cli",
-    "signature" : "void gw(boolean threads, java.lang.String genai, java.lang.String instructions, java.lang.String guidance, java.lang.String excludes, boolean logInputs, java.lang.String[] scanDirs)",
-    "description" : "Runs the Ghostwriter pipeline to scan and process directories or files using GenAI guidance. Supports multi-threaded processing, custom instructions and default guidance (text, URL, or file path), excludes list, and optional logging of LLM request inputs.",
+    "signature" : "void gw(int threads, java.lang.String model, java.lang.String instructions, java.lang.String guidance, java.lang.String excludes, java.lang.Boolean logInputs, java.io.File projectDir, java.lang.String[] scanDirs)",
+    "description" : "Runs the Ghostwriter guidance pipeline to scan and process directories or files using GenAI guidance. Supports concurrent processing (threads), custom instructions and default guidance (as text, URL, or file path), excludes list, scan directories, and optional logging of LLM request inputs. Delegates to org.machanism.machai.gw.processor.GuidanceProcessor and resolves defaults from machai.properties via ConfigCommand.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.cli.GWCommand cmd = new org.machanism.machai.cli.GWCommand();\ncmd.gw(false, \"CodeMie:gpt-5-2-2025-12-11\", null, null, \"target,.git\", false, new java.lang.String[]{\"./docs\"});",
+      "snippet" : "org.machanism.machai.cli.GWCommand cmd = new org.machanism.machai.cli.GWCommand((org.jline.reader.LineReader) null);\ncmd.gw(1, \"OpenAI:gpt-5.1\", null, null, \"target,.git\", java.lang.Boolean.FALSE, new java.io.File(\".\"), new java.lang.String[]{\"./docs\"});",
       "description" : "Processes ./docs with Ghostwriter, excluding target and .git directories."
+    } ]
+  }, {
+    "name" : "act",
+    "package" : "org.machanism.machai.cli",
+    "signature" : "void act(java.lang.String[] act) throws java.io.IOException",
+    "description" : "Runs Ghostwriter \"Act mode\" by scanning the configured project folder and executing a predefined action/prompt interactively via org.machanism.machai.gw.processor.ActProcessor. The action name and optional extra prompt text are built from the provided tokens, defaults are resolved from machai.properties via ConfigCommand, and scanning uses a scanDir resolved from gw.scanDir or defaults to the project directory.",
+    "examples" : [ {
+      "snippet" : "org.machanism.machai.cli.ActCommand cmd = new org.machanism.machai.cli.ActCommand();\ncmd.act(new java.lang.String[]{\"commit\"});",
+      "description" : "Runs the predefined \"commit\" action in Act mode (interactive)."
+    } ]
+  }, {
+    "name" : "config-set",
+    "package" : "org.machanism.machai.cli",
+    "signature" : "void set(java.lang.String key, java.lang.String value) throws java.io.IOException",
+    "description" : "Sets or gets a persistent CLI configuration property stored in machai.properties. If value is null, prints the current value for the key; otherwise writes and saves the value.",
+    "examples" : [ {
+      "snippet" : "org.machanism.machai.cli.ConfigCommand cmd = new org.machanism.machai.cli.ConfigCommand();\ncmd.set(\"score\", \"0.9\");",
+      "description" : "Sets the default semantic-search similarity score threshold and persists it to machai.properties."
     } ]
   } ],
   "customizations" : [ {
     "name" : "machai.properties",
     "package" : "org.machanism.machai.cli",
-    "description" : "Persistent configuration file used to customize default CLI behavior. Supports setting default working directory (dir), default GenAI provider/model identifier (genai), and default semantic search similarity threshold (score). Also supports Ghostwriter properties such as root dir, instructions, and guidance via org.machanism.machai.gw.processor.Ghostwriter property names.",
+    "description" : "Persistent configuration file used to customize default CLI behavior across commands. Common properties include default project/work directory (project.dir), default GenAI provider/model identifiers (for example: model, gw.model), default semantic search similarity threshold (score), Ghostwriter prompts (gw.instructions, gw.guidance), logging of LLM request inputs (gw.logInputs), and optional scan directory override (gw.scanDir).",
     "type" : "configuration property",
     "examples" : [ {
-      "snippet" : "genai=CodeMie:gpt-5-2-2025-12-11\ndir=/path/to/workspace\nscore=0.9",
-      "description" : "Sets default provider/model, working directory, and semantic search score threshold."
+      "snippet" : "model=OpenAI:gpt-5.1\nproject.dir=/path/to/workspace\nscore=0.9\ngw.model=OpenAI:gpt-5.1\ngw.excludes=target,.git\ngw.logInputs=false",
+      "description" : "Sets default model and project directory, semantic search score threshold, and Ghostwriter defaults."
     } ]
   }, {
     "name" : "-Dconfig",
     "package" : "org.machanism.machai.cli",
-    "description" : "System property used at startup to point to an alternative properties file to be loaded into System properties (defaults to machai.properties in the working directory). Implemented by org.machanism.machai.cli.MachaiCLI.loadSystemProperties().",
+    "description" : "System property used at startup to point to an alternative properties file to be loaded into JVM System properties (defaults to machai.properties in the working directory). Implemented by org.machanism.machai.cli.MachaiCLI.loadSystemProperties().",
     "type" : "configuration property",
     "examples" : [ {
       "snippet" : "java -Dconfig=/path/to/machai.properties -jar machai.jar",
@@ -156,16 +183,19 @@
   "studs" : [ ],
   "examples" : [ {
     "scenario" : "Configure defaults and generate/register bindex",
-    "steps" : [ "config genai CodeMie:gpt-5-2-2025-12-11", "config dir ./my-project", "config score 0.9", "bindex --dir ./my-project --update true", "register --dir ./my-project --registerUrl http://localhost:8080 --update true" ]
+    "steps" : [ "set --key model --value OpenAI:gpt-5.1", "set --key project.dir --value ./my-project", "set --key score --value 0.9", "bindex --dir ./my-project --update true", "register --dir ./my-project --registerUrl http://localhost:8080 --update true" ]
   }, {
     "scenario" : "Pick libraries and assemble a project",
     "steps" : [ "pick --query \"Create a web app with REST API and persistence\" --score 0.9 --registerUrl http://localhost:8080", "assembly --dir ./out" ]
   }, {
-    "scenario" : "Run Ghostwriter processing",
-    "steps" : [ "gw --model CodeMie:gpt-5-2-2025-12-11 --excludes target,.git --scanDirs ./docs" ]
+    "scenario" : "Run Ghostwriter guidance processing",
+    "steps" : [ "gw --model OpenAI:gpt-5.1 --excludes target,.git --scanDir ./docs --threads 2 --logInputs false" ]
+  }, {
+    "scenario" : "Run Ghostwriter Act mode",
+    "steps" : [ "act commit", "act commit \"and push\"", "act sonar-fix --model OpenAI:gpt-5.1" ]
   }, {
     "scenario" : "Clean temporary Machai folders",
     "steps" : [ "clean --dir ./my-project" ]
   } ],
-  "dependencies" : [ "org.machanism.machai:bindex-core:0.0.13-SNAPSHOT", "org.machanism.machai:ghostwriter:0.0.13-SNAPSHOT", "ch.qos.logback:logback-classic:1.5.6", "org.apache.commons:commons-lang3:3.20.0", "com.google.code.gson:gson:2.13.2", "org.springframework.shell:spring-shell-starter:3.4.0", "org.apache.maven:maven-model:3.6.0", "org.apache.maven:maven-plugin-api:3.6.0", "org.apache.maven:maven-core:3.6.0", "org.apache.maven.resolver:maven-resolver-connector-basic:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-file:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-http:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-wagon:1.3.3", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
+  "dependencies" : [ "org.machanism.machai:bindex-core:1.0.2-SNAPSHOT", "org.machanism.machai:ghostwriter:1.0.2-SNAPSHOT", "ch.qos.logback:logback-classic:1.5.6", "org.apache.commons:commons-lang3:3.20.0", "com.google.code.gson:gson:2.13.2", "org.springframework.shell:spring-shell-starter:3.4.1", "org.apache.maven:maven-model:3.8.1", "org.apache.maven:maven-plugin-api:3.8.1", "org.apache.maven:maven-core:3.8.1", "org.apache.maven.resolver:maven-resolver-connector-basic:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-file:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-http:1.3.3", "org.apache.maven.resolver:maven-resolver-transport-wagon:1.3.3", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
 }
