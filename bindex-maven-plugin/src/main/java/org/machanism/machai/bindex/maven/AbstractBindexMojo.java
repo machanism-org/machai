@@ -69,7 +69,6 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 
 		MavenProjectLayout projectLayout = new MavenProjectLayout();
 		projectLayout.projectDir(basedir);
-		projectLayout.effectivePomRequired(true);
 		projectLayout.model(project.getModel());
 		creator.processFolder(projectLayout);
 	}
