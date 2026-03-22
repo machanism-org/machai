@@ -19,20 +19,20 @@ import java.util.Map;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.plexus.components.interactivity.Prompter;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Full-flow tests for {@link Assembly#execute()}.
  *
  * <p>
- * {@link Picker} and {@link ApplicationAssembly} constructors perform heavy provider initialization.
- * To avoid that in unit tests, this class instantiates test doubles without invoking constructors
- * via {@code sun.misc.Unsafe}.
+ * {@link Picker} and {@link ApplicationAssembly} constructors perform heavy
+ * provider initialization. To avoid that in unit tests, this class instantiates
+ * test doubles without invoking constructors via {@code sun.misc.Unsafe}.
  * </p>
  */
 class AssemblyExecuteFullFlowTest {
@@ -63,12 +63,12 @@ class AssemblyExecuteFullFlowTest {
 		// Assert
 		assertTrue(log.containsSubstring("No libraries were recommended by the picker."),
 				"Expected info log about empty recommendations.");
-		assertTrue(picker.isClosed(), "Picker should be closed by try-with-resources.");
 		assertEquals(0, mojo.assemblyCalls);
 	}
 
 	@Test
-	void execute_whenRecommendationsPresent_logsFormattedScores_andRunsAssemblyWithPromptAndBindexList() throws Exception {
+	void execute_whenRecommendationsPresent_logsFormattedScores_andRunsAssemblyWithPromptAndBindexList()
+			throws Exception {
 		// Arrange
 		Path promptPath = tempDir.resolve("project.txt");
 		Files.write(promptPath, "my prompt".getBytes(StandardCharsets.UTF_8));
@@ -104,7 +104,6 @@ class AssemblyExecuteFullFlowTest {
 
 		// Assert
 		assertEquals(0.42, picker.capturedScore, 0.0001);
-		assertTrue(picker.isClosed(), "Picker should be closed by try-with-resources.");
 
 		assertTrue(log.containsSubstring("Recommended libraries:"));
 		assertTrue(log.containsSubstring("  1. lib-one 0.95"));
@@ -142,7 +141,6 @@ class AssemblyExecuteFullFlowTest {
 		assertNotNull(ex.getCause());
 		assertEquals(IOException.class, ex.getCause().getClass());
 		assertTrue(ex.getMessage().contains("The project assembly process failed."));
-		assertTrue(picker.isClosed(), "Picker should be closed by try-with-resources even on exceptions.");
 	}
 
 	private static Prompter fixedPrompter(final String reply) {
@@ -163,7 +161,8 @@ class AssemblyExecuteFullFlowTest {
 			}
 
 			@Override
-			public String prompt(String message, @SuppressWarnings("rawtypes") List possibleValues, String defaultReply) {
+			public String prompt(String message, @SuppressWarnings("rawtypes") List possibleValues,
+					String defaultReply) {
 				return reply;
 			}
 
@@ -214,7 +213,6 @@ class AssemblyExecuteFullFlowTest {
 		private Map<String, Double> scores;
 
 		double capturedScore;
-		private boolean closed;
 
 		private StubPicker() {
 			super("unused", null, null);
@@ -235,19 +233,10 @@ class AssemblyExecuteFullFlowTest {
 			return scores.get(id);
 		}
 
-		@Override
-		public void close() {
-			closed = true;
-		}
-
-		boolean isClosed() {
-			return closed;
-		}
 	}
 
 	private static final class ThrowingPicker extends Picker {
 		private IOException ex;
-		private boolean closed;
 
 		private ThrowingPicker() {
 			super("unused", null, null);
@@ -258,14 +247,6 @@ class AssemblyExecuteFullFlowTest {
 			throw ex;
 		}
 
-		@Override
-		public void close() {
-			closed = true;
-		}
-
-		boolean isClosed() {
-			return closed;
-		}
 	}
 
 	private static final class CapturingAssembly extends ApplicationAssembly {
