@@ -66,7 +66,7 @@ public class ActCommand {
 		} catch (FileNotFoundException e) {
 			// configuration file not found.
 		}
-		String resolvedModel = ConfigCommand.config.get("gw.model");
+		String resolvedModel = ConfigCommand.config.get(Ghostwriter.GW_MODEL_PROP_NAME);
 		ActProcessor processor = new ActProcessor(projectDir, configurator, resolvedModel);
 		String prompt = StringUtils.join(act, " ");
 		processor.setDefaultPrompt(prompt);

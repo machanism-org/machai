@@ -151,7 +151,7 @@ public class GW extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator config = getConfiguration();
 
-		String genai = config.get(Ghostwriter.GW_GENAI_PROP_NAME, this.model);
+		String genai = config.get(Ghostwriter.GW_MODEL_PROP_NAME, this.model);
 		GuidanceProcessor processor = new GuidanceProcessor(basedir, genai, config) {
 
 			@Override

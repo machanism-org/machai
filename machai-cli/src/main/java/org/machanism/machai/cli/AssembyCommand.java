@@ -118,7 +118,7 @@ public class AssembyCommand {
 
 			findQuery = query;
 			model = Optional.ofNullable(model)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME,
+					.orElse(ConfigCommand.config.get(ApplicationAssembly.MODEL_PROP_NAME,
 							ApplicationAssembly.DEFAULT_MODEL));
 			score = Optional.ofNullable(score)
 					.orElse(ConfigCommand.config.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE));

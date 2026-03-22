@@ -261,7 +261,7 @@ public class GWCommand {
 	}
 
 	private String resolveModel(String model) {
-		String genaiValue = ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, null);
+		String genaiValue = ConfigCommand.config.get(Ghostwriter.GW_MODEL_PROP_NAME, null);
 		return model != null ? model : genaiValue;
 	}
 

@@ -117,7 +117,7 @@ public class BindexCommand {
 			dir = Optional.ofNullable(dir).orElse(
 					ConfigCommand.config.getFile(BindexCreator.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 			model = Optional.ofNullable(model)
-					.orElse(ConfigCommand.config.get(Ghostwriter.GW_GENAI_PROP_NAME, BindexCreator.DEFAULT_MODEL));
+					.orElse(ConfigCommand.config.get(Ghostwriter.GW_MODEL_PROP_NAME, BindexCreator.DEFAULT_MODEL));
 
 			logger.info("The project directory: {}", dir);
 			logger.info("GenAI model: {}", model);

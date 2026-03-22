@@ -68,7 +68,7 @@ public final class Ghostwriter {
 	public static final String PROJECT_DIR_PROP_NAME = "project.dir";
 
 	/** Configuration key specifying the GenAI provider/model to use. */
-	public static final String GW_GENAI_PROP_NAME = "gw.model";
+	public static final String GW_MODEL_PROP_NAME = "gw.model";
 
 	/** Configuration key containing optional system instructions. */
 	public static final String GW_INSTRUCTIONS_PROP_NAME = "gw.instructions";
@@ -100,7 +100,7 @@ public final class Ghostwriter {
 	 */
 	public Ghostwriter(String genai, AIFileProcessor processor) {
 		if (StringUtils.isBlank(genai)) {
-			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_GENAI_PROP_NAME
+			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_MODEL_PROP_NAME
 					+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -m/--model (e.g., OpenAI:gpt-5.1).");
 		}
 
@@ -437,7 +437,7 @@ public final class Ghostwriter {
 
 		PropertiesConfigurator config = initializeConfiguration(projectDir);
 
-		String genai = config.get(GW_GENAI_PROP_NAME, null);
+		String genai = config.get(GW_MODEL_PROP_NAME, null);
 		if (cmd.hasOption(genaiOpt)) {
 			String opt = StringUtils.trimToNull(cmd.getOptionValue(genaiOpt));
 			if (opt != null) {

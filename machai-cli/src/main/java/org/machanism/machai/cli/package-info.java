@@ -1,41 +1,31 @@
 /**
- * Spring Shell-based command-line interface (CLI) for Machai.
+ * Command-line interface (CLI) layer for Machai.
  *
- * <p>This package contains the Spring Boot entry point and Spring Shell command components that expose Machai
- * functionality through both interactive (REPL) and non-interactive command execution.
+ * <p>
+ * This package provides the Spring Shell commands and application bootstrap used
+ * to run Machai workflows from an interactive terminal. Commands typically read
+ * defaults from {@code machai.properties} via {@link org.machanism.macha.core.commons.configurator.PropertiesConfigurator}
+ * (see {@link org.machanism.machai.cli.ConfigCommand}) and delegate the heavy
+ * lifting to modules such as Ghostwriter guidance processing and bindex-based
+ * library picking/assembly.
  *
- * <h2>Command groups</h2>
+ * <h2>What is included</h2>
  * <ul>
- *   <li><strong>Configuration</strong> – {@link org.machanism.machai.cli.ConfigCommand} persists defaults
- *       (for example, working directory and GenAI provider/model) in {@code machai.properties}.</li>
- *   <li><strong>Indexing and registration</strong> – {@link org.machanism.machai.cli.BindexCommand} generates
- *       and registers bindex metadata for projects.</li>
- *   <li><strong>Picking and assembly</strong> – {@link org.machanism.machai.cli.AssembyCommand} performs
- *       semantic search (“pick”) and assembles a project skeleton using a configured GenAI provider.</li>
- *   <li><strong>Document processing</strong> – {@link org.machanism.machai.cli.GWCommand} scans folders and processes
- *       files using the Ghostwriter pipeline; {@link org.machanism.machai.cli.ActCommand} runs an interactive
- *       predefined action/prompt in “Act mode”.</li>
- *   <li><strong>Cleanup</strong> – {@link org.machanism.machai.cli.CleanCommand} removes Machai temporary directories
- *       (for example, {@code .machai}) under a selected root directory.</li>
- * </ul>
- *
- * <h2>How configuration is resolved</h2>
- * <ul>
- *   <li>The application entry point {@link org.machanism.machai.cli.MachaiCLI} loads optional system properties from
- *       {@code machai.properties} or from a file provided via {@code -Dconfig=...}.</li>
- *   <li>Most commands use defaults persisted by {@link org.machanism.machai.cli.ConfigCommand} when an option
- *       (such as {@code --dir} or {@code --model}) is not provided.</li>
+ *   <li>Application bootstrap: {@link org.machanism.machai.cli.MachaiCLI}</li>
+ *   <li>Ghostwriter pipeline execution: {@link org.machanism.machai.cli.GWCommand} and {@link org.machanism.machai.cli.ActCommand}</li>
+ *   <li>bindex operations: {@link org.machanism.machai.cli.BindexCommand} and {@link org.machanism.machai.cli.AssembyCommand}</li>
+ *   <li>Local workspace cleanup: {@link org.machanism.machai.cli.CleanCommand}</li>
+ *   <li>Persistent CLI configuration: {@link org.machanism.machai.cli.ConfigCommand}</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>
- * config genai OpenAI:gpt-5.1
- * config dir .\\my-project
+ * config set --key gw.model --value OpenAI:gpt-5.1
+ * gw --scanDir .\\my-project --excludes target,.git
+ * act commit "and push"
  * bindex --dir .\\my-project
  * pick --query "Create a web app" --score 0.8
  * assembly --dir .\\out
- * gw --scanDir .\\my-project --excludes target,.git
- * act commit "and push"
  * clean --dir .\\my-project
  * </pre>
  */

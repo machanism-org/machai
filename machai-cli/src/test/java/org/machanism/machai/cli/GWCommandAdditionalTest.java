@@ -17,7 +17,7 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveModel_shouldReturnConfiguredValue_whenOptionIsNull() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_GENAI_PROP_NAME, "Configured:Model");
+		ConfigCommand.config.set(Ghostwriter.GW_MODEL_PROP_NAME, "Configured:Model");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveModel", String.class);
@@ -33,7 +33,7 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveModel_shouldPreferOptionValue_whenProvided() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_GENAI_PROP_NAME, "Configured:Model");
+		ConfigCommand.config.set(Ghostwriter.GW_MODEL_PROP_NAME, "Configured:Model");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveModel", String.class);
