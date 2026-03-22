@@ -458,7 +458,7 @@ public class OpenAIProvider implements GenAIProvider {
 
 	private void logInputs(Writer streamWriter) throws IOException {
 		streamWriter.write(StringUtils.defaultString(instructions));
-
+		streamWriter.write("\n\n");
 		for (ResponseInputItem responseInputItem : inputs) {
 			String inputText = "";
 			if (responseInputItem.isMessage()) {

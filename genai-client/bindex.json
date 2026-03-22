@@ -1,18 +1,18 @@
 {
-  "id" : "org.machanism.machai:genai-client:0.0.13-SNAPSHOT",
+  "id" : "org.machanism.machai:genai-client:1.0.2-SNAPSHOT",
   "name" : "org.machanism.machai:genai-client",
-  "version" : "0.0.13-SNAPSHOT",
+  "version" : "1.0.2-SNAPSHOT",
   "location" : {
     "repositoryType" : "Maven",
-    "repositoryUrl" : "https://repo.maven.apache.org/maven2",
+    "repositoryUrl" : "https://central.sonatype.com/repository/maven-snapshots",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "genai-client",
-      "version" : "0.0.13-SNAPSHOT",
+      "version" : "1.0.2-SNAPSHOT",
       "extension" : "jar"
     }
   },
-  "description" : "GenAI Client is a Java library in the Machai/Machanism ecosystem that provides a provider-neutral API for interacting with Generative AI models and host-integrated tool/function calling. The core abstraction is org.machanism.machai.ai.manager.GenAIProvider, a session-like contract for accumulating system instructions and user prompts, optionally attaching local files or remote URLs, registering host-side tools, executing requests (perform), retrieving token usage metrics (usage), clearing state (clear), and closing resources (close). Providers are resolved at runtime via org.machanism.machai.ai.manager.GenAIProviderManager from a Provider:Model identifier (e.g., \"OpenAI:gpt-4o-mini\" or \"Web:CodeMie\"); if the provider prefix is omitted, the default provider is None. Provider instantiation uses reflection and sets the resolved model into the provided org.machanism.macha.core.commons.configurator.Configurator under key \"chatModel\" before calling init(conf). Included providers cover multiple integration styles: OpenAIProvider integrates the OpenAI Java SDK Responses API, supports iterative tool-call resolution (function calls), configurable request timeout (GENAI_TIMEOUT), output constraints (MAX_OUTPUT_TOKENS), tool-call limits (MAX_TOOL_CALLS), optional input logging (inputsLog(File)), working-directory context for tools (setWorkingDir(File)), and embedding generation (embedding(text, dimensions)). NoneProvider is a no-op/offline provider for restricted environments: it accumulates prompts and optionally logs instructions/prompts to disk; perform() returns null and embeddings are unsupported. WebProvider drives a GenAI web UI using Anteater workspace recipes: it uses chatModel as Anteater configuration name, requires setWorkingDir(File) once per JVM to initialize a shared workspace, submits the accumulated prompt list via the \"Submit Prompt\" recipe, and returns a captured result. CodeMieProvider integrates EPAM CodeMie by obtaining an OAuth2/OIDC access token from a configurable AUTH_URL using GENAI_USERNAME/GENAI_PASSWORD, then configuring an OpenAI-compatible base URL and API key and delegating to OpenAIProvider, GeminiProvider, or ClaudeProvider based on model prefix (gpt-/gemini-/claude-). The library also provides curated host-side tool installers discoverable via java.util.ServiceLoader through the FunctionTools SPI and applied by FunctionToolsLoader: FileFunctionTools (read/write/list/recursive list files relative to a provider working directory), CommandFunctionTools (controlled command execution with OS-specific denylist checks, project-root confinement, bounded output via LimitedStringBuilder, and a terminate_process tool), and WebFunctionTools (HTTP GET content retrieval and generic REST calls with optional Basic Auth via URL userInfo, optional CSS selection and text-only extraction using Jsoup, and header templating via ${...} placeholders resolved from Configurator). Typical use cases include backend services and automation tooling that need unified access to multiple LLM vendors and endpoints, prompt orchestration, controlled local tool invocation, web/REST retrieval, embedding pipelines for semantic search, and consolidated token-usage reporting.",
+  "description" : "GenAI Client is a Java library in the MachAI/Machanism ecosystem that provides a provider-neutral API for interacting with generative AI/LLM backends, including prompt orchestration, optional file attachments, embedding generation, token-usage reporting, and host-integrated tool/function calling.\n\nCore API: org.machanism.machai.ai.manager.GenAIProvider defines a session-like contract: init(Configurator), instructions(String), prompt(String), addFile(File)/addFile(URL) for attachments, addTool(String,String,ToolFunction,String...) for registering host-side tools, perform() to execute, embedding(String,long) for vector generation, clear() to reset state, inputsLog(File) to log prompts/instructions, setWorkingDir(File) to scope tool/file operations, and usage() returning org.machanism.machai.ai.manager.Usage (inputTokens, inputCachedTokens, outputTokens).\n\nProvider resolution: org.machanism.machai.ai.manager.GenAIProviderManager resolves providers at runtime from a Provider:Model identifier (e.g., \"OpenAI:gpt-4o-mini\" or \"CodeMie:gpt-4o-mini\"). If the provider prefix is omitted, the default provider is org.machanism.machai.ai.provider.none.NoneProvider. Resolution supports short provider names mapped to org.machanism.machai.ai.provider.<provider>.<Provider>Provider or fully-qualified class names. The manager writes the resolved model into the provided org.machanism.macha.core.commons.configurator.Configurator as key \"chatModel\" before calling provider.init(conf). Usage metrics from runs are aggregated in-memory and can be logged.\n\nIncluded providers and behaviors:\n- org.machanism.machai.ai.provider.openai.OpenAIProvider: integrates the OpenAI Java SDK Responses API; supports multi-turn prompt accumulation, instructions, local/URL file inputs, function-tool calling with iterative tool-call resolution, and embeddings. Configuration keys (via Configurator): chatModel (required), OPENAI_API_KEY (required), OPENAI_BASE_URL (optional for OpenAI-compatible endpoints), GENAI_TIMEOUT (seconds, optional), MAX_OUTPUT_TOKENS (optional), MAX_TOOL_CALLS (optional). Tool call handlers receive Object[2] where [0] is com.fasterxml.jackson.databind.JsonNode of arguments and [1] is the working directory File.\n- org.machanism.machai.ai.provider.codemie.CodeMieProvider: integrates EPAM CodeMie by requesting an OAuth2/OIDC access token from AUTH_URL (default CodeMie token endpoint) using GENAI_USERNAME/GENAI_PASSWORD. It configures OPENAI_BASE_URL to the CodeMie API base URL and sets OPENAI_API_KEY to the token. Delegation is selected by chatModel prefix: gpt-* delegates to OpenAIProvider; gemini-* delegates to GeminiProvider; claude-* delegates to ClaudeProvider.\n- org.machanism.machai.ai.provider.none.NoneProvider: no-op/offline provider for restricted environments; accumulates prompts, optionally writes prompts to inputsLog and instructions to instructions.txt, perform() returns null, embeddings unsupported.\n- org.machanism.machai.ai.provider.gemini.GeminiProvider and org.machanism.machai.ai.provider.claude.ClaudeProvider: currently scaffolds/placeholders (many methods not implemented) intended to adapt Google Gemini and Anthropic Claude.\n\nHost-integrated tools (function calling): the SPI org.machanism.machai.ai.tools.FunctionTools allows curated tool installers to register named tools on a provider. org.machanism.machai.ai.tools.FunctionToolsLoader discovers implementations via java.util.ServiceLoader and applies them, optionally propagating Configurator for runtime placeholder resolution (${...}) in tool parameters.\n- FileFunctionTools: read/write/list/recursive-list files relative to provider working directory.\n- CommandFunctionTools: controlled command execution with denylist checks (OS-specific resources denylist/unix.txt and denylist/windows.txt), project-root confinement for working directory, bounded output via LimitedStringBuilder, and a terminate_process tool that aborts execution.\n- WebFunctionTools: HTTP GET content retrieval and generic REST calls, supports optional Basic Auth via URL userInfo, optional CSS selector extraction (Jsoup) and text-only rendering, and header templating via ${...} placeholders resolved from Configurator.\n\nTypical use cases: backend services and automation tooling needing unified access to multiple LLM vendors/endpoints, prompt execution and orchestration, safe host-side tool invocation during tool-calling, embedding pipelines for semantic search/retrieval, and consolidated token usage accounting. Key dependencies include com.openai:openai-java, org.jsoup:jsoup, net.htmlparser.jericho:jericho-html, org.apache.commons:commons-text, and Machanism configurator.",
   "authors" : [ {
     "name" : "Viktor Tovstyi",
     "email" : "viktor.tovstyi@gmail.com",
@@ -21,60 +21,52 @@
   "license" : "Apache License, Version 2.0",
   "classification" : {
     "type" : "library",
-    "domains" : [ "Generative AI", "LLM Integration", "Prompt Orchestration", "Function Calling / Tool Use", "Embeddings", "Web UI Automation", "Automation Tooling", "Backend Services", "Security Controls" ],
+    "domains" : [ "Generative AI", "LLM Integration", "Provider Abstraction", "Prompt Orchestration", "Function Calling / Tool Use", "Embeddings", "Automation Tooling", "Security Controls", "Token Usage Accounting" ],
     "languages" : [ {
       "name" : "Java",
       "version" : ""
     } ],
     "layers" : [ "Infrastructure", "Adapters" ],
-    "usageContext" : [ "Java backend applications", "Machai modules", "Provider-agnostic LLM access", "Prompt execution and orchestration", "Tool/function calling with controlled host capabilities", "Embedding generation pipelines", "Semantic search and retrieval workflows", "Automation and project analysis assistants", "Web UI automation via Anteater recipes" ],
+    "usageContext" : [ "Java backend applications", "MachAI/Machanism modules", "Provider-agnostic LLM access", "Prompt execution and orchestration", "Tool/function calling with controlled host capabilities", "Embedding generation pipelines", "Semantic search and retrieval workflows", "Automation and repository analysis assistants" ],
     "targetEnvironment" : [ "Java" ],
-    "integrations" : [ "OpenAI", "Anthropic", "Google GenAI", "EPAM CodeMie", "Anteater" ]
+    "integrations" : [ "OpenAI", "EPAM CodeMie", "Google Gemini (planned)", "Anthropic Claude (planned)" ]
   },
   "constructors" : [ {
     "package" : "org.machanism.machai.ai.manager",
     "signature" : "org.machanism.machai.ai.manager.GenAIAdapter()",
-    "description" : "Creates a delegating GenAIProvider adapter without an initial delegate. Call setProvider(GenAIProvider) (typically from a subclass) before invoking methods to avoid a NullPointerException.",
+    "description" : "Creates a delegating GenAIProvider adapter without an initial delegate. Subclasses should call setProvider(GenAIProvider) before any other operation; otherwise calls will fail with a NullPointerException.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.ai.manager.GenAIAdapter adapter = new org.machanism.machai.ai.manager.GenAIAdapter();",
-      "description" : "Creates an adapter instance. In practice, use a subclass that sets the delegate provider during initialization."
+      "description" : "Creates an adapter instance; typically extended to set the delegate provider during initialization."
     } ]
   }, {
     "package" : "org.machanism.machai.ai.provider.codemie",
     "signature" : "org.machanism.machai.ai.provider.codemie.CodeMieProvider()",
-    "description" : "Creates a CodeMie provider instance. The provider retrieves an OAuth2 token from an OpenID Connect token endpoint and delegates requests to a concrete provider based on the configured model prefix (gpt-/gemini-/claude-).",
+    "description" : "Creates a CodeMie provider instance that authenticates against an OIDC token endpoint and delegates to OpenAIProvider/GeminiProvider/ClaudeProvider depending on the chatModel prefix.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.ai.provider.codemie.CodeMieProvider provider = new org.machanism.machai.ai.provider.codemie.CodeMieProvider();\norg.machanism.macha.core.commons.configurator.Configurator conf = null;\nprovider.init(conf);",
-      "description" : "Instantiates the provider and initializes it with a Configurator. The Configurator must provide GENAI_USERNAME, GENAI_PASSWORD, and chatModel (and optionally AUTH_URL)."
+      "description" : "Instantiates and initializes the provider. The configurator must supply GENAI_USERNAME, GENAI_PASSWORD, and chatModel (AUTH_URL optional)."
     } ]
   }, {
     "package" : "org.machanism.machai.ai.provider.none",
     "signature" : "org.machanism.machai.ai.provider.none.NoneProvider()",
-    "description" : "Creates a no-op provider instance suitable for environments where external LLM calls are disabled. It can accumulate prompts and optionally log them to disk when inputsLog(File) is configured.",
+    "description" : "Creates a no-op provider suitable for disabled/offline environments. It can accumulate prompts and optionally log instructions/prompts to disk via inputsLog(File).",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = new org.machanism.machai.ai.provider.none.NoneProvider();\nprovider.inputsLog(new java.io.File(\"./inputsLog/inputs.txt\"));\nprovider.instructions(\"You are a helpful assistant.\");\nprovider.prompt(\"Describe the weather.\");\njava.lang.String response = provider.perform();",
-      "description" : "Uses NoneProvider to write prompts/instructions to local files and returns null as no model is invoked."
+      "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = new org.machanism.machai.ai.provider.none.NoneProvider();\nprovider.inputsLog(new java.io.File(\"./inputsLog/inputs.txt\"));\nprovider.instructions(\"You are a helpful assistant.\");\nprovider.prompt(\"Describe the repository.\");\njava.lang.String response = provider.perform();",
+      "description" : "Uses NoneProvider to log inputs and returns null as no model is invoked."
     } ]
   }, {
     "package" : "org.machanism.machai.ai.provider.openai",
     "signature" : "org.machanism.machai.ai.provider.openai.OpenAIProvider()",
-    "description" : "Creates an OpenAI-backed provider instance. Call init(Configurator) to configure chatModel and OpenAI client settings before use.",
+    "description" : "Creates an OpenAI-backed provider instance. Call init(Configurator) to configure chatModel, credentials, and optional limits/timeouts before use.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.ai.provider.openai.OpenAIProvider provider = new org.machanism.machai.ai.provider.openai.OpenAIProvider();\norg.machanism.macha.core.commons.configurator.Configurator conf = null;\nprovider.init(conf);",
-      "description" : "Creates the provider and initializes it with a Configurator. The Configurator must provide OPENAI_API_KEY and chatModel; OPENAI_BASE_URL, GENAI_TIMEOUT, MAX_OUTPUT_TOKENS, and MAX_TOOL_CALLS are optional."
-    } ]
-  }, {
-    "package" : "org.machanism.machai.ai.provider.web",
-    "signature" : "org.machanism.machai.ai.provider.web.WebProvider()",
-    "description" : "Creates a web-UI automation provider instance backed by Anteater. Call init(Configurator) to select the Anteater configuration name (via chatModel) and setWorkingDir(File) to initialize the workspace.",
-    "examples" : [ {
-      "snippet" : "org.machanism.machai.ai.provider.web.WebProvider provider = new org.machanism.machai.ai.provider.web.WebProvider();\norg.machanism.macha.core.commons.configurator.Configurator conf = null;\nprovider.init(conf);\nprovider.setWorkingDir(new java.io.File(\"C:\\\\path\\\\to\\\\project\"));\nprovider.prompt(\"Summarize this repository.\");\njava.lang.String response = provider.perform();",
-      "description" : "Initializes a WebProvider with an Anteater configuration name in chatModel, sets the project working directory, submits prompts through the \"Submit Prompt\" recipe, and returns the captured result."
+      "description" : "Creates and initializes the provider. The configurator must supply OPENAI_API_KEY and chatModel; OPENAI_BASE_URL, GENAI_TIMEOUT, MAX_OUTPUT_TOKENS, and MAX_TOOL_CALLS are optional."
     } ]
   }, {
     "package" : "org.machanism.machai.ai.manager",
     "signature" : "org.machanism.machai.ai.manager.Usage(long inputTokens, long inputCachedTokens, long outputTokens)",
-    "description" : "Creates a usage record representing token counts for a single invocation. Providers typically create these and the manager can aggregate them.",
+    "description" : "Creates an immutable usage record representing token counts for a single invocation. Providers can return this from usage(), and GenAIProviderManager can aggregate it.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.ai.manager.Usage usage = new org.machanism.machai.ai.manager.Usage(100L, 0L, 250L);",
       "description" : "Creates a Usage instance with explicit input, cached input, and output token counts."
@@ -84,10 +76,10 @@
     "name" : "getProvider",
     "package" : "org.machanism.machai.ai.manager",
     "signature" : "org.machanism.machai.ai.manager.GenAIProvider org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(java.lang.String chatModel, org.machanism.macha.core.commons.configurator.Configurator conf)",
-    "description" : "Resolves and instantiates a GenAIProvider implementation based on a provider/model identifier formatted as Provider:Model. If the provider prefix is omitted, the default None provider is used. Providers can be referenced via short names (mapped to org.machanism.machai.ai.provider.<provider>.<Provider>Provider) or by fully qualified class name. The method sets the resolved model name into the configurator under key chatModel and invokes provider.init(conf).",
+    "description" : "Resolves and instantiates a GenAIProvider implementation based on a provider/model identifier formatted as Provider:Model. If the provider prefix is omitted, the default None provider is used. Providers can be referenced via short names (mapped to org.machanism.machai.ai.provider.<provider>.<Provider>Provider) or by fully qualified class name. The method sets the resolved model name into the configurator under key \"chatModel\" and invokes provider.init(conf).",
     "examples" : [ {
       "snippet" : "org.machanism.macha.core.commons.configurator.Configurator conf = null;\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", conf);\nprovider.instructions(\"You are a helpful assistant.\");\nprovider.prompt(\"Hello!\");\njava.lang.String response = provider.perform();\nprovider.close();",
-      "description" : "Resolves an OpenAI provider instance for model gpt-4o-mini, runs a simple prompt, and closes the provider."
+      "description" : "Resolves an OpenAI provider instance for model gpt-4o-mini and runs a simple prompt (provider implementations may expose close(); it is not part of GenAIProvider interface)."
     } ]
   }, {
     "name" : "prompt",
@@ -102,34 +94,43 @@
     "name" : "instructions",
     "package" : "org.machanism.machai.ai.manager",
     "signature" : "void org.machanism.machai.ai.manager.GenAIProvider.instructions(java.lang.String instructions)",
-    "description" : "Sets system/session instructions that guide the model behavior for the current conversation (for example role, constraints, or tone).",
+    "description" : "Sets system/session instructions that guide model behavior for the current conversation (for example role, constraints, or tone).",
     "examples" : [ {
       "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = null;\nprovider.instructions(\"You are a concise assistant.\");",
       "description" : "Sets system instructions used by the provider for subsequent execution."
     } ]
   }, {
+    "name" : "addFile",
+    "package" : "org.machanism.machai.ai.manager",
+    "signature" : "void org.machanism.machai.ai.manager.GenAIProvider.addFile(java.io.File file) throws java.io.IOException",
+    "description" : "Attaches a local file resource for provider-side processing. Concrete providers may upload the file (e.g., OpenAIProvider uploads to OpenAI Files API and attaches by file_id) or ignore it (NoneProvider).",
+    "examples" : [ {
+      "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = null;\nprovider.addFile(new java.io.File(\"./docs/spec.pdf\"));",
+      "description" : "Attaches a local file to the current request context."
+    } ]
+  }, {
     "name" : "addTool",
     "package" : "org.machanism.machai.ai.manager",
-    "signature" : "void org.machanism.machai.ai.manager.GenAIProvider.addTool(java.lang.String name, java.lang.String description, java.util.function.Function<java.lang.Object[], java.lang.Object> function, java.lang.String... paramsDesc)",
-    "description" : "Registers a host-side tool (function) that the provider may invoke during a model run. Tool argument format is provider-specific; in OpenAIProvider, handlers receive Object[2] where index 0 is a parsed com.fasterxml.jackson.databind.JsonNode of arguments and index 1 is the working directory provided via setWorkingDir(java.io.File).",
+    "signature" : "void org.machanism.machai.ai.manager.GenAIProvider.addTool(java.lang.String name, java.lang.String description, org.machanism.machai.ai.manager.GenAIProvider.ToolFunction function, java.lang.String... paramsDesc)",
+    "description" : "Registers a host-side tool (function) that the provider may invoke during a model run. In OpenAIProvider, handlers receive Object[2] where index 0 is a parsed com.fasterxml.jackson.databind.JsonNode of arguments and index 1 is the working directory provided via setWorkingDir(java.io.File).",
     "examples" : [ {
       "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = null;\nprovider.addTool(\n  \"echo\",\n  \"Returns the provided message.\",\n  (java.lang.Object[] args) -> {\n    com.fasterxml.jackson.databind.JsonNode node = (com.fasterxml.jackson.databind.JsonNode) args[0];\n    return node.has(\"message\") ? node.get(\"message\").asText() : \"\";\n  },\n  \"message:string:required:Message to return\"\n);",
-      "description" : "Registers a simple tool named \"echo\" that returns a JSON argument value. This example matches the OpenAIProvider argument convention."
+      "description" : "Registers a simple tool named \"echo\" that returns a JSON argument value (OpenAIProvider argument convention)."
     } ]
   }, {
     "name" : "perform",
     "package" : "org.machanism.machai.ai.manager",
     "signature" : "java.lang.String org.machanism.machai.ai.manager.GenAIProvider.perform()",
-    "description" : "Executes the provider using accumulated prompts, instructions, attachments, and registered tools, returning the final response text when available. Providers may support iterative tool-call resolution (for example OpenAIProvider).",
+    "description" : "Executes the provider using accumulated prompts, instructions, attachments, and registered tools, returning response text when available. Providers may support iterative tool-call resolution (e.g., OpenAIProvider) and may return null for no-op providers (NoneProvider).",
     "examples" : [ {
       "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = null;\nprovider.instructions(\"You are a helpful assistant.\");\nprovider.prompt(\"Explain embeddings.\");\njava.lang.String response = provider.perform();",
-      "description" : "Runs a simple prompt execution and reads the response."
+      "description" : "Runs a prompt execution and reads the response."
     } ]
   }, {
     "name" : "embedding",
     "package" : "org.machanism.machai.ai.manager",
     "signature" : "java.util.List<java.lang.Double> org.machanism.machai.ai.manager.GenAIProvider.embedding(java.lang.String text, long dimensions)",
-    "description" : "Computes an embedding vector for input text when supported by the provider (for example OpenAIProvider). Providers that do not support embeddings may throw UnsupportedOperationException (for example NoneProvider).",
+    "description" : "Computes an embedding vector for input text when supported by the provider (e.g., OpenAIProvider). Providers that do not support embeddings may throw UnsupportedOperationException (e.g., NoneProvider).",
     "examples" : [ {
       "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = null;\njava.util.List<java.lang.Double> vector = provider.embedding(\"hello\", 1536L);",
       "description" : "Requests an embedding vector of a given dimensionality."
@@ -140,14 +141,14 @@
     "signature" : "void org.machanism.machai.ai.tools.FunctionToolsLoader.applyTools(org.machanism.machai.ai.manager.GenAIProvider provider)",
     "description" : "Discovers FunctionTools implementations via ServiceLoader and applies them to a provider by registering their tools (file tools, command tools, web tools) using GenAIProvider.addTool(...).",
     "examples" : [ {
-      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator conf = null;\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", conf);\norg.machanism.machai.ai.tools.FunctionToolsLoader loader = org.machanism.machai.ai.tools.FunctionToolsLoader.getInstance();\nloader.setConfiguration(conf);\nloader.applyTools(provider);",
-      "description" : "Configures and installs host-side tools into a provider using the singleton loader."
+      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator conf = null;\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", conf);\norg.machanism.machai.ai.tools.FunctionToolsLoader loader = org.machanism.machai.ai.tools.FunctionToolsLoader.getInstance();\nloader.setConfiguration(conf);\nloader.applyTools(provider);\nprovider.setWorkingDir(new java.io.File(\"/path/to/project\"));",
+      "description" : "Configures and installs host-side tools into a provider using the singleton loader, then sets the working directory used by tools."
     } ]
   } ],
   "customizations" : [ {
-    "name" : "FunctionTools (SPI)",
+    "name" : "FunctionTools",
     "package" : "org.machanism.machai.ai.tools",
-    "description" : "Service-provider interface used to contribute host-side tools (functions) that can be registered with a GenAIProvider. Implementations are commonly discovered via java.util.ServiceLoader and applied by FunctionToolsLoader.",
+    "description" : "Service-provider interface (SPI) used to contribute host-side tools (functions) that can be registered with a GenAIProvider. Implementations are commonly discovered via java.util.ServiceLoader and applied by FunctionToolsLoader. Implementations may also resolve ${...} placeholders using a Configurator.",
     "type" : "interface",
     "examples" : [ {
       "snippet" : "public final class MyTools implements org.machanism.machai.ai.tools.FunctionTools {\n\t@Override\n\tpublic void applyTools(org.machanism.machai.ai.manager.GenAIProvider provider) {\n\t\tprovider.addTool(\n\t\t\t\"my_tool\",\n\t\t\t\"Does something useful.\",\n\t\t\t(java.lang.Object[] args) -> \"ok\",\n\t\t\t\"param:string:optional:Example parameter\"\n\t\t);\n\t}\n}",
@@ -156,7 +157,7 @@
   }, {
     "name" : "GenAIAdapter",
     "package" : "org.machanism.machai.ai.manager",
-    "description" : "Delegating GenAIProvider adapter intended for decoration. Subclasses can intercept calls (for example prompt, perform, addTool) while delegating to an underlying provider configured via setProvider(GenAIProvider).",
+    "description" : "Delegating GenAIProvider adapter intended for decoration. Subclasses can intercept calls (e.g., prompt, perform, addTool) while delegating to an underlying provider configured via setProvider(GenAIProvider).",
     "type" : "class",
     "examples" : [ {
       "snippet" : "public final class LoggingProvider extends org.machanism.machai.ai.manager.GenAIAdapter {\n\t@Override\n\tpublic void prompt(java.lang.String text) {\n\t\torg.slf4j.LoggerFactory.getLogger(getClass()).info(\"Prompt: {}\", text);\n\t\tsuper.prompt(text);\n\t}\n}",
@@ -169,7 +170,7 @@
     "type" : "interface",
     "description" : "Provider contract for generative-AI integrations, including prompt/instructions accumulation, optional file inputs, tool registration, execution, usage reporting, and lifecycle operations.",
     "examples" : [ {
-      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator conf = null;\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", conf);\nprovider.instructions(\"You are a helpful assistant.\");\nprovider.prompt(\"Hello!\");\njava.lang.String response = provider.perform();\nprovider.close();",
+      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator conf = null;\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", conf);\nprovider.instructions(\"You are a helpful assistant.\");\nprovider.prompt(\"Hello!\");\njava.lang.String response = provider.perform();",
       "description" : "Uses the GenAIProvider interface to interact with a concrete provider resolved at runtime."
     } ],
     "implement" : "org.machanism.machai.ai.provider.openai.OpenAIProvider",
@@ -188,13 +189,13 @@
   } ],
   "examples" : [ {
     "title" : "Provider resolution and basic prompt execution",
-    "snippet" : "org.machanism.macha.core.commons.configurator.Configurator conf = null;\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", conf);\nprovider.instructions(\"You are a helpful assistant.\");\nprovider.prompt(\"Summarize this project.\");\njava.lang.String response = provider.perform();\norg.machanism.machai.ai.manager.Usage usage = provider.usage();\nprovider.close();"
+    "snippet" : "org.machanism.macha.core.commons.configurator.Configurator conf = null;\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", conf);\nprovider.instructions(\"You are a helpful assistant.\");\nprovider.prompt(\"Summarize this project.\");\njava.lang.String response = provider.perform();\norg.machanism.machai.ai.manager.Usage usage = provider.usage();"
   }, {
     "title" : "Installing host-side tools via ServiceLoader",
-    "snippet" : "org.machanism.macha.core.commons.configurator.Configurator conf = null;\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", conf);\norg.machanism.machai.ai.tools.FunctionToolsLoader loader = org.machanism.machai.ai.tools.FunctionToolsLoader.getInstance();\nloader.setConfiguration(conf);\nloader.applyTools(provider);\nprovider.setWorkingDir(new java.io.File(\"C:\\\\path\\\\to\\\\project\"));"
+    "snippet" : "org.machanism.macha.core.commons.configurator.Configurator conf = null;\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", conf);\norg.machanism.machai.ai.tools.FunctionToolsLoader loader = org.machanism.machai.ai.tools.FunctionToolsLoader.getInstance();\nloader.setConfiguration(conf);\nloader.applyTools(provider);\nprovider.setWorkingDir(new java.io.File(\"/path/to/project\"));"
   }, {
     "title" : "Using the no-op provider for input logging only",
     "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = new org.machanism.machai.ai.provider.none.NoneProvider();\nprovider.inputsLog(new java.io.File(\"./inputsLog/inputs.txt\"));\nprovider.instructions(\"You are a helpful assistant.\");\nprovider.prompt(\"Describe the repository.\");\nprovider.perform();"
   } ],
-  "dependencies" : [ "org.machanism.macha.core.commons:configurator:0.0.6", "com.openai:openai-java:4.19.0", "org.jsoup:jsoup:1.22.1", "org.apache.commons:commons-text:1.15.0", "com.ganteater:anteater-cli:1.2.9", "org.apache.maven.shared:maven-shared-utils:3.4.2", "com.google.guava:guava:33.4.8-jre", "commons-lang:commons-lang:2.6", "commons-io:commons-io:2.20.0", "org.slf4j:slf4j-api:2.0.17", "com.anthropic:anthropic-java:2.14.0", "com.google.genai:google-genai:1.39.0", "ch.qos.logback:logback-classic:1.3.16", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0" ]
+  "dependencies" : [ "org.machanism.macha.core.commons:configurator:0.0.8", "com.openai:openai-java:4.19.0", "org.jsoup:jsoup:1.22.1", "net.htmlparser.jericho:jericho-html:3.4", "org.apache.commons:commons-text:1.15.0", "org.apache.maven.shared:maven-shared-utils:3.4.2", "com.google.guava:guava:33.4.8-jre", "commons-lang:commons-lang:2.6", "commons-io:commons-io:2.20.0", "org.slf4j:slf4j-api:2.0.17", "com.anthropic:anthropic-java:2.14.0", "com.google.genai:google-genai:1.39.0", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "ch.qos.logback:logback-classic:1.3.16" ]
 }
