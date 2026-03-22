@@ -28,37 +28,38 @@
  */
 
 /**
- * Maven plugin goals (Mojos) that integrate Machai/Bindex operations into a Maven build.
+ * Maven plugin integration for Machai Bindex.
  *
  * <p>
- * This package contains Maven {@code @Mojo} implementations that bridge Maven's build lifecycle to the Machai/Bindex
- * tooling:
+ * This package provides the Maven {@code Mojo} goals that expose the Machai Bindex
+ * workflow to Maven builds.
  * </p>
+ *
+ * <h2>What the goals do</h2>
  * <ul>
- *   <li>Index generation and refresh via {@link org.machanism.machai.bindex.BindexCreator}.</li>
- *   <li>Project scanning and metadata publishing via {@link org.machanism.machai.bindex.BindexRegister}.</li>
+ * <li>Determine whether the current module should be processed (modules with
+ * {@code pom} packaging are skipped).</li>
+ * <li>Resolve build-time configuration such as the GenAI provider/model identifier
+ * (for example {@code OpenAI:gpt-5}).</li>
+ * <li>Optionally load GenAI credentials from {@code settings.xml} when
+ * {@code gw.genai.serverId} is configured (see {@link AbstractBindexMojo}).</li>
+ * <li>Invoke core Bindex operations to create/update an index or publish metadata to
+ * a registry.</li>
  * </ul>
- *
- * <p>
- * Most goals extend {@link org.machanism.machai.bindex.maven.AbstractBindexMojo} to share configuration such as the
- * current {@link org.apache.maven.project.MavenProject}, the project base directory, and the configured AI provider/model
- * (via {@code -Dbindex.genai}, for example {@code OpenAI:gpt-5}). Projects with {@code pom} packaging (typically
- * parent/aggregator modules) are skipped.
- * </p>
  *
  * <h2>Provided goals</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.maven.Create create} &ndash; create a new Bindex index for the current module.</li>
- *   <li>{@link org.machanism.machai.bindex.maven.Update update} &ndash; update (refresh) an existing index.</li>
- *   <li>{@link org.machanism.machai.bindex.maven.Register register} &ndash; scan and publish metadata to a registry.</li>
- *   <li>{@link org.machanism.machai.bindex.maven.Clean clean} &ndash; remove temporary artifacts created by the tooling.</li>
+ * <li>{@link org.machanism.machai.bindex.maven.Create} – create a new index</li>
+ * <li>{@link org.machanism.machai.bindex.maven.Update} – update an existing index</li>
+ * <li>{@link org.machanism.machai.bindex.maven.Register} – scan and register project metadata to a registry</li>
+ * <li>{@link org.machanism.machai.bindex.maven.Clean} – remove temporary artifacts</li>
  * </ul>
  *
  * <h2>Command-line usage</h2>
  * <pre>
- * mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5
- * mvn org.machanism.machai:bindex-maven-plugin:update -Dbindex.genai=OpenAI:gpt-5
- * mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
+ * mvn org.machanism.machai:bindex-maven-plugin:create -Dgw.genai.model=OpenAI:gpt-5
+ * mvn org.machanism.machai:bindex-maven-plugin:update -Dgw.genai.model=OpenAI:gpt-5
+ * mvn org.machanism.machai:bindex-maven-plugin:register -Dgw.genai.model=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
  * mvn org.machanism.machai:bindex-maven-plugin:clean
  * </pre>
  */

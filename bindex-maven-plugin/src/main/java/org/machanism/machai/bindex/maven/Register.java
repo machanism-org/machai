@@ -6,7 +6,11 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.bindex.BindexRegister;
+import org.machanism.machai.bindex.BindexRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maven goal that registers the project's Bindex metadata in an external
@@ -27,6 +31,11 @@ import org.machanism.machai.bindex.BindexRegister;
 public class Register extends AbstractBindexMojo {
 
 	/**
+	 * Logger for this Mojo.
+	 */
+	private static final Logger logger = LoggerFactory.getLogger(Register.class);
+
+	/**
 	 * Whether to perform an update while registering.
 	 */
 	@Parameter(defaultValue = "true")
@@ -36,7 +45,7 @@ public class Register extends AbstractBindexMojo {
 	 * URL of the registry database endpoint where project metadata should be
 	 * stored.
 	 */
-	@Parameter(property = "bindex.register.url")
+	@Parameter(property = "bindex.register.url", defaultValue = BindexRepository.DB_URL, required = false)
 	protected String registerUrl;
 
 	/**
@@ -49,14 +58,20 @@ public class Register extends AbstractBindexMojo {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		if (isBindexed()) {
-			try {
-				BindexRegister register = new BindexRegister(model, registerUrl, getConfigurator());
-				register.update(update);
-				register.scanFolder(project.getBasedir());
-			} catch (IOException e) {
-				throw new MojoExecutionException("Bindex register failed.", e);
-			}
+		if (!isBindexed()) {
+			logger.debug("Skipping Bindex register for pom-packaged project '{}'.", project.getArtifactId());
+			return;
+		}
+
+		try {
+			logger.debug("Registering Bindex metadata for project '{}' to '{}'.", project.getArtifactId(), registerUrl);
+			BindexRegister register = new BindexRegister(model, registerUrl, getConfigurator());
+			register.update(update);
+			register.scanFolder(project.getBasedir());
+		} catch (IOException e) {
+			throw new MojoExecutionException("Bindex register failed.", e);
+		} finally {
+			GenAIProviderManager.logUsage();
 		}
 	}
 }

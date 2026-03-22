@@ -2,6 +2,9 @@ package org.machanism.machai.bindex.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maven goal that creates a new Bindex index for the current project.
@@ -11,11 +14,17 @@ import org.apache.maven.plugins.annotations.Mojo;
  * </p>
  *
  * <p>
- * Example: {@code mvn org.machanism.machai:bindex-maven-plugin:create}
+ * Example:
+ * {@code mvn org.machanism.machai:bindex-maven-plugin:create}
  * </p>
  */
 @Mojo(name = "create", defaultPhase = org.apache.maven.plugins.annotations.LifecyclePhase.INSTALL)
 public class Create extends AbstractBindexMojo {
+
+	/**
+	 * Logger for this Mojo.
+	 */
+	private static final Logger logger = LoggerFactory.getLogger(Create.class);
 
 	/**
 	 * Runs the {@code create} goal.
@@ -24,8 +33,15 @@ public class Create extends AbstractBindexMojo {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
-		if (isBindexed()) {
-			createBindex(false);
+		try {
+			if (isBindexed()) {
+				logger.debug("Creating Bindex index for project '{}' in '{}'.", project.getArtifactId(), basedir);
+				createBindex(false);
+			} else {
+				logger.debug("Skipping Bindex create for pom-packaged project '{}'.", project.getArtifactId());
+			}
+		} finally {
+			GenAIProviderManager.logUsage();
 		}
 	}
 }
