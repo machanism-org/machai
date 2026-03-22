@@ -46,13 +46,13 @@ public class BindexRegister extends BindexProjectProcessor {
 	 * Creates a register instance.
 	 *
 	 * @param genai GenAI provider identifier used by {@link Picker}
-	 * @param url   MongoDB connection URI to use; when {@code null}, {@link Picker}
+	 * @param registerUrl   MongoDB connection URI to use; when {@code null}, {@link Picker}
 	 *              chooses a default
 	 * @param conf  configurator used to initialize the provider
 	 * @throws IllegalArgumentException if {@code genai} or {@code conf} is
 	 *                                  {@code null}
 	 */
-	public BindexRegister(String genai, String uri, Configurator conf) {
+	public BindexRegister(String genai, String registerUrl, Configurator conf) {
 		if (genai == null) {
 			throw new IllegalArgumentException("genai must not be null");
 		}
@@ -60,16 +60,7 @@ public class BindexRegister extends BindexProjectProcessor {
 			throw new IllegalArgumentException("conf must not be null");
 		}
 
-		String bindexRegPassword = conf.get("BINDEX_REG_PASSWORD");
-		if (uri == null) {
-			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-				uri = "mongodb+srv://user:user@" + Picker.DB_URL;
-			} else {
-				uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + Picker.DB_URL;
-			}
-		}
-
-		this.picker = new Picker(genai, uri, conf);
+		this.picker = new Picker(genai, registerUrl, conf);
 	}
 
 	/**

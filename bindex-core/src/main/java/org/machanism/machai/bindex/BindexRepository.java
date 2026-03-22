@@ -1,5 +1,8 @@
 package org.machanism.machai.bindex;
 
+import java.util.Objects;
+
+import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -16,17 +19,21 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 /**
- * MongoDB-backed repository for persisting and retrieving {@link Bindex} documents.
+ * MongoDB-backed repository for persisting and retrieving {@link Bindex}
+ * documents.
  *
- * <p>The repository stores the serialized Bindex JSON in a dedicated field (see
- * {@link #BINDEX_PROPERTY_NAME}) and provides helper operations commonly needed by higher-level
- * components such as {@link Picker} and tool integrations.
+ * <p>
+ * The repository stores the serialized Bindex JSON in a dedicated field (see
+ * {@link #BINDEX_PROPERTY_NAME}) and provides helper operations commonly needed
+ * by higher-level components such as {@link Picker} and tool integrations.
  *
- * <p>Connection details are resolved from configuration/environment:
+ * <p>
+ * Connection details are resolved from configuration/environment:
  * <ul>
- *   <li>When {@code BINDEX_REPO_URL} is configured, it is used as the MongoDB connection URI.</li>
- *   <li>Otherwise a default cluster URI is used, with credentials optionally sourced from
- *       {@code BINDEX_REG_PASSWORD}.</li>
+ * <li>When {@code BINDEX_REPO_URL} is configured, it is used as the MongoDB
+ * connection URI.</li>
+ * <li>Otherwise a default cluster URI is used, with credentials optionally
+ * sourced from {@code BINDEX_REG_PASSWORD}.</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -36,13 +43,15 @@ public class BindexRepository {
 	/** MongoDB field name used to store the serialized Bindex JSON payload. */
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
-	private static final String INSTANCE_NAME = "machanism";
-	private static final String COLLECTION_NAME = "bindex";
+	public static final String DB_URL = "mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+	private static final String PUBLILC_USER_NAME = "user";
+	private static final String REGISTER_USER_NAME = "machanismorg_db_user";
+	public static final String BINDEX_REG_PASSWORD_PROP_NAME = "BINDEX_REG_PASSWORD";
 
-	private static final String DEFAULT_CLUSTER_HOST = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+	private static final String INSTANCENAME = "machanism";
+	private static final String CONNECTION = "bindex";
 
 	private final MongoCollection<Document> collection;
-	protected final MongoClient mongoClient;
 
 	/**
 	 * Creates a repository instance backed by a MongoDB collection.
@@ -55,30 +64,31 @@ public class BindexRepository {
 			throw new IllegalArgumentException("config must not be null");
 		}
 
-		String uri = config.get("BINDEX_REPO_URL", null);
-		if (uri == null) {
-			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
-			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-				uri = "mongodb+srv://user:user@" + DEFAULT_CLUSTER_HOST;
-			} else {
-				uri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + DEFAULT_CLUSTER_HOST;
-			}
-		}
+		collection = getCollection(config);
+	}
 
-		mongoClient = MongoClients.create(uri);
-		MongoDatabase database = mongoClient.getDatabase(INSTANCE_NAME);
-		collection = database.getCollection(COLLECTION_NAME);
+	public static MongoCollection<Document> getCollection(Configurator config) {
+		String password = config.get(BINDEX_REG_PASSWORD_PROP_NAME, null);
+
+		String username = password == null ? PUBLILC_USER_NAME : REGISTER_USER_NAME;
+		password = password == null ? PUBLILC_USER_NAME : password;
+
+		String url = config.get("BINDEX_REPO_URL", null);
+		url = StringUtils.replace(Objects.toString(url, DB_URL), "://", "://" + username + ":" + password + "@");
+		MongoClient mongoClient = MongoClients.create(url);
+		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
+		return database.getCollection(CONNECTION);
 	}
 
 	/**
-	 * Package-private constructor used for tests to avoid MongoDB driver initialization.
+	 * Package-private constructor used for tests to avoid MongoDB driver
+	 * initialization.
 	 */
 	BindexRepository(MongoCollection<Document> collection) {
 		if (collection == null) {
 			throw new IllegalArgumentException("collection must not be null");
 		}
 		this.collection = collection;
-		this.mongoClient = null;
 	}
 
 	/**
@@ -105,7 +115,8 @@ public class BindexRepository {
 	 *
 	 * @param id Bindex id (the {@code id} field in the stored document)
 	 * @return parsed {@link Bindex}, or {@code null} if not present
-	 * @throws IllegalArgumentException if {@code id} is {@code null} or the stored JSON cannot be parsed
+	 * @throws IllegalArgumentException if {@code id} is {@code null} or the stored
+	 *                                  JSON cannot be parsed
 	 */
 	public Bindex getBindex(String id) {
 		if (id == null) {

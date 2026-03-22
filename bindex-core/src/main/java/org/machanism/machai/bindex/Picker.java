@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -81,10 +82,9 @@ import com.mongodb.client.result.InsertOneResult;
  * @since 0.0.2
  */
 public class Picker {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(Picker.class);
 
-	private static final String INSTANCENAME = "machanism";
-	private static final String CONNECTION = "bindex";
 	private static final String INDEXNAME = "vector_index";
 	private static final String LANGUAGES_PROPERTY_NAME = "languages";
 	private static final String DOMAINS_PROPERTY_NAME = "domains";
@@ -97,8 +97,6 @@ public class Picker {
 	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
 	/** Result limit for vector search operations. */
 	private static final int VECTOR_SEARCH_LIMITS = 250;
-
-	public static final String DB_URL = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 
 	private String embeddingModelName = "text-embedding-3-small";
 
@@ -145,9 +143,7 @@ public class Picker {
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		if (collection == null) {
-			MongoClient mongoClient = MongoClients.create(uri);
-			MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
-			collection = database.getCollection(CONNECTION);
+			collection = BindexRepository.getCollection(config);
 		}
 	}
 
@@ -211,7 +207,7 @@ public class Picker {
 			return result.getInsertedId().toString();
 
 		} catch (MongoCommandException e) {
-			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
+			String bindexRegPassword = System.getenv(BindexRepository.BINDEX_REG_PASSWORD_PROP_NAME);
 			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
 				LOGGER.error("To register a Bindex, the BINDEX_REG_PASSWORD env property is required.");
 			}

@@ -1,6 +1,7 @@
 package org.machanism.machai.bindex;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -48,10 +49,24 @@ class PickerTest {
 	}
 
 	@Test
+	void getNormalizedLanguageName_shouldRemoveParenthesesWithoutLeadingSpace() {
+		// Arrange
+		Language lang = new Language();
+		lang.setName("C#(dotnet)");
+
+		// Act
+		String normalized = Picker.getNormalizedLanguageName(lang);
+
+		// Assert
+		assertEquals("c#", normalized);
+	}
+
+	@Test
 	void setScoreAndGetScore_shouldStoreAndReturnScoresFromMap() throws Exception {
 		// Arrange
 		Picker picker = allocateWithoutConstructor(Picker.class);
 		picker.setScore(0.42d);
+
 		Map<String, Double> scoreMap = new HashMap<>();
 		scoreMap.put("lib:1.0", 0.99d);
 		setField(picker, "scoreMap", scoreMap);
@@ -64,6 +79,19 @@ class PickerTest {
 	}
 
 	@Test
+	void getScore_shouldReturnNullWhenNoScorePresent() throws Exception {
+		// Arrange
+		Picker picker = allocateWithoutConstructor(Picker.class);
+		setField(picker, "scoreMap", new HashMap<>());
+
+		// Act
+		Double score = picker.getScore("missing");
+
+		// Assert
+		assertNull(score);
+	}
+
+	@Test
 	void addDependencies_shouldAddTransitiveDependenciesAndAvoidCycles() throws Exception {
 		// Arrange
 		Picker picker = allocateWithoutConstructor(Picker.class);
@@ -71,7 +99,7 @@ class PickerTest {
 		repo.put("A", bindexWithDependencies("A", "B", "C"));
 		repo.put("B", bindexWithDependencies("B", "C"));
 		repo.put("C", bindexWithDependencies("C", "A")); // cycle
-		setField(picker, "collection", null); // ensure no accidental DB usage
+		setStaticField(Picker.class, "collection", null); // ensure no accidental DB usage
 
 		TestablePickerAccess access = new TestablePickerAccess(repo);
 		Set<String> deps = new HashSet<>();
@@ -84,9 +112,8 @@ class PickerTest {
 	}
 
 	@Test
-	void addDependencies_shouldIgnoreUnknownBindexId() throws Exception {
+	void addDependencies_shouldIgnoreUnknownBindexId() {
 		// Arrange
-		allocateWithoutConstructor(Picker.class); // keep coverage for instantiation helper
 		TestablePickerAccess access = new TestablePickerAccess(Collections.emptyMap());
 		Set<String> deps = new HashSet<>();
 
@@ -123,6 +150,12 @@ class PickerTest {
 		field.set(target, value);
 	}
 
+	private static void setStaticField(Class<?> targetClass, String fieldName, Object value) throws Exception {
+		Field field = targetClass.getDeclaredField(fieldName);
+		field.setAccessible(true);
+		field.set(null, value);
+	}
+
 	@SuppressWarnings("unchecked")
 	private static <T> T allocateWithoutConstructor(Class<T> type) throws Exception {
 		Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
@@ -135,9 +168,10 @@ class PickerTest {
 	/**
 	 * Helper that re-implements {@link Picker#addDependencies(Set, String)} logic without hitting MongoDB.
 	 *
-	 * <p>We cannot directly instantiate {@link Picker} in unit tests because its constructor creates a
-	 * MongoDB client. We also cannot override {@code addDependencies} itself. Therefore, this helper
-	 * mirrors the exact algorithm while sourcing Bindexes from an in-memory map.
+	 * <p>
+	 * We cannot directly instantiate {@link Picker} in unit tests because its constructor creates a MongoDB
+	 * client. We also cannot override {@code addDependencies} itself. Therefore, this helper mirrors the
+	 * exact algorithm while sourcing Bindexes from an in-memory map.
 	 */
 	private static final class TestablePickerAccess {
 		private final Map<String, Bindex> repo;
