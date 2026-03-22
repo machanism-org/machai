@@ -4,7 +4,7 @@
   "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
-    "repositoryUrl" : "https://repo1.maven.org/maven2/",
+    "repositoryUrl" : "https://central.sonatype.com/repository/maven-snapshots",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "bindex-maven-plugin",
@@ -12,7 +12,7 @@
       "extension" : "maven-plugin"
     }
   },
-  "description" : "Bindex Maven Plugin is a Maven build plugin in the Machanism Machai ecosystem that integrates Machai/Bindex operations into the Maven build lifecycle for a module. It provides Maven goals (Mojos) to generate and refresh Bindex metadata (bindex.json and related resources) by scanning the module directory and using the module effective POM model via org.machanism.machai.project.layout.MavenProjectLayout. The plugin supports creating a new index (create), updating an existing index (update), registering/publishing the project's Bindex metadata to an external registry service endpoint (register), and cleaning temporary artifacts created by the tooling (clean deletes .machai/bindex-inputs.txt). The goals skip parent/aggregator modules with pom packaging. GenAI provider/model selection is configured via the required Maven property bindex.genai (example OpenAI:gpt-5) and credentials can be supplied via Maven settings.xml by specifying gw.genai.serverId to load <server> username/password into workflow properties GENAI_USERNAME and GENAI_PASSWORD. The register goal publishes to a registry URL configured with -Dbindex.register.url and can run in update mode via the update parameter (default true). Intended use cases include CI/CD pipelines and local builds to automate library discovery, semantic-search-ready metadata generation, and metadata publishing for downstream assembly/integration workflows.",
+  "description" : "Bindex Maven Plugin (org.machanism.machai:bindex-maven-plugin) is a Maven build plugin in the Machanism Machai ecosystem that automates generation, refresh, and registration of Bindex metadata for Maven modules. It integrates Machai/Bindex operations into the Maven build lifecycle by providing Mojos that scan the current module directory and use the effective Maven model to build a project layout (org.machanism.machai.project.layout.MavenProjectLayout) for indexing.\n\nCore goals:\n- create: generates a new Bindex index/resources for the current module during the install phase.\n- update: refreshes an existing Bindex index/resources for the current module during the install phase.\n- register: scans the module and publishes Bindex metadata to an external registry endpoint using org.machanism.machai.bindex.BindexRegister; supports update mode.\n- clean: deletes temporary Machai/Bindex artifacts under the project directory (currently .machai/bindex-inputs.txt) during the clean phase.\n\nBehavior and configuration:\n- Skips execution for aggregator/parent modules with pom packaging.\n- Requires selecting a GenAI provider/model via the Maven property bindex.genai (bound to org.machanism.machai.bindex.BindexCreator.MODEL_PROP_NAME; example OpenAI:gpt-5) which is used by BindexCreator and BindexRegister.\n- Can optionally load GenAI credentials from Maven settings.xml by specifying gw.genai.serverId; the plugin reads the matching <server> username/password and maps them to workflow properties GENAI_USERNAME and GENAI_PASSWORD via a org.machanism.macha.core.commons.configurator.PropertiesConfigurator.\n- The register goal publishes to the registry URL configured with the Maven property bindex.register.url and supports a boolean parameter update (default true) to control update vs create behavior when registering.\n\nIntended use cases include CI/CD pipelines and local builds to enable library discovery, semantic-search-ready metadata generation, and metadata publishing to a registry for downstream assembly/integration workflows.",
   "authors" : [ {
     "name" : "Viktor Tovstyi",
     "email" : "viktor.tovstyi@gmail.com",
@@ -21,31 +21,31 @@
   "license" : "Apache License, Version 2.0",
   "classification" : {
     "type" : "plugin",
-    "domains" : [ "Build Tooling", "Developer Tooling", "Artifact Metadata", "Dependency Management", "Software Supply Chain", "GenAI Integration", "Semantic Search", "Indexing and Registry" ],
+    "domains" : [ "Build Tooling", "Maven Plugins", "Artifact Metadata", "Dependency Management", "Software Supply Chain", "Indexing and Registry", "GenAI Integration", "Semantic Search", "Developer Tooling", "CI/CD Automation" ],
     "languages" : [ {
       "name" : "Java",
       "version" : "8+"
     } ],
     "layers" : [ "Infrastructure" ],
-    "usageContext" : [ "Maven build lifecycle (install/clean phases)", "Maven plugin goals (create/update/register/clean)", "Multi-module Maven projects (skips pom packaging modules)", "CI/CD pipelines for metadata generation and publishing", "Library publishing, artifact discovery, and indexing workflows", "Using Maven settings.xml <server> credentials via gw.genai.serverId" ],
+    "usageContext" : [ "Maven build lifecycle (install and clean phases)", "Maven plugin goals (create/update/register/clean)", "Multi-module Maven projects (skips modules with pom packaging)", "CI/CD pipelines for metadata generation and publishing", "Publishing and registering semantic-search metadata for downstream assembly/integration workflows", "Supplying GenAI credentials via Maven settings.xml using gw.genai.serverId" ],
     "targetEnvironment" : [ "Java", "Maven" ],
-    "integrations" : [ "Maven", "Machai/Bindex Registry", "Maven settings.xml" ]
+    "integrations" : [ "Maven", "Machai/Bindex", "Maven settings.xml" ]
   },
   "constructors" : [ {
     "package" : "org.machanism.machai.bindex.maven",
     "signature" : "org.machanism.machai.bindex.maven.AbstractBindexMojo()",
-    "description" : "Base Mojo class for Bindex plugin goals. Maven instantiates subclasses and injects parameters such as the current org.apache.maven.project.MavenProject, the required GenAI model identifier (property bindex.genai), the project base directory, and Maven org.apache.maven.settings.Settings. The base class provides helper methods to decide whether to process the current module (skipping pom packaging), to build a org.machanism.macha.core.commons.configurator.PropertiesConfigurator (optionally loading GenAI credentials from settings.xml using gw.genai.serverId), and to create/update Bindex metadata using org.machanism.machai.bindex.BindexCreator and org.machanism.machai.project.layout.MavenProjectLayout.",
+    "description" : "Base Maven Mojo for Bindex goals. Maven instantiates subclasses and injects parameters including org.apache.maven.project.MavenProject, the required GenAI model identifier (property bindex.genai), the project base directory, and org.apache.maven.settings.Settings. Provides shared helpers to skip pom-packaging modules, build a org.machanism.macha.core.commons.configurator.PropertiesConfigurator (optionally loading credentials from settings.xml using gw.genai.serverId), and create or update Bindex metadata using org.machanism.machai.bindex.BindexCreator with a org.machanism.machai.project.layout.MavenProjectLayout created from the module base directory and project model.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.bindex.maven.Create mojo = new org.machanism.machai.bindex.maven.Create();",
-      "description" : "Illustrative instantiation of a concrete Mojo. In real Maven execution, Maven constructs Mojos and injects @Parameter fields before calling execute()."
+      "description" : "Illustrative instantiation of a concrete Mojo. In normal Maven execution, Maven constructs Mojos, injects @Parameter fields, and then calls execute()."
     } ]
   }, {
     "package" : "org.machanism.machai.bindex.maven",
     "signature" : "org.machanism.machai.bindex.maven.Clean()",
-    "description" : "Creates the Clean goal Mojo (normally instantiated by Maven) which deletes temporary Machai/Bindex artifacts under the project base directory, currently removing .machai/bindex-inputs.txt.",
+    "description" : "Creates the Clean goal Mojo (normally instantiated by Maven) which deletes temporary Machai/Bindex artifacts under the project base directory; currently removes .machai/bindex-inputs.txt.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.bindex.maven.Clean clean = new org.machanism.machai.bindex.maven.Clean();",
-      "description" : "Illustrative instantiation of the Clean Mojo. Maven typically constructs and executes this goal as part of the clean lifecycle phase."
+      "description" : "Illustrative instantiation. Maven runs this goal in the clean phase."
     } ]
   }, {
     "package" : "org.machanism.machai.bindex.maven",
@@ -53,7 +53,7 @@
     "description" : "Creates the Create goal Mojo (normally instantiated by Maven) which generates a new Bindex index/resources for the current module during the install phase, skipping modules with pom packaging.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.bindex.maven.Create create = new org.machanism.machai.bindex.maven.Create();",
-      "description" : "Illustrative instantiation of the Create Mojo. Maven executes it via the create goal."
+      "description" : "Illustrative instantiation. Maven executes it via the create goal."
     } ]
   }, {
     "package" : "org.machanism.machai.bindex.maven",
@@ -61,22 +61,22 @@
     "description" : "Creates the Update goal Mojo (normally instantiated by Maven) which refreshes an existing Bindex index/resources for the current module during the install phase, skipping modules with pom packaging.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.bindex.maven.Update update = new org.machanism.machai.bindex.maven.Update();",
-      "description" : "Illustrative instantiation of the Update Mojo. Maven executes it via the update goal."
+      "description" : "Illustrative instantiation. Maven executes it via the update goal."
     } ]
   }, {
     "package" : "org.machanism.machai.bindex.maven",
     "signature" : "org.machanism.machai.bindex.maven.Register()",
-    "description" : "Creates the Register goal Mojo (normally instantiated by Maven) which scans the project folder and registers/publishes Bindex metadata to an external registry endpoint during the install phase, skipping modules with pom packaging.",
+    "description" : "Creates the Register goal Mojo (normally instantiated by Maven) which scans the project base directory and registers/publishes Bindex metadata to an external registry endpoint during the install phase. Uses org.machanism.machai.bindex.BindexRegister with the configured model and bindex.register.url and supports update mode via the update parameter (default true). Skips modules with pom packaging.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.bindex.maven.Register register = new org.machanism.machai.bindex.maven.Register();",
-      "description" : "Illustrative instantiation of the Register Mojo. Maven executes it via the register goal."
+      "description" : "Illustrative instantiation. Maven executes it via the register goal."
     } ]
   } ],
   "features" : [ {
     "name" : "create",
     "package" : "org.machanism.machai.bindex.maven",
     "signature" : "void org.machanism.machai.bindex.maven.Create.execute() throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Maven goal that creates a new Bindex index/resources for the current module during the install phase. Delegates to AbstractBindexMojo.createBindex(false) and skips execution for modules with pom packaging.",
+    "description" : "Maven goal that creates a new Bindex index/resources for the current module during the install phase. Skips execution for modules with pom packaging and delegates to org.machanism.machai.bindex.maven.AbstractBindexMojo.createBindex(boolean) with update=false.",
     "examples" : [ {
       "snippet" : "mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5",
       "description" : "Runs the create goal to generate a fresh Bindex index for the current Maven module using the specified GenAI provider/model."
@@ -85,7 +85,7 @@
     "name" : "update",
     "package" : "org.machanism.machai.bindex.maven",
     "signature" : "void org.machanism.machai.bindex.maven.Update.execute() throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Maven goal that updates (refreshes) an existing Bindex index/resources for the current module during the install phase. Delegates to AbstractBindexMojo.createBindex(true) and skips execution for modules with pom packaging.",
+    "description" : "Maven goal that updates (refreshes) an existing Bindex index/resources for the current module during the install phase. Skips execution for modules with pom packaging and delegates to org.machanism.machai.bindex.maven.AbstractBindexMojo.createBindex(boolean) with update=true.",
     "examples" : [ {
       "snippet" : "mvn org.machanism.machai:bindex-maven-plugin:update -Dbindex.genai=OpenAI:gpt-5",
       "description" : "Runs the update goal to refresh Bindex metadata for the current Maven module."
@@ -94,19 +94,19 @@
     "name" : "register",
     "package" : "org.machanism.machai.bindex.maven",
     "signature" : "void org.machanism.machai.bindex.maven.Register.execute() throws org.apache.maven.plugin.MojoExecutionException, org.apache.maven.plugin.MojoFailureException",
-    "description" : "Maven goal that registers the project's Bindex metadata to an external registry endpoint. Creates org.machanism.machai.bindex.BindexRegister with the configured model and registry URL, sets update mode (parameter update, default true), and scans the project base directory. Skips execution for modules with pom packaging.",
+    "description" : "Maven goal that registers the project's Bindex metadata to an external registry endpoint. Constructs org.machanism.machai.bindex.BindexRegister with the configured model (bindex.genai), registry URL (bindex.register.url), and workflow configurator (optionally with credentials from settings.xml via gw.genai.serverId). Sets update mode from the update parameter (default true) and scans the module base directory via scanFolder(java.io.File). Skips execution for modules with pom packaging; wraps java.io.IOException as MojoExecutionException.",
     "examples" : [ {
       "snippet" : "mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.register.url=http://localhost:8080 -Dbindex.genai=OpenAI:gpt-5",
       "description" : "Scans the module and publishes Bindex metadata to a local registry endpoint using the selected GenAI provider/model."
     }, {
       "snippet" : "mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.register.url=https://registry.example.com -Dbindex.genai=OpenAI:gpt-5 -Dupdate=false",
-      "description" : "Registers Bindex metadata without update mode (subject to Maven parameter binding/configuration)."
+      "description" : "Registers Bindex metadata without update mode."
     } ]
   }, {
     "name" : "clean",
     "package" : "org.machanism.machai.bindex.maven",
     "signature" : "void org.machanism.machai.bindex.maven.Clean.execute() throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Maven goal bound to the clean phase that removes temporary Machai/Bindex artifacts, currently deleting the inputs log file \".machai/bindex-inputs.txt\" under the project base directory.",
+    "description" : "Maven goal bound to the clean phase that removes temporary Machai/Bindex artifacts by deleting the inputs log file \".machai/bindex-inputs.txt\" under the project base directory.",
     "examples" : [ {
       "snippet" : "mvn org.machanism.machai:bindex-maven-plugin:clean",
       "description" : "Deletes the Machai/Bindex inputs log file created under the .machai directory."
@@ -115,16 +115,16 @@
     "name" : "createBindex",
     "package" : "org.machanism.machai.bindex.maven",
     "signature" : "void org.machanism.machai.bindex.maven.AbstractBindexMojo.createBindex(boolean update) throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Shared helper used by create/update goals to build Bindex metadata. Creates org.machanism.machai.bindex.BindexCreator with the configured model and a properties configurator, sets update mode, constructs a org.machanism.machai.project.layout.MavenProjectLayout with basedir and effective POM model (project.getModel()) and processes the project folder.",
+    "description" : "Shared helper used by create/update goals to build Bindex metadata. Creates org.machanism.machai.bindex.BindexCreator with the configured model and a org.machanism.macha.core.commons.configurator.PropertiesConfigurator from getConfigurator(), sets update mode, builds a org.machanism.machai.project.layout.MavenProjectLayout with projectDir(java.io.File) and model(org.apache.maven.model.Model), and processes the module folder via processFolder(org.machanism.machai.project.layout.MavenProjectLayout).",
     "examples" : [ {
       "snippet" : "org.machanism.machai.bindex.maven.AbstractBindexMojo mojo = new org.machanism.machai.bindex.maven.Create();\n// Maven normally calls execute(); createBindex(update) is invoked internally by goal implementations.",
-      "description" : "Illustrates that create/update goals delegate to the shared createBindex(update) helper to process the project folder via BindexCreator."
+      "description" : "Illustrates that create/update goals delegate to createBindex(update) to process the project folder using BindexCreator."
     } ]
   }, {
     "name" : "getConfigurator",
     "package" : "org.machanism.machai.bindex.maven",
     "signature" : "org.machanism.macha.core.commons.configurator.PropertiesConfigurator org.machanism.machai.bindex.maven.AbstractBindexMojo.getConfigurator() throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Builds a PropertiesConfigurator for workflow execution. If gw.genai.serverId is provided, resolves the matching <server> entry from Maven settings.xml and maps its username/password to workflow properties GENAI_USERNAME and GENAI_PASSWORD. Throws MojoExecutionException when settings are unavailable or the configured server id cannot be found.",
+    "description" : "Builds a org.machanism.macha.core.commons.configurator.PropertiesConfigurator for workflow execution. If gw.genai.serverId is set and Maven settings are available, reads the matching org.apache.maven.settings.Server entry from settings.xml and maps its username/password to workflow properties GENAI_USERNAME and GENAI_PASSWORD. Throws MojoExecutionException when settings are unavailable or the configured server id cannot be found.",
     "examples" : [ {
       "snippet" : "<settings>\n  <servers>\n    <server>\n      <id>my-genai</id>\n      <username>user</username>\n      <password>secret</password>\n    </server>\n  </servers>\n</settings>\n\nmvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5 -Dgw.genai.serverId=my-genai",
       "description" : "Configures GenAI credentials via Maven settings.xml and selects the server id with gw.genai.serverId."
@@ -151,7 +151,7 @@
   }, {
     "name" : "update",
     "package" : "org.machanism.machai.bindex.maven",
-    "description" : "Parameter for the register goal controlling whether registration performs an update (incremental refresh) while scanning and publishing metadata. Defaults to true.",
+    "description" : "Boolean parameter for the register goal controlling whether registration performs an update while scanning and publishing metadata. Defaults to true.",
     "type" : "configuration property",
     "examples" : [ {
       "snippet" : "mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.register.url=http://localhost:8080 -Dupdate=false",
