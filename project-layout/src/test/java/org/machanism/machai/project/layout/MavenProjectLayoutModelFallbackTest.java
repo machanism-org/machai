@@ -1,6 +1,8 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +23,7 @@ class MavenProjectLayoutModelFallbackTest {
 		Files.write(pom.toPath(), minimalPom().getBytes(StandardCharsets.UTF_8));
 		pom.deleteOnExit();
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir).effectivePomRequired(true);
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir);
 
 		// Act
 		Model model = layout.getModel();
@@ -43,7 +45,7 @@ class MavenProjectLayoutModelFallbackTest {
 		Files.write(pom.toPath(), "<project>".getBytes(StandardCharsets.UTF_8));
 		pom.deleteOnExit();
 
-		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir).effectivePomRequired(false);
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir);
 
 		// Act + Assert
 		assertThrows(IllegalArgumentException.class, layout::getModel);

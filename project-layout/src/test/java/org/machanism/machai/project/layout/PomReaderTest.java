@@ -1,6 +1,9 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,8 +37,8 @@ class PomReaderTest {
 
 		try {
 			// Act
-			reader.getProjectModel(pom1.toFile(), false);
-			Model model2 = reader.getProjectModel(pom2.toFile(), false);
+			reader.getProjectModel(pom1.toFile());
+			Model model2 = reader.getProjectModel(pom2.toFile());
 
 			// Assert
 			assertEquals("value123", model2.getArtifactId());
@@ -60,7 +63,7 @@ class PomReaderTest {
 
 		try {
 			// Act
-			reader.getProjectModel(pom.toFile(), false);
+			reader.getProjectModel(pom.toFile());
 
 			// Assert
 			assertEquals("9.9.9", reader.getPomProperties().get("project.version"));
@@ -79,7 +82,7 @@ class PomReaderTest {
 		try {
 			// Act
 			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-					() -> reader.getProjectModel(missing.toFile(), false));
+					() -> reader.getProjectModel(missing.toFile()));
 
 			// Assert
 			assertTrue(ex.getMessage().contains("POM file:"));
@@ -129,15 +132,7 @@ class PomReaderTest {
 				"<groupId>g</groupId><artifactId>a</artifactId><version>1</version>" +
 				"</project>").getBytes(StandardCharsets.UTF_8));
 
-		PomReader reader = new PomReader() {
-			@Override
-			public Model getProjectModel(java.io.File pomFile, boolean effective) {
-				if (effective) {
-					throw new RuntimeException("boom");
-				}
-				return super.getProjectModel(pomFile, false);
-			}
-		};
+		PomReader reader = new PomReader();
 
 		try {
 			// Act

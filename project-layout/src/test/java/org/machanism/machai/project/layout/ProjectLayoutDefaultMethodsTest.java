@@ -1,6 +1,6 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
 
