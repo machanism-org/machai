@@ -1,18 +1,18 @@
 {
-  "id" : "org.machanism.machai:gw-maven-plugin:0.0.13-SNAPSHOT",
+  "id" : "org.machanism.machai:gw-maven-plugin:1.0.2",
   "name" : "org.machanism.machai:gw-maven-plugin",
-  "version" : "0.0.13-SNAPSHOT",
+  "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
-    "repositoryUrl" : "https://repo.maven.apache.org/maven2",
+    "repositoryUrl" : "https://repo1.maven.org/maven2/",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "gw-maven-plugin",
-      "version" : "0.0.13-SNAPSHOT",
+      "version" : "1.0.2",
       "extension" : "maven-plugin"
     }
   },
-  "description" : "GW Maven Plugin (Ghostwriter Maven Plugin) is a Maven plugin that integrates MachAI Ghostwriter guided workflow (GW) document processing into Java/Maven builds. It scans and processes documentation source trees (commonly src/site) using embedded guidance tags and instruction inputs, generating and maintaining consistent, up-to-date project documentation across single-module and multi-module (reactor) builds. The plugin provides goals to run GW processing in reverse module order (gw:gw, processing sub-modules first then parents, and able to run without a pom.xml), to run processing using standard Maven reactor dependency ordering with an option to defer the execution-root project until the end (gw:reactor), and to delete temporary workflow artifacts (gw:clean, typically bound to the clean phase). It supports configuration via Maven properties and plugin parameters, including scan root override (gw.scanDir), instructions locations (gw.instructions), default guidance text (gw.guidance), exclude patterns (gw.excludes), input-file logging (gw.logInputs), multi-threaded module processing for gw:gw (gw.threads), and optional credential forwarding from ~/.m2/settings.xml by specifying a server id (gw.genai.serverId), which maps to GENAI_USERNAME/GENAI_PASSWORD workflow properties. It leverages the org.machanism.machai:ghostwriter library and integrates with Maven core/plugin APIs to operate during build lifecycles and in CI/CD pipelines for automated documentation generation and maintenance.",
+  "description" : "GW Maven Plugin (Ghostwriter Maven Plugin) is a Maven plugin that integrates MachAI Ghostwriter guided workflow (GW) document processing into Java/Maven builds. It scans a documentation source tree (commonly src/site, or an overridden directory) for embedded @guidance blocks and processes/rewrites content using the configured GenAI provider/model. The plugin supports both aggregator-style execution that can run without a pom.xml and reactor-style execution that follows Maven dependency ordering. It also provides an interactive \"act\" mode for applying a predefined action prompt over scanned documents, and a clean goal to delete temporary workflow artifacts.\n\nGoals:\n- gw:gw (org.machanism.machai.gw.maven.GW): Aggregator goal (requiresProject=false) that can run in directories without a pom.xml. Processes modules in reverse order (sub-modules first, then parents), similar to Ghostwriter CLI. Supports Maven parallel session settings; also supports multi-threaded behavior via gw.threads as documented by the project.\n- gw:reactor (org.machanism.machai.gw.maven.ReactorGW): Runs in standard Maven reactor context; processes documents using reactor ordering and can optionally defer execution-root project processing until other reactor projects complete via gw.rootProjectLast (default true).\n- gw:act (org.machanism.machai.gw.maven.Act): Aggregator interactive goal that applies an \"action\" prompt to documents. The action prompt is provided via -Dgw.act or collected interactively via Maven Prompter. Optional -Dgw.acts points to a directory of predefined action definitions.\n- gw:act-reactor (org.machanism.machai.gw.maven.ReactorAct): Reactor-friendly variant of gw:act that targets the execution-root project.\n- gw:clean (org.machanism.machai.gw.maven.Clean): Deletes temporary artifacts created by GW processing (typically bound to Maven clean phase).\n\nShared configuration (via AbstractGWGoal):\n- gw.model: Provider/model identifier forwarded to the workflow (e.g., openai:gpt-4o-mini).\n- gw.scanDir: Optional scan root override; when omitted defaults to the Maven execution root directory/module base depending on the goal.\n- gw.instructions: Instruction locations consumed by the workflow.\n- gw.guidance: Default guidance text forwarded to the workflow.\n- gw.excludes: Exclude glob patterns/paths to skip during scanning.\n- gw.logInputs (default false): Log the input files passed to the workflow.\n- gw.genai.serverId: Reads credentials from ~/.m2/settings.xml <servers><server> and forwards them to the workflow as GENAI_USERNAME and GENAI_PASSWORD.\n\nImplementation notes relevant for embedding: built on org.machanism.machai:ghostwriter; uses MavenProjectLayout/ProjectLayout detection for scanning; supports non-recursive invocation detection; supports concurrency when Maven is running in parallel mode (degreeOfConcurrency). Primary use cases include documentation automation, guided file processing, CI/CD documentation maintenance, and integrating GenAI-backed transformations into Maven build lifecycles.",
   "authors" : [ {
     "name" : "Viktor Tovstyi",
     "email" : "viktor.tovstyi@gmail.com"
@@ -22,10 +22,11 @@
     "type" : "plugin",
     "domains" : [ "Developer Tools", "Documentation", "Build Automation", "Maven", "Generative AI" ],
     "languages" : [ {
-      "name" : "Java"
+      "name" : "Java",
+      "version" : ""
     } ],
     "layers" : [ "Infrastructure" ],
-    "usageContext" : [ "Maven build lifecycle", "Maven plugin goals (Mojo)", "CI/CD pipelines", "Multi-module (reactor) builds", "Documentation automation", "Guided file processing", "Credential forwarding from Maven settings.xml" ],
+    "usageContext" : [ "Maven plugin goals (Mojo)", "Maven build lifecycle", "Maven reactor (multi-module) builds", "Aggregator goal execution without a pom.xml", "Documentation automation", "Guided file processing with embedded @guidance blocks", "Interactive prompting via Maven Prompter", "CI/CD pipelines", "Credential forwarding from Maven settings.xml" ],
     "targetEnvironment" : [ "Java", "Maven" ],
     "integrations" : [ "MachAI Ghostwriter" ]
   },
@@ -33,8 +34,8 @@
   "features" : [ {
     "name" : "gw:gw",
     "package" : "org.machanism.machai.gw.maven",
-    "signature" : "org.machanism.machai.gw.maven.GW.execute() throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Runs Ghostwriter guided file processing as an aggregator goal that can execute without a pom.xml (requiresProject=false). Processes modules in reverse order (sub-modules first, then parent modules), similar to the Ghostwriter CLI. Supports optional multi-threaded module processing via gw.threads and inherits shared scanning/configuration parameters (gw.model, gw.scanDir, gw.instructions, gw.guidance, gw.excludes, gw.genai.serverId, gw.logInputs).",
+    "signature" : "void execute() throws org.apache.maven.plugin.MojoExecutionException",
+    "description" : "Aggregator goal (requiresProject=false) that runs Ghostwriter guided file processing and can be executed in directories without a pom.xml. Processes modules in reverse order (sub-modules first, then parent modules), similar to the Ghostwriter CLI. Uses common configuration from AbstractGWGoal (gw.model, gw.scanDir, gw.instructions, gw.guidance, gw.excludes, gw.genai.serverId, gw.logInputs) and respects Maven parallel session settings for concurrency; reports process termination failures as MojoExecutionException.",
     "examples" : [ {
       "snippet" : "mvn gw:gw",
       "description" : "Run guided workflow processing in the current directory."
@@ -42,17 +43,14 @@
       "snippet" : "cd path\\\\to\\\\project\nmvn gw:gw",
       "description" : "Run gw:gw in a directory that does not contain a pom.xml (goal supports requiresProject=false)."
     }, {
-      "snippet" : "mvn gw:gw -Dgw.threads=true",
-      "description" : "Enable multi-threaded module processing."
-    }, {
-      "snippet" : "mvn -pl :my-module gw:gw",
-      "description" : "Run guided workflow processing for a specific module in a multi-module build."
+      "snippet" : "mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\\\site -Dgw.logInputs=true",
+      "description" : "Select a model/provider, override the scan root, and enable input-file logging."
     } ]
   }, {
     "name" : "gw:reactor",
     "package" : "org.machanism.machai.gw.maven",
-    "signature" : "org.machanism.machai.gw.maven.ReactorGW.execute() throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Processes documents across a multi-module build using standard Maven reactor dependency ordering. Optionally defers execution-root project processing until other reactor projects have completed using gw.rootProjectLast. Inherits shared scanning/configuration parameters (gw.model, gw.scanDir, gw.instructions, gw.guidance, gw.excludes, gw.genai.serverId, gw.logInputs).",
+    "signature" : "void execute() throws org.apache.maven.plugin.MojoExecutionException",
+    "description" : "Processes documents using Maven reactor context. Supports standard reactor dependency ordering and can optionally defer processing of the execution-root project until other reactor projects complete via gw.rootProjectLast (default true). Inherits shared scanning and credential configuration parameters from AbstractGWGoal.",
     "examples" : [ {
       "snippet" : "mvn gw:reactor",
       "description" : "Run guided workflow processing using Maven reactor ordering."
@@ -67,9 +65,36 @@
       "description" : "Load GenAI credentials from ~/.m2/settings.xml <server> and forward them to the workflow."
     } ]
   }, {
+    "name" : "gw:act",
+    "package" : "org.machanism.machai.gw.maven",
+    "signature" : "void execute() throws org.apache.maven.plugin.MojoExecutionException",
+    "description" : "Interactive aggregator goal that runs a predefined \"action\" prompt over scanned documents using ActProcessor. The action prompt is provided via -Dgw.act or collected interactively via Maven Prompter. Optionally, -Dgw.acts points to a directory of predefined action definitions. Inherits shared scanning and credential configuration parameters from AbstractGWGoal.",
+    "examples" : [ {
+      "snippet" : "mvn gw:act",
+      "description" : "Run interactive action mode and prompt for the action text."
+    }, {
+      "snippet" : "mvn gw:act -Dgw.act=\"Rewrite headings for clarity\" -Dgw.scanDir=src\\\\site",
+      "description" : "Run action mode with an explicit action prompt and scan root override."
+    }, {
+      "snippet" : "mvn gw:act -Dgw.acts=src\\\\site\\\\acts -Dgw.logInputs=true",
+      "description" : "Use a directory of predefined actions and enable input-file logging."
+    } ]
+  }, {
+    "name" : "gw:act-reactor",
+    "package" : "org.machanism.machai.gw.maven",
+    "signature" : "void execute() throws org.apache.maven.plugin.MojoExecutionException",
+    "description" : "Reactor-friendly variant of gw:act that runs an action against the execution-root project in standard reactor build context. It delegates scanning and processing to ActProcessor but does not process modules itself (no-op module processing override). Inherits parameters from Act and AbstractGWGoal.",
+    "examples" : [ {
+      "snippet" : "mvn gw:act-reactor",
+      "description" : "Run action processing for the execution-root project using reactor context."
+    }, {
+      "snippet" : "mvn gw:act-reactor -Dgw.act=\"Rewrite headings\" -Dgw.scanDir=src\\\\site",
+      "description" : "Run with an explicit action prompt and scan root override."
+    } ]
+  }, {
     "name" : "gw:clean",
     "package" : "org.machanism.machai.gw.maven",
-    "signature" : "org.machanism.machai.gw.maven.Clean.execute() throws org.apache.maven.plugin.MojoExecutionException",
+    "signature" : "void execute() throws org.apache.maven.plugin.MojoExecutionException",
     "description" : "Deletes temporary artifacts created by the MachAI Ghostwriter guided workflow document processing under the current module base directory. Typically bound to Maven's clean phase.",
     "examples" : [ {
       "snippet" : "mvn gw:clean",
@@ -79,13 +104,16 @@
       "description" : "Run standard Maven clean and then delete GW workflow temporary files."
     } ]
   }, {
-    "name" : "Shared scanning and credential configuration",
+    "name" : "Shared scanning and settings.xml credential forwarding",
     "package" : "org.machanism.machai.gw.maven",
-    "signature" : "org.machanism.machai.gw.maven.AbstractGWGoal.scanDocuments(org.machanism.machai.gw.processor.GuidanceProcessor) throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Common scan/execute flow used by goals to configure a FileProcessor, apply excludes, set instructions and default guidance, establish scan root (defaults to Maven execution root directory when gw.scanDir is omitted), optionally log input files (gw.logInputs), and forward optional GenAI credentials read from ~/.m2/settings.xml when gw.genai.serverId is provided.",
+    "signature" : "void scanDocuments(org.machanism.machai.gw.processor.GuidanceProcessor processor) throws org.apache.maven.plugin.MojoExecutionException",
+    "description" : "Common scan/execute flow used by goals to configure a processor (excludes, instructions, default guidance, scan root selection, optional input-file logging) and run document scanning. When gw.genai.serverId is set, reads username/password from ~/.m2/settings.xml <servers><server> and forwards them to the workflow as GENAI_USERNAME and GENAI_PASSWORD properties via PropertiesConfigurator.",
     "examples" : [ {
       "snippet" : "mvn gw:gw -Dgw.scanDir=src\\\\site -Dgw.instructions=classpath:gw/instructions.md -Dgw.guidance=\"Keep docs concise\" -Dgw.excludes=**/target/** -Dgw.logInputs=true",
       "description" : "Run processing with scan root override, instructions, default guidance, excludes, and input logging enabled."
+    }, {
+      "snippet" : "mvn gw:reactor -Dgw.genai.serverId=my-genai-server",
+      "description" : "Load GenAI credentials from Maven settings.xml and forward them to the workflow."
     } ]
   } ],
   "customizations" : [ {
@@ -98,7 +126,7 @@
       "description" : "Reads username/password from the specified settings.xml server entry and forwards them to the workflow."
     } ]
   }, {
-    "name" : "Excludes for scan filtering",
+    "name" : "Scan filtering with excludes",
     "package" : "org.machanism.machai.gw.maven",
     "description" : "Use gw.excludes to configure exclude patterns/paths that should be skipped when scanning documentation sources.",
     "type" : "configuration property",
@@ -107,27 +135,30 @@
       "description" : "Exclude build and VCS directories from scanning."
     } ]
   }, {
-    "name" : "Multi-threaded module processing (gw:gw)",
+    "name" : "Deferred execution-root processing in reactor mode",
     "package" : "org.machanism.machai.gw.maven",
-    "description" : "Use gw.threads to enable or disable concurrent module processing for the gw:gw goal.",
-    "type" : "configuration property",
-    "examples" : [ {
-      "snippet" : "mvn gw:gw -Dgw.threads=true",
-      "description" : "Enable concurrent module processing."
-    } ]
-  }, {
-    "name" : "Deferred root project processing (gw:reactor)",
-    "package" : "org.machanism.machai.gw.maven",
-    "description" : "Use gw.rootProjectLast to delay processing of the execution-root project until all other reactor projects complete (typically useful for parent pom projects).",
+    "description" : "Use gw.rootProjectLast (default true) to delay processing of the execution-root project until other reactor projects complete, typically useful for parent pom projects.",
     "type" : "configuration property",
     "examples" : [ {
       "snippet" : "mvn gw:reactor -Dgw.rootProjectLast=true",
       "description" : "Defers execution-root processing until other modules are done."
     } ]
+  }, {
+    "name" : "Interactive action prompt selection",
+    "package" : "org.machanism.machai.gw.maven",
+    "description" : "Use gw.act to supply an action prompt non-interactively; if not set, the plugin prompts via Maven Prompter. Use gw.acts to point to a directory of predefined action definitions.",
+    "type" : "configuration property",
+    "examples" : [ {
+      "snippet" : "mvn gw:act -Dgw.act=\"Rewrite headings for clarity\"",
+      "description" : "Supply the action prompt via system property (non-interactive)."
+    }, {
+      "snippet" : "mvn gw:act -Dgw.acts=src\\\\site\\\\acts",
+      "description" : "Use a directory of predefined action definitions."
+    } ]
   } ],
   "studs" : [ ],
   "examples" : [ {
-    "title" : "Basic usage",
+    "title" : "Basic guided workflow processing",
     "snippet" : "mvn gw:gw",
     "description" : "Runs guided workflow processing in the current directory."
   }, {
@@ -135,10 +166,13 @@
     "snippet" : "mvn gw:reactor -Dgw.scanDir=src\\\\site",
     "description" : "Processes documentation under src/site using Maven reactor ordering."
   }, {
+    "title" : "Interactive action mode",
+    "snippet" : "mvn gw:act",
+    "description" : "Prompts for an action prompt and applies it to scanned documents."
+  }, {
     "title" : "Use Maven settings credentials",
     "snippet" : "mvn gw:gw -Dgw.genai.serverId=my-genai-server -Dgw.model=openai:gpt-4o-mini",
     "description" : "Loads credentials from settings.xml and selects a provider/model identifier for the workflow."
   } ],
-  "dependencies" : [ "org.machanism.machai:ghostwriter:0.0.13-SNAPSHOT", "org.apache.commons:commons-lang3:3.20.0", "org.apache.maven.shared:maven-shared-utils:3.4.2", "org.apache.maven:maven-core:3.6.0", "org.apache.maven:maven-plugin-api:3.0", "org.apache.maven.plugin-tools:maven-plugin-annotations:3.4", "org.apache.maven.plugin-testing:maven-plugin-testing-harness:3.4.0", "org.slf4j:slf4j-api:2.0.17", "junit:junit:4.13.2", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0" ],
-  "$schema" : "http://json-schema.org/draft-07/schema#"
+  "dependencies" : [ "org.apache.commons:commons-lang3:3.20.0", "org.apache.maven:maven-core:3.8.1", "org.apache.maven:maven-plugin-api:3.0", "org.apache.maven.plugin-tools:maven-plugin-annotations:3.4", "org.apache.maven.plugin-testing:maven-plugin-testing-harness:3.4.0", "org.apache.maven.shared:maven-shared-utils:3.4.2", "org.codehaus.plexus:plexus-interactivity-api:1.5.1", "org.junit.jupiter:junit-jupiter-api:5.9.2", "junit:junit:4.13.2", "org.machanism.machai:ghostwriter:1.0.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
 }
