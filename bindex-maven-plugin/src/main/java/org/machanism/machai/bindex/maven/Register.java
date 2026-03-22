@@ -51,7 +51,7 @@ public class Register extends AbstractBindexMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (isBindexed()) {
 			try {
-				BindexRegister register = new BindexRegister(genai, registerUrl, getConfigurator());
+				BindexRegister register = new BindexRegister(model, registerUrl, getConfigurator());
 				register.update(update);
 				register.scanFolder(project.getBasedir());
 			} catch (IOException e) {

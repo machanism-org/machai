@@ -1,12 +1,14 @@
 package org.machanism.machai.bindex.maven;
 
 import java.io.File;
-import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.machanism.macha.core.commons.configurator.Configurator;
+import org.apache.maven.settings.Server;
+import org.apache.maven.settings.Settings;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.project.layout.MavenProjectLayout;
@@ -32,8 +34,8 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 * The AI provider/model identifier used by the plugin (for example
 	 * {@code OpenAI:gpt-5}).
 	 */
-	@Parameter(property = "bindex.genai", required = true)
-	protected String genai;
+	@Parameter(property = BindexCreator.MODEL_PROP_NAME, required = true)
+	protected String model;
 
 	/**
 	 * The base directory of the Maven project.
@@ -42,24 +44,16 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	protected File basedir;
 
 	/**
-	 * Provides configuration properties to other components (for example API
-	 * keys/provider settings).
+	 * The Maven settings used to resolve credentials from {@code settings.xml}.
 	 */
-	private final Configurator configurator;
-
+	@Parameter(readonly = true, defaultValue = "${settings}")
+	private Settings settings;
+	
 	/**
-	 * Creates a new instance.
+	 * {@code settings.xml} {@code <server>} id used to read GenAI credentials.
 	 */
-	public AbstractBindexMojo() {
-		super();
-		PropertiesConfigurator configurator = new PropertiesConfigurator();
-		try {
-			configurator.setConfiguration("bindex.properties");
-		} catch (IOException e) {
-			getLog().warn("Configuration file `bindex.properties` not found.");
-		}
-		this.configurator = configurator;
-	}
+	@Parameter(property = "gw.genai.serverId", required = false)
+	private String serverId;
 
 	/**
 	 * Creates or updates the Bindex index and related resources for the current
@@ -67,9 +61,10 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 *
 	 * @param update whether to run in update mode (incremental refresh) instead of
 	 *               create mode
+	 * @throws MojoExecutionException 
 	 */
-	protected void createBindex(boolean update) {
-		BindexCreator creator = new BindexCreator(genai, configurator);
+	protected void createBindex(boolean update) throws MojoExecutionException {
+		BindexCreator creator = new BindexCreator(model, getConfigurator());
 		creator.update(update);
 
 		MavenProjectLayout projectLayout = new MavenProjectLayout();
@@ -95,11 +90,41 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	}
 
 	/**
-	 * Returns the configurator used to resolve plugin configuration properties.
+	 * Builds a {@link PropertiesConfigurator} for workflow execution.
 	 *
-	 * @return the configurator instance
+	 * <p>
+	 * When {@code gw.genai.serverId} is set, credentials are read from Maven
+	 * settings.
+	 * </p>
+	 *
+	 * @return a configurator populated with any available workflow properties
+	 * @throws MojoExecutionException if Maven settings are not available or
+	 *                                configured incorrectly
 	 */
-	public Configurator getConfigurator() {
-		return configurator;
+	protected PropertiesConfigurator getConfigurator() throws MojoExecutionException {
+		if (settings == null) {
+			throw new MojoExecutionException("Maven settings are not available.");
+		}
+
+		PropertiesConfigurator config = new PropertiesConfigurator();
+
+		if (serverId != null) {
+			Server server = settings.getServer(serverId);
+			if (server == null) {
+				throw new MojoExecutionException("No <server> with id '" + serverId + "' found in Maven settings.xml.");
+			}
+
+			String username = server.getUsername();
+			if (StringUtils.isNotBlank(username)) {
+				config.set("GENAI_USERNAME", username);
+			}
+			String password = server.getPassword();
+			if (StringUtils.isNotBlank(password)) {
+				config.set("GENAI_PASSWORD", password);
+			}
+		}
+
+		return config;
 	}
+	
 }
