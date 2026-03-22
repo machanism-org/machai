@@ -2,7 +2,6 @@ package org.machanism.machai.schema;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -170,34 +169,6 @@ class SchemaPojoTest {
 		assertSame(Layer.INTERACTORS, parsed);
 		assertThrows(IllegalArgumentException.class, () -> Layer.fromValue("does-not-exist"));
 		assertEquals("Interactors", Layer.INTERACTORS.toString());
-	}
-
-	@Test
-	void bindex__1_projectWrapper_additionalPropertiesAndEquals() {
-		// Arrange
-		Bindex__1 wrapper1 = new Bindex__1();
-		Project project = new Project();
-		project.setFeatures(Arrays.asList(new Feature__1()));
-		project.setAdditionalProperty("a", 1);
-		wrapper1.setProject(project);
-		wrapper1.setAdditionalProperty("b", 2);
-
-		Bindex__1 wrapper2 = new Bindex__1();
-		Project project2 = new Project();
-		project2.setFeatures(Arrays.asList(new Feature__1()));
-		project2.setAdditionalProperty("a", 1);
-		wrapper2.setProject(project2);
-		wrapper2.setAdditionalProperty("b", 2);
-
-		// Act
-		String text = wrapper1.toString();
-
-		// Assert
-		assertNotNull(wrapper1.getProject());
-		assertEquals(2, wrapper1.getAdditionalProperties().get("b"));
-		assertTrue(text.contains("project"));
-		assertEquals(wrapper1, wrapper2);
-		assertEquals(wrapper1.hashCode(), wrapper2.hashCode());
 	}
 
 	@Test

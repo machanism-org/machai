@@ -80,7 +80,7 @@ import com.mongodb.client.result.InsertOneResult;
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
-public class Picker implements AutoCloseable {
+public class Picker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Picker.class);
 
 	private static final String INSTANCENAME = "machanism";
@@ -98,7 +98,8 @@ public class Picker implements AutoCloseable {
 	/** Result limit for vector search operations. */
 	private static final int VECTOR_SEARCH_LIMITS = 250;
 
-	private static final String DB_URL = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+	public static final String DB_URL = "cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+
 	private String embeddingModelName = "text-embedding-3-small";
 
 	/** MongoDB field name used to store the serialized Bindex JSON payload. */
@@ -114,8 +115,7 @@ public class Picker implements AutoCloseable {
 	public static final String MODEL_PROP_NAME = "pick.model";
 	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
 
-	private final MongoCollection<Document> collection;
-	private final MongoClient mongoClient;
+	private static MongoCollection<Document> collection;
 
 	private final GenAIProvider provider;
 
@@ -144,19 +144,11 @@ public class Picker implements AutoCloseable {
 		this.provider = GenAIProviderManager.getProvider(genai, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
-		String effectiveUri = uri;
-		if (effectiveUri == null) {
-			String bindexRegPassword = System.getenv("BINDEX_REG_PASSWORD");
-			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
-				effectiveUri = "mongodb+srv://user:user@" + DB_URL;
-			} else {
-				effectiveUri = "mongodb+srv://machanismorg_db_user:" + bindexRegPassword + "@" + DB_URL;
-			}
+		if (collection == null) {
+			MongoClient mongoClient = MongoClients.create(uri);
+			MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
+			collection = database.getCollection(CONNECTION);
 		}
-
-		this.mongoClient = MongoClients.create(effectiveUri);
-		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
-		this.collection = database.getCollection(CONNECTION);
 	}
 
 	/**
@@ -518,11 +510,4 @@ public class Picker implements AutoCloseable {
 		this.embeddingModelName = embeddingModelName;
 	}
 
-	/**
-	 * Closes the underlying MongoDB client.
-	 */
-	@Override
-	public void close() {
-		mongoClient.close();
-	}
 }
