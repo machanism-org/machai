@@ -1,128 +1,140 @@
+---
+canonical: https://machai.machanism.org/bindex-maven-plugin/index.html
+---
+
 <!-- @guidance:
 Page Structure: 
 # Header
    - Project Title: need to use from pom.xml
-   - Maven Central Badge ([![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
-# Introduction
-   - Full description of purpose and benefits.
-# Overview
-   - Explanation of the project function and value proposition.
-# Key Features
-   - Bulleted list highlighting the primary capabilities of the project.
-# Getting Started
-   - Prerequisites: List of required software and services.
-   - Environment Variables: Table describing necessary environment variables.
-   - Basic Usage: Example command to run the plugin.
-   - Typical Workflow: Step-by-step outline of how to use the project artifacts.
-# Configuration
-   - Table of common configuration parameters, their descriptions, and default values.
-   - Example: Command-line example showing how to configure and run the plugin with custom parameters.
-# Resources
-   - List of relevant links (platform, GitHub, Maven).
+   - Maven Central Badge ([!\[Maven Central\](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
+2. Introduction
+   - Provide a comprehensive description of the GW Maven plugin, including its purpose and benefits.
+   - Analyze java files in the `src/main/java` to inform the description.
+3. Overview
+   - Clearly explain the main functions and value proposition of the GW Maven plugin.
+   - Summarize how the plugin enhances project workflows and documentation.
+4. Key Features
+   - Present a bulleted list of the primary capabilities and unique features of the plugin.
+5. Getting Started
+   - **Prerequisites:**  
+     - List all required software, services, and environment settings needed to use the plugin.
+   - **Java Version:**  
+     Note that the required Java version is defined in `pom.xml`, but actual functional requirements may differ. Clearly state both.
+   - **Basic Usage:**  
+     - Provide an example command for running the plugin.
+   - **Typical Workflow:**  
+     - Outline the step-by-step process for using the plugin and its artifacts.
+6. Configuration
+   - Include a table of common configuration parameters, with columns for parameter name, description, and default value.
+   - Ensure descriptions are clear and concise.
+   - Use `MAVEN_OPTS="\-\-add\-exports=jdk.naming.dns/com.sun.jndi.dns=java.naming"` to run `mvn bindex:register`.
+7. Resources
+   - Provide a list of relevant links, including:
+     - Official platform or documentation site
+     - GitHub repository
+     - Maven Central page
+     - Any other useful resources
+# General Instructions     
+**Formatting Requirements:**
+- Use Markdown syntax for headings, lists, tables, code blocks, and links.
+- Ensure clarity, conciseness, and easy navigation throughout the page.
 -->
 
 # Bindex Maven Plugin
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-# Introduction
+## Introduction
 
-The **Bindex Maven Plugin** enables automated generation and (optionally) registration of **bindex metadata** for Maven projects.
+Bindex Maven Plugin is a Maven plugin that generates, updates, and registers **Bindex metadata** for Maven projects within the Machai ecosystem.
 
-It facilitates library discovery, integration, and assembly by leveraging structured metadata and GenAI-powered semantic search within the Machanism ecosystem.
+It provides build goals that:
 
-# Overview
+- **Create** a Bindex index for a project (typically during `install`)
+- **Update** (refresh) an existing index
+- **Register** the project’s metadata to an external registry endpoint for discovery
+- **Clean** temporary artifacts produced during indexing
 
-During a Maven build, the plugin inspects the current project (typically skipping aggregator/parent projects with `pom` packaging) and uses Maven coordinates and model information (packaging, dependencies, and related descriptors) to create or update a local bindex index.
+The plugin integrates with Machai’s GenAI capabilities by requiring an AI provider/model identifier and (optionally) loading provider credentials from Maven `settings.xml`.
 
-When registration is enabled, the plugin can also publish the generated metadata to a registry endpoint so it can be discovered across projects.
+## Overview
 
-Value proposition:
+At a high level, the plugin scans the current Maven project (skipping aggregator/parent modules with `pom` packaging), builds a `MavenProjectLayout` from the project directory and POM model, and then invokes the Bindex core engine to:
 
-- **Repeatable, automated metadata generation** as part of a standard Maven lifecycle.
-- **Improved discoverability** of artifacts for both humans and tools.
-- **Better integration workflows** by enabling indexing, search, and semantic enrichment based on structured metadata.
+- Produce structured metadata for the module
+- Maintain that metadata over time via an update mode
+- Publish the metadata to a registry for organization-wide discovery and assembly
 
-# Key Features
+This helps teams standardize how library/project metadata is produced and makes it easier to discover, integrate, and assemble components (including via semantic search) in the broader Machai toolchain.
 
-- Maven goals to **create**, **update**, **clean**, and **register** bindex metadata for a project.
-- Deterministic metadata generation based on the Maven project model.
-- Optional registration/publishing to a configurable registry endpoint.
+## Key Features
 
-# Getting Started
+- Maven goals for **create**, **update**, **register**, and **clean** workflows
+- Skips modules with `pom` packaging (parent/aggregator projects)
+- Configurable GenAI provider/model via `-Dgw.genai.model=...`
+- Optional credential resolution from `~/.m2/settings.xml` via `-Dgw.genai.serverId=...`
+- Registry publishing support with configurable URL (`-Dbindex.register.url=...`)
+- Logs GenAI provider usage at the end of each goal execution
 
-## Prerequisites
+## Getting Started
 
-- Java 8+
-- Maven 3.x
-- Network access (only required if registration/publishing is enabled and targets a remote service)
+### Prerequisites
 
-## Environment Variables
+- Apache Maven
+- Access to a supported GenAI provider/model (as configured for Machai)
+- (Optional) Maven `settings.xml` server credentials if your provider requires authentication
+- (Optional) Access to a Bindex registry endpoint for registration
 
-This plugin does not require environment variables for basic index/metadata generation.
+### Java Version
 
-| Environment variable | Required | Description | Default |
-|---|---:|---|---|
-| (none) | No | No environment variables are required for basic usage. | n/a |
+- **Configured compile level (POM):** Java **8** (`maven.compiler.release=8`)
+- **Practical runtime requirement:** Java **8+** is expected for this module, but the broader Machai/GenAI stack may impose additional requirements depending on the configured provider, TLS/runtime environment, and registry connectivity.
 
-## Basic Usage
+### Basic Usage
 
-Add the plugin to your project’s `pom.xml` and run a goal.
+Run a goal by fully qualifying the plugin:
 
-```xml
-<build>
-  <plugins>
-    <plugin>
-      <groupId>org.machanism.machai</groupId>
-      <artifactId>bindex-maven-plugin</artifactId>
-      <version><!-- use the latest release from Maven Central --></version>
-      <executions>
-        <execution>
-          <goals>
-            <goal>create</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
-  </plugins>
-</build>
+```bash
+mvn org.machanism.machai:bindex-maven-plugin:create -Dgw.genai.model=OpenAI:gpt-5
 ```
 
-```cmd
-mvn verify
-```
+### Typical Workflow
 
-Or run it directly from the command line:
+1. Configure the GenAI provider/model:
+   - Provide the model identifier via `-Dgw.genai.model=...`.
+2. (Optional) Configure credentials in `~/.m2/settings.xml`:
+   - Add a `<server>` entry.
+   - Run with `-Dgw.genai.serverId=<id>` to load `GENAI_USERNAME` / `GENAI_PASSWORD`.
+3. Generate metadata locally:
+   - Run `bindex-maven-plugin:create` to create a new index.
+4. Refresh metadata over time:
+   - Run `bindex-maven-plugin:update` to refresh an existing index.
+5. Publish metadata to a registry:
+   - Run `bindex-maven-plugin:register` with a registry URL.
+6. Clean temp files:
+   - Run `bindex-maven-plugin:clean` to remove the `.machai/bindex-inputs.txt` log file.
 
-```cmd
-mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5
-```
+## Configuration
 
-## Typical Workflow
-
-1. Configure the plugin in your `pom.xml` (or invoke a goal directly).
-2. Run your standard Maven lifecycle (`mvn verify`, `mvn package`, etc.).
-3. Use `create` (first run) or `update` (subsequent runs) to generate/refresh the project’s bindex metadata.
-4. (Optional) Use `register` to publish the metadata to a registry endpoint.
-5. Use downstream tooling to search, analyze, or assemble artifacts based on the indexed metadata.
-
-# Configuration
+Common parameters:
 
 | Parameter | Description | Default |
 |---|---|---|
-| `bindex.genai` | AI provider/model identifier used for indexing (for example `OpenAI:gpt-5`). | (required) |
-| `bindex.register.url` | Registry endpoint URL used by the `register` goal. | (none) |
-| `bindex.register.update` | When `true`, `register` performs an update while registering. | `true` |
+| `gw.genai.model` | GenAI provider/model identifier used by the plugin (passed through to Bindex), e.g. `OpenAI:gpt-5`. | *(required)* |
+| `gw.genai.serverId` | `settings.xml` `<server>` id used to load GenAI credentials (`GENAI_USERNAME` / `GENAI_PASSWORD`). | *(none)* |
+| `bindex.register.url` | Registry endpoint URL used by the `register` goal to publish metadata. | `Picker.DB_URL` |
+| `update` | Whether `register` should update metadata as part of registration. | `true` |
 
-Example configuring and running registration:
+When running `register`, you may need to add an export for JDK DNS internals depending on your environment:
 
-```cmd
-mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080 -Dbindex.register.update=true
+```bash
+set MAVEN_OPTS="--add-exports=jdk.naming.dns/com.sun.jndi.dns=java.naming"
+mvn bindex:register -Dgw.genai.model=OpenAI:gpt-5
 ```
 
-# Resources
+## Resources
 
+- Documentation: https://machai.machanism.org/bindex-maven-plugin/index.html
+- GitHub repository: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin
-- Project site: https://machai.machanism.org/bindex-maven-plugin
-- Source repository: https://github.com/machanism-org/machai
-- Issue tracker: https://github.com/machanism-org/machai/issues
+- Related module (Bindex core): https://machai.machanism.org/bindex-core/

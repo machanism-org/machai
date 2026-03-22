@@ -24,87 +24,65 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-The **Bindex Maven Plugin** is a Maven plugin that automates generation and (optionally) registration of **bindex metadata** for Maven projects. It supports library discovery, integration, and assembly by producing structured metadata that can be used for indexing and GenAI-powered semantic search within the Machanism ecosystem.
+Bindex Maven Plugin enables automated generation and registration of **Bindex metadata** for Maven projects. This metadata supports **library discovery, integration, and assembly** by providing structured information that can be indexed and searched (including GenAI-powered semantic search) within the Machanism ecosystem.
 
 ## Installation Instructions
 
 ### Prerequisites
 
-- Git
-- Java 8+ (JDK)
-- Maven 3.x
+- Java: built with `maven.compiler.release=8` (Java 8 bytecode)
+- Apache Maven
+- Network access to a Bindex registry endpoint (only for the `register` goal)
+- A configured AI provider/model compatible with Machanism (when semantic processing is enabled by your configuration)
 
-### Checkout and build
+### Checkout and Build
 
-This module lives in the `machai` monorepo.
-
-```cmd
+```bash
 git clone https://github.com/machanism-org/machai.git
-cd machai
-mvn -pl bindex-maven-plugin -am clean install
+cd machai/bindex-maven-plugin
+mvn -DskipTests package
 ```
 
 ## Usage
 
-### Add the plugin to your project
+This project is a Maven plugin (`packaging=maven-plugin`). It provides goals to create/update/register Bindex metadata and to clean previously generated artifacts.
 
-Configure the plugin in your project `pom.xml` and bind a goal to a lifecycle phase:
+### Goals
 
-```xml
-<build>
-  <plugins>
-    <plugin>
-      <groupId>org.machanism.machai</groupId>
-      <artifactId>bindex-maven-plugin</artifactId>
-      <version><!-- use the latest release from Maven Central --></version>
-      <executions>
-        <execution>
-          <id>bindex-create</id>
-          <phase>verify</phase>
-          <goals>
-            <goal>create</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
-  </plugins>
-</build>
+- `create`: create a new Bindex index for the current project
+- `update`: refresh an existing index as the project evolves
+- `register`: publish the project’s metadata to a remote registry endpoint
+- `clean`: remove previously generated artifacts
+
+### Basic usage (fully-qualified)
+
+```bash
+mvn org.machanism.machai:bindex-maven-plugin:register
 ```
 
-### Run the plugin
+If you have configured plugin groups in your Maven settings, you may also be able to run:
 
-Run a normal Maven lifecycle (for example, `verify`) and the plugin will execute where you bound it:
-
-```cmd
-mvn verify
+```bash
+mvn bindex:register
 ```
-
-You can also invoke a goal directly:
-
-```cmd
-mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5
-```
-
-### Typical workflow
-
-1. Configure the plugin in your `pom.xml` (or invoke a goal directly).
-2. Run your standard Maven lifecycle (`mvn verify`, `mvn package`, etc.).
-3. Use `create` (first run) or `update` (subsequent runs) to generate/refresh the project’s bindex metadata.
-4. (Optional) Use `register` to publish the metadata to a registry endpoint.
-5. Use downstream tooling to search, analyze, or assemble artifacts based on the indexed metadata.
 
 ### Configuration examples
 
-Common configuration parameters:
+Set a custom registry URL when registering:
 
-| Parameter | Description | Default |
-|---|---|---|
-| `bindex.genai` | AI provider/model identifier used for indexing (for example `OpenAI:gpt-5`). | (required) |
-| `bindex.register.url` | Registry endpoint URL used by the `register` goal. | (none) |
-| `bindex.register.update` | When `true`, `register` performs an update while registering. | `true` |
-
-Example configuring and running registration:
-
-```cmd
-mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080 -Dbindex.register.update=true
+```bash
+mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.register.url=http://localhost:8080
 ```
+
+To run `mvn bindex:register`, use:
+
+```bash
+set "MAVEN_OPTS=--add-exports=jdk.naming.dns/com.sun.jndi.dns=java.naming"
+mvn bindex:register
+```
+
+## Resources
+
+- Documentation: https://machai.machanism.org/bindex-maven-plugin/index.html
+- Source (monorepo): https://github.com/machanism-org/machai
+- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin

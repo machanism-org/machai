@@ -23,93 +23,92 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bindex Maven Plugin - Overview</title>
+  <title>Bindex Maven Plugin Overview</title>
 </head>
 <body>
 
 <h1>Bindex Maven Plugin</h1>
 
 <p>
-  <strong>Bindex Maven Plugin</strong> enables automated generation and registration of
-  bindex metadata for Maven projects. It facilitates library discovery,
-  integration, and assembly by leveraging structured metadata and
+  <strong>Bindex Maven Plugin</strong> enables automated generation and registration of bindex metadata for Maven
+  projects. It facilitates library discovery, integration, and assembly by leveraging structured metadata and
   GenAI-powered semantic search within the Machanism ecosystem.
 </p>
 
-<h2>Purpose</h2>
-
+<h2>Module overview</h2>
 <p>
-  This module provides a Maven plugin (a set of Mojos) that bridges Maven builds to the Machai/Bindex tooling.
-  The plugin operates on the current Maven module and typically skips projects with <code>pom</code> packaging
-  (parent/aggregator modules), since they do not produce an artifact to index.
+  This project is packaged as a Maven plugin (<code>maven-plugin</code>) and exposes Bindex operations as standard Maven
+  goals (Mojos). Each goal runs within a Maven build, reads configuration from the current project, and delegates
+  the heavy lifting to Machai Bindex Core APIs.
 </p>
 
-<h2>Packages</h2>
-
+<h2>Package summary</h2>
 <ul>
   <li>
-    <code>org.machanism.machai.bindex.maven</code> &ndash; Maven plugin goals (Mojos) that integrate Bindex operations into a Maven
-    build. The goals share configuration and behavior through a common abstract base Mojo and execute against the current
-    <code>org.apache.maven.project.MavenProject</code>.
+    <code>org.machanism.machai.bindex.maven</code> &ndash; Maven plugin integration layer for Machai Bindex.
+    Contains the Mojo implementations and shared support code used by all goals.
   </li>
 </ul>
 
-<h2>How it fits together</h2>
-
+<h2>Goals</h2>
 <p>
-  The Mojos in this plugin delegate the core work to services provided by <code>bindex-core</code>:
+  The plugin provides the following goals:
 </p>
+<ul>
+  <li><code>create</code> &ndash; create a new index (see {@link org.machanism.machai.bindex.maven.Create})</li>
+  <li><code>update</code> &ndash; update an existing index (see {@link org.machanism.machai.bindex.maven.Update})</li>
+  <li><code>register</code> &ndash; publish metadata to a registry (see {@link org.machanism.machai.bindex.maven.Register})</li>
+  <li><code>clean</code> &ndash; remove temporary artifacts (see {@link org.machanism.machai.bindex.maven.Clean})</li>
+</ul>
 
+<h2>How it works</h2>
 <ul>
   <li>
-    <code>org.machanism.machai.bindex.BindexCreator</code> &ndash; creates or refreshes a local Bindex index for the current
-    module.
+    <strong>Module eligibility:</strong> determines whether the current Maven module should be processed
+    (for example, modules with <code>pom</code> packaging are typically skipped).
   </li>
   <li>
-    <code>org.machanism.machai.bindex.BindexRegister</code> &ndash; scans a project and publishes metadata to a registry.
+    <strong>Configuration:</strong> reads build-time parameters from the current project and system properties,
+    including the GenAI provider/model identifier (for example <code>OpenAI:gpt-5</code>).
+  </li>
+  <li>
+    <strong>Credentials:</strong> can load GenAI credentials from Maven <code>settings.xml</code> when a server id
+    is configured (see {@link org.machanism.machai.bindex.maven.AbstractBindexMojo}).
+  </li>
+  <li>
+    <strong>Delegation:</strong> invokes Bindex Core operations to create/update indexes and to register project
+    metadata with a registry.
   </li>
 </ul>
 
-<h2>Goals and typical usage</h2>
-
-<ul>
-  <li><strong>create</strong> &ndash; create a new Bindex index for the current module.</li>
-  <li><strong>update</strong> &ndash; refresh an existing Bindex index.</li>
-  <li><strong>register</strong> &ndash; scan the current project and publish metadata to a registry.</li>
-  <li><strong>clean</strong> &ndash; remove plugin-generated temporary artifacts.</li>
-</ul>
-
+<h2>Typical usage</h2>
+<p>
+  The following examples show common command-line invocations. Exact parameters depend on your build
+  configuration and the target registry.
+</p>
 <pre>
-mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.genai=OpenAI:gpt-5
-mvn org.machanism.machai:bindex-maven-plugin:update -Dbindex.genai=OpenAI:gpt-5
-mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.genai=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
+mvn org.machanism.machai:bindex-maven-plugin:create -Dgw.genai.model=OpenAI:gpt-5
+mvn org.machanism.machai:bindex-maven-plugin:update -Dgw.genai.model=OpenAI:gpt-5
+mvn org.machanism.machai:bindex-maven-plugin:register -Dgw.genai.model=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
 mvn org.machanism.machai:bindex-maven-plugin:clean
 </pre>
 
-<h2>Configuration</h2>
-
+<h2>Architecture</h2>
 <p>
-  The GenAI provider/model is selected via the system property <code>-Dbindex.genai</code> (for example,
-  <code>OpenAI:gpt-5</code>). The <strong>register</strong> goal additionally uses <code>-Dbindex.register.url</code> to
-  select the registry endpoint.
+  The class diagram below summarizes the major types in this module and how the Mojos relate to each other.
 </p>
-
-<h2>Class diagram</h2>
-
-<p>
-  The following diagram summarizes how the Mojos relate to each other and to the underlying Bindex services.
-</p>
-
 <p>
   <img src="../images/class-diagram.png" alt="Class diagram for the Bindex Maven Plugin" />
 </p>
 
-<h2>Where to look next</h2>
-
-<p>
-  For goal-specific behavior and execution details, browse the classes in
-  <code>org.machanism.machai.bindex.maven</code>.
-</p>
+<h2>Build and documentation</h2>
+<ul>
+  <li>This project targets Java 8 for compilation.</li>
+  <li>
+    External API links are configured in the Maven Javadoc report (for example, the Java SE API and Machai
+    Bindex Core).
+  </li>
+</ul>
 
 </body>
 </html>
