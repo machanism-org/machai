@@ -22,10 +22,11 @@ import org.springframework.shell.standard.ShellOption;
  * Spring Shell command that runs Ghostwriter "Act mode".
  *
  * <p>
- * The command scans the configured project folder and then executes a predefined
- * action/prompt interactively via {@link ActProcessor}.
+ * The command scans the configured project folder and then executes a
+ * predefined action/prompt interactively via {@link ActProcessor}.
  *
  * <h2>Examples</h2>
+ * 
  * <pre>
  * act commit
  * act commit "and push"

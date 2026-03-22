@@ -122,11 +122,10 @@ public class AssembyCommand {
 							ApplicationAssembly.DEFAULT_MODEL));
 			score = Optional.ofNullable(score)
 					.orElse(ConfigCommand.config.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE));
-			try (Picker picker = new Picker(model, registerUrl, config)) {
-				picker.setScore(score);
-				bindexList = picker.pick(query);
-				printFindResult(bindexList, picker);
-			}
+			Picker picker = new Picker(model, registerUrl, config);
+			picker.setScore(score);
+			bindexList = picker.pick(query);
+			printFindResult(bindexList, picker);
 
 		} finally {
 			GenAIProviderManager.logUsage();
@@ -211,11 +210,10 @@ public class AssembyCommand {
 				query = getQueryFromFile(query);
 				score = Optional.ofNullable(score)
 						.orElse(ConfigCommand.config.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE));
-				try (Picker picker = new Picker(model, registerUrl, config)) {
-					picker.setScore(score);
-					bindexList = picker.pick(query);
-					this.findQuery = query;
-				}
+				Picker picker = new Picker(model, registerUrl, config);
+				picker.setScore(score);
+				bindexList = picker.pick(query);
+				this.findQuery = query;
 			}
 
 			if (!bindexList.isEmpty()) {
