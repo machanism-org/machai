@@ -19,16 +19,6 @@ import org.apache.maven.model.building.DefaultModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
-import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
-import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
-import org.eclipse.aether.impl.DefaultServiceLocator;
-import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
-import org.eclipse.aether.spi.connector.transport.TransporterFactory;
-import org.eclipse.aether.transport.file.FileTransporterFactory;
-import org.eclipse.aether.transport.http.HttpTransporterFactory;
-import org.eclipse.aether.transport.wagon.WagonTransporterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Utility for reading and processing Maven <code>pom.xml</code> files into
@@ -127,24 +117,6 @@ public class PomReader {
 		Writer stringWriter = new StringWriter();
 		writer.write(stringWriter, model);
 		return stringWriter.toString();
-	}
-
-	/**
-	 * Configures a Maven ServiceLocator with repository and transporter services.
-	 * 
-	 * @return Initialized DefaultServiceLocator
-	 */
-	public DefaultServiceLocator serviceLocator() {
-		DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
-		locator.addService(RepositoryConnectorFactory.class,
-				BasicRepositoryConnectorFactory.class);
-		locator.addService(
-				TransporterFactory.class, FileTransporterFactory.class);
-		locator.addService(TransporterFactory.class,
-				HttpTransporterFactory.class);
-		locator.addService(TransporterFactory.class,
-				WagonTransporterFactory.class);
-		return locator;
 	}
 
 	/**

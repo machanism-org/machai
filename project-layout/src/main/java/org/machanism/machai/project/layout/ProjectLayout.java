@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.gradle.internal.impldep.javax.annotation.Nullable;
 import org.machanism.machai.project.ProjectProcessor;
 
 /**

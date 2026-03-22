@@ -111,18 +111,6 @@ class PomReaderTest {
 	}
 
 	@Test
-	void serviceLocator_shouldReturnNonNullServiceLocator() {
-		// Arrange
-		PomReader reader = new PomReader();
-
-		// Act
-		Object locator = reader.serviceLocator();
-
-		// Assert
-		assertNotNull(locator);
-	}
-
-	@Test
 	void getProjectModel_singleArg_shouldFallbackToNonEffectiveWhenEffectiveFails() throws IOException {
 		// Arrange
 		Path tempDir = Files.createTempDirectory("pomreader-test-");
