@@ -27,158 +27,187 @@ Page Structure:
 
 ## Introduction
 
-Machai CLI is a Spring Shell-based command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem.
+Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library discovery and integration.
 
-It leverages GenAI to:
-
-- generate library metadata (“bindex”) from source code and project descriptors
-- register metadata in a remote registry for sharing and discovery
-- perform semantic search (“pick”) across registered libraries
-- assemble an application/project using selected libraries
-- run the Ghostwriter guidance pipeline over files and folders
-- execute predefined Ghostwriter “acts” (reusable interactive prompt workflows)
+Beyond metadata workflows, Machai CLI also provides a “Ghostwriter” mode that can scan a directory tree and apply GenAI guidance (and reusable “Acts”) to help you refactor, review, or otherwise transform files at scale.
 
 ## Overview
 
-Machai CLI exposes Machai capabilities as interactive commands:
+Machai CLI is implemented as a Spring Boot application that starts a Spring Shell interactive console. The CLI exposes several command groups:
 
-- **`gw`**: scans folders/files and applies Ghostwriter guidance (refactoring/review/documentation-style automation) via the `GuidanceProcessor`.
-- **`act`**: runs Ghostwriter in “Act mode” using `ActProcessor` (predefined actions/prompts).
-- **`bindex`**: generates bindex metadata for a project directory using `BindexCreator`.
-- **`register`**: registers generated bindex metadata into a remote registry using `BindexRegister`.
-- **`pick`**: performs semantic search for libraries matching a prompt using `Picker` and prints ranked results.
-- **`assembly`**: assembles an output project using `ApplicationAssembly` from the picked libraries.
-- **`prompt`**: sends a one-off prompt to the configured GenAI provider.
-- **`clean`**: removes Machai temporary folders (`.machai`) from a directory tree.
-- **`set`**: sets/gets persistent configuration values stored in `machai.properties`.
+- **Ghostwriter processing (`gw`)**: scans directories/files and runs a guidance pipeline, with support for custom instructions, default guidance, excludes, concurrency, and request input logging.
+- **Act mode (`act`)**: executes predefined reusable “acts” (prompt templates) interactively after scanning the configured project directory.
+- **Bindex workflows (`bindex`, `register`)**: generates bindex metadata for a project and optionally registers it in an external registry service.
+- **Semantic pick + assembly (`pick`, `assembly`)**: performs semantic search for libraries (bindex entries) and assembles an output project from selected results.
+- **Prompt helper (`prompt`)**: sends a one-off prompt to the configured GenAI provider.
+- **Cleanup (`clean`)**: removes temporary `.machai` folders from a directory tree.
+- **Persistent configuration (`set`)**: stores and retrieves defaults in `machai.properties`.
+
+At startup, the application attempts to load additional JVM system properties from `machai.properties` (or a file provided via `-Dconfig=/path/to/file`).
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Java 17+**
-- **Internet access** (required for GenAI providers and optionally for registry access)
-- **GenAI provider account/credentials** (for example OpenAI, depending on your configured provider)
+- **Java 17** (runtime required)
+- Network access to your chosen **GenAI provider** (depending on the configured model)
+- (Optional) Access to a **bindex registry service** if you plan to register metadata (`registerUrl`)
 
 ### Installation
 
-- Download the CLI jar:
+- Download the Machai CLI application JAR:
 
   [![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai/machai.jar/download)
 
-- Run the CLI:
+- Run the CLI (Spring Shell interactive mode):
 
   ```bash
   java -jar machai.jar
   ```
 
+- (Optional) Use an explicit configuration file at startup:
+
+  ```bash
+  java -Dconfig=./machai.properties -jar machai.jar
+  ```
+
 ### Environment Variables
 
-Machai CLI itself does not require specific environment variables, but GenAI providers typically do. Configure the variables required by your selected provider.
+Machai CLI delegates authentication and provider configuration to the underlying GenAI provider implementation. The following environment variables are commonly required (depending on the provider/model you choose):
 
 | Variable | Description | Required | Example |
 |---|---|---:|---|
-| `OPENAI_API_KEY` | API key for OpenAI-backed models (if using OpenAI provider) | Provider-dependent | `sk-...` |
-| `ANTHROPIC_API_KEY` | API key for Anthropic-backed models (if using Anthropic provider) | Provider-dependent | `...` |
-| `AZURE_OPENAI_API_KEY` | API key for Azure OpenAI (if using Azure provider) | Provider-dependent | `...` |
-| `AZURE_OPENAI_ENDPOINT` | Endpoint URL for Azure OpenAI resource | Provider-dependent | `https://<resource>.openai.azure.com/` |
+| `OPENAI_API_KEY` | API key for OpenAI models | Provider-specific | `sk-...` |
+| `AZURE_OPENAI_API_KEY` | API key for Azure OpenAI | Provider-specific | `...` |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint URL | Provider-specific | `https://<resource>.openai.azure.com/` |
+| `ANTHROPIC_API_KEY` | API key for Anthropic models | Provider-specific | `...` |
+
+If your chosen provider uses different variables, set those required by that provider.
 
 ## Configuration
 
-Configuration defaults are stored in `machai.properties` (in the working directory) and are used by all commands.
-
-You can also load system properties at startup from `machai.properties` or specify an alternative file via:
-
-```bash
-java -Dconfig=path\\to\\machai.properties -jar machai.jar
-```
+Machai CLI persists user defaults in `machai.properties` (in the working directory). You can set values using the `set` command.
 
 ### Common configuration parameters
 
-| Parameter | Description | Default |
+| Property key | Description | Default |
 |---|---|---|
-| `dir` | Default working directory used by some commands | Current user directory |
-| `projectDir` | Default root directory for scanning/processing (`-d/--projectDir`) | Current user directory |
-| `genai` | Default GenAI provider/model identifier (for example `OpenAI:gpt-5.1`) | Command-dependent |
-| `gw.model` | Default model for Ghostwriter/GW flows | _not set_ |
-| `gw.instructions` | Default Ghostwriter system instructions (text/URL/path) | _not set_ |
-| `gw.guidance` | Default Ghostwriter guidance (text/URL/path) | _not set_ |
-| `gw.logInputs` | Log LLM request inputs to files | `false` |
-| `gw.scanDir` | Default scan directory for Act mode (if not provided) | falls back to project/user dir |
-| `score` | Similarity threshold used by semantic search (`pick`) | `0.75` (module default) |
-
-> Note: exact defaults may vary by module/version; the CLI resolves missing values from `machai.properties` when available.
+| `projectDir` | Default project directory used by commands that operate on a folder tree | Current working directory |
+| `gw.model` | Default GenAI provider/model for Ghostwriter workflows | (none) |
+| `gw.instructions` | Default system instructions (text/URL/file path) for `gw` | (none) |
+| `gw.guidance` | Default guidance (text/URL/file path) for `gw` | (none) |
+| `gw.logInputs` | Whether to log LLM request inputs to dedicated log files | `false` |
+| `score` | Default similarity threshold used for semantic search (`pick` / `assembly`) | `0.65` |
 
 ### Typical workflow
 
-1. Configure defaults (model, directory, score):
+1. **Set defaults** (recommended):
 
-   ```bash
-   set --key genai --value OpenAI:gpt-5.1
-   set --key projectDir --value .
+   ```text
+   set --key projectDir --value ./my-project
+   set --key gw.model --value OpenAI:gpt-5.1
    set --key score --value 0.8
    ```
 
-2. Generate metadata for a project:
+2. **Generate bindex metadata** for a project:
 
-   ```bash
-   bindex --projectDir .\\my-lib --model OpenAI:gpt-5.1
+   ```text
+   bindex --dir ./my-project --update false --model OpenAI:gpt-5.1
    ```
 
-3. Register the metadata to a registry service:
+3. **Register bindex metadata** (optional):
 
-   ```bash
-   register --dir .\\my-lib --registerUrl https://registry.example/api --update true
+   ```text
+   register --dir ./my-project --registerUrl https://registry.example/api --update true
    ```
 
-4. Search for libraries semantically:
+4. **Pick + assemble** an application from libraries:
 
-   ```bash
+   ```text
    pick --query "Create a web app" --score 0.8
+   assembly --dir ./out
    ```
 
-5. Assemble an output project from selected libraries:
+5. **Run Ghostwriter guidance** over a directory:
 
-   ```bash
-   assembly --dir .\\out
+   ```text
+   gw --scanDir ./my-project --excludes target,.git --threads 4 --logInputs true
    ```
 
 ## Usage
 
-Start the interactive shell:
+Start the shell:
 
 ```bash
 java -jar machai.jar
 ```
 
-### Command reference (high level)
+Then use the following commands.
 
-- `set --key <k> [--value <v>]`: set or get a configuration value in `machai.properties`.
-- `gw [options]`: scan and process files using Ghostwriter guidance.
-- `act <actName> [extra prompt text...]`: run an Act mode workflow.
-- `bindex [options]`: generate bindex files for a project.
-- `register [options]`: register bindex data to a registry.
-- `pick [options]`: semantic search for libraries matching a prompt.
-- `assembly [options]`: assemble a project from the picked libraries.
-- `prompt [options]`: run a one-off prompt against the configured provider.
-- `clean [options]`: remove `.machai` temporary directories.
+### `set` (configuration)
 
-### Example
+- Set a config value:
 
-Run Ghostwriter over a project with custom parameters:
+  ```text
+  set --key gw.model --value OpenAI:gpt-5.1
+  ```
 
-```bash
-java -jar machai.jar \
-  --spring.shell.interactive.enabled=true
+- Get a config value:
 
-# In the Machai shell:
-set --key gw.model --value OpenAI:gpt-5.1
-set --key gw.guidance --value "Refactor for readability; keep behavior unchanged."
-gw --scanDir .\\my-project --excludes target,.git --threads 4 --logInputs true
+  ```text
+  set --key gw.model
+  ```
+
+### `gw` (Ghostwriter guidance pipeline)
+
+Scan a directory tree and apply GenAI guidance:
+
+```text
+gw --scanDir ./my-project --threads 4 --excludes target,.git --model OpenAI:gpt-5.1 --guidance "Refactor for clarity" --logInputs true
+```
+
+### `act` (Ghostwriter Act mode)
+
+Run a predefined act (prompt template), optionally with extra prompt text:
+
+```text
+act commit
+act commit "and push"
+```
+
+### `bindex` (generate bindex metadata)
+
+```text
+bindex --dir ./my-project --update false --model OpenAI:gpt-5.1
+```
+
+### `register` (register bindex metadata)
+
+```text
+register --dir ./my-project --registerUrl https://registry.example/api --update true --model OpenAI:gpt-5.1
+```
+
+### `pick` and `assembly` (semantic search + project assembly)
+
+```text
+pick --query "Create a web app" --score 0.8 --model OpenAI:gpt-5.1
+assembly --dir ./out
+```
+
+### `prompt` (one-off GenAI prompt)
+
+```text
+prompt --query "Explain what this project does" --model OpenAI:gpt-5.1 --dir ./my-project
+```
+
+### `clean` (remove temporary folders)
+
+```text
+clean --dir ./my-project
 ```
 
 ## Resources
 
-- GitHub (monorepo): https://github.com/machanism-org/machai
+- GitHub (parent project): https://github.com/machanism-org/machai
 - Maven Central artifact: https://central.sonatype.com/artifact/org.machanism.machai/machai-cli
-- Machanism organization: https://github.com/machanism-org
+- Download JAR: https://sourceforge.net/projects/machanism/files/machai/machai.jar/download
