@@ -2,7 +2,6 @@ package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +37,6 @@ public class MavenProjectLayout extends ProjectLayout {
 	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
 	private Model model;
-	private boolean effectivePomRequired = true;
 
 	/**
 	 * Checks whether the given directory appears to be a Maven project.
@@ -68,7 +66,7 @@ public class MavenProjectLayout extends ProjectLayout {
 		File pomFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
 		if (model == null) {
 			try {
-				model = new PomReader().getProjectModel(pomFile, effectivePomRequired);
+				model = new PomReader().getProjectModel(pomFile);
 			} catch (Exception e) {
 				logger.warn("Effective model building failed: {}",
 						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
@@ -91,15 +89,7 @@ public class MavenProjectLayout extends ProjectLayout {
 		if (model == null) {
 			File projectDir = getProjectDir();
 			File file = new File(projectDir, PROJECT_MODEL_FILE_NAME);
-			try {
-				model = new PomReader().getProjectModel(file, effectivePomRequired);
-			} catch (Exception e) {
-				if (effectivePomRequired) {
-					model = new PomReader().getProjectModel(file, false);
-				} else {
-					throw e;
-				}
-			}
+			model = new PomReader().getProjectModel(file);
 		}
 
 		return model;
@@ -113,19 +103,6 @@ public class MavenProjectLayout extends ProjectLayout {
 	 */
 	public MavenProjectLayout model(Model model) {
 		this.model = model;
-		return this;
-	}
-
-	/**
-	 * Enables/disables effective POM calculation when building the model.
-	 *
-	 * @param effectivePomRequired {@code true} to attempt building the effective
-	 *                             POM first; {@code false} to read the raw model
-	 *                             only
-	 * @return this instance for chaining
-	 */
-	public MavenProjectLayout effectivePomRequired(boolean effectivePomRequired) {
-		this.effectivePomRequired = effectivePomRequired;
 		return this;
 	}
 

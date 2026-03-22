@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,34 +13,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.model.License;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.building.DefaultModelBuilder;
 import org.apache.maven.model.building.DefaultModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.model.building.ModelBuildingResult;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
-import org.apache.maven.model.resolution.ModelResolver;
-import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.project.ProjectModelResolver;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
-import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.PlexusContainerException;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.eclipse.aether.DefaultRepositorySystemSession;
-import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RequestTrace;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.impl.DefaultServiceLocator;
-import org.eclipse.aether.impl.RemoteRepositoryManager;
-import org.eclipse.aether.internal.impl.DefaultRepositorySystem;
-import org.eclipse.aether.repository.LocalRepository;
-import org.eclipse.aether.repository.LocalRepositoryManager;
-import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
@@ -61,7 +41,6 @@ import org.slf4j.LoggerFactory;
  * @since 0.0.2
  */
 public class PomReader {
-	private static Logger logger = LoggerFactory.getLogger(PomReader.class);
 
 	private Map<String, String> pomProperties = new HashMap<>();
 	private List<License> defaultLicenses;
@@ -76,18 +55,12 @@ public class PomReader {
 	 * @throws IllegalArgumentException if <code>pom.xml</code> cannot be processed
 	 * @see <a href="https://maven.apache.org/pom.html">Maven POM Reference</a>
 	 */
-	public Model getProjectModel(File pomFile, boolean effective) {
+	public Model getProjectModel(File pomFile) {
 		ModelBuildingRequest request = new DefaultModelBuildingRequest();
 		request.setPomFile(pomFile);
 
 		Model model = null;
 		try {
-			if (effective) {
-				DefaultModelBuilder modelBuilder = getModelBuilder(request);
-				ModelBuildingResult result = modelBuilder.build(request);
-				model = result.getEffectiveModel();
-
-			} else {
 				MavenXpp3Reader reader = new MavenXpp3Reader();
 				FileReader fileReader = new FileReader(pomFile);
 				String pomStr = IOUtils.toString(fileReader);
@@ -96,7 +69,6 @@ public class PomReader {
 					throw new IllegalArgumentException("POM content could not be read: " + pomFile);
 				}
 				model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
-			}
 		} catch (Exception e) {
 			throw new IllegalArgumentException("POM file: " + pomFile, e);
 		}
@@ -106,12 +78,10 @@ public class PomReader {
 			pomProperties.put((String) entry.getKey(), (String) entry.getValue());
 		}
 
-		if (!effective) {
 			String version = model.getVersion();
 			if (version != null) {
 				pomProperties.put("project.version", version);
 			}
-		}
 
 		List<License> licenses = model.getLicenses();
 		if (licenses.isEmpty()) {
@@ -143,47 +113,6 @@ public class PomReader {
 			}
 		}
 		return pomStr;
-	}
-
-	/**
-	 * Gets a Maven model builder.
-	 * 
-	 * @param request ModelBuildingRequest configured with pom file
-	 * @return DefaultModelBuilder for Maven model building
-	 * @throws PlexusContainerException if Plexus Container fails
-	 * @throws ComponentLookupException if ModelBuilder lookup fails
-	 */
-	private DefaultModelBuilder getModelBuilder(ModelBuildingRequest request)
-			throws PlexusContainerException, ComponentLookupException {
-
-		DefaultServiceLocator locator = serviceLocator();
-		RepositorySystem system = locator.getService(RepositorySystem.class);
-		File repoDir = new File(SystemUtils.getUserHome(), ".m2/repository");
-		LocalRepository localRepo = new LocalRepository(repoDir);
-
-		DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-		LocalRepositoryManager repManager = system.newLocalRepositoryManager(session, localRepo);
-		session.setLocalRepositoryManager(repManager);
-
-		RequestTrace requestTrace = new RequestTrace(null);
-		DefaultRepositorySystem repositorySystem = new DefaultRepositorySystem();
-		repositorySystem.initService(locator);
-
-		RemoteRepositoryManager remoteRepositoryManager = locator.getService(RemoteRepositoryManager.class);
-		List<RemoteRepository> repos = Arrays.asList(new RemoteRepository.Builder("central", "default",
-				"https://repo.maven.apache.org/maven2/").build());
-
-		ModelResolver modelResolver = new ProjectModelResolver(session, requestTrace,
-				repositorySystem, remoteRepositoryManager, repos,
-				ProjectBuildingRequest.RepositoryMerging.POM_DOMINANT,
-				null);
-		request.setModelResolver(modelResolver);
-		request.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
-		request.setProcessPlugins(false);
-		request.setTwoPhaseBuilding(false);
-
-		PlexusContainer container = new DefaultPlexusContainer();
-		return (DefaultModelBuilder) container.lookup(org.apache.maven.model.building.ModelBuilder.class);
 	}
 
 	/**
@@ -225,24 +154,6 @@ public class PomReader {
 	 */
 	public Map<String, String> getPomProperties() {
 		return pomProperties;
-	}
-
-	/**
-	 * Loads a Maven model from the given file, preferring the effective model but
-	 * falling back if unsuccessful.
-	 *
-	 * @param file The <code>pom.xml</code> file to parse
-	 * @return Parsed Maven Model
-	 */
-	public Model getProjectModel(File file) {
-		Model model;
-		try {
-			model = getProjectModel(file, true);
-		} catch (Exception e) {
-			logger.debug("Effective pom creation failed: {}", StringUtils.abbreviate(e.getLocalizedMessage(), 80));
-			model = getProjectModel(file, false);
-		}
-		return model;
 	}
 
 }

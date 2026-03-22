@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.machai.project.ProjectProcessor;
@@ -55,7 +57,7 @@ public abstract class ProjectLayout {
 			".classpath", ".settings", ".settings", ".project", ".m2" };
 
 	public static final String PROJECT_DIR_PROP_NAME = "project.dir";
-	
+
 	private File projectDir;
 
 	/**
@@ -80,11 +82,10 @@ public abstract class ProjectLayout {
 
 	/**
 	 * Returns a list of module directories (or names) within this project.
-	 *
-	 * @return module directories (root-relative); never {@code null}
 	 */
+	@Nullable
 	public List<String> getModules() {
-		return Collections.emptyList();
+		return null;
 	}
 
 	/**
@@ -267,11 +268,12 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Returns a copy of the exclude directories array to prevent external modification.
+	 * Returns a copy of the exclude directories array to prevent external
+	 * modification.
 	 *
 	 * @return a copy of the exclude directories array
 	 */
 	public static String[] getExcludeDirs() {
-	    return EXCLUDE_DIRS.clone();
+		return EXCLUDE_DIRS.clone();
 	}
 }
