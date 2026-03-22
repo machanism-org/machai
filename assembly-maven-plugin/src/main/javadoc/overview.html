@@ -35,12 +35,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   GenAI-powered semantic search and metadata-driven workflows.
 </p>
 
-<h2>What this project provides</h2>
+<h2>What this plugin does</h2>
 
 <p>
   <strong>Assembly Maven Plugin</strong> is a Maven plugin (packaging type <code>maven-plugin</code>) that exposes an
-  <code>assembly</code> goal. The goal uses a natural-language prompt to drive an AI-assisted workflow that recommends
-  relevant libraries (from bindex metadata) and applies the resulting project changes directly to the Maven execution
+  <code>assembly</code> goal. The goal uses a natural-language prompt to drive an AI-assisted workflow that identifies
+  relevant libraries from bindex metadata and applies the resulting project changes directly to the Maven execution
   base directory (<code>${basedir}</code>).
 </p>
 
@@ -78,8 +78,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h3><code>org.machanism.machai.assembly.maven</code></h3>
 
 <p>
-  Maven plugin entry point for MachAI's AI-assisted project assembly workflow. This package contains the Mojo
-  implementation and the minimal orchestration logic needed to:
+  Maven plugin entry point for MachAI's AI-assisted project assembly workflow.
+  This package provides the <code>assembly</code> goal implementation and the minimal orchestration logic needed to:
 </p>
 
 <ul>
@@ -102,15 +102,16 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Configuration and inputs</h2>
 
 <p>
-  The goal can be configured via Maven properties and/or plugin configuration. Common parameters include:
+  The goal can be configured via Maven properties and/or plugin configuration.
+  Common parameters include:
 </p>
 
 <ul>
   <li><code>assembly.genai</code> &ndash; GenAI provider identifier used during the assembly phase.</li>
   <li><code>pick.genai</code> &ndash; GenAI provider identifier used during the recommendation (picker) phase.</li>
-  <li><code>assembly.prompt.file</code> &ndash; Text file containing the natural-language prompt.</li>
-  <li><code>assembly.score</code> &ndash; Minimum score threshold for recommendations.</li>
-  <li><code>bindex.register.url</code> &ndash; Optional endpoint used by the picker for metadata lookup/registration.</li>
+  <li><code>assembly.prompt.file</code> &ndash; text file containing the natural-language prompt.</li>
+  <li><code>assembly.score</code> &ndash; minimum score threshold for recommendations.</li>
+  <li><code>bindex.register.url</code> &ndash; optional endpoint used by the picker for metadata lookup/registration.</li>
 </ul>
 
 <h2>Typical usage</h2>

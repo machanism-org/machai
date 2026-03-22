@@ -79,7 +79,7 @@ Common parameters for the `assembly` goal:
 | `assembly.genai` | GenAI provider identifier used for the assembly phase. | `OpenAI:gpt-5` |
 | `pick.genai` | GenAI provider identifier used for the library recommendation (picker) phase. | `OpenAI:gpt-5-mini` |
 | `assembly.prompt.file` | Prompt file path. If it exists, it will be read as the prompt; otherwise the prompt is requested interactively. | `project.txt` |
-| `assembly.score` | Minimum score required for a recommended library to be listed/used. | `0.9` |
+| `assembly.score` | Minimum score required for a recommended library to be listed/used. | `0.8` |
 | `bindex.register.url` | Optional registration/lookup endpoint used by the picker for metadata lookups/registration. | (none) |
 
 ## Resources
