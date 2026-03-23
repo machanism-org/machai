@@ -12,12 +12,7 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a modular toolkit for GenAI-enabled developer
-		automation. It provides Java libraries, a command line application, and
-		Maven plugins that unify access to multiple GenAI providers, generate
-		and consume bindex metadata for library discovery and reuse, assemble
-		projects using metadata-driven updates, and automate repository-scale
-		documentation updates from embedded guidance using Ghostwriter.</description>
+	<description>Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins that unify access to multiple GenAI providers, generate and consume bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate repository-scale documentation updates from embedded guidance using Ghostwriter.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -243,18 +238,20 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.github.funthomas424242</groupId>
+				<groupId>it.mulders.puml</groupId>
 				<artifactId>plantuml-maven-plugin</artifactId>
-				<version>1.5.2</version>
+				<version>0.4.15</version>
 				<configuration>
 					<sourceFiles>
 						<directory>${basedir}</directory>
 						<includes>
-							<include>src\\site\\puml\\**\\*.*</include>
-							<include>target\\generated-docs\\puml\\*.*</include>
+							<include>src/site/puml/**/*.*</include>
+							<include>target/generated-docs/puml/*.*</include>
 						</includes>
 					</sourceFiles>
-					<outputDirectory>target\\site\\images</outputDirectory>
+					<outputDirectory>${project.build.directory}/site/images</outputDirectory>
+					<stripPath>src/site/puml</stripPath>
+					<format>PNG</format>
 				</configuration>
 				<executions>
 					<execution>
@@ -267,9 +264,14 @@
 				</executions>
 				<dependencies>
 					<dependency>
+						<groupId>it.mulders.puml</groupId>
+						<artifactId>plantuml-v1-adapter</artifactId>
+						<version>0.4.15</version>
+					</dependency>
+					<dependency>
 						<groupId>net.sourceforge.plantuml</groupId>
 						<artifactId>plantuml</artifactId>
-						<version>1.2022.7</version>
+						<version>1.2026.2</version>
 					</dependency>
 				</dependencies>
 			</plugin>
