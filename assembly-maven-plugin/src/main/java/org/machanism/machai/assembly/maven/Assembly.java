@@ -21,33 +21,42 @@ import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
 
 /**
- * Maven {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly} goal.
+ * Maven {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly}
+ * goal.
  *
  * <p>
- * This goal runs MachAI's AI-assisted workflow against the Maven execution {@link #basedir}. It:
+ * This goal runs MachAI's AI-assisted workflow against the Maven execution
+ * {@link #basedir}. It:
  * </p>
  * <ol>
- *   <li>Acquires a natural-language prompt from {@link #assemblyPromptFile} (if present) or requests it interactively.</li>
- *   <li>Uses {@link #pickModel} to recommend candidate libraries (as {@link Bindex} entries) via {@link Picker}.</li>
- *   <li>Filters recommendations by {@link #score}.</li>
- *   <li>Runs {@link ApplicationAssembly} with {@link #assemblyModel} to apply changes in {@link #basedir}.</li>
+ * <li>Acquires a natural-language prompt from {@link #assemblyPromptFile} (if
+ * present) or requests it interactively.</li>
+ * <li>Uses {@link #pickModel} to recommend candidate libraries (as
+ * {@link Bindex} entries) via {@link Picker}.</li>
+ * <li>Filters recommendations by {@link #score}.</li>
+ * <li>Runs {@link ApplicationAssembly} with {@link #assemblyModel} to apply
+ * changes in {@link #basedir}.</li>
  * </ol>
  *
  * <h2>Plugin parameters</h2>
  * <ul>
- *   <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; provider id for the assembly phase.</li>
- *   <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; provider id for the library recommendation (picker)
- *       phase.</li>
- *   <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; file containing the prompt; if absent, the prompt is
- *       requested interactively.</li>
- *   <li>{@code assembly.score} (default {@code 0.8}) &ndash; minimum score required for a recommended library to be used.</li>
- *   <li>{@code bindex.register.url} (optional) &ndash; registration/lookup endpoint used by the picker.</li>
+ * <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; provider id
+ * for the assembly phase.</li>
+ * <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; provider
+ * id for the library recommendation (picker) phase.</li>
+ * <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; file
+ * containing the prompt; if absent, the prompt is requested interactively.</li>
+ * <li>{@code assembly.score} (default {@code 0.8}) &ndash; minimum score
+ * required for a recommended library to be used.</li>
+ * <li>{@code bindex.register.url} (optional) &ndash; registration/lookup
+ * endpoint used by the picker.</li>
  * </ul>
  *
  * <h2>Usage examples</h2>
  * <p>
  * <b>Command line:</b>
  * </p>
+ * 
  * <pre>
  * mvn org.machanism.machai:assembly-maven-plugin:assembly
  *   -Dassembly.genai=OpenAI:gpt-5
@@ -60,7 +69,8 @@ import org.machanism.machai.schema.Bindex;
 public class Assembly extends AbstractMojo {
 
 	/**
-	 * Interactive prompt provider used to collect the assembly prompt when {@link #assemblyPromptFile} does not exist.
+	 * Interactive prompt provider used to collect the assembly prompt when
+	 * {@link #assemblyPromptFile} does not exist.
 	 */
 	@Component
 	protected Prompter prompter;
@@ -69,17 +79,20 @@ public class Assembly extends AbstractMojo {
 	 * GenAI provider identifier used for the assembly workflow.
 	 *
 	 * <p>
-	 * The value is resolved by the MachAI provider manager (for example, {@code OpenAI:gpt-5}).
+	 * The value is resolved by the MachAI provider manager (for example,
+	 * {@code OpenAI:gpt-5}).
 	 * </p>
 	 */
 	@Parameter(property = ApplicationAssembly.MODEL_PROP_NAME, defaultValue = ApplicationAssembly.DEFAULT_MODEL, required = true)
 	protected String assemblyModel;
 
 	/**
-	 * GenAI provider identifier used for the library recommendation (picker) workflow.
+	 * GenAI provider identifier used for the library recommendation (picker)
+	 * workflow.
 	 *
 	 * <p>
-	 * This provider can be different from {@link #assemblyModel} to reduce cost or latency during recommendation.
+	 * This provider can be different from {@link #assemblyModel} to reduce cost or
+	 * latency during recommendation.
 	 * </p>
 	 */
 	@Parameter(property = Picker.MODEL_PROP_NAME, defaultValue = Picker.DEFAULT_MODEL, required = true)
@@ -89,7 +102,8 @@ public class Assembly extends AbstractMojo {
 	 * Prompt file for the assembly workflow.
 	 *
 	 * <p>
-	 * If the file exists, it is read as text and used as the prompt; otherwise the prompt is requested interactively.
+	 * If the file exists, it is read as text and used as the prompt; otherwise the
+	 * prompt is requested interactively.
 	 * </p>
 	 */
 	@Parameter(property = "assembly.prompt.file", defaultValue = "project.txt")
@@ -102,7 +116,8 @@ public class Assembly extends AbstractMojo {
 	protected Double score = ApplicationAssembly.DEFAULT_SCORE_VALUE;
 
 	/**
-	 * Optional registration URL used by the picker for metadata lookups/registration.
+	 * Optional registration URL used by the picker for metadata
+	 * lookups/registration.
 	 */
 	@Parameter(property = "bindex.register.url")
 	protected String registerUrl;
@@ -148,13 +163,18 @@ public class Assembly extends AbstractMojo {
 	 * Execution steps:
 	 * </p>
 	 * <ol>
-	 *   <li>Read the prompt from {@link #assemblyPromptFile} if it exists; otherwise prompt the user.</li>
-	 *   <li>Create a {@link Configurator} backed by {@code bindex.properties}.</li>
-	 *   <li>Run {@link Picker} using {@link #pickModel} and log any recommended {@link Bindex} entries.</li>
-	 *   <li>Run {@link ApplicationAssembly} using {@link #assemblyModel} to apply changes to {@link #basedir}.</li>
+	 * <li>Read the prompt from {@link #assemblyPromptFile} if it exists; otherwise
+	 * prompt the user.</li>
+	 * <li>Create a {@link Configurator} backed by {@code bindex.properties}.</li>
+	 * <li>Run {@link Picker} using {@link #pickModel} and log any recommended
+	 * {@link Bindex} entries.</li>
+	 * <li>Run {@link ApplicationAssembly} using {@link #assemblyModel} to apply
+	 * changes to {@link #basedir}.</li>
 	 * </ol>
 	 *
-	 * @throws MojoExecutionException if prompt acquisition fails, provider interaction fails, or the assembly workflow fails
+	 * @throws MojoExecutionException if prompt acquisition fails, provider
+	 *                                interaction fails, or the assembly workflow
+	 *                                fails
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -192,6 +212,8 @@ public class Assembly extends AbstractMojo {
 
 			getLog().info("The project directory: " + basedir);
 			assembly.projectDir(basedir);
+			boolean inputsLog = config.getBoolean(ApplicationAssembly.LOG_INPUTS_PROP_NAME, false);
+			assembly.setInputsLog(inputsLog);
 			assembly.assembly(query, bindexList);
 
 		} catch (IOException | PrompterException e) {

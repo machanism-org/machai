@@ -15,6 +15,7 @@ import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
@@ -57,8 +58,6 @@ public class AssembyCommand {
 	/** JLine line reader for shell interaction (optional). */
 	LineReader reader;
 
-	private final PropertiesConfigurator config;
-
 	private final LineReader lineReader;
 
 	/**
@@ -69,14 +68,6 @@ public class AssembyCommand {
 	public AssembyCommand(@Lazy LineReader lineReader) {
 		super();
 		this.lineReader = lineReader;
-
-		config = new PropertiesConfigurator();
-		String configFileName = "machai.properties";
-		try {
-			config.setConfiguration(configFileName);
-		} catch (Exception e) {
-			logger.debug("Configuration filr: `{}` not found.", configFileName);
-		}
 	}
 
 	/**
@@ -122,7 +113,7 @@ public class AssembyCommand {
 							ApplicationAssembly.DEFAULT_MODEL));
 			score = Optional.ofNullable(score)
 					.orElse(ConfigCommand.config.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE));
-			Picker picker = new Picker(model, registerUrl, config);
+			Picker picker = new Picker(model, registerUrl, ConfigCommand.config);
 			picker.setScore(score);
 			bindexList = picker.pick(query);
 			printFindResult(bindexList, picker);
@@ -210,15 +201,17 @@ public class AssembyCommand {
 				query = getQueryFromFile(query);
 				score = Optional.ofNullable(score)
 						.orElse(ConfigCommand.config.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE));
-				Picker picker = new Picker(model, registerUrl, config);
+				Picker picker = new Picker(model, registerUrl, ConfigCommand.config);
 				picker.setScore(score);
 				bindexList = picker.pick(query);
 				this.findQuery = query;
 			}
 
 			if (!bindexList.isEmpty()) {
-				ApplicationAssembly assembly = new ApplicationAssembly(model, config, dir);
+				ApplicationAssembly assembly = new ApplicationAssembly(model, ConfigCommand.config, dir);
 				assembly.projectDir(dir);
+				boolean inputsLog = ConfigCommand.config.getBoolean(ApplicationAssembly.LOG_INPUTS_PROP_NAME, false);
+				assembly.setInputsLog(inputsLog );
 				assembly.assembly(query, bindexList);
 			} else {
 				logger.error(
@@ -252,7 +245,7 @@ public class AssembyCommand {
 			chatModel = Optional.ofNullable(chatModel)
 					.orElse(ConfigCommand.config.get(ApplicationAssembly.MODEL_PROP_NAME,
 							ApplicationAssembly.DEFAULT_MODEL));
-			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, config);
+			GenAIProvider provider = GenAIProviderManager.getProvider(chatModel, ConfigCommand.config);
 
 			FunctionToolsLoader.getInstance().applyTools(provider);
 			dir = Optional.ofNullable(dir).orElse(

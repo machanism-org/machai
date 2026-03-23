@@ -63,8 +63,12 @@ public class ApplicationAssembly {
 
 	public static final String MODEL_PROP_NAME = "assembly.model";
 
+	public static final String LOG_INPUTS_PROP_NAME = "assembly.logInputs";
+
 	private final GenAIProvider provider;
 	private File projectDir = SystemUtils.getUserDir();
+
+	private boolean inputsLog;
 
 	/**
 	 * Creates an instance that uses the configured GenAI provider.
@@ -142,8 +146,11 @@ public class ApplicationAssembly {
 
 		provider.prompt(bindexPrompt.toString());
 
-		File bindexTempDir = new File(projectDir, ASSEMBLY_TEMP_DIR);
-		provider.inputsLog(bindexTempDir);
+		if (isInputsLog()) {
+			File bindexTempDir = new File(projectDir, ASSEMBLY_TEMP_DIR);
+			provider.inputsLog(bindexTempDir);
+		}
+
 		provider.perform();
 	}
 
@@ -161,6 +168,14 @@ public class ApplicationAssembly {
 		}
 		this.projectDir = projectDir;
 		return this;
+	}
+
+	public boolean isInputsLog() {
+		return inputsLog;
+	}
+
+	public void setInputsLog(boolean inputsLog) {
+		this.inputsLog = inputsLog;
 	}
 
 }
