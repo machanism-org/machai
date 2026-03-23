@@ -6,7 +6,7 @@
     <release version="1.0.0" date="2026-03-09">
       <action dev="dev" type="add">
         <![CDATA[
-<h2>Features</h2>
+<h3>Features</h3>
 <ul>
   <li>CLI commands for indexing and assembly workflows (bindex, register, assembly), including debug/overwrite flags and directory targeting.</li>
   <li>BIndex generation and update support (including Maven and Python/JavaScript builders) with schema evolution (layers, scores, constructors, examples).</li>
@@ -14,24 +14,24 @@
   <li>GenAI integration enhancements: provider abstraction, multi-call functional tools, prompt templates via resource bundles, and parent/sub-module processing.</li>
   <li>New Maven plugins/modules added, including ghostwriter-maven-plugin and assembly-maven-plugin.</li>
 </ul>
-<h2>Fixes</h2>
+<h3>Fixes</h3>
 <ul>
   <li>Resolved issues in prompt templates and guidance handling (markdown guidance tag, guidance file pathing, Java prompt generation).</li>
   <li>Fixed project layout/path handling and root-directory file processing; improved project structure description generation.</li>
   <li>Fixed BIndex/plugin issues (NPE, required property handling, effective model retrieval, plugin property names) and corrected JS/Python edge cases (file extension filters, private Python packages).</li>
   <li>Fixed logging and output behavior (inputs log paths/location, debug mode behavior, stream closing).</li>
 </ul>
-<h2>Refactoring</h2>
+<h3>Refactoring</h3>
 <ul>
   <li>Extracted/reshaped core abstractions (GenAIProvider, FunctionTools, Reviewer classes, ProjectLayout vs BindexBuilder, AssemblyCommand).</li>
   <li>Renamed/reorganized modules and directories (e.g., bindex-core naming, CLI folder rename, documents module movements) and general cleanup.</li>
 </ul>
-<h2>Documentation</h2>
+<h3>Documentation</h3>
 <ul>
   <li>Substantial README and site documentation updates, including diagrams, images, and improved Javadoc coverage across main sources.</li>
   <li>Added and refined prompt/recipe documentation and examples for supported workflows.</li>
 </ul>
-<h2>Chores</h2>
+<h3>Chores</h3>
 <ul>
   <li>Release and build metadata updates (pom descriptions, javadoc plugin config, versioning and release tags).</li>
   <li>Added/updated project assets (logos, screenshots) and housekeeping changes (tests, file renames, excludes).</li>
@@ -43,31 +43,57 @@
     <release version="1.0.1" date="2026-03-14">
       <action dev="dev" type="add">
         <![CDATA[
-<h2>Features</h2>
+<h3>Features</h3>
 <ul>
   <li>Added support for loading Acts from URL locations.</li>
   <li>Added built-in Act listing tool and improved Act discovery/logging.</li>
   <li>Improved CLI help and Act listing output (including Act descriptions).</li>
   <li>Added unit-test creation guidance and expanded unit-test Act templates.</li>
 </ul>
-<h2>Fixes</h2>
+<h3>Fixes</h3>
 <ul>
   <li>Fixed NPE and corrected handling of Act properties (inputs formatting, inheritance, and placeholder processing).</li>
   <li>Fixed log path handling.</li>
   <li>Fixed prompt defaults, a method name, and <code>custom</code> parameter processing.</li>
 </ul>
-<h2>Refactoring</h2>
+<h3>Refactoring</h3>
 <ul>
   <li>Removed unsupported <code>prologue</code>/<code>epilogue</code> Act properties after initial experimentation.</li>
 </ul>
-<h2>Documentation</h2>
+<h3>Documentation</h3>
 <ul>
   <li>Updated release-notes Act template and refined guidance/rules (including Windows <code>cmd /c</code> usage).</li>
 </ul>
-<h2>Chores</h2>
+<h3>Chores</h3>
 <ul>
   <li>Improved GW/Act concurrency and updated CLI options for <code>ActCommand</code> and <code>GWCommand</code>.</li>
   <li>Added JUnit Jupiter params dependency and expanded test coverage.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
+
+    <release version="1.0.2" date="2026-03-23">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h3>Fixes</h3>
+<ul>
+  <li>Fixed Act input template formatting to be null-safe (including a fallback path).</li>
+  <li>Fixed Act loader behavior for missing custom Act directories and improved absolute-path/URL handling.</li>
+  <li>Corrected GenAI model property naming and related configuration property names.</li>
+  <li>Improved AIFileProcessor logging (result logging added, null handling improved).</li>
+  <li>Improved processing to consistently use the project directory as the base path.</li>
+</ul>
+<h3>Documentation</h3>
+<ul>
+  <li>Updated docs for guidance defaults, <code>scanDir</code> configuration, and corrected property names.</li>
+  <li>Adjusted help/commit Act prompt structure and instructions; added <code>site.toml</code> Act template.</li>
+</ul>
+<h3>Chores</h3>
+<ul>
+  <li>Updated dependency versions to address vulnerabilities reported by Grype and adjusted POM security override configuration.</li>
+  <li>Refreshed generated <code>bindex.json</code> files and removed unused Maven dependencies.</li>
+  <li>Minor cleanup (task template cleanup, removed Sonar comments, standardized LF usage).</li>
 </ul>
         ]]>
       </action>

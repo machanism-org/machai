@@ -6,7 +6,7 @@
     <release version="1.0.0" date="2026-03-09">
       <action dev="dev" type="add">
         <![CDATA[
-<h2>Features</h2>
+<h3>Features</h3>
 <ul>
   <li><strong>Bindex core:</strong> generate and register Bindex metadata with CLI support (create/update/search), including layered picking and integration-aware search.</li>
   <li><strong>Project layout support:</strong> detect and process Maven, JavaScript, Python and Gradle project structures; handle recursive sub-modules and parent projects.</li>
@@ -18,7 +18,7 @@
   <li><strong>Packaging &amp; distribution:</strong> delivery pack creation and improved build profiles; added site docs, diagrams and assets.</li>
 </ul>
 
-<h2>Fixes</h2>
+<h3>Fixes</h3>
 <ul>
   <li>Stabilized scanning/root directory handling and related-path resolution across CLI and Maven plugin runs.</li>
   <li>Improved prompt/template processing (guidance handling, markdown formatting edge cases, prompt substitutions and line ending normalization).</li>
@@ -27,20 +27,20 @@
   <li>Fixed bindex generation/schema issues (required fields, JS/Python builders, temp/debug location under <code>.machai</code>).</li>
 </ul>
 
-<h2>Refactoring</h2>
+<h3>Refactoring</h3>
 <ul>
   <li>Extracted and reorganized modules and interfaces (project-layout module, GenAIProvider/Adapter abstractions, shared processor logic, function tools discovery via ServiceLoader).</li>
   <li>Renamed and normalized options/properties and package/module names (e.g., ghostwriter to gw, property prefixes, goal naming).</li>
   <li>Cleaned up dependencies/build configuration and improved import organization and logging consistency.</li>
 </ul>
 
-<h2>Documentation</h2>
+<h3>Documentation</h3>
 <ul>
   <li>Expanded README and site documentation, including CLI/plugin usage, Act templates, processing guides, and additional pages/assets.</li>
   <li>Added and improved Javadoc across modules; updated diagrams and screenshots.</li>
 </ul>
 
-<h2>Chores</h2>
+<h3>Chores</h3>
 <ul>
   <li>Versioning and release metadata updates; added release-related POM tags and build tooling updates.</li>
   <li>Added tests and test resources; adjusted defaults for compatibility (Java 8/9/11 where applicable).</li>
@@ -53,28 +53,55 @@
     <release version="1.0.1" date="2026-03-14">
       <action dev="dev" type="add">
         <![CDATA[
-<h2>Fixes</h2>
+<h3>Fixes</h3>
 <ul>
   <li>Require <code>genai</code> configuration and remove the deprecated <code>pickChatModel</code> property.</li>
 </ul>
 
-<h2>Refactoring</h2>
+<h3>Refactoring</h3>
 <ul>
   <li>Simplify GenAI configuration by using <code>genai</code> as a string in Picker/ApplicationAssembly.</li>
   <li>Remove Closeable from Picker/BindexRegister and improve prompt construction using <code>StringBuilder</code>.</li>
 </ul>
 
-<h2>Documentation</h2>
+<h3>Documentation</h3>
 <ul>
   <li>Update site configuration/assets (icons, manifest links) and add MachAI YouTube playlist link.</li>
   <li>Add Javadoc output folders and update PlantUML <code>scanPackages</code> configuration.</li>
 </ul>
 
-<h2>Chores</h2>
+<h3>Chores</h3>
 <ul>
   <li>Add <code>changes.xml</code> to site metadata.</li>
   <li>Project version bumps through 0.0.14–1.0.1-SNAPSHOT.</li>
   <li>Miscellaneous GW automated maintenance updates.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
+
+    <release version="1.0.2" date="2026-03-23">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h3>Features</h3>
+<ul>
+  <li>Update bindex-maven-plugin GenAI configuration/settings.</li>
+</ul>
+
+<h3>Fixes</h3>
+<ul>
+  <li>Stop building an effective POM model during processing.</li>
+</ul>
+
+<h3>Documentation</h3>
+<ul>
+  <li>Update bindex-maven-plugin documentation.</li>
+</ul>
+
+<h3>Chores</h3>
+<ul>
+  <li>Refresh bindex.json and related sample/config files.</li>
+  <li>Update bindex-maven-plugin goal metadata.</li>
 </ul>
         ]]>
       </action>

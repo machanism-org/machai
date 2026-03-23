@@ -5,7 +5,7 @@
   <body>
     <release version="1.0.0" date="2026-03-09">
       <action dev="dev" type="add"><![CDATA[
-<h2>Features</h2>
+<h3>Features</h3>
 <ul>
   <li>Add bindex builder classes.</li>
   <li>Add MongoDB integration and EmbeddingProvider.</li>
@@ -14,20 +14,20 @@
   <li>Support recursive sub-module processing.</li>
   <li>Add search-bindex diagram.</li>
 </ul>
-<h2>Fixes</h2>
+<h3>Fixes</h3>
 <ul>
   <li>Fix CLI issues; ensure FileInputStream is properly closed.</li>
   <li>Fix GenAIProvider debug mode and improve find result output.</li>
 </ul>
-<h2>Refactoring</h2>
+<h3>Refactoring</h3>
 <ul>
   <li>Extract AssemblyCommand into a separate class; remove unused file(s).</li>
 </ul>
-<h2>Documentation</h2>
+<h3>Documentation</h3>
 <ul>
   <li>Add and iteratively update README; add/update project logo and documentation assets.</li>
 </ul>
-<h2>Chores</h2>
+<h3>Chores</h3>
 <ul>
   <li>Add Maven assembly plugin configuration.</li>
   <li>Introduce default user DB for read access.</li>
@@ -38,26 +38,50 @@
 
     <release version="1.0.1" date="2026-03-14">
       <action dev="dev" type="add"><![CDATA[
-<h2>Features</h2>
+<h3>Features</h3>
 <ul>
   <li>Add command-line properties replacement support (CommandFunctionTools).</li>
   <li>Introduce <code>ToolFunction</code> interface.</li>
   <li>Add unit-test creation guidance tag.</li>
 </ul>
-<h2>Fixes</h2>
+<h3>Fixes</h3>
 <ul>
   <li>Apply deny-check per command part instead of the entire command line.</li>
   <li>Handle error responses correctly in <code>callRestApi</code>.</li>
   <li>Fix prompt default selection, method naming, and <code>custom</code> parameter processing.</li>
 </ul>
-<h2>Refactoring</h2>
+<h3>Refactoring</h3>
 <ul>
   <li>Relax method visibility from <code>private</code> to package-private where needed.</li>
   <li>Miscellaneous Sonar-driven cleanups.</li>
 </ul>
-<h2>Tests</h2>
+<h3>Tests</h3>
 <ul>
   <li>Add and expand automated test coverage.</li>
+</ul>
+]]></action>
+    </release>
+
+    <release version="1.0.2" date="2026-03-23">
+      <action dev="dev" type="add"><![CDATA[
+<h3>Fixes</h3>
+<ul>
+  <li>Pin/fix dependency versions.</li>
+  <li>Stop logging OpenAI provider responses; reduce tool-loading log verbosity.</li>
+  <li>Normalize line-feed handling (use <code>StringUtils.LF</code>).</li>
+</ul>
+<h3>Refactoring</h3>
+<ul>
+  <li>Remove <code>ToolHandlingResult</code> inner class.</li>
+  <li>Remove Sonar-related inline comments.</li>
+</ul>
+<h3>Tests</h3>
+<ul>
+  <li>Add OpenAI tool-invocation unit tests.</li>
+</ul>
+<h3>Chores</h3>
+<ul>
+  <li>Update bindex.json examples/descriptions and dependency list.</li>
 </ul>
 ]]></action>
     </release>

@@ -5,7 +5,7 @@
   <body>
     <release version="1.0.0" date="2026-03-09">
       <action dev="dev" type="add"><![CDATA[
-<h2>Features</h2>
+<h3>Features</h3>
 <ul>
   <li>Initial Bindex Core builder implementation.</li>
   <li>CLI commands for indexing and assembling (including a dedicated <code>assembly</code> command).</li>
@@ -13,22 +13,22 @@
   <li>Recursive processing of sub-modules.</li>
   <li>Application assembly support, including generated <code>assemble.txt</code> prompt files.</li>
 </ul>
-<h2>Fixes</h2>
+<h3>Fixes</h3>
 <ul>
   <li>Fixed CLI behavior and added <code>BindexCommand</code>.</li>
   <li>Fixed <code>FileInputStream</code> resource closing.</li>
   <li>Improved debug mode for <code>GenAIProvider</code> and enhanced find-result output.</li>
 </ul>
-<h2>Refactoring</h2>
+<h3>Refactoring</h3>
 <ul>
   <li>Extracted <code>AssembyCommand</code> into a separate class.</li>
   <li>Removed unused files.</li>
 </ul>
-<h2>Documentation</h2>
+<h3>Documentation</h3>
 <ul>
   <li>Created and iteratively updated the README, including diagrams and branding assets.</li>
 </ul>
-<h2>Chores</h2>
+<h3>Chores</h3>
 <ul>
   <li>Added license file.</li>
   <li>Added Maven Assembly Plugin configuration.</li>
@@ -37,14 +37,43 @@
     </release>
     <release version="1.0.1" date="2026-03-14">
       <action dev="dev" type="add"><![CDATA[
-<h2>Fixes</h2>
+<h3>Fixes</h3>
 <ul>
   <li>Applied Sonar-driven fixes and cleanups.</li>
   <li>Improved test coverage and addressed Sonar test findings.</li>
 </ul>
-<h2>Refactoring</h2>
+<h3>Refactoring</h3>
 <ul>
   <li>Adopted the <code>ToolFunction</code> interface.</li>
+</ul>
+]]></action>
+    </release>
+    <release version="1.0.2" date="2026-03-23">
+      <action dev="dev" type="add"><![CDATA[
+<h3>Features</h3>
+<ul>
+  <li>Improved picker selection behavior and repository/register handling.</li>
+  <li>Added bindex-core builder and tool “happy path” tests.</li>
+  <li>Added OS information to the assembly instructions prompt.</li>
+  <li>Added Picker constructor validation unit tests.</li>
+</ul>
+<h3>Fixes</h3>
+<ul>
+  <li>Fixed inputs log setup for <code>AssembyCommand</code>.</li>
+  <li>Improved bindex registry connection handling.</li>
+  <li>Fixed property naming inconsistencies and updated related docs.</li>
+  <li>Fixed failing tests.</li>
+</ul>
+<h3>Refactoring</h3>
+<ul>
+  <li>Standardized newline handling using <code>StringUtils.LF</code>.</li>
+  <li>Adjusted assembly/picker model constants, naming, and vector search limits.</li>
+  <li>Removed unused Maven dependencies and SLF4J imports; cleaned up Sonar comments.</li>
+</ul>
+<h3>Documentation</h3>
+<ul>
+  <li>Updated bindex-core documentation and refined assembly prompt guidance/formatting.</li>
+  <li>Updated <code>bindex.json</code> examples/templates.</li>
 </ul>
 ]]></action>
     </release>
