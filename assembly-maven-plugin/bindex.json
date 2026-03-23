@@ -4,7 +4,7 @@
   "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
-    "repositoryUrl" : "https://repo1.maven.org/maven2/",
+    "repositoryUrl" : "https://oss.sonatype.org/content/repositories/releases/",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "assembly-maven-plugin",
@@ -12,7 +12,7 @@
       "extension" : "jar"
     }
   },
-  "description" : "assembly-maven-plugin is a Maven plugin (packaging: maven-plugin) in the Machanism MachAI ecosystem that automates project \"assembly\" by combining GenAI-assisted library recommendation with an automated application assembly workflow driven by bindex metadata. It provides the Maven goal \"assembly\" (requiresProject=false) so it can be executed outside a standard Maven project and applies changes to a configured base directory (${basedir}). The workflow: (1) obtains a free-form assembly prompt either from a configured prompt file (default project.txt, property assembly.prompt.file) or interactively via Plexus Prompter; (2) loads configuration from bindex.properties via PropertiesConfigurator; (3) runs org.machanism.machai.bindex.Picker using a configurable GenAI provider/model (property Picker.MODEL_PROP_NAME, default Picker.DEFAULT_MODEL) and an optional bindex registration/lookup URL (property bindex.register.url) to recommend relevant libraries as org.machanism.machai.schema.Bindex entries, filtering by a minimum score threshold (property assembly.score, default ApplicationAssembly.DEFAULT_SCORE_VALUE) and logging recommended library ids and scores; (4) runs org.machanism.machai.bindex.ApplicationAssembly using a configurable GenAI provider/model (property ApplicationAssembly.MODEL_PROP_NAME, default ApplicationAssembly.DEFAULT_MODEL) to apply changes to the project directory, optionally logging inputs controlled by ApplicationAssembly.LOG_INPUTS_PROP_NAME. Primary use cases: generating or modifying a project structure and its dependencies based on a natural-language prompt; recommending libraries based on semantic search over bindex metadata; automating integration steps in a Maven-managed directory. It depends on MachAI bindex-core and Maven/Plexus APIs and uses Apache Commons IO for prompt file reading. Typical invocation is via Maven plugin execution, supplying an assembly prompt file or using interactive prompting, then allowing the plugin to recommend and integrate libraries into the target directory.",
+  "description" : "assembly-maven-plugin is a Maven plugin (packaging: maven-plugin) in the Machanism MachAI ecosystem that automates project \"assembly\" by combining GenAI-assisted library recommendation with an automated application assembly workflow driven by bindex metadata. It provides the Maven goal \"assembly\" (requiresProject=false, requiresDependencyCollection=NONE) so it can be executed outside a standard Maven project and applies changes to a configured base directory (${basedir}). Workflow: (1) obtains a free-form assembly prompt either from a configured prompt file (default project.txt, property assembly.prompt.file) or interactively via Plexus Prompter; (2) loads configuration from bindex.properties using org.machanism.macha.core.commons.configurator.PropertiesConfigurator (Configurator abstraction); (3) runs org.machanism.machai.bindex.Picker using a configurable GenAI provider/model (property org.machanism.machai.bindex.Picker.MODEL_PROP_NAME, default org.machanism.machai.bindex.Picker.DEFAULT_MODEL) and optional bindex registration/lookup URL (property bindex.register.url) to recommend relevant libraries as org.machanism.machai.schema.Bindex entries, filtered by a minimum score threshold (property assembly.score, default org.machanism.machai.bindex.ApplicationAssembly.DEFAULT_SCORE_VALUE), and logs recommended library ids with their scores (via picker.getScore); (4) runs org.machanism.machai.bindex.ApplicationAssembly using a configurable GenAI provider/model (property org.machanism.machai.bindex.ApplicationAssembly.MODEL_PROP_NAME, default org.machanism.machai.bindex.ApplicationAssembly.DEFAULT_MODEL) to apply changes to the project directory, setting the project dir to ${basedir} and optionally logging inputs controlled by org.machanism.machai.bindex.ApplicationAssembly.LOG_INPUTS_PROP_NAME. Primary use cases: generating/modifying a project structure and dependencies based on a natural-language prompt; recommending libraries based on semantic search over bindex metadata; automating integration/assembly steps in a Maven-managed directory. Key dependencies include MachAI bindex-core (1.0.2), Maven plugin APIs/annotations, Plexus Interactivity (Prompter), SLF4J, and test tooling (JUnit Jupiter, Mockito).",
   "authors" : [ {
     "name" : "Viktor Tovstyi",
     "email" : "viktor.tovstyi@gmail.com"
@@ -20,19 +20,20 @@
   "license" : "Apache License, Version 2.0",
   "classification" : {
     "type" : "plugin",
-    "domains" : [ "Build Tooling", "Maven Plugins", "Project Scaffolding", "Dependency Recommendation", "GenAI-assisted Development", "Semantic Search" ],
+    "domains" : [ "Build Tooling", "Maven Plugins", "Project Scaffolding", "Project Assembly", "Dependency Recommendation", "GenAI-assisted Development", "Semantic Search", "Automation" ],
     "languages" : [ {
-      "name" : "Java"
+      "name" : "Java",
+      "version" : ""
     } ],
     "layers" : [ "Infrastructure" ],
-    "usageContext" : [ "Maven build", "CLI/interactive execution", "Project automation", "Developer tooling" ],
+    "usageContext" : [ "Maven build", "CLI/interactive execution", "Developer tooling", "Project automation" ],
     "targetEnvironment" : [ "Java", "Maven" ],
     "integrations" : [ "MachAI" ]
   },
   "constructors" : [ {
     "package" : "org.machanism.machai.assembly.maven",
     "signature" : "org.machanism.machai.bindex.Picker createPicker(org.machanism.macha.core.commons.configurator.Configurator config)",
-    "description" : "Factory method used by the Mojo to create a Picker instance configured with the picker model and optional bindex registration URL. Exists primarily to allow overriding picker creation in tests.",
+    "description" : "Factory method used by the Mojo to create a Picker instance configured with the picker model (pickModel) and optional bindex registration URL (registerUrl), using the provided Configurator as a configuration source. Intended primarily for testability/overriding picker creation.",
     "examples" : [ {
       "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator(\"bindex.properties\");\norg.machanism.machai.assembly.maven.Assembly mojo = new org.machanism.machai.assembly.maven.Assembly();\norg.machanism.machai.bindex.Picker picker = mojo.createPicker(config);",
       "description" : "Creates a Picker using a PropertiesConfigurator-backed configuration source."
@@ -40,7 +41,7 @@
   }, {
     "package" : "org.machanism.machai.assembly.maven",
     "signature" : "org.machanism.machai.bindex.ApplicationAssembly createAssembly(org.machanism.macha.core.commons.configurator.Configurator config)",
-    "description" : "Factory method used by the Mojo to create an ApplicationAssembly instance configured with the assembly model, configuration source, and the Maven execution base directory (basedir). Exists primarily to allow overriding assembly creation in tests.",
+    "description" : "Factory method used by the Mojo to create an ApplicationAssembly instance configured with the assembly model (assemblyModel), configuration source (Configurator), and Maven execution base directory (basedir). Intended primarily for testability/overriding assembly creation.",
     "examples" : [ {
       "snippet" : "java.io.File basedir = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator config = new org.machanism.macha.core.commons.configurator.PropertiesConfigurator(\"bindex.properties\");\norg.machanism.machai.assembly.maven.Assembly mojo = new org.machanism.machai.assembly.maven.Assembly();\norg.machanism.machai.bindex.ApplicationAssembly assembly = mojo.createAssembly(config);\nassembly.projectDir(basedir);",
       "description" : "Creates an ApplicationAssembly and sets the project directory before running the assembly workflow."
@@ -50,7 +51,7 @@
     "name" : "execute",
     "package" : "org.machanism.machai.assembly.maven",
     "signature" : "void execute() throws org.apache.maven.plugin.MojoExecutionException",
-    "description" : "Executes the Maven goal \"assembly\". Reads the assembly prompt from a configured file (default project.txt) if it exists, otherwise prompts the user interactively. Loads configuration from bindex.properties, runs the MachAI Picker to recommend libraries (Bindex entries) above a configured score threshold, logs recommended libraries and their scores, then runs the MachAI ApplicationAssembly workflow to apply changes to the configured project base directory. Wraps I/O and prompting failures in MojoExecutionException.",
+    "description" : "Executes the Maven goal \"assembly\". Reads the assembly prompt from a configured file (default project.txt, property assembly.prompt.file) if it exists; otherwise prompts the user interactively via Plexus Prompter. Creates a Configurator backed by bindex.properties. Runs MachAI Picker (configured by pickModel and optional bindex.register.url), applies a minimum score threshold (assembly.score, default ApplicationAssembly.DEFAULT_SCORE_VALUE), logs the recommended org.machanism.machai.schema.Bindex ids and their picker scores, then runs MachAI ApplicationAssembly (configured by assemblyModel) against the Maven base directory (${basedir}). Optionally enables input logging based on ApplicationAssembly.LOG_INPUTS_PROP_NAME. Wraps I/O and prompting failures in MojoExecutionException.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.assembly.maven.Assembly mojo = new org.machanism.machai.assembly.maven.Assembly();\ntry {\n  mojo.execute();\n} catch (org.apache.maven.plugin.MojoExecutionException e) {\n  throw new java.lang.RuntimeException(e);\n}",
       "description" : "Illustrates programmatic execution of the Mojo (typically Maven invokes this automatically during a build or direct goal execution)."
@@ -59,7 +60,7 @@
   "customizations" : [ ],
   "studs" : [ ],
   "examples" : [ {
-    "name" : "Maven goal usage",
+    "name" : "Maven goal usage (snapshot)",
     "description" : "Run the assembly workflow against a directory using a prompt file (default project.txt) or interactively if the file is missing.",
     "snippet" : "mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly -Dassembly.prompt.file=project.txt -Dassembly.score=0.75 -Dbindex.register.url=https://example.org/bindex/register"
   }, {

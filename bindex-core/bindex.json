@@ -4,7 +4,7 @@
   "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
-    "repositoryUrl" : "https://repo1.maven.org/maven2/",
+    "repositoryUrl" : "https://oss.sonatype.org/content/repositories/releases/",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "bindex-core",
@@ -12,7 +12,7 @@
       "extension" : "jar"
     }
   },
-  "description" : "bindex-core provides core functionality for MachAI Bindex metadata management. It supports AI-assisted generation and update of bindex.json files for projects by assembling prompts from a JSON schema plus project context (Maven pom.xml, JavaScript package.json + src tree, Python pyproject.toml + inferred source directory). It registers and retrieves Bindex documents in a MongoDB-backed registry, storing serialized Bindex JSON and a classification embedding vector for semantic (vector) search. It can classify user queries into required Clean Architecture layers and languages, run vector search with language/layer filters, and assemble selected Bindexes into deterministic provider inputs for downstream LLM workflows. It includes function tools for LLM workflows to fetch a Bindex by id and to fetch the Bindex JSON schema on demand. Primary components include BindexCreator (create/update bindex.json), BindexBuilderFactory and builders (MavenBindexBuilder, JScriptBindexBuilder, PythonBindexBuilder), BindexRegister (register local bindex.json), BindexRepository (MongoDB persistence primitives), Picker (semantic retrieval with embeddings and dependency expansion), and ApplicationAssembly (prompt assembly and optional input logging).",
+  "description" : "bindex-core provides core functionality for MachAI Bindex metadata management, including AI-assisted generation and update of bindex.json files, registration of Bindex documents into a MongoDB-backed registry, and semantic (vector) retrieval of relevant libraries using classification embeddings. It builds prompts from a Bindex JSON schema plus project context (Maven pom.xml with selected source/resource files, JavaScript package.json plus src tree, Python pyproject.toml plus inferred source directory), supports incremental updates via an origin Bindex, and can optionally log provider inputs under .machai. It exposes function tools for LLM workflows to retrieve a registered Bindex by id (get_bindex) and to retrieve the Bindex JSON schema (get_bindex_schema). Core components include BindexCreator (create/update bindex.json), BindexBuilderFactory with builders (MavenBindexBuilder, JScriptBindexBuilder, PythonBindexBuilder), BindexRegister (register local bindex.json), BindexRepository (MongoDB persistence primitives), Picker (embedding generation, MongoDB vector search with language/layer filters, and dependency expansion), and ApplicationAssembly (deterministic prompt assembly from selected Bindexes and optional input logging).",
   "authors" : [ {
     "name" : "Viktor Tovstyi",
     "email" : "viktor.tovstyi@gmail.com"

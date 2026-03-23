@@ -4,7 +4,7 @@
   "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
-    "repositoryUrl" : "https://repo1.maven.org/maven2/",
+    "repositoryUrl" : "https://oss.sonatype.org/content/repositories/releases/",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "project-layout",
@@ -12,39 +12,40 @@
       "extension" : "jar"
     }
   },
-  "description" : "Project Layout is a Java utility library for detecting, describing, and working with conventional on-disk project directory layouts (sources, resources, tests, docs, and modules) in a consistent way. It targets build tooling and plugins that need reliable discovery of well-known folders across heterogeneous repositories.\n\nCore API: org.machanism.machai.project.layout.ProjectLayout models a project rooted at a filesystem directory and exposes root-relative paths for production sources, tests, and documentation, and optionally nested modules. The library includes utilities to compute stable root-relative paths and to traverse files/directories while excluding common build/tooling folders (e.g., node_modules, .git, target, build).\n\nLayout detection/orchestration: org.machanism.machai.project.ProjectLayoutManager detects an appropriate layout implementation for a given project directory by inspecting build metadata files and indicators.\n\nProvided layout implementations:\n- MavenProjectLayout: reads pom.xml (via PomReader) to determine modules for pom-packaging aggregators and to infer/compute source and test roots using Maven Build defaults and configuration.\n- GragleProjectLayout: uses the Gradle Tooling API to load the GradleProject model, exposing child module names for multi-project builds and conventional directories (src/main, src/test, src/site).\n- JScriptProjectLayout: parses package.json workspaces and resolves module directories by matching workspace glob patterns against folders containing package.json.\n- PythonProjectLayout: detects Python projects via pyproject.toml metadata (and related heuristics) and currently returns safe empty defaults for layout paths.\n- DefaultProjectLayout: filesystem-based fallback that treats immediate subdirectories as potential modules while excluding known tooling/build directories.\n\nKey capabilities include project type detection (Maven/Gradle/Node.js/Python), module enumeration where supported, and consistent handling of root-relative path computation to support downstream scanners and processors.\n\nNotable runtime dependencies include Maven Model APIs for pom parsing, Gradle Tooling API for Gradle model access, Jackson for JSON parsing, and tomlj for TOML parsing, plus commons-lang3/commons-io and slf4j for utilities/logging.",
+  "description" : "Project Layout is a Java utility library for detecting, describing, and working with conventional on-disk project directory layouts (sources, tests, docs, resources) in a consistent way. It is intended for build tooling, repository scanners, and plugins that need reliable discovery of well-known folders across heterogeneous repositories.\n\nCore abstraction: org.machanism.machai.project.layout.ProjectLayout models a project rooted at a filesystem directory and exposes root-relative paths for production sources, test sources, and documentation roots, and optionally nested modules. It also provides filesystem traversal helpers (findFiles/findDirectories) that recursively scan a project while excluding common build/tooling directories such as node_modules, .git, target, build, IDE metadata, and virtualenv caches.\n\nLayout detection/orchestration: org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(java.io.File) selects an appropriate ProjectLayout implementation by inspecting standard build metadata files: pom.xml (Maven), build.gradle (Gradle), package.json (JavaScript/TypeScript), and pyproject.toml (Python). The returned layout is configured with the given projectDir.\n\nProvided layout implementations:\n- MavenProjectLayout: reads pom.xml via PomReader and exposes Maven-derived modules when packaging is pom; computes sources/tests using Maven build defaults and configured build directories and resources.\n- GragleProjectLayout: uses the Gradle Tooling API to load the GradleProject model, enumerates child module names, and returns conventional roots (src/main, src/test, src/site).\n- JScriptProjectLayout: parses package.json \"workspaces\" and resolves module directories by matching workspace glob patterns against directories containing package.json; returns module paths relative to the project root.\n- PythonProjectLayout: detects Python projects primarily via pyproject.toml metadata and related heuristics; currently returns empty lists for sources/tests/docs.\n- DefaultProjectLayout: minimal filesystem fallback that treats immediate subdirectories as potential modules (excluding well-known tooling/build directories) and returns empty lists for sources/tests/docs.\n\nNotable runtime dependencies include Apache Maven Model APIs for POM parsing, Gradle Tooling API for Gradle model access, Jackson for JSON parsing, tomlj for TOML parsing, commons-lang3/commons-io utilities, and slf4j for logging.",
   "authors" : [ {
     "name" : "Viktor Tovstyi",
-    "email" : "viktor.tovstyi@gmail.com"
+    "email" : "viktor.tovstyi@gmail.com",
+    "website" : "https://machai.machanism.org/project-layout"
   } ],
   "license" : "Apache License, Version 2.0",
   "classification" : {
     "type" : "library",
-    "domains" : [ "Build Tooling", "Project Analysis", "Repository Scanning", "Developer Tools" ],
+    "domains" : [ "Build Tooling", "Project Layout Detection", "Repository Scanning", "Developer Tools", "Static Analysis Tooling" ],
     "languages" : [ {
       "name" : "Java",
       "version" : "8+"
     } ],
     "layers" : [ "Utils" ],
-    "usageContext" : [ "Build plugins", "Codebase scanners", "Tooling that needs to locate sources/tests/docs across different project types" ],
+    "usageContext" : [ "Build plugins", "Repository/codebase scanners", "Tools that need to locate sources/tests/docs across Maven/Gradle/Node/Python projects", "Project structure analyzers" ],
     "targetEnvironment" : [ "Java" ],
     "integrations" : [ "Maven", "Gradle", "Node.js workspaces (package.json)", "Python packaging (pyproject.toml)" ]
   },
   "constructors" : [ {
     "package" : "org.machanism.machai.project.layout",
     "signature" : "org.machanism.machai.project.layout.MavenProjectLayout org.machanism.machai.project.layout.MavenProjectLayout()",
-    "description" : "Creates a Maven-aware layout. Configure it with projectDir(java.io.File) before calling accessors.",
+    "description" : "Creates a Maven-aware project layout instance. Configure it by calling projectDir(java.io.File) before calling accessors such as getSources(), getTests(), getDocuments(), or getModules().",
     "examples" : [ {
       "snippet" : "java.io.File projectDir = new java.io.File(\"C:\\\\repo\");\norg.machanism.machai.project.layout.ProjectLayout layout = new org.machanism.machai.project.layout.MavenProjectLayout().projectDir(projectDir);\njava.util.List<java.lang.String> sources = layout.getSources();",
-      "description" : "Create a MavenProjectLayout for a repository root and read conventional source roots."
+      "description" : "Create a MavenProjectLayout for a repository root and read Maven-derived source roots."
     } ]
   }, {
-    "package" : "org.machanism.machai.project.layout",
+    "package" : "org.machanism.machai.project",
     "signature" : "org.machanism.machai.project.layout.ProjectLayout org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(java.io.File projectDir) throws java.io.FileNotFoundException",
     "description" : "Detects and instantiates the appropriate ProjectLayout (Maven/Gradle/JS/Python/Default) based on files present in the given directory, and sets the projectDir on the returned layout.",
     "examples" : [ {
       "snippet" : "java.io.File dir = new java.io.File(\"/path/to/project\");\norg.machanism.machai.project.layout.ProjectLayout layout = org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(dir);\njava.util.List<java.lang.String> modules = layout.getModules();",
-      "description" : "Detect the layout type from a project directory and enumerate modules if supported."
+      "description" : "Detect the layout type from a project directory and enumerate modules when supported."
     } ]
   } ],
   "features" : [ {
@@ -60,7 +61,7 @@
     "name" : "getRelativePath",
     "package" : "org.machanism.machai.project.layout",
     "signature" : "java.lang.String org.machanism.machai.project.layout.ProjectLayout.getRelativePath(java.io.File dir, java.io.File file, boolean addSingleDot)",
-    "description" : "Computes a normalized root-relative path from a project directory to a target file, with an option to prefix './'. Returns '.' when the target is the base directory; returns null when the computed result indicates the target is not within the project directory (as per current implementation behavior).",
+    "description" : "Computes a normalized root-relative path from a project directory to a target file. Can optionally prefix the result with \"./\". Returns \".\" when the target is the base directory; returns null when the computed result indicates the target is not within the project directory (as per current implementation behavior).",
     "examples" : [ {
       "snippet" : "java.io.File root = new java.io.File(\"/repo\");\njava.io.File f = new java.io.File(\"/repo/src/main/java\");\njava.lang.String rel = org.machanism.machai.project.layout.ProjectLayout.getRelativePath(root, f, false);",
       "description" : "Compute a root-relative path for a file under the project root."
@@ -87,7 +88,7 @@
     "name" : "getModules (Gradle)",
     "package" : "org.machanism.machai.project.layout",
     "signature" : "java.util.List<java.lang.String> org.machanism.machai.project.layout.GragleProjectLayout.getModules()",
-    "description" : "Uses the Gradle Tooling API GradleProject model to enumerate child projects for multi-project builds; returns empty list if the model cannot be loaded or has no children.",
+    "description" : "Uses the Gradle Tooling API GradleProject model to enumerate child projects for multi-project builds; returns an empty list if the model cannot be loaded or has no children.",
     "examples" : [ {
       "snippet" : "java.io.File root = new java.io.File(\"/repo\");\norg.machanism.machai.project.layout.GragleProjectLayout layout = new org.machanism.machai.project.layout.GragleProjectLayout().projectDir(root);\njava.util.List<java.lang.String> modules = layout.getModules();",
       "description" : "List Gradle child modules using the tooling model."
@@ -101,9 +102,38 @@
       "snippet" : "java.io.File root = new java.io.File(\"/repo\");\norg.machanism.machai.project.layout.JScriptProjectLayout layout = new org.machanism.machai.project.layout.JScriptProjectLayout().projectDir(root);\njava.util.List<java.lang.String> modules = layout.getModules();",
       "description" : "Resolve Yarn/npm/pnpm workspace modules from package.json."
     } ]
+  }, {
+    "name" : "scanFolder",
+    "package" : "org.machanism.machai.project",
+    "signature" : "void org.machanism.machai.project.ProjectProcessor.scanFolder(java.io.File projectDir) throws java.io.IOException",
+    "description" : "Scans a project directory, detects its layout, and processes either the root folder or recursively processes each discovered module (if the layout returns a non-null module list).",
+    "examples" : [ {
+      "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.machai.project.ProjectProcessor processor = new org.machanism.machai.project.ProjectProcessor() {\n  @Override\n  public void processFolder(org.machanism.machai.project.layout.ProjectLayout layout) {\n    java.util.List<java.lang.String> sources = layout.getSources();\n    java.util.List<java.lang.String> tests = layout.getTests();\n    java.util.List<java.lang.String> docs = layout.getDocuments();\n  }\n};\nprocessor.scanFolder(root);",
+      "description" : "Scan a repository, detect the layout, and process sources/tests/docs for the root project or for each module recursively."
+    } ]
   } ],
   "customizations" : [ ],
-  "studs" : [ ],
+  "studs" : [ {
+    "name" : "org.machanism.machai.project.layout.ProjectLayout",
+    "package" : "org.machanism.machai.project.layout",
+    "type" : "abstract class",
+    "description" : "Base abstraction for describing a project's conventional on-disk layout. Implementations return root-relative paths for sources/tests/docs, optionally enumerate modules, and provide helper methods for computing relative paths and scanning directories while excluding common build/tooling folders.",
+    "examples" : [ {
+      "snippet" : "java.io.File projectDir = new java.io.File(\"C:\\\\repo\");\norg.machanism.machai.project.layout.ProjectLayout layout = new org.machanism.machai.project.layout.MavenProjectLayout().projectDir(projectDir);\njava.util.List<java.lang.String> sources = layout.getSources();\njava.util.List<java.lang.String> tests = layout.getTests();",
+      "description" : "Use the ProjectLayout abstraction to obtain conventional roots regardless of the underlying build system."
+    } ],
+    "methods" : [ ]
+  }, {
+    "name" : "org.machanism.machai.project.ProjectProcessor",
+    "package" : "org.machanism.machai.project",
+    "type" : "abstract class",
+    "description" : "Abstract processor that scans a project folder, detects its layout, optionally recurses into modules, and delegates per-folder handling to processFolder(ProjectLayout). Intended to be extended by tools that need to walk repositories and act on sources/tests/docs.",
+    "examples" : [ {
+      "snippet" : "org.machanism.machai.project.ProjectProcessor processor = new org.machanism.machai.project.ProjectProcessor() {\n  @Override\n  public void processFolder(org.machanism.machai.project.layout.ProjectLayout layout) {\n    java.util.List<java.lang.String> modules = layout.getModules();\n  }\n};",
+      "description" : "Extend ProjectProcessor to implement custom per-folder logic."
+    } ],
+    "methods" : [ ]
+  } ],
   "examples" : [ {
     "title" : "Scan a repository and process modules recursively",
     "snippet" : "java.io.File root = new java.io.File(\"/path/to/project\");\norg.machanism.machai.project.ProjectProcessor processor = new org.machanism.machai.project.ProjectProcessor() {\n  @Override\n  public void processFolder(org.machanism.machai.project.layout.ProjectLayout layout) {\n    java.util.List<java.lang.String> sources = layout.getSources();\n    java.util.List<java.lang.String> tests = layout.getTests();\n    java.util.List<java.lang.String> docs = layout.getDocuments();\n  }\n};\ntry {\n  processor.scanFolder(root);\n} catch (java.io.IOException e) {\n  throw new java.lang.RuntimeException(e);\n}",
