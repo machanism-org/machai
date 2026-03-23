@@ -21,49 +21,25 @@ import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
 
 /**
- * Maven {@link org.apache.maven.plugin.Mojo} implementing the {@code assembly}
- * goal.
+ * Maven Mojo that runs the MachAI project "assembly" workflow.
  *
  * <p>
- * This goal runs MachAI's AI-assisted workflow against the Maven execution
- * {@link #basedir}. It:
+ * The {@code assembly} goal is intentionally configured with
+ * {@code requiresProject=false} so it can be executed outside of a standard
+ * Maven project, operating on the configured {@link #basedir}.
+ * </p>
+ *
+ * <p>
+ * The workflow is:
  * </p>
  * <ol>
- * <li>Acquires a natural-language prompt from {@link #assemblyPromptFile} (if
- * present) or requests it interactively.</li>
- * <li>Uses {@link #pickModel} to recommend candidate libraries (as
- * {@link Bindex} entries) via {@link Picker}.</li>
- * <li>Filters recommendations by {@link #score}.</li>
- * <li>Runs {@link ApplicationAssembly} with {@link #assemblyModel} to apply
- * changes in {@link #basedir}.</li>
+ * <li>Obtain an assembly prompt from {@link #assemblyPromptFile} if present, or
+ * by interactively prompting the user.</li>
+ * <li>Use {@link Picker} to recommend libraries (as {@link Bindex} entries).
+ * Recommendations are logged to the Maven output.</li>
+ * <li>Run {@link ApplicationAssembly} to apply changes to the project directory.
+ * </li>
  * </ol>
- *
- * <h2>Plugin parameters</h2>
- * <ul>
- * <li>{@code assembly.genai} (default {@code OpenAI:gpt-5}) &ndash; provider id
- * for the assembly phase.</li>
- * <li>{@code pick.genai} (default {@code OpenAI:gpt-5-mini}) &ndash; provider
- * id for the library recommendation (picker) phase.</li>
- * <li>{@code assembly.prompt.file} (default {@code project.txt}) &ndash; file
- * containing the prompt; if absent, the prompt is requested interactively.</li>
- * <li>{@code assembly.score} (default {@code 0.8}) &ndash; minimum score
- * required for a recommended library to be used.</li>
- * <li>{@code bindex.register.url} (optional) &ndash; registration/lookup
- * endpoint used by the picker.</li>
- * </ul>
- *
- * <h2>Usage examples</h2>
- * <p>
- * <b>Command line:</b>
- * </p>
- * 
- * <pre>
- * mvn org.machanism.machai:assembly-maven-plugin:assembly
- *   -Dassembly.genai=OpenAI:gpt-5
- *   -Dpick.genai=OpenAI:gpt-5-mini
- *   -Dassembly.prompt.file=project.txt
- *   -Dassembly.score=0.8
- * </pre>
  */
 @Mojo(name = "assembly", requiresProject = false, requiresDependencyCollection = ResolutionScope.NONE)
 public class Assembly extends AbstractMojo {
@@ -213,7 +189,7 @@ public class Assembly extends AbstractMojo {
 			getLog().info("The project directory: " + basedir);
 			assembly.projectDir(basedir);
 			boolean inputsLog = config.getBoolean(ApplicationAssembly.LOG_INPUTS_PROP_NAME, false);
-			assembly.setInputsLog(inputsLog);
+			assembly.setLogInputs(inputsLog);
 			assembly.assembly(query, bindexList);
 
 		} catch (IOException | PrompterException e) {

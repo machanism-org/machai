@@ -35,26 +35,25 @@
  */
 
 /**
- * Maven plugin entry point for MachAI's AI-assisted project assembly workflow.
+ * Maven plugin integration for MachAI "assembly" workflows.
  *
  * <p>
- * This package provides the {@link org.machanism.machai.assembly.maven.Assembly} Maven {@code Mojo} that exposes the
- * {@code assembly} goal. The goal is intended to be run against a target directory (typically the Maven
- * {@code ${basedir}}), using a natural-language prompt to guide automated project changes.
+ * This package provides the Maven {@code assembly} goal, implemented by
+ * {@link org.machanism.machai.assembly.maven.Assembly}, which:
  * </p>
- *
- * <h2>High-level workflow</h2>
  * <ol>
- *   <li>Acquire a prompt from a configured text file or via interactive input.</li>
- *   <li>Use MachAI's {@link org.machanism.machai.bindex.Picker} to recommend candidate libraries as
- *       {@link org.machanism.machai.schema.Bindex} entries, filtered by a configured score threshold.</li>
- *   <li>Run {@link org.machanism.machai.bindex.ApplicationAssembly} to apply changes to the target project directory.</li>
+ * <li>Obtains a free-form project prompt (from a configured file or interactively
+ * via the Maven {@link org.codehaus.plexus.components.interactivity.Prompter}).</li>
+ * <li>Invokes the MachAI picker to recommend libraries (as {@link org.machanism.machai.schema.Bindex}
+ * entries).</li>
+ * <li>Runs the MachAI application assembly workflow to apply changes to the
+ * Maven project directory.</li>
  * </ol>
  *
- * <h2>Configuration</h2>
  * <p>
- * Inputs are typically supplied via Maven properties and/or plugin configuration (for example,
- * {@code -Dassembly.genai=...} and {@code -Dassembly.prompt.file=...}).
+ * The plugin is designed to run outside the context of a Maven project
+ * (i.e., {@code requiresProject=false}) and operates on the configured base
+ * directory.
  * </p>
  */
 package org.machanism.machai.assembly.maven;
