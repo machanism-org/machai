@@ -24,7 +24,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-Bindex Maven Plugin enables automated generation and registration of **Bindex metadata** for Maven projects. This metadata supports **library discovery, integration, and assembly** by providing structured information that can be indexed and searched (including GenAI-powered semantic search) within the Machanism ecosystem.
+Bindex Maven Plugin enables automated generation, updating, and registration of **Bindex metadata** for Maven projects within the Machanism/Machai ecosystem. It scans your project directory to build a Bindex index (optionally incrementally) and can publish that metadata to a remote registry endpoint to support library discovery, integration, and assembly workflows.
 
 ## Installation Instructions
 
@@ -32,8 +32,6 @@ Bindex Maven Plugin enables automated generation and registration of **Bindex me
 
 - Java: built with `maven.compiler.release=8` (Java 8 bytecode)
 - Apache Maven
-- Network access to a Bindex registry endpoint (only for the `register` goal)
-- A configured AI provider/model compatible with Machanism (when semantic processing is enabled by your configuration)
 
 ### Checkout and Build
 
@@ -57,28 +55,28 @@ This project is a Maven plugin (`packaging=maven-plugin`). It provides goals to 
 ### Basic usage (fully-qualified)
 
 ```bash
-mvn org.machanism.machai:bindex-maven-plugin:register
+mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.model=OpenAI:gpt-5
 ```
 
-If you have configured plugin groups in your Maven settings, you may also be able to run:
+### Register with a custom registry URL
 
 ```bash
-mvn bindex:register
+mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.model=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
 ```
 
-### Configuration examples
+### Running via plugin group (`bindex:...`)
 
-Set a custom registry URL when registering:
+If you have configured plugin groups in your Maven settings, you may be able to run:
 
 ```bash
-mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.register.url=http://localhost:8080
+mvn bindex:register -Dbindex.model=OpenAI:gpt-5
 ```
 
-To run `mvn bindex:register`, use:
+Some environments require an additional JVM export to run `register`:
 
 ```bash
-set "MAVEN_OPTS=--add-exports=jdk.naming.dns/com.sun.jndi.dns=java.naming"
-mvn bindex:register
+set MAVEN_OPTS=--add-exports=jdk.naming.dns/com.sun.jndi.dns=java.naming
+mvn bindex:register -Dbindex.model=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
 ```
 
 ## Resources

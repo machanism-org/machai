@@ -7,7 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Maven goal that updates (refreshes) an existing Bindex index for the current * project.
+ * Maven goal that updates (refreshes) an existing Bindex index for the current
+ * project.
  *
  * <p>
  * The goal is skipped for projects with {@code pom} packaging.

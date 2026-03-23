@@ -49,7 +49,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 */
 	@Parameter(readonly = true, defaultValue = "${settings}")
 	private Settings settings;
-	
+
 	/**
 	 * {@code settings.xml} {@code <server>} id used to read GenAI credentials.
 	 */
@@ -62,7 +62,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 *
 	 * @param update whether to run in update mode (incremental refresh) instead of
 	 *               create mode
-	 * @throws MojoExecutionException 
+	 * @throws MojoExecutionException if the Bindex operation fails
 	 */
 	protected void createBindex(boolean update) throws MojoExecutionException {
 		PropertiesConfigurator config = getConfigurator();
@@ -71,7 +71,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 
 		boolean inputsLog = config.getBoolean(ApplicationAssembly.LOG_INPUTS_PROP_NAME, false);
 		creator.setLogInputs(inputsLog);
-		
+
 		MavenProjectLayout projectLayout = new MavenProjectLayout();
 		projectLayout.projectDir(basedir);
 		projectLayout.model(project.getModel());
@@ -130,5 +130,5 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 
 		return config;
 	}
-	
+
 }
