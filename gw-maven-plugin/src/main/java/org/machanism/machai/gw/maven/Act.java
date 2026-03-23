@@ -159,7 +159,7 @@ public class Act extends AbstractGWGoal {
 		}
 	}
 
-	private void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
+	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
 		try {
 			Properties userProperties = session.getUserProperties();
 			actPrompt = userProperties.getProperty("gw.act");
@@ -170,15 +170,21 @@ public class Act extends AbstractGWGoal {
 				logger.info("Act: {}", actPrompt);
 			}
 			actProcessor.setDefaultPrompt(actPrompt);
-			String gwScanDir = actProcessor.getConfigurator().get("gw.scanDir", null);
-			String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
-			resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
-			logger.info("Starting scan of directory: {}", resolvedScanDir);
-			actProcessor.scanDocuments(basedir, resolvedScanDir);
-			logger.info("Finished scanning directory: {}", resolvedScanDir);
+			
+			scanDocuments(actProcessor);
 		} catch (PrompterException e) {
 			throw new MojoExecutionException("Failed to read 'gw.act' prompt interactively.", e);
 		}
+	}
+
+	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
+		String gwScanDir = actProcessor.getConfigurator().get("gw.scanDir", null);
+		String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
+		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
+
+		logger.info("Starting scan of directory: {}", resolvedScanDir);
+		actProcessor.scanDocuments(basedir, resolvedScanDir);
+		logger.info("Finished scanning directory: {}", resolvedScanDir);
 	}
 
 	/**

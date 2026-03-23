@@ -3,10 +3,12 @@ package org.machanism.machai.gw.maven;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.project.ProjectLayoutManager;
@@ -77,6 +79,7 @@ public class ReactorAct extends Act {
 	@Override
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
+
 		File projectDir = new File(session.getExecutionRootDirectory());
 
 		String model = configuration.get("gw.model", this.model);
@@ -103,9 +106,22 @@ public class ReactorAct extends Act {
 				// No-op for this implementation
 			}
 		};
-		actProcessor.setNonRecursive(true);
 
 		process(actProcessor);
 	}
 
+	@Override
+	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
+		List<MavenProject> modules = session.getAllProjects();
+		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
+		String executionRootDirectory = session.getExecutionRootDirectory();
+		boolean isExecutionRootProject = executionRootDirectory.equals(basedir.getAbsolutePath());
+		if ((isExecutionRootProject || !actProcessor.isNonRecursive()) && !nonRecursive) {
+			actProcessor.setNonRecursive(true);
+			super.scanDocuments(actProcessor);
+		} else {
+			getLog().info(
+					"Skipping document scan as the project is either not the execution root or is non-recursive.");
+		}
+	}
 }
