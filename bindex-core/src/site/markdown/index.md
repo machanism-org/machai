@@ -13,6 +13,10 @@ Page Structure:
 3. Overview
    - Clearly explain the main functions and value proposition of the project.
    - Summarize how the project workflows and documentation.
+   Describe the project with diagrams bellow:
+     - Create a project structure overview based on the `.puml` files below.
+     - Describe the project without including file names in the description.
+     - Use the project structure diagram by the path: `./images/c4-diagram.png` (`src/site/puml/c4-diagram.puml`).
 4. Key Features
    - Present a bulleted list of the primary capabilities and unique features of the project.
 5. Getting Started
@@ -43,55 +47,49 @@ Page Structure:
 
 ## Introduction
 
-Bindex Core (`org.machanism.machai:bindex-core`) provides the core library used to **generate**, **register**, **retrieve**, and **assemble** MachAI **Bindex** documents.
+Bindex Core (`org.machanism.machai:bindex-core`) is the foundational Java library for working with **MachAI Bindex** documents.
 
-A **Bindex** is a JSON document (typically `bindex.json`) that describes a software project or reusable library in a form that is both **machine-readable** and **LLM-friendly**. It captures key metadata such as identity (`id`, `name`, `version`), semantic classification facets (domains, layers, languages, integrations), and dependencies on other Bindexes to support transitive expansion.
+A **Bindex** is a JSON document (commonly `bindex.json`) that captures a project or library in a form that is both **machine-readable** and **LLM-friendly**. It focuses on stable identity and discovery metadata (such as `id`, `name`, `version`, tags/facets, and dependencies), enabling Bindexes to be **generated** from a project folder, **registered** into a shared registry, **retrieved** later (including by semantic similarity), and **assembled** into curated context for downstream LLM-assisted workflows.
 
-By standardizing project/library metadata and supporting semantic discovery over a registry, Bindex Core enables automated workflows for:
-
-- generating and keeping `bindex.json` up to date for a project
-- registering Bindexes into a MongoDB-backed registry
-- selecting relevant libraries for a free-text query via classification + vector search
-- assembling selected Bindexes into prompt-ready context for downstream LLM-assisted tasks
+In practice, Bindex Core helps teams keep consistent metadata for many codebases, search for relevant building blocks via a registry, and automatically package the selected information into a prompt-ready bundle.
 
 ## Overview
 
-Bindex Core is designed around an end-to-end workflow that starts from a local project folder and ends with reusable, prompt-ready context:
+Bindex Core supports an end-to-end workflow:
 
-1. **Create or update** a project’s `bindex.json` using `BindexCreator` with an appropriate layout-specific builder (for example Maven, Python, or JavaScript).
-2. **Register** the resulting Bindex into a **MongoDB** registry via `BindexRegister`/`BindexRepository` (optionally including embeddings for semantic retrieval).
-3. **Pick** relevant Bindexes for a free-text query using `Picker` (classification + semantic search) and expand results using declared dependencies.
-4. **Assemble** selected Bindexes into structured prompt inputs using `ApplicationAssembly`.
+1. **Create/Update** a Bindex from a local project directory using a layout-aware builder (for example Maven, Python, or JavaScript).
+2. **Register** the resulting Bindex into a MongoDB-backed registry (optionally storing embeddings for semantic retrieval).
+3. **Pick** relevant Bindexes for a free-text query using classification plus semantic/vector search, with dependency expansion.
+4. **Assemble** selected Bindexes into structured, prompt-ready context for application building or analysis.
 
-The primary API entry points are in the `org.machanism.machai.bindex` package, with builders under `org.machanism.machai.bindex.builder`.
+### Architecture (C4 overview)
+
+![C4 Diagram](./images/c4-diagram.png)
+
+At a high level, the library is organized around four collaborating components: a creation pipeline that scans a project layout and produces a Bindex document, a repository layer that persists and queries Bindexes in MongoDB, a picker that combines query classification with semantic search to select relevant candidates (and expands them via declared dependencies), and an assembly step that turns the selected Bindexes into structured context inputs for LLM-driven workflows.
 
 ## Key Features
 
-- Generate or update a project’s `bindex.json` using AI-assisted builders.
-- Choose a builder based on detected project layout (Maven, Python, JavaScript).
+- Generate or update `bindex.json` for a project using layout-aware builders.
+- Select a builder based on detected project layout (Maven, Python, JavaScript).
 - Register Bindex documents into a MongoDB-backed registry.
 - Retrieve Bindexes using query classification plus semantic/vector search.
-- Expand results using transitive dependency references between Bindexes.
-- Assemble selected Bindexes into structured, prompt-ready inputs for downstream LLM workflows.
+- Expand results using declared dependencies between Bindexes.
+- Assemble selected Bindexes into structured, prompt-ready inputs for downstream workflows.
 
 ## Getting Started
 
 ### Prerequisites
 
 - **Java** (see version notes below)
-- **Maven** (to build and run tests)
-- **MongoDB** (only required for registry operations such as register/search)
-- A configured **GenAI provider** compatible with MachAI’s `GenAIProvider` integration (required for classification/embedding and AI-assisted generation)
-
-Environment/configuration you may need (depending on what you use):
-
-- `BINDEX_REPO_URL`: MongoDB connection URI for repository-backed operations
-- `BINDEX_REG_PASSWORD`: password used for registry authentication when required
+- **Maven** (to build and run)
+- **MongoDB** (required for registry operations such as register/search)
+- A configured **GenAI provider** compatible with the MachAI `GenAIProvider` integration (required for classification/embedding and AI-assisted generation)
 
 ### Java Version
 
 - **Build configuration (from `pom.xml`)**: `maven.compiler.release = 8` (Java 8 bytecode)
-- **Practical runtime requirements**: Java 8+ is expected for compilation and baseline usage. Some integrations (for example MongoDB driver usage or GenAI provider implementations available on your classpath) may impose stricter runtime requirements; validate against your dependency set and target deployment.
+- **Practical runtime requirements**: Java 8+ is expected for core usage. Some integrations on the classpath (for example the MongoDB driver or a specific GenAI provider implementation) may impose stricter requirements; validate against your dependency set and runtime environment.
 
 ### Basic Usage
 
@@ -140,22 +138,20 @@ new ApplicationAssembly("openai", config, projectDir)
 ### Typical Workflow
 
 1. Detect/construct a `ProjectLayout` for the target project.
-2. Use `BindexCreator` to create/update `bindex.json`.
-3. Use `BindexRegister`/`BindexRepository` to register the Bindex in MongoDB.
+2. Run `BindexCreator` to create/update `bindex.json`.
+3. Run `BindexRegister` (and the underlying repository) to persist the Bindex into MongoDB.
 4. Use `Picker` to classify a query and retrieve matching Bindexes (with dependency expansion).
 5. Use `ApplicationAssembly` to turn the selected Bindexes into structured context for an LLM workflow.
 
 ## Configuration
 
-Common configuration parameters:
-
 | Parameter | Description | Default |
 |---|---|---|
-| `bindex.model` | Model/provider identifier used by `BindexCreator` and its builders. | `CodeMie:gpt-5-2-2025-12-11` |
-| `pick.model` | Model/provider identifier used by `Picker` for classification prompts. | `CodeMie:gpt-5-2-2025-12-11` |
-| `assembly.model` | Model/provider identifier used by `ApplicationAssembly`. | `CodeMie:gpt-5-2-2025-12-11` |
-| `BINDEX_REPO_URL` | MongoDB connection URI for repository-backed operations. | (unset; falls back to a default cluster URI) |
-| `BINDEX_REG_PASSWORD` | MongoDB registry password used to authenticate registration/search (when required). | (unset; depends on registry configuration) |
+| `bindex.model` | Model/provider identifier used for Bindex generation and layout builders. | `CodeMie:gpt-5-2-2025-12-11` |
+| `pick.model` | Model/provider identifier used for query classification during picking. | `CodeMie:gpt-5-2-2025-12-11` |
+| `assembly.model` | Model/provider identifier used to assemble prompt-ready context. | `CodeMie:gpt-5-2-2025-12-11` |
+| `BINDEX_REPO_URL` | MongoDB connection URI for repository-backed operations. | (unset; falls back to an internal default) |
+| `BINDEX_REG_PASSWORD` | Registry password used to authenticate when required. | (unset; depends on registry configuration) |
 
 ## Resources
 

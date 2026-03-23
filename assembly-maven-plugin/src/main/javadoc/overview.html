@@ -17,127 +17,108 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     - If Javadoc build fails due to invalid @throws tags or missing required Javadoc, 
        automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
 -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Assembly Maven Plugin - Overview</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assembly Maven Plugin — Overview</title>
 </head>
 <body>
 
 <h1>Assembly Maven Plugin</h1>
 
 <p>
-  assembly-maven-plugin automates the assembly of projects within the Machanism ecosystem by integrating libraries
-  based on bindex metadata. It streamlines dependency resolution, library selection, and project packaging using
-  GenAI-powered semantic search and metadata-driven workflows.
+  <strong>Assembly Maven Plugin</strong> automates the assembly of projects within the
+  Machanism ecosystem by integrating libraries based on bindex metadata.
+  It streamlines dependency resolution, library selection, and project
+  packaging using GenAI-powered semantic search and metadata-driven
+  workflows.
 </p>
 
 <h2>What this plugin does</h2>
 
 <p>
-  <strong>Assembly Maven Plugin</strong> is a Maven plugin (packaging type <code>maven-plugin</code>) that exposes an
-  <code>assembly</code> goal. The goal uses a natural-language prompt to drive an AI-assisted workflow that identifies
-  relevant libraries from bindex metadata and applies the resulting project changes directly to the Maven execution
-  base directory (<code>${basedir}</code>).
+  This module is packaged as a Maven plugin and exposes the <strong><code>assembly</code></strong> goal.
+  The goal is designed to run <em>without requiring an existing Maven project</em>
+  (i.e. it operates on a configured base directory and is compatible with workflows
+  that generate or modify project content).
 </p>
 
 <h2>High-level workflow</h2>
 
 <ol>
   <li>
-    <strong>Prompt acquisition</strong>: read the prompt from a configured file (for example
-    <code>project.txt</code>) or collect it interactively.
+    <strong>Acquire a prompt.</strong>
+    If a prompt file is configured and exists (default: <code>project.txt</code>), its contents are used;
+    otherwise the goal prompts interactively via Plexus Prompter.
   </li>
   <li>
-    <strong>Library recommendation</strong>: use MachAI's picker to recommend candidate libraries described as bindex
-    entries.
+    <strong>Recommend libraries.</strong>
+    The plugin invokes the MachAI picker to recommend libraries as bindex entries.
+    Recommendations are logged to the Maven output.
   </li>
   <li>
-    <strong>Scoring and filtering</strong>: optionally discard candidates below a configured minimum score threshold.
-  </li>
-  <li>
-    <strong>Assembly application</strong>: run the assembly engine to apply updates to the project directory in-place.
+    <strong>Assemble the project.</strong>
+    The MachAI application assembly workflow is run to apply changes to the target directory
+    (e.g., updating a Maven project structure, dependencies, or other generated content).
   </li>
 </ol>
 
-<h2>Architecture</h2>
+<h2>Configuration</h2>
 
 <p>
-  The following diagram summarizes the primary types involved in the plugin and how they relate.
-</p>
-
-<p>
-  <img src="../images/class-diagram.png" alt="Class diagram for the Assembly Maven Plugin" />
-</p>
-
-<h2>Package overview</h2>
-
-<h3><code>org.machanism.machai.assembly.maven</code></h3>
-
-<p>
-  Maven plugin entry point for MachAI's AI-assisted project assembly workflow.
-  This package provides the <code>assembly</code> goal implementation and the minimal orchestration logic needed to:
+  The goal can be configured using Maven properties. Common parameters:
 </p>
 
 <ul>
-  <li>obtain a natural-language prompt (file-based or interactive),</li>
-  <li>invoke MachAI's <code>Picker</code> to recommend libraries as bindex entries (optionally filtered by score), and</li>
-  <li>invoke the application assembly engine to apply changes to the target project directory.</li>
+  <li><strong><code>assembly.prompt.file</code></strong> — prompt file path (default: <code>project.txt</code>).</li>
+  <li><strong><code>assembly.score</code></strong> — minimum score threshold for recommendations.</li>
+  <li><strong><code>bindex.register.url</code></strong> — optional URL used by the picker for metadata registration/lookups.</li>
+  <li>
+    <strong>Model/provider selection</strong> — the plugin uses separate provider identifiers for:
+    <ul>
+      <li>the assembly workflow (<code>ApplicationAssembly</code> model property)</li>
+      <li>the picker workflow (<code>Picker</code> model property)</li>
+    </ul>
+  </li>
 </ul>
 
-<p>
-  The primary entry point is <code>org.machanism.machai.assembly.maven.Assembly</code>, a Maven Mojo that coordinates:
-</p>
-
-<ul>
-  <li>prompt input via the <code>assembly.prompt.file</code> setting (or interactive input),</li>
-  <li>recommendations produced by <code>org.machanism.machai.bindex.Picker</code> as
-      <code>org.machanism.machai.schema.Bindex</code> entries, and</li>
-  <li>in-place changes applied by <code>org.machanism.machai.bindex.ApplicationAssembly</code> to <code>${basedir}</code>.</li>
-</ul>
-
-<h2>Configuration and inputs</h2>
-
-<p>
-  The goal can be configured via Maven properties and/or plugin configuration.
-  Common parameters include:
-</p>
-
-<ul>
-  <li><code>assembly.genai</code> &ndash; GenAI provider identifier used during the assembly phase.</li>
-  <li><code>pick.genai</code> &ndash; GenAI provider identifier used during the recommendation (picker) phase.</li>
-  <li><code>assembly.prompt.file</code> &ndash; text file containing the natural-language prompt.</li>
-  <li><code>assembly.score</code> &ndash; minimum score threshold for recommendations.</li>
-  <li><code>bindex.register.url</code> &ndash; optional endpoint used by the picker for metadata lookup/registration.</li>
-</ul>
-
-<h2>Typical usage</h2>
+<h2>Usage example</h2>
 
 <pre>
 mvn org.machanism.machai:assembly-maven-plugin:assembly
-  -Dassembly.genai=OpenAI:gpt-5
-  -Dpick.genai=OpenAI:gpt-5-mini
-  -Dassembly.prompt.file=project.txt
-  -Dassembly.score=0.9
 </pre>
 
 <p>
-  If <code>assembly.prompt.file</code> does not exist, the goal prompts for interactive input.
+  To drive the workflow from a file, place your prompt in <code>project.txt</code> (or configure an alternate
+  file via <code>-Dassembly.prompt.file=...</code>). If the file is absent, the goal will prompt interactively.
 </p>
 
-<h2>Operational notes</h2>
+<h2>Packages</h2>
+
+<p>
+  The public API surface for this plugin is small and centered around the single Maven Mojo that implements
+  the goal.
+</p>
 
 <ul>
   <li>
-    The plugin operates on the Maven execution base directory (<code>${basedir}</code>) and applies changes in-place.
-  </li>
-  <li>
-    Recommended libraries are produced from bindex metadata and are typically logged before the assembly phase begins.
+    <strong><code>org.machanism.machai.assembly.maven</code></strong> — Maven plugin integration for MachAI “assembly” workflows.
+    Provides the <code>assembly</code> goal that reads an assembly prompt, invokes the picker for library recommendations,
+    and runs the assembly workflow on a configured base directory.
   </li>
 </ul>
+
+<h2>Class diagram</h2>
+
+<p>
+  The following diagram summarizes the main types involved in the plugin goal.
+</p>
+
+<p>
+  <img src="../images/class-diagram.png" alt="Class diagram for Assembly Maven Plugin" />
+</p>
 
 </body>
 </html>

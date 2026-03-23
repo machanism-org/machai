@@ -1,0 +1,112 @@
+' @guidance: create the C4 plantuml diagram for the project.
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+' ============================================================================
+' Bindex Core (bindex-core) - C4 Detailed Diagram
+' ============================================================================
+
+LAYOUT_WITH_LEGEND()
+
+title Bindex Core (bindex-core) - C4 Detailed Diagram
+
+' -----------------------------
+' C1: System Context
+' -----------------------------
+Person(dev, "Developer", "Uses MachAI tooling to generate/register Bindex documents and assemble prompts")
+
+System_Boundary(sys, "Bindex Core") {
+  System(bindexCore, "Bindex Core", "Generates bindex.json, registers it in MongoDB, and retrieves relevant Bindexes for prompt assembly")
+}
+
+System_Ext(genai, "GenAI Provider", "LLM + Embeddings", "Provides chat completions and text embeddings")
+System_Ext(mongodb, "MongoDB Atlas", "Vector Search", "Stores Bindex documents and classification embeddings")
+System_Ext(projectFs, "Project Filesystem", "Local workspace", "Contains project sources and bindex.json")
+
+Rel(dev, bindexCore, "Runs")
+Rel(bindexCore, genai, "Uses", "Prompting + Embeddings")
+Rel(bindexCore, mongodb, "Reads/Writes", "Bindex documents + vector search")
+Rel(bindexCore, projectFs, "Reads/Writes", "bindex.json + sources")
+
+' -----------------------------
+' C2: Containers
+' -----------------------------
+
+System_Boundary(sys2, "Bindex Core") {
+  Container(javaLib, "Bindex Core Java Library", "Java (Maven)", "Core library providing Bindex creation, registration, retrieval and prompt assembly")
+
+  ContainerDb(repo, "Bindex Registry (MongoDB)", "MongoDB Atlas", "Persisted Bindex documents with classification facets + embeddings")
+  Container_Ext(genaiApi, "GenAI Provider API", "HTTP API", "Chat completion + embeddings")
+  Container_Ext(fs, "Project Workspace", "Filesystem", "Project sources and bindex.json")
+}
+
+Rel(dev, javaLib, "Invokes", "CLI/Runner (outside this module)")
+Rel(javaLib, fs, "Reads/Writes", "bindex.json")
+Rel(javaLib, genaiApi, "Calls", "Prompts + embeddings")
+Rel(javaLib, repo, "Reads/Writes", "Bindex docs + vector search")
+
+' -----------------------------
+' C3: Components (inside Java library)
+' -----------------------------
+
+Container_Boundary(components, "Bindex Core Java Library") {
+  Component(appAssembly, "ApplicationAssembly", "Service", "Assembles prompts using selected Bindexes and executes GenAI provider")
+  Component(creator, "BindexCreator", "Processor", "Creates/updates bindex.json using an AI-assisted BindexBuilder")
+  Component(register, "BindexRegister", "Processor", "Registers a project's bindex.json into the registry using Picker")
+  Component(processorBase, "BindexProjectProcessor", "Base class", "Shared utilities to locate/parse bindex.json")
+
+  Component(builderFactory, "BindexBuilderFactory", "Factory", "Selects a BindexBuilder based on ProjectLayout")
+  Component(mavenBuilder, "MavenBindexBuilder", "BindexBuilder", "Builds Bindex for Maven projects")
+  Component(pyBuilder, "PythonBindexBuilder", "BindexBuilder", "Builds Bindex for Python projects")
+  Component(jsBuilder, "JScriptBindexBuilder", "BindexBuilder", "Builds Bindex for JavaScript projects")
+
+  Component(picker, "Picker", "Service", "Classifies queries, runs vector search, registers and retrieves Bindexes")
+  Component(repository, "BindexRepository", "Repository", "MongoDB access to stored Bindex documents")
+
+  Component(funcTools, "BindexFunctionTools", "FunctionTools", "Exposes get_bindex and get_bindex_schema tools to GenAI Provider")
+
+  Component(genaiProvider, "GenAIProvider", "Adapter (external)", "Provider abstraction (chat + embeddings)")
+  Component(genaiManager, "GenAIProviderManager", "Factory (external)", "Creates a GenAIProvider")
+  Component(functionToolsLoader, "FunctionToolsLoader", "Registry (external)", "Registers function tools with provider")
+
+  Component(layout, "ProjectLayout", "Model (external)", "Describes project directory and layout")
+}
+
+' -----------------------------
+' Key relationships
+' -----------------------------
+
+Rel(appAssembly, genaiManager, "Obtains provider")
+Rel(appAssembly, functionToolsLoader, "Applies tools")
+Rel(appAssembly, genaiProvider, "Sends instructions/prompt and performs")
+' NOTE: .machai is reserved for LLM activity logging and must be ignored.
+'Rel(appAssembly, fs, "Optionally logs inputs", ".machai/assembly-inputs.txt")
+
+Rel(creator, processorBase, "Extends")
+Rel(creator, builderFactory, "Uses")
+Rel(creator, layout, "Processes")
+Rel(creator, fs, "Writes", "bindex.json")
+Rel(creator, genaiProvider, "Indirectly uses", "via BindexBuilder")
+
+Rel(register, processorBase, "Extends")
+Rel(register, layout, "Processes")
+Rel(register, picker, "Uses")
+Rel(register, repo, "Writes", "Register bindex")
+
+Rel(picker, genaiManager, "Obtains provider")
+Rel(picker, functionToolsLoader, "Applies tools")
+Rel(picker, genaiProvider, "Uses", "classification prompts + embeddings")
+Rel(picker, repository, "Uses")
+Rel(repository, repo, "Connects to")
+Rel(picker, repo, "Vector search + CRUD")
+
+Rel(funcTools, repository, "Uses")
+Rel(funcTools, genaiProvider, "Registers tools with")
+
+Rel(javaLib, mongodb, "Connects to", "MongoDB driver")
+Rel(javaLib, genai, "Calls", "Provider SDK/HTTP")
+
+@enduml

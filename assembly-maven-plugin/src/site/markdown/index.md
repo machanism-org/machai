@@ -2,92 +2,6 @@
 canonical: https://machai.machanism.org/assembly-maven-plugin/index.html
 ---
 
-# Assembly Maven Plugin
-
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
-
-## Introduction
-
-Assembly Maven Plugin is a Machai Maven plugin that implements the `assembly` goal. It runs an AI-assisted, metadata-driven workflow against the Maven execution base directory (`${basedir}`) to help assemble or update a target project directory in-place.
-
-The plugin is built around a Guided File Processing style loop: acquire guidance (your natural-language prompt), use metadata to inform decisions (Bindex), and apply repeatable automation (project edits). See [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) for the conceptual foundation.
-
-Concretely, the `assembly` goal:
-
-- Acquires a natural-language prompt by reading `assembly.prompt.file` (default: `project.txt`) when present, or by prompting interactively via the Maven console.
-- Loads configuration from `bindex.properties` using `PropertiesConfigurator`.
-- Uses a GenAI-backed picker (`pick.genai`) to recommend candidate libraries expressed as Bindex entries (`Picker`; optionally using `bindex.register.url`).
-- Filters recommendations by a configurable score threshold (`assembly.score`) and logs the recommended library ids and scores.
-- Runs the assembly phase (`assembly.genai`) to apply changes to the project directory (`${basedir}`) using `ApplicationAssembly`, the prompt, and the selected libraries.
-
-## Overview
-
-The plugin translates “what I want to build” (your prompt) into actionable project updates by combining:
-
-- Prompt acquisition (file-based or interactive).
-- Semantic library recommendation using Bindex metadata.
-- A deterministic execution flow that logs recommendations and applies edits directly to the current project directory (`${basedir}`).
-
-This reduces manual dependency discovery and boilerplate setup, and supports a repeatable, prompt-driven workflow for creating and evolving projects.
-
-## Key Features
-
-- Maven goal `assembly` for prompt-driven project assembly.
-- Prompt acquisition from a file (default `project.txt`) or interactive console entry.
-- Uses `bindex.properties` at runtime for Machai/Bindex configuration.
-- Library recommendation via Bindex entries using a configurable picker GenAI provider.
-- Configurable score threshold for recommended libraries.
-- Optional `bindex.register.url` for Bindex metadata discovery/registration during picking.
-- Applies changes directly to the Maven execution base directory (`${basedir}`).
-- Supports distinct GenAI provider identifiers for picking and assembly phases.
-
-## Getting Started
-
-### Prerequisites
-
-- Maven (to execute the plugin goal).
-- A terminal/console that supports interactive prompting (only required if the prompt file is absent).
-- Network access and credentials for the configured GenAI provider(s).
-- A Machai/Bindex configuration file available at runtime (`bindex.properties`).
-- (Optional) Access to a Bindex registration/lookup endpoint if `bindex.register.url` is configured.
-
-### Java Version
-
-- **Build/runtime baseline defined in `pom.xml`:** Java **8** (`maven.compiler.release=8`).
-- **Functional requirements may differ:** depending on the configured GenAI providers and runtime dependencies, you may need a newer Java version even if the plugin is compiled for Java 8.
-
-### Basic Usage
-
-```bash
-mvn org.machanism.machai:assembly-maven-plugin:assembly
-```
-
-### Typical Workflow
-
-1. Create a prompt file in the target project directory (default: `project.txt`) describing what you want assembled.
-2. Run the `assembly` goal.
-3. The plugin reads the prompt file (or requests the prompt interactively if the file is missing).
-4. The picker recommends candidate libraries (Bindex entries), filtered by the configured score threshold.
-5. The plugin logs recommended libraries and then runs the assembly phase to apply changes to the project directory (`${basedir}`).
-
-## Configuration
-
-Common parameters for the `assembly` goal:
-
-| Parameter | Description | Default |
-|---|---|---|
-| `assembly.genai` | GenAI provider identifier used for the assembly phase. | `OpenAI:gpt-5` |
-| `pick.genai` | GenAI provider identifier used for the library recommendation (picker) phase. | `OpenAI:gpt-5-mini` |
-| `assembly.prompt.file` | Prompt file path. If it exists, it will be read as the prompt; otherwise the prompt is requested interactively. | `project.txt` |
-| `assembly.score` | Minimum score required for a recommended library to be listed/used. | `0.8` |
-| `bindex.register.url` | Optional registration/lookup endpoint used by the picker for metadata lookups/registration. | (none) |
-
-## Resources
-
-- Guided File Processing (conceptual foundation): https://www.machanism.org/guided-file-processing/index.html
-- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin
-- Source repository (SCM): https://github.com/machanism-org/machai.git
-
 <!-- @guidance:
 # Page Structure
 1. Header
@@ -129,3 +43,85 @@ Common parameters for the `assembly` goal:
 - Use Markdown syntax for headings, lists, tables, code blocks, and links.
 - Ensure clarity, conciseness, and easy navigation throughout the page.
 -->
+
+# Assembly Maven Plugin
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/assembly-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin)
+
+## Introduction
+
+`assembly-maven-plugin` runs MachAI’s project **assembly** workflow from Maven. It takes a natural-language prompt describing what you want to build, recommends relevant libraries via MachAI **bindex** metadata, and then applies the selected set to a target project directory.
+
+At the center of the plugin is the `assembly` Mojo (`org.machanism.machai.assembly.maven.Assembly`). It can be run **outside** a standard Maven project (`requiresProject=false`), reads the assembly prompt from a file (default `project.txt`) or interactively prompts you, and then orchestrates:
+
+1. **Library recommendation** using `Picker` (GenAI-powered semantic search over bindex metadata).
+2. **Project updates** using `ApplicationAssembly`, which applies changes to the configured project directory.
+
+Conceptually, this aligns with Machanism’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): the plugin acts as a repeatable, metadata-driven workflow that produces consistent project changes from high-level intent.
+
+## Overview
+
+The plugin’s value proposition is to turn “what I want to build” into a concrete, reproducible project setup:
+
+- It captures intent as a prompt (file-based or interactive).
+- It discovers and ranks candidate libraries using bindex entries.
+- It applies the assembled result to a project directory, enabling fast bootstrapping and standardized assembly across projects.
+
+## Key Features
+
+- Maven goal `assembly` that can run with or without a Maven project.
+- Prompt input via `project.txt` (or a configurable prompt file), with interactive fallback.
+- GenAI-backed library recommendations through MachAI `Picker`.
+- Minimum recommendation score threshold control.
+- Optional bindex registration/lookup URL support.
+- Applies changes directly to the configured base directory.
+- Separate model selection for recommendation (`pickModel`) vs assembly (`assemblyModel`).
+
+## Getting Started
+
+### Prerequisites
+
+- **Java:** see version notes below.
+- **Maven:** a Maven installation suitable for running plugins.
+- **GenAI provider configuration:** the MachAI provider referenced by the configured model identifiers must be available (credentials/environment depend on the provider you choose).
+- **bindex configuration:** a `bindex.properties` file available to the execution (used by the workflow configuration).
+- (Optional) Network access to any configured bindex registration/lookup service.
+
+### Java Version
+
+- **Build-level requirement (from `pom.xml`):** compiled with `maven.compiler.release=8` (Java 8).
+- **Functional/runtime note:** depending on the selected GenAI provider integrations and your execution environment, you may choose to run on a newer Java runtime; however, the plugin is intended to be compatible with Java 8 as declared.
+
+### Basic Usage
+
+```bash
+mvn org.machanism.machai:assembly-maven-plugin:assembly
+```
+
+To provide a prompt via file, create `project.txt` in the directory you are running from (or set `-Dassembly.prompt.file=...`).
+
+### Typical Workflow
+
+1. Create or choose a target directory (the Maven `${basedir}` where changes will be applied).
+2. Write your assembly prompt in `project.txt` (or plan to answer the interactive prompt).
+3. Ensure `bindex.properties` is present and configured for your environment.
+4. Run the `assembly` goal.
+5. Review the “Recommended libraries” output (bindex IDs and scores).
+6. The plugin applies the assembly workflow to the project directory.
+
+## Configuration
+
+| Parameter | Description | Default |
+|---|---|---|
+| `assembly.model` | GenAI provider/model identifier for the assembly workflow (`ApplicationAssembly.MODEL_PROP_NAME`). | `ApplicationAssembly.DEFAULT_MODEL` |
+| `picker.model` | GenAI provider/model identifier for library recommendations (`Picker.MODEL_PROP_NAME`). | `Picker.DEFAULT_MODEL` |
+| `assembly.prompt.file` | Prompt file to read as plain text; if missing, the plugin prompts interactively. | `project.txt` |
+| `assembly.score` | Minimum score threshold used by the picker when recommending libraries. | `ApplicationAssembly.DEFAULT_SCORE_VALUE` |
+| `bindex.register.url` | Optional registration/lookup URL used by the picker for metadata operations. | _(none)_ |
+
+## Resources
+
+- MachAI documentation: https://machai.machanism.org/
+- Guided File Processing: https://www.machanism.org/guided-file-processing/index.html
+- GitHub (monorepo): https://github.com/machanism-org/machai
+- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/assembly-maven-plugin

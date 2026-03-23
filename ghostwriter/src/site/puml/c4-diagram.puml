@@ -1,0 +1,124 @@
+' @guidance: create a detail C4 plantuml diagram. 
+@startuml
+' C4-PlantUML Detailed Diagram for Ghostwriter
+' Requires C4-PlantUML library. If rendering fails, ensure includes are available.
+
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+LAYOUT_WITH_LEGEND()
+SHOW_PERSON_OUTLINE()
+
+' ============================================================================
+' Level 1: System Context
+' ============================================================================
+
+title Ghostwriter - Detailed C4 (Context + Containers + Components)
+
+Person(user, "User", "Creates prompts, runs acts, reviews generated content")
+Person(admin, "Admin", "Manages templates/acts, configures environment")
+
+System_Boundary(gw, "Ghostwriter") {
+  System(ghostwriter, "Ghostwriter", "Java/Maven application for structured prompt workflows (Acts), content generation, and project-aware assistance")
+}
+
+System_Ext(llm, "LLM Provider", "External LLM API (e.g., OpenAI/Anthropic/Azure)")
+System_Ext(vcs, "Git Hosting", "GitHub/GitLab/Bitbucket")
+System_Ext(pkg, "Maven Central", "Dependency repository")
+System_Ext(os, "Operating System", "Windows 11")
+
+Rel(user, ghostwriter, "Uses", "CLI")
+Rel(admin, ghostwriter, "Administers", "CLI/Config")
+Rel(ghostwriter, llm, "Calls", "HTTPS/JSON")
+Rel(ghostwriter, vcs, "Reads/Writes", "git/https")
+Rel(ghostwriter, pkg, "Downloads deps", "HTTPS")
+Rel(ghostwriter, os, "Reads/Writes", "File system")
+
+' ============================================================================
+' Level 2: Container Diagram
+' ============================================================================
+
+newpage
+
+title Ghostwriter - Container Diagram
+
+System_Boundary(gw2, "Ghostwriter") {
+  Container(cli, "CLI", "Java", "Command-line interface to run acts, generate outputs, manage configuration")
+  Container(app, "Core Application", "Java", "Orchestrates workflows, reads project context, executes tools and LLM calls")
+  ContainerDb(projectFs, "Project Workspace", "File System", "Source code, docs, diagrams, configuration")
+  ContainerDb(actsRepo, "Acts/Templates", "TOML/Files", "Reusable prompt templates (acts) stored as TOML")
+  ContainerDb(cache, "Local Cache", "Files", "Cached responses, logs, and intermediate artifacts")
+}
+
+Rel(user, cli, "Runs commands", "Terminal")
+Rel(admin, cli, "Configures", "Terminal")
+Rel(cli, app, "Invokes", "In-process")
+Rel(app, projectFs, "Reads/Writes", "File I/O")
+Rel(app, actsRepo, "Loads", "File I/O")
+Rel(app, cache, "Stores", "File I/O")
+Rel(app, llm, "Prompts / completion", "HTTPS/JSON")
+Rel(app, vcs, "Fetch/commit (optional)", "git/https")
+
+' ============================================================================
+' Level 3: Component Diagram (Core Application)
+' ============================================================================
+
+newpage
+
+title Ghostwriter - Component Diagram (Core Application)
+
+Container_Boundary(appBoundary, "Core Application") {
+  Component(contextLoader, "Project Context Loader", "Java", "Scans project layout (Maven), reads metadata and key files")
+  Component(actRegistry, "Act Registry", "Java", "Lists and loads act definitions (TOML)")
+  Component(promptEngine, "Prompt Engine", "Java", "Renders prompts from acts + runtime inputs + project context")
+  Component(toolRunner, "Tool Runner", "Java", "Executes safe tools: file I/O, web fetch, REST calls, shell commands")
+  Component(llmClient, "LLM Client", "Java", "Sends prompt/messages to LLM provider and parses responses")
+  Component(outputWriter, "Output Writer", "Java", "Writes generated artifacts (e.g., docs, diagrams, code) to workspace")
+  Component(auditLogger, "Audit/Logging", "Java", "Captures actions, tool usage, and execution logs")
+  Component(config, "Configuration", "Java", "Loads env/config for providers, paths, and policies")
+}
+
+Rel(cli, contextLoader, "Requests context")
+Rel(cli, actRegistry, "Lists/loads acts")
+Rel(cli, promptEngine, "Submits inputs")
+Rel(promptEngine, contextLoader, "Consumes", "In-process")
+Rel(promptEngine, actRegistry, "Uses act templates", "In-process")
+Rel(promptEngine, llmClient, "Builds request")
+Rel(llmClient, llm, "Calls", "HTTPS/JSON")
+Rel(cli, toolRunner, "Runs tools")
+Rel(toolRunner, projectFs, "Reads/Writes")
+Rel(outputWriter, projectFs, "Writes artifacts")
+Rel(toolRunner, auditLogger, "Logs")
+Rel(llmClient, auditLogger, "Logs")
+Rel(config, llmClient, "Provides keys/endpoints")
+Rel(config, toolRunner, "Provides policies")
+
+' ============================================================================
+' Optional: Deployment (Local workstation)
+' ============================================================================
+
+newpage
+
+title Ghostwriter - Deployment (Local Workstation)
+
+Deployment_Node(win, "Windows 11 Workstation", "Windows 11") {
+  Deployment_Node(jvm, "JVM", "Java") {
+    Container(cliD, "CLI", "Java")
+    Container(appD, "Core Application", "Java")
+  }
+  Deployment_Node(fsNode, "NTFS File System", "Local Disk") {
+    ContainerDb(projectFsD, "Project Workspace", "Files")
+    ContainerDb(actsRepoD, "Acts/Templates", "TOML")
+    ContainerDb(cacheD, "Local Cache", "Files")
+  }
+}
+
+Rel(cliD, appD, "Invokes")
+Rel(appD, projectFsD, "Reads/Writes")
+Rel(appD, actsRepoD, "Loads")
+Rel(appD, cacheD, "Stores")
+Rel(appD, llm, "Calls", "HTTPS")
+
+@enduml
