@@ -211,7 +211,7 @@ public class AssembyCommand {
 				ApplicationAssembly assembly = new ApplicationAssembly(model, ConfigCommand.config, dir);
 				assembly.projectDir(dir);
 				boolean inputsLog = ConfigCommand.config.getBoolean(ApplicationAssembly.LOG_INPUTS_PROP_NAME, false);
-				assembly.setInputsLog(inputsLog );
+				assembly.setLogInputs(inputsLog );
 				assembly.assembly(query, bindexList);
 			} else {
 				logger.error(
