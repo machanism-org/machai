@@ -17,8 +17,6 @@ System_Boundary(machai, "Machai Project") {
   Container(assemblyPlugin, "assembly-maven-plugin", "Maven Plugin (Java)", "Prompt-driven assembly using bindex + GenAI")
   Container(gwPlugin, "gw-maven-plugin", "Maven Plugin (Java)", "Run Ghostwriter during Maven build / reactor-aware")
 
-  Container(asmCli, "assembly-maven-plugin", "Maven Plugin (Java)", "Prompt-driven assembly using bindex + GenAI")
-
   Rel(cli, bindexCore, "Uses")
   Rel(cli, gw, "Uses")
   Rel(cli, genai, "Uses")
