@@ -100,7 +100,7 @@ class OpenAIProviderTest {
 	}
 
 	@Test
-	void inputsLog_shouldSetInputsLogFile() {
+	void inputsLog_shouldSetLogInputsFile() {
 		// Arrange
 		provider.init(minimalConfig());
 		File f = new File("target/test-inputs-log.txt");
