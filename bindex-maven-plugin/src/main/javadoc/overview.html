@@ -35,18 +35,18 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   GenAI-powered semantic search within the Machanism ecosystem.
 </p>
 
-<h2>Module overview</h2>
+<h2>Overview</h2>
 <p>
-  This project is packaged as a Maven plugin (<code>maven-plugin</code>) and exposes Bindex operations as standard Maven
-  goals (Mojos). Each goal runs within a Maven build, reads configuration from the current project, and delegates
-  the heavy lifting to Machai Bindex Core APIs.
+  This module is packaged as a Maven plugin (<code>maven-plugin</code>) and exposes Bindex operations as standard Maven
+  goals (Mojos). Each goal runs inside a Maven build, reads configuration from the current project and system
+  properties, and delegates indexing and registration work to the Machai Bindex Core library.
 </p>
 
 <h2>Package summary</h2>
 <ul>
   <li>
     <code>org.machanism.machai.bindex.maven</code> &ndash; Maven plugin integration layer for Machai Bindex.
-    Contains the Mojo implementations and shared support code used by all goals.
+    Contains the Mojo implementations (<code>create</code>, <code>update</code>, <code>register</code>, <code>clean</code>) and shared support code.
   </li>
 </ul>
 
@@ -55,10 +55,10 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   The plugin provides the following goals:
 </p>
 <ul>
-  <li><code>create</code> &ndash; create a new index (see {@link org.machanism.machai.bindex.maven.Create})</li>
-  <li><code>update</code> &ndash; update an existing index (see {@link org.machanism.machai.bindex.maven.Update})</li>
-  <li><code>register</code> &ndash; publish metadata to a registry (see {@link org.machanism.machai.bindex.maven.Register})</li>
-  <li><code>clean</code> &ndash; remove temporary artifacts (see {@link org.machanism.machai.bindex.maven.Clean})</li>
+  <li><code>create</code> &ndash; create a new Bindex index (see {@link org.machanism.machai.bindex.maven.Create})</li>
+  <li><code>update</code> &ndash; refresh an existing index (see {@link org.machanism.machai.bindex.maven.Update})</li>
+  <li><code>register</code> &ndash; scan and publish metadata to a registry (see {@link org.machanism.machai.bindex.maven.Register})</li>
+  <li><code>clean</code> &ndash; remove temporary artifacts created by the tooling (see {@link org.machanism.machai.bindex.maven.Clean})</li>
 </ul>
 
 <h2>How it works</h2>
@@ -68,15 +68,15 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     (for example, modules with <code>pom</code> packaging are typically skipped).
   </li>
   <li>
-    <strong>Configuration:</strong> reads build-time parameters from the current project and system properties,
-    including the GenAI provider/model identifier (for example <code>OpenAI:gpt-5</code>).
+    <strong>Configuration:</strong> reads plugin parameters from the current Maven project and system properties,
+    including selection of the GenAI provider/model.
   </li>
   <li>
-    <strong>Credentials:</strong> can load GenAI credentials from Maven <code>settings.xml</code> when a server id
+    <strong>Credentials:</strong> optionally loads GenAI credentials from Maven <code>settings.xml</code> when a server id
     is configured (see {@link org.machanism.machai.bindex.maven.AbstractBindexMojo}).
   </li>
   <li>
-    <strong>Delegation:</strong> invokes Bindex Core operations to create/update indexes and to register project
+    <strong>Delegation:</strong> invokes Machai Bindex Core APIs to create/update indexes and to register project
     metadata with a registry.
   </li>
 </ul>
@@ -87,9 +87,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   configuration and the target registry.
 </p>
 <pre>
-mvn org.machanism.machai:bindex-maven-plugin:create -Dgw.genai.model=OpenAI:gpt-5
-mvn org.machanism.machai:bindex-maven-plugin:update -Dgw.genai.model=OpenAI:gpt-5
-mvn org.machanism.machai:bindex-maven-plugin:register -Dgw.genai.model=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
+mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.model=OpenAI:gpt-5
+mvn org.machanism.machai:bindex-maven-plugin:update -Dbindex.model=OpenAI:gpt-5
+mvn org.machanism.machai:bindex-maven-plugin:register -Dbindex.model=OpenAI:gpt-5 -Dbindex.register.url=http://localhost:8080
 mvn org.machanism.machai:bindex-maven-plugin:clean
 </pre>
 
@@ -105,8 +105,7 @@ mvn org.machanism.machai:bindex-maven-plugin:clean
 <ul>
   <li>This project targets Java 8 for compilation.</li>
   <li>
-    External API links are configured in the Maven Javadoc report (for example, the Java SE API and Machai
-    Bindex Core).
+    External API links are configured in the Maven Javadoc report, including the Java SE API and Machai Bindex Core.
   </li>
 </ul>
 
