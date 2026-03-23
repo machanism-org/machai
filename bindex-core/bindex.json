@@ -4,7 +4,7 @@
   "version" : "1.0.2",
   "location" : {
     "repositoryType" : "Maven",
-    "repositoryUrl" : "https://central.sonatype.com/repository/maven-snapshots",
+    "repositoryUrl" : "https://repo1.maven.org/maven2/",
     "coordinates" : {
       "group" : "org.machanism.machai",
       "artifactId" : "bindex-core",
@@ -12,125 +12,117 @@
       "extension" : "jar"
     }
   },
-  "description" : "Bindex Core (org.machanism.machai:bindex-core) is a Java library that provides core workflows for creating/updating bindex.json files, registering them into a MongoDB-backed registry, semantically retrieving relevant Bindex documents using embeddings and MongoDB vector search, and assembling deterministic LLM prompt inputs from selected Bindexes. It includes AI-assisted Bindex generation via BindexBuilder (and specialized builders for Maven, JavaScript/TypeScript/Vue, and Python) that prompt a GenAIProvider with the Bindex v2 JSON schema and project context (e.g., sanitized effective POM plus selected source/resource files, package.json plus src scan, pyproject.toml plus inferred source dir), with optional incremental update from an existing bindex.json and logging of provider inputs to .machai/bindex-inputs.txt. Registry and retrieval are implemented via Picker and BindexRepository, persisting serialized Bindex JSON plus normalized classification facets and a classification embedding vector in MongoDB, executing vector search with language/layer filters and a minimum similarity threshold, and selecting best versions per library. ApplicationAssembly builds and executes an ordered prompt conversation (system + assembly instructions + recommended libraries + user task) and logs provider inputs to .machai/assembly-inputs.txt. The module integrates with MongoDB (mongodb-driver-sync) and OpenAI-compatible providers (via langchain4j-open-ai) through the GenAIProvider abstraction.",
+  "description" : "bindex-core provides core functionality for MachAI Bindex metadata management. It supports AI-assisted generation and update of bindex.json files for projects by assembling prompts from a JSON schema plus project context (Maven pom.xml, JavaScript package.json + src tree, Python pyproject.toml + inferred source directory). It registers and retrieves Bindex documents in a MongoDB-backed registry, storing serialized Bindex JSON and a classification embedding vector for semantic (vector) search. It can classify user queries into required Clean Architecture layers and languages, run vector search with language/layer filters, and assemble selected Bindexes into deterministic provider inputs for downstream LLM workflows. It includes function tools for LLM workflows to fetch a Bindex by id and to fetch the Bindex JSON schema on demand. Primary components include BindexCreator (create/update bindex.json), BindexBuilderFactory and builders (MavenBindexBuilder, JScriptBindexBuilder, PythonBindexBuilder), BindexRegister (register local bindex.json), BindexRepository (MongoDB persistence primitives), Picker (semantic retrieval with embeddings and dependency expansion), and ApplicationAssembly (prompt assembly and optional input logging).",
   "authors" : [ {
     "name" : "Viktor Tovstyi",
     "email" : "viktor.tovstyi@gmail.com"
   } ],
   "license" : "Apache License, Version 2.0",
   "classification" : {
-    "type" : "library",
-    "domains" : [ "GenAI Tooling", "Developer Tooling", "Library/Artifact Indexing", "Metadata Management", "Semantic Search", "Vector Search", "Prompt Assembly", "Repository Automation" ],
+    "type" : "module",
+    "domains" : [ "Developer Tools", "AI Tooling", "Metadata Management", "Semantic Search", "Software Composition" ],
     "languages" : [ {
       "name" : "Java",
-      "version" : "8"
+      "version" : "8+"
     } ],
-    "layers" : [ "Infrastructure", "Adapters" ],
-    "usageContext" : [ "Generating and updating bindex.json for projects (Maven, JavaScript/TypeScript/Vue, Python)", "Prompting a GenAI provider with schema + project context to produce schema-compliant Bindex metadata", "Registering Bindex documents into MongoDB with stored JSON + classification facets + embedding vector", "Embedding-based semantic retrieval using MongoDB Atlas vector search with language/layer filters and score threshold", "Selecting best versions per library name during semantic retrieval", "Retrieving registered Bindexes by id via a function tool (get_bindex)", "Assembling deterministic LLM prompt inputs from selected Bindex documents and executing them via a GenAI provider" ],
+    "layers" : [ "Infrastructure", "Adapters", "Interactors", "Utils" ],
+    "usageContext" : [ "Build-time metadata generation", "Project analysis", "Library discovery and selection", "LLM-assisted workflows", "MongoDB-backed registry operations" ],
     "targetEnvironment" : [ "Java" ],
-    "integrations" : [ "MongoDB", "OpenAI" ]
+    "integrations" : [ "mongodb" ]
   },
   "constructors" : [ {
-    "package" : "org.machanism.machai.bindex.ai.tools",
-    "signature" : "org.machanism.machai.bindex.ai.tools.BindexFunctionTools()",
-    "description" : "Creates an instance that can register Bindex-related function tools (get_bindex, get_bindex_schema) with a GenAIProvider. A BindexRepository is initialized when setConfigurator(org.machanism.macha.core.commons.configurator.Configurator) is called.",
-    "examples" : [ {
-      "snippet" : "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\norg.machanism.macha.core.commons.configurator.Configurator config = /* ... */;\ntools.setConfigurator(config);\norg.machanism.machai.ai.manager.GenAIProvider provider = /* ... */;\ntools.applyTools(provider);",
-      "description" : "Initialize the tools with configuration and register them on a provider so LLM workflows can call get_bindex and get_bindex_schema."
-    } ]
-  }, {
-    "package" : "org.machanism.machai.bindex",
-    "signature" : "org.machanism.machai.bindex.ApplicationAssembly(java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator config, java.io.File dir)",
-    "description" : "Creates an ApplicationAssembly that uses the given provider identifier and configuration, applies available function tools, sets the provider working directory, and configures the FunctionToolsLoader with the same configuration.",
-    "examples" : [ {
-      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = /* ... */;\njava.io.File projectDir = new java.io.File(\"/path/to/project\");\norg.machanism.machai.bindex.ApplicationAssembly assembly = new org.machanism.machai.bindex.ApplicationAssembly(\"openai\", config, projectDir)\n    .projectDir(projectDir);",
-      "description" : "Create an assembly helper and set the project directory used for writing .machai/assembly-inputs.txt."
-    } ]
-  }, {
     "package" : "org.machanism.machai.bindex",
     "signature" : "org.machanism.machai.bindex.BindexCreator(java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator config)",
-    "description" : "Creates a BindexCreator configured to use the specified GenAI provider identifier and configuration to generate or update a project's bindex.json based on its detected ProjectLayout.",
+    "description" : "Creates a processor that can generate or update a project's bindex.json using an AI-assisted BindexBuilder selected from the project layout.",
     "examples" : [ {
-      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = /* ... */;\norg.machanism.machai.bindex.BindexCreator creator = new org.machanism.machai.bindex.BindexCreator(\"openai\", config)\n    .update(true);",
-      "description" : "Create a BindexCreator in update mode so existing bindex.json files are regenerated."
+      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = ...;\norg.machanism.machai.project.layout.ProjectLayout layout = ...;\nnew org.machanism.machai.bindex.BindexCreator(\"openai\", config)\n    .update(true)\n    .processFolder(layout);",
+      "description" : "Generate or update bindex.json for a project and write it to disk."
     } ]
   }, {
     "package" : "org.machanism.machai.bindex",
-    "signature" : "org.machanism.machai.bindex.BindexRegister(java.lang.String genai, java.lang.String uri, org.machanism.macha.core.commons.configurator.Configurator conf)",
-    "description" : "Creates a BindexRegister that reads a local bindex.json and registers it into MongoDB via Picker using the given GenAI provider identifier and configuration. If uri is null, Picker constructs a default MongoDB URI (using BINDEX_REG_PASSWORD when available).",
+    "signature" : "org.machanism.machai.bindex.BindexRegister(java.lang.String genai, java.lang.String registerUrl, org.machanism.macha.core.commons.configurator.Configurator conf)",
+    "description" : "Creates a processor that registers an existing bindex.json into the MongoDB-backed registry via Picker.",
     "examples" : [ {
-      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = /* ... */;\norg.machanism.machai.bindex.BindexRegister register = new org.machanism.machai.bindex.BindexRegister(\"openai\", null, config)\n    .update(true);",
-      "description" : "Create a register in overwrite mode to refresh an existing registration."
+      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = ...;\norg.machanism.machai.project.layout.ProjectLayout layout = ...;\nnew org.machanism.machai.bindex.BindexRegister(\"openai\", null, config)\n    .update(true)\n    .processFolder(layout);",
+      "description" : "Register bindex.json for a project in the registry (overwrite if already present)."
     } ]
   }, {
     "package" : "org.machanism.machai.bindex",
     "signature" : "org.machanism.machai.bindex.Picker(java.lang.String genai, java.lang.String uri, org.machanism.macha.core.commons.configurator.Configurator config)",
-    "description" : "Creates a Picker that can register Bindexes and perform semantic retrieval against MongoDB using classification embeddings produced by the configured GenAIProvider.",
+    "description" : "Creates a Picker capable of registering Bindexes and performing semantic retrieval using embeddings and MongoDB vector search.",
     "examples" : [ {
-      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = /* ... */;\ntry (org.machanism.machai.bindex.Picker picker = new org.machanism.machai.bindex.Picker(\"openai\", null, config)) {\n    java.util.List<org.machanism.machai.schema.Bindex> libs = picker.pick(\"need libraries for bindex generation and prompt assembly\");\n}",
-      "description" : "Create a Picker and retrieve semantically matching Bindexes for a query string."
+      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = ...;\norg.machanism.machai.bindex.Picker picker = new org.machanism.machai.bindex.Picker(\"openai\", null, config);\njava.util.List<org.machanism.machai.schema.Bindex> results = picker.pick(\"Find libraries for server-side logging\");",
+      "description" : "Classify a query and retrieve relevant Bindexes using vector search."
+    } ]
+  }, {
+    "package" : "org.machanism.machai.bindex",
+    "signature" : "org.machanism.machai.bindex.ApplicationAssembly(java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator config, java.io.File dir)",
+    "description" : "Creates an application assembly runner that builds a deterministic prompt conversation using selected Bindexes and executes it against a configured GenAI provider.",
+    "examples" : [ {
+      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = ...;\njava.io.File projectDir = new java.io.File(\"/path/to/project\");\njava.util.List<org.machanism.machai.schema.Bindex> selected = ...;\nnew org.machanism.machai.bindex.ApplicationAssembly(\"openai\", config, projectDir)\n    .assembly(\"Generate an example app using the selected libraries\", selected);",
+      "description" : "Assemble provider inputs from selected Bindexes and execute the provider."
     } ]
   } ],
   "features" : [ {
-    "name" : "get_bindex_schema",
-    "package" : "org.machanism.machai.bindex.ai.tools",
-    "signature" : "java.lang.String org.machanism.machai.bindex.ai.tools.BindexFunctionTools.getBindexSchema(java.lang.Object[] params) throws java.io.IOException",
-    "description" : "Function tool implementation that loads and returns the Bindex v2 JSON schema (classpath resource /schema/bindex-schema-v2.json) as a JSON string for LLM workflows.",
-    "examples" : [ {
-      "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = /* ... */;\n// after org.machanism.machai.bindex.ai.tools.BindexFunctionTools.applyTools(provider)\n// the LLM/tooling layer can invoke: get_bindex_schema()",
-      "description" : "Expose the Bindex schema to an LLM so it can generate schema-compliant bindex.json documents."
-    } ]
-  }, {
-    "name" : "get_bindex",
-    "package" : "org.machanism.machai.bindex.ai.tools",
-    "signature" : "java.lang.String org.machanism.machai.bindex.ai.tools.BindexFunctionTools.getBindex(java.lang.Object[] params) throws com.fasterxml.jackson.core.JsonProcessingException",
-    "description" : "Function tool implementation that retrieves a registered Bindex from MongoDB by its id via BindexRepository and returns it serialized as JSON (or the literal null if not found).",
-    "examples" : [ {
-      "snippet" : "org.machanism.machai.ai.manager.GenAIProvider provider = /* ... */;\n// after tool registration, the LLM/tooling layer can call get_bindex({\"id\":\"org.machanism.machai:bindex-core:1.0.2\"})",
-      "description" : "Fetch a specific Bindex document by id during an LLM-assisted workflow."
-    } ]
-  }, {
-    "name" : "processFolder",
+    "name" : "Generate or update bindex.json",
     "package" : "org.machanism.machai.bindex",
     "signature" : "void org.machanism.machai.bindex.BindexCreator.processFolder(org.machanism.machai.project.layout.ProjectLayout projectLayout)",
-    "description" : "Creates or updates a project's bindex.json in the project directory described by the given ProjectLayout. Selects an appropriate BindexBuilder via BindexBuilderFactory, optionally loads an existing Bindex as origin, and writes the generated Bindex to bindex.json (creating parent directories if needed).",
+    "description" : "Generates or updates a project's bindex.json file using an AI-assisted builder selected for the detected project layout. Can optionally use an existing origin Bindex for incremental updates and can log provider inputs to .machai.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.project.layout.ProjectLayout layout = /* ... */;\norg.machanism.macha.core.commons.configurator.Configurator config = /* ... */;\nnew org.machanism.machai.bindex.BindexCreator(\"openai\", config)\n    .update(true)\n    .processFolder(layout);",
-      "description" : "Generate (or overwrite) bindex.json for a project by inspecting its layout and using an AI provider to build a schema-compliant Bindex."
+      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = ...;\norg.machanism.machai.project.layout.ProjectLayout layout = ...;\nnew org.machanism.machai.bindex.BindexCreator(\"openai\", config)\n    .update(true)\n    .processFolder(layout);",
+      "description" : "Create/update bindex.json for a project."
     } ]
   }, {
-    "name" : "processFolder",
+    "name" : "Register bindex in MongoDB registry",
     "package" : "org.machanism.machai.bindex",
     "signature" : "void org.machanism.machai.bindex.BindexRegister.processFolder(org.machanism.machai.project.layout.ProjectLayout projectLayout)",
-    "description" : "Reads bindex.json from the given project directory and registers it in the MongoDB-backed registry through Picker. If update is disabled and an entry exists, it skips re-registration; otherwise it inserts (after deleting any prior document by id).",
+    "description" : "Reads bindex.json from a project directory and registers it in the MongoDB-backed registry using Picker, inserting or updating the stored document and its embedding vector.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.project.layout.ProjectLayout layout = /* ... */;\norg.machanism.macha.core.commons.configurator.Configurator config = /* ... */;\norg.machanism.machai.bindex.BindexRegister register = new org.machanism.machai.bindex.BindexRegister(\"openai\", null, config)\n    .update(false);\nregister.processFolder(layout);",
-      "description" : "Register a project's bindex.json if it is not already registered."
+      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = ...;\norg.machanism.machai.project.layout.ProjectLayout layout = ...;\nnew org.machanism.machai.bindex.BindexRegister(\"openai\", null, config)\n    .update(true)\n    .processFolder(layout);",
+      "description" : "Register the local bindex.json in the registry."
     } ]
   }, {
-    "name" : "pick",
+    "name" : "Semantic retrieval (vector search) of Bindexes",
     "package" : "org.machanism.machai.bindex",
-    "signature" : "java.util.List&lt;org.machanism.machai.schema.Bindex&gt; org.machanism.machai.bindex.Picker.pick(java.lang.String query) throws java.io.IOException",
-    "description" : "Performs semantic retrieval for the given query by prompting the GenAIProvider to produce Classification objects, vector-searching MongoDB using classification embeddings with language and layer filters, enforcing a minimum similarity score threshold, selecting best versions per library name, and returning matching Bindexes.",
+    "signature" : "java.util.List<org.machanism.machai.schema.Bindex> org.machanism.machai.bindex.Picker.pick(java.lang.String query) throws java.io.IOException",
+    "description" : "Classifies a free-text query into one or more Classification objects, generates embeddings, performs MongoDB vector search filtered by language and Clean Architecture layer, and returns matching Bindex documents (plus expanded dependencies where applicable).",
     "examples" : [ {
-      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = /* ... */;\ntry (org.machanism.machai.bindex.Picker picker = new org.machanism.machai.bindex.Picker(\"openai\", null, config)) {\n    picker.setScore(0.85);\n    java.util.List<org.machanism.machai.schema.Bindex> results = picker.pick(\"Need tooling to generate and register bindex.json and assemble LLM prompts\");\n}",
-      "description" : "Run a semantic search with a relaxed minimum score threshold and retrieve matching Bindexes."
+      "snippet" : "org.machanism.machai.bindex.Picker picker = new org.machanism.machai.bindex.Picker(\"openai\", null, config);\npicker.setScore(0.80);\njava.util.List<org.machanism.machai.schema.Bindex> results = picker.pick(\"Find libraries for server-side logging\");",
+      "description" : "Retrieve Bindexes relevant to a query using vector search."
     } ]
   }, {
-    "name" : "assembly",
-    "package" : "org.machanism.machai.bindex",
-    "signature" : "void org.machanism.machai.bindex.ApplicationAssembly.assembly(java.lang.String prompt, java.util.List&lt;org.machanism.machai.schema.Bindex&gt; bindexList)",
-    "description" : "Builds a deterministic prompt conversation and executes it via the configured GenAIProvider. It sends system instructions and assembly instructions, includes a recommended libraries table derived from the selected Bindexes, appends the user task prompt, logs provider inputs to .machai/assembly-inputs.txt under the configured project directory, and executes provider.perform().",
+    "name" : "Retrieve bindex metadata by id (function tool)",
+    "package" : "org.machanism.machai.bindex.ai.tools",
+    "signature" : "java.lang.String org.machanism.machai.bindex.ai.tools.BindexFunctionTools.getBindex(java.lang.Object[] params) throws com.fasterxml.jackson.core.JsonProcessingException",
+    "description" : "LLM function tool implementation that retrieves a registered Bindex by id from the MongoDB-backed repository and returns it as a JSON string (or the literal null when not found).",
     "examples" : [ {
-      "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = /* ... */;\njava.io.File projectDir = new java.io.File(\"/path/to/project\");\njava.util.List<org.machanism.machai.schema.Bindex> bindexes = /* ... */;\nnew org.machanism.machai.bindex.ApplicationAssembly(\"openai\", config, projectDir)\n    .projectDir(projectDir)\n    .assembly(\"Create a minimal sample using the selected libraries\", bindexes);",
-      "description" : "Assemble and execute an LLM prompt using selected Bindex documents as context and log the provider inputs under .machai."
+      "snippet" : "{ \"id\": \"org.machanism.machai:bindex-core:1.0.2\" }",
+      "description" : "Tool arguments used to request a Bindex by id."
+    } ]
+  }, {
+    "name" : "Retrieve bindex JSON schema (function tool)",
+    "package" : "org.machanism.machai.bindex.ai.tools",
+    "signature" : "java.lang.String org.machanism.machai.bindex.ai.tools.BindexFunctionTools.getBindexSchema(java.lang.Object[] params) throws java.io.IOException",
+    "description" : "LLM function tool implementation that returns the Bindex JSON schema resource content as a JSON string.",
+    "examples" : [ {
+      "snippet" : "{}",
+      "description" : "Tool invocation has no arguments."
+    } ]
+  }, {
+    "name" : "Assemble prompt inputs using selected Bindexes",
+    "package" : "org.machanism.machai.bindex",
+    "signature" : "void org.machanism.machai.bindex.ApplicationAssembly.assembly(java.lang.String prompt, java.util.List<org.machanism.machai.schema.Bindex> bindexList)",
+    "description" : "Builds a deterministic provider conversation consisting of system instructions, assembly instructions, user prompt, and a recommended library section derived from selected Bindexes; optionally logs inputs to .machai/assembly-inputs.txt and executes the provider.",
+    "examples" : [ {
+      "snippet" : "new org.machanism.machai.bindex.ApplicationAssembly(\"openai\", config, layout.getProjectDir())\n    .assembly(\"Create a minimal sample that uses the selected libraries\", selectedBindexes);",
+      "description" : "Assemble and run an LLM workflow with selected library context."
     } ]
   } ],
   "customizations" : [ ],
   "studs" : [ ],
   "examples" : [ {
-    "name" : "End-to-end workflow",
-    "steps" : [ "Use BindexCreator to generate/update bindex.json for a project layout (Maven/JScript/Python).", "Use BindexRegister to register the generated bindex.json into MongoDB via Picker.", "Use Picker.pick(query) to retrieve relevant libraries (Bindexes) for an intent.", "Use ApplicationAssembly.assembly(userPrompt, bindexes) to construct and execute an LLM prompt using the selected library metadata." ]
+    "workflow" : "Generate, register, retrieve, assemble",
+    "snippet" : "org.machanism.macha.core.commons.configurator.Configurator config = ...;\norg.machanism.machai.project.layout.ProjectLayout layout = ...;\n\n// 1) Create/update bindex.json\nnew org.machanism.machai.bindex.BindexCreator(\"openai\", config).update(true).processFolder(layout);\n\n// 2) Register\nnew org.machanism.machai.bindex.BindexRegister(\"openai\", null, config).update(true).processFolder(layout);\n\n// 3) Retrieve\norg.machanism.machai.bindex.Picker picker = new org.machanism.machai.bindex.Picker(\"openai\", null, config);\njava.util.List<org.machanism.machai.schema.Bindex> selected = picker.pick(\"Find libraries for server-side logging\");\n\n// 4) Assemble prompt input\nnew org.machanism.machai.bindex.ApplicationAssembly(\"openai\", config, layout.getProjectDir())\n    .assembly(\"Generate an example app using the selected libraries\", selected);"
   } ],
-  "dependencies" : [ "org.machanism.machai:project-layout:1.0.2", "org.machanism.machai:genai-client:1.0.2", "org.mongodb:mongodb-driver-sync:5.6.4", "dev.langchain4j:langchain4j-open-ai:0.35.0", "org.tomlj:tomlj:1.1.1", "org.apache.maven:maven-core:3.8.1", "org.mockito:mockito-inline:5.2.0", "org.junit.jupiter:junit-jupiter-api:5.9.2", "org.mockito:mockito-core:4.11.0", "org.slf4j:slf4j-api:2.0.17" ]
+  "dependencies" : [ "org.machanism.machai:project-layout:1.0.2", "org.machanism.machai:genai-client:1.0.2", "org.mongodb:mongodb-driver-sync:5.6.4", "dev.langchain4j:langchain4j-open-ai:0.35.0", "org.tomlj:tomlj:1.1.1", "org.apache.maven:maven-core:3.8.1", "org.slf4j:slf4j-api:2.0.17" ]
 }
