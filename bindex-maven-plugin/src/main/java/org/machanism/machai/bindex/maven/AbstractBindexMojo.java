@@ -10,6 +10,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 
@@ -64,9 +65,13 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 * @throws MojoExecutionException 
 	 */
 	protected void createBindex(boolean update) throws MojoExecutionException {
-		BindexCreator creator = new BindexCreator(model, getConfigurator());
+		PropertiesConfigurator config = getConfigurator();
+		BindexCreator creator = new BindexCreator(model, config);
 		creator.update(update);
 
+		boolean inputsLog = config.getBoolean(ApplicationAssembly.LOG_INPUTS_PROP_NAME, false);
+		creator.setLogInputs(inputsLog);
+		
 		MavenProjectLayout projectLayout = new MavenProjectLayout();
 		projectLayout.projectDir(basedir);
 		projectLayout.model(project.getModel());

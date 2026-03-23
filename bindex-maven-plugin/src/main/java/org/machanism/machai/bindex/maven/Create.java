@@ -35,10 +35,10 @@ public class Create extends AbstractBindexMojo {
 	public void execute() throws MojoExecutionException {
 		try {
 			if (isBindexed()) {
-				logger.debug("Creating Bindex index for project '{}' in '{}'.", project.getArtifactId(), basedir);
+				logger.info("Creating Bindex index for project '{}' in '{}'.", project.getArtifactId(), basedir);
 				createBindex(false);
 			} else {
-				logger.debug("Skipping Bindex create for pom-packaged project '{}'.", project.getArtifactId());
+				logger.info("Skipping Bindex create for pom-packaged project '{}'.", project.getArtifactId());
 			}
 		} finally {
 			GenAIProviderManager.logUsage();
