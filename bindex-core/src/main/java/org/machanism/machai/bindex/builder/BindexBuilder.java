@@ -66,6 +66,8 @@ public class BindexBuilder {
 	/** Provider used to build the prompt and perform generation. */
 	private final GenAIProvider provider;
 
+	private boolean logInputs;
+
 	/**
 	 * Constructs a builder for the specified project layout.
 	 *
@@ -119,8 +121,11 @@ public class BindexBuilder {
 
 		provider.prompt(prompt.toString());
 
-		File tmpBindexDir = new File(projectLayout.getProjectDir(), BINDEX_TEMP_DIR);
-		provider.inputsLog(tmpBindexDir);
+		if (logInputs) {
+			File tmpBindexDir = new File(projectLayout.getProjectDir(), BINDEX_TEMP_DIR);
+			provider.inputsLog(tmpBindexDir);
+		}
+
 		String output = provider.perform();
 
 		if (output == null) {
@@ -132,7 +137,9 @@ public class BindexBuilder {
 			normalizedOutput = StringUtils.substringBetween(normalizedOutput, "```json", "```");
 		}
 
-		return new ObjectMapper().readValue(normalizedOutput, Bindex.class);
+		Bindex value = new ObjectMapper().readValue(normalizedOutput, Bindex.class);
+		
+		return value;
 	}
 
 	/**
@@ -215,5 +222,14 @@ public class BindexBuilder {
 	 */
 	public GenAIProvider getGenAIProvider() {
 		return provider;
+	}
+
+	public boolean isLogInputs() {
+		return logInputs;
+	}
+
+	public BindexBuilder logInputs(boolean logInputs) {
+		this.logInputs = logInputs;
+		return this;
 	}
 }

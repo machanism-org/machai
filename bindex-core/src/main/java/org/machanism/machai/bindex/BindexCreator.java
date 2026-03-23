@@ -13,9 +13,11 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Creates or updates a project's {@code bindex.json} file using an AI-assisted {@link BindexBuilder}.
+ * Creates or updates a project's {@code bindex.json} file using an AI-assisted
+ * {@link BindexBuilder}.
  *
- * <p>The Bindex content is produced by a {@link BindexBuilder} selected by
+ * <p>
+ * The Bindex content is produced by a {@link BindexBuilder} selected by
  * {@link BindexBuilderFactory} based on the supplied {@link ProjectLayout}.
  *
  * <h2>Example</h2>
@@ -51,12 +53,15 @@ public class BindexCreator extends BindexProjectProcessor {
 	/** Whether an existing Bindex should be overwritten. */
 	private boolean update;
 
+	private boolean logInputs;
+
 	/**
 	 * Creates a {@link BindexCreator}.
 	 *
 	 * @param model  GenAI provider identifier used for AI-assisted Bindex creation
 	 * @param config configurator used to initialize the provider and builders
-	 * @throws IllegalArgumentException if {@code model} or {@code config} is {@code null}
+	 * @throws IllegalArgumentException if {@code model} or {@code config} is
+	 *                                  {@code null}
 	 */
 	public BindexCreator(String genai, Configurator config) {
 		if (genai == null) {
@@ -70,13 +75,16 @@ public class BindexCreator extends BindexProjectProcessor {
 	}
 
 	/**
-	 * Creates or updates {@code bindex.json} in the project directory described by the given layout.
+	 * Creates or updates {@code bindex.json} in the project directory described by
+	 * the given layout.
 	 *
-	 * <p>If {@link #update(boolean)} is enabled, any existing Bindex file will be regenerated. If
-	 * update is disabled, an existing file is left unchanged.
+	 * <p>
+	 * If {@link #update(boolean)} is enabled, any existing Bindex file will be
+	 * regenerated. If update is disabled, an existing file is left unchanged.
 	 *
 	 * @param projectLayout project layout to inspect
-	 * @throws IllegalArgumentException if {@code projectLayout} is {@code null} or an I/O error occurs
+	 * @throws IllegalArgumentException if {@code projectLayout} is {@code null} or
+	 *                                  an I/O error occurs
 	 */
 	public void processFolder(ProjectLayout projectLayout) {
 		if (projectLayout == null) {
@@ -100,7 +108,7 @@ public class BindexCreator extends BindexProjectProcessor {
 				parent.mkdirs();
 			}
 
-			Bindex bindex = bindexBuilder.origin(origin).build();
+			Bindex bindex = bindexBuilder.logInputs(logInputs).origin(origin).build();
 			if (bindex != null) {
 				new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(bindexFile, bindex);
 				LOGGER.info("Bindex file: {}", bindexFile);
@@ -113,13 +121,21 @@ public class BindexCreator extends BindexProjectProcessor {
 	/**
 	 * Enables or disables update mode.
 	 *
-	 * @param update {@code true} to overwrite an existing {@code bindex.json}; {@code false} to only
-	 *               create when absent
+	 * @param update {@code true} to overwrite an existing {@code bindex.json};
+	 *               {@code false} to only create when absent
 	 * @return this instance for chaining
 	 */
 	public BindexCreator update(boolean update) {
 		this.update = update;
 		return this;
+	}
+
+	public void setLogInputs(boolean inputsLog) {
+		this.logInputs = inputsLog;
+	}
+
+	public boolean isInputsLog() {
+		return logInputs;
 	}
 
 }

@@ -174,7 +174,7 @@ public class ApplicationAssembly {
 		return inputsLog;
 	}
 
-	public void setInputsLog(boolean inputsLog) {
+	public void setLogInputs(boolean inputsLog) {
 		this.inputsLog = inputsLog;
 	}
 
