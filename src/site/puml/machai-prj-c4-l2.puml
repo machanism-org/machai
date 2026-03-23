@@ -1,0 +1,57 @@
+' @guidance: create a C4 diagram for the project.
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Machai Project - Containers (C4 L2)
+
+Person(dev, "Developer")
+
+System_Boundary(machai, "Machai Project") {
+  Container(cli, "machai-cli", "Java (Spring Shell)", "Interactive CLI for bindex/assembly/ghostwriter workflows")
+  Container(gw, "ghostwriter", "Java", "Guidance-driven file processing & documentation automation")
+  Container(genai, "genai-client", "Java", "Unified client for multiple GenAI providers + tool calling")
+  Container(bindexCore, "bindex-core", "Java", "Create/merge/register/read bindex metadata + picking support")
+  Container(projectLayout, "project-layout", "Java", "Detect/represent project layouts (Maven/JS/Python/Gradle/Default)")
+
+  Container(bindexPlugin, "bindex-maven-plugin", "Maven Plugin (Java)", "Generate/register bindex during Maven build")
+  Container(assemblyPlugin, "assembly-maven-plugin", "Maven Plugin (Java)", "Prompt-driven assembly using bindex + GenAI")
+  Container(gwPlugin, "gw-maven-plugin", "Maven Plugin (Java)", "Run Ghostwriter during Maven build / reactor-aware")
+
+  Container(asmCli, "assembly-maven-plugin", "Maven Plugin (Java)", "Prompt-driven assembly using bindex + GenAI")
+
+  Rel(cli, bindexCore, "Uses")
+  Rel(cli, gw, "Uses")
+  Rel(cli, genai, "Uses")
+
+  Rel(gw, genai, "Uses")
+  Rel(bindexCore, genai, "Uses (semantic picking/tooling)")
+  Rel(bindexCore, projectLayout, "Uses (project detection)")
+
+  Rel(bindexPlugin, bindexCore, "Uses")
+  Rel(assemblyPlugin, bindexCore, "Uses")
+  Rel(assemblyPlugin, genai, "Uses")
+  Rel(gwPlugin, gw, "Uses")
+  Rel(gwPlugin, genai, "Uses")
+}
+
+System_Ext(genaiProviders, "GenAI Providers", "OpenAI/Claude/Gemini/etc.")
+System_Ext(maven, "Apache Maven", "Build runner")
+System_Ext(fs, "File System", "Project working directory")
+
+Rel(dev, cli, "Runs")
+Rel(dev, gw, "Runs", "CLI/JAR")
+
+Rel(maven, bindexPlugin, "Executes goals")
+Rel(maven, assemblyPlugin, "Executes goals")
+Rel(maven, gwPlugin, "Executes goals")
+
+Rel(genai, genaiProviders, "Calls provider APIs", "HTTPS")
+
+Rel(cli, fs, "Reads/writes")
+Rel(gw, fs, "Reads/writes")
+Rel(bindexCore, fs, "Reads/writes bindex.json etc.")
+Rel(bindexPlugin, fs, "Reads project model / writes bindex outputs")
+Rel(assemblyPlugin, fs, "Applies changes to project")
+Rel(gwPlugin, fs, "Updates files during build")
+
+@enduml

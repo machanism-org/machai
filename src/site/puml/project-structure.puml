@@ -1,4 +1,4 @@
-' @guidance: For each module, use information from its pom.xml file to create a PlantUML dependency diagram and save it as `src/site/puml/project-structure.puml`.
+' @guidance: For each module, use information from its pom.xml file to create a PlantUML dependency diagram.
 @startuml
 
 title Machai Project - Module Dependencies
@@ -23,6 +23,7 @@ skinparam arrow {
 legend left
   <b>Legend</b>
   A --> B : A depends on B
+  A ..> B : A includes B as a Maven module
 endlegend
 
 component "machai\n(root pom)" as machai_root <<pom>>

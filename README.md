@@ -48,7 +48,7 @@ Key capabilities include:
 | [Project Layout](project-layout/) | Java utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, and site content) in a consistent way. |
 | [GenAI Client](genai-client/) | Java library that provides a single, consistent API for integrating with multiple Generative AI providers. It offers centralized provider selection, prompt and instruction management, optional tool (function) calling, optional file attachments, and provider-dependent embeddings. |
 | [Bindex Core](bindex-core/) | Foundational Java library for working with bindex metadata in the Machanism ecosystem, including generating, reading, validating, merging, and aggregating bindex descriptors to support discovery and metadata-driven project assembly workflows. |
-| [Machai CLI](cli/) | Spring Boot and Spring Shell command-line application that orchestrates Bindex and Ghostwriter workflows: generate and register bindex metadata, perform semantic library picking, assemble project skeletons from selected libraries, run Ghostwriter-guided processing over project files, and clean temporary `.machai` folders. |
+| [Machai CLI](machai-cli/) | Spring Boot and Spring Shell command-line application that orchestrates Bindex and Ghostwriter workflows: generate and register bindex metadata, perform semantic library picking, assemble project skeletons from selected libraries, run Ghostwriter-guided processing over project files, and clean temporary `.machai` folders. |
 | [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and optionally registers bindex metadata during the build, deriving machine-readable descriptors from the Maven project model for indexing, discovery, and assembly tooling. |
 | [Assembly Maven Plugin](assembly-maven-plugin/) | Maven plugin that performs prompt-driven, metadata-assisted project assembly by reading a prompt (default `project.txt`), using GenAI-backed semantic picking over bindex entries, and applying resulting changes to the Maven execution base directory (`${basedir}`). |
 | [Ghostwriter](ghostwriter/) | Guidance-driven documentation and transformation engine (CLI and library) that scans project files, extracts embedded `@guidance:` directives, and uses a configured GenAI provider to synthesize and apply updates across repository artifacts. |
@@ -87,7 +87,7 @@ mvn -pl genai-client clean install
 ### Run the Machai CLI
 
 ```bat
-cd cli
+cd machai-cli
 mvn -Ppack package
 java -jar target\machai.jar
 ```
@@ -111,13 +111,13 @@ java -jar target\gw.jar src\site\markdown
 Run the Ghostwriter Maven plugin goal:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:0.0.19-SNAPSHOT:gw
+mvn org.machanism.machai:gw-maven-plugin:1.0.2:gw
 ```
 
 Run the Assembly Maven plugin goal:
 
 ```bat
-mvn org.machanism.machai:assembly-maven-plugin:0.0.19-SNAPSHOT:assembly
+mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly
 ```
 
 ## Contributing

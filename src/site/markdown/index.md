@@ -11,8 +11,11 @@ Generate a content:
    **Name**: Display the module name as a clickable link in the format `[name]([artifactId]/)`, the [name] and [artifactId] values should be obtained from the module pom.xml file.
    **Description**: Provide a comprehensive description for each module, using the content from `[module_dir]/src/site/markdown/index.md`.
    **Project structure**: 
-    - Use the project structure diagram by the path: `./images/project-structure.png`.
-    - Include this image in the section to visually represent the project structure.
+   Describe the project with diagrams bellow:
+     - Describe the project without including file names in the description.
+     - Use the project structure diagram by the path: `./images/project-structure.png` (`src/site/puml/project-structure.puml`).
+     - Use the project structure diagram by the path: `./images/machai-prj-c4-l2.png` (`src/site/puml/machai-prj-c4-l2.puml`).
+     - Include this image in the section to visually represent the project structure.
 3. **Installation Instructions:**  
    - Describe how to clone the repository and build the project using Maven).
    - Include prerequisites such as Java version and build tools.
@@ -45,27 +48,31 @@ Key capabilities include:
 
 ## Project structure
 
+These diagrams show the Machai multi-module layout and a higher-level view of how the main components relate.
+
 ![](./images/project-structure.png)
+
+![](./images/machai-prj-c4-l2.png)
 
 ## Modules
 
 | Name | Description |
 | --- | --- |
-| [Project Layout](project-layout/) | Java utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, and site content) in a consistent way. It centralizes folder conventions so build tools and plugins can resolve well-known paths reliably and avoid hard-coded directories and duplicated path logic. |
-| [GenAI Client](genai-client/) | Java library that provides a single, consistent API for integrating with multiple Generative AI providers. It offers centralized provider selection, prompt and instruction management, optional tool (function) calling, optional file attachments, and provider-dependent embeddings, and is used as the GenAI abstraction across Machai modules. |
-| [Bindex Core](bindex-core/) | Foundational Java library for working with bindex metadata in the Machanism ecosystem. It defines the canonical metadata model and provides utilities for generating, reading, validating, merging, and aggregating bindex descriptors to support discovery, selection, registration, and metadata-driven project assembly workflows. |
-| [Machai CLI](machai-cli/) | Spring Boot and Spring Shell command-line application that orchestrates Bindex and Ghostwriter workflows. It can generate and register bindex metadata, perform semantic library picking, assemble project skeletons from selected libraries, run Ghostwriter-guided processing over project files, and clean temporary `.machai` folders. |
-| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and optionally registers bindex metadata during the build. It derives consistent machine-readable descriptors from the Maven project model so artifacts can be indexed and discovered, and provides goals for creating, updating, cleaning, and registering bindex metadata. |
-| [Assembly Maven Plugin](assembly-maven-plugin/) | Maven plugin that performs prompt-driven, metadata-assisted project assembly. It reads a prompt (default `project.txt`), uses GenAI-backed semantic picking over bindex entries to recommend libraries above a score threshold, and applies resulting changes directly to the Maven execution base directory (`${basedir}`) as part of a repeatable goal. |
-| [Ghostwriter](ghostwriter/) | Guidance-driven documentation and transformation engine (CLI and library) that scans project files, extracts embedded `@guidance:` directives, and uses a configured GenAI provider to synthesize and apply updates. It supports Maven multi-module traversal, directory and pattern-based scanning, optional multi-threading, and optional request input logging. |
-| [GW Maven Plugin](gw-maven-plugin/) | Maven plugin that integrates Ghostwriter Guided File Processing into Maven builds. It scans project files for embedded `@guidance:` directives and runs the Ghostwriter pipeline as a Maven goal, supporting reactor-aware processing, optional multi-threading, excludes, optional input logging, and optional credential loading from Maven `settings.xml`. |
+| [Project Layout](project-layout/) | Java utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs) in a consistent way. It centralizes folder conventions so build tools and plugins can resolve well-known paths reliably and avoid hard-coded directories and duplicated path logic. |
+| [GenAI Client](genai-client/) | Java library that provides a single, consistent API for integrating with multiple Generative AI providers. It offers provider abstraction, centralized provider selection, prompt and instruction management, optional tool (function) calling, optional file attachments, and provider-dependent embeddings. |
+| [Bindex Core](bindex-core/) | Foundational Java library for working with Bindex metadata. It defines the metadata model and provides utilities for generating, reading, validating, merging, registering, and semantically searching Bindex descriptors to support discovery and metadata-driven project assembly workflows. |
+| [Machai CLI](machai-cli/) | Spring Boot and Spring Shell command-line application that orchestrates Bindex and Ghostwriter workflows. It can generate and register Bindex metadata, perform semantic library picking, assemble project skeletons from selected libraries, run guidance-driven processing over project files, and clean temporary `.machai` folders. |
+| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates, updates, and optionally registers Bindex metadata during the build. It derives consistent machine-readable descriptors from the Maven project model and provides goals for creating, updating, registering, and cleaning Bindex metadata. |
+| [Assembly Maven Plugin](assembly-maven-plugin/) | Maven plugin that performs prompt-driven, metadata-assisted project assembly. It reads a prompt (default `project.txt`), uses GenAI-backed semantic picking over Bindex entries to recommend libraries above a score threshold, and applies resulting changes directly to the Maven execution base directory (`${basedir}`). |
+| [Ghostwriter](ghostwriter/) | Guidance-driven documentation and transformation engine (CLI and library) that scans project files, extracts embedded `@guidance:` directives, and uses a configured GenAI provider to synthesize and apply updates. It supports Maven multi-module traversal, directory and pattern-based scanning, optional multi-threading, optional default guidance, and optional request input logging. |
+| [GW Maven Plugin](gw-maven-plugin/) | Maven plugin that integrates Ghostwriter Guided File Processing into Maven builds. It scans project files for embedded `@guidance:` directives and runs the Ghostwriter pipeline as a Maven goal, supporting aggregator and reactor ordering, excludes, optional multi-threading, optional input logging, and optional credential loading from Maven `settings.xml`. |
 
 ## Installation
 
 ### Prerequisites
 
 - Git
-- Java 17 (recommended for building and running the full toolkit; some modules target Java 8)
+- Java 17 recommended (some modules compile to Java 8)
 - Maven 3.6.0 or later
 
 ### Clone and build
@@ -93,15 +100,9 @@ mvn -pl genai-client clean install
 ### Run the Machai CLI
 
 ```bat
-cd cli
+cd machai-cli
 mvn -Ppack package
 java -jar target\machai.jar
-```
-
-Inside the shell, list available commands:
-
-```text
-help
 ```
 
 ### Run Ghostwriter
@@ -114,16 +115,16 @@ java -jar target\gw.jar src\site\markdown
 
 ### Run Maven plugins
 
-Run the Ghostwriter Maven plugin goal:
+Run the GW Maven Plugin goal:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:0.0.13-SNAPSHOT:gw
+mvn org.machanism.machai:gw-maven-plugin:1.0.2:gw
 ```
 
-Run the Assembly Maven plugin goal:
+Run the Assembly Maven Plugin goal:
 
 ```bat
-mvn org.machanism.machai:assembly-maven-plugin:0.0.13-SNAPSHOT:assembly
+mvn org.machanism.machai:assembly-maven-plugin:1.0.2:assembly
 ```
 
 ## Contributing
