@@ -13,6 +13,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
@@ -74,6 +75,12 @@ public final class Ghostwriter {
 
 	/** Configuration key containing comma-separated scan exclusions. */
 	public static final String GW_EXCLUDES_PROP_NAME = "gw.excludes";
+
+	/** Configuration key containing comma-separated scan exclusions. */
+	public static final String GW_ACTS_PROP_NAME = "gw.acts";
+
+	/** Configuration key containing comma-separated scan exclusions. */
+	public static final String GW_ACT_PROP_NAME = "gw.act";
 
 	/** Configuration key containing default guidance. */
 	public static final String GW_GUIDANCE_PROP_NAME = "gw.guidance";
@@ -227,7 +234,7 @@ public final class Ghostwriter {
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (scanner.hasNextLine()) {
 				String nextLine = scanner.nextLine();
-				if (StringUtils.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
+				if (Strings.CS.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
 					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(StringUtils.LF);
 					System.out.print("\t");
 				} else {
@@ -305,7 +312,7 @@ public final class Ghostwriter {
 		String defaultPrompt;
 		if (cmd.hasOption("act")) {
 			processor = createActProcessor(cmd, projectDir, config, genai);
-			defaultPrompt = resolveActPrompt(cmd);
+			defaultPrompt = resolveActPrompt(cmd, config);
 			logDefaultPrompt("Act", defaultPrompt);
 		} else {
 			processor = new GuidanceProcessor(projectDir, genai, config);
@@ -319,18 +326,22 @@ public final class Ghostwriter {
 	static AIFileProcessor createActProcessor(CommandLine cmd, File projectDir, PropertiesConfigurator config,
 			String genai) {
 		ActProcessor processor = new ActProcessor(projectDir, config, genai);
+		String acts = config.get(GW_ACTS_PROP_NAME, null);
 		if (cmd.hasOption("acts")) {
-			String value = cmd.getOptionValue("acts");
-			logger.info("Act directory: {}", value);
-			processor.setActsLocation(value);
+			acts = cmd.getOptionValue("acts");
+			logger.info("Act directory: {}", acts);
+			processor.setActsLocation(acts);
 		}
 		return processor;
 	}
 
-	static String resolveActPrompt(CommandLine cmd) {
-		String defaultPrompt = cmd.getOptionValue("act");
-		if (defaultPrompt == null) {
-			defaultPrompt = readText("Act");
+	static String resolveActPrompt(CommandLine cmd, PropertiesConfigurator config) {
+		String defaultPrompt = config.get(GW_ACT_PROP_NAME, null);
+		if (cmd.hasOption("act")) {
+			defaultPrompt = cmd.getOptionValue("act");
+			if (defaultPrompt == null) {
+				defaultPrompt = readText("Act");
+			}
 		}
 		return defaultPrompt;
 	}
