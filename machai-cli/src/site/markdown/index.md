@@ -96,7 +96,7 @@ Machai CLI persists user defaults in `machai.properties` (in the working directo
 | `gw.model` | Default GenAI provider/model for Ghostwriter workflows | (none) |
 | `gw.instructions` | Default system instructions (text/URL/file path) for `gw` | (none) |
 | `gw.guidance` | Default guidance (text/URL/file path) for `gw` | (none) |
-| `gw.logInputs` | Whether to log LLM request inputs to dedicated log files | `false` |
+| `logInputs` | Whether to log LLM request inputs to dedicated log files | `false` |
 | `score` | Default similarity threshold used for semantic search (`pick` / `assembly`) | `0.65` |
 
 ### Typical workflow
