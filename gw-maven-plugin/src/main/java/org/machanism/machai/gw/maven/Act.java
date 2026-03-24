@@ -144,7 +144,7 @@ public class Act extends AbstractGWGoal {
 			}
 
 			if (acts != null) {
-				logger.info("Act directory: {}", acts);
+				logger.info("Custom acts location specified: {}", acts);
 				actProcessor.setActsLocation(acts);
 			}
 
