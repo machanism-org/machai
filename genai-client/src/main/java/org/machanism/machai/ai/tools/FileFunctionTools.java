@@ -54,6 +54,9 @@ public class FileFunctionTools implements FunctionTools {
 
 	private static final String CHARSET_NAME_FIELD = "charsetName";
 
+	// Sonar(java:S1192): avoid duplicating JSON field literal.
+	private static final String START_POSITION_FIELD = "start_position";
+
 	/** Logger for file tool operations and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
 
@@ -127,7 +130,10 @@ public class FileFunctionTools implements FunctionTools {
 			logger.info("List files recursively: {}, Result: {}", Arrays.toString(params),
 					StringUtils.abbreviate(result, 60).replace(StringUtils.LF, ""));
 		}
-		logger.debug("List files recursively: {}, Result: {}", Arrays.toString(params), result);
+		// Sonar(java:S2629): avoid Arrays.toString(params) unless DEBUG logging is enabled.
+		if (logger.isDebugEnabled()) {
+			logger.debug("List files recursively: {}, Result: {}", Arrays.toString(params), result);
+		}
 		return result;
 	}
 
@@ -196,59 +202,73 @@ public class FileFunctionTools implements FunctionTools {
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText() : DEFAULT_CHARSET;
 		File workingDir = (File) params[1];
 
+		// Sonar(java:S2629): avoid expensive toString() when the log level is disabled.
 		if (logger.isInfoEnabled()) {
-			logger.info("Write file: [{}, {}]", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH),
-					workingDir);
+			logger.info("Write file: [{}, {}]", StringUtils.abbreviate(String.valueOf(props), MAXWIDTH), workingDir);
 		}
-		logger.debug("Write file: [{}, {}]", params[0], workingDir);
+		logger.debug("Write file: [{}, {}]", props, workingDir);
 
 		File file = new File(workingDir, filePath);
 		try {
 			if (file.exists()) {
-				// Read the existing content of the file
-				StringBuilder fileContent = new StringBuilder();
-				try (BufferedReader reader = new BufferedReader(
-						new InputStreamReader(new FileInputStream(file), Charset.forName(charsetName)))) {
-					String line;
-					while ((line = reader.readLine()) != null) {
-						fileContent.append(line).append(System.lineSeparator());
-					}
-				}
-
-				int startPosition = props.has("start_position") ? props.get("start_position").asInt() : 0;
-				int endPosition = props.has("start_position") ? props.get("end_position").asInt()
-						: fileContent.length();
-
-				// Validate positions
-				if (startPosition < 0 || endPosition > fileContent.length() || startPosition >= endPosition) {
-					return "Invalid start or end position for text replacement.";
-				}
-
-				// Replace the text between start and end positions
-				fileContent.replace(startPosition, endPosition, text);
-
-				// Write the updated content back to the file
-				try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName(charsetName))) {
-					writer.write(fileContent.toString());
-				}
-
-				return "File updated successfully: " + filePath;
-
-			} else {
-				if (file.getParentFile() != null) {
-					file.getParentFile().mkdirs();
-				}
-				try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName(charsetName))) {
-					writer.write(text);
-					result = "File written successfully: " + filePath;
-				}
+				return updateExistingFile(props, file, text, charsetName, filePath);
 			}
+
+			return writeNewFile(file, text, charsetName, filePath);
 
 		} catch (IOException e) {
 			result = e.getMessage();
 		}
 
 		return result;
+	}
+
+	// Sonar(java:S3776): extracted helpers to reduce cognitive complexity.
+	private Object updateExistingFile(JsonNode props, File file, String text, String charsetName, String filePath)
+			throws IOException {
+		StringBuilder fileContent = readFileContent(file, charsetName);
+
+		int startPosition = props.has(START_POSITION_FIELD) ? props.get(START_POSITION_FIELD).asInt() : 0;
+		int endPosition = props.has(START_POSITION_FIELD) ? props.get("end_position").asInt() : fileContent.length();
+
+		if (!isValidReplacementRange(startPosition, endPosition, fileContent.length())) {
+			return "Invalid start or end position for text replacement.";
+		}
+
+		fileContent.replace(startPosition, endPosition, text);
+		writeFileContent(file, fileContent.toString(), charsetName);
+		return "File updated successfully: " + filePath;
+	}
+
+	private StringBuilder readFileContent(File file, String charsetName) throws IOException {
+		StringBuilder fileContent = new StringBuilder();
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(new FileInputStream(file), Charset.forName(charsetName)))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				fileContent.append(line).append(System.lineSeparator());
+			}
+		}
+		return fileContent;
+	}
+
+	private boolean isValidReplacementRange(int startPosition, int endPosition, int contentLength) {
+		return !(startPosition < 0 || endPosition > contentLength || startPosition >= endPosition);
+	}
+
+	private void writeFileContent(File file, String content, String charsetName) throws IOException {
+		try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName(charsetName))) {
+			writer.write(content);
+		}
+	}
+
+	private Object writeNewFile(File file, String text, String charsetName, String filePath) throws IOException {
+		File parent = file.getParentFile();
+		if (parent != null) {
+			parent.mkdirs();
+		}
+		writeFileContent(file, text, charsetName);
+		return "File written successfully: " + filePath;
 	}
 
 	/**

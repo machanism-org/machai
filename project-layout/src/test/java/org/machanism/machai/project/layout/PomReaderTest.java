@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -80,9 +81,11 @@ class PomReaderTest {
 		PomReader reader = new PomReader();
 
 		try {
+			// Sonar java:S5778 - avoid doing work inside the lambda that may throw another runtime exception.
+			File missingFile = missing.toFile();
+
 			// Act
-			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-					() -> reader.getProjectModel(missing.toFile()));
+			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> reader.getProjectModel(missingFile));
 
 			// Assert
 			assertTrue(ex.getMessage().contains("POM file:"));

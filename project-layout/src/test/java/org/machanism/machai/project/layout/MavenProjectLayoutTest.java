@@ -3,7 +3,6 @@ package org.machanism.machai.project.layout;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -81,7 +80,8 @@ class MavenProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertNull(modules);
+		// Sonar java:S1168 - contract changed to return empty list instead of null.
+		assertEquals(Collections.emptyList(), modules);
 	}
 
 	@Test
@@ -200,7 +200,7 @@ class MavenProjectLayoutTest {
 		String parentId = layout.getParentId();
 
 		// Assert
-		assertNull(parentId);
+		org.junit.jupiter.api.Assertions.assertNull(parentId);
 	}
 
 	@Test

@@ -298,19 +298,6 @@ public class OpenAIProvider implements GenAIProvider {
 		return null;
 	}
 
-	/**
-	 * Holds processing results for a response output iteration.
-	 */
-	private static final class ToolHandlingResult {
-		private final boolean anyToolCalls;
-		private final String text;
-
-		private ToolHandlingResult(boolean anyToolCalls, String text) {
-			this.anyToolCalls = anyToolCalls;
-			this.text = text;
-		}
-	}
-
 	private void handleFunctionCall(ResponseFunctionToolCall functionCall, List<ResponseInputItem> currentInputs) {
 		currentInputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 

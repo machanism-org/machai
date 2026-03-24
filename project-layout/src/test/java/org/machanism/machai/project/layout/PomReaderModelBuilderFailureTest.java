@@ -2,17 +2,12 @@ package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 class PomReaderModelBuilderFailureTest {
-
-	@TempDir
-	File tempDir;
 
 	@Test
 	void replaceProperty_shouldNotReplaceWhenValueIsNull() throws Exception {
