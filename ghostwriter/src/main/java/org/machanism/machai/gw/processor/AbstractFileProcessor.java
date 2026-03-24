@@ -367,7 +367,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param path project-relative path
 	 * @return {@code true} when excluded
 	 */
-	boolean shouldExcludePath(Path path) {
+	public boolean shouldExcludePath(Path path) {
 		if (path == null || excludes == null) {
 			return false;
 		}

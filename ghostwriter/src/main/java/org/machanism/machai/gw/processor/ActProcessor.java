@@ -66,7 +66,6 @@ public class ActProcessor extends AIFileProcessor {
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
 
 	private static final String TOML_EXTENSION = ".toml";
-	private static final String INPUTS_PROPERTY_NAME = "inputs";
 
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
@@ -77,7 +76,7 @@ public class ActProcessor extends AIFileProcessor {
 	/**
 	 * Creates an act processor.
 	 *
-	 * @param projectDir      root directory used as a base for relative paths
+	 * @param projectDir   root directory used as a base for relative paths
 	 * @param configurator configuration source
 	 * @param genai        provider key/name (including model)
 	 */
@@ -125,11 +124,11 @@ public class ActProcessor extends AIFileProcessor {
 		try {
 			loadAct(name, actData, actsLocation);
 
-			Object mainValue = actData.get(INPUTS_PROPERTY_NAME);
+			Object mainValue = actData.get(Ghostwriter.INPUTS_PROPERTY_NAME);
 			if (mainValue instanceof String) {
 				String actPrompt = Objects.toString((String) actData.get("prompt"), "");
 				String value = String.format((String) mainValue, Objects.toString(prompt, actPrompt));
-				actData.put(INPUTS_PROPERTY_NAME, value);
+				actData.put(Ghostwriter.INPUTS_PROPERTY_NAME, value);
 			}
 
 			applyActData(actData);
@@ -337,23 +336,23 @@ public class ActProcessor extends AIFileProcessor {
 					value = String.format(value, StringUtils.defaultString(inheritValue));
 				}
 				switch (key) {
-				case "instructions":
+				case Ghostwriter.INSTRUCTIONS_PROP_NAME:
 					super.setInstructions(value);
 					break;
 
-				case INPUTS_PROPERTY_NAME:
+				case Ghostwriter.INPUTS_PROPERTY_NAME:
 					super.setDefaultPrompt(value);
 					break;
 
-				case "gw.threads":
+				case Ghostwriter.GW_THREADS_PROP_NAME:
 					super.setDegreeOfConcurrency(Integer.parseInt(value));
 					break;
 
-				case "gw.excludes":
+				case Ghostwriter.GW_EXCLUDES_PROP_NAME:
 					super.setExcludes(StringUtils.split(value, ","));
 					break;
 
-				case "gw.nonRecursive":
+				case Ghostwriter.GW_NONRECURSIVE_PROP_NAME:
 					super.setNonRecursive(Boolean.parseBoolean(value));
 					break;
 
@@ -398,7 +397,8 @@ public class ActProcessor extends AIFileProcessor {
 			processFile(projectLayout, child);
 		}
 
-		if (match(scanProjectDir, scanProjectDir) && getDefaultPrompt() != null) {
+		if (match(scanProjectDir, scanProjectDir) && getDefaultPrompt() != null
+				&& !shouldExcludePath(scanProjectDir.toPath())) {
 			process(projectLayout, scanProjectDir, getInstructions(), getDefaultPrompt());
 		}
 	}

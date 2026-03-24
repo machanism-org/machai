@@ -73,7 +73,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act-reactor -Dgw.act="Rewrite headings" -Dgw.scanDir=src\\site
  * </pre>
  */
-@Mojo(name = "act-reactor", aggregator = false, threadSafe = true)
+@Mojo(name = "act-reactor", aggregator = false, threadSafe = true, requiresProject = true)
 public class ReactorAct extends Act {
 
 	@Override

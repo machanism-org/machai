@@ -67,7 +67,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act -Dgw.acts=src\\site\\acts -DlogInputs=true
  * </pre>
  */
-@Mojo(name = "act", aggregator = true, threadSafe = true)
+@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false)
 public class Act extends AbstractGWGoal {
 
 	/**

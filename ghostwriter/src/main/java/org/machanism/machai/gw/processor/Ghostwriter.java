@@ -70,7 +70,7 @@ public final class Ghostwriter {
 	public static final String GW_MODEL_PROP_NAME = "gw.model";
 
 	/** Configuration key containing optional system instructions. */
-	public static final String GW_INSTRUCTIONS_PROP_NAME = "gw.instructions";
+	public static final String INSTRUCTIONS_PROP_NAME = "instructions";
 
 	/** Configuration key containing comma-separated scan exclusions. */
 	public static final String GW_EXCLUDES_PROP_NAME = "gw.excludes";
@@ -83,6 +83,10 @@ public final class Ghostwriter {
 
 	/** Configuration key specifying a default scan directory/pattern. */
 	public static final String GW_SCAN_DIR_PROP_NAME = "gw.scanDir";
+
+	public static final String GW_NONRECURSIVE_PROP_NAME = "gw.nonRecursive";
+
+	public static final String INPUTS_PROPERTY_NAME = "inputs";
 
 	/** Processor implementation used by this CLI instance. */
 	private final AIFileProcessor processor;
@@ -372,7 +376,8 @@ public final class Ghostwriter {
 	public static void main(String[] args) throws IOException, ParseException {
 		Options options = new Options();
 		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
-		Option logInputsOption = new Option("l", GenAIProvider.LOG_INPUTS_PROP_NAME, false, "Log LLM request inputs to dedicated log files.");
+		Option logInputsOption = new Option("l", GenAIProvider.LOG_INPUTS_PROP_NAME, false,
+				"Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
 				.desc("The degree of concurrency for the processing to improve performance.")
@@ -441,7 +446,7 @@ public final class Ghostwriter {
 			}
 		}
 
-		String instructions = config.get(GW_INSTRUCTIONS_PROP_NAME, null);
+		String instructions = config.get(INSTRUCTIONS_PROP_NAME, null);
 		if (cmd.hasOption(instructionsOpt)) {
 			instructions = cmd.getOptionValue(instructionsOpt);
 
