@@ -1,6 +1,8 @@
 package org.machanism.machai.cli;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -57,5 +59,21 @@ class MachaiCLIMainTest {
 		// Assert
 		assertEquals("test.value", System.getProperty("test.key"));
 		assertTrue(new File(System.getProperty("config")).exists());
+	}
+
+	@Test
+	void loadSystemProperties_whenConfigPropertyNotSet_shouldNotThrowAndShouldNotSetNewProperties() throws Exception {
+		// Arrange
+		previousConfig = System.getProperty("config");
+		previousSystemProperties = (Properties) System.getProperties().clone();
+		System.clearProperty("config");
+		System.clearProperty("test.key");
+
+		Method m = MachaiCLI.class.getDeclaredMethod("loadSystemProperties");
+		m.setAccessible(true);
+
+		// Act + Assert
+		assertDoesNotThrow(() -> m.invoke(null));
+		assertNull(System.getProperty("test.key"));
 	}
 }
