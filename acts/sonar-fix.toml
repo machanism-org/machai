@@ -27,6 +27,6 @@ inputs = '''
 
 gw.scanDir="glob:."
 severities="LOW,MEDIUM,HIGH,BLOCKER"
-sonar.url="http://${sonar.token}:@192.168.0.177:9000"
+sonar.url="192.168.0.177:9000"
 sonar.token="sqa_1ca2fc4cb0449e8a70c08933bb8a82cba89d91df"
 
