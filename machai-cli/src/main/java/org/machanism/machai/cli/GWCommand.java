@@ -10,6 +10,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jline.reader.LineReader;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.gw.processor.Ghostwriter;
@@ -33,6 +34,7 @@ import org.springframework.shell.standard.ShellOption;
  * {@link GuidanceProcessor}.
  *
  * <h2>Examples</h2>
+ * 
  * <pre>
  * gw --scanDir .\\my-project --excludes target,.git
  * gw --model OpenAI:gpt-5.1 --guidance "Refactor for clarity"
@@ -67,7 +69,8 @@ public class GWCommand {
 	}
 
 	/**
-	 * Internal option container used to avoid a long parameter list between methods.
+	 * Internal option container used to avoid a long parameter list between
+	 * methods.
 	 */
 	private static final class GwOptions {
 		private int threads;
@@ -161,7 +164,7 @@ public class GWCommand {
 			@ShellOption(value = { "-e",
 					"--excludes" }, help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
 			@ShellOption(value = { "-l",
-					"--logInputs" }, help = "Log LLM request inputs to dedicated log files", defaultValue = ShellOption.NULL) Boolean logInputs,
+					"--" + GenAIProvider.LOG_INPUTS_PROP_NAME }, help = "Log LLM request inputs to dedicated log files", defaultValue = ShellOption.NULL) Boolean logInputs,
 			@ShellOption(value = { "-d",
 					ProjectLayout.PROJECT_DIR_PROP_NAME }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File projectDir,
 			@ShellOption(value = { "-s",
@@ -267,7 +270,7 @@ public class GWCommand {
 	}
 
 	private Boolean resolveLogInputs(Boolean logInputs) {
-		return ConfigCommand.config.getBoolean(Ghostwriter.GW_LOG_INPUTS_PROP_NAME, logInputs);
+		return ConfigCommand.config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, logInputs);
 	}
 
 	private String resolveInstructions(String instructions) {

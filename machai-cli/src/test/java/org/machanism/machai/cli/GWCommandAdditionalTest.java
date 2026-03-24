@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 
 import org.jline.reader.LineReader;
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.mockito.Mockito;
@@ -50,7 +51,7 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveLogInputs_shouldReturnFalse_whenConfigValueIsEmptyString() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_LOG_INPUTS_PROP_NAME, "");
+		ConfigCommand.config.set(GenAIProvider.LOG_INPUTS_PROP_NAME, "");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveLogInputs", Boolean.class);
@@ -66,7 +67,7 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveLogInputs_shouldReturnConfiguredValue_whenPresent() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_LOG_INPUTS_PROP_NAME, "false");
+		ConfigCommand.config.set(GenAIProvider.LOG_INPUTS_PROP_NAME, "false");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveLogInputs", Boolean.class);
