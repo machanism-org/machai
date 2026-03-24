@@ -50,7 +50,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * This goal also supports all common parameters defined by
  * {@link AbstractGWGoal} (for example {@code -Dgw.model}, {@code -Dgw.scanDir},
  * {@code -Dgw.excludes}, {@code -Dgw.genai.serverId}, and
- * {@code -Dgw.logInputs}).
+ * {@code -DlogInputs}).
  * </p>
  *
  * <h2>Usage examples</h2>
@@ -64,7 +64,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </pre>
  * 
  * <pre>
- * mvn gw:act -Dgw.acts=src\\site\\acts -Dgw.logInputs=true
+ * mvn gw:act -Dgw.acts=src\\site\\acts -DlogInputs=true
  * </pre>
  */
 @Mojo(name = "act", aggregator = true, threadSafe = true)

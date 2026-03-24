@@ -13,6 +13,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * documentation sources.</li>
  * <li>{@code -Dgw.model.serverId} - {@code settings.xml} {@code &lt;server&gt;}
  * id used to read GenAI credentials.</li>
- * <li>{@code -Dgw.logInputs} (default {@code false}) - Logs the list of input
+ * <li>{@code -DlogInputs} (default {@code false}) - Logs the list of input
  * files passed to the workflow.</li>
  * </ul>
  *
@@ -56,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * <h2>Examples</h2>
  * <pre>
- * mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site -Dgw.logInputs=true
+ * mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site -DlogInputs=true
  * </pre>
  */
 public abstract class AbstractGWGoal extends AbstractMojo {
@@ -124,7 +125,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * Whether to log the list of input files passed to the workflow.
 	 */
-	@Parameter(property = "gw.logInputs", defaultValue = "false")
+	@Parameter(property = GenAIProvider.LOG_INPUTS_PROP_NAME, defaultValue = "false")
 	protected boolean logInputs;
 	/**
 	 * Reactor projects for the current Maven session.

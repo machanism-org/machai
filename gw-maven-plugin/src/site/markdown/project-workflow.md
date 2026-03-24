@@ -101,5 +101,5 @@ mvn org.machanism.machai:gw-maven-plugin:0.0.10:gw \
   -Dgw.scanDir="glob:**/*.java" \
   -Dgw.guidance="file:default-guidance.txt" \
   -Dgw.instructions="file:project-instructions.txt" \
-  -Dgw.logInputs=true
+  -DlogInputs=true
 ```

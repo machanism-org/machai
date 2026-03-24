@@ -72,7 +72,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * used to read GenAI credentials.
  * </li>
  * <li>
- * <b>{@code gw.logInputs}</b> ({@code logInputs}): Whether to log the list of input files passed to
+ * <b>{@code logInputs}</b> ({@code logInputs}): Whether to log the list of input files passed to
  * the workflow.
  * <p>
  * Default: {@code false}
