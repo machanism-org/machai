@@ -329,7 +329,7 @@ public final class Ghostwriter {
 		String acts = config.get(GW_ACTS_PROP_NAME, null);
 		if (cmd.hasOption("acts")) {
 			acts = cmd.getOptionValue("acts");
-			logger.info("Act directory: {}", acts);
+			logger.info("Custom acts location specified: {}", acts);
 			processor.setActsLocation(acts);
 		}
 		return processor;

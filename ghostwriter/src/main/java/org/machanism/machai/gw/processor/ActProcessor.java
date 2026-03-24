@@ -374,7 +374,7 @@ public class ActProcessor extends AIFileProcessor {
 			}
 		}
 		this.actsLocation = actsLocation;
-		getConfigurator().set("gw.acts", actsLocation);
+		getConfigurator().set(Ghostwriter.GW_ACTS_PROP_NAME, actsLocation);
 	}
 
 	/**
