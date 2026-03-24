@@ -49,8 +49,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * This goal also supports all common parameters defined by
  * {@link AbstractGWGoal} (for example {@code -Dgw.model}, {@code -Dgw.scanDir},
- * {@code -Dgw.excludes}, {@code -Dgw.genai.serverId}, and
- * {@code -DlogInputs}).
+ * {@code -Dgw.excludes}, {@code -Dgw.genai.serverId}, and {@code -DlogInputs}).
  * </p>
  *
  * <h2>Usage examples</h2>
@@ -139,13 +138,26 @@ public class Act extends AbstractGWGoal {
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
+			String acts = actProcessor.getConfigurator().get(Ghostwriter.GW_ACTS_PROP_NAME, null);
+			if (this.acts != null) {
+				acts = this.acts;
+			}
+
 			if (acts != null) {
 				logger.info("Act directory: {}", acts);
 				actProcessor.setActsLocation(acts);
 			}
+
+			String[] excludes = null;
+			String excludesStr = actProcessor.getConfigurator().get(Ghostwriter.GW_EXCLUDES_PROP_NAME, null);
+			if (excludesStr != null) {
+				excludes = StringUtils.split(excludesStr, ",");
+			}
+
 			if (excludes != null) {
 				actProcessor.setExcludes(excludes);
 			}
+
 			actProcessor.setLogInputs(logInputs);
 
 			configureAndScan(actProcessor);
@@ -162,23 +174,29 @@ public class Act extends AbstractGWGoal {
 	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
 		try {
 			Properties userProperties = session.getUserProperties();
-			actPrompt = userProperties.getProperty("gw.act");
+			actPrompt = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
 			if (actPrompt == null) {
-				actPrompt = readText("Act");
-				userProperties.setProperty("gw.act", actPrompt);
+				String act = actProcessor.getConfigurator().get(Ghostwriter.GW_ACT_PROP_NAME, null);
+				if (act == null) {
+					actPrompt = readText("Act");
+				} else {
+					actPrompt = act;
+					logger.info("Act: {}", actPrompt);
+				}
+				userProperties.setProperty(Ghostwriter.GW_ACT_PROP_NAME, actPrompt);
 			} else {
 				logger.info("Act: {}", actPrompt);
 			}
 			actProcessor.setDefaultPrompt(actPrompt);
-			
+
 			scanDocuments(actProcessor);
 		} catch (PrompterException e) {
-			throw new MojoExecutionException("Failed to read 'gw.act' prompt interactively.", e);
+			throw new MojoExecutionException("Failed to read '" + Ghostwriter.GW_ACT_PROP_NAME + "' prompt interactively.", e);
 		}
 	}
 
 	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
-		String gwScanDir = actProcessor.getConfigurator().get("gw.scanDir", null);
+		String gwScanDir = actProcessor.getConfigurator().get(Ghostwriter.GW_SCAN_DIR_PROP_NAME, null);
 		String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
@@ -206,7 +224,8 @@ public class Act extends AbstractGWGoal {
 		while ((line = prompter.prompt(prompt)) != null) {
 			prompt = "\t";
 			if (Strings.CS.endsWith(line, Ghostwriter.MULTIPLE_LINES_BREAKER)) {
-				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER)).append(StringUtils.LF);
+				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER))
+						.append(StringUtils.LF);
 			} else {
 				sb.append(line);
 				break;
