@@ -16,7 +16,7 @@ inputs = '''
 # Additional Instruction
 
 - Ensure all fixes are applied to the correct source files and are properly tested.
-— Re-run the Sonar plugin command: `mvn clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=http://${sonar.token}`.
+— Re-run the Sonar plugin command: `mvn clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=http://${sonar.url}`.
 - If After re-running the API query, Sonar still reports issues. the next iteration should fetch the next pages (or increase `ps`) and continue fixing issue-by-issue.
 — Run the Sonar plugin command before get the report.
 
