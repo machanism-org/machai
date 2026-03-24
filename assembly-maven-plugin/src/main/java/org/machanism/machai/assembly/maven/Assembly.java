@@ -16,6 +16,7 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
@@ -37,8 +38,8 @@ import org.machanism.machai.schema.Bindex;
  * by interactively prompting the user.</li>
  * <li>Use {@link Picker} to recommend libraries (as {@link Bindex} entries).
  * Recommendations are logged to the Maven output.</li>
- * <li>Run {@link ApplicationAssembly} to apply changes to the project directory.
- * </li>
+ * <li>Run {@link ApplicationAssembly} to apply changes to the project
+ * directory.</li>
  * </ol>
  */
 @Mojo(name = "assembly", requiresProject = false, requiresDependencyCollection = ResolutionScope.NONE)
@@ -188,7 +189,7 @@ public class Assembly extends AbstractMojo {
 
 			getLog().info("The project directory: " + basedir);
 			assembly.projectDir(basedir);
-			boolean inputsLog = config.getBoolean(ApplicationAssembly.LOG_INPUTS_PROP_NAME, false);
+			boolean inputsLog = config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);
 			assembly.setLogInputs(inputsLog);
 			assembly.assembly(query, bindexList);
 
