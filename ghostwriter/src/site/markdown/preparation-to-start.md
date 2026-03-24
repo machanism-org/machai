@@ -90,7 +90,7 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 | `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null`. | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
 | `gw.guidance` | Default guidance applied when embedded `@guidance:` directives are not present (non-Act mode). | `null`. | Loaded via `config.get("gw.guidance", null)`. Optionally overridden by CLI `-g/--guidance`; if `-g` is specified without a value, guidance is read from stdin via `readText(...)`. Used to compute the default prompt (`resolveGuidancePrompt(...)`) and applied via `AIFileProcessor#setDefaultPrompt(...)`. |
 | `gw.threads` | Degree of concurrency for processing. | `null` (unset). | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads <count>`. Parsed as an integer and applied via `AIFileProcessor#setDegreeOfConcurrency(int)` (via `Ghostwriter#setDegreeOfConcurrency(String)`). |
-| `gw.logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("gw.logInputs", false)` and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
+| `logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("logInputs", false)` and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
 | `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | If unset: `user.dir` absolute path. | When there are no CLI scanDir args, Ghostwriter reads `config.get("gw.scanDir", null)`. If absent, it scans `SystemUtils.getUserDir().getAbsolutePath()` (see `resolveScanDirs(...)`). |
 
 > Notes:
@@ -121,7 +121,7 @@ java -jar gw.jar --act "Improve readability and add tests"
 gw.model=CodeMie:gpt-5-2-2025-12-11
 
 # Enable logging of input prompts
-gw.logInputs=true
+logInputs=true
 
 # Default instructions and guidance (optional)
 gw.instructions=file:C:\\projects\\MDDA-BPD\\instructions.txt

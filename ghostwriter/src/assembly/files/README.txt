@@ -112,7 +112,7 @@ Setting configuration via gw.properties
   - gw.guidance
   - gw.excludes
   - gw.threads
-  - gw.logInputs
+  - logInputs
   - gw.scanDir
 
 Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
@@ -165,11 +165,11 @@ Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
   - Set in gw.properties.
   - Override with -t/--threads <count>.
 
-7) gw.logInputs
+7) logInputs
 - Description: Enable logging of LLM request inputs to dedicated log files.
 - Default: false.
 - Usage:
-  - Set in gw.properties (gw.logInputs=true).
+  - Set in gw.properties (logInputs=true).
   - Or enable via -l/--logInputs.
 
 8) gw.scanDir
@@ -244,7 +244,7 @@ Common issues
 Logs and debug
 - Standard logs are written via SLF4J (logging backend configuration depends on the runtime classpath).
 - Provider usage is logged at the end of execution.
-- If -l/--logInputs is enabled (or gw.logInputs=true), Ghostwriter writes dedicated log files containing provider request inputs.
+- If -l/--logInputs is enabled (or logInputs=true), Ghostwriter writes dedicated log files containing provider request inputs.
 
 
 Contact & Documentation

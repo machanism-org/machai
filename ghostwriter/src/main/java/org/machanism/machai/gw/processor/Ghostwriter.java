@@ -15,6 +15,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -79,9 +80,6 @@ public final class Ghostwriter {
 
 	/** Configuration key enabling multi-threaded processing. */
 	public static final String GW_THREADS_PROP_NAME = "gw.threads";
-
-	/** Configuration key enabling request input logging. */
-	public static final String GW_LOG_INPUTS_PROP_NAME = "gw.logInputs";
 
 	/** Configuration key specifying a default scan directory/pattern. */
 	public static final String GW_SCAN_DIR_PROP_NAME = "gw.scanDir";
@@ -374,7 +372,7 @@ public final class Ghostwriter {
 	public static void main(String[] args) throws IOException, ParseException {
 		Options options = new Options();
 		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
-		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
+		Option logInputsOption = new Option("l", GenAIProvider.LOG_INPUTS_PROP_NAME, false, "Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
 				.desc("The degree of concurrency for the processing to improve performance.")
@@ -464,7 +462,7 @@ public final class Ghostwriter {
 			multiThread = opt;
 		}
 
-		boolean logInputs = config.getBoolean(GW_LOG_INPUTS_PROP_NAME, false);
+		boolean logInputs = config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);
 		if (cmd.hasOption(logInputsOption)) {
 			logInputs = true;
 		}
