@@ -19,8 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tomlj.Toml;
 import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
@@ -58,9 +56,6 @@ import org.tomlj.TomlParseResult;
  * </p>
  */
 public class ActProcessor extends AIFileProcessor {
-
-	/** Logger for documentation input processing events. */
-	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
 	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
@@ -374,8 +369,8 @@ public class ActProcessor extends AIFileProcessor {
 		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
 			File actDir = new File(actsLocation);
 			if (!actDir.exists() || !actDir.isDirectory()) {
-				logger.error("Act directory does not exist or not a directory: {}", actDir.getAbsolutePath());
-				return;
+				throw new IllegalArgumentException(
+						"Act directory does not exist or not a directory: " + actDir.getAbsolutePath());
 			}
 		}
 		this.actsLocation = actsLocation;

@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.processor;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -8,7 +9,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 
 class ActProcessorAdditionalTest {
 
@@ -26,17 +26,6 @@ class ActProcessorAdditionalTest {
 
 		// Assert
 		assertTrue(ex.getMessage().contains("not found"));
-	}
-
-	@Test
-	void setActDir_whenDirectoryNotExists_thenDoesNotThrow() {
-		// Arrange
-		PropertiesConfigurator config = new PropertiesConfigurator();
-		config.set("gw.acts", tempDir.resolve("original").toString());
-		ActProcessor processor = new ActProcessor(tempDir.toFile(), config, "Any:Model");
-
-		// Act + Assert
-		assertDoesNotThrow(() -> processor.setActsLocation(tempDir.resolve("missing").toString()));
 	}
 
 }

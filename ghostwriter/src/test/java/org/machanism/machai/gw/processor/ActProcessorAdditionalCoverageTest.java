@@ -18,20 +18,6 @@ class ActProcessorAdditionalCoverageTest {
 	Path tempDir;
 
 	@Test
-	void setActsLocation_whenDirectoryDoesNotExist_doesNotUpdateConfigurator() {
-		// Arrange
-		PropertiesConfigurator configurator = new PropertiesConfigurator();
-		ActProcessor processor = new ActProcessor(tempDir.toFile(), configurator, "Any:Model");
-		String missing = tempDir.resolve("missing-dir").toString();
-
-		// Act
-		processor.setActsLocation(missing);
-
-		// Assert
-		assertNull(configurator.get("gw.acts", null), "Expected gw.acts not to be set when directory is missing");
-	}
-
-	@Test
 	void loadAct_whenNotFoundInClasspathOrDirectory_throwsIllegalArgumentException() {
 		// Arrange
 		Map<String, Object> props = new HashMap<>();
@@ -46,8 +32,10 @@ class ActProcessorAdditionalCoverageTest {
 		Map<String, Object> props = new HashMap<>();
 
 		// Act + Assert
-		// The implementation only swallows FileNotFoundException; other I/O failures propagate.
-		assertThrows(Exception.class, () -> ActProcessor.tryLoadActFromDirectory(props, "missing", "http://nonexistent.invalid"));
+		// The implementation only swallows FileNotFoundException; other I/O failures
+		// propagate.
+		assertThrows(Exception.class,
+				() -> ActProcessor.tryLoadActFromDirectory(props, "missing", "http://nonexistent.invalid"));
 	}
 
 	@Test
