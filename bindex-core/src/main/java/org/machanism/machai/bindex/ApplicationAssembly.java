@@ -63,8 +63,6 @@ public class ApplicationAssembly {
 
 	public static final String MODEL_PROP_NAME = "assembly.model";
 
-	public static final String LOG_INPUTS_PROP_NAME = "assembly.logInputs";
-
 	private final GenAIProvider provider;
 	private File projectDir = SystemUtils.getUserDir();
 
