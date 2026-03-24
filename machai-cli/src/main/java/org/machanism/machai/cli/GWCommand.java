@@ -274,7 +274,7 @@ public class GWCommand {
 	}
 
 	private String resolveInstructions(String instructions) {
-		String instructionsValue = ConfigCommand.config.get(Ghostwriter.GW_INSTRUCTIONS_PROP_NAME, null);
+		String instructionsValue = ConfigCommand.config.get(Ghostwriter.INSTRUCTIONS_PROP_NAME, null);
 		if (instructions == null) {
 			return instructionsValue;
 		}

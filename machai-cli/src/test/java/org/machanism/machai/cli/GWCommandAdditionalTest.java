@@ -116,7 +116,7 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveInstructions_shouldReturnConfiguredValue_whenOptionIsNull() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_INSTRUCTIONS_PROP_NAME, "cfg-instr");
+		ConfigCommand.config.set(Ghostwriter.INSTRUCTIONS_PROP_NAME, "cfg-instr");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveInstructions", String.class);
