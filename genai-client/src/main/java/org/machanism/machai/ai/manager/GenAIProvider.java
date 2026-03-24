@@ -41,6 +41,8 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  */
 public interface GenAIProvider {
 
+	public static final String LOG_INPUTS_PROP_NAME = "logInputs";
+
 	@FunctionalInterface
 	public interface ToolFunction {
 		Object apply(Object[] params) throws IOException;
