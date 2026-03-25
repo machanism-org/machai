@@ -56,9 +56,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	private File projectDir;
 
 	/**
-	 * Specifies a special scanning path or path pattern. This should be a relative
-	 * path with respect to the current processing project. If an absolute path is
-	 * provided, it must be located within the {@code projectDir}.
+	 * Specifies a special scanning path or path pattern. This should be a relative	 * path with respect to the current processing project. If an absolute path is	 * provided, it must be located within the {@code projectDir}.
 	 */
 	private File scanDir;
 
@@ -323,13 +321,11 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
-			if (!shouldIncludeInFindFiles(projectDir, file)) {
-				continue;
-			}
-
-			result.add(file);
-			if (file.isDirectory()) {
-				result.addAll(findFiles(file));
+			if (shouldIncludeInFindFiles(projectDir, file)) {
+				result.add(file);
+				if (file.isDirectory()) {
+					result.addAll(findFiles(file));
+				}
 			}
 		}
 

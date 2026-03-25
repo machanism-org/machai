@@ -267,6 +267,7 @@ public final class Ghostwriter {
 	public void setInstructions(String instructions) {
 		if (instructions != null) {
 			if (logger.isInfoEnabled()) {
+				// Sonar java:S2629 - avoid eager string construction when INFO is disabled.
 				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
 			}
 			processor.setInstructions(instructions);
@@ -480,8 +481,7 @@ public final class Ghostwriter {
 
 		String multiThread = config.get(GW_THREADS_PROP_NAME, null);
 		if (cmd.hasOption(multiThreadOption)) {
-			String opt = cmd.getOptionValue(multiThreadOption);
-			multiThread = opt;
+			multiThread = cmd.getOptionValue(multiThreadOption);
 		}
 
 		boolean logInputs = config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);

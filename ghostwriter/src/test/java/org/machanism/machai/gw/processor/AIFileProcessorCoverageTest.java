@@ -187,7 +187,7 @@ class AIFileProcessorCoverageTest {
 		m.setAccessible(true);
 
 		// Act
-		Object result = m.invoke(processor, new Object[] { null });
+		Object result = invokeTryToGetInstructionsFromReference(m, processor, null);
 
 		// Assert
 		assertNull(result);
@@ -204,7 +204,7 @@ class AIFileProcessorCoverageTest {
 		m.setAccessible(true);
 
 		// Act
-		String result = (String) m.invoke(processor, "file:" + p.toAbsolutePath());
+		String result = (String) invokeTryToGetInstructionsFromReference(m, processor, "file:" + p.toAbsolutePath());
 
 		// Assert
 		assertNotNull(result);
