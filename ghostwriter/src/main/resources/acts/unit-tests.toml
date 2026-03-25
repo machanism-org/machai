@@ -36,7 +36,7 @@ inputs = '''
 - **Create new, high-quality unit tests as needed** to ensure every public and package-private class and method in the required source folder is fully tested, including static methods.
   - For static methods, use all required tools and frameworks (e.g., Mockito with static mocking, PowerMock, or other suitable libraries).
   - If necessary, update the `pom.xml` to add or update dependencies required for static method testing.
-- **Ensure that overall test coverage for the required source folder is at least 90%%**
+- **Ensure that overall test coverage for the required source folder is at least 90%**
 - Achieve comprehensive coverage of all core logic, edge cases, and error handling scenarios.
 - Refactor or enhance existing tests to improve clarity, maintainability, and coverage where necessary.
 - **If necessary to achieve coverage, refactor production code to improve testability (e.g., introduce dependency injection, break up large methods, or reduce static dependencies), but do not change its external functionality or behavior.**

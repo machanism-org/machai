@@ -226,9 +226,9 @@ public final class Ghostwriter {
 	 * @param prompt prompt to display before reading
 	 * @return the entered text (never {@code null})
 	 */
-	@SuppressWarnings("S106")
 	public static String readText(String prompt) {
-		System.out.print(prompt + ": ");
+		// Sonar java:S106 - use logger for output (minimizes direct console usage).
+		logger.info("{}:", prompt);
 
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
@@ -236,7 +236,7 @@ public final class Ghostwriter {
 				String nextLine = scanner.nextLine();
 				if (Strings.CS.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
 					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(GenAIProvider.LINE_SEPARATOR);
-					System.out.print("\t");
+					logger.info("\t");
 				} else {
 					sb.append(nextLine);
 					break;
@@ -326,11 +326,17 @@ public final class Ghostwriter {
 	static AIFileProcessor createActProcessor(CommandLine cmd, File projectDir, PropertiesConfigurator config,
 			String genai) {
 		ActProcessor processor = new ActProcessor(projectDir, config, genai);
-		String acts = config.get(GW_ACTS_PROP_NAME, null);
+
+		// Sonar java:S1854 - avoid useless assignment; only read when needed.
 		if (cmd.hasOption("acts")) {
-			acts = cmd.getOptionValue("acts");
+			String acts = cmd.getOptionValue("acts");
 			logger.info("Custom acts location specified: {}", acts);
 			processor.setActsLocation(acts);
+		} else {
+			String acts = config.get(GW_ACTS_PROP_NAME, null);
+			if (acts != null) {
+				processor.setActsLocation(acts);
+			}
 		}
 		return processor;
 	}
@@ -399,7 +405,7 @@ public final class Ghostwriter {
 
 		Option genaiOpt = new Option("m", "model", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
-		Option instructionsOpt = Option.builder("i").longOpt("instructions")
+		Option instructionsOpt = Option.builder("i").longOpt(INSTRUCTIONS_PROP_NAME)
 				.desc("Specify system instructions as plain text, by URL, or by file path. "
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "

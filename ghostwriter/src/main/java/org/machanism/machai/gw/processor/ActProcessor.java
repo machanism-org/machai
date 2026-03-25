@@ -65,6 +65,11 @@ public class ActProcessor extends AIFileProcessor {
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
 
+	// Sonar java:S1192 - Avoid duplicated string literals.
+	private static final String HTTP_PREFIX = "http://";
+	// Sonar java:S1192 - Avoid duplicated string literals.
+	private static final String HTTPS_PREFIX = "https://";
+
 	/** Optional directory containing external {@code *.toml} act files. */
 	private String actsLocation;
 
@@ -121,8 +126,9 @@ public class ActProcessor extends AIFileProcessor {
 
 			Object mainValue = actData.get(Ghostwriter.INPUTS_PROPERTY_NAME);
 			if (mainValue instanceof String) {
-				String actPrompt = Objects.toString((String) actData.get("prompt"), "");
-				String value = String.format((String) mainValue, Objects.toString(prompt, actPrompt));
+				// Sonar java:S1905 - unnecessary cast removed.
+				String actPrompt = Objects.toString(actData.get("prompt"), "");
+				String value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(prompt, actPrompt));
 				actData.put(Ghostwriter.INPUTS_PROPERTY_NAME, value);
 			}
 
@@ -240,7 +246,7 @@ public class ActProcessor extends AIFileProcessor {
 
 	private static String getAssolutePath(String name, String actsLocation) throws IOException {
 		String path = null;
-		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
+		if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
 			File file = new File(name);
 			if (!file.isAbsolute()) {
 				file = new File(actsLocation, name + TOML_EXTENSION);
@@ -253,14 +259,10 @@ public class ActProcessor extends AIFileProcessor {
 			}
 
 		} else {
-			URI uri;
-			if (Strings.CS.endsWith(name, TOML_EXTENSION)) {
-				uri = URI.create(name);
-
-			} else {
-				uri = URI.create(actsLocation + "/" + name + TOML_EXTENSION);
-				path = uri.toURL().toString();
-			}
+			// Sonar java:S1075 - do not hard-code path delimiter.
+			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";
+			String uriString = Strings.CS.endsWith(name, TOML_EXTENSION) ? name : base + name + TOML_EXTENSION;
+			path = URI.create(uriString).toURL().toString();
 		}
 
 		return path;
@@ -268,7 +270,7 @@ public class ActProcessor extends AIFileProcessor {
 
 	private static TomlParseResult loadActToml(String name) throws IOException {
 		TomlParseResult toml = null;
-		if (!Strings.CS.startsWithAny(name, "http://", "https://")) {
+		if (!Strings.CS.startsWithAny(name, HTTP_PREFIX, HTTPS_PREFIX)) {
 			File file = new File(name);
 			if (file.exists()) {
 				toml = Toml.parse(file.toPath());
@@ -303,7 +305,7 @@ public class ActProcessor extends AIFileProcessor {
 				String value = (String) entry.getValue();
 				Object mainValue = properties.get(key);
 				if (mainValue instanceof String) {
-					value = String.format((String) mainValue, Objects.toString(value, "%s"));
+					value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(value, "%s"));
 				}
 				properties.put(key, value);
 			}
@@ -328,7 +330,7 @@ public class ActProcessor extends AIFileProcessor {
 				String value = (String) valueObj;
 				String inheritValue = getConfigurator().get(key, null);
 				if (inheritValue != null) {
-					value = String.format(value, StringUtils.defaultString(inheritValue));
+					value = Strings.CS.replace(value, "%s",  StringUtils.defaultString(inheritValue));
 				}
 				switch (key) {
 				case Ghostwriter.INSTRUCTIONS_PROP_NAME:
@@ -366,7 +368,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param actsLocation directory containing {@code *.toml} act files
 	 */
 	public void setActsLocation(String actsLocation) {
-		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
+		if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
 			File actDir = new File(actsLocation);
 			if (!actDir.exists() || !actDir.isDirectory()) {
 				throw new IllegalArgumentException(
