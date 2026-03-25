@@ -1,0 +1,101 @@
+package org.machanism.machai.gw.maven;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNull;
+
+import java.io.IOException;
+
+import org.apache.maven.plugin.MojoExecutionException;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.gw.processor.Ghostwriter;
+
+public class ActProcessTest {
+
+	static class TestableAct extends Act {
+		boolean configureAndScanCalled;
+
+		@Override
+		public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
+			configureAndScanCalled = true;
+		}
+	}
+
+	@Test
+	public void process_whenActsLocationProvided_setsActsLocation() throws Exception {
+		// Arrange
+		TestableAct act = new TestableAct();
+		ActProcessor processor = Mockito.mock(ActProcessor.class);
+		Configurator conf = Mockito.mock(Configurator.class);
+		Mockito.when(processor.getConfigurator()).thenReturn(conf);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_ACTS_PROP_NAME), Mockito.any())).thenReturn("c:/acts");
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
+
+		// Act
+		act.process(processor);
+
+		// Assert
+		Mockito.verify(processor).setActsLocation("c:/acts");
+		Mockito.verify(processor).setLogInputs(false);
+	}
+
+	@Test
+	public void process_whenNoExcludesConfigured_setsNullExcludes() throws Exception {
+		// Arrange
+		TestableAct act = new TestableAct();
+		ActProcessor processor = Mockito.mock(ActProcessor.class);
+		Configurator conf = Mockito.mock(Configurator.class);
+		Mockito.when(processor.getConfigurator()).thenReturn(conf);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_ACTS_PROP_NAME), Mockito.any())).thenReturn(null);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
+
+		// Act
+		act.process(processor);
+
+		// Assert
+		Mockito.verify(processor).setExcludes((String[]) Mockito.isNull());
+		assertNull(act.excludes);
+	}
+
+	@Test
+	public void process_whenExcludesConfigured_usesFieldExcludesArray_notParsedValue() throws Exception {
+		// Arrange
+		TestableAct act = new TestableAct();
+		act.excludes = new String[] { "a", "b" };
+
+		ActProcessor processor = Mockito.mock(ActProcessor.class);
+		Configurator conf = Mockito.mock(Configurator.class);
+		Mockito.when(processor.getConfigurator()).thenReturn(conf);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_ACTS_PROP_NAME), Mockito.any())).thenReturn(null);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_EXCLUDES_PROP_NAME), Mockito.isNull()))
+				.thenReturn("x,y");
+
+		// Act
+		act.process(processor);
+
+		// Assert
+		Mockito.verify(processor).setExcludes(Mockito.eq(act.excludes));
+		assertArrayEquals(new String[] { "a", "b" }, act.excludes);
+	}
+
+	@Test(expected = MojoExecutionException.class)
+	public void process_whenConfigureAndScanThrowsIOException_wrapsIntoMojoExecutionException() throws Exception {
+		// Arrange
+		Act act = new Act() {
+			@Override
+			public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
+				throw new IOException("boom");
+			}
+		};
+		ActProcessor processor = Mockito.mock(ActProcessor.class);
+		Configurator conf = Mockito.mock(Configurator.class);
+		Mockito.when(processor.getConfigurator()).thenReturn(conf);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_ACTS_PROP_NAME), Mockito.any())).thenReturn(null);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
+
+		// Act
+		act.process(processor);
+	}
+}
