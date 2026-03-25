@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -100,7 +99,7 @@ class BindexBuilderAdditionalTest {
 
 		// Assert
 		assertNotNull(result);
-		verify(provider).inputsLog(eq(new File(tempDir, BindexBuilder.BINDEX_TEMP_DIR)));
+		verify(provider).inputsLog(new File(tempDir, BindexBuilder.BINDEX_TEMP_DIR));
 		verify(provider).prompt(argThat(p -> p.contains("oldId")));
 		verify(provider).perform();
 	}
@@ -174,7 +173,8 @@ class BindexBuilderAdditionalTest {
 		BindexBuilder builder;
 
 		try (MockedStatic<GenAIProviderManager> managerMock = mockStatic(GenAIProviderManager.class)) {
-			managerMock.when(() -> GenAIProviderManager.getProvider(eq("openai"), eq(configurator))).thenReturn(provider);
+			// Sonar java:S6068 - Mockito eq(...) is redundant in static invocation matching.
+			managerMock.when(() -> GenAIProviderManager.getProvider("openai", configurator)).thenReturn(provider);
 			builder = new BindexBuilder(layout, "openai", configurator);
 		}
 

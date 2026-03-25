@@ -153,7 +153,8 @@ class SchemaPojoTest {
 		assertEquals("Java", bindex.getClassification().getLanguages().get(0).getName());
 		assertEquals(Arrays.asList("dep:1"), bindex.getDependencies());
 		assertEquals(123, bindex.getAdditionalProperties().get("p"));
-		assertNotEquals(bindex, null);
+		// Sonar java:S3415 - JUnit assertion arguments must be ordered as: expected, actual.
+		assertNotEquals(null, bindex);
 		assertNotEquals(bindex, new Object());
 	}
 

@@ -14,7 +14,8 @@ import com.mongodb.client.MongoCollection;
  * Unit tests for {@link BindexRepository#findFirst(org.bson.conversions.Bson)} and
  * {@link BindexRepository#findFirst(org.bson.Document)}.
  *
- * <p>Mockito inline mocking is enabled in this project, but the MongoDB driver interfaces involved
+ * <p>
+ * Mockito inline mocking is enabled in this project, but the MongoDB driver interfaces involved
  * are not compatible with inline mocking on this runtime. Therefore, we use small hand-written fakes
  * based on {@link java.lang.reflect.Proxy}.
  */
@@ -28,7 +29,7 @@ class BindexRepositoryFindFirstTest {
 		BindexRepository repo = new BindexRepository(collection);
 
 		// Act
-		Document actual = repo.findFirst(new F());
+		Document actual = repo.findFirst(new FilterBson());
 
 		// Assert
 		assertSame(expected, actual);
@@ -81,9 +82,9 @@ class BindexRepositoryFindFirstTest {
 		return iterable;
 	}
 
-	private static final class F implements Bson {
+	private static final class FilterBson implements Bson {
 		@Override
-		public <TDocument> org.bson.BsonDocument toBsonDocument(Class<TDocument> documentClass,
+		public <D> org.bson.BsonDocument toBsonDocument(Class<D> documentClass,
 				org.bson.codecs.configuration.CodecRegistry codecRegistry) {
 			return new org.bson.BsonDocument();
 		}

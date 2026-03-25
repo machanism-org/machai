@@ -53,6 +53,8 @@ public class BindexRepository {
 
 	private final MongoCollection<Document> collection;
 
+	private final MongoClient mongoClient;
+
 	/**
 	 * Creates a repository instance backed by a MongoDB collection.
 	 *
@@ -64,10 +66,14 @@ public class BindexRepository {
 			throw new IllegalArgumentException("config must not be null");
 		}
 
-		collection = getCollection(config);
+		// Sonar java:S2095 - keep MongoClient as an instance field and close it when the repository is closed.
+		this.mongoClient = createMongoClient(config);
+		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
+		this.collection = database.getCollection(CONNECTION);
 	}
 
-	public static MongoCollection<Document> getCollection(Configurator config) {
+	// Sonar java:S2095 - caller (repository) owns the created client and must close it.
+	private static MongoClient createMongoClient(Configurator config) {
 		String password = config.get(BINDEX_REG_PASSWORD_PROP_NAME, null);
 
 		String username = password == null ? PUBLILC_USER_NAME : REGISTER_USER_NAME;
@@ -75,12 +81,28 @@ public class BindexRepository {
 
 		String url = config.get("BINDEX_REPO_URL", null);
 		url = StringUtils.replace(Objects.toString(url, DB_URL), "://", "://" + username + ":" + password + "@");
-		MongoClient mongoClient = MongoClients.create(url);
-		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
-		return database.getCollection(CONNECTION);
+		return MongoClients.create(url);
 	}
 
 	/**
+	 * Provides direct access to the underlying MongoDB collection.
+	 *
+	 * <p>
+	 * Used by components such as {@link Picker} which operate on aggregation
+	 * pipelines and need the raw {@link MongoCollection}.
+	 *
+	 * @param config configurator (kept for backward compatibility with callers)
+	 * @return MongoDB collection handle
+	 */
+	public static MongoCollection<Document> getCollection(Configurator config) {
+		// Sonar java:S1135 - required bridge method for legacy callers.
+		return new BindexRepository(config).collection;
+	}
+
+	/**
+	 * Creates a repository using an existing collection.
+	 *
+	 * <p>
 	 * Package-private constructor used for tests to avoid MongoDB driver
 	 * initialization.
 	 */
@@ -89,6 +111,23 @@ public class BindexRepository {
 			throw new IllegalArgumentException("collection must not be null");
 		}
 		this.collection = collection;
+		this.mongoClient = null;
+	}
+
+	/**
+	 * Closes the underlying {@link MongoClient} if this repository created it.
+	 *
+	 * <p>
+	 * This allows callers to use try-with-resources:
+	 *
+	 * <pre>
+	 * try (BindexRepository repo = new BindexRepository(config)) { ... }
+	 * </pre>
+	 */
+	public void close() {
+		if (mongoClient != null) {
+			mongoClient.close();
+		}
 	}
 
 	/**

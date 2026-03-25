@@ -137,9 +137,8 @@ public class BindexBuilder {
 			normalizedOutput = StringUtils.substringBetween(normalizedOutput, "```json", "```");
 		}
 
-		Bindex value = new ObjectMapper().readValue(normalizedOutput, Bindex.class);
-		
-		return value;
+		// Sonar java:S1488 - avoid unnecessary temporary variable.
+		return new ObjectMapper().readValue(normalizedOutput, Bindex.class);
 	}
 
 	/**

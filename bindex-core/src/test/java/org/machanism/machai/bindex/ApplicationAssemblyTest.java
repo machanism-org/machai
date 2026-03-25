@@ -25,7 +25,8 @@ class ApplicationAssemblyTest {
 		File dir = new File(".");
 
 		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ApplicationAssembly(null, config, dir));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> new ApplicationAssembly(null, config, dir));
 
 		// Assert
 		assertEquals("genai must not be null", ex.getMessage());
@@ -37,7 +38,8 @@ class ApplicationAssemblyTest {
 		File dir = new File(".");
 
 		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ApplicationAssembly("openai", null, dir));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> new ApplicationAssembly("openai", null, dir));
 
 		// Assert
 		assertEquals("config must not be null", ex.getMessage());
@@ -49,7 +51,8 @@ class ApplicationAssemblyTest {
 		Configurator config = org.mockito.Mockito.mock(Configurator.class);
 
 		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ApplicationAssembly("openai", config, null));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> new ApplicationAssembly("openai", config, null));
 
 		// Assert
 		assertEquals("dir must not be null", ex.getMessage());
@@ -72,7 +75,8 @@ class ApplicationAssemblyTest {
 			final List<Bindex> bindexes = java.util.Collections.emptyList();
 
 			// Act
-			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.assembly(prompt, bindexes));
+			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+					() -> assembly.assembly(prompt, bindexes));
 
 			// Assert
 			assertEquals("prompt must not be null", ex.getMessage());
@@ -96,7 +100,8 @@ class ApplicationAssemblyTest {
 			List<Bindex> bindexes = null;
 
 			// Act
-			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.assembly(promptText, bindexes));
+			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+					() -> assembly.assembly(promptText, bindexes));
 
 			// Assert
 			assertEquals("bindexList must not be null", ex.getMessage());
@@ -119,7 +124,8 @@ class ApplicationAssemblyTest {
 			File nullDir = null;
 
 			// Act
-			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> assembly.projectDir(nullDir));
+			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+					() -> assembly.projectDir(nullDir));
 
 			// Assert
 			assertEquals("projectDir must not be null", ex.getMessage());
@@ -129,8 +135,8 @@ class ApplicationAssemblyTest {
 	private static Object newProviderProxy(CapturingProviderHandler handler) {
 		try {
 			Class<?> providerInterface = Class.forName("org.machanism.machai.ai.manager.GenAIProvider");
-			return Proxy.newProxyInstance(ApplicationAssemblyTest.class.getClassLoader(), new Class<?>[] { providerInterface },
-				handler);
+			return Proxy.newProxyInstance(ApplicationAssemblyTest.class.getClassLoader(),
+					new Class<?>[] { providerInterface }, handler);
 		} catch (ClassNotFoundException e) {
 			throw new AssertionError(e);
 		}
@@ -141,7 +147,7 @@ class ApplicationAssemblyTest {
 		private final List<String> promptCalls = new ArrayList<>();
 		private final List<File> inputsLogCalls = new ArrayList<>();
 		private int performCalls;
-		private File workingDir;
+		// Sonar java:S1068 - removed unused "workingDir" field.
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -158,7 +164,6 @@ class ApplicationAssemblyTest {
 					inputsLogCalls.add((File) args[0]);
 					return null;
 				case "setWorkingDir":
-					workingDir = (File) args[0];
 					return null;
 				case "perform":
 					performCalls++;
