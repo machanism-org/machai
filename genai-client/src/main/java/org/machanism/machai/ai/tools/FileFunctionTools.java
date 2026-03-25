@@ -246,7 +246,7 @@ public class FileFunctionTools implements FunctionTools {
 				new InputStreamReader(new FileInputStream(file), Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				fileContent.append(line).append(System.lineSeparator());
+				fileContent.append(line).append(StringUtils.LF);
 			}
 		}
 		return fileContent;
