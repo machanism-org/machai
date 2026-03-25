@@ -159,7 +159,7 @@ class AssemblyExecuteCoverageTest {
 		};
 	}
 
-	private static final class CapturingLog implements Log {
+	static final class CapturingLog implements Log {
 		final java.util.List<String> messages = new java.util.ArrayList<>();
 
 		private void add(String msg) {
@@ -252,7 +252,7 @@ class AssemblyExecuteCoverageTest {
 	 *
 	 * We allocate without constructors using Objenesis.
 	 */
-	private static final class StubPicker extends Picker {
+	static final class StubPicker extends Picker {
 
 		private List<Bindex> result;
 		double setScoreValue = Double.NaN;
@@ -287,7 +287,7 @@ class AssemblyExecuteCoverageTest {
 	/**
 	 * Avoid calling the real ApplicationAssembly constructor (it attempts to initialize a GenAI provider).
 	 */
-	private static final class StubApplicationAssembly extends ApplicationAssembly {
+	static final class StubApplicationAssembly extends ApplicationAssembly {
 		boolean assemblyCalled;
 		File projectDir;
 		String query;
