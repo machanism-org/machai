@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -95,7 +94,7 @@ class PickerAdditionalTest {
 	}
 
 	@Test
-	void addDependencies_whenBindexNotFound_doesNotAddAnything() throws Exception {
+	void addDependencies_whenBindexNotFound_doesNotAddAnything() {
 		// Arrange
 		MongoCollection<Document> collection = proxyOf(MongoCollection.class, (p, method, args) -> {
 			if ("find".equals(method.getName())) {
@@ -121,7 +120,7 @@ class PickerAdditionalTest {
 	}
 
 	@Test
-	void addDependencies_whenGraphHasCycle_doesNotRecurseInfinitely() throws Exception {
+	void addDependencies_whenGraphHasCycle_doesNotRecurseInfinitely() {
 		// Arrange
 		Document docA = new Document(Picker.BINDEX_PROPERTY_NAME, "{\"id\":\"A\",\"dependencies\":[\"B\"]}");
 		Document docB = new Document(Picker.BINDEX_PROPERTY_NAME, "{\"id\":\"B\",\"dependencies\":[\"A\"]}");
