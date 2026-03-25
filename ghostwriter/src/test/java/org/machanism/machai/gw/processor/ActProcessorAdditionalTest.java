@@ -3,17 +3,12 @@ package org.machanism.machai.gw.processor;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 class ActProcessorAdditionalTest {
-
-	@TempDir
-	Path tempDir;
 
 	@Test
 	void loadAct_whenMissingEverywhere_thenThrowsIllegalArgumentException() {

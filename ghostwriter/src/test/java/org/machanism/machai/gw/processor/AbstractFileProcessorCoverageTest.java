@@ -210,11 +210,14 @@ class AbstractFileProcessorCoverageTest {
 		AbstractFileProcessor processor = newProcessor(projectDir);
 		processor.setDegreeOfConcurrency(2);
 
-		Thread.currentThread().interrupt();
+		// Act + Assert (Sonar java:S5778: isolate the single invocation which may throw)
+		java.util.concurrent.Callable<Void> call = () -> {
+			Thread.currentThread().interrupt();
+			processor.processModulesMultiThreaded(projectDir, Collections.singletonList("m"));
+			return null;
+		};
 
-		// Act + Assert
-		IllegalStateException ex = assertThrows(IllegalStateException.class,
-				() -> processor.processModulesMultiThreaded(projectDir, Collections.singletonList("m")));
+		IllegalStateException ex = assertThrows(IllegalStateException.class, call::call);
 		assertTrue(ex.getMessage().contains("interrupted"));
 		assertTrue(Thread.currentThread().isInterrupted());
 		Thread.interrupted();

@@ -56,7 +56,8 @@ class AIFileProcessorCoverageTest {
 		final String outsidePath = outside.getAbsolutePath();
 
 		// Act + Assert
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> processor.parseScanDir(projectDir, outsidePath));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> processor.parseScanDir(projectDir, outsidePath));
 		assertTrue(ex.getMessage().contains("must be located within"));
 	}
 
@@ -67,7 +68,8 @@ class AIFileProcessorCoverageTest {
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Any:Model");
 
 		// Act + Assert
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> processor.scanDocuments(null, "src"));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> processor.scanDocuments(null, "src"));
 		assertEquals("projectDir must not be null", ex.getMessage());
 	}
 
@@ -171,7 +173,8 @@ class AIFileProcessorCoverageTest {
 		AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "Any:Model");
 
 		// Act + Assert
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> processor.readFromFilePath("does-not-exist.txt"));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> processor.readFromFilePath("does-not-exist.txt"));
 		assertTrue(ex.getMessage().contains("Failed to read file:"));
 		assertTrue(ex.getMessage().contains(projectDir.getAbsolutePath()));
 	}
@@ -216,10 +219,19 @@ class AIFileProcessorCoverageTest {
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 		Method m = AIFileProcessor.class.getDeclaredMethod("tryToGetInstructionsFromReference", String.class);
 		m.setAccessible(true);
+		String reference = "http://localhost:0/does-not-exist";
 
-		// Act + Assert
+		// Act (Sonar java:S5778 - keep only one possibly-throwing invocation inside the assertThrows lambda)
 		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
-				() -> m.invoke(processor, "http://localhost:0/does-not-exist"));
+				() -> invokeTryToGetInstructionsFromReference(m, processor, reference));
+
+		// Assert
 		assertTrue(ex.getCause() instanceof IOException, "Expected IOException from URL read");
+	}
+
+	// Sonar java:S5778 - extracted helper so the lambda contains only one invocation.
+	private static Object invokeTryToGetInstructionsFromReference(Method m, AIFileProcessor processor, String reference)
+			throws IllegalAccessException, InvocationTargetException {
+		return m.invoke(processor, reference);
 	}
 }
