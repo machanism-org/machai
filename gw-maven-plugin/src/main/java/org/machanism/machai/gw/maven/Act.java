@@ -144,10 +144,7 @@ public class Act extends AbstractGWGoal {
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
 			// Sonar java:S1117 - avoid local variable hiding the field 'acts'
-			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.GW_ACTS_PROP_NAME, null);
-			if (this.acts != null) {
-				actsLocation = this.acts;
-			}
+			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.GW_ACTS_PROP_NAME, this.acts);
 
 			if (actsLocation != null) {
 				logger.info("Custom acts location specified: {}", actsLocation);
@@ -161,9 +158,11 @@ public class Act extends AbstractGWGoal {
 			}
 
 			if (excludes != null) {
+				actProcessor.setExcludes(this.excludes);
+			} else {
 				actProcessor.setExcludes(excludes);
 			}
-
+			
 			actProcessor.setLogInputs(logInputs);
 
 			configureAndScan(actProcessor);
