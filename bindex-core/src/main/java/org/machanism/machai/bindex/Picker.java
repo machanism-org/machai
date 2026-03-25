@@ -141,6 +141,18 @@ public class Picker {
 		this.collection = BindexRepository.getCollection(config);
 	}
 
+	// Package-private constructor for tests and internal use.
+	Picker(MongoCollection<Document> collection, GenAIProvider provider) {
+		if (collection == null) {
+			throw new IllegalArgumentException("collection must not be null");
+		}
+		if (provider == null) {
+			throw new IllegalArgumentException("provider must not be null");
+		}
+		this.collection = collection;
+		this.provider = provider;
+	}
+
 	/**
 	 * Registers (inserts or updates) a Bindex document for the supplied
 	 * {@link Bindex}.
