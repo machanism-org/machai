@@ -34,7 +34,7 @@ import org.springframework.shell.standard.ShellOption;
  * {@link GuidanceProcessor}.
  *
  * <h2>Examples</h2>
- * 
+ *
  * <pre>
  * gw --scanDir .\\my-project --excludes target,.git
  * gw --model OpenAI:gpt-5.1 --guidance "Refactor for clarity"
@@ -149,8 +149,11 @@ public class GWCommand {
 	 *                     resolved {@code projectDir}
 	 */
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
-	// FalsePositive Method signature is dictated by Spring Shell option binding;
-	// grouping would reduce CLI UX.
+	/**
+	 * FalsePositive
+	 * Method signature is dictated by Spring Shell option binding; grouping would
+	 * reduce CLI UX.
+	 */
 	@SuppressWarnings("java:S107")
 	public void gw(
 			@ShellOption(value = { "-t",

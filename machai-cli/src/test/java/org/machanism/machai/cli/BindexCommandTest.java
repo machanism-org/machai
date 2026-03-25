@@ -4,16 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.File;
 
-import org.jline.reader.LineReader;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 class BindexCommandTest {
 
 	@Test
 	void bindex_shouldAlwaysLogUsage_evenWhenScanFolderFails() {
 		// Arrange
-		LineReader reader = Mockito.mock(LineReader.class);
 		BindexCommand cmd = new BindexCommand();
 		File nonExistingDir = new File("target/does-not-exist-dir-12345");
 
