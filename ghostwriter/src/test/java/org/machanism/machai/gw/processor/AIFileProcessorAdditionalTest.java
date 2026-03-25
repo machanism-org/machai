@@ -12,10 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.GenAIProvider;
 
 class AIFileProcessorAdditionalTest {
 
@@ -143,6 +143,6 @@ class AIFileProcessorAdditionalTest {
 		// Assert
 		assertTrue(out.contains("hello"));
 		assertTrue(out.contains("world"));
-		assertTrue(out.endsWith(StringUtils.LF), "parseLines should append newline after each input line");
+		assertTrue(out.endsWith(GenAIProvider.LINE_SEPARATOR), "parseLines should append newline after each input line");
 	}
 }

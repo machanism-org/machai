@@ -235,7 +235,7 @@ public final class Ghostwriter {
 			while (scanner.hasNextLine()) {
 				String nextLine = scanner.nextLine();
 				if (Strings.CS.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
-					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(StringUtils.LF);
+					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(GenAIProvider.LINE_SEPARATOR);
 					System.out.print("\t");
 				} else {
 					sb.append(nextLine);
