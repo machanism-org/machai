@@ -54,7 +54,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	/**
 	 * {@code settings.xml} {@code <server>} id used to read GenAI credentials.
 	 */
-	@Parameter(property = "gw.genai.serverId", required = false)
+	@Parameter(property = GenAIProvider.SERVERID_PROP_NAME, required = false)
 	private String serverId;
 
 	/**
