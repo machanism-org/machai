@@ -143,6 +143,8 @@ public class ReactorAct extends Act {
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				log.error("Deferred execution-root processing was interrupted.", e);
+			} finally {
+				log.error("Finally.");
 			}
 		}, "gw-reactor-root-last");
 		deferredRootScanThread.setDaemon(true);
