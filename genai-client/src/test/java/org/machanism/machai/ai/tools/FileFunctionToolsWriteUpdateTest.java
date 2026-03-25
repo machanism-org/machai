@@ -13,6 +13,10 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import org.apache.commons.lang3.SystemUtils;
+import org.junit.jupiter.api.Assumptions;
 
 class FileFunctionToolsWriteUpdateTest {
 
@@ -99,4 +103,60 @@ class FileFunctionToolsWriteUpdateTest {
 		// Assert
 		assertInstanceOf(NullPointerException.class, ex.getCause());
 	}
+
+    @Test
+void getRelativePath_whenPathsAreEquivalent_shouldReturnDot() {
+    // TestMate-9eacaed05d90f12c7d15799a4e13439f
+    // Arrange
+    File baseDir = new File("target");
+    File equivalentDir = new File("target/./");
+    // Act
+    String result = FileFunctionTools.getRelativePath(baseDir, equivalentDir, true);
+    // Assert
+    assertEquals(".", result);
+}
+
+    @Test
+    void getRelativePath_whenFileIsDescendant_shouldReturnNormalizedPathWithForwardSlashes() {
+        // TestMate-faf16ef5cd83eb95ec63d7ddf3de224a
+        // Arrange
+        File baseDir = new File("target/base");
+        File descendantFile = new File("target/base/src/main/java/App.java");
+        // Act
+        String resultWithDot = FileFunctionTools.getRelativePath(baseDir, descendantFile, true);
+        String resultWithoutDot = FileFunctionTools.getRelativePath(baseDir, descendantFile, false);
+        // Assert
+        assertEquals("./src/main/java/App.java", resultWithDot);
+        assertEquals("src/main/java/App.java", resultWithoutDot);
+    }
+
+    @Test
+    void getRelativePath_whenPathsAreUnrelated_shouldReturnNull() {
+        // TestMate-87315bb1ffd8789071e5f3821f66edc2
+        // Arrange
+        // This scenario specifically targets the IllegalArgumentException thrown by Path.relativize 
+        // when paths have different roots. This is most reliably reproducible on Windows with different drive letters.
+        Assumptions.assumeTrue(SystemUtils.IS_OS_WINDOWS);
+        File baseDir = new File("C:/project/app");
+        File unrelatedFile = new File("D:/other/data.txt");
+        // Act
+        String result = FileFunctionTools.getRelativePath(baseDir, unrelatedFile, true);
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+void getRelativePath_whenFileIsOutsideDir_shouldReturnParentTraversalWithoutRedundantDot() {
+    // TestMate-70ca4c83433165d93b193654ce1008d0
+    // Arrange
+    File baseDir = new File("target/app/src");
+    File targetFile = new File("target/app/readme.md");
+    File parentDir = new File("target/app");
+    // Act
+    String resultToFile = FileFunctionTools.getRelativePath(baseDir, targetFile, true);
+    String resultToParent = FileFunctionTools.getRelativePath(baseDir, parentDir, true);
+    // Assert
+    assertEquals("../readme.md", resultToFile);
+    assertEquals("..", resultToParent);
+}
 }
