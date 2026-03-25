@@ -1,10 +1,8 @@
-﻿---
-canonical: https://machai.machanism.org/ghostwriter/act.html
----
+﻿
+# Act
 <!--
 @guidance:
-Create the Act page as a Project Information page for the project.
-
+Create the Act page as a Project Information page for the project:
 - Analyze the `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java` class and `src/main/resources/acts` files as toml act file examples.
 - Write a general description of the Act feature and its main functionality, using clear and simple language suitable for users who may not have prior technical knowledge or experience with the project.
 - Clearly describe how inherited values are processed within the file:
@@ -21,8 +19,6 @@ Create the Act page as a Project Information page for the project.
 - Organize your output so that each act is easy to identify and understand.
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
-
-# Acts
 
 An **Act** is a reusable set of instructions ("prompt template") that Ghostwriter can apply to files in your project.
 
@@ -53,7 +49,7 @@ This is implemented by `org.machanism.machai.gw.processor.ActProcessor`.
 The `--act` value supports:
 
 ```
---act &lt;name&gt; [your request text]
+--act <name> [your request text]
 ```
 
 Examples:
@@ -68,13 +64,13 @@ If the act name is missing or blank, Ghostwriter defaults to `help`.
 Ghostwriter tries to load act definitions from two places:
 
 1. a **user-defined location** (if `gw.acts` is set), and
-2. the **built-in classpath** resource `/acts/&lt;name&gt;.toml`.
+2. the **built-in classpath** resource `/acts/<name>.toml`.
 
 Either one can exist, and both can exist at the same time.
 
 If neither is found, Ghostwriter errors with:
 
-- `Act: `&lt;name&gt;` not found.`
+- `Act: `<name>` not found.`
 
 ### 3) Turning your request into the prompt
 
@@ -180,7 +176,7 @@ Conceptually:
 2. **Run Ghostwriter with the act name**
 
    ```
-   --act &lt;name&gt; [your request text]
+   --act <name> [your request text]
    ```
 
 3. **Ghostwriter applies the act**
