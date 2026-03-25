@@ -80,7 +80,7 @@ public class Act extends AbstractGWGoal {
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
 	@Parameter(property = Ghostwriter.GW_ACT_PROP_NAME, required = false)
-	private String actPrompt;
+	protected String act;
 
 	/**
 	 * Optional directory containing predefined action definitions.
@@ -139,14 +139,15 @@ public class Act extends AbstractGWGoal {
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
-			String acts = actProcessor.getConfigurator().get(Ghostwriter.GW_ACTS_PROP_NAME, null);
+			// Sonar java:S1117 - avoid local variable hiding the field 'acts'
+			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.GW_ACTS_PROP_NAME, null);
 			if (this.acts != null) {
-				acts = this.acts;
+				actsLocation = this.acts;
 			}
 
-			if (acts != null) {
-				logger.info("Custom acts location specified: {}", acts);
-				actProcessor.setActsLocation(acts);
+			if (actsLocation != null) {
+				logger.info("Custom acts location specified: {}", actsLocation);
+				actProcessor.setActsLocation(actsLocation);
 			}
 
 			String[] excludes = null;
@@ -173,26 +174,27 @@ public class Act extends AbstractGWGoal {
 	}
 
 	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
+		applyActPrompt(actProcessor);
+		actProcessor.setDefaultPrompt(act);
+		scanDocuments(actProcessor);
+	}
+
+	protected void applyActPrompt(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
 			Properties userProperties = session.getUserProperties();
-			actPrompt = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
-			if (actPrompt == null) {
+			String savedAct = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
+			if (savedAct == null) {
 				String act = actProcessor.getConfigurator().get(Ghostwriter.GW_ACT_PROP_NAME, null);
 				if (act == null) {
-					actPrompt = readText("Act");
-				} else {
-					actPrompt = act;
-					logger.info("Act: {}", actPrompt);
+					act = readText("Act");
 				}
-				userProperties.setProperty(Ghostwriter.GW_ACT_PROP_NAME, actPrompt);
+				userProperties.setProperty(Ghostwriter.GW_ACT_PROP_NAME, act);
 			} else {
-				logger.info("Act: {}", actPrompt);
+				logger.info("Act: {}", act);
 			}
-			actProcessor.setDefaultPrompt(actPrompt);
-
-			scanDocuments(actProcessor);
 		} catch (PrompterException e) {
-			throw new MojoExecutionException("Failed to read '" + Ghostwriter.GW_ACT_PROP_NAME + "' prompt interactively.", e);
+			throw new MojoExecutionException(
+					"Failed to read '" + Ghostwriter.GW_ACT_PROP_NAME + "' prompt interactively.", e);
 		}
 	}
 

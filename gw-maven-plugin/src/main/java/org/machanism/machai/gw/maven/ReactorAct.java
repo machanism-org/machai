@@ -4,17 +4,22 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maven goal {@code gw:act-reactor} that runs an action against the
@@ -77,6 +82,16 @@ import org.machanism.machai.project.layout.ProjectLayout;
 @Mojo(name = "act-reactor", aggregator = false, threadSafe = true, requiresProject = true)
 public class ReactorAct extends Act {
 
+	/** Logger for this class. */
+	private static final Logger log = LoggerFactory.getLogger(ReactorAct.class);
+
+	/**
+	 * If {@code true}, delays processing of the execution-root project until all
+	 * other reactor projects complete.
+	 */
+	@Parameter(property = "gw.rootProjectLast", defaultValue = "true")
+	private boolean rootProjectLast;
+
 	@Override
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
@@ -108,7 +123,32 @@ public class ReactorAct extends Act {
 			}
 		};
 
-		process(actProcessor);
+		String executionRootDirectory = session.getExecutionRootDirectory();
+		boolean isExecutionRootProject = executionRootDirectory.equals(basedir.getAbsolutePath());
+		boolean isPomPackaging = "pom".equals(project.getPackaging());
+
+		if (!isExecutionRootProject || !isPomPackaging || !rootProjectLast) {
+			process(actProcessor);
+			return;
+		}
+
+		applyActPrompt(actProcessor);
+
+		Thread deferredRootScanThread = new Thread(() -> {
+			try {
+				while (!reactorProjects.isEmpty()) {
+					Thread.sleep(500);
+				}
+				process(actProcessor);
+			} catch (MojoExecutionException e) {
+				log.error("Failed to scan documents in deferred execution-root processing.", e);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				log.error("Deferred execution-root processing was interrupted.", e);
+			}
+		}, "gw-reactor-root-last");
+		deferredRootScanThread.setDaemon(true);
+		deferredRootScanThread.start();
 	}
 
 	@Override
