@@ -11,6 +11,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -82,7 +83,7 @@ public class ReactorAct extends Act {
 
 		File projectDir = new File(session.getExecutionRootDirectory());
 
-		String model = configuration.get("gw.model", this.model);
+		String model = configuration.get(Ghostwriter.GW_MODEL_PROP_NAME, this.model);
 		logger.info("Model: {}", model);
 
 		ActProcessor actProcessor = new ActProcessor(projectDir, configuration, model) {

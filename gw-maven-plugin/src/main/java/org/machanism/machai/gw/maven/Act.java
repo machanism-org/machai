@@ -78,13 +78,13 @@ public class Act extends AbstractGWGoal {
 	/**
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
-	@Parameter(property = "gw.act", required = false)
+	@Parameter(property = Ghostwriter.GW_ACT_PROP_NAME, required = false)
 	private String actPrompt;
 
 	/**
 	 * Optional directory containing predefined action definitions.
 	 */
-	@Parameter(property = "gw.acts", required = false)
+	@Parameter(property = Ghostwriter.GW_ACTS_PROP_NAME, required = false)
 	private String acts;
 
 	/**
@@ -98,7 +98,7 @@ public class Act extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
 
-		String model = configuration.get("gw.model", this.model);
+		String model = configuration.get(Ghostwriter.GW_MODEL_PROP_NAME, this.model);
 		logger.info("Model: {}", model);
 
 		ActProcessor actProcessor = new ActProcessor(basedir, configuration, model) {
