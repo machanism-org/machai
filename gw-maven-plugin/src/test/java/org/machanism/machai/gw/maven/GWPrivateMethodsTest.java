@@ -11,6 +11,7 @@ import java.util.Collections;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -95,6 +96,7 @@ public class GWPrivateMethodsTest {
 		// Act
 		try {
 			resolve.invoke(null, Arrays.asList(p1, p2), model);
+			Assert.fail("Expected IllegalStateException due to multiple matching projects"); // Sonar java:S2699
 		} catch (InvocationTargetException e) {
 			// Assert
 			if (!(e.getCause() instanceof IllegalStateException)) {
@@ -125,8 +127,8 @@ public class GWPrivateMethodsTest {
 		String coord = (String) toCoord.invoke(null, p);
 
 		// Assert
-		org.junit.Assert.assertEquals(-1, coord.indexOf("null"));
-		org.junit.Assert.assertTrue(coord.contains(":"));
-		org.junit.Assert.assertTrue(coord.contains("@"));
+		Assert.assertEquals(-1, coord.indexOf("null"));
+		Assert.assertTrue(coord.contains(":"));
+		Assert.assertTrue(coord.contains("@"));
 	}
 }

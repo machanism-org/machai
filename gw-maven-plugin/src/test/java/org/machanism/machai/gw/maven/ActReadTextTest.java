@@ -27,8 +27,9 @@ public class ActReadTextTest {
 			return lines.poll();
 		}
 
+		// Sonar java:S1172 - defaultReply is part of Prompter API; avoid unused parameter by using it
 		public String prompt(String message, String defaultReply) throws PrompterException {
-			return prompt(message);
+			return (defaultReply != null) ? defaultReply : prompt(message);
 		}
 
 		public String prompt(String message, java.util.List<String> possibleValues) throws PrompterException {
@@ -37,7 +38,7 @@ public class ActReadTextTest {
 
 		public String prompt(String message, java.util.List<String> possibleValues, String defaultReply)
 				throws PrompterException {
-			return prompt(message);
+			return prompt(message, defaultReply);
 		}
 
 		public String promptForPassword(String message) throws PrompterException {
@@ -45,7 +46,7 @@ public class ActReadTextTest {
 		}
 
 		public String promptForPassword(String message, String defaultReply) throws PrompterException {
-			return prompt(message);
+			return prompt(message, defaultReply);
 		}
 
 		public void showMessage(String message) throws PrompterException {

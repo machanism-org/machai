@@ -17,6 +17,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
@@ -79,14 +80,17 @@ public class Act extends AbstractGWGoal {
 	/**
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
+	// Sonar java:S1700 - use a clearer name than "act" for the action prompt text.
 	@Parameter(property = Ghostwriter.GW_ACT_PROP_NAME, required = false)
-	protected String act;
+	protected String actPrompt;
 
 	/**
 	 * Optional directory containing predefined action definitions.
 	 */
 	@Parameter(property = Ghostwriter.GW_ACTS_PROP_NAME, required = false)
 	private String acts;
+
+	private static final Object MONITOR = new Object();
 
 	/**
 	 * Executes the interactive action and scans documents using the configured
@@ -174,27 +178,29 @@ public class Act extends AbstractGWGoal {
 	}
 
 	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
-		applyActPrompt(actProcessor);
-		actProcessor.setDefaultPrompt(act);
+		applyActPrompt(actProcessor.getConfigurator());
+		actProcessor.setDefaultPrompt(actPrompt);
 		scanDocuments(actProcessor);
 	}
 
-	protected void applyActPrompt(ActProcessor actProcessor) throws MojoExecutionException {
-		try {
-			Properties userProperties = session.getUserProperties();
-			String savedAct = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
-			if (savedAct == null) {
-				String act = actProcessor.getConfigurator().get(Ghostwriter.GW_ACT_PROP_NAME, null);
-				if (act == null) {
-					act = readText("Act");
+	protected void applyActPrompt(Configurator conf) throws MojoExecutionException {
+		synchronized (MONITOR) {
+			try {
+				Properties userProperties = session.getUserProperties();
+				String savedAct = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
+				if (savedAct == null) {
+					String actValue = conf.get(Ghostwriter.GW_ACT_PROP_NAME, null);
+					if (actValue == null) {
+						actValue = readText("Act");
+					}
+					userProperties.setProperty(Ghostwriter.GW_ACT_PROP_NAME, actValue);
+				} else {
+					logger.info("Act: {}", savedAct);
 				}
-				userProperties.setProperty(Ghostwriter.GW_ACT_PROP_NAME, act);
-			} else {
-				logger.info("Act: {}", act);
+			} catch (PrompterException e) {
+				throw new MojoExecutionException(
+						"Failed to read '" + Ghostwriter.GW_ACT_PROP_NAME + "' prompt interactively.", e);
 			}
-		} catch (PrompterException e) {
-			throw new MojoExecutionException(
-					"Failed to read '" + Ghostwriter.GW_ACT_PROP_NAME + "' prompt interactively.", e);
 		}
 	}
 

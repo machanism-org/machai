@@ -4,14 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
@@ -94,7 +92,9 @@ public class ReactorAct extends Act {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+
 		PropertiesConfigurator configuration = getConfiguration();
+		applyActPrompt(configuration);
 
 		File projectDir = new File(session.getExecutionRootDirectory());
 
@@ -131,8 +131,6 @@ public class ReactorAct extends Act {
 			process(actProcessor);
 			return;
 		}
-
-		applyActPrompt(actProcessor);
 
 		Thread deferredRootScanThread = new Thread(() -> {
 			try {
