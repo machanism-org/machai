@@ -126,21 +126,22 @@ public class ApplicationAssembly {
 		String assemblyInstructions = MessageFormat.format(PROMPT_BUNDLE.getString("assembly_instructions"),
 				SystemUtils.OS_NAME);
 		bindexPrompt.append(assemblyInstructions);
-		bindexPrompt.append(StringUtils.LF);
+		bindexPrompt.append(GenAIProvider.LINE_SEPARATOR);
 
 		StringBuilder picked = new StringBuilder();
 		for (Bindex bindex : bindexList) {
 			if (bindex != null) {
-				picked.append("| ").append(bindex.getId()).append(" | ").append(bindex.getDescription()).append(" |\n");
+				picked.append("| ").append(bindex.getId()).append(" | ").append(bindex.getDescription()).append(" |")
+						.append(GenAIProvider.LINE_SEPARATOR);
 			}
 		}
 
 		String promptStr = PROMPT_BUNDLE.getString("recommended_library_section");
 
-		bindexPrompt.append(promptStr).append(picked.toString()).append("\n\n");
+		bindexPrompt.append(promptStr).append(picked.toString()).append(GenAIProvider.PARAGRAPH_SEPARATOR);
 
 		String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
-		bindexPrompt.append(userPrompt).append("\n\n");
+		bindexPrompt.append(userPrompt).append(GenAIProvider.PARAGRAPH_SEPARATOR);
 
 		provider.prompt(bindexPrompt.toString());
 
