@@ -120,7 +120,7 @@ public class FileFunctionTools implements FunctionTools {
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
 				String relativePath = getRelativePath(workingDir, file, true);
-				content.append(relativePath).append(StringUtils.LF);
+				content.append(relativePath).append(GenAIProvider.LINE_SEPARATOR);
 			}
 		} else {
 			content.append("No files found in directory.");
@@ -128,7 +128,7 @@ public class FileFunctionTools implements FunctionTools {
 		result = content.toString();
 		if (logger.isInfoEnabled()) {
 			logger.info("List files recursively: {}, Result: {}", Arrays.toString(params),
-					StringUtils.abbreviate(result, 60).replace(StringUtils.LF, ""));
+					StringUtils.abbreviate(result, 60).replace(GenAIProvider.LINE_SEPARATOR, ""));
 		}
 		// Sonar(java:S2629): avoid Arrays.toString(params) unless DEBUG logging is enabled.
 		if (logger.isDebugEnabled()) {
@@ -246,7 +246,7 @@ public class FileFunctionTools implements FunctionTools {
 				new InputStreamReader(new FileInputStream(file), Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				fileContent.append(line).append(StringUtils.LF);
+				fileContent.append(line).append(GenAIProvider.LINE_SEPARATOR);
 			}
 		}
 		return fileContent;

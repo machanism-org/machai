@@ -42,8 +42,12 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 public interface GenAIProvider {
 
 	public static final String LOG_INPUTS_PROP_NAME = "logInputs";
-	
+
 	public static final String SERVERID_PROP_NAME = "genai.serverId";
+
+	public static final String LINE_SEPARATOR = "\n";
+
+	public static final String PARAGRAPH_SEPARATOR = "\n\n";
 
 	@FunctionalInterface
 	public interface ToolFunction {
