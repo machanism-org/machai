@@ -13,8 +13,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -69,10 +71,16 @@ public final class Ghostwriter {
 	public static final String GW_MODEL_PROP_NAME = "gw.model";
 
 	/** Configuration key containing optional system instructions. */
-	public static final String GW_INSTRUCTIONS_PROP_NAME = "gw.instructions";
+	public static final String INSTRUCTIONS_PROP_NAME = "instructions";
 
 	/** Configuration key containing comma-separated scan exclusions. */
 	public static final String GW_EXCLUDES_PROP_NAME = "gw.excludes";
+
+	/** Configuration key containing comma-separated scan exclusions. */
+	public static final String GW_ACTS_PROP_NAME = "gw.acts";
+
+	/** Configuration key containing comma-separated scan exclusions. */
+	public static final String GW_ACT_PROP_NAME = "gw.act";
 
 	/** Configuration key containing default guidance. */
 	public static final String GW_GUIDANCE_PROP_NAME = "gw.guidance";
@@ -80,11 +88,12 @@ public final class Ghostwriter {
 	/** Configuration key enabling multi-threaded processing. */
 	public static final String GW_THREADS_PROP_NAME = "gw.threads";
 
-	/** Configuration key enabling request input logging. */
-	public static final String GW_LOG_INPUTS_PROP_NAME = "gw.logInputs";
-
 	/** Configuration key specifying a default scan directory/pattern. */
 	public static final String GW_SCAN_DIR_PROP_NAME = "gw.scanDir";
+
+	public static final String GW_NONRECURSIVE_PROP_NAME = "gw.nonRecursive";
+
+	public static final String INPUTS_PROPERTY_NAME = "inputs";
 
 	/** Processor implementation used by this CLI instance. */
 	private final AIFileProcessor processor;
@@ -217,17 +226,17 @@ public final class Ghostwriter {
 	 * @param prompt prompt to display before reading
 	 * @return the entered text (never {@code null})
 	 */
-	@SuppressWarnings("S106")
 	public static String readText(String prompt) {
-		System.out.print(prompt + ": ");
+		// Sonar java:S106 - use logger for output (minimizes direct console usage).
+		logger.info("{}:", prompt);
 
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
 			while (scanner.hasNextLine()) {
 				String nextLine = scanner.nextLine();
-				if (StringUtils.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
-					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(StringUtils.LF);
-					System.out.print("\t");
+				if (Strings.CS.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
+					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(GenAIProvider.LINE_SEPARATOR);
+					logger.info("\t");
 				} else {
 					sb.append(nextLine);
 					break;
@@ -258,6 +267,7 @@ public final class Ghostwriter {
 	public void setInstructions(String instructions) {
 		if (instructions != null) {
 			if (logger.isInfoEnabled()) {
+				// Sonar java:S2629 - avoid eager string construction when INFO is disabled.
 				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
 			}
 			processor.setInstructions(instructions);
@@ -303,7 +313,7 @@ public final class Ghostwriter {
 		String defaultPrompt;
 		if (cmd.hasOption("act")) {
 			processor = createActProcessor(cmd, projectDir, config, genai);
-			defaultPrompt = resolveActPrompt(cmd);
+			defaultPrompt = resolveActPrompt(cmd, config);
 			logDefaultPrompt("Act", defaultPrompt);
 		} else {
 			processor = new GuidanceProcessor(projectDir, genai, config);
@@ -317,18 +327,28 @@ public final class Ghostwriter {
 	static AIFileProcessor createActProcessor(CommandLine cmd, File projectDir, PropertiesConfigurator config,
 			String genai) {
 		ActProcessor processor = new ActProcessor(projectDir, config, genai);
+
+		// Sonar java:S1854 - avoid useless assignment; only read when needed.
 		if (cmd.hasOption("acts")) {
-			String value = cmd.getOptionValue("acts");
-			logger.info("Act directory: {}", value);
-			processor.setActsLocation(value);
+			String acts = cmd.getOptionValue("acts");
+			logger.info("Custom acts location specified: {}", acts);
+			processor.setActsLocation(acts);
+		} else {
+			String acts = config.get(GW_ACTS_PROP_NAME, null);
+			if (acts != null) {
+				processor.setActsLocation(acts);
+			}
 		}
 		return processor;
 	}
 
-	static String resolveActPrompt(CommandLine cmd) {
-		String defaultPrompt = cmd.getOptionValue("act");
-		if (defaultPrompt == null) {
-			defaultPrompt = readText("Act");
+	static String resolveActPrompt(CommandLine cmd, PropertiesConfigurator config) {
+		String defaultPrompt = config.get(GW_ACT_PROP_NAME, null);
+		if (cmd.hasOption("act")) {
+			defaultPrompt = cmd.getOptionValue("act");
+			if (defaultPrompt == null) {
+				defaultPrompt = readText("Act");
+			}
 		}
 		return defaultPrompt;
 	}
@@ -374,7 +394,8 @@ public final class Ghostwriter {
 	public static void main(String[] args) throws IOException, ParseException {
 		Options options = new Options();
 		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
-		Option logInputsOption = new Option("l", "logInputs", false, "Log LLM request inputs to dedicated log files.");
+		Option logInputsOption = new Option("l", GenAIProvider.LOG_INPUTS_PROP_NAME, false,
+				"Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
 				.desc("The degree of concurrency for the processing to improve performance.")
@@ -385,7 +406,7 @@ public final class Ghostwriter {
 
 		Option genaiOpt = new Option("m", "model", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
-		Option instructionsOpt = Option.builder("i").longOpt("instructions")
+		Option instructionsOpt = Option.builder("i").longOpt(INSTRUCTIONS_PROP_NAME)
 				.desc("Specify system instructions as plain text, by URL, or by file path. "
 						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
 						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
@@ -443,7 +464,7 @@ public final class Ghostwriter {
 			}
 		}
 
-		String instructions = config.get(GW_INSTRUCTIONS_PROP_NAME, null);
+		String instructions = config.get(INSTRUCTIONS_PROP_NAME, null);
 		if (cmd.hasOption(instructionsOpt)) {
 			instructions = cmd.getOptionValue(instructionsOpt);
 
@@ -460,11 +481,10 @@ public final class Ghostwriter {
 
 		String multiThread = config.get(GW_THREADS_PROP_NAME, null);
 		if (cmd.hasOption(multiThreadOption)) {
-			String opt = cmd.getOptionValue(multiThreadOption);
-			multiThread = opt;
+			multiThread = cmd.getOptionValue(multiThreadOption);
 		}
 
-		boolean logInputs = config.getBoolean(GW_LOG_INPUTS_PROP_NAME, false);
+		boolean logInputs = config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);
 		if (cmd.hasOption(logInputsOption)) {
 			logInputs = true;
 		}

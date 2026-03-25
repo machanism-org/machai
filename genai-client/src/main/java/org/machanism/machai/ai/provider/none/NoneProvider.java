@@ -76,7 +76,7 @@ public class NoneProvider implements GenAIProvider {
 	@Override
 	public void prompt(String text) {
 		prompts.append(text);
-		prompts.append("\n\n");
+		prompts.append(GenAIProvider.PARAGRAPH_SEPARATOR);
 	}
 
 	/**

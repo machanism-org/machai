@@ -13,7 +13,9 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * documentation sources.</li>
  * <li>{@code -Dgw.model.serverId} - {@code settings.xml} {@code &lt;server&gt;}
  * id used to read GenAI credentials.</li>
- * <li>{@code -Dgw.logInputs} (default {@code false}) - Logs the list of input
+ * <li>{@code -DlogInputs} (default {@code false}) - Logs the list of input
  * files passed to the workflow.</li>
  * </ul>
  *
@@ -56,7 +58,7 @@ import org.slf4j.LoggerFactory;
  *
  * <h2>Examples</h2>
  * <pre>
- * mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site -Dgw.logInputs=true
+ * mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site -DlogInputs=true
  * </pre>
  */
 public abstract class AbstractGWGoal extends AbstractMojo {
@@ -66,7 +68,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * Provider/model identifier to pass to the workflow.
 	 */
-	@Parameter(property = "gw.model")
+	@Parameter(property = Ghostwriter.GW_MODEL_PROP_NAME)
 	protected String model;
 	/**
 	 * The Maven module base directory.
@@ -76,24 +78,24 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * Optional scan root override.
 	 */
-	@Parameter(property = "gw.scanDir")
+	@Parameter(property = Ghostwriter.GW_SCAN_DIR_PROP_NAME)
 	String scanDir;
 	/**
 	 * Instruction locations (for example, file paths or classpath locations)
 	 * consumed by the workflow.
 	 */
-	@Parameter(property = "gw.instructions", name = "instructions")
+	@Parameter(property = Ghostwriter.INSTRUCTIONS_PROP_NAME, name = "instructions")
 	protected String instructions;
 	/**
 	 * Default guidance text forwarded to the workflow.
 	 */
-	@Parameter(property = "gw.guidance", name = "guidance")
+	@Parameter(property = Ghostwriter.GW_GUIDANCE_PROP_NAME, name = "guidance")
 	protected String guidance;
 	/**
 	 * Exclude patterns/paths that should be skipped when scanning documentation
 	 * sources.
 	 */
-	@Parameter(property = "gw.excludes", name = "excludes")
+	@Parameter(property = Ghostwriter.GW_EXCLUDES_PROP_NAME, name = "excludes")
 	protected String[] excludes;
 	/**
 	 * The current Maven project.
@@ -119,12 +121,12 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * {@code settings.xml} {@code <server>} id used to read GenAI credentials.
 	 */
-	@Parameter(property = "gw.genai.serverId", required = false)
+	@Parameter(property = GenAIProvider.SERVERID_PROP_NAME, required = false)
 	private String serverId;
 	/**
 	 * Whether to log the list of input files passed to the workflow.
 	 */
-	@Parameter(property = "gw.logInputs", defaultValue = "false")
+	@Parameter(property = GenAIProvider.LOG_INPUTS_PROP_NAME, defaultValue = "false")
 	protected boolean logInputs;
 	/**
 	 * Reactor projects for the current Maven session.

@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,11 +41,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoCommandException;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
@@ -113,7 +108,7 @@ public class Picker {
 	public static final String MODEL_PROP_NAME = "pick.model";
 	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
 
-	private static MongoCollection<Document> collection;
+	private final MongoCollection<Document> collection;
 
 	private final GenAIProvider provider;
 
@@ -142,9 +137,20 @@ public class Picker {
 		this.provider = GenAIProviderManager.getProvider(genai, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
+		// Sonar java:S3010 - avoid mutating a static field from an instance constructor.
+		this.collection = BindexRepository.getCollection(config);
+	}
+
+	// Package-private constructor for tests and internal use.
+	Picker(MongoCollection<Document> collection, GenAIProvider provider) {
 		if (collection == null) {
-			collection = BindexRepository.getCollection(config);
+			throw new IllegalArgumentException("collection must not be null");
 		}
+		if (provider == null) {
+			throw new IllegalArgumentException("provider must not be null");
+		}
+		this.collection = collection;
+		this.provider = provider;
 	}
 
 	/**
@@ -251,13 +257,11 @@ public class Picker {
 			throw new IllegalArgumentException("bindex must not be null");
 		}
 		Document query = new Document(ID_FIELD_NAME, bindex.getId());
-		FindIterable<Document> find = collection.find(query);
-		Document document = find.first();
-		String id = null;
-		if (document != null) {
-			id = ((ObjectId) document.get("_id")).toString();
+		Document document = collection.find(query).first();
+		if (document == null) {
+			return null;
 		}
-		return id;
+		return ((ObjectId) document.get("_id")).toString();
 	}
 
 	/**
@@ -303,11 +307,8 @@ public class Picker {
 			}
 		}
 
-		List<Bindex> pickResult = classificatioResults.stream().map(id -> {
-			return getBindex(id);
-		}).filter(b -> b != null).collect(Collectors.toList());
-
-		return pickResult;
+		// Sonar java:S1488/java:S1602/java:S1612 - simplify stream mapping.
+		return classificatioResults.stream().map(this::getBindex).filter(b -> b != null).collect(Collectors.toList());
 	}
 
 	/**
@@ -375,18 +376,17 @@ public class Picker {
 			throw new IllegalArgumentException("id must not be null");
 		}
 
-		Bindex result = null;
 		Document doc = collection.find(Filters.eq(ID_FIELD_NAME, id)).first();
-		if (doc != null) {
-			String bindexStr = doc.getString(BINDEX_PROPERTY_NAME);
-			try {
-				result = new ObjectMapper().readValue(bindexStr, Bindex.class);
-			} catch (JsonProcessingException e) {
-				throw new IllegalArgumentException(e);
-			}
+		if (doc == null) {
+			return null;
 		}
 
-		return result;
+		String bindexStr = doc.getString(BINDEX_PROPERTY_NAME);
+		try {
+			return new ObjectMapper().readValue(bindexStr, Bindex.class);
+		} catch (JsonProcessingException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	/**

@@ -8,12 +8,16 @@ import java.util.List;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maven goal {@code gw:act-reactor} that runs an action against the
@@ -59,7 +63,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>{@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
  * credentials.</dd>
  *
- * <dt><b>{@code -Dgw.logInputs}</b> / {@code &lt;logInputs&gt;}</dt>
+ * <dt><b>{@code -DlogInputs}</b> / {@code &lt;logInputs&gt;}</dt>
  * <dd>Whether to log the list of input files passed to the workflow.</dd>
  * </dl>
  *
@@ -73,16 +77,18 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act-reactor -Dgw.act="Rewrite headings" -Dgw.scanDir=src\\site
  * </pre>
  */
-@Mojo(name = "act-reactor", aggregator = false, threadSafe = true)
+@Mojo(name = "act-reactor", aggregator = false, threadSafe = true, requiresProject = true)
 public class ReactorAct extends Act {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+
 		PropertiesConfigurator configuration = getConfiguration();
+		applyActPrompt(configuration);
 
 		File projectDir = new File(session.getExecutionRootDirectory());
 
-		String model = configuration.get("gw.model", this.model);
+		String model = configuration.get(Ghostwriter.GW_MODEL_PROP_NAME, this.model);
 		logger.info("Model: {}", model);
 
 		ActProcessor actProcessor = new ActProcessor(projectDir, configuration, model) {

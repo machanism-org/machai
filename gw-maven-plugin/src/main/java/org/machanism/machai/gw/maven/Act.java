@@ -17,7 +17,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
@@ -49,8 +51,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * This goal also supports all common parameters defined by
  * {@link AbstractGWGoal} (for example {@code -Dgw.model}, {@code -Dgw.scanDir},
- * {@code -Dgw.excludes}, {@code -Dgw.genai.serverId}, and
- * {@code -Dgw.logInputs}).
+ * {@code -Dgw.excludes}, {@code -Dgw.genai.serverId}, and {@code -DlogInputs}).
  * </p>
  *
  * <h2>Usage examples</h2>
@@ -64,10 +65,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </pre>
  * 
  * <pre>
- * mvn gw:act -Dgw.acts=src\\site\\acts -Dgw.logInputs=true
+ * mvn gw:act -Dgw.acts=src\\site\\acts -DlogInputs=true
  * </pre>
  */
-@Mojo(name = "act", aggregator = true, threadSafe = true)
+@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false)
 public class Act extends AbstractGWGoal {
 
 	/**
@@ -79,14 +80,17 @@ public class Act extends AbstractGWGoal {
 	/**
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
-	@Parameter(property = "gw.act", required = false)
-	private String actPrompt;
+	// Sonar java:S1700 - use a clearer name than "act" for the action prompt text.
+	@Parameter(property = Ghostwriter.GW_ACT_PROP_NAME, required = false)
+	protected String actPrompt;
 
 	/**
 	 * Optional directory containing predefined action definitions.
 	 */
-	@Parameter(property = "gw.acts", required = false)
+	@Parameter(property = Ghostwriter.GW_ACTS_PROP_NAME, required = false)
 	private String acts;
+
+	private static final Object MONITOR = new Object();
 
 	/**
 	 * Executes the interactive action and scans documents using the configured
@@ -99,7 +103,7 @@ public class Act extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
 
-		String model = configuration.get("gw.model", this.model);
+		String model = configuration.get(Ghostwriter.GW_MODEL_PROP_NAME, this.model);
 		logger.info("Model: {}", model);
 
 		ActProcessor actProcessor = new ActProcessor(basedir, configuration, model) {
@@ -139,13 +143,26 @@ public class Act extends AbstractGWGoal {
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
-			if (acts != null) {
-				logger.info("Act directory: {}", acts);
-				actProcessor.setActsLocation(acts);
+			// Sonar java:S1117 - avoid local variable hiding the field 'acts'
+			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.GW_ACTS_PROP_NAME, this.acts);
+
+			if (actsLocation != null) {
+				logger.info("Custom acts location specified: {}", actsLocation);
+				actProcessor.setActsLocation(actsLocation);
 			}
+
+			String[] excludes = null;
+			String excludesStr = actProcessor.getConfigurator().get(Ghostwriter.GW_EXCLUDES_PROP_NAME, null);
+			if (excludesStr != null) {
+				excludes = StringUtils.split(excludesStr, ",");
+			}
+
 			if (excludes != null) {
+				actProcessor.setExcludes(this.excludes);
+			} else {
 				actProcessor.setExcludes(excludes);
 			}
+			
 			actProcessor.setLogInputs(logInputs);
 
 			configureAndScan(actProcessor);
@@ -160,25 +177,36 @@ public class Act extends AbstractGWGoal {
 	}
 
 	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
-		try {
-			Properties userProperties = session.getUserProperties();
-			actPrompt = userProperties.getProperty("gw.act");
-			if (actPrompt == null) {
-				actPrompt = readText("Act");
-				userProperties.setProperty("gw.act", actPrompt);
-			} else {
-				logger.info("Act: {}", actPrompt);
+		applyActPrompt(actProcessor.getConfigurator());
+		Properties userProperties = session.getUserProperties();
+		String savedAct = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
+		actProcessor.setDefaultPrompt(savedAct);
+		scanDocuments(actProcessor);
+	}
+
+	protected void applyActPrompt(Configurator conf) throws MojoExecutionException {
+		synchronized (MONITOR) {
+			try {
+				Properties userProperties = session.getUserProperties();
+				String savedAct = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
+				if (savedAct == null) {
+					String actValue = conf.get(Ghostwriter.GW_ACT_PROP_NAME, null);
+					if (actValue == null) {
+						actValue = readText("Act");
+					}
+					userProperties.setProperty(Ghostwriter.GW_ACT_PROP_NAME, actValue);
+				} else {
+					logger.info("Act: {}", savedAct);
+				}
+			} catch (PrompterException e) {
+				throw new MojoExecutionException(
+						"Failed to read '" + Ghostwriter.GW_ACT_PROP_NAME + "' prompt interactively.", e);
 			}
-			actProcessor.setDefaultPrompt(actPrompt);
-			
-			scanDocuments(actProcessor);
-		} catch (PrompterException e) {
-			throw new MojoExecutionException("Failed to read 'gw.act' prompt interactively.", e);
 		}
 	}
 
 	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
-		String gwScanDir = actProcessor.getConfigurator().get("gw.scanDir", null);
+		String gwScanDir = actProcessor.getConfigurator().get(Ghostwriter.GW_SCAN_DIR_PROP_NAME, null);
 		String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
@@ -206,7 +234,8 @@ public class Act extends AbstractGWGoal {
 		while ((line = prompter.prompt(prompt)) != null) {
 			prompt = "\t";
 			if (Strings.CS.endsWith(line, Ghostwriter.MULTIPLE_LINES_BREAKER)) {
-				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER)).append(StringUtils.LF);
+				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER))
+						.append(GenAIProvider.LINE_SEPARATOR);
 			} else {
 				sb.append(line);
 				break;

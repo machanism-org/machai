@@ -12,7 +12,12 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a modular toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins that unify access to multiple GenAI providers, generate and consume Bindex metadata for library discovery and reuse, assemble projects using metadata-driven updates, and automate repository-scale documentation updates from embedded guidance using Ghostwriter.</description>
+	<description>Machai is a modular toolkit for GenAI-enabled developer
+		automation. It provides Java libraries, a command line application, and
+		Maven plugins that unify access to multiple GenAI providers, generate
+		and consume Bindex metadata for library discovery and reuse, assemble
+		projects using metadata-driven updates, and automate repository-scale
+		documentation updates from embedded guidance using Ghostwriter.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -23,7 +28,8 @@
 		<gw.acts>
 			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</gw.acts>
 		<gw.model>CodeMie:gpt-5-2-2025-12-11</gw.model>
-		<gw.genai.serverId>CodeMie</gw.genai.serverId>
+		<genai.serverId>CodeMie</genai.serverId>
+		<gw.rootProjectLast>true</gw.rootProjectLast>
 	</properties>
 
 	<profiles>
@@ -177,19 +183,11 @@
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>bindex-maven-plugin</artifactId>
 					<version>1.0.3-SNAPSHOT</version>
-					<configuration>
-						<serverId>CodeMie</serverId>
-						<model>CodeMie:gpt-5-2-2025-12-11</model>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>gw-maven-plugin</artifactId>
 					<version>1.0.3-SNAPSHOT</version>
-					<configuration>
-						<serverId>CodeMie</serverId>
-						<model>CodeMie:gpt-5-2-2025-12-11</model>
-					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

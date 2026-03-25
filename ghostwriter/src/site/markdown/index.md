@@ -154,7 +154,7 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 | `-i, --instructions[=<text\|url\|file:...>]` | System instructions. If no value: prompted to enter text via stdin. | `gw.instructions` |
 | `-g, --guidance[=<text\|url\|file:...>]` | Default guidance. If no value: prompted to enter text via stdin. | `gw.guidance` |
 | `-e, --excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` |
-| `-l, --logInputs` | Log LLM request inputs to dedicated log files. | `false` (`gw.logInputs`) |
+| `-l, --logInputs` | Log LLM request inputs to dedicated log files. | `false` (`logInputs`) |
 | `-as, --acts <path>` | Specify the path to the directory containing predefined act prompt files for processing. | not set |
 | `-a, --act[=<...>]` | Run Ghostwriter in Act mode. If no value: prompted to enter text via stdin. | disabled |
 

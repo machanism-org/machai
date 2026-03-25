@@ -84,7 +84,8 @@ public abstract class ProjectLayout {
 	 */
 	@Nullable
 	public List<String> getModules() {
-		return null;
+		// Sonar java:S1168 - return empty collection instead of null to prevent NPEs in callers.
+		return Collections.emptyList();
 	}
 
 	/**

@@ -9,13 +9,11 @@ import java.util.Optional;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jline.reader.LineReader;
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.Picker;
-import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
@@ -210,8 +208,8 @@ public class AssembyCommand {
 			if (!bindexList.isEmpty()) {
 				ApplicationAssembly assembly = new ApplicationAssembly(model, ConfigCommand.config, dir);
 				assembly.projectDir(dir);
-				boolean inputsLog = ConfigCommand.config.getBoolean(ApplicationAssembly.LOG_INPUTS_PROP_NAME, false);
-				assembly.setLogInputs(inputsLog );
+				boolean inputsLog = ConfigCommand.config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);
+				assembly.setLogInputs(inputsLog);
 				assembly.assembly(query, bindexList);
 			} else {
 				logger.error(

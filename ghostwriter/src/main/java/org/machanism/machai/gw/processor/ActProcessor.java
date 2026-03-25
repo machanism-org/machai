@@ -19,8 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tomlj.Toml;
 import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
@@ -59,17 +57,18 @@ import org.tomlj.TomlParseResult;
  */
 public class ActProcessor extends AIFileProcessor {
 
-	/** Logger for documentation input processing events. */
-	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
-
 	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
 
 	private static final String TOML_EXTENSION = ".toml";
-	private static final String INPUTS_PROPERTY_NAME = "inputs";
 
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
+
+	// Sonar java:S1192 - Avoid duplicated string literals.
+	private static final String HTTP_PREFIX = "http://";
+	// Sonar java:S1192 - Avoid duplicated string literals.
+	private static final String HTTPS_PREFIX = "https://";
 
 	/** Optional directory containing external {@code *.toml} act files. */
 	private String actsLocation;
@@ -77,13 +76,13 @@ public class ActProcessor extends AIFileProcessor {
 	/**
 	 * Creates an act processor.
 	 *
-	 * @param projectDir      root directory used as a base for relative paths
+	 * @param projectDir   root directory used as a base for relative paths
 	 * @param configurator configuration source
 	 * @param genai        provider key/name (including model)
 	 */
 	public ActProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator, genai);
-		actsLocation = configurator.get("gw.acts", null);
+		actsLocation = configurator.get(Ghostwriter.GW_ACTS_PROP_NAME, null);
 	}
 
 	/**
@@ -125,11 +124,12 @@ public class ActProcessor extends AIFileProcessor {
 		try {
 			loadAct(name, actData, actsLocation);
 
-			Object mainValue = actData.get(INPUTS_PROPERTY_NAME);
+			Object mainValue = actData.get(Ghostwriter.INPUTS_PROPERTY_NAME);
 			if (mainValue instanceof String) {
-				String actPrompt = Objects.toString((String) actData.get("prompt"), "");
-				String value = String.format((String) mainValue, Objects.toString(prompt, actPrompt));
-				actData.put(INPUTS_PROPERTY_NAME, value);
+				// Sonar java:S1905 - unnecessary cast removed.
+				String actPrompt = Objects.toString(actData.get("prompt"), "");
+				String value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(prompt, actPrompt));
+				actData.put(Ghostwriter.INPUTS_PROPERTY_NAME, value);
 			}
 
 			applyActData(actData);
@@ -246,7 +246,7 @@ public class ActProcessor extends AIFileProcessor {
 
 	private static String getAssolutePath(String name, String actsLocation) throws IOException {
 		String path = null;
-		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
+		if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
 			File file = new File(name);
 			if (!file.isAbsolute()) {
 				file = new File(actsLocation, name + TOML_EXTENSION);
@@ -259,14 +259,10 @@ public class ActProcessor extends AIFileProcessor {
 			}
 
 		} else {
-			URI uri;
-			if (Strings.CS.endsWith(name, TOML_EXTENSION)) {
-				uri = URI.create(name);
-
-			} else {
-				uri = URI.create(actsLocation + "/" + name + TOML_EXTENSION);
-				path = uri.toURL().toString();
-			}
+			// Sonar java:S1075 - do not hard-code path delimiter.
+			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";
+			String uriString = Strings.CS.endsWith(name, TOML_EXTENSION) ? name : base + name + TOML_EXTENSION;
+			path = URI.create(uriString).toURL().toString();
 		}
 
 		return path;
@@ -274,7 +270,7 @@ public class ActProcessor extends AIFileProcessor {
 
 	private static TomlParseResult loadActToml(String name) throws IOException {
 		TomlParseResult toml = null;
-		if (!Strings.CS.startsWithAny(name, "http://", "https://")) {
+		if (!Strings.CS.startsWithAny(name, HTTP_PREFIX, HTTPS_PREFIX)) {
 			File file = new File(name);
 			if (file.exists()) {
 				toml = Toml.parse(file.toPath());
@@ -309,7 +305,7 @@ public class ActProcessor extends AIFileProcessor {
 				String value = (String) entry.getValue();
 				Object mainValue = properties.get(key);
 				if (mainValue instanceof String) {
-					value = String.format((String) mainValue, Objects.toString(value, "%s"));
+					value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(value, "%s"));
 				}
 				properties.put(key, value);
 			}
@@ -334,26 +330,26 @@ public class ActProcessor extends AIFileProcessor {
 				String value = (String) valueObj;
 				String inheritValue = getConfigurator().get(key, null);
 				if (inheritValue != null) {
-					value = String.format(value, StringUtils.defaultString(inheritValue));
+					value = Strings.CS.replace(value, "%s",  StringUtils.defaultString(inheritValue));
 				}
 				switch (key) {
-				case "instructions":
+				case Ghostwriter.INSTRUCTIONS_PROP_NAME:
 					super.setInstructions(value);
 					break;
 
-				case INPUTS_PROPERTY_NAME:
+				case Ghostwriter.INPUTS_PROPERTY_NAME:
 					super.setDefaultPrompt(value);
 					break;
 
-				case "gw.threads":
+				case Ghostwriter.GW_THREADS_PROP_NAME:
 					super.setDegreeOfConcurrency(Integer.parseInt(value));
 					break;
 
-				case "gw.excludes":
+				case Ghostwriter.GW_EXCLUDES_PROP_NAME:
 					super.setExcludes(StringUtils.split(value, ","));
 					break;
 
-				case "gw.nonRecursive":
+				case Ghostwriter.GW_NONRECURSIVE_PROP_NAME:
 					super.setNonRecursive(Boolean.parseBoolean(value));
 					break;
 
@@ -372,15 +368,15 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param actsLocation directory containing {@code *.toml} act files
 	 */
 	public void setActsLocation(String actsLocation) {
-		if (!Strings.CS.startsWithAny(actsLocation, "http://", "https://")) {
+		if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
 			File actDir = new File(actsLocation);
 			if (!actDir.exists() || !actDir.isDirectory()) {
-				logger.error("Act directory does not exist or not a directory: {}", actDir.getAbsolutePath());
-				return;
+				throw new IllegalArgumentException(
+						"Act directory does not exist or not a directory: " + actDir.getAbsolutePath());
 			}
 		}
 		this.actsLocation = actsLocation;
-		getConfigurator().set("gw.acts", actsLocation);
+		getConfigurator().set(Ghostwriter.GW_ACTS_PROP_NAME, actsLocation);
 	}
 
 	/**
@@ -398,7 +394,8 @@ public class ActProcessor extends AIFileProcessor {
 			processFile(projectLayout, child);
 		}
 
-		if (match(scanProjectDir, scanProjectDir) && getDefaultPrompt() != null) {
+		if (match(scanProjectDir, scanProjectDir) && getDefaultPrompt() != null
+				&& !shouldExcludePath(scanProjectDir.toPath())) {
 			process(projectLayout, scanProjectDir, getInstructions(), getDefaultPrompt());
 		}
 	}

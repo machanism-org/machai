@@ -1,6 +1,9 @@
 package org.machanism.machai.bindex.maven;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -49,9 +52,17 @@ public class Clean extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		File file = new File(basedir, MACHAI_TEMP_DIR + File.separator + "bindex-inputs.txt");
 		logger.info("Removing '{}' inputs log file.", file);
-		boolean deleted = file.delete();
-		if (deleted) {
+
+		// Sonar java:S4042 - prefer java.nio.file.Files#delete for clearer error messages
+		Path path = file.toPath();
+		if (!Files.exists(path)) {
+			return;
+		}
+		try {
+			Files.delete(path);
 			logger.info("Cleanup process finished.");
+		} catch (IOException e) {
+			throw new MojoExecutionException("Failed to delete inputs log file: " + file, e);
 		}
 	}
 }

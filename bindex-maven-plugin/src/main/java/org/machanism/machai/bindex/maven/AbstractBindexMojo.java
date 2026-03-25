@@ -10,7 +10,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.bindex.ApplicationAssembly;
+import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 
@@ -53,7 +53,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	/**
 	 * {@code settings.xml} {@code <server>} id used to read GenAI credentials.
 	 */
-	@Parameter(property = "gw.genai.serverId", required = false)
+	@Parameter(property = GenAIProvider.SERVERID_PROP_NAME, required = false)
 	private String serverId;
 
 	/**
@@ -69,7 +69,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 		BindexCreator creator = new BindexCreator(model, config);
 		creator.update(update);
 
-		boolean inputsLog = config.getBoolean(ApplicationAssembly.LOG_INPUTS_PROP_NAME, false);
+		boolean inputsLog = config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);
 		creator.setLogInputs(inputsLog);
 
 		MavenProjectLayout projectLayout = new MavenProjectLayout();

@@ -112,12 +112,12 @@ public class BindexBuilder {
 			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
 			String updateBindexPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("update_bindex_prompt"),
 					bindexStr);
-			prompt.append(updateBindexPrompt).append(StringUtils.LF);
+			prompt.append(updateBindexPrompt).append(GenAIProvider.LINE_SEPARATOR);
 		}
 
-		prompt.append(projectContext()).append(StringUtils.LF).append(StringUtils.LF);
-		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append(StringUtils.LF)
-				.append(StringUtils.LF);
+		prompt.append(projectContext()).append(GenAIProvider.LINE_SEPARATOR).append(GenAIProvider.LINE_SEPARATOR);
+		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append(GenAIProvider.LINE_SEPARATOR)
+				.append(GenAIProvider.LINE_SEPARATOR);
 
 		provider.prompt(prompt.toString());
 
@@ -137,9 +137,8 @@ public class BindexBuilder {
 			normalizedOutput = StringUtils.substringBetween(normalizedOutput, "```json", "```");
 		}
 
-		Bindex value = new ObjectMapper().readValue(normalizedOutput, Bindex.class);
-		
-		return value;
+		// Sonar java:S1488 - avoid unnecessary temporary variable.
+		return new ObjectMapper().readValue(normalizedOutput, Bindex.class);
 	}
 
 	/**

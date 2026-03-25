@@ -173,7 +173,7 @@ Common configuration parameters (usable as `-D...` system properties or via `<co
 | `gw.guidance` | Default guidance text forwarded to the workflow. | *(none)* |
 | `gw.excludes` | Exclude patterns/paths to skip while scanning documentation sources. | *(none)* |
 | `gw.genai.serverId` | `settings.xml` `<server>` id used to load GenAI credentials into `GENAI_USERNAME`/`GENAI_PASSWORD`. | *(none)* |
-| `gw.logInputs` | Logs the list of input files passed to the workflow. | `false` |
+| `logInputs` | Logs the list of input files passed to the workflow. | `false` |
 | `gw.rootProjectLast` | For `gw:reactor`: if `true`, defers execution-root project processing until other reactor projects complete. | `true` |
 | `gw.act` | For `gw:act` / `gw:act-reactor`: the action prompt to apply (interactive if omitted for `gw:act`). | *(none)* |
 | `gw.acts` | For `gw:act`: directory containing predefined action definitions. | *(none)* |

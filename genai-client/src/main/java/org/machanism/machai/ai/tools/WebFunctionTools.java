@@ -174,7 +174,7 @@ public class WebFunctionTools implements FunctionTools {
 
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
-						StringUtils.abbreviate(response, 80).replace(StringUtils.LF, " ").replace("\r", ""));
+						StringUtils.abbreviate(response, 80).replace(GenAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
 			}
 			return response;
 
@@ -193,7 +193,7 @@ public class WebFunctionTools implements FunctionTools {
 		org.jsoup.select.Elements elements = doc.select(selector);
 		StringBuilder selectedContent = new StringBuilder();
 		for (org.jsoup.nodes.Element element : elements) {
-			selectedContent.append(element.outerHtml()).append(StringUtils.LF);
+			selectedContent.append(element.outerHtml()).append(GenAIProvider.LINE_SEPARATOR);
 		}
 		return selectedContent.toString().trim();
 	}
@@ -202,7 +202,7 @@ public class WebFunctionTools implements FunctionTools {
 		if (!textOnly) {
 			return response;
 		}
-		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(StringUtils.LF).toString();
+		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(GenAIProvider.LINE_SEPARATOR).toString();
 	}
 
 	/**
@@ -256,13 +256,13 @@ public class WebFunctionTools implements FunctionTools {
 
 		int responseCode = connection.getResponseCode();
 		output.append("HTTP ").append(Integer.toString(responseCode)).append(" ")
-				.append(connection.getResponseMessage()).append(StringUtils.LF);
+				.append(connection.getResponseMessage()).append(GenAIProvider.LINE_SEPARATOR);
 
 		try (InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				output.append(line).append(StringUtils.LF);
+				output.append(line).append(GenAIProvider.LINE_SEPARATOR);
 			}
 		}
 
@@ -313,7 +313,7 @@ public class WebFunctionTools implements FunctionTools {
 			int responseCode = connection.getResponseCode();
 			StringBuilder response = new StringBuilder();
 			response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
-					.append(StringUtils.LF);
+					.append(GenAIProvider.LINE_SEPARATOR);
 
 			return parseResult(requestId, charsetName, connection, responseCode, response);
 
@@ -330,7 +330,7 @@ public class WebFunctionTools implements FunctionTools {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					response.append(line).append(StringUtils.LF);
+					response.append(line).append(GenAIProvider.LINE_SEPARATOR);
 				}
 			}
 

@@ -68,7 +68,7 @@
     "name" : "act",
     "package" : "org.machanism.machai.cli",
     "signature" : "void act(java.lang.String[] act) throws java.io.IOException",
-    "description" : "Runs Ghostwriter \"Act mode\" interactively using org.machanism.machai.gw.processor.ActProcessor. Joins the provided words into a default prompt, resolves project directory and model from persisted configuration, and scans documents in gw.scanDir (or the project directory) before executing the action/prompt. Supports logging of LLM request inputs via gw.logInputs configuration.",
+    "description" : "Runs Ghostwriter \"Act mode\" interactively using org.machanism.machai.gw.processor.ActProcessor. Joins the provided words into a default prompt, resolves project directory and model from persisted configuration, and scans documents in gw.scanDir (or the project directory) before executing the action/prompt. Supports logging of LLM request inputs via logInputs configuration.",
     "examples" : [ {
       "snippet" : "org.machanism.machai.cli.ActCommand cmd = new org.machanism.machai.cli.ActCommand();\ncmd.act(new java.lang.String[]{\"commit\", \"and\", \"push\"});",
       "description" : "Executes the predefined \"commit\" action with extra prompt text \"and push\"."

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
@@ -62,8 +61,6 @@ public class ApplicationAssembly {
 	private static final String ASSEMBLY_TEMP_DIR = ".machai/assembly-inputs.txt";
 
 	public static final String MODEL_PROP_NAME = "assembly.model";
-
-	public static final String LOG_INPUTS_PROP_NAME = "assembly.logInputs";
 
 	private final GenAIProvider provider;
 	private File projectDir = SystemUtils.getUserDir();
@@ -128,21 +125,22 @@ public class ApplicationAssembly {
 		String assemblyInstructions = MessageFormat.format(PROMPT_BUNDLE.getString("assembly_instructions"),
 				SystemUtils.OS_NAME);
 		bindexPrompt.append(assemblyInstructions);
-		bindexPrompt.append(StringUtils.LF);
+		bindexPrompt.append(GenAIProvider.LINE_SEPARATOR);
 
 		StringBuilder picked = new StringBuilder();
 		for (Bindex bindex : bindexList) {
 			if (bindex != null) {
-				picked.append("| ").append(bindex.getId()).append(" | ").append(bindex.getDescription()).append(" |\n");
+				picked.append("| ").append(bindex.getId()).append(" | ").append(bindex.getDescription()).append(" |")
+						.append(GenAIProvider.LINE_SEPARATOR);
 			}
 		}
 
 		String promptStr = PROMPT_BUNDLE.getString("recommended_library_section");
 
-		bindexPrompt.append(promptStr).append(picked.toString()).append("\n\n");
+		bindexPrompt.append(promptStr).append(picked.toString()).append(GenAIProvider.PARAGRAPH_SEPARATOR);
 
 		String userPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("user_prompt"), prompt);
-		bindexPrompt.append(userPrompt).append("\n\n");
+		bindexPrompt.append(userPrompt).append(GenAIProvider.PARAGRAPH_SEPARATOR);
 
 		provider.prompt(bindexPrompt.toString());
 
