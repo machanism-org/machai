@@ -179,7 +179,9 @@ public class Act extends AbstractGWGoal {
 
 	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
 		applyActPrompt(actProcessor.getConfigurator());
-		actProcessor.setDefaultPrompt(actPrompt);
+		Properties userProperties = session.getUserProperties();
+		String savedAct = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
+		actProcessor.setDefaultPrompt(savedAct);
 		scanDocuments(actProcessor);
 	}
 

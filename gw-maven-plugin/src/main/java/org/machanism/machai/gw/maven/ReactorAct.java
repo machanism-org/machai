@@ -80,16 +80,6 @@ import org.slf4j.LoggerFactory;
 @Mojo(name = "act-reactor", aggregator = false, threadSafe = true, requiresProject = true)
 public class ReactorAct extends Act {
 
-	/** Logger for this class. */
-	private static final Logger log = LoggerFactory.getLogger(ReactorAct.class);
-
-	/**
-	 * If {@code true}, delays processing of the execution-root project until all
-	 * other reactor projects complete.
-	 */
-	@Parameter(property = "gw.rootProjectLast", defaultValue = "true")
-	private boolean rootProjectLast;
-
 	@Override
 	public void execute() throws MojoExecutionException {
 
@@ -123,32 +113,7 @@ public class ReactorAct extends Act {
 			}
 		};
 
-		String executionRootDirectory = session.getExecutionRootDirectory();
-		boolean isExecutionRootProject = executionRootDirectory.equals(basedir.getAbsolutePath());
-		boolean isPomPackaging = "pom".equals(project.getPackaging());
-
-		if (!isExecutionRootProject || !isPomPackaging || !rootProjectLast) {
-			process(actProcessor);
-			return;
-		}
-
-		Thread deferredRootScanThread = new Thread(() -> {
-			try {
-				while (!reactorProjects.isEmpty()) {
-					Thread.sleep(500);
-				}
-				process(actProcessor);
-			} catch (MojoExecutionException e) {
-				log.error("Failed to scan documents in deferred execution-root processing.", e);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				log.error("Deferred execution-root processing was interrupted.", e);
-			} finally {
-				log.error("Finally.");
-			}
-		}, "gw-reactor-root-last");
-		deferredRootScanThread.setDaemon(true);
-		deferredRootScanThread.start();
+		process(actProcessor);
 	}
 
 	@Override
