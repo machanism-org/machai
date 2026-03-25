@@ -97,7 +97,7 @@ public class ActFunctionTools implements FunctionTools {
 		String custom = props.has("custom") ? props.get("custom").asText() : null;
 
 		Map<String, Object> properties = new HashMap<>();
-		String acts = configurator.get("gw.acts", null);
+		String acts = configurator.get(Ghostwriter.GW_ACTS_PROP_NAME, null);
 		if (custom == null) {
 			ActProcessor.loadAct(actName, properties, acts);
 		} else {

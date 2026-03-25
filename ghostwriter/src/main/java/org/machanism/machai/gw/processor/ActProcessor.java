@@ -77,7 +77,7 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public ActProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator, genai);
-		actsLocation = configurator.get("gw.acts", null);
+		actsLocation = configurator.get(Ghostwriter.GW_ACTS_PROP_NAME, null);
 	}
 
 	/**
