@@ -77,7 +77,7 @@ public class ActCommand {
 		Boolean logInputs = ConfigCommand.config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);
 		processor.setLogInputs(logInputs);
 
-		String scanDir = processor.getConfigurator().get("gw.scanDir", null);
+		String scanDir = processor.getConfigurator().get(Ghostwriter.GW_SCAN_DIR_PROP_NAME, null);
 		if (scanDir == null) {
 			scanDir = (projectDir != null ? projectDir : SystemUtils.getUserDir()).getAbsolutePath();
 		}

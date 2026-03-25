@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.File;
 
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.project.layout.ProjectLayout;
 
 class ActCommandTest {
 
@@ -22,8 +24,8 @@ class ActCommandTest {
 	void act_whenGenAiProviderIsNotAvailable_shouldPropagateError() {
 		// Arrange
 		ActCommand cmd = new ActCommand();
-		ConfigCommand.config.set("project.dir", new File(".").getAbsolutePath());
-		ConfigCommand.config.set("gw.model", "TestProvider");
+		ConfigCommand.config.set(ProjectLayout.PROJECT_DIR_PROP_NAME, new File(".").getAbsolutePath());
+		ConfigCommand.config.set(Ghostwriter.GW_MODEL_PROP_NAME, "TestProvider");
 
 		// Act + Assert
 		assertThrows(IllegalArgumentException.class, () -> cmd.act(new String[] { "commit" }));
