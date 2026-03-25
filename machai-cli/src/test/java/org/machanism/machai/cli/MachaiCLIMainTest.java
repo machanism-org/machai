@@ -62,7 +62,25 @@ class MachaiCLIMainTest {
 	}
 
 	@Test
-	void loadSystemProperties_whenConfigPropertyNotSet_shouldNotThrowAndShouldNotSetNewProperties() throws Exception {
+	void loadSystemProperties_whenConfigPropertyPointsToMissingFile_shouldNotThrowAndShouldNotSetNewProperties()
+			throws Exception {
+		// Arrange
+		previousConfig = System.getProperty("config");
+		previousSystemProperties = (Properties) System.getProperties().clone();
+		System.setProperty("config", new File(tempDir, "missing.properties").getAbsolutePath());
+		System.clearProperty("test.key");
+
+		Method m = MachaiCLI.class.getDeclaredMethod("loadSystemProperties");
+		m.setAccessible(true);
+
+		// Act + Assert
+		assertDoesNotThrow(() -> m.invoke(null));
+		assertNull(System.getProperty("test.key"));
+	}
+
+	@Test
+	void loadSystemProperties_whenConfigPropertyNotSetAndDefaultFileMissing_shouldNotThrowAndShouldNotSetNewProperties()
+			throws Exception {
 		// Arrange
 		previousConfig = System.getProperty("config");
 		previousSystemProperties = (Properties) System.getProperties().clone();
