@@ -71,44 +71,44 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   Machanism ecosystem.
 </p>
 
-<h2>Overview</h2>
+<h2>What is a Bindex?</h2>
 <p>
-  A <strong>Bindex</strong> is a JSON document (typically named <code>bindex.json</code>) that describes a software project
-  or reusable library. The document provides a stable identity for the project, a set of classification facets
-  used for semantic retrieval, and a dependency graph that allows results to be expanded transitively.
+  A <strong>Bindex</strong> is a JSON document (typically named <code>bindex.json</code>) that describes a software project or a
+  reusable library. It provides a stable identity for the project, a set of classification facets used for semantic
+  retrieval, and a dependency graph that allows results to be expanded transitively.
 </p>
 
-<h3>What a Bindex contains</h3>
+<h3>Typical contents</h3>
 <ul>
   <li><strong>Identity</strong>: for example <code>id</code>, <code>name</code>, <code>version</code>.</li>
-  <li><strong>Facets</strong>: domains, layers, languages, integrations—used for search and selection.</li>
-  <li><strong>Dependencies</strong>: links to other Bindexes, enabling expansion and assembly.</li>
+  <li><strong>Facets</strong>: domains, layers, languages, integrations used for search and selection.</li>
+  <li><strong>Dependencies</strong>: links to other Bindexes, enabling transitive expansion.</li>
 </ul>
 
-<h2>Package structure</h2>
+<h2>Package overview</h2>
 <p>
-  The public API is organized into two main packages:
+  The public API is primarily organized into the following packages.
+</p>
+
+<h3><code>org.machanism.machai.bindex</code></h3>
+<p>
+  Orchestration layer that generates, persists, registers, and retrieves Bindex documents.
+  It supports:
 </p>
 <ul>
-  <li>
-    <code>org.machanism.machai.bindex</code>
-    <div>
-      Orchestration layer that generates, persists, registers, and retrieves Bindex documents. It supports both
-      local workflows (create/update <code>bindex.json</code>) and registry workflows backed by MongoDB. The package also
-      includes semantic retrieval with dependency expansion and assembly of selected Bindex content into prompt
-      inputs for downstream LLM-assisted tasks.
-    </div>
-  </li>
-  <li>
-    <code>org.machanism.machai.bindex.builder</code>
-    <div>
-      Builder implementations that generate <code>org.machanism.machai.schema.Bindex</code> instances. Builders collect
-      project context (such as <code>pom.xml</code>, <code>package.json</code>, or <code>pyproject.toml</code>), compose a prompt using the
-      Bindex schema, and delegate generation to a configured
-      <code>org.machanism.machai.ai.manager.GenAIProvider</code>.
-    </div>
-  </li>
+  <li>Local workflows (create/update <code>bindex.json</code> for a project).</li>
+  <li>Registry workflows (store and search Bindexes in MongoDB).</li>
+  <li>Semantic retrieval with dependency expansion.</li>
+  <li>Assembly of selected Bindex content into prompt-ready inputs for downstream LLM-assisted tasks.</li>
 </ul>
+
+<h3><code>org.machanism.machai.bindex.builder</code></h3>
+<p>
+  Builder implementations that generate <code>org.machanism.machai.schema.Bindex</code> instances for different project
+  layouts. A builder collects project context (for example <code>pom.xml</code>, <code>package.json</code>, or <code>pyproject.toml</code>),
+  composes a schema-guided prompt, delegates generation to a configured
+  <code>org.machanism.machai.ai.manager.GenAIProvider</code>, and deserializes the provider response.
+</p>
 
 <h2>Typical workflow</h2>
 <ol>
@@ -120,11 +120,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Key types</h2>
 <ul>
-  <li><code>org.machanism.machai.bindex.BindexCreator</code>: create or update <code>bindex.json</code> for a project.</li>
-  <li><code>org.machanism.machai.bindex.BindexRegister</code>: register a local <code>bindex.json</code> in the registry.</li>
-  <li><code>org.machanism.machai.bindex.Picker</code>: run semantic search and expand results via dependencies.</li>
-  <li><code>org.machanism.machai.bindex.ApplicationAssembly</code>: build prompt-ready inputs from selected Bindexes.</li>
-  <li><code>org.machanism.machai.bindex.BindexBuilderFactory</code>: select a builder based on the detected project layout.</li>
+  <li><code>org.machanism.machai.bindex.BindexCreator</code>: creates or updates <code>bindex.json</code> for a project.</li>
+  <li><code>org.machanism.machai.bindex.BindexBuilderFactory</code>: selects a builder based on the detected project layout.</li>
+  <li><code>org.machanism.machai.bindex.BindexRegister</code>: registers a local <code>bindex.json</code> in the registry.</li>
+  <li><code>org.machanism.machai.bindex.BindexRepository</code>: persistence primitives for registry operations.</li>
+  <li><code>org.machanism.machai.bindex.Picker</code>: performs semantic search and expands results via dependencies.</li>
+  <li><code>org.machanism.machai.bindex.ApplicationAssembly</code>: assembles prompt-ready inputs from selected Bindexes.</li>
 </ul>
 
 <h2>Class diagram</h2>
@@ -134,7 +135,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Usage examples</h2>
 
-<h3>Create or update bindex.json</h3>
+<h3>Create or update <code>bindex.json</code></h3>
 <pre>{@code
 Configurator config = ...;
 ProjectLayout layout = ...;
@@ -144,7 +145,7 @@ new BindexCreator("openai", config)
     .processFolder(layout);
 }</pre>
 
-<h3>Register bindex.json in the registry</h3>
+<h3>Register <code>bindex.json</code> in the registry</h3>
 <pre>{@code
 Configurator config = ...;
 ProjectLayout layout = ...;
@@ -171,7 +172,6 @@ new ApplicationAssembly("openai", config, layout.getProjectDir())
 <ul>
   <li>Source compatibility targets Java 8 (see <code>maven.compiler.release</code>).</li>
   <li>The registry uses MongoDB; connection settings are provided via configuration and environment variables.</li>
-  <li class="muted">External API links are configured via the Maven Javadoc Plugin.</li>
 </ul>
 
 </body>

@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  * <h2>Credentials</h2>
  * <p>
- * If {@code -Dgw.genai.serverId} is provided, this goal reads credentials from
+ * If {@code -Dgenai.serverId} is provided, this goal reads credentials from
  * {@code ~/.m2/settings.xml} {@code &lt;servers&gt;&lt;server&gt;} and forwards
  * them to the workflow as {@code GENAI_USERNAME}/{@code GENAI_PASSWORD}
  * properties.
@@ -142,7 +142,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	 * Builds a {@link PropertiesConfigurator} for workflow execution.
 	 *
 	 * <p>
-	 * When {@code gw.genai.serverId} is set, credentials are read from Maven
+	 * When {@code genai.serverId} is set, credentials are read from Maven
 	 * settings.
 	 * </p>
 	 *

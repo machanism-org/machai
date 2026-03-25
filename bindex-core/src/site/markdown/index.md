@@ -47,20 +47,25 @@ Page Structure:
 
 ## Introduction
 
-Bindex Core (`org.machanism.machai:bindex-core`) is the foundational Java library for working with **MachAI Bindex** documents.
+Bindex Core (`org.machanism.machai:bindex-core`) is the foundational Java library for generating, persisting, registering, and retrieving **MachAI Bindex** documents.
 
-A **Bindex** is a JSON document (commonly `bindex.json`) that captures a project or library in a form that is both **machine-readable** and **LLM-friendly**. It focuses on stable identity and discovery metadata (such as `id`, `name`, `version`, tags/facets, and dependencies), enabling Bindexes to be **generated** from a project folder, **registered** into a shared registry, **retrieved** later (including by semantic similarity), and **assembled** into curated context for downstream LLM-assisted workflows.
+A **Bindex** is a JSON document (typically named `bindex.json`) that describes a software project or reusable library in a way that is both **machine-readable** and **LLM-friendly**. It focuses on stable identity and discovery metadata (such as `id`, `name`, `version`, classification facets, and dependencies), enabling Bindexes to be:
 
-In practice, Bindex Core helps teams keep consistent metadata for many codebases, search for relevant building blocks via a registry, and automatically package the selected information into a prompt-ready bundle.
+- **Generated** from a local project folder using layout-aware builders
+- **Registered** into a MongoDB-backed registry (optionally with embeddings for semantic retrieval)
+- **Retrieved** later by query classification and vector search
+- **Assembled** into curated, prompt-ready context for downstream LLM-assisted workflows
+
+In practice, Bindex Core helps teams keep consistent metadata across many codebases, search for relevant building blocks via a registry, and automatically package selected information into a context bundle suitable for application assembly and analysis.
 
 ## Overview
 
 Bindex Core supports an end-to-end workflow:
 
-1. **Create/Update** a Bindex from a local project directory using a layout-aware builder (for example Maven, Python, or JavaScript).
-2. **Register** the resulting Bindex into a MongoDB-backed registry (optionally storing embeddings for semantic retrieval).
-3. **Pick** relevant Bindexes for a free-text query using classification plus semantic/vector search, with dependency expansion.
-4. **Assemble** selected Bindexes into structured, prompt-ready context for application building or analysis.
+1. **Create/Update** a Bindex from a local project directory using a layout-aware builder.
+2. **Register** the resulting Bindex into a MongoDB-backed registry.
+3. **Pick** relevant Bindexes for a free-text query using classification plus semantic/vector search (with dependency expansion).
+4. **Assemble** selected Bindexes into structured, prompt-ready context for LLM-driven workflows.
 
 ### Architecture (C4 overview)
 
@@ -71,7 +76,7 @@ At a high level, the library is organized around four collaborating components: 
 ## Key Features
 
 - Generate or update `bindex.json` for a project using layout-aware builders.
-- Select a builder based on detected project layout (Maven, Python, JavaScript).
+- Select a builder based on detected project layout (for example Maven, Python, or JavaScript).
 - Register Bindex documents into a MongoDB-backed registry.
 - Retrieve Bindexes using query classification plus semantic/vector search.
 - Expand results using declared dependencies between Bindexes.

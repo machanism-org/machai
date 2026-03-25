@@ -7,13 +7,17 @@
  * TypeScript, Python, PlantUML, or plain-text {@code @guidance.txt} files), understands that format's comment
  * conventions, and returns a formatted fragment that can be assembled into a single request for the LLM.
  *
- * <p>A typical fragment includes:
+ * <p>Each fragment typically includes:
  * <ul>
- *   <li>the project-relative path computed using
+ *   <li>the project-relative path computed via
  *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}</li>
- *   <li>the original file content or an extracted guidance block containing {@code @guidance}</li>
+ *   <li>the source content and/or extracted guidance block containing {@code @guidance}</li>
  *   <li>a prompt template sourced from the {@code document-prompts} resource bundle</li>
  * </ul>
+ *
+ * <p>The package provides specialized implementations for common formats, such as {@link JavaReviewer} for Java
+ * sources (including {@code package-info.java}), {@link MarkdownReviewer} for Markdown, {@link HtmlReviewer} for
+ * HTML/XML, and additional reviewers for other file types.
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer
  */

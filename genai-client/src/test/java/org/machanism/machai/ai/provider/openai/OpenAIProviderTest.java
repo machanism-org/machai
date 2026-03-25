@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
 
 /**
- * Unit tests focused on OpenAIProvider core logic that does not require network access.
+ * Unit tests focused on {@link OpenAIProvider} core logic that does not require network access.
  */
 class OpenAIProviderTest {
 

@@ -24,14 +24,18 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-Bindex Maven Plugin enables automated generation, updating, and registration of **Bindex metadata** for Maven projects within the Machanism/Machai ecosystem. It scans your project directory to build a Bindex index (optionally incrementally) and can publish that metadata to a remote registry endpoint to support library discovery, integration, and assembly workflows.
+Bindex Maven Plugin is a Maven plugin that generates and registers **Bindex metadata** for Maven projects in the Machanism/Machai ecosystem.
+
+It runs Bindex against your project directory to produce a structured index for library discovery, integration, and assembly workflows. The plugin supports first-time index creation and incremental refreshes, and it can publish the resulting metadata to an external registry endpoint.
 
 ## Installation Instructions
 
 ### Prerequisites
 
-- Java: built with `maven.compiler.release=8` (Java 8 bytecode)
 - Apache Maven
+- Java Development Kit (JDK)
+  - Build/compile level (from `pom.xml`): `maven.compiler.release=8` (Java 8 bytecode)
+  - Practical runtime requirement: many environments run Maven on Java 11+
 
 ### Checkout and Build
 
@@ -43,14 +47,14 @@ mvn -DskipTests package
 
 ## Usage
 
-This project is a Maven plugin (`packaging=maven-plugin`). It provides goals to create/update/register Bindex metadata and to clean previously generated artifacts.
+This project is a Maven plugin (`packaging=maven-plugin`) with goals to create/update/register Bindex metadata and to clean temporary artifacts.
 
 ### Goals
 
-- `create`: create a new Bindex index for the current project
-- `update`: refresh an existing index as the project evolves
-- `register`: publish the project’s metadata to a remote registry endpoint
-- `clean`: remove previously generated artifacts
+- `create`: generate a new Bindex index for the current module
+- `update`: refresh an existing Bindex index (incremental/update mode)
+- `register`: optionally update and then publish Bindex metadata to a registry URL
+- `clean`: remove temporary artifacts produced during indexing
 
 ### Basic usage (fully-qualified)
 

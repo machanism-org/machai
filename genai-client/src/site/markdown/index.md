@@ -145,14 +145,14 @@ This provider adapts the MachAI provider abstraction to the OpenAI Java SDK Resp
 
 **Configuration**
 
-Configuration values are read from the `Configurator` passed to `init(Configurator)`:
+Configuration values are read from the `Configurator` passed to `init(Configurator)`. The following keys are used:
 
 - `chatModel` (required): model identifier passed to the OpenAI Responses API (for example, `gpt-4.1` or `gpt-4o`).
 - `OPENAI_API_KEY` (required): API key used to authenticate with the OpenAI API.
 - `OPENAI_BASE_URL` (optional): base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
-- `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, the SDK default timeouts are used.
-- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to provider constant.
-- `MAX_TOOL_CALLS` (optional): maximum number of tool calls allowed in a single response. Defaults to provider constant.
+- `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, the SDK default timeouts are used. Defaults to `600` seconds.
+- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to `300000`.
+- `MAX_TOOL_CALLS` (optional): maximum number of tool calls allowed in a single response. Defaults to `200`.
 
 **Capabilities**
 
@@ -207,7 +207,7 @@ This provider adapts the Anthropic Java SDK to MachAI's provider interface.
 
 **Status**
 
-Not implemented yet: `init(Configurator)` throws `NotImplementedException` and other methods are placeholders.
+Not implemented yet: `init(Configurator)` throws `UnsupportedOperationException` and other methods are placeholders.
 
 **Thread safety:** not thread-safe.
 
@@ -240,5 +240,5 @@ This provider is intended for environments where no external LLM integration sho
 ## Resources
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/genai-client
-- Badge: https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg
+- Badge: https://img.shields.io/maven-central/v/org.machananism.machai/genai-client.svg
 - GitHub: https://github.com/machanism-org/machai

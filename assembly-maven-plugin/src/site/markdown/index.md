@@ -50,47 +50,46 @@ canonical: https://machai.machanism.org/assembly-maven-plugin/index.html
 
 ## Introduction
 
-`assembly-maven-plugin` runs MachAI’s project **assembly** workflow from Maven. It takes a natural-language prompt describing what you want to build, recommends relevant libraries via MachAI **bindex** metadata, and then applies the selected set to a target project directory.
+`assembly-maven-plugin` runs MachAI’s project assembly workflow from Maven. It takes a natural-language prompt describing the project you want to assemble, recommends relevant libraries via MachAI **bindex** metadata, and then applies the selected set to a target directory.
 
-At the center of the plugin is the `assembly` Mojo (`org.machanism.machai.assembly.maven.Assembly`). It can be run **outside** a standard Maven project (`requiresProject=false`), reads the assembly prompt from a file (default `project.txt`) or interactively prompts you, and then orchestrates:
+At the center of the plugin is the `assembly` Mojo (`org.machanism.machai.assembly.maven.Assembly`). The goal is intentionally configured with `requiresProject=false`, so it can be run outside of a standard Maven project while still operating on the configured Maven `${basedir}`.
 
-1. **Library recommendation** using `Picker` (GenAI-powered semantic search over bindex metadata).
-2. **Project updates** using `ApplicationAssembly`, which applies changes to the configured project directory.
-
-Conceptually, this aligns with Machanism’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): the plugin acts as a repeatable, metadata-driven workflow that produces consistent project changes from high-level intent.
+The workflow follows a metadata-driven, repeatable process aligned with Machanism’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): high-level intent (the prompt) is converted into consistent, automated file and configuration changes.
 
 ## Overview
 
-The plugin’s value proposition is to turn “what I want to build” into a concrete, reproducible project setup:
+The plugin’s value is turning “what I want to build” into a concrete and reproducible project setup:
 
-- It captures intent as a prompt (file-based or interactive).
-- It discovers and ranks candidate libraries using bindex entries.
-- It applies the assembled result to a project directory, enabling fast bootstrapping and standardized assembly across projects.
+- Captures intent as a prompt (file-based or interactive).
+- Uses `Picker` to semantically search bindex entries and recommend libraries.
+- Runs `ApplicationAssembly` to apply the assembled changes to the target directory.
+
+This enables rapid bootstrapping and standardized assembly across projects.
 
 ## Key Features
 
-- Maven goal `assembly` that can run with or without a Maven project.
-- Prompt input via `project.txt` (or a configurable prompt file), with interactive fallback.
+- Maven goal `assembly` that can run with or without a Maven project (`requiresProject=false`).
+- Prompt input via `project.txt` (configurable), with interactive fallback.
 - GenAI-backed library recommendations through MachAI `Picker`.
-- Minimum recommendation score threshold control.
-- Optional bindex registration/lookup URL support.
-- Applies changes directly to the configured base directory.
-- Separate model selection for recommendation (`pickModel`) vs assembly (`assemblyModel`).
+- Minimum recommendation score threshold (`assembly.score`).
+- Optional bindex registration/lookup URL support (`bindex.register.url`).
+- Separate model selection for recommendation (`picker.model`) vs assembly (`assembly.model`).
+- Applies changes directly to the configured base directory (`${basedir}`).
 
 ## Getting Started
 
 ### Prerequisites
 
 - **Java:** see version notes below.
-- **Maven:** a Maven installation suitable for running plugins.
-- **GenAI provider configuration:** the MachAI provider referenced by the configured model identifiers must be available (credentials/environment depend on the provider you choose).
-- **bindex configuration:** a `bindex.properties` file available to the execution (used by the workflow configuration).
+- **Maven:** a Maven installation capable of executing plugins.
+- **GenAI provider configuration:** the MachAI provider referenced by the configured model identifiers must be available (credentials and environment variables depend on the chosen provider).
+- **bindex configuration:** a `bindex.properties` file must be available at execution time (used by the workflow configuration).
 - (Optional) Network access to any configured bindex registration/lookup service.
 
 ### Java Version
 
 - **Build-level requirement (from `pom.xml`):** compiled with `maven.compiler.release=8` (Java 8).
-- **Functional/runtime note:** depending on the selected GenAI provider integrations and your execution environment, you may choose to run on a newer Java runtime; however, the plugin is intended to be compatible with Java 8 as declared.
+- **Functional/runtime note:** runtime needs may vary by GenAI provider integrations and environment, but the plugin is intended to be compatible with Java 8 as declared.
 
 ### Basic Usage
 
@@ -102,7 +101,7 @@ To provide a prompt via file, create `project.txt` in the directory you are runn
 
 ### Typical Workflow
 
-1. Create or choose a target directory (the Maven `${basedir}` where changes will be applied).
+1. Choose the directory where changes should be applied (the Maven `${basedir}`).
 2. Write your assembly prompt in `project.txt` (or plan to answer the interactive prompt).
 3. Ensure `bindex.properties` is present and configured for your environment.
 4. Run the `assembly` goal.
@@ -117,7 +116,7 @@ To provide a prompt via file, create `project.txt` in the directory you are runn
 | `picker.model` | GenAI provider/model identifier for library recommendations (`Picker.MODEL_PROP_NAME`). | `Picker.DEFAULT_MODEL` |
 | `assembly.prompt.file` | Prompt file to read as plain text; if missing, the plugin prompts interactively. | `project.txt` |
 | `assembly.score` | Minimum score threshold used by the picker when recommending libraries. | `ApplicationAssembly.DEFAULT_SCORE_VALUE` |
-| `bindex.register.url` | Optional registration/lookup URL used by the picker for metadata operations. | _(none)_ |
+| `bindex.register.url` | Optional registration URL used by the picker for metadata lookups/registration. | _(none)_ |
 
 ## Resources
 

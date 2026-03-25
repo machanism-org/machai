@@ -51,7 +51,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <p>
  * This goal also supports all common parameters defined by
  * {@link AbstractGWGoal} (for example {@code -Dgw.model}, {@code -Dgw.scanDir},
- * {@code -Dgw.excludes}, {@code -Dgw.genai.serverId}, and {@code -DlogInputs}).
+ * {@code -Dgw.excludes}, {@code -Dgenai.serverId}, and {@code -DlogInputs}).
  * </p>
  *
  * <h2>Usage examples</h2>

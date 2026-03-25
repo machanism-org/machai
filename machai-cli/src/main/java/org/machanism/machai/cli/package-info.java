@@ -1,8 +1,33 @@
 /**
- * Command-line interface (CLI) entry points and supporting components for the Machai tool.
+ * Command-line interface (CLI) commands for the Machai tool.
  *
- * <p>This package provides the public-facing CLI surface area, including command definitions, option parsing,
- * and console I/O coordination.
+ * <p>
+ * This package contains the Spring Boot / Spring Shell entry point and the set of shell commands that
+ * orchestrate Machai features:
+ * </p>
+ * <ul>
+ *   <li>Project scanning and Ghostwriter guidance processing ({@link org.machanism.machai.cli.GWCommand}).</li>
+ *   <li>Interactive Act-mode execution ({@link org.machanism.machai.cli.ActCommand}).</li>
+ *   <li>Bindex generation/registration and library picking/assembly workflows
+ *       ({@link org.machanism.machai.cli.BindexCommand}, {@link org.machanism.machai.cli.AssembyCommand}).</li>
+ *   <li>Persistent CLI configuration management ({@link org.machanism.machai.cli.ConfigCommand}).</li>
+ *   <li>Cleanup of Machai temporary folders ({@link org.machanism.machai.cli.CleanCommand}).</li>
+ * </ul>
+ *
+ * <p>
+ * Most commands read defaults (for example, the project directory and GenAI model) from the shared
+ * configuration stored in {@code machai.properties}.
+ * </p>
+ *
+ * <h2>Typical usage</h2>
+ *
+ * <pre>
+ * config --key dir --value .\my-project
+ * gw --scanDir .\my-project --excludes target,.git
+ * act commit "and push"
+ * bindex --dir .\my-project
+ * clean --dir .\my-project
+ * </pre>
  */
 package org.machanism.machai.cli;
 

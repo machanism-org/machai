@@ -37,11 +37,15 @@ public class PomReader {
 
 	/**
 	 * Loads and returns the Maven model from a <code>pom.xml</code> file.
-	 * Optionally calculates the effective model with plugin resolution.
 	 *
-	 * @param pomFile   pom.xml file to parse
-	 * @param effective true for effective model calculation, false for raw parsing
-	 * @return Parsed Maven Model
+	 * <p>
+	 * Note: despite earlier versions of this class referencing an "effective"
+	 * build, this implementation currently performs a lightweight parse of the POM
+	 * after applying property substitutions.
+	 * </p>
+	 *
+	 * @param pomFile pom.xml file to parse
+	 * @return parsed Maven model
 	 * @throws IllegalArgumentException if <code>pom.xml</code> cannot be processed
 	 * @see <a href="https://maven.apache.org/pom.html">Maven POM Reference</a>
 	 */
@@ -51,14 +55,14 @@ public class PomReader {
 
 		Model model = null;
 		try {
-				MavenXpp3Reader reader = new MavenXpp3Reader();
-				FileReader fileReader = new FileReader(pomFile);
-				String pomStr = IOUtils.toString(fileReader);
-				pomStr = replaceProperty(pomStr);
-				if (pomStr == null) {
-					throw new IllegalArgumentException("POM content could not be read: " + pomFile);
-				}
-				model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
+			MavenXpp3Reader reader = new MavenXpp3Reader();
+			FileReader fileReader = new FileReader(pomFile);
+			String pomStr = IOUtils.toString(fileReader);
+			pomStr = replaceProperty(pomStr);
+			if (pomStr == null) {
+				throw new IllegalArgumentException("POM content could not be read: " + pomFile);
+			}
+			model = reader.read(new ByteArrayInputStream(pomStr.getBytes()), false);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("POM file: " + pomFile, e);
 		}
@@ -68,10 +72,10 @@ public class PomReader {
 			pomProperties.put((String) entry.getKey(), (String) entry.getValue());
 		}
 
-			String version = model.getVersion();
-			if (version != null) {
-				pomProperties.put("project.version", version);
-			}
+		String version = model.getVersion();
+		if (version != null) {
+			pomProperties.put("project.version", version);
+		}
 
 		List<License> licenses = model.getLicenses();
 		if (licenses.isEmpty()) {
@@ -88,7 +92,7 @@ public class PomReader {
 	/**
 	 * Replaces placeholders in a POM string using collected properties.
 	 * 
-	 * @param pomStr Raw POM file as string
+	 * @param pomStr raw POM file as string
 	 * @return POM string with placeholders replaced
 	 */
 	private String replaceProperty(String pomStr) {
@@ -122,7 +126,7 @@ public class PomReader {
 	/**
 	 * Returns properties parsed from pom.xml files.
 	 * 
-	 * @return Map of POM properties
+	 * @return map of POM properties
 	 */
 	public Map<String, String> getPomProperties() {
 		return pomProperties;

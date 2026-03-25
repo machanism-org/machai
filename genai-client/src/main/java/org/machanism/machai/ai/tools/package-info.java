@@ -47,7 +47,7 @@
  * <ul>
  *   <li><b>Tool registration</b>: implementations of {@link org.machanism.machai.ai.tools.FunctionTools} register
  *       tools via
- *       {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, java.util.function.Function, String...)}.</li>
+ *       {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, org.machanism.machai.ai.manager.GenAIProvider.ToolFunction, String...)}.</li>
  *   <li><b>Discovery and wiring</b>: installers are typically discovered using {@link java.util.ServiceLoader} and
  *       applied by {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
  *   <li><b>Scoped execution</b>: tools interpret paths relative to a host-supplied working directory, bound output

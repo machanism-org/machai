@@ -33,18 +33,18 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project
     documentation using embedded guidance tags and AI-powered synthesis.
   </p>
-  <p>
-    Ghostwriter supports all types of project files—including source code, documentation, project site content,
-    and other relevant files.
-  </p>
 </header>
 
 <section>
-  <h2>Overview</h2>
+  <h2>Purpose</h2>
   <p>
-    Ghostwriter is a filesystem-first tool for generating and updating documentation in-place.
-    It traverses a project directory tree, discovers embedded <code>@guidance:</code> instructions, and orchestrates
-    provider-ready prompts for a configured GenAI provider.
+    Ghostwriter is a filesystem-first documentation and content generation tool. It traverses a project directory
+    tree, discovers embedded <code>@guidance:</code> instructions in files, and orchestrates provider-ready prompts for a
+    configured GenAI provider. The resulting content is applied in-place to the same files.
+  </p>
+  <p>
+    Ghostwriter supports all types of project files—including source code, documentation, project site content, and
+    other relevant files.
   </p>
 </section>
 
@@ -56,8 +56,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   </figure>
 
   <p>
-    The implementation is organized around an orchestration pipeline (project traversal, guidance extraction,
-    prompt composition, and dispatch) and a reviewer SPI (format-specific guidance extractors).
+    The implementation is organized around an orchestration pipeline (project traversal, guidance extraction, prompt
+    composition, and dispatch) and a reviewer SPI (format-specific guidance extractors).
   </p>
 </section>
 
@@ -66,19 +66,22 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <dl>
     <dt><strong>Guidance</strong></dt>
     <dd>
-      File-embedded instructions (usually introduced by <code>@guidance:</code>) that describe what should be generated
-      or updated.
+      File-embedded instructions (usually introduced by <code>@guidance:</code>) that describe what should be generated or
+      updated.
     </dd>
 
     <dt><strong>Reviewer</strong></dt>
     <dd>
-      A file-format-aware extractor that locates guidance blocks and builds normalized prompt fragments.
+      A file-format-aware extractor that locates guidance blocks and converts them into normalized prompt fragments.
+      Reviewers understand format-specific comment conventions and can handle common file types such as Java,
+      Markdown, HTML/XML, TypeScript, Python, PlantUML, and plain text.
     </dd>
 
     <dt><strong>Processor</strong></dt>
     <dd>
-      An orchestration component that scans the filesystem, selects files, invokes reviewers, composes prompts,
-      and applies results.
+      Orchestration components that scan the filesystem, select files, invoke reviewers, compose prompts, and apply
+      results. Processing is strictly filesystem-based: projects are not built and dependencies are not resolved
+      during scanning.
     </dd>
 
     <dt><strong>Act</strong></dt>
@@ -86,21 +89,6 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       A predefined TOML-based prompt template that can be applied to matching files.
     </dd>
   </dl>
-</section>
-
-<section>
-  <h2>Core workflow</h2>
-  <ol>
-    <li><strong>Select scan targets</strong> (directory roots and/or path matchers such as <code>glob:</code> and <code>regex:</code>).</li>
-    <li><strong>Traverse the filesystem</strong> and select files to process using include/exclude rules.</li>
-    <li><strong>Extract guidance</strong> from file comments using a format-specific reviewer.</li>
-    <li><strong>Compose prompts</strong> using project metadata and extracted guidance (acts/templates may also be applied).</li>
-    <li><strong>Dispatch</strong> the prompt to the configured GenAI provider and apply the result.</li>
-  </ol>
-  <p>
-    Processing is strictly filesystem-based: projects are not built and dependencies are not resolved during scanning.
-    For multi-module layouts, processing is performed child-first.
-  </p>
 </section>
 
 <section>
@@ -114,16 +102,27 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     Project scanning, guidance extraction, and prompt orchestration for the Ghostwriter command-line tool.
     This package contains the CLI entry point and the processors responsible for scanning a project directory tree,
     extracting embedded <code>@guidance:</code> directives, and invoking the configured GenAI provider.
-    Processing is strictly filesystem-based, and multi-module projects are handled child-first.
+    Multi-module projects are processed child-first.
   </p>
 
   <h3><code>org.machanism.machai.gw.reviewer</code></h3>
   <p>
     File-format-aware scanners that locate embedded <code>@guidance</code> instructions in project files and convert them
     into normalized prompt fragments for Ghostwriter's downstream processing pipeline.
-    Reviewers understand format-specific comment conventions and can handle common file types such as Java,
-    Markdown, HTML/XML, TypeScript, Python, PlantUML, and plain text.
+    Reviewers understand format-specific comment conventions and return formatted fragments that can be assembled
+    into a single request for the LLM.
   </p>
+</section>
+
+<section>
+  <h2>Workflow</h2>
+  <ol>
+    <li><strong>Select scan targets</strong> (directory roots and/or matchers such as <code>glob:</code> and <code>regex:</code>).</li>
+    <li><strong>Traverse the filesystem</strong> and select files to process using include/exclude rules.</li>
+    <li><strong>Extract guidance</strong> with a format-specific reviewer.</li>
+    <li><strong>Compose prompts</strong> using extracted guidance, acts/templates, and project metadata.</li>
+    <li><strong>Dispatch</strong> the request to the configured GenAI provider and apply the result.</li>
+  </ol>
 </section>
 
 <section>

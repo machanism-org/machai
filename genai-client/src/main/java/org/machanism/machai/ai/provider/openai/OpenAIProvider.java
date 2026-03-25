@@ -84,11 +84,12 @@ import com.openai.services.blocking.ModelService;
  * <li>{@code OPENAI_BASE_URL} (optional): base URL for OpenAI-compatible
  * endpoints. If unset, the SDK default base URL is used.</li>
  * <li>{@code GENAI_TIMEOUT} (optional): request timeout in seconds. If missing,
- * {@code 0}, or negative, the SDK default timeouts are used.</li>
+ * {@code 0}, or negative, the SDK default timeouts are used. Defaults to
+ * {@value #TIMEOUT_SEC} seconds.</li>
  * <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum number of output tokens.
- * Defaults to {@link #MAX_OUTPUT_TOKENS}.</li>
+ * Defaults to {@value #MAX_OUTPUT_TOKENS}.</li>
  * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls allowed
- * in a single response. Defaults to {@link #MAX_TOOL_CALLS}.</li>
+ * in a single response. Defaults to {@value #MAX_TOOL_CALLS}.</li>
  * </ul>
  */
 public class OpenAIProvider implements GenAIProvider {

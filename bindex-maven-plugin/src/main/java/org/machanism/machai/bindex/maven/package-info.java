@@ -28,35 +28,32 @@
  */
 
 /**
- * Maven plugin goals for creating, updating, cleaning, and registering Bindex
- * metadata for a Maven project.
+ * Maven plugin Mojos that integrate Machai/Bindex workflows into a Maven build.
  *
  * <p>
- * This package provides several Mojos that integrate the Machai/Bindex indexing
- * workflow into the Maven lifecycle:
+ * The classes in this package provide goals for creating or updating a Bindex index
+ * for the current project, registering the project's metadata in an external
+ * registry, and cleaning up temporary artifacts produced during execution.
  * </p>
  *
+ * <h2>Goals</h2>
+ *
  * <ul>
- * <li>{@link org.machanism.machai.bindex.maven.Create} - create a new Bindex
- * index and related resources.</li>
- * <li>{@link org.machanism.machai.bindex.maven.Update} - refresh an existing
- * Bindex index.</li>
- * <li>{@link org.machanism.machai.bindex.maven.Register} - scan the project and
- * publish Bindex metadata to an external registry.</li>
- * <li>{@link org.machanism.machai.bindex.maven.Clean} - remove temporary
- * artifacts (such as the inputs log file) created by the tooling.</li>
+ * <li>{@link org.machanism.machai.bindex.maven.Create} - generates a new Bindex index and related resources.</li>
+ * <li>{@link org.machanism.machai.bindex.maven.Update} - refreshes an existing index.</li>
+ * <li>{@link org.machanism.machai.bindex.maven.Register} - scans the project and publishes metadata to a registry.</li>
+ * <li>{@link org.machanism.machai.bindex.maven.Clean} - removes temporary artifacts (for example the inputs log file).</li>
  * </ul>
  *
  * <p>
- * All goals share common configuration implemented by
- * {@link org.machanism.machai.bindex.maven.AbstractBindexMojo}, including:
+ * Shared configuration and Maven integration helpers are implemented by
+ * {@link org.machanism.machai.bindex.maven.AbstractBindexMojo}. Common properties include:
  * </p>
  *
  * <ul>
- * <li>Selection of the AI provider/model via the {@code bindex.model}
- * property.</li>
- * <li>Optional credential resolution from {@code settings.xml} using
- * {@code gw.genai.serverId}.</li>
+ * <li>{@code bindex.model} (required) - AI provider/model identifier used by Bindex (for example {@code OpenAI:gpt-5}).</li>
+ * <li>{@code genai.serverId} (optional) - {@code settings.xml} server id used to resolve GenAI credentials.</li>
+ * <li>{@code bindex.register.url} (optional) - registry endpoint URL used by the {@code register} goal.</li>
  * </ul>
  *
  * <h2>Usage</h2>

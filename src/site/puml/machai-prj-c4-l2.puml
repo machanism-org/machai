@@ -2,9 +2,12 @@
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
+' Layout & styling
+LAYOUT_WITH_LEGEND()
+
 title Machai Project - Containers (C4 L2)
 
-Person(dev, "Developer")
+Person(dev, "Developer", "Maintains and runs Machai tools")
 
 System_Boundary(machai, "Machai Project") {
   Container(cli, "machai-cli", "Java (Spring Shell)", "Interactive CLI for bindex/assembly/ghostwriter workflows")
@@ -17,13 +20,16 @@ System_Boundary(machai, "Machai Project") {
   Container(assemblyPlugin, "assembly-maven-plugin", "Maven Plugin (Java)", "Prompt-driven assembly using bindex + GenAI")
   Container(gwPlugin, "gw-maven-plugin", "Maven Plugin (Java)", "Run Ghostwriter during Maven build / reactor-aware")
 
+  Rel(dev, cli, "Runs")
+  Rel(dev, gw, "Runs", "CLI/JAR")
+
   Rel(cli, bindexCore, "Uses")
   Rel(cli, gw, "Uses")
   Rel(cli, genai, "Uses")
 
   Rel(gw, genai, "Uses")
-  Rel(bindexCore, genai, "Uses (semantic picking/tooling)")
-  Rel(bindexCore, projectLayout, "Uses (project detection)")
+  Rel(bindexCore, genai, "Uses", "Semantic picking/tooling")
+  Rel(bindexCore, projectLayout, "Uses", "Project detection")
 
   Rel(bindexPlugin, bindexCore, "Uses")
   Rel(assemblyPlugin, bindexCore, "Uses")
@@ -36,9 +42,6 @@ System_Ext(genaiProviders, "GenAI Providers", "OpenAI/Claude/Gemini/etc.")
 System_Ext(maven, "Apache Maven", "Build runner")
 System_Ext(fs, "File System", "Project working directory")
 
-Rel(dev, cli, "Runs")
-Rel(dev, gw, "Runs", "CLI/JAR")
-
 Rel(maven, bindexPlugin, "Executes goals")
 Rel(maven, assemblyPlugin, "Executes goals")
 Rel(maven, gwPlugin, "Executes goals")
@@ -47,7 +50,7 @@ Rel(genai, genaiProviders, "Calls provider APIs", "HTTPS")
 
 Rel(cli, fs, "Reads/writes")
 Rel(gw, fs, "Reads/writes")
-Rel(bindexCore, fs, "Reads/writes bindex.json etc.")
+Rel(bindexCore, fs, "Reads/writes", "bindex.json etc.")
 Rel(bindexPlugin, fs, "Reads project model / writes bindex outputs")
 Rel(assemblyPlugin, fs, "Applies changes to project")
 Rel(gwPlugin, fs, "Updates files during build")

@@ -23,7 +23,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Machai CLI – Overview</title>
+  <title>Machai CLI  Overview</title>
 </head>
 <body>
 
@@ -35,73 +35,64 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   discovery and integration.
 </p>
 
-<h2>Purpose</h2>
+<h2>Overview</h2>
 
 <p>
-  This module provides a Spring Shell-based command-line interface for the Machai toolchain. It is designed for:
+  This module provides a Spring Shell-based command-line interface for the Machai toolchain. It supports interactive
+  execution (REPL) as well as non-interactive usage suitable for scripts and CI pipelines.
 </p>
 
+<h2>Key capabilities</h2>
+
 <ul>
-  <li><strong>Interactive use</strong> via a REPL-style shell.</li>
-  <li><strong>Non-interactive execution</strong> suitable for scripting and CI automation.</li>
-  <li><strong>Delegation to core Machai libraries</strong> (for example, bindex and Ghostwriter) to perform indexing,
-    semantic search, and guided file processing.</li>
+  <li><strong>Guided file processing:</strong> scan a project and process files using the Ghostwriter pipeline.</li>
+  <li><strong>Act mode:</strong> run predefined interactive actions/prompts against a working directory.</li>
+  <li><strong>Indexing and discovery:</strong> generate and optionally register bindex metadata for semantic search.</li>
+  <li><strong>Picking and assembly:</strong> select libraries based on a query and assemble an output project.</li>
+  <li><strong>Configuration:</strong> persist CLI defaults (for example, project directory and model/provider settings).</li>
+  <li><strong>Cleanup:</strong> remove Machai temporary artifacts (for example, <code>.machai</code>).</li>
 </ul>
 
-<h2>High-level architecture</h2>
+<h2>Architecture</h2>
 
 <ul>
   <li>
-    <strong>Application bootstrap:</strong>
-    <code>org.machanism.machai.cli.MachaiCLI</code> starts the JVM process and initializes Spring Shell.
+    <strong>Application entry point</strong>  <code>org.machanism.machai.cli.MachaiCLI</code> bootstraps the process and
+    initializes Spring Shell.
   </li>
   <li>
-    <strong>Command layer:</strong>
-    Command classes in <code>org.machanism.machai.cli</code> expose user-facing operations, map shell options to typed
-    parameters, and coordinate console I/O.
+    <strong>Command layer</strong>  classes in <code>org.machanism.machai.cli</code> expose user-facing operations, map shell
+    options to typed parameters, and coordinate console I/O.
   </li>
   <li>
-    <strong>Execution &amp; delegation:</strong>
-    Commands validate inputs, resolve working directories, read defaults from configuration, and then delegate work
-    to underlying Machai modules (for indexing, search, prompt execution, and assembly).
+    <strong>Delegation to core libraries</strong>  commands perform basic validation and directory resolution and then
+    delegate to underlying Machai modules (for example, bindex and Ghostwriter) to execute the workflow.
   </li>
 </ul>
 
 <h2>Package overview</h2>
 
-<p>
-  Public CLI functionality is concentrated in the following package:
-</p>
-
 <ul>
   <li>
-    <strong><code>org.machanism.machai.cli</code></strong> – Command-line interface (CLI) entry points and supporting
-    components.
+    <strong><code>org.machanism.machai.cli</code></strong>  Spring Shell entry point and CLI command implementations.
     <ul>
-      <li>
-        Defines Spring Shell commands that expose Machai workflows as interactive or scriptable operations.
-      </li>
-      <li>
-        Coordinates option parsing, console output, and basic validation before invoking Machai libraries.
-      </li>
-      <li>
-        Uses persisted configuration (via <code>ConfigCommand</code>) to provide defaults such as project directory and
-        model/provider settings.
-      </li>
+      <li>Orchestrates Machai workflows such as scanning, Act-mode execution, bindex generation, and cleanup.</li>
+      <li>Provides persistent configuration used as defaults by most commands.</li>
+      <li>Serves as the primary integration point for scripting and CI automation.</li>
     </ul>
   </li>
 </ul>
 
-<h2>Primary command components</h2>
+<h2>Primary components</h2>
 
 <ul>
-  <li><code>org.machanism.machai.cli.MachaiCLI</code> – Application entry point; initializes Spring Shell.</li>
-  <li><code>org.machanism.machai.cli.ConfigCommand</code> – Reads/writes CLI defaults and configuration.</li>
-  <li><code>org.machanism.machai.cli.BindexCommand</code> – Generates (and optionally registers) bindex metadata.</li>
-  <li><code>org.machanism.machai.cli.AssembyCommand</code> – Performs semantic search selection and assembles an output project.</li>
-  <li><code>org.machanism.machai.cli.GWCommand</code> – Scans folders and processes files using the Ghostwriter pipeline.</li>
-  <li><code>org.machanism.machai.cli.ActCommand</code> – Runs predefined interactive actions/prompts (Act mode).</li>
-  <li><code>org.machanism.machai.cli.CleanCommand</code> – Removes Machai temporary artifacts (for example, <code>.machai</code>).</li>
+  <li><code>org.machanism.machai.cli.MachaiCLI</code>  application entry point.</li>
+  <li><code>org.machanism.machai.cli.ConfigCommand</code>  reads/writes CLI configuration defaults.</li>
+  <li><code>org.machanism.machai.cli.GWCommand</code>  scans folders and processes files with Ghostwriter.</li>
+  <li><code>org.machanism.machai.cli.ActCommand</code>  runs predefined interactive actions/prompts (Act mode).</li>
+  <li><code>org.machanism.machai.cli.BindexCommand</code>  generates (and optionally registers) bindex metadata.</li>
+  <li><code>org.machanism.machai.cli.AssembyCommand</code>  performs pick/assembly workflows based on semantic search.</li>
+  <li><code>org.machanism.machai.cli.CleanCommand</code>  removes Machai temporary artifacts.</li>
 </ul>
 
 <h2>Class diagram</h2>

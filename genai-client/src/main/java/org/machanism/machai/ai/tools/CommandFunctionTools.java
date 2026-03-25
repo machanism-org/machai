@@ -27,33 +27,27 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Installs command-execution and process-termination tools into a
- * {@link GenAIProvider}.
+ * Installs command-execution and process-termination tools into a {@link GenAIProvider}.
  *
  * <p>
- * The installed tools provide a controlled wrapper around
- * {@link ProcessBuilder} to execute a host command line within a validated
- * working directory and capture both stdout and stderr into a bounded buffer
- * (see {@link LimitedStringBuilder}).
+ * The installed tools provide a controlled wrapper around {@link ProcessBuilder} to execute a host command line
+ * within a validated working directory and capture both stdout and stderr into a bounded buffer (see
+ * {@link LimitedStringBuilder}).
  * </p>
  *
  * <h2>Security model</h2>
  * <p>
- * Command execution is intended to be restricted by the host application. This
- * implementation supports:
+ * Command execution is intended to be restricted by the host application. This implementation supports:
  * </p>
  * <ul>
  * <li>A deny-list heuristic check via {@link CommandSecurityChecker}</li>
- * <li>Project-root confinement for the working directory (see
- * {@link #resolveWorkingDir(File, String)})</li>
+ * <li>Project-root confinement for the working directory (see {@link #resolveWorkingDir(File, String)})</li>
  * </ul>
  *
  * <h2>Installed tools</h2>
  * <ul>
- * <li>{@code run_command_line_tool} – executes a command line and returns
- * output</li>
- * <li>{@code terminate_process} – aborts execution by throwing a
- * {@link ProcessTerminationException}</li>
+ * <li>{@code run_command_line_tool} – executes a command line and returns output</li>
+ * <li>{@code terminate_process} – aborts execution by throwing a {@link ProcessTerminationException}</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -63,30 +57,28 @@ public class CommandFunctionTools implements FunctionTools {
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
 
-	/**
-	 * Default maximum number of characters to return from captured process output.
-	 */
+	/** Default maximum number of characters to return from captured process output. */
 	private static final int DEFAULT_RESULT_TAIL_SIZE = 1024;
 
 	/** Default character set used to decode process output streams. */
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
-	/** Maximum time to wait for a started process to complete. */
+	/** Maximum time to wait for a started process to complete, in seconds. */
 	private int processTimeoutSeconds = 600;
 
 	/** Checker that rejects known-dangerous command fragments. */
 	private CommandSecurityChecker checker;
 
+	/**
+	 * Configuration source used to resolve ${...} placeholders in commands and other tool parameters.
+	 */
 	private Configurator configurator;
 
-	/**
-	 * Reusable Random instance.
-	 */
+	/** Reusable random instance used for generating lightweight command ids for logging. */
 	private static final SecureRandom RANDOM = new SecureRandom();
 
 	/**
-	 * Runtime exception used by {@code terminate_process} to signal early
-	 * termination to the host.
+	 * Runtime exception used by {@code terminate_process} to signal early termination to the host.
 	 */
 	public static class ProcessTerminationException extends RuntimeException {
 		private static final long serialVersionUID = -4615360980518233932L;
@@ -126,36 +118,31 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Registers system command and process control tools with the provided
-	 * {@link GenAIProvider}.
+	 * Registers system command and process control tools with the provided {@link GenAIProvider}.
+	 *
 	 * <p>
 	 * The following tools are installed:
 	 * </p>
 	 * <ul>
-	 * <li><b>run_command_line_tool</b> – Executes a system command using Java's
-	 * {@link ProcessBuilder}.<br>
+	 * <li><b>run_command_line_tool</b> – Executes a system command using Java's {@link ProcessBuilder}.<br>
 	 * <b>Parameters:</b>
 	 * <ul>
 	 * <li><b>command</b> (string, required): The command to execute.</li>
-	 * <li><b>env</b> (string, optional): Environment variables as
-	 * {@code NAME=VALUE} pairs separated by newline characters ({@code \n}).</li>
-	 * <li><b>dir</b> (string, optional): Working directory relative to the project
-	 * directory; defaults to {@code .}.</li>
-	 * <li><b>tailResultSize</b> (integer, optional): Maximum number of characters
-	 * to return from captured output; defaults to
-	 * {@code DEFAULT_RESULT_TAIL_SIZE}.</li>
-	 * <li><b>charsetName</b> (string, optional): Character set used to decode
-	 * process output; defaults to {@code DEFAULT_CHARSET}.</li>
+	 * <li><b>env</b> (string, optional): Environment variables as {@code NAME=VALUE} pairs separated by newline
+	 * characters ({@code \n}).</li>
+	 * <li><b>dir</b> (string, optional): Working directory relative to the project directory; defaults to
+	 * {@code .}.</li>
+	 * <li><b>tailResultSize</b> (integer, optional): Maximum number of characters to return from captured output;
+	 * defaults to {@code DEFAULT_RESULT_TAIL_SIZE}.</li>
+	 * <li><b>charsetName</b> (string, optional): Character set used to decode process output; defaults to
+	 * {@code DEFAULT_CHARSET}.</li>
 	 * </ul>
 	 * </li>
-	 * <li><b>terminate_process</b> – Throws an exception to immediately terminate
-	 * execution.<br>
+	 * <li><b>terminate_process</b> – Throws an exception to immediately terminate execution.<br>
 	 * <b>Parameters:</b>
 	 * <ul>
-	 * <li><b>message</b> (string, optional): Exception message; defaults to
-	 * "Process terminated by function tool."</li>
-	 * <li><b>cause</b> (string, optional): Optional cause message; wrapped in an
-	 * {@link Exception}.</li>
+	 * <li><b>message</b> (string, optional): Exception message; defaults to "Process terminated by function tool."</li>
+	 * <li><b>cause</b> (string, optional): Optional cause message; wrapped in an {@link Exception}.</li>
 	 * <li><b>exitCode</b> (integer, optional): Exit code; defaults to 1.</li>
 	 * </ul>
 	 * </li>
@@ -190,14 +177,12 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Implements the {@code terminate_process} tool.
 	 *
 	 * <p>
-	 * Reads {@code message}, {@code cause}, and {@code exitCode} from the supplied
-	 * {@link JsonNode} and throws a {@link ProcessTerminationException}. This
-	 * mechanism allows a tool invocation to abort the overall workflow with an
-	 * explicit exit code.
+	 * Reads {@code message}, {@code cause}, and {@code exitCode} from the supplied {@link JsonNode} and throws a
+	 * {@link ProcessTerminationException}. This mechanism allows a tool invocation to abort the overall workflow
+	 * with an explicit exit code.
 	 * </p>
 	 *
-	 * @param params tool invocation parameters (expects a single {@link JsonNode}
-	 *               argument)
+	 * @param params tool invocation parameters (expects a single {@link JsonNode} argument)
 	 * @return never returns; always throws
 	 * @throws ProcessTerminationException always thrown to terminate execution
 	 */
@@ -222,13 +207,12 @@ public class CommandFunctionTools implements FunctionTools {
 	 * </p>
 	 * <ol>
 	 * <li>{@link JsonNode} containing {@code command} and optional settings</li>
-	 * <li>{@link File} project working directory supplied by the provider
-	 * runtime</li>
+	 * <li>{@link File} project working directory supplied by the provider runtime</li>
 	 * </ol>
 	 *
 	 * @param params tool arguments
 	 * @return command output bounded to the configured tail size
-	 * @throws IOException 
+	 * @throws IOException if the process cannot be started or I/O occurs while resolving paths
 	 */
 	public String executeCommand(Object[] params) throws IOException {
 		String commandId = Integer.toHexString(RANDOM.nextInt());
@@ -255,8 +239,7 @@ public class CommandFunctionTools implements FunctionTools {
 			return "Error: Working directory must be within project directory.";
 		}
 
-		Integer tailResultSize = props.has("tailResultSize")
-				? props.get("tailResultSize").asInt(DEFAULT_RESULT_TAIL_SIZE)
+		Integer tailResultSize = props.has("tailResultSize") ? props.get("tailResultSize").asInt(DEFAULT_RESULT_TAIL_SIZE)
 				: DEFAULT_RESULT_TAIL_SIZE;
 		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(DEFAULT_CHARSET)
 				: DEFAULT_CHARSET;
@@ -264,8 +247,7 @@ public class CommandFunctionTools implements FunctionTools {
 		Process prc = null;
 		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
 
-		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
-				Executors.newFixedThreadPool(2))) {
+		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(Executors.newFixedThreadPool(2))) {
 
 			runDenyChecks(command);
 
@@ -280,15 +262,13 @@ public class CommandFunctionTools implements FunctionTools {
 			final Process process = pb.start();
 			prc = process;
 
-			Future<?> stdoutFuture = executor.get()
-					.submit(() -> readStream(process.getInputStream(), charsetName, output,
-							line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
-							e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
+			Future<?> stdoutFuture = executor.get().submit(() -> readStream(process.getInputStream(), charsetName, output,
+					line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
+					e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
 
-			Future<?> stderrFuture = executor.get()
-					.submit(() -> readStream(process.getErrorStream(), charsetName, output,
-							line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
-							e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
+			Future<?> stderrFuture = executor.get().submit(() -> readStream(process.getErrorStream(), charsetName, output,
+					line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
+					e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
 
 			return waitAndCollect(process, stdoutFuture, stderrFuture, output, commandId);
 
@@ -320,6 +300,13 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Applies deny-list checks to each token of the supplied command line.
+	 *
+	 * @param command the full command line
+	 * @throws CommandLineException if the command cannot be tokenized
+	 * @throws DenyException        if any token violates a deny-list rule
+	 */
 	private void runDenyChecks(String command) throws CommandLineException, DenyException {
 		String[] commandParts = CommandLineUtils.translateCommandline(command);
 		for (String commandPart : commandParts) {
@@ -327,9 +314,25 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 	}
 
-	String waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture,
-			LimitedStringBuilder output, String commandId)
-			throws InterruptedException, TimeoutException, ExecutionException {
+	/**
+	 * Waits for the process to finish (up to {@link #processTimeoutSeconds}) and then returns collected output.
+	 *
+	 * <p>
+	 * This method also waits briefly for stdout/stderr reader tasks to complete so that output is not lost.
+	 * </p>
+	 *
+	 * @param process      process being observed
+	 * @param stdoutFuture future representing the stdout reader task
+	 * @param stderrFuture future representing the stderr reader task
+	 * @param output       bounded output buffer
+	 * @param commandId    id used for log correlation
+	 * @return collected output, followed by an exit-code line
+	 * @throws InterruptedException if the current thread is interrupted while waiting
+	 * @throws TimeoutException     if collecting output times out
+	 * @throws ExecutionException   if a reader task fails
+	 */
+	String waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture, LimitedStringBuilder output,
+			String commandId) throws InterruptedException, TimeoutException, ExecutionException {
 		boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
 		if (!finished) {
 			process.destroyForcibly();
@@ -350,8 +353,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Resolves a working directory relative to a canonical project directory.
 	 *
 	 * <p>
-	 * Absolute paths are rejected and attempts to traverse outside the project
-	 * directory are blocked.
+	 * Absolute paths are rejected and attempts to traverse outside the project directory are blocked.
 	 * </p>
 	 *
 	 * @param projectDir canonical project directory
@@ -393,8 +395,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Parses the {@code env} parameter string into a map of environment variables.
 	 *
 	 * <p>
-	 * Lines are separated by {@code \n} (or {@code \n}); empty lines and lines
-	 * starting with {@code #} are ignored.
+	 * Lines are separated by {@code \n} (or {@code \n}); empty lines and lines starting with {@code #} are ignored.
 	 * </p>
 	 *
 	 * @param envString environment string
@@ -449,8 +450,8 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Reads a process stream and appends its content to {@code output} while also
-	 * passing each line to the provided consumer.
+	 * Reads a process stream and appends its content to {@code output} while also passing each line to the provided
+	 * consumer.
 	 *
 	 * @param inputStream   process stream
 	 * @param charsetName   stream character set
@@ -460,8 +461,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 */
 	private void readStream(java.io.InputStream inputStream, String charsetName, LimitedStringBuilder output,
 			LineConsumer lineConsumer, ErrorConsumer errorConsumer) {
-		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append(GenAIProvider.LINE_SEPARATOR);
@@ -483,8 +483,7 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Auto-closeable wrapper for {@link ExecutorService} so it can be used with
-	 * try-with-resources.
+	 * Auto-closeable wrapper for {@link ExecutorService} so it can be used with try-with-resources.
 	 */
 	private static final class ExecutorServiceAutoCloseable implements AutoCloseable {
 		private final ExecutorService executor;

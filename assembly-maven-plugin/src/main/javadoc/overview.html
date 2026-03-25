@@ -36,39 +36,39 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   workflows.
 </p>
 
-<h2>What this plugin does</h2>
+<h2>Overview</h2>
 
 <p>
-  This module is packaged as a Maven plugin and exposes the <strong><code>assembly</code></strong> goal.
-  The goal is designed to run <em>without requiring an existing Maven project</em>
-  (i.e. it operates on a configured base directory and is compatible with workflows
-  that generate or modify project content).
+  This module is packaged as a Maven plugin and provides an <strong><code>assembly</code></strong> goal.
+  The goal is intended to be usable in automation and bootstrap scenarios, and is configured via Maven
+  parameters (typically system properties) rather than relying on an existing project model.
 </p>
 
 <h2>High-level workflow</h2>
 
 <ol>
   <li>
-    <strong>Acquire a prompt.</strong>
+    <strong>Acquire a project prompt.</strong>
     If a prompt file is configured and exists (default: <code>project.txt</code>), its contents are used;
-    otherwise the goal prompts interactively via Plexus Prompter.
+    otherwise the goal asks for input interactively via the Plexus
+    <code>org.codehaus.plexus.components.interactivity.Prompter</code>.
   </li>
   <li>
-    <strong>Recommend libraries.</strong>
+    <strong>Recommend libraries from metadata.</strong>
     The plugin invokes the MachAI picker to recommend libraries as bindex entries.
-    Recommendations are logged to the Maven output.
+    Recommendations are emitted to the Maven log.
   </li>
   <li>
     <strong>Assemble the project.</strong>
-    The MachAI application assembly workflow is run to apply changes to the target directory
-    (e.g., updating a Maven project structure, dependencies, or other generated content).
+    The MachAI application assembly workflow is executed to apply changes to the configured base directory
+    (for example, updating Maven configuration, dependencies, and generated project content).
   </li>
 </ol>
 
 <h2>Configuration</h2>
 
 <p>
-  The goal can be configured using Maven properties. Common parameters:
+  The goal can be configured using Maven properties. Common parameters include:
 </p>
 
 <ul>
@@ -76,30 +76,27 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li><strong><code>assembly.score</code></strong> — minimum score threshold for recommendations.</li>
   <li><strong><code>bindex.register.url</code></strong> — optional URL used by the picker for metadata registration/lookups.</li>
   <li>
-    <strong>Model/provider selection</strong> — the plugin uses separate provider identifiers for:
-    <ul>
-      <li>the assembly workflow (<code>ApplicationAssembly</code> model property)</li>
-      <li>the picker workflow (<code>Picker</code> model property)</li>
-    </ul>
+    <strong>Model/provider selection</strong> — the plugin uses separate provider identifiers for the assembly workflow
+    and the picker workflow.
   </li>
 </ul>
 
-<h2>Usage example</h2>
+<h2>Usage</h2>
 
 <pre>
 mvn org.machanism.machai:assembly-maven-plugin:assembly
 </pre>
 
 <p>
-  To drive the workflow from a file, place your prompt in <code>project.txt</code> (or configure an alternate
-  file via <code>-Dassembly.prompt.file=...</code>). If the file is absent, the goal will prompt interactively.
+  To run using a file-based prompt, create <code>project.txt</code> in the working directory or provide a path via
+  <code>-Dassembly.prompt.file=...</code>. If the file is absent, the goal prompts interactively.
 </p>
 
 <h2>Packages</h2>
 
 <p>
-  The public API surface for this plugin is small and centered around the single Maven Mojo that implements
-  the goal.
+  The public API surface for this plugin is intentionally small and is centered around the single Mojo that
+  implements the goal.
 </p>
 
 <ul>

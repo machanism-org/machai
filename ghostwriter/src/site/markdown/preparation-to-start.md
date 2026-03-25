@@ -84,13 +84,15 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 |---|---|---|---|
 | `gw.config` | Properties file name to load at startup (resolved relative to `gw.home`). | `gw.properties` | Used in `initializeConfiguration(...)` when creating `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. **System property only** (not read from `gw.properties`). |
 | `gw.home` | Ghostwriter home directory used to resolve `gw.config`. Ghostwriter also sets `System.setProperty("gw.home", gwHomeDir.getAbsolutePath())` after resolving it. | If not set: CLI `--projectDir/-d` value (if provided); else `user.dir`. | Read via `PropertiesConfigurator#getFile("gw.home", null)` in `initializeConfiguration(...)`. Acts as the base directory when locating the configuration file. |
-| `project.dir` | Root directory used as the base directory for scanning/processing when CLI `--projectDir/-d` is not provided. | If not set: `user.dir`. | When `-d/--projectDir` is not provided, Ghostwriter loads it via `config.getFile("project.dir", null)` and falls back to `SystemUtils.getUserDir()`. It is passed to `ActProcessor` / `GuidanceProcessor` and used as the base for `scanDocuments(projectDir, scanDir)`. |
 | `gw.model` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | `null` (required; must be non-blank). | Loaded via `config.get("gw.model", null)` and optionally overridden by CLI `-m/--model`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor` / `GuidanceProcessor`. |
-| `gw.instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null`. | Loaded via `config.get("gw.instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin via `readText(...)` (multi-line supported with `\\` line continuation). Applied via `AIFileProcessor#setInstructions(...)`. |
+| `instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null`. | Loaded via `config.get("instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin via `readText(...)` (multi-line supported with `\\` line continuation). Applied via `AIFileProcessor#setInstructions(...)`. |
 | `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null`. | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
-| `gw.guidance` | Default guidance applied when embedded `@guidance:` directives are not present (non-Act mode). | `null`. | Loaded via `config.get("gw.guidance", null)`. Optionally overridden by CLI `-g/--guidance`; if `-g` is specified without a value, guidance is read from stdin via `readText(...)`. Used to compute the default prompt (`resolveGuidancePrompt(...)`) and applied via `AIFileProcessor#setDefaultPrompt(...)`. |
+| `gw.acts` | Default directory containing act prompt files (used when running in Act mode and `--acts` is not provided). | `null`. | When `--act` is enabled and `--acts` is not provided, read via `config.get("gw.acts", null)` and passed to `ActProcessor#setActsLocation(...)`. |
+| `gw.act` | Default act prompt text (used when running in Act mode and `--act` is provided with no value). | `null`. | In Act mode, used by `resolveActPrompt(...)` as the initial default prompt: `config.get("gw.act", null)`, overridden by CLI `--act` value or stdin via `readText("Act")`. |
+| `gw.guidance` | Default guidance applied when embedded `@guidance:` directives are not present (non-Act mode). | `null`. | Loaded via `config.get("gw.guidance", null)`. Optionally overridden by CLI `-g/--guidance`; if `-g` is specified without a value, guidance is read from stdin via `readText("Guidance")`. Used as the processor default prompt via `AIFileProcessor#setDefaultPrompt(...)`. |
 | `gw.threads` | Degree of concurrency for processing. | `null` (unset). | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads <count>`. Parsed as an integer and applied via `AIFileProcessor#setDegreeOfConcurrency(int)` (via `Ghostwriter#setDegreeOfConcurrency(String)`). |
 | `logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("logInputs", false)` and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
+| `project.dir` | Root directory used as the base directory for scanning/processing when CLI `--projectDir/-d` is not provided. | If not set: `user.dir`. | When `-d/--projectDir` is not provided, Ghostwriter loads it via `config.getFile("project.dir", null)` and falls back to `SystemUtils.getUserDir()`. It is passed to `ActProcessor` / `GuidanceProcessor` and used as the base for `scanDocuments(projectDir, scanDir)`. |
 | `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | If unset: `user.dir` absolute path. | When there are no CLI scanDir args, Ghostwriter reads `config.get("gw.scanDir", null)`. If absent, it scans `SystemUtils.getUserDir().getAbsolutePath()` (see `resolveScanDirs(...)`). |
 
 > Notes:
@@ -124,7 +126,7 @@ gw.model=CodeMie:gpt-5-2-2025-12-11
 logInputs=true
 
 # Default instructions and guidance (optional)
-gw.instructions=file:C:\\projects\\MDDA-BPD\\instructions.txt
+instructions=file:C:\\projects\\MDDA-BPD\\instructions.txt
 gw.guidance=file:C:\\projects\\MDDA-BPD\\guidance.txt
 
 # Exclude directories (optional)
@@ -149,6 +151,10 @@ project.dir=C:\\projects\\machai
 # Optional: override gwHomeDir (base directory used to resolve gw.config)
 # (set as a Java system property; not read from gw.properties)
 # -Dgw.home=C:\\machai\\ghostwriter
+
+# Optional: Act mode defaults
+# gw.acts=C:\\machai\\ghostwriter\\acts
+# gw.act=Improve readability and add tests
 ```
 
 ### Overriding Settings: Command-Line Options

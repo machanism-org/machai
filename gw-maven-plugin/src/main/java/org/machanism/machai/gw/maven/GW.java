@@ -87,7 +87,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dt><b>{@code -Dgw.excludes}</b> / {@code &lt;excludes&gt;}</dt>
  * <dd>Exclude patterns/paths to skip when scanning documentation sources.</dd>
  *
- * <dt><b>{@code -Dgw.genai.serverId}</b> / {@code &lt;serverId&gt;}</dt>
+ * <dt><b>{@code -Dgenai.serverId}</b> / {@code &lt;serverId&gt;}</dt>
  * <dd>{@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
  * credentials.</dd>
  *

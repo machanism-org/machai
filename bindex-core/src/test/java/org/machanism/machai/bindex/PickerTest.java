@@ -1,6 +1,8 @@
 package org.machanism.machai.bindex;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -62,16 +64,12 @@ class PickerTest {
 	}
 
 	@Test
-	void addDependencies_shouldAddTransitiveDependenciesAndAvoidCycles() throws Exception {
+	void addDependencies_shouldAddTransitiveDependenciesAndAvoidCycles() {
 		// Arrange
-		Picker picker = allocateWithoutConstructor(Picker.class);
-		Map<String, Bindex> repo = new HashMap<>();
-		repo.put("A", bindexWithDependencies("A", "B", "C"));
-		repo.put("B", bindexWithDependencies("B", "C"));
-		repo.put("C", bindexWithDependencies("C", "A")); // cycle
-		setField(picker, "collection", null); // ensure no accidental DB usage
-
-		TestablePickerAccess access = new TestablePickerAccess(repo);
+		TestablePickerAccess access = new TestablePickerAccess();
+		access.repo.put("A", bindexWithDependencies("A", "B", "C"));
+		access.repo.put("B", bindexWithDependencies("B", "C"));
+		access.repo.put("C", bindexWithDependencies("C", "A")); // cycle
 		Set<String> deps = new HashSet<>();
 
 		// Act
@@ -82,10 +80,9 @@ class PickerTest {
 	}
 
 	@Test
-	void addDependencies_shouldIgnoreUnknownBindexId() throws Exception {
+	void addDependencies_shouldIgnoreUnknownBindexId() {
 		// Arrange
-		allocateWithoutConstructor(Picker.class); // keep coverage for instantiation helper
-		TestablePickerAccess access = new TestablePickerAccess(Collections.emptyMap());
+		TestablePickerAccess access = new TestablePickerAccess();
 		Set<String> deps = new HashSet<>();
 
 		// Act
@@ -130,19 +127,8 @@ class PickerTest {
 		return (T) unsafeClass.getMethod("allocateInstance", Class.class).invoke(unsafe, type);
 	}
 
-	/**
-	 * Helper that re-implements {@link Picker#addDependencies(Set, String)} logic without hitting MongoDB.
-	 *
-	 * <p>We cannot directly instantiate {@link Picker} in unit tests because its constructor creates a
-	 * MongoDB client. We also cannot override {@code addDependencies} itself. Therefore, this helper
-	 * mirrors the exact algorithm while sourcing Bindexes from an in-memory map.
-	 */
 	private static final class TestablePickerAccess {
-		private final Map<String, Bindex> repo;
-
-		private TestablePickerAccess(Map<String, Bindex> repo) {
-			this.repo = repo;
-		}
+		private final Map<String, Bindex> repo = new HashMap<>();
 
 		void addDependencies(Set<String> dependencies, String bindexId) {
 			Bindex bindex = repo.get(bindexId);

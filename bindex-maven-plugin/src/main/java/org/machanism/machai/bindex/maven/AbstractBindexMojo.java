@@ -97,7 +97,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	 * Builds a {@link PropertiesConfigurator} for workflow execution.
 	 *
 	 * <p>
-	 * When {@code gw.genai.serverId} is set, credentials are read from Maven
+	 * When {@code genai.serverId} is set, credentials are read from Maven
 	 * settings.
 	 * </p>
 	 *

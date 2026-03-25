@@ -50,8 +50,8 @@ Supported layouts include Maven, Gradle, JavaScript, Python, plus a default layo
 
 ## Prerequisites
 
-- Java 8+
-- Maven 3.x (to build)
+- Java 8+ (runtime)
+- Maven 3.x (build)
 
 ## Basic Usage
 

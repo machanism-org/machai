@@ -6,12 +6,12 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
 ' ============================================================================
-' Bindex Core (bindex-core) - C4 Detailed Diagram
+' Bindex Core (bindex-core) - C4 Diagram
 ' ============================================================================
 
 LAYOUT_WITH_LEGEND()
 
-title Bindex Core (bindex-core) - C4 Detailed Diagram
+title Bindex Core (bindex-core) - C4 Diagram
 
 ' -----------------------------
 ' C1: System Context
@@ -34,14 +34,13 @@ Rel(bindexCore, projectFs, "Reads/Writes", "bindex.json + sources")
 ' -----------------------------
 ' C2: Containers
 ' -----------------------------
-
 System_Boundary(sys2, "Bindex Core") {
   Container(javaLib, "Bindex Core Java Library", "Java (Maven)", "Core library providing Bindex creation, registration, retrieval and prompt assembly")
-
-  ContainerDb(repo, "Bindex Registry (MongoDB)", "MongoDB Atlas", "Persisted Bindex documents with classification facets + embeddings")
-  Container_Ext(genaiApi, "GenAI Provider API", "HTTP API", "Chat completion + embeddings")
-  Container_Ext(fs, "Project Workspace", "Filesystem", "Project sources and bindex.json")
 }
+
+ContainerDb(repo, "Bindex Registry (MongoDB)", "MongoDB Atlas", "Persisted Bindex documents with classification facets + embeddings")
+Container_Ext(genaiApi, "GenAI Provider API", "HTTP API", "Chat completion + embeddings")
+Container_Ext(fs, "Project Workspace", "Filesystem", "Project sources and bindex.json")
 
 Rel(dev, javaLib, "Invokes", "CLI/Runner (outside this module)")
 Rel(javaLib, fs, "Reads/Writes", "bindex.json")
@@ -51,7 +50,6 @@ Rel(javaLib, repo, "Reads/Writes", "Bindex docs + vector search")
 ' -----------------------------
 ' C3: Components (inside Java library)
 ' -----------------------------
-
 Container_Boundary(components, "Bindex Core Java Library") {
   Component(appAssembly, "ApplicationAssembly", "Service", "Assembles prompts using selected Bindexes and executes GenAI provider")
   Component(creator, "BindexCreator", "Processor", "Creates/updates bindex.json using an AI-assisted BindexBuilder")
@@ -78,12 +76,9 @@ Container_Boundary(components, "Bindex Core Java Library") {
 ' -----------------------------
 ' Key relationships
 ' -----------------------------
-
 Rel(appAssembly, genaiManager, "Obtains provider")
 Rel(appAssembly, functionToolsLoader, "Applies tools")
 Rel(appAssembly, genaiProvider, "Sends instructions/prompt and performs")
-' NOTE: .machai is reserved for LLM activity logging and must be ignored.
-'Rel(appAssembly, fs, "Optionally logs inputs", ".machai/assembly-inputs.txt")
 
 Rel(creator, processorBase, "Extends")
 Rel(creator, builderFactory, "Uses")

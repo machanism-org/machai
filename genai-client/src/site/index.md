@@ -51,15 +51,9 @@ and generate the content for this section following net format:
 
 Anthropic-backed implementation of MachAI's `GenAIProvider` abstraction.
 
-This provider adapts the Anthropic Java SDK to MachAI's provider interface.
+This provider is currently a stub. All core operations (`init(...)`, `prompt(...)`, `addFile(...)`, `perform()`, `clear()`, `addTool(...)`, `instructions(...)`, `inputsLog(...)`, `setWorkingDir(...)`, and `usage()`) throw `UnsupportedOperationException` with the message `"ClaudeProvider is not implemented yet."`.
 
-Status
-
-The current implementation is a placeholder: `init(Configurator)` throws `NotImplementedException`, and most operations return `null` or are no-ops.
-
-Thread-safety
-
-Instances are not thread-safe.
+Because the provider is not implemented yet, it should not be used in production.
 
 ### CodeMie
 
@@ -105,7 +99,7 @@ This provider adapts MachAI's provider-agnostic abstractions (prompts, tool defi
 
 Status
 
-The current implementation is a placeholder. Most operations are not yet implemented and will be completed in a future iteration. `init(Configurator)`, `perform()`, and `embedding(...)` throw `NotImplementedException`.
+The current implementation is a placeholder. `init(Configurator)`, `perform()`, and `embedding(...)` throw `NotImplementedException`. Most other operations are currently no-ops and will be completed in a future iteration.
 
 ### None
 
@@ -133,18 +127,18 @@ provider.perform();
 
 OpenAI-backed `GenAIProvider` implementation.
 
-This provider adapts the MachAI provider abstraction to the OpenAI Java SDK Responses API. It supports prompting, file inputs, tool/function calling, and embedding generation.
+This provider adapts the MachAI provider abstraction to the OpenAI Java SDK Responses API. It supports prompting, file inputs, tool/function calling, embedding generation, and usage reporting.
 
 Configuration
 
-Configuration values are read from the `Configurator` passed to `init(Configurator)`.
+Configuration values are read from the `Configurator` passed to `init(Configurator)`. The following keys are used:
 
 - `chatModel` (required): model identifier passed to the OpenAI Responses API (for example, `gpt-4.1` or `gpt-4o`).
 - `OPENAI_API_KEY` (required): API key used to authenticate with the OpenAI API.
 - `OPENAI_BASE_URL` (optional): base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
-- `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, the SDK default timeouts are used.
-- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens.
-- `MAX_TOOL_CALLS` (optional): maximum number of tool calls allowed in a single response.
+- `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, the SDK default timeouts are used. Defaults to `600` seconds.
+- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to `300000`.
+- `MAX_TOOL_CALLS` (optional): maximum number of tool calls allowed in a single response. Defaults to `200`.
 
 Capabilities
 

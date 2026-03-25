@@ -27,7 +27,12 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * processed according to their dependencies, following standard Maven reactor
  * logic.
  * </p>
- * </ul>
+ *
+ * <h2>Parameters</h2>
+ * <p>
+ * This goal does not introduce additional parameters beyond those inherited
+ * from {@link AbstractGWGoal}.
+ * </p>
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
@@ -45,7 +50,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <li><b>{@code gw.excludes}</b> / {@code &lt;excludes&gt;} ({@code excludes}):
  * Exclude patterns/paths that should be skipped when scanning documentation
  * sources.</li>
- * <li><b>{@code gw.genai.serverId}</b> ({@code serverId}): {@code settings.xml}
+ * <li><b>{@code genai.serverId}</b> ({@code serverId}): {@code settings.xml}
  * {@code &lt;server&gt;} id used to read GenAI credentials.</li>
  * <li><b>{@code logInputs}</b> ({@code logInputs}): Whether to log the list of
  * input files passed to the workflow.
@@ -72,7 +77,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <h3>Use Maven settings credentials for the GenAI provider</h3>
  *
  * <pre>
- * mvn gw:reactor -Dgw.genai.serverId=my-model-server
+ * mvn gw:reactor -Dgenai.serverId=my-model-server
  * </pre>
  *
  * <h3>Plugin configuration</h3>

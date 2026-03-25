@@ -6,12 +6,14 @@
 
 ## Project Overview
 
-GW Maven Plugin is the primary Maven adapter for the MachAI [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds so project artifacts—documentation, source code, and other files—can be scanned, evaluated against embedded `@guidance:` blocks, and updated consistently as part of a normal developer workflow.
+GW Maven Plugin is the primary Maven adapter for the MachAI [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds so project documentation (commonly under `src/site`) can be scanned, evaluated against embedded `@guidance:` blocks, and updated consistently over time.
 
-The plugin exposes Maven goals (Mojos) that configure and invoke Ghostwriter processors for two main modes:
+The plugin provides Maven goals (Mojos) that configure and invoke Ghostwriter processors:
 
 - **Guided processing** (`gw:gw`, `gw:reactor`) to scan a working tree (commonly `src/site`) and apply guidance-driven updates.
 - **Action processing** (`gw:act`, `gw:act-reactor`) to apply an interactive or predefined “act” prompt across a scanned document set.
+
+Credentials can optionally be sourced from Maven `settings.xml` via `-Dgenai.serverId=...`, keeping secrets out of source control while still enabling CI-friendly execution.
 
 ## Installation Instructions
 
@@ -63,7 +65,7 @@ mvn gw:gw -Dgw.scanDir=src\\site
 Load GenAI credentials from Maven `settings.xml`:
 
 ```bash
-mvn gw:gw -Dgw.genai.serverId=my-genai-server
+mvn gw:gw -Dgenai.serverId=my-genai-server
 ```
 
 Apply a one-off action across scanned files:

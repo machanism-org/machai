@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
@@ -15,8 +14,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.manager.GenAIProvider;
 
 class ClaudeProviderTest {
+
+	private static final String NOT_IMPLEMENTED_MSG = "ClaudeProvider is not implemented yet.";
 
 	@Test
 	void init_shouldThrowUnsupportedOperationException_withExpectedMessage() {
@@ -27,7 +29,7 @@ class ClaudeProviderTest {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.init(null));
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -39,7 +41,7 @@ class ClaudeProviderTest {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.prompt("hi"));
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -52,7 +54,7 @@ class ClaudeProviderTest {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.addFile(file));
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -65,7 +67,7 @@ class ClaudeProviderTest {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.addFile(url));
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -77,7 +79,7 @@ class ClaudeProviderTest {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, provider::perform);
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -89,7 +91,7 @@ class ClaudeProviderTest {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, provider::clear);
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -102,7 +104,7 @@ class ClaudeProviderTest {
 				() -> provider.addTool("name", "desc", args -> "ok", "p1"));
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -115,13 +117,13 @@ class ClaudeProviderTest {
 				() -> provider.instructions("be helpful"));
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
 	void promptBundle_shouldThrowUnsupportedOperationException_withExpectedMessage() {
 		// Arrange
-		ClaudeProvider provider = new ClaudeProvider();		
+		ClaudeProvider provider = new ClaudeProvider();
 		ResourceBundle bundle = new ResourceBundle() {
 			@Override
 			protected Object handleGetObject(String key) {
@@ -139,7 +141,7 @@ class ClaudeProviderTest {
 				() -> provider.promptBundle(bundle));
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -152,7 +154,7 @@ class ClaudeProviderTest {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.inputsLog(log));
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -165,7 +167,7 @@ class ClaudeProviderTest {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.setWorkingDir(dir));
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -177,7 +179,7 @@ class ClaudeProviderTest {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, provider::usage);
 
 		// Assert
-		assertEquals("ClaudeProvider is not implemented yet.", ex.getMessage());
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
 	}
 
 	@Test
@@ -197,27 +199,25 @@ class ClaudeProviderTest {
 	}
 
 	@Test
-	void addFile_file_signature_shouldDeclareIOException() throws NoSuchMethodException {
+	void addFile_file_shouldDeclareIOException_onInterface() throws NoSuchMethodException {
 		// Arrange
 
 		// Act
-		Method method = ClaudeProvider.class.getMethod("addFile", File.class);
+		Class<?>[] exceptions = GenAIProvider.class.getMethod("addFile", File.class).getExceptionTypes();
 
 		// Assert
-		Class<?>[] exceptions = method.getExceptionTypes();
 		assertEquals(1, exceptions.length);
 		assertEquals(IOException.class, exceptions[0]);
 	}
 
 	@Test
-	void addFile_url_signature_shouldDeclareIOException() throws NoSuchMethodException {
+	void addFile_url_shouldDeclareIOException_onInterface() throws NoSuchMethodException {
 		// Arrange
 
 		// Act
-		Method method = ClaudeProvider.class.getMethod("addFile", URL.class);
+		Class<?>[] exceptions = GenAIProvider.class.getMethod("addFile", URL.class).getExceptionTypes();
 
 		// Assert
-		Class<?>[] exceptions = method.getExceptionTypes();
 		assertEquals(1, exceptions.length);
 		assertEquals(IOException.class, exceptions[0]);
 	}

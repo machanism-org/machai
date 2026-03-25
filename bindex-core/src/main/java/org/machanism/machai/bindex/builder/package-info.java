@@ -26,13 +26,13 @@
  */
 
 /**
- * Builders that generate {@link org.machanism.machai.schema.Bindex} documents for a project by assembling a
- * prompt (schema + project context) and delegating generation to a configured
- * {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Builders for generating {@link org.machanism.machai.schema.Bindex} documents for a project.
  *
- * <p>The base {@link org.machanism.machai.bindex.builder.BindexBuilder} composes the prompt, optionally includes an
- * existing (origin) {@code Bindex} for incremental updates, invokes the provider, and deserializes the resulting
- * JSON into a {@code Bindex}.
+ * <p>This package provides the {@link org.machanism.machai.bindex.builder.BindexBuilder} base type and concrete
+ * builders for different project layouts. A builder is responsible for assembling a generation prompt (schema plus
+ * project context), optionally merging an existing (origin) {@code Bindex} for incremental updates, delegating the
+ * generation step to a configured {@link org.machanism.machai.ai.manager.GenAIProvider}, and then deserializing the
+ * provider response into a {@code Bindex}.
  *
  * <h2>Provided implementations</h2>
  * <ul>

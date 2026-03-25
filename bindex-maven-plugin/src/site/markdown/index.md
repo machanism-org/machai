@@ -46,28 +46,32 @@ Page Structure:
 
 ## Introduction
 
-Bindex Maven Plugin enables automated generation, updating, and registration of **Bindex metadata** for Maven projects within the Machanism/Machai ecosystem.
+Bindex Maven Plugin is a Maven plugin that generates and registers **Bindex metadata** for Maven projects in the Machanism/Machai ecosystem.
 
-It provides Maven goals (Mojos) that scan your project directory, build a Bindex index (optionally incrementally), and—when desired—publish that metadata to an external registry endpoint. The plugin is intended to support library discovery, integration, and assembly workflows by producing structured metadata that can be searched and consumed by other Machai tooling.
+It runs Bindex against your project directory to produce a structured index that can be used for library discovery, integration, and assembly workflows. The plugin supports both first-time index creation and incremental refreshes, and it can publish the resulting metadata to an external registry endpoint.
+
+Under the hood, each goal builds a `MavenProjectLayout` from the current project’s `basedir` and POM model, then invokes Bindex using a configured GenAI provider/model.
 
 ## Overview
 
-The plugin integrates Bindex operations directly into the Maven lifecycle so you can:
+The plugin provides four goals:
 
-- **Create** a fresh Bindex index and related artifacts for a project.
-- **Update** an existing Bindex index (refresh/incremental mode).
-- **Register** (publish) Bindex metadata to a registry service/database.
-- **Clean** temporary artifacts produced by the tooling (for example, an inputs log file under `.machai`).
+- `create`: generate a new Bindex index for the current module
+- `update`: refresh an existing Bindex index (incremental/update mode)
+- `register`: optionally update and then publish Bindex metadata to a registry URL
+- `clean`: remove temporary artifacts produced during indexing (currently, the `.machai/bindex-inputs.txt` inputs log)
 
-Projects with `pom` packaging (typical parent/aggregator modules) are automatically skipped for create/update/register.
+Modules with `pom` packaging (typical aggregator/parent modules) are automatically skipped by `create`, `update`, and `register`.
 
 ## Key Features
 
-- Maven goals for **create**, **update**, **register**, and **clean**
-- **Model/provider selection** via a required `bindex.model` property (e.g., `OpenAI:gpt-5`)
-- Optional **credential resolution from `~/.m2/settings.xml`** via `gw.genai.serverId`
-- Registration support via `bindex.register.url` (defaults to the Bindex repository DB URL)
-- Lifecycle integration (`install` phase for create/update/register; `clean` phase for clean)
+- Goals for **create**, **update**, **register**, and **clean**
+- Required model selection via `-Dbindex.model=Provider:Model` (for example, `OpenAI:gpt-5`)
+- Optional credential resolution from `~/.m2/settings.xml` via `-Dgenai.serverId=...` (maps to `GENAI_USERNAME` / `GENAI_PASSWORD`)
+- Registry publishing via `-Dbindex.register.url=...` (defaults to `BindexRepository.DB_URL`)
+- Lifecycle integration:
+  - `create`, `update`, `register` default to the Maven `install` phase
+  - `clean` defaults to the Maven `clean` phase
 
 ## Getting Started
 
@@ -75,18 +79,16 @@ Projects with `pom` packaging (typical parent/aggregator modules) are automatica
 
 - Apache Maven
 - Java Development Kit (JDK)
-- Access to a supported GenAI provider/model (configured via `bindex.model`)
-- (Optional) Maven `settings.xml` server credentials if your provider requires authentication
-- (Optional) A reachable Bindex registry endpoint for `register`
+- A supported GenAI provider/model configured via `bindex.model`
+- (Optional) Maven `settings.xml` credentials when using `genai.serverId`
+- (Optional) Network access to the registry endpoint used by `register`
 
 ### Java Version
 
 - **Build/compile level (from `pom.xml`):** `maven.compiler.release=8` (Java 8 bytecode)
-- **Practical runtime requirement:** depends on your Maven runtime and the Machai/Bindex dependencies in your environment. Many modern Maven setups run on Java 11+; if you use `register`, you may also need additional JVM module exports (see below).
+- **Practical runtime requirement:** your Maven runtime plus the transitive dependencies you use. Many environments run Maven on Java 11+. If you run `register` on newer JDKs, you may also need the module export shown below.
 
 ### Basic Usage
-
-Run a goal using the fully-qualified plugin coordinates:
 
 ```bash
 mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.model=OpenAI:gpt-5
@@ -94,28 +96,22 @@ mvn org.machanism.machai:bindex-maven-plugin:create -Dbindex.model=OpenAI:gpt-5
 
 ### Typical Workflow
 
-1. **Choose a GenAI provider/model** and set it via `-Dbindex.model=...`.
-2. **Create** the initial index:
-   - `mvn ...:create`
-3. **Iterate** on your project and periodically **update**:
-   - `mvn ...:update`
-4. If you have a registry service available, **register** the metadata:
-   - `mvn ...:register -Dbindex.register.url=...`
-5. If you enabled input logging and want to remove temporary artifacts, run **clean**:
-   - `mvn ...:clean`
+1. Configure the GenAI model: `-Dbindex.model=Provider:Model`.
+2. Generate the initial index: `mvn ...:create`.
+3. Refresh the index after changes: `mvn ...:update`.
+4. Publish metadata (optional): `mvn ...:register -Dbindex.register.url=...`.
+5. Remove temporary artifacts (optional): `mvn ...:clean`.
 
 ## Configuration
 
-Common configuration parameters:
-
 | Parameter | Description | Default |
 |---|---|---|
-| `bindex.model` | AI provider/model identifier used by Bindex (required). Example: `OpenAI:gpt-5`. | *(none; required)* |
-| `gw.genai.serverId` | Optional `settings.xml` `<server>` id used to read GenAI credentials and populate `GENAI_USERNAME` / `GENAI_PASSWORD` for the workflow. | *(unset)* |
-| `bindex.register.url` | Registry database endpoint URL to publish metadata to when running `register`. | `BindexRepository.DB_URL` |
+| `bindex.model` | GenAI provider/model identifier used by Bindex (required). Example: `OpenAI:gpt-5`. | *(none; required)* |
+| `genai.serverId` | Optional Maven `settings.xml` `<server>` id used to load GenAI credentials into `GENAI_USERNAME` / `GENAI_PASSWORD`. | *(unset)* |
+| `bindex.register.url` | Registry database endpoint URL used by `register` to publish metadata. | `BindexRepository.DB_URL` |
 | `update` | When running `register`, whether to update/refresh index content before publishing. | `true` |
 
-To run the `register` goal, use the required JVM export setting:
+To run `register`, use:
 
 ```bash
 set MAVEN_OPTS=--add-exports=jdk.naming.dns/com.sun.jndi.dns=java.naming
