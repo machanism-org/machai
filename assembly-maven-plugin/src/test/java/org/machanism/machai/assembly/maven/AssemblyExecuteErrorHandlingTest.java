@@ -26,7 +26,8 @@ class AssemblyExecuteErrorHandlingTest {
 	Path tempDir;
 
 	@Test
-	void execute_whenPromptFileReadFails_wrapsInMojoExecutionException() throws Exception {
+	void execute_whenPromptFileReadFails_wrapsInMojoExecutionException() throws IOException {
+		// Sonar java:S1130 - do not declare generic exceptions that cannot be thrown.
 		// Arrange
 		// Create a directory where a file is expected -> FileReader will throw.
 		Path promptDir = tempDir.resolve("project.txt");
@@ -162,7 +163,7 @@ class AssemblyExecuteErrorHandlingTest {
 
 			@Override
 			public void showMessage(String message) {
-				// no-op
+				// Sonar java:S1186 - intentionally empty: this stubbed prompter ignores display-only calls.
 			}
 
 			@Override
@@ -198,7 +199,7 @@ class AssemblyExecuteErrorHandlingTest {
 
 			@Override
 			public void showMessage(String message) {
-				// no-op
+				// Sonar java:S1186 - intentionally empty: this stubbed prompter ignores display-only calls.
 			}
 
 			@Override
