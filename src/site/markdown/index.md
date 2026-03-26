@@ -15,7 +15,6 @@ Generate a content:
      - Create a project structure overview based on the `.puml` files below.
      - Describe the project without including file names in the description.
      - Use the project structure diagram by the path: `./images/project-structure.png` (`src/site/puml/project-structure.puml`).
-     - Use the project structure diagram by the path: `./images/machai-prj-c4-l2.png` (`src/site/puml/machai-prj-c4-l2.puml`).
      - Include this image in the section to visually represent the project structure.
 3. **Installation Instructions:**  
    - Describe how to clone the repository and build the project using Maven).
@@ -52,8 +51,6 @@ Key capabilities include:
 These diagrams show the Machai multi-module layout and a higher-level view of how the main components relate.
 
 ![](./images/project-structure.png)
-
-![](./images/machai-prj-c4-l2.png)
 
 ## Modules
 
