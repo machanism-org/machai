@@ -15,7 +15,8 @@
 		<maven.compiler.release>8</maven.compiler.release>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<plantuml-generator.scanPackages>org.machanism.machai.gw*</plantuml-generator.scanPackages>
-		<!-- Sonar/CI: keep JUnit5 artifacts aligned to avoid classpath mismatches -->
+		<!-- Sonar/CI: keep JUnit5 artifacts aligned to avoid classpath
+		mismatches -->
 		<junit.jupiter.version>5.10.2</junit.jupiter.version>
 	</properties>
 
@@ -58,7 +59,8 @@
 								<configuration>
 									<appendAssemblyId>false</appendAssemblyId>
 									<descriptors>
-										<descriptor>src/assembly/assembly-jar.xml</descriptor>
+										<descriptor>
+											src/assembly/assembly-jar.xml</descriptor>
 									</descriptors>
 									<outputDirectory>${project.build.directory}</outputDirectory>
 									<archive>
@@ -117,6 +119,12 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.18.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.machanism.machai</groupId>
+			<artifactId>bindex-core</artifactId>
+			<version>1.0.3-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Test dependencies -->
