@@ -79,8 +79,8 @@ public class BindexRepository {
 		String username = password == null ? PUBLILC_USER_NAME : REGISTER_USER_NAME;
 		password = password == null ? PUBLILC_USER_NAME : password;
 
-		String url = config.get("BINDEX_REPO_URL", null);
-		url = StringUtils.replace(Objects.toString(url, DB_URL), "://", "://" + username + ":" + password + "@");
+		String url = config.get("BINDEX_REPO_URL", DB_URL);
+		url = StringUtils.replace(url, "://", "://" + username + ":" + password + "@");
 		return MongoClients.create(url);
 	}
 
