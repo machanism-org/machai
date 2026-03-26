@@ -1,6 +1,9 @@
 package org.machanism.machai.ai.tools;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,6 +16,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -165,16 +169,36 @@ public class WebFunctionTools implements FunctionTools {
 		String selector = props.has(SELECTOR_FIELD) ? props.get(SELECTOR_FIELD).asText(null) : null;
 
 		try {
-			HttpURLConnection connection = getConnection(URI.create(url), headers);
-			logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
+			URI uri = URI.create(url);
+			String response = null;
+			if ("file".equals(uri.getScheme())) {
+				File workingDir = (File) params[1];
+				String path = uri.getPath();
+				File file = new File(path);
+				if (!file.isAbsolute()) {
+					file = new File(workingDir, path);
+				}
+				try (FileInputStream io = new FileInputStream(file)) {
+					response = IOUtils.toString(io, charsetName);
+				} catch (FileNotFoundException e) {
+					response = "File not found.";
+				} catch (IOException e) {
+					throw new IllegalArgumentException(e);
+				}
 
-			String response = getWebPage(connection, timeout, charsetName);
-			response = applySelectorIfPresent(selector, response);
-			response = renderTextOnlyIfRequested(textOnly, response);
+			} else {
+				HttpURLConnection connection = getConnection(uri, headers);
+				logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
+
+				response = getWebPage(connection, timeout, charsetName);
+				response = applySelectorIfPresent(selector, response);
+				response = renderTextOnlyIfRequested(textOnly, response);
+			}
 
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
-						StringUtils.abbreviate(response, 80).replace(GenAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
+						StringUtils.abbreviate(response, 80).replace(GenAIProvider.LINE_SEPARATOR, " ").replace("\r",
+								""));
 			}
 			return response;
 
@@ -202,7 +226,8 @@ public class WebFunctionTools implements FunctionTools {
 		if (!textOnly) {
 			return response;
 		}
-		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(GenAIProvider.LINE_SEPARATOR).toString();
+		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(GenAIProvider.LINE_SEPARATOR)
+				.toString();
 	}
 
 	/**
