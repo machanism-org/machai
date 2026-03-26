@@ -226,9 +226,9 @@ public final class Ghostwriter {
 	 * @param prompt prompt to display before reading
 	 * @return the entered text (never {@code null})
 	 */
+	@SuppressWarnings("java:S106")
 	public static String readText(String prompt) {
-		// Sonar java:S106 - use logger for output (minimizes direct console usage).
-		logger.info("{}:", prompt);
+		System.out.print(prompt);
 
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
