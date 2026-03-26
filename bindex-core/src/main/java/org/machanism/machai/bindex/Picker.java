@@ -108,11 +108,13 @@ public class Picker {
 	public static final String MODEL_PROP_NAME = "pick.model";
 	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
 
+	public static final Double DEFAULT_SCORE_VALUE = 0.85;
+
 	private final MongoCollection<Document> collection;
 
 	private final GenAIProvider provider;
 
-	private Double score = ApplicationAssembly.DEFAULT_SCORE_VALUE;
+	private Double score = DEFAULT_SCORE_VALUE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
 
 	/**

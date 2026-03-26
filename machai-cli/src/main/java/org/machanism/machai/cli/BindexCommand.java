@@ -7,9 +7,9 @@ import java.util.Optional;
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenAIProviderManager;
-import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
+import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,7 @@ public class BindexCommand {
 			@ShellOption(value = { "-u",
 					"--update" }, help = "The update mode: all saved data will be updated.", defaultValue = "false") boolean update,
 			@ShellOption(value = { "-m",
-					ApplicationAssembly.MODEL_PROP_NAME }, help = "Specifies the GenAI service provider and model (e.g., `"
+					Picker.MODEL_PROP_NAME }, help = "Specifies the GenAI service provider and model (e.g., `"
 							+ BindexCreator.DEFAULT_MODEL + "`).", defaultValue = ShellOption.NULL) String model)
 			throws IOException {
 

@@ -3,16 +3,13 @@ package org.machanism.machai.bindex.ai.tools;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.bindex.ApplicationAssembly;
 import org.machanism.machai.bindex.BindexRepository;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.bindex.builder.BindexBuilder;
@@ -137,8 +134,8 @@ public class BindexFunctionTools implements FunctionTools {
 
 		String prompt = props.get("prompt").asText();
 
-		String model = configurator.get(ApplicationAssembly.MODEL_PROP_NAME, ApplicationAssembly.DEFAULT_MODEL);
-		Double score = configurator.getDouble("score", ApplicationAssembly.DEFAULT_SCORE_VALUE);
+		String model = configurator.get(Picker.MODEL_PROP_NAME, Picker.DEFAULT_MODEL);
+		Double score = configurator.getDouble("score", Picker.DEFAULT_SCORE_VALUE);
 		String registerUrl = configurator.get("BINDEX_REPO_URL", null);
 
 		Picker picker = new Picker(model, registerUrl, configurator);
