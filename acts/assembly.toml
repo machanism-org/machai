@@ -1,4 +1,6 @@
 description = '''
+This Act file guides the AI assistant to implement user tasks by leveraging recommended libraries described in Bindex JSON format.
+The assistant analyzes the provided library recommendations, retrieves detailed metadata using the `get_bindex` tool, and utilizes these libraries to build the required application.
 '''
 
 instructions = '''
