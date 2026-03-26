@@ -98,7 +98,8 @@ class AssemblyExecuteErrorHandlingTest {
 	}
 
 	@Test
-	void execute_whenPromptFileMissing_usesPrompterResultAndContinuesFlow() throws Exception {
+	void execute_whenPromptFileMissing_usesPrompterResultAndContinuesFlow() {
+		// Sonar java:S1130 - keep throws list accurate; no checked exception is expected here.
 		// Arrange
 		File promptFile = tempDir.resolve("project.txt").toFile();
 		org.junit.jupiter.api.Assertions.assertFalse(promptFile.exists());
@@ -217,14 +218,17 @@ class AssemblyExecuteErrorHandlingTest {
 
 		@Override
 		public void debug(CharSequence content) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
 		public void debug(CharSequence content, Throwable error) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
 		public void debug(Throwable error) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
@@ -234,14 +238,17 @@ class AssemblyExecuteErrorHandlingTest {
 
 		@Override
 		public void info(CharSequence content) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
 		public void info(CharSequence content, Throwable error) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
 		public void info(Throwable error) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
@@ -251,14 +258,17 @@ class AssemblyExecuteErrorHandlingTest {
 
 		@Override
 		public void warn(CharSequence content) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
 		public void warn(CharSequence content, Throwable error) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
 		public void warn(Throwable error) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
@@ -268,14 +278,17 @@ class AssemblyExecuteErrorHandlingTest {
 
 		@Override
 		public void error(CharSequence content) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
 		public void error(CharSequence content, Throwable error) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 
 		@Override
 		public void error(Throwable error) {
+			// Sonar java:S1186 - intentionally empty: no-op logger for tests.
 		}
 	}
 }
