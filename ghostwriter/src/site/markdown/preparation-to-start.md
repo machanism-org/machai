@@ -1,11 +1,10 @@
 ---
-canonical: https://machai.machanism.org/ghostwriter/preparation-to-start.html
----
-
 <!-- @guidance:  
 Analyze the `src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java` class to extract and document all available configuration properties.  
 For each property, provide its name, description, default value (if any), and usage context.
 -->
+canonical: https://machai.machanism.org/ghostwriter/preparation-to-start.html
+---
 
 # Preparation to Start
 
@@ -91,9 +90,10 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 | `gw.act` | Default act prompt text (used when running in Act mode and `--act` is provided with no value). | `null`. | In Act mode, used by `resolveActPrompt(...)` as the initial default prompt: `config.get("gw.act", null)`, overridden by CLI `--act` value or stdin via `readText("Act")`. |
 | `gw.guidance` | Default guidance applied when embedded `@guidance:` directives are not present (non-Act mode). | `null`. | Loaded via `config.get("gw.guidance", null)`. Optionally overridden by CLI `-g/--guidance`; if `-g` is specified without a value, guidance is read from stdin via `readText("Guidance")`. Used as the processor default prompt via `AIFileProcessor#setDefaultPrompt(...)`. |
 | `gw.threads` | Degree of concurrency for processing. | `null` (unset). | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads <count>`. Parsed as an integer and applied via `AIFileProcessor#setDegreeOfConcurrency(int)` (via `Ghostwriter#setDegreeOfConcurrency(String)`). |
-| `logInputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("logInputs", false)` and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
-| `project.dir` | Root directory used as the base directory for scanning/processing when CLI `--projectDir/-d` is not provided. | If not set: `user.dir`. | When `-d/--projectDir` is not provided, Ghostwriter loads it via `config.getFile("project.dir", null)` and falls back to `SystemUtils.getUserDir()`. It is passed to `ActProcessor` / `GuidanceProcessor` and used as the base for `scanDocuments(projectDir, scanDir)`. |
+| `inputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("inputs", false)` (via `GenAIProvider.LOG_INPUTS_PROP_NAME`) and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
+| `project.dir` | Root directory used as the base directory for scanning/processing when CLI `--projectDir/-d` is not provided. | If not set: `user.dir`. | When `-d/--projectDir` is not provided, Ghostwriter loads it via `config.getFile("project.dir", null)` (via `ProjectLayout.PROJECT_DIR_PROP_NAME`) and falls back to `SystemUtils.getUserDir()`. Passed to `ActProcessor` / `GuidanceProcessor` and used as the base for `scanDocuments(projectDir, scanDir)`. |
 | `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | If unset: `user.dir` absolute path. | When there are no CLI scanDir args, Ghostwriter reads `config.get("gw.scanDir", null)`. If absent, it scans `SystemUtils.getUserDir().getAbsolutePath()` (see `resolveScanDirs(...)`). |
+| `gw.nonRecursive` | Declared constant in `Ghostwriter`, likely intended to control recursive scanning behavior. | N/A (not read by `Ghostwriter` currently). | Present as `public static final String GW_NONRECURSIVE_PROP_NAME = "gw.nonRecursive";` but not referenced elsewhere in this class. |
 
 > Notes:
 > - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself resolves `gw.home` via configuration/system properties (it does not read `GW_HOME` directly).
@@ -123,7 +123,7 @@ java -jar gw.jar --act "Improve readability and add tests"
 gw.model=CodeMie:gpt-5-2-2025-12-11
 
 # Enable logging of input prompts
-logInputs=true
+inputs=true
 
 # Default instructions and guidance (optional)
 instructions=file:C:\\projects\\MDDA-BPD\\instructions.txt

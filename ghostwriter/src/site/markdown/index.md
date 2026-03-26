@@ -1,4 +1,55 @@
 ---
+<!-- @guidance:
+**IMPORTANT:**  
+The Ghostwriter Maven plugin is designed to work with **all types of project files**—including source code, documentation, project site content, and any other relevant files.  
+**When generating content or documentation, always consider the full range of file types present in the project.**
+# Page Structure
+1. **Header**
+   - **Project Title:** Extract automatically from `pom.xml`.
+   - **Maven Central Badge:**  
+     Use the following Markdown, replacing `[groupId]` and `[artifactId]` with values from `pom.xml`:  
+     `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
+2. **Quote**
+   - Do not change this section. Leave it exactly as provided.
+3. **Introduction**
+   - Provide a comprehensive description of the project's purpose and main benefits.
+   - Reference [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
+4. **Overview**
+   - Clearly explain the core functionality and value proposition of the project.
+   Describe the project with diagrams bellow:
+     - Create a project structure overview based on the `.puml` files below.
+     - Describe the project without including file names in the description.
+     - Use the project structure diagram by the path: `./images/c4-diagram.png` (`src/site/puml/c4-diagram.puml`).
+5. **Machai Ghostwriter vs. Other Tools.** 
+   - Identify the AI code assistant tool most similar to Machai Ghostwriter and explain why, focusing on project-wide automation, CI/CD integration, and extensibility.
+   - List key similarities and key differences between Machai Ghostwriter and the closest tool.
+   - Briefly compare Machai Ghostwriter to other popular tools (e.g., Tabnine, GitHub Copilot, Claude Code, Cursor) in terms of project-wide automation, guidance, and documentation features.
+   - Summarize the comparison in a Markdown table showing which tools support project-wide automation, custom guidance, CI/CD integration, and documentation generation.
+   - Conclude with a short statement on what makes Machai Ghostwriter unique.
+Let me know if you want it even shorter or tailored for a specific toolset!
+6. **Key Features**
+   - Present a concise, bulleted list of the primary capabilities and features.
+7. **Getting Started**
+   - **Prerequisites:** List all required software, services, and environment settings.
+   - **Download:**  
+     Add a download link for the Ghostwriter CLI application jar:  
+     `[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)`
+   - **Basic Usage:** Provide an example command to run the application.
+   - **Typical Workflow:** Outline the step-by-step process for using the project artifacts.
+   - **Java Version:** State the required Java version as defined in `pom.xml`, and clarify any additional functional requirements.
+8. **Configuration**
+   - **Command-Line Options:** Analyze `/java/org/machanism/machai/gw/processor/Ghostwriter.java` to extract and describe all available command-line options.
+   - **Options Table:** Present a table listing each option, its description, and default value.
+   - **Example:** Provide a command-line example showing how to configure and run the application with custom parameters. Include information from the `Ghostwriter.help()` method.
+9. **Default Guidance**
+   - Use the documentation for the `FileProcessor.setDefaultGuidance(String defaultGuidance)` method to generate a section detailing the purpose and usage of `defaultGuidance`.
+10. **Resources**
+   - List relevant links, including the official platform, GitHub repository, and Maven Central page.
+# General Instructions
+- Ensure clarity, completeness, and accuracy in each section.
+- Use information from project files and source code as specified.
+- Structure the documentation for easy navigation and practical use.
+-->
 canonical: https://machai.machanism.org/ghostwriter/index.html
 ---
 
@@ -199,54 +250,4 @@ When default guidance is set, the processor may also execute a folder-level proc
 - GitHub repository (Machai mono-repo): https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
 
-<!-- @guidance:
-**IMPORTANT:**  
-The Ghostwriter Maven plugin is designed to work with **all types of project files**—including source code, documentation, project site content, and any other relevant files.  
-**When generating content or documentation, always consider the full range of file types present in the project.**
-# Page Structure
-1. **Header**
-   - **Project Title:** Extract automatically from `pom.xml`.
-   - **Maven Central Badge:**  
-     Use the following Markdown, replacing `[groupId]` and `[artifactId]` with values from `pom.xml`:  
-     `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
-2. **Quote**
-   - Do not change this section. Leave it exactly as provided.
-3. **Introduction**
-   - Provide a comprehensive description of the project's purpose and main benefits.
-   - Reference [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
-4. **Overview**
-   - Clearly explain the core functionality and value proposition of the project.
-   Describe the project with diagrams bellow:
-     - Create a project structure overview based on the `.puml` files below.
-     - Describe the project without including file names in the description.
-     - Use the project structure diagram by the path: `./images/c4-diagram.png` (`src/site/puml/c4-diagram.puml`).
-5. **Machai Ghostwriter vs. Other Tools.** 
-   - Identify the AI code assistant tool most similar to Machai Ghostwriter and explain why, focusing on project-wide automation, CI/CD integration, and extensibility.
-   - List key similarities and key differences between Machai Ghostwriter and the closest tool.
-   - Briefly compare Machai Ghostwriter to other popular tools (e.g., Tabnine, GitHub Copilot, Claude Code, Cursor) in terms of project-wide automation, guidance, and documentation features.
-   - Summarize the comparison in a Markdown table showing which tools support project-wide automation, custom guidance, CI/CD integration, and documentation generation.
-   - Conclude with a short statement on what makes Machai Ghostwriter unique.
-Let me know if you want it even shorter or tailored for a specific toolset!
-6. **Key Features**
-   - Present a concise, bulleted list of the primary capabilities and features.
-7. **Getting Started**
-   - **Prerequisites:** List all required software, services, and environment settings.
-   - **Download:**  
-     Add a download link for the Ghostwriter CLI application jar:  
-     `[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)`
-   - **Basic Usage:** Provide an example command to run the application.
-   - **Typical Workflow:** Outline the step-by-step process for using the project artifacts.
-   - **Java Version:** State the required Java version as defined in `pom.xml`, and clarify any additional functional requirements.
-8. **Configuration**
-   - **Command-Line Options:** Analyze `/java/org/machanism/machai/gw/processor/Ghostwriter.java` to extract and describe all available command-line options.
-   - **Options Table:** Present a table listing each option, its description, and default value.
-   - **Example:** Provide a command-line example showing how to configure and run the application with custom parameters. Include information from the `Ghostwriter.help()` method.
-9. **Default Guidance**
-   - Use the documentation for the `FileProcessor.setDefaultGuidance(String defaultGuidance)` method to generate a section detailing the purpose and usage of `defaultGuidance`.
-10. **Resources**
-   - List relevant links, including the official platform, GitHub repository, and Maven Central page.
-# General Instructions
-- Ensure clarity, completeness, and accuracy in each section.
-- Use information from project files and source code as specified.
-- Structure the documentation for easy navigation and practical use.
--->
+
