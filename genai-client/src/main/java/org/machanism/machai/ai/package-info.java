@@ -18,7 +18,7 @@
 /**
  * Provider-agnostic client API for MachAI generative-AI integrations.
  *
- * <p>This root package groups the public abstractions and runtime components needed to configure and execute LLM/GenAI
+ * <p>This root package groups the public abstractions and runtime components used to configure and execute LLM/GenAI
  * requests while keeping the rest of the application isolated from vendor SDKs and transport details.
  *
  * <h2>Sub-packages</h2>

@@ -239,7 +239,7 @@ class GenAIProviderManagerTest {
 		String providerName = NoDefaultConstructorProvider.class.getName() + ":m";
 		org.junit.jupiter.api.function.Executable call = () -> GenaiProviderManager.getProvider(providerName, conf);
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, call);
-		
+
 		// Assert
 		assertNotNull(ex.getCause());
 	}

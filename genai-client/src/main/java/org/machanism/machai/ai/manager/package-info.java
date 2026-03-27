@@ -51,7 +51,7 @@
  * {@link org.machanism.machai.ai.manager.GenaiProviderManager} falls back to the default provider.
  *
  * <p>A provider can be referenced either by a short provider name (mapped to
- * {@code org.machanism.machai.ai.provider.&lt;provider&gt;.&lt;Provider&gt;Provider}) or by a fully-qualified class name.
+ * {@code org.machanism.machai.ai.provider.<provider>.<Provider>Provider}) or by a fully-qualified class name.
  *
  * <h2>Typical usage</h2>
  * <pre>{@code

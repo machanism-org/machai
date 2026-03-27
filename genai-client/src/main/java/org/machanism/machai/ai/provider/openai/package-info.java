@@ -30,10 +30,10 @@
  * OpenAI provider implementation for MachAI.
  *
  * <p>
- * This package provides the OpenAI-backed {@link org.machanism.machai.ai.manager.Genai} implementation
+ * This package provides an OpenAI-backed {@link org.machanism.machai.ai.manager.Genai} implementation
  * ({@link org.machanism.machai.ai.provider.openai.OpenAIProvider}). It builds OpenAI Responses API requests from
  * MachAI prompts, optional system instructions, file inputs, and registered tools, then converts the model output
- * into plain text results and MachAI token-usage metrics.
+ * into plain-text results and MachAI token-usage metrics.
  * </p>
  *
  * <h2>Typical usage</h2>
@@ -52,7 +52,8 @@
  *
  * <h2>Tools and function calling</h2>
  * <p>
- * Tools can be registered via {@link org.machanism.machai.ai.manager.Genai#addTool(String, String, org.machanism.machai.ai.manager.Genai.ToolFunction, String...)},
+ * Tools can be registered via
+ * {@link org.machanism.machai.ai.manager.Genai#addTool(String, String, org.machanism.machai.ai.manager.Genai.ToolFunction, String...)},
  * which exposes them to the model as OpenAI function tools. When the model requests a tool call, the provider
  * executes the matching handler locally, appends the tool output to the conversation, and continues until a final
  * response message is produced.

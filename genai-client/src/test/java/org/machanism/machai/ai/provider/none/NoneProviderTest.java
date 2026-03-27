@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -188,7 +189,89 @@ class NoneProviderTest {
 		assertEquals(Arrays.asList("P", ""), Files.readAllLines(inputs, StandardCharsets.UTF_8));
 	}
 
-	private static String readUtf8(Path path) throws Exception {
+	@Test
+	void perform_whenInputsLogHasNoParent_usesUserDirForInstructions(@TempDir Path tempDir) throws Exception {
+		// Arrange
+		String originalUserDir = System.getProperty("user.dir");
+		try {
+			System.setProperty("user.dir", tempDir.toString());
+
+			NoneProvider provider = new NoneProvider();
+			provider.inputsLog(new File("inputs.txt"));
+			provider.instructions("INST");
+			provider.prompt("P");
+
+			// Act
+			provider.perform();
+
+			// Assert
+			Path instructionsFile = tempDir.resolve("instructions.txt");
+			assertTrue(Files.exists(instructionsFile));
+			assertEquals("INST", readUtf8(instructionsFile));
+		} finally {
+			System.setProperty("user.dir", originalUserDir);
+		}
+	}
+
+	@Test
+	void perform_whenInputsLogParentCannotBeCreated_stillAttemptsToWriteInputsLog(@TempDir Path tempDir) throws Exception {
+		// Arrange
+		Path parentAsFile = tempDir.resolve("parentAsFile");
+		Files.write(parentAsFile, "x".getBytes(StandardCharsets.UTF_8));
+
+		Path inputs = parentAsFile.resolve("inputs.txt");
+		NoneProvider provider = new NoneProvider();
+		provider.inputsLog(inputs.toFile());
+		provider.prompt("P");
+
+		// Act
+		provider.perform();
+
+		// Assert
+		assertTrue(Files.notExists(inputs), "inputs log cannot be created when parent is a file");
+		assertEquals("", provider.getPrompts(), "perform() should clear prompts even on write failure");
+	}
+
+	@Test
+	void perform_whenInputsLogWriteFails_stillClearsPrompts(@TempDir Path tempDir) throws Exception {
+		// Arrange
+		Path dirAsFile = tempDir.resolve("inputs.txt");
+		Files.createDirectories(dirAsFile);
+
+		NoneProvider provider = new NoneProvider();
+		provider.inputsLog(dirAsFile.toFile());
+		provider.prompt("P");
+
+		// Act
+		provider.perform();
+
+		// Assert
+		assertTrue(Files.isDirectory(dirAsFile));
+		assertEquals("", provider.getPrompts(), "perform() should clear prompts even on write failure");
+	}
+
+	@Test
+	void perform_whenInstructionsWriteFails_doesNotThrow_andStillWritesInputs(@TempDir Path tempDir) throws Exception {
+		// Arrange
+		Path instructionsPath = tempDir.resolve("instructions.txt");
+		Files.createDirectories(instructionsPath);
+
+		NoneProvider provider = new NoneProvider();
+		Path inputs = tempDir.resolve("inputs.txt");
+		provider.inputsLog(inputs.toFile());
+		provider.instructions("INST");
+		provider.prompt("P");
+
+		// Act
+		assertDoesNotThrow(provider::perform);
+
+		// Assert
+		assertTrue(Files.isDirectory(instructionsPath));
+		assertTrue(Files.exists(inputs));
+		assertEquals("P\n\n", readUtf8(inputs));
+	}
+
+	private static String readUtf8(Path path) throws IOException {
 		return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 	}
 }

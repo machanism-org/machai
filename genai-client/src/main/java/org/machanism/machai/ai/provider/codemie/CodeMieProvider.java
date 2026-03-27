@@ -130,6 +130,18 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 
 		if (Strings.CS.startsWithAny(chatModel, "gpt-") || StringUtils.isBlank(chatModel)) {
 			provider = new OpenAIProvider() {
+				/**
+				 * Builds (and caches) an {@link OpenAIClient} after ensuring the current configuration contains an
+				 * {@code OPENAI_API_KEY} value.
+				 *
+				 * <p>
+				 * The access token is requested lazily at client creation time so that initialization can fail fast on
+				 * authorization errors.
+				 * </p>
+				 *
+				 * @return OpenAI-compatible client configured for the CodeMie backend
+				 * @throws IllegalArgumentException if token acquisition fails
+				 */
 				@Override
 				protected OpenAIClient getClient() {
 					try {
