@@ -23,37 +23,31 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * Maven goal that processes documents across a multi-module (reactor) build.
  *
  * <p>
- * This goal supports Maven reactor module processing: all submodules are
- * processed according to their dependencies, following standard Maven reactor
- * logic.
+ * This goal supports Maven reactor module processing: all submodules are processed according to their dependencies,
+ * following standard Maven reactor logic.
  * </p>
  *
  * <h2>Parameters</h2>
  * <p>
- * This goal does not introduce additional parameters beyond those inherited
- * from {@link AbstractGWGoal}.
+ * This goal does not introduce additional parameters beyond those inherited from {@link AbstractGWGoal}.
  * </p>
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <ul>
- * <li><b>{@code gw.model}</b> / {@code &lt;model&gt;} ({@code model}):
- * Provider/model identifier to pass to the workflow.</li>
+ * <li><b>{@code gw.model}</b> / {@code &lt;model&gt;} ({@code model}): Provider/model identifier to pass to the
+ * workflow.</li>
  * <li><b>${basedir}</b> ({@code basedir}): Maven module base directory.</li>
- * <li><b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}):
- * Optional scan root override. When omitted, defaults to the module base
- * directory.</li>
- * <li><b>{@code gw.instructions}</b> / {@code &lt;instructions&gt;}
- * ({@code instructions}): Instruction locations (for example, file paths or
- * classpath locations) consumed by the workflow.</li>
- * <li><b>{@code gw.guidance}</b> / {@code &lt;guidance&gt;} ({@code guidance}):
- * Default guidance text forwarded to the workflow.</li>
- * <li><b>{@code gw.excludes}</b> / {@code &lt;excludes&gt;} ({@code excludes}):
- * Exclude patterns/paths that should be skipped when scanning documentation
- * sources.</li>
- * <li><b>{@code genai.serverId}</b> ({@code serverId}): {@code settings.xml}
- * {@code &lt;server&gt;} id used to read GenAI credentials.</li>
- * <li><b>{@code logInputs}</b> ({@code logInputs}): Whether to log the list of
- * input files passed to the workflow.
+ * <li><b>{@code gw.scanDir}</b> / {@code &lt;scanDir&gt;} ({@code scanDir}): Optional scan root override. When omitted,
+ * defaults to the module base directory.</li>
+ * <li><b>{@code gw.instructions}</b> / {@code &lt;instructions&gt;} ({@code instructions}): Instruction locations (for
+ * example, file paths or classpath locations) consumed by the workflow.</li>
+ * <li><b>{@code gw.guidance}</b> / {@code &lt;guidance&gt;} ({@code guidance}): Default guidance text forwarded to the
+ * workflow.</li>
+ * <li><b>{@code gw.excludes}</b> / {@code &lt;excludes&gt;} ({@code excludes}): Exclude patterns/paths that should be
+ * skipped when scanning documentation sources.</li>
+ * <li><b>{@code genai.serverId}</b> ({@code serverId}): {@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
+ * credentials.</li>
+ * <li><b>{@code logInputs}</b> ({@code logInputs}): Whether to log the list of input files passed to the workflow.
  * <p>
  * Default: {@code false}
  * </p>

@@ -1,7 +1,4 @@
 ---
-canonical: https://machai.machanism.org/gw-maven-plugin/index.html
----
-
 <!-- @guidance:
 **VERY IMPORTANT NOTE:** Ghostwriter works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
 Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
@@ -47,6 +44,8 @@ It serves as the main integration point, enabling Ghostwriter’s features and a
 - Use Markdown syntax for headings, lists, tables, code blocks, and links.
 - Ensure clarity, conciseness, and easy navigation throughout the page.
 -->
+canonical: https://machai.machanism.org/gw-maven-plugin/index.html
+---
 
 # GW Maven Plugin
 
@@ -54,33 +53,33 @@ It serves as the main integration point, enabling Ghostwriter’s features and a
 
 ## Introduction
 
-GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds so project documentation (commonly under `src/site`) can be scanned, evaluated against embedded `@guidance:` blocks, and updated consistently over time.
+GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds, enabling documentation (commonly under `src/site`) and other project assets to be scanned, evaluated against embedded `@guidance:` blocks, and updated consistently over time.
 
-The plugin provides Maven goals (Mojos) that configure and invoke Ghostwriter processors:
+At its core, the plugin exposes Maven goals (Mojos) that configure and invoke Ghostwriter processors:
 
-- **Guided processing** via `GuidanceProcessor` (`gw:gw`, `gw:reactor`) for scanning a documentation tree and applying guidance-driven updates.
-- **Action processing** via `ActProcessor` (`gw:act`, `gw:act-reactor`) for applying an interactive or predefined “act” prompt across a scanned document set.
+- **Guided processing** using `GuidanceProcessor` (`gw:gw`, `gw:reactor`) for scanning a tree and applying guidance-driven updates.
+- **Action processing** using `ActProcessor` (`gw:act`, `gw:act-reactor`) for applying an interactive or predefined “act” prompt across a scanned document set.
 
 Credentials can optionally be sourced from Maven `settings.xml` via `-Dgenai.serverId=...`, keeping secrets out of source control while still enabling CI-friendly execution.
 
 ## Overview
 
-The GW Maven Plugin enhances documentation workflows by making Ghostwriter execution repeatable and Maven-native:
+The GW Maven Plugin makes Ghostwriter execution repeatable and Maven-native:
 
 - Run documentation automation in **local development** and **CI** using standard Maven invocations.
 - Choose between **aggregator-style processing** (CLI-like module discovery) and **reactor ordering** (standard Maven dependency build order).
 - Configure scanning, exclusions, and prompting through **system properties** (`-D...`) or plugin `<configuration>`.
-- Optionally run **interactive** or **predefined** prompt-based actions to perform targeted rewrites.
+- Use **guided** automation for repeatable rules embedded in content, or **acts** for one-off, prompt-driven rewrites.
 
 In practice, you point the plugin at a scan root (for example `src/site`), it discovers files, applies guidance or actions, and writes updates back to disk.
 
 ## Key Features
 
 - **Guided File Processing integration** using Ghostwriter processors.
-- **Multiple execution modes**:
+- **Goals for guided processing**:
   - `gw:gw`: aggregator goal that can run without a `pom.xml` and processes modules in reverse order (sub-modules first, then parents), similar to the Ghostwriter CLI.
   - `gw:reactor`: processes projects using standard Maven reactor dependency ordering.
-- **Interactive and predefined actions**:
+- **Goals for action-based processing**:
   - `gw:act`: prompts for an “act” if `gw.act` is not provided.
   - `gw:act-reactor`: reactor-friendly variant intended for execution-root context.
 - **Configurable scan root and exclusions** to focus processing on documentation sources.
@@ -131,10 +130,61 @@ mvn gw:gw
 Scan a specific documentation directory:
 
 ```bash
-mvn gw:gw -Dgw.scanDir=src\site
+mvn gw:gw -Dgw.scanDir=src\\site
 ```
 
 Run with a specific provider/model:
+
+```bash
+mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site
+```
+
+Run a one-off action prompt across your documentation tree:
+
+```bash
+mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\\site
+```
+
+### Typical Workflow
+
+1. **Add or update documentation** (commonly under `src/site`).
+2. **Embed `@guidance:` blocks** in documents where you want repeatable automation.
+3. **Run a goal**:
+   - Use `gw:gw` for aggregator-style processing (reverse module order, CLI-like behavior).
+   - Use `gw:reactor` for reactor dependency ordering.
+   - Use `gw:act` / `gw:act-reactor` for targeted prompt-driven rewrites.
+4. **Review changes** in your VCS diff.
+5. **Commit updates** to keep documentation synchronized with code.
+6. (Optional) **Clean temporary artifacts**:
+
+```bash
+mvn gw:clean
+```
+
+## Configuration
+
+Common configuration parameters (usable as `-D...` system properties or via `<configuration>` in your `pom.xml`):
+
+| Parameter | Description | Default |
+|---|---|---|
+| `gw.model` | Provider/model identifier forwarded to Ghostwriter (example: `openai:gpt-4o-mini`). | *(none)* |
+| `gw.scanDir` | Scan root directory to process. If not provided, defaults to the execution root directory for `gw:gw` and the module base directory for reactor-style usage. | *(varies by goal)* |
+| `gw.instructions` | Instruction locations consumed by the workflow (for example, file paths or classpath locations). | *(none)* |
+| `gw.guidance` | Default guidance text forwarded to the workflow. | *(none)* |
+| `gw.excludes` | Exclude patterns/paths to skip while scanning documentation sources. | *(none)* |
+| `genai.serverId` | `settings.xml` `<server>` id used to load GenAI credentials into `GENAI_USERNAME`/`GENAI_PASSWORD`. | *(none)* |
+| `logInputs` | Logs the list of input files passed to the workflow. | `false` |
+| `gw.act` | For `gw:act` / `gw:act-reactor`: the action prompt to apply (interactive if omitted for `gw:act`). | *(none)* |
+| `gw.acts` | For `gw:act` / `gw:act-reactor`: directory containing predefined action definitions. | *(none)* |
+
+## Resources
+
+- Official documentation site: https://machai.machanism.org/
+- Guided File Processing (concept): https://www.machanism.org/guided-file-processing/index.html
+- Ghostwriter documentation: https://machai.machanism.org/ghostwriter/index.html
+- Source repository (SCM): https://github.com/machanism-org/machai.git
+- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin
+ecific provider/model:
 
 ```bash
 mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\site

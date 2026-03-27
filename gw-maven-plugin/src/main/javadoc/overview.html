@@ -37,9 +37,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </p>
 
 <p>
-  Ghostwriter Maven Plugin is an advanced documentation automation tool for Java projects. It automatically scans,
-  analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. The plugin
-  streamlines the creation and maintenance of high-quality, consistent documentation, ensuring best practices and
+  Ghostwriter Maven Plugin is an advanced documentation automation tool
+  for Java projects. It automatically scans, analyzes, and assembles
+  project documentation using embedded guidance tags and AI-powered
+  synthesis. The plugin streamlines the creation and maintenance of
+  high-quality, consistent documentation, ensuring best practices and
   up-to-date information across all modules.
 </p>
 
@@ -53,7 +55,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <code>src/site</code>) for files containing embedded <code>@guidance:</code> blocks.
 </p>
 
-<h2>Core concepts</h2>
+<h2>Key concepts</h2>
 
 <dl>
   <dt><strong>Guidance blocks</strong></dt>
@@ -78,19 +80,15 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <ul>
   <li>Scans a configurable directory tree for files containing embedded <code>@guidance:</code> blocks.</li>
-  <li>
-    Runs the configured processor to apply guided transformations using the selected GenAI provider.
-  </li>
-  <li>
-    Supports single-module and multi-module runs, including reactor-aware processing.
-  </li>
+  <li>Invokes the configured Ghostwriter processor and GenAI provider to apply guided transformations.</li>
+  <li>Supports single-module and multi-module runs, including reactor-aware processing.</li>
 </ul>
 
 <h2>How guided processing works</h2>
 
 <ol>
   <li>
-    A goal selects a scan root (typically the Maven execution root), optionally overridden via a parameter such as
+    A goal selects a scan root (typically the Maven execution root), optionally overridden via
     <code>-Dgw.scanDir</code>.
   </li>
   <li>
@@ -101,7 +99,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     default guidance, and embedded guidance.
   </li>
   <li>
-    The configured GenAI provider is invoked to produce the transformed content, which is then written back to disk.
+    The configured GenAI provider is invoked to produce transformed content, which is then written back to disk.
   </li>
   <li>
     Temporary artifacts created during processing can be removed via <code>gw:clean</code>.
@@ -121,8 +119,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <ul>
   <li>
     <strong><code>gw:gw</code></strong> (<code>org.machanism.machai.gw.maven.GW</code>) &mdash; Aggregator goal intended to run
-    across a multi-module build. It processes modules in reverse order (sub-modules first, then parent modules),
-    similar to the Ghostwriter CLI.
+    across a multi-module build. It processes modules in reverse order (sub-modules first, then parent modules).
   </li>
   <li>
     <strong><code>gw:reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorGW</code>) &mdash; Processes modules using
