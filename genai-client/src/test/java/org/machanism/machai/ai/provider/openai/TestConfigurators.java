@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 
-final class TestConfigurators {
+class TestConfigurators {
 
 	private TestConfigurators() {
 	}

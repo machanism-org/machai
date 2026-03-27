@@ -1,12 +1,11 @@
 package org.machanism.machai.ai.tools;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -22,40 +21,47 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 /**
  * Installs file-system tools into a {@link Genai}.
  *
  * <p>
- * Tools in this installer are intended for host-integrated use where the host
- * controls the base working directory. All paths provided to these tools are
- * interpreted relative to the working directory supplied by the
+ * Tools in this installer are intended for host-integrated use where the host controls the base working
+ * directory. All paths provided to these tools are interpreted relative to the working directory supplied by the
  * provider/runtime.
  * </p>
  *
  * <h2>Installed tools</h2>
  * <ul>
  * <li>{@code read_file_from_file_system} – reads a file as text</li>
- * <li>{@code write_file_to_file_system} – writes a file (creating parent
- * directories as needed)</li>
- * <li>{@code list_files_in_directory} – lists immediate children of a
- * directory</li>
- * <li>{@code get_recursive_file_list} – recursively lists all files under a
- * directory</li>
+ * <li>{@code write_file_to_file_system} – writes a file (creating parent directories as needed)</li>
+ * <li>{@code list_files_in_directory} – lists immediate children of a directory</li>
+ * <li>{@code get_recursive_file_list} – recursively lists all files under a directory</li>
  * </ul>
  *
  * @author Viktor Tovstyi
  */
 public class FileFunctionTools implements FunctionTools {
 
+	/**
+	 * Maximum width used when abbreviating large log values.
+	 */
 	private static final int MAXWIDTH = 160;
 
+	/**
+	 * Default character set used when reading or writing text files.
+	 */
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
+	/** JSON field name for the optional character-set parameter. */
 	private static final String CHARSET_NAME_FIELD = "charsetName";
 
-	// Sonar(java:S1192): avoid duplicating JSON field literal.
+	/** JSON field name for the optional start position parameter. */
 	private static final String START_POSITION_FIELD = "start_position";
+
+	/** JSON field name for the optional end position parameter. */
+	private static final String END_POSITION_FIELD = "end_position";
 
 	/** Logger for file tool operations and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
@@ -75,8 +81,12 @@ public class FileFunctionTools implements FunctionTools {
 				this::writeFile,
 				"file_path:string:required:The path to the file you want to write to or create.",
 				"text:string:required:The content to be written into the file or used as replacement.",
-			    "start_position:integer:optional:The zero-based index in the file where replacement begins. If not specified, defaults to 0 (start of file).",
-			    "end_position:integer:optional:The zero-based index in the file where replacement ends (exclusive). If not specified, defaults to the end of the file.",
+				START_POSITION_FIELD
+						+ ":integer:optional:The zero-based index in the file where the replacement or insertion should begin. If omitted, defaults to 0 (start of file). "
+						+ "If start_position equals end_position, the text will be inserted at that position.",
+				END_POSITION_FIELD
+						+ ":integer:optional:The zero-based index in the file where the replacement should end (exclusive). If omitted, defaults to the end of the file. "
+						+ "If start_position equals end_position, the text will be inserted at that position.",
 				"charsetName:string:optional:The name of the requested charset. Default: " + DEFAULT_CHARSET);
 		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
 				this::listFiles, "dir_path:string:optional:The path to the directory to list contents of.");
@@ -97,8 +107,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a newline-separated list of project-relative file paths, or a message
-	 *         if no files are found
+	 * @return a newline-separated list of project-relative file paths, or a message if no files are found
 	 */
 	private Object getRecursiveFiles(Object[] params) {
 		String result;
@@ -148,8 +157,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a comma-separated list of project-relative paths, or a message if the
-	 *         directory does not exist or is empty
+	 * @return a comma-separated list of project-relative paths, or a message if the directory does not exist or is
+	 *         empty
 	 */
 	private Object listFiles(Object[] params) {
 		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
@@ -185,8 +194,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * Expected parameters:
 	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} containing {@code file_path}, {@code text},
-	 * {@code start_position}, and {@code end_position}</li>
+	 * <li>{@link JsonNode} containing {@code file_path}, {@code text}, {@code start_position}, and
+	 * {@code end_position}</li>
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 *
@@ -202,7 +211,8 @@ public class FileFunctionTools implements FunctionTools {
 		File workingDir = (File) params[1];
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Write file: [{}, {}]", StringUtils.abbreviate(String.valueOf(props), MAXWIDTH), workingDir);
+			logger.info("Write file: [{}, {}]", toStringFields(props, "file_path", START_POSITION_FIELD,
+					END_POSITION_FIELD, CHARSET_NAME_FIELD, "text"), workingDir);
 		}
 		logger.debug("Write file: [{}, {}]", props, workingDir);
 
@@ -221,45 +231,91 @@ public class FileFunctionTools implements FunctionTools {
 		return result;
 	}
 
+	/**
+	 * Builds a compact string containing only the requested JSON fields.
+	 *
+	 * <p>
+	 * This is primarily used for logging to avoid dumping potentially large content (for example, a full file text
+	 * payload).
+	 * </p>
+	 *
+	 * @param props  JSON object containing tool parameters
+	 * @param fields JSON field names to include
+	 * @return compact object string
+	 */
+	private String toStringFields(JsonNode props, String... fields) {
+		StringBuilder stringBuilder = new StringBuilder("{");
+		for (String name : fields) {
+			if (props.has(name)) {
+				if (stringBuilder.length() > 1) {
+					stringBuilder.append(",");
+				}
+				stringBuilder.append("\"").append(name).append("\":");
+				JsonNodeType nodeType = props.get(name).getNodeType();
+				String value = props.get(name).asText();
+				String type = nodeType.name();
+				if ("STRING".equals(type)) {
+					value = "\"" + value + "\"";
+				}
+				stringBuilder.append(StringUtils.abbreviate(value, MAXWIDTH));
+			}
+		}
+		stringBuilder.append("}");
+		return stringBuilder.toString();
+	}
+
 	// Sonar(java:S3776): extracted helpers to reduce cognitive complexity.
 	private Object updateExistingFile(JsonNode props, File file, String text, String charsetName, String filePath)
 			throws IOException {
-		StringBuilder fileContent = readFileContent(file, charsetName);
+		StringBuilder fileContent;
+		try (InputStream input = new FileInputStream(file)) {
+			String content = IOUtils.toString(input, charsetName);
+			fileContent = new StringBuilder(content);
 
-		int startPosition = props.has(START_POSITION_FIELD) ? props.get(START_POSITION_FIELD).asInt() : 0;
-		int endPosition = props.has(START_POSITION_FIELD) ? props.get("end_position").asInt() : fileContent.length();
+			int startPosition = props.has(START_POSITION_FIELD) ? props.get(START_POSITION_FIELD).asInt() : 0;
+			int endPosition = props.has(END_POSITION_FIELD) ? props.get(END_POSITION_FIELD).asInt()
+					: fileContent.length();
 
-		if (!isValidReplacementRange(startPosition, endPosition, fileContent.length())) {
-			return "Invalid start or end position for text replacement.";
-		}
-
-		fileContent.replace(startPosition, endPosition, text);
-		writeFileContent(file, fileContent.toString(), charsetName);
-		return "File updated successfully: " + filePath;
-	}
-
-	private StringBuilder readFileContent(File file, String charsetName) throws IOException {
-		StringBuilder fileContent = new StringBuilder();
-		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(new FileInputStream(file), Charset.forName(charsetName)))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				fileContent.append(line).append(Genai.LINE_SEPARATOR);
+			if (startPosition < 0 || startPosition > endPosition) {
+				return "Invalid start or end position for text replacement.";
 			}
+
+			if (startPosition == endPosition) {
+				fileContent.insert(startPosition, text);
+			} else {
+				fileContent.replace(startPosition, endPosition, text);
+			}
+
+			writeFileContent(file, fileContent.toString(), charsetName);
+			return "File updated successfully: " + filePath;
 		}
-		return fileContent;
 	}
 
-	private boolean isValidReplacementRange(int startPosition, int endPosition, int contentLength) {
-		return !(startPosition < 0 || endPosition > contentLength || startPosition >= endPosition);
-	}
-
+	/**
+	 * Writes {@code content} to {@code file} using {@code charsetName}.
+	 *
+	 * @param file        destination file
+	 * @param content     content to write
+	 * @param charsetName character set name
+	 * @throws IOException if writing fails
+	 */
 	private void writeFileContent(File file, String content, String charsetName) throws IOException {
 		try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName(charsetName))) {
 			writer.write(content);
 		}
 	}
 
+	/**
+	 * Creates the file (and parent directories as needed) and writes {@code text} using the requested character
+	 * set.
+	 *
+	 * @param file        file to create
+	 * @param text        content
+	 * @param charsetName character set name
+	 * @param filePath    original (relative) file path used for messaging
+	 * @return success message
+	 * @throws IOException if an I/O error occurs
+	 */
 	private Object writeNewFile(File file, String text, String charsetName, String filePath) throws IOException {
 		File parent = file.getParentFile();
 		if (parent != null) {
@@ -288,7 +344,7 @@ public class FileFunctionTools implements FunctionTools {
 		if (logger.isInfoEnabled()) {
 			logger.info("Read file: {}", Arrays.toString(params));
 		}
-		
+
 		JsonNode props = (JsonNode) params[0];
 		String filePath = props.get("file_path").asText();
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
@@ -334,15 +390,14 @@ public class FileFunctionTools implements FunctionTools {
 	 * Computes a project-relative path string.
 	 *
 	 * <p>
-	 * The returned path always uses forward slashes ({@code /}) for consistency
-	 * across platforms.
+	 * The returned path always uses forward slashes ({@code /}) for consistency across platforms.
 	 * </p>
 	 *
 	 * @param dir          base directory used to relativize the {@code file}
 	 * @param file         target file or directory
 	 * @param addSingleDot whether to prefix relative paths with {@code ./}
-	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or
-	 *         {@code null} if {@code file} is not a descendant of {@code dir}
+	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or {@code null} if {@code file} is not a
+	 *         descendant of {@code dir}
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		if (dir == null || file == null) {

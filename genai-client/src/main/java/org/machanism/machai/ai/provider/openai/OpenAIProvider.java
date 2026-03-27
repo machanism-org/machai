@@ -105,6 +105,7 @@ public class OpenAIProvider implements Genai {
 	/** Default maximum number of tokens the model may generate. */
 	public static final long MAX_OUTPUT_TOKENS = 300000;
 
+	/** Default request timeout in seconds used when {@code GENAI_TIMEOUT} is unset. */
 	private static final long TIMEOUT_SEC = 600;
 
 	/** Active model identifier used in {@link #perform()}. */

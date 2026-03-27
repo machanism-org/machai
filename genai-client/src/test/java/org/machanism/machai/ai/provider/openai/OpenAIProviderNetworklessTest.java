@@ -189,7 +189,7 @@ class OpenAIProviderNetworklessTest {
         java.io.StringWriter out = new java.io.StringWriter();
 
         // Act
-        invokePrivate(provider, "logInputs", new Class<?>[] { java.io.Writer.class }, new Object[] { out });
+        invokePrivate(provider, OpenAIProvider.class, "logInputs", new Class<?>[] { java.io.Writer.class }, new Object[] { out });
 
         // Assert
         String text = out.toString();
@@ -223,8 +223,9 @@ class OpenAIProviderNetworklessTest {
         return f.get(target);
     }
 
-    private static Object invokePrivate(Object target, String method, Class<?>[] types, Object[] args) throws Exception {
-        Method m = target.getClass().getSuperclass().getDeclaredMethod(method, types);
+    private static Object invokePrivate(Object target, Class<?> declaringClass, String method, Class<?>[] types, Object[] args)
+            throws Exception {
+        Method m = declaringClass.getDeclaredMethod(method, types);
         m.setAccessible(true);
         return m.invoke(target, args);
     }

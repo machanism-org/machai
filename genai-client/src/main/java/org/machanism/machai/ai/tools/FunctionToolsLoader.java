@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * Discovers and applies {@link FunctionTools} implementations using {@link ServiceLoader}.
  *
  * <p>
- * This class acts as a host-side entry point for registering a curated set of local capabilities (for example,
+ * This class is the host-side entry point for registering a curated set of local capabilities (for example,
  * file access, command execution, and HTTP retrieval) with a {@link Genai}. Implementations are discovered from
  * the classpath (typically via {@code META-INF/services} provider configuration) and then applied to the provider
  * in discovery order.

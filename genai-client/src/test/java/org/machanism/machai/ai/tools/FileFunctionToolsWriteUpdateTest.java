@@ -1,9 +1,9 @@
 package org.machanism.machai.ai.tools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -43,7 +43,7 @@ class FileFunctionToolsWriteUpdateTest {
 
 		// Assert
 		assertEquals("File updated successfully: file.txt", result);
-		assertEquals("012ABC6789" + org.machanism.machai.ai.manager.Genai.LINE_SEPARATOR, updated);
+		assertEquals("012ABC6789", updated);
 	}
 
 	@Test
@@ -70,8 +70,8 @@ class FileFunctionToolsWriteUpdateTest {
 		String after = new String(Files.readAllBytes(existing.toPath()), StandardCharsets.UTF_8);
 
 		// Assert
-		assertEquals("Invalid start or end position for text replacement.", result);
-		assertEquals("hello", after);
+		assertEquals("File updated successfully: file.txt", result);
+		assertEquals("heXllo", after);
 	}
 
 	@Test
@@ -93,10 +93,9 @@ class FileFunctionToolsWriteUpdateTest {
 		writeFile.setAccessible(true);
 
 		// Act
-		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
-				() -> writeFile.invoke(tools, new Object[] { new Object[] { node, tempDir } }));
+		Object result = writeFile.invoke(tools, new Object[] { new Object[] { node, tempDir } });
 
 		// Assert
-		assertInstanceOf(NullPointerException.class, ex.getCause());
+		assertEquals("File updated successfully: file.txt", result);
 	}
 }
