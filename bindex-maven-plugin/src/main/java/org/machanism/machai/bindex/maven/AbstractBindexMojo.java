@@ -9,8 +9,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 
@@ -53,7 +54,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 	/**
 	 * {@code settings.xml} {@code <server>} id used to read GenAI credentials.
 	 */
-	@Parameter(property = GenAIProvider.SERVERID_PROP_NAME, required = false)
+	@Parameter(property = Genai.SERVERID_PROP_NAME, required = false)
 	private String serverId;
 
 	/**
@@ -69,7 +70,7 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 		BindexCreator creator = new BindexCreator(model, config);
 		creator.update(update);
 
-		boolean inputsLog = config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);
+		boolean inputsLog = config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, false);
 		creator.setLogInputs(inputsLog);
 
 		MavenProjectLayout projectLayout = new MavenProjectLayout();
@@ -120,11 +121,19 @@ public abstract class AbstractBindexMojo extends AbstractMojo {
 
 			String username = server.getUsername();
 			if (StringUtils.isNotBlank(username)) {
-				config.set("GENAI_USERNAME", username);
+				config.set(Genai.USERNAME_PROP_NAME, username);
 			}
 			String password = server.getPassword();
 			if (StringUtils.isNotBlank(password)) {
-				config.set("GENAI_PASSWORD", password);
+				config.set(Genai.PASSWORD_PROP_NAME, password);
+			}
+			
+			if (server.getConfiguration() instanceof Xpp3Dom) {
+				Xpp3Dom configuration = (Xpp3Dom) server.getConfiguration();
+				Xpp3Dom[] children = configuration.getChildren();
+				for (Xpp3Dom xpp3Dom : children) {
+					config.set(xpp3Dom.getName(), xpp3Dom.getValue());
+				}
 			}
 		}
 

@@ -37,7 +37,7 @@ class RegisterTest {
 			} catch (IOException e) {
 				throw new MojoExecutionException("Bindex register failed.", e);
 			} finally {
-				usageLogged = true; // in production: GenAIProviderManager.logUsage()
+				usageLogged = true; // in production: GenaiProviderManager.logUsage()
 			}
 		}
 

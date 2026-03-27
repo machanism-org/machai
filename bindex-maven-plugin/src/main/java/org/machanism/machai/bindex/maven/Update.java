@@ -2,7 +2,7 @@ package org.machanism.machai.bindex.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class Update extends AbstractBindexMojo {
 				logger.debug("Skipping Bindex update for pom-packaged project '{}'.", project.getArtifactId());
 			}
 		} finally {
-			GenAIProviderManager.logUsage();
+			GenaiProviderManager.logUsage();
 		}
 	}
 }

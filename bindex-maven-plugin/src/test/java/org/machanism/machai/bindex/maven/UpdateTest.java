@@ -25,7 +25,7 @@ class UpdateTest {
 					createBindex(true);
 				}
 			} finally {
-				usageLogged = true; // in production: GenAIProviderManager.logUsage()
+				usageLogged = true; // in production: GenaiProviderManager.logUsage()
 			}
 		}
 

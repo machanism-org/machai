@@ -13,6 +13,7 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.Genai;
 
 class AbstractBindexMojoTest {
 
@@ -125,8 +126,8 @@ class AbstractBindexMojoTest {
 
 		// Assert
 		assertNotNull(config);
-		assertNull(configValue(config, "GENAI_USERNAME"));
-		assertNull(configValue(config, "GENAI_PASSWORD"));
+		assertNull(configValue(config, Genai.USERNAME_PROP_NAME));
+		assertNull(configValue(config, Genai.PASSWORD_PROP_NAME));
 	}
 
 	@Test
@@ -159,8 +160,8 @@ class AbstractBindexMojoTest {
 		PropertiesConfigurator config = mojo.getConfigurator();
 
 		// Assert
-		assertEquals("user", configValue(config, "GENAI_USERNAME"));
-		assertEquals("pass", configValue(config, "GENAI_PASSWORD"));
+		assertEquals("user", configValue(config, Genai.USERNAME_PROP_NAME));
+		assertEquals("pass", configValue(config, Genai.PASSWORD_PROP_NAME));
 	}
 
 	@Test
@@ -180,7 +181,7 @@ class AbstractBindexMojoTest {
 		PropertiesConfigurator config = mojo.getConfigurator();
 
 		// Assert
-		assertNull(configValue(config, "GENAI_USERNAME"));
-		assertNull(configValue(config, "GENAI_PASSWORD"));
+		assertNull(configValue(config, Genai.USERNAME_PROP_NAME));
+		assertNull(configValue(config, Genai.PASSWORD_PROP_NAME));
 	}
 }

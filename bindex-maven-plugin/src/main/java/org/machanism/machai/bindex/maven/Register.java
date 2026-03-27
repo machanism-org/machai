@@ -6,7 +6,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.bindex.BindexRepository;
 import org.slf4j.Logger;
@@ -71,7 +71,7 @@ public class Register extends AbstractBindexMojo {
 		} catch (IOException e) {
 			throw new MojoExecutionException("Bindex register failed.", e);
 		} finally {
-			GenAIProviderManager.logUsage();
+			GenaiProviderManager.logUsage();
 		}
 	}
 }
