@@ -1,6 +1,6 @@
-<!-- 
+<!--
 @guidance:
-**IMPORTANT: GENERATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+**IMPORTANT: GENERATE OR UPDATECONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
 
 Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
 [PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
@@ -14,9 +14,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
 
 - **Automatic Fixes for Javadoc Build Issues:**
-    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc, 
+    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc,
        automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
-- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags. 
+- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags.
   Use only the standard inline or block code formatting as appropriate, and preserve the {@code ...} syntax without additional HTML tags.
 -->
 
@@ -66,7 +66,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
   <dt><strong>Processors</strong></dt>
   <dd>
-    The plugin delegates to the Ghostwriter engine to interpret guidance blocks and apply changes.
+    The Maven plugin delegates to the Ghostwriter engine to interpret guidance blocks and apply guided updates to
+    files in-place.
   </dd>
 
   <dt><strong>Scan root</strong></dt>
@@ -111,15 +112,25 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h3><code>org.machanism.machai.gw.maven</code></h3>
 
 <p>
-  Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document processing as part of Maven builds.
+  Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document
+  processing as part of Maven builds.
+</p>
+
+<p>
+  The goals in this package configure and invoke a
+  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> (or a specialized
+  processor such as <code>org.machanism.machai.gw.processor.ActProcessor</code>) to
+  scan a documentation source tree (commonly <code>src/site</code>) for files
+  containing embedded <code>@guidance:</code> blocks.
 </p>
 
 <h4>Goals</h4>
 
 <ul>
   <li>
-    <strong><code>gw:gw</code></strong> (<code>org.machanism.machai.gw.maven.GW</code>) &mdash; Aggregator goal intended to run
-    across a multi-module build. It processes modules in reverse order (sub-modules first, then parent modules).
+    <strong><code>gw:gw</code></strong> (<code>org.machanism.machai.gw.maven.GW</code>) &mdash; Aggregator goal that can run
+    without a <code>pom.xml</code>. It processes modules in reverse order (sub-modules first, then parent modules),
+    similar to the Ghostwriter CLI.
   </li>
   <li>
     <strong><code>gw:reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorGW</code>) &mdash; Processes modules using
@@ -139,23 +150,23 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   </li>
 </ul>
 
-<h4>Shared infrastructure</h4>
-
-<ul>
-  <li>
-    <strong><code>org.machanism.machai.gw.maven.AbstractGWGoal</code></strong> &mdash; Base class providing shared
-    configuration and execution flow, including scan directory selection, excludes, optional credential lookup, and
-    logging behavior.
-  </li>
-</ul>
-
-<h2>Configuration and credentials</h2>
+<h4>Credentials</h4>
 
 <p>
-  Provider credentials can optionally be sourced from <code>~/.m2/settings.xml</code> by providing
-  <code>-Dgenai.serverId=&lt;serverId&gt;</code>. When set, the plugin reads the matching <code>&lt;server&gt;</code>
-  entry and forwards credentials to the Ghostwriter workflow.
+  Provider credentials can optionally be sourced from <code>~/.m2/settings.xml</code>
+  by providing <code>-Dgenai.serverId=&lt;serverId&gt;</code>. When set, the plugin reads
+  the matching <code>&lt;server&gt;</code> entry and forwards credentials to the workflow.
 </p>
+
+<h4>Usage examples</h4>
+
+<pre>
+mvn gw:gw
+</pre>
+
+<pre>
+mvn gw:reactor -Dgw.scanDir=src\\site
+</pre>
 
 <h2>Class diagram</h2>
 
@@ -166,32 +177,6 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <p>
   <img src="../images/class-diagram.png" alt="Class diagram for GW Maven Plugin" />
 </p>
-
-<h2>Common usage</h2>
-
-<h3>Run guided processing</h3>
-
-<pre>
-mvn gw:gw
-</pre>
-
-<h3>Run reactor-ordered processing in a multi-module build</h3>
-
-<pre>
-mvn gw:reactor
-</pre>
-
-<h3>Override the scan root directory (Windows example)</h3>
-
-<pre>
-mvn gw:reactor -Dgw.scanDir=src\\site
-</pre>
-
-<h3>Use credentials from Maven settings</h3>
-
-<pre>
-mvn gw:gw -Dgenai.serverId=my-genai-provider
-</pre>
 
 </body>
 </html>

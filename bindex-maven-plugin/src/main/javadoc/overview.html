@@ -1,6 +1,6 @@
 <!-- 
 @guidance:
-**IMPORTANT: GENERATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+**IMPORTANT: GENERATE OR UPDATECONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
 
 Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
 [PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
@@ -37,16 +37,15 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   GenAI-powered semantic search within the Machanism ecosystem.
 </p>
 
-<h2>What this module provides</h2>
+<h2>Overview</h2>
 <p>
-  This project is packaged as a Maven plugin (<code>maven-plugin</code>) that contributes build goals (Mojos) for creating
-  and maintaining a Bindex index for the current Maven project, optionally publishing the resulting metadata to a
-  registry.
+  This module is packaged as a Maven plugin (<code>maven-plugin</code>) that adds build goals (Mojos) for producing a
+  Bindex index for the current Maven project, optionally publishing the resulting metadata to a registry.
 </p>
 
 <h2>Package overview</h2>
 <p>
-  The primary implementation lives in the <code>org.machanism.machai.bindex.maven</code> package, which contains:
+  The primary implementation lives in <code>org.machanism.machai.bindex.maven</code>, which provides:
 </p>
 <ul>
   <li>
@@ -54,15 +53,15 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     temporary artifacts.
   </li>
   <li>
-    A shared base Mojo that centralizes parameter handling and common Maven integration concerns.
+    A shared base Mojo that centralizes configuration and Maven integration concerns.
   </li>
 </ul>
 
-<h2>Goals</h2>
+<h3>Goals</h3>
 <ul>
-  <li><code>create</code> &ndash; create a new Bindex index (see {@link org.machanism.machai.bindex.maven.Create}).</li>
-  <li><code>update</code> &ndash; update an existing index (see {@link org.machanism.machai.bindex.maven.Update}).</li>
-  <li><code>register</code> &ndash; scan and publish metadata to a registry (see {@link org.machanism.machai.bindex.maven.Register}).</li>
+  <li><code>create</code> &ndash; generate a new Bindex index and related resources (see {@link org.machanism.machai.bindex.maven.Create}).</li>
+  <li><code>update</code> &ndash; refresh an existing index (see {@link org.machanism.machai.bindex.maven.Update}).</li>
+  <li><code>register</code> &ndash; scan the project and publish metadata to a registry (see {@link org.machanism.machai.bindex.maven.Register}).</li>
   <li><code>clean</code> &ndash; remove temporary artifacts created by the tooling (see {@link org.machanism.machai.bindex.maven.Clean}).</li>
 </ul>
 
@@ -109,8 +108,8 @@ mvn org.machanism.machai:bindex-maven-plugin:clean
 <ul>
   <li>This project compiles with Java 8 (<code>maven.compiler.release</code>).</li>
   <li>
-    The generated Javadoc is configured to link to external API documentation, including the Java SE API and the
-    Machai Bindex Core API.
+    The generated Javadoc links to external API documentation, including the Java SE API and the Machai Bindex Core
+    API.
   </li>
 </ul>
 
