@@ -129,6 +129,9 @@ Always check [Maven Central](https://search.maven.org/search?q=g:org.machanism.m
     <id>CodeMie</id>
     <username>your-genai-username</username>
     <password>your-genai-password</password>
+	<configuration>
+		<AUTH_URL>codemie-auth-url</AUTH_URL>
+	</configuration>
   </server>
   ```
 
