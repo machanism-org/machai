@@ -16,6 +16,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 - **Automatic Fixes for Javadoc Build Issues:**
     - If Javadoc build fails due to invalid @throws tags or missing required Javadoc, 
        automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
+- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags. 
+  Use only the standard inline or block code formatting as appropriate, and preserve the {@code ...} syntax without additional HTML tags.
 -->
 
 <!DOCTYPE html>
