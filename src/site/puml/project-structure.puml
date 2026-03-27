@@ -32,7 +32,6 @@ component "genai-client" as genai_client
 component "bindex-core" as bindex_core
 component "machai-cli" as machai_cli
 component "bindex-maven-plugin" as bindex_maven_plugin
-component "assembly-maven-plugin" as assembly_maven_plugin
 component "ghostwriter" as ghostwriter
 component "gw-maven-plugin" as gw_maven_plugin
 
@@ -41,7 +40,6 @@ machai_root ..> genai_client : module
 machai_root ..> bindex_core : module
 machai_root ..> machai_cli : module
 machai_root ..> bindex_maven_plugin : module
-machai_root ..> assembly_maven_plugin : module
 machai_root ..> ghostwriter : module
 machai_root ..> gw_maven_plugin : module
 
@@ -54,10 +52,10 @@ machai_cli --> bindex_core
 machai_cli --> ghostwriter
 
 bindex_maven_plugin --> bindex_core
-assembly_maven_plugin --> bindex_core
 
 ghostwriter --> project_layout
 ghostwriter --> genai_client
+ghostwriter --> bindex_core
 
 gw_maven_plugin --> ghostwriter
 
