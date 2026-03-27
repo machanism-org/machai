@@ -27,22 +27,24 @@
  */
 
 /**
- * No-op generative-AI provider implementation.
+ * No-op (offline) {@link org.machanism.machai.ai.manager.Genai} provider.
  *
- * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
- * {@link org.machanism.machai.ai.manager.Genai} implementation intended for environments where external
- * model backends are disabled, unavailable, or not permitted.
+ * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, a {@link
+ * org.machanism.machai.ai.manager.Genai} implementation intended for environments where external model backends are
+ * disabled, unavailable, or not permitted. Instead of contacting an LLM, it collects prompts in memory and can
+ * optionally persist instructions and prompts to local files.
  *
  * <h2>Behavior</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)} accumulates prompt text in memory,
- *       separated by {@link org.machanism.machai.ai.manager.Genai#PARAGRAPH_SEPARATOR}.</li>
+ *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)} appends prompt text to an in-memory
+ *       buffer, separating entries with {@link org.machanism.machai.ai.manager.Genai#PARAGRAPH_SEPARATOR}.</li>
  *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} never calls an LLM and always returns
  *       {@code null}. When configured via {@link org.machanism.machai.ai.provider.none.NoneProvider#inputsLog(java.io.File)},
- *       it writes the accumulated prompts to the specified file.</li>
- *   <li>If instructions are configured via {@link org.machanism.machai.ai.provider.none.NoneProvider#instructions(String)},
- *       they are written to an {@code instructions.txt} file in the same directory as the inputs log (or to the process
- *       user directory when the log file has no parent directory).</li>
+ *       it writes the accumulated prompts to the configured log file and clears the buffer.</li>
+ *   <li>When instructions are configured via
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#instructions(String)}, they are written to an
+ *       {@code instructions.txt} file in the same directory as the inputs log (or to the process user directory when the
+ *       log file has no parent directory).</li>
  *   <li>Unsupported capabilities such as
  *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String, long)} throw
  *       {@link java.lang.UnsupportedOperationException}.</li>

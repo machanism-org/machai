@@ -16,20 +16,20 @@
  */
 
 /**
- * Provider-agnostic client API and runtime infrastructure for MachAI generative-AI integrations.
+ * Provider-agnostic client API for MachAI generative-AI integrations.
  *
- * <p>This root package defines the public abstractions used to build and execute LLM/GenAI requests while isolating
- * the rest of the application from vendor-specific SDKs and transport details.
+ * <p>This root package groups the public abstractions and runtime components needed to configure and execute LLM/GenAI
+ * requests while keeping the rest of the application isolated from vendor SDKs and transport details.
  *
- * <h2>Major areas</h2>
+ * <h2>Sub-packages</h2>
  * <ul>
- *   <li><strong>Manager API / SPI</strong> ({@code org.machanism.machai.ai.manager}) &ndash; the provider contract
+ *   <li><strong>Manager API / SPI</strong> ({@code org.machanism.machai.ai.manager}) &ndash; the core provider contract
  *       ({@link org.machanism.machai.ai.manager.Genai}), provider resolution/aggregation
- *       ({@link org.machanism.machai.ai.manager.GenaiProviderManager}), and usage reporting
+ *       ({@link org.machanism.machai.ai.manager.GenaiProviderManager}), and token usage reporting
  *       ({@link org.machanism.machai.ai.manager.Usage}).</li>
  *   <li><strong>Providers</strong> ({@code org.machanism.machai.ai.provider.*}) &ndash; concrete backend integrations,
- *       including OpenAI ({@code .openai}), Google Gemini ({@code .gemini}), EPAM CodeMie ({@code .codemie}) and a
- *       no-op provider ({@code .none}) for offline/disabled environments.</li>
+ *       including OpenAI ({@code .openai}), Google Gemini ({@code .gemini}), EPAM CodeMie ({@code .codemie}), an offline
+ *       no-op provider ({@code .none}), and other supported backends.</li>
  *   <li><strong>Tools</strong> ({@code org.machanism.machai.ai.tools}) &ndash; host-executed capabilities that can be
  *       registered with providers for tool/function calling (file system, command execution, and web access), typically
  *       discovered and applied via {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
@@ -38,12 +38,12 @@
  * <h2>Typical workflow</h2>
  * <ol>
  *   <li>Select a provider/model (for example {@code OpenAI:gpt-4o-mini}).</li>
- *   <li>Configure the provider (instructions, prompts, attachments, tools).</li>
- *   <li>Execute the request and record aggregated usage.</li>
+ *   <li>Initialize and configure the provider (instructions, prompts, attachments, tools).</li>
+ *   <li>Execute the request and record aggregated token usage.</li>
  * </ol>
  *
  * <h2>Example</h2>
- * <pre>{@code
+ * <pre>
  * Configurator conf = ...;
  * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  *
@@ -57,6 +57,6 @@
  * String answer = provider.perform();
  * GenaiProviderManager.addUsage(provider.usage());
  * GenaiProviderManager.logUsage();
- * }</pre>
+ * </pre>
  */
 package org.machanism.machai.ai;

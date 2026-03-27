@@ -30,41 +30,47 @@
  * OpenAI provider implementation for MachAI.
  *
  * <p>
- * This package provides the OpenAI-backed implementation of MachAI's provider abstraction
- * ({@link org.machanism.machai.ai.manager.Genai}). Its primary entry point is
- * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, which translates prompts, instructions, attached
- * inputs, and conversation state into OpenAI API requests and maps OpenAI responses back into MachAI result types.
- * </p>
- *
- * <p>
- * Responsibilities implemented in this package typically include:
- * </p>
- * <ul>
- *   <li>Building requests for chat/completions-style interactions (for example via the Responses API) from MachAI
- *       prompts and options.</li>
- *   <li>Registering MachAI function tools, translating their schemas into OpenAI tool definitions, and dispatching
- *       tool calls to local handlers.</li>
- *   <li>Collecting token usage (input, cached, and output) and reporting it through
- *       {@link org.machanism.machai.ai.manager.GenaiProviderManager}.</li>
- *   <li>Providing embeddings support via
- *       {@link org.machanism.machai.ai.provider.openai.OpenAIProvider#embedding(String, long)}.</li>
- * </ul>
- *
- * <h2>Configuration</h2>
- * <p>
- * The provider is configured using a {@link org.machanism.macha.core.commons.configurator.Configurator}. Typical
- * configuration includes the OpenAI model identifier (for example, {@code chatModel}) and an API key supplied via
- * {@code OPENAI_API_KEY}. Optional settings may include a base URL ({@code OPENAI_BASE_URL}) and provider limits
- * such as timeouts and maximum output/tool-call counts.
+ * This package provides the OpenAI-backed {@link org.machanism.machai.ai.manager.Genai} implementation
+ * ({@link org.machanism.machai.ai.provider.openai.OpenAIProvider}). It builds OpenAI Responses API requests from
+ * MachAI prompts, optional system instructions, file inputs, and registered tools, then converts the model output
+ * into plain text results and MachAI token-usage metrics.
  * </p>
  *
  * <h2>Typical usage</h2>
- * <pre>{@code
- * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-5.1");
- * provider.instructions("You are a concise assistant.");
- * provider.prompt("Summarize this text...");
+ * <pre>
+ * Configurator cfg = ...;
+ * OpenAIProvider provider = new OpenAIProvider();
+ * provider.init(cfg);
+ *
+ * provider.instructions("You are a helpful assistant.");
+ * provider.prompt("Summarize this document.");
+ * provider.addFile(new File("./docs/input.pdf"));
+ *
  * String answer = provider.perform();
- * }
+ * Usage usage = provider.usage();
  * </pre>
+ *
+ * <h2>Tools and function calling</h2>
+ * <p>
+ * Tools can be registered via {@link org.machanism.machai.ai.manager.Genai#addTool(String, String, org.machanism.machai.ai.manager.Genai.ToolFunction, String...)},
+ * which exposes them to the model as OpenAI function tools. When the model requests a tool call, the provider
+ * executes the matching handler locally, appends the tool output to the conversation, and continues until a final
+ * response message is produced.
+ * </p>
+ *
+ * <h2>Configuration</h2>
+ * <p>
+ * The provider is initialized via
+ * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider#init(org.machanism.macha.core.commons.configurator.Configurator)}
+ * and reads the following configuration keys:
+ * </p>
+ * <ul>
+ *   <li>{@code OPENAI_API_KEY} (required): OpenAI API key.</li>
+ *   <li>{@code chatModel} (required): model identifier used for responses (for example {@code gpt-4.1}).</li>
+ *   <li>{@code OPENAI_BASE_URL} (optional): base URL override for OpenAI-compatible endpoints.</li>
+ *   <li>{@code GENAI_TIMEOUT} (optional): timeout in seconds for API requests.</li>
+ *   <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum output tokens per response.</li>
+ *   <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls allowed per response.</li>
+ * </ul>
  */
 package org.machanism.machai.ai.provider.openai;

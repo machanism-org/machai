@@ -38,10 +38,9 @@
  * Host-integrated function tools exposed to a {@link org.machanism.machai.ai.manager.Genai}.
  *
  * <p>
- * This package provides a curated set of host-side "tool" installers (SPI implementations) that register named
- * functions with a {@link org.machanism.machai.ai.manager.Genai} provider. These tools are executed inside the
- * host application and are designed to keep access scoped (for example, to a project working directory) and
- * observable (via host logging).
+ * This package contains host-side “tool installers” (SPI implementations) that register named functions with a
+ * {@link org.machanism.machai.ai.manager.Genai} provider. Tools are executed inside the host application and are
+ * designed to keep access scoped (for example, to a project working directory) and observable (via host logging).
  * </p>
  *
  * <h2>Responsibilities</h2>
@@ -52,7 +51,7 @@
  *   <li><b>Discovery and wiring</b>: installers are typically discovered using {@link java.util.ServiceLoader} and
  *       applied by {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
  *   <li><b>Scoped execution</b>: tools interpret paths relative to a host-supplied working directory, bound output
- *       sizes, and apply deny checks/validation for potentially risky operations.</li>
+ *       sizes, and apply validation/deny checks for potentially risky operations.</li>
  * </ul>
  *
  * <h2>Key components</h2>
@@ -63,15 +62,5 @@
  *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution and process termination</li>
  *   <li>{@link org.machanism.machai.ai.tools.WebFunctionTools} – HTTP fetching and REST calls</li>
  * </ul>
- *
- * <h2>Usage</h2>
- * <pre>{@code
- * Configurator conf = ...;
- * Genai provider = ...;
- * FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
- * loader.setConfiguration(conf);
- * loader.applyTools(provider);
- * }
- * </pre>
  */
 package org.machanism.machai.ai.tools;
