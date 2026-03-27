@@ -57,7 +57,7 @@ public class MavenBindexBuilder extends BindexBuilder {
 	 * @param projectLayout Maven project layout describing the POM and directory
 	 *                      structure
 	 * @param genai         provider identifier used by
-	 *                      {@link org.machanism.machai.ai.manager.GenAIProviderManager}
+	 *                      {@link org.machanism.machai.ai.manager.GenaiProviderManager}
 	 * @param config        configuration used to initialize the provider
 	 */
 	public MavenBindexBuilder(MavenProjectLayout projectLayout, String genai, Configurator config) {

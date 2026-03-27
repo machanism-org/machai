@@ -21,8 +21,8 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
 import org.mockito.MockedStatic;
@@ -35,7 +35,7 @@ class BindexBuilderAdditionalTest {
 	@Test
 	void isLogInputs_and_logInputs_roundTrip() {
 		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		BindexBuilder builder = createBuilderWithMockedProvider(provider, TestProjectLayouts.projectLayout(tempDir));
 
 		// Act
@@ -50,7 +50,7 @@ class BindexBuilderAdditionalTest {
 	void build_whenProviderReturnsNull_returnsNull() throws Exception {
 		// Arrange
 		ProjectLayout layout = TestProjectLayouts.projectLayout(tempDir);
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		when(provider.perform()).thenReturn(null);
 		BindexBuilder builder = createBuilderWithMockedProvider(provider, layout);
 
@@ -67,7 +67,7 @@ class BindexBuilderAdditionalTest {
 	void build_whenOutputIsJsonFencedCodeBlock_stripsFenceAndParses() throws Exception {
 		// Arrange
 		ProjectLayout layout = TestProjectLayouts.projectLayout(tempDir);
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		String json = "{\"id\":\"abc\",\"description\":\"Hello\"}";
 		when(provider.perform()).thenReturn("```json\n" + json + "\n```");
 		BindexBuilder builder = createBuilderWithMockedProvider(provider, layout);
@@ -85,7 +85,7 @@ class BindexBuilderAdditionalTest {
 	void build_whenOriginProvided_includesUpdatePromptAndLogsInputsWhenEnabled() throws Exception {
 		// Arrange
 		ProjectLayout layout = TestProjectLayouts.projectLayout(tempDir);
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		when(provider.perform()).thenReturn("{\"id\":\"newId\"}");
 
 		Bindex origin = new Bindex();
@@ -107,7 +107,7 @@ class BindexBuilderAdditionalTest {
 	@Test
 	void promptFile_whenBundleMessageNameNull_returnsRawFileData() throws Exception {
 		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		BindexBuilder builder = createBuilderWithMockedProvider(provider, TestProjectLayouts.projectLayout(tempDir));
 
 		File file = new File(tempDir, "some.txt");
@@ -123,7 +123,7 @@ class BindexBuilderAdditionalTest {
 	@Test
 	void promptFile_whenBundleMessageNameUnknown_throwsMissingResourceException() throws Exception {
 		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		BindexBuilder builder = createBuilderWithMockedProvider(provider, TestProjectLayouts.projectLayout(tempDir));
 
 		File file = new File(tempDir, "example.json");
@@ -136,7 +136,7 @@ class BindexBuilderAdditionalTest {
 	@Test
 	void getOrigin_and_origin_roundTrip() {
 		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		BindexBuilder builder = createBuilderWithMockedProvider(provider, TestProjectLayouts.projectLayout(tempDir));
 		Bindex origin = new Bindex();
 
@@ -150,7 +150,7 @@ class BindexBuilderAdditionalTest {
 	@Test
 	void getProjectLayout_returnsProvidedLayout() {
 		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		ProjectLayout layout = TestProjectLayouts.projectLayout(tempDir);
 		BindexBuilder builder = createBuilderWithMockedProvider(provider, layout);
 
@@ -161,20 +161,20 @@ class BindexBuilderAdditionalTest {
 	@Test
 	void getGenAIProvider_returnsProvider() {
 		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		BindexBuilder builder = createBuilderWithMockedProvider(provider, TestProjectLayouts.projectLayout(tempDir));
 
 		// Act + Assert
 		assertSame(provider, builder.getGenAIProvider());
 	}
 
-	private static BindexBuilder createBuilderWithMockedProvider(GenAIProvider provider, ProjectLayout layout) {
+	private static BindexBuilder createBuilderWithMockedProvider(Genai provider, ProjectLayout layout) {
 		Configurator configurator = mock(Configurator.class);
 		BindexBuilder builder;
 
-		try (MockedStatic<GenAIProviderManager> managerMock = mockStatic(GenAIProviderManager.class)) {
+		try (MockedStatic<GenaiProviderManager> managerMock = mockStatic(GenaiProviderManager.class)) {
 			// Sonar java:S6068 - Mockito eq(...) is redundant in static invocation matching.
-			managerMock.when(() -> GenAIProviderManager.getProvider("openai", configurator)).thenReturn(provider);
+			managerMock.when(() -> GenaiProviderManager.getProvider("openai", configurator)).thenReturn(provider);
 			builder = new BindexBuilder(layout, "openai", configurator);
 		}
 

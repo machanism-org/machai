@@ -26,8 +26,8 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.schema.Bindex;
@@ -112,7 +112,7 @@ public class Picker {
 
 	private final MongoCollection<Document> collection;
 
-	private final GenAIProvider provider;
+	private final Genai provider;
 
 	private Double score = DEFAULT_SCORE_VALUE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
@@ -136,7 +136,7 @@ public class Picker {
 			throw new IllegalArgumentException("config must not be null");
 		}
 
-		this.provider = GenAIProviderManager.getProvider(genai, config);
+		this.provider = GenaiProviderManager.getProvider(genai, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		// Sonar java:S3010 - avoid mutating a static field from an instance constructor.
@@ -144,7 +144,7 @@ public class Picker {
 	}
 
 	// Package-private constructor for tests and internal use.
-	Picker(MongoCollection<Document> collection, GenAIProvider provider) {
+	Picker(MongoCollection<Document> collection, Genai provider) {
 		if (collection == null) {
 			throw new IllegalArgumentException("collection must not be null");
 		}
@@ -345,7 +345,7 @@ public class Picker {
 	}
 
 	/**
-	 * Performs a schema classification prompt using {@link GenAIProvider}.
+	 * Performs a schema classification prompt using {@link Genai}.
 	 *
 	 * @param query search query string
 	 * @return classification schema as a JSON string

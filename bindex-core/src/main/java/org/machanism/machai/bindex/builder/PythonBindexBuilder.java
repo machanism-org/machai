@@ -45,7 +45,7 @@ public class PythonBindexBuilder extends BindexBuilder {
 	 * @param projectLayout layout describing the project directory and manifest
 	 *                      location
 	 * @param genai         provider identifier used by
-	 *                      {@link org.machanism.machai.ai.manager.GenAIProviderManager}
+	 *                      {@link org.machanism.machai.ai.manager.GenaiProviderManager}
 	 * @param config        configuration used to initialize the provider
 	 */
 	public PythonBindexBuilder(ProjectLayout projectLayout, String genai, Configurator config) {

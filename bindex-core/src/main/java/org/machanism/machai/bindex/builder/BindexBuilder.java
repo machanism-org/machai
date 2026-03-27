@@ -12,8 +12,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Builds {@link Bindex} documents for a project on disk by prompting a
- * {@link GenAIProvider} with:
+ * {@link Genai} with:
  * <ul>
  * <li>the Bindex JSON schema,</li>
  * <li>project-specific context supplied by subclasses, and</li>
@@ -64,7 +64,7 @@ public class BindexBuilder {
 	private final ProjectLayout projectLayout;
 
 	/** Provider used to build the prompt and perform generation. */
-	private final GenAIProvider provider;
+	private final Genai provider;
 
 	private boolean logInputs;
 
@@ -73,12 +73,12 @@ public class BindexBuilder {
 	 *
 	 * @param projectLayout describes the target project on disk
 	 * @param genai         provider identifier used by
-	 *                      {@link GenAIProviderManager#getProvider(String, Configurator)}
+	 *                      {@link GenaiProviderManager#getProvider(String, Configurator)}
 	 * @param config        configuration used to initialize the provider
 	 */
 	public BindexBuilder(ProjectLayout projectLayout, String genai, Configurator config) {
 		this.projectLayout = projectLayout;
-		this.provider = GenAIProviderManager.getProvider(genai, config);
+		this.provider = GenaiProviderManager.getProvider(genai, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		String systemPrompt = PROMPT_BUNDLE.getString("bindex_system_instructions");
@@ -95,7 +95,7 @@ public class BindexBuilder {
 	 * provided,</li>
 	 * <li>adds project context via {@link #projectContext()},</li>
 	 * <li>issues the generation prompt and calls
-	 * {@link GenAIProvider#perform()},</li>
+	 * {@link Genai#perform()},</li>
 	 * <li>deserializes the provider output into a {@link Bindex}.</li>
 	 * </ol>
 	 *
@@ -112,12 +112,12 @@ public class BindexBuilder {
 			String bindexStr = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(origin);
 			String updateBindexPrompt = MessageFormat.format(PROMPT_BUNDLE.getString("update_bindex_prompt"),
 					bindexStr);
-			prompt.append(updateBindexPrompt).append(GenAIProvider.LINE_SEPARATOR);
+			prompt.append(updateBindexPrompt).append(Genai.LINE_SEPARATOR);
 		}
 
-		prompt.append(projectContext()).append(GenAIProvider.LINE_SEPARATOR).append(GenAIProvider.LINE_SEPARATOR);
-		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append(GenAIProvider.LINE_SEPARATOR)
-				.append(GenAIProvider.LINE_SEPARATOR);
+		prompt.append(projectContext()).append(Genai.LINE_SEPARATOR).append(Genai.LINE_SEPARATOR);
+		prompt.append(PROMPT_BUNDLE.getString("bindex_generation_prompt")).append(Genai.LINE_SEPARATOR)
+				.append(Genai.LINE_SEPARATOR);
 
 		provider.prompt(prompt.toString());
 
@@ -219,7 +219,7 @@ public class BindexBuilder {
 	 *
 	 * @return provider instance
 	 */
-	public GenAIProvider getGenAIProvider() {
+	public Genai getGenAIProvider() {
 		return provider;
 	}
 

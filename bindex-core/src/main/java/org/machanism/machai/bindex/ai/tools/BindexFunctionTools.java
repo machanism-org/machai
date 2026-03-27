@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.bindex.BindexRepository;
 import org.machanism.machai.bindex.Picker;
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Registers Bindex-related function tools for a {@link GenAIProvider}.
+ * Registers Bindex-related function tools for a {@link Genai}.
  *
  * <p>
  * The tools exposed by this type are intended to be consumed by LLM-assisted
@@ -54,11 +54,11 @@ public class BindexFunctionTools implements FunctionTools {
 	private Configurator configurator;
 
 	/**
-	 * Registers Bindex function tools with the provided {@link GenAIProvider}.
+	 * Registers Bindex function tools with the provided {@link Genai}.
 	 *
 	 * @param provider the provider to register tools with
 	 */
-	public void applyTools(GenAIProvider provider) {
+	public void applyTools(Genai provider) {
 		provider.addTool(
 				"get_bindex",
 				"Retrieves bindex metadata for a given project or library.",
@@ -95,7 +95,7 @@ public class BindexFunctionTools implements FunctionTools {
 		String bindexJson = bindex == null ? "null" : objectMapper.writeValueAsString(bindex);
 		if (logger.isInfoEnabled()) {
 			logger.info("Retrieved bindex: {}",
-					StringUtils.abbreviate(bindexJson, 120).replace(GenAIProvider.LINE_SEPARATOR, " ").replace("\r",
+					StringUtils.abbreviate(bindexJson, 120).replace(Genai.LINE_SEPARATOR, " ").replace("\r",
 							""));
 		}
 		return bindexJson;
@@ -120,7 +120,7 @@ public class BindexFunctionTools implements FunctionTools {
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bindex schema: {}",
-					StringUtils.abbreviate(schema, 120).replace(GenAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
+					StringUtils.abbreviate(schema, 120).replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""));
 		}
 		return schema;
 	}
@@ -151,7 +151,7 @@ public class BindexFunctionTools implements FunctionTools {
 		for (Bindex bindex : bindexList) {
 			if (bindex != null) {
 				picked.append("| ").append(bindex.getId()).append(" | ").append(bindex.getDescription()).append(" |")
-						.append(GenAIProvider.LINE_SEPARATOR);
+						.append(Genai.LINE_SEPARATOR);
 			}
 		}
 		picked.append("```\n");
@@ -159,7 +159,7 @@ public class BindexFunctionTools implements FunctionTools {
 		String result = picked.toString();
 		if (logger.isInfoEnabled()) {
 			logger.info("Recommended Artifacts: {}",
-					StringUtils.abbreviate(result, 60).replace(GenAIProvider.LINE_SEPARATOR, ""));
+					StringUtils.abbreviate(result, 60).replace(Genai.LINE_SEPARATOR, ""));
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Recommended Artifacts: {}", result);

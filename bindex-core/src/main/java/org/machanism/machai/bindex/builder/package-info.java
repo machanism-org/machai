@@ -31,7 +31,7 @@
  * <p>This package provides the {@link org.machanism.machai.bindex.builder.BindexBuilder} base type and concrete
  * builders for different project layouts. A builder is responsible for assembling a generation prompt (schema plus
  * project context), optionally merging an existing (origin) {@code Bindex} for incremental updates, delegating the
- * generation step to a configured {@link org.machanism.machai.ai.manager.GenAIProvider}, and then deserializing the
+ * generation step to a configured {@link org.machanism.machai.ai.manager.Genai}, and then deserializing the
  * provider response into a {@code Bindex}.
  *
  * <h2>Provided implementations</h2>

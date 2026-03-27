@@ -13,7 +13,7 @@ import java.util.Set;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Language;
@@ -31,7 +31,7 @@ class PickerAdditionalTest {
 	void getEmbeddingBson_whenClassificationNull_throws() {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		Picker picker = new Picker(collection, provider);
 
 		// Act + Assert
@@ -44,7 +44,7 @@ class PickerAdditionalTest {
 	void getEmbeddingBson_whenDimensionsNonPositive_throws() {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		Picker picker = new Picker(collection, provider);
 		Classification classification = new Classification();
 
@@ -58,7 +58,7 @@ class PickerAdditionalTest {
 	void getRegistredId_whenBindexNull_throws() {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		Picker picker = new Picker(collection, provider);
 
 		// Act + Assert
@@ -70,7 +70,7 @@ class PickerAdditionalTest {
 	void getRegistredId_whenDocumentNotFound_returnsNull() {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		Picker picker = new Picker(collection, provider);
 
 		Bindex bindex = new Bindex();
@@ -107,7 +107,7 @@ class PickerAdditionalTest {
 			}
 			throw new UnsupportedOperationException("Unexpected method: " + method);
 		});
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		Picker picker = new Picker(collection, provider);
 
 		Set<String> deps = new HashSet<>();
@@ -140,7 +140,7 @@ class PickerAdditionalTest {
 			throw new UnsupportedOperationException("Unexpected method: " + method);
 		});
 
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		Picker picker = new Picker(collection, provider);
 
 		Set<String> deps = new HashSet<>();

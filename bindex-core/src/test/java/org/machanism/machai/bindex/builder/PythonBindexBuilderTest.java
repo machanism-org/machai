@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -34,12 +34,12 @@ class PythonBindexBuilderTest {
 
 		ProjectLayout layout = TestProjectLayouts.projectLayout(projectDir);
 
-		GenAIProvider provider = Mockito.mock(GenAIProvider.class);
+		Genai provider = Mockito.mock(Genai.class);
 		Configurator config = Mockito.mock(Configurator.class);
 
-		try (MockedStatic<org.machanism.machai.ai.manager.GenAIProviderManager> mocked = Mockito
-				.mockStatic(org.machanism.machai.ai.manager.GenAIProviderManager.class)) {
-			mocked.when(() -> org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(Mockito.anyString(),
+		try (MockedStatic<org.machanism.machai.ai.manager.GenaiProviderManager> mocked = Mockito
+				.mockStatic(org.machanism.machai.ai.manager.GenaiProviderManager.class)) {
+			mocked.when(() -> org.machanism.machai.ai.manager.GenaiProviderManager.getProvider(Mockito.anyString(),
 					Mockito.same(config))).thenReturn(provider);
 
 			PythonBindexBuilder builder = new PythonBindexBuilder(layout, "provider", config);
@@ -60,12 +60,12 @@ class PythonBindexBuilderTest {
 
 		ProjectLayout layout = TestProjectLayouts.projectLayout(projectDir);
 
-		GenAIProvider provider = Mockito.mock(GenAIProvider.class);
+		Genai provider = Mockito.mock(Genai.class);
 		Configurator config = Mockito.mock(Configurator.class);
 
-		try (MockedStatic<org.machanism.machai.ai.manager.GenAIProviderManager> mocked = Mockito
-				.mockStatic(org.machanism.machai.ai.manager.GenAIProviderManager.class)) {
-			mocked.when(() -> org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(Mockito.anyString(),
+		try (MockedStatic<org.machanism.machai.ai.manager.GenaiProviderManager> mocked = Mockito
+				.mockStatic(org.machanism.machai.ai.manager.GenaiProviderManager.class)) {
+			mocked.when(() -> org.machanism.machai.ai.manager.GenaiProviderManager.getProvider(Mockito.anyString(),
 					Mockito.same(config))).thenReturn(provider);
 
 			PythonBindexBuilder builder = new PythonBindexBuilder(layout, "provider", config);
