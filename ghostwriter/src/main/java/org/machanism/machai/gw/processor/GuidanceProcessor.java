@@ -14,7 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Scans a project tree, extracts per-file {@code @guidance} directives through
  * {@link Reviewer}s, and dispatches the resulting prompts to a configured
- * {@link GenAIProvider}.
+ * {@link Genai}.
  *
  * <p>
  * The processor supports single-module and multi-module project layouts. For
@@ -213,7 +213,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
 		String osName = System.getProperty("os.name");
 		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
-		guidanceBuilder.append(docsProcessingInstructions).append(GenAIProvider.LINE_SEPARATOR);
+		guidanceBuilder.append(docsProcessingInstructions).append(Genai.LINE_SEPARATOR);
 
 		return super.process(projectLayout, file, instructions, guidanceBuilder.toString());
 	}

@@ -6,7 +6,7 @@
  * The {@code org.machanism.machai.gw.processor} package contains the CLI entry
  * point and the processors responsible for scanning a project directory tree,
  * extracting embedded {@code @guidance:} directives, and invoking the
- * configured {@link org.machanism.machai.ai.manager.GenAIProvider GenAI
+ * configured {@link org.machanism.machai.ai.manager.Genai GenAI
  * provider}.
  * </p>
  *

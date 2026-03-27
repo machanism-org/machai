@@ -16,8 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -142,7 +142,7 @@ public final class Ghostwriter {
 			logger.error("Unexpected error: {}", e.getMessage(), e);
 			exitCode = 1;
 		} finally {
-			GenAIProviderManager.logUsage();
+			GenaiProviderManager.logUsage();
 			logger.info("File processing completed.");
 		}
 
@@ -235,7 +235,7 @@ public final class Ghostwriter {
 			while (scanner.hasNextLine()) {
 				String nextLine = scanner.nextLine();
 				if (Strings.CS.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
-					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(GenAIProvider.LINE_SEPARATOR);
+					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(Genai.LINE_SEPARATOR);
 					logger.info("\t");
 				} else {
 					sb.append(nextLine);
@@ -394,7 +394,7 @@ public final class Ghostwriter {
 	public static void main(String[] args) throws IOException, ParseException {
 		Options options = new Options();
 		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
-		Option logInputsOption = new Option("l", GenAIProvider.LOG_INPUTS_PROP_NAME, false,
+		Option logInputsOption = new Option("l", Genai.LOG_INPUTS_PROP_NAME, false,
 				"Log LLM request inputs to dedicated log files.");
 
 		Option multiThreadOption = Option.builder("t").longOpt("threads")
@@ -484,7 +484,7 @@ public final class Ghostwriter {
 			multiThread = cmd.getOptionValue(multiThreadOption);
 		}
 
-		boolean logInputs = config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);
+		boolean logInputs = config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, false);
 		if (cmd.hasOption(logInputsOption)) {
 			logInputs = true;
 		}

@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 
 class AIFileProcessorAdditionalTest {
 
@@ -143,6 +143,6 @@ class AIFileProcessorAdditionalTest {
 		// Assert
 		assertTrue(out.contains("hello"));
 		assertTrue(out.contains("world"));
-		assertTrue(out.endsWith(GenAIProvider.LINE_SEPARATOR), "parseLines should append newline after each input line");
+		assertTrue(out.endsWith(Genai.LINE_SEPARATOR), "parseLines should append newline after each input line");
 	}
 }

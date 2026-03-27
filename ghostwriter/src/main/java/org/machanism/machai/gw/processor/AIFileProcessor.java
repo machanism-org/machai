@@ -25,8 +25,8 @@ import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -34,14 +34,14 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base class for processors that build prompts and execute a configured
- * {@link GenAIProvider} against project files.
+ * {@link Genai} against project files.
  *
  * <p>
  * This type extends {@link AbstractFileProcessor} with the mechanics required
  * to invoke a GenAI provider:
  * </p>
  * <ul>
- * <li>create a provider using {@link GenAIProviderManager},</li>
+ * <li>create a provider using {@link GenaiProviderManager},</li>
  * <li>apply registered function tools via {@link FunctionToolsLoader},</li>
  * <li>optionally log the composed provider inputs for auditing/debugging,
  * and</li>
@@ -117,7 +117,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			throws IOException {
 		logger.info("Processing file: '{}'", file);
 
-		GenAIProvider provider = GenAIProviderManager.getProvider(getModel(), getConfigurator());
+		Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
 		File projectDir = projectLayout.getProjectDir();
@@ -128,7 +128,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		String projectInfo = getProjectStructureDescription(projectLayout, file);
 
 		StringBuilder promptBuilder = new StringBuilder();
-		promptBuilder.append(projectInfo).append(GenAIProvider.LINE_SEPARATOR);
+		promptBuilder.append(projectInfo).append(Genai.LINE_SEPARATOR);
 
 		String promptLines = parseLines(prompt);
 		promptBuilder.append(promptLines);
@@ -196,7 +196,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		content.add(relativeFile);
 
 		Object[] array = content.toArray(new String[0]);
-		return MessageFormat.format(promptBundle.getString("project_information"), array) + GenAIProvider.LINE_SEPARATOR;
+		return MessageFormat.format(promptBundle.getString("project_information"), array) + Genai.LINE_SEPARATOR;
 	}
 
 	/**
@@ -287,7 +287,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			while ((line = reader.readLine()) != null) {
 				String normalizedLine = StringUtils.stripToNull(line);
 				if (normalizedLine == null) {
-					sb.append(GenAIProvider.LINE_SEPARATOR);
+					sb.append(Genai.LINE_SEPARATOR);
 					continue;
 				}
 
@@ -295,7 +295,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				if (content != null) {
 					sb.append(content);
 				}
-				sb.append(GenAIProvider.LINE_SEPARATOR);
+				sb.append(Genai.LINE_SEPARATOR);
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);

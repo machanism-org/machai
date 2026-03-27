@@ -7,14 +7,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 
 class ActFunctionToolsApplyToolsTest {
 
 	@Test
 	void applyTools_registersLoadActDetailsTool() {
 		// Arrange
-		GenAIProvider provider = mock(GenAIProvider.class);
+		Genai provider = mock(Genai.class);
 		ActFunctionTools tools = new ActFunctionTools();
 
 		// Act

@@ -61,8 +61,8 @@ class GhostwriterCoverageTest {
 		String text = Ghostwriter.readText("Prompt");
 
 		// Assert
-		assertEquals("line1" + org.machanism.machai.ai.manager.GenAIProvider.LINE_SEPARATOR + "line2"
-				+ org.machanism.machai.ai.manager.GenAIProvider.LINE_SEPARATOR + "last", text);
+		assertEquals("line1" + org.machanism.machai.ai.manager.Genai.LINE_SEPARATOR + "line2"
+				+ org.machanism.machai.ai.manager.Genai.LINE_SEPARATOR + "last", text);
 	}
 
 	@Test

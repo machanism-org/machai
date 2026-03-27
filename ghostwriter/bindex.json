@@ -28,7 +28,7 @@
     "layers" : [ "Infrastructure", "Adapters" ],
     "usageContext" : [ "Command-line applications", "Automated documentation generation", "Repository-wide AI-assisted workflows", "Multi-module project scanning", "Prompt template execution and automation (acts)" ],
     "targetEnvironment" : [ "Java" ],
-    "integrations" : [ "Machai project-layout (org.machanism.machai:project-layout)", "Machai GenAI providers via org.machanism.machai.ai.manager.GenAIProviderManager", "Machai function tools loader via org.machanism.machai.ai.tools.FunctionToolsLoader" ]
+    "integrations" : [ "Machai project-layout (org.machanism.machai:project-layout)", "Machai GenAI providers via org.machanism.machai.ai.manager.GenaiProviderManager", "Machai function tools loader via org.machanism.machai.ai.tools.FunctionToolsLoader" ]
   },
   "constructors" : [ {
     "package" : "org.machanism.machai.gw.processor",
@@ -102,10 +102,10 @@
   }, {
     "name" : "Built-in act listing and act details function tools",
     "package" : "org.machanism.machai.gw.tools",
-    "signature" : "void applyTools(org.machanism.machai.ai.manager.GenAIProvider provider)",
+    "signature" : "void applyTools(org.machanism.machai.ai.manager.Genai provider)",
     "description" : "Registers Ghostwriter-specific function tools into the provider, including build_in_list_acts (lists built-in act templates from the distribution) and load_act_details (loads an act's effective/built-in/custom definition), enabling act discovery/inspection by the GenAI provider.",
     "examples" : [ {
-      "snippet" : "org.machanism.machai.gw.tools.ActFunctionTools tools = new org.machanism.machai.gw.tools.ActFunctionTools();\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenAIProviderManager.getProvider(\"OpenAI:gpt-5.1\", new org.machanism.macha.core.commons.configurator.PropertiesConfigurator());\ntools.setConfigurator(new org.machanism.macha.core.commons.configurator.PropertiesConfigurator());\ntools.applyTools(provider);",
+      "snippet" : "org.machanism.machai.gw.tools.ActFunctionTools tools = new org.machanism.machai.gw.tools.ActFunctionTools();\norg.machanism.machai.ai.manager.GenAIProvider provider = org.machanism.machai.ai.manager.GenaiProviderManager.getProvider(\"OpenAI:gpt-5.1\", new org.machanism.macha.core.commons.configurator.PropertiesConfigurator());\ntools.setConfigurator(new org.machanism.macha.core.commons.configurator.PropertiesConfigurator());\ntools.applyTools(provider);",
       "description" : "Register act-related function tools into a provider."
     } ]
   } ],

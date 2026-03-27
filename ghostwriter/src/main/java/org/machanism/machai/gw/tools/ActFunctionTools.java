@@ -17,7 +17,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
@@ -31,7 +31,7 @@ public class ActFunctionTools implements FunctionTools {
 	private Configurator configurator;
 
 	@Override
-	public void applyTools(GenAIProvider provider) {
+	public void applyTools(Genai provider) {
 		provider.addTool(
 				"build_in_list_acts",
 				"Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable prompt templates stored as TOML files, "
@@ -55,7 +55,7 @@ public class ActFunctionTools implements FunctionTools {
 	 */
 	private Object getActList(Object... args) throws IOException {
 		List<String> result = getBaseActList().stream().map(line -> "- `" + line).collect(Collectors.toList());
-		return StringUtils.join(result, GenAIProvider.LINE_SEPARATOR);
+		return StringUtils.join(result, Genai.LINE_SEPARATOR);
 	}
 
 	public Set<String> getBaseActList() throws IOException {
