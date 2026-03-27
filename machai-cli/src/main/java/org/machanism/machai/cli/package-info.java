@@ -2,31 +2,47 @@
  * Command-line interface (CLI) commands for the Machai tool.
  *
  * <p>
- * This package contains the Spring Boot / Spring Shell entry point and the set of shell commands that
- * orchestrate Machai features:
+ * This package provides the Spring Boot / Spring Shell entry point
+ * ({@link org.machanism.machai.cli.MachaiCLI}) and a set of interactive shell commands that
+ * orchestrate Machai workflows, including Ghostwriter guidance processing and bindex operations.
  * </p>
+ *
+ * <h2>Commands</h2>
  * <ul>
- *   <li>Project scanning and Ghostwriter guidance processing ({@link org.machanism.machai.cli.GWCommand}).</li>
- *   <li>Interactive Act-mode execution ({@link org.machanism.machai.cli.ActCommand}).</li>
- *   <li>Bindex generation/registration and library picking/assembly workflows
- *       ({@link org.machanism.machai.cli.BindexCommand}, {@link org.machanism.machai.cli.AssembyCommand}).</li>
- *   <li>Persistent CLI configuration management ({@link org.machanism.machai.cli.ConfigCommand}).</li>
- *   <li>Cleanup of Machai temporary folders ({@link org.machanism.machai.cli.CleanCommand}).</li>
+ *   <li>
+ *     Ghostwriter guidance processing and scanning:
+ *     {@link org.machanism.machai.cli.GWCommand}
+ *   </li>
+ *   <li>
+ *     Interactive Act-mode execution:
+ *     {@link org.machanism.machai.cli.ActCommand}
+ *   </li>
+ *   <li>
+ *     Bindex generation and registration:
+ *     {@link org.machanism.machai.cli.BindexCommand}
+ *   </li>
+ *   <li>
+ *     Persistent CLI configuration management:
+ *     {@link org.machanism.machai.cli.ConfigCommand}
+ *   </li>
+ *   <li>
+ *     Cleanup of Machai temporary folders:
+ *     {@link org.machanism.machai.cli.CleanCommand}
+ *   </li>
  * </ul>
  *
  * <p>
- * Most commands read defaults (for example, the project directory and GenAI model) from the shared
- * configuration stored in {@code machai.properties}.
+ * Most commands resolve defaults (for example, the project directory and GenAI model) from the
+ * shared configuration stored in {@code machai.properties}.
  * </p>
  *
  * <h2>Typical usage</h2>
- *
  * <pre>
- * config --key dir --value .\my-project
- * gw --scanDir .\my-project --excludes target,.git
+ * set --key dir --value .\\my-project
+ * gw --scanDir .\\my-project --excludes target,.git
  * act commit "and push"
- * bindex --dir .\my-project
- * clean --dir .\my-project
+ * bindex --dir .\\my-project
+ * clean --dir .\\my-project
  * </pre>
  */
 package org.machanism.machai.cli;

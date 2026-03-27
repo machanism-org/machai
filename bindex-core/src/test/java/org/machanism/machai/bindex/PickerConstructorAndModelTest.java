@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 /**
  * Focused unit tests for {@link Picker} that do not require MongoDB connectivity.
  *
- * <p>These tests validate constructor argument handling and simple property accessors.
+ * <p>
+ * These tests validate constructor argument handling and simple property
+ * accessors.
  */
 class PickerConstructorAndModelTest {
 
@@ -20,7 +22,8 @@ class PickerConstructorAndModelTest {
 		String genai = null;
 
 		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> new Picker(genai, null, null));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new Picker(genai, null, null));
+		assertEquals("genai must not be null", ex.getMessage());
 	}
 
 	@Test
@@ -29,14 +32,16 @@ class PickerConstructorAndModelTest {
 		String genai = "openai";
 
 		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> new Picker(genai, null, null));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new Picker(genai, null, null));
+		assertEquals("config must not be null", ex.getMessage());
 	}
 
 	@Test
 	void getEmbeddingModelNameAndSetEmbeddingModelName_shouldRoundTrip() throws Exception {
 		// Arrange
 		Picker picker = allocateWithoutConstructor(Picker.class);
-		// Default field value is set via field initializer; allocateInstance bypasses that.
+		// Default field value is set via field initializer; allocateInstance bypasses
+		// that.
 		setField(picker, "embeddingModelName", "text-embedding-3-small");
 
 		// Act

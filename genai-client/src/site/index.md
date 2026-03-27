@@ -49,17 +49,17 @@ and generate the content for this section following net format:
 
 ### Claude
 
-Anthropic-backed implementation of MachAI's `GenAIProvider` abstraction.
+Anthropic-backed implementation of MachAI's `Genai` abstraction.
 
-This provider is currently a stub. All core operations (`init(...)`, `prompt(...)`, `addFile(...)`, `perform()`, `clear()`, `addTool(...)`, `instructions(...)`, `inputsLog(...)`, `setWorkingDir(...)`, and `usage()`) throw `UnsupportedOperationException` with the message `"ClaudeProvider is not implemented yet."`.
+This provider is not implemented yet. All core operations (`init(...)`, `prompt(...)`, `addFile(...)`, `perform()`, `clear()`, `addTool(...)`, `instructions(...)`, `inputsLog(...)`, `setWorkingDir(...)`, and `usage()`) currently throw `UnsupportedOperationException` with the message `"ClaudeProvider is not implemented yet."`.
 
-Because the provider is not implemented yet, it should not be used in production.
+The `embedding(String,long)` method currently returns an empty list.
 
 ### CodeMie
 
-`GenAIProvider` implementation that integrates with EPAM CodeMie.
+`Genai` implementation that integrates with EPAM CodeMie.
 
-The provider performs an OpenID Connect (OIDC) token request to obtain an OAuth 2.0 access token and then configures an OpenAI-compatible backend to call the CodeMie Code Assistant REST API.
+This provider authenticates against a CodeMie OpenID Connect (OIDC) token endpoint to obtain an OAuth 2.0 access token and then configures an OpenAI-compatible backend (CodeMie Code Assistant REST API).
 
 Authentication modes
 
@@ -93,17 +93,17 @@ Optional configuration keys:
 
 ### Gemini
 
-MachAI `GenAIProvider` implementation for Google's Gemini models.
+MachAI `Genai` implementation for Google's Gemini models.
 
 This provider adapts MachAI's provider-agnostic abstractions (prompts, tool definitions, files/attachments, and usage reporting) to Gemini's API.
 
 Status
 
-The current implementation is a placeholder. `init(Configurator)`, `perform()`, and `embedding(...)` throw `NotImplementedException`. Most other operations are currently no-ops and will be completed in a future iteration.
+The current implementation is a placeholder. Most operations are not yet implemented and will be completed in a future iteration. In particular, `init(Configurator)`, `perform()`, and `embedding(...)` throw `NotImplementedException`.
 
 ### None
 
-No-op implementation of `GenAIProvider`.
+No-op implementation of `Genai`.
 
 This provider is intended for environments where no external LLM integration should be used. It accumulates prompt text in memory and can optionally write instructions and prompts to local files when `inputsLog(File)` has been configured.
 
@@ -112,20 +112,12 @@ Key characteristics
 - No network calls are performed.
 - `perform()` always returns `null`.
 - Unsupported capabilities (for example, `embedding(String,long)`) throw `UnsupportedOperationException`.
-
-Example
-
-```java
-GenAIProvider provider = new NoneProvider();
-provider.inputsLog(new File("./inputsLog/inputs.txt"));
-provider.instructions("You are a helpful assistant.");
-provider.prompt("Describe the weather.");
-provider.perform();
-```
+- Tool registration is ignored (no-op).
+- File attachments are ignored (no-op).
 
 ### OpenAI
 
-OpenAI-backed `GenAIProvider` implementation.
+OpenAI-backed `Genai` implementation.
 
 This provider adapts the MachAI provider abstraction to the OpenAI Java SDK Responses API. It supports prompting, file inputs, tool/function calling, embedding generation, and usage reporting.
 

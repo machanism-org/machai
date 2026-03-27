@@ -30,27 +30,25 @@
  * Manager API and service-provider interface (SPI) for resolving, configuring, and operating generative-AI provider
  * integrations.
  *
- * <p>This package defines the central {@link org.machanism.machai.ai.manager.Genai} contract and utilities
- * for locating and instantiating concrete provider implementations (for example, OpenAI, Gemini, local models).
- * Provider instances typically collect prompts, instructions, optional file inputs, and tool registrations and then
- * execute a request via {@link org.machanism.machai.ai.manager.Genai#perform()}.
+ * <p>This package provides a small, provider-agnostic contract ({@link org.machanism.machai.ai.manager.Genai}) and a
+ * reflection-based factory ({@link org.machanism.machai.ai.manager.GenaiProviderManager}) used to locate and
+ * instantiate provider implementations from a model identifier.
  *
  * <h2>Key types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.Genai} – provider contract exposing a common interaction
- *   surface (prompts, instructions, file inputs, embeddings, and tool registration).</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenaiProviderManager} – resolves and instantiates providers from a
- *   model identifier and aggregates {@link org.machanism.machai.ai.manager.Usage}.</li>
- *   <li>{@link org.machanism.machai.ai.manager.GenaiAdapter} – delegating provider base class used to wrap another
- *   provider (for example, for logging, metrics, retries, or request shaping).</li>
- *   <li>{@link org.machanism.machai.ai.manager.Usage} – immutable value object capturing token usage for a single
- *   provider invocation.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.Genai} – provider contract for prompts, instructions, file inputs,
+ *   embeddings, tool registration, execution, and token usage reporting.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenaiProviderManager} – resolves providers and aggregates
+ *   {@link org.machanism.machai.ai.manager.Usage} records for logging.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenaiAdapter} – base delegating implementation for decorating a
+ *   provider.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.Usage} – immutable per-invocation token usage metrics.</li>
  * </ul>
  *
  * <h2>Provider resolution</h2>
- * <p>Providers are commonly selected using a model identifier formatted as {@code Provider:Model} (for example,
- * {@code OpenAI:gpt-4o-mini}). If the provider prefix is omitted (for example, {@code gpt-4o-mini}), the manager
- * falls back to the default provider.
+ * <p>Providers are typically selected with a model identifier formatted as {@code Provider:Model} (for example,
+ * {@code OpenAI:gpt-4o-mini}). If the provider prefix is omitted (for example, {@code gpt-4o-mini}),
+ * {@link org.machanism.machai.ai.manager.GenaiProviderManager} falls back to the default provider.
  *
  * <p>A provider can be referenced either by a short provider name (mapped to
  * {@code org.machanism.machai.ai.provider.&lt;provider&gt;.&lt;Provider&gt;Provider}) or by a fully-qualified class name.

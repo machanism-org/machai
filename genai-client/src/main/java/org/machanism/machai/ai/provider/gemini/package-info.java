@@ -30,28 +30,22 @@
  * Google Gemini provider integration for the MachAI framework.
  *
  * <p>
- * This package provides MachAI's {@link org.machanism.machai.ai.manager.Genai} implementation for
- * Google's Gemini models: {@link org.machanism.machai.ai.provider.gemini.GeminiProvider}.
+ * This package contains {@link org.machanism.machai.ai.manager.Genai} implementations that adapt
+ * MachAI's provider-agnostic contract (prompts, system instructions, tool/function calling,
+ * attachments, and optional usage reporting) to Google's Gemini models.
  * </p>
  *
- * <h2>Responsibilities</h2>
+ * <p>
+ * The main entry point is {@link org.machanism.machai.ai.provider.gemini.GeminiProvider}.
+ * </p>
+ *
+ * <h2>Capabilities (planned)</h2>
  * <ul>
- * <li>Collecting prompts and system instructions.</li>
- * <li>Managing tool registration (function calling) and dispatch.</li>
- * <li>Managing file inputs/attachments (local files and URL-based resources).</li>
- * <li>Executing requests and exposing response usage metrics.</li>
+ * <li>Aggregating prompts and instructions into a model request.</li>
+ * <li>Registering tools/functions and dispatching model tool calls.</li>
+ * <li>Attaching local files and URL-based resources.</li>
+ * <li>Providing request usage metrics when available.</li>
  * </ul>
- *
- * <p>
- * At runtime, the provider translates MachAI's provider-agnostic contract into Gemini-specific request and
- * response handling.
- * </p>
- *
- * <h2>Implementation status</h2>
- * <p>
- * The current implementation is a scaffold: several operations are no-ops and others throw
- * {@link org.apache.commons.lang.NotImplementedException} until the Gemini adapter is completed.
- * </p>
  *
  * <h2>Example</h2>
  * <pre>

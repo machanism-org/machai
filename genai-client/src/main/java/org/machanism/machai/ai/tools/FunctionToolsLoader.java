@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * This class acts as a host-side entry point for registering a curated set of local capabilities (for example,
- * file access, command execution, and HTTP retrieval) with a {@link Genai}. Implementations are
- * discovered from the classpath (typically via {@code META-INF/services} provider configuration) and then
- * applied to the provider in discovery order.
+ * file access, command execution, and HTTP retrieval) with a {@link Genai}. Implementations are discovered from
+ * the classpath (typically via {@code META-INF/services} provider configuration) and then applied to the provider
+ * in discovery order.
  * </p>
  *
  * <h2>Usage</h2>
@@ -78,8 +78,8 @@ public class FunctionToolsLoader {
 	 * Supplies configuration to all discovered tool installers.
 	 *
 	 * <p>
-	 * Not all {@link FunctionTools} implementations use configuration, but the loader provides a centralized way to
-	 * propagate a {@link Configurator} to all tool installers (for example, for resolving header placeholders in
+	 * Not all {@link FunctionTools} implementations use configuration, but the loader provides a centralized way
+	 * to propagate a {@link Configurator} to all tool installers (for example, for resolving header placeholders in
 	 * web requests).
 	 * </p>
 	 *

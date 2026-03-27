@@ -30,32 +30,27 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>GenAI Client</h1>
 
 <p>
-  GenAI Client is a Java library designed for seamless integration with
-  Generative AI providers. It offers foundational prompt management and
-  embedding capabilities, enabling AI-powered features across Machai
-  modules. The library simplifies interactions with AI services,
-  supporting advanced use cases such as semantic search, automated content
-  generation, and intelligent project assembly within the Machanism
-  ecosystem.
+  GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers a
+  provider-agnostic API for building and executing LLM requests (instructions, prompts, optional inputs, embeddings,
+  and function tools), while keeping applications isolated from vendor SDKs and transport details.
 </p>
 
 <h2>What this module provides</h2>
 <ul>
   <li>
-    A provider-agnostic API for configuring and executing GenAI requests (system instructions, prompts, optional
-    inputs, embeddings, and function tools).
+    A small public contract for issuing GenAI requests and obtaining responses and token usage.
   </li>
   <li>
-    Provider resolution from <code>Provider:Model</code> identifiers (for example <code>OpenAI:gpt-4o-mini</code>), with support
-    for resolving short provider names or fully-qualified provider classes.
+    Provider resolution from <code>Provider:Model</code> identifiers (for example <code>OpenAI:gpt-4o-mini</code>), including a
+    default-provider fallback when the prefix is omitted.
   </li>
   <li>
     Built-in provider integrations for OpenAI, Google Gemini, EPAM CodeMie, Anthropic Claude, and a no-op provider for
     offline/disabled environments.
   </li>
   <li>
-    A curated tool system that can expose controlled host capabilities (file access, HTTP/REST calls, command
-    execution) to model tool calls.
+    An optional, curated tool system that can expose controlled host capabilities (file access, HTTP/REST calls,
+    command execution) to model tool calls.
   </li>
 </ul>
 
@@ -69,25 +64,19 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Package overview</h2>
 <p>
-  The library is organized around a small provider-agnostic surface, concrete provider implementations, and optional
-  host-integrated tools. The package descriptions below are aggregated from the module's <code>package-info.java</code>
-  documentation.
+  The library is organized around a provider-agnostic surface, a manager layer for provider resolution and usage
+  aggregation, concrete provider implementations, and optional host-integrated tools.
 </p>
 
 <ul>
   <li>
     <p>
-      <strong><code>org.machanism.machai.ai</code></strong> &ndash; root package for MachAI's generative-AI client integration
-      layer.
+      <strong><code>org.machanism.machai.ai</code></strong> &ndash; root package that defines the public abstractions used to build
+      and execute LLM/GenAI requests while isolating applications from vendor-specific SDKs.
     </p>
     <ul>
       <li>
-        Defines the public abstractions used to build and execute LLM/GenAI requests while isolating applications from
-        vendor SDKs and transport details.
-      </li>
-      <li>
-        Provides shared runtime pieces used by providers, such as provider selection, usage accounting, and host-executed
-        tools.
+        Groups the manager API/SPI, provider implementations, and the tool system under a consistent surface.
       </li>
     </ul>
   </li>
@@ -99,8 +88,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     </p>
     <ul>
       <li>
-        Defines the provider contract (<code>GenAIProvider</code>), provider resolution and usage aggregation
-        (<code>GenAIProviderManager</code>), a delegating adapter base class (<code>GenAIAdapter</code>), and the per-invocation usage
+        Defines the provider contract (<code>Genai</code>), provider resolution and usage aggregation
+        (<code>GenaiProviderManager</code>), a delegating adapter base class (<code>GenaiAdapter</code>), and the per-invocation usage
         value object (<code>Usage</code>).
       </li>
       <li>
@@ -112,12 +101,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
   <li>
     <p>
-      <strong><code>org.machanism.machai.ai.provider.openai</code></strong> &ndash; OpenAI-backed implementation using the OpenAI Java
-      SDK.
+      <strong><code>org.machanism.machai.ai.provider.openai</code></strong> &ndash; OpenAI-backed implementation.
     </p>
     <ul>
-      <li>Translates prompts, tools, and usage reporting to OpenAI request/response types.</li>
-      <li>Provides embeddings through the common provider contract.</li>
+      <li>Translates MachAI prompts, tools, and usage reporting to OpenAI request/response types.</li>
+      <li>Provides embeddings via the common provider contract.</li>
     </ul>
   </li>
 
@@ -126,8 +114,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       <strong><code>org.machanism.machai.ai.provider.gemini</code></strong> &ndash; Google Gemini provider integration.
     </p>
     <ul>
-      <li>Adapts the provider contract to Gemini models (implementation may be partially scaffolded).</li>
-      <li>Handles prompt/instruction collection and (where implemented) tool registration and execution.</li>
+      <li>Adapts the provider contract to Gemini models.</li>
+      <li>Collects instructions/prompts and (where supported) registers tools and dispatches tool calls.</li>
     </ul>
   </li>
 
@@ -137,7 +125,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     </p>
     <ul>
       <li>Authenticates using an OIDC token endpoint, then configures an OpenAI-compatible backend.</li>
-      <li>Routes to OpenAI/Gemini/Claude implementations based on the configured model prefix.</li>
+      <li>Delegates to OpenAI/Gemini/Claude based on the configured model prefix.</li>
     </ul>
   </li>
 
@@ -148,7 +136,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     </p>
     <ul>
       <li>Accumulates prompts and can persist inputs/instructions to log files for auditing.</li>
-      <li>Model-dependent features (for example embeddings) are unsupported.</li>
+      <li>Unsupported features (for example embeddings) throw <code>UnsupportedOperationException</code>.</li>
     </ul>
   </li>
 
@@ -176,7 +164,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 Configurator conf = ...;
 
 // Resolve Provider:Model (for example: "OpenAI:gpt-4o-mini").
-GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
+Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
 
 // Optional: expose host-side tools (file/web/command helpers).
 FunctionToolsLoader tools = FunctionToolsLoader.getInstance();
@@ -193,15 +181,15 @@ Usage usage = provider.usage();
 <h2>Operational notes</h2>
 <ul>
   <li>
-    Provider instances typically maintain mutable, per-request state. Prefer one provider instance per request (or
-    synchronize externally).
+    Provider instances maintain mutable, per-request state. Prefer one provider instance per request (or synchronize
+    externally).
   </li>
   <li>
     Tool execution happens in the host process. Apply tools selectively and configure security checks (for example
     allowed commands and allowed paths) according to your deployment environment.
   </li>
   <li>
-    Usage aggregation is supported via <code>GenAIProviderManager</code>; applications can add each invocation's
+    Usage aggregation is available via <code>GenaiProviderManager</code>; applications can add each invocation's
     <code>Usage</code> and log aggregated totals.
   </li>
 </ul>

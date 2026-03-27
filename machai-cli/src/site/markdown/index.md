@@ -27,31 +27,37 @@ Page Structure:
 
 ## Introduction
 
-Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library discovery and integration.
+Machai CLI is a Spring Shell-based command-line application for generating, registering, and managing library metadata (bindex) within the Machanism ecosystem. It uses GenAI to speed up metadata authoring, improve discoverability through semantic search, and streamline project assembly from selected libraries.
 
-Beyond metadata workflows, Machai CLI also provides a “Ghostwriter” mode that can scan a directory tree and apply GenAI guidance (and reusable “Acts”) to help you refactor, review, or otherwise transform files at scale.
+In addition to metadata workflows, Machai CLI includes a “Ghostwriter” mode that can scan a directory tree and apply GenAI guidance (and reusable “Acts”) to help you refactor, review, or otherwise transform files at scale.
 
 ## Overview
 
-Machai CLI is implemented as a Spring Boot application that starts a Spring Shell interactive console. The CLI exposes several command groups:
+Machai CLI is implemented as a Spring Boot application that launches a Spring Shell interactive console (see `org.machanism.machai.cli.MachaiCLI`). It exposes command groups implemented under `src/main/java/org/machanism/machai/cli`:
 
-- **Ghostwriter processing (`gw`)**: scans directories/files and runs a guidance pipeline, with support for custom instructions, default guidance, excludes, concurrency, and request input logging.
-- **Act mode (`act`)**: executes predefined reusable “acts” (prompt templates) interactively after scanning the configured project directory.
-- **Bindex workflows (`bindex`, `register`)**: generates bindex metadata for a project and optionally registers it in an external registry service.
-- **Semantic pick + assembly (`pick`, `assembly`)**: performs semantic search for libraries (bindex entries) and assembles an output project from selected results.
-- **Prompt helper (`prompt`)**: sends a one-off prompt to the configured GenAI provider.
-- **Cleanup (`clean`)**: removes temporary `.machai` folders from a directory tree.
-- **Persistent configuration (`set`)**: stores and retrieves defaults in `machai.properties`.
+- **Configuration (`set`)** (`ConfigCommand`) — stores and retrieves persistent defaults in `machai.properties` (for example: default `projectDir`, model selection, thresholds).
+- **Ghostwriter processing (`gw`)** (`GWCommand`) — scans directories/files and runs a guidance pipeline, supporting:
+  - guidance/instructions from text, file, or URL
+  - excludes and file selection filters
+  - concurrency controls (threads)
+  - optional logging of LLM request inputs
+- **Act mode (`act`)** (`ActCommand`) — runs predefined reusable “acts” (prompt templates) against the scanned project context.
+- **Bindex generation (`bindex`)** (`BindexCommand`) — generates bindex metadata for a project.
+- **Registry registration (`register`)** (`BindexCommand`) — registers generated metadata in an external registry service (when configured).
+- **Project assembly (`assembly`)** (`BindexCommand`) — assembles an output project/artifact from selected libraries.
+- **Semantic pick (`pick`)** (`BindexCommand`) — performs semantic search across bindex entries to identify relevant libraries.
+- **Prompt helper (`prompt`)** (`BindexCommand`) — sends a one-off prompt to the configured GenAI provider.
+- **Cleanup (`clean`)** (`CleanCommand`) — deletes temporary `.machai` folders from a directory tree.
 
-At startup, the application attempts to load additional JVM system properties from `machai.properties` (or a file provided via `-Dconfig=/path/to/file`).
+At startup, the CLI can load additional system properties from `machai.properties` in the working directory, or from a file provided via `-Dconfig=...`.
 
 ## Getting Started
 
 ### Prerequisites
 
 - **Java 17** (runtime required)
-- Network access to your chosen **GenAI provider** (depending on the configured model)
-- (Optional) Access to a **bindex registry service** if you plan to register metadata (`registerUrl`)
+- Network access to your chosen **GenAI provider** (model/provider dependent)
+- (Optional) Access to a **bindex registry service** if you plan to use `register`
 
 ### Installation
 
@@ -73,16 +79,16 @@ At startup, the application attempts to load additional JVM system properties fr
 
 ### Environment Variables
 
-Machai CLI delegates authentication and provider configuration to the underlying GenAI provider implementation. The following environment variables are commonly required (depending on the provider/model you choose):
+Machai CLI delegates authentication/provider configuration to the underlying GenAI provider implementation. Common environment variables (provider/model dependent) include:
 
-| Variable | Description | Required | Example |
-|---|---|---:|---|
-| `OPENAI_API_KEY` | API key for OpenAI models | Provider-specific | `sk-...` |
-| `AZURE_OPENAI_API_KEY` | API key for Azure OpenAI | Provider-specific | `...` |
-| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint URL | Provider-specific | `https://<resource>.openai.azure.com/` |
-| `ANTHROPIC_API_KEY` | API key for Anthropic models | Provider-specific | `...` |
+| Variable | Description | When needed | Example |
+|---|---|---|---|
+| `OPENAI_API_KEY` | API key for OpenAI models | Using OpenAI | `sk-...` |
+| `AZURE_OPENAI_API_KEY` | API key for Azure OpenAI | Using Azure OpenAI | `...` |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint URL | Using Azure OpenAI | `https://<resource>.openai.azure.com/` |
+| `ANTHROPIC_API_KEY` | API key for Anthropic models | Using Anthropic | `...` |
 
-If your chosen provider uses different variables, set those required by that provider.
+If your selected provider requires different variables, set those required by that provider.
 
 ## Configuration
 
@@ -93,11 +99,11 @@ Machai CLI persists user defaults in `machai.properties` (in the working directo
 | Property key | Description | Default |
 |---|---|---|
 | `projectDir` | Default project directory used by commands that operate on a folder tree | Current working directory |
-| `gw.model` | Default GenAI provider/model for Ghostwriter workflows | (none) |
-| `gw.instructions` | Default system instructions (text/URL/file path) for `gw` | (none) |
-| `gw.guidance` | Default guidance (text/URL/file path) for `gw` | (none) |
-| `logInputs` | Whether to log LLM request inputs to dedicated log files | `false` |
-| `score` | Default similarity threshold used for semantic search (`pick` / `assembly`) | `0.65` |
+| `gw.model` | Default GenAI provider/model used by `gw` | (none) |
+| `gw.instructions` | Default system instructions source (text/URL/file path) | (none) |
+| `gw.guidance` | Default guidance source (text/URL/file path) | (none) |
+| `logInputs` | Whether to log LLM request inputs to dedicated files | `false` |
+| `score` | Default similarity threshold for semantic search (`pick` / `assembly`) | `0.65` |
 
 ### Typical workflow
 

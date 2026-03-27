@@ -86,7 +86,7 @@ public class NoneProvider implements Genai {
 	 */
 	@Override
 	public void addFile(File file) {
-		// No-op in NoneProvider
+		// No-op in NoneProvider.
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class NoneProvider implements Genai {
 	 */
 	@Override
 	public void addFile(URL fileUrl) {
-		// No-op in NoneProvider
+		// No-op in NoneProvider.
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class NoneProvider implements Genai {
 	 */
 	@Override
 	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
-		// No-op in NoneProvider
+		// No-op in NoneProvider.
 	}
 
 	/**

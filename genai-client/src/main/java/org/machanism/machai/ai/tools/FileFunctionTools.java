@@ -75,8 +75,8 @@ public class FileFunctionTools implements FunctionTools {
 				this::writeFile,
 				"file_path:string:required:The path to the file you want to write to or create.",
 				"text:string:required:The content to be written into the file or used as replacement.",
-				"start_position:integer:optional:The starting position in the file where the text should replace existing content. Default: -1 (no replacement).",
-				"end_position:integer:optional:The ending position in the file where the text should replace existing content. Default: -1 (no replacement).",
+			    "start_position:integer:optional:The zero-based index in the file where replacement begins. If not specified, defaults to 0 (start of file).",
+			    "end_position:integer:optional:The zero-based index in the file where replacement ends (exclusive). If not specified, defaults to the end of the file.",
 				"charsetName:string:optional:The name of the requested charset. Default: " + DEFAULT_CHARSET);
 		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
 				this::listFiles, "dir_path:string:optional:The path to the directory to list contents of.");
@@ -130,7 +130,6 @@ public class FileFunctionTools implements FunctionTools {
 			logger.info("List files recursively: {}, Result: {}", Arrays.toString(params),
 					StringUtils.abbreviate(result, 60).replace(Genai.LINE_SEPARATOR, ""));
 		}
-		// Sonar(java:S2629): avoid Arrays.toString(params) unless DEBUG logging is enabled.
 		if (logger.isDebugEnabled()) {
 			logger.debug("List files recursively: {}, Result: {}", Arrays.toString(params), result);
 		}
@@ -202,7 +201,6 @@ public class FileFunctionTools implements FunctionTools {
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText() : DEFAULT_CHARSET;
 		File workingDir = (File) params[1];
 
-		// Sonar(java:S2629): avoid expensive toString() when the log level is disabled.
 		if (logger.isInfoEnabled()) {
 			logger.info("Write file: [{}, {}]", StringUtils.abbreviate(String.valueOf(props), MAXWIDTH), workingDir);
 		}
@@ -287,6 +285,10 @@ public class FileFunctionTools implements FunctionTools {
 	 * @throws IllegalArgumentException on I/O error
 	 */
 	private Object readFile(Object[] params) {
+		if (logger.isInfoEnabled()) {
+			logger.info("Read file: {}", Arrays.toString(params));
+		}
+		
 		JsonNode props = (JsonNode) params[0];
 		String filePath = props.get("file_path").asText();
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
@@ -300,14 +302,6 @@ public class FileFunctionTools implements FunctionTools {
 			result = "File not found.";
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
-		}
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Read file: {}", Arrays.toString(params));
-		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Read file: {}", Arrays.toString(params));
 		}
 
 		return result;

@@ -4,9 +4,9 @@
  * <p>
  * This package defines {@link org.machanism.machai.project.layout.ProjectLayout}, an abstraction that models a project
  * as a root directory plus conventional, root-relative paths such as production sources, test sources, resources, and
- * documentation roots. Implementations typically infer these paths by applying build-tool conventions and/or inspecting
- * build metadata (for example, Maven {@code pom.xml}, Gradle build files, JavaScript {@code package.json} workspaces, or
- * Python {@code pyproject.toml}).
+ * documentation roots. Implementations infer these paths by applying build-tool conventions and/or inspecting build
+ * metadata (for example, Maven {@code pom.xml}, Gradle build files, JavaScript {@code package.json} workspaces, or Python
+ * {@code pyproject.toml}).
  * </p>
  *
  * <h2>Key concepts</h2>
@@ -24,7 +24,8 @@
  * <h2>Implementations</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} reads {@code pom.xml} (via
- *       {@link org.machanism.machai.project.layout.PomReader}) to determine modules and source/test/resource roots.</li>
+ *       {@link org.machanism.machai.project.layout.PomReader}) to determine modules and conventional source/test/resource
+ *       roots.</li>
  *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} uses the Gradle Tooling API and returns
  *       conventional source/test/document roots.</li>
  *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} parses {@code package.json} workspaces and

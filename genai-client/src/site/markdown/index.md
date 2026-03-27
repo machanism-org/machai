@@ -87,8 +87,8 @@ This design provides:
 ### Basic Usage
 
 ```java
-import org.machanism.machai.ai.manager.Genai;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.GenAIProviderManager;
 
 GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
 provider.prompt("Summarize this project in one paragraph.");
@@ -240,5 +240,5 @@ This provider is intended for environments where no external LLM integration sho
 ## Resources
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/genai-client
-- Badge: https://img.shields.io/maven-central/v/org.machananism.machai/genai-client.svg
+- Badge: https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg
 - GitHub: https://github.com/machanism-org/machai

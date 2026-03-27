@@ -38,7 +38,7 @@ System_Boundary(sys2, "Bindex Core") {
   Container(javaLib, "Bindex Core Java Library", "Java (Maven)", "Core library providing Bindex creation, registration, retrieval and prompt assembly")
 }
 
-ContainerDb(repo, "Bindex Registry (MongoDB)", "MongoDB Atlas", "Persisted Bindex documents with classification facets + embeddings")
+ContainerDb(repo, "Bindex Registry", "MongoDB Atlas (Vector Search)", "Persisted Bindex documents with classification facets + embeddings")
 Container_Ext(genaiApi, "GenAI Provider API", "HTTP API", "Chat completion + embeddings")
 Container_Ext(fs, "Project Workspace", "Filesystem", "Project sources and bindex.json")
 
@@ -59,7 +59,7 @@ Container_Boundary(components, "Bindex Core Java Library") {
   Component(builderFactory, "BindexBuilderFactory", "Factory", "Selects a BindexBuilder based on ProjectLayout")
   Component(mavenBuilder, "MavenBindexBuilder", "BindexBuilder", "Builds Bindex for Maven projects")
   Component(pyBuilder, "PythonBindexBuilder", "BindexBuilder", "Builds Bindex for Python projects")
-  Component(jsBuilder, "JScriptBindexBuilder", "BindexBuilder", "Builds Bindex for JavaScript projects")
+  Component(jsBuilder, "JavaScriptBindexBuilder", "BindexBuilder", "Builds Bindex for JavaScript projects")
 
   Component(picker, "Picker", "Service", "Classifies queries, runs vector search, registers and retrieves Bindexes")
   Component(repository, "BindexRepository", "Repository", "MongoDB access to stored Bindex documents")
@@ -89,6 +89,7 @@ Rel(creator, genaiProvider, "Indirectly uses", "via BindexBuilder")
 Rel(register, processorBase, "Extends")
 Rel(register, layout, "Processes")
 Rel(register, picker, "Uses")
+Rel(register, repository, "Uses")
 Rel(register, repo, "Writes", "Register bindex")
 
 Rel(picker, genaiManager, "Obtains provider")
@@ -101,7 +102,7 @@ Rel(picker, repo, "Vector search + CRUD")
 Rel(funcTools, repository, "Uses")
 Rel(funcTools, genaiProvider, "Registers tools with")
 
-Rel(javaLib, mongodb, "Connects to", "MongoDB driver")
-Rel(javaLib, genai, "Calls", "Provider SDK/HTTP")
+Rel(javaLib, repo, "Connects to", "MongoDB driver")
+Rel(javaLib, genaiApi, "Calls", "Provider SDK/HTTP")
 
 @enduml

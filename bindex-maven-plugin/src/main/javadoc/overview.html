@@ -35,25 +35,31 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   GenAI-powered semantic search within the Machanism ecosystem.
 </p>
 
-<h2>Overview</h2>
+<h2>What this module provides</h2>
 <p>
-  This module is packaged as a Maven plugin (<code>maven-plugin</code>) and provides Mojos that run within a standard
-  Maven build. Each goal reads configuration from plugin parameters, Maven project metadata, and system
-  properties, then delegates the core indexing and registration work to the Machai <em>Bindex Core</em> library.
+  This project is packaged as a Maven plugin (<code>maven-plugin</code>) that contributes build goals (Mojos) for creating
+  and maintaining a Bindex index for the current Maven project, optionally publishing the resulting metadata to a
+  registry.
 </p>
 
-<h2>Package structure</h2>
+<h2>Package overview</h2>
+<p>
+  The primary implementation lives in the <code>org.machanism.machai.bindex.maven</code> package, which contains:
+</p>
 <ul>
   <li>
-    <code>org.machanism.machai.bindex.maven</code> &ndash; Maven plugin integration layer for Machai Bindex.
-    Contains goal implementations and shared support code.
+    Goal implementations for creating and updating a Bindex index, registering project metadata, and cleaning up
+    temporary artifacts.
+  </li>
+  <li>
+    A shared base Mojo that centralizes parameter handling and common Maven integration concerns.
   </li>
 </ul>
 
 <h2>Goals</h2>
 <ul>
   <li><code>create</code> &ndash; create a new Bindex index (see {@link org.machanism.machai.bindex.maven.Create}).</li>
-  <li><code>update</code> &ndash; refresh an existing index (see {@link org.machanism.machai.bindex.maven.Update}).</li>
+  <li><code>update</code> &ndash; update an existing index (see {@link org.machanism.machai.bindex.maven.Update}).</li>
   <li><code>register</code> &ndash; scan and publish metadata to a registry (see {@link org.machanism.machai.bindex.maven.Register}).</li>
   <li><code>clean</code> &ndash; remove temporary artifacts created by the tooling (see {@link org.machanism.machai.bindex.maven.Clean}).</li>
 </ul>
@@ -61,20 +67,19 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Execution model</h2>
 <ul>
   <li>
-    <strong>Module eligibility:</strong> Mojos decide whether the current Maven module should be processed
-    (for example, aggregator modules with <code>pom</code> packaging are typically skipped).
+    <strong>Module selection:</strong> goals may skip modules that are not eligible for indexing (for example, aggregator
+    modules with <code>pom</code> packaging).
   </li>
   <li>
-    <strong>Shared configuration:</strong> common parameters and Maven integration helpers are implemented in
+    <strong>Shared configuration:</strong> common parameters and Maven integration helpers are implemented by
     {@link org.machanism.machai.bindex.maven.AbstractBindexMojo}.
   </li>
   <li>
-    <strong>Credentials (optional):</strong> GenAI credentials can be resolved from Maven <code>settings.xml</code>
-    using a configured server id.
+    <strong>Credentials (optional):</strong> GenAI credentials can be resolved from Maven <code>settings.xml</code> using a configured
+    server id.
   </li>
   <li>
-    <strong>Delegation:</strong> each goal calls Bindex Core APIs to create/update indexes and to register project
-    metadata with a registry.
+    <strong>Delegation:</strong> each goal delegates indexing and registration work to the Machai <em>Bindex Core</em> library.
   </li>
 </ul>
 

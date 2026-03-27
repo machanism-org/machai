@@ -26,20 +26,24 @@
  */
 
 /**
- * Builders for generating {@link org.machanism.machai.schema.Bindex} documents for a project.
+ * Builders that generate {@link org.machanism.machai.schema.Bindex} documents by assembling a project-specific
+ * prompt and delegating generation to a configured {@link org.machanism.machai.ai.manager.Genai} provider.
  *
- * <p>This package provides the {@link org.machanism.machai.bindex.builder.BindexBuilder} base type and concrete
- * builders for different project layouts. A builder is responsible for assembling a generation prompt (schema plus
- * project context), optionally merging an existing (origin) {@code Bindex} for incremental updates, delegating the
- * generation step to a configured {@link org.machanism.machai.ai.manager.Genai}, and then deserializing the
- * provider response into a {@code Bindex}.
- *
- * <h2>Provided implementations</h2>
+ * <p>
+ * The central type is {@link org.machanism.machai.bindex.builder.BindexBuilder}, which:
  * <ul>
- *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: collects Maven build context from
- *       {@code pom.xml} and includes files from the Maven-configured source/resource/test directories.</li>
+ *   <li>optionally incorporates a prior (origin) {@code Bindex} to request incremental updates,</li>
+ *   <li>collects project context contributed by subclasses (manifest/build files and selected source trees),</li>
+ *   <li>submits a generation request, and</li>
+ *   <li>parses the provider response back into a {@code Bindex} instance.</li>
+ * </ul>
+ *
+ * <h2>Implementations</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.bindex.builder.MavenBindexBuilder}: reads {@code pom.xml} and includes files from
+ *       Maven build directories (sources and resources).</li>
  *   <li>{@link org.machanism.machai.bindex.builder.JScriptBindexBuilder}: reads {@code package.json} and includes
- *       {@code .js}/{@code .ts}/{@code .vue} sources under {@code src}.</li>
+ *       {@code .js}, {@code .ts}, and {@code .vue} sources under {@code src}.</li>
  *   <li>{@link org.machanism.machai.bindex.builder.PythonBindexBuilder}: reads {@code pyproject.toml} and includes
  *       files under a source directory inferred from {@code project.name}.</li>
  * </ul>
@@ -48,6 +52,7 @@
  * <pre>{@code
  * Bindex bindex = new MavenBindexBuilder(layout, "openai", config)
  *     .origin(previousBindex)
+ *     .logInputs(true)
  *     .build();
  * }</pre>
  */

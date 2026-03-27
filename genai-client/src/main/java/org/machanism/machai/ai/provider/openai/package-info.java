@@ -30,34 +30,32 @@
  * OpenAI provider implementation for MachAI.
  *
  * <p>
- * This package adapts MachAI's {@link org.machanism.machai.ai.manager.Genai} abstraction to the
- * OpenAI Java SDK, primarily via {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}.
+ * This package provides the OpenAI-backed implementation of MachAI's provider abstraction
+ * ({@link org.machanism.machai.ai.manager.Genai}). Its primary entry point is
+ * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, which translates prompts, instructions, attached
+ * inputs, and conversation state into OpenAI API requests and maps OpenAI responses back into MachAI result types.
  * </p>
  *
  * <p>
- * Responsibilities include:
+ * Responsibilities implemented in this package typically include:
  * </p>
  * <ul>
- *   <li>Creating OpenAI Responses API requests from prompts, instructions, files, and conversation state.</li>
- *   <li>Registering function tools, translating MachAI tool definitions to OpenAI tool schemas, and dispatching
- *       tool calls to locally provided handlers.</li>
- *   <li>Extracting usage information (input, cached, and output tokens) and reporting it via
+ *   <li>Building requests for chat/completions-style interactions (for example via the Responses API) from MachAI
+ *       prompts and options.</li>
+ *   <li>Registering MachAI function tools, translating their schemas into OpenAI tool definitions, and dispatching
+ *       tool calls to local handlers.</li>
+ *   <li>Collecting token usage (input, cached, and output) and reporting it through
  *       {@link org.machanism.machai.ai.manager.GenaiProviderManager}.</li>
- *   <li>Obtaining embedding vectors for text via {@link org.machanism.machai.ai.provider.openai.OpenAIProvider#embedding(String, long)}.</li>
+ *   <li>Providing embeddings support via
+ *       {@link org.machanism.machai.ai.provider.openai.OpenAIProvider#embedding(String, long)}.</li>
  * </ul>
  *
  * <h2>Configuration</h2>
  * <p>
- * The provider is initialized from a {@link org.machanism.macha.core.commons.configurator.Configurator} and
- * expects at minimum:
- * </p>
- * <ul>
- *   <li>{@code chatModel}: model identifier passed to the OpenAI Responses API.</li>
- *   <li>{@code OPENAI_API_KEY}: API key for authenticating requests.</li>
- * </ul>
- * <p>
- * Optional settings include {@code OPENAI_BASE_URL}, {@code GENAI_TIMEOUT}, {@code MAX_OUTPUT_TOKENS}, and
- * {@code MAX_TOOL_CALLS}.
+ * The provider is configured using a {@link org.machanism.macha.core.commons.configurator.Configurator}. Typical
+ * configuration includes the OpenAI model identifier (for example, {@code chatModel}) and an API key supplied via
+ * {@code OPENAI_API_KEY}. Optional settings may include a base URL ({@code OPENAI_BASE_URL}) and provider limits
+ * such as timeouts and maximum output/tool-call counts.
  * </p>
  *
  * <h2>Typical usage</h2>
