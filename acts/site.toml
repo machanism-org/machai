@@ -6,7 +6,7 @@ Follow these steps:
 1. **Build the Maven Project Site:**
    - Run the following command to generate the project site:
      ```
-     mvn clean install site site:stage
+     mvn -q clean install site site:stage
      ```
    - Ensure the build completes successfully and the site is generated in the directory specified by the environment variable `MACHAI_SITE`.
 
@@ -27,6 +27,9 @@ Follow these steps:
 4. **Clarity and Brevity:**
    - Output only the essential commands and status messages.
    - Avoid unnecessary explanations unless clarification is requested.
+
+5. Ensure that all line breaks in your output use only the LF character (\n). Do not use CR (\r) or CRLF (\r\n) line endings. 
+   All multi-line output must consistently use LF as the sole line separator.
 '''
 
 inputs = '''
