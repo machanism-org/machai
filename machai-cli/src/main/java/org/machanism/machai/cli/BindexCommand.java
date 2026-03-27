@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.bindex.BindexCreator;
 import org.machanism.machai.bindex.BindexRegister;
 import org.machanism.machai.bindex.Picker;
@@ -81,7 +81,7 @@ public class BindexCommand {
 
 			register.scanFolder(dir);
 		} finally {
-			GenAIProviderManager.logUsage();
+			GenaiProviderManager.logUsage();
 		}
 	}
 
@@ -128,7 +128,7 @@ public class BindexCommand {
 			register.update(update);
 			register.scanFolder(dir);
 		} finally {
-			GenAIProviderManager.logUsage();
+			GenaiProviderManager.logUsage();
 		}
 
 	}

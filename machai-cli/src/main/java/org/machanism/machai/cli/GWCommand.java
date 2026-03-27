@@ -10,8 +10,8 @@ import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jline.reader.LineReader;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
@@ -167,7 +167,7 @@ public class GWCommand {
 			@ShellOption(value = { "-e",
 					"--excludes" }, help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
 			@ShellOption(value = { "-l",
-					"--" + GenAIProvider.LOG_INPUTS_PROP_NAME }, help = "Log LLM request inputs to dedicated log files", defaultValue = ShellOption.NULL) Boolean logInputs,
+					"--" + Genai.LOG_INPUTS_PROP_NAME }, help = "Log LLM request inputs to dedicated log files", defaultValue = ShellOption.NULL) Boolean logInputs,
 			@ShellOption(value = { "-d",
 					ProjectLayout.PROJECT_DIR_PROP_NAME }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File projectDir,
 			@ShellOption(value = { "-s",
@@ -184,7 +184,7 @@ public class GWCommand {
 		} catch (Exception e) {
 			LOGGER.error("Unexpected error: {}", e.getMessage(), e);
 		} finally {
-			GenAIProviderManager.logUsage();
+			GenaiProviderManager.logUsage();
 			LOGGER.info("File processing completed.");
 		}
 	}
@@ -273,7 +273,7 @@ public class GWCommand {
 	}
 
 	private Boolean resolveLogInputs(Boolean logInputs) {
-		return ConfigCommand.config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, logInputs);
+		return ConfigCommand.config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, logInputs);
 	}
 
 	private String resolveInstructions(String instructions) {

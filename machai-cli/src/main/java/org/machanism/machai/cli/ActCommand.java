@@ -9,7 +9,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -74,7 +74,7 @@ public class ActCommand {
 		String prompt = StringUtils.join(act, " ");
 		processor.setDefaultPrompt(prompt);
 
-		Boolean logInputs = ConfigCommand.config.getBoolean(GenAIProvider.LOG_INPUTS_PROP_NAME, false);
+		Boolean logInputs = ConfigCommand.config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, false);
 		processor.setLogInputs(logInputs);
 
 		String scanDir = processor.getConfigurator().get(Ghostwriter.GW_SCAN_DIR_PROP_NAME, null);
