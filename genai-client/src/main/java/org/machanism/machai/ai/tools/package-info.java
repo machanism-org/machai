@@ -35,7 +35,7 @@
  */
 
 /**
- * Host-integrated function tools exposed to a {@link org.machanism.machai.ai.manager.GenAIProvider}.
+ * Host-integrated function tools exposed to a {@link org.machanism.machai.ai.manager.Genai}.
  *
  * <p>
  * This package contains a curated set of tool installers (SPI implementations) that register named functions
@@ -47,7 +47,7 @@
  * <ul>
  *   <li><b>Tool registration</b>: implementations of {@link org.machanism.machai.ai.tools.FunctionTools} register
  *       tools via
- *       {@link org.machanism.machai.ai.manager.GenAIProvider#addTool(String, String, org.machanism.machai.ai.manager.GenAIProvider.ToolFunction, String...)}.</li>
+ *       {@link org.machanism.machai.ai.manager.Genai#addTool(String, String, org.machanism.machai.ai.manager.Genai.ToolFunction, String...)}.</li>
  *   <li><b>Discovery and wiring</b>: installers are typically discovered using {@link java.util.ServiceLoader} and
  *       applied by {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
  *   <li><b>Scoped execution</b>: tools interpret paths relative to a host-supplied working directory, bound output
@@ -66,7 +66,7 @@
  * <h2>Usage</h2>
  * <pre>{@code
  * Configurator conf = ...;
- * GenAIProvider provider = ...;
+ * Genai provider = ...;
  * FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
  * loader.setConfiguration(conf);
  * loader.applyTools(provider);

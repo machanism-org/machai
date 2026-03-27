@@ -9,13 +9,13 @@ import java.util.List;
 
 import org.apache.commons.lang.SystemUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.Usage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * No-op implementation of {@link GenAIProvider}.
+ * No-op implementation of {@link Genai}.
  *
  * <p>This provider is intended for environments where no external LLM integration should be used.
  * It accumulates prompt text in memory and can optionally write instructions and prompts to local
@@ -31,14 +31,14 @@ import org.slf4j.LoggerFactory;
  *
  * <h2>Example</h2>
  * <pre>{@code
- * GenAIProvider provider = new NoneProvider();
+ * Genai provider = new NoneProvider();
  * provider.inputsLog(new File("./inputsLog/inputs.txt"));
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Describe the weather.");
  * provider.perform();
  * }</pre>
  */
-public class NoneProvider implements GenAIProvider {
+public class NoneProvider implements Genai {
 	/**
 	 * Provider name used for identification in configuration.
 	 */
@@ -76,7 +76,7 @@ public class NoneProvider implements GenAIProvider {
 	@Override
 	public void prompt(String text) {
 		prompts.append(text);
-		prompts.append(GenAIProvider.PARAGRAPH_SEPARATOR);
+		prompts.append(Genai.PARAGRAPH_SEPARATOR);
 	}
 
 	/**

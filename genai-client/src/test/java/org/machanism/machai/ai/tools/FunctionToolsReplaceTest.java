@@ -11,7 +11,7 @@ class FunctionToolsReplaceTest {
 
 	private static final class TestTools implements FunctionTools {
 		@Override
-		public void applyTools(org.machanism.machai.ai.manager.GenAIProvider provider) {
+		public void applyTools(org.machanism.machai.ai.manager.Genai provider) {
 			// not used
 		}
 	}

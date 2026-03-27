@@ -25,9 +25,9 @@
  * <h2>Core concepts</h2>
  * <ul>
  *   <li><strong>Provider</strong>: a concrete backend integration (for example OpenAI, Gemini, Claude) implementing
- *       {@link org.machanism.machai.ai.manager.GenAIProvider}.</li>
+ *       {@link org.machanism.machai.ai.manager.Genai}.</li>
  *   <li><strong>Provider manager</strong>: resolves a provider/model identifier to a ready-to-use provider instance via
- *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *       {@link org.machanism.machai.ai.manager.GenaiProviderManager}.</li>
  *   <li><strong>Usage</strong>: token/credit accounting captured per request and aggregated through
  *       {@link org.machanism.machai.ai.manager.Usage}.</li>
  *   <li><strong>Tools</strong>: a controlled set of host capabilities (file/command/web operations) that can be exposed
@@ -52,12 +52,12 @@
  * <h2>Example</h2>
  * <pre>{@code
  * Configurator conf = ...;
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
+ * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  * provider.instructions("You are a concise assistant.");
  * provider.prompt("Summarize this repository.");
  * String answer = provider.perform();
- * GenAIProviderManager.addUsage(provider.usage());
- * GenAIProviderManager.logUsage();
+ * GenaiProviderManager.addUsage(provider.usage());
+ * GenaiProviderManager.logUsage();
  * }</pre>
  */
 package org.machanism.machai.ai;

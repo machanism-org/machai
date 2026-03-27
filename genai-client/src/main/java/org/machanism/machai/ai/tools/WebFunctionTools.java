@@ -20,7 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import net.htmlparser.jericho.Source;
 
 /**
- * Installs HTTP retrieval tools into a {@link GenAIProvider}.
+ * Installs HTTP retrieval tools into a {@link Genai}.
  *
  * <p>
  * This tool set provides two host-side functions:
@@ -89,11 +89,11 @@ public class WebFunctionTools implements FunctionTools {
 
 	/**
 	 * Registers web content and REST API function tools with the provided
-	 * {@link GenAIProvider}.
+	 * {@link Genai}.
 	 *
 	 * @param provider the provider to register tools with
 	 */
-	public void applyTools(GenAIProvider provider) {
+	public void applyTools(Genai provider) {
 		provider.addTool("get_web_content",
 				"Fetches the content of a web page using an HTTP GET request. The URL may include user credentials in the userInfo format (e.g., https://user:password@host/path) for basic authentication.",
 				this::getWebContent,
@@ -197,7 +197,7 @@ public class WebFunctionTools implements FunctionTools {
 
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
-						StringUtils.abbreviate(response, 80).replace(GenAIProvider.LINE_SEPARATOR, " ").replace("\r",
+						StringUtils.abbreviate(response, 80).replace(Genai.LINE_SEPARATOR, " ").replace("\r",
 								""));
 			}
 			return response;
@@ -217,7 +217,7 @@ public class WebFunctionTools implements FunctionTools {
 		org.jsoup.select.Elements elements = doc.select(selector);
 		StringBuilder selectedContent = new StringBuilder();
 		for (org.jsoup.nodes.Element element : elements) {
-			selectedContent.append(element.outerHtml()).append(GenAIProvider.LINE_SEPARATOR);
+			selectedContent.append(element.outerHtml()).append(Genai.LINE_SEPARATOR);
 		}
 		return selectedContent.toString().trim();
 	}
@@ -226,7 +226,7 @@ public class WebFunctionTools implements FunctionTools {
 		if (!textOnly) {
 			return response;
 		}
-		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(GenAIProvider.LINE_SEPARATOR)
+		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(Genai.LINE_SEPARATOR)
 				.toString();
 	}
 
@@ -281,13 +281,13 @@ public class WebFunctionTools implements FunctionTools {
 
 		int responseCode = connection.getResponseCode();
 		output.append("HTTP ").append(Integer.toString(responseCode)).append(" ")
-				.append(connection.getResponseMessage()).append(GenAIProvider.LINE_SEPARATOR);
+				.append(connection.getResponseMessage()).append(Genai.LINE_SEPARATOR);
 
 		try (InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				output.append(line).append(GenAIProvider.LINE_SEPARATOR);
+				output.append(line).append(Genai.LINE_SEPARATOR);
 			}
 		}
 
@@ -338,7 +338,7 @@ public class WebFunctionTools implements FunctionTools {
 			int responseCode = connection.getResponseCode();
 			StringBuilder response = new StringBuilder();
 			response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
-					.append(GenAIProvider.LINE_SEPARATOR);
+					.append(Genai.LINE_SEPARATOR);
 
 			return parseResult(requestId, charsetName, connection, responseCode, response);
 
@@ -355,7 +355,7 @@ public class WebFunctionTools implements FunctionTools {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					response.append(line).append(GenAIProvider.LINE_SEPARATOR);
+					response.append(line).append(Genai.LINE_SEPARATOR);
 				}
 			}
 

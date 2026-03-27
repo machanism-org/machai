@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 
 class ClaudeProviderTest {
 
@@ -203,7 +203,7 @@ class ClaudeProviderTest {
 		// Arrange
 
 		// Act
-		Class<?>[] exceptions = GenAIProvider.class.getMethod("addFile", File.class).getExceptionTypes();
+		Class<?>[] exceptions = Genai.class.getMethod("addFile", File.class).getExceptionTypes();
 
 		// Assert
 		assertEquals(1, exceptions.length);
@@ -215,7 +215,7 @@ class ClaudeProviderTest {
 		// Arrange
 
 		// Act
-		Class<?>[] exceptions = GenAIProvider.class.getMethod("addFile", URL.class).getExceptionTypes();
+		Class<?>[] exceptions = Genai.class.getMethod("addFile", URL.class).getExceptionTypes();
 
 		// Assert
 		assertEquals(1, exceptions.length);

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * This class acts as a host-side entry point for registering a curated set of local capabilities (for example,
- * file access, command execution, and HTTP retrieval) with a {@link GenAIProvider}. Implementations are
+ * file access, command execution, and HTTP retrieval) with a {@link Genai}. Implementations are
  * discovered from the classpath (typically via {@code META-INF/services} provider configuration) and then
  * applied to the provider in discovery order.
  * </p>
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * <h2>Usage</h2>
  * <pre>{@code
  * Configurator conf = ...;
- * GenAIProvider provider = ...;
+ * Genai provider = ...;
  * FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
  * loader.setConfiguration(conf);
  * loader.applyTools(provider);
@@ -68,7 +68,7 @@ public class FunctionToolsLoader {
 	 *
 	 * @param provider provider instance to augment with tool functions
 	 */
-	public void applyTools(GenAIProvider provider) {
+	public void applyTools(Genai provider) {
 		for (FunctionTools functionTool : functionTools) {
 			functionTool.applyTools(provider);
 		}

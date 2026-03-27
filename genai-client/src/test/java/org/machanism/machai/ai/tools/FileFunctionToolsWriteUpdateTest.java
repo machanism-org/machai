@@ -43,7 +43,7 @@ class FileFunctionToolsWriteUpdateTest {
 
 		// Assert
 		assertEquals("File updated successfully: file.txt", result);
-		assertEquals("012ABC6789" + org.machanism.machai.ai.manager.GenAIProvider.LINE_SEPARATOR, updated);
+		assertEquals("012ABC6789" + org.machanism.machai.ai.manager.Genai.LINE_SEPARATOR, updated);
 	}
 
 	@Test

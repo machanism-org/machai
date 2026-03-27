@@ -17,14 +17,14 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Installs file-system tools into a {@link GenAIProvider}.
+ * Installs file-system tools into a {@link Genai}.
  *
  * <p>
  * Tools in this installer are intended for host-integrated use where the host
@@ -65,7 +65,7 @@ public class FileFunctionTools implements FunctionTools {
 	 *
 	 * @param provider provider instance
 	 */
-	public void applyTools(GenAIProvider provider) {
+	public void applyTools(Genai provider) {
 		provider.addTool("read_file_from_file_system", "Read the contents of a file from the disk.", this::readFile,
 				"file_path:string:required:The path to the file to be read.",
 				"charsetName:string:optional:the name of the requested charset, default: " + DEFAULT_CHARSET);
@@ -120,7 +120,7 @@ public class FileFunctionTools implements FunctionTools {
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
 				String relativePath = getRelativePath(workingDir, file, true);
-				content.append(relativePath).append(GenAIProvider.LINE_SEPARATOR);
+				content.append(relativePath).append(Genai.LINE_SEPARATOR);
 			}
 		} else {
 			content.append("No files found in directory.");
@@ -128,7 +128,7 @@ public class FileFunctionTools implements FunctionTools {
 		result = content.toString();
 		if (logger.isInfoEnabled()) {
 			logger.info("List files recursively: {}, Result: {}", Arrays.toString(params),
-					StringUtils.abbreviate(result, 60).replace(GenAIProvider.LINE_SEPARATOR, ""));
+					StringUtils.abbreviate(result, 60).replace(Genai.LINE_SEPARATOR, ""));
 		}
 		// Sonar(java:S2629): avoid Arrays.toString(params) unless DEBUG logging is enabled.
 		if (logger.isDebugEnabled()) {
@@ -246,7 +246,7 @@ public class FileFunctionTools implements FunctionTools {
 				new InputStreamReader(new FileInputStream(file), Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				fileContent.append(line).append(GenAIProvider.LINE_SEPARATOR);
+				fileContent.append(line).append(Genai.LINE_SEPARATOR);
 			}
 		}
 		return fileContent;

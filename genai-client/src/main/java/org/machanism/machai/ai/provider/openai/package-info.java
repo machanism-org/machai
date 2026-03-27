@@ -30,7 +30,7 @@
  * OpenAI provider implementation for MachAI.
  *
  * <p>
- * This package adapts MachAI's {@link org.machanism.machai.ai.manager.GenAIProvider} abstraction to the
+ * This package adapts MachAI's {@link org.machanism.machai.ai.manager.Genai} abstraction to the
  * OpenAI Java SDK, primarily via {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}.
  * </p>
  *
@@ -42,7 +42,7 @@
  *   <li>Registering function tools, translating MachAI tool definitions to OpenAI tool schemas, and dispatching
  *       tool calls to locally provided handlers.</li>
  *   <li>Extracting usage information (input, cached, and output tokens) and reporting it via
- *       {@link org.machanism.machai.ai.manager.GenAIProviderManager}.</li>
+ *       {@link org.machanism.machai.ai.manager.GenaiProviderManager}.</li>
  *   <li>Obtaining embedding vectors for text via {@link org.machanism.machai.ai.provider.openai.OpenAIProvider#embedding(String, long)}.</li>
  * </ul>
  *
@@ -62,7 +62,7 @@
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-5.1");
+ * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-5.1");
  * provider.instructions("You are a concise assistant.");
  * provider.prompt("Summarize this text...");
  * String answer = provider.perform();

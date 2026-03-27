@@ -7,15 +7,15 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 
 /**
  * Service-provider interface (SPI) for installing host-provided function tools
- * into a {@link GenAIProvider}.
+ * into a {@link Genai}.
  *
  * <p>
  * Implementations contribute one or more named tools via
- * {@link GenAIProvider#addTool(String, String, org.machanism.machai.ai.manager.GenAIProvider.ToolFunction, String...)}.
+ * {@link Genai#addTool(String, String, org.machanism.machai.ai.manager.Genai.ToolFunction, String...)}.
  * Tools are typically discovered via {@link java.util.ServiceLoader} and
  * applied at runtime by {@link FunctionToolsLoader}.
  * </p>
@@ -33,7 +33,7 @@ public interface FunctionTools {
 	 *
 	 * @param provider provider to register tools with
 	 */
-	void applyTools(GenAIProvider provider);
+	void applyTools(Genai provider);
 
 	/**
 	 * Provides a configurator instance to the tool set.

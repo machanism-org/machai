@@ -8,11 +8,11 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.Usage;
 
 /**
- * MachAI {@link GenAIProvider} implementation for Google's Gemini models.
+ * MachAI {@link Genai} implementation for Google's Gemini models.
  *
  * <p>
  * This provider adapts MachAI's provider-agnostic abstractions (prompts, tool definitions,
@@ -25,7 +25,7 @@ import org.machanism.machai.ai.manager.Usage;
  * completed in a future iteration.
  * </p>
  */
-public class GeminiProvider implements GenAIProvider {
+public class GeminiProvider implements Genai {
 
 	/**
 	 * Initializes this provider using the supplied configuration.

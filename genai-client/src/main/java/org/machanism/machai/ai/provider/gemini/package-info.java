@@ -30,7 +30,7 @@
  * Google Gemini provider integration for the MachAI framework.
  *
  * <p>
- * This package provides MachAI's {@link org.machanism.machai.ai.manager.GenAIProvider} implementation for
+ * This package provides MachAI's {@link org.machanism.machai.ai.manager.Genai} implementation for
  * Google's Gemini models: {@link org.machanism.machai.ai.provider.gemini.GeminiProvider}.
  * </p>
  *

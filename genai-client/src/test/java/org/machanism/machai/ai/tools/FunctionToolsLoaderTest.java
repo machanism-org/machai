@@ -9,11 +9,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 
 class FunctionToolsLoaderTest {
 
-	private static final class CountingProvider implements GenAIProvider {
+	private static final class CountingProvider implements Genai {
 		private final AtomicInteger adds = new AtomicInteger();
 
 		@Override
@@ -178,14 +178,14 @@ class FunctionToolsLoaderTest {
 		AtomicInteger applied = new AtomicInteger();
 		FunctionTools t1 = new FunctionTools() {
 			@Override
-			public void applyTools(GenAIProvider p) {
+			public void applyTools(Genai p) {
 				applied.incrementAndGet();
 				p.addTool("a", "", args -> null);
 			}
 		};
 		FunctionTools t2 = new FunctionTools() {
 			@Override
-			public void applyTools(GenAIProvider p) {
+			public void applyTools(Genai p) {
 				applied.incrementAndGet();
 				p.addTool("b", "", args -> null);
 			}
@@ -215,7 +215,7 @@ class FunctionToolsLoaderTest {
 		AtomicInteger configured = new AtomicInteger();
 		FunctionTools t1 = new FunctionTools() {
 			@Override
-			public void applyTools(GenAIProvider provider) {
+			public void applyTools(Genai provider) {
 				// not used
 			}
 
@@ -227,7 +227,7 @@ class FunctionToolsLoaderTest {
 		};
 		FunctionTools t2 = new FunctionTools() {
 			@Override
-			public void applyTools(GenAIProvider provider) {
+			public void applyTools(Genai provider) {
 				// not used
 			}
 

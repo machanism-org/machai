@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory/registry for resolving {@link GenAIProvider} implementations from a provider/model identifier and
+ * Factory/registry for resolving {@link Genai} implementations from a provider/model identifier and
  * aggregating per-run {@link Usage} metrics.
  *
  * <p>The model identifier is formatted as {@code Provider:Model} (for example, {@code OpenAI:gpt-4o-mini}). If the
@@ -28,27 +28,27 @@ import org.slf4j.LoggerFactory;
  * <h2>Usage</h2>
  * <pre>{@code
  * Configurator conf = ...;
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
+ * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  * provider.prompt("Hello!");
  * String response = provider.perform();
  *
- * GenAIProviderManager.addUsage(provider.usage());
- * GenAIProviderManager.logUsage();
+ * GenaiProviderManager.addUsage(provider.usage());
+ * GenaiProviderManager.logUsage();
  * }</pre>
  *
  * <p><strong>Thread-safety:</strong> Usage aggregation is backed by a static {@link ArrayList} and is not
  * synchronized.
  *
  * @author Viktor Tovstyi
- * @see GenAIProvider
+ * @see Genai
  */
-public class GenAIProviderManager {
+public class GenaiProviderManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(GenAIProviderManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(GenaiProviderManager.class);
 
 	private static final List<Usage> usages = new ArrayList<>();
 
-	private GenAIProviderManager() {
+	private GenaiProviderManager() {
 		// Utility class.
 	}
 
@@ -60,7 +60,7 @@ public class GenAIProviderManager {
 	 * @return a new provider instance configured with the requested model
 	 * @throws IllegalArgumentException if the provider cannot be resolved or instantiated
 	 */
-	public static GenAIProvider getProvider(String chatModel, Configurator conf) {
+	public static Genai getProvider(String chatModel, Configurator conf) {
 		String providerName = StringUtils.substringBefore(chatModel, ":");
 		String chatModelName = StringUtils.substringAfter(chatModel, ":");
 
@@ -79,9 +79,9 @@ public class GenAIProviderManager {
 
 		try {
 			@SuppressWarnings("unchecked")
-			Class<? extends GenAIProvider> providerClass = (Class<? extends GenAIProvider>) Class.forName(className);
-			Constructor<? extends GenAIProvider> constructor = providerClass.getConstructor();
-			GenAIProvider provider = constructor.newInstance();
+			Class<? extends Genai> providerClass = (Class<? extends Genai>) Class.forName(className);
+			Constructor<? extends Genai> constructor = providerClass.getConstructor();
+			Genai provider = constructor.newInstance();
 			conf.set("chatModel", chatModelName);
 			provider.init(conf);
 			return provider;

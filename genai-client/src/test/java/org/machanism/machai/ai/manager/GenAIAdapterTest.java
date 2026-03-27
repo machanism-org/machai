@@ -16,13 +16,13 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 
 class GenAIAdapterTest {
 
-	private static final class TestAdapter extends GenAIAdapter {
-		TestAdapter(GenAIProvider provider) {
+	private static final class TestAdapter extends GenaiAdapter {
+		TestAdapter(Genai provider) {
 			setProvider(provider);
 		}
 	}
 
-	private static final class RecordingProvider implements GenAIProvider {
+	private static final class RecordingProvider implements Genai {
 		Configurator initConf;
 		String prompted;
 		File addedFile;
@@ -110,7 +110,7 @@ class GenAIAdapterTest {
 	@Test
 	void setProvider_whenNull_throwsIllegalArgumentException() {
 		// Arrange
-		GenAIAdapter adapter = new GenAIAdapter();
+		GenaiAdapter adapter = new GenaiAdapter();
 
 		// Act + Assert
 		assertThrows(IllegalArgumentException.class, () -> adapter.setProvider(null));
@@ -120,11 +120,11 @@ class GenAIAdapterTest {
 	void allMethods_delegateToUnderlyingProvider() throws IOException {
 		// Arrange
 		RecordingProvider provider = new RecordingProvider();
-		GenAIProvider adapter = new TestAdapter(provider);
+		Genai adapter = new TestAdapter(provider);
 		Configurator conf = null;
 		File file = new File("test.txt");
 		URL url = URI.create("https://example.test/file").toURL();
-		GenAIProvider.ToolFunction fn = params -> "done";
+		Genai.ToolFunction fn = params -> "done";
 
 		// Act
 		adapter.init(conf);

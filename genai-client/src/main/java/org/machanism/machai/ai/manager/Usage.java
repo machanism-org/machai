@@ -4,7 +4,7 @@ package org.machanism.machai.ai.manager;
  * Token usage metrics for a single generative-AI invocation.
  *
  * <p>Instances of this class are typically created by provider implementations and aggregated by
- * {@link GenAIProviderManager} to produce a summary log of the application's consumption.
+ * {@link GenaiProviderManager} to produce a summary log of the application's consumption.
  *
  * <p>This is an immutable value object.
  */

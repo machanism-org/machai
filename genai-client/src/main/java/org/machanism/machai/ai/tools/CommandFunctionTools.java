@@ -20,14 +20,14 @@ import java.util.concurrent.TimeoutException;
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Installs command-execution and process-termination tools into a {@link GenAIProvider}.
+ * Installs command-execution and process-termination tools into a {@link Genai}.
  *
  * <p>
  * The installed tools provide a controlled wrapper around {@link ProcessBuilder} to execute a host command line
@@ -118,7 +118,7 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Registers system command and process control tools with the provided {@link GenAIProvider}.
+	 * Registers system command and process control tools with the provided {@link Genai}.
 	 *
 	 * <p>
 	 * The following tools are installed:
@@ -150,7 +150,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 *
 	 * @param provider the provider instance to which tools will be registered
 	 */
-	public void applyTools(GenAIProvider provider) {
+	public void applyTools(Genai provider) {
 		provider.addTool("run_command_line_tool",
 				"Executes a system command using Java's ProcessBuilder for controlled and secure execution."
 						+ " Only explicitly allowed commands can be executed for security reasons. "
@@ -277,7 +277,7 @@ public class CommandFunctionTools implements FunctionTools {
 			return "Error: Invalid or unsafe command.";
 
 		} catch (TimeoutException e) {
-			output.append("Output reading timed out.").append(GenAIProvider.LINE_SEPARATOR);
+			output.append("Output reading timed out.").append(Genai.LINE_SEPARATOR);
 			logger.error("[CMD {}] Output reading timed out", commandId, e);
 			return output.getLastText();
 
@@ -337,7 +337,7 @@ public class CommandFunctionTools implements FunctionTools {
 		if (!finished) {
 			process.destroyForcibly();
 			output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds)).append(" seconds.")
-					.append(GenAIProvider.LINE_SEPARATOR);
+					.append(Genai.LINE_SEPARATOR);
 			logger.warn("[CMD {}] Command timed out", commandId);
 		}
 
@@ -345,7 +345,7 @@ public class CommandFunctionTools implements FunctionTools {
 		stderrFuture.get(5, TimeUnit.SECONDS);
 
 		int exitCode = process.exitValue();
-		output.append("Command exited with code: ").append(Integer.toString(exitCode)).append(GenAIProvider.LINE_SEPARATOR);
+		output.append("Command exited with code: ").append(Integer.toString(exitCode)).append(Genai.LINE_SEPARATOR);
 		return output.getLastText();
 	}
 
@@ -464,7 +464,7 @@ public class CommandFunctionTools implements FunctionTools {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				output.append(line).append(GenAIProvider.LINE_SEPARATOR);
+				output.append(line).append(Genai.LINE_SEPARATOR);
 				lineConsumer.accept(line);
 			}
 		} catch (IOException e) {

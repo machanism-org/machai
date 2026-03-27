@@ -30,7 +30,7 @@
  * EPAM CodeMie provider integration.
  *
  * <p>This package contains {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation that authenticates with CodeMie via an OpenID
+ * {@link org.machanism.machai.ai.manager.Genai} implementation that authenticates with CodeMie via an OpenID
  * Connect (OIDC) token endpoint to obtain an OAuth 2.0 access token.
  *
  * <p>After obtaining a token, the provider configures an OpenAI-compatible client by setting:</p>

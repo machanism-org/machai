@@ -17,7 +17,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 
 /**
  * Unit tests for {@link GeminiProvider}.
@@ -119,7 +119,7 @@ class GeminiProviderTest {
 	void addTool_shouldNotThrow_withRealFunctionAndParams() {
 		// Arrange
 		GeminiProvider provider = new GeminiProvider();
-		GenAIProvider.ToolFunction function = args -> "ok";
+		Genai.ToolFunction function = args -> "ok";
 
 		// Act + Assert
 		assertDoesNotThrow(() -> provider.addTool("tool", "desc", function, "a", "b"));

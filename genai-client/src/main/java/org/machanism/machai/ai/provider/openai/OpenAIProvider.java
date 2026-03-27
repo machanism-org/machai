@@ -20,8 +20,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.manager.Usage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,7 @@ import com.openai.services.blocking.ModelService;
 /* @guidance: add to the OpenAIProvider class javadoc add information about configuration variable. */
 
 /**
- * OpenAI-backed {@link GenAIProvider} implementation.
+ * OpenAI-backed {@link Genai} implementation.
  *
  * <p>
  * This provider adapts the MachAI provider abstraction to the OpenAI Java SDK
@@ -92,7 +92,7 @@ import com.openai.services.blocking.ModelService;
  * in a single response. Defaults to {@value #MAX_TOOL_CALLS}.</li>
  * </ul>
  */
-public class OpenAIProvider implements GenAIProvider {
+public class OpenAIProvider implements Genai {
 
 	private static final String EMBEDDING_MODEL = "text-embedding-005";
 
@@ -245,7 +245,7 @@ public class OpenAIProvider implements GenAIProvider {
 			long outputTokens = responseUsage.outputTokens();
 
 			lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
-			GenAIProviderManager.addUsage(lastUsage);
+			GenaiProviderManager.addUsage(lastUsage);
 		} else {
 			lastUsage = new Usage(0, 0, 0);
 		}
@@ -446,7 +446,7 @@ public class OpenAIProvider implements GenAIProvider {
 
 	private void logInputs(Writer streamWriter) throws IOException {
 		streamWriter.write(StringUtils.defaultString(instructions));
-		streamWriter.write(GenAIProvider.PARAGRAPH_SEPARATOR);
+		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
 		for (ResponseInputItem responseInputItem : inputs) {
 			String inputText = "";
 			if (responseInputItem.isMessage()) {
@@ -463,7 +463,7 @@ public class OpenAIProvider implements GenAIProvider {
 					inputText = "Data invalid: " + responseInputItem;
 				}
 				streamWriter.write(inputText);
-				streamWriter.write(GenAIProvider.PARAGRAPH_SEPARATOR);
+				streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
 			}
 		}
 		logger.debug("LLM Inputs: {}", inputsLog);

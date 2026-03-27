@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
+import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.Usage;
 
 /**
- * Anthropic-backed implementation of MachAI's {@link GenAIProvider}
+ * Anthropic-backed implementation of MachAI's {@link Genai}
  * abstraction.
  *
  * <p>
@@ -22,7 +22,7 @@ import org.machanism.machai.ai.manager.Usage;
  * @author Viktor Tovstyi
  * @since 0.0.11
  */
-public class ClaudeProvider implements GenAIProvider {
+public class ClaudeProvider implements Genai {
 
 	@Override
 	public void init(Configurator config) {

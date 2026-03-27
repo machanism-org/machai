@@ -30,13 +30,13 @@
  * No-op generative-AI provider implementation.
  *
  * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, a
- * {@link org.machanism.machai.ai.manager.GenAIProvider} implementation intended for environments where external
+ * {@link org.machanism.machai.ai.manager.Genai} implementation intended for environments where external
  * model backends are disabled, unavailable, or not permitted.
  *
  * <h2>Behavior</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)} accumulates prompt text in memory,
- *       separated by {@link org.machanism.machai.ai.manager.GenAIProvider#PARAGRAPH_SEPARATOR}.</li>
+ *       separated by {@link org.machanism.machai.ai.manager.Genai#PARAGRAPH_SEPARATOR}.</li>
  *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} never calls an LLM and always returns
  *       {@code null}. When configured via {@link org.machanism.machai.ai.provider.none.NoneProvider#inputsLog(java.io.File)},
  *       it writes the accumulated prompts to the specified file.</li>
@@ -50,7 +50,7 @@
  *
  * <h2>Example</h2>
  * <pre>{@code
- * GenAIProvider provider = new NoneProvider();
+ * Genai provider = new NoneProvider();
  * provider.inputsLog(new File("./inputsLog/inputs.txt"));
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Describe the weather.");

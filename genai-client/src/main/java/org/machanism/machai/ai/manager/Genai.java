@@ -11,7 +11,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  * Contract for a generative-AI provider integration.
  *
  * <p>
- * A {@code GenAIProvider} represents a concrete implementation (for example
+ * A {@code Genai} represents a concrete implementation (for example
  * OpenAI, Gemini, a local model, etc.) capable of:
  * <ul>
  * <li>collecting prompts and system instructions for a conversation,</li>
@@ -28,7 +28,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  * 
  * <pre>{@code
  * Configurator conf = ...;
- * GenAIProvider provider = GenAIProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
+ * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  *
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Hello!");
@@ -39,16 +39,20 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  *
  * @author Viktor Tovstyi
  */
-public interface GenAIProvider {
+public interface Genai {
 
 	public static final String LOG_INPUTS_PROP_NAME = "logInputs";
 
 	public static final String SERVERID_PROP_NAME = "genai.serverId";
 
+	public static final String USERNAME_PROP_NAME = "GENAI_USERNAME";  
+
+	public static final String PASSWORD_PROP_NAME = "GENAI_PASSWORD";  
+
 	public static final String LINE_SEPARATOR = "\n";
 
 	public static final String PARAGRAPH_SEPARATOR = "\n\n";
-
+	
 	@FunctionalInterface
 	public interface ToolFunction {
 		Object apply(Object[] params) throws IOException;

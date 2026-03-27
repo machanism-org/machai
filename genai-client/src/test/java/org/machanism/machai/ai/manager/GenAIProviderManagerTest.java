@@ -99,7 +99,7 @@ class GenAIProviderManagerTest {
 		}
 	}
 
-	public static class ProviderXProvider implements GenAIProvider {
+	public static class ProviderXProvider implements Genai {
 		static Configurator lastInitConf;
 
 		@Override
@@ -165,7 +165,7 @@ class GenAIProviderManagerTest {
 
 	@AfterEach
 	void clearUsageAggregation() throws Exception {
-		Field f = GenAIProviderManager.class.getDeclaredField("usages");
+		Field f = GenaiProviderManager.class.getDeclaredField("usages");
 		f.setAccessible(true);
 		@SuppressWarnings("unchecked")
 		List<Usage> usages = (List<Usage>) f.get(null);
@@ -178,7 +178,7 @@ class GenAIProviderManagerTest {
 		Configurator conf = new MapConfigurator();
 
 		// Act
-		GenAIProvider provider = GenAIProviderManager.getProvider(ProviderXProvider.class.getName() + ":m1", conf);
+		Genai provider = GenaiProviderManager.getProvider(ProviderXProvider.class.getName() + ":m1", conf);
 
 		// Assert
 		assertNotNull(provider);
@@ -193,7 +193,7 @@ class GenAIProviderManagerTest {
 		Configurator conf = new MapConfigurator();
 
 		// Act
-		GenAIProvider provider = GenAIProviderManager.getProvider("None:ignored", conf);
+		Genai provider = GenaiProviderManager.getProvider("None:ignored", conf);
 
 		// Assert
 		assertNotNull(provider);
@@ -208,7 +208,7 @@ class GenAIProviderManagerTest {
 
 		// Act
 		String modelName = "my-model";
-		org.junit.jupiter.api.function.Executable call = () -> GenAIProviderManager.getProvider(modelName, conf);
+		org.junit.jupiter.api.function.Executable call = () -> GenaiProviderManager.getProvider(modelName, conf);
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, call);
 
 		// Assert
@@ -223,7 +223,7 @@ class GenAIProviderManagerTest {
 
 		// Act
 		String providerName = "com.example.DoesNotExist:model";
-		org.junit.jupiter.api.function.Executable call = () -> GenAIProviderManager.getProvider(providerName, conf);
+		org.junit.jupiter.api.function.Executable call = () -> GenaiProviderManager.getProvider(providerName, conf);
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, call);
 
 		// Assert
@@ -237,7 +237,7 @@ class GenAIProviderManagerTest {
 
 		// Act
 		String providerName = NoDefaultConstructorProvider.class.getName() + ":m";
-		org.junit.jupiter.api.function.Executable call = () -> GenAIProviderManager.getProvider(providerName, conf);
+		org.junit.jupiter.api.function.Executable call = () -> GenaiProviderManager.getProvider(providerName, conf);
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, call);
 		
 		// Assert
@@ -251,11 +251,11 @@ class GenAIProviderManagerTest {
 		Usage u2 = new Usage(10, 20, 30);
 
 		// Act
-		GenAIProviderManager.addUsage(u1);
-		GenAIProviderManager.addUsage(u2);
+		GenaiProviderManager.addUsage(u1);
+		GenaiProviderManager.addUsage(u2);
 
 		// Assert
-		Field f = GenAIProviderManager.class.getDeclaredField("usages");
+		Field f = GenaiProviderManager.class.getDeclaredField("usages");
 		f.setAccessible(true);
 		@SuppressWarnings("unchecked")
 		List<Usage> usages = (List<Usage>) f.get(null);
@@ -269,26 +269,26 @@ class GenAIProviderManagerTest {
 		// Arrange
 
 		// Act
-		GenAIProviderManager.logUsage();
+		GenaiProviderManager.logUsage();
 
 		// Assert
-		assertThrows(NoSuchFieldException.class, () -> GenAIProviderManager.class.getDeclaredField("__never_exists__"));
+		assertThrows(NoSuchFieldException.class, () -> GenaiProviderManager.class.getDeclaredField("__never_exists__"));
 	}
 
 	@Test
 	void logUsage_whenUsagesPresent_doesNotThrow() {
 		// Arrange
-		GenAIProviderManager.addUsage(new Usage(1, 1, 1));
-		GenAIProviderManager.addUsage(new Usage(2, 0, 3));
+		GenaiProviderManager.addUsage(new Usage(1, 1, 1));
+		GenaiProviderManager.addUsage(new Usage(2, 0, 3));
 
 		// Act
-		GenAIProviderManager.logUsage();
+		GenaiProviderManager.logUsage();
 
 		// Assert
-		assertThrows(NoSuchFieldException.class, () -> GenAIProviderManager.class.getDeclaredField("__never_exists__"));
+		assertThrows(NoSuchFieldException.class, () -> GenaiProviderManager.class.getDeclaredField("__never_exists__"));
 	}
 
-	public static class NoDefaultConstructorProvider implements GenAIProvider {
+	public static class NoDefaultConstructorProvider implements Genai {
 		public NoDefaultConstructorProvider(@SuppressWarnings("unused") String arg) {
 			// intentionally not a no-args constructor
 		}
