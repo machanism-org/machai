@@ -1,7 +1,6 @@
 <!--
 @guidance:
-**IMPORTANT: GENERATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
-If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
+**IMPORTANT: GENERATE OR UPDATECONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
 
 Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
 [PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
@@ -15,9 +14,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
 
 - **Automatic Fixes for Javadoc Build Issues:**
-    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc, 
+    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc,
        automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
-- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags. 
+- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags.
   Use only the standard inline or block code formatting as appropriate, and preserve the {@code ...} syntax without additional HTML tags.
 -->
 
@@ -41,43 +40,49 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Architecture at a glance</h2>
 <p>
-  GenAI Client provides a provider-agnostic API for executing LLM/GenAI requests while keeping applications isolated
-  from vendor SDKs and transport details. Providers are resolved from a model identifier (typically
-  <code>Provider:Model</code>), and optional host-side “function tools” can be installed to enable tool/function-calling
-  capable models to access controlled host capabilities.
+  GenAI Client exposes a provider-agnostic API for executing LLM/GenAI requests while keeping applications isolated from
+  vendor SDKs and transport details. Providers are resolved from a model identifier, typically
+  <code>Provider:Model</code> (for example, <code>OpenAI:gpt-4o-mini</code>). A default provider can be used when the
+  prefix is omitted.
+</p>
+
+<p>
+  Some providers support tool/function calling. When enabled, host-side “function tools” can be installed to expose
+  controlled capabilities such as file access, HTTP calls, or command execution.
 </p>
 
 <p>
   <img src="../images/class-diagram.png" alt="GenAI Client class diagram" />
 </p>
 
-<h2>Package structure</h2>
+<h2>Packages</h2>
 <p>
-  The public API is organized so application code depends on stable abstractions while concrete provider integrations
-  and host-side tools evolve independently.
+  The library is organized so application code depends on stable abstractions while concrete provider integrations and
+  host-side tool installers evolve independently.
 </p>
 
 <ul>
   <li>
-    <strong><code>org.machanism.machai.ai</code></strong> &ndash; provider-agnostic client API.
+    <strong><code>org.machanism.machai.ai</code></strong> &ndash; root client API.
     <ul>
       <li>
-        Root package that groups the public abstractions and runtime components needed to configure and execute
-        LLM/GenAI requests.
+        Provider-agnostic entry point package that groups the public abstractions and runtime components used to
+        configure and execute GenAI requests.
       </li>
     </ul>
   </li>
 
   <li>
-    <strong><code>org.machanism.machai.ai.manager</code></strong> &ndash; manager API / SPI for provider resolution and usage aggregation.
+    <strong><code>org.machanism.machai.ai.manager</code></strong> &ndash; provider contract, resolution, and usage aggregation.
     <ul>
       <li>
         Defines the provider contract (<code>Genai</code>), the resolver/aggregator (<code>GenaiProviderManager</code>),
         a delegating base (<code>GenaiAdapter</code>), and the per-invocation usage record (<code>Usage</code>).
       </li>
       <li>
-        Providers are typically selected using <code>Provider:Model</code> (for example, <code>OpenAI:gpt-4o-mini</code>).
-        If the provider prefix is omitted, the manager falls back to the default provider.
+        Providers can be referenced by a short provider name (mapped to
+        <code>org.machanism.machai.ai.provider.&lt;provider&gt;.&lt;Provider&gt;Provider</code>) or by fully-qualified
+        class name.
       </li>
     </ul>
   </li>
@@ -96,8 +101,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.provider.gemini</code></strong> &ndash; Google Gemini integration.
     <ul>
       <li>
-        Adapts the common provider contract to Gemini models. Some operations may be unimplemented depending on the
-        current implementation.
+        Adapts the common provider contract to Gemini models. Depending on the current implementation, some operations
+        may be unimplemented.
       </li>
     </ul>
   </li>
@@ -129,8 +134,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.tools</code></strong> &ndash; host-integrated function tools.
     <ul>
       <li>
-        Provides controlled host capabilities (file access, HTTP/REST calls, and command execution) to providers that
-        support tool/function calling.
+        Provides controlled host capabilities (file system, HTTP/REST, and command execution) to providers that support
+        tool/function calling.
       </li>
       <li>
         Tool installers are typically discovered via <code>ServiceLoader</code> and applied to a provider instance via
@@ -141,18 +146,20 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </ul>
 
 <h2>Typical workflow</h2>
-<p>
-  A typical invocation resolves a provider for a model identifier, optionally applies host-side tools, supplies
-  instructions and prompts, executes the request, then records token usage.
-</p>
+<ol>
+  <li>Resolve a provider for a model identifier (for example <code>OpenAI:gpt-4o-mini</code>).</li>
+  <li>Optionally apply host-side tools (file/web/command helpers) when tool calling is enabled.</li>
+  <li>Supply system instructions and one or more prompts.</li>
+  <li>Execute the request and record aggregated token usage.</li>
+</ol>
 
-<pre>{@code
+<pre>
 Configurator conf = ...;
 
 // Resolve Provider:Model (for example: "OpenAI:gpt-4o-mini").
 Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
 
-// Optional: expose host-side tools (file/web/command helpers).
+// Optional: expose host-side tools.
 FunctionToolsLoader tools = FunctionToolsLoader.getInstance();
 tools.setConfiguration(conf);
 tools.applyTools(provider);
@@ -164,7 +171,7 @@ String answer = provider.perform();
 Usage usage = provider.usage();
 GenaiProviderManager.addUsage(usage);
 GenaiProviderManager.logUsage();
-}</pre>
+</pre>
 
 <h2>Operational notes</h2>
 <ul>
