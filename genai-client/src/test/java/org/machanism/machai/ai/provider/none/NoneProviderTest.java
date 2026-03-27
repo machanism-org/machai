@@ -197,7 +197,7 @@ class NoneProviderTest {
 			System.setProperty("user.dir", tempDir.toString());
 
 			NoneProvider provider = new NoneProvider();
-			provider.inputsLog(new File("inputs.txt"));
+			provider.inputsLog(tempDir.resolve("inputs.txt").toFile());
 			provider.instructions("INST");
 			provider.prompt("P");
 

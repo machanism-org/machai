@@ -77,8 +77,7 @@ public class MavenProjectLayout extends ProjectLayout {
 		if (mavenModel != null && "pom".equals(mavenModel.getPackaging())) {
 			return mavenModel.getModules();
 		}
-		// Sonar java:S1168 - return empty collection instead of null to prevent NPEs in callers.
-		return Collections.emptyList();
+		return null;
 	}
 
 	/**
