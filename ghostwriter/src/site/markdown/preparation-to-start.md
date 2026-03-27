@@ -93,7 +93,7 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 | `inputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("inputs", false)` (via `GenAIProvider.LOG_INPUTS_PROP_NAME`) and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
 | `project.dir` | Root directory used as the base directory for scanning/processing when CLI `--projectDir/-d` is not provided. | If not set: `user.dir`. | When `-d/--projectDir` is not provided, Ghostwriter loads it via `config.getFile("project.dir", null)` (via `ProjectLayout.PROJECT_DIR_PROP_NAME`) and falls back to `SystemUtils.getUserDir()`. Passed to `ActProcessor` / `GuidanceProcessor` and used as the base for `scanDocuments(projectDir, scanDir)`. |
 | `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | If unset: `user.dir` absolute path. | When there are no CLI scanDir args, Ghostwriter reads `config.get("gw.scanDir", null)`. If absent, it scans `SystemUtils.getUserDir().getAbsolutePath()` (see `resolveScanDirs(...)`). |
-| `gw.nonRecursive` | Declared constant in `Ghostwriter`, likely intended to control recursive scanning behavior. | N/A (not read by `Ghostwriter` currently). | Present as `public static final String GW_NONRECURSIVE_PROP_NAME = "gw.nonRecursive";` but not referenced elsewhere in this class. |
+| `gw.nonRecursive` | Declared constant (not used by `Ghostwriter` currently). | N/A. | Present as `public static final String GW_NONRECURSIVE_PROP_NAME = "gw.nonRecursive";` but not referenced elsewhere in this class. |
 
 > Notes:
 > - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself resolves `gw.home` via configuration/system properties (it does not read `GW_HOME` directly).
@@ -164,7 +164,7 @@ Ghostwriter CLI supports overriding several configuration properties via command
 To view all available command-line options, run:
 
 ```text
-C:\projects\machanism.org\machai>java -jar \opt\gw\gw.jar -h
+C:\projects\machanism.org\machai>java -jar \\opt\\gw\\gw.jar -h
 usage: java -jar gw.jar <scanDir> [options] [-e <arg>] [-g
        <arg>] [-h] [-i <arg>] [-l] [-m <arg>] [-d <arg>] [-t <arg>]
 

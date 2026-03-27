@@ -81,7 +81,7 @@ Ghostwriter is delivered as a Java CLI entry point (`org.machanism.machai.gw.pro
 - Composes provider inputs including project structure context and optional system instructions.
 - Executes the configured GenAI provider across matching files (or in Act mode).
 
-In addition to per-file guidance, Ghostwriter can apply *default guidance* when a file has no embedded `@guidance:` and can also perform a folder-level step (processor-dependent).
+In addition to per-file guidance, Ghostwriter can apply default guidance when a file has no embedded `@guidance:` and can also perform a folder-level step (processor-dependent).
 
 ### Architecture (conceptual)
 
@@ -130,7 +130,7 @@ The closest tool in spirit is **Claude Code**: both operate across a repository 
 | Cursor | Limited | No | Limited | Limited |
 | Tabnine | Limited | No | Limited | Limited |
 
-Machai Ghostwriter is unique in how it turns *file-local guidance* into a repeatable, repository-scale processing pipeline.
+Machai Ghostwriter is unique in how it turns file-local guidance into a repeatable, repository-scale processing pipeline.
 
 ## Key Features
 
@@ -141,7 +141,7 @@ Machai Ghostwriter is unique in how it turns *file-local guidance* into a repeat
 - Supports excludes (exact paths or `glob:` / `regex:` patterns).
 - Optional multi-threaded processing.
 - Optional logging of provider inputs per processed file.
-- “Act mode” for executing predefined prompts (`--act`).
+- Act mode for executing predefined prompts (`--act`).
 
 ## Getting Started
 
@@ -167,7 +167,7 @@ java -jar gw.jar <scanDir> -m OpenAI:gpt-5.1
 2. Create `gw.properties` (optional) and configure:
    - `project.dir` (project root)
    - `gw.model` (provider:model)
-   - `gw.instructions` (optional)
+   - `instructions` (optional)
    - `gw.excludes` (optional)
    - `gw.guidance` (optional default guidance)
 3. Run Ghostwriter against a directory or pattern (e.g., `src`, `glob:**/*.md`, `regex:...`).
@@ -189,7 +189,7 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 - `-m, --model <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
 - `-i, --instructions[=<text|url|file:...>]` — System instructions (plain text, URL, or `file:`). If no value: stdin until a line does not end with `\\`.
 - `-g, --guidance[=<text|url|file:...>]` — Default guidance (plain text, URL, or `file:`). If no value: stdin until a line does not end with `\\`.
-- `-e, --excludes <csv>` — Comma-separated list of directories to exclude.
+- `-e, --excludes <csv>` — Comma-separated list of directories/patterns to exclude.
 - `-l, --logInputs` — Log LLM request inputs to dedicated log files.
 - `-as, --acts <path>` — Directory containing predefined act prompt files.
 - `-a, --act[=<name and prompt>]` — Run in Act mode (interactive execution of predefined prompts). If no value: stdin until a line does not end with `\\`.
@@ -199,15 +199,15 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 | Option | Description | Default |
 |---|---|---|
 | `-h, --help` | Show this help message and exit. | `false` |
-| `-d, --projectDir <path>` | Specify the path to the root directory for file processing. | `project.dir` or current working directory |
-| `-t, --threads <count>` | The degree of concurrency for the processing to improve performance. | `gw.threads` or unset |
-| `-m, --model <provider:model>` | Set the GenAI provider and model. | `gw.model` |
-| `-i, --instructions[=<text\|url\|file:...>]` | System instructions. If no value: prompted to enter text via stdin. | `gw.instructions` |
-| `-g, --guidance[=<text\|url\|file:...>]` | Default guidance. If no value: prompted to enter text via stdin. | `gw.guidance` |
-| `-e, --excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` |
-| `-l, --logInputs` | Log LLM request inputs to dedicated log files. | `false` (`logInputs`) |
-| `-as, --acts <path>` | Specify the path to the directory containing predefined act prompt files for processing. | not set |
-| `-a, --act[=<...>]` | Run Ghostwriter in Act mode. If no value: prompted to enter text via stdin. | disabled |
+| `-d, --projectDir <path>` | Root directory for file processing. | `project.dir` (if set) or current working directory |
+| `-t, --threads <count>` | Degree of concurrency for module processing. | `gw.threads` or disabled |
+| `-m, --model <provider:model>` | GenAI provider and model. | `gw.model` |
+| `-i, --instructions[=<text\|url\|file:...>]` | System instructions. If no value: reads multi-line text from stdin. | `instructions` |
+| `-g, --guidance[=<text\|url\|file:...>]` | Default guidance. If no value: reads multi-line text from stdin. | `gw.guidance` |
+| `-e, --excludes <csv>` | Comma-separated excludes (exact paths or `glob:` / `regex:` patterns). | `gw.excludes` |
+| `-l, --logInputs` | Log LLM request inputs. | `false` (`inputs`) |
+| `-as, --acts <path>` | Directory containing act prompt files. | `gw.acts` or unset |
+| `-a, --act[=<...>]` | Act mode prompt. If no value: reads multi-line text from stdin. | `gw.act` or disabled |
 
 ### Example
 
@@ -231,23 +231,21 @@ Ghostwriter supports a default guidance prompt (stored as `defaultPrompt`) that 
 ### Purpose
 
 - Provide a baseline instruction set for files that do not carry their own embedded `@guidance:` blocks.
-- Allow centralized, repeatable prompting for a scan run (for example: “summarize all Markdown files”, “modernize headers”, “add missing Javadoc”).
-- Enable prompting when running in Act mode (where the act prompt is treated as the processor’s default prompt).
+- Allow centralized, repeatable prompting for a scan run (for example: summarize Markdown files, modernize headers, add missing Javadoc).
+- Enable prompting when running in Act mode (where the act prompt is treated as the processors default prompt).
 
 ### How it works
 
 The default guidance is resolved and applied as follows:
 
-- **Configured value**: loaded from `gw.properties` (`gw.guidance`) and/or the `-g/--guidance` CLI option.
-- **Optional stdin input**: if `-g/--guidance` is present with no value, Ghostwriter reads multi-line text from stdin.
-- **Per-line expansion**: each line preserves blanks; lines starting with `http(s)://` are fetched and included; lines starting with `file:` load content from the referenced file; all other lines are included as-is.
+- Configured value: loaded from `gw.properties` (`gw.guidance`) and/or the `-g/--guidance` CLI option.
+- Optional stdin input: if `-g/--guidance` is present with no value, Ghostwriter reads multi-line text from stdin.
+- Per-line expansion: blank lines are preserved; lines starting with `http(s)://` are fetched and included; lines starting with `file:` load content from the referenced file; all other lines are included as-is.
 
-When default guidance is set, the processor may also execute a folder-level processing step for the scanned directory.
+When default guidance is set, scanning a directory path (not a `glob:`/`regex:` pattern) changes matching behavior so only the specified directory itself is included (not its descendants). When it is not set, the directory and all descendants are included.
 
 ## Resources
 
 - Project site: https://machai.machanism.org/ghostwriter/index.html
 - GitHub repository (Machai mono-repo): https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
-
-

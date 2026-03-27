@@ -22,51 +22,52 @@ canonical: https://machai.machanism.org/ghostwriter/act.html
 
 # Act
 
-An **Act** is a reusable template that tells Ghostwriter what to do and how to talk to the AI.
+An **Act** is a reusable “recipe” that tells Ghostwriter what to do and how to talk to the AI.
 
-Instead of writing a long prompt every time, you select an act by name and (optionally) add a short request. Ghostwriter combines your request with the act’s template and runs it against your project files.
+Instead of writing a long prompt every time, you choose an act by name and (optionally) add a short request. Ghostwriter loads the act’s TOML file, combines it with your request, and applies the result while scanning and processing your project files.
 
-Acts are stored as small **TOML** files.
+Acts are small **TOML** files. Built-in acts ship with Ghostwriter in `src/main/resources/acts`. You can also provide your own acts using `--acts <path>`.
 
 ## What an Act can contain
 
-An act file can:
+An act file can provide:
 
-- Provide **AI behavior instructions** via `instructions`
-- Provide a **prompt template** via `inputs` (your request is inserted into it)
-- Optionally set **Ghostwriter runtime options** under `[gw]` (for example `scanDir`, `excludes`, `threads`, `nonRecursive`)
-- Provide **other configuration values** (any other keys are applied to Ghostwriter configuration)
-
-Built-in acts ship with Ghostwriter under `src/main/resources/acts`. You can also provide your own acts using `--acts <path>`.
+- **AI behavior instructions** via `instructions`
+- A **prompt template** via `inputs` (your request is inserted into it)
+- Optional **Ghostwriter runtime options** under `[gw]` (for example `scanDir`, `excludes`, `threads`, `nonRecursive`)
+- Optional **functional tool configuration** under `[ft.*]` (for example `[ft.command] denylist`)
+- Any other dotted keys (for example `gw.scanDir = "glob:."`), which are forwarded into Ghostwriter configuration
 
 ## How Acts run (what Ghostwriter does)
 
 Act mode is implemented by `org.machanism.machai.gw.processor.ActProcessor`.
 
-At a high level, when you run an act, Ghostwriter:
+When you run an act, Ghostwriter:
 
 1. **Chooses the act name** (from `--act`). If you don’t provide one, it uses `help`.
 2. **Loads the act TOML** from:
    - built-in resources (classpath `/acts/<name>.toml`)
-   - and/or your custom acts location (`--acts <path>`, which can be a local directory or an `http(s)://...` URL)
+   - and/or a custom acts location (`--acts <path>`, which can be a local directory or an `http(s)://...` URL)
 3. **Resolves inheritance** (`basedOn`) and merges parent → child.
-4. **Builds the final prompt** by inserting your request text into the act’s `inputs` template.
-5. **Applies act settings** to the current run (AI instructions, default prompt, scan options, and other configuration values).
+4. **Builds the final prompt** by inserting your request text into the act’s `inputs`.
+5. **Applies act settings** (AI instructions, prompt, scan options, and other configuration values).
 6. **Scans and processes files** using the composed instructions and prompt.
 
-## Act TOML keys you will commonly see
+## Common Act TOML keys
 
-- `description` (optional): a short summary of the act
-- `instructions`: the “system-style” guidance sent to the AI
-- `inputs`: a template for your request text
+You will commonly see:
+
+- `description` (optional): short summary of the act
+- `instructions`: the high-level “how to behave” instructions sent to the AI
+- `inputs`: a template that receives your request text
 - `basedOn` (optional): inherit from another act
 - `[gw] ...`: Ghostwriter scan/run options
 - `[ft.command] ...`: functional-tool related configuration (for example a denylist)
-- Other dotted keys (for example `gw.scanDir = "glob:."`): also applied to Ghostwriter configuration
+- Other dotted keys: also applied to Ghostwriter configuration
 
 ## Inheritance and “inherited values”
 
-Acts support several kinds of inheritance/overrides. This is important because it lets you reuse a base act and change only the parts you need.
+Acts support several kinds of inheritance/override behavior. This lets you reuse a base act and change only what you need.
 
 ### 1) Inheriting from another act (`basedOn`)
 
@@ -80,17 +81,17 @@ Ghostwriter loads the parent act first, then loads the child act and merges the 
 
 Key points:
 
-- Inheritance is **recursive**: the parent can itself have `basedOn`.
+- Inheritance is **recursive** (a parent can itself have `basedOn`).
 - After loading the parent, Ghostwriter removes `basedOn` from the merged result.
 
 ### 2) Custom acts override built-in acts (same act name)
 
-Ghostwriter can load an act from both:
+Ghostwriter can load an act definition from both:
 
 - built-in resources (`src/main/resources/acts` → classpath `/acts/...`)
 - a custom acts location (`--acts <path>`)
 
-If both exist for the same act name, Ghostwriter loads both so your **custom act wraps and overrides** the built-in one.
+If both exist for the same act name, Ghostwriter loads both so your **custom act overlays and overrides** the built-in act.
 
 This is the recommended way to customize behavior without editing the shipped act files.
 
@@ -98,11 +99,11 @@ This is the recommended way to customize behavior without editing the shipped ac
 
 When merging act properties, Ghostwriter uses a special rule for **string values** (`ActProcessor.setActData(...)`):
 
-- If a key already exists as a string (inherited from a parent act or from the built-in act)
+- If a key already exists as a string (inherited from a parent act, or from the built-in act)
 - and the child also provides a string for the same key
 - the child string is inserted into the parent string by replacing the parent’s first `%s`
 
-This lets a child act extend a parent template instead of replacing it.
+This allows “extend” behavior instead of “replace” behavior.
 
 Example:
 
@@ -118,7 +119,7 @@ Child act:
 inputs = "Please focus only on documentation changes."
 ```
 
-Merged `inputs`:
+Merged `inputs` becomes:
 
 ```text
 # Task
@@ -126,19 +127,19 @@ Merged `inputs`:
 Please focus only on documentation changes.
 ```
 
-### 4) Inheriting from Ghostwriter’s existing configuration (runtime “inherit value”)
+### 4) Inheriting from existing Ghostwriter configuration at runtime (`%s`)
 
 After the act data is loaded and merged, Ghostwriter applies it (`ActProcessor.applyActData(...)`).
 
 For each string property:
 
-- Ghostwriter first checks whether there is already an existing value for the same key in the current configuration (from CLI flags, environment, or other config sources).
+- Ghostwriter checks whether there is already an existing value for the same key in the current configuration (from CLI flags, environment, or other config sources).
 - If there is an existing value and the act value contains `%s`, Ghostwriter replaces `%s` with that existing value.
-- If there is an existing value and the act value does not contain `%s`, the act value simply replaces it.
+- If there is an existing value and the act value does not contain `%s`, the act value replaces it.
 
-This is commonly used to extend multi-line configuration strings such as a functional-tool denylist.
+This is commonly used to *extend* multi-line configuration strings, such as a functional-tool denylist.
 
-Example idea (append extra denylist lines while keeping the existing denylist):
+Example (append to an existing denylist):
 
 ```toml
 [ft.command]
@@ -149,7 +150,7 @@ rm -rf
 '''
 ```
 
-At runtime, `%s` is replaced with the existing denylist value.
+At runtime, `%s` is replaced with the denylist Ghostwriter already had.
 
 ### 5) Inserting your request text into `inputs`
 
@@ -166,7 +167,7 @@ You run an act using `-a/--act`.
 ### Step-by-step
 
 1. Pick an act name (for example `task`).
-2. (Optional) Provide a custom acts directory with `--acts <path>`.
+2. (Optional) Provide a custom acts directory or URL with `--acts <path>`.
 3. Add a short request after the act name.
 4. Run Ghostwriter.
 
@@ -180,15 +181,21 @@ If you omit the act name, Ghostwriter uses `help`.
 
 ## Where Acts fit in Ghostwriter (key responsibilities)
 
-`ActProcessor` is responsible for Act mode. The most important responsibilities are:
+`ActProcessor` is responsible for Act mode. Its key responsibilities are:
 
 - **Select act + request text** (`setDefaultPrompt(String act)`)
 - **Load act TOML** from classpath and/or an external acts location (`tryLoadActFromClasspath`, `tryLoadActFromDirectory`)
 - **Resolve inheritance** via `basedOn` (`loadAct`)
-- **Merge properties** including `%s`-based template extension (`setActData`)
+- **Merge act properties** including `%s`-based template extension (`setActData`)
 - **Apply act settings** to Ghostwriter runtime/configuration (`applyActData`)
 
 ## Built-in Acts (`src/main/resources/acts`)
+
+### assembly
+
+Uses a list of recommended libraries (in **Bindex JSON** format) to help build or assemble an application.
+
+Use it when you have library recommendations available and want Ghostwriter to fetch detailed library metadata (via `get_bindex` and `get_bindex_schema`) and implement a solution using those libraries.
 
 ### commit
 
