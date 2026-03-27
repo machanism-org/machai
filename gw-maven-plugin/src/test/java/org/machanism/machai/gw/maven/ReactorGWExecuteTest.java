@@ -9,8 +9,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
+import org.mockito.Mockito;
 
 /**
  * Tests for {@link ReactorGW#execute()} exception handling.

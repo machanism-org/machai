@@ -7,9 +7,9 @@ import java.io.File;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Test;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.machanism.machai.gw.processor.GuidanceProcessor;
 
 public class CleanTest {
 

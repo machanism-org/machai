@@ -12,9 +12,10 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenAIProvider;
-import org.machanism.machai.ai.manager.GenAIProviderManager;
+import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.slf4j.Logger;
@@ -57,6 +58,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * <h2>Examples</h2>
+ * 
  * <pre>
  * mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site -DlogInputs=true
  * </pre>
@@ -121,12 +123,12 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * {@code settings.xml} {@code <server>} id used to read GenAI credentials.
 	 */
-	@Parameter(property = GenAIProvider.SERVERID_PROP_NAME, required = false)
+	@Parameter(property = Genai.SERVERID_PROP_NAME, required = false)
 	private String serverId;
 	/**
 	 * Whether to log the list of input files passed to the workflow.
 	 */
-	@Parameter(property = GenAIProvider.LOG_INPUTS_PROP_NAME, defaultValue = "false")
+	@Parameter(property = Genai.LOG_INPUTS_PROP_NAME, defaultValue = "false")
 	protected boolean logInputs;
 	/**
 	 * Reactor projects for the current Maven session.
@@ -142,8 +144,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	 * Builds a {@link PropertiesConfigurator} for workflow execution.
 	 *
 	 * <p>
-	 * When {@code genai.serverId} is set, credentials are read from Maven
-	 * settings.
+	 * When {@code genai.serverId} is set, credentials are read from Maven settings.
 	 * </p>
 	 *
 	 * @return a configurator populated with any available workflow properties
@@ -165,11 +166,19 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 
 			String username = server.getUsername();
 			if (StringUtils.isNotBlank(username)) {
-				config.set("GENAI_USERNAME", username);
+				config.set(Genai.USERNAME_PROP_NAME, username);
 			}
 			String password = server.getPassword();
 			if (StringUtils.isNotBlank(password)) {
-				config.set("GENAI_PASSWORD", password);
+				config.set(Genai.PASSWORD_PROP_NAME, password);
+			}
+
+			if (server.getConfiguration() instanceof Xpp3Dom) {
+				Xpp3Dom configuration = (Xpp3Dom) server.getConfiguration();
+				Xpp3Dom[] children = configuration.getChildren();
+				for (Xpp3Dom xpp3Dom : children) {
+					config.set(xpp3Dom.getName(), xpp3Dom.getValue());
+				}
 			}
 		}
 
@@ -221,7 +230,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 			throw new MojoExecutionException("File processing failed.", e);
 
 		} finally {
-			GenAIProviderManager.logUsage();
+			GenaiProviderManager.logUsage();
 			logger.info("File processing completed.");
 		}
 	}

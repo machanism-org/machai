@@ -7,10 +7,8 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.gw.processor.ActProcessor;
-import org.machanism.machai.gw.processor.Ghostwriter;
+import org.mockito.Mockito;
 
 public class ReactorActTest {
 

@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
@@ -16,8 +15,6 @@ import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Maven goal {@code gw:act-reactor} that runs an action against the

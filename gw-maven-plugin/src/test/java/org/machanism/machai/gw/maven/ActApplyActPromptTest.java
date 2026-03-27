@@ -4,15 +4,14 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Properties;
 
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.gw.processor.Ghostwriter;
+import org.mockito.Mockito;
 
 public class ActApplyActPromptTest {
 
