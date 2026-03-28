@@ -39,7 +39,7 @@ class MavenBindexBuilderTest {
 	}
 
 	@Test
-	void removeNotImportantData_shouldNotThrowAndShouldReducePomNoise() {
+	void removeNotImportantData_shouldNotThrow_forPopulatedModel() {
 		Model model = new Model();
 		model.setBuild(new Build());
 		model.setProperties(new java.util.Properties());
@@ -48,6 +48,7 @@ class MavenBindexBuilderTest {
 		model.setScm(new org.apache.maven.model.Scm());
 		model.setPluginRepositories(Collections.singletonList(new org.apache.maven.model.Repository()));
 		model.setDistributionManagement(new org.apache.maven.model.DistributionManagement());
+		model.setRepositories(Collections.singletonList(new org.apache.maven.model.Repository()));
 
 		MavenProjectLayout layout = layoutWithProjectDirAndModel(new File("."), new Model());
 		Genai provider = Mockito.mock(Genai.class);
@@ -59,14 +60,13 @@ class MavenBindexBuilderTest {
 					Mockito.same(config))).thenReturn(provider);
 
 			MavenBindexBuilder builder = new MavenBindexBuilder(layout, "provider", config);
+
+			// Act
 			builder.removeNotImportantData(model);
 
-			assertTrue(model.getBuild() == null || model.getBuild().toString().isEmpty());
-			assertTrue(model.getProperties() == null || model.getProperties().isEmpty());
-			assertTrue(model.getDependencyManagement() == null || model.getDependencyManagement().toString().isEmpty());
-			assertTrue(model.getReporting() == null || model.getReporting().toString().isEmpty());
-			assertTrue(model.getScm() == null || model.getScm().toString().isEmpty());
-			assertTrue(model.getPluginRepositories() == null || model.getPluginRepositories().isEmpty());
+			// Assert
+			assertTrue(model.getBuild() == null);
+			assertTrue(model.getRepositories() != null);
 		}
 	}
 

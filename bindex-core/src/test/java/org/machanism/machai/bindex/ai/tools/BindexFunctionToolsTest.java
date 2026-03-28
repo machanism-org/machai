@@ -3,6 +3,7 @@ package org.machanism.machai.bindex.ai.tools;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -83,7 +84,7 @@ class BindexFunctionToolsTest {
 	}
 
 	@Test
-	void getBindex_returnsSerializedBindexWhenFound() throws Exception {
+	void getBindex_returnsSerializedBindexWhenFound_andAvoidsAbbreviationBranchWhenLogInfoDisabled() throws Exception {
 		// Arrange
 		BindexFunctionTools tools = new BindexFunctionTools();
 		Configurator configurator = Mockito.mock(Configurator.class);
@@ -110,7 +111,27 @@ class BindexFunctionToolsTest {
 	}
 
 	@Test
-	void getBindexSchema_returnsSchemaJson() throws Exception {
+	void getBindexRepository_returnsInjectedRepositoryAndReusesSameInstance() throws Exception {
+		// Arrange
+		BindexFunctionTools tools = new BindexFunctionTools();
+		Configurator configurator = Mockito.mock(Configurator.class);
+		tools.setConfigurator(configurator);
+
+		BindexRepository repository = Mockito.mock(BindexRepository.class);
+		injectField(tools, "bindexRepository", repository);
+
+		// Act
+		Object first = invokeGetBindexRepository(tools);
+		Object second = invokeGetBindexRepository(tools);
+
+		// Assert
+		assertNotNull(first);
+		assertEquals(repository, first);
+		assertEquals(first, second);
+	}
+
+	@Test
+	void getBindexSchema_returnsSchemaJson_andAvoidsDebugBranchByDefault() throws Exception {
 		// Arrange
 		BindexFunctionTools tools = new BindexFunctionTools();
 
@@ -119,7 +140,7 @@ class BindexFunctionToolsTest {
 
 		// Assert
 		assertNotNull(schema);
-		assertEquals(true, schema.trim().startsWith("{"));
+		assertTrue(schema.trim().startsWith("{"));
 	}
 
 	@Test
@@ -140,6 +161,12 @@ class BindexFunctionToolsTest {
 		Method method = BindexFunctionTools.class.getDeclaredMethod("getBindex", Object[].class);
 		method.setAccessible(true);
 		return (String) method.invoke(tools, new Object[] { params });
+	}
+
+	private static Object invokeGetBindexRepository(BindexFunctionTools tools) throws Exception {
+		Method method = BindexFunctionTools.class.getDeclaredMethod("getBindexRepository");
+		method.setAccessible(true);
+		return method.invoke(tools);
 	}
 
 	private static String invokeGetBindexWithInjectedRepository(

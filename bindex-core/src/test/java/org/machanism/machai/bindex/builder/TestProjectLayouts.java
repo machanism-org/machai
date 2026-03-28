@@ -26,10 +26,10 @@ final class TestProjectLayouts {
 				return Collections.emptyList();
 			}
 
-		@Override
-		public List<String> getDocuments() {
-			return Collections.emptyList();
-		}
+			@Override
+			public List<String> getDocuments() {
+				return Collections.emptyList();
+			}
 
 			@Override
 			public List<String> getTests() {
