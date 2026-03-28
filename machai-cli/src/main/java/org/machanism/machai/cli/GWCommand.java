@@ -159,7 +159,7 @@ public class GWCommand {
 			@ShellOption(value = { "-t",
 					"--threads" }, help = "Sets the number of threads for concurrent processing.", defaultValue = "1") int threads,
 			@ShellOption(value = { "-m",
-					Ghostwriter.GW_MODEL_PROP_NAME }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
+					Ghostwriter.MODEL_PROP_NAME }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
 			@ShellOption(value = { "-i",
 					"--instructions" }, help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
 			@ShellOption(value = { "-g",
@@ -268,7 +268,7 @@ public class GWCommand {
 	}
 
 	private String resolveModel(String model) {
-		String genaiValue = ConfigCommand.config.get(Ghostwriter.GW_MODEL_PROP_NAME, null);
+		String genaiValue = ConfigCommand.config.get(Ghostwriter.MODEL_PROP_NAME, null);
 		return model != null ? model : genaiValue;
 	}
 
@@ -290,7 +290,7 @@ public class GWCommand {
 	}
 
 	private String resolveGuidance(String guidance) {
-		String defaultGuidance = ConfigCommand.config.get(Ghostwriter.GW_GUIDANCE_PROP_NAME, null);
+		String defaultGuidance = ConfigCommand.config.get(Ghostwriter.GUIDANCE_PROP_NAME, null);
 		if (guidance == null) {
 			return defaultGuidance;
 		}

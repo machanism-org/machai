@@ -29,7 +29,7 @@ class ActCommandTest {
 		LineReader reader = Mockito.mock(LineReader.class);
 		ActCommand cmd = new ActCommand(reader);
 		ConfigCommand.config.set(ProjectLayout.PROJECT_DIR_PROP_NAME, new File(".").getAbsolutePath());
-		ConfigCommand.config.set(Ghostwriter.GW_MODEL_PROP_NAME, "TestProvider");
+		ConfigCommand.config.set(Ghostwriter.MODEL_PROP_NAME, "TestProvider");
 
 		// Act + Assert
 		assertThrows(IllegalArgumentException.class, () -> cmd.act(new String[] { "commit" }));

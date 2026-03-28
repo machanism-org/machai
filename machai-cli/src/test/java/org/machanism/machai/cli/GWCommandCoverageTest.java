@@ -53,7 +53,7 @@ class GWCommandCoverageTest {
 	@Test
 	void resolveGuidance_whenNull_returnsConfigValue() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(org.machanism.machai.gw.processor.Ghostwriter.GW_GUIDANCE_PROP_NAME,
+		ConfigCommand.config.set(org.machanism.machai.gw.processor.Ghostwriter.GUIDANCE_PROP_NAME,
 				"guidance-from-config");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);

@@ -78,7 +78,7 @@ public class ActCommand {
 		} catch (FileNotFoundException e) {
 			// configuration file not found.
 		}
-		String resolvedModel = ConfigCommand.config.get(Ghostwriter.GW_MODEL_PROP_NAME);
+		String resolvedModel = ConfigCommand.config.get(Ghostwriter.MODEL_PROP_NAME);
 		ActProcessor processor = new ActProcessor(projectDir, configurator, resolvedModel) {
 			@Override
 			protected String input() {
@@ -91,7 +91,7 @@ public class ActCommand {
 		Boolean logInputs = ConfigCommand.config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, false);
 		processor.setLogInputs(logInputs);
 
-		String scanDir = processor.getConfigurator().get(Ghostwriter.GW_SCAN_DIR_PROP_NAME, null);
+		String scanDir = processor.getConfigurator().get(Ghostwriter.SCAN_DIR_PROP_NAME, null);
 		if (scanDir == null) {
 			scanDir = (projectDir != null ? projectDir : SystemUtils.getUserDir()).getAbsolutePath();
 		}

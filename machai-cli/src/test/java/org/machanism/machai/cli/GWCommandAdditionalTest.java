@@ -19,7 +19,7 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveModel_shouldReturnConfiguredValue_whenOptionIsNull() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_MODEL_PROP_NAME, "Configured:Model");
+		ConfigCommand.config.set(Ghostwriter.MODEL_PROP_NAME, "Configured:Model");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveModel", String.class);
@@ -35,7 +35,7 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveModel_shouldPreferOptionValue_whenProvided() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_MODEL_PROP_NAME, "Configured:Model");
+		ConfigCommand.config.set(Ghostwriter.MODEL_PROP_NAME, "Configured:Model");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveModel", String.class);
@@ -132,7 +132,7 @@ class GWCommandAdditionalTest {
 	@Test
 	void resolveGuidance_shouldReturnConfiguredValue_whenOptionIsNull() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GW_GUIDANCE_PROP_NAME, "cfg-guidance");
+		ConfigCommand.config.set(Ghostwriter.GUIDANCE_PROP_NAME, "cfg-guidance");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 		Method m = GWCommand.class.getDeclaredMethod("resolveGuidance", String.class);
