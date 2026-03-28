@@ -24,9 +24,11 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin)
 
-Bindex Maven Plugin is a Maven plugin that generates and registers **Bindex metadata** for Maven projects in the Machanism/Machai ecosystem.
+Bindex Maven Plugin is a Maven plugin for generating, updating, and optionally publishing **Bindex metadata** for Maven modules.
 
-It runs Bindex against your project directory to produce a structured index for library discovery, integration, and assembly workflows. The plugin supports first-time index creation and incremental refreshes, and it can publish the resulting metadata to an external registry endpoint.
+It integrates the Machai/Bindex indexing workflow into your build by scanning the current project directory (using a configured GenAI provider/model) and producing a structured index that can be used for capability-based discovery, semantic search, integration, and assembly workflows across the Machanism ecosystem.
+
+When desired, the plugin can also publish the generated metadata to an external registry endpoint so other tools and services can discover the project by its capabilities rather than only by Maven coordinates.
 
 ## Installation Instructions
 
@@ -35,7 +37,7 @@ It runs Bindex against your project directory to produce a structured index for 
 - Apache Maven
 - Java Development Kit (JDK)
   - Build/compile level (from `pom.xml`): `maven.compiler.release=8` (Java 8 bytecode)
-  - Practical runtime requirement: many environments run Maven on Java 11+
+  - Practical runtime requirement: Maven itself runs on a Java runtime (commonly Java 11+)
 
 ### Checkout and Build
 
@@ -52,7 +54,7 @@ This project is a Maven plugin (`packaging=maven-plugin`) with goals to create/u
 ### Goals
 
 - `create`: generate a new Bindex index for the current module
-- `update`: refresh an existing Bindex index (incremental/update mode)
+- `update`: refresh an existing Bindex index (update mode)
 - `register`: optionally update and then publish Bindex metadata to a registry URL
 - `clean`: remove temporary artifacts produced during indexing
 
@@ -88,3 +90,4 @@ mvn bindex:register -Dbindex.model=OpenAI:gpt-5 -Dbindex.register.url=http://loc
 - Documentation: https://machai.machanism.org/bindex-maven-plugin/index.html
 - Source (monorepo): https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/bindex-maven-plugin
+- Related component (Bindex Core): https://machai.machanism.org/bindex-core/

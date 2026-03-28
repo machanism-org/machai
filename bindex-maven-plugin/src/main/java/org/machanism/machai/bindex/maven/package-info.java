@@ -28,30 +28,29 @@
  */
 
 /**
- * Maven plugin Mojos that integrate Machai/Bindex workflows into a Maven build.
+ * Maven plugin goals (Mojos) that integrate Machai/Bindex workflows into a Maven build.
  *
  * <p>
- * The classes in this package provide goals for creating or updating a Bindex index
- * for the current project, registering the project's metadata in an external
- * registry, and cleaning up temporary artifacts produced during execution.
+ * This package contains the concrete plugin goals exposed to Maven ({@code create}, {@code update},
+ * {@code register}, and {@code clean}) and their shared base class.
  * </p>
  *
  * <h2>Goals</h2>
- *
  * <ul>
- * <li>{@link org.machanism.machai.bindex.maven.Create} - generates a new Bindex index and related resources.</li>
+ * <li>{@link org.machanism.machai.bindex.maven.Create} - creates a new Bindex index for the current project.</li>
  * <li>{@link org.machanism.machai.bindex.maven.Update} - refreshes an existing index.</li>
  * <li>{@link org.machanism.machai.bindex.maven.Register} - scans the project and publishes metadata to a registry.</li>
  * <li>{@link org.machanism.machai.bindex.maven.Clean} - removes temporary artifacts (for example the inputs log file).</li>
  * </ul>
  *
+ * <h2>Common configuration</h2>
  * <p>
- * Shared configuration and Maven integration helpers are implemented by
- * {@link org.machanism.machai.bindex.maven.AbstractBindexMojo}. Common properties include:
+ * Most goals inherit common parameters from {@link org.machanism.machai.bindex.maven.AbstractBindexMojo},
+ * including the required AI model selection and optional credential resolution via Maven {@code settings.xml}.
  * </p>
  *
  * <ul>
- * <li>{@code bindex.model} (required) - AI provider/model identifier used by Bindex (for example {@code OpenAI:gpt-5}).</li>
+ * <li>{@code bindex.model} (required) - AI provider/model identifier (for example {@code OpenAI:gpt-5}).</li>
  * <li>{@code genai.serverId} (optional) - {@code settings.xml} server id used to resolve GenAI credentials.</li>
  * <li>{@code bindex.register.url} (optional) - registry endpoint URL used by the {@code register} goal.</li>
  * </ul>
