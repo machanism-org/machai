@@ -86,42 +86,22 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li><strong>Dependencies</strong>: links to other Bindexes, enabling transitive expansion.</li>
 </ul>
 
-<h2>API packages</h2>
+<h2>Package overview</h2>
 <p>
-  The public API is organized around two primary areas: the <em>orchestration layer</em> for working with Bindexes (create,
-  register, search, assemble), and the <em>builder layer</em> that generates {@code Bindex} instances from different project
-  layouts.
-</p>
-
-<h3><code>org.machanism.machai.bindex</code></h3>
-<p>
-  Generates, persists, registers, and retrieves MachAI Bindex documents. The package supports both local workflows
-  (create/update <code>bindex.json</code> for a project) and registry workflows (store and search Bindexes in MongoDB).
+  The public API is organized around two primary areas:
 </p>
 <ul>
-  <li><strong>Creation/update</strong> of <code>bindex.json</code> from project context via AI-assisted builders.</li>
-  <li><strong>Registration and lookup</strong> of Bindexes in a MongoDB-backed store.</li>
-  <li><strong>Semantic retrieval</strong> with dependency expansion.</li>
-  <li><strong>Assembly</strong> of retrieved Bindex content into prompt inputs for downstream LLM-assisted tasks.</li>
-</ul>
-
-<h3><code>org.machanism.machai.bindex.builder</code></h3>
-<p>
-  Builders that generate <code>org.machanism.machai.schema.Bindex</code> documents by assembling a project-specific prompt and
-  delegating generation to a configured <code>org.machanism.machai.ai.manager.Genai</code> provider.
-</p>
-<p>
-  The central type is <code>org.machanism.machai.bindex.builder.BindexBuilder</code>, which can optionally incorporate an origin
-  (previous) Bindex for incremental updates, collect project context, submit a generation request, and parse the provider
-  response back into a Bindex instance.
-</p>
-
-<h4>Implementations</h4>
-<ul>
-  <li><code>MavenBindexBuilder</code>: reads <code>pom.xml</code> and includes files from Maven source/resource directories.</li>
-  <li><code>JScriptBindexBuilder</code>: reads <code>package.json</code> and includes <code>.js</code>, <code>.ts</code>, and <code>.vue</code> sources under <code>src</code>.</li>
-  <li><code>PythonBindexBuilder</code>: reads <code>pyproject.toml</code> and includes files under a source directory inferred from
-      <code>project.name</code>.</li>
+  <li>
+    <strong><code>org.machanism.machai.bindex</code></strong> &mdash; generates, persists, registers, and retrieves Bindex documents.
+    Supports local workflows (create/update a project&apos;s <code>bindex.json</code>) and registry workflows (store and search
+    Bindexes in MongoDB), including semantic retrieval with dependency expansion and assembling prompt-ready inputs
+    for downstream LLM-assisted tasks.
+  </li>
+  <li>
+    <strong><code>org.machanism.machai.bindex.builder</code></strong> &mdash; builders that generate
+    <code>org.machanism.machai.schema.Bindex</code> by assembling project context and delegating generation to a configured
+    <code>org.machanism.machai.ai.manager.Genai</code> provider.
+  </li>
 </ul>
 
 <h2>Typical workflow</h2>
@@ -140,6 +120,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li><code>org.machanism.machai.bindex.BindexRepository</code>: persistence primitives for registry operations.</li>
   <li><code>org.machanism.machai.bindex.Picker</code>: performs semantic search and expands results via dependencies.</li>
   <li><code>org.machanism.machai.bindex.ApplicationAssembly</code>: assembles prompt-ready inputs from selected Bindexes.</li>
+  <li><code>org.machanism.machai.bindex.builder.BindexBuilder</code>: base class for project-layout-specific builders.</li>
 </ul>
 
 <h2>Class diagram</h2>

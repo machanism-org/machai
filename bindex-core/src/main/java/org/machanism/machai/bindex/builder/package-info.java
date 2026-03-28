@@ -26,8 +26,8 @@
  */
 
 /**
- * Builders that generate {@link org.machanism.machai.schema.Bindex} documents by assembling a project-specific
- * prompt and delegating generation to a configured {@link org.machanism.machai.ai.manager.Genai} provider.
+ * Builders that generate {@link org.machanism.machai.schema.Bindex} documents by assembling a project-specific prompt
+ * and delegating generation to a configured {@link org.machanism.machai.ai.manager.Genai} provider.
  *
  * <p>
  * The central type is {@link org.machanism.machai.bindex.builder.BindexBuilder}, which:
