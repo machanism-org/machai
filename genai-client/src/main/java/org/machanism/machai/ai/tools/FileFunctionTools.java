@@ -27,22 +27,29 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
  * Installs file-system tools into a {@link Genai}.
  *
  * <p>
- * Tools in this installer are intended for host-integrated use where the host controls the base working
- * directory. All paths provided to these tools are interpreted relative to the working directory supplied by the
+ * Tools in this installer are intended for host-integrated use where the host
+ * controls the base working directory. All paths provided to these tools are
+ * interpreted relative to the working directory supplied by the
  * provider/runtime.
  * </p>
  *
  * <h2>Installed tools</h2>
  * <ul>
  * <li>{@code read_file_from_file_system} – reads a file as text</li>
- * <li>{@code write_file_to_file_system} – writes a file (creating parent directories as needed)</li>
- * <li>{@code list_files_in_directory} – lists immediate children of a directory</li>
- * <li>{@code get_recursive_file_list} – recursively lists all files under a directory</li>
+ * <li>{@code write_file_to_file_system} – writes a file (creating parent
+ * directories as needed)</li>
+ * <li>{@code list_files_in_directory} – lists immediate children of a
+ * directory</li>
+ * <li>{@code get_recursive_file_list} – recursively lists all files under a
+ * directory</li>
  * </ul>
  *
  * @author Viktor Tovstyi
  */
 public class FileFunctionTools implements FunctionTools {
+
+	/** Logger for file tool operations and diagnostics. */
+	private static final Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
 
 	/**
 	 * Maximum width used when abbreviating large log values.
@@ -56,15 +63,6 @@ public class FileFunctionTools implements FunctionTools {
 
 	/** JSON field name for the optional character-set parameter. */
 	private static final String CHARSET_NAME_FIELD = "charsetName";
-
-	/** JSON field name for the optional start position parameter. */
-	private static final String START_POSITION_FIELD = "start_position";
-
-	/** JSON field name for the optional end position parameter. */
-	private static final String END_POSITION_FIELD = "end_position";
-
-	/** Logger for file tool operations and diagnostics. */
-	private static final Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
 
 	/**
 	 * Registers file read/write/list tools into the provided provider.
@@ -81,12 +79,6 @@ public class FileFunctionTools implements FunctionTools {
 				this::writeFile,
 				"file_path:string:required:The path to the file you want to write to or create.",
 				"text:string:required:The content to be written into the file or used as replacement.",
-				START_POSITION_FIELD
-						+ ":integer:optional:The zero-based index in the file where the replacement or insertion should begin. If omitted, defaults to 0 (start of file). "
-						+ "If start_position equals end_position, the text will be inserted at that position.",
-				END_POSITION_FIELD
-						+ ":integer:optional:The zero-based index in the file where the replacement should end (exclusive). If omitted, defaults to the end of the file. "
-						+ "If start_position equals end_position, the text will be inserted at that position.",
 				"charsetName:string:optional:The name of the requested charset. Default: " + DEFAULT_CHARSET);
 		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
 				this::listFiles, "dir_path:string:optional:The path to the directory to list contents of.");
@@ -107,7 +99,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a newline-separated list of project-relative file paths, or a message if no files are found
+	 * @return a newline-separated list of project-relative file paths, or a message
+	 *         if no files are found
 	 */
 	private Object getRecursiveFiles(Object[] params) {
 		String result;
@@ -157,8 +150,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * </ol>
 	 *
 	 * @param params tool arguments
-	 * @return a comma-separated list of project-relative paths, or a message if the directory does not exist or is
-	 *         empty
+	 * @return a comma-separated list of project-relative paths, or a message if the
+	 *         directory does not exist or is empty
 	 */
 	private Object listFiles(Object[] params) {
 		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
@@ -194,8 +187,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * Expected parameters:
 	 * </p>
 	 * <ol>
-	 * <li>{@link JsonNode} containing {@code file_path}, {@code text}, {@code start_position}, and
-	 * {@code end_position}</li>
+	 * <li>{@link JsonNode} containing {@code file_path}, {@code text},
+	 * {@code start_position}, and {@code end_position}</li>
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 *
@@ -211,15 +204,16 @@ public class FileFunctionTools implements FunctionTools {
 		File workingDir = (File) params[1];
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Write file: [{}, {}]", toStringFields(props, "file_path", START_POSITION_FIELD,
-					END_POSITION_FIELD, CHARSET_NAME_FIELD, "text"), workingDir);
+			logger.info("Write file: [{}, {}]", toStringFields(props, "file_path", CHARSET_NAME_FIELD, "text"),
+					workingDir);
 		}
 		logger.debug("Write file: [{}, {}]", props, workingDir);
 
 		File file = new File(workingDir, filePath);
 		try {
 			if (file.exists()) {
-				return updateExistingFile(props, file, text, charsetName, filePath);
+				writeFileContent(file, text, charsetName);
+				return "File updated successfully: " + filePath;
 			}
 
 			return writeNewFile(file, text, charsetName, filePath);
@@ -235,8 +229,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * Builds a compact string containing only the requested JSON fields.
 	 *
 	 * <p>
-	 * This is primarily used for logging to avoid dumping potentially large content (for example, a full file text
-	 * payload).
+	 * This is primarily used for logging to avoid dumping potentially large content
+	 * (for example, a full file text payload).
 	 * </p>
 	 *
 	 * @param props  JSON object containing tool parameters
@@ -264,33 +258,6 @@ public class FileFunctionTools implements FunctionTools {
 		return stringBuilder.toString();
 	}
 
-	// Sonar(java:S3776): extracted helpers to reduce cognitive complexity.
-	private Object updateExistingFile(JsonNode props, File file, String text, String charsetName, String filePath)
-			throws IOException {
-		StringBuilder fileContent;
-		try (InputStream input = new FileInputStream(file)) {
-			String content = IOUtils.toString(input, charsetName);
-			fileContent = new StringBuilder(content);
-
-			int startPosition = props.has(START_POSITION_FIELD) ? props.get(START_POSITION_FIELD).asInt() : 0;
-			int endPosition = props.has(END_POSITION_FIELD) ? props.get(END_POSITION_FIELD).asInt()
-					: fileContent.length();
-
-			if (startPosition < 0 || startPosition > endPosition) {
-				return "Invalid start or end position for text replacement.";
-			}
-
-			if (startPosition == endPosition) {
-				fileContent.insert(startPosition, text);
-			} else {
-				fileContent.replace(startPosition, endPosition, text);
-			}
-
-			writeFileContent(file, fileContent.toString(), charsetName);
-			return "File updated successfully: " + filePath;
-		}
-	}
-
 	/**
 	 * Writes {@code content} to {@code file} using {@code charsetName}.
 	 *
@@ -306,8 +273,8 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Creates the file (and parent directories as needed) and writes {@code text} using the requested character
-	 * set.
+	 * Creates the file (and parent directories as needed) and writes {@code text}
+	 * using the requested character set.
 	 *
 	 * @param file        file to create
 	 * @param text        content
@@ -390,14 +357,15 @@ public class FileFunctionTools implements FunctionTools {
 	 * Computes a project-relative path string.
 	 *
 	 * <p>
-	 * The returned path always uses forward slashes ({@code /}) for consistency across platforms.
+	 * The returned path always uses forward slashes ({@code /}) for consistency
+	 * across platforms.
 	 * </p>
 	 *
 	 * @param dir          base directory used to relativize the {@code file}
 	 * @param file         target file or directory
 	 * @param addSingleDot whether to prefix relative paths with {@code ./}
-	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or {@code null} if {@code file} is not a
-	 *         descendant of {@code dir}
+	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or
+	 *         {@code null} if {@code file} is not a descendant of {@code dir}
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		if (dir == null || file == null) {
