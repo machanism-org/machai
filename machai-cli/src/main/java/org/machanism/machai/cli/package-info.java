@@ -1,16 +1,18 @@
 /**
- * Command-line interface (CLI) commands for the Machai tool.
+ * Command-line interface (CLI) components for running Machai workflows.
  *
  * <p>
- * This package provides the Spring Boot / Spring Shell entry point
- * ({@link org.machanism.machai.cli.MachaiCLI}) and a set of interactive shell commands that
- * orchestrate Machai workflows, including Ghostwriter guidance processing and bindex operations.
+ * This package contains the Spring Boot entry point ({@link org.machanism.machai.cli.MachaiCLI})
+ * and Spring Shell command components that expose Machai functionality via an interactive shell.
+ * Commands typically read defaults (for example, project directory, GenAI provider/model, and
+ * Ghostwriter prompts) from the shared {@code machai.properties} configuration managed by
+ * {@link org.machanism.machai.cli.ConfigCommand}.
  * </p>
  *
- * <h2>Commands</h2>
+ * <h2>Available commands</h2>
  * <ul>
  *   <li>
- *     Ghostwriter guidance processing and scanning:
+ *     Ghostwriter guidance scanning and processing:
  *     {@link org.machanism.machai.cli.GWCommand}
  *   </li>
  *   <li>
@@ -30,11 +32,6 @@
  *     {@link org.machanism.machai.cli.CleanCommand}
  *   </li>
  * </ul>
- *
- * <p>
- * Most commands resolve defaults (for example, the project directory and GenAI model) from the
- * shared configuration stored in {@code machai.properties}.
- * </p>
  *
  * <h2>Typical usage</h2>
  * <pre>
