@@ -267,14 +267,13 @@ public class OpenAIProvider implements Genai {
 	 */
 	private String parseResponse(Response response) {
 		Response current = response;
-		List<ResponseInputItem> currentInputs = new ArrayList<>(this.inputs);
 		while (current != null) {
 			boolean anyToolCalls = false;
 			String text = null;
 			for (ResponseOutputItem item : current.output()) {
 				if (item.isFunctionCall()) {
 					anyToolCalls = true;
-					handleFunctionCall(item.asFunctionCall(), currentInputs);
+					handleFunctionCall(item.asFunctionCall());
 				}
 				String reasoning = extractReasoningText(item);
 				if (StringUtils.isNotBlank(reasoning)) {
@@ -290,7 +289,7 @@ public class OpenAIProvider implements Genai {
 				return text;
 			}
 
-			ResponseCreateParams params = createResponseBuilder(currentInputs);
+			ResponseCreateParams params = createResponseBuilder(this.inputs);
 
 			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
 			current = getClient().responses().create(params);
@@ -300,13 +299,13 @@ public class OpenAIProvider implements Genai {
 		return null;
 	}
 
-	private void handleFunctionCall(ResponseFunctionToolCall functionCall, List<ResponseInputItem> currentInputs) {
-		currentInputs.add(ResponseInputItem.ofFunctionCall(functionCall));
+	private void handleFunctionCall(ResponseFunctionToolCall functionCall) {
+		inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
 		Object value = callFunction(functionCall);
 		Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
 
-		currentInputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
+		inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
 				.callId(functionCall.callId()).outputAsJson(callFunction).build()));
 	}
 
