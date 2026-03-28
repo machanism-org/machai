@@ -40,21 +40,21 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Architecture</h2>
 <p>
-  The library exposes a provider-agnostic contract (<code>Genai</code>) and a resolver/aggregator
-  (<code>GenaiProviderManager</code>) so application code can execute LLM/GenAI requests without binding to any particular
-  vendor SDK.
+  GenAI Client provides a provider-agnostic contract (<code>org.machanism.machai.ai.manager.Genai</code>) and a
+  resolver/aggregator (<code>org.machanism.machai.ai.manager.GenaiProviderManager</code>) so application code can execute
+  LLM/GenAI requests without binding to a particular vendor SDK.
 </p>
 
 <p>
   Providers are typically selected with a model identifier formatted as <code>Provider:Model</code> (for example,
-  <code>OpenAI:gpt-4o-mini</code>). When the provider prefix is omitted, the provider manager falls back to the default
-  provider.
+  <code>OpenAI:gpt-4o-mini</code>). If the provider prefix is omitted, the provider manager can fall back to a configured
+  default provider.
 </p>
 
 <p>
-  For providers that support tool/function calling, host-side “function tools” can be discovered and applied (typically
-  via <code>ServiceLoader</code>) to expose controlled capabilities such as reading/writing files, executing a limited set
-  of commands, or fetching web content.
+  Providers that support tool/function calling can be augmented with host-side function tools that expose controlled
+  capabilities (file system access, command execution, and web/REST calls). Tool installers are commonly discovered
+  and applied via <code>java.util.ServiceLoader</code> and <code>org.machanism.machai.ai.tools.FunctionToolsLoader</code>.
 </p>
 
 <p>
@@ -69,11 +69,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <ul>
   <li>
-    <strong><code>org.machanism.machai.ai</code></strong> – root client API.
+    <strong><code>org.machanism.machai.ai</code></strong> – public, provider-agnostic client API.
     <ul>
       <li>
-        Provider-agnostic entry point that groups public abstractions and runtime components used to configure and
-        execute GenAI requests.
+        Defines the top-level entry points and groups the main abstractions and runtime components used to configure
+        and execute GenAI requests.
       </li>
     </ul>
   </li>
@@ -82,14 +82,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.manager</code></strong> – provider contract, resolution, and usage aggregation.
     <ul>
       <li>
-        Defines the provider contract (<code>Genai</code>), the resolver/factory and usage aggregator
-        (<code>GenaiProviderManager</code>), a delegating base implementation (<code>GenaiAdapter</code>), and per-invocation
-        usage metrics (<code>Usage</code>).
+        Defines the provider contract (<code>Genai</code>), the resolver/aggregator (<code>GenaiProviderManager</code>), a
+        delegating base implementation (<code>GenaiAdapter</code>), and per-invocation usage metrics (<code>Usage</code>).
       </li>
       <li>
-        Providers can be referenced either by a short provider name (mapped to
-        <code>org.machanism.machai.ai.provider.&lt;provider&gt;.&lt;Provider&gt;Provider</code>) or by fully-qualified
-        class name.
+        Supports resolving providers via a short provider name or by fully-qualified class name.
       </li>
     </ul>
   </li>
@@ -98,8 +95,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.provider.openai</code></strong> – OpenAI-backed implementation.
     <ul>
       <li>
-        Builds OpenAI requests from prompts, optional system instructions, file inputs, and registered tools, then maps
-        the result into the common provider contract and usage metrics.
+        Builds OpenAI API requests from prompts, optional system instructions, file inputs, and registered tools, then
+        maps results into the common provider contract and usage metrics.
       </li>
     </ul>
   </li>
@@ -108,8 +105,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.provider.gemini</code></strong> – Google Gemini integration.
     <ul>
       <li>
-        Adapts the common provider contract to Gemini models. Depending on the current implementation, some operations
-        may be unimplemented.
+        Adapts the common provider contract to Gemini models.
       </li>
     </ul>
   </li>
@@ -118,8 +114,17 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.provider.codemie</code></strong> – EPAM CodeMie integration.
     <ul>
       <li>
-        Authenticates via an OIDC token endpoint to obtain an access token, configures OpenAI-compatible settings, and
-        routes requests to an underlying provider based on the configured model prefix.
+        Authenticates via an OpenID Connect (OIDC) token endpoint to obtain an access token, configures
+        OpenAI-compatible settings, and delegates calls to a downstream provider based on the configured model prefix.
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <strong><code>org.machanism.machai.ai.provider.claude</code></strong> – Anthropic Claude integration.
+    <ul>
+      <li>
+        Adapts the common provider contract to Claude models.
       </li>
     </ul>
   </li>
@@ -128,8 +133,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.provider.none</code></strong> – offline/no-op provider.
     <ul>
       <li>
-        Never calls an external model; collects prompts/instructions and can optionally persist them to local log files
-        for auditing.
+        Never calls an external model; accumulates prompts/instructions and can optionally persist them to local log
+        files for auditing.
       </li>
       <li>
         Unsupported capabilities (for example embeddings) throw <code>UnsupportedOperationException</code>.
@@ -145,7 +150,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
         tool/function calling.
       </li>
       <li>
-        Tool installers are typically discovered via <code>ServiceLoader</code> and applied to a provider instance via
+        Tools are typically discovered via <code>ServiceLoader</code> and applied via
         <code>FunctionToolsLoader</code>.
       </li>
     </ul>
@@ -156,8 +161,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <ol>
   <li>Resolve a provider for a model identifier (for example <code>OpenAI:gpt-4o-mini</code>).</li>
   <li>Optionally apply host-side tools (file/web/command helpers) when tool calling is enabled.</li>
-  <li>Supply system instructions and one or more prompts.</li>
-  <li>Execute the request and record aggregated token usage.</li>
+  <li>Supply system instructions and one or more prompts (and optionally files/URLs).</li>
+  <li>Execute the request and record token usage.</li>
 </ol>
 
 <pre>{@code
@@ -183,16 +188,16 @@ GenaiProviderManager.logUsage();
 <h2>Operational notes</h2>
 <ul>
   <li>
-    Provider instances maintain mutable, per-request state. Prefer one provider instance per request (or synchronize
-    externally).
+    Provider instances are mutable and typically hold per-request state (instructions, prompts/messages, tool
+    registrations). Prefer one provider instance per request.
   </li>
   <li>
     Function tools execute inside the host process. Apply them selectively and configure allow/deny checks (for
     example, allowed commands and allowed paths) according to your deployment environment.
   </li>
   <li>
-    Usage can be aggregated across invocations via <code>GenaiProviderManager</code> to support logging and basic cost
-    analysis.
+    Token usage can be aggregated across invocations via <code>GenaiProviderManager</code> to support logging and basic
+    cost analysis.
   </li>
 </ul>
 

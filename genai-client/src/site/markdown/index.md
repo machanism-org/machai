@@ -148,7 +148,7 @@ Configuration values are read from the `Configurator` passed to `init(Configurat
 - `OPENAI_API_KEY` (required): API key used to authenticate with the OpenAI API.
 - `OPENAI_BASE_URL` (optional): base URL for OpenAI-compatible endpoints. If unset, the SDK default base URL is used.
 - `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, the SDK default timeouts are used. Defaults to `600` seconds.
-- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to `300000`.
+- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to `18000`.
 - `MAX_TOOL_CALLS` (optional): maximum number of tool calls allowed in a single response. Defaults to `200`.
 
 **Capabilities**
