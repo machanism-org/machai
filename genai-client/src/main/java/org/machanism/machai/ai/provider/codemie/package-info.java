@@ -30,21 +30,18 @@
  * EPAM CodeMie provider integration.
  *
  * <p>
- * This package contains {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a
- * {@link org.machanism.machai.ai.manager.Genai} implementation that authenticates with EPAM CodeMie using an OpenID
- * Connect (OIDC) token endpoint, obtains an OAuth 2.0 access token, and configures OpenAI-compatible client settings to
- * call the CodeMie Code Assistant API.
+ * Provides {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a {@link org.machanism.machai.ai.manager.Genai}
+ * implementation that authenticates with the EPAM CodeMie OpenID Connect (OIDC) token endpoint to retrieve an OAuth 2.0
+ * access token and then configures an OpenAI-compatible client to call the CodeMie Code Assistant API.
  * </p>
  *
- * <h2>Responsibilities</h2>
- * <ul>
- * <li>Acquire an OAuth 2.0 access token from an OIDC token endpoint (password grant or client credentials).</li>
- * <li>Set OpenAI-compatible configuration keys for downstream providers:</li>
- * </ul>
- * <ul>
- * <li>{@code OPENAI_BASE_URL} – CodeMie API base URL</li>
- * <li>{@code OPENAI_API_KEY} – OAuth 2.0 access token</li>
- * </ul>
+ * <h2>How it works</h2>
+ * <ol>
+ * <li>Obtain an OAuth 2.0 access token from the configured (or default) OIDC token endpoint.</li>
+ * <li>Set {@code OPENAI_BASE_URL} to the CodeMie API base URL.</li>
+ * <li>Set {@code OPENAI_API_KEY} to the retrieved access token.</li>
+ * <li>Delegate requests to a downstream provider based on the configured {@code chatModel} prefix.</li>
+ * </ol>
  *
  * <h2>Authentication modes</h2>
  * <p>
@@ -55,22 +52,19 @@
  * <li><b>Client credentials</b> otherwise (service-to-service).</li>
  * </ul>
  *
- * <h2>Model routing</h2>
- * <p>
- * After authentication, requests are delegated to a provider based on the configured {@code chatModel} prefix:
- * </p>
+ * <h2>Provider delegation</h2>
  * <ul>
- * <li>{@code gpt-*} (or blank/unspecified) – {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}</li>
- * <li>{@code gemini-*} – {@link org.machanism.machai.ai.provider.gemini.GeminiProvider}</li>
- * <li>{@code claude-*} – {@link org.machanism.machai.ai.provider.claude.ClaudeProvider}</li>
+ * <li>{@code gpt-*} (or blank/unspecified)  {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}</li>
+ * <li>{@code gemini-*}  {@link org.machanism.machai.ai.provider.gemini.GeminiProvider}</li>
+ * <li>{@code claude-*}  {@link org.machanism.machai.ai.provider.claude.ClaudeProvider}</li>
  * </ul>
  *
  * <h2>Configuration</h2>
  * <ul>
- * <li>{@code GENAI_USERNAME} – user e-mail or client id.</li>
- * <li>{@code GENAI_PASSWORD} – password or client secret.</li>
- * <li>{@code chatModel} – model identifier (for example {@code gpt-4o-mini}).</li>
- * <li>{@code AUTH_URL} (optional) – token endpoint override.</li>
+ * <li>{@code GENAI_USERNAME}  user e-mail or client id.</li>
+ * <li>{@code GENAI_PASSWORD}  password or client secret.</li>
+ * <li>{@code chatModel}  model identifier (for example {@code gpt-4o-mini}).</li>
+ * <li>{@code AUTH_URL} (optional)  token endpoint override.</li>
  * </ul>
  */
 package org.machanism.machai.ai.provider.codemie;

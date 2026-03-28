@@ -4,9 +4,8 @@ package org.machanism.machai.ai.tools;
  * Exception thrown when a command fails a deny-list security check.
  *
  * <p>
- * This exception is used by {@link CommandSecurityChecker} to signal that the
- * provided command line matches a deny-list rule (keyword or regular
- * expression). Host-side command execution tools can catch this exception and
+ * This exception is used by {@link CommandSecurityChecker} to signal that the provided command line matches a
+ * deny-list rule (keyword or regular expression). Host-side command execution tools can catch this exception and
  * refuse to run the command.
  * </p>
  */

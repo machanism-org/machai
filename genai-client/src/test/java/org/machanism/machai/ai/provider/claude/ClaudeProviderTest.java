@@ -1,12 +1,12 @@
 package org.machanism.machai.ai.provider.claude;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.manager.Genai;
 
 class ClaudeProviderTest {
 
@@ -123,7 +122,7 @@ class ClaudeProviderTest {
 	@Test
 	void promptBundle_shouldThrowUnsupportedOperationException_withExpectedMessage() {
 		// Arrange
-		ClaudeProvider provider = new ClaudeProvider();
+		ClaudeProvider provider = new ClaudeProvider();		
 		ResourceBundle bundle = new ResourceBundle() {
 			@Override
 			protected Object handleGetObject(String key) {
@@ -199,26 +198,49 @@ class ClaudeProviderTest {
 	}
 
 	@Test
-	void addFile_file_shouldDeclareIOException_onInterface() throws NoSuchMethodException {
+	void allNotImplementedPublicApiMethods_shouldThrowUnsupportedOperationExceptionWithExpectedMessage() throws Exception {
 		// Arrange
+		ClaudeProvider provider = new ClaudeProvider();		
+		File file = new File("some-file.txt");
+		URL url = URI.create("file:some-file.txt").toURL();
+		ResourceBundle bundle = new ResourceBundle() {
+			@Override
+			protected Object handleGetObject(String key) {
+				return null;
+			}
 
-		// Act
-		Class<?>[] exceptions = Genai.class.getMethod("addFile", File.class).getExceptionTypes();
+			@Override
+			public java.util.Enumeration<String> getKeys() {
+				return Collections.emptyEnumeration();
+			}
+		};
 
-		// Assert
-		assertEquals(1, exceptions.length);
-		assertEquals(IOException.class, exceptions[0]);
-	}
-
-	@Test
-	void addFile_url_shouldDeclareIOException_onInterface() throws NoSuchMethodException {
-		// Arrange
-
-		// Act
-		Class<?>[] exceptions = Genai.class.getMethod("addFile", URL.class).getExceptionTypes();
-
-		// Assert
-		assertEquals(1, exceptions.length);
-		assertEquals(IOException.class, exceptions[0]);
+		// Act + Assert
+		assertAll(
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, () -> provider.init(null)).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, () -> provider.prompt("x")).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, () -> provider.addFile(file)).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, () -> provider.addFile(url)).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, provider::perform).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, provider::clear).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class,
+								() -> provider.addTool("name", "desc", args -> "ok", "p1")).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, () -> provider.instructions("ins")).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, () -> provider.promptBundle(bundle)).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, () -> provider.inputsLog(new File("inputs.log"))).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, () -> provider.setWorkingDir(new File("."))).getMessage()),
+				() -> assertEquals(NOT_IMPLEMENTED_MSG,
+						assertThrows(UnsupportedOperationException.class, provider::usage).getMessage()));
 	}
 }

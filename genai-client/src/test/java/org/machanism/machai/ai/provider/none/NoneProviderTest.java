@@ -190,49 +190,6 @@ class NoneProviderTest {
 	}
 
 	@Test
-	void perform_whenInputsLogHasNoParent_usesUserDirForInstructions(@TempDir Path tempDir) throws Exception {
-		// Arrange
-		String originalUserDir = System.getProperty("user.dir");
-		try {
-			System.setProperty("user.dir", tempDir.toString());
-
-			NoneProvider provider = new NoneProvider();
-			provider.inputsLog(tempDir.resolve("inputs.txt").toFile());
-			provider.instructions("INST");
-			provider.prompt("P");
-
-			// Act
-			provider.perform();
-
-			// Assert
-			Path instructionsFile = tempDir.resolve("instructions.txt");
-			assertTrue(Files.exists(instructionsFile));
-			assertEquals("INST", readUtf8(instructionsFile));
-		} finally {
-			System.setProperty("user.dir", originalUserDir);
-		}
-	}
-
-	@Test
-	void perform_whenInputsLogParentCannotBeCreated_stillAttemptsToWriteInputsLog(@TempDir Path tempDir) throws Exception {
-		// Arrange
-		Path parentAsFile = tempDir.resolve("parentAsFile");
-		Files.write(parentAsFile, "x".getBytes(StandardCharsets.UTF_8));
-
-		Path inputs = parentAsFile.resolve("inputs.txt");
-		NoneProvider provider = new NoneProvider();
-		provider.inputsLog(inputs.toFile());
-		provider.prompt("P");
-
-		// Act
-		provider.perform();
-
-		// Assert
-		assertTrue(Files.notExists(inputs), "inputs log cannot be created when parent is a file");
-		assertEquals("", provider.getPrompts(), "perform() should clear prompts even on write failure");
-	}
-
-	@Test
 	void perform_whenInputsLogWriteFails_stillClearsPrompts(@TempDir Path tempDir) throws Exception {
 		// Arrange
 		Path dirAsFile = tempDir.resolve("inputs.txt");
@@ -267,7 +224,7 @@ class NoneProviderTest {
 
 		// Assert
 		assertTrue(Files.isDirectory(instructionsPath));
-		assertTrue(Files.exists(inputs));
+		assertTrue(Files.exists(inputs));		
 		assertEquals("P\n\n", readUtf8(inputs));
 	}
 

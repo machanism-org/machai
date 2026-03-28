@@ -35,31 +35,27 @@ import net.htmlparser.jericho.Source;
  * This tool set provides two host-side functions:
  * </p>
  * <ul>
- * <li>{@code get_web_content} – Fetches web page content over HTTP(S) via GET
- * and optionally returns plain text or content selected via a CSS
- * selector.</li>
- * <li>{@code call_rest_api} – Executes a generic REST call using an arbitrary
- * HTTP method with optional headers and request body.</li>
+ * <li>{@code get_web_content} – Fetches web page content over HTTP(S) via GET and optionally returns plain text or
+ * content selected via a CSS selector.</li>
+ * <li>{@code call_rest_api} – Executes a generic REST call using an arbitrary HTTP method with optional headers and
+ * request body.</li>
  * </ul>
  *
  * <h2>Header variable placeholders</h2>
  * <p>
- * Header values may include placeholders in the form ${propertyName}. When a
- * {@link Configurator} is provided via {@link #setConfigurator(Configurator)},
- * those placeholders are resolved at runtime.
+ * Header values may include placeholders in the form ${propertyName}. When a {@link Configurator} is provided via
+ * {@link #setConfigurator(Configurator)}, those placeholders are resolved at runtime.
  * </p>
  *
  * <h2>Authentication</h2>
  * <p>
- * HTTP Basic authentication is supported via the URL {@code userInfo} component
- * (for example {@code https://user:password@host/path}), which is converted
- * into an {@code Authorization: Basic ...} header. You can also specify an
- * explicit {@code Authorization} header.
+ * HTTP Basic authentication is supported via the URL {@code userInfo} component (for example
+ * {@code https://user:password@host/path}), which is converted into an {@code Authorization: Basic ...} header. You
+ * can also specify an explicit {@code Authorization} header.
  * </p>
  *
  * <p>
- * Outbound network policy (allow/deny lists) is intentionally left to the host
- * application.
+ * Outbound network policy (allow/deny lists) is intentionally left to the host application.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -82,14 +78,12 @@ public class WebFunctionTools implements FunctionTools {
 	private static final Logger logger = LoggerFactory.getLogger(WebFunctionTools.class);
 
 	/**
-	 * Optional configuration source used to resolve ${...} placeholders in header
-	 * values.
+	 * Optional configuration source used to resolve ${...} placeholders in header values.
 	 */
 	private Configurator configurator;
 
 	/**
-	 * Registers web content and REST API function tools with the provided
-	 * {@link Genai}.
+	 * Registers web content and REST API function tools with the provided {@link Genai}.
 	 *
 	 * @param provider the provider to register tools with
 	 */
@@ -118,16 +112,14 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implements {@code get_web_content} by retrieving web content via an HTTP GET
-	 * request.
+	 * Implements {@code get_web_content} by retrieving web content via an HTTP GET request.
 	 *
 	 * <p>
 	 * Parameters are passed in {@code params}:
 	 * </p>
 	 * <ol>
 	 * <li>{@link JsonNode} containing the tool arguments</li>
-	 * <li>(optional) additional runtime-supplied arguments, ignored by this
-	 * tool</li>
+	 * <li>(optional) additional runtime-supplied arguments, ignored by this tool</li>
 	 * </ol>
 	 *
 	 * <p>
@@ -135,16 +127,12 @@ public class WebFunctionTools implements FunctionTools {
 	 * </p>
 	 * <ul>
 	 * <li>{@code url} (required) – target URL</li>
-	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE}
-	 * pairs</li>
-	 * <li>{@code timeout} (optional) – timeout in milliseconds (default
-	 * {@value #TIMEOUT})</li>
-	 * <li>{@code charsetName} (optional) – response decoding charset (default
-	 * {@code UTF-8})</li>
-	 * <li>{@code textOnly} (optional) – if {@code true}, strips HTML to plain
-	 * text</li>
-	 * <li>{@code selector} (optional) – extracts content matching the CSS selector
-	 * (text or HTML depending on {@code textOnly})</li>
+	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE} pairs</li>
+	 * <li>{@code timeout} (optional) – timeout in milliseconds (default {@value #TIMEOUT})</li>
+	 * <li>{@code charsetName} (optional) – response decoding charset (default {@code UTF-8})</li>
+	 * <li>{@code textOnly} (optional) – if {@code true}, strips HTML to plain text</li>
+	 * <li>{@code selector} (optional) – extracts content matching the CSS selector (text or HTML depending on
+	 * {@code textOnly})</li>
 	 * </ul>
 	 *
 	 * @param params tool arguments
@@ -170,7 +158,7 @@ public class WebFunctionTools implements FunctionTools {
 
 		try {
 			URI uri = URI.create(url);
-			String response = null;
+			String response;
 			if ("file".equals(uri.getScheme())) {
 				File workingDir = (File) params[1];
 				String path = uri.getPath();
@@ -197,8 +185,7 @@ public class WebFunctionTools implements FunctionTools {
 
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
-						StringUtils.abbreviate(response, 80).replace(Genai.LINE_SEPARATOR, " ").replace("\r",
-								""));
+						StringUtils.abbreviate(response, 80).replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""));
 			}
 			return response;
 
@@ -208,6 +195,13 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Applies a CSS selector to the response HTML if one was provided.
+	 *
+	 * @param selector CSS selector (may be blank)
+	 * @param response full response content
+	 * @return selected HTML content (joined with newlines) or the original response if {@code selector} is blank
+	 */
 	String applySelectorIfPresent(String selector, String response) {
 		if (StringUtils.isBlank(selector)) {
 			return response;
@@ -222,20 +216,26 @@ public class WebFunctionTools implements FunctionTools {
 		return selectedContent.toString().trim();
 	}
 
+	/**
+	 * Converts the response to plain text when requested.
+	 *
+	 * @param textOnly  whether to render text only
+	 * @param response  response content (typically HTML)
+	 * @return rendered text content if {@code textOnly} is {@code true}; otherwise the original response
+	 */
 	private String renderTextOnlyIfRequested(boolean textOnly, String response) {
 		if (!textOnly) {
 			return response;
 		}
-		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(Genai.LINE_SEPARATOR)
-				.toString();
+		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(Genai.LINE_SEPARATOR).toString();
 	}
 
 	/**
 	 * Creates and configures an {@link HttpURLConnection}.
 	 *
 	 * <p>
-	 * If the URI contains {@code userInfo}, it is removed from the request URI and
-	 * used to set an HTTP Basic {@code Authorization} header.
+	 * If the URI contains {@code userInfo}, it is removed from the request URI and used to set an HTTP Basic
+	 * {@code Authorization} header.
 	 * </p>
 	 *
 	 * @param uri     URI to connect to
@@ -295,8 +295,7 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implements {@code call_rest_api} by executing an HTTP request against the
-	 * provided endpoint.
+	 * Implements {@code call_rest_api} by executing an HTTP request against the provided endpoint.
 	 *
 	 * <p>
 	 * Supported JSON properties:
@@ -304,19 +303,14 @@ public class WebFunctionTools implements FunctionTools {
 	 * <ul>
 	 * <li>{@code url} (required) – endpoint URL</li>
 	 * <li>{@code method} (optional) – HTTP method (default {@code GET})</li>
-	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE}
-	 * pairs</li>
-	 * <li>{@code body} (optional) – request body (used for POST/PUT/PATCH
-	 * only)</li>
-	 * <li>{@code timeout} (optional) – timeout in milliseconds (default
-	 * {@value #TIMEOUT})</li>
-	 * <li>{@code charsetName} (optional) – request/response charset (default
-	 * {@code UTF-8})</li>
+	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE} pairs</li>
+	 * <li>{@code body} (optional) – request body (used for POST/PUT/PATCH only)</li>
+	 * <li>{@code timeout} (optional) – timeout in milliseconds (default {@value #TIMEOUT})</li>
+	 * <li>{@code charsetName} (optional) – request/response charset (default {@code UTF-8})</li>
 	 * </ul>
 	 *
 	 * @param params tool arguments
-	 * @return response content including an initial HTTP status line, or an error
-	 *         message
+	 * @return response content including an initial HTTP status line, or an error message
 	 */
 	public String callRestApi(Object[] params) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
@@ -348,6 +342,17 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Reads the response stream and returns the full response text.
+	 *
+	 * @param requestId     correlation id used for logs
+	 * @param charsetName   response decoding charset
+	 * @param connection    open connection
+	 * @param responseCode  HTTP response code
+	 * @param response      builder already containing the status line
+	 * @return response text
+	 * @throws IOException if reading the response fails
+	 */
 	private String parseResult(String requestId, String charsetName, HttpURLConnection connection, int responseCode,
 			StringBuilder response) throws IOException {
 		InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
@@ -399,8 +404,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * Applies headers to the connection.
 	 *
 	 * <p>
-	 * Each header line must be in the form {@code NAME=VALUE}. Header values may
-	 * include ${...} placeholders.
+	 * Each header line must be in the form {@code NAME=VALUE}. Header values may include ${...} placeholders.
 	 * </p>
 	 *
 	 * @param headers    newline-separated header definitions

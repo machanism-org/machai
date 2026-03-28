@@ -29,10 +29,10 @@
 /**
  * No-op (offline) {@link org.machanism.machai.ai.manager.Genai} provider.
  *
- * <p>This package provides {@link org.machanism.machai.ai.provider.none.NoneProvider}, a {@link
- * org.machanism.machai.ai.manager.Genai} implementation intended for environments where external model backends are
- * disabled, unavailable, or not permitted. Instead of contacting an LLM, it collects prompts in memory and can
- * optionally persist instructions and prompts to local files.
+ * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a no-op implementation of
+ * {@link org.machanism.machai.ai.manager.Genai} intended for environments where external model backends are disabled,
+ * unavailable, or not permitted. Instead of contacting an LLM, it accumulates prompts in memory and can optionally
+ * persist instructions and prompts to local files.
  *
  * <h2>Behavior</h2>
  * <ul>
@@ -43,10 +43,10 @@
  *       it writes the accumulated prompts to the configured log file and clears the buffer.</li>
  *   <li>When instructions are configured via
  *       {@link org.machanism.machai.ai.provider.none.NoneProvider#instructions(String)}, they are written to an
- *       {@code instructions.txt} file in the same directory as the inputs log (or to the process user directory when the
- *       log file has no parent directory).</li>
- *   <li>Unsupported capabilities such as
- *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String, long)} throw
+ *       file named {@code instructions.txt} in the same directory as the inputs log (or to the process user directory
+ *       when the log file has no parent directory).</li>
+ *   <li>Unsupported capabilities (for example,
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String, long)}) throw
  *       {@link java.lang.UnsupportedOperationException}.</li>
  * </ul>
  *

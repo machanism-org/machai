@@ -119,7 +119,6 @@ class CodeMieProviderTest {
 
 		@Override
 		public void handle(HttpExchange exchange) throws IOException {
-			// Consume request body to ensure client can complete request cleanly.
 			try (InputStream is = exchange.getRequestBody()) {
 				readAllBytesCompat(is);
 			}

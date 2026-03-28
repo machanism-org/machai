@@ -27,36 +27,16 @@
  */
 
 /**
- * Google Gemini provider integration for the MachAI framework.
+ * Provider integration for Google's Gemini models.
  *
  * <p>
- * This package contains the MachAI provider adapter for Google's Gemini models.
+ * This package contains the MachAI {@link org.machanism.machai.ai.manager.Genai} adapter that translates
+ * provider-agnostic request state (prompts, optional system instructions, optional tool registration,
+ * and optional file/URL inputs) into calls to the Gemini API.
  * </p>
  *
- * <h2>Contents</h2>
- * <ul>
- * <li>{@link org.machanism.machai.ai.provider.gemini.GeminiProvider} - Provider adapter for Gemini.</li>
- * </ul>
- *
- * <h2>Responsibilities</h2>
  * <p>
- * The provider translates MachAI's provider-agnostic request state (prompt text, optional system instructions,
- * tool registration, file/URL attachments, and optional usage reporting) into Gemini API calls.
- * </p>
- *
- * <h2>Typical usage</h2>
- * <pre>
- * Configurator conf = ...;
- * GeminiProvider provider = new GeminiProvider();
- * provider.init(conf);
- * provider.instructions("You are a helpful assistant.");
- * provider.prompt("Summarize this document.");
- * String response = provider.perform();
- * </pre>
- *
- * <p>
- * <strong>Implementation note:</strong> this provider may be incomplete; some operations can be unimplemented and may
- * throw {@code NotImplementedException}.
+ * The primary entry point is {@link org.machanism.machai.ai.provider.gemini.GeminiProvider}.
  * </p>
  */
 package org.machanism.machai.ai.provider.gemini;

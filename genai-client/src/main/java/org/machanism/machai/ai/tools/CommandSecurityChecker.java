@@ -69,7 +69,7 @@ public class CommandSecurityChecker {
 			resourcePath = "denylist/unix.txt";
 		} else {
 			throw new IllegalArgumentException(
-					"No denylist defined for operating system: `" + SystemUtils.OS_NAME + "`.");
+					"No denylist defined for operating system: `" + SystemUtils.OS_NAME + "`." );
 		}
 
 		logger.debug("Loading denylist for OS `{}` from resource: {}", SystemUtils.OS_NAME, resourcePath);
