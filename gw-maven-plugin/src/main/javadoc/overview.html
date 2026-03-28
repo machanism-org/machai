@@ -32,17 +32,14 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>GW Maven Plugin</h1>
 
 <p>
-  <strong>GW Maven Plugin</strong> is a Maven plugin that integrates the MachAI <em>Ghostwriter</em> guided
-  document-processing workflow into a Maven build.
+  <strong>GW Maven Plugin</strong> is an advanced documentation automation tool for Java projects.
+  It integrates MachAI <em>Ghostwriter</em> guided document-processing into a Maven build.
 </p>
 
 <p>
-  Ghostwriter Maven Plugin is an advanced documentation automation tool
-  for Java projects. It automatically scans, analyzes, and assembles
-  project documentation using embedded guidance tags and AI-powered
-  synthesis. The plugin streamlines the creation and maintenance of
-  high-quality, consistent documentation, ensuring best practices and
-  up-to-date information across all modules.
+  It scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
+  The plugin streamlines the creation and maintenance of high-quality, consistent documentation, ensuring best
+  practices and up-to-date information across all modules.
 </p>
 
 <h2>Overview</h2>
@@ -112,16 +109,14 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h3><code>org.machanism.machai.gw.maven</code></h3>
 
 <p>
-  Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document
-  processing as part of Maven builds.
+  Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document processing during Maven builds.
 </p>
 
 <p>
-  The goals in this package configure and invoke a
-  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> (or a specialized
-  processor such as <code>org.machanism.machai.gw.processor.ActProcessor</code>) to
-  scan a documentation source tree (commonly <code>src/site</code>) for files
-  containing embedded <code>@guidance:</code> blocks.
+  The goals in this package configure and execute a
+  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> (and related processors such as
+  <code>org.machanism.machai.gw.processor.ActProcessor</code>) to scan a documentation source tree (commonly
+  <code>src/site</code>) for files containing embedded <code>@guidance:</code> blocks.
 </p>
 
 <h4>Goals</h4>
@@ -155,7 +150,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <p>
   Provider credentials can optionally be sourced from <code>~/.m2/settings.xml</code>
   by providing <code>-Dgenai.serverId=&lt;serverId&gt;</code>. When set, the plugin reads
-  the matching <code>&lt;server&gt;</code> entry and forwards credentials to the workflow.
+  the matching <code>&lt;server&gt;</code> entry and forwards credentials and/or additional
+  configuration fields to the workflow.
 </p>
 
 <h4>Usage examples</h4>
@@ -165,7 +161,7 @@ mvn gw:gw
 </pre>
 
 <pre>
-mvn gw:reactor -Dgw.scanDir=src\\site
+mvn gw:reactor -Dgw.scanDir=src\site
 </pre>
 
 <h2>Class diagram</h2>

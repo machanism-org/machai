@@ -1,11 +1,11 @@
 /**
  * Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document
- * processing as part of Maven builds.
+ * processing during Maven builds.
  *
  * <p>
- * The goals in this package configure and invoke a
- * {@link org.machanism.machai.gw.processor.GuidanceProcessor} (or a specialized
- * processor such as {@link org.machanism.machai.gw.processor.ActProcessor}) to
+ * The goals in this package configure and execute a
+ * {@link org.machanism.machai.gw.processor.GuidanceProcessor} (and related
+ * processors such as {@link org.machanism.machai.gw.processor.ActProcessor}) to
  * scan a documentation source tree (commonly {@code src/site}) for files
  * containing embedded {@code @guidance:} blocks.
  * </p>
@@ -41,13 +41,16 @@
  * <p>
  * Provider credentials can optionally be sourced from {@code ~/.m2/settings.xml}
  * by providing {@code -Dgenai.serverId=&lt;serverId&gt;}. When set, the plugin reads
- * the matching {@code &lt;server&gt;} entry and forwards credentials to the workflow.
+ * the matching {@code &lt;server&gt;} entry and forwards credentials and/or additional
+ * configuration fields to the workflow.
  * </p>
  *
  * <h2>Usage examples</h2>
+ *
  * <pre>
  * mvn gw:gw
  * </pre>
+ *
  * <pre>
  * mvn gw:reactor -Dgw.scanDir=src\\site
  * </pre>

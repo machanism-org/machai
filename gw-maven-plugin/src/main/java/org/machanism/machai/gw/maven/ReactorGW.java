@@ -92,46 +92,47 @@ ProcessModules supports Maven reactor for module processing. All submodules will
 @Mojo(name = "reactor", threadSafe = true)
 public class ReactorGW extends AbstractGWGoal {
 
-	@Override
-	public void execute() throws MojoExecutionException {
-		String executionRootDirectory = session.getExecutionRootDirectory();
+    @Override
+    public void execute() throws MojoExecutionException {
+        String executionRootDirectory = session.getExecutionRootDirectory();
 
-		PropertiesConfigurator config = getConfiguration();
+        PropertiesConfigurator config = getConfiguration();
 
-		GuidanceProcessor documents = new GuidanceProcessor(new File(executionRootDirectory), model, config) {
+        GuidanceProcessor documents = new GuidanceProcessor(new File(executionRootDirectory), model, config) {
 
-			@Override
-			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
-				ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
+            @Override
+            public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+                ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
 
-				if (projectLayout instanceof MavenProjectLayout) {
-					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
-					mavenProjectLayout.projectDir(projectDir);
-					Model model = project.getModel();
-					mavenProjectLayout.model(model);
-				}
+                if (projectLayout instanceof MavenProjectLayout) {
+                    MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
+                    mavenProjectLayout.projectDir(projectDir);
 
-				return projectLayout;
-			}
+                    Model model = project.getModel();
+                    mavenProjectLayout.model(model);
+                }
 
-			@Override
-			protected void processModule(File projectDir, String module) throws IOException {
-				// No-op for this implementation
-			}
-		};
+                return projectLayout;
+            }
 
-		if (scanDir == null) {
-			scanDir = basedir.getAbsolutePath();
-		}
+            @Override
+            protected void processModule(File projectDir, String module) throws IOException {
+                // No-op for this implementation
+            }
+        };
 
-		try {
-			scanDocuments(documents);
-		} catch (ProcessTerminationException e) {
-			throw new MojoExecutionException(
-					"Process terminated while scanning documents: " + e.getMessage() + " (exit code: " + e.getExitCode()
-							+ ")",
-					e);
-		}
-	}
+        if (scanDir == null) {
+            scanDir = basedir.getAbsolutePath();
+        }
+
+        try {
+            scanDocuments(documents);
+        } catch (ProcessTerminationException e) {
+            throw new MojoExecutionException(
+                    "Process terminated while scanning documents: " + e.getMessage() + " (exit code: " + e.getExitCode()
+                            + ")",
+                    e);
+        }
+    }
 
 }
