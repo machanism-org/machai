@@ -26,7 +26,7 @@
  *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} reads {@code pom.xml} (via
  *       {@link org.machanism.machai.project.layout.PomReader}) to determine modules and conventional source/test/resource
  *       roots.</li>
- *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} uses the Gradle Tooling API and returns
+ *   <li>{@link org.machanism.machai.project.layout.GradleProjectLayout} uses the Gradle Tooling API and returns
  *       conventional source/test/document roots.</li>
  *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} parses {@code package.json} workspaces and
  *       resolves module directories by matching workspace glob patterns.</li>

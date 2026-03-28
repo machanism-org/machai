@@ -39,13 +39,13 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   projects.
 </p>
 
-<h2>Overview</h2>
+<h2>Package overview</h2>
 
 <p>
-  The library models a project as a <em>project root</em> plus a set of conventional, root-relative directories such as
-  production sources, test sources, resources, documentation roots, and (optionally) nested modules.
-  Tooling can either construct an explicit layout implementation (for example Maven) or ask the library to detect the
-  correct layout based on build metadata.
+  The library models a source-code repository as a <em>project root</em> plus a set of conventional, root-relative
+  directories such as production sources, test sources, resources, and documentation roots. The core workflow is:
+  detect an appropriate layout for a root directory, query that layout for conventional paths, then resolve those paths
+  against the root to perform filesystem operations.
 </p>
 
 <h2>Packages</h2>
@@ -54,17 +54,18 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   Facilities for discovering, describing, and processing a source-code project rooted at a filesystem directory.
-  This package provides the core orchestration APIs for:
+  It provides orchestration APIs for layout detection and for scanning a project tree (optionally including nested
+  modules) using a user-supplied processor.
 </p>
 
 <ul>
   <li>
-    Detecting a project's on-disk convention (for example Maven, Gradle, JavaScript, or Python) and exposing it as a
+    Detect a project's on-disk convention (for example Maven, Gradle, JavaScript, or Python) and expose it as a
     <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a> via
     <a href="org/machanism/machai/project/ProjectLayoutManager.html#detectProjectLayout-java.io.File-">ProjectLayoutManager.detectProjectLayout(File)</a>.
   </li>
   <li>
-    Scanning a project root, optionally recursing into nested modules, and delegating per-project processing logic to a
+    Scan a project root and delegate per-project processing logic to a
     <a href="org/machanism/machai/project/ProjectProcessor.html">ProjectProcessor</a> implementation.
   </li>
 </ul>
@@ -83,7 +84,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </ul>
 
 <p>
-  Implementations cover common build ecosystems:
+  Implementations cover common ecosystems and conventions:
 </p>
 
 <ul>
@@ -113,20 +114,19 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <ul>
   <li>
-    <strong>Project root</strong>:
-    the filesystem directory that contains the project's build metadata and top-level folders.
+    <strong>Project root</strong>: the filesystem directory that contains the project's build metadata and top-level
+    folders.
   </li>
   <li>
-    <strong>Root-relative paths</strong>:
-    layout accessors return conventional paths (for example <code>src/main/java</code>, <code>src/test/java</code>,
-    <code>src/main/resources</code>, <code>src/test/resources</code>, or documentation roots) expressed relative to the
-    project root. Resolve these against the configured project root before performing filesystem access.
+    <strong>Root-relative paths</strong>: layout accessors return conventional paths (for example <code>src/main/java</code>,
+    <code>src/test/java</code>, <code>src/main/resources</code>, <code>src/test/resources</code>, or documentation roots)
+    expressed relative to the project root. Resolve these against the configured project root before performing
+    filesystem IO.
   </li>
   <li>
-    <strong>Modules</strong>:
-    some layouts can enumerate nested projects (for example Maven reactor modules, Gradle multi-project builds, or
-    JavaScript workspaces). Module discovery is layout-specific and may be driven by build metadata or by filesystem
-    scanning.
+    <strong>Modules</strong>: some layouts can enumerate nested projects (for example Maven reactor modules, Gradle
+    multi-project builds, or JavaScript workspaces). Module discovery is layout-specific and may be driven by build
+    metadata or filesystem scanning.
   </li>
 </ul>
 
