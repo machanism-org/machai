@@ -66,7 +66,7 @@ Key capabilities include:
 | Name | Description |
 | --- | --- |
 | [Project Layout](project-layout/) | Project Layout is a small utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, etc.) in a consistent way. It centralizes layout conventions so tools and plugins can resolve well-known folders reliably, avoid hard-coded paths, and reduce duplicated path logic. |
-| [GenAI Client](genai-client/) | GenAI Client is a Java library that provides a single, consistent API for integrating with multiple Generative AI providers. It offers a provider abstraction and centralized provider selection, prompt and instruction composition, optional tool (function) calling, optional file attachments, provider-dependent embeddings, and optional request input logging. |
+| [GenAI Client](genai-client/) | GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers a provider abstraction, centralized provider selection, prompt and instruction composition, optional tool (function) calling, optional file attachments, provider-dependent embeddings, and optional request input logging. |
 | [Bindex Core](bindex-core/) | Bindex Core is the foundational Java library for generating, persisting, registering, retrieving, and assembling Bindex documents (JSON descriptors that are machine-readable and LLM-friendly). It supports generating or updating `bindex.json` from a project layout, registering and searching Bindexes in a MongoDB-backed registry (optionally with embeddings), semantically picking relevant libraries for a free-text query, expanding results via declared dependencies, and assembling selected Bindexes into prompt-ready context for downstream workflows. |
 | [Machai CLI](machai-cli/) | Machai CLI is a Spring Boot and Spring Shell command-line application that orchestrates Bindex and Ghostwriter workflows. It can generate and register Bindex metadata, perform semantic pick and project assembly, run guidance-driven Ghostwriter processing over a directory tree, execute reusable prompt templates (Acts), issue one-off prompts to a configured provider, manage persisted defaults via `machai.properties`, and clean temporary `.machai` folders. |
 | [Bindex Maven Plugin](bindex-maven-plugin/) | Bindex Maven Plugin is a Maven plugin that generates, updates, and registers Bindex metadata for Maven projects. It provides goals to create or update a module Bindex, register it to an external registry endpoint for discovery, and clean temporary artifacts, and it can optionally load credentials from Maven `settings.xml`. |
@@ -123,7 +123,7 @@ mvn -pl genai-client clean install
 ```bat
 cd machai-cli
 mvn -Ppack package
-java -jar target\machai.jar
+java -jar target\\machai.jar
 ```
 
 ### Run Ghostwriter
@@ -131,7 +131,7 @@ java -jar target\machai.jar
 ```bat
 cd ghostwriter
 mvn -Ppack package
-java -jar target\gw.jar src\site\markdown
+java -jar target\\gw.jar src\\site\\markdown
 ```
 
 ### Run Maven plugins
