@@ -126,7 +126,6 @@ public class ActProcessor extends AIFileProcessor {
 
 			Object mainValue = actData.get(Ghostwriter.INPUTS_PROPERTY_NAME);
 			if (mainValue instanceof String) {
-				// Sonar java:S1905 - unnecessary cast removed.
 				String actPrompt = Objects.toString(actData.get("prompt"), "");
 				String value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(prompt, actPrompt));
 				actData.put(Ghostwriter.INPUTS_PROPERTY_NAME, value);

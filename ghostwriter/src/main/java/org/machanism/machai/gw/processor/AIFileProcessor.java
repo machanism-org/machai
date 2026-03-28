@@ -115,7 +115,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt)
 			throws IOException {
-		logger.info("Processing file: '{}'", file);
+		logger.info("Processing path: '{}'", file);
 
 		Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
 		FunctionToolsLoader.getInstance().applyTools(provider);
@@ -151,7 +151,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			logger.info(">>> {}", perform);
 		}
 
-		logger.info("Finished processing file: {}", file.getAbsolutePath());
+		logger.info("Finished processing path: {}", file.getAbsolutePath());
 		return perform;
 	}
 
