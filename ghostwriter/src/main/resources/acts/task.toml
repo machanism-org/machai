@@ -62,3 +62,5 @@ inputs = '''
 
 %s
 '''
+
+gw.interactive = true

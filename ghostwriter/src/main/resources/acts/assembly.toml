@@ -22,7 +22,7 @@ inputs = '''
 # Context
 
 Bindex JSON is a structured library description containing key information about each artifact, along with usage examples.
-Use functional tool `get_bindex_schema` to get the bindex schema.
+Use functional tool `get_bindex_schema` to get the bindex schema. 
 
 # Environment
 
@@ -31,6 +31,8 @@ Use functional tool `get_bindex_schema` to get the bindex schema.
 # Instructions
 
 - The following Bindex JSON data provides a list of recommended libraries.
+- To obtain information about recommended libraries, use the `pick_libraries` function tool. 
+  Pass the original user prompt query as the value for the prompt parameter.
 - Use this information to build the required application.
 - **Create all required files on the project folder.**
 - The `.machai` folder is reserved for LLM activity logging and must be ignored during all operations. Do not read, modify, or include any files from the `.machai` directory.
@@ -41,3 +43,5 @@ Use functional tool `get_bindex_schema` to get the bindex schema.
 
 %s
 '''
+
+gw.interactive = true

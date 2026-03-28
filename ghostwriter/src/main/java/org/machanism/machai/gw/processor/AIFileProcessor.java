@@ -91,10 +91,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	private String defaultPrompt;
 
+	private boolean interactive;
+
 	/**
 	 * Creates a new processor using the given provider key.
 	 *
-	 * @param projectDir      root directory used as a base for relative paths
+	 * @param projectDir   root directory used as a base for relative paths
 	 * @param configurator configuration source
 	 * @param genai        provider key/name (including model)
 	 */
@@ -134,7 +136,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		promptBuilder.append(promptLines);
 
 		provider.prompt(promptBuilder.toString());
+		String perform = perform(file, provider);
 
+		logger.info("Finished processing path: {}", file.getAbsolutePath());
+		return perform;
+	}
+
+	private String perform(File file, Genai provider) throws IOException {
 		if (isLogInputs()) {
 			String inputsFileName = ProjectLayout.getRelativePath(getProjectDir(), file);
 			File docsTempDir = new File(getProjectDir(), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
@@ -149,10 +157,19 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		String perform = provider.perform();
 		if (perform != null) {
 			logger.info(">>> {}", perform);
+			if (interactive) {
+				String input = input();
+				if (!input.isEmpty()) {
+					provider.prompt(input);
+					perform = perform(file, provider);
+				}
+			}
 		}
-
-		logger.info("Finished processing path: {}", file.getAbsolutePath());
 		return perform;
+	}
+
+	protected String input() {
+		return null;
 	}
 
 	/**
@@ -194,6 +211,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		String relativeFile = ProjectLayout.getRelativePath(projectDir, file);
 		content.add(relativeFile);
+
+		if (!interactive) {
+			content.add("- This is an automated process.\n- Do not include explanations or any additional output.");
+		}
 
 		Object[] array = content.toArray(new String[0]);
 		return MessageFormat.format(promptBundle.getString("project_information"), array) + Genai.LINE_SEPARATOR;
@@ -489,6 +510,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	public String getModel() {
 		return genai;
+	}
+
+	public void setInteractive(boolean interactive) {
+		this.interactive = interactive;
+	}
+
+	public boolean isInteractive() {
+		return interactive;
 	}
 
 }

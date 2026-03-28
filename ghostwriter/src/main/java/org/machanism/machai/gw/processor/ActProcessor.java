@@ -308,6 +308,18 @@ public class ActProcessor extends AIFileProcessor {
 				}
 				properties.put(key, value);
 			}
+			if (entry.getValue() instanceof Boolean) {
+				Boolean value = (Boolean) entry.getValue();
+				properties.put(key, Boolean.toString(value));
+			}
+			if (entry.getValue() instanceof Integer) {
+				Integer value = (Integer) entry.getValue();
+				properties.put(key, Integer.toString(value));
+			}
+			if (entry.getValue() instanceof Double) {
+				Double value = (Double) entry.getValue();
+				properties.put(key, Double.toString(value));
+			}
 			if (entry.getValue() instanceof TomlArray) {
 				List<Object> value = ((TomlArray) entry.getValue()).toList();
 				properties.put(key, value);
@@ -329,7 +341,7 @@ public class ActProcessor extends AIFileProcessor {
 				String value = (String) valueObj;
 				String inheritValue = getConfigurator().get(key, null);
 				if (inheritValue != null) {
-					value = Strings.CS.replace(value, "%s",  StringUtils.defaultString(inheritValue));
+					value = Strings.CS.replace(value, "%s", StringUtils.defaultString(inheritValue));
 				}
 				switch (key) {
 				case Ghostwriter.INSTRUCTIONS_PROP_NAME:
@@ -350,6 +362,10 @@ public class ActProcessor extends AIFileProcessor {
 
 				case Ghostwriter.GW_NONRECURSIVE_PROP_NAME:
 					super.setNonRecursive(Boolean.parseBoolean(value));
+					break;
+
+				case Ghostwriter.INTERACTIVE_MODE_PROP_NAME:
+					super.setInteractive(Boolean.parseBoolean(value));
 					break;
 
 				default:

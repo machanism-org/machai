@@ -94,6 +94,8 @@ public final class Ghostwriter {
 	public static final String GW_NONRECURSIVE_PROP_NAME = "gw.nonRecursive";
 
 	public static final String INPUTS_PROPERTY_NAME = "inputs";
+	
+	public static final String INTERACTIVE_MODE_PROP_NAME = "gw.interactive";
 
 	/** Processor implementation used by this CLI instance. */
 	private final AIFileProcessor processor;
