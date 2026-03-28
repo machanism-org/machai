@@ -1,6 +1,5 @@
 package org.machanism.machai.cli;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Constructor;
@@ -22,16 +21,4 @@ class MachaiCLITest {
 		assertEquals(MachaiCLI.class, instance.getClass());
 	}
 
-	@Test
-	void loadSystemProperties_whenNoConfigAndNoFile_shouldNotThrow() {
-		// Arrange
-		System.clearProperty("config");
-
-		// Act + Assert
-		assertDoesNotThrow(() -> {
-			var m = MachaiCLI.class.getDeclaredMethod("loadSystemProperties");
-			m.setAccessible(true);
-			m.invoke(null);
-		});
-	}
 }

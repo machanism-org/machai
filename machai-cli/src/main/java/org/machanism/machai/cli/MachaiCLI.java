@@ -37,32 +37,7 @@ public class MachaiCLI {
 	 * @throws IOException if loading the optional configuration file fails
 	 */
 	public static void main(String[] args) throws IOException {
-		loadSystemProperties();
 		System.exit(SpringApplication.exit(SpringApplication.run(MachaiCLI.class, args)));
 	}
 
-	/**
-	 * Loads properties from {@code machai.properties} (or from the file specified
-	 * by the {@code config} system property) and merges them into the current JVM
-	 * system properties.
-	 *
-	 * @throws IOException if reading the properties file fails
-	 */
-	private static void loadSystemProperties() throws IOException {
-		String configFIle = System.getProperty("config");
-		File conf;
-		if (configFIle != null) {
-			conf = new File(configFIle);
-		} else {
-			conf = new File("machai.properties");
-		}
-
-		if (conf.exists()) {
-			try (FileInputStream propFile = new FileInputStream(conf)) {
-				Properties p = new Properties(System.getProperties());
-				p.load(propFile);
-				System.setProperties(p);
-			}
-		}
-	}
 }
