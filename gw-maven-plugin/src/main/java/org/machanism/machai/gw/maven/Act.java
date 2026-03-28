@@ -126,6 +126,15 @@ public class Act extends AbstractGWGoal {
 
 				return projectLayout;
 			}
+
+			@Override
+			protected String input() {
+				try {
+					return readText("act");
+				} catch (PrompterException e) {
+					throw new IllegalArgumentException(e);
+				}
+			}
 		};
 
 		List<MavenProject> modules = session.getAllProjects();
@@ -162,7 +171,7 @@ public class Act extends AbstractGWGoal {
 			} else {
 				actProcessor.setExcludes(excludes);
 			}
-			
+
 			actProcessor.setLogInputs(logInputs);
 
 			configureAndScan(actProcessor);
