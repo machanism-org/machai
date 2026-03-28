@@ -128,9 +128,9 @@ public class BindexFunctionTools implements FunctionTools {
 	private String getRecommendedLibraries(Object[] params) throws IOException {
 		JsonNode props = (JsonNode) params[0];
 		if (logger.isInfoEnabled()) {
-			logger.info("List files: {}", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH));
+			logger.info("Picking for: {}", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH));
 		}
-		logger.debug("List files: {}", params[0]);
+		logger.debug("Picking for: {}", params[0]);
 
 		String prompt = props.get("prompt").asText();
 
@@ -158,11 +158,10 @@ public class BindexFunctionTools implements FunctionTools {
 
 		String result = picked.toString();
 		if (logger.isInfoEnabled()) {
-			logger.info("Recommended Artifacts: {}",
-					StringUtils.abbreviate(result, 60).replace(Genai.LINE_SEPARATOR, ""));
+			logger.info("Recommended Artifacts: \n{}", StringUtils.abbreviate(result, MAXWIDTH));
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Recommended Artifacts: {}", result);
+			logger.debug("Recommended Artifacts: \n{}", result);
 		}
 		return result;
 	}
