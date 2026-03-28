@@ -192,11 +192,11 @@ public class Act extends AbstractGWGoal {
 				if (savedAct == null) {
 					String actValue = conf.get(Ghostwriter.GW_ACT_PROP_NAME, null);
 					if (actValue == null) {
-						actValue = readText("Act");
+						actValue = readText("act");
 					}
 					userProperties.setProperty(Ghostwriter.GW_ACT_PROP_NAME, actValue);
 				} else {
-					logger.info("Act: {}", savedAct);
+					logger.info("act: {}", savedAct);
 				}
 			} catch (PrompterException e) {
 				throw new MojoExecutionException(
