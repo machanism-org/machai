@@ -20,7 +20,7 @@ public class ActApplyActPromptTest {
 		// Arrange
 		Act act = new Act();
 		Properties userProps = new Properties();
-		userProps.setProperty(Ghostwriter.GW_ACT_PROP_NAME, "saved");
+		userProps.setProperty(Ghostwriter.ACT_PROP_NAME, "saved");
 
 		MavenSession session = Mockito.mock(MavenSession.class);
 		Mockito.when(session.getUserProperties()).thenReturn(userProps);
@@ -34,7 +34,7 @@ public class ActApplyActPromptTest {
 
 		// Assert
 		Mockito.verifyNoInteractions(act.prompter);
-		assertEquals("saved", userProps.getProperty(Ghostwriter.GW_ACT_PROP_NAME));
+		assertEquals("saved", userProps.getProperty(Ghostwriter.ACT_PROP_NAME));
 	}
 
 	@Test
@@ -49,13 +49,13 @@ public class ActApplyActPromptTest {
 
 		act.prompter = Mockito.mock(Prompter.class);
 		Configurator conf = Mockito.mock(Configurator.class);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_ACT_PROP_NAME), Mockito.isNull())).thenReturn("fromConf");
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACT_PROP_NAME), Mockito.isNull())).thenReturn("fromConf");
 
 		// Act
 		act.applyActPrompt(conf);
 
 		// Assert
-		assertEquals("fromConf", userProps.getProperty(Ghostwriter.GW_ACT_PROP_NAME));
+		assertEquals("fromConf", userProps.getProperty(Ghostwriter.ACT_PROP_NAME));
 		Mockito.verifyNoInteractions(act.prompter);
 	}
 

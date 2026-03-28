@@ -85,7 +85,7 @@ public class ReactorAct extends Act {
 
 		File projectDir = new File(session.getExecutionRootDirectory());
 
-		String model = configuration.get(Ghostwriter.GW_MODEL_PROP_NAME, this.model);
+		String model = configuration.get(Ghostwriter.MODEL_PROP_NAME, this.model);
 		logger.info("Model: {}", model);
 
 		ActProcessor actProcessor = new ActProcessor(projectDir, configuration, model) {

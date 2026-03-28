@@ -30,8 +30,8 @@ public class ActProcessTest {
 		ActProcessor processor = Mockito.mock(ActProcessor.class);
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(processor.getConfigurator()).thenReturn(conf);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_ACTS_PROP_NAME), Mockito.any())).thenReturn("c:/acts");
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn("c:/acts");
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
 
 		// Act
 		act.process(processor);
@@ -48,8 +48,8 @@ public class ActProcessTest {
 		ActProcessor processor = Mockito.mock(ActProcessor.class);
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(processor.getConfigurator()).thenReturn(conf);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_ACTS_PROP_NAME), Mockito.any())).thenReturn(null);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn(null);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
 
 		// Act
 		act.process(processor);
@@ -68,8 +68,8 @@ public class ActProcessTest {
 		ActProcessor processor = Mockito.mock(ActProcessor.class);
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(processor.getConfigurator()).thenReturn(conf);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_ACTS_PROP_NAME), Mockito.any())).thenReturn(null);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_EXCLUDES_PROP_NAME), Mockito.isNull()))
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn(null);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.EXCLUDES_PROP_NAME), Mockito.isNull()))
 				.thenReturn("x,y");
 
 		// Act
@@ -92,8 +92,8 @@ public class ActProcessTest {
 		ActProcessor processor = Mockito.mock(ActProcessor.class);
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(processor.getConfigurator()).thenReturn(conf);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_ACTS_PROP_NAME), Mockito.any())).thenReturn(null);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.GW_EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn(null);
+		Mockito.when(conf.get(Mockito.eq(Ghostwriter.EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
 
 		// Act
 		act.process(processor);

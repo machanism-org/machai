@@ -70,7 +70,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * Provider/model identifier to pass to the workflow.
 	 */
-	@Parameter(property = Ghostwriter.GW_MODEL_PROP_NAME)
+	@Parameter(property = Ghostwriter.MODEL_PROP_NAME)
 	protected String model;
 	/**
 	 * The Maven module base directory.
@@ -80,7 +80,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * Optional scan root override.
 	 */
-	@Parameter(property = Ghostwriter.GW_SCAN_DIR_PROP_NAME)
+	@Parameter(property = Ghostwriter.SCAN_DIR_PROP_NAME)
 	String scanDir;
 	/**
 	 * Instruction locations (for example, file paths or classpath locations)
@@ -91,13 +91,13 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	/**
 	 * Default guidance text forwarded to the workflow.
 	 */
-	@Parameter(property = Ghostwriter.GW_GUIDANCE_PROP_NAME, name = "guidance")
+	@Parameter(property = Ghostwriter.GUIDANCE_PROP_NAME, name = "guidance")
 	protected String guidance;
 	/**
 	 * Exclude patterns/paths that should be skipped when scanning documentation
 	 * sources.
 	 */
-	@Parameter(property = Ghostwriter.GW_EXCLUDES_PROP_NAME, name = "excludes")
+	@Parameter(property = Ghostwriter.EXCLUDES_PROP_NAME, name = "excludes")
 	protected String[] excludes;
 	/**
 	 * The current Maven project.

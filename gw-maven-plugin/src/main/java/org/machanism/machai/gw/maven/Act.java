@@ -43,7 +43,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>Action text/prompt to apply. If omitted, the goal reads it interactively.
  * </dd>
  *
- * <dt><b>{@code -Dgw.acts}</b> / {@code &lt;acts&gt;}</dt>
+ * <dt><b>{@code -Dgw.acts}</b> / {@code &lt;locations&gt;}</dt>
  * <dd>Optional directory containing predefined action definitions.</dd>
  * </dl>
  *
@@ -65,7 +65,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </pre>
  * 
  * <pre>
- * mvn gw:act -Dgw.acts=src\\site\\acts -DlogInputs=true
+ * mvn gw:act -Dgw.acts=src\\site\\locations -DlogInputs=true
  * </pre>
  */
 @Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false)
@@ -80,15 +80,15 @@ public class Act extends AbstractGWGoal {
 	/**
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
-	// Sonar java:S1700 - use a clearer name than "act" for the action prompt text.
-	@Parameter(property = Ghostwriter.GW_ACT_PROP_NAME, required = false)
-	protected String actPrompt;
+	@SuppressWarnings("S1700")
+	@Parameter(property = Ghostwriter.ACT_PROP_NAME, required = false)
+	protected String act;
 
 	/**
 	 * Optional directory containing predefined action definitions.
 	 */
-	@Parameter(property = Ghostwriter.GW_ACTS_PROP_NAME, required = false)
-	private String acts;
+	@Parameter(property = Ghostwriter.ACTS_LOCATION_PROP_NAME, required = false)
+	private String locations;
 
 	private static final Object MONITOR = new Object();
 
@@ -103,7 +103,7 @@ public class Act extends AbstractGWGoal {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
 
-		String model = configuration.get(Ghostwriter.GW_MODEL_PROP_NAME, this.model);
+		String model = configuration.get(Ghostwriter.MODEL_PROP_NAME, this.model);
 		logger.info("Model: {}", model);
 
 		ActProcessor actProcessor = new ActProcessor(basedir, configuration, model) {
@@ -152,16 +152,15 @@ public class Act extends AbstractGWGoal {
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
-			// Sonar java:S1117 - avoid local variable hiding the field 'acts'
-			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.GW_ACTS_PROP_NAME, this.acts);
+			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.ACTS_LOCATION_PROP_NAME, this.locations);
 
 			if (actsLocation != null) {
-				logger.info("Custom acts location specified: {}", actsLocation);
+				logger.info("Custom locations location specified: {}", actsLocation);
 				actProcessor.setActsLocation(actsLocation);
 			}
 
 			String[] excludes = null;
-			String excludesStr = actProcessor.getConfigurator().get(Ghostwriter.GW_EXCLUDES_PROP_NAME, null);
+			String excludesStr = actProcessor.getConfigurator().get(Ghostwriter.EXCLUDES_PROP_NAME, null);
 			if (excludesStr != null) {
 				excludes = StringUtils.split(excludesStr, ",");
 			}
@@ -188,7 +187,7 @@ public class Act extends AbstractGWGoal {
 	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
 		applyActPrompt(actProcessor.getConfigurator());
 		Properties userProperties = session.getUserProperties();
-		String savedAct = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
+		String savedAct = userProperties.getProperty(Ghostwriter.ACT_PROP_NAME);
 		actProcessor.setDefaultPrompt(savedAct);
 		scanDocuments(actProcessor);
 	}
@@ -197,25 +196,25 @@ public class Act extends AbstractGWGoal {
 		synchronized (MONITOR) {
 			try {
 				Properties userProperties = session.getUserProperties();
-				String savedAct = userProperties.getProperty(Ghostwriter.GW_ACT_PROP_NAME);
+				String savedAct = userProperties.getProperty(Ghostwriter.ACT_PROP_NAME);
 				if (savedAct == null) {
-					String actValue = conf.get(Ghostwriter.GW_ACT_PROP_NAME, null);
+					String actValue = conf.get(Ghostwriter.ACT_PROP_NAME, null);
 					if (actValue == null) {
 						actValue = readText("act");
 					}
-					userProperties.setProperty(Ghostwriter.GW_ACT_PROP_NAME, actValue);
+					userProperties.setProperty(Ghostwriter.ACT_PROP_NAME, actValue);
 				} else {
 					logger.info("act: {}", savedAct);
 				}
 			} catch (PrompterException e) {
 				throw new MojoExecutionException(
-						"Failed to read '" + Ghostwriter.GW_ACT_PROP_NAME + "' prompt interactively.", e);
+						"Failed to read '" + Ghostwriter.ACT_PROP_NAME + "' prompt interactively.", e);
 			}
 		}
 	}
 
 	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
-		String gwScanDir = actProcessor.getConfigurator().get(Ghostwriter.GW_SCAN_DIR_PROP_NAME, null);
+		String gwScanDir = actProcessor.getConfigurator().get(Ghostwriter.SCAN_DIR_PROP_NAME, null);
 		String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
