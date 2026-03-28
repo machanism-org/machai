@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jline.reader.LineReader;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.gw.processor.ActProcessor;
@@ -15,6 +16,7 @@ import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -38,6 +40,13 @@ import org.springframework.shell.standard.ShellOption;
 public class ActCommand {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ActCommand.class);
+
+	private final LineReader lineReader;
+
+	public ActCommand(@Lazy LineReader lineReader) {
+		super();
+		this.lineReader = lineReader;
+	}
 
 	/**
 	 * Spring lifecycle hook.
@@ -70,7 +79,12 @@ public class ActCommand {
 			// configuration file not found.
 		}
 		String resolvedModel = ConfigCommand.config.get(Ghostwriter.GW_MODEL_PROP_NAME);
-		ActProcessor processor = new ActProcessor(projectDir, configurator, resolvedModel);
+		ActProcessor processor = new ActProcessor(projectDir, configurator, resolvedModel) {
+			@Override
+			protected String input() {
+				return lineReader.readLine("prompt:> ");
+			}
+		};
 		String prompt = StringUtils.join(act, " ");
 		processor.setDefaultPrompt(prompt);
 
