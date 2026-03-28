@@ -14,6 +14,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.gw.processor.Ghostwriter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -32,7 +33,7 @@ class ActFunctionToolsTest {
 		Files.write(actFile, Arrays.asList("description='My act'"), StandardCharsets.UTF_8);
 
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
-		configurator.set("gw.acts", actsDir.toFile().getAbsolutePath());
+		configurator.set(Ghostwriter.ACTS_LOCATION_PROP_NAME, actsDir.toFile().getAbsolutePath());
 
 		ActFunctionTools tools = new ActFunctionTools();
 		tools.setConfigurator(configurator);

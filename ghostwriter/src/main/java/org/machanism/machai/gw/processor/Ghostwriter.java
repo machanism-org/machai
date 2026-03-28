@@ -62,39 +62,39 @@ public final class Ghostwriter {
 	public static final String GW_PROPERTIES_FILE_NAME = "gw.properties";
 
 	/** System property key to override the Ghostwriter configuration file path. */
-	public static final String GW_CONFIG_PROP_NAME = "gw.config";
+	public static final String CONFIG_PROP_NAME = "gw.config";
 
 	/** System property key indicating the Ghostwriter home directory. */
-	public static final String GW_HOME_PROP_NAME = "gw.home";
+	public static final String HOME_PROP_NAME = "gw.home";
 
 	/** Configuration key specifying the GenAI provider/model to use. */
-	public static final String GW_MODEL_PROP_NAME = "gw.model";
+	public static final String MODEL_PROP_NAME = "gw.model";
 
 	/** Configuration key containing optional system instructions. */
 	public static final String INSTRUCTIONS_PROP_NAME = "instructions";
 
 	/** Configuration key containing comma-separated scan exclusions. */
-	public static final String GW_EXCLUDES_PROP_NAME = "gw.excludes";
+	public static final String EXCLUDES_PROP_NAME = "gw.excludes";
 
 	/** Configuration key containing comma-separated scan exclusions. */
-	public static final String GW_ACTS_PROP_NAME = "gw.acts";
+	public static final String ACTS_LOCATION_PROP_NAME = "acts.location";
 
 	/** Configuration key containing comma-separated scan exclusions. */
-	public static final String GW_ACT_PROP_NAME = "gw.act";
+	public static final String ACT_PROP_NAME = "gw.act";
 
 	/** Configuration key containing default guidance. */
-	public static final String GW_GUIDANCE_PROP_NAME = "gw.guidance";
+	public static final String GUIDANCE_PROP_NAME = "gw.guidance";
 
 	/** Configuration key enabling multi-threaded processing. */
-	public static final String GW_THREADS_PROP_NAME = "gw.threads";
+	public static final String THREADS_PROP_NAME = "gw.threads";
 
 	/** Configuration key specifying a default scan directory/pattern. */
-	public static final String GW_SCAN_DIR_PROP_NAME = "gw.scanDir";
+	public static final String SCAN_DIR_PROP_NAME = "gw.scanDir";
 
-	public static final String GW_NONRECURSIVE_PROP_NAME = "gw.nonRecursive";
+	public static final String NONRECURSIVE_PROP_NAME = "gw.nonRecursive";
 
 	public static final String INPUTS_PROPERTY_NAME = "inputs";
-	
+
 	public static final String INTERACTIVE_MODE_PROP_NAME = "gw.interactive";
 
 	/** Processor implementation used by this CLI instance. */
@@ -109,7 +109,7 @@ public final class Ghostwriter {
 	 */
 	public Ghostwriter(String genai, AIFileProcessor processor) {
 		if (StringUtils.isBlank(genai)) {
-			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + GW_MODEL_PROP_NAME
+			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + MODEL_PROP_NAME
 					+ "' in " + GW_PROPERTIES_FILE_NAME + " or pass -m/--model (e.g., OpenAI:gpt-5.1).");
 		}
 
@@ -157,7 +157,7 @@ public final class Ghostwriter {
 	 * <p>
 	 * The configuration file defaults to {@link #GW_PROPERTIES_FILE_NAME} in the
 	 * resolved home directory, but can be overridden via the
-	 * {@link #GW_CONFIG_PROP_NAME} system property.
+	 * {@link #CONFIG_PROP_NAME} system property.
 	 * </p>
 	 *
 	 * @param projectDir optional root directory used to resolve the home directory
@@ -166,7 +166,7 @@ public final class Ghostwriter {
 	static PropertiesConfigurator initializeConfiguration(File projectDir) {
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
-		File gwHomeDir = config.getFile(GW_HOME_PROP_NAME, null);
+		File gwHomeDir = config.getFile(HOME_PROP_NAME, null);
 		if (gwHomeDir == null) {
 			gwHomeDir = projectDir;
 			if (gwHomeDir == null) {
@@ -174,7 +174,7 @@ public final class Ghostwriter {
 			}
 		}
 
-		System.setProperty(GW_HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
+		System.setProperty(HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
 		logger = LoggerFactory.getLogger(Ghostwriter.class);
 
 		String version = Ghostwriter.class.getPackage().getImplementationVersion();
@@ -184,7 +184,7 @@ public final class Ghostwriter {
 		logger.info("Home directory: {}", gwHomeDir);
 
 		try {
-			File configFile = new File(gwHomeDir, System.getProperty(GW_CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
+			File configFile = new File(gwHomeDir, System.getProperty(CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
 			config.setConfiguration(configFile.getAbsolutePath());
 		} catch (IOException e) {
 			// The property file is not defined, ignore.
@@ -237,7 +237,8 @@ public final class Ghostwriter {
 			while (scanner.hasNextLine()) {
 				String nextLine = scanner.nextLine();
 				if (Strings.CS.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
-					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER)).append(Genai.LINE_SEPARATOR);
+					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER))
+							.append(Genai.LINE_SEPARATOR);
 					logger.info("\t");
 				} else {
 					sb.append(nextLine);
@@ -336,16 +337,16 @@ public final class Ghostwriter {
 			logger.info("Custom acts location specified: {}", acts);
 			processor.setActsLocation(acts);
 		} else {
-			String acts = config.get(GW_ACTS_PROP_NAME, null);
-			if (acts != null) {
-				processor.setActsLocation(acts);
+			String actsLocation = config.get(ACTS_LOCATION_PROP_NAME, null);
+			if (actsLocation != null) {
+				processor.setActsLocation(actsLocation);
 			}
 		}
 		return processor;
 	}
 
 	static String resolveActPrompt(CommandLine cmd, PropertiesConfigurator config) {
-		String defaultPrompt = config.get(GW_ACT_PROP_NAME, null);
+		String defaultPrompt = config.get(ACT_PROP_NAME, null);
 		if (cmd.hasOption("act")) {
 			defaultPrompt = cmd.getOptionValue("act");
 			if (defaultPrompt == null) {
@@ -356,7 +357,7 @@ public final class Ghostwriter {
 	}
 
 	static String resolveGuidancePrompt(CommandLine cmd, PropertiesConfigurator config) {
-		String defaultPrompt = config.get(GW_GUIDANCE_PROP_NAME, null);
+		String defaultPrompt = config.get(GUIDANCE_PROP_NAME, null);
 		if (cmd.hasOption(GUIDANCE_OPTION)) {
 			defaultPrompt = cmd.getOptionValue(GUIDANCE_OPTION);
 			if (defaultPrompt == null) {
@@ -375,7 +376,7 @@ public final class Ghostwriter {
 	static String[] resolveScanDirs(CommandLine cmd, PropertiesConfigurator config) {
 		String[] scanDirs = cmd.getArgs();
 		if (scanDirs == null || scanDirs.length == 0) {
-			String gwScanDir = config.get(GW_SCAN_DIR_PROP_NAME, null);
+			String gwScanDir = config.get(SCAN_DIR_PROP_NAME, null);
 			if (gwScanDir != null) {
 				scanDirs = new String[] { gwScanDir };
 			}
@@ -458,7 +459,7 @@ public final class Ghostwriter {
 
 		PropertiesConfigurator config = initializeConfiguration(projectDir);
 
-		String genai = config.get(GW_MODEL_PROP_NAME, null);
+		String genai = config.get(MODEL_PROP_NAME, null);
 		if (cmd.hasOption(genaiOpt)) {
 			String opt = StringUtils.trimToNull(cmd.getOptionValue(genaiOpt));
 			if (opt != null) {
@@ -476,12 +477,12 @@ public final class Ghostwriter {
 			}
 		}
 
-		String[] excludes = StringUtils.split(config.get(GW_EXCLUDES_PROP_NAME, null), ',');
+		String[] excludes = StringUtils.split(config.get(EXCLUDES_PROP_NAME, null), ',');
 		if (cmd.hasOption(excludesOpt)) {
 			excludes = StringUtils.split(cmd.getOptionValue(excludesOpt), ',');
 		}
 
-		String multiThread = config.get(GW_THREADS_PROP_NAME, null);
+		String multiThread = config.get(THREADS_PROP_NAME, null);
 		if (cmd.hasOption(multiThreadOption)) {
 			multiThread = cmd.getOptionValue(multiThreadOption);
 		}

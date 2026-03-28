@@ -35,7 +35,7 @@ class GhostwriterTest {
 	@Test
 	void resolveScanDirs_whenConfigProvides_thenUsesConfig() {
 		PropertiesConfigurator config = new PropertiesConfigurator();
-		config.set(Ghostwriter.GW_SCAN_DIR_PROP_NAME, "src");
+		config.set(Ghostwriter.SCAN_DIR_PROP_NAME, "src");
 		CommandLine cmd = parse(new String[] {}, new Options());
 		String[] dirs = Ghostwriter.resolveScanDirs(cmd, config);
 		assertArrayEquals(new String[] { "src" }, dirs);

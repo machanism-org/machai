@@ -65,7 +65,7 @@ class GhostwriterAdditionalTest {
 		Options options = new Options();
 		CommandLine cmd = new DefaultParser().parse(options, new String[] {});
 		PropertiesConfigurator config = new PropertiesConfigurator();
-		config.set(Ghostwriter.GW_SCAN_DIR_PROP_NAME, "glob:**/*.java");
+		config.set(Ghostwriter.SCAN_DIR_PROP_NAME, "glob:**/*.java");
 
 		// Act
 		String[] result = Ghostwriter.resolveScanDirs(cmd, config);

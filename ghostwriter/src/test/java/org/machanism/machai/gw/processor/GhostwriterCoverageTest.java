@@ -22,21 +22,21 @@ import org.mockito.Mockito;
 class GhostwriterCoverageTest {
 
 	private final java.io.InputStream originalIn = System.in;
-	private final String originalGwHome = System.getProperty(Ghostwriter.GW_HOME_PROP_NAME);
-	private final String originalGwConfig = System.getProperty(Ghostwriter.GW_CONFIG_PROP_NAME);
+	private final String originalGwHome = System.getProperty(Ghostwriter.HOME_PROP_NAME);
+	private final String originalGwConfig = System.getProperty(Ghostwriter.CONFIG_PROP_NAME);
 
 	@AfterEach
 	void tearDown() {
 		System.setIn(originalIn);
 		if (originalGwHome == null) {
-			System.clearProperty(Ghostwriter.GW_HOME_PROP_NAME);
+			System.clearProperty(Ghostwriter.HOME_PROP_NAME);
 		} else {
-			System.setProperty(Ghostwriter.GW_HOME_PROP_NAME, originalGwHome);
+			System.setProperty(Ghostwriter.HOME_PROP_NAME, originalGwHome);
 		}
 		if (originalGwConfig == null) {
-			System.clearProperty(Ghostwriter.GW_CONFIG_PROP_NAME);
+			System.clearProperty(Ghostwriter.CONFIG_PROP_NAME);
 		} else {
-			System.setProperty(Ghostwriter.GW_CONFIG_PROP_NAME, originalGwConfig);
+			System.setProperty(Ghostwriter.CONFIG_PROP_NAME, originalGwConfig);
 		}
 	}
 
@@ -47,7 +47,7 @@ class GhostwriterCoverageTest {
 
 		// Act + Assert
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new Ghostwriter("  ", processor));
-		assertTrue(ex.getMessage().contains(Ghostwriter.GW_MODEL_PROP_NAME));
+		assertTrue(ex.getMessage().contains(Ghostwriter.MODEL_PROP_NAME));
 	}
 
 	@Test
@@ -87,7 +87,7 @@ class GhostwriterCoverageTest {
 		Options opts = new Options();
 		CommandLine cmd = new DefaultParser().parse(opts, new String[0]);
 		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.GW_SCAN_DIR_PROP_NAME, null)).thenReturn("glob:**/*.java");
+		Mockito.when(config.get(Ghostwriter.SCAN_DIR_PROP_NAME, null)).thenReturn("glob:**/*.java");
 
 		// Act
 		String[] scanDirs = Ghostwriter.resolveScanDirs(cmd, config);
@@ -108,7 +108,7 @@ class GhostwriterCoverageTest {
 		Ghostwriter.initializeConfiguration(new File("."));
 
 		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.GW_ACT_PROP_NAME, null)).thenReturn("ignored");
+		Mockito.when(config.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn("ignored");
 
 		// Act
 		String act = Ghostwriter.resolveActPrompt(cmd, config);
@@ -128,7 +128,7 @@ class GhostwriterCoverageTest {
 		Ghostwriter.initializeConfiguration(new File("."));
 
 		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.GW_GUIDANCE_PROP_NAME, null)).thenReturn(null);
+		Mockito.when(config.get(Ghostwriter.GUIDANCE_PROP_NAME, null)).thenReturn(null);
 
 		// Act
 		String guidance = Ghostwriter.resolveGuidancePrompt(cmd, config);
@@ -146,8 +146,8 @@ class GhostwriterCoverageTest {
 		CommandLine cmd = new DefaultParser().parse(opts, new String[] { "--act", "help", "--acts", tmp.getAbsolutePath() });
 
 		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.GW_ACT_PROP_NAME, null)).thenReturn("configAct");
-		Mockito.when(config.get(Ghostwriter.GW_ACTS_PROP_NAME, null)).thenReturn(null);
+		Mockito.when(config.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn("configAct");
+		Mockito.when(config.get(Ghostwriter.ACTS_LOCATION_PROP_NAME, null)).thenReturn(null);
 
 		// Act
 		AIFileProcessor processor = Ghostwriter.createProcessor(cmd, tmp, config, "Any:Model");
@@ -165,7 +165,7 @@ class GhostwriterCoverageTest {
 		CommandLine cmd = new DefaultParser().parse(opts, new String[] { "--act", "help" });
 
 		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.GW_ACTS_PROP_NAME, null)).thenReturn(tmp.getAbsolutePath());
+		Mockito.when(config.get(Ghostwriter.ACTS_LOCATION_PROP_NAME, null)).thenReturn(tmp.getAbsolutePath());
 
 		// Act
 		AIFileProcessor processor = Ghostwriter.createActProcessor(cmd, tmp, config, "Any:Model");
@@ -243,15 +243,15 @@ class GhostwriterCoverageTest {
 	@Test
 	void initializeConfiguration_whenHomeAlreadySet_doesNotOverride(@TempDir File tmp) {
 		// Arrange
-		System.setProperty(Ghostwriter.GW_HOME_PROP_NAME, new File("C:/opt/gw").getAbsolutePath());
-		System.clearProperty(Ghostwriter.GW_CONFIG_PROP_NAME);
+		System.setProperty(Ghostwriter.HOME_PROP_NAME, new File("C:/opt/gw").getAbsolutePath());
+		System.clearProperty(Ghostwriter.CONFIG_PROP_NAME);
 
 		// Act
 		PropertiesConfigurator cfg = Ghostwriter.initializeConfiguration(tmp);
 
 		// Assert
 		assertNotNull(cfg);
-		assertEquals(new File("C:/opt/gw").getAbsolutePath(), System.getProperty(Ghostwriter.GW_HOME_PROP_NAME));
+		assertEquals(new File("C:/opt/gw").getAbsolutePath(), System.getProperty(Ghostwriter.HOME_PROP_NAME));
 	}
 
 	@Test
@@ -271,7 +271,7 @@ class GhostwriterCoverageTest {
 		opts.addOption(Option.builder("a").longOpt("act").hasArg(true).optionalArg(true).build());
 		CommandLine cmd = new DefaultParser().parse(opts, new String[0]);
 		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.GW_ACT_PROP_NAME, null)).thenReturn("help");
+		Mockito.when(config.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn("help");
 
 		// Act
 		String prompt = Ghostwriter.resolveActPrompt(cmd, config);
@@ -287,7 +287,7 @@ class GhostwriterCoverageTest {
 		opts.addOption(Option.builder("g").longOpt("guidance").hasArg(true).optionalArg(true).build());
 		CommandLine cmd = new DefaultParser().parse(opts, new String[0]);
 		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.GW_GUIDANCE_PROP_NAME, null)).thenReturn("G");
+		Mockito.when(config.get(Ghostwriter.GUIDANCE_PROP_NAME, null)).thenReturn("G");
 
 		// Act
 		String prompt = Ghostwriter.resolveGuidancePrompt(cmd, config);
@@ -325,15 +325,15 @@ class GhostwriterCoverageTest {
 	@Test
 	void initializeConfiguration_whenConfigFilePropertySet_doesNotThrowEvenIfFileMissing(@TempDir File tmp) {
 		// Arrange
-		System.setProperty(Ghostwriter.GW_HOME_PROP_NAME, tmp.getAbsolutePath());
-		System.setProperty(Ghostwriter.GW_CONFIG_PROP_NAME, "missing.properties");
+		System.setProperty(Ghostwriter.HOME_PROP_NAME, tmp.getAbsolutePath());
+		System.setProperty(Ghostwriter.CONFIG_PROP_NAME, "missing.properties");
 
 		// Act
 		PropertiesConfigurator cfg = Ghostwriter.initializeConfiguration(tmp);
 
 		// Assert
 		assertNotNull(cfg);
-		assertEquals(tmp.getAbsolutePath(), System.getProperty(Ghostwriter.GW_HOME_PROP_NAME));
+		assertEquals(tmp.getAbsolutePath(), System.getProperty(Ghostwriter.HOME_PROP_NAME));
 	}
 
 	@Test

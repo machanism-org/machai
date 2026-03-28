@@ -82,7 +82,7 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public ActProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator, genai);
-		actsLocation = configurator.get(Ghostwriter.GW_ACTS_PROP_NAME, null);
+		actsLocation = configurator.get(Ghostwriter.ACTS_LOCATION_PROP_NAME, null);
 	}
 
 	/**
@@ -352,15 +352,15 @@ public class ActProcessor extends AIFileProcessor {
 					super.setDefaultPrompt(value);
 					break;
 
-				case Ghostwriter.GW_THREADS_PROP_NAME:
+				case Ghostwriter.THREADS_PROP_NAME:
 					super.setDegreeOfConcurrency(Integer.parseInt(value));
 					break;
 
-				case Ghostwriter.GW_EXCLUDES_PROP_NAME:
+				case Ghostwriter.EXCLUDES_PROP_NAME:
 					super.setExcludes(StringUtils.split(value, ","));
 					break;
 
-				case Ghostwriter.GW_NONRECURSIVE_PROP_NAME:
+				case Ghostwriter.NONRECURSIVE_PROP_NAME:
 					super.setNonRecursive(Boolean.parseBoolean(value));
 					break;
 
@@ -391,7 +391,7 @@ public class ActProcessor extends AIFileProcessor {
 			}
 		}
 		this.actsLocation = actsLocation;
-		getConfigurator().set(Ghostwriter.GW_ACTS_PROP_NAME, actsLocation);
+		getConfigurator().set(Ghostwriter.ACTS_LOCATION_PROP_NAME, actsLocation);
 	}
 
 	/**
