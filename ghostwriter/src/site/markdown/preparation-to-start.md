@@ -86,14 +86,15 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 | `gw.model` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | `null` (required; must be non-blank). | Loaded via `config.get("gw.model", null)` and optionally overridden by CLI `-m/--model`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor` / `GuidanceProcessor`. |
 | `instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null`. | Loaded via `config.get("instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin via `readText(...)` (multi-line supported with `\\` line continuation). Applied via `AIFileProcessor#setInstructions(...)`. |
 | `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null`. | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
-| `gw.acts` | Default directory containing act prompt files (used when running in Act mode and `--acts` is not provided). | `null`. | When `--act` is enabled and `--acts` is not provided, read via `config.get("gw.acts", null)` and passed to `ActProcessor#setActsLocation(...)`. |
+| `acts.location` | Default directory containing act prompt files (used when running in Act mode and `--acts` is not provided). | `null`. | In Act mode, when `--acts` is not provided, read via `config.get("acts.location", null)` and passed to `ActProcessor#setActsLocation(...)`. |
 | `gw.act` | Default act prompt text (used when running in Act mode and `--act` is provided with no value). | `null`. | In Act mode, used by `resolveActPrompt(...)` as the initial default prompt: `config.get("gw.act", null)`, overridden by CLI `--act` value or stdin via `readText("Act")`. |
 | `gw.guidance` | Default guidance applied when embedded `@guidance:` directives are not present (non-Act mode). | `null`. | Loaded via `config.get("gw.guidance", null)`. Optionally overridden by CLI `-g/--guidance`; if `-g` is specified without a value, guidance is read from stdin via `readText("Guidance")`. Used as the processor default prompt via `AIFileProcessor#setDefaultPrompt(...)`. |
 | `gw.threads` | Degree of concurrency for processing. | `null` (unset). | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads <count>`. Parsed as an integer and applied via `AIFileProcessor#setDegreeOfConcurrency(int)` (via `Ghostwriter#setDegreeOfConcurrency(String)`). |
-| `inputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("inputs", false)` (via `GenAIProvider.LOG_INPUTS_PROP_NAME`) and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
+| `inputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("inputs", false)` (via `Genai.LOG_INPUTS_PROP_NAME`) and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
 | `project.dir` | Root directory used as the base directory for scanning/processing when CLI `--projectDir/-d` is not provided. | If not set: `user.dir`. | When `-d/--projectDir` is not provided, Ghostwriter loads it via `config.getFile("project.dir", null)` (via `ProjectLayout.PROJECT_DIR_PROP_NAME`) and falls back to `SystemUtils.getUserDir()`. Passed to `ActProcessor` / `GuidanceProcessor` and used as the base for `scanDocuments(projectDir, scanDir)`. |
 | `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | If unset: `user.dir` absolute path. | When there are no CLI scanDir args, Ghostwriter reads `config.get("gw.scanDir", null)`. If absent, it scans `SystemUtils.getUserDir().getAbsolutePath()` (see `resolveScanDirs(...)`). |
-| `gw.nonRecursive` | Declared constant (not used by `Ghostwriter` currently). | N/A. | Present as `public static final String GW_NONRECURSIVE_PROP_NAME = "gw.nonRecursive";` but not referenced elsewhere in this class. |
+| `gw.nonRecursive` | Declared constant (not used by `Ghostwriter` currently). | N/A. | Present as `public static final String NONRECURSIVE_PROP_NAME = "gw.nonRecursive";` but not referenced elsewhere in this class. |
+| `gw.interactive` | Declared constant (not used by `Ghostwriter` currently). | N/A. | Present as `public static final String INTERACTIVE_MODE_PROP_NAME = "gw.interactive";` but not referenced elsewhere in this class. |
 
 > Notes:
 > - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself resolves `gw.home` via configuration/system properties (it does not read `GW_HOME` directly).
@@ -153,7 +154,7 @@ project.dir=C:\\projects\\machai
 # -Dgw.home=C:\\machai\\ghostwriter
 
 # Optional: Act mode defaults
-# gw.acts=C:\\machai\\ghostwriter\\acts
+# acts.location=C:\\machai\\ghostwriter\\acts
 # gw.act=Improve readability and add tests
 ```
 

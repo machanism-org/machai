@@ -64,6 +64,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <li><strong>Processors</strong> that traverse the filesystem, select scan targets, compose prompts, and apply results.</li>
     <li><strong>Reviewers</strong> (an SPI) that extract guidance blocks from specific file formats and normalize them into prompt fragments.</li>
     <li><strong>Acts</strong> (TOML templates) that provide reusable prompt/instruction bundles for common workflows.</li>
+    <li><strong>Provider integration</strong> via {@code org.machanism.machai.ai.manager.Genai} for prompt dispatch and tool registration.</li>
   </ul>
 </section>
 
@@ -90,13 +91,19 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <p>
     The central abstraction is the <code>Reviewer</code> service-provider interface (SPI). Each reviewer targets a specific
     file type (for example Java sources, Markdown, HTML/XML, TypeScript, Python, PlantUML, or plain-text guidance
-    files), understands that format's comment conventions, and returns formatted fragments that can be assembled into a
+    files), understands that format's comment conventions, and returns a formatted fragment that can be assembled into a
     single request for the LLM.
+  </p>
+
+  <h3><code>org.machanism.machai.gw.tools</code></h3>
+  <p>
+    GenAI provider tool registration for Ghostwriter-specific operations. This package exposes selected project
+    capabilities (for example listing and loading Act templates) as callable tools.
   </p>
 </section>
 
 <section>
-  <h2>Workflow</h2>
+  <h2>Processing workflow</h2>
   <ol>
     <li><strong>Select scan targets</strong> (directory roots and/or matchers such as <code>glob:</code> and <code>regex:</code>).</li>
     <li><strong>Traverse the filesystem</strong> and select files to process using include/exclude rules.</li>

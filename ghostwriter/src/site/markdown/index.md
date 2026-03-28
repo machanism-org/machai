@@ -232,7 +232,7 @@ Ghostwriter supports a default guidance prompt (stored as `defaultPrompt`) that 
 
 - Provide a baseline instruction set for files that do not carry their own embedded `@guidance:` blocks.
 - Allow centralized, repeatable prompting for a scan run (for example: summarize Markdown files, modernize headers, add missing Javadoc).
-- Enable prompting when running in Act mode (where the act prompt is treated as the processors default prompt).
+- Enable prompting when running in Act mode (where the act prompt is treated as the processor’s default prompt).
 
 ### How it works
 
