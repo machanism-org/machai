@@ -255,7 +255,7 @@
 						</includes>
 					</sourceFiles>
 					<outputDirectory>${project.build.directory}/site/images</outputDirectory>
-					<stripPath>target/generated-docs/puml</stripPath>
+					<stripPath>src/site/puml</stripPath>
 					<format>PNG</format>
 				</configuration>
 				<executions>
