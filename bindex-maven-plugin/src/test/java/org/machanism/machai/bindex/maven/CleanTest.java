@@ -31,7 +31,8 @@ class CleanTest {
 		mojo.setBasedir(tempDir);
 
 		// Act + Assert
-		assertDoesNotThrow(() -> mojo.execute());
+		// Sonar java:S1612 - replace lambda with method reference.
+		assertDoesNotThrow(mojo::execute);
 	}
 
 	@Test
