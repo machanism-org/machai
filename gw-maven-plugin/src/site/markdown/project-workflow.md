@@ -99,7 +99,6 @@ For most automation scenarios, let the plugin process the entire project or modu
 ```sh
 mvn org.machanism.machai:gw-maven-plugin:0.0.10:gw \
   -Dgw.scanDir="glob:**/*.java" \
-  -Dgw.guidance="file:default-guidance.txt" \
   -Dgw.instructions="file:project-instructions.txt" \
   -DlogInputs=true
 ```

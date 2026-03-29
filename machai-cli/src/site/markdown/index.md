@@ -104,7 +104,6 @@ Machai CLI persists user defaults in `machai.properties` (in the working directo
 | `projectDir` | Default project directory used by commands that operate on a folder tree | Current working directory |
 | `gw.model` | Default GenAI provider/model used by `gw` | (none) |
 | `gw.instructions` | Default system instructions source (text/URL/file path) | (none) |
-| `gw.guidance` | Default guidance source (text/URL/file path) | (none) |
 | `logInputs` | Whether to log LLM request inputs to dedicated files | `false` |
 | `score` | Default similarity threshold for semantic search (`pick` / `assembly`) | `0.65` |
 

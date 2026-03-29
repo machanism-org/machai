@@ -39,8 +39,6 @@ import org.slf4j.LoggerFactory;
  * defaults to the module base directory.</li>
  * <li>{@code -Dgw.instructions} - Instruction locations (for example, file
  * paths or classpath locations) consumed by the workflow.</li>
- * <li>{@code -Dgw.guidance} - Default guidance text forwarded to the
- * workflow.</li>
  * <li>{@code -Dgw.excludes} - Exclude patterns/paths to skip while scanning
  * documentation sources.</li>
  * <li>{@code -Dgw.model.serverId} - {@code settings.xml} {@code &lt;server&gt;}

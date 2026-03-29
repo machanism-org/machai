@@ -161,7 +161,6 @@ java -jar gw.jar src -m OpenAI:gpt-5.1
    - `gw.model` (provider:model)
    - `instructions` (optional system instructions)
    - `gw.excludes` (optional excludes)
-   - `gw.guidance` (optional default guidance)
 3. Run Ghostwriter against a directory or pattern (e.g., `src`, `glob:**/*.md`, `regex:...`).
 4. Review the resulting changes and iterate.
 
@@ -195,7 +194,6 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 | `-t, --threads <count>` | Degree of concurrency for processing. | `gw.threads` or unset |
 | `-m, --model <provider:model>` | GenAI provider and model. | `gw.model` |
 | `-i, --instructions[=<text\|url\|file:...>]` | System instructions (plain text/URL/`file:`). If no value: multi-line stdin. | `instructions` |
-| `-g, --guidance[=<text\|url\|file:...>]` | Default guidance (plain text/URL/`file:`). If no value: multi-line stdin. | `gw.guidance` |
 | `-e, --excludes <csv>` | Comma-separated excludes (exact paths or `glob:` / `regex:` patterns). | `gw.excludes` |
 | `-l, --logInputs` | Log provider input payloads to log files. | `false` |
 | `-as, --acts <path>` | Directory containing act prompt files. | `acts.location` |
@@ -215,23 +213,6 @@ From the built-in help:
 - If an absolute scan path is provided, it must be located within the root project directory.
 - If an option with an optional value (`-g/--guidance`, `-i/--instructions`, `-a/--act`) is used without a value, Ghostwriter reads multi-line input from stdin.
 - When entering multi-line input interactively, end input when a line does not end with `\` (a trailing backslash continues the next line).
-
-## Default Guidance
-
-Default guidance is the processor’s fallback prompt configured via `AIFileProcessor.setDefaultPrompt(String defaultPrompt)` and passed to the CLI via `gw.guidance` / `-g, --guidance`. It is applied when a file does not contain embedded `@guidance:` directives.
-
-### Purpose
-
-- Provide a baseline instruction set for files without embedded guidance blocks.
-- Centralize consistent behavior for a scan run (e.g., summarize Markdown pages, modernize headers, add missing Javadoc).
-- Enable directory-level processing in addition to per-file guidance, depending on the processor mode.
-
-### How it works
-
-- Source: set in `gw.properties` (`gw.guidance`) or via `-g/--guidance`.
-- Multi-line input: if `-g/--guidance` is used without a value, Ghostwriter reads text from stdin until a line does not end with `\`.
-- Expansion rules: processed line-by-line; blank lines are preserved; `http(s)://...` lines are fetched; `file:...` lines load local file contents; other lines are used as-is.
-- Scanning behavior: when default guidance is set and you pass a directory (not a matcher), only that directory itself is matched; when it is not set, the directory and its descendants are matched.
 
 ## Resources
 

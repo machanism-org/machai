@@ -150,38 +150,29 @@ Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
   - Used when running with -a/--act; can be set in gw.properties.
   - If -a/--act is used without a value, Ghostwriter reads a multi-line act prompt from stdin.
 
-7) gw.guidance (Ghostwriter.GUIDANCE_PROP_NAME)
-- Description: Default guidance applied when embedded @guidance directives are not present (also used as the processor default prompt).
-- Default: Unset.
-- Usage context:
-  - Set in gw.properties.
-  - Override with -g/--guidance.
-  - If -g/--guidance is used without a value, Ghostwriter reads multi-line guidance from stdin.
-  - Lines are processed the same way as instructions.
-
-8) gw.threads (Ghostwriter.THREADS_PROP_NAME)
+7) gw.threads (Ghostwriter.THREADS_PROP_NAME)
 - Description: Degree of concurrency for processing (worker thread count).
 - Default: Unset.
 - Usage context: Set in gw.properties; can be overridden with -t/--threads <count>.
 
-9) gw.scanDir (Ghostwriter.SCAN_DIR_PROP_NAME)
+8) gw.scanDir (Ghostwriter.SCAN_DIR_PROP_NAME)
 - Description: Default scan directory/pattern if no <scanDir> argument is provided.
 - Default: If unset and no scanDir args are provided, Ghostwriter uses the current working directory absolute path.
 - Usage context: Set in gw.properties to avoid passing <scanDir> every run.
 
-10) gw.nonRecursive (Ghostwriter.NONRECURSIVE_PROP_NAME)
+9) gw.nonRecursive (Ghostwriter.NONRECURSIVE_PROP_NAME)
 - Description: Controls whether scanning should be non-recursive.
 - Default: Unset.
 - Usage context: Used by processor implementation(s) to adjust scan behavior.
 
-11) inputs (Ghostwriter.INPUTS_PROPERTY_NAME / Genai.LOG_INPUTS_PROP_NAME)
+10) inputs (Ghostwriter.INPUTS_PROPERTY_NAME / Genai.LOG_INPUTS_PROP_NAME)
 - Description: Enables request input logging to dedicated log files.
 - Default: false.
 - Usage context:
   - Set in gw.properties (inputs=true).
   - Or enable via -l/--inputs.
 
-12) gw.interactive (Ghostwriter.INTERACTIVE_MODE_PROP_NAME)
+11) gw.interactive (Ghostwriter.INTERACTIVE_MODE_PROP_NAME)
 - Description: Toggles interactive behavior in the processor layer (if supported by the configured processor).
 - Default: Unset.
 - Usage context: Read by processor implementation(s).
@@ -203,16 +194,10 @@ CLI options summary
 - -t, --threads <count>: Degree of concurrency for processing.
 - -m, --model <provider:model>: GenAI provider/model selection.
 - -i, --instructions[=<text|url|file:...>]: System instructions (or multi-line stdin if no value).
-- -g, --guidance[=<text|url|file:...>]: Default guidance (or multi-line stdin if no value).
 - -e, --excludes <csv>: Comma-separated excludes.
 - -l, --logInputs: Log LLM request inputs to dedicated log files.
 - -as, --acts <path>: Directory containing predefined act prompt files.
 - -a, --act[=<...>]: Act mode prompt (or multi-line stdin if no value).
-
-Notes on default guidance
-- Default guidance (gw.guidance / -g) is used when a file contains no embedded "@guidance:" directives.
-- Default guidance can also be used as a centralized, repeatable instruction set for a scan run.
-
 
 Troubleshooting & Support
 

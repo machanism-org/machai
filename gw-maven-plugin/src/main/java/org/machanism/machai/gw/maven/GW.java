@@ -81,9 +81,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>Instruction locations (for example, file paths or classpath locations)
  * consumed by the workflow.</dd>
  *
- * <dt><b>{@code -Dgw.guidance}</b> / {@code &lt;guidance&gt;}</dt>
- * <dd>Default guidance text forwarded to the workflow.</dd>
- *
  * <dt><b>{@code -Dgw.excludes}</b> / {@code &lt;excludes&gt;}</dt>
  * <dd>Exclude patterns/paths to skip when scanning documentation sources.</dd>
  *

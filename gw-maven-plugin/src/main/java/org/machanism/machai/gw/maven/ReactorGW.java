@@ -41,8 +41,6 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * defaults to the module base directory.</li>
  * <li><b>{@code gw.instructions}</b> / {@code &lt;instructions&gt;} ({@code instructions}): Instruction locations (for
  * example, file paths or classpath locations) consumed by the workflow.</li>
- * <li><b>{@code gw.guidance}</b> / {@code &lt;guidance&gt;} ({@code guidance}): Default guidance text forwarded to the
- * workflow.</li>
  * <li><b>{@code gw.excludes}</b> / {@code &lt;excludes&gt;} ({@code excludes}): Exclude patterns/paths that should be
  * skipped when scanning documentation sources.</li>
  * <li><b>{@code genai.serverId}</b> ({@code serverId}): {@code settings.xml} {@code &lt;server&gt;} id used to read GenAI

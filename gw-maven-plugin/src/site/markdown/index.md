@@ -173,7 +173,6 @@ Common configuration parameters (usable as `-D...` system properties or via `<co
 | `gw.model` | Provider/model identifier forwarded to Ghostwriter (example: `openai:gpt-4o-mini`). | *(none)* |
 | `gw.scanDir` | Scan root directory to process. If not provided, defaults to the execution root directory for `gw:gw` and the module base directory for reactor-style usage. | *(varies by goal)* |
 | `gw.instructions` | Instruction locations consumed by the workflow (for example, file paths or classpath locations). | *(none)* |
-| `gw.guidance` | Default guidance text forwarded to the workflow. | *(none)* |
 | `gw.excludes` | Exclude patterns/paths to skip while scanning documentation sources. | *(none)* |
 | `genai.serverId` | `settings.xml` `<server>` id used to load GenAI credentials into `GENAI_USERNAME`/`GENAI_PASSWORD`. | *(none)* |
 | `logInputs` | Logs the list of input files passed to the workflow. | `false` |

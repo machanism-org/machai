@@ -63,7 +63,6 @@ java -jar gw.jar src -m OpenAI:gpt-5.1
    - `gw.model` (provider:model)
    - `instructions` (optional system instructions)
    - `gw.excludes` (optional excludes)
-   - `gw.guidance` (optional default guidance)
 3. Run Ghostwriter against a directory or pattern (e.g., `src`, `glob:**/*.md`, `regex:...`).
 4. Review the resulting changes and iterate.
 
