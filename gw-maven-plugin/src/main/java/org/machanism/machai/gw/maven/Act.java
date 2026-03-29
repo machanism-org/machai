@@ -12,6 +12,7 @@ import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -68,7 +69,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act -Dgw.acts=src\\site\\locations -DlogInputs=true
  * </pre>
  */
-@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false)
+@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false, defaultPhase = LifecyclePhase.PACKAGE)
 public class Act extends AbstractGWGoal {
 
 	/**
@@ -80,7 +81,7 @@ public class Act extends AbstractGWGoal {
 	/**
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
-	@SuppressWarnings("S1700")
+	@SuppressWarnings("java:S1700")
 	@Parameter(property = Ghostwriter.ACT_PROP_NAME, required = false)
 	protected String act;
 
@@ -152,7 +153,8 @@ public class Act extends AbstractGWGoal {
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
-			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.ACTS_LOCATION_PROP_NAME, this.locations);
+			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.ACTS_LOCATION_PROP_NAME,
+					this.locations);
 
 			if (actsLocation != null) {
 				logger.info("Custom locations location specified: {}", actsLocation);
@@ -178,16 +180,18 @@ public class Act extends AbstractGWGoal {
 		} catch (IOException e) {
 			getLog().error("I/O error occurred during file processing: " + e.getMessage());
 			throw new MojoExecutionException("I/O error occurred during file processing", e);
-
 		} finally {
 			GenaiProviderManager.logUsage();
 		}
 	}
 
 	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
-		applyActPrompt(actProcessor.getConfigurator());
-		Properties userProperties = session.getUserProperties();
-		String savedAct = userProperties.getProperty(Ghostwriter.ACT_PROP_NAME);
+		String savedAct = act;
+		if (savedAct == null) {
+			applyActPrompt(actProcessor.getConfigurator());
+			Properties userProperties = session.getUserProperties();
+			savedAct = userProperties.getProperty(Ghostwriter.ACT_PROP_NAME);
+		}
 		actProcessor.setDefaultPrompt(savedAct);
 		scanDocuments(actProcessor);
 	}
