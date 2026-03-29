@@ -1,14 +1,8 @@
 package org.machanism.machai.cli;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.File;
-import java.io.FileOutputStream;
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class MachaiCLICoverageTest {

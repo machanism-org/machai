@@ -76,7 +76,6 @@ public class GWCommand {
 		private int threads;
 		private String model;
 		private String instructions;
-		private String guidance;
 		private String excludes;
 		private Boolean logInputs;
 		private File projectDir;
@@ -98,11 +97,6 @@ public class GWCommand {
 
 		private GwOptions instructions(String instructions) {
 			this.instructions = instructions;
-			return this;
-		}
-
-		private GwOptions guidance(String guidance) {
-			this.guidance = guidance;
 			return this;
 		}
 
@@ -150,9 +144,8 @@ public class GWCommand {
 	 */
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
 	/**
-	 * FalsePositive
-	 * Method signature is dictated by Spring Shell option binding; grouping would
-	 * reduce CLI UX.
+	 * FalsePositive Method signature is dictated by Spring Shell option binding;
+	 * grouping would reduce CLI UX.
 	 */
 	@SuppressWarnings("java:S107")
 	public void gw(
@@ -162,8 +155,6 @@ public class GWCommand {
 					Ghostwriter.MODEL_PROP_NAME }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
 			@ShellOption(value = { "-i",
 					"--instructions" }, help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
-			@ShellOption(value = { "-g",
-					"--guidance" }, help = "Default guidance as text, URL, or file path", defaultValue = ShellOption.NULL) String guidance,
 			@ShellOption(value = { "-e",
 					"--excludes" }, help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
 			@ShellOption(value = { "-l",
@@ -173,7 +164,7 @@ public class GWCommand {
 			@ShellOption(value = { "-s",
 					"--scanDir" }, help = "Directories to scan.", defaultValue = ShellOption.NULL) String[] scanDirs) {
 
-		GwOptions options = new GwOptions().threads(threads).model(model).instructions(instructions).guidance(guidance)
+		GwOptions options = new GwOptions().threads(threads).model(model).instructions(instructions)
 				.excludes(excludes).logInputs(logInputs).projectDir(projectDir).scanDirs(scanDirs);
 		try {
 			runGw(options);
@@ -193,20 +184,17 @@ public class GWCommand {
 		File projectDir = resolveProjectDir(options.projectDir);
 		String genaiValue = resolveModel(options.model);
 		Boolean logInputs = resolveLogInputs(options.logInputs);
-		PromptContext prompts = resolvePrompts(options.instructions, options.guidance);
+		String instructionsValue = options.instructions;
 		String[] dirs = resolveScanDirs(options.scanDirs, projectDir);
 		String[] excludesArr = splitExcludes(options.excludes);
 		PropertiesConfigurator config = loadMachaiPropertiesConfig();
 
 		for (String scanDir : dirs) {
-			ProcessingContext ctx = new ProcessingContext(projectDir, scanDir, genaiValue, config, excludesArr, prompts,
+			ProcessingContext ctx = new ProcessingContext(projectDir, scanDir, genaiValue, config, excludesArr,
+					instructionsValue,
 					new ExecutionContext(options.threads, logInputs));
 			processSingleScanDir(ctx);
 		}
-	}
-
-	private PromptContext resolvePrompts(String instructions, String guidance) {
-		return new PromptContext(resolveInstructions(instructions), resolveGuidance(guidance));
 	}
 
 	/**
@@ -218,31 +206,18 @@ public class GWCommand {
 		private final String genaiValue;
 		private final PropertiesConfigurator config;
 		private final String[] excludesArr;
-		private final PromptContext prompts;
+		private final String instructionsValue;
 		private final ExecutionContext execution;
 
 		private ProcessingContext(File projectDir, String scanDir, String genaiValue, PropertiesConfigurator config,
-				String[] excludesArr, PromptContext prompts, ExecutionContext execution) {
+				String[] excludesArr, String instructionsValue, ExecutionContext execution) {
 			this.projectDir = projectDir;
 			this.scanDir = scanDir;
 			this.genaiValue = genaiValue;
 			this.config = config;
 			this.excludesArr = excludesArr;
-			this.prompts = prompts;
-			this.execution = execution;
-		}
-	}
-
-	/**
-	 * Pair of prompts used by Ghostwriter.
-	 */
-	private static final class PromptContext {
-		private final String instructionsValue;
-		private final String defaultGuidance;
-
-		private PromptContext(String instructionsValue, String defaultGuidance) {
 			this.instructionsValue = instructionsValue;
-			this.defaultGuidance = defaultGuidance;
+			this.execution = execution;
 		}
 	}
 
@@ -289,19 +264,6 @@ public class GWCommand {
 		return instructionsValue;
 	}
 
-	private String resolveGuidance(String guidance) {
-		String defaultGuidance = ConfigCommand.config.get(Ghostwriter.GUIDANCE_PROP_NAME, null);
-		if (guidance == null) {
-			return defaultGuidance;
-		}
-
-		defaultGuidance = guidance;
-		if (defaultGuidance.isEmpty()) {
-			defaultGuidance = lineReader.readLine("Guidance: ");
-		}
-		return defaultGuidance;
-	}
-
 	private String[] resolveScanDirs(String[] scanDirs, File projectDir) {
 		if (scanDirs == null || scanDirs.length == 0) {
 			return new String[] { projectDir.getAbsolutePath() };
@@ -333,25 +295,16 @@ public class GWCommand {
 			processor.setExcludes(ctx.excludesArr);
 		}
 
-		if (ctx.prompts.instructionsValue != null) {
+		if (ctx.instructionsValue != null) {
 			if (LOGGER.isInfoEnabled()) {
-				String abbreviated = org.apache.commons.lang.StringUtils.abbreviate(ctx.prompts.instructionsValue,
+				String abbreviated = org.apache.commons.lang.StringUtils.abbreviate(ctx.instructionsValue,
 						LOG_PREVIEW_LEN);
 				LOGGER.info("Instructions: {}", abbreviated);
 			}
-			processor.setInstructions(ctx.prompts.instructionsValue);
+			processor.setInstructions(ctx.instructionsValue);
 		}
 
 		processor.setDegreeOfConcurrency(ctx.execution.threads);
-
-		if (ctx.prompts.defaultGuidance != null) {
-			if (LOGGER.isInfoEnabled()) {
-				String abbreviated = org.apache.commons.lang.StringUtils.abbreviate(ctx.prompts.defaultGuidance,
-						LOG_PREVIEW_LEN);
-				LOGGER.info("Default Guidance: {}", abbreviated);
-			}
-			processor.setDefaultPrompt(ctx.prompts.defaultGuidance);
-		}
 
 		processor.setLogInputs(ObjectUtils.getIfNull(ctx.execution.logInputs, false));
 		processor.scanDocuments(ctx.projectDir, ctx.scanDir);

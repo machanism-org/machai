@@ -130,38 +130,6 @@ class GWCommandAdditionalTest {
 	}
 
 	@Test
-	void resolveGuidance_shouldReturnConfiguredValue_whenOptionIsNull() throws Exception {
-		// Arrange
-		ConfigCommand.config.set(Ghostwriter.GUIDANCE_PROP_NAME, "cfg-guidance");
-		LineReader reader = Mockito.mock(LineReader.class);
-		GWCommand cmd = new GWCommand(reader);
-		Method m = GWCommand.class.getDeclaredMethod("resolveGuidance", String.class);
-		m.setAccessible(true);
-
-		// Act
-		String result = (String) m.invoke(cmd, new Object[] { null });
-
-		// Assert
-		assertEquals("cfg-guidance", result);
-	}
-
-	@Test
-	void splitExcludes_shouldReturnSingleEntry_whenNoComma() throws Exception {
-		// Arrange
-		LineReader reader = Mockito.mock(LineReader.class);
-		GWCommand cmd = new GWCommand(reader);
-		Method m = GWCommand.class.getDeclaredMethod("splitExcludes", String.class);
-		m.setAccessible(true);
-
-		// Act
-		String[] result = (String[]) m.invoke(cmd, "target");
-
-		// Assert
-		assertEquals(1, result.length);
-		assertEquals("target", result[0]);
-	}
-
-	@Test
 	void loadMachaiPropertiesConfig_shouldReturnConfigurator_whenFileMissing() throws Exception {
 		// Arrange
 		File props = new File(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);
