@@ -27,6 +27,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -427,25 +428,32 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *                                  root project directory
 	 */
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
-		FunctionToolsLoader.getInstance().setConfiguration(getConfigurator());
+		try {
+			FunctionToolsLoader.getInstance().setConfiguration(getConfigurator());
 
-		if (projectDir == null) {
-			throw new IllegalArgumentException("projectDir must not be null");
-		}
-		if (StringUtils.isBlank(scanDir)) {
-			throw new IllegalArgumentException("scanDir must not be blank");
-		}
-
-		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
-			if (!isPathPattern(scanDir)) {
-				scanDir = parseScanDir(projectDir, scanDir);
+			if (projectDir == null) {
+				throw new IllegalArgumentException("projectDir must not be null");
 			}
-			super.setPathMatcher(FileSystems.getDefault().getPathMatcher(scanDir));
-		} else {
-			setScanDir(projectDir);
-		}
+			if (StringUtils.isBlank(scanDir)) {
+				throw new IllegalArgumentException("scanDir must not be blank");
+			}
 
-		scanFolder(projectDir);
+			if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
+				if (!isPathPattern(scanDir)) {
+					scanDir = parseScanDir(projectDir, scanDir);
+				}
+				super.setPathMatcher(FileSystems.getDefault().getPathMatcher(scanDir));
+			} else {
+				setScanDir(projectDir);
+			}
+
+			scanFolder(projectDir);
+		} catch (ProcessTerminationException e) {
+			if (e.getExitCode() != 0) {
+				throw e;
+			}
+			logger.info("Process terminated gracefully: {}", e.getMessage());
+		}
 	}
 
 	String parseScanDir(File projectDir, String scanDir) {
