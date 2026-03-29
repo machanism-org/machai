@@ -60,7 +60,7 @@ package org.machanism.machai.gw.maven;
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
+ * **IMPORTANT: ADD OR UPDATE JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
  *
  * - Update Existing Javadoc and Add Missing Javadoc:
  *      - Review all classes in the folder.

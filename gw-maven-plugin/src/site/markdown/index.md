@@ -1,5 +1,8 @@
 ---
 <!-- @guidance:
+Generate or update the content as follows.  
+**Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
+
 **VERY IMPORTANT NOTE:** Ghostwriter works with **all types of project files—including source code, documentation, project site content, and other relevant files**.
 Ensure that your content generation and documentation efforts consider the full range of file types present in the project.
 **GW Maven Plugin is the primary adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html).**  

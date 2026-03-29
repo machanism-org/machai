@@ -89,8 +89,7 @@ mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\\site
 - GitHub (SCM): https://github.com/machanism-org/machai
 
 <!--
-@guidance:
-**ADD FOLLOWING SECTIONS TO THIS README FILE:**
+**Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 1. **Project Title and Overview:**  
    - Provide the project name and a brief description based on `src/site/markdown/index.md` content summary.
    - Use `src/site/markdown/index.md` as the primary source of information for generating the project description. Summarize and adapt its content as needed for clarity and conciseness.

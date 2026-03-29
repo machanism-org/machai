@@ -38,7 +38,7 @@ package org.machanism.machai.project;
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
+ * **IMPORTANT: ADD OR UPDATE JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
  * 
  * - Use Clear and Concise Descriptions:
  * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.

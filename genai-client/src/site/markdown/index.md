@@ -1,5 +1,8 @@
 ---
 <!-- @guidance:
+Generate or update the content as follows.  
+**Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
+
 Page Structure: 
 # Header
    - Project Title: need to use from pom.xml

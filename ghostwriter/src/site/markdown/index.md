@@ -1,5 +1,8 @@
 ---
 <!-- @guidance:
+Generate or update the content as follows.  
+**Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
+
 **IMPORTANT:**  
 The Ghostwriter Maven plugin is designed to work with **all types of project files**—including source code, documentation, project site content, and any other relevant files.  
 **When generating content or documentation, always consider the full range of file types present in the project.**

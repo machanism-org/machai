@@ -1,8 +1,8 @@
 ---
-canonical: https://machai.machanism.org/bindex-core/index.html
----
-
 <!-- @guidance:
+Generate or update the content as follows.  
+**Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
+
 Page Structure: 
 # Header
    - Project Title: need to use from pom.xml
@@ -40,6 +40,8 @@ Page Structure:
 - Use Markdown syntax for headings, lists, tables, code blocks, and links.
 - Ensure clarity, conciseness, and easy navigation throughout the page.
 -->
+canonical: https://machai.machanism.org/bindex-core/index.html
+---
 
 # Bindex Core
 
@@ -125,17 +127,6 @@ Configurator config = ...;
 Picker picker = new Picker("openai", null, config);
 
 List<Bindex> selected = picker.pick("Find libraries for server-side logging");
-```
-
-Assemble prompt-ready inputs:
-
-```java
-Configurator config = ...;
-File projectDir = ...;
-List<Bindex> bindexes = ...;
-
-new ApplicationAssembly("openai", config, projectDir)
-    .assembly("Create a minimal sample that uses the selected libraries", bindexes);
 ```
 
 ### Typical Workflow

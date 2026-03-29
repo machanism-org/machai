@@ -1,6 +1,6 @@
 <!--
 @guidance:
-**IMPORTANT: GENERATE OR UPDATECONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+**IMPORTANT: GENERATE OR UPDATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
 
 Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
 [PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
@@ -119,7 +119,6 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li><code>org.machanism.machai.bindex.BindexRegister</code>: registers a local <code>bindex.json</code> in the registry.</li>
   <li><code>org.machanism.machai.bindex.BindexRepository</code>: persistence primitives for registry operations.</li>
   <li><code>org.machanism.machai.bindex.Picker</code>: performs semantic search and expands results via dependencies.</li>
-  <li><code>org.machanism.machai.bindex.ApplicationAssembly</code>: assembles prompt-ready inputs from selected Bindexes.</li>
   <li><code>org.machanism.machai.bindex.builder.BindexBuilder</code>: base class for project-layout-specific builders.</li>
 </ul>
 
@@ -157,10 +156,6 @@ ProjectLayout layout = ...;
 
 List<Bindex> selected = new Picker("openai", null, config)
     .pick("http client with oauth2 support");
-
-new ApplicationAssembly("openai", config, layout.getProjectDir())
-    .projectDir(layout.getProjectDir())
-    .assembly("Create a minimal sample using the selected libraries", selected);
 }</pre>
 
 <h2>Operational notes</h2>

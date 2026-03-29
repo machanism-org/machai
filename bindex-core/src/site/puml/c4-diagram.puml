@@ -1,4 +1,4 @@
-' @guidance: create the C4 plantuml diagram for the project.
+' @guidance: create or update the C4 plantuml diagram for the project.
 
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
@@ -51,7 +51,6 @@ Rel(javaLib, repo, "Reads/Writes", "Bindex docs + vector search")
 ' C3: Components (inside Java library)
 ' -----------------------------
 Container_Boundary(components, "Bindex Core Java Library") {
-  Component(appAssembly, "ApplicationAssembly", "Service", "Assembles prompts using selected Bindexes and executes GenAI provider")
   Component(creator, "BindexCreator", "Processor", "Creates/updates bindex.json using an AI-assisted BindexBuilder")
   Component(register, "BindexRegister", "Processor", "Registers a project's bindex.json into the registry using Picker")
   Component(processorBase, "BindexProjectProcessor", "Base class", "Shared utilities to locate/parse bindex.json")
@@ -76,10 +75,6 @@ Container_Boundary(components, "Bindex Core Java Library") {
 ' -----------------------------
 ' Key relationships
 ' -----------------------------
-Rel(appAssembly, genaiManager, "Obtains provider")
-Rel(appAssembly, functionToolsLoader, "Applies tools")
-Rel(appAssembly, genaiProvider, "Sends instructions/prompt and performs")
-
 Rel(creator, processorBase, "Extends")
 Rel(creator, builderFactory, "Uses")
 Rel(creator, layout, "Processes")

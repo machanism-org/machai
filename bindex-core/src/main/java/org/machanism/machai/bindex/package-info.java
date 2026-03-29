@@ -1,7 +1,7 @@
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
+ * **IMPORTANT: ADD OR UPDATE JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
  * 
  * - Use Clear and Concise Descriptions:
  * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
@@ -55,7 +55,6 @@
  *   <li>{@link org.machanism.machai.bindex.BindexRegister} registers a local {@code bindex.json} in the registry.</li>
  *   <li>{@link org.machanism.machai.bindex.BindexRepository} provides MongoDB persistence primitives.</li>
  *   <li>{@link org.machanism.machai.bindex.Picker} performs semantic search and expands results via dependencies.</li>
- *   <li>{@link org.machanism.machai.bindex.ApplicationAssembly} builds prompt-ready inputs from selected Bindexes.</li>
  * </ul>
  *
  * <h2>Typical workflow</h2>
@@ -63,7 +62,6 @@
  *   <li>Generate or update {@code bindex.json} using {@link org.machanism.machai.bindex.BindexCreator}.</li>
  *   <li>Register it via {@link org.machanism.machai.bindex.BindexRegister}.</li>
  *   <li>Retrieve relevant documents for a query via {@link org.machanism.machai.bindex.Picker}.</li>
- *   <li>Assemble prompt input using {@link org.machanism.machai.bindex.ApplicationAssembly}.</li>
  * </ol>
  *
  * <h2>Example</h2>
@@ -78,9 +76,6 @@
  * Picker picker = new Picker("openai", null, config);
  * List<Bindex> selected = picker.pick("Find libraries for server-side logging");
  *
- * // 4) Assemble prompt input for an LLM workflow
- * new ApplicationAssembly("openai", config, layout.getProjectDir())
- *     .assembly("Generate an example app using the selected libraries", selected);
  * }</pre>
  */
 package org.machanism.machai.bindex;
