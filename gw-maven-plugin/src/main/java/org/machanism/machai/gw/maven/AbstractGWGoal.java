@@ -89,11 +89,6 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	@Parameter(property = Ghostwriter.INSTRUCTIONS_PROP_NAME, name = "instructions")
 	protected String instructions;
 	/**
-	 * Default guidance text forwarded to the workflow.
-	 */
-	@Parameter(property = Ghostwriter.GUIDANCE_PROP_NAME, name = "guidance")
-	protected String guidance;
-	/**
 	 * Exclude patterns/paths that should be skipped when scanning documentation
 	 * sources.
 	 */
@@ -206,13 +201,6 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 					logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
 				}
 				processor.setInstructions(instructions);
-			}
-
-			if (guidance != null) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Default Guidance: {}", StringUtils.abbreviate(guidance, 60));
-				}
-				processor.setDefaultPrompt(guidance);
 			}
 
 			File projectDir = new File(session.getExecutionRootDirectory());

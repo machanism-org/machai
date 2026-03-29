@@ -82,9 +82,6 @@ public final class Ghostwriter {
 	/** Configuration key containing comma-separated scan exclusions. */
 	public static final String ACT_PROP_NAME = "gw.act";
 
-	/** Configuration key containing default guidance. */
-	public static final String GUIDANCE_PROP_NAME = "gw.guidance";
-
 	/** Configuration key enabling multi-threaded processing. */
 	public static final String THREADS_PROP_NAME = "gw.threads";
 
@@ -318,12 +315,10 @@ public final class Ghostwriter {
 			processor = createActProcessor(cmd, projectDir, config, genai);
 			defaultPrompt = resolveActPrompt(cmd, config);
 			logDefaultPrompt("Act", defaultPrompt);
+			processor.setDefaultPrompt(defaultPrompt);
 		} else {
 			processor = new GuidanceProcessor(projectDir, genai, config);
-			defaultPrompt = resolveGuidancePrompt(cmd, config);
-			logDefaultPrompt("Default Prompt", defaultPrompt);
 		}
-		processor.setDefaultPrompt(defaultPrompt);
 		return processor;
 	}
 
@@ -351,17 +346,6 @@ public final class Ghostwriter {
 			defaultPrompt = cmd.getOptionValue("act");
 			if (defaultPrompt == null) {
 				defaultPrompt = readText("Act");
-			}
-		}
-		return defaultPrompt;
-	}
-
-	static String resolveGuidancePrompt(CommandLine cmd, PropertiesConfigurator config) {
-		String defaultPrompt = config.get(GUIDANCE_PROP_NAME, null);
-		if (cmd.hasOption(GUIDANCE_OPTION)) {
-			defaultPrompt = cmd.getOptionValue(GUIDANCE_OPTION);
-			if (defaultPrompt == null) {
-				defaultPrompt = readText("Guidance");
 			}
 		}
 		return defaultPrompt;
