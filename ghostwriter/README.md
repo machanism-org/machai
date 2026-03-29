@@ -32,7 +32,7 @@ Its conceptual foundation is [Guided File Processing](https://www.machanism.org/
 Main benefits:
 
 - **Guidance-first prompting**: instructions live next to the content they govern via embedded `@guidance:` blocks.
-- **Repository-scale consistency**: deterministic scanning, per-type reviewers, and injected project context make runs repeatable.
+- **Repository-scale consistency**: deterministic scanning plus per-file-type reviewers build prompts in a repeatable way.
 - **Automation-ready**: designed for non-interactive execution and integration into scripts and CI/CD pipelines.
 
 ## Usage
@@ -57,8 +57,8 @@ java -jar gw.jar src -m OpenAI:gpt-5.1
 
 #### Typical Workflow
 
-1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document (code, docs, configs, site pages, etc.).
-2. Create `gw.properties` (optional) and configure values such as:
+1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document (code, docs, configs, site pages, diagrams, etc.).
+2. (Optional) Create `gw.properties` and configure values such as:
    - `project.dir` (project root)
    - `gw.model` (provider:model)
    - `instructions` (optional system instructions)

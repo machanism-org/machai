@@ -1,30 +1,29 @@
 /**
- * File-format-aware components that locate embedded {@code @guidance} instructions and convert them into
- * normalized prompt fragments for Ghostwriter's downstream processing pipeline.
+ * File-format-aware components that extract embedded {@code @guidance} instructions and convert them into
+ * normalized prompt fragments for Ghostwriter.
  *
- * <p>The central abstraction is the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface
- * (SPI). Each {@code Reviewer} targets one or more file extensions, understands the corresponding comment or
- * annotation conventions for that format, and returns a formatted fragment that can be assembled into a single
- * request to the LLM.
+ * <p>The primary abstraction is the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface
+ * (SPI). Each implementation targets one or more file types, locates the {@code @guidance} tag according to the
+ * format's comment conventions, and produces a prompt fragment that includes project-relative path context.
  *
- * <p>Implementations in this package are responsible for:
+ * <h2>Overview</h2>
  * <ul>
- *   <li>reading supported files as UTF-8</li>
- *   <li>detecting whether {@code @guidance} is present (or, for {@code @guidance.txt}, matching by filename)</li>
- *   <li>computing a project-relative path via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File}</li>
- *   <li>emitting a prompt fragment using templates from the {@code document-prompts} resource bundle</li>
+ *   <li>Reviewers scan supported files (typically read as UTF-8).</li>
+ *   <li>If the {@code @guidance} tag is present (or the file is {@code @guidance.txt}), the reviewer formats a
+ *       prompt fragment using templates from the {@code document-prompts} resource bundle.</li>
+ *   <li>Paths are computed relative to the project root via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}.</li>
  * </ul>
  *
- * <p>Supported formats include (but are not limited to):
+ * <h2>Provided reviewers</h2>
  * <ul>
- *   <li>Java source ({@link org.machanism.machai.gw.reviewer.JavaReviewer})</li>
- *   <li>Markdown ({@link org.machanism.machai.gw.reviewer.MarkdownReviewer})</li>
- *   <li>HTML/XML ({@link org.machanism.machai.gw.reviewer.HtmlReviewer})</li>
- *   <li>TypeScript ({@link org.machanism.machai.gw.reviewer.TypeScriptReviewer})</li>
- *   <li>Python ({@link org.machanism.machai.gw.reviewer.PythonReviewer})</li>
- *   <li>PlantUML ({@link org.machanism.machai.gw.reviewer.PumlReviewer})</li>
- *   <li>Plain guidance files ({@link org.machanism.machai.gw.reviewer.TextReviewer})</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer} – Java source (including {@code package-info.java})</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer} – Markdown</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer} – HTML/XML</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer} – TypeScript</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer} – Python</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer} – PlantUML</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} – plain {@code @guidance.txt} files</li>
  * </ul>
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer

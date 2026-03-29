@@ -16,8 +16,8 @@ Key features
 - Per-file-type reviewers extract embedded directives and build project-aware prompts.
 - Optional system instructions and default guidance (plain text, URLs, or file: references).
 - Excludes support (exact paths and matchers as supported by the CLI/processor).
-- Optional multi-threaded processing.
-- Optional logging of provider inputs per processed file.
+- Optional multi-threaded processing (--threads).
+- Optional logging of provider inputs per processed file (--logInputs).
 - Act mode for running predefined prompts (--act) and custom act bundles (--acts).
 
 Typical use cases
@@ -27,7 +27,7 @@ Typical use cases
 
 Supported GenAI providers
 - CodeMie
-- OpenAI-compatible services (for example provider/model selection like OpenAI:gpt-5.1)
+- OpenAI-compatible services (provider/model selection like OpenAI:gpt-5.1)
 
 
 Installation Instructions
@@ -37,7 +37,7 @@ Prerequisites
 - A configured GenAI provider/model:
   - Property: gw.model
   - Or CLI option: -m / --model
-- Credentials for your selected provider (examples):
+- Credentials for your selected provider (examples; exact names depend on provider implementation):
   - CodeMie:
     - GENAI_USERNAME
     - GENAI_PASSWORD
@@ -88,6 +88,9 @@ Windows examples (.bat / cmd)
 
 - Scan by regex pattern:
   java -jar gw.jar "regex:^.*/[^/]+\\.java$" -m OpenAI:gpt-5.1
+
+- Provide system instructions via stdin (end input when a line does not end with "\\"):
+  java -jar gw.jar src -m OpenAI:gpt-5.1 -i
 
 - Provide default guidance via stdin (end input when a line does not end with "\\"):
   java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -g -l
@@ -170,7 +173,7 @@ Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
 - Default: false.
 - Usage context:
   - Set in gw.properties (inputs=true).
-  - Or enable via -l/--inputs.
+  - Or enable via -l/--logInputs.
 
 11) gw.interactive (Ghostwriter.INTERACTIVE_MODE_PROP_NAME)
 - Description: Toggles interactive behavior in the processor layer (if supported by the configured processor).
@@ -194,6 +197,7 @@ CLI options summary
 - -t, --threads <count>: Degree of concurrency for processing.
 - -m, --model <provider:model>: GenAI provider/model selection.
 - -i, --instructions[=<text|url|file:...>]: System instructions (or multi-line stdin if no value).
+- -g, --guidance[=<text|url|file:...>]: Default guidance (or multi-line stdin if no value).
 - -e, --excludes <csv>: Comma-separated excludes.
 - -l, --logInputs: Log LLM request inputs to dedicated log files.
 - -as, --acts <path>: Directory containing predefined act prompt files.

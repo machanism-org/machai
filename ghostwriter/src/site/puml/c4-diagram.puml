@@ -19,24 +19,22 @@ title Ghostwriter - C4 Component Diagram
 Person(user, "User", "Runs Ghostwriter to generate/update documentation.")
 
 System_Boundary(gw, "Ghostwriter (CLI)") {
-  Component(cli, "Ghostwriter CLI", "Java", "Parses CLI options, loads configuration, orchestrates scanning and processing.")
+  Component(cli, "Ghostwriter CLI", "Java", "Parses CLI options, loads configuration, and orchestrates scanning and processing.")
 
-  Component(procOrch, "File Processing Orchestrator", "Java", "Drives scanning, selects processing mode (Guidance vs Act), applies excludes, and manages concurrency.")
+  Component(config, "Configuration", "Properties", "Loads gw.properties and resolves scanDir, excludes, instructions, and model/provider settings.")
+  Component(projectLayout, "ProjectLayout", "Library", "Determines project root and layout metadata (Maven, Gradle, etc.).")
 
-  Component(guidanceProc, "GuidanceProcessor", "Java", "Extracts embedded @guidance directives from files and builds prompts.")
-  Component(actProc, "ActProcessor", "Java", "Executes predefined Act prompts from TOML act definitions.")
+  Component(procOrch, "Processing Orchestrator", "Java", "Drives scanning, selects processing mode (Guidance vs Act), applies excludes, and manages concurrency.")
 
-  Component(absFileProc, "AbstractFileProcessor", "Java", "Shared scanning and per-file processing behavior; delegates to reviewers and GenAI.")
+  Component(guidanceProc, "Guidance Processor", "Java", "Extracts embedded @guidance directives from files and builds per-file prompts.")
+  Component(actProc, "Act Processor", "Java", "Loads Act definitions (TOML), renders input templates, and executes Act prompts.")
 
-  Component(reviewers, "Reviewers", "Java", "Language-specific reviewers for content quality and safety (Java/Markdown/PUML/etc.).")
+  Component(absFileProc, "File Processor", "Java", "Shared per-file processing pipeline; delegates to reviewers and GenAI integration.")
+  Component(reviewers, "Reviewers", "Java", "Language/content reviewers (Java/Markdown/PUML/etc.) used for quality and safety checks.")
 
-  Component(tools, "ActFunctionTools", "Java", "Function tools exposed to the LLM for Act execution (e.g., act listing/apply).")
+  Component(tooling, "Function Tools", "Java", "Tool endpoints exposed to the LLM during Act execution (e.g., list/load acts, file ops).")
 
-  Component(genaiMgr, "GenAI Integration", "Java", "Provider selection, request dispatch, and usage accounting via Genai/GenaiProviderManager.")
-
-  Component(config, "Configuration", "Properties", "Loads gw.properties and resolves instructions, scanDir, excludes, model.")
-
-  Component(projectLayout, "ProjectLayout", "Library", "Resolves project root and layout metadata.")
+  Component(genaiMgr, "GenAI Integration", "Java", "Provider selection, request dispatch, streaming, and usage accounting.")
 }
 
 System_Ext(genaiProvider, "GenAI Provider", "External System", "LLM provider (e.g., OpenAI).")
@@ -45,16 +43,17 @@ System_Ext(fs, "File System", "External System", "Source/docs files scanned and 
 Rel(user, cli, "Invokes", "CLI")
 
 Rel(cli, config, "Loads", "gw.properties")
-Rel(cli, projectLayout, "Resolves project root", "project-layout")
-Rel(cli, procOrch, "Orchestrates")
+Rel(cli, projectLayout, "Resolves root/layout")
+Rel(cli, procOrch, "Starts")
 
+Rel(procOrch, guidanceProc, "Uses", "Default mode")
+Rel(procOrch, actProc, "Uses", "Act mode")
 Rel(procOrch, absFileProc, "Uses")
-Rel(procOrch, guidanceProc, "Uses (default mode)")
-Rel(procOrch, actProc, "Uses (Act mode)")
 
 Rel(absFileProc, reviewers, "Uses", "Reviewer SPI")
 Rel(absFileProc, genaiMgr, "Submits prompts/results")
-Rel(actProc, tools, "Exposes tools to LLM")
+
+Rel(actProc, tooling, "Enables", "Tool calling")
 Rel(genaiMgr, genaiProvider, "Calls", "HTTPS/API")
 
 Rel(absFileProc, fs, "Reads/Writes", "Local files")
