@@ -19,6 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tomlj.Toml;
 import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
@@ -56,6 +58,9 @@ import org.tomlj.TomlParseResult;
  * </p>
  */
 public class ActProcessor extends AIFileProcessor {
+
+	/** Logger for documentation input processing events. */
+	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
 	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
@@ -411,7 +416,10 @@ public class ActProcessor extends AIFileProcessor {
 
 		if (match(scanProjectDir, scanProjectDir) && getDefaultPrompt() != null
 				&& !shouldExcludePath(scanProjectDir.toPath())) {
-			process(projectLayout, scanProjectDir, getInstructions(), getDefaultPrompt());
+			String perform = process(projectLayout, scanProjectDir, getInstructions(), getDefaultPrompt());
+			if (perform != null) {
+				logger.info(">>> {}", perform);
+			}
 		}
 	}
 

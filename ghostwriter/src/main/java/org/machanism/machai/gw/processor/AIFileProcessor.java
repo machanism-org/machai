@@ -119,27 +119,38 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt)
 			throws IOException {
 		logger.info("Processing path: '{}'", file);
+		String perform = null;
+		try {
+			Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
+			FunctionToolsLoader.getInstance().applyTools(provider);
 
-		Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
-		FunctionToolsLoader.getInstance().applyTools(provider);
+			File projectDir = projectLayout.getProjectDir();
+			provider.setWorkingDir(projectDir);
 
-		File projectDir = projectLayout.getProjectDir();
-		provider.setWorkingDir(projectDir);
+			provider.instructions(instructions);
 
-		provider.instructions(instructions);
+			String projectInfo = getProjectStructureDescription(projectLayout, file);
 
-		String projectInfo = getProjectStructureDescription(projectLayout, file);
+			StringBuilder promptBuilder = new StringBuilder();
+			promptBuilder.append(projectInfo).append(Genai.LINE_SEPARATOR);
 
-		StringBuilder promptBuilder = new StringBuilder();
-		promptBuilder.append(projectInfo).append(Genai.LINE_SEPARATOR);
+			String promptLines = parseLines(prompt);
+			promptBuilder.append(promptLines);
 
-		String promptLines = parseLines(prompt);
-		promptBuilder.append(promptLines);
+			provider.prompt(promptBuilder.toString());
+			perform = perform(file, provider);
 
-		provider.prompt(promptBuilder.toString());
-		String perform = perform(file, provider);
+		} catch (ProcessTerminationException e) {
+			if (e.getExitCode() != 0) {
+				throw e;
+			}
+			perform = e.getMessage();
 
-		logger.info("Finished processing path: {}", file.getAbsolutePath());
+		} finally {
+			logger.info("Finished processing path: {}", file.getAbsolutePath());
+
+		}
+
 		return perform;
 	}
 
@@ -157,8 +168,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		String perform = provider.perform();
 		if (perform != null) {
-			logger.info(">>> {}", perform);
 			if (interactive) {
+				logger.info(">>> {}", perform);
 				String input = input();
 				if (!input.isEmpty()) {
 					provider.prompt(input);
@@ -428,32 +439,25 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *                                  root project directory
 	 */
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
-		try {
-			FunctionToolsLoader.getInstance().setConfiguration(getConfigurator());
+		FunctionToolsLoader.getInstance().setConfiguration(getConfigurator());
 
-			if (projectDir == null) {
-				throw new IllegalArgumentException("projectDir must not be null");
-			}
-			if (StringUtils.isBlank(scanDir)) {
-				throw new IllegalArgumentException("scanDir must not be blank");
-			}
-
-			if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
-				if (!isPathPattern(scanDir)) {
-					scanDir = parseScanDir(projectDir, scanDir);
-				}
-				super.setPathMatcher(FileSystems.getDefault().getPathMatcher(scanDir));
-			} else {
-				setScanDir(projectDir);
-			}
-
-			scanFolder(projectDir);
-		} catch (ProcessTerminationException e) {
-			if (e.getExitCode() != 0) {
-				throw e;
-			}
-			logger.info("Process terminated gracefully: {}", e.getMessage());
+		if (projectDir == null) {
+			throw new IllegalArgumentException("projectDir must not be null");
 		}
+		if (StringUtils.isBlank(scanDir)) {
+			throw new IllegalArgumentException("scanDir must not be blank");
+		}
+
+		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
+			if (!isPathPattern(scanDir)) {
+				scanDir = parseScanDir(projectDir, scanDir);
+			}
+			super.setPathMatcher(FileSystems.getDefault().getPathMatcher(scanDir));
+		} else {
+			setScanDir(projectDir);
+		}
+
+		scanFolder(projectDir);
 	}
 
 	String parseScanDir(File projectDir, String scanDir) {
@@ -508,7 +512,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	@Override
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
-			process(projectLayout, projectLayout.getProjectDir(), instructions, defaultPrompt);
+			String perform = process(projectLayout, projectLayout.getProjectDir(), instructions, defaultPrompt);
+			if (perform != null) {
+				logger.info(">>> {}", perform);
+			}
+
 		} catch (IOException e) {
 			// Fix for Sonar java:S3984 - previously created an exception without throwing
 			// it.

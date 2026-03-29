@@ -161,7 +161,10 @@ public class GuidanceProcessor extends AIFileProcessor {
 		if (match && getDefaultPrompt() != null) {
 			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), projectDir,
 					getDefaultPrompt());
-			process(projectLayout, projectDir, defaultGuidanceText);
+			String perform = process(projectLayout, projectDir, defaultGuidanceText);
+			if (perform != null) {
+				logger.info(">>> {}", perform);
+			}
 		}
 	}
 
@@ -190,8 +193,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 			}
 		}
 
-		if (StringUtils.isNotBlank(perform)) {
-			logger.debug(perform);
+		if (perform != null) {
+			logger.info(">>> {}", perform);
 		}
 	}
 
