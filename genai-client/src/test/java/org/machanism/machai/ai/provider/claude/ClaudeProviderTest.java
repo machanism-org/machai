@@ -217,30 +217,39 @@ class ClaudeProviderTest {
 
 		// Act + Assert
 		assertAll(
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, () -> provider.init(null)).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, () -> provider.prompt("x")).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, () -> provider.addFile(file)).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, () -> provider.addFile(url)).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, provider::perform).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, provider::clear).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class,
-								() -> provider.addTool("name", "desc", args -> "ok", "p1")).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, () -> provider.instructions("ins")).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, () -> provider.promptBundle(bundle)).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, () -> provider.inputsLog(new File("inputs.log"))).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, () -> provider.setWorkingDir(new File("."))).getMessage()),
-				() -> assertEquals(NOT_IMPLEMENTED_MSG,
-						assertThrows(UnsupportedOperationException.class, provider::usage).getMessage()));
+				() -> assertNotImplemented(() -> provider.init(null)),
+				() -> assertNotImplemented(() -> provider.prompt("x")),
+				() -> assertNotImplemented(() -> provider.addFile(file)),
+				() -> assertNotImplemented(() -> provider.addFile(url)),
+				() -> assertNotImplemented(provider::perform),
+				() -> assertNotImplemented(provider::clear),
+				() -> assertNotImplemented(() -> provider.addTool("name", "desc", args -> "ok", "p1")),
+				() -> assertNotImplemented(() -> provider.instructions("ins")),
+				() -> assertNotImplemented(() -> provider.promptBundle(bundle)),
+				() -> assertNotImplemented(() -> provider.inputsLog(new File("inputs.log"))),
+				() -> assertNotImplemented(() -> provider.setWorkingDir(new File("."))),
+				() -> assertNotImplemented(provider::usage));
+	}
+
+	// Sonar java:S5778: reduce the number of potentially-throwing invocations inside a lambda.
+	private static void assertNotImplemented(ThrowingRunnable action) {
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, action::run);
+		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
+	}
+
+	@FunctionalInterface
+	private interface ThrowingRunnable extends org.junit.jupiter.api.function.Executable {
+		@Override
+		void execute() throws Throwable;
+
+		default void run() {
+			try {
+				execute();
+			} catch (RuntimeException e) {
+				throw e;
+			} catch (Throwable t) {
+				throw new RuntimeException(t);
+			}
+		}
 	}
 }

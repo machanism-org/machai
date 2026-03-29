@@ -5,8 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Writer;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -55,6 +55,11 @@ public class FileFunctionTools implements FunctionTools {
 	 * Default character set used when reading or writing text files.
 	 */
 	private static final String DEFAULT_CHARSET = "UTF-8";
+
+	/**
+	 * Sonar java:S1192: Define constants for repeated JSON field names.
+	 */
+	private static final String FILE_PATH_FIELD = "file_path";
 
 	/** JSON field name for the optional character-set parameter. */
 	private static final String CHARSET_NAME_FIELD = "charsetName";
@@ -191,13 +196,13 @@ public class FileFunctionTools implements FunctionTools {
 	private Object writeFile(Object[] params) {
 		String result;
 		JsonNode props = (JsonNode) params[0];
-		String filePath = props.get("file_path").asText();
+		String filePath = props.get(FILE_PATH_FIELD).asText();
 		String text = props.get("text").asText();
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText() : DEFAULT_CHARSET;
 		File workingDir = (File) params[1];
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Write file: [{}, {}]", toStringFields(props, "file_path", CHARSET_NAME_FIELD, "text"),
+			logger.info("Write file: [{}, {}]", toStringFields(props, FILE_PATH_FIELD, CHARSET_NAME_FIELD, "text"),
 					workingDir);
 		}
 		logger.debug("Write file: [{}, {}]", props, workingDir);
@@ -305,7 +310,7 @@ public class FileFunctionTools implements FunctionTools {
 		}
 
 		JsonNode props = (JsonNode) params[0];
-		String filePath = props.get("file_path").asText();
+		String filePath = props.get(FILE_PATH_FIELD).asText();
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
 				: DEFAULT_CHARSET;
 

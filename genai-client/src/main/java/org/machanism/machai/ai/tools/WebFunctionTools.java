@@ -160,27 +160,9 @@ public class WebFunctionTools implements FunctionTools {
 			URI uri = URI.create(url);
 			String response;
 			if ("file".equals(uri.getScheme())) {
-				File workingDir = (File) params[1];
-				String path = uri.getPath();
-				File file = new File(path);
-				if (!file.isAbsolute()) {
-					file = new File(workingDir, path);
-				}
-				try (FileInputStream io = new FileInputStream(file)) {
-					response = IOUtils.toString(io, charsetName);
-				} catch (FileNotFoundException e) {
-					response = "File not found.";
-				} catch (IOException e) {
-					throw new IllegalArgumentException(e);
-				}
-
+				response = readFileUriContent(params, charsetName, uri);
 			} else {
-				HttpURLConnection connection = getConnection(uri, headers);
-				logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
-
-				response = getWebPage(connection, timeout, charsetName);
-				response = applySelectorIfPresent(selector, response);
-				response = renderTextOnlyIfRequested(textOnly, response);
+				response = fetchHttpContent(requestId, selector, headers, timeout, charsetName, textOnly, uri);
 			}
 
 			if (logger.isInfoEnabled()) {
@@ -192,6 +174,39 @@ public class WebFunctionTools implements FunctionTools {
 		} catch (Exception e) {
 			logger.error("[WEB {}] IO error during web content fetch", requestId, e);
 			return "IO Error: " + e.getMessage();
+		}
+	}
+
+	// Sonar java:S1141/java:S3776: Extract nested try blocks / reduce cognitive complexity.
+	private String readFileUriContent(Object[] params, String charsetName, URI uri) {
+		File workingDir = (File) params[1];
+		String path = uri.getPath();
+		File file = new File(path);
+		if (!file.isAbsolute()) {
+			file = new File(workingDir, path);
+		}
+		return readFileContent(file, charsetName);
+	}
+
+	// Sonar java:S1141/java:S3776: Keep the main method linear by moving HTTP flow to a helper.
+	private String fetchHttpContent(String requestId, String selector, String headers, int timeout, String charsetName,
+			boolean textOnly, URI uri) throws IOException {
+		HttpURLConnection connection = getConnection(uri, headers);
+		logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
+
+		String response = getWebPage(connection, timeout, charsetName);
+		response = applySelectorIfPresent(selector, response);
+		return renderTextOnlyIfRequested(textOnly, response);
+	}
+
+	// Sonar java:S1141: Extract file reading (previously nested try/catch) to a helper.
+	private String readFileContent(File file, String charsetName) {
+		try (FileInputStream io = new FileInputStream(file)) {
+			return IOUtils.toString(io, charsetName);
+		} catch (FileNotFoundException e) {
+			return "File not found.";
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
 		}
 	}
 

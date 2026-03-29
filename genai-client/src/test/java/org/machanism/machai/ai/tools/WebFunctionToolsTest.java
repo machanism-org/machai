@@ -506,11 +506,7 @@ class WebFunctionToolsTest {
 
 		// Act
 		String fileHtml = tools.getWebContent(new Object[] { props, tempDir });
-
-		Method render = WebFunctionTools.class.getDeclaredMethod("renderTextOnlyIfRequested", boolean.class,
-				String.class);
-		render.setAccessible(true);
-		String plain = (String) render.invoke(tools, true, fileHtml);
+		String plain = invokeRenderTextOnly(tools, true, fileHtml);
 
 		// Assert
 		assertNotNull(fileHtml);
@@ -571,39 +567,50 @@ class WebFunctionToolsTest {
 	}
 
 	@Test
-	void renderTextOnlyIfRequested_whenFalse_returnsOriginal() throws Exception {
+	void renderTextOnlyIfRequested_whenFalse_returnsOriginal() {
 		// Arrange
 		WebFunctionTools tools = new WebFunctionTools();
-		Method m = WebFunctionTools.class.getDeclaredMethod("renderTextOnlyIfRequested", boolean.class, String.class);
-		m.setAccessible(true);
 
 		// Act
-		String result = (String) m.invoke(tools, false, "<p>X</p>");
+		String result = invokeRenderTextOnly(tools, false, "<p>X</p>");
 
 		// Assert
 		assertEquals("<p>X</p>", result);
 	}
 
 	@Test
-	void renderTextOnlyIfRequested_whenTrue_rendersPlainText() throws Exception {
+	void renderTextOnlyIfRequested_whenTrue_rendersPlainText() {
 		// Arrange
 		WebFunctionTools tools = new WebFunctionTools();
-		Method m = WebFunctionTools.class.getDeclaredMethod("renderTextOnlyIfRequested", boolean.class, String.class);
-		m.setAccessible(true);
 
 		// Act
-		String result = (String) m.invoke(tools, true, "<html><body><p>X</p></body></html>");
+		String result = invokeRenderTextOnly(tools, true, "<html><body><p>X</p></body></html>");
 
 		// Assert
 		assertTrue(result.contains("X"));
 		assertFalse(result.contains("<p>"));
 	}
 
+	/**
+	 * Sonar java:S1874
+	 * This helper exists solely for building a fake {@link HttpURLConnection} in tests.
+	 */
+	@SuppressWarnings("java:S1874")
 	private static URL urlFrom(URI uri) {
 		try {
 			return uri.toURL();
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
+		}
+	}
+
+	private static String invokeRenderTextOnly(WebFunctionTools tools, boolean textOnly, String input) {
+		try {
+			Method m = WebFunctionTools.class.getDeclaredMethod("renderTextOnlyIfRequested", boolean.class, String.class);
+			m.setAccessible(true);
+			return (String) m.invoke(tools, textOnly, input);
+		} catch (ReflectiveOperationException e) {
+			throw new AssertionError(e);
 		}
 	}
 }
