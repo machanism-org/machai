@@ -139,13 +139,3 @@ Always check [Maven Central](https://search.maven.org/search?q=g:org.machanism.m
 - For more information on configuring Maven plugins, see the [Maven Plugin Configuration Guide](https://maven.apache.org/guides/mini/guide-configuring-plugins.html).
 - For multi-module projects, add the plugin to the parent POM or to the specific module(s) where you want to enable Ghostwriter processing.
 
-### Configure Required Properties
-
-- **GenAI Credentials:**  
-  If using GenAI features, set the following environment variables or system properties:
-  - `GENAI_USERNAME`
-  - `GENAI_PASSWORD`
-
-- **Guidance and Instructions:**  
-  Prepare your default guidance and additional instructions files (e.g., `guidance.txt`, `instructions.txt`).
-
