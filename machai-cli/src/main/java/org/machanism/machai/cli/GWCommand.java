@@ -183,7 +183,8 @@ public class GWCommand {
 		File projectDir = resolveProjectDir(options.projectDir);
 		String genaiValue = resolveModel(options.model);
 		Boolean logInputs = resolveLogInputs(options.logInputs);
-		String instructionsValue = options.instructions;
+		// Sonar(java:S1144): use existing private helper instead of leaving it unused.
+		String instructionsValue = resolveInstructions(options.instructions);
 		String[] dirs = resolveScanDirs(options.scanDirs, projectDir);
 		String[] excludesArr = splitExcludes(options.excludes);
 		PropertiesConfigurator config = loadMachaiPropertiesConfig();

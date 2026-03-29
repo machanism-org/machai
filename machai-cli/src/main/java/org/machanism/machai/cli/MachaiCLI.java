@@ -1,7 +1,5 @@
 package org.machanism.machai.cli;
 
-import java.io.IOException;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -31,9 +29,9 @@ public class MachaiCLI {
 	 * Starts the Machai CLI application.
 	 *
 	 * @param args command-line arguments
-	 * @throws IOException if loading the optional configuration file fails
 	 */
-	public static void main(String[] args) throws IOException {
+	// Sonar(java:S1130): main does not throw IOException.
+	public static void main(String[] args) {
 		System.exit(SpringApplication.exit(SpringApplication.run(MachaiCLI.class, args)));
 	}
 

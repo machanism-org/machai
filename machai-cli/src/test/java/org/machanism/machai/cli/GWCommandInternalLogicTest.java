@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.jline.reader.LineReader;
@@ -166,8 +165,7 @@ class GWCommandInternalLogicTest {
 		assertEquals(Boolean.TRUE, logInputs);
 	}
 
-	private static Object getField(Object target, String name)
-			throws NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+	private static Object getField(Object target, String name) throws NoSuchFieldException, IllegalAccessException {
 		java.lang.reflect.Field f = target.getClass().getDeclaredField(name);
 		f.setAccessible(true);
 		return f.get(target);
