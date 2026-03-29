@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.processor;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -9,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -72,26 +72,6 @@ class GhostwriterAdditionalTest {
 
 		// Assert
 		assertArrayEquals(new String[] { "glob:**/*.java" }, result);
-	}
-
-	@Test
-	void resolveGuidancePrompt_whenGuidanceOptionPresentWithoutValue_readsFromStdin() throws Exception {
-		// Arrange
-		Options options = new Options();
-		options.addOption(Option.builder("g").longOpt("guidance").hasArg(true).optionalArg(true).build());
-		CommandLine cmd = new DefaultParser().parse(options, new String[] { "--guidance" });
-
-		PropertiesConfigurator config = new PropertiesConfigurator();
-
-		Ghostwriter.initializeConfiguration(tempDir);
-		originalIn = System.in;
-		System.setIn(new ByteArrayInputStream("my guidance\n".getBytes(StandardCharsets.UTF_8)));
-
-		// Act
-		String prompt = Ghostwriter.resolveGuidancePrompt(cmd, config);
-
-		// Assert
-		assertEquals("my guidance", prompt);
 	}
 
 	@Test

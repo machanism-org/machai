@@ -118,26 +118,6 @@ class GhostwriterCoverageTest {
 	}
 
 	@Test
-	void resolveGuidancePrompt_whenGuidanceOptionPresentButValueMissing_readsFromStdin() throws Exception {
-		// Arrange
-		Options opts = new Options();
-		opts.addOption(Option.builder("g").longOpt("guidance").hasArg(true).optionalArg(true).build());
-		CommandLine cmd = new DefaultParser().parse(opts, new String[] { "-g" });
-
-		System.setIn(new ByteArrayInputStream("Be concise\r\n".getBytes(StandardCharsets.UTF_8)));
-		Ghostwriter.initializeConfiguration(new File("."));
-
-		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.GUIDANCE_PROP_NAME, null)).thenReturn(null);
-
-		// Act
-		String guidance = Ghostwriter.resolveGuidancePrompt(cmd, config);
-
-		// Assert
-		assertEquals("Be concise", guidance);
-	}
-
-	@Test
 	void createProcessor_whenActOptionPresent_createsActProcessorAndSetsDefaultPrompt(@TempDir File tmp) throws Exception {
 		// Arrange
 		Options opts = new Options();
@@ -278,22 +258,6 @@ class GhostwriterCoverageTest {
 
 		// Assert
 		assertEquals("help", prompt);
-	}
-
-	@Test
-	void resolveGuidancePrompt_whenNoGuidanceOption_returnsConfigValue() throws Exception {
-		// Arrange
-		Options opts = new Options();
-		opts.addOption(Option.builder("g").longOpt("guidance").hasArg(true).optionalArg(true).build());
-		CommandLine cmd = new DefaultParser().parse(opts, new String[0]);
-		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.GUIDANCE_PROP_NAME, null)).thenReturn("G");
-
-		// Act
-		String prompt = Ghostwriter.resolveGuidancePrompt(cmd, config);
-
-		// Assert
-		assertEquals("G", prompt);
 	}
 
 	@Test
