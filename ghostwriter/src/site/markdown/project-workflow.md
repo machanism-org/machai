@@ -112,28 +112,6 @@ This allows you to control the scope of default guidance:
 - Use a folder as `scanDir` to apply guidance at the directory level.
 - Use a pattern as `scanDir` to apply guidance to each matched file.
 
-### Setting Default Guidance
-
-You can set the default guidance using the `--guidance` option:
-
-```sh
-java -jar gw.jar src/main/java --guidance="file:default-guidance.txt"
-```
-
-Or with plain text:
-
-```sh
-java -jar gw.jar src/main/java --guidance="Please review and document this file according to project standards."
-```
-
-Or from a URL:
-
-```sh
-java -jar gw.jar src/main/java --guidance="https://example.com/guidance.md"
-```
-
-If your project does not contain embedded `@guidance` tags in its files, you can leverage Ghostwriter’s **default guidance** feature as a starting point. This approach allows you to begin generating documentation and prompts without modifying your source files.
-
 ### Why Use Default Guidance?
 
 - **Quick Start:**  

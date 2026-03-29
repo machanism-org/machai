@@ -37,7 +37,6 @@ import org.springframework.shell.standard.ShellOption;
  *
  * <pre>
  * gw --scanDir .\\my-project --excludes target,.git
- * gw --model OpenAI:gpt-5.1 --guidance "Refactor for clarity"
  * gw --instructions "You are a strict code reviewer" --logInputs true
  * </pre>
  */

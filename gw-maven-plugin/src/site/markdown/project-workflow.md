@@ -22,19 +22,16 @@ When you run the GW Maven Plugin with one of these goals, it performs the follow
 2. **Guidance Extraction:**  
    For each file, the plugin looks for embedded `@guidance` tags. If found, these tags provide file-specific instructions for GenAI.
 
-3. **Default Guidance Application:**  
-   If a file does not contain an embedded `@guidance` tag, the plugin applies the default guidance (if specified via the `--guidance` option or property).
-
-4. **Prompt Construction:**  
+3. **Prompt Construction:**  
    The plugin constructs a prompt for GenAI, combining:
    - Project structure and metadata
    - Guidance (embedded or default)
    - Any additional instructions (from the `--instructions` option or property)
 
-5. **GenAI Processing:**  
+4. **GenAI Processing:**  
    The constructed prompt is sent to the configured GenAI provider. The response is used to generate or update documentation, code comments, or other artifacts.
 
-6. **Logging and Output:**  
+5. **Logging and Output:**  
    Optionally, the plugin logs all inputs and outputs for traceability and review.
 
 **Tip:**  
@@ -75,9 +72,6 @@ For most automation scenarios, let the plugin process the entire project or modu
 
 - **Embedded Guidance:**  
   Add `@guidance:` comments directly in your source or documentation files for file-specific instructions.
-
-- **Default Guidance:**  
-  Use the `--guidance` option to provide fallback instructions for files without embedded guidance.
 
 - **Additional Instructions:**  
   Use the `--instructions` option to append project-wide instructions to every prompt.

@@ -179,7 +179,6 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 - `-t, --threads <count>` — Degree of concurrency for processing.
 - `-m, --model <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
 - `-i, --instructions[=<text|url|file:...>]` — Additional system instructions. If used without a value, reads multi-line text from stdin until a line does not end with `\`.
-- `-g, --guidance[=<text|url|file:...>]` — Default guidance. If used without a value, reads multi-line text from stdin until a line does not end with `\`.
 - `-e, --excludes <csv>` — Comma-separated list of directories/patterns to exclude.
 - `-l, --logInputs` — Log LLM request inputs to dedicated log files.
 - `-as, --acts <path>` — Directory containing predefined Act prompt files.
@@ -211,7 +210,7 @@ From the built-in help:
 
 - `<scanDir>` may be a relative path (from the current project directory) or a `glob:` / `regex:` matcher.
 - If an absolute scan path is provided, it must be located within the root project directory.
-- If an option with an optional value (`-g/--guidance`, `-i/--instructions`, `-a/--act`) is used without a value, Ghostwriter reads multi-line input from stdin.
+- If an option with an optional value (`-i/--instructions`, `-a/--act`) is used without a value, Ghostwriter reads multi-line input from stdin.
 - When entering multi-line input interactively, end input when a line does not end with `\` (a trailing backslash continues the next line).
 
 ## Resources

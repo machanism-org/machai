@@ -166,14 +166,6 @@ Then use the following commands.
   set --key gw.model
   ```
 
-### `gw` (Ghostwriter guidance pipeline)
-
-Scan a directory tree and apply GenAI guidance:
-
-```text
-gw --scanDir ./my-project --threads 4 --excludes target,.git --model OpenAI:gpt-5.1 --guidance "Refactor for clarity" --logInputs true
-```
-
 ### `act` (Ghostwriter Act mode)
 
 Run a predefined act (prompt template), optionally with extra prompt text:

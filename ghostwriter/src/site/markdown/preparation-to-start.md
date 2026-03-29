@@ -183,18 +183,6 @@ project directory.
 Options:
  -e,--excludes <arg>       Specify a comma-separated list of directories
                            to exclude from processing.
- -g,--guidance <arg>       Specify the default guidance as plain text, by
-                           URL, or by file path to apply as a final step
-                           for the current directory. Each line of input
-                           is processed: blank lines are preserved, lines
-                           starting with 'http://' or 'https://' are
-                           loaded from the specified URL, lines starting
-                           with 'file:' are loaded from the specified file
-                           path, and other lines are used as-is. To
-                           provide the guidance directly, use the option
-                           without a value and you will be prompted to
-                           enter the guidance text via standard input
-                           (stdin).
  -h,--help                 Show this help message and exit.
  -i,--instructions <arg>   Specify system instructions as plain text, by
                            URL, or by file path. Each line of input is
