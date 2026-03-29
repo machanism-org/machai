@@ -1,6 +1,5 @@
 /*-
  * @guidance:
- *
  * **IMPORTANT: ADD OR UPDATE JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
  * 
  * - Use Clear and Concise Descriptions:

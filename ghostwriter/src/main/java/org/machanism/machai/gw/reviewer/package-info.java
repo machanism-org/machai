@@ -7,24 +7,24 @@
  * annotation conventions for that format, and returns a formatted fragment that can be assembled into a single
  * request to the LLM.
  *
- * <p>Reviewers generally:
+ * <p>Implementations in this package are responsible for:
  * <ul>
- *   <li>read the file as UTF-8</li>
- *   <li>detect whether {@code @guidance} is present</li>
- *   <li>compute a project-relative path via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}</li>
- *   <li>format the prompt fragment using templates from the {@code document-prompts} resource bundle</li>
+ *   <li>reading supported files as UTF-8</li>
+ *   <li>detecting whether {@code @guidance} is present (or, for {@code @guidance.txt}, matching by filename)</li>
+ *   <li>computing a project-relative path via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File}</li>
+ *   <li>emitting a prompt fragment using templates from the {@code document-prompts} resource bundle</li>
  * </ul>
  *
- * <p>This package includes specialized implementations for common formats, such as:
+ * <p>Supported formats include (but are not limited to):
  * <ul>
- *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer} for Java sources (including {@code package-info.java})</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer} for Markdown</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer} for HTML/XML</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer} for TypeScript</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer} for Python</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer} for PlantUML</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} for {@code @guidance.txt} files</li>
+ *   <li>Java source ({@link org.machanism.machai.gw.reviewer.JavaReviewer})</li>
+ *   <li>Markdown ({@link org.machanism.machai.gw.reviewer.MarkdownReviewer})</li>
+ *   <li>HTML/XML ({@link org.machanism.machai.gw.reviewer.HtmlReviewer})</li>
+ *   <li>TypeScript ({@link org.machanism.machai.gw.reviewer.TypeScriptReviewer})</li>
+ *   <li>Python ({@link org.machanism.machai.gw.reviewer.PythonReviewer})</li>
+ *   <li>PlantUML ({@link org.machanism.machai.gw.reviewer.PumlReviewer})</li>
+ *   <li>Plain guidance files ({@link org.machanism.machai.gw.reviewer.TextReviewer})</li>
  * </ul>
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer

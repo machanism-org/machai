@@ -3,34 +3,47 @@
  * tool.
  *
  * <p>
- * The {@code org.machanism.machai.gw.processor} package contains the CLI entry point and the
- * processors responsible for scanning a project directory tree, extracting embedded
- * {@code @guidance:} directives, and invoking the configured
+ * The {@code org.machanism.machai.gw.processor} package contains the Ghostwriter CLI entry point
+ * along with the processors responsible for scanning a project directory tree, extracting embedded
+ * {@code @guidance:} directives (via reviewers), and invoking the configured
  * {@link org.machanism.machai.ai.manager.Genai GenAI provider}.
  * </p>
  *
- * <h2>Key components</h2>
+ * <h2>Core responsibilities</h2>
+ * <ul>
+ *   <li>
+ *     Traverse a project directory (optionally multi-module) and select files using include
+ *     matchers and excludes.
+ *   </li>
+ *   <li>
+ *     Compose prompts from project metadata, per-file content, and extracted guidance.
+ *   </li>
+ *   <li>
+ *     Execute prompts against a configured provider and optionally log composed inputs.
+ *   </li>
+ * </ul>
+ *
+ * <h2>Key types</h2>
  * <ul>
  *   <li>
  *     {@link org.machanism.machai.gw.processor.Ghostwriter}: CLI entry point that reads
- *     configuration and launches scans.
+ *     configuration, parses command-line options, and runs a scan.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.processor.GuidanceProcessor}: filesystem scanner that extracts
- *     per-file guidance via {@link org.machanism.machai.gw.reviewer.Reviewer reviewers} and
- *     processes multi-module projects child-first.
- *   </li>
- *   <li>
- *     {@link org.machanism.machai.gw.processor.ActProcessor}: executes predefined TOML-based prompt
- *     templates ("acts") against matching files.
+ *     {@link org.machanism.machai.gw.processor.AbstractFileProcessor}: common traversal utilities,
+ *     include/exclude matching, and module handling.
  *   </li>
  *   <li>
  *     {@link org.machanism.machai.gw.processor.AIFileProcessor}: prompt composition and provider
- *     invocation (instructions, project metadata, and optional input logging).
+ *     invocation (including optional input logging).
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.processor.AbstractFileProcessor}: shared traversal utilities,
- *     include/exclude matching, and module handling.
+ *     {@link org.machanism.machai.gw.processor.GuidanceProcessor}: default scanning mode that uses
+ *     {@link org.machanism.machai.gw.reviewer.Reviewer reviewers} to extract per-file guidance.
+ *   </li>
+ *   <li>
+ *     {@link org.machanism.machai.gw.processor.ActProcessor}: "act" mode which executes predefined
+ *     TOML-based prompt templates against matching files.
  *   </li>
  * </ul>
  *
@@ -78,4 +91,3 @@ package org.machanism.machai.gw.processor;
  *      - All code improvements and Javadoc updates must be compatible with the Java version specified in the project's `pom.xml`.
  *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
  */
-

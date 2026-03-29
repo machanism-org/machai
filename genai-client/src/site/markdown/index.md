@@ -2,9 +2,8 @@
 <!-- @guidance:
 Generate or update the content as follows.  
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
-
-Page Structure: 
-# Header
+# Page Structure: 
+1. Header
    - Project Title: need to use from pom.xml
    - Maven Central Badge ([![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
 # Introduction
