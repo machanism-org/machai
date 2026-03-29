@@ -92,20 +92,24 @@ public class ActFunctionTools implements FunctionTools {
 	}
 
 	private Object getActDetails(Object... params) throws IOException {
-		JsonNode props = (JsonNode) params[0];
-		String actName = props.get("actName").asText();
-		String custom = props.has("custom") ? props.get("custom").asText() : null;
-
 		Map<String, Object> properties = new HashMap<>();
-		String acts = configurator.get(Ghostwriter.ACTS_LOCATION_PROP_NAME, null);
-		if (custom == null) {
-			ActProcessor.loadAct(actName, properties, acts);
-		} else {
-			if ("true".equals(custom)) {
-				ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
+		try {
+			JsonNode props = (JsonNode) params[0];
+			String actName = props.get("actName").asText();
+			String custom = props.has("custom") ? props.get("custom").asText() : null;
+
+			String acts = configurator.get(Ghostwriter.ACTS_LOCATION_PROP_NAME, null);
+			if (custom == null) {
+				ActProcessor.loadAct(actName, properties, acts);
 			} else {
-				ActProcessor.tryLoadActFromClasspath(properties, actName);
+				if ("true".equals(custom)) {
+					ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
+				} else {
+					ActProcessor.tryLoadActFromClasspath(properties, actName);
+				}
 			}
+		} catch (IllegalArgumentException e) {
+			return e.getMessage();
 		}
 
 		return properties;

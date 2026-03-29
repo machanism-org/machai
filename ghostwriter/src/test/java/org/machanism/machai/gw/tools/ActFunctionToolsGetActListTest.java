@@ -51,8 +51,7 @@ class ActFunctionToolsGetActListTest {
 		Mockito.doThrow(new IOException("boom")).when(tools).getBaseActList();
 
 		// Act + Assert (Sonar java:S5783 - single invocation in lambda; exception unwrapped outside)
-		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
-				() -> invokeGetActList(tools));
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class, () -> invokeGetActList(tools));
 		assertNotNull(ex.getCause());
 		assertTrue(ex.getCause() instanceof IOException);
 		assertEquals("boom", ex.getCause().getMessage());
