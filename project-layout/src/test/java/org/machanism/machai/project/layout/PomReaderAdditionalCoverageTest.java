@@ -2,7 +2,6 @@ package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -112,9 +111,13 @@ class PomReaderAdditionalCoverageTest {
 		write(pom, "<project><not-closed>");
 		PomReader reader = new PomReader();
 
+		Path pomFile = pom;
+		java.io.File pomAsFile = pomFile.toFile();
+
 		// Act
+		// Sonar java:S5778 - Ensure a single invocation in the lambda may throw.
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> reader.getProjectModel(pom.toFile()));
+				() -> reader.getProjectModel(pomAsFile));
 
 		// Assert
 		assertTrue(ex.getMessage().contains("POM file:"), "Exception message should include file context");

@@ -106,6 +106,14 @@
 				</pluginManagement>
 			</build>
 		</profile>
+		<profile>
+			<id>auto-acts</id>
+			<build>
+				<plugins>
+				
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 	<modules>

@@ -6,6 +6,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.model.Build;
@@ -35,7 +36,8 @@ class MavenProjectLayoutAdditionalCoverageTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertNull(modules);
+		// Sonar java:S1168 - return empty list instead of null.
+		assertEquals(Collections.emptyList(), modules);
 	}
 
 	@Test

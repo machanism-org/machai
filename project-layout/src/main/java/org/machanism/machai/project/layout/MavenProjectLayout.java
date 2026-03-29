@@ -2,7 +2,6 @@ package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,7 +76,8 @@ public class MavenProjectLayout extends ProjectLayout {
 		if (mavenModel != null && "pom".equals(mavenModel.getPackaging())) {
 			return mavenModel.getModules();
 		}
-		return null;
+		// Sonar java:S1168 - Return an empty collection instead of null.
+		return new ArrayList<>();
 	}
 
 	/**
