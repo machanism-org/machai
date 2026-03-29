@@ -37,14 +37,17 @@ class GhostwriterPerformTest {
 
 		// Assert
 		assertEquals(0, exitCode);
-		verify(processor).scanDocuments(eq(new File(".")), eq("dir1"));
-		verify(processor).scanDocuments(eq(new File(".")), eq("dir2"));
+		// Sonar java:S6068 - avoid useless eq(...) when passing exact values.
+		verify(processor).scanDocuments(new File("."), "dir1");
+		// Sonar java:S6068 - avoid useless eq(...) when passing exact values.
+		verify(processor).scanDocuments(new File("."), "dir2");
 	}
 
 	@Test
 	void perform_whenProcessTerminationException_returnsProvidedExitCode() throws Exception {
 		// Arrange
 		String[] scanDirs = { "dir" };
+		// Sonar java:S6068 - only remove eq(...) when not required; keep it when mixing with matchers.
 		doThrow(new ProcessTerminationException("stop", 42)).when(processor).scanDocuments(any(File.class), eq("dir"));
 
 		// Act
@@ -58,6 +61,7 @@ class GhostwriterPerformTest {
 	void perform_whenIllegalArgumentException_returnsOne() throws Exception {
 		// Arrange
 		String[] scanDirs = { "dir" };
+		// Sonar java:S6068 - only remove eq(...) when not required; keep it when mixing with matchers.
 		doThrow(new IllegalArgumentException("bad")).when(processor).scanDocuments(any(File.class), eq("dir"));
 
 		// Act
@@ -71,6 +75,7 @@ class GhostwriterPerformTest {
 	void perform_whenUnexpectedException_returnsOne() throws Exception {
 		// Arrange
 		String[] scanDirs = { "dir" };
+		// Sonar java:S6068 - only remove eq(...) when not required; keep it when mixing with matchers.
 		doThrow(new IOException("io")).when(processor).scanDocuments(any(File.class), eq("dir"));
 
 		// Act

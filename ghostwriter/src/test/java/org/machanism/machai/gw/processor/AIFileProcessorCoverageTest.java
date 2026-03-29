@@ -225,7 +225,7 @@ class AIFileProcessorCoverageTest {
 		m.setAccessible(true);
 		String reference = "http://localhost:0/does-not-exist";
 
-		// Act (Sonar java:S5778 - keep only one possibly-throwing invocation inside the assertThrows lambda)
+		// Sonar java:S5778 - extracted helper so the assertThrows lambda contains only one invocation.
 		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
 				() -> invokeTryToGetInstructionsFromReference(m, processor, reference));
 
@@ -233,7 +233,11 @@ class AIFileProcessorCoverageTest {
 		assertTrue(ex.getCause() instanceof IOException, "Expected IOException from URL read");
 	}
 
-	// Sonar java:S5778 - extracted helper so the lambda contains only one invocation.
+	/**
+	* FalsePositive
+	* Sonar java:S5778 reports multiple throwable invocations due to reflection internals; the test already uses a helper so the lambda has a single call.
+	*/
+	@SuppressWarnings("java:S5778")
 	private static Object invokeTryToGetInstructionsFromReference(Method m, AIFileProcessor processor, String reference)
 			throws IllegalAccessException, InvocationTargetException {
 		return m.invoke(processor, reference);
