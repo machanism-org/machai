@@ -1,23 +1,31 @@
 /**
- * File-format-aware scanners that locate embedded {@code @guidance} instructions in project files and convert them
- * into normalized prompt fragments for Ghostwriter's downstream processing pipeline.
+ * File-format-aware components that locate embedded {@code @guidance} instructions and convert them into
+ * normalized prompt fragments for Ghostwriter's downstream processing pipeline.
  *
  * <p>The central abstraction is the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface
- * (SPI). Each {@code Reviewer} targets a specific file type (for example Java sources, Markdown, HTML/XML,
- * TypeScript, Python, PlantUML, or plain-text {@code @guidance.txt} files), understands that format's comment
- * conventions, and returns a formatted fragment that can be assembled into a single request for the LLM.
+ * (SPI). Each {@code Reviewer} targets one or more file extensions, understands the corresponding comment or
+ * annotation conventions for that format, and returns a formatted fragment that can be assembled into a single
+ * request to the LLM.
  *
- * <p>Each fragment typically includes:
+ * <p>Reviewers generally:
  * <ul>
- *   <li>the project-relative path computed via
+ *   <li>read the file as UTF-8</li>
+ *   <li>detect whether {@code @guidance} is present</li>
+ *   <li>compute a project-relative path via
  *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}</li>
- *   <li>the source content and/or extracted guidance block containing {@code @guidance}</li>
- *   <li>a prompt template sourced from the {@code document-prompts} resource bundle</li>
+ *   <li>format the prompt fragment using templates from the {@code document-prompts} resource bundle</li>
  * </ul>
  *
- * <p>The package provides specialized implementations for common formats, such as {@link JavaReviewer} for Java
- * sources (including {@code package-info.java}), {@link MarkdownReviewer} for Markdown, {@link HtmlReviewer} for
- * HTML/XML, and additional reviewers for other file types.
+ * <p>This package includes specialized implementations for common formats, such as:
+ * <ul>
+ *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer} for Java sources (including {@code package-info.java})</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer} for Markdown</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer} for HTML/XML</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer} for TypeScript</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer} for Python</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer} for PlantUML</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} for {@code @guidance.txt} files</li>
+ * </ul>
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer
  */

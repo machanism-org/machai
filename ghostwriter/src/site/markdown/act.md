@@ -22,22 +22,22 @@ canonical: https://machai.machanism.org/ghostwriter/act.html
 
 # Act
 
-An Act is a reusable set of instructions that tells Ghostwriter what to do and how to talk to the AI.
+An Act is a saved “recipe” that tells Ghostwriter what to ask the AI and how to run the scan.
 
-Instead of rewriting a long prompt each time, you run Ghostwriter with an act name and (optionally) a short request. Ghostwriter loads the act file (a small TOML document), combines it with your request, applies any act settings (scan options and other configuration), and then processes your project files.
+Instead of writing a long prompt every time, you choose an act name and (optionally) provide a short request. Ghostwriter loads the act definition from a small TOML file, combines it with your request, applies any act settings (for example scan directory or interactive mode), and then processes your project files.
 
-Built-in acts are included with Ghostwriter under `src/main/resources/acts`. You can also provide your own act files using `--acts <path>`.
+Built-in acts ship with Ghostwriter under `src/main/resources/acts` (loaded from classpath `/acts/<name>.toml`). You can also provide your own act files with `--acts <path>`.
 
 ## What an Act TOML file contains
 
-Acts are TOML files (`*.toml`). Most acts contain:
+Acts are TOML files (`*.toml`). Common keys include:
 
-- `description` (optional): a short human-friendly summary
-- `instructions`: the AI behavior rules (the “system instructions”)
-- `inputs`: a prompt template used to build the final request sent to the AI
+- `description` (optional): human-friendly summary of what the act is for
+- `instructions`: the AI “behavior rules” (sent as system instructions)
+- `inputs`: a template used to build the final prompt (typically contains `%s`)
 - `basedOn` (optional): inherit from another act
-- `gw.*` options: Ghostwriter runtime settings (for example scan directory, non-recursive mode, concurrency)
-- `ft.*` options: functional tool settings (for example a command denylist)
+- `gw.*`: Ghostwriter runtime options (scan and execution settings)
+- `ft.*`: functional tool settings (for example `ft.command.denylist`)
 - Any other dotted keys: forwarded into Ghostwriter configuration
 
 ## How Ghostwriter runs an Act
@@ -46,18 +46,18 @@ Act mode is implemented by `org.machanism.machai.gw.processor.ActProcessor`.
 
 When you run an act, Ghostwriter:
 
-1. Picks the act name from `--act`. If not provided or blank, it uses `help`.
-2. Loads the act TOML:
-   - from built-in resources on the classpath (`/acts/<name>.toml`)
-   - and optionally from a user-supplied acts location (`--acts <path>`), which can be a directory or an `http(s)://...` URL
-3. Resolves inheritance (`basedOn`) and merges parent and child act data.
+1. Reads `--act <name> [request text...]`. If the act argument is missing or blank, it uses `help`.
+2. Loads the act TOML from:
+   - built-in classpath resources (`/acts/<name>.toml`)
+   - and, if configured, from a user-provided acts location (`--acts <path>`), which can be a directory or an `http(s)://...` URL
+3. Resolves inheritance (`basedOn`) and merges parent + child act data.
 4. Builds the final prompt by inserting your request text into the act’s `inputs` template.
-5. Applies act settings to Ghostwriter (instructions, prompt, scan settings, and other configuration values).
-6. Scans and processes files using the composed instructions and prompt.
+5. Applies act settings to Ghostwriter (instructions, prompt, scan settings, and other configuration).
+6. Scans and processes the matched files using the composed instructions and prompt.
 
 ## Inheritance and “inherited values”
 
-Acts support multiple kinds of inheritance and override behavior. This is how you reuse a base act and change only what you need.
+Acts support a few kinds of inheritance/override behavior. This lets you reuse a base act and override only what you need.
 
 ### 1) Act-to-act inheritance (`basedOn`)
 
@@ -67,31 +67,37 @@ If an act contains:
 basedOn = "task"
 ```
 
-Ghostwriter loads the parent act first (recursively, if needed), then loads the child act and merges the values.
+Ghostwriter loads the parent act first (recursively, if needed), then merges the child act on top.
 
-Important details:
+Notes based on `ActProcessor.loadAct(...)`:
 
-- Inheritance can be chained: an act can be based on an act that is itself based on another act.
-- After loading the parent, Ghostwriter removes the `basedOn` property from the merged result.
+- Inheritance can be chained.
+- After the merge is complete, `basedOn` is removed from the final merged properties.
 
-### 2) Custom acts override built-in acts (same name)
+### 2) Custom acts can extend/override built-in acts (same name)
 
-Ghostwriter can load the same act name from:
+Ghostwriter can load an act of the same name from two places:
 
-- built-in resources (`src/main/resources/acts` -> classpath `/acts/...`)
+- built-in resources (classpath `/acts/...`)
 - a custom acts location (`--acts <path>`)
 
-If both exist for the same act name, Ghostwriter loads both. The custom act is applied in addition to the built-in act, so custom values can override or extend the built-in definition. This is the recommended way to customize behavior without editing the shipped act files.
+If both exist, Ghostwriter loads both into the same properties map. Because the custom act is loaded first and the built-in act is loaded afterwards, the effective result depends on the merge rules below.
 
-### 3) Extending strings during act merge using `%s`
+Practical guidance:
 
-When Ghostwriter merges act data, it uses a special rule for string values (`ActProcessor.setActData(...)`):
+- If you want to safely customize a built-in act, use `basedOn` (create a new act that is based on the built-in one).
+- If you do override an act by using the same name, verify the final merged keys (especially `instructions` and `inputs`) behave as intended.
 
-- If a key already exists as a string (from a parent act or from the built-in act)
-- and the child provides a string value for the same key
-- the child’s value is inserted into the existing value by replacing the first `%s` in the existing value
+### 3) String extension during act merge using `%s`
 
-This provides “extend” behavior instead of always replacing the parent value.
+When Ghostwriter merges act data (`ActProcessor.setActData(...)`), string values do not always replace each other.
+
+If the same key already exists as a string (for example from a parent act), and a later-loaded act provides a string for the same key, Ghostwriter will:
+
+- take the existing string value
+- replace the first `%s` in that existing string with the new string
+
+This is a template-style “extend” mechanism.
 
 Example:
 
@@ -115,14 +121,16 @@ Merged result:
 Please focus only on documentation changes.
 ```
 
-### 4) Inheriting from existing runtime configuration using `%s`
+### 4) Inheriting from the current runtime configuration using `%s`
 
-After all act files are loaded and merged, Ghostwriter applies the values (`ActProcessor.applyActData(...)`). For each string property:
+After all act files are loaded and merged, Ghostwriter applies the act properties to the running configuration (`ActProcessor.applyActData(...)`).
 
-- If Ghostwriter already has a value for the same key in its current configuration (for example from CLI flags or other config sources), and the act value contains `%s`, Ghostwriter replaces `%s` with that existing value.
-- If there is an existing value but the act value does not contain `%s`, the act value replaces it.
+For string properties, Ghostwriter also supports inheriting from whatever value is already present in the configurator (for example values coming from CLI flags or other config sources):
 
-This is commonly used to extend multi-line configuration strings (for example to append extra entries to a functional tool denylist).
+- If there is an existing config value for the same key, Ghostwriter replaces `%s` inside the act’s value with that existing value.
+- If there is an existing config value and the act value does not contain `%s`, the act value replaces the existing value.
+
+This is useful for extending multi-line strings such as a tool denylist.
 
 Example:
 
@@ -135,31 +143,31 @@ rm -rf
 '''
 ```
 
-At runtime, `%s` is replaced with whatever denylist Ghostwriter already had.
+At runtime, `%s` is replaced with the denylist Ghostwriter already had.
 
 ### 5) Inserting your request text into `inputs`
 
-Finally, Ghostwriter inserts your request text into the act’s `inputs`:
+After the act is loaded and merged, Ghostwriter inserts your request text into the act’s `inputs`.
 
-- Request text is the part after the act name in `--act <name> [request text...]`.
+- The request text is the part after the act name: `--act <name> [request text...]`.
 - If you do not provide request text, Ghostwriter uses its current default prompt.
-- Ghostwriter replaces `%s` in `inputs` with your request text.
+- Ghostwriter replaces `%s` in `inputs` with that request text.
 
 ## How Acts fit into Ghostwriter (key responsibilities)
 
 `ActProcessor` is responsible for:
 
-- selecting act name and request text (`setDefaultPrompt(String act)`)
-- loading act TOML from classpath and/or user-defined location (`tryLoadActFromClasspath`, `tryLoadActFromDirectory`)
+- selecting the act name and extracting request text (`setDefaultPrompt(String act)`)
+- loading act TOML from classpath and/or user-defined location (`tryLoadActFromClasspath`, `tryLoadActFromDirectory`, `loadAct`)
 - resolving inheritance via `basedOn` (`loadAct`)
 - merging act properties (including `%s` string extension) (`setActData`)
 - applying act settings into Ghostwriter runtime/configuration (`applyActData`)
 
-## How to use an Act
+## How to use an Act (step-by-step)
 
 1. Choose an act name (for example `task`).
-2. (Optional) Provide a custom acts directory or URL using `--acts <path>`.
-3. Add your short request after the act name.
+2. (Optional) Point Ghostwriter to a directory (or URL) containing custom acts with `--acts <path>`.
+3. Write your short request text after the act name.
 4. Run Ghostwriter.
 
 Example:
@@ -168,15 +176,15 @@ Example:
 java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -a "task Please rewrite these docs for end users"
 ```
 
-If you omit the act name, Ghostwriter uses `help`.
+If you omit the act name (or pass an empty act), Ghostwriter uses `help`.
 
 ## Built-in Acts (`src/main/resources/acts`)
 
 ### assembly
 
-Uses recommended libraries (described via Bindex JSON) to implement a task.
+Implements a task using recommended libraries described as Bindex JSON.
 
-Use it when you want Ghostwriter to choose and apply libraries instead of writing everything from scratch, and you have (or want to generate) a list of library recommendations.
+Use it when you want Ghostwriter to select and apply existing libraries (via Bindex metadata) instead of writing everything from scratch.
 
 ### code-doc
 
@@ -186,42 +194,42 @@ Use it when you want to improve code documentation without changing program beha
 
 ### commit
 
-Analyzes repository changes and helps group and commit them.
+Helps you commit repository changes by checking status, grouping changes, generating commit messages, and running the version control commands.
 
-Use it when you want Ghostwriter to generate commit messages and run the version control commands needed to commit changes in logical groups.
+Use it when you want guided, automated commits with messages that match the project’s commit style.
 
 ### grype-fix
 
-Fixes dependency vulnerabilities reported by Grype.
+Fixes dependency vulnerabilities reported by Grype by updating dependencies, rebuilding, and documenting the changes.
 
-Use it when you want Ghostwriter to generate an SBOM (Syft), scan it (Grype), update vulnerable dependencies, build the project, and document what changed.
+Use it when you have Grype results (or can run Grype) and want to streamline vulnerability remediation.
 
 ### help
 
-Explains acts and helps you discover and inspect available acts.
+Explains acts and helps you discover, inspect, and understand available acts (including inheritance and configuration).
 
-Use it when you are new to acts, want to understand inheritance/overrides, or want details about a specific act.
+Use it when you are new to acts, or when you want details about how an act is configured.
 
 ### release-notes
 
-Generates release notes from git history and writes them into `src/changes/changes.xml` using the Maven Changes schema.
+Generates release notes from git commit history and writes them into `src/changes/changes.xml` using the Maven Changes schema.
 
 Use it when preparing a release and you want consistent, structured release notes.
 
 ### sonar-fix
 
-Fixes issues reported by SonarQube.
+Fixes issues reported by SonarQube (typically from a JSON report), applying minimal changes and only using `@SuppressWarnings` under strict rules.
 
-Use it when you can provide access to a SonarQube report (typically JSON) and want Ghostwriter to apply minimal, targeted fixes, using `@SuppressWarnings` only under strict rules.
+Use it when you can provide SonarQube report access and want targeted code quality and security fixes.
 
 ### task
 
 A minimal, general-purpose template.
 
-Use it for one-off requests where you simply want Ghostwriter to run your instruction against the project.
+Use it for one-off requests where you want Ghostwriter to apply your instructions to the project.
 
 ### unit-tests
 
-Generates and improves unit tests and aims for high coverage.
+Generates and improves unit tests using the project’s build and coverage tooling (for example Maven + JaCoCo).
 
-Use it when you want Ghostwriter to run the build, inspect coverage (JaCoCo), and add or improve tests until coverage is high (targeting at least 90%).
+Use it when you want higher test coverage and new or improved tests added to the project.

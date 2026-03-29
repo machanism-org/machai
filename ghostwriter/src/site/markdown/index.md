@@ -64,68 +64,57 @@ canonical: https://machai.machanism.org/ghostwriter/index.html
 
 ## Introduction
 
-Machai Ghostwriter is an AI-assisted documentation and review engine that scans an entire project—source code, tests, documentation, and other relevant assets—extracts embedded `@guidance:` directives, and turns them into actionable prompts for a configured GenAI provider.
+Machai Ghostwriter is a guided, AI-assisted processing engine that runs across an entire repository—source code, tests, documentation, and other project assets—to generate and maintain project-wide documentation and code improvements.
 
-Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system, where each file can carry local guidance and the tool orchestrates processing across the project consistently.
+Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system where each file can carry its own embedded guidance and the tool orchestrates consistent processing across the project.
 
-Key benefits:
+Main benefits:
 
-- **Guidance-first prompting**: prompts live next to the content they govern.
-- **Repository-scale consistency**: scan rules, file-type reviewers, and project-context injection ensure repeatable runs.
-- **Automation-ready**: designed for non-interactive execution and integration into scripted workflows.
+- **Guidance-first prompting**: instructions live next to the content they govern via embedded `@guidance:` blocks.
+- **Repository-scale consistency**: deterministic scanning, per-type reviewers, and injected project context make runs repeatable.
+- **Automation-ready**: designed for non-interactive execution and integration into scripts and CI/CD pipelines.
 
 ## Overview
 
-Ghostwriter is delivered as a Java CLI entry point (`org.machanism.machai.gw.processor.Ghostwriter`) that:
+Ghostwriter is delivered as a Java CLI that scans a target directory or a matcher pattern, extracts embedded guidance directives from supported files, composes project-aware prompts, executes a configured GenAI provider, and writes results back into the workspace.
 
-- Loads configuration from `gw.properties` (or an override via `-Dgw.config=...`).
-- Resolves a project root directory and scan targets (directory paths or `glob:` / `regex:` matchers).
-- Discovers supported file types and uses per-type reviewers to extract embedded `@guidance:` directives.
-- Composes provider inputs including project structure context and optional system instructions.
-- Executes the configured GenAI provider across matching files (or in Act mode).
-
-In addition to per-file guidance, Ghostwriter can apply default guidance when a file has no embedded `@guidance:` and can also perform a folder-level step (processor-dependent).
-
-### Architecture (conceptual)
-
-Ghostwriter’s workflow is an orchestration pipeline: scan → extract guidance → assemble a project-aware prompt → call a GenAI provider → write results.
-
-The following diagram illustrates the major containers and responsibilities (rendered from `src/site/puml/c4-diagram.puml`):
+The following diagram illustrates the major responsibilities and how the components collaborate:
 
 ![Ghostwriter C4 diagram](./images/c4-diagram.png)
 
 At a high level:
 
-- A CLI starts a run with a scan target (directory, `glob:...`, or `regex:...`).
-- The core processor loads project context and guidance directives and builds prompts.
-- A provider client executes the prompt against a configured GenAI backend.
-- Outputs and optional request-input logs are written back into the project workspace.
+- A CLI run starts with a scan target (directory path, `glob:...`, or `regex:...`).
+- A processor resolves project layout and configuration, then scans the workspace.
+- Reviewers extract `@guidance:` directives and build a prompt with injected project context.
+- A provider client executes the prompt against the configured GenAI backend.
+- Outputs (and optionally input logs) are written under the project workspace.
 
 ## Machai Ghostwriter vs. Other Tools
 
-The closest tool in spirit is **Claude Code**: both operate across a repository (not just a single editor buffer), can be used non-interactively, and are suitable for scripted or CI/CD execution.
+The most similar tool in spirit is **Claude Code**, because both are designed for repository-scale work (beyond an editor buffer), can be used in automation contexts, and are suitable for scripted or CI/CD execution.
 
-### Similarities (Ghostwriter vs. Claude Code)
+### Key similarities
 
-- Repository-aware workflows (operate on more than one file).
-- Designed for practical engineering tasks, not just chat.
-- Can be used in automation contexts.
+- Repository-wide workflows spanning multiple files.
+- Practical engineering focus (documentation, refactors, maintenance).
+- Can be used non-interactively as part of an automated run.
 
 ### Key differences
 
-- **Guidance-first**: Ghostwriter’s primary input mechanism is embedded `@guidance:` directives in project files (plus optional default guidance). Claude Code is typically driven by interactive task prompts.
-- **Deterministic scanning**: Ghostwriter has a defined scan/match model (directory, `glob:` or `regex:`) and a reviewer registry keyed by file extension.
-- **Project-structure context**: Ghostwriter injects project layout information into prompts during processing.
-- **Distribution model**: Ghostwriter is packaged as a Java CLI (and designed to integrate with Maven-based projects), whereas Claude Code is a separate agent toolchain.
+- **Embedded guidance as the primary interface**: Ghostwriter is driven by file-local `@guidance:` directives (plus optional default guidance). Claude Code is typically driven by interactive task prompts.
+- **Deterministic scanning and review**: Ghostwriter uses explicit scan targets (`dir`, `glob:`, `regex:`), extension-based reviewers, and configured excludes.
+- **Extensibility model**: Ghostwriter integrates with the Machai ecosystem (project layout, GenAI client, function tools), and supports Act prompt bundles.
+- **Distribution**: Ghostwriter is a Java CLI intended to run inside/alongside Java and Maven-based projects.
 
 ### Brief comparison to other assistants
 
-- **GitHub Copilot / Cursor / Tabnine**: primarily editor-first, focusing on inline completion and local code assistance rather than guided, project-wide batch processing.
-- **Claude Code**: most similar for repo-scale actions, but Ghostwriter is distinguished by embedded guidance directives and a scanning pipeline.
+- **GitHub Copilot / Cursor / Tabnine**: primarily editor-first (inline completions and interactive edits), with limited guidance-in-files concepts and limited batch, project-wide automation.
+- **Claude Code**: closest for repo-scale actions, but Ghostwriter’s differentiator is turning embedded guidance into a repeatable scanning pipeline that can be rerun in CI.
 
 ### Capability summary
 
-| Tool | Project-wide automation | Custom guidance in files (`@guidance:`) | CI/CD-friendly batch runs | Documentation generation |
+| Tool | Project-wide automation | Custom guidance in files (`@guidance:`) | CI/CD integration | Documentation generation |
 |---|---:|---:|---:|---:|
 | Machai Ghostwriter | Yes | Yes | Yes | Yes |
 | Claude Code | Yes | No (prompt-driven) | Yes | Partial |
@@ -133,26 +122,26 @@ The closest tool in spirit is **Claude Code**: both operate across a repository 
 | Cursor | Limited | No | Limited | Limited |
 | Tabnine | Limited | No | Limited | Limited |
 
-Machai Ghostwriter is unique in how it turns file-local guidance into a repeatable, repository-scale processing pipeline.
+Machai Ghostwriter is unique in how it makes guidance part of the repository itself and turns it into a deterministic, repeatable, project-wide processing pipeline.
 
 ## Key Features
 
-- Scans project directories and patterns (`glob:` / `regex:`) and processes matching files.
+- Scans directories and patterns (`glob:` / `regex:`) and processes matching files.
 - Extracts embedded `@guidance:` directives using per-file-type reviewers.
-- Adds project structure context to prompts.
-- Supports system instructions and default guidance from plain text, URLs, or `file:` references.
+- Injects project layout and structure context into prompts.
+- Supports additional system instructions and default guidance from plain text, URLs, or `file:` references.
 - Supports excludes (exact paths or `glob:` / `regex:` patterns).
 - Optional multi-threaded processing.
-- Optional logging of provider inputs per processed file.
-- Act mode for executing predefined prompts (`--act`).
+- Optional logging of provider input payloads per processed file.
+- Act mode for running predefined prompts (`--act`) and custom act bundles (`--acts`).
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java **8** (as configured by `maven.compiler.release` in `pom.xml`).
-- A configured GenAI provider/model setting (`gw.model`) or CLI override (`-m/--model`).
-- (Optional) A `gw.properties` file to persist configuration.
+- Java **8** (per `maven.compiler.release` in `pom.xml`).
+- A configured GenAI provider/model (set `gw.model` in `gw.properties` or pass `-m/--model`).
+- (Optional) `gw.properties` to persist configuration.
 
 ### Download
 
@@ -161,24 +150,24 @@ Machai Ghostwriter is unique in how it turns file-local guidance into a repeatab
 ### Basic Usage
 
 ```bash
-java -jar gw.jar <scanDir> -m OpenAI:gpt-5.1
+java -jar gw.jar src -m OpenAI:gpt-5.1
 ```
 
 ### Typical Workflow
 
-1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document.
-2. Create `gw.properties` (optional) and configure:
+1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document (code, docs, configs, site pages, etc.).
+2. Create `gw.properties` (optional) and configure values such as:
    - `project.dir` (project root)
    - `gw.model` (provider:model)
-   - `instructions` (optional)
-   - `gw.excludes` (optional)
+   - `instructions` (optional system instructions)
+   - `gw.excludes` (optional excludes)
    - `gw.guidance` (optional default guidance)
 3. Run Ghostwriter against a directory or pattern (e.g., `src`, `glob:**/*.md`, `regex:...`).
 4. Review the resulting changes and iterate.
 
 ### Java Version
 
-Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.model` or `-m/--model`), otherwise the CLI will fail fast.
+Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (for example via `gw.model` or `-m/--model`), otherwise the CLI fails fast.
 
 ## Configuration
 
@@ -190,12 +179,12 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 - `-d, --projectDir <path>` — Root directory for file processing.
 - `-t, --threads <count>` — Degree of concurrency for processing.
 - `-m, --model <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
-- `-i, --instructions[=<text|url|file:...>]` — System instructions (plain text, URL, or `file:`). If no value: stdin until a line does not end with `\\`.
-- `-g, --guidance[=<text|url|file:...>]` — Default guidance (plain text, URL, or `file:`). If no value: stdin until a line does not end with `\\`.
+- `-i, --instructions[=<text|url|file:...>]` — Additional system instructions. If used without a value, reads multi-line text from stdin until a line does not end with `\`.
+- `-g, --guidance[=<text|url|file:...>]` — Default guidance. If used without a value, reads multi-line text from stdin until a line does not end with `\`.
 - `-e, --excludes <csv>` — Comma-separated list of directories/patterns to exclude.
 - `-l, --logInputs` — Log LLM request inputs to dedicated log files.
-- `-as, --acts <path>` — Directory containing predefined act prompt files.
-- `-a, --act[=<name and prompt>]` — Run in Act mode (interactive execution of predefined prompts). If no value: stdin until a line does not end with `\\`.
+- `-as, --acts <path>` — Directory containing predefined Act prompt files.
+- `-a, --act[=<prompt>]` — Run in Act mode. If used without a value, reads multi-line text from stdin until a line does not end with `\`.
 
 ### Options Table
 
@@ -203,18 +192,18 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 |---|---|---|
 | `-h, --help` | Show this help message and exit. | `false` |
 | `-d, --projectDir <path>` | Root directory for file processing. | `project.dir` (if set) or current working directory |
-| `-t, --threads <count>` | Degree of concurrency for module processing. | `gw.threads` or disabled |
+| `-t, --threads <count>` | Degree of concurrency for processing. | `gw.threads` or unset |
 | `-m, --model <provider:model>` | GenAI provider and model. | `gw.model` |
-| `-i, --instructions[=<text\|url\|file:...>]` | System instructions. If no value: reads multi-line text from stdin. | `instructions` |
-| `-g, --guidance[=<text\|url\|file:...>]` | Default guidance. If no value: reads multi-line text from stdin. | `gw.guidance` |
+| `-i, --instructions[=<text\|url\|file:...>]` | System instructions (plain text/URL/`file:`). If no value: multi-line stdin. | `instructions` |
+| `-g, --guidance[=<text\|url\|file:...>]` | Default guidance (plain text/URL/`file:`). If no value: multi-line stdin. | `gw.guidance` |
 | `-e, --excludes <csv>` | Comma-separated excludes (exact paths or `glob:` / `regex:` patterns). | `gw.excludes` |
-| `-l, --logInputs` | Log LLM request inputs. | `false` (`inputs`) |
-| `-as, --acts <path>` | Directory containing act prompt files. | `gw.acts` or unset |
-| `-a, --act[=<...>]` | Act mode prompt. If no value: reads multi-line text from stdin. | `gw.act` or disabled |
+| `-l, --logInputs` | Log provider input payloads to log files. | `false` |
+| `-as, --acts <path>` | Directory containing act prompt files. | `acts.location` |
+| `-a, --act[=<prompt>]` | Act mode prompt. If no value: multi-line stdin. | `gw.act` |
 
 ### Example
 
-This example combines a scan pattern, explicit provider selection, default guidance from stdin, and input logging:
+This example runs on a pattern, provides default guidance via stdin, and enables input logging:
 
 ```bash
 java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -g -l
@@ -224,28 +213,25 @@ From the built-in help:
 
 - `<scanDir>` may be a relative path (from the current project directory) or a `glob:` / `regex:` matcher.
 - If an absolute scan path is provided, it must be located within the root project directory.
-- If an option that accepts optional text (`-g/--guidance`, `-i/--instructions`, or `-a/--act`) is used without a value, Ghostwriter reads multi-line input from stdin.
-- When entering multi-line input interactively, end input when a line does not end with `\\` (a trailing backslash continues the next line).
+- If an option with an optional value (`-g/--guidance`, `-i/--instructions`, `-a/--act`) is used without a value, Ghostwriter reads multi-line input from stdin.
+- When entering multi-line input interactively, end input when a line does not end with `\` (a trailing backslash continues the next line).
 
 ## Default Guidance
 
-Ghostwriter supports a default guidance prompt (stored as `defaultPrompt`) that is applied when a file does not contain embedded `@guidance:` directives.
+Default guidance is the processor’s fallback prompt configured via `AIFileProcessor.setDefaultPrompt(String defaultPrompt)` and passed to the CLI via `gw.guidance` / `-g, --guidance`. It is applied when a file does not contain embedded `@guidance:` directives.
 
 ### Purpose
 
-- Provide a baseline instruction set for files that do not carry their own embedded `@guidance:` blocks.
-- Allow centralized, repeatable prompting for a scan run (for example: summarize Markdown files, modernize headers, add missing Javadoc).
-- Enable prompting when running in Act mode (where the act prompt is treated as the processor’s default prompt).
+- Provide a baseline instruction set for files without embedded guidance blocks.
+- Centralize consistent behavior for a scan run (e.g., summarize Markdown pages, modernize headers, add missing Javadoc).
+- Enable directory-level processing in addition to per-file guidance, depending on the processor mode.
 
 ### How it works
 
-The default guidance is resolved and applied as follows:
-
-- Configured value: loaded from `gw.properties` (`gw.guidance`) and/or the `-g/--guidance` CLI option.
-- Optional stdin input: if `-g/--guidance` is present with no value, Ghostwriter reads multi-line text from stdin.
-- Per-line expansion: blank lines are preserved; lines starting with `http(s)://` are fetched and included; lines starting with `file:` load content from the referenced file; all other lines are included as-is.
-
-When default guidance is set, scanning a directory path (not a `glob:`/`regex:` pattern) changes matching behavior so only the specified directory itself is included (not its descendants). When it is not set, the directory and all descendants are included.
+- Source: set in `gw.properties` (`gw.guidance`) or via `-g/--guidance`.
+- Multi-line input: if `-g/--guidance` is used without a value, Ghostwriter reads text from stdin until a line does not end with `\`.
+- Expansion rules: processed line-by-line; blank lines are preserved; `http(s)://...` lines are fetched; `file:...` lines load local file contents; other lines are used as-is.
+- Scanning behavior: when default guidance is set and you pass a directory (not a matcher), only that directory itself is matched; when it is not set, the directory and its descendants are matched.
 
 ## Resources
 

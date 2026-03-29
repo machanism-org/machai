@@ -2,35 +2,32 @@ Ghostwriter CLI
 
 Application Overview
 
-Machai Ghostwriter is a guided file processing engine for generating and maintaining project-wide documentation and code improvements with AI.
-
-Ghostwriter scans an entire repository (source code, tests, documentation, and other relevant assets), extracts embedded "@guidance:" directives, and turns them into actionable prompts for a configured GenAI provider.
+Machai Ghostwriter is a guided, AI-assisted processing engine delivered as a Java CLI. It scans a repository (source code, tests, documentation, and other assets), extracts embedded "@guidance:" directives (or uses optional default guidance), and executes the resulting prompts against a configured GenAI provider to generate and maintain project-wide documentation and code improvements.
 
 Conceptual foundation (Guided File Processing):
 https://www.machanism.org/guided-file-processing/index.html
 
 Key features
 - Guidance-first prompting via embedded "@guidance:" directives in project files.
-- Repository-scale scanning of directories and patterns:
+- Repository-scale scanning of directories and matchers:
   - directory paths
   - glob: patterns (e.g., glob:**/*.java)
   - regex: patterns
-- Per-file-type reviewers extract embedded "@guidance:" directives.
-- Injects project structure context into provider prompts.
+- Per-file-type reviewers extract embedded directives and build project-aware prompts.
 - Optional system instructions and default guidance (plain text, URLs, or file: references).
-- Excludes support (comma-separated list; may include patterns depending on processor implementation).
+- Excludes support (exact paths and matchers as supported by the CLI/processor).
 - Optional multi-threaded processing.
 - Optional logging of provider inputs per processed file.
-- Act mode for executing predefined prompts (--act).
+- Act mode for running predefined prompts (--act) and custom act bundles (--acts).
 
 Typical use cases
 - Generate or update documentation across a repository.
 - Apply consistent, guidance-driven refactors or improvements across many files.
-- Run in CI/CD or scripted workflows.
+- Run as part of a scripted workflow or CI/CD pipeline.
 
 Supported GenAI providers
 - CodeMie
-- OpenAI-compatible services (via provider/model selection, e.g., OpenAI:gpt-5.1)
+- OpenAI-compatible services (for example provider/model selection like OpenAI:gpt-5.1)
 
 
 Installation Instructions
@@ -116,17 +113,17 @@ Setting configuration via gw.properties
 
 Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
 
-1) project.dir
+1) project.dir (ProjectLayout.PROJECT_DIR_PROP_NAME)
 - Description: Root directory for file processing when -d/--projectDir is not provided.
 - Default: Current working directory (SystemUtils.getUserDir()) if not set.
 - Usage context: Determines the root directory used for scanning and for validating absolute scan paths.
 
-2) gw.model
+2) gw.model (Ghostwriter.MODEL_PROP_NAME)
 - Description: GenAI provider and model to use, in the form provider:model (e.g., OpenAI:gpt-5.1).
 - Default: None; the CLI fails fast if not configured.
 - Usage context: Set in gw.properties, or override via -m/--model.
 
-3) instructions
+3) instructions (Ghostwriter.INSTRUCTIONS_PROP_NAME)
 - Description: Optional system instructions provided to the GenAI provider.
 - Default: Unset.
 - Usage context:
@@ -136,24 +133,24 @@ Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
   - Each line is processed: blank lines preserved; http(s):// lines fetched and included; file: lines loaded; other lines included as-is.
   - Multi-line stdin input ends when a line does not end with "\\".
 
-4) gw.excludes
+4) gw.excludes (Ghostwriter.EXCLUDES_PROP_NAME)
 - Description: Comma-separated list of directories/files to exclude from processing.
 - Default: Unset.
 - Usage context: Set in gw.properties, or override with -e/--excludes.
 
-5) acts.location
+5) acts.location (Ghostwriter.ACTS_LOCATION_PROP_NAME)
 - Description: Directory containing predefined act prompt files.
 - Default: Unset.
 - Usage context: Set in gw.properties; can be overridden with -as/--acts.
 
-6) gw.act
+6) gw.act (Ghostwriter.ACT_PROP_NAME)
 - Description: Act prompt used for Act mode.
 - Default: Unset.
 - Usage context:
   - Used when running with -a/--act; can be set in gw.properties.
   - If -a/--act is used without a value, Ghostwriter reads a multi-line act prompt from stdin.
 
-7) gw.guidance
+7) gw.guidance (Ghostwriter.GUIDANCE_PROP_NAME)
 - Description: Default guidance applied when embedded @guidance directives are not present (also used as the processor default prompt).
 - Default: Unset.
 - Usage context:
@@ -162,35 +159,40 @@ Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
   - If -g/--guidance is used without a value, Ghostwriter reads multi-line guidance from stdin.
   - Lines are processed the same way as instructions.
 
-8) gw.threads
+8) gw.threads (Ghostwriter.THREADS_PROP_NAME)
 - Description: Degree of concurrency for processing (worker thread count).
 - Default: Unset.
 - Usage context: Set in gw.properties; can be overridden with -t/--threads <count>.
 
-9) gw.scanDir
+9) gw.scanDir (Ghostwriter.SCAN_DIR_PROP_NAME)
 - Description: Default scan directory/pattern if no <scanDir> argument is provided.
 - Default: If unset and no scanDir args are provided, Ghostwriter uses the current working directory absolute path.
 - Usage context: Set in gw.properties to avoid passing <scanDir> every run.
 
-10) gw.nonRecursive
+10) gw.nonRecursive (Ghostwriter.NONRECURSIVE_PROP_NAME)
 - Description: Controls whether scanning should be non-recursive.
 - Default: Unset.
 - Usage context: Used by processor implementation(s) to adjust scan behavior.
 
-11) inputs
+11) inputs (Ghostwriter.INPUTS_PROPERTY_NAME / Genai.LOG_INPUTS_PROP_NAME)
 - Description: Enables request input logging to dedicated log files.
 - Default: false.
 - Usage context:
   - Set in gw.properties (inputs=true).
   - Or enable via -l/--inputs.
 
+12) gw.interactive (Ghostwriter.INTERACTIVE_MODE_PROP_NAME)
+- Description: Toggles interactive behavior in the processor layer (if supported by the configured processor).
+- Default: Unset.
+- Usage context: Read by processor implementation(s).
+
 Additional Java system properties
-- gw.config
+- gw.config (Ghostwriter.CONFIG_PROP_NAME)
   - Description: Override the Ghostwriter configuration file path (resolved relative to gw.home).
   - Default: gw.properties
   - Usage: java -Dgw.config=conf/gw.properties -jar gw.jar ...
 
-- gw.home
+- gw.home (Ghostwriter.HOME_PROP_NAME)
   - Description: Home directory used to locate gw.properties by default.
   - Default: projectDir if provided; otherwise current working directory.
   - Usage: java -Dgw.home=. -jar gw.jar ...

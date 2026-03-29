@@ -74,8 +74,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <h3><code>org.machanism.machai.gw.processor</code></h3>
   <p>
     Project scanning, guidance extraction, and prompt orchestration for the Ghostwriter command-line tool.
-    This package contains the CLI entry point and the processors responsible for scanning a project directory tree,
-    extracting embedded <code>@guidance:</code> directives, and invoking the configured GenAI provider.
+    The processor pipeline scans a project directory tree, extracts embedded <code>@guidance:</code> directives,
+    assembles the final prompt using configuration and project metadata, and applies the generated output back to
+    the originating files.
   </p>
   <p>
     Processing is strictly filesystem-based: projects are not built and dependencies are not resolved during scanning.
@@ -89,16 +90,20 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     into normalized prompt fragments for Ghostwriter's downstream processing pipeline.
   </p>
   <p>
-    The central abstraction is the <code>Reviewer</code> service-provider interface (SPI). Each reviewer targets a specific
-    file type (for example Java sources, Markdown, HTML/XML, TypeScript, Python, PlantUML, or plain-text guidance
-    files), understands that format's comment conventions, and returns a formatted fragment that can be assembled into a
-    single request for the LLM.
+    The central abstraction is the <code>Reviewer</code> service-provider interface (SPI). Each reviewer targets one or
+    more file extensions, understands that format's comment conventions, and returns a formatted fragment that can be
+    assembled into a single request to the LLM.
+  </p>
+  <p>
+    Reviewers generally read files as UTF-8, detect whether guidance is present, compute a project-relative path, and
+    format prompt fragments using templates from the <code>document-prompts</code> resource bundle.
   </p>
 
   <h3><code>org.machanism.machai.gw.tools</code></h3>
   <p>
-    GenAI provider tool registration for Ghostwriter-specific operations. This package exposes selected project
-    capabilities (for example listing and loading Act templates) as callable tools.
+    GenAI provider tool registration for Ghostwriter-specific operations.
+    This package exposes selected Ghostwriter capabilities (for example listing and loading Act templates) as callable
+    tools available to the configured provider.
   </p>
 </section>
 
@@ -108,14 +113,14 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <li><strong>Select scan targets</strong> (directory roots and/or matchers such as <code>glob:</code> and <code>regex:</code>).</li>
     <li><strong>Traverse the filesystem</strong> and select files to process using include/exclude rules.</li>
     <li><strong>Extract guidance</strong> with a format-specific reviewer.</li>
-    <li><strong>Compose prompts</strong> using extracted guidance, acts/templates, and project metadata.</li>
+    <li><strong>Compose prompts</strong> using extracted guidance, optional acts/templates, and configuration.</li>
     <li><strong>Dispatch</strong> the request to the configured GenAI provider and apply the result.</li>
   </ol>
 </section>
 
 <section>
   <h2>Typical usage</h2>
-  <pre><code>java -jar gw.jar &lt;scanDir&gt; [options]</code></pre>
+  <p><code>java -jar gw.jar &lt;scanDir&gt; [options]</code></p>
   <p>
     The <code>&lt;scanDir&gt;</code> argument may be a project-relative directory (for example, <code>src/main</code>) or a matcher
     expression supported by <code>java.nio.file.FileSystems.getPathMatcher</code> (for example, <code>glob:**/*.java</code>).

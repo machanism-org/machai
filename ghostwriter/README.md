@@ -25,27 +25,15 @@
 
 ## Introduction
 
-Machai Ghostwriter is an AI-assisted documentation and review engine that scans an entire project—source code, tests, documentation, and other relevant assets—extracts embedded `@guidance:` directives, and turns them into actionable prompts for a configured GenAI provider.
+Machai Ghostwriter is a guided, AI-assisted processing engine that runs across an entire repository—source code, tests, documentation, and other project assets—to generate and maintain project-wide documentation and code improvements.
 
-Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system, where each file can carry local guidance and the tool orchestrates processing across the project consistently.
+Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system where each file can carry its own embedded guidance and the tool orchestrates consistent processing across the project.
 
-Key benefits:
+Main benefits:
 
-- **Guidance-first prompting**: prompts live next to the content they govern.
-- **Repository-scale consistency**: scan rules, file-type reviewers, and project-context injection ensure repeatable runs.
-- **Automation-ready**: designed for non-interactive execution and integration into scripted workflows.
-
-## Overview
-
-Ghostwriter is delivered as a Java CLI entry point (`org.machanism.machai.gw.processor.Ghostwriter`) that:
-
-- Loads configuration from `gw.properties` (or an override via `-Dgw.config=...`).
-- Resolves a project root directory and scan targets (directory paths or `glob:` / `regex:` matchers).
-- Discovers supported file types and uses per-type reviewers to extract embedded `@guidance:` directives.
-- Composes provider inputs including project structure context and optional system instructions.
-- Executes the configured GenAI provider across matching files (or in Act mode).
-
-In addition to per-file guidance, Ghostwriter can apply *default guidance* when a file has no embedded `@guidance:` and can also perform a folder-level step (processor-dependent).
+- **Guidance-first prompting**: instructions live next to the content they govern via embedded `@guidance:` blocks.
+- **Repository-scale consistency**: deterministic scanning, per-type reviewers, and injected project context make runs repeatable.
+- **Automation-ready**: designed for non-interactive execution and integration into scripts and CI/CD pipelines.
 
 ## Usage
 
@@ -53,9 +41,9 @@ In addition to per-file guidance, Ghostwriter can apply *default guidance* when 
 
 #### Prerequisites
 
-- Java **8** (as configured by `maven.compiler.release` in `pom.xml`).
-- A configured GenAI provider/model setting (`gw.model`) or CLI override (`-m/--model`).
-- (Optional) A `gw.properties` file to persist configuration.
+- Java **8** (per `maven.compiler.release` in `pom.xml`).
+- A configured GenAI provider/model (set `gw.model` in `gw.properties` or pass `-m/--model`).
+- (Optional) `gw.properties` to persist configuration.
 
 #### Installation
 
@@ -64,24 +52,24 @@ In addition to per-file guidance, Ghostwriter can apply *default guidance* when 
 #### Basic Usage
 
 ```bash
-java -jar gw.jar <scanDir> -m OpenAI:gpt-5.1
+java -jar gw.jar src -m OpenAI:gpt-5.1
 ```
 
 #### Typical Workflow
 
-1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document.
-2. Create `gw.properties` (optional) and configure:
+1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document (code, docs, configs, site pages, etc.).
+2. Create `gw.properties` (optional) and configure values such as:
    - `project.dir` (project root)
    - `gw.model` (provider:model)
-   - `gw.instructions` (optional)
-   - `gw.excludes` (optional)
+   - `instructions` (optional system instructions)
+   - `gw.excludes` (optional excludes)
    - `gw.guidance` (optional default guidance)
 3. Run Ghostwriter against a directory or pattern (e.g., `src`, `glob:**/*.md`, `regex:...`).
 4. Review the resulting changes and iterate.
 
 #### Java Version
 
-Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (e.g., via `gw.model` or `-m/--model`), otherwise the CLI will fail fast.
+Ghostwriter requires **Java 8**. In addition, you must configure an accessible GenAI provider/model (for example via `gw.model` or `-m/--model`), otherwise the CLI fails fast.
 
 ## Resources
 

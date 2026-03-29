@@ -12,18 +12,18 @@ canonical: https://machai.machanism.org/ghostwriter/preparation-to-start.html
 
 Before you begin, ensure your environment meets the following requirements:
 
-- **Java Development Kit (JDK) 8 or higher**  
+- **Java Development Kit (JDK) 8 or higher**
   [Download JDK](https://adoptopenjdk.net/) or use your system’s package manager.
 
-- **Active subscription to OpenAI or CodeMie API service**  
-  You must have a valid and active subscription to either the OpenAI or CodeMie API service to access GenAI features in Ghostwriter.  
+- **Active subscription to OpenAI or CodeMie API service**
+  You must have a valid and active subscription to either the OpenAI or CodeMie API service to access GenAI features in Ghostwriter.
   Make sure you have your API credentials ready.
 
 ## Installation Steps
 
 ### 1. Download the Ghostwriter CLI Bundle
 
-Get the latest Ghostwriter CLI bundle:  
+Get the latest Ghostwriter CLI bundle:
 [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
 
 ### 2. Extract the Bundle
@@ -32,7 +32,7 @@ Unpack the downloaded archive (`gw.zip`) to a dedicated folder of your choice.
 
 ### 3. Add the Folder to Your System PATH
 
-Update your system’s PATH environment variable to include the folder where you extracted Ghostwriter CLI.  
+Update your system’s PATH environment variable to include the folder where you extracted Ghostwriter CLI.
 This allows you to run the CLI from any directory.
 
 ### 4. Set the `GW_HOME` Environment Variable
@@ -71,8 +71,8 @@ Ghostwriter CLI offers flexible configuration using a `gw.properties` file. This
 > To use a custom configuration file name (resolved relative to `gw.home`), set:
 > `-Dgw.config=custom.properties`
 
-**Where to place it:**  
-Save your `gw.properties` file in the directory selected as `gw.home` (see above).  
+**Where to place it:**
+Save your `gw.properties` file in the directory selected as `gw.home` (see above).
 Ghostwriter automatically loads this file at startup.
 
 ## Configuration Properties Reference
@@ -86,7 +86,7 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 | `gw.model` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | `null` (required; must be non-blank). | Loaded via `config.get("gw.model", null)` and optionally overridden by CLI `-m/--model`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor` / `GuidanceProcessor`. |
 | `instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null`. | Loaded via `config.get("instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin via `readText(...)` (multi-line supported with `\\` line continuation). Applied via `AIFileProcessor#setInstructions(...)`. |
 | `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null`. | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
-| `acts.location` | Default directory containing act prompt files (used when running in Act mode and `--acts` is not provided). | `null`. | In Act mode, when `--acts` is not provided, read via `config.get("acts.location", null)` and passed to `ActProcessor#setActsLocation(...)`. |
+| `acts.location` | Default directory containing act prompt files (used when running in Act mode and `--acts` is not provided). | `null`. | In Act mode, when `--acts` is not provided, read via `config.get("acts.location", null)` and applied via `ActProcessor#setActsLocation(...)`. |
 | `gw.act` | Default act prompt text (used when running in Act mode and `--act` is provided with no value). | `null`. | In Act mode, used by `resolveActPrompt(...)` as the initial default prompt: `config.get("gw.act", null)`, overridden by CLI `--act` value or stdin via `readText("Act")`. |
 | `gw.guidance` | Default guidance applied when embedded `@guidance:` directives are not present (non-Act mode). | `null`. | Loaded via `config.get("gw.guidance", null)`. Optionally overridden by CLI `-g/--guidance`; if `-g` is specified without a value, guidance is read from stdin via `readText("Guidance")`. Used as the processor default prompt via `AIFileProcessor#setDefaultPrompt(...)`. |
 | `gw.threads` | Degree of concurrency for processing. | `null` (unset). | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads <count>`. Parsed as an integer and applied via `AIFileProcessor#setDegreeOfConcurrency(int)` (via `Ghostwriter#setDegreeOfConcurrency(String)`). |
@@ -225,5 +225,5 @@ Examples:
 09:59:07.678 INFO  File processing completed.
 ```
 
-**Advanced Configuration:**  
+**Advanced Configuration:**
 For a complete list of supported properties and detailed explanations, see the [Ghostwriter configuration reference](https://machai.machanism.org/ghostwriter/docs.html#configuration).
