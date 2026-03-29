@@ -32,24 +32,25 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>GW Maven Plugin</h1>
 
 <p>
-  <strong>GW Maven Plugin</strong> is an advanced documentation automation tool for Java projects.
-  It integrates MachAI <em>Ghostwriter</em> guided document-processing into a Maven build.
+  <strong>GW Maven Plugin</strong> (artifactId: <code>gw-maven-plugin</code>) is a Maven plugin that integrates
+  MachAI Ghostwriter guided document processing into a Maven build. It scans a configured directory tree for files
+  containing embedded <code>@guidance:</code> blocks and applies guided, in-place updates.
 </p>
 
 <p>
-  It scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.
-  The plugin streamlines the creation and maintenance of high-quality, consistent documentation, ensuring best
-  practices and up-to-date information across all modules.
+  Ghostwriter Maven Plugin is an advanced documentation automation tool for Java projects. It automatically scans,
+  analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. The plugin
+  streamlines the creation and maintenance of high-quality, consistent documentation, ensuring best practices and
+  up-to-date information across all modules.
 </p>
 
-<h2>Overview</h2>
+<h2>Module purpose</h2>
 
 <p>
-  This module provides Maven goals (Mojos) for running MachAI Ghostwriter (GW) guided document processing as part of
-  a Maven build. The goals configure and invoke a
-  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> (or a specialized processor such as
-  <code>org.machanism.machai.gw.processor.ActProcessor</code>) to scan a documentation source tree (commonly
-  <code>src/site</code>) for files containing embedded <code>@guidance:</code> blocks.
+  This module provides Maven goals (Mojos) that configure and invoke the Ghostwriter engine. At runtime, the plugin
+  delegates to core Ghostwriter processors such as
+  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> and
+  <code>org.machanism.machai.gw.processor.ActProcessor</code>.
 </p>
 
 <h2>Key concepts</h2>
@@ -61,16 +62,16 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     generation or transformation.
   </dd>
 
-  <dt><strong>Processors</strong></dt>
-  <dd>
-    The Maven plugin delegates to the Ghostwriter engine to interpret guidance blocks and apply guided updates to
-    files in-place.
-  </dd>
-
   <dt><strong>Scan root</strong></dt>
   <dd>
     The directory tree searched for files containing guidance blocks (commonly <code>src/site</code>), configurable via
-    plugin parameters.
+    goal parameters and/or system properties.
+  </dd>
+
+  <dt><strong>Processors</strong></dt>
+  <dd>
+    The underlying Ghostwriter engine components that interpret guidance blocks, invoke the configured GenAI
+    provider, and apply updates to the scanned files.
   </dd>
 </dl>
 
@@ -78,30 +79,19 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <ul>
   <li>Scans a configurable directory tree for files containing embedded <code>@guidance:</code> blocks.</li>
-  <li>Invokes the configured Ghostwriter processor and GenAI provider to apply guided transformations.</li>
-  <li>Supports single-module and multi-module runs, including reactor-aware processing.</li>
+  <li>Composes the effective prompt/instructions from goal parameters and embedded guidance.</li>
+  <li>Invokes the configured GenAI provider and applies the resulting changes to files in-place.</li>
+  <li>Supports multi-module builds by providing goals that operate with different module ordering strategies.</li>
 </ul>
 
 <h2>How guided processing works</h2>
 
 <ol>
-  <li>
-    A goal selects a scan root (typically the Maven execution root), optionally overridden via
-    <code>-Dgw.scanDir</code>.
-  </li>
-  <li>
-    The scan walks the directory tree, respecting configured excludes.
-  </li>
-  <li>
-    For each file containing a <code>@guidance:</code> block, the workflow composes instructions from goal parameters,
-    default guidance, and embedded guidance.
-  </li>
-  <li>
-    The configured GenAI provider is invoked to produce transformed content, which is then written back to disk.
-  </li>
-  <li>
-    Temporary artifacts created during processing can be removed via <code>gw:clean</code>.
-  </li>
+  <li>Select a scan root (for example, <code>src/site</code>).</li>
+  <li>Walk the directory tree, applying configured excludes.</li>
+  <li>Detect files that contain <code>@guidance:</code> blocks.</li>
+  <li>Invoke the selected processor to generate updated content.</li>
+  <li>Write the updated content back to disk; temporary artifacts may be removed via <code>gw:clean</code>.</li>
 </ol>
 
 <h2>Packages</h2>
@@ -110,48 +100,48 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document processing during Maven builds.
-</p>
-
-<p>
-  The goals in this package configure and execute a
-  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> (and related processors such as
-  <code>org.machanism.machai.gw.processor.ActProcessor</code>) to scan a documentation source tree (commonly
-  <code>src/site</code>) for files containing embedded <code>@guidance:</code> blocks.
+  The goals in this package configure and execute guided file processing using
+  <code>org.machanism.machai.gw.processor.GuidanceProcessor</code> and related processors such as
+  <code>org.machanism.machai.gw.processor.ActProcessor</code>. Typical usage is to scan a documentation source tree
+  (commonly <code>src/site</code>) for files containing embedded <code>@guidance:</code> blocks.
 </p>
 
 <h4>Goals</h4>
 
 <ul>
   <li>
-    <strong><code>gw:gw</code></strong> (<code>org.machanism.machai.gw.maven.GW</code>) &mdash; Aggregator goal that can run
-    without a <code>pom.xml</code>. It processes modules in reverse order (sub-modules first, then parent modules),
-    similar to the Ghostwriter CLI.
+    <strong><code>gw:gw</code></strong>
+    (<code>org.machanism.machai.gw.maven.GW</code>) &mdash; Aggregator goal that can run without a <code>pom.xml</code>.
+    It processes modules in reverse order (sub-modules first, then parent modules), similar to the Ghostwriter CLI.
   </li>
   <li>
-    <strong><code>gw:reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorGW</code>) &mdash; Processes modules using
-    standard Maven reactor dependency ordering.
+    <strong><code>gw:reactor</code></strong>
+    (<code>org.machanism.machai.gw.maven.ReactorGW</code>) &mdash; Processes modules using standard Maven reactor dependency
+    ordering.
   </li>
   <li>
-    <strong><code>gw:act</code></strong> (<code>org.machanism.machai.gw.maven.Act</code>) &mdash; Interactive goal for running a
-    predefined action prompt over scanned documents.
+    <strong><code>gw:act</code></strong>
+    (<code>org.machanism.machai.gw.maven.Act</code>) &mdash; Interactive goal for running a predefined action prompt over
+    scanned documents.
   </li>
   <li>
-    <strong><code>gw:act-reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorAct</code>) &mdash; Reactor-friendly
-    variant of <code>gw:act</code> intended to run in the execution-root project context.
+    <strong><code>gw:act-reactor</code></strong>
+    (<code>org.machanism.machai.gw.maven.ReactorAct</code>) &mdash; Reactor-friendly variant of <code>gw:act</code> intended to run
+    in the execution-root project context.
   </li>
   <li>
-    <strong><code>gw:clean</code></strong> (<code>org.machanism.machai.gw.maven.Clean</code>) &mdash; Deletes temporary artifacts
-    created by GW processing (typically bound to Maven&apos;s <code>clean</code> lifecycle).
+    <strong><code>gw:clean</code></strong>
+    (<code>org.machanism.machai.gw.maven.Clean</code>) &mdash; Deletes temporary artifacts created by GW processing
+    (typically bound to Maven&apos;s <code>clean</code> lifecycle).
   </li>
 </ul>
 
 <h4>Credentials</h4>
 
 <p>
-  Provider credentials can optionally be sourced from <code>~/.m2/settings.xml</code>
-  by providing <code>-Dgenai.serverId=&lt;serverId&gt;</code>. When set, the plugin reads
-  the matching <code>&lt;server&gt;</code> entry and forwards credentials and/or additional
-  configuration fields to the workflow.
+  Provider credentials can optionally be sourced from <code>~/.m2/settings.xml</code> by providing
+  <code>-Dgenai.serverId=&lt;serverId&gt;</code>. When set, the plugin reads the matching <code>&lt;server&gt;</code> entry and
+  forwards credentials and/or additional configuration fields to the workflow.
 </p>
 
 <h4>Usage examples</h4>
@@ -161,7 +151,7 @@ mvn gw:gw
 </pre>
 
 <pre>
-mvn gw:reactor -Dgw.scanDir=src\site
+mvn gw:reactor -Dgw.scanDir=src\\site
 </pre>
 
 <h2>Class diagram</h2>
