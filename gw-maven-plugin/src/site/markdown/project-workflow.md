@@ -81,13 +81,6 @@ For most automation scenarios, let the plugin process the entire project or modu
 - Enable input logging with the `--logInputs` option to save all prompts and responses for review.
 - Logs are stored in a temporary directory under your project root.
 
-## Best Practices
-
-- Start with default guidance to quickly enable documentation for your project.
-- Gradually add embedded `@guidance` tags for files or modules that require specific instructions.
-- Use patterns and excludes to focus processing on relevant parts of your project.
-- Regularly review logs and outputs to ensure quality and compliance.
-
 ## Example Command
 
 ```sh

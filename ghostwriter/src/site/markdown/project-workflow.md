@@ -89,51 +89,6 @@ java -jar gw.jar --logInputs --instructions=file:instructions.txt src/main/java
 ```
 Here, `src/main/java` is a left-over argument, and `--logInputs` and `--instructions` are options.
 
-## Default Guidance
-
-Ghostwriter supports a **default guidance** feature, which provides fallback instructions for files that do not contain embedded `@guidance` directives. This ensures that every file can be processed with meaningful instructions, even if explicit guidance is missing.
-
-### How Default Guidance Works
-
-- If a file lacks an `@guidance` comment, Ghostwriter automatically applies the default guidance content.
-- The default guidance can be specified as:
-  - Plain text instructions
-  - A file reference (e.g., `file:default-guidance.txt`)
-  - A URL (e.g., `https://example.com/guidance.md`)
-
-### Sensitivity to `scanDir`
-
-- **If `scanDir` is a folder:**  
-  Default guidance will be applied only to that folder (not to individual files within it).
-- **If `scanDir` is a pattern (e.g., glob or regex):**  
-  Default guidance will be applied to all files that match the pattern.
-
-This allows you to control the scope of default guidance:
-- Use a folder as `scanDir` to apply guidance at the directory level.
-- Use a pattern as `scanDir` to apply guidance to each matched file.
-
-### Why Use Default Guidance?
-
-- **Quick Start:**  
-  Default guidance enables you to use Ghostwriter immediately, even if your project hasn’t adopted embedded `@guidance` comments yet.
-- **Incremental Adoption:**  
-  As your project evolves, you can gradually add embedded `@guidance` tags for more granular control, while default guidance continues to cover files without them.
-
-### Recommended Workflow
-
-1. **Set up default guidance** to cover your project’s documentation needs.
-2. **Run Ghostwriter** to generate documentation for all files, even those without embedded guidance.
-3. **Review the output** and identify files or modules that require more specific instructions.
-4. **Add embedded `@guidance` tags** to those files for tailored documentation prompts.
-
-Using default guidance is an effective first step to integrate Ghostwriter into your project, providing immediate value and a path toward more advanced, file-specific documentation workflows.
-
-### Best Practices
-
-- Use default guidance to enforce consistent documentation standards across your project.
-- Store reusable guidance templates in a file or at a URL for easy updates and sharing.
-- Combine default guidance with project-specific variables and templates for maximum flexibility.
-
 ## Additional Instructions
 
 Ghostwriter allows you to provide **additional instructions** that are appended to every prompt sent to the GenAI provider. This feature is useful for enforcing project-wide standards, adding context, or supplying extra guidance for documentation generation.
