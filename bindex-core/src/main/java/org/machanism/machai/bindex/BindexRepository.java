@@ -1,7 +1,5 @@
 package org.machanism.machai.bindex;
 
-import java.util.Objects;
-
 import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;

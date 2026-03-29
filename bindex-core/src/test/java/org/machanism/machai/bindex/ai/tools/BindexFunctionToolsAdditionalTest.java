@@ -1,6 +1,7 @@
 package org.machanism.machai.bindex.ai.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
@@ -29,8 +30,10 @@ class BindexFunctionToolsAdditionalTest {
 		String schema = (String) method.invoke(tools, new Object[] { new Object[] {} });
 
 		// Assert
-		assertTrue(schema != null);
-		assertTrue(schema.trim().length() > 0);
+		// Sonar java:S5785 - use assertNotNull instead of null-check in assertTrue.
+		assertNotNull(schema);
+		// Sonar java:S7158 - use isEmpty() to check if the string is empty.
+		assertTrue(!schema.trim().isEmpty());
 		assertTrue(schema.trim().startsWith("{"));
 	}
 

@@ -1,6 +1,7 @@
 package org.machanism.machai.bindex.builder;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -65,8 +66,9 @@ class MavenBindexBuilderTest {
 			builder.removeNotImportantData(model);
 
 			// Assert
-			assertTrue(model.getBuild() == null);
-			assertTrue(model.getRepositories() != null);
+			// Sonar java:S5785 - use assertNull/assertNotNull instead of null-check in assertTrue.
+			assertNull(model.getBuild());
+			assertNotNull(model.getRepositories());
 		}
 	}
 

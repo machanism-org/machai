@@ -34,7 +34,7 @@ class BindexFunctionToolsRepositoryInitializationTest {
 		Method method = BindexFunctionTools.class.getDeclaredMethod("getBindexRepository");
 		method.setAccessible(true);
 
-		BindexRepository repo = Mockito.mock(BindexRepository.class);
+		// Sonar java:S1481 - remove unused local variable; use mocked construction directly.
 		try (MockedConstruction<BindexRepository> construction = Mockito.mockConstruction(BindexRepository.class,
 				(mock, context) -> {
 					Mockito.when(mock.getBindex(Mockito.anyString())).thenReturn(null);
