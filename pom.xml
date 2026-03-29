@@ -119,6 +119,26 @@
 						<groupId>org.machanism.machai</groupId>
 						<artifactId>gw-maven-plugin</artifactId>
 						<version>1.0.3-SNAPSHOT</version>
+						<executions>
+							<execution>
+								<id>sonar-tests</id>
+								<goals>
+									<goal>act</goal>
+								</goals>
+								<configuration>
+									<act>sonar-tests</act>
+								</configuration>
+							</execution>
+							<execution>
+								<id>sonar-fix</id>
+								<goals>
+									<goal>act</goal>
+								</goals>
+								<configuration>
+									<act>sonar-fix</act>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.machanism.machai</groupId>
