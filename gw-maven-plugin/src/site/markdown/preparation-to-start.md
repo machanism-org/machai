@@ -87,7 +87,6 @@ You can also specify configuration options to customize the plugin’s behavior:
         <threads>true</threads>
         <scanDir>src/main/java</scanDir>
         <instructions>file:instructions.txt</instructions>
-        <guidance>file:guidance.txt</guidance>
         <excludes>
           <exclude>logs</exclude>
         </excludes>
