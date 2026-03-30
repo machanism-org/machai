@@ -19,29 +19,26 @@ You must implement user tasks.
 '''
 
 inputs = '''
-# Context
+# Task
 
-Bindex JSON is a structured library description containing key information about each artifact, along with usage examples.
-Use functional tool `get_bindex_schema` to get the bindex schema. 
+- Bindex JSON is a structured library description containing key information about each artifact, along with usage examples. Use functional tool `get_bindex_schema` to get the bindex schema. 
+- To get information about recommended libraries, use the `pick_libraries` function tool. Pass the user's initial query as the value of the prompt parameter.
+- Carefully analyze the description of each library and determine which libraries match the user's query.
+- For each suitable library, request its Bindex file using the `get_bindex` function tool to get detailed information in Bindex format.
+- When possible, use these libraries to avoid writing code from scratch.
+- **Create all necessary files in the project folder.**
+- Add the necessary code and publicly available libraries to achieve the desired result.
+— Clean and build the project, and fix any errors after making changes to the code.
+- Make the project functional.
+- Ask the user if the necessary information required.
+- Create a detailed description in the README.md file.
+- The `.machai` folder is reserved for LLM activity logging and should be ignored during all operations. Do not read, modify, or include any files from the `.machai` directory.
+- Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
 
-# Environment
-
-- `Operation System`: `{0}`
-
-# Instructions
-
-- The following Bindex JSON data provides a list of recommended libraries.
-- To obtain information about recommended libraries, use the `pick_libraries` function tool. 
-  Pass the original user prompt query as the value for the prompt parameter.
-- Use this information to build the required application.
-- **Create all required files on the project folder.**
-- The `.machai` folder is reserved for LLM activity logging and must be ignored during all operations. Do not read, modify, or include any files from the `.machai` directory.
-- The table below contains recommended libraries for solving user tasks.
-- Carefully analyze the description of each library and identify which libraries are relevant to the user's request.
-- For each well-matched library, request its bindex file using the `get_bindex` functional tool to obtain detailed information in bindex format.
-- Whenever possible, leverage these libraries to avoid writing code from scratch.
+# User Query
 
 %s
+
 '''
 
 gw.interactive = true
