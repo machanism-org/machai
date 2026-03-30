@@ -85,5 +85,30 @@
 </ul>
 ]]></action>
     </release>
+
+    <release version="1.0.3" date="2026-03-30">
+      <action dev="dev" type="add"><![CDATA[
+<h3>Fixes</h3>
+<ul>
+  <li>Fix OpenAI provider tool-call input handling.</li>
+  <li>Fix guidance tag definition and PlantUML Maven plugin configuration.</li>
+</ul>
+<h3>Documentation</h3>
+<ul>
+  <li>Update site documentation and Javadoc overview/instructions.</li>
+  <li>Update GenAI provider documentation.</li>
+</ul>
+<h3>Chores</h3>
+<ul>
+  <li>Increase <code>MAX_OUTPUT_TOKENS</code> to 18000.</li>
+  <li>Update function tools (including file write behavior) and bindex.json files.</li>
+  <li>Return <code>null</code> for non-<code>pom</code> packaging projects.</li>
+</ul>
+<h3>Tests</h3>
+<ul>
+  <li>Update and improve provider/function-tool test coverage.</li>
+</ul>
+]]></action>
+    </release>
   </body>
 </document>

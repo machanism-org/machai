@@ -102,5 +102,38 @@
         ]]>
       </action>
     </release>
+
+    <release version="1.0.3" date="2026-03-30">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h3>Features</h3>
+<ul>
+  <li>Added Maven plugin integration tests for Act/GW goals.</li>
+  <li>Improved Act handling and behavior, including prompt label casing and prompt restore in reactor executions.</li>
+</ul>
+
+<h3>Fixes</h3>
+<ul>
+  <li>Fixed property constant usage across plugin goals (including <code>logInputs</code>, Ghostwriter constants, Act constants, and line separator handling).</li>
+  <li>Fixed scan exclusion handling and deferred root scan logging.</li>
+  <li>Fixed custom/override <code>acts</code> location resolution and related Act goal logging/messages.</li>
+  <li>Fixed guidance tag definition and PlantUML Maven plugin configuration.</li>
+  <li>Removed support for <code>gw.rootProjectLast</code>.</li>
+</ul>
+
+<h3>Documentation</h3>
+<ul>
+  <li>Updated site docs, Javadoc (including overview formatting guidance), and related tests/documents.</li>
+</ul>
+
+<h3>Chores</h3>
+<ul>
+  <li>Normalized GW plugin line endings.</li>
+  <li>Updated <code>bindex.json</code> metadata files.</li>
+  <li>General maintenance updates to GenAI settings mapping and test coverage.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
   </body>
 </document>

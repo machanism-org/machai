@@ -106,5 +106,39 @@
         ]]>
       </action>
     </release>
+
+    <release version="1.0.3" date="2026-03-30">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h3>Features</h3>
+<ul>
+  <li>Update bindex mojo defaults.</li>
+  <li>Update bindex-maven-plugin mojo options.</li>
+</ul>
+
+<h3>Fixes</h3>
+<ul>
+  <li>Fix inputsLog propagation in bindex-maven-plugin.</li>
+  <li>Fix <code>genai.serverId</code> property constant usage in <code>AbstractBindexMojo</code>.</li>
+  <li>Delete clean goal output using <code>Files.delete</code>.</li>
+  <li>Remove unused import in <code>AbstractBindexMojo</code>.</li>
+  <li>Fix guidance tag definition.</li>
+  <li>Fix <code>plantuml-maven-plugin</code> configuration.</li>
+</ul>
+
+<h3>Documentation</h3>
+<ul>
+  <li>Update documentation and Javadoc (including overview formatting guidance).</li>
+</ul>
+
+<h3>Chores</h3>
+<ul>
+  <li>Update tests, test dependencies, and coverage.</li>
+  <li>Refresh <code>bindex.json</code> files.</li>
+  <li>Update <code>guidance</code> tags.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
   </body>
 </document>

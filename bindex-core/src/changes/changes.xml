@@ -77,5 +77,35 @@
 </ul>
 ]]></action>
     </release>
+    <release version="1.0.3" date="2026-03-30">
+      <action dev="dev" type="add"><![CDATA[
+<h3>Features</h3>
+<ul>
+  <li>Updated library picker to return recommended libraries as JSON.</li>
+</ul>
+<h3>Fixes</h3>
+<ul>
+  <li>Fixed bindex inputs log propagation and assembly logInputs property constant.</li>
+  <li>Fixed picker lazy-init repository behavior and corrected pick_libraries tool registration.</li>
+  <li>Fixed guidance tag definition and PlantUML Maven Plugin configuration.</li>
+  <li>Fixed prompt line-separator handling for GenAIProvider.</li>
+  <li>Resolved Sonar findings and removed unused imports across picker and tests.</li>
+</ul>
+<h3>Refactoring</h3>
+<ul>
+  <li>Removed assembly command and bindex assembly support.</li>
+  <li>Improved function tools logging for the library picker.</li>
+</ul>
+<h3>Documentation</h3>
+<ul>
+  <li>Updated documentation and Javadoc (including overview formatting guidance).</li>
+  <li>Updated <code>bindex.json</code> examples/templates.</li>
+</ul>
+<h3>Chores</h3>
+<ul>
+  <li>Updated and expanded automated tests (builder, picker, and function tools).</li>
+</ul>
+]]></action>
+    </release>
   </body>
 </document>

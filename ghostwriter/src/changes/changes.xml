@@ -98,5 +98,38 @@
         ]]>
       </action>
     </release>
+
+    <release version="1.0.3" date="2026-03-30">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h3>Features</h3>
+<ul>
+  <li>Added <code>code-doc</code> Act template for generating code documentation.</li>
+  <li>Improved interactive mode support.</li>
+</ul>
+<h3>Fixes</h3>
+<ul>
+  <li>Improved graceful tool termination handling (including treating <code>exitCode=0</code> terminations as normal output and ensuring processing completion logging).</li>
+  <li>Fixed Act processor URL handling and prompt interpolation.</li>
+  <li>Fixed processor file-scan matching and concurrency option handling.</li>
+  <li>Fixed console prompt output in <code>Ghostwriter.readText</code>.</li>
+  <li>Corrected guidance tag definition and Maven PlantUML plugin configuration.</li>
+</ul>
+<h3>Refactoring</h3>
+<ul>
+  <li>Updated Act behavior and aligned Acts location property usage across processors.</li>
+</ul>
+<h3>Documentation</h3>
+<ul>
+  <li>Updated site documentation, Javadoc, and <code>act.md</code>.</li>
+</ul>
+<h3>Chores</h3>
+<ul>
+  <li>Moved <code>assembly.toml</code> into built-in Acts resources.</li>
+  <li>Updated dependencies, refreshed <code>bindex.json</code> files, and expanded test coverage.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
   </body>
 </document>

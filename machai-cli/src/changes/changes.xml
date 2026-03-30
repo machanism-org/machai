@@ -111,5 +111,42 @@
         ]]>
       </action>
     </release>
+
+    <release version="1.0.3" date="2026-03-30">
+      <action dev="dev" type="add">
+        <![CDATA[
+<h3>Features</h3>
+<ul>
+  <li>Improved <code>act</code> command prompt input handling.</li>
+</ul>
+
+<h3>Fixes</h3>
+<ul>
+  <li>Fixed guidance tag definition and PlantUML Maven plugin configuration.</li>
+  <li>Fixed CLI/config property constant usage in commands (<code>GWCommand</code>, <code>ActCommand</code>).</li>
+  <li>Fixed CLI property loading and missing config handling (with tests).</li>
+  <li>Fixed Machai CLI GenAI manager references.</li>
+</ul>
+
+<h3>Refactoring</h3>
+<ul>
+  <li>Removed system properties file loading.</li>
+  <li>Removed assembly command and bindex assembly support.</li>
+  <li>Removed <code>gw.guidance</code> from <code>gw</code> goal.</li>
+</ul>
+
+<h3>Documentation</h3>
+<ul>
+  <li>Updated documentation and Javadoc (including overview formatting guidance).</li>
+</ul>
+
+<h3>Chores</h3>
+<ul>
+  <li>Updated CLI commands/tests and addressed Sonar issues.</li>
+  <li>Updated <code>bindex.json</code> files.</li>
+</ul>
+        ]]>
+      </action>
+    </release>
   </body>
 </document>
