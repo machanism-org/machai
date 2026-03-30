@@ -75,7 +75,7 @@ Analyze the Grype vulnerability scan results for this Maven project. For each vu
 - **Generate an SBOM:**  
   Create a Software Bill of Materials (SBOM) for the project using Syft.  
   
-  **IMPORTENT: Exclude `Child Projects` via the `--exclude` option, e.g. `--exclude ./[Child Project]`.
+  **IMPORTENT: Exclude `Modules` via the `--exclude` option, e.g. `--exclude ./[Child Project]`.
 
   Run in the project root:
   ```

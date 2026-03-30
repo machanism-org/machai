@@ -47,7 +47,7 @@ You need to fix SonarQube issues in the project.
 %s	 
 	 
 1. **Select and Review the Appropriate SonarQube Report:**  
-   - If the project has `Child Projects`, then skip next steps for current project and continue.
+   - If the project has `Modules`, then skip next steps for current project and continue.
    - Use SonarQube Web API to get the `Sonar Report` by url: [SONARQUBE_URL]. 
    - If the response returns an error, the process is terminated using the Function tool and the exit code `500` is returned.
    - If the response is not successfully, then immediately skip all the following steps and complete the task.
