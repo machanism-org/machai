@@ -225,7 +225,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		content.add(relativeFile);
 
 		if (!interactive) {
-			content.add("- This is an automated process.\n- Do not include explanations or any additional output.");
+			content.add("- This is an automated process.\n"
+					+ "- Do not include explanations or any additional output.\n");
+		} else {
+			content.add("- This is an interactive process.\n"
+					+ "- If the task is completed successfully, call the `terminate_process` function with exit code = 0.");
 		}
 
 		Object[] array = content.toArray(new String[0]);
