@@ -295,7 +295,7 @@ public class Picker {
 			List<Layer> layers = classification.getLayers();
 			String languagesQuery = StringUtils.join(languages, ", ");
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Layer: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
+				LOGGER.info("Picking: {} ({})", StringUtils.join(layers, ", "), languagesQuery);
 			}
 
 			String classificationQuery = getClassificationText(classification);
