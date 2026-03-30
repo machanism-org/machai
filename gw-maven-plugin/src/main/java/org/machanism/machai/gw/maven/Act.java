@@ -157,7 +157,7 @@ public class Act extends AbstractGWGoal {
 					this.locations);
 
 			if (actsLocation != null) {
-				logger.info("Custom locations location specified: {}", actsLocation);
+				logger.info("Custom acts location specified: {}", actsLocation);
 				actProcessor.setActsLocation(actsLocation);
 			}
 
