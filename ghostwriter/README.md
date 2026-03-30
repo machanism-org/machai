@@ -25,14 +25,14 @@
 
 ## Introduction
 
-Machai Ghostwriter is a guided, AI-assisted processing engine that runs across an entire repository—source code, tests, documentation, and other project assets—to generate and maintain project-wide documentation and code improvements.
+Machai Ghostwriter is a guided, AI-assisted processing engine that runs across an entire repository—source code, tests, documentation, project site content, diagrams, and other project assets—to generate and maintain project-wide documentation and code improvements.
 
-Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system where each file can carry its own embedded guidance and the tool orchestrates consistent processing across the project.
+Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): instead of treating files as isolated inputs, Ghostwriter treats a repository as a structured system where each file can carry embedded guidance and the tool orchestrates consistent processing across the project.
 
 Main benefits:
 
 - **Guidance-first prompting**: instructions live next to the content they govern via embedded `@guidance:` blocks.
-- **Repository-scale consistency**: deterministic scanning plus per-file-type reviewers build prompts in a repeatable way.
+- **Repository-scale consistency**: deterministic scanning plus per-file-type processing builds prompts in a repeatable way.
 - **Automation-ready**: designed for non-interactive execution and integration into scripts and CI/CD pipelines.
 
 ## Usage
@@ -43,7 +43,7 @@ Main benefits:
 
 - Java **8** (per `maven.compiler.release` in `pom.xml`).
 - A configured GenAI provider/model (set `gw.model` in `gw.properties` or pass `-m/--model`).
-- (Optional) `gw.properties` to persist configuration.
+- (Optional) `gw.properties` to persist defaults such as scan targets, excludes, and instructions.
 
 #### Installation
 
@@ -58,11 +58,12 @@ java -jar gw.jar src -m OpenAI:gpt-5.1
 #### Typical Workflow
 
 1. Add `@guidance:` blocks to the files you want Ghostwriter to improve or document (code, docs, configs, site pages, diagrams, etc.).
-2. (Optional) Create `gw.properties` and configure values such as:
+2. (Optional) Create `gw.properties` and set defaults such as:
    - `project.dir` (project root)
    - `gw.model` (provider:model)
    - `instructions` (optional system instructions)
    - `gw.excludes` (optional excludes)
+   - `gw.scanDir` (default scan target)
 3. Run Ghostwriter against a directory or pattern (e.g., `src`, `glob:**/*.md`, `regex:...`).
 4. Review the resulting changes and iterate.
 

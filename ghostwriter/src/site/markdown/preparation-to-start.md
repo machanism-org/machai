@@ -98,7 +98,6 @@ The following properties are read by the Ghostwriter CLI bootstrap (`src/main/ja
 > Notes:
 > - `GW_HOME` is an environment variable you may set for convenience, but Ghostwriter itself resolves `gw.home` via configuration/system properties (it does not read `GW_HOME` directly).
 > - The CLI option `--acts <dir>` is not a `gw.*` property; it is a command-line-only override for the directory containing act prompt files.
-> - The CLI option `-g/--guidance` is also command-line-only in this class (it is parsed but not used by `Ghostwriter` currently).
 > - Act mode is enabled via `--act` and is also a command-line-only option (not a `gw.*` property).
 
 ### Act Mode
@@ -165,8 +164,7 @@ To view all available command-line options, run:
 
 ```text
 C:\projects\machanism.org\machai>java -jar \\opt\\gw\\gw.jar -h
-usage: java -jar gw.jar <scanDir> [options] [-e <arg>] [-g
-       <arg>] [-h] [-i <arg>] [-l] [-m <arg>] [-d <arg>] [-t <arg>]
+usage: java -jar gw.jar <scanDir> [options]
 
 Ghostwriter CLI - Scan and process directories or files using GenAI
 guidance.

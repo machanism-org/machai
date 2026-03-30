@@ -38,11 +38,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </header>
 
 <section>
-  <h2>Overview</h2>
+  <h2>Purpose</h2>
   <p>
     Ghostwriter is a filesystem-first documentation and content generation tool. It traverses a project directory tree, discovers embedded
-    <code>@guidance:</code> instructions in supported files, composes provider-ready prompts, and applies generated output in-place to the
-    original files.
+    <code>@guidance:</code> instructions in supported files, composes provider-ready prompts, and applies generated output back to the original
+    files.
   </p>
   <p>
     Ghostwriter supports all types of project files—including source code, documentation, project site content, and other relevant files.
@@ -56,9 +56,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <figcaption>High-level class relationships in the Ghostwriter processing pipeline.</figcaption>
   </figure>
 
-  <p>
-    The core flow is:
-  </p>
+  <p>The processing pipeline follows a consistent sequence:</p>
   <ul>
     <li><strong>Select</strong> scan roots and matching rules.</li>
     <li><strong>Traverse</strong> the filesystem and choose files to process.</li>
@@ -69,52 +67,44 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </section>
 
 <section>
-  <h2>Packages</h2>
+  <h2>Package overview</h2>
 
   <h3><code>org.machanism.machai.gw.processor</code></h3>
   <p>
-    Command-line entry point and processing pipeline responsible for scanning a project directory, selecting files, extracting guidance, and
-    orchestrating prompt execution against a configured
+    Command-line entry point and processing pipeline. This package provides the Ghostwriter CLI and the processors that scan a project
+    directory, select files, and orchestrate prompt execution against a configured
     {@code org.machanism.machai.ai.manager.Genai} provider.
   </p>
-  <p>
-    Key responsibilities include:
-  </p>
+  <p>Key concepts include:</p>
   <ul>
-    <li>Discover project and module structure via {@code org.machanism.machai.project.layout.ProjectLayout}.</li>
-    <li>Traverse the filesystem and apply include/exclude rules to determine which paths are processed.</li>
-    <li>Support execution modes:
-      <ul>
-        <li><strong>Guidance mode</strong>: extract embedded {@code @guidance:} directives using
-          {@code org.machanism.machai.gw.reviewer.Reviewer} implementations and build prompts from those directives.</li>
-        <li><strong>Act mode</strong>: load TOML-based Act templates and execute them across matching files.</li>
-      </ul>
-    </li>
-    <li>Invoke the provider and (optionally) log composed request inputs.</li>
+    <li><strong>Project layout</strong>: scanning behavior can be derived from
+      {@code org.machanism.machai.project.layout.ProjectLayout} (for example, identifying source/test/documentation roots).</li>
+    <li><strong>File traversal and filtering</strong>: shared traversal logic and common exclusions are centralized in
+      {@code org.machanism.machai.gw.processor.AbstractFileProcessor}.</li>
+    <li><strong>Provider execution</strong>: prompt composition and provider invocation are handled by
+      {@code org.machanism.machai.gw.processor.AIFileProcessor}.</li>
   </ul>
+  <p>
+    The CLI typically runs in one of two modes: <em>Guidance</em> (extract inline <code>@guidance:</code> directives and build a prompt from
+    them) or <em>Act</em> (apply a TOML-defined Act template to matching files).
+  </p>
 
   <h3><code>org.machanism.machai.gw.reviewer</code></h3>
   <p>
-    File-format-aware components that extract embedded {@code @guidance} instructions and convert them into normalized prompt fragments.
+    File-format-aware components that locate and extract embedded {@code @guidance} directives and convert them into normalized prompt
+    fragments. The package is organized around the {@code org.machanism.machai.gw.reviewer.Reviewer} interface, with implementations for
+    multiple formats (Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and plain text).
   </p>
   <p>
-    The primary abstraction is the {@code Reviewer} service-provider interface (SPI). Each implementation targets one or more file types,
-    locates the {@code @guidance} tag according to the format's comment conventions, and emits a formatted fragment suitable for inclusion in a
-    single request to the LLM.
-  </p>
-  <p>
-    Reviewers typically read files as UTF-8, compute project-relative paths via
-    {@code org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}, and format prompt fragments using
+    Reviewers generally compute a stable project-relative path via
+    {@code org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)} and then format prompt fragments using
     templates from the {@code document-prompts} resource bundle.
   </p>
 
   <h3><code>org.machanism.machai.gw.tools</code></h3>
   <p>
-    GenAI provider tool registration for Ghostwriter-specific operations.
-  </p>
-  <p>
-    This package exposes selected Ghostwriter capabilities (for example listing and loading Act templates) as callable tools available to the
-    configured provider.
+    GenAI provider tool registration for Ghostwriter-specific operations. This package exposes selected Ghostwriter capabilities as callable
+    tools available to the configured provider.
   </p>
 </section>
 

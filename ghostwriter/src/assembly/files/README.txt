@@ -2,7 +2,7 @@ Ghostwriter CLI
 
 Application Overview
 
-Machai Ghostwriter is a guided, AI-assisted processing engine delivered as a Java CLI. It scans a repository (source code, tests, documentation, and other assets), extracts embedded "@guidance:" directives (or uses optional default guidance), and executes the resulting prompts against a configured GenAI provider to generate and maintain project-wide documentation and code improvements.
+Machai Ghostwriter is a guided, AI-assisted processing engine delivered as a Java CLI. It scans a repository (source code, tests, documentation, diagrams, and other assets), extracts embedded "@guidance:" directives (or applies a default prompt when guidance is absent), and executes the resulting prompts against a configured GenAI provider to generate and maintain project-wide documentation and code improvements.
 
 Conceptual foundation (Guided File Processing):
 https://www.machanism.org/guided-file-processing/index.html
@@ -13,9 +13,9 @@ Key features
   - directory paths
   - glob: patterns (e.g., glob:**/*.java)
   - regex: patterns
-- Per-file-type reviewers extract embedded directives and build project-aware prompts.
-- Optional system instructions and default guidance (plain text, URLs, or file: references).
-- Excludes support (exact paths and matchers as supported by the CLI/processor).
+- Project-aware prompts with injected repository context (layout/structure).
+- Optional system instructions and default prompts (plain text, URLs, or file: references).
+- Excludes support (comma-separated; exact paths plus glob:/regex: matchers).
 - Optional multi-threaded processing (--threads).
 - Optional logging of provider inputs per processed file (--logInputs).
 - Act mode for running predefined prompts (--act) and custom act bundles (--acts).
@@ -79,46 +79,11 @@ scanDir rules
 - If an absolute scan path is provided, it must be located within the root project directory.
 - If no <scanDir> is provided, Ghostwriter uses gw.scanDir if configured; otherwise it scans the current working directory.
 
-Windows examples (.bat / cmd)
-- Scan a directory:
-  java -jar gw.jar src -m OpenAI:gpt-5.1
-
-- Scan by glob pattern:
-  java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1
-
-- Scan by regex pattern:
-  java -jar gw.jar "regex:^.*/[^/]+\\.java$" -m OpenAI:gpt-5.1
-
-- Provide system instructions via stdin (end input when a line does not end with "\\"):
-  java -jar gw.jar src -m OpenAI:gpt-5.1 -i
-
-- Provide default guidance via stdin (end input when a line does not end with "\\"):
-  java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -g -l
-
-Unix examples (.sh)
-- Scan a directory:
-  java -jar gw.jar src -m OpenAI:gpt-5.1
-
-- Scan by glob pattern:
-  java -jar gw.jar 'glob:**/*.md' -m OpenAI:gpt-5.1
-
-- Scan by regex pattern:
-  java -jar gw.jar 'regex:^.*/[^/]+\\.java$' -m OpenAI:gpt-5.1
-
-Setting configuration via Java system properties
-- Override config file path (resolved relative to gw.home):
-  -Dgw.config=<path>
-- Set Ghostwriter home directory:
-  -Dgw.home=<path>
-
-Setting configuration via gw.properties
-- An example gw.properties is included in this folder.
-
 Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
 
 1) project.dir (ProjectLayout.PROJECT_DIR_PROP_NAME)
 - Description: Root directory for file processing when -d/--projectDir is not provided.
-- Default: Current working directory (SystemUtils.getUserDir()) if not set.
+- Default: If not set, current working directory (SystemUtils.getUserDir()).
 - Usage context: Determines the root directory used for scanning and for validating absolute scan paths.
 
 2) gw.model (Ghostwriter.MODEL_PROP_NAME)
@@ -147,7 +112,7 @@ Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
 - Usage context: Set in gw.properties; can be overridden with -as/--acts.
 
 6) gw.act (Ghostwriter.ACT_PROP_NAME)
-- Description: Act prompt used for Act mode.
+- Description: Default act prompt used for Act mode and for the default prompt when Act mode is enabled.
 - Default: Unset.
 - Usage context:
   - Used when running with -a/--act; can be set in gw.properties.
@@ -197,11 +162,57 @@ CLI options summary
 - -t, --threads <count>: Degree of concurrency for processing.
 - -m, --model <provider:model>: GenAI provider/model selection.
 - -i, --instructions[=<text|url|file:...>]: System instructions (or multi-line stdin if no value).
-- -g, --guidance[=<text|url|file:...>]: Default guidance (or multi-line stdin if no value).
 - -e, --excludes <csv>: Comma-separated excludes.
 - -l, --logInputs: Log LLM request inputs to dedicated log files.
 - -as, --acts <path>: Directory containing predefined act prompt files.
-- -a, --act[=<...>]: Act mode prompt (or multi-line stdin if no value).
+- -a, --act[=<prompt>]: Enable Act mode. If no value: multi-line stdin (line continuation: "\\").
+
+Examples
+
+Windows (cmd)
+- Scan a directory:
+  java -jar gw.jar src -m OpenAI:gpt-5.1
+
+- Scan by glob pattern:
+  java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1
+
+- Scan by regex pattern:
+  java -jar gw.jar "regex:^.*/[^/]+\\.java$" -m OpenAI:gpt-5.1
+
+- Provide system instructions from a file:
+  java -jar gw.jar src -m OpenAI:gpt-5.1 -i "file:./instructions.txt"
+
+- Provide system instructions via stdin (input ends when a line does not end with "\\"):
+  java -jar gw.jar src -m OpenAI:gpt-5.1 -i
+
+- Exclude build outputs and VCS metadata:
+  java -jar gw.jar src -m OpenAI:gpt-5.1 -e "glob:**/target/**,glob:**/.git/**"
+
+- Use custom project root:
+  java -jar gw.jar "glob:**/*.md" -d . -m OpenAI:gpt-5.1
+
+- Act mode with prompt from config (gw.act):
+  java -jar gw.jar src -m OpenAI:gpt-5.1 -a
+
+- Act mode with inline prompt:
+  java -jar gw.jar src -m OpenAI:gpt-5.1 -a "Update the README files across the project"
+
+Unix (sh)
+- Scan a directory:
+  java -jar gw.jar src -m OpenAI:gpt-5.1
+
+- Scan by glob pattern:
+  java -jar gw.jar 'glob:**/*.md' -m OpenAI:gpt-5.1
+
+- Scan by regex pattern:
+  java -jar gw.jar 'regex:^.*/[^/]+\\.java$' -m OpenAI:gpt-5.1
+
+- Provide system instructions from a file:
+  java -jar gw.jar src -m OpenAI:gpt-5.1 -i 'file:./instructions.txt'
+
+- Exclude build outputs and VCS metadata:
+  java -jar gw.jar src -m OpenAI:gpt-5.1 -e 'glob:**/target/**,glob:**/.git/**'
+
 
 Troubleshooting & Support
 

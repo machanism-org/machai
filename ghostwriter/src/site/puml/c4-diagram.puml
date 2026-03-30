@@ -19,43 +19,45 @@ title Ghostwriter - C4 Component Diagram
 Person(user, "User", "Runs Ghostwriter to generate/update documentation.")
 
 System_Boundary(gw, "Ghostwriter (CLI)") {
-  Component(cli, "Ghostwriter CLI", "Java", "Parses CLI options, loads configuration, and orchestrates scanning and processing.")
+  Component(cli, "Ghostwriter CLI", "Java", "Command-line entry point (org.machanism.machai.gw.processor.Ghostwriter): parses options, bootstraps configuration, resolves scan dirs, and orchestrates processing.")
 
-  Component(config, "Configuration", "Properties", "Loads gw.properties and resolves scanDir, excludes, instructions, and model/provider settings.")
-  Component(projectLayout, "ProjectLayout", "Library", "Determines project root and layout metadata (Maven, Gradle, etc.).")
+  Component(config, "Configuration", "PropertiesConfigurator", "Loads gw.properties, resolves gw.home/gw.config, and provides settings (scanDir, excludes, instructions, model, threads, acts location, etc.).")
+  Component(projectLayout, "Project Layout", "ProjectLayout", "Resolves project root and layout metadata via machai project layout utilities.")
 
-  Component(procOrch, "Processing Orchestrator", "Java", "Drives scanning, selects processing mode (Guidance vs Act), applies excludes, and manages concurrency.")
+  Component(procGuidance, "Guidance Processor", "GuidanceProcessor", "Default mode: scans documents, extracts embedded @guidance directives, builds per-file prompts and runs processing.")
+  Component(procAct, "Act Processor", "ActProcessor", "Act mode: loads act definitions (TOML), renders templates, enables tool-calling, and processes files accordingly.")
 
-  Component(guidanceProc, "Guidance Processor", "Java", "Extracts embedded @guidance directives from files and builds per-file prompts.")
-  Component(actProc, "Act Processor", "Java", "Loads Act definitions (TOML), renders input templates, and executes Act prompts.")
+  Component(filePipeline, "File Processing Pipeline", "AbstractFileProcessor", "Shared per-file pipeline: scanning, filtering/excludes, reading/writing files, reviewer selection, and GenAI request/response handling.")
+  Component(reviewers, "Reviewers", "Reviewer SPI", "File-type reviewers (Java/Markdown/PUML/HTML/Python/TypeScript/Text) used for quality/safety checks and formatting guidance.")
 
-  Component(absFileProc, "File Processor", "Java", "Shared per-file processing pipeline; delegates to reviewers and GenAI integration.")
-  Component(reviewers, "Reviewers", "Java", "Language/content reviewers (Java/Markdown/PUML/etc.) used for quality and safety checks.")
+  Component(tools, "Act Function Tools", "ActFunctionTools", "Tool endpoints exposed to the LLM during Act execution (list/load acts, file system read/write, command execution, REST/web access).")
 
-  Component(tooling, "Function Tools", "Java", "Tool endpoints exposed to the LLM during Act execution (e.g., list/load acts, file ops).")
-
-  Component(genaiMgr, "GenAI Integration", "Java", "Provider selection, request dispatch, streaming, and usage accounting.")
+  Component(genaiMgr, "GenAI Provider Manager", "Genai/GenaiProviderManager", "Provider selection, request dispatch, streaming, and usage accounting/logging.")
 }
 
 System_Ext(genaiProvider, "GenAI Provider", "External System", "LLM provider (e.g., OpenAI).")
-System_Ext(fs, "File System", "External System", "Source/docs files scanned and updated by Ghostwriter.")
+System_Ext(fs, "File System", "External System", "Local source/docs files scanned and updated by Ghostwriter.")
+System_Ext(net, "External URLs", "External System", "URLs used for instruction loading or web content retrieval.")
 
 Rel(user, cli, "Invokes", "CLI")
 
-Rel(cli, config, "Loads", "gw.properties")
-Rel(cli, projectLayout, "Resolves root/layout")
-Rel(cli, procOrch, "Starts")
+Rel(cli, config, "Initializes/loads", "gw.properties")
+Rel(cli, projectLayout, "Resolves", "project root/layout")
 
-Rel(procOrch, guidanceProc, "Uses", "Default mode")
-Rel(procOrch, actProc, "Uses", "Act mode")
-Rel(procOrch, absFileProc, "Uses")
+Rel(cli, procGuidance, "Runs", "default")
+Rel(cli, procAct, "Runs", "-a/--act")
 
-Rel(absFileProc, reviewers, "Uses", "Reviewer SPI")
-Rel(absFileProc, genaiMgr, "Submits prompts/results")
+Rel(procGuidance, filePipeline, "Uses")
+Rel(procAct, filePipeline, "Uses")
 
-Rel(actProc, tooling, "Enables", "Tool calling")
+Rel(filePipeline, reviewers, "Selects/uses", "by file type")
+Rel(filePipeline, genaiMgr, "Submits prompts/results")
+Rel(filePipeline, fs, "Reads/Writes", "local files")
+
+Rel(procAct, tools, "Enables", "tool calling")
+Rel(tools, fs, "Reads/Writes", "files")
+Rel(tools, net, "Fetches", "HTTP")
+
 Rel(genaiMgr, genaiProvider, "Calls", "HTTPS/API")
-
-Rel(absFileProc, fs, "Reads/Writes", "Local files")
 
 @enduml
