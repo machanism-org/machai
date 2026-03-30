@@ -22,8 +22,11 @@ class MarkdownReviewerTest {
 		// Arrange
 		MarkdownReviewer reviewer = new MarkdownReviewer();
 
-		// Act + Assert
-		assertArrayEquals(new String[] { "md" }, reviewer.getSupportedFileExtensions());
+		// Act
+		String[] result = reviewer.getSupportedFileExtensions();
+
+		// Assert
+		assertArrayEquals(new String[] { "md" }, result);
 	}
 
 	@Test
@@ -53,6 +56,25 @@ class MarkdownReviewerTest {
 		Path file = project.resolve("docs").resolve("guide.md");
 		Files.createDirectories(file.getParent());
 		String content = "<!-- @guidance: explain -->\n# Guide\n";
+		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
+		assertNotNull(result);
+	}
+
+	@Test
+	void perform_formatsMarkdownWhenCommentIsNotClosedAtEndOfFile() throws IOException {
+		// Arrange
+		MarkdownReviewer reviewer = new MarkdownReviewer();
+
+		Path project = tempDir.resolve("project");
+		Files.createDirectories(project);
+		Path file = project.resolve("docs").resolve("guide.md");
+		Files.createDirectories(file.getParent());
+		String content = "<!-- @guidance: explain\n# Guide\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
 		// Act

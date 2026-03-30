@@ -20,18 +20,28 @@ class PumlReviewerTest {
 
 	@Test
 	void getSupportedFileExtensions_returnsPuml() {
+		// Arrange
 		PumlReviewer reviewer = new PumlReviewer();
-		assertArrayEquals(new String[] { "puml" }, reviewer.getSupportedFileExtensions());
+
+		// Act
+		String[] result = reviewer.getSupportedFileExtensions();
+
+		// Assert
+		assertArrayEquals(new String[] { "puml" }, result);
 	}
 
 	@Test
 	void perform_throwsWhenArgumentsNull() {
+		// Arrange
 		PumlReviewer reviewer = new PumlReviewer();
+
+		// Act + Assert
 		assertThrows(NullPointerException.class, () -> reviewer.perform(null, null));
 	}
 
 	@Test
 	void perform_returnsNullWhenNoGuidanceTag() throws IOException {
+		// Arrange
 		PumlReviewer reviewer = new PumlReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -39,11 +49,16 @@ class PumlReviewerTest {
 		Path file = project.resolve("diagram.puml");
 		Files.write(file, "@startuml\nAlice -> Bob\n@enduml\n".getBytes(StandardCharsets.UTF_8));
 
-		assertNull(reviewer.perform(project.toFile(), file.toFile()));
+		// Act
+		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
+		assertNull(result);
 	}
 
 	@Test
 	void perform_formatsWhenGuidanceTagPresent() throws IOException {
+		// Arrange
 		PumlReviewer reviewer = new PumlReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -53,7 +68,10 @@ class PumlReviewerTest {
 		String content = "' @guidance: include\n@startuml\nAlice -> Bob\n@enduml\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
+		// Act
 		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
 		assertNotNull(result);
 	}
 }

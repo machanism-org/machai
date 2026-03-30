@@ -28,15 +28,19 @@ class JavaReviewerTest {
 		// Arrange
 		JavaReviewer reviewer = new JavaReviewer();
 
-		// Act + Assert
-		assertArrayEquals(new String[] { "java" }, reviewer.getSupportedFileExtensions());
+		// Act
+		String[] result = reviewer.getSupportedFileExtensions();
+
+		// Assert
+		assertArrayEquals(new String[] { "java" }, result);
 	}
 
 	@ParameterizedTest
 	@CsvSource({
 			"'/* some header */\npackage org.example.test;\n// tail', org.example.test",
 			"'// no package here\npublic class X {}', <default package>",
-			"'package org.exa_mple.v2;', org.exa_mple.v2"
+			"'package org.exa_mple.v2;', org.exa_mple.v2",
+			"'package\n  org.example.deep.sub;\nclass X {}', org.example.deep.sub"
 	})
 	void extractPackageName_variousCases(String content, String expected) {
 		// Act
@@ -81,18 +85,26 @@ class JavaReviewerTest {
 		assertNull(result);
 	}
 
-	@ParameterizedTest
-	@CsvSource({
-			"'src/main/java/A.java', '// " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\npublic class A {}\n'",
-			"'A.java', '/*\n * header\n * " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\n */\npublic class A {}\n'",
-			"'src/main/java/org/example/package-info.java', '/* " + GuidanceProcessor.GUIDANCE_TAG_NAME
-					+ " package docs */\npackage org.example;\n'"
-	})
-	void perform_returnsFormattedOutputWhenGuidancePresent(String relativePath, String fileContent) throws IOException {
-		assertGuidanceIsExtracted(relativePath, fileContent);
+	@Test
+	void perform_returnsNonNullForLineCommentGuidance() throws IOException {
+		assertGuidanceIsExtracted("src/main/java/A.java",
+				"// " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\npublic class A {}\n");
+	}
+
+	@Test
+	void perform_returnsNonNullForBlockCommentGuidance() throws IOException {
+		assertGuidanceIsExtracted("A.java",
+				"/*\n * header\n * " + GuidanceProcessor.GUIDANCE_TAG_NAME + " keep\n */\npublic class A {}\n");
+	}
+
+	@Test
+	void perform_returnsNonNullForPackageInfoGuidance() throws IOException {
+		assertGuidanceIsExtracted("src/main/java/org/example/package-info.java",
+				"/* " + GuidanceProcessor.GUIDANCE_TAG_NAME + " package docs */\npackage org.example;\n");
 	}
 
 	private void assertGuidanceIsExtracted(String relativePath, String fileContent) throws IOException {
+		// Arrange
 		JavaReviewer reviewer = new JavaReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -101,7 +113,10 @@ class JavaReviewerTest {
 		Files.createDirectories(file.getParent());
 		Files.write(file, fileContent.getBytes(StandardCharsets.UTF_8));
 
+		// Act
 		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
 		assertNotNull(result);
 	}
 

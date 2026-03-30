@@ -24,8 +24,11 @@ class TextReviewerTest {
 		// Arrange
 		TextReviewer reviewer = new TextReviewer();
 
-		// Act + Assert
-		assertArrayEquals(new String[] { "txt" }, reviewer.getSupportedFileExtensions());
+		// Act
+		String[] result = reviewer.getSupportedFileExtensions();
+
+		// Assert
+		assertArrayEquals(new String[] { "txt" }, result);
 	}
 
 	@Test
@@ -77,5 +80,19 @@ class TextReviewerTest {
 
 		// Assert
 		assertSame(blank, result);
+	}
+
+	@Test
+	void getPrompt_returnsFormattedPromptWhenNonBlank() {
+		// Arrange
+		TextReviewer reviewer = new TextReviewer();
+		String guidance = "Hello";
+
+		// Act
+		String result = reviewer.getPrompt(tempDir.toFile(), tempDir.resolve("child").toFile(), guidance);
+
+		// Assert
+		assertNotNull(result);
+		assertTrue(result.contains("Hello"));
 	}
 }

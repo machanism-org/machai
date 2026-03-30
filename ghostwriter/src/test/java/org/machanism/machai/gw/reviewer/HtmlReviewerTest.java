@@ -22,8 +22,11 @@ class HtmlReviewerTest {
 		// Arrange
 		HtmlReviewer reviewer = new HtmlReviewer();
 
-		// Act + Assert
-		assertArrayEquals(new String[] { "html", "htm", "xml" }, reviewer.getSupportedFileExtensions());
+		// Act
+		String[] result = reviewer.getSupportedFileExtensions();
+
+		// Assert
+		assertArrayEquals(new String[] { "html", "htm", "xml" }, result);
 	}
 
 	@Test
@@ -35,6 +38,23 @@ class HtmlReviewerTest {
 		Files.createDirectories(project);
 		Path file = project.resolve("index.html");
 		Files.write(file, "<html></html>".getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
+		assertNull(result);
+	}
+
+	@Test
+	void perform_returnsNullWhenGuidanceTagIsNotInHtmlComment() throws IOException {
+		// Arrange
+		HtmlReviewer reviewer = new HtmlReviewer();
+
+		Path project = tempDir.resolve("project");
+		Files.createDirectories(project);
+		Path file = project.resolve("index.html");
+		Files.write(file, "<div>@guidance: ignore</div>".getBytes(StandardCharsets.UTF_8));
 
 		// Act
 		String result = reviewer.perform(project.toFile(), file.toFile());

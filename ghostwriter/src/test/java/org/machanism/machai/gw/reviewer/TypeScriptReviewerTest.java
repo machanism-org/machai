@@ -25,10 +25,10 @@ class TypeScriptReviewerTest {
 		TypeScriptReviewer reviewer = new TypeScriptReviewer();
 
 		// Act
-		String[] extensions = reviewer.getSupportedFileExtensions();
+		String[] result = reviewer.getSupportedFileExtensions();
 
 		// Assert
-		assertArrayEquals(new String[] { "ts" }, extensions);
+		assertArrayEquals(new String[] { "ts" }, result);
 	}
 
 	@Test

@@ -19,12 +19,19 @@ class PythonReviewerTest {
 
 	@Test
 	void getSupportedFileExtensions_returnsPy() {
+		// Arrange
 		PythonReviewer reviewer = new PythonReviewer();
-		assertArrayEquals(new String[] { "py" }, reviewer.getSupportedFileExtensions());
+
+		// Act
+		String[] result = reviewer.getSupportedFileExtensions();
+
+		// Assert
+		assertArrayEquals(new String[] { "py" }, result);
 	}
 
 	@Test
 	void perform_returnsNullWhenNoGuidanceTag() throws IOException {
+		// Arrange
 		PythonReviewer reviewer = new PythonReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -32,11 +39,33 @@ class PythonReviewerTest {
 		Path file = project.resolve("a.py");
 		Files.write(file, "print('hi')\n".getBytes(StandardCharsets.UTF_8));
 
-		assertNull(reviewer.perform(project.toFile(), file.toFile()));
+		// Act
+		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
+		assertNull(result);
+	}
+
+	@Test
+	void perform_returnsNullWhenGuidanceTagPresentButNoSupportedSyntaxMatches() throws IOException {
+		// Arrange
+		PythonReviewer reviewer = new PythonReviewer();
+
+		Path project = tempDir.resolve("project");
+		Files.createDirectories(project);
+		Path file = project.resolve("a.py");
+		Files.write(file, ("x = '@guidance: not a comment'\n").getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
+		assertNull(result);
 	}
 
 	@Test
 	void perform_formatsWhenGuidancePresentInLineComment() throws IOException {
+		// Arrange
 		PythonReviewer reviewer = new PythonReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -46,12 +75,16 @@ class PythonReviewerTest {
 		String content = "# @guidance: keep\nprint('hi')\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
+		// Act
 		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
 		assertNotNull(result);
 	}
 
 	@Test
 	void perform_formatsWhenGuidancePresentInTripleQuotedString() throws IOException {
+		// Arrange
 		PythonReviewer reviewer = new PythonReviewer();
 
 		Path project = tempDir.resolve("project");
@@ -60,7 +93,10 @@ class PythonReviewerTest {
 		String content = "\"\"\" @guidance: doc \"\"\"\nprint('hi')\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
+		// Act
 		String result = reviewer.perform(project.toFile(), file.toFile());
+
+		// Assert
 		assertNotNull(result);
 	}
 }
