@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * Registers Bindex-related function tools for a {@link Genai}.
@@ -125,7 +127,7 @@ public class BindexFunctionTools implements FunctionTools {
 		return schema;
 	}
 
-	private String getRecommendedLibraries(Object[] params) throws IOException {
+	private JsonArray getRecommendedLibraries(Object[] params) throws IOException {
 		JsonNode props = (JsonNode) params[0];
 		if (logger.isInfoEnabled()) {
 			logger.info("Picking for: {}", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH));
@@ -143,22 +145,19 @@ public class BindexFunctionTools implements FunctionTools {
 
 		List<Bindex> bindexList = picker.pick(prompt);
 
-		StringBuilder picked = new StringBuilder("```md\n# Recommended Artifacts\n"
-				+ "\n"
-				+ "| Library Id | Description |\n"
-				+ "|------------|-------------|\n"
-				+ "");
+		JsonArray result = new JsonArray();
 		for (Bindex bindex : bindexList) {
 			if (bindex != null) {
-				picked.append("| ").append(bindex.getId()).append(" | ").append(bindex.getDescription()).append(" |")
-						.append(Genai.LINE_SEPARATOR);
+				JsonObject element = new JsonObject();
+				element.addProperty("id", bindex.getId());
+				element.addProperty("description", bindex.getDescription());
+
+				result.add(element);
 			}
 		}
-		picked.append("```\n");
 
-		String result = picked.toString();
 		if (logger.isInfoEnabled()) {
-			logger.info("Recommended Artifacts: \n{}", StringUtils.abbreviate(result, MAXWIDTH));
+			logger.info("Recommended Artifacts: \n{}", StringUtils.abbreviate(result.toString(), MAXWIDTH));
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Recommended Artifacts: \n{}", result);

@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonArray;
 
 class BindexFunctionToolsAdditionalTest {
 
@@ -30,15 +31,13 @@ class BindexFunctionToolsAdditionalTest {
 		String schema = (String) method.invoke(tools, new Object[] { new Object[] {} });
 
 		// Assert
-		// Sonar java:S5785 - use assertNotNull instead of null-check in assertTrue.
 		assertNotNull(schema);
-		// Sonar java:S7158 - use isEmpty() to check if the string is empty.
 		assertTrue(!schema.trim().isEmpty());
 		assertTrue(schema.trim().startsWith("{"));
 	}
 
 	@Test
-	void getRecommendedLibraries_returnsMarkdownTable_andOmitsNullEntries() throws Exception {
+	void getRecommendedLibraries_returnsJsonArray_andOmitsNullEntries() throws Exception {
 		// Arrange
 		BindexFunctionTools tools = new BindexFunctionTools();
 
@@ -63,13 +62,16 @@ class BindexFunctionToolsAdditionalTest {
 			method.setAccessible(true);
 
 			// Act
-			String out = (String) method.invoke(tools, new Object[] { new Object[] { props } });
+			Object out = method.invoke(tools, new Object[] { new Object[] { props } });
 
 			// Assert
-			assertTrue(out.startsWith("```md\n# Recommended Artifacts\n"));
-			assertTrue(out.contains("| Library Id | Description |"));
-			assertTrue(out.contains("| a | desc-a |"));
-			assertEquals(1, mocked.constructed().size());
+			assertTrue(out instanceof JsonArray);
+			JsonArray arr = (JsonArray) out;
+			assertEquals(1, arr.size());
+			assertEquals("a", arr.get(0).getAsJsonObject().get("id").getAsString());
+			assertEquals("desc-a", arr.get(0).getAsJsonObject().get("description").getAsString());
+
+			assertEquals(1, mocked.constructed().size());			
 			Mockito.verify(mocked.constructed().get(0)).setScore(0.12);
 			Mockito.verify(mocked.constructed().get(0)).pick("need libs");
 		}
