@@ -3,6 +3,7 @@ package org.machanism.machai.bindex.ai.tools;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -20,8 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 /**
  * Registers Bindex-related function tools for a {@link Genai}.
@@ -54,6 +53,38 @@ public class BindexFunctionTools implements FunctionTools {
 	private BindexRepository bindexRepository;
 
 	private Configurator configurator;
+
+	public class BindexElement {
+		public BindexElement(String id, String description) {
+			super();
+			this.id = id;
+			this.description = description;
+		}
+
+		private String id;
+		private String description;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+		
+		@Override
+		public String toString() {
+			return id;
+		}
+	}
 
 	/**
 	 * Registers Bindex function tools with the provided {@link Genai}.
@@ -127,7 +158,7 @@ public class BindexFunctionTools implements FunctionTools {
 		return schema;
 	}
 
-	private JsonArray getRecommendedLibraries(Object[] params) throws IOException {
+	private List<BindexElement> getRecommendedLibraries(Object[] params) throws IOException {
 		JsonNode props = (JsonNode) params[0];
 		if (logger.isInfoEnabled()) {
 			logger.info("Picking for: {}", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH));
@@ -145,23 +176,19 @@ public class BindexFunctionTools implements FunctionTools {
 
 		List<Bindex> bindexList = picker.pick(prompt);
 
-		JsonArray result = new JsonArray();
+		List<BindexElement> result = new ArrayList<>();
+
 		for (Bindex bindex : bindexList) {
 			if (bindex != null) {
-				JsonObject element = new JsonObject();
-				element.addProperty("id", bindex.getId());
-				element.addProperty("description", bindex.getDescription());
-
-				result.add(element);
+				result.add(new BindexElement(bindex.getId(), bindex.getDescription()));
 			}
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Recommended Artifacts: \n{}", StringUtils.abbreviate(result.toString(), MAXWIDTH));
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Recommended Artifacts: \n{}", result);
-		}
+	    if (logger.isInfoEnabled()) {
+	        logger.info("Number of recommended libraries picked: {}. Artifacts: {}", result.size(), StringUtils.abbreviate(result.toString(), MAXWIDTH));
+	    }
+	    logger.debug("Detailed picked artifacts: {}", result);
+
 		return result;
 	}
 
