@@ -14,21 +14,19 @@ import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Reviewer implementation for TypeScript source files (.ts).
- * <p>
- * Extracts guidance information or comments annotated with the
- * {@link GuidanceProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
- * supporting TypeScript file comment conventions.
+ * {@link Reviewer} implementation for TypeScript source files ({@code .ts}).
+ *
+ * <p>Guidance may be embedded in either line comments ({@code //}) or block comments ({@code /* ... *&#47;})
+ * containing the {@link GuidanceProcessor#GUIDANCE_TAG_NAME @guidance} tag.
  */
 public class TypeScriptReviewer implements Reviewer {
 
-	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
+	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Returns the file extensions supported by this reviewer. This reviewer
-	 * processes files with extension: ts.
+	 * Returns the file extensions supported by this reviewer.
 	 *
-	 * @return an array of supported file extension strings
+	 * @return an array containing {@code "ts"}
 	 */
 	@Override
 	public String[] getSupportedFileExtensions() {
@@ -36,32 +34,39 @@ public class TypeScriptReviewer implements Reviewer {
 	}
 
 	/**
-	 * Performs analysis on the specified TypeScript source file, extracting
-	 * documentation guidance if marked with the appropriate tag.
+	 * Reviews the provided TypeScript file and, if guidance is present, returns a formatted prompt fragment.
 	 *
-	 * @param projectDir    the root directory of the project for context
-	 * @param guidancesFile the TypeScript file to be analyzed
-	 * @return formatted documentation guidance or {@code null} if none found
-	 * @throws IOException if an error occurs reading the file
+	 * @param projectDir    the project root directory used to compute a project-relative path for context
+	 * @param guidancesFile the TypeScript file to analyze
+	 * @return a formatted prompt fragment, or {@code null} when the file does not contain guidance
+	 * @throws IOException if an error occurs while reading the file
 	 */
+	@Override
 	public String perform(File projectDir, File guidancesFile) throws IOException {
-		// Java 8 compatible file reading
 		String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
-		String result = null;
-		if (Strings.CS.contains(content, GuidanceProcessor.GUIDANCE_TAG_NAME)) {
-			Pattern pattern = Pattern.compile("(?://\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
-					+ "|(?:/\\*.*?" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*\\*/)", Pattern.DOTALL);
-			Matcher matcher = pattern.matcher(content);
-			if (matcher.find()) {
-				String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
-				if (guidanceText != null) {
-					String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
-					String name = guidancesFile.getName();
-					result = MessageFormat.format(promptBundle.getString("typescript_file"), name, relativePath,
-							guidanceText.trim());
-				}
-			}
+		if (!Strings.CS.contains(content, GuidanceProcessor.GUIDANCE_TAG_NAME)) {
+			return null;
 		}
-		return result;
+
+		Pattern pattern = Pattern.compile(
+				"(?://\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
+						+ "|(?:/\\*.*?" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*\\*/)",
+				Pattern.DOTALL);
+		Matcher matcher = pattern.matcher(content);
+		if (!matcher.find()) {
+			return null;
+		}
+
+		String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+		if (guidanceText == null) {
+			return null;
+		}
+
+		String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
+		return MessageFormat.format(
+				promptBundle.getString("typescript_file"),
+				guidancesFile.getName(),
+				relativePath,
+				guidanceText.trim());
 	}
 }

@@ -53,8 +53,6 @@ public final class Ghostwriter {
 	 */
 	public static final String MULTIPLE_LINES_BREAKER = "\\";
 
-	private static final String GUIDANCE_OPTION = "guidance";
-
 	/** Logger for the Ghostwriter application. */
 	private static Logger logger;
 
@@ -403,13 +401,6 @@ public final class Ghostwriter {
 		Option excludesOpt = new Option("e", "excludes", true,
 				"Specify a comma-separated list of directories to exclude from processing.");
 
-		Option guidanceOpt = Option.builder("g").longOpt(GUIDANCE_OPTION)
-				.desc("Specify the default guidance as plain text, by URL, or by file path to apply as a final step for the current directory. "
-						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or 'https://' are loaded from the specified URL, "
-						+ "lines starting with 'file:' are loaded from the specified file path, and other lines are used as-is. "
-						+ "To provide the guidance directly, use the option without a value and you will be prompted to enter the guidance text via standard input (stdin).")
-				.hasArg(true).optionalArg(true).build();
-
 		Option actsDirOpt = new Option("as", "acts", true,
 				"Specify the path to the directory containing predefined act prompt files for processing.");
 
@@ -422,7 +413,6 @@ public final class Ghostwriter {
 		options.addOption(multiThreadOption);
 		options.addOption(genaiOpt);
 		options.addOption(instructionsOpt);
-		options.addOption(guidanceOpt);
 		options.addOption(excludesOpt);
 		options.addOption(logInputsOption);
 		options.addOption(actsDirOpt);

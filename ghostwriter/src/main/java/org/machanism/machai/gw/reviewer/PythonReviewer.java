@@ -14,21 +14,19 @@ import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Reviewer implementation for Python source files (.py).
- * <p>
- * Extracts guidance information or comments annotated with the
- * {@link GuidanceProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
- * supporting Python file comment conventions.
+ * {@link Reviewer} implementation for Python source files ({@code .py}).
+ *
+ * <p>Guidance may appear in either single-line comments ({@code #}) or in triple-quoted strings that contain
+ * the {@link GuidanceProcessor#GUIDANCE_TAG_NAME @guidance} tag.
  */
 public class PythonReviewer implements Reviewer {
 
-	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
+	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
 	 * Returns the file extensions supported by this reviewer.
-	 * This reviewer handles files with the 'py' extension.
 	 *
-	 * @return an array of supported file extension strings
+	 * @return an array containing {@code "py"}
 	 */
 	@Override
 	public String[] getSupportedFileExtensions() {
@@ -36,38 +34,37 @@ public class PythonReviewer implements Reviewer {
 	}
 
 	/**
-	 * Performs analysis on the specified Python source file, extracting
-	 * documentation guidance if marked with the appropriate tag.
+	 * Reviews the provided Python file and, if guidance is present, returns a formatted prompt fragment.
 	 *
-	 * @param projectDir    the root directory of the project for context
-	 * @param guidancesFile the Python file to be analyzed
-	 * @return formatted documentation guidance or {@code null} if none found
-	 * @throws IOException if an error occurs reading the file
+	 * @param projectDir    the project root directory used to compute a project-relative path for context
+	 * @param guidancesFile the Python file to analyze
+	 * @return a formatted prompt fragment, or {@code null} when the file does not contain guidance
+	 * @throws IOException if an error occurs while reading the file
 	 */
+	@Override
 	public String perform(File projectDir, File guidancesFile) throws IOException {
-	    // Java 8 compatible file reading
-	    String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
-	    String result = null;
-	    if (Strings.CS.contains(content, GuidanceProcessor.GUIDANCE_TAG_NAME)) {
-	        Pattern pattern = Pattern.compile(
-	            "(?:#\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
-	            + "|(?:[\"']{3}\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*[\"']{3})",
-	            Pattern.DOTALL
-	        );
-	        Matcher matcher = pattern.matcher(content);
-	        if (matcher.find()) {
-	            String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
-	            if (guidanceText != null) {
-	                String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
-	                String name = guidancesFile.getName();
-	                result = MessageFormat.format(
-	                    promptBundle.getString("python_file"),
-	                    name, relativePath, guidanceText.trim()
-	                );
-	            }
-	        }
-	    }
-	    return result;
+		String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
+		if (!Strings.CS.contains(content, GuidanceProcessor.GUIDANCE_TAG_NAME)) {
+			return null;
+		}
+
+		Pattern pattern = Pattern.compile(
+				"(?:#\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
+						+ "|(?:[\"']{3}\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*[\"']{3})",
+				Pattern.DOTALL);
+		Matcher matcher = pattern.matcher(content);
+		if (!matcher.find()) {
+			return null;
+		}
+
+		String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+		if (guidanceText == null) {
+			return null;
+		}
+
+		String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
+		return MessageFormat.format(promptBundle.getString("python_file"), guidancesFile.getName(), relativePath,
+				guidanceText.trim());
 	}
 
 }

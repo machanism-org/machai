@@ -13,20 +13,19 @@ import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Reviewer implementation for Markdown files (.md).
- * <p>
- * Extracts documented guidance from Markdown content using a special tag for
- * input into automated documentation workflows.
+ * {@link Reviewer} implementation for Markdown files ({@code .md}).
+ *
+ * <p>Guidance is expected to be embedded in an HTML comment block that contains the
+ * {@link GuidanceProcessor#GUIDANCE_TAG_NAME @guidance} tag.
  */
 public class MarkdownReviewer implements Reviewer {
 
-	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
+	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Returns the file extensions supported by this reviewer. This reviewer handles
-	 * files with the 'md' extension.
+	 * Returns the file extensions supported by this reviewer.
 	 *
-	 * @return an array of supported file extension strings
+	 * @return an array containing {@code "md"}
 	 */
 	@Override
 	public String[] getSupportedFileExtensions() {
@@ -34,28 +33,27 @@ public class MarkdownReviewer implements Reviewer {
 	}
 
 	/**
-	 * Reviews the given Markdown file for contained guidance comments and formats
-	 * the content for input to documentation generators.
+	 * Reviews the given Markdown file and returns a formatted prompt fragment when guidance is present.
 	 *
-	 * @param projectDir    the root directory of the project for context
-	 * @param guidancesFile the Markdown file to be analyzed
-	 * @return formatted documentation guidance or {@code null} if none found
-	 * @throws IOException if an error occurs reading the file
+	 * @param projectDir    the project root directory used to compute a project-relative path for context
+	 * @param guidancesFile the Markdown file to analyze
+	 * @return a formatted prompt fragment, or {@code null} when the file does not contain guidance
+	 * @throws IOException if an error occurs while reading the file
 	 */
+	@Override
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String content = IOUtils.toString(guidancesFile.toURI(), StandardCharsets.UTF_8);
 
-		Pattern pattern = Pattern.compile("<!--.*?" + GuidanceProcessor.GUIDANCE_TAG_NAME + "(.*?)(?:-->|\\Z)",
+		Pattern pattern = Pattern.compile(
+				"<!--.*?" + GuidanceProcessor.GUIDANCE_TAG_NAME + "(.*?)(?:-->|\\Z)",
 				Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(content);
 
-		String result = null;
-		if (matcher.find()) {
-			String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
-			result = MessageFormat.format(promptBundle.getString("markdown_file"),
-					relativePath, content);
+		if (!matcher.find()) {
+			return null;
 		}
 
-		return result;
+		String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
+		return MessageFormat.format(promptBundle.getString("markdown_file"), relativePath, content);
 	}
 }

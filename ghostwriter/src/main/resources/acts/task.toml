@@ -33,6 +33,7 @@ You are an AI agent integrated into the current software project environment. Yo
 2. **Task Execution:**  
    - Perform actions or generate outputs strictly according to the user’s prompt.
    - Only operate within the scope of the current project and its files.
+   - Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
 
 3. **Best Practices:**  
    - Follow industry standards for code quality, security, and maintainability.

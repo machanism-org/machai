@@ -15,21 +15,23 @@ import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Reviewer implementation for Java source files (.java).
- * <p>
- * Extracts guidance information or comments annotated with the
- * {@link GuidanceProcessor#GUIDANCE_TAG_NAME} for documentation input processing,
- * including support for package-info.java and regular Java files.
+ * {@link Reviewer} implementation for Java source files ({@code .java}).
+ *
+ * <p>This reviewer reads Java source as UTF-8 and detects the presence of the
+ * {@link GuidanceProcessor#GUIDANCE_TAG_NAME @guidance} tag in either block ({@code /* ... *&#47;})
+ * or line ({@code // ...}) comments.
+ *
+ * <p>When processing {@code package-info.java}, the reviewer emits a package-level prompt fragment that only
+ * includes path context; for other Java files it emits a prompt fragment containing the full file content.
  */
 public class JavaReviewer implements Reviewer {
 
-	private ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
+	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Returns the file extensions supported by this reviewer. This reviewer
-	 * processes files with extension: java.
+	 * Returns the file extensions supported by this reviewer.
 	 *
-	 * @return an array of supported file extension strings
+	 * @return an array containing {@code "java"}
 	 */
 	@Override
 	public String[] getSupportedFileExtensions() {
@@ -37,29 +39,29 @@ public class JavaReviewer implements Reviewer {
 	}
 
 	/**
-	 * Performs analysis on the specified Java source or package-info file,
-	 * extracting documentation guidance if marked with the appropriate tag.
+	 * Reviews the provided Java file and, if guidance is present, returns a formatted prompt fragment.
 	 *
-	 * @param projectDir    the root directory of the project for context
-	 * @param guidancesFile the Java file to be analyzed
-	 * @return formatted documentation guidance or {@code null} if none found
-	 * @throws IOException if an error occurs reading the file
+	 * @param projectDir    the project root directory used to compute a project-relative path for context
+	 * @param guidancesFile the Java file to analyze
+	 * @return a formatted prompt fragment, or {@code null} when the file does not contain guidance
+	 * @throws IOException if an error occurs while reading the file
 	 */
+	@Override
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String result = null;
 		try {
-			// Java 8 compatible file reading
 			String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
 
 			if (Strings.CS.contains(content, GuidanceProcessor.GUIDANCE_TAG_NAME)) {
-				Pattern pattern = Pattern.compile("(?:/\\*.*?" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*\\*/)|"
-						+ "(?://\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))", Pattern.DOTALL);
+				Pattern pattern = Pattern.compile(
+						"(?:/\\*.*?" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*\\*/)|"
+								+ "(?://\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))",
+						Pattern.DOTALL);
 				Matcher matcher = pattern.matcher(content);
 				if (matcher.find()) {
 					if (Strings.CS.equals(guidancesFile.getName(), "package-info.java")) {
 						String relatedFilePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
-						result = MessageFormat.format(promptBundle.getString("java_package_info_file"),
-								relatedFilePath);
+						result = MessageFormat.format(promptBundle.getString("java_package_info_file"), relatedFilePath);
 					} else {
 						String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
 						String name = guidancesFile.getName();
@@ -74,14 +76,12 @@ public class JavaReviewer implements Reviewer {
 	}
 
 	/**
-	 * Extracts the package name from the content of a package-info.java file.
-	 * 
-	 * @param content The full text content of the package-info.java file.
-	 * @return The package name, or null if not found.
+	 * Extracts the declared package name from a Java source snippet.
+	 *
+	 * @param content the full text content of a Java source file
+	 * @return the declared package name, or {@code "<default package>"} when no package declaration is present
 	 */
 	public static String extractPackageName(String content) {
-		// Regex: matches 'package' followed by whitespace, then the package name,
-		// ending with a semicolon
 		Pattern pattern = Pattern.compile("\\bpackage\\s+([a-zA-Z_][\\w\\.]*);");
 		Matcher matcher = pattern.matcher(content);
 		if (matcher.find()) {
