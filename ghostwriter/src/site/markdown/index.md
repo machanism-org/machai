@@ -101,7 +101,7 @@ The closest tool in spirit is **Claude Code**, because both can operate at repos
 
 ### Key differences
 
-- **Guidance embedded in the repository**: Ghostwriter is driven by file-local `@guidance:` directives (plus optional default guidance). Claude Code is primarily driven by user prompts.
+- **Guidance embedded in the repository**: Ghostwriter is driven by file-local `@guidance:` directives (plus an optional default prompt). Claude Code is primarily driven by user prompts.
 - **Deterministic scanning and filtering**: Ghostwriter uses explicit scan targets (`dir`, `glob:`, `regex:`) and comma-separated excludes.
 - **Extensibility via acts and tooling**: Ghostwriter supports Act prompt bundles (`--act`, `--acts`) and integrates provider function tools.
 - **Distribution model**: Ghostwriter is a Java CLI intended to run alongside build tooling and in CI.
@@ -178,11 +178,11 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 - `-d, --projectDir <path>` — Specify the path to the root directory for file processing.
 - `-t, --threads <count>` — The degree of concurrency for processing.
 - `-m, --model <provider:model>` — Set the GenAI provider and model (e.g., `OpenAI:gpt-5.1`).
-- `-i, --instructions[=<text|url|file:...>]` — Specify system instructions as plain text, by URL, or by `file:` reference. If used without a value, reads multi-line text from stdin until a line does not end with `\\`.
+- `-i, --instructions[=<text|url|file:...>]` — System instructions. Accepts plain text, URL lines, or `file:` lines; if used without a value, reads multi-line text from stdin (line continuation: `\\`).
 - `-e, --excludes <csv>` — Comma-separated list of directories/patterns to exclude.
 - `-l, --logInputs` — Log LLM request inputs to dedicated log files.
 - `-as, --acts <path>` — Directory containing predefined act prompt files.
-- `-a, --act[=<prompt>]` — Run in Act mode. If used without a value, reads multi-line text from stdin until a line does not end with `\\`.
+- `-a, --act[=<prompt>]` — Run in Act mode. If used without a value, reads multi-line text from stdin (line continuation: `\\`).
 
 ### Options Table
 
@@ -190,11 +190,11 @@ Ghostwriter CLI options are defined in `org.machanism.machai.gw.processor.Ghostw
 |---|---|---|
 | `-h, --help` | Show help message and exit. | `false` |
 | `-d, --projectDir <path>` | Root directory for file processing. | `project.dir` (if set) or current working directory |
-| `-t, --threads <count>` | The degree of concurrency for processing. | `gw.threads` (if set) |
+| `-t, --threads <count>` | Degree of concurrency for processing. | `gw.threads` |
 | `-m, --model <provider:model>` | GenAI provider and model. | `gw.model` |
-| `-i, --instructions[=<text\|url\|file:...>]` | System instructions; supports plain text, URL, or `file:`. If no value: multi-line stdin (line continuation: `\\`). | `instructions` |
+| `-i, --instructions[=<text\|url\|file:...>]` | System instructions; supports plain text, URL lines, or `file:` lines; if no value: multi-line stdin (line continuation: `\\`). | `instructions` |
 | `-e, --excludes <csv>` | Comma-separated excludes. | `gw.excludes` |
-| `-l, --logInputs` | Log composed provider inputs. | `inputs=false` |
+| `-l, --logInputs` | Log composed provider inputs. | `false` |
 | `-as, --acts <path>` | Custom acts directory. | `acts.location` |
 | `-a, --act[=<prompt>]` | Enable Act mode and provide an act prompt. If no value: multi-line stdin (line continuation: `\\`). | `gw.act` |
 
@@ -215,7 +215,7 @@ In the CLI this is configured via Act mode:
 - When `--act` is enabled, Ghostwriter resolves the act prompt from `gw.act` (in `gw.properties`) or from `-a/--act` (option value or multi-line stdin).
 - That resolved prompt is passed to the processor as the default prompt, and is used as the instruction payload for processing when file-local guidance is absent.
 
-The default prompt input accepts the same formats as other instruction inputs in Ghostwriter:
+The default prompt input accepts the same formats as system instructions:
 
 - Plain text
 - `http(s)://...` (content is fetched and inlined)
