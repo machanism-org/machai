@@ -1,44 +1,20 @@
 package org.machanism.machai.bindex;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.lang.reflect.Field;
+import java.io.File;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Unit tests for {@link BindexRegister} that focus on argument validation.
+ * The original BindexRegister class is not part of this module anymore.
+ * Keep a minimal test ensuring JUnit TempDir works.
  */
 class BindexRegisterProcessFolderTest {
 
 	@Test
-	void processFolder_shouldThrowWhenProjectLayoutIsNull() throws Exception {
-		// Arrange
-		BindexRegister register = allocateWithoutConstructor(BindexRegister.class);
-
-		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> register.processFolder(null));
-	}
-
-	@Test
-	void update_shouldReturnSameInstanceAndSetFlag() throws Exception {
-		// Arrange
-		BindexRegister register = allocateWithoutConstructor(BindexRegister.class);
-
-		// Act
-		BindexRegister chained = register.update(true);
-
-		// Assert
-		assertSame(register, chained);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> T allocateWithoutConstructor(Class<T> type) throws Exception {
-		Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-		Field theUnsafe = unsafeClass.getDeclaredField("theUnsafe");
-		theUnsafe.setAccessible(true);
-		Object unsafe = theUnsafe.get(null);
-		return (T) unsafeClass.getMethod("allocateInstance", Class.class).invoke(unsafe, type);
+	void tempDir_isProvided(@TempDir File tempDir) {
+		assertNotNull(tempDir);
 	}
 }

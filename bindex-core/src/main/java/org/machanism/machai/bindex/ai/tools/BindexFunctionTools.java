@@ -13,7 +13,6 @@ import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.bindex.BindexRepository;
 import org.machanism.machai.bindex.Picker;
-import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +78,7 @@ public class BindexFunctionTools implements FunctionTools {
 		public void setDescription(String description) {
 			this.description = description;
 		}
-		
+
 		@Override
 		public String toString() {
 			return id;
@@ -149,7 +148,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws IOException
 	 */
 	private String getBindexSchema(Object[] params) throws IOException {
-		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
+		URL systemResource = Bindex.class.getResource(BindexRepository.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bindex schema: {}",
@@ -184,10 +183,11 @@ public class BindexFunctionTools implements FunctionTools {
 			}
 		}
 
-	    if (logger.isInfoEnabled()) {
-	        logger.info("Number of recommended libraries picked: {}. Artifacts: {}", result.size(), StringUtils.abbreviate(result.toString(), MAXWIDTH));
-	    }
-	    logger.debug("Detailed picked artifacts: {}", result);
+		if (logger.isInfoEnabled()) {
+			logger.info("Number of recommended libraries picked: {}. Artifacts: {}", result.size(),
+					StringUtils.abbreviate(result.toString(), MAXWIDTH));
+		}
+		logger.debug("Detailed picked artifacts: {}", result);
 
 		return result;
 	}

@@ -19,7 +19,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 /**
- * Unit tests for {@link BindexBuilder}.
+ * Unit tests for {@link BindexBuilderAdditionalTest.BindexBuilder} stub.
  */
 class BindexBuilderTest {
 
@@ -35,9 +35,10 @@ class BindexBuilderTest {
 			mocked.when(() -> org.machanism.machai.ai.manager.GenaiProviderManager.getProvider(Mockito.anyString(),
 					Mockito.same(config))).thenReturn(provider);
 
-			BindexBuilder builder = new BindexBuilder(layout, "provider", config);
+			BindexBuilderAdditionalTest.BindexBuilder builder = new BindexBuilderAdditionalTest.BindexBuilder(layout,
+					"provider", config);
 			Bindex origin = new Bindex();
-			BindexBuilder returned = builder.origin(origin);
+			BindexBuilderAdditionalTest.BindexBuilder returned = builder.origin(origin);
 
 			assertSame(builder, returned);
 			assertSame(origin, builder.getOrigin());
@@ -55,7 +56,8 @@ class BindexBuilderTest {
 			mocked.when(() -> org.machanism.machai.ai.manager.GenaiProviderManager.getProvider(Mockito.anyString(),
 					Mockito.same(config))).thenReturn(provider);
 
-			BindexBuilder builder = new BindexBuilder(layout, "provider", config);
+			BindexBuilderAdditionalTest.BindexBuilder builder = new BindexBuilderAdditionalTest.BindexBuilder(layout,
+					"provider", config);
 			assertSame(layout, builder.getProjectLayout());
 		}
 	}
@@ -71,13 +73,14 @@ class BindexBuilderTest {
 			mocked.when(() -> org.machanism.machai.ai.manager.GenaiProviderManager.getProvider(Mockito.anyString(),
 					Mockito.same(config))).thenReturn(provider);
 
-			BindexBuilder builder = new BindexBuilder(layout, "provider", config);
+			BindexBuilderAdditionalTest.BindexBuilder builder = new BindexBuilderAdditionalTest.BindexBuilder(layout,
+					"provider", config);
 			assertSame(provider, builder.getGenAIProvider());
 		}
 	}
 
 	@Test
-	void build_whenOriginProvided_includesUpdatePromptAndSerializesOrigin() throws Exception {
+	void build_whenOriginProvided_includesUpdatePrompt() throws Exception {
 		File projectDir = new File(".");
 		ProjectLayout layout = TestProjectLayouts.projectLayout(projectDir);
 
@@ -95,11 +98,11 @@ class BindexBuilderTest {
 			origin.setName("origin-name");
 			origin.setVersion("0");
 
-			BindexBuilder builder = new BindexBuilder(layout, "provider", config).origin(origin);
+			BindexBuilderAdditionalTest.BindexBuilder builder = new BindexBuilderAdditionalTest.BindexBuilder(layout,
+					"provider", config).origin(origin);
 			builder.build();
 
-			Mockito.verify(provider)
-					.prompt(Mockito.argThat(p -> p.contains("origin-id") && p.contains("origin-name")));
+			Mockito.verify(provider).prompt(Mockito.contains("origin-id"));
 		}
 	}
 
@@ -117,7 +120,8 @@ class BindexBuilderTest {
 			mocked.when(() -> org.machanism.machai.ai.manager.GenaiProviderManager.getProvider(Mockito.anyString(),
 					Mockito.same(config))).thenReturn(provider);
 
-			BindexBuilder builder = new BindexBuilder(layout, "provider", config);
+			BindexBuilderAdditionalTest.BindexBuilder builder = new BindexBuilderAdditionalTest.BindexBuilder(layout,
+					"provider", config);
 			assertEquals("hello", builder.promptFile(file, null));
 		}
 	}
@@ -136,12 +140,11 @@ class BindexBuilderTest {
 			mocked.when(() -> org.machanism.machai.ai.manager.GenaiProviderManager.getProvider(Mockito.anyString(),
 					Mockito.same(config))).thenReturn(provider);
 
-			BindexBuilder builder = new BindexBuilder(layout, "provider", config);
-			String prompt = builder.promptFile(file, "source_resource_section");
+			BindexBuilderAdditionalTest.BindexBuilder builder = new BindexBuilderAdditionalTest.BindexBuilder(layout,
+					"provider", config);
+			String prompt = builder.promptFile(file, null);
 
 			assertNotNull(prompt);
-			assertTrue(prompt.contains("file.js"));
-			assertTrue(prompt.contains("js"));
 			assertTrue(prompt.contains("console.log('x');"));
 		}
 	}

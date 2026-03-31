@@ -29,7 +29,6 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
-import org.machanism.machai.bindex.builder.BindexBuilder;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Language;
@@ -139,7 +138,8 @@ public class Picker {
 		this.provider = GenaiProviderManager.getProvider(genai, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
-		// Sonar java:S3010 - avoid mutating a static field from an instance constructor.
+		// Sonar java:S3010 - avoid mutating a static field from an instance
+		// constructor.
 		this.collection = BindexRepository.getCollection(config);
 	}
 
@@ -352,7 +352,7 @@ public class Picker {
 	 * @throws IOException if prompt or IO operation fails
 	 */
 	private String getClassification(String query) throws IOException {
-		URL systemResource = Bindex.class.getResource(BindexBuilder.BINDEX_SCHEMA_RESOURCE);
+		URL systemResource = Bindex.class.getResource(BindexRepository.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode schemaJson = objectMapper.readTree(schema);

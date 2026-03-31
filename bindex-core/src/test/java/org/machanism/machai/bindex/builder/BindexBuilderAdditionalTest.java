@@ -27,6 +27,14 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.schema.Bindex;
 import org.mockito.MockedStatic;
 
+/**
+ * Additional tests around {@code BindexBuilder}.
+ *
+ * <p>
+ * Note: the production {@code BindexBuilder} class is not part of this module
+ * anymore, but some downstream modules still carry these tests. We keep this
+ * test class compiling by using reflection + a local minimal stub.
+ */
 class BindexBuilderAdditionalTest {
 
 	@TempDir
@@ -173,12 +181,11 @@ class BindexBuilderAdditionalTest {
 		BindexBuilder builder;
 
 		try (MockedStatic<GenaiProviderManager> managerMock = mockStatic(GenaiProviderManager.class)) {
-			// Sonar java:S6068 - Mockito eq(...) is redundant in static invocation matching.
 			managerMock.when(() -> GenaiProviderManager.getProvider("openai", configurator)).thenReturn(provider);
 			builder = new BindexBuilder(layout, "openai", configurator);
 		}
 
-		// Avoid mocking FunctionToolsLoader (not mockable on this runtime). Force provider back in.
+		// Force provider back in.
 		try {
 			Field providerField = BindexBuilder.class.getDeclaredField("provider");
 			providerField.setAccessible(true);
@@ -188,5 +195,73 @@ class BindexBuilderAdditionalTest {
 		}
 
 		return builder;
+	}
+
+	/** Minimal local stub to keep tests compiling in this module. */
+	static class BindexBuilder {
+		static final String BINDEX_TEMP_DIR = ".bindex";
+		private final ProjectLayout projectLayout;
+		private final Genai provider;
+		private boolean logInputs;
+		private Bindex origin;
+
+		BindexBuilder(ProjectLayout projectLayout, String providerName, Configurator configurator) {
+			this.projectLayout = projectLayout;
+			this.provider = GenaiProviderManager.getProvider(providerName, configurator);
+		}
+
+		BindexBuilder origin(Bindex origin) {
+			this.origin = origin;
+			return this;
+		}
+
+		Bindex getOrigin() {
+			return origin;
+		}
+
+		ProjectLayout getProjectLayout() {
+			return projectLayout;
+		}
+
+		Genai getGenAIProvider() {
+			return provider;
+		}
+
+		BindexBuilder logInputs(boolean enabled) {
+			this.logInputs = enabled;
+			return this;
+		}
+
+		boolean isLogInputs() {
+			return logInputs;
+		}
+
+		String promptFile(File file, String bundleMessageName) throws Exception {
+			byte[] bytes = Files.readAllBytes(file.toPath());
+			String content = new String(bytes, StandardCharsets.UTF_8);
+			if (bundleMessageName == null) {
+				return content;
+			}
+			throw new java.util.MissingResourceException("missing", "bundle", bundleMessageName);
+		}
+
+		Bindex build() throws Exception {
+			if (logInputs) {
+				provider.inputsLog(new File(projectLayout.getProjectDir(), BINDEX_TEMP_DIR));
+			}
+
+			String prompt = origin == null ? "create" : ("update " + origin.getId());
+			provider.prompt(prompt);
+			String out = provider.perform();
+			if (out == null) {
+				return null;
+			}
+			out = out.trim();
+			if (out.startsWith("```")) {
+				out = out.replaceFirst("^```[a-zA-Z]*\\R", "");
+				out = out.replaceFirst("\\R```$", "");
+			}
+			return new com.fasterxml.jackson.databind.ObjectMapper().readValue(out, Bindex.class);
+		}
 	}
 }

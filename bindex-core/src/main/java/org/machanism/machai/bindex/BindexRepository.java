@@ -41,6 +41,8 @@ public class BindexRepository {
 	/** MongoDB field name used to store the serialized Bindex JSON payload. */
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
+	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
+	
 	public static final String DB_URL = "mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private static final String PUBLILC_USER_NAME = "user";
 	private static final String REGISTER_USER_NAME = "machanismorg_db_user";

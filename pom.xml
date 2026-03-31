@@ -155,7 +155,6 @@
 		<module>genai-client</module>
 		<module>bindex-core</module>
 		<module>machai-cli</module>
-		<module>bindex-maven-plugin</module>
 		<module>ghostwriter</module>
 		<module>gw-maven-plugin</module>
 	</modules>
