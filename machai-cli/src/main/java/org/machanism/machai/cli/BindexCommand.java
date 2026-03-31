@@ -39,9 +39,6 @@ import org.springframework.shell.standard.ShellOption;
 public class BindexCommand {
 	private static final Logger logger = LoggerFactory.getLogger(BindexCommand.class);
 
-	/** Configuration used by bindex creator/register operations. */
-	private final PropertiesConfigurator config = new PropertiesConfigurator();
-
 	/**
 	 * Generates bindex files for a project directory.
 	 *
@@ -69,17 +66,18 @@ public class BindexCommand {
 			throws IOException {
 
 		try {
+			PropertiesConfigurator config = ConfigCommand.getConfigurator();
 			model = Optional.ofNullable(model)
-					.orElse(ConfigCommand.config.get(BindexCreator.MODEL_PROP_NAME, BindexCreator.DEFAULT_MODEL));
-			BindexCreator register = new BindexCreator(model, config);
-			register.update(update);
+					.orElse(config.get(BindexCreator.MODEL_PROP_NAME, BindexCreator.DEFAULT_MODEL));
+			BindexCreator bindexCreator = new BindexCreator(model, config);
+			bindexCreator.update(update);
 			dir = Optional.ofNullable(dir).orElse(
-					ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
+					config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 
 			logger.info("The project directory: {}", dir);
 			logger.info("GenAI model: {}", model);
 
-			register.scanFolder(dir);
+			bindexCreator.scanFolder(dir);
 		} finally {
 			GenaiProviderManager.logUsage();
 		}
@@ -116,10 +114,11 @@ public class BindexCommand {
 			throws IOException {
 
 		try {
+			PropertiesConfigurator config = ConfigCommand.getConfigurator();
 			dir = Optional.ofNullable(dir).orElse(
-					ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
+					config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 			model = Optional.ofNullable(model)
-					.orElse(ConfigCommand.config.get(BindexCreator.MODEL_PROP_NAME, BindexCreator.DEFAULT_MODEL));
+					.orElse(config.get(BindexCreator.MODEL_PROP_NAME, BindexCreator.DEFAULT_MODEL));
 
 			logger.info("The project directory: {}", dir);
 			logger.info("GenAI model: {}", model);

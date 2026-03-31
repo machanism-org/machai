@@ -2,6 +2,7 @@ package org.machanism.machai.cli;
 
 import java.io.IOException;
 
+import org.machanism.macha.core.commons.configurator.AbstractFileConfigurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +11,17 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 /**
- * Spring Shell command for reading and writing persistent Machai CLI configuration.
+ * Spring Shell command for reading and writing persistent Machai CLI
+ * configuration.
  *
- * <p>The command stores values in {@code machai.properties} (when available) via
+ * <p>
+ * The command stores values in {@code machai.properties} (when available) via
  * {@link PropertiesConfigurator} and exposes helpers for configuring defaults
  * used by other commands (for example, the default GenAI provider/model, the
  * default working directory, and the default semantic-search score threshold).
  *
  * <h2>Examples</h2>
+ * 
  * <pre>
  * config dir ./my-project
  * config score 0.8
@@ -32,22 +36,10 @@ public class ConfigCommand {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigCommand.class);
 
 	/**
-	 * Shared configuration instance used by commands in this package.
-	 */
-	public static final PropertiesConfigurator config = new PropertiesConfigurator();
-
-	static {
-		try {
-			config.setConfiguration(MACHAI_PROPERTIES_FILE_NAME);
-		} catch (Exception e) {
-			// configuration file not found.
-		}
-	}
-
-	/**
 	 * Sets or gets a configuration property.
 	 *
-	 * <p>If {@code value} is provided, updates the configuration property with the
+	 * <p>
+	 * If {@code value} is provided, updates the configuration property with the
 	 * given {@code key} and saves the change. If {@code value} is omitted, outputs
 	 * the current value for {@code key}.
 	 *
@@ -61,6 +53,7 @@ public class ConfigCommand {
 			@ShellOption(value = "--key", help = "The configuration property key to set or get.") String key,
 			@ShellOption(value = "--value", help = "The value to assign to the specified key. If omitted, displays the current value.", defaultValue = ShellOption.NULL) String value)
 			throws IOException {
+		PropertiesConfigurator config = getConfigurator();
 		if (value == null) {
 			String currentValue = config.get(key);
 			LOGGER.info("Current value for '{}': {}", key, currentValue);
@@ -69,6 +62,16 @@ public class ConfigCommand {
 			config.save(MACHAI_PROPERTIES_FILE_NAME);
 			LOGGER.info("Set '{}' to '{}' and saved.", key, value);
 		}
+	}
+
+	public static PropertiesConfigurator getConfigurator() {
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		try {
+			config.setConfiguration(MACHAI_PROPERTIES_FILE_NAME);
+		} catch (Exception e) {
+			// configuration file not found.
+		}
+		return config;
 	}
 
 }

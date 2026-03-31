@@ -16,12 +16,13 @@ class ConfigCommandTest {
 	@Test
 	void set_shouldLogCurrentValueWhenValueIsNull() {
 		// Arrange
-		ConfigCommand.config.set("some.key", "some.value");
+		var config = ConfigCommand.getConfigurator();
+		config.set("some.key", "some.value");
 		ConfigCommand command = new ConfigCommand();
 
 		// Act / Assert
 		assertDoesNotThrow(() -> command.set("some.key", null));
-		assertEquals("some.value", ConfigCommand.config.get("some.key"));
+		assertEquals("some.value", config.get("some.key"));
 	}
 
 	@Test
@@ -36,7 +37,7 @@ class ConfigCommandTest {
 			assertDoesNotThrow(() -> command.set("k", "v"));
 
 			// Assert
-			assertEquals("v", ConfigCommand.config.get("k"));
+			assertEquals("v", ConfigCommand.getConfigurator().get("k"));
 		} finally {
 			if (oldUserDir != null) {
 				System.setProperty("user.dir", oldUserDir);

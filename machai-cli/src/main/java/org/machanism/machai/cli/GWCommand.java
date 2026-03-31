@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jline.reader.LineReader;
+import org.machanism.macha.core.commons.configurator.AbstractConfigurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
@@ -180,14 +181,15 @@ public class GWCommand {
 	}
 
 	private void runGw(GwOptions options) throws IOException {
-		File projectDir = resolveProjectDir(options.projectDir);
-		String genaiValue = resolveModel(options.model);
-		Boolean logInputs = resolveLogInputs(options.logInputs);
+		PropertiesConfigurator config = ConfigCommand.getConfigurator();
+		
+		File projectDir = resolveProjectDir(options.projectDir, config);
+		String genaiValue = resolveModel(options.model, config);
+		Boolean logInputs = resolveLogInputs(options.logInputs, config);
 		// Sonar(java:S1144): use existing private helper instead of leaving it unused.
-		String instructionsValue = resolveInstructions(options.instructions);
+		String instructionsValue = resolveInstructions(options.instructions, config);
 		String[] dirs = resolveScanDirs(options.scanDirs, projectDir);
 		String[] excludesArr = splitExcludes(options.excludes);
-		PropertiesConfigurator config = loadMachaiPropertiesConfig();
 
 		for (String scanDir : dirs) {
 			ProcessingContext ctx = new ProcessingContext(projectDir, scanDir, genaiValue, config, excludesArr,
@@ -234,25 +236,25 @@ public class GWCommand {
 		}
 	}
 
-	private File resolveProjectDir(File projectDir) {
+	private File resolveProjectDir(File projectDir, AbstractConfigurator config) {
 		File effectiveProjectDir = projectDir;
 		if (effectiveProjectDir == null) {
 			effectiveProjectDir = SystemUtils.getUserDir();
 		}
-		return ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, effectiveProjectDir);
+		return config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, effectiveProjectDir);
 	}
 
-	private String resolveModel(String model) {
-		String genaiValue = ConfigCommand.config.get(Ghostwriter.MODEL_PROP_NAME, null);
+	private String resolveModel(String model, AbstractConfigurator config) {
+		String genaiValue = config.get(Ghostwriter.MODEL_PROP_NAME, null);
 		return model != null ? model : genaiValue;
 	}
 
-	private Boolean resolveLogInputs(Boolean logInputs) {
-		return ConfigCommand.config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, logInputs);
+	private Boolean resolveLogInputs(Boolean logInputs, AbstractConfigurator config) {
+		return config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, logInputs);
 	}
 
-	private String resolveInstructions(String instructions) {
-		String instructionsValue = ConfigCommand.config.get(Ghostwriter.INSTRUCTIONS_PROP_NAME, null);
+	private String resolveInstructions(String instructions, AbstractConfigurator config) {
+		String instructionsValue = config.get(Ghostwriter.INSTRUCTIONS_PROP_NAME, null);
 		if (instructions == null) {
 			return instructionsValue;
 		}
@@ -273,16 +275,6 @@ public class GWCommand {
 
 	private String[] splitExcludes(String excludes) {
 		return excludes != null ? excludes.split(",") : null;
-	}
-
-	private PropertiesConfigurator loadMachaiPropertiesConfig() {
-		PropertiesConfigurator config = new PropertiesConfigurator();
-		try {
-			config.setConfiguration(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);
-		} catch (IOException e) {
-			// The property file is not defined, ignore.
-		}
-		return config;
 	}
 
 	private void processSingleScanDir(ProcessingContext ctx) throws IOException {

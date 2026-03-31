@@ -70,7 +70,8 @@ public class ActCommand {
 	@ShellMethod("Interactively execute a predefined action or prompt using Act mode.")
 	public void act(@ShellOption(value = "", defaultValue = ShellOption.NULL) String[] act) throws IOException {
 
-		File projectDir = ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir());
+		PropertiesConfigurator config = ConfigCommand.getConfigurator();
+		File projectDir = config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir());
 
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		try {
@@ -78,7 +79,7 @@ public class ActCommand {
 		} catch (FileNotFoundException e) {
 			// configuration file not found.
 		}
-		String resolvedModel = ConfigCommand.config.get(Ghostwriter.MODEL_PROP_NAME);
+		String resolvedModel = config.get(Ghostwriter.MODEL_PROP_NAME);
 		ActProcessor processor = new ActProcessor(projectDir, configurator, resolvedModel) {
 			@Override
 			protected String input() {
@@ -88,7 +89,7 @@ public class ActCommand {
 		String prompt = StringUtils.join(act, " ");
 		processor.setDefaultPrompt(prompt);
 
-		Boolean logInputs = ConfigCommand.config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, false);
+		Boolean logInputs = config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, false);
 		processor.setLogInputs(logInputs);
 
 		String scanDir = processor.getConfigurator().get(Ghostwriter.SCAN_DIR_PROP_NAME, null);

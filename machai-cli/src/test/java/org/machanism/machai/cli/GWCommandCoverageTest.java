@@ -3,7 +3,6 @@ package org.machanism.machai.cli;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
@@ -15,6 +14,7 @@ import org.jline.reader.LineReader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.mockito.Mockito;
 
 /**
@@ -35,15 +35,17 @@ class GWCommandCoverageTest {
 	@Test
 	void resolveInstructions_whenNull_returnsConfigValue() throws Exception {
 		// Arrange
-		ConfigCommand.config.set(org.machanism.machai.gw.processor.Ghostwriter.INSTRUCTIONS_PROP_NAME, "from-config");
+		var config = ConfigCommand.getConfigurator();
+		config.set(Ghostwriter.INSTRUCTIONS_PROP_NAME, "from-config");
 		LineReader reader = Mockito.mock(LineReader.class);
 		GWCommand cmd = new GWCommand(reader);
 
-		Method m = GWCommand.class.getDeclaredMethod("resolveInstructions", String.class);
+		Method m = GWCommand.class.getDeclaredMethod("resolveInstructions", String.class,
+				org.machanism.macha.core.commons.configurator.AbstractConfigurator.class);
 		m.setAccessible(true);
 
 		// Act
-		String result = (String) m.invoke(cmd, new Object[] { null });
+		String result = (String) m.invoke(cmd, null, config);
 
 		// Assert
 		assertEquals("from-config", result);
@@ -82,22 +84,6 @@ class GWCommandCoverageTest {
 		// Assert
 		assertArrayEquals(new String[] { rootDir.getAbsolutePath() }, resultNull);
 		assertArrayEquals(new String[] { rootDir.getAbsolutePath() }, resultEmpty);
-	}
-
-	@Test
-	void loadMachaiPropertiesConfig_whenFileMissing_doesNotThrow_andReturnsNonNullConfig() throws Exception {
-		// Arrange
-		LineReader reader = Mockito.mock(LineReader.class);
-		GWCommand cmd = new GWCommand(reader);
-		Method m = GWCommand.class.getDeclaredMethod("loadMachaiPropertiesConfig");
-		m.setAccessible(true);
-
-		// Act
-		Object cfg = m.invoke(cmd);
-
-		// Assert
-		assertNotNull(cfg);
-		assertEquals("org.machanism.macha.core.commons.configurator.PropertiesConfigurator", cfg.getClass().getName());
 	}
 
 	@Test

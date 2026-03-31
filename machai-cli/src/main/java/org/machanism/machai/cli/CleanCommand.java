@@ -10,6 +10,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Optional;
 
 import org.apache.commons.lang.SystemUtils;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,8 @@ public class CleanCommand {
 			@ShellOption(value = { "-d",
 					ProjectLayout.PROJECT_DIR_PROP_NAME }, help = "The path fo the project directory.", defaultValue = ShellOption.NULL) File dir)
 			throws IOException {
-		dir = Optional.ofNullable(dir).orElse(ConfigCommand.config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
+		PropertiesConfigurator config = ConfigCommand.getConfigurator();
+		dir = Optional.ofNullable(dir).orElse(config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir()));
 		logger.info("Starting cleanup: Removing all '{}' temporary folders in {}.", MACHAI_TEMP_DIR, dir);
 		removeAllDirectoriesByName(dir.toPath(), MACHAI_TEMP_DIR);
 		logger.info("Cleanup process finished.");
