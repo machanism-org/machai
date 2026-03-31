@@ -373,6 +373,10 @@ public class ActProcessor extends AIFileProcessor {
 					super.setInteractive(Boolean.parseBoolean(value));
 					break;
 
+				case Ghostwriter.MODEL_PROP_NAME:
+					super.setModel(value);
+					break;
+
 				default:
 					getConfigurator().set(key, value);
 					break;

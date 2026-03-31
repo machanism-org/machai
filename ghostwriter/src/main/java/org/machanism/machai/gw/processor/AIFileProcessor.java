@@ -76,7 +76,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
 	/** Provider key/name (including model) used when creating GenAI providers. */
-	private final String genai;
+	private String genai;
 
 	/** Whether to persist the composed inputs to a per-file log. */
 	private boolean logInputs;
@@ -531,12 +531,20 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return genai;
 	}
 
+	public void setModel(String genai) {
+		this.genai = genai;
+	}
+
 	public void setInteractive(boolean interactive) {
 		this.interactive = interactive;
 	}
 
 	public boolean isInteractive() {
 		return interactive;
+	}
+
+	public String getGenai() {
+		return genai;
 	}
 
 }

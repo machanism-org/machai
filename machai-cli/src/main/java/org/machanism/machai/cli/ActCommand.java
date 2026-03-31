@@ -79,7 +79,7 @@ public class ActCommand {
 		} catch (FileNotFoundException e) {
 			// configuration file not found.
 		}
-		String resolvedModel = config.get(Ghostwriter.MODEL_PROP_NAME);
+		String resolvedModel = config.get(Ghostwriter.MODEL_PROP_NAME, null);
 		ActProcessor processor = new ActProcessor(projectDir, configurator, resolvedModel) {
 			@Override
 			protected String input() {
