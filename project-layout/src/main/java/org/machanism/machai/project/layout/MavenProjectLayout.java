@@ -2,10 +2,11 @@ package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
@@ -56,28 +57,17 @@ public class MavenProjectLayout extends ProjectLayout {
 	 * </p>
 	 *
 	 * @return list of module directories (as declared in <code>pom.xml</code>), or
-	 *         empty list if the project does not declare modules
+	 *         null if the project is not a parent.
 	 */
 	@Override
 	@Nullable
+	@SuppressWarnings("java:S1168")
 	public List<String> getModules() {
-		File projectDir = getProjectDir();
-		File pomFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
-		if (model == null) {
-			try {
-				model = new PomReader().getProjectModel(pomFile);
-			} catch (Exception e) {
-				logger.warn("Effective model building failed: {}",
-						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
-			}
-		}
-
 		Model mavenModel = getModel();
 		if (mavenModel != null && "pom".equals(mavenModel.getPackaging())) {
 			return mavenModel.getModules();
 		}
-		// Sonar java:S1168 - Return an empty collection instead of null.
-		return new ArrayList<>();
+		return null;
 	}
 
 	/**
@@ -88,8 +78,9 @@ public class MavenProjectLayout extends ProjectLayout {
 	public Model getModel() {
 		if (model == null) {
 			File projectDir = getProjectDir();
-			File file = new File(projectDir, PROJECT_MODEL_FILE_NAME);
-			model = new PomReader().getProjectModel(file);
+			File pomFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
+
+			model = new PomReader().getProjectModel(pomFile);
 		}
 
 		return model;
@@ -117,8 +108,8 @@ public class MavenProjectLayout extends ProjectLayout {
 	 *         to the configured project root
 	 */
 	@Override
-	public List<String> getSources() {
-		List<String> sources = new ArrayList<>();
+	public Set<String> getSources() {
+		Set<String> sources = new HashSet<>();
 
 		Model mavenModel = getModel();
 		Build build = mavenModel.getBuild();
@@ -136,11 +127,15 @@ public class MavenProjectLayout extends ProjectLayout {
 
 		String sourceDirectory = build.getSourceDirectory();
 		if (sourceDirectory != null) {
-			sources.add(ProjectLayout.getRelativePath(getProjectDir(), new File(sourceDirectory)));
+			String relativePath = ProjectLayout.getRelativePath(getProjectDir(), new File(sourceDirectory));
+			sources.add(relativePath);
 		}
 		if (build.getResources() != null) {
 			sources.addAll(build.getResources().stream().map(org.apache.maven.model.FileSet::getDirectory)
-					.map(p -> ProjectLayout.getRelativePath(getProjectDir(), new File(p)))
+					.map(name -> {
+						File file = new File(name);
+						return file.isAbsolute() ? ProjectLayout.getRelativePath(getProjectDir(), file) : name;
+					})
 					.collect(Collectors.toList()));
 		}
 		return sources;

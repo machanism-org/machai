@@ -3,6 +3,7 @@ package org.machanism.machai.project.layout;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
@@ -80,8 +82,7 @@ class MavenProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		// Sonar java:S1168 - return empty list instead of null.
-		assertEquals(Collections.emptyList(), modules);
+		assertNull(modules);
 	}
 
 	@Test
@@ -92,7 +93,7 @@ class MavenProjectLayoutTest {
 		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
 
 		// Act
-		List<String> sources = layout.getSources();
+		Set<String> sources = layout.getSources();
 
 		// Assert
 		assertTrue(sources.contains("src/main/java"));
@@ -119,7 +120,7 @@ class MavenProjectLayoutTest {
 		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
 
 		// Act
-		List<String> sources = layout.getSources();
+		Set<String> sources = layout.getSources();
 
 		// Assert
 		assertTrue(sources.contains("src/main/java"));

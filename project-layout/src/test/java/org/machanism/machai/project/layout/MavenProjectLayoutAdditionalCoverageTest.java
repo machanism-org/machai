@@ -1,13 +1,17 @@
 package org.machanism.machai.project.layout;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
@@ -36,8 +40,7 @@ class MavenProjectLayoutAdditionalCoverageTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		// Sonar java:S1168 - return empty list instead of null.
-		assertEquals(Collections.emptyList(), modules);
+		assertNull(modules);
 	}
 
 	@Test
@@ -57,7 +60,7 @@ class MavenProjectLayoutAdditionalCoverageTest {
 		MavenProjectLayout layout = new MavenProjectLayout().projectDir(projectDir.toFile()).model(model);
 
 		// Act
-		List<String> sources = layout.getSources();
+		Set<String> sources = layout.getSources();
 
 		// Assert
 		assertTrue(sources.contains("src/main/java"), "Should contain default src/main/java");

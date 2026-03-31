@@ -14,6 +14,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -171,10 +172,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			if (interactive) {
 				logger.info(">>> {}", perform);
 				String input = input();
-				if (!input.isEmpty()) {
-					provider.prompt(input);
-					perform = perform(file, provider);
-				}
+				provider.prompt(input);
+				perform = perform(file, provider);
 			}
 		}
 		return perform;
@@ -200,10 +199,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		String parentId = projectLayout.getParentId();
 		File parentDir = projectLayout.getProjectDir().getParentFile();
 
-		List<String> sources = projectLayout.getSources();
-		List<String> tests = projectLayout.getTests();
-		List<String> documents = projectLayout.getDocuments();
-		List<String> modules = projectLayout.getModules();
+		Collection<String> sources = projectLayout.getSources();
+		Collection<String> tests = projectLayout.getTests();
+		Collection<String> documents = projectLayout.getDocuments();
+		Collection<String> modules = projectLayout.getModules();
 
 		content.add(SystemUtils.OS_NAME);
 		content.add(projectLayout.getProjectName() != null ? projectLayout.getProjectName() : NOT_DEFINED);
@@ -243,7 +242,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @param projectDir project root directory
 	 * @return formatted directory list, or {@link #NOT_DEFINED} if none apply
 	 */
-	String getDirInfoLine(List<String> sources, File projectDir) {
+	String getDirInfoLine(Collection<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null && !sources.isEmpty()) {
 			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())

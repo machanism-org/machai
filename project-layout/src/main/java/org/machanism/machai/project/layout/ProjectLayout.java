@@ -2,6 +2,7 @@ package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -80,12 +81,12 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Returns a list of module directories (or names) within this project.
+	 * Returns a list of module directories (or names) within this project or null for non-parent project.
 	 */
 	@Nullable
+	@SuppressWarnings("java:S1168")
 	public List<String> getModules() {
-		// Sonar java:S1168 - return empty collection instead of null to prevent NPEs in callers.
-		return Collections.emptyList();
+		return null;
 	}
 
 	/**
@@ -108,21 +109,21 @@ public abstract class ProjectLayout {
 	 *
 	 * @return list of root-relative source directories
 	 */
-	public abstract List<String> getSources();
+	public abstract Collection<String> getSources();
 
 	/**
 	 * Returns the root-relative documentation directories.
 	 *
 	 * @return list of root-relative documentation directories
 	 */
-	public abstract List<String> getDocuments();
+	public abstract Collection<String> getDocuments();
 
 	/**
 	 * Returns the root-relative source directories for test code.
 	 *
 	 * @return list of root-relative test source directories
 	 */
-	public abstract List<String> getTests();
+	public abstract Collection<String> getTests();
 
 	/**
 	 * Computes the relative path from the specified project directory to the target
