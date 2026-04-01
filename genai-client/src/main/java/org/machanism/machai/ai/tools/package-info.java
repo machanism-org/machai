@@ -58,7 +58,7 @@
  * <ul>
  *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} – SPI implemented by tool installers</li>
  *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – discovers and applies installers</li>
- *   <li>{@link org.machanism.machai.ai.tools.FileFunctionTools} – file-system utilities relative to a working directory</li>
+ *   <li>{@link org.machanism.machai.gw.tools.FileFunctionTools} – file-system utilities relative to a working directory</li>
  *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution and process termination</li>
  *   <li>{@link org.machanism.machai.ai.tools.WebFunctionTools} – HTTP fetching and REST calls</li>
  * </ul>

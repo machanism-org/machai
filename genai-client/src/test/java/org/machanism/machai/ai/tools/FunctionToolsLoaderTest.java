@@ -1,6 +1,7 @@
 package org.machanism.machai.ai.tools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.lang.reflect.Field;
 import java.util.List;

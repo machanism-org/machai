@@ -101,11 +101,6 @@
 			<artifactId>google-genai</artifactId>
 			<version>1.39.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.machanism.machai</groupId>
-			<artifactId>project-layout</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 
 	<reporting>
