@@ -32,53 +32,55 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>Machai CLI</h1>
 
 <p>
-  Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism
-  ecosystem. It leverages GenAI to automate project assembly and enable semantic search for efficient library
-  discovery and integration.
+  Machai CLI is a command-line tool for generating, registering, and
+  managing library metadata within the Machanism ecosystem. It leverages
+  GenAI to automate project assembly and enable semantic search for
+  efficient library discovery and integration.
 </p>
 
-<h2>Overview</h2>
+<h2>Module overview</h2>
 
 <p>
-  This module provides a Spring Boot and Spring Shell based command-line interface (CLI) for running Machai
-  workflows in an interactive REPL or in non-interactive mode suitable for scripts and CI pipelines.
-  The CLI focuses on orchestrating higher-level operations (configuration, scanning, indexing, and cleanup) and
-  delegates the heavy lifting to the underlying Machai libraries (for example, Ghostwriter and bindex).
+  This module provides a Spring Boot / Spring Shell command-line interface that can be used interactively (REPL)
+  or non-interactively (scripts and CI). The CLI primarily orchestrates workflows: parsing options, resolving
+  paths, applying persisted defaults, and delegating the core work to the underlying Machai libraries.
 </p>
 
-<h2>Packages</h2>
+<h2>Package summary</h2>
+
+<p>
+  The public API surface of this module is concentrated in a single package:
+</p>
 
 <ul>
   <li>
-    <strong><code>org.machanism.machai.cli</code></strong> – application entry point and Spring Shell commands.
+    <strong><code>org.machanism.machai.cli</code></strong> – Command-line interface (CLI) commands and application entry
+    point for Machai.
     <ul>
-      <li>Provides command implementations and option parsing for common workflows.</li>
-      <li>Reads and persists CLI defaults (for example, working directory and provider/model selection).</li>
-      <li>Performs lightweight validation and path resolution, then invokes Machai services.</li>
+      <li>Provides the Spring Boot / Spring Shell wiring required to run Machai workflows from a terminal.</li>
+      <li>Exposes commands for configuration management, Ghostwriter processing, Act-mode execution, and cleanup.</li>
+      <li>Supports both interactive sessions (REPL) and non-interactive execution (scripts/CI).</li>
     </ul>
   </li>
 </ul>
 
-<h2>Primary components</h2>
+<h2>Primary types</h2>
 
 <ul>
   <li><code>org.machanism.machai.cli.MachaiCLI</code> – application entry point.</li>
-  <li><code>org.machanism.machai.cli.GWCommand</code> – scans folders and processes files with Ghostwriter.</li>
-  <li><code>org.machanism.machai.cli.ActCommand</code> – runs Act-mode actions/prompts.</li>
-  <li><code>org.machanism.machai.cli.BindexCommand</code> – generates (and optionally registers) bindex metadata.</li>
-  <li><code>org.machanism.machai.cli.ConfigCommand</code> – reads/writes CLI configuration defaults.</li>
-  <li><code>org.machanism.machai.cli.CleanCommand</code> – removes Machai temporary artifacts.</li>
+  <li><code>org.machanism.machai.cli.GWCommand</code> – Ghostwriter scanning and processing orchestration.</li>
+  <li><code>org.machanism.machai.cli.ActCommand</code> – Act-mode prompt execution.</li>
+  <li><code>org.machanism.machai.cli.ConfigCommand</code> – persistent CLI configuration management.</li>
+  <li><code>org.machanism.machai.cli.CleanCommand</code> – cleanup of Machai temporary folders.</li>
 </ul>
 
 <h2>Key capabilities</h2>
 
 <ul>
-  <li><strong>Ghostwriter processing:</strong> scan a project and process selected files through the Ghostwriter pipeline.</li>
-  <li><strong>Act mode:</strong> run predefined interactive actions/prompts in the context of a working directory.</li>
-  <li><strong>Indexing and discovery:</strong> generate and optionally register bindex metadata for semantic search.</li>
-  <li><strong>Picking and assembly:</strong> select libraries based on a query and assemble an output project.</li>
-  <li><strong>Configuration:</strong> set and persist CLI defaults (for example, directory and provider/model settings).</li>
-  <li><strong>Cleanup:</strong> remove Machai temporary artifacts (for example, <code>.machai</code>).</li>
+  <li><strong>Configuration management:</strong> set and persist defaults used by other commands.</li>
+  <li><strong>Ghostwriter orchestration:</strong> scan folders and run guidance-driven processing on selected files.</li>
+  <li><strong>Act-mode execution:</strong> run predefined actions/prompts against a working directory context.</li>
+  <li><strong>Cleanup:</strong> remove temporary artifacts created by Machai workflows (for example, <code>.machai</code>).</li>
 </ul>
 
 <h2>Class diagram</h2>
@@ -98,13 +100,6 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 config set --key gw.model --value OpenAI:gpt-5.1
 config dir .\\my-project
 
-# Index a project for semantic search
-bindex --dir .\\my-project
-
-# Pick libraries and assemble an output project
-pick --query "Create a web app" --score 0.8
-assembly --dir .\\out
-
 # Run Ghostwriter processing and Act mode prompts
 gw --scanDir .\\my-project --excludes target,.git
 act --action "Summarize the architecture"
@@ -117,11 +112,11 @@ clean --dir .\\my-project
 
 <ul>
   <li>
-    The <code>.machai</code> directory is used for temporary artifacts produced by Machai workflows. Use the
-    <code>clean</code> command to remove it when appropriate.
+    The <code>.machai</code> directory is used for temporary artifacts produced by Machai workflows; remove it using
+    <code>clean</code> when appropriate.
   </li>
   <li>
-    For command names, options, and default values, refer to the Javadoc on each command class in
+    For command names and options, refer to the Javadoc on the command classes in
     <code>org.machanism.machai.cli</code>.
   </li>
 </ul>

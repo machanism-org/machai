@@ -24,21 +24,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
-/**
- * Spring Shell command that scans files/directories and runs the Ghostwriter guidance pipeline.
- *
- * <p>
- * The command resolves defaults (project directory, GenAI model, and system instructions) from the
- * persisted configuration managed by {@link ConfigCommand}, and then delegates processing to
- * {@link GuidanceProcessor}.
- * </p>
- *
- * <h2>Examples</h2>
- * <pre>
- * gw --scanDir .\\my-project --excludes target,.git
- * gw --instructions "You are a strict code reviewer" --logInputs true
- * </pre>
- */
 @ShellComponent
 public class GWCommand {
 
@@ -67,7 +52,8 @@ public class GWCommand {
 	}
 
 	/**
-	 * Internal option container used to avoid a long parameter list between methods.
+	 * Internal option container used to avoid a long parameter list between
+	 * methods.
 	 */
 	private static final class GwOptions {
 		private int threads;
@@ -119,34 +105,45 @@ public class GWCommand {
 	}
 
 	/**
-	 * Scans and processes directories or files using the configured GenAI model and guidance.
+	 * Scans and processes directories or files using the configured GenAI model and
+	 * guidance.
 	 *
 	 * @param threads      number of threads for concurrent processing
-	 * @param model        GenAI provider and model identifier (for example, {@code OpenAI:gpt-5.1});
-	 *                     if {@code null}, uses the configured default
-	 * @param instructions system instructions as text, URL, or file path; if {@code null}, uses the
+	 * @param model        GenAI provider and model identifier (for example,
+	 *                     {@code OpenAI:gpt-5.1}); if {@code null}, uses the
 	 *                     configured default
-	 * @param excludes     comma-separated list of directories to exclude; may be {@code null}
-	 * @param logInputs    whether to log LLM request inputs to dedicated log files; if {@code null},
-	 *                     uses the configured default
-	 * @param projectDir   root directory for file processing; if {@code null}, uses the configured
-	 *                     default or the current working directory
-	 * @param scanDirs     directories to scan; if {@code null} or empty, scans the resolved
-	 *                     {@code projectDir}
+	 * @param instructions system instructions as text, URL, or file path; if
+	 *                     {@code null}, uses the configured default
+	 * @param excludes     comma-separated list of directories to exclude; may be
+	 *                     {@code null}
+	 * @param logInputs    whether to log LLM request inputs to dedicated log files;
+	 *                     if {@code null}, uses the configured default
+	 * @param projectDir   root directory for file processing; if {@code null}, uses
+	 *                     the configured default or the current working directory
+	 * @param scanDirs     directories to scan; if {@code null} or empty, scans the
+	 *                     resolved {@code projectDir}
 	 */
 	@ShellMethod("Scan and process directories or files using GenAI guidance.")
 	/**
-	 * FalsePositive Method signature is dictated by Spring Shell option binding; grouping would reduce CLI UX.
+	 * FalsePositive Method signature is dictated by Spring Shell option binding;
+	 * grouping would reduce CLI UX.
 	 */
 	@SuppressWarnings("java:S107")
 	public void gw(
-			@ShellOption(value = { "-t", "--threads" }, help = "Sets the number of threads for concurrent processing.", defaultValue = "1") int threads,
-			@ShellOption(value = { "-m", Ghostwriter.MODEL_PROP_NAME }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
-			@ShellOption(value = { "-i", "--instructions" }, help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
-			@ShellOption(value = { "-e", "--excludes" }, help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
-			@ShellOption(value = { "-l", "--" + Genai.LOG_INPUTS_PROP_NAME }, help = "Log LLM request inputs to dedicated log files", defaultValue = ShellOption.NULL) Boolean logInputs,
-			@ShellOption(value = { "-d", ProjectLayout.PROJECT_DIR_PROP_NAME }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File projectDir,
-			@ShellOption(value = { "-s", "--scanDir" }, help = "Directories to scan.", defaultValue = ShellOption.NULL) String[] scanDirs) {
+			@ShellOption(value = { "-t", "--"
+					+ Ghostwriter.THREADS_PROP_NAME }, help = "Sets the number of threads for concurrent processing.", defaultValue = "1") int threads,
+			@ShellOption(value = { "-m", "--"
+					+ Ghostwriter.MODEL_PROP_NAME }, help = "Set the GenAI provider and model", defaultValue = ShellOption.NULL) String model,
+			@ShellOption(value = { "-i", "--"
+					+ Ghostwriter.INSTRUCTIONS_PROP_NAME }, help = "System instructions as text, URL, or file path", defaultValue = ShellOption.NULL) String instructions,
+			@ShellOption(value = { "-e", "--"
+					+ Ghostwriter.EXCLUDES_PROP_NAME }, help = "Comma-separated list of directories to exclude", defaultValue = ShellOption.NULL) String excludes,
+			@ShellOption(value = { "-l", "--"
+					+ Genai.LOG_INPUTS_PROP_NAME }, help = "Log LLM request inputs to dedicated log files", defaultValue = ShellOption.NULL) Boolean logInputs,
+			@ShellOption(value = { "-d", "--"
+					+ ProjectLayout.PROJECT_DIR_PROP_NAME }, help = "Specify the path to the root directory for file processing.", defaultValue = ShellOption.NULL) File projectDir,
+			@ShellOption(value = { "-s", "--"
+					+ Ghostwriter.SCAN_DIR_PROP_NAME }, help = "Directories to scan.", defaultValue = ShellOption.NULL) String[] scanDirs) {
 
 		GwOptions options = new GwOptions().threads(threads).model(model).instructions(instructions)
 				.excludes(excludes).logInputs(logInputs).projectDir(projectDir).scanDirs(scanDirs);
@@ -272,7 +269,8 @@ public class GWCommand {
 
 		if (ctx.instructionsValue != null) {
 			if (LOGGER.isInfoEnabled()) {
-				String abbreviated = org.apache.commons.lang.StringUtils.abbreviate(ctx.instructionsValue, LOG_PREVIEW_LEN);
+				String abbreviated = org.apache.commons.lang.StringUtils.abbreviate(ctx.instructionsValue,
+						LOG_PREVIEW_LEN);
 				LOGGER.info("Instructions: {}", abbreviated);
 			}
 			processor.setInstructions(ctx.instructionsValue);

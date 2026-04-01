@@ -29,156 +29,123 @@ Generate or update the content as follows.
 
 ## Introduction
 
-Machai CLI is a Spring Boot + Spring Shell command-line application for running Machai workflows from an interactive console.
-
-It helps you:
-
-- **Generate and manage metadata** for projects (bindex) to improve library discoverability and automation.
-- **Scan and process a project tree** using Ghostwriter guidance, with configurable model, instructions, concurrency, and exclusions.
-- **Run reusable “Acts”** (prompt templates) interactively against a scanned project.
-- **Clean temporary artifacts** created by Machai workflows.
+Machai CLI is a command-line tool for generating, registering, and managing library metadata within the Machanism ecosystem. It leverages GenAI to automate project assembly and to enable semantic search, improving the speed and accuracy of library discovery and integration.
 
 ## Overview
 
-Machai CLI starts a Spring Shell interactive console via `org.machanism.machai.cli.MachaiCLI` and exposes command groups implemented in `src/main/java/org/machanism/machai/cli`:
+Machai CLI is a Spring Boot + Spring Shell application that provides commands to run Machai workflows from a terminal:
 
-- **Configuration (`set`)** (`ConfigCommand`) — reads/writes persistent defaults in `machai.properties`.
-- **Ghostwriter processing (`gw`)** (`GWCommand`) — scans directories/files and runs Ghostwriter’s guidance pipeline via `GuidanceProcessor`, supporting:
-  - project directory selection (defaulting to current working directory)
-  - scan directories (`--scanDir`) and directory exclusions (`--excludes`)
-  - GenAI provider/model selection (`--model`)
-  - instructions (inline text, URL, or file path; interactive prompt if empty)
-  - concurrency (`--threads`)
-  - optional logging of LLM request inputs (`--logInputs`)
-- **Act mode (`act`)** (`ActCommand`) — scans the configured project and runs a predefined Act via `ActProcessor` (interactive prompt support).
-- **Cleanup (`clean`)** (`CleanCommand`) — removes `.machai` temporary folders from a directory tree.
-
-Configuration is loaded from `machai.properties` in the working directory when available.
+- **Application entry point** (`MachaiCLI`): boots Spring and starts the Spring Shell runtime.
+- **Ghostwriter processing** (`GWCommand`): scans directories/files and processes documents using GenAI guidance; supports excludes, per-run model selection, custom system instructions, concurrency, and optional logging of LLM inputs.
+- **Act mode** (`ActCommand`): runs a predefined “act” prompt interactively and applies it to the scanned project context.
+- **Configuration management** (`ConfigCommand`): reads/writes persistent settings in `machai.properties` (for example, default model, scan directory, and project directory).
+- **Cleanup utility** (`CleanCommand`): removes Machai temporary folders (`.machai`) from a project tree.
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Java 17**
-- Network access to your selected **GenAI provider** (provider/model dependent)
+- Java 17+
+- Maven 3.9+ (for building from source)
+- Network access to your selected GenAI provider (for example OpenAI, etc.)
 
 ### Installation
 
-- Download the Machai CLI application JAR:
+- Download the runnable jar:
 
-  [![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai/machai.jar/download)
+[![Download Jar](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download jar")](https://sourceforge.net/projects/machanism/files/machai/machai.jar/download)
 
-- Run the CLI (Spring Shell interactive mode):
-
-  ```bash
-  java -jar machai.jar
-  ```
-
-- (Optional) Use an explicit configuration file at startup:
-
-  ```bash
-  java -Dconfig=./machai.properties -jar machai.jar
-  ```
-
-### Environment Variables
-
-Machai CLI delegates authentication/provider configuration to the underlying GenAI provider implementation. Common environment variables (provider/model dependent) include:
-
-| Variable | Description | When needed | Example |
-|---|---|---|---|
-| `OPENAI_API_KEY` | API key for OpenAI models | Using OpenAI | `sk-...` |
-| `AZURE_OPENAI_API_KEY` | API key for Azure OpenAI | Using Azure OpenAI | `...` |
-| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint URL | Using Azure OpenAI | `https://<resource>.openai.azure.com/` |
-| `ANTHROPIC_API_KEY` | API key for Anthropic models | Using Anthropic | `...` |
-
-If your selected provider requires different variables, set those required by that provider.
-
-## Configuration
-
-Machai CLI persists user defaults in `machai.properties` (in the working directory). You can set values using the `set` command.
-
-### Common configuration parameters
-
-| Property key | Description | Default |
-|---|---|---|
-| `projectDir` | Default project directory used by commands that operate on a folder tree | Current working directory |
-| `gw.model` | Default GenAI provider/model used by `gw` and `act` | (none) |
-| `gw.instructions` | Default Ghostwriter system instructions source (text/URL/file path) | (none) |
-| `logInputs` | Whether to log LLM request inputs to dedicated files | `false` |
-
-### Typical workflow
-
-1. Set defaults:
-
-   ```text
-   set --key projectDir --value ./my-project
-   set --key gw.model --value OpenAI:gpt-5.1
-   ```
-
-2. Run Ghostwriter guidance over a directory:
-
-   ```text
-   gw --scanDir ./my-project --excludes target,.git --threads 4 --logInputs true
-   ```
-
-3. Run an Act over the scanned project:
-
-   ```text
-   act commit
-   act sonar-fix --model OpenAI:gpt-5.1
-   ```
-
-4. Clean temporary artifacts (optional):
-
-   ```text
-   clean --dir ./my-project
-   ```
-
-## Usage
-
-Start the shell:
+- Run:
 
 ```bash
 java -jar machai.jar
 ```
 
-Then use the following commands.
+### Environment Variables
 
-### `set` (configuration)
+The CLI delegates GenAI access to the configured provider. Set the provider-specific credentials in your environment.
 
-- Set a value:
+| Variable | Required | Description | Example |
+|---|---:|---|---|
+| `OPENAI_API_KEY` | Provider-specific | API key for OpenAI (when using an OpenAI model). | `sk-...` |
+| `AZURE_OPENAI_ENDPOINT` | Provider-specific | Azure OpenAI endpoint (when using Azure OpenAI). | `https://...openai.azure.com/` |
+| `AZURE_OPENAI_API_KEY` | Provider-specific | Azure OpenAI API key (when using Azure OpenAI). | `...` |
+| `ANTHROPIC_API_KEY` | Provider-specific | API key for Anthropic (when using Anthropic models). | `sk-ant-...` |
 
-  ```text
-  set --key gw.model --value OpenAI:gpt-5.1
-  ```
+## Configuration
 
-- Get a value:
+Machai CLI uses `machai.properties` for persistent defaults. You can set values using the `config` command.
 
-  ```text
-  set --key gw.model
-  ```
+### Common Parameters
 
-### `gw` (Ghostwriter guidance scanning)
+| Key | Description | Default |
+|---|---|---|
+| `project.dir` | Root directory used by commands when a directory is not provided explicitly. | Current working directory |
+| `gw.model` | Default GenAI provider/model identifier (for example `OpenAI:gpt-5.1`). | *(unset)* |
+| `gw.scanDir` | Default scan directory path. | `project.dir` |
+| `gw.instructions` | System instructions (text, URL, or file path) used by Ghostwriter. | *(unset)* |
+| `gw.excludes` | Comma-separated list of directories to exclude from scanning. | *(unset)* |
+| `genai.logInputs` | Whether to log LLM request inputs to dedicated log files. | `false` |
 
-```text
-gw --scanDir ./my-project --excludes target,.git --threads 4 --instructions "You are a strict code reviewer" --logInputs true
+### Typical Workflow
+
+1. (Optional) Set the default project directory:
+   ```bash
+   config set --key project.dir --value .\my-project
+   ```
+2. Configure the default GenAI model:
+   ```bash
+   config set --key gw.model --value OpenAI:gpt-5.1
+   ```
+3. (Optional) Configure a default scan directory:
+   ```bash
+   config set --key gw.scanDir --value src\main\java
+   ```
+4. Run Ghostwriter processing:
+   ```bash
+   gw --gw.threads 4 --gw.scanDir src\main\java
+   ```
+5. Clean temporary `.machai` artifacts when needed:
+   ```bash
+   clean --project.dir .\my-project
+   ```
+
+## Usage
+
+Machai CLI starts an interactive Spring Shell session. Type `help` to list available commands and options.
+
+### Commands
+
+- `gw`: Scan and process directories or files using GenAI guidance.
+- `act`: Run Act mode interactively for a predefined act/prompt.
+- `config set`: Set or get persistent configuration values in `machai.properties`.
+- `clean`: Remove `.machai` temporary folders from a directory tree.
+
+### Example: Run Ghostwriter with custom parameters
+
+```bash
+# Set defaults (optional)
+config set --key project.dir --value .\my-project
+config set --key gw.model --value OpenAI:gpt-5.1
+
+# Run Ghostwriter with explicit overrides
+gw --gw.threads 4 \
+   --gw.model OpenAI:gpt-5.1 \
+   --gw.instructions "Follow repository guidance comments strictly." \
+   --gw.excludes target,.git,.machai \
+   --project.dir .\my-project \
+   --gw.scanDir src\main\java src\site
 ```
 
-### `act` (Ghostwriter Act mode)
+### Example: Run Act mode
 
-```text
-act commit
+```bash
+# Execute an act (prompt template) and then answer interactive questions
 act commit "and push"
-```
-
-### `clean` (remove temporary folders)
-
-```text
-clean --dir ./my-project
 ```
 
 ## Resources
 
-- GitHub (parent project): https://github.com/machanism-org/machai
-- Maven Central artifact: https://central.sonatype.com/artifact/org.machanism.machai/machai-cli
-- Download JAR: https://sourceforge.net/projects/machanism/files/machai/machai.jar/download
+- GitHub: https://github.com/machanism-org/machai
+- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/machai-cli
+- Machanism (organization): https://github.com/machanism-org

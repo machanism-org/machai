@@ -1,29 +1,11 @@
 /**
- * Command-line interface (CLI) for running Machai and Ghostwriter workflows.
+ * Command-line interface (CLI) commands and application entry point for Machai.
  *
  * <p>
- * This package contains the Spring Boot application entry point and the Spring Shell commands that expose
- * Machai functionality via an interactive shell. Commands generally read and persist defaults
- * (for example, working directory, GenAI provider/model, and Ghostwriter instructions) via the shared
- * {@code machai.properties} configuration.
+ * This package contains the Spring Boot/Spring Shell wiring for executing Machai
+ * workflows from a terminal, including configuration management, Ghostwriter
+ * processing, Act-mode execution, and cleanup utilities.
  * </p>
- *
- * <h2>Key types</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.cli.MachaiCLI} - Spring Boot application entry point.</li>
- *   <li>{@link org.machanism.machai.cli.GWCommand} - Ghostwriter guidance scanning and processing.</li>
- *   <li>{@link org.machanism.machai.cli.ActCommand} - Interactive Act-mode execution.</li>
- *   <li>{@link org.machanism.machai.cli.ConfigCommand} - Persistent CLI configuration management.</li>
- *   <li>{@link org.machanism.machai.cli.CleanCommand} - Cleanup of Machai temporary folders.</li>
- * </ul>
- *
- * <h2>Typical usage</h2>
- * <pre>
- * config dir .\\my-project
- * gw --scanDir .\\my-project --excludes target,.git
- * act commit "and push"
- * clean --dir .\\my-project
- * </pre>
  */
 package org.machanism.machai.cli;
 
