@@ -10,27 +10,41 @@ Use functional tool `get_bindex_schema` to get the bindex schema.
 '''
 
 inputs = '''
-Recursively analyze the files located:
+# Task
 
-- [Main Source & Resource Folders]
-- [Test Source & Resource Folders]
-- [Documentation Folders]
+Perform user query bellow:
 
-Generate the `bindex.json` file to describe the project for use as a library.  
-
+```
 %s
+```
 
-- The JSON object must strictly conform to the Bindex schema provided by the `get_bindex_schema` functional tool.
+# Generation Rules
+
+These rules must be followed if the `bindex.json` file needs to be created or updated; otherwise, they should be ignored.
+
+Generate the `bindex.json` based on information extracted from [Main Source & Resource Folders] and [Documentation Folders] directories.
+Parse these files and generate a `bindex.json` file for the project to make it easier to use as a library.
+
+- `bindex.json` file must be strictly conform to the Bindex schema provided by the `get_bindex_schema` functional tool.
 - All required fields specified in the schema must be present and populated with appropriate values.
 - Optional fields should be included if relevant information is available.
 - The JSON must be valid (parsable) and should not include any comments or extraneous text.
 - If any field values are not available, use null or an empty array/object as specified by the schema.
 - Do not include any explanatory text, markdown formatting, or additional output outside the JSON object.
 - Save the JSON object to `bindex.json`.
+- The response message must be inforn the user about the status creation the bindex.json file. 
+- Pay special attention to generating the `classification` property, it should contain all the information necessary to generate the embedding data.
+- Not escaped double quotes (`"`) within string values in the JSON must be escaped as `\"`.
 
-Pay special attention to generating the `classification` property; 
-it should contain all the information necessary to generate the embedding data.
+# Registration Rules
+
+These rules must be followed if the `bindex.json` file needs to be register; otherwise, they should be ignored.
+
+- Check for the presence of the `bindex.json` file in the project's root directory.
+- If the file exists, call the `register_bindex` function to register the `bindex.json` file.
+— After the registration operation is completed, display the `RecordId` and a status message.
 '''
 
+prompt = "Create or update bindex.json"
 gw.model = "CodeMie:gpt-5-2-2025-12-11"
 gw.scanDir = "glob:."

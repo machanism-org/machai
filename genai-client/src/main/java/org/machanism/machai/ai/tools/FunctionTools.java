@@ -69,7 +69,7 @@ public interface FunctionTools {
 			Matcher matcher = pattern.matcher(current);
 			while (matcher.find()) {
 				String propName = matcher.group(1);
-				String propValue = conf.get(propName);
+				String propValue = conf.get(propName, null);
 				if (propValue != null) {
 					properties.put(propName, propValue);
 				}

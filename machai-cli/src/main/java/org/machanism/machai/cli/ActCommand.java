@@ -73,14 +73,8 @@ public class ActCommand {
 		PropertiesConfigurator config = ConfigCommand.getConfigurator();
 		File projectDir = config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDir());
 
-		PropertiesConfigurator configurator = new PropertiesConfigurator();
-		try {
-			configurator.setConfiguration(ConfigCommand.MACHAI_PROPERTIES_FILE_NAME);
-		} catch (FileNotFoundException e) {
-			// configuration file not found.
-		}
 		String resolvedModel = config.get(Ghostwriter.MODEL_PROP_NAME, null);
-		ActProcessor processor = new ActProcessor(projectDir, configurator, resolvedModel) {
+		ActProcessor processor = new ActProcessor(projectDir, config, resolvedModel) {
 			@Override
 			protected String input() {
 				return lineReader.readLine("prompt:> ");

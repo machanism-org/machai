@@ -375,6 +375,7 @@ public class ActProcessor extends AIFileProcessor {
 
 				case Ghostwriter.MODEL_PROP_NAME:
 					super.setModel(value);
+					getConfigurator().set(key, value);
 					break;
 
 				default:

@@ -1,6 +1,9 @@
 package org.machanism.machai.bindex.ai.tools;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -107,6 +110,12 @@ public class BindexFunctionTools implements FunctionTools {
 				"Recommends libraries based on the user's prompt or project requirements.",
 				this::getRecommendedLibraries,
 				"prompt:string:required:The user prompt describing project needs or requirements.");
+
+		provider.addTool(
+				"register_bindex",
+				"Registers a Bindex record from a file in the working directory.",
+				this::registerBindex,
+				"fileName:string:required:The name of the Bindex file to register (must exist in the working directory).");
 	}
 
 	/**
@@ -122,6 +131,11 @@ public class BindexFunctionTools implements FunctionTools {
 	private String getBindex(Object[] params) throws JsonProcessingException {
 		JsonNode props = (JsonNode) params[0];
 		String id = props.get("id").asText();
+		String bindexJson = getBindex(id);
+		return bindexJson;
+	}
+
+	private String getBindex(String id) throws JsonProcessingException {
 		Bindex bindex = getBindexRepository().getBindex(id);
 		ObjectMapper objectMapper = new ObjectMapper();
 		String bindexJson = bindex == null ? "null" : objectMapper.writeValueAsString(bindex);
@@ -188,6 +202,31 @@ public class BindexFunctionTools implements FunctionTools {
 					StringUtils.abbreviate(result.toString(), MAXWIDTH));
 		}
 		logger.debug("Detailed picked artifacts: {}", result);
+
+		return result;
+	}
+
+	private String registerBindex(Object[] params) throws JsonProcessingException {
+		JsonNode props = (JsonNode) params[0];
+		File workingDir = (File) params[1];
+		String fileName = props.get("fileName").asText();
+
+		Picker picker = new Picker(configurator.get("gw.model"), null, configurator);
+		File bindexFile = new File(workingDir, fileName);
+
+		String result;
+		if (bindexFile.exists()) {
+			try (Reader reader = new FileReader(bindexFile)) {
+				Bindex bindex = new ObjectMapper().readValue(reader, Bindex.class);
+
+				String recordId = picker.create(bindex);
+				result = "RecordId: " + recordId;
+			} catch (Exception e) {
+				throw new IllegalArgumentException(e);
+			}
+		} else {
+			result = "file not found";
+		}
 
 		return result;
 	}
