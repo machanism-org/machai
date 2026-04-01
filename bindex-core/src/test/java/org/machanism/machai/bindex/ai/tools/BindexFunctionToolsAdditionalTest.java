@@ -24,5 +24,4 @@ class BindexFunctionToolsAdditionalTest {
 		assertTrue(!schema.trim().isEmpty());
 		assertTrue(schema.trim().startsWith("{"));
 	}
-
 }

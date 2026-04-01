@@ -1,7 +1,6 @@
 package org.machanism.machai.cli;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.annotation.PostConstruct;
@@ -22,18 +21,19 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 /**
- * Spring Shell command that runs Ghostwriter "Act mode".
+ * Spring Shell command that runs Ghostwriter "Act mode" for a project.
  *
  * <p>
- * The command scans the configured project folder and then executes a
- * predefined action/prompt interactively via {@link ActProcessor}.
+ * The command resolves the project directory and other defaults from
+ * {@link ConfigCommand} and then delegates execution to {@link ActProcessor}.
+ * The user is prompted for any additional input required by the selected act.
+ * </p>
  *
  * <h2>Examples</h2>
- * 
  * <pre>
  * act commit
  * act commit "and push"
- * act sonar-fix --model OpenAI:gpt-5.1
+ * act sonar-fix
  * </pre>
  */
 @ShellComponent
@@ -43,6 +43,11 @@ public class ActCommand {
 
 	private final LineReader lineReader;
 
+	/**
+	 * Creates a new Act command instance.
+	 *
+	 * @param lineReader JLine reader used to prompt the user in interactive mode
+	 */
 	public ActCommand(@Lazy LineReader lineReader) {
 		super();
 		this.lineReader = lineReader;
@@ -60,8 +65,9 @@ public class ActCommand {
 	 * Interactively executes a predefined action/prompt using Act mode.
 	 *
 	 * <p>
-	 * The default root directory and model are resolved from the persisted
+	 * The default project directory and model are resolved from the persisted
 	 * configuration managed by {@link ConfigCommand}.
+	 * </p>
 	 *
 	 * @param act words composing the action name and optional extra prompt text
 	 *            passed to Act mode

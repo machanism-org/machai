@@ -91,6 +91,9 @@ import com.openai.services.blocking.ModelService;
  * Defaults to {@value #MAX_OUTPUT_TOKENS}.</li>
  * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls allowed
  * in a single response. Defaults to {@value #MAX_TOOL_CALLS}.</li>
+ * <li>{@code embedding.model} (optional): embedding model identifier used by
+ * {@link #embedding(String, long)}. If unset, embedding generation may fail due
+ * to missing model selection.</li>
  * </ul>
  */
 public class OpenAIProvider implements Genai {

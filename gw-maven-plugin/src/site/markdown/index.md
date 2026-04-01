@@ -56,12 +56,12 @@ canonical: https://machai.machanism.org/gw-maven-plugin/index.html
 
 ## Introduction
 
-GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds, enabling project assets (source code, documentation, and other scanned files) to be evaluated against embedded `@guidance:` blocks and updated consistently over time.
+GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds so that any project assets (source code, documentation, project site content, and other scanned files) can be evaluated against embedded `@guidance:` blocks and updated consistently over time.
 
-The plugin exposes Maven goals (Mojos) that configure and invoke Ghostwriter processors from the `org.machanism.machai.gw.processor` package:
+The plugin provides Maven goals (Mojos) in `org.machanism.machai.gw.maven` that delegate to Ghostwriter processors:
 
-- **Guided processing** via `GuidanceProcessor` (`gw:gw`, `gw:reactor`) for scanning a tree and applying guidance-driven updates.
-- **Action processing** via `ActProcessor` (`gw:act`, `gw:act-reactor`) for applying an interactive or predefined “act” prompt across a scanned document set.
+- **Guided processing** (`gw:gw`, `gw:reactor`) via `GuidanceProcessor` for scanning a tree and applying guidance-driven updates.
+- **Action processing** (`gw:act`, `gw:act-reactor`) via `ActProcessor` for applying an interactive or predefined “act” prompt across a scanned document set.
 
 Credentials can optionally be sourced from Maven `settings.xml` via `-Dgenai.serverId=...`, keeping secrets out of source control while still enabling CI-friendly execution.
 
@@ -70,8 +70,8 @@ Credentials can optionally be sourced from Maven `settings.xml` via `-Dgenai.ser
 The GW Maven Plugin makes Ghostwriter execution repeatable and Maven-native:
 
 - Run documentation and content automation in **local development** and **CI** using standard Maven invocations.
-- Choose between **aggregator-style processing** (CLI-like module discovery and reverse order) and **reactor ordering** (standard Maven dependency build order).
-- Configure scanning, exclusions, instructions, and model/provider selection through **system properties** (`-D...`) or plugin `<configuration>`.
+- Choose between **aggregator-style processing** (CLI-like module discovery and reverse module order) and **reactor ordering** (standard Maven dependency build order).
+- Configure scan roots, instructions, exclusions, model/provider selection, and logging through **system properties** (`-D...`) or plugin `<configuration>`.
 - Use **guided** automation for repeatable, embedded rules, or **acts** for one-off, prompt-driven rewrites.
 
 In practice, you point the plugin at a scan root (commonly `src/site`, but any folder can be scanned), it discovers files, applies guidance or actions, and writes updates back to disk.

@@ -1,48 +1,42 @@
 /**
- * Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document
- * processing during Maven builds.
+ * Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document processing.
  *
  * <p>
- * The goals in this package configure and execute guided file processing using
- * {@link org.machanism.machai.gw.processor.GuidanceProcessor} and related
- * processors such as {@link org.machanism.machai.gw.processor.ActProcessor}.
- * Typical usage is to scan a documentation source tree (commonly
- * {@code src/site}) for files containing embedded {@code @guidance:} blocks.
+ * The goals in this package provide Maven integrations around the Ghostwriter document-processing workflow.
+ * They scan documentation trees (commonly {@code src/site}) for embedded {@code @guidance:} blocks and
+ * apply guided transformations using the GW processors.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
  * <li>
- * {@link org.machanism.machai.gw.maven.GW} ({@code gw:gw}) - Aggregator goal
- * that can run without a {@code pom.xml}. It processes modules in reverse order
- * (sub-modules first, then parent modules), similar to the Ghostwriter CLI.
+ * {@link org.machanism.machai.gw.maven.GW} ({@code gw:gw}) - Aggregator goal that can run without a
+ * {@code pom.xml}. Processes modules in reverse order (sub-modules first, then parent modules), similar
+ * to the Ghostwriter CLI.
  * </li>
  * <li>
- * {@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor}) -
- * Processes modules using standard Maven reactor dependency ordering.
+ * {@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor}) - Processes modules using standard
+ * Maven reactor dependency ordering.
  * </li>
  * <li>
- * {@link org.machanism.machai.gw.maven.Act} ({@code gw:act}) - Interactive goal
- * for running a predefined action prompt over scanned documents.
+ * {@link org.machanism.machai.gw.maven.Act} ({@code gw:act}) - Interactive goal for running a predefined
+ * action prompt over scanned documents.
  * </li>
  * <li>
- * {@link org.machanism.machai.gw.maven.ReactorAct} ({@code gw:act-reactor}) -
- * Reactor-friendly variant of {@code gw:act} intended to run in the
- * execution-root project context.
+ * {@link org.machanism.machai.gw.maven.ReactorAct} ({@code gw:act-reactor}) - Reactor-friendly variant of
+ * {@code gw:act} intended to run in the execution-root project context.
  * </li>
  * <li>
- * {@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean}) - Deletes
- * temporary artifacts created by GW processing (typically bound to Maven's
- * {@code clean} lifecycle).
+ * {@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by
+ * GW processing (typically bound to Maven's {@code clean} lifecycle).
  * </li>
  * </ul>
  *
  * <h2>Credentials</h2>
  * <p>
- * Provider credentials can optionally be sourced from {@code ~/.m2/settings.xml}
- * by providing {@code -Dgenai.serverId=&lt;serverId&gt;}. When set, the plugin reads
- * the matching {@code &lt;server&gt;} entry and forwards credentials and/or
- * additional configuration fields to the workflow.
+ * Provider credentials can optionally be sourced from {@code ~/.m2/settings.xml} by providing
+ * {@code -Dgenai.serverId=&lt;serverId&gt;}. When set, the plugin reads the matching {@code &lt;server&gt;}
+ * entry and forwards credentials and/or additional configuration fields to the workflow.
  * </p>
  *
  * <h2>Usage examples</h2>

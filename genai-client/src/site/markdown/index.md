@@ -32,7 +32,7 @@ canonical: https://machai.machanism.org/genai-client/index.html
 
 ## Introduction
 
-GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers foundational prompt management and embedding capabilities, enabling AI-powered features across MachAI modules. The library simplifies interactions with AI services, supporting advanced use cases such as semantic search, automated content generation, and intelligent project assembly within the Machanism ecosystem.
+GenAI Client is a Java library for integrating with Generative AI providers using a consistent, provider-agnostic API. It provides prompt composition, optional file inputs, optional tool/function calling, and text-embedding generation (provider-dependent). This enables building AI features—such as summarization, semantic search, and automation workflows—while keeping your application insulated from provider-specific SDK differences.
 
 Key benefits:
 
@@ -78,11 +78,11 @@ This design provides:
 
 | Variable | Required | Used by | Description |
 |---|---:|---|---|
-| `OPENAI_API_KEY` | Conditional | OpenAI / OpenAI-compatible / CodeMie (internal delegation) | API key (or access token) used to authenticate requests. |
-| `OPENAI_BASE_URL` | No | OpenAI / OpenAI-compatible / CodeMie (internal delegation) | Override API base URL (useful for OpenAI-compatible gateways). |
+| `OPENAI_API_KEY` | Conditional | OpenAI / OpenAI-compatible | API key (or access token) used to authenticate requests. |
+| `OPENAI_BASE_URL` | No | OpenAI / OpenAI-compatible / CodeMie (delegated clients) | Override API base URL (useful for OpenAI-compatible gateways). |
 | `GENAI_USERNAME` | Conditional | CodeMie | Username used to obtain an access token (or a client id if using client_credentials). |
 | `GENAI_PASSWORD` | Conditional | CodeMie | Password used to obtain an access token (or a client secret if using client_credentials). |
-| `AUTH_URL` | No | CodeMie | OAuth2 token endpoint override (defaults to CodeMie Keycloak token URL). |
+| `AUTH_URL` | No | CodeMie | OAuth2 token endpoint override (defaults to the CodeMie OIDC token URL). |
 | `GENAI_TIMEOUT` | No | OpenAI / OpenAI-compatible | Request timeout in seconds; when `0` or missing, SDK defaults are used. |
 | `MAX_OUTPUT_TOKENS` | No | OpenAI / OpenAI-compatible | Max output tokens (provider default applies if not set). |
 | `MAX_TOOL_CALLS` | No | OpenAI / OpenAI-compatible | Max tool calls per request (provider default applies if not set). |
@@ -114,6 +114,13 @@ String answer = provider.perform();
 | Parameter | Description | Default |
 |---|---|---|
 | Provider spec (`ProviderName:modelOrConfig`) | String passed to `GenaiProviderManager` to select provider and model/config. | None |
+| `chatModel` | Model identifier used by the provider (for example `gpt-*`, `gemini-*`, `claude-*`). | None |
+| `OPENAI_API_KEY` | API key or access token for OpenAI-compatible backends. | None |
+| `OPENAI_BASE_URL` | Base URL override for OpenAI-compatible endpoints. | Provider/SDK default |
+| `GENAI_TIMEOUT` | Request timeout in seconds (OpenAI provider). | `600` |
+| `MAX_OUTPUT_TOKENS` | Max output tokens (OpenAI provider). | `18000` |
+| `MAX_TOOL_CALLS` | Max tool calls per request (OpenAI provider). | `200` |
+| `embedding.model` | Embedding model identifier (OpenAI provider). | None |
 | `setWorkingDir(File)` | Sets a working directory used by tools and/or provider workflows. | Not set |
 | `inputsLog(File)` | Enables logging of prompt inputs to a file for auditing/debugging. | Disabled |
 | `instructions(String)` | Sets system-level instructions for the request/session. | Not set |
@@ -152,6 +159,7 @@ Configuration values are read from the `Configurator` passed to `init(Configurat
 - `GENAI_TIMEOUT` (optional): request timeout in seconds. If missing, `0`, or negative, the SDK default timeouts are used. Defaults to `600` seconds.
 - `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to `18000`.
 - `MAX_TOOL_CALLS` (optional): maximum number of tool calls allowed in a single response. Defaults to `200`.
+- `embedding.model` (optional): embedding model identifier used by `embedding(String, long)`. If unset, embedding generation may fail due to missing model selection.
 
 **Capabilities**
 

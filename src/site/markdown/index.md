@@ -65,13 +65,12 @@ Key capabilities include:
 
 | Name | Description |
 | --- | --- |
-| [Project Layout](project-layout/) | Project Layout is a small utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, etc.) in a consistent way. It centralizes layout conventions so tools and plugins can resolve well-known folders reliably, avoid hard-coded paths, and reduce duplicated path logic. |
-| [GenAI Client](genai-client/) | GenAI Client is a Java library designed for seamless integration with Generative AI providers. It offers a provider abstraction, centralized provider selection, prompt and instruction composition, optional tool (function) calling, optional file attachments, provider-dependent embeddings, and optional request input logging. |
-| [Bindex Core](bindex-core/) | Bindex Core is the foundational Java library for generating, persisting, registering, retrieving, and assembling Bindex documents (JSON descriptors that are machine-readable and LLM-friendly). It supports generating or updating `bindex.json` from a project layout, registering and searching Bindexes in a MongoDB-backed registry (optionally with embeddings), semantically picking relevant libraries for a free-text query, expanding results via declared dependencies, and assembling selected Bindexes into prompt-ready context for downstream workflows. |
-| [Machai CLI](machai-cli/) | Machai CLI is a Spring Boot and Spring Shell command-line application that orchestrates Bindex and Ghostwriter workflows. It can generate and register Bindex metadata, perform semantic pick and project assembly, run guidance-driven Ghostwriter processing over a directory tree, execute reusable prompt templates (Acts), issue one-off prompts to a configured provider, manage persisted defaults via `machai.properties`, and clean temporary `.machai` folders. |
-| [Bindex Maven Plugin](bindex-maven-plugin/) | Bindex Maven Plugin is a Maven plugin that generates, updates, and registers Bindex metadata for Maven projects. It provides goals to create or update a module Bindex, register it to an external registry endpoint for discovery, and clean temporary artifacts, and it can optionally load credentials from Maven `settings.xml`. |
-| [Ghostwriter](ghostwriter/) | Ghostwriter is a guidance-driven documentation and transformation engine (CLI and library) that scans project files, extracts embedded `@guidance:` directives, composes provider inputs with project structure context and optional system instructions, and applies AI-synthesized updates back to disk. It supports directory and pattern-based scanning (`glob:` and `regex:`), exclusions, optional multi-threading, Act mode for reusable prompt templates, and optional request input logging. |
-| [GW Maven Plugin](gw-maven-plugin/) | GW Maven Plugin is the primary Maven adapter for Ghostwriter. It integrates guidance-driven file processing into Maven builds by providing goals for aggregator-style and reactor-ordered execution, guided processing and Act mode, configurable scan roots and excludes, optional multi-threading and input logging, and optional credential loading from Maven `settings.xml` for consistent local and CI automation. |
+| [Project Layout](project-layout/) | Utility library for describing and working with conventional project directory layouts (sources, resources, tests, docs, etc.) in a consistent way. It centralizes layout conventions so tools and plugins can resolve well-known folders reliably, avoid hard-coded paths, and reduce duplicated path logic. |
+| [GenAI Client](genai-client/) | Java library that provides a provider-agnostic API for Generative AI integrations, including prompt composition, optional file inputs, optional tool/function calling, and provider-dependent embeddings, so downstream modules can switch providers largely through configuration. |
+| [Bindex Core](bindex-core/) | Core Java library for Bindex metadata workflows: generate/update `bindex.json` from a project layout, register Bindexes into a MongoDB-backed registry (optionally with embeddings), classify and semantically pick relevant libraries for a free-text query, expand results via declared dependencies, and assemble selected Bindexes into prompt-ready context. |
+| [Machai CLI](machai-cli/) | Spring Boot + Spring Shell command-line application that orchestrates Bindex and Ghostwriter workflows: generate/register Bindexes, perform pick and assembly, run guidance-driven Ghostwriter processing over a directory tree, execute reusable prompt templates (Acts), manage persisted defaults via `machai.properties`, and clean temporary `.machai` folders. |
+| [Ghostwriter](ghostwriter/) | Guidance-driven documentation and transformation engine (CLI and library) that scans project files, extracts embedded `@guidance:` directives, composes provider inputs with project context and optional system instructions, and applies AI-synthesized updates back to disk. It supports directory and pattern-based scanning (`glob:` and `regex:`), exclusions, optional multi-threading, Act mode for reusable prompt templates, and optional request input logging. |
+| [GW Maven Plugin](gw-maven-plugin/) | Maven adapter for Ghostwriter that integrates guidance-driven processing into Maven builds. It provides aggregator-style and reactor-ordered goals for guided processing and Act mode, configurable scan roots and excludes, optional multi-threading and input logging, and optional credential loading from Maven `settings.xml` for consistent local and CI automation. |
 
 ## Project structure
 
@@ -86,7 +85,7 @@ At a high level:
 - `bindex-core` builds on project-layout and genai-client to generate, register, pick, and assemble Bindex metadata.
 - `ghostwriter` applies guidance-driven processing across repository files.
 - `machai-cli` orchestrates Bindex and Ghostwriter workflows for interactive and scripted use.
-- Maven plugins integrate Bindex and Ghostwriter into Maven builds.
+- `gw-maven-plugin` integrates Ghostwriter into Maven builds.
 
 ## Installation
 
@@ -139,13 +138,7 @@ java -jar target\\gw.jar src\\site\\markdown
 Run the GW Maven Plugin goal:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.0.3-SNAPSHOT:gw
-```
-
-Run the Bindex Maven Plugin goal:
-
-```bat
-mvn org.machanism.machai:bindex-maven-plugin:1.0.3-SNAPSHOT:create -Dbindex.model=OpenAI:gpt-5.1
+mvn org.machanism.machai:gw-maven-plugin:1.0.4-SNAPSHOT:gw
 ```
 
 ## Contributing

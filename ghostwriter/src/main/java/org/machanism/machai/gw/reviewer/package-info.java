@@ -1,20 +1,19 @@
 /**
- * File-format-aware components that extract embedded {@code @guidance} instructions and convert them into
- * normalized prompt fragments for Ghostwriter.
+ * File-format-aware components that locate embedded {@code @guidance} directives in project files and convert
+ * them into normalized prompt fragments for Ghostwriter.
  *
  * <p>The main entry point is the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface
- * (SPI). Each {@code Reviewer} implementation targets one or more file types, locates the
- * {@link org.machanism.machai.gw.processor.GuidanceProcessor#GUIDANCE_TAG_NAME @guidance} tag according to the
- * format's comment conventions, and returns a formatted fragment suitable for downstream processing.
+ * (SPI). Each {@code Reviewer} implementation targets one or more file types, applies the relevant comment and
+ * string-literal conventions for that format, and produces a formatted fragment suitable for downstream
+ * processing.
  *
- * <h2>Responsibilities</h2>
+ * <h2>How reviewers are used</h2>
  * <ul>
  *   <li>Read a supported file (typically UTF-8) and detect whether it contains an {@code @guidance} directive.</li>
- *   <li>Extract and/or include relevant file content as required by the prompt templates.</li>
  *   <li>Compute a project-relative path via
  *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)} to
  *       provide stable context independent of the local filesystem layout.</li>
- *   <li>Format the final prompt fragment using templates loaded from the {@code document-prompts} resource bundle.</li>
+ *   <li>Format the final fragment using templates loaded from the {@code document-prompts} resource bundle.</li>
  * </ul>
  *
  * <h2>Provided reviewers</h2>

@@ -50,7 +50,7 @@ public class ActFunctionTools implements FunctionTools {
 	/**
 	 * Lists all available Act TOML files in the specified directory or built-in
 	 * directory.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	private Object getActList(Object... args) throws IOException {
@@ -78,8 +78,7 @@ public class ActFunctionTools implements FunctionTools {
 					if (actName != null) {
 						try {
 							ActProcessor.tryLoadActFromClasspath(properties, actName);
-							result.add("`" + actName + "`: "
-									+ Objects.toString(properties.get("description")));
+							result.add("`" + actName + "`: " + Objects.toString(properties.get("description")));
 						} catch (IOException e) {
 							throw new IllegalArgumentException(e);
 						}

@@ -29,35 +29,38 @@ Generate or update the content as follows.
 
 ## Introduction
 
-Machai CLI is a Spring Boot + Spring Shell command-line tool for running Machai workflows from an interactive console. It focuses on generating, registering, and managing **bindex** (library metadata) to improve library discoverability and enable semantic selection/assembly of projects.
+Machai CLI is a Spring Boot + Spring Shell command-line application for running Machai workflows from an interactive console.
 
-It also includes **Ghostwriter** tooling to scan a directory tree and apply GenAI-driven guidance, and **Act mode** to run reusable prompt templates (“Acts”) over a scanned project.
+It helps you:
+
+- **Generate and manage metadata** for projects (bindex) to improve library discoverability and automation.
+- **Scan and process a project tree** using Ghostwriter guidance, with configurable model, instructions, concurrency, and exclusions.
+- **Run reusable “Acts”** (prompt templates) interactively against a scanned project.
+- **Clean temporary artifacts** created by Machai workflows.
 
 ## Overview
 
-Machai CLI starts a Spring Shell interactive console (`org.machanism.machai.cli.MachaiCLI`) and exposes command groups implemented in `src/main/java/org/machanism/machai/cli`:
+Machai CLI starts a Spring Shell interactive console via `org.machanism.machai.cli.MachaiCLI` and exposes command groups implemented in `src/main/java/org/machanism/machai/cli`:
 
 - **Configuration (`set`)** (`ConfigCommand`) — reads/writes persistent defaults in `machai.properties`.
-- **Ghostwriter processing (`gw`)** (`GWCommand`) — scans directories/files and runs the Ghostwriter guidance pipeline with configurable:
-  - scan directories and excludes
-  - GenAI provider/model selection
-  - instructions (text/URL/file path)
+- **Ghostwriter processing (`gw`)** (`GWCommand`) — scans directories/files and runs Ghostwriter’s guidance pipeline via `GuidanceProcessor`, supporting:
+  - project directory selection (defaulting to current working directory)
+  - scan directories (`--scanDir`) and directory exclusions (`--excludes`)
+  - GenAI provider/model selection (`--model`)
+  - instructions (inline text, URL, or file path; interactive prompt if empty)
   - concurrency (`--threads`)
-  - optional logging of LLM request inputs
-- **Act mode (`act`)** (`ActCommand`) — scans the configured project and runs a predefined “Act” via Ghostwriter’s Act processor (interactive prompt support).
-- **Bindex generation (`bindex`)** (`BindexCommand`) — generates bindex metadata for a project directory.
-- **Registry registration (`register`)** (`BindexCommand`) — registers generated metadata with an external registry service (when configured).
+  - optional logging of LLM request inputs (`--logInputs`)
+- **Act mode (`act`)** (`ActCommand`) — scans the configured project and runs a predefined Act via `ActProcessor` (interactive prompt support).
 - **Cleanup (`clean`)** (`CleanCommand`) — removes `.machai` temporary folders from a directory tree.
 
-The CLI loads configuration from `machai.properties` in the working directory when available.
+Configuration is loaded from `machai.properties` in the working directory when available.
 
 ## Getting Started
 
 ### Prerequisites
 
 - **Java 17**
-- Network access to your chosen **GenAI provider** (model/provider dependent)
-- (Optional) Access to a **bindex registry service** if you plan to use `register`
+- Network access to your selected **GenAI provider** (provider/model dependent)
 
 ### Installation
 
@@ -99,10 +102,9 @@ Machai CLI persists user defaults in `machai.properties` (in the working directo
 | Property key | Description | Default |
 |---|---|---|
 | `projectDir` | Default project directory used by commands that operate on a folder tree | Current working directory |
-| `gw.model` | Default GenAI provider/model used by `gw` / `act` / bindex commands | (none) |
+| `gw.model` | Default GenAI provider/model used by `gw` and `act` | (none) |
 | `gw.instructions` | Default Ghostwriter system instructions source (text/URL/file path) | (none) |
 | `logInputs` | Whether to log LLM request inputs to dedicated files | `false` |
-| `score` | Default similarity threshold for semantic search (when applicable) | `0.65` |
 
 ### Typical workflow
 
@@ -111,32 +113,25 @@ Machai CLI persists user defaults in `machai.properties` (in the working directo
    ```text
    set --key projectDir --value ./my-project
    set --key gw.model --value OpenAI:gpt-5.1
-   set --key score --value 0.8
    ```
 
-2. Generate bindex metadata:
-
-   ```text
-   bindex --dir ./my-project --update false --model OpenAI:gpt-5.1
-   ```
-
-3. Register bindex metadata (optional):
-
-   ```text
-   register --dir ./my-project --registerUrl https://registry.example/api --update true --model OpenAI:gpt-5.1
-   ```
-
-4. Run Ghostwriter guidance over a directory:
+2. Run Ghostwriter guidance over a directory:
 
    ```text
    gw --scanDir ./my-project --excludes target,.git --threads 4 --logInputs true
    ```
 
-5. Run an Act over the scanned project:
+3. Run an Act over the scanned project:
 
    ```text
    act commit
    act sonar-fix --model OpenAI:gpt-5.1
+   ```
+
+4. Clean temporary artifacts (optional):
+
+   ```text
+   clean --dir ./my-project
    ```
 
 ## Usage
@@ -174,18 +169,6 @@ gw --scanDir ./my-project --excludes target,.git --threads 4 --instructions "You
 ```text
 act commit
 act commit "and push"
-```
-
-### `bindex` (generate bindex metadata)
-
-```text
-bindex --dir ./my-project --update false --model OpenAI:gpt-5.1
-```
-
-### `register` (register bindex metadata)
-
-```text
-register --dir ./my-project --registerUrl https://registry.example/api --update true --model OpenAI:gpt-5.1
 ```
 
 ### `clean` (remove temporary folders)

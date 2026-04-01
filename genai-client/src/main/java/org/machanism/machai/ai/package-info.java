@@ -18,18 +18,17 @@
 /**
  * Provider-agnostic client API for MachAI generative-AI integrations.
  *
- * <p>This package defines the public abstractions and runtime components used to configure and execute LLM/GenAI
- * requests while isolating the rest of the application from vendor SDKs, authentication mechanisms, and transport
- * details.
+ * <p>This package groups the core abstractions used to create and execute LLM/GenAI requests while keeping callers
+ * decoupled from vendor SDKs, authentication strategies, and transport details.
  *
  * <h2>Sub-packages</h2>
  * <ul>
- *   <li><strong>Manager API / SPI</strong> ({@code org.machanism.machai.ai.manager}) &ndash; the provider contract
- *       ({@link org.machanism.machai.ai.manager.Genai}), provider lookup/aggregation
- *       ({@link org.machanism.machai.ai.manager.GenaiProviderManager}), and token usage reporting
- *       ({@link org.machanism.machai.ai.manager.Usage}).</li>
+ *   <li><strong>Manager API / SPI</strong> ({@code org.machanism.machai.ai.manager}) &ndash; provider contracts and
+ *       orchestration (for example {@link org.machanism.machai.ai.manager.Genai},
+ *       {@link org.machanism.machai.ai.manager.GenaiProviderManager}, and
+ *       {@link org.machanism.machai.ai.manager.Usage}).</li>
  *   <li><strong>Providers</strong> ({@code org.machanism.machai.ai.provider.*}) &ndash; concrete backend integrations
- *       (e.g. OpenAI, Google Gemini, EPAM CodeMie) plus offline/no-op providers.</li>
+ *       (for example OpenAI, Google Gemini, EPAM CodeMie) plus offline/no-op providers.</li>
  *   <li><strong>Tools</strong> ({@code org.machanism.machai.ai.tools}) &ndash; host-executed capabilities that can be
  *       registered with providers for tool/function calling (file system, command execution, and web access), typically
  *       discovered and applied via {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
@@ -38,8 +37,8 @@
  * <h2>Typical workflow</h2>
  * <ol>
  *   <li>Select a provider/model identifier (for example {@code OpenAI:gpt-4o-mini}).</li>
- *   <li>Initialize and configure the provider (instructions, prompt/messages, optional attachments and tools).</li>
- *   <li>Execute the request and record aggregated token usage.</li>
+ *   <li>Configure instructions/prompts (and optional attachments/tools) on the selected provider.</li>
+ *   <li>Execute the request and report aggregated token usage.</li>
  * </ol>
  *
  * <h2>Example</h2>

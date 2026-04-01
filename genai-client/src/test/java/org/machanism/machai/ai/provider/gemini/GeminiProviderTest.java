@@ -1,7 +1,9 @@
 package org.machanism.machai.ai.provider.gemini;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
@@ -10,11 +12,11 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.ListResourceBundle;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Genai;
@@ -254,8 +256,33 @@ class GeminiProviderTest {
 		boolean urlDeclaresIo = declaresExceptionAssignableTo(urlMethod.getExceptionTypes(), IOException.class);
 
 		// Assert
-		Assertions.assertTrue(fileDeclaresIo);
-		Assertions.assertTrue(urlDeclaresIo);
+		org.junit.jupiter.api.Assertions.assertTrue(fileDeclaresIo);
+		org.junit.jupiter.api.Assertions.assertTrue(urlDeclaresIo);
+	}
+
+	@Test
+	void implementsGenai_shouldBeAssignable() {
+		// Arrange
+		GeminiProvider provider = new GeminiProvider();
+
+		// Act
+		Genai genai = provider;
+
+		// Assert
+		assertSame(provider, genai);
+		assertNotNull(genai);
+	}
+
+	@Test
+	void embedding_returnType_shouldBeListOfDouble() throws NoSuchMethodException {
+		// Arrange
+		Method method = GeminiProvider.class.getMethod("embedding", String.class, long.class);
+
+		// Act
+		Class<?> returnType = method.getReturnType();
+
+		// Assert
+		assertSame(List.class, returnType);
 	}
 
 	private static boolean declaresExceptionAssignableTo(Class<?>[] declared, Class<?> expected) {

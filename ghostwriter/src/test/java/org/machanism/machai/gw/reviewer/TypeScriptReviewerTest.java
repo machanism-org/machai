@@ -109,6 +109,42 @@ class TypeScriptReviewerTest {
 	}
 
 	@Test
+	void perform_returnsNullWhenGuidanceTagPresentOnlyInStringLiteral() throws IOException {
+		// Arrange
+		TypeScriptReviewer reviewer = new TypeScriptReviewer();
+		Path projectDir = tempDir.resolve("project");
+		Files.createDirectories(projectDir);
+
+		Path file = projectDir.resolve("d.ts");
+		String content = "const tag = \"@guidance: not-a-comment\";\n";
+		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		String result = reviewer.perform(projectDir.toFile(), file.toFile());
+
+		// Assert
+		assertNull(result);
+	}
+
+	@Test
+	void perform_returnsNullWhenGuidanceTagAppearsInBlockCommentButNotClosed() throws IOException {
+		// Arrange
+		TypeScriptReviewer reviewer = new TypeScriptReviewer();
+		Path projectDir = tempDir.resolve("project");
+		Files.createDirectories(projectDir);
+
+		Path file = projectDir.resolve("e.ts");
+		String content = "/* " + "@guidance: keep\nconst x = 1;\n";
+		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
+
+		// Act
+		String result = reviewer.perform(projectDir.toFile(), file.toFile());
+
+		// Assert
+		assertNull(result);
+	}
+
+	@Test
 	void perform_throwsWhenFileDoesNotExist() {
 		// Arrange
 		TypeScriptReviewer reviewer = new TypeScriptReviewer();

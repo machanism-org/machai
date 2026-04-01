@@ -37,48 +37,26 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   discovery and integration.
 </p>
 
-<h2>Module overview</h2>
+<h2>Overview</h2>
 
 <p>
-  This module provides a Spring Shell-based command-line interface for running common Machai workflows from an
-  interactive REPL or in non-interactive mode suitable for scripts and CI pipelines.
+  This module provides a Spring Boot and Spring Shell based command-line interface (CLI) for running Machai
+  workflows in an interactive REPL or in non-interactive mode suitable for scripts and CI pipelines.
+  The CLI focuses on orchestrating higher-level operations (configuration, scanning, indexing, and cleanup) and
+  delegates the heavy lifting to the underlying Machai libraries (for example, Ghostwriter and bindex).
 </p>
 
-<h2>Package overview</h2>
-
-<p>
-  The primary package in this module is:
-</p>
+<h2>Packages</h2>
 
 <ul>
   <li>
-    <strong><code>org.machanism.machai.cli</code></strong> – Spring Boot/Spring Shell entry point and command implementations.
+    <strong><code>org.machanism.machai.cli</code></strong> – application entry point and Spring Shell commands.
     <ul>
-      <li>
-        Exposes Machai workflows through typed command options and parameters, and manages console-oriented input
-        and output.
-      </li>
-      <li>
-        Reads and persists CLI defaults (for example, working directory and provider/model selection) via a shared
-        configuration file managed by the configuration command.
-      </li>
-      <li>
-        Performs lightweight validation and directory resolution, then delegates execution to the underlying Machai
-        libraries (for example, Ghostwriter and bindex).
-      </li>
+      <li>Provides command implementations and option parsing for common workflows.</li>
+      <li>Reads and persists CLI defaults (for example, working directory and provider/model selection).</li>
+      <li>Performs lightweight validation and path resolution, then invokes Machai services.</li>
     </ul>
   </li>
-</ul>
-
-<h2>Key capabilities</h2>
-
-<ul>
-  <li><strong>Ghostwriter processing:</strong> scan a project and process files through the Ghostwriter pipeline.</li>
-  <li><strong>Act mode:</strong> run predefined interactive actions/prompts in the context of a working directory.</li>
-  <li><strong>Indexing and discovery:</strong> generate and optionally register bindex metadata for semantic search.</li>
-  <li><strong>Picking and assembly:</strong> select libraries based on a query and assemble an output project.</li>
-  <li><strong>Configuration:</strong> set and persist CLI defaults (for example, project directory and model/provider settings).</li>
-  <li><strong>Cleanup:</strong> remove Machai temporary artifacts (for example, <code>.machai</code>).</li>
 </ul>
 
 <h2>Primary components</h2>
@@ -90,6 +68,17 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li><code>org.machanism.machai.cli.BindexCommand</code> – generates (and optionally registers) bindex metadata.</li>
   <li><code>org.machanism.machai.cli.ConfigCommand</code> – reads/writes CLI configuration defaults.</li>
   <li><code>org.machanism.machai.cli.CleanCommand</code> – removes Machai temporary artifacts.</li>
+</ul>
+
+<h2>Key capabilities</h2>
+
+<ul>
+  <li><strong>Ghostwriter processing:</strong> scan a project and process selected files through the Ghostwriter pipeline.</li>
+  <li><strong>Act mode:</strong> run predefined interactive actions/prompts in the context of a working directory.</li>
+  <li><strong>Indexing and discovery:</strong> generate and optionally register bindex metadata for semantic search.</li>
+  <li><strong>Picking and assembly:</strong> select libraries based on a query and assemble an output project.</li>
+  <li><strong>Configuration:</strong> set and persist CLI defaults (for example, directory and provider/model settings).</li>
+  <li><strong>Cleanup:</strong> remove Machai temporary artifacts (for example, <code>.machai</code>).</li>
 </ul>
 
 <h2>Class diagram</h2>

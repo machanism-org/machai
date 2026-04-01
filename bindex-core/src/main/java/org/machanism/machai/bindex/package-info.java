@@ -24,4 +24,24 @@
  *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
 
+/**
+ * MongoDB-backed persistence and semantic retrieval for {@code Bindex} metadata.
+ *
+ * <p>
+ * This package provides the core components for:
+ *
+ * <ul>
+ * <li>Persisting and retrieving {@code Bindex} records stored as JSON inside MongoDB documents</li>
+ * <li>Registering Bindexes enriched with classification facets and an embedding vector</li>
+ * <li>Performing semantic search by embedding a classified query and using MongoDB vector search</li>
+ * </ul>
+ *
+ * <p>
+ * The main entry points are:
+ *
+ * <ul>
+ * <li>{@link org.machanism.machai.bindex.Picker} for registering and searching Bindexes</li>
+ * <li>{@link org.machanism.machai.bindex.BindexRepository} for basic CRUD-style access to stored Bindexes</li>
+ * </ul>
+ */
 package org.machanism.machai.bindex;

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.project.layout.ProjectLayout;
 
 class AIFileProcessorAdditionalTest {
 

@@ -31,7 +31,7 @@ public class GeminiProvider implements Genai {
 	 * Initializes this provider using the supplied configuration.
 	 *
 	 * @param conf
-	 *            provider configuration (e.g., API keys, model selection, timeouts)
+	 *            provider configuration (for example, API keys, model selection, timeouts)
 	 * @throws NotImplementedException
 	 *             always thrown until the provider is fully implemented
 	 */

@@ -386,7 +386,7 @@ public final class Ghostwriter {
 				.desc("The degree of concurrency for the processing to improve performance.")
 				.hasArg(true).build();
 
-		Option projectDirOpt = new Option("d", "projectDir", true,
+		Option projectDirOpt = new Option("d", ProjectLayout.PROJECT_DIR_PROP_NAME, true,
 				"Specify the path to the root directory for file processing.");
 
 		Option genaiOpt = new Option("m", "model", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");

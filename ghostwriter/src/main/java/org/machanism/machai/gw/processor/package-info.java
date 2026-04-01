@@ -1,38 +1,37 @@
 /**
- * Ghostwriter CLI processing implementation.
+ * Ghostwriter CLI processing support.
  *
  * <p>
- * This package contains the command-line entry point ({@link org.machanism.machai.gw.processor.Ghostwriter}) and
- * the processor implementations that scan a project directory, select files, and orchestrate prompt execution
- * against a configured {@link org.machanism.machai.ai.manager.Genai} provider.
+ * This package contains the Ghostwriter command-line entry point
+ * ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the file processors responsible for scanning a project
+ * directory, selecting files, and orchestrating prompt execution against a configured
+ * {@link org.machanism.machai.ai.manager.Genai} provider.
  * </p>
  *
- * <h2>Concepts</h2>
+ * <h2>Responsibilities</h2>
  * <ul>
  *   <li>
- *     <b>Project layout</b>: scanning behavior is derived from {@link org.machanism.machai.project.layout.ProjectLayout},
- *     including module detection and source/test/document folder metadata.
+ *     <b>Directory traversal and filtering</b> via {@link org.machanism.machai.gw.processor.AbstractFileProcessor}:
+ *     excludes common build/tooling directories, supports glob/regex matching, and dispatches per-file work.
  *   </li>
  *   <li>
- *     <b>File traversal and filtering</b>: {@link org.machanism.machai.gw.processor.AbstractFileProcessor} provides
- *     filesystem traversal with common exclusions and optional include/exclude matching.
+ *     <b>Provider execution</b> via {@link org.machanism.machai.gw.processor.AIFileProcessor}:
+ *     builds the prompt (including project metadata), configures the provider working directory, applies function
+ *     tools, and can optionally log composed request inputs.
  *   </li>
  *   <li>
- *     <b>Provider execution</b>: {@link org.machanism.machai.gw.processor.AIFileProcessor} composes prompts, configures
- *     the provider working directory, applies function tools, and optionally logs request inputs.
- *   </li>
- * </ul>
- *
- * <h2>Execution modes</h2>
- * <ul>
- *   <li>
- *     <b>Guidance mode</b> ({@link org.machanism.machai.gw.processor.GuidanceProcessor}): extracts embedded
- *     {@code @guidance:} directives from files using {@link org.machanism.machai.gw.reviewer.Reviewer} implementations
- *     and builds prompts from those directives.
- *   </li>
- *   <li>
- *     <b>Act mode</b> ({@link org.machanism.machai.gw.processor.ActProcessor}): loads TOML-based act templates
- *     (built-in and/or custom) and executes the act prompt across matching files.
+ *     <b>Execution modes</b>:
+ *     <ul>
+ *       <li>
+ *         <b>Guidance mode</b> ({@link org.machanism.machai.gw.processor.GuidanceProcessor}):
+ *         extracts embedded {@code @guidance:} directives using
+ *         {@link org.machanism.machai.gw.reviewer.Reviewer} implementations and submits the derived prompts.
+ *       </li>
+ *       <li>
+ *         <b>Act mode</b> ({@link org.machanism.machai.gw.processor.ActProcessor}):
+ *         loads TOML-based act templates (built-in and/or custom) and executes an act prompt across matching files.
+ *       </li>
+ *     </ul>
  *   </li>
  * </ul>
  *

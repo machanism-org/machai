@@ -67,7 +67,7 @@
  * </p>
  * <ul>
  *   <li>{@code OPENAI_API_KEY} (required): OpenAI API key.</li>
- *   <li>{@code chatModel} (required): model identifier used for responses (for example {@code gpt-4.1}).</li>
+ *   <li>{@code CHAT_MODEL} (required): model identifier used for responses (for example {@code gpt-4.1}).</li>
  *   <li>{@code OPENAI_BASE_URL} (optional): base URL override for OpenAI-compatible endpoints.</li>
  *   <li>{@code GENAI_TIMEOUT} (optional): timeout in seconds for API requests.</li>
  *   <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum output tokens per response.</li>

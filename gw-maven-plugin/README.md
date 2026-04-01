@@ -6,12 +6,12 @@
 
 ## Project Overview
 
-GW Maven Plugin is the primary Maven adapter for the MachAI [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds, enabling project assets (source code, documentation, and other scanned files) to be evaluated against embedded `@guidance:` blocks and updated consistently over time.
+GW Maven Plugin is the primary Maven adapter for the MachAI [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds so that project assets (source code, documentation, project site content, and other scanned files) can be evaluated against embedded `@guidance:` blocks and updated consistently over time.
 
-At its core, the plugin exposes Maven goals (Mojos) that configure and invoke Ghostwriter processors:
+The plugin provides Maven goals (Mojos) in `org.machanism.machai.gw.maven` that delegate to Ghostwriter processors:
 
-- **Guided processing** via `GuidanceProcessor` (`gw:gw`, `gw:reactor`) for scanning a tree and applying guidance-driven updates.
-- **Action processing** via `ActProcessor` (`gw:act`, `gw:act-reactor`) for applying an interactive or predefined “act” prompt across a scanned document set.
+- **Guided processing** (`gw:gw`, `gw:reactor`) via `GuidanceProcessor` for scanning a tree and applying guidance-driven updates.
+- **Action processing** (`gw:act`, `gw:act-reactor`) via `ActProcessor` for applying an interactive or predefined “act” prompt across a scanned document set.
 
 Credentials can optionally be sourced from Maven `settings.xml` via `-Dgenai.serverId=...`, keeping secrets out of source control while still enabling CI-friendly execution.
 

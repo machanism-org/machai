@@ -37,13 +37,7 @@ Prerequisites
 - A configured GenAI provider/model:
   - Property: gw.model
   - Or CLI option: -m / --model
-- Credentials for your selected provider (examples; exact names depend on provider implementation):
-  - CodeMie:
-    - GENAI_USERNAME
-    - GENAI_PASSWORD
-  - OpenAI-compatible:
-    - OPENAI_API_KEY
-    - (Optional) OPENAI_BASE_URL
+- Credentials for your selected provider (exact names depend on provider implementation)
 - (Optional) A configuration file:
   - gw.properties
   - You may override the configuration file path with: -Dgw.config=...
@@ -221,7 +215,7 @@ Common issues
   - Set gw.model in gw.properties, or pass -m/--model.
 
 - Authentication errors
-  - Ensure provider credentials are set (e.g., GENAI_USERNAME/GENAI_PASSWORD for CodeMie, or OPENAI_API_KEY for OpenAI-compatible providers).
+  - Ensure provider credentials are set for the selected provider.
 
 - Scan path errors
   - If providing an absolute scan path, ensure it is inside the configured root project directory.

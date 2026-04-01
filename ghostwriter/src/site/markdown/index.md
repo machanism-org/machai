@@ -210,16 +210,17 @@ java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -i "file:./instructions.txt" -
 
 Ghostwriter supports a *default prompt* that is applied when a processed file does not contain embedded `@guidance:` directives.
 
-In the CLI this is configured via Act mode:
+This is configured via Act mode and passed into the processor as the default prompt (the same concept as `defaultGuidance`):
 
-- When `--act` is enabled, Ghostwriter resolves the act prompt from `gw.act` (in `gw.properties`) or from `-a/--act` (option value or multi-line stdin).
-- That resolved prompt is passed to the processor as the default prompt, and is used as the instruction payload for processing when file-local guidance is absent.
+- Enable Act mode with `-a/--act`.
+- The prompt content is resolved from `gw.act` (in `gw.properties`) or from the `-a/--act` option value; if `-a/--act` is used without a value, Ghostwriter reads multi-line text from stdin using a trailing `\\` line-continuation marker.
+- The resolved prompt is used as fallback instructions when a file has no embedded `@guidance:` directives.
 
-The default prompt input accepts the same formats as system instructions:
+Like system instructions, the default guidance input is expanded line-by-line and supports:
 
 - Plain text
-- `http(s)://...` (content is fetched and inlined)
-- `file:...` (content is read and inlined)
+- `http(s)://...` lines (fetched and inlined)
+- `file:...` lines (read and inlined)
 
 ## Resources
 

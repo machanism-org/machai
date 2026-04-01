@@ -2,41 +2,47 @@
  * APIs for detecting, describing, and working with a repository's on-disk project layout.
  *
  * <p>
- * This package defines {@link org.machanism.machai.project.layout.ProjectLayout}, an abstraction that models a project
- * as a root directory plus conventional, root-relative paths such as production sources, test sources, resources, and
- * documentation roots. Implementations infer these paths by applying build-tool conventions and/or inspecting build
- * metadata (for example, Maven {@code pom.xml}, Gradle build files, JavaScript {@code package.json} workspaces, or Python
- * {@code pyproject.toml}).
+ * This package centers on {@link org.machanism.machai.project.layout.ProjectLayout}, an abstraction that models a
+ * project as a root directory plus conventional, root-relative locations such as production sources, tests, resources,
+ * and documentation roots. Implementations typically infer these locations by applying build-tool conventions and/or
+ * inspecting build metadata (for example, Maven {@code pom.xml}, Gradle build files, JavaScript {@code package.json}
+ * workspaces, or Python {@code pyproject.toml}).
  * </p>
  *
- * <h2>Key concepts</h2>
+ * <h2>Responsibilities</h2>
  * <ul>
- *   <li><strong>Project root</strong>: Set via {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.
- *       Most accessors assume the root is configured.</li>
- *   <li><strong>Root-relative paths</strong>: Returned paths are typically expressed as strings relative to
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getProjectDir()} and should be resolved against that
- *       directory before filesystem access.</li>
- *   <li><strong>Modules</strong>: Some layouts can enumerate nested modules (for example, Maven reactor modules, Gradle
- *       multi-project builds, or JavaScript workspaces). Module identifiers are generally expressed relative to the
- *       project root.</li>
+ *   <li>Represent the project root directory and resolve root-relative locations for common folders.</li>
+ *   <li>Enumerate modules for multi-module repositories and provide module identifiers relative to the project root.</li>
+ *   <li>Offer consistent access to sources, tests, resources, and documentation roots across different build systems.</li>
  * </ul>
  *
- * <h2>Implementations</h2>
+ * <h2>Terminology</h2>
+ * <ul>
+ *   <li><strong>Project root</strong>: configured via {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.
+ *       Most accessors assume the root is configured.</li>
+ *   <li><strong>Root-relative paths</strong>: returned locations are typically expressed relative to
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#getProjectDir()} and should be resolved against that
+ *       directory prior to filesystem access.</li>
+ *   <li><strong>Modules</strong>: nested projects discovered by a build tool (for example, Maven reactor modules, Gradle
+ *       multi-project builds, JavaScript workspaces). Module identifiers are generally root-relative.</li>
+ * </ul>
+ *
+ * <h2>Provided implementations</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} reads {@code pom.xml} (via
- *       {@link org.machanism.machai.project.layout.PomReader}) to determine modules and conventional source/test/resource
- *       roots.</li>
- *   <li>{@link org.machanism.machai.project.layout.GradleProjectLayout} uses the Gradle Tooling API and returns
+ *       {@link org.machanism.machai.project.layout.PomReader}) to determine modules and conventional
+ *       source/test/resource roots.</li>
+ *   <li>{@link org.machanism.machai.project.layout.GradleProjectLayout} uses Gradle build metadata to return
  *       conventional source/test/document roots.</li>
  *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} parses {@code package.json} workspaces and
  *       resolves module directories by matching workspace glob patterns.</li>
  *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} detects Python projects using
  *       {@code pyproject.toml} metadata.</li>
  *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} provides a minimal filesystem-based fallback
- *       and treats immediate subdirectories as potential modules.</li>
+ *       and may treat immediate subdirectories as potential modules.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
+ * <h2>Example</h2>
  * <pre><code>
  * java.io.File projectDir = new java.io.File("C:\\repo");
  *

@@ -25,38 +25,45 @@ import org.slf4j.LoggerFactory;
  * Base class for GW Maven plugin goals.
  *
  * <p>
- * This class centralizes shared configuration parameters and the common
- * scan/execute flow. Concrete goals typically configure goal-specific behavior
- * (for example, reactor aggregation, processing order, or threading) and then
- * delegate to {@link #scanDocuments(GuidanceProcessor)}.
+ * This class centralizes shared configuration parameters and the common scan/execute flow.
+ * Concrete goals typically configure goal-specific behavior (for example, reactor aggregation,
+ * processing order, or threading) and then delegate to {@link #scanDocuments(GuidanceProcessor)}.
  * </p>
  *
  * <h2>Common parameters</h2>
- * <ul>
- * <li>{@code -Dgw.model} - Provider/model identifier to pass to the
- * workflow.</li>
- * <li>{@code -Dgw.scanDir} - Optional scan root override. When omitted,
- * defaults to the module base directory.</li>
- * <li>{@code -Dgw.instructions} - Instruction locations (for example, file
- * paths or classpath locations) consumed by the workflow.</li>
- * <li>{@code -Dgw.excludes} - Exclude patterns/paths to skip while scanning
- * documentation sources.</li>
- * <li>{@code -Dgw.model.serverId} - {@code settings.xml} {@code &lt;server&gt;}
- * id used to read GenAI credentials.</li>
- * <li>{@code -DlogInputs} (default {@code false}) - Logs the list of input
- * files passed to the workflow.</li>
- * </ul>
+ * <dl>
+ * <dt><b>{@code -Dgw.model}</b> / {@code &lt;model&gt;}</dt>
+ * <dd>Provider/model identifier to pass to the workflow.</dd>
+ *
+ * <dt><b>{@code -Dgw.scanDir}</b> / {@code &lt;scanDir&gt;}</dt>
+ * <dd>Optional scan root override. When omitted, defaults to the execution root directory.</dd>
+ *
+ * <dt><b>{@code -Dgw.instructions}</b> / {@code &lt;instructions&gt;}</dt>
+ * <dd>Instruction locations (for example, file paths or classpath locations) consumed by the workflow.</dd>
+ *
+ * <dt><b>{@code -Dgw.excludes}</b> / {@code &lt;excludes&gt;}</dt>
+ * <dd>Exclude patterns/paths to skip while scanning documentation sources.</dd>
+ *
+ * <dt><b>{@code -Dgenai.serverId}</b> / {@code &lt;serverId&gt;}</dt>
+ * <dd>{@code settings.xml} {@code &lt;server&gt;} id used to read GenAI credentials.</dd>
+ *
+ * <dt><b>{@code -DlogInputs}</b></dt>
+ * <dd>Whether to log the list of input files passed to the workflow.
+ * <p>
+ * Default: {@code false}
+ * </p>
+ * </dd>
+ * </dl>
  *
  * <h2>Credentials</h2>
  * <p>
  * If {@code -Dgenai.serverId} is provided, this goal reads credentials from
- * {@code ~/.m2/settings.xml} {@code &lt;servers&gt;&lt;server&gt;} and forwards
- * them to the workflow as {@code GENAI_USERNAME}/{@code GENAI_PASSWORD}
- * properties.
+ * {@code ~/.m2/settings.xml} {@code &lt;servers&gt;&lt;server&gt;} and forwards them
+ * to the workflow as {@code genai.username}/{@code genai.password} properties.
  * </p>
  *
  * <h2>Examples</h2>
- * 
+ *
  * <pre>
  * mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site -DlogInputs=true
  * </pre>
@@ -81,14 +88,12 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	@Parameter(property = Ghostwriter.SCAN_DIR_PROP_NAME)
 	String scanDir;
 	/**
-	 * Instruction locations (for example, file paths or classpath locations)
-	 * consumed by the workflow.
+	 * Instruction locations (for example, file paths or classpath locations) consumed by the workflow.
 	 */
 	@Parameter(property = Ghostwriter.INSTRUCTIONS_PROP_NAME, name = "instructions")
 	protected String instructions;
 	/**
-	 * Exclude patterns/paths that should be skipped when scanning documentation
-	 * sources.
+	 * Exclude patterns/paths that should be skipped when scanning documentation sources.
 	 */
 	@Parameter(property = Ghostwriter.EXCLUDES_PROP_NAME, name = "excludes")
 	protected String[] excludes;
@@ -96,9 +101,8 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	 * The current Maven project.
 	 *
 	 * <p>
-	 * Used to derive whether the invocation is effectively non-recursive (for
-	 * example, when running against a parent POM without building the full
-	 * reactor).
+	 * Used to derive whether the invocation is effectively non-recursive (for example, when running
+	 * against a parent POM without building the full reactor).
 	 * </p>
 	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
@@ -114,7 +118,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	@Parameter(readonly = true, defaultValue = "${settings}")
 	private Settings settings;
 	/**
-	 * {@code settings.xml} {@code <server>} id used to read GenAI credentials.
+	 * {@code settings.xml} {@code &lt;server&gt;} id used to read GenAI credentials.
 	 */
 	@Parameter(property = Genai.SERVERID_PROP_NAME, required = false)
 	private String serverId;
@@ -141,8 +145,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	 * </p>
 	 *
 	 * @return a configurator populated with any available workflow properties
-	 * @throws MojoExecutionException if Maven settings are not available or
-	 *                                configured incorrectly
+	 * @throws MojoExecutionException if Maven settings are not available or configured incorrectly
 	 */
 	protected PropertiesConfigurator getConfiguration() throws MojoExecutionException {
 		if (settings == null) {

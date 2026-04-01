@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.project.layout.ProjectLayout;
 
 public class ReactorActExecuteTest {
 

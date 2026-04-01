@@ -30,22 +30,22 @@
  * EPAM CodeMie provider integration.
  *
  * <p>
- * Provides {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider}, a {@link org.machanism.machai.ai.manager.Genai}
- * implementation that authenticates with the EPAM CodeMie OpenID Connect (OIDC) token endpoint to retrieve an OAuth 2.0
- * access token and then configures an OpenAI-compatible client to call the CodeMie Code Assistant API.
+ * This package contains an implementation of {@link org.machanism.machai.ai.manager.Genai} that authenticates against
+ * the EPAM CodeMie OpenID Connect (OIDC) token endpoint to obtain an OAuth 2.0 access token and then configures an
+ * OpenAI-compatible client to call the CodeMie Code Assistant API.
  * </p>
  *
- * <h2>How it works</h2>
+ * <h2>Flow overview</h2>
  * <ol>
  * <li>Obtain an OAuth 2.0 access token from the configured (or default) OIDC token endpoint.</li>
- * <li>Set {@code OPENAI_BASE_URL} to the CodeMie API base URL.</li>
- * <li>Set {@code OPENAI_API_KEY} to the retrieved access token.</li>
+ * <li>Configure an OpenAI-compatible client with the CodeMie API base URL.</li>
+ * <li>Use the retrieved access token as the API key/credential for subsequent requests.</li>
  * <li>Delegate requests to a downstream provider based on the configured {@code chatModel} prefix.</li>
  * </ol>
  *
- * <h2>Authentication modes</h2>
+ * <h2>Authentication mode selection</h2>
  * <p>
- * The OAuth grant type is derived from {@code GENAI_USERNAME}:
+ * The OAuth 2.0 grant type is derived from {@code GENAI_USERNAME}:
  * </p>
  * <ul>
  * <li><b>Password grant</b> when the username contains {@code "@"} (typical e-mail login).</li>
@@ -53,11 +53,10 @@
  * </ul>
  *
  * <h2>Provider delegation</h2>
- * <ul>
- * <li>{@code gpt-*} (or blank/unspecified)  {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}</li>
- * <li>{@code gemini-*}  {@link org.machanism.machai.ai.provider.gemini.GeminiProvider}</li>
- * <li>{@code claude-*}  {@link org.machanism.machai.ai.provider.claude.ClaudeProvider}</li>
- * </ul>
+ * <p>
+ * The provider delegates the actual chat/streaming implementation to an underlying provider selected by the model
+ * identifier prefix (for example, {@code gpt-}, {@code gemini-}, or {@code claude-}).
+ * </p>
  *
  * <h2>Configuration</h2>
  * <ul>

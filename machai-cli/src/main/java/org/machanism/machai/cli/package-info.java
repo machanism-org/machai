@@ -1,44 +1,27 @@
 /**
- * Command-line interface (CLI) components for running Machai workflows.
+ * Command-line interface (CLI) for running Machai and Ghostwriter workflows.
  *
  * <p>
- * This package contains the Spring Boot entry point ({@link org.machanism.machai.cli.MachaiCLI})
- * and Spring Shell command components that expose Machai functionality via an interactive shell.
- * Commands typically read defaults (for example, project directory, GenAI provider/model, and
- * Ghostwriter prompts) from the shared {@code machai.properties} configuration managed by
- * {@link org.machanism.machai.cli.ConfigCommand}.
+ * This package contains the Spring Boot application entry point and the Spring Shell commands that expose
+ * Machai functionality via an interactive shell. Commands generally read and persist defaults
+ * (for example, working directory, GenAI provider/model, and Ghostwriter instructions) via the shared
+ * {@code machai.properties} configuration.
  * </p>
  *
- * <h2>Available commands</h2>
+ * <h2>Key types</h2>
  * <ul>
- *   <li>
- *     Ghostwriter guidance scanning and processing:
- *     {@link org.machanism.machai.cli.GWCommand}
- *   </li>
- *   <li>
- *     Interactive Act-mode execution:
- *     {@link org.machanism.machai.cli.ActCommand}
- *   </li>
- *   <li>
- *     Bindex generation and registration:
- *     {@link org.machanism.machai.cli.BindexCommand}
- *   </li>
- *   <li>
- *     Persistent CLI configuration management:
- *     {@link org.machanism.machai.cli.ConfigCommand}
- *   </li>
- *   <li>
- *     Cleanup of Machai temporary folders:
- *     {@link org.machanism.machai.cli.CleanCommand}
- *   </li>
+ *   <li>{@link org.machanism.machai.cli.MachaiCLI} - Spring Boot application entry point.</li>
+ *   <li>{@link org.machanism.machai.cli.GWCommand} - Ghostwriter guidance scanning and processing.</li>
+ *   <li>{@link org.machanism.machai.cli.ActCommand} - Interactive Act-mode execution.</li>
+ *   <li>{@link org.machanism.machai.cli.ConfigCommand} - Persistent CLI configuration management.</li>
+ *   <li>{@link org.machanism.machai.cli.CleanCommand} - Cleanup of Machai temporary folders.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>
- * set --key dir --value .\\my-project
+ * config dir .\\my-project
  * gw --scanDir .\\my-project --excludes target,.git
  * act commit "and push"
- * bindex --dir .\\my-project
  * clean --dir .\\my-project
  * </pre>
  */

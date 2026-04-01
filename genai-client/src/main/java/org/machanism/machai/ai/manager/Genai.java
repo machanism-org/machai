@@ -10,22 +10,17 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 /**
  * Contract for a generative-AI provider integration.
  *
- * <p>
- * A {@code Genai} represents a concrete implementation (for example
- * OpenAI, Gemini, a local model, etc.) capable of:
+ * <p>A {@code Genai} represents a concrete implementation (for example OpenAI, Gemini, a local model, etc.) capable of:
  * <ul>
- * <li>collecting prompts and system instructions for a conversation,</li>
- * <li>attaching local or remote files for provider-side processing,</li>
- * <li>computing embedding vectors,</li>
- * <li>registering tool functions that may be invoked during a run.</li>
+ *   <li>collecting prompts and system instructions for a conversation,</li>
+ *   <li>attaching local or remote files for provider-side processing,</li>
+ *   <li>computing embedding vectors,</li>
+ *   <li>registering tool functions that may be invoked during a run.</li>
  * </ul>
  *
- * <p>
- * Implementations may keep session state between calls. Use {@link #clear()} to
- * reset conversation state.
+ * <p>Implementations may keep session state between calls. Use {@link #clear()} to reset conversation state.
  *
  * <h2>Typical usage</h2>
- * 
  * <pre>{@code
  * Configurator conf = ...;
  * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
@@ -41,20 +36,49 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  */
 public interface Genai {
 
-	public static final String LOG_INPUTS_PROP_NAME = "logInputs";
+	/**
+	 * Configuration property name indicating whether provider inputs should be logged.
+	 */
+	String LOG_INPUTS_PROP_NAME = "logInputs";
 
-	public static final String SERVERID_PROP_NAME = "genai.serverId";
+	/**
+	 * Configuration property name for the target GenAI server identifier.
+	 */
+	String SERVERID_PROP_NAME = "genai.serverId";
 
-	public static final String USERNAME_PROP_NAME = "GENAI_USERNAME";  
+	/**
+	 * Environment variable name for authenticating with the GenAI provider.
+	 */
+	String USERNAME_PROP_NAME = "GENAI_USERNAME";
 
-	public static final String PASSWORD_PROP_NAME = "GENAI_PASSWORD";  
+	/**
+	 * Environment variable name for authenticating with the GenAI provider.
+	 */
+	String PASSWORD_PROP_NAME = "GENAI_PASSWORD";
 
-	public static final String LINE_SEPARATOR = "\n";
+	/**
+	 * Line separator used when composing prompts.
+	 */
+	String LINE_SEPARATOR = "\n";
 
-	public static final String PARAGRAPH_SEPARATOR = "\n\n";
-	
+	/**
+	 * Paragraph separator used when composing prompts.
+	 */
+	String PARAGRAPH_SEPARATOR = "\n\n";
+
+	/**
+	 * Functional interface representing a tool callable by a provider during a run.
+	 */
 	@FunctionalInterface
-	public interface ToolFunction {
+	interface ToolFunction {
+
+		/**
+		 * Executes the tool.
+		 *
+		 * @param params provider-specific parameters
+		 * @return tool result (provider-specific; commonly serialized to JSON)
+		 * @throws IOException if tool execution fails
+		 */
 		Object apply(Object[] params) throws IOException;
 	}
 
@@ -91,7 +115,7 @@ public interface Genai {
 	/**
 	 * Computes an embedding vector for the provided text.
 	 *
-	 * @param text       the input text
+	 * @param text the input text
 	 * @param dimensions desired embedding dimensionality (provider-specific)
 	 * @return the embedding vector
 	 */
@@ -105,15 +129,12 @@ public interface Genai {
 	/**
 	 * Registers a custom tool function that the provider may invoke at runtime.
 	 *
-	 * <p>
-	 * The expected argument structure passed to {@code function} is
-	 * provider-specific.
+	 * <p>The expected argument structure passed to {@code function} is provider-specific.
 	 *
-	 * @param name        tool name (unique per provider instance)
+	 * @param name tool name (unique per provider instance)
 	 * @param description human-readable description of the tool
-	 * @param function    function implementation; receives an argument array and
-	 *                    returns a result
-	 * @param paramsDesc  parameter descriptors (format is provider-specific)
+	 * @param function function implementation; receives an argument array and returns a result
+	 * @param paramsDesc parameter descriptors (format is provider-specific)
 	 */
 	void addTool(String name, String description, ToolFunction function, String... paramsDesc);
 
@@ -125,8 +146,7 @@ public interface Genai {
 	void instructions(String instructions);
 
 	/**
-	 * Executes the provider to produce a response based on the accumulated prompts
-	 * and state.
+	 * Executes the provider to produce a response based on the accumulated prompts and state.
 	 *
 	 * @return the provider response
 	 */
@@ -147,11 +167,9 @@ public interface Genai {
 	void setWorkingDir(File workingDir);
 
 	/**
-	 * Returns token usage metrics for the most recent {@link #perform()}
-	 * invocation.
+	 * Returns token usage metrics for the most recent {@link #perform()} invocation.
 	 *
-	 * @return usage metrics; implementations may return zero values if not
-	 *         supported
+	 * @return usage metrics; implementations may return zero values if not supported
 	 */
 	Usage usage();
 
