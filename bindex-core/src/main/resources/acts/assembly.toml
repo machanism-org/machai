@@ -42,3 +42,6 @@ inputs = '''
 '''
 
 gw.interactive = true
+gw.model = "CodeMie:gpt-5-2-2025-12-11"
+embedding.model = "text-embedding-005"
+pick.score = 0.86

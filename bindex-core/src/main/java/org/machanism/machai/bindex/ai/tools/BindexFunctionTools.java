@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -181,7 +182,7 @@ public class BindexFunctionTools implements FunctionTools {
 		String prompt = props.get("prompt").asText();
 
 		String model = configurator.get(Picker.MODEL_PROP_NAME, Picker.DEFAULT_MODEL);
-		Double score = configurator.getDouble("score", Picker.DEFAULT_SCORE_VALUE);
+		Double score = configurator.getDouble(Picker.SCORE_PROP_NAME, Picker.DEFAULT_SCORE_VALUE);
 		String registerUrl = configurator.get("BINDEX_REPO_URL", null);
 
 		Picker picker = new Picker(model, registerUrl, configurator);
@@ -221,8 +222,9 @@ public class BindexFunctionTools implements FunctionTools {
 
 				String recordId = picker.create(bindex);
 				result = "RecordId: " + recordId;
-			} catch (Exception e) {
-				throw new IllegalArgumentException(e);
+			} catch (IOException e) {
+				logger.debug("registerBindex failed.", e);
+				result = "Error: " + e.getMessage();
 			}
 		} else {
 			result = "file not found";

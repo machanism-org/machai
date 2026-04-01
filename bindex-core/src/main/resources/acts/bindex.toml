@@ -47,4 +47,5 @@ These rules must be followed if the `bindex.json` file needs to be register; oth
 
 prompt = "Create or update bindex.json"
 gw.model = "CodeMie:gpt-5-2-2025-12-11"
+embedding.model = "text-embedding-005"
 gw.scanDir = "glob:."

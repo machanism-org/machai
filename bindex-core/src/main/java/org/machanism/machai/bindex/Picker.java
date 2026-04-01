@@ -105,8 +105,9 @@ public class Picker {
 	private static final String NAME_FIELD_NAME = "name";
 
 	public static final String MODEL_PROP_NAME = "pick.model";
-	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
+	public static final String SCORE_PROP_NAME = "pick.score";
 
+	public static final String DEFAULT_MODEL = "CodeMie:gpt-5-2-2025-12-11";
 	public static final Double DEFAULT_SCORE_VALUE = 0.85;
 
 	private final MongoCollection<Document> collection;
@@ -488,24 +489,6 @@ public class Picker {
 	 */
 	public Double getScore(String id) {
 		return scoreMap.get(id);
-	}
-
-	/**
-	 * Returns the embedding model name used by the provider.
-	 *
-	 * @return embedding model name
-	 */
-	public String getEmbeddingModelName() {
-		return embeddingModelName;
-	}
-
-	/**
-	 * Sets the embedding model name used by the provider.
-	 *
-	 * @param embeddingModelName embedding model name
-	 */
-	public void setEmbeddingModelName(String embeddingModelName) {
-		this.embeddingModelName = embeddingModelName;
 	}
 
 }
