@@ -4,7 +4,7 @@ The content must be based on the information from `/src/site/markdown/index.md` 
 
 **Instructions:**
 
-- **Create `README.txt` as specified.**
+- **Create or update `README.txt` as specified.**
 - If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 - Carefully analyze `/src/site/markdown/index.md` for the application’s description, features, and usage details.
 - Review all files in `[Current File]/files` for additional configuration, scripts, or examples to include or reference in the README.
