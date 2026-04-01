@@ -31,9 +31,13 @@ By centralizing these conventions in one place, tools and plugins can avoid hard
 
 # Overview
 
-The library provides a model of a project layout (for example, `src/main/java`, `src/test/resources`, `src/site`) and utilities for resolving these paths relative to a project base directory. Using a single, centralized definition of the layout reduces duplicated path logic, makes tooling more predictable, and improves maintainability.
+Project Layout provides:
 
-Supported layouts include Maven, Gradle, JavaScript, Python, plus a default layout fallback.
+- A model for well-known project directories (for example, `src/main/java`, `src/test/resources`, `src/site`).
+- Concrete layout definitions for common ecosystems.
+- Utilities to resolve layout paths relative to a project base directory and (when applicable) derive layout information from project metadata (for example, `pom.xml`).
+
+The main value proposition is to give build tools, scanners, generators, and plugins a single dependable way to reason about project folder conventions, improving consistency and reducing duplicated path logic.
 
 # Key Features
 
@@ -46,7 +50,7 @@ Supported layouts include Maven, Gradle, JavaScript, Python, plus a default layo
   - Default (`DefaultProjectLayout`)
 - Utilities for reading and deriving layout information from project metadata (for example, `pom.xml` via `PomReader`)
 - Resolves layout paths relative to a given project base directory
-- Intended for embedding in other tools/plugins that need consistent path conventions
+- Designed to be embedded in other tools/plugins that need consistent path conventions
 
 # Getting Started
 
@@ -70,9 +74,9 @@ Add the dependency:
 ## Typical Workflow
 
 1. Add `project-layout` as a dependency to your build/tooling project.
-2. Select a layout definition that matches your target project type (for example `MavenProjectLayout` or `GradleProjectLayout`).
-3. Provide a base directory and resolve the directories you need (main sources, test sources, resources, docs).
-4. Use the resolved paths in your build/tooling logic (scanners, generators, compilers, packagers).
+2. Select a layout definition that matches your target project type (for example, `MavenProjectLayout` or `GradleProjectLayout`).
+3. Provide a base directory (project root) and resolve the directories you need (main sources, test sources, resources, docs).
+4. Use the resolved paths in your tooling logic (scanners, generators, compilers, packagers).
 
 # Resources
 

@@ -37,7 +37,6 @@ import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
-import com.openai.models.embeddings.EmbeddingModel;
 import com.openai.models.files.FileCreateParams;
 import com.openai.models.files.FileObject;
 import com.openai.models.files.FilePurpose;
@@ -75,7 +74,7 @@ import com.openai.services.blocking.ModelService;
  * <h2>Configuration</h2>
  * <p>
  * Configuration values are read from the {@link Configurator} passed to
- * {@link #init(Configurator)}. The following keys are used:
+ * {@link #init(Configurator)}.
  * </p>
  * <ul>
  * <li>{@code chatModel} (required): model identifier passed to the OpenAI

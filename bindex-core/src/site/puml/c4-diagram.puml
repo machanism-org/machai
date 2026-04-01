@@ -13,31 +13,35 @@
 
 title Bindex Core (bindex-core) - C4 Component Diagram
 
-Person(user, "Developer / Automation", "Invokes Bindex generation, registration and semantic picking.")
+Person(user, "Developer / Automation", "Invokes Bindex registration and semantic picking via code or LLM tools.")
 
 System_Boundary(bc, "Bindex Core") {
-  Component(picker, "Picker", "Java", "Registers Bindexes and performs semantic vector search using GenAI embeddings + MongoDB vector search.")
-  Component(bindexRepository, "BindexRepository", "Java", "MongoDB repository to retrieve/delete Bindex documents; also provides collection access.")
+  Component(picker, "Picker", "Java", "Creates/updates Bindex documents and performs semantic retrieval using GenAI embeddings + MongoDB Vector Search.")
+  Component(bindexRepository, "BindexRepository", "Java", "MongoDB-backed repository for persisting/retrieving Bindex JSON documents and exposing the collection.")
   Component(functionTools, "BindexFunctionTools", "Java", "Registers GenAI function tools: get_bindex, get_bindex_schema, pick_libraries, register_bindex.")
+
+  ComponentDb(mongoCollection, "MongoCollection<Document>", "MongoDB Java Driver", "Low-level collection access used for CRUD and aggregation pipelines.")
 }
 
 System_Ext(genai, "GenAI Provider", "LLM/Embeddings", "Provides prompting and embedding generation.")
-System_Ext(mongo, "MongoDB Atlas", "Database", "Stores Bindex documents and vector embeddings.")
+System_Ext(mongo, "MongoDB Atlas", "Database", "Stores Bindex documents and vector embeddings; hosts Vector Search index.")
 System_Ext(projectFs, "Working Directory", "File System", "Contains a bindex JSON file to register.")
 System_Ext(schemaRes, "Classpath Resource", "JSON", "Bindex JSON schema resource (/schema/bindex-schema-v2.json).")
 
-Rel(user, picker, "Performs semantic pick")
-Rel(user, functionTools, "Uses LLM tools via provider")
+Rel(user, picker, "Calls", "create(bindex), pick(query)")
+Rel(user, functionTools, "Uses", "LLM function tools")
 
-Rel(picker, genai, "Prompts + embeddings")
-Rel(picker, mongo, "Reads/writes", "Bindex documents + embeddings")
+Rel(picker, genai, "Uses", "prompt + embedding")
+Rel(picker, mongoCollection, "Reads/writes", "Documents + aggregation (vectorSearch)")
 
-Rel(bindexRepository, mongo, "Reads/writes", "Bindex documents")
+Rel(bindexRepository, mongoCollection, "Reads/writes", "find/insert/delete")
 
-Rel(functionTools, genai, "Registers tools")
-Rel(functionTools, bindexRepository, "Fetches", "Bindex by id")
-Rel(functionTools, schemaRes, "Reads", "bindex schema")
-Rel(functionTools, picker, "Invokes", "pick_libraries / register_bindex")
+Rel(functionTools, genai, "Registers tools with")
+Rel(functionTools, bindexRepository, "Uses", "get_bindex")
+Rel(functionTools, schemaRes, "Reads", "get_bindex_schema")
+Rel(functionTools, picker, "Invokes", "pick_libraries, register_bindex")
 Rel(functionTools, projectFs, "Reads", "bindex file to register")
+
+Rel(mongoCollection, mongo, "Connects to", "MongoDB connection")
 
 @enduml

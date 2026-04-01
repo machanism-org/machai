@@ -18,27 +18,27 @@
 /**
  * Provider-agnostic client API for MachAI generative-AI integrations.
  *
- * <p>This package groups the core abstractions used to create and execute LLM/GenAI requests while keeping callers
+ * <p>This package defines the public abstractions used to compose and execute LLM/GenAI requests while keeping callers
  * decoupled from vendor SDKs, authentication strategies, and transport details.
  *
  * <h2>Sub-packages</h2>
  * <ul>
- *   <li><strong>Manager API / SPI</strong> ({@code org.machanism.machai.ai.manager}) &ndash; provider contracts and
- *       orchestration (for example {@link org.machanism.machai.ai.manager.Genai},
+ *   <li><strong>Manager API / SPI</strong> ({@code org.machanism.machai.ai.manager}) &ndash; provider contracts,
+ *       selection, and usage aggregation (for example {@link org.machanism.machai.ai.manager.Genai},
  *       {@link org.machanism.machai.ai.manager.GenaiProviderManager}, and
  *       {@link org.machanism.machai.ai.manager.Usage}).</li>
  *   <li><strong>Providers</strong> ({@code org.machanism.machai.ai.provider.*}) &ndash; concrete backend integrations
- *       (for example OpenAI, Google Gemini, EPAM CodeMie) plus offline/no-op providers.</li>
+ *       (for example OpenAI, Google Gemini, EPAM CodeMie) and offline/no-op providers.</li>
  *   <li><strong>Tools</strong> ({@code org.machanism.machai.ai.tools}) &ndash; host-executed capabilities that can be
- *       registered with providers for tool/function calling (file system, command execution, and web access), typically
- *       discovered and applied via {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
+ *       registered with providers for tool/function calling, typically discovered and applied via
+ *       {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
  * </ul>
  *
  * <h2>Typical workflow</h2>
  * <ol>
  *   <li>Select a provider/model identifier (for example {@code OpenAI:gpt-4o-mini}).</li>
- *   <li>Configure instructions/prompts (and optional attachments/tools) on the selected provider.</li>
- *   <li>Execute the request and report aggregated token usage.</li>
+ *   <li>Configure instructions, prompts, and optional attachments/tools.</li>
+ *   <li>Execute the request and record aggregated token usage.</li>
  * </ol>
  *
  * <h2>Example</h2>

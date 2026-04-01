@@ -39,13 +39,18 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   projects.
 </p>
 
-<h2>Overview</h2>
+<h2>What this module provides</h2>
 
 <p>
-  The library models a source-code repository as a <em>project root</em> plus a set of conventional, root-relative
-  directories such as production sources, test sources, resources, and documentation roots. A typical workflow is:
-  detect an appropriate layout for a root directory, query that layout for conventional paths, then resolve those paths
-  against the root to perform filesystem operations.
+  This module models a source repository as a <em>project root</em> plus a set of conventional, root-relative
+  directories such as production sources, test sources, resources, and documentation roots.
+  It also supports optional <em>module discovery</em> for multi-project repositories.
+</p>
+
+<p>
+  A typical workflow is:
+  detect an appropriate layout for a root directory, query that layout for conventional locations, then resolve those
+  locations against the root to perform filesystem operations.
 </p>
 
 <h2>Packages</h2>
@@ -80,7 +85,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </p>
 
 <p>
-  Implementations typically infer these locations by applying build-tool conventions and/or inspecting build metadata:
+  The package provides layout implementations for common ecosystems:
 </p>
 
 <ul>
@@ -90,7 +95,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   </li>
   <li>
     <a href="org/machanism/machai/project/layout/GragleProjectLayout.html">GragleProjectLayout</a>
-    (uses the Gradle Tooling API)
+    (uses Gradle build metadata)
   </li>
   <li>
     <a href="org/machanism/machai/project/layout/JScriptProjectLayout.html">JScriptProjectLayout</a>
@@ -117,7 +122,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong>Root-relative paths</strong>: layout accessors return conventional paths (for example <code>src/main/java</code>,
     <code>src/test/java</code>, <code>src/main/resources</code>, <code>src/test/resources</code>, or documentation roots)
     expressed relative to the project root. Resolve these against the configured project root before performing
-    filesystem IO.
+    filesystem I/O.
   </li>
   <li>
     <strong>Modules</strong>: some layouts can enumerate nested projects (for example Maven reactor modules, Gradle
@@ -136,7 +141,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     Query the layout for conventional directories (returned as root-relative paths).
   </li>
   <li>
-    Resolve those paths against the project root before performing IO.
+    Resolve those paths against the project root before performing filesystem I/O.
   </li>
   <li>
     Optionally scan a repository and process each discovered project/module using a
@@ -153,7 +158,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 org.machanism.machai.project.layout.ProjectLayout layout =
     org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(projectDir);
 
-java.util.List&lt;String&gt; sources = layout.getSources();
+java.util.Collection&lt;String&gt; sources = layout.getSources();
 for (String rel : sources) {
   java.nio.file.Path dir = projectDir.toPath().resolve(rel);
   // ... work with dir

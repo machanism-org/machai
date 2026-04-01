@@ -2,9 +2,9 @@
  * File-format-aware components that locate embedded {@code @guidance} directives in project files and convert
  * them into normalized prompt fragments for Ghostwriter.
  *
- * <p>The main entry point is the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface
- * (SPI). Each {@code Reviewer} implementation targets one or more file types, applies the relevant comment and
- * string-literal conventions for that format, and produces a formatted fragment suitable for downstream
+ * <p>The central extension point is the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider
+ * interface (SPI). Each {@code Reviewer} implementation targets one or more file types, understands the
+ * comment/string literal conventions for that format, and produces a formatted fragment suitable for downstream
  * processing.
  *
  * <h2>How reviewers are used</h2>
@@ -24,7 +24,7 @@
  *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer} – TypeScript</li>
  *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer} – Python</li>
  *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer} – PlantUML</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} – plain {@code @guidance.txt} files</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} – Plain {@code @guidance.txt} files</li>
  * </ul>
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer

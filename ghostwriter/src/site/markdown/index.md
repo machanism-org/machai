@@ -84,14 +84,14 @@ At a high level:
 
 - A CLI run starts with one or more scan targets (directory path, `glob:...`, or `regex:...`).
 - Configuration is resolved from `gw.properties` (or system properties) and overridden by CLI options.
-- The processor scans the workspace, applying excludes.
+- The processor discovers project structure (including modules) and traverses files, applying built-in excludes plus optional user excludes.
 - Guidance is extracted and combined with project context and optional system instructions.
 - A provider executes the prompt, optionally logging composed inputs for auditing/debugging.
 - The resulting output is written back into the project.
 
 ## Machai Ghostwriter vs. Other Tools
 
-The closest tool in spirit is **Claude Code**, because both can operate at repository scope (beyond a single editor buffer), can be used in automation contexts, and support scripted execution in developer workflows.
+The closest tool in spirit is **Claude Code**, because both can work at repository scope (beyond a single editor buffer), can be used in automation contexts, and support scripted execution in developer workflows.
 
 ### Key similarities
 
@@ -102,8 +102,9 @@ The closest tool in spirit is **Claude Code**, because both can operate at repos
 ### Key differences
 
 - **Guidance embedded in the repository**: Ghostwriter is driven by file-local `@guidance:` directives (plus an optional default prompt). Claude Code is primarily driven by user prompts.
-- **Deterministic scanning and filtering**: Ghostwriter uses explicit scan targets (`dir`, `glob:`, `regex:`) and comma-separated excludes.
-- **Extensibility via acts and tooling**: Ghostwriter supports Act prompt bundles (`--act`, `--acts`) and integrates provider function tools.
+- **Deterministic scanning and filtering**: Ghostwriter uses explicit scan targets (directory path, `glob:`, `regex:`) plus optional comma-separated excludes.
+- **Project-layout awareness**: Ghostwriter discovers repository layout (sources, tests, docs, modules) and can inject that context into prompts.
+- **Extensibility via acts and tooling**: Ghostwriter supports Act prompt bundles (`--act`, `--acts`) and can expose function tools through its provider layer.
 - **Distribution model**: Ghostwriter is a Java CLI intended to run alongside build tooling and in CI.
 
 ### Brief comparison to other assistants
@@ -210,17 +211,17 @@ java -jar gw.jar "glob:**/*.md" -m OpenAI:gpt-5.1 -i "file:./instructions.txt" -
 
 Ghostwriter supports a *default prompt* that is applied when a processed file does not contain embedded `@guidance:` directives.
 
-This is configured via Act mode and passed into the processor as the default prompt (the same concept as `defaultGuidance`):
+This concept corresponds to the processor’s default prompt (historically referred to as `defaultGuidance`): a fallback instruction set that is applied when file-local guidance is absent.
 
-- Enable Act mode with `-a/--act`.
+How it works:
+
+- When a file contains no embedded `@guidance:` directives, the processor uses the default prompt instead.
+- The CLI enables this feature via Act mode (`-a/--act`).
 - The prompt content is resolved from `gw.act` (in `gw.properties`) or from the `-a/--act` option value; if `-a/--act` is used without a value, Ghostwriter reads multi-line text from stdin using a trailing `\\` line-continuation marker.
-- The resolved prompt is used as fallback instructions when a file has no embedded `@guidance:` directives.
-
-Like system instructions, the default guidance input is expanded line-by-line and supports:
-
-- Plain text
-- `http(s)://...` lines (fetched and inlined)
-- `file:...` lines (read and inlined)
+- Like system instructions, the default prompt can be composed line-by-line and supports:
+  - Plain text
+  - `http(s)://...` lines (fetched and inlined)
+  - `file:...` lines (read and inlined)
 
 ## Resources
 

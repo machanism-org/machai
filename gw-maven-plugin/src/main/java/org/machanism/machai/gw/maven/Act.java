@@ -28,21 +28,18 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Maven goal {@code gw:act} that runs an interactive, predefined "action" over
- * a documentation tree.
+ * Maven goal {@code gw:act} that runs an interactive, predefined "action" over a documentation tree.
  *
  * <p>
- * An action is a prompt (typically sourced from a resource bundle or prompt
- * file) that is applied to the scanned documents. If {@code -Dgw.act} is not
- * provided, the goal prompts the user interactively via Maven's
+ * An action is a prompt (typically sourced from a resource bundle or prompt file) that is applied to scanned
+ * documents. If {@code -Dgw.act} is not provided, the goal prompts the user interactively via Maven's
  * {@link Prompter} component.
  * </p>
  *
  * <h2>Parameters</h2>
  * <dl>
  * <dt><b>{@code -Dgw.act}</b> / {@code &lt;act&gt;}</dt>
- * <dd>Action text/prompt to apply. If omitted, the goal reads it interactively.
- * </dd>
+ * <dd>Action text/prompt to apply. If omitted, the goal reads it interactively.</dd>
  *
  * <dt><b>{@code -Dgw.acts}</b> / {@code &lt;locations&gt;}</dt>
  * <dd>Optional directory containing predefined action definitions.</dd>
@@ -50,21 +47,20 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
  * <p>
- * This goal also supports all common parameters defined by
- * {@link AbstractGWGoal} (for example {@code -Dgw.model}, {@code -Dgw.scanDir},
- * {@code -Dgw.excludes}, {@code -Dgenai.serverId}, and {@code -DlogInputs}).
+ * This goal also supports all common parameters defined by {@link AbstractGWGoal} (for example {@code -Dgw.model},
+ * {@code -Dgw.scanDir}, {@code -Dgw.excludes}, {@code -Dgenai.serverId}, and {@code -DlogInputs}).
  * </p>
  *
  * <h2>Usage examples</h2>
- * 
+ *
  * <pre>
  * mvn gw:act
  * </pre>
- * 
+ *
  * <pre>
  * mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\\site
  * </pre>
- * 
+ *
  * <pre>
  * mvn gw:act -Dgw.acts=src\\site\\locations -DlogInputs=true
  * </pre>
@@ -94,11 +90,9 @@ public class Act extends AbstractGWGoal {
 	private static final Object MONITOR = new Object();
 
 	/**
-	 * Executes the interactive action and scans documents using the configured
-	 * action prompt.
+	 * Executes the interactive action and scans documents using the configured action prompt.
 	 *
-	 * @throws MojoExecutionException if an I/O failure occurs while processing
-	 *                                files
+	 * @throws MojoExecutionException if an I/O failure occurs while processing files
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -153,24 +147,23 @@ public class Act extends AbstractGWGoal {
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
-			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.ACTS_LOCATION_PROP_NAME,
-					this.locations);
+			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.ACTS_LOCATION_PROP_NAME, this.locations);
 
 			if (actsLocation != null) {
 				logger.info("Custom acts location specified: {}", actsLocation);
 				actProcessor.setActsLocation(actsLocation);
 			}
 
-			String[] excludes = null;
+			String[] effectiveExcludes = null;
 			String excludesStr = actProcessor.getConfigurator().get(Ghostwriter.EXCLUDES_PROP_NAME, null);
 			if (excludesStr != null) {
-				excludes = StringUtils.split(excludesStr, ",");
+				effectiveExcludes = StringUtils.split(excludesStr, ",");
 			}
 
-			if (excludes != null) {
-				actProcessor.setExcludes(this.excludes);
+			if (effectiveExcludes != null) {
+				actProcessor.setExcludes(effectiveExcludes);
 			} else {
-				actProcessor.setExcludes(excludes);
+				actProcessor.setExcludes(this.excludes);
 			}
 
 			actProcessor.setLogInputs(logInputs);
@@ -232,8 +225,7 @@ public class Act extends AbstractGWGoal {
 	 *
 	 * <p>
 	 * The user can enter multiple lines by ending a line with
-	 * {@link Ghostwriter#MULTIPLE_LINES_BREAKER}. Input collection stops when a
-	 * line does not end with the breaker.
+	 * {@link Ghostwriter#MULTIPLE_LINES_BREAKER}. Input collection stops when a line does not end with the breaker.
 	 * </p>
 	 *
 	 * @param prompt the initial prompt label displayed to the user
@@ -242,7 +234,7 @@ public class Act extends AbstractGWGoal {
 	 */
 	public String readText(String prompt) throws PrompterException {
 		StringBuilder sb = new StringBuilder();
-		String line = null;
+		String line;
 		while ((line = prompter.prompt(prompt)) != null) {
 			prompt = "\t";
 			if (Strings.CS.endsWith(line, Ghostwriter.MULTIPLE_LINES_BREAKER)) {

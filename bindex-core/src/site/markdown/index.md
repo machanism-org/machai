@@ -18,13 +18,13 @@ Generate or update the content as follows.
      - Use the project structure diagram by the path: `./images/c4-diagram.png` (`src/site/puml/c4-diagram.puml`).
 4. Key Features
    - Present a bulleted list of the primary capabilities and unique features of the project.
-5. Getting Started
-   - **Prerequisites:**  
-     - List all required software, services, and environment settings needed to use the project.
-   - **Java Version:**  
-     Note that the required Java version is defined in `pom.xml`, but actual functional requirements may differ. Clearly state both.
-   - **Basic Usage.**  
-   - **Typical Workflow.**  
+5. Acts
+	- Analyze all act TOML files located in the `src/main/resources/acts` folder.
+	- For each act, create a section that includes:
+		 - The act's name.
+		 - A clear, concise description of the act's purpose and when it should be used.
+	- Organize your output so that each act is easy to identify and understand.
+	- Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 6. Configuration
    - Include a table of common configuration parameters, with columns for parameter name, description, and default value.
    - Ensure descriptions are clear and concise.
@@ -48,92 +48,63 @@ canonical: https://machai.machanism.org/bindex-core/index.html
 
 ## Introduction
 
-Bindex Core (`org.machanism.machai:bindex-core`) is the core Java library for **Bindex** metadata management in the MachAI ecosystem.
+Bindex Core (`org.machanism.machai:bindex-core`) is a Java library that provides the core primitives for working with **Bindex** metadata in the MachAI ecosystem.
 
-A *Bindex* is a JSON document (typically `bindex.json`) that captures stable library identity and discovery metadata (for example: id, name, version, human-readable description, classification facets, and dependencies). Bindex Core provides the building blocks to:
+A *Bindex* is a JSON document describing a library/project with stable identity and discovery metadata (for example: id, name, version, description, classification facets such as domains/layers/languages/integrations, and dependency identifiers). Bindex Core focuses on:
 
-- Persist and retrieve Bindex documents in a MongoDB-backed registry
-- Compute and store embedding vectors for semantic retrieval
-- Classify a free-text query into structured classification objects using a GenAI provider
-- Execute MongoDB vector search with facet filters and score thresholds
-- Return the most relevant libraries and expand results via transitive dependency discovery
+- Persisting Bindex documents in a MongoDB-backed registry.
+- Enriching stored records with vector embeddings for semantic retrieval.
+- Using a GenAI provider to classify free-text queries into structured classification objects that can drive filtered vector search.
+- Exposing these capabilities as function tools so LLM-driven workflows can fetch a Bindex, retrieve the schema, pick candidate libraries, or register a local Bindex file.
 
 ## Overview
 
-Bindex Core supports an end-to-end discovery workflow:
+Bindex Core enables an end-to-end “register and pick” workflow:
 
-1. **Register**: serialize a Bindex document and store it together with classification facets and a vector embedding used for semantic retrieval.
-2. **Classify**: convert a natural-language query into one or more structured classifications via an LLM prompt constrained by the Bindex JSON schema.
-3. **Search**: run MongoDB vector search over stored embeddings, apply facet filters (languages, layers, etc.), and enforce a minimum similarity score.
-4. **Expand**: include transitive dependencies declared by selected results.
+1. **Register** Bindex documents into MongoDB, storing the serialized JSON payload plus searchable projection fields (id/name/version and facet arrays) together with a classification embedding vector.
+2. **Classify** a natural-language query into structured classification objects using a schema-guided prompt derived from the Bindex JSON schema.
+3. **Search** MongoDB using vector search against stored embeddings, applying facet filters (for example language and layer) and a configurable minimum similarity score.
+4. **Consume** results (Bindex documents) in downstream automation via direct API calls or GenAI function tools.
 
 ### Architecture (C4 overview)
 
 ![C4 Diagram](./images/c4-diagram.png)
 
-At a high level, the library combines: (1) a MongoDB repository layer for storing serialized Bindex documents; (2) a picking/search layer that produces embeddings, performs schema-guided LLM classification, runs MongoDB vector search, and expands dependencies; and (3) an integration layer that exposes these capabilities as function tools to GenAI-driven workflows.
+At a high level, the library centers around a semantic picker that orchestrates:
+
+- A GenAI provider for schema-guided classification and embedding generation.
+- A MongoDB registry for persistence and vector search.
+- A tool-integration layer that exposes Bindex operations as callable tools for LLM-assisted workflows.
 
 ## Key Features
 
 - MongoDB-backed persistence and lookup for Bindex documents.
+- Registration flow that stores both Bindex JSON and searchable projection fields.
 - Schema-guided query classification using a GenAI provider.
 - Embedding generation for classification data and semantic retrieval.
-- MongoDB vector search pipeline with facet filtering and configurable score threshold.
-- Dependency expansion for returned results (transitive discovery).
-- GenAI function tools to fetch a Bindex, fetch the Bindex schema, pick libraries, and register a local Bindex file.
+- MongoDB vector search with facet filtering (languages/layers/integrations) and configurable score threshold.
+- GenAI function tools for fetching a Bindex, fetching the schema, recommending libraries for a prompt, and registering a local Bindex file.
 
-## Getting Started
+## Acts
 
-### Prerequisites
+### assembly
 
-- **Java** (see version notes below)
-- **Maven** (to build the project)
-- **MongoDB Atlas / MongoDB** with:
-  - A collection containing Bindex records
-  - A vector search index configured for the stored embedding field
-- A configured **GenAI provider** supported by MachAI (required for schema classification prompts and embeddings)
+Helps implement an application task by using Bindex-based library recommendations. Use it when you want the assistant to pick suitable libraries for a user request, fetch their full Bindex metadata, and assemble a working solution with minimal “from scratch” code (including creating files, building, and fixing errors).
 
-### Java Version
+### bindex
 
-- **Build configuration (from `pom.xml`)**: `maven.compiler.release = 8` (Java 8 bytecode)
-- **Practical runtime requirements**: Java 8+ for core features. MongoDB driver / GenAI provider implementations on the classpath may require newer Java versions depending on how they are deployed.
-
-### Basic Usage
-
-Pick relevant Bindexes for a free-text query:
-
-```java
-Configurator config = ...;
-
-Picker picker = new Picker("openai", null, config);
-List<Bindex> selected = picker.pick("Find libraries for server-side logging");
-```
-
-Register a Bindex in MongoDB:
-
-```java
-Configurator config = ...;
-
-Picker picker = new Picker("openai", null, config);
-String recordId = picker.create(bindex);
-```
-
-### Typical Workflow
-
-1. Ensure MongoDB is configured with a vector search index for stored Bindex embeddings.
-2. Register Bindex documents into the registry.
-3. Run `Picker.pick(query)` to classify the query and perform semantic retrieval.
-4. Use returned Bindexes and their transitive dependencies in downstream automation (for example, assembling LLM context).
+Guides the assistant to analyze a project and create or update a `bindex.json` file that conforms to the Bindex schema. Use it when you need to generate high-quality Bindex metadata for a project and (optionally) register it into the Bindex registry if the file exists.
 
 ## Configuration
 
 | Parameter | Description | Default |
 |---|---|---|
-| `pick.model` | GenAI provider/model identifier used for query classification and embeddings in picking flows. | `CodeMie:gpt-5-2-2025-12-11` |
+| `pick.model` | GenAI provider/model identifier used by picking flows (classification and embeddings). | `CodeMie:gpt-5-2-2025-12-11` |
 | `pick.score` | Minimum vector similarity score required for a result to be included. | `0.85` |
-| `BINDEX_REPO_URL` | MongoDB connection URI used by the repository/picker. When unset, a built-in default is used. | (unset) |
-| `BINDEX_REG_PASSWORD` | Password used to authenticate to MongoDB when required (paired with a configured username). | (unset) |
-| `gw.model` | GenAI provider/model identifier used by the registration function tool when registering a local Bindex file. | (unset) |
+| `BINDEX_REPO_URL` | MongoDB connection URI used to access the Bindex registry. | `mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0` |
+| `BINDEX_REG_PASSWORD` | Password used for MongoDB authentication when registering/updating records (enables privileged user). | (unset) |
+| `gw.model` | GenAI provider/model identifier used by the `register_bindex` tool when registering a local Bindex file. | (unset) |
+| `embedding.model` | Embedding model identifier used by acts that generate embeddings. | `text-embedding-005` |
 
 ## Resources
 

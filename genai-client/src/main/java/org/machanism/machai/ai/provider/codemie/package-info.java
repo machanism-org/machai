@@ -30,22 +30,21 @@
  * EPAM CodeMie provider integration.
  *
  * <p>
- * This package contains an implementation of {@link org.machanism.machai.ai.manager.Genai} that authenticates against
- * the EPAM CodeMie OpenID Connect (OIDC) token endpoint to obtain an OAuth 2.0 access token and then configures an
- * OpenAI-compatible client to call the CodeMie Code Assistant API.
+ * Provides {@link org.machanism.machai.ai.manager.Genai} implementation(s) that authenticate against the EPAM CodeMie
+ * OpenID Connect (OIDC) token endpoint to obtain an OAuth 2.0 access token and then configure an OpenAI-compatible
+ * client to call the CodeMie Code Assistant REST API.
  * </p>
  *
- * <h2>Flow overview</h2>
- * <ol>
- * <li>Obtain an OAuth 2.0 access token from the configured (or default) OIDC token endpoint.</li>
- * <li>Configure an OpenAI-compatible client with the CodeMie API base URL.</li>
- * <li>Use the retrieved access token as the API key/credential for subsequent requests.</li>
- * <li>Delegate requests to a downstream provider based on the configured {@code chatModel} prefix.</li>
- * </ol>
+ * <h2>Responsibilities</h2>
+ * <ul>
+ * <li>Acquire an OAuth 2.0 access token using either password grant or client credentials.</li>
+ * <li>Set OpenAI-compatible configuration (base URL and API key) for downstream providers.</li>
+ * <li>Delegate chat/completions execution to the appropriate provider based on the configured model identifier.</li>
+ * </ul>
  *
- * <h2>Authentication mode selection</h2>
+ * <h2>Authentication</h2>
  * <p>
- * The OAuth 2.0 grant type is derived from {@code GENAI_USERNAME}:
+ * The grant type is selected from {@code GENAI_USERNAME}:
  * </p>
  * <ul>
  * <li><b>Password grant</b> when the username contains {@code "@"} (typical e-mail login).</li>
@@ -54,8 +53,8 @@
  *
  * <h2>Provider delegation</h2>
  * <p>
- * The provider delegates the actual chat/streaming implementation to an underlying provider selected by the model
- * identifier prefix (for example, {@code gpt-}, {@code gemini-}, or {@code claude-}).
+ * The implementation delegates to a downstream provider selected by the {@code chatModel} prefix (for example,
+ * {@code gpt-}, {@code gemini-}, or {@code claude-}).
  * </p>
  *
  * <h2>Configuration</h2>

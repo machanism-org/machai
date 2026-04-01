@@ -12,7 +12,7 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries, a command line application, and Maven plugins that unify access to multiple GenAI providers, generate and consume Bindex metadata for library discovery and reuse, and automate repository-scale documentation updates from embedded guidance using Ghostwriter.</description>
+	<description>Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries and Maven tooling that unify access to multiple GenAI providers, generate and consume Bindex metadata for library discovery and reuse, and automate repository-scale documentation updates from embedded guidance using Ghostwriter.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -135,11 +135,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-						<groupId>org.machanism.machai</groupId>
-						<artifactId>bindex-maven-plugin</artifactId>
-						<version>1.0.4-SNAPSHOT</version>
-					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -149,7 +144,6 @@
 		<module>project-layout</module>
 		<module>genai-client</module>
 		<module>bindex-core</module>
-		<module>machai-cli</module>
 		<module>ghostwriter</module>
 		<module>gw-maven-plugin</module>
 	</modules>
@@ -209,11 +203,6 @@
 							</goals>
 						</execution>
 					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.machanism.machai</groupId>
-					<artifactId>bindex-maven-plugin</artifactId>
-					<version>1.0.4-SNAPSHOT</version>
 				</plugin>
 				<plugin>
 					<groupId>org.machanism.machai</groupId>

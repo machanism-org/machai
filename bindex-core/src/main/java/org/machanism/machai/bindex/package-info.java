@@ -28,20 +28,30 @@
  * MongoDB-backed persistence and semantic retrieval for {@code Bindex} metadata.
  *
  * <p>
- * This package provides the core components for:
+ * This package contains the MongoDB integration used to register, store, and
+ * retrieve {@link org.machanism.machai.schema.Bindex} documents.
+ *
+ * <p>
+ * Core responsibilities:
  *
  * <ul>
- * <li>Persisting and retrieving {@code Bindex} records stored as JSON inside MongoDB documents</li>
- * <li>Registering Bindexes enriched with classification facets and an embedding vector</li>
- * <li>Performing semantic search by embedding a classified query and using MongoDB vector search</li>
+ * <li><strong>Persistence</strong>: storing a serialized {@code Bindex} JSON payload
+ * in a MongoDB document field (see {@link org.machanism.machai.bindex.BindexRepository#BINDEX_PROPERTY_NAME}).</li>
+ * <li><strong>Registration</strong>: inserting (or replacing) Bindexes enriched with
+ * classification facets and a vector embedding used for semantic search.</li>
+ * <li><strong>Semantic retrieval</strong>: classifying a free-text query via an LLM,
+ * embedding that classification, and running MongoDB vector search to find relevant
+ * Bindexes.</li>
  * </ul>
  *
  * <p>
- * The main entry points are:
+ * Main entry points:
  *
  * <ul>
- * <li>{@link org.machanism.machai.bindex.Picker} for registering and searching Bindexes</li>
- * <li>{@link org.machanism.machai.bindex.BindexRepository} for basic CRUD-style access to stored Bindexes</li>
+ * <li>{@link org.machanism.machai.bindex.Picker} for registering and semantically
+ * searching Bindexes.</li>
+ * <li>{@link org.machanism.machai.bindex.BindexRepository} for CRUD-style access to
+ * stored Bindex documents.</li>
  * </ul>
  */
 package org.machanism.machai.bindex;

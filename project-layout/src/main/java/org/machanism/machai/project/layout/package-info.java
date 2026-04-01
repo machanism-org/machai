@@ -18,13 +18,14 @@
  *
  * <h2>Terminology</h2>
  * <ul>
- *   <li><strong>Project root</strong>: configured via {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}.
- *       Most accessors assume the root is configured.</li>
+ *   <li><strong>Project root</strong>: configured via
+ *       {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}. Most accessors assume the
+ *       root is configured.</li>
  *   <li><strong>Root-relative paths</strong>: returned locations are typically expressed relative to
  *       {@link org.machanism.machai.project.layout.ProjectLayout#getProjectDir()} and should be resolved against that
  *       directory prior to filesystem access.</li>
- *   <li><strong>Modules</strong>: nested projects discovered by a build tool (for example, Maven reactor modules, Gradle
- *       multi-project builds, JavaScript workspaces). Module identifiers are generally root-relative.</li>
+ *   <li><strong>Modules</strong>: nested projects discovered by a build tool (for example, Maven reactor modules,
+ *       Gradle multi-project builds, JavaScript workspaces). Module identifiers are generally root-relative.</li>
  * </ul>
  *
  * <h2>Provided implementations</h2>
@@ -32,7 +33,7 @@
  *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} reads {@code pom.xml} (via
  *       {@link org.machanism.machai.project.layout.PomReader}) to determine modules and conventional
  *       source/test/resource roots.</li>
- *   <li>{@link org.machanism.machai.project.layout.GradleProjectLayout} uses Gradle build metadata to return
+ *   <li>{@link org.machanism.machai.project.layout.GragleProjectLayout} uses Gradle build metadata to return
  *       conventional source/test/document roots.</li>
  *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} parses {@code package.json} workspaces and
  *       resolves module directories by matching workspace glob patterns.</li>
@@ -48,9 +49,9 @@
  *
  * ProjectLayout layout = new MavenProjectLayout().projectDir(projectDir);
  * java.util.List&lt;String&gt; modules = layout.getModules();
- * java.util.List&lt;String&gt; sources = layout.getSources();
- * java.util.List&lt;String&gt; tests = layout.getTests();
- * java.util.List&lt;String&gt; docs = layout.getDocuments();
+ * java.util.Collection&lt;String&gt; sources = layout.getSources();
+ * java.util.Collection&lt;String&gt; tests = layout.getTests();
+ * java.util.Collection&lt;String&gt; docs = layout.getDocuments();
  * </code></pre>
  */
 package org.machanism.machai.project.layout;

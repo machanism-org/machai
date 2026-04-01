@@ -40,22 +40,23 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Purpose and scope</h2>
 <p>
-  This module provides a provider-agnostic client API and a small runtime for resolving, configuring, and executing
-  requests against different GenAI backends. Callers interact with stable abstractions and can switch providers by
-  configuration (for example, selecting a different <code>Provider:Model</code>), rather than binding directly to a vendor SDK.
+  GenAI Client provides a provider-agnostic API for composing prompts, supplying system instructions, optionally
+  attaching files, and executing requests against multiple GenAI backends. Consumers can select a backend by
+  configuration (typically using a <code>Provider:Model</code> identifier) rather than binding directly to a vendor SDK.
 </p>
 
-<h2>Architecture</h2>
+<h2>Architecture overview</h2>
 <p>
-  The provider contract is defined by <code>org.machanism.machai.ai.manager.Genai</code>. Provider resolution and usage
-  aggregation is handled by <code>org.machanism.machai.ai.manager.GenaiProviderManager</code>.
-  Concrete provider integrations (OpenAI, Gemini, Claude, CodeMie, and a no-op provider) implement the contract.
+  The central provider contract is defined by <code>org.machanism.machai.ai.manager.Genai</code>. Provider resolution,
+  instantiation, and usage aggregation are handled by
+  <code>org.machanism.machai.ai.manager.GenaiProviderManager</code>. Concrete provider implementations adapt the shared
+  contract to specific backends (for example OpenAI, Google Gemini, Anthropic Claude, EPAM CodeMie, and an offline
+  no-op provider).
 </p>
 
 <p>
-  Providers that support tool/function calling can be augmented with host-side function tools that expose controlled
-  capabilities (file system access, command execution, and web/REST calls). Tool installers are typically discovered
-  via <code>java.util.ServiceLoader</code> and applied using
+  Providers that support tool/function calling can be augmented with host-side tools (file system, command execution,
+  and web/REST access). Tool installers are typically discovered via <code>java.util.ServiceLoader</code> and applied using
   <code>org.machanism.machai.ai.tools.FunctionToolsLoader</code>.
 </p>
 
@@ -63,18 +64,14 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <img src="../images/class-diagram.png" alt="GenAI Client class diagram" />
 </p>
 
-<h2>Packages</h2>
-<p>
-  The library is organized around the following packages.
-</p>
-
+<h2>Package structure</h2>
 <ul>
   <li>
-    <strong><code>org.machanism.machai.ai</code></strong> – public, provider-agnostic client API.
+    <strong><code>org.machanism.machai.ai</code></strong> – provider-agnostic client API.
     <ul>
       <li>
-        Groups the core abstractions used to configure and execute GenAI requests while keeping callers decoupled from
-        vendor SDKs, authentication strategies, and transport details.
+        Public abstractions used by consumers to remain decoupled from provider-specific SDKs and transport/auth
+        details.
       </li>
     </ul>
   </li>
@@ -83,13 +80,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.manager</code></strong> – provider contract and provider resolution.
     <ul>
       <li>
-        Defines the provider contract (<code>Genai</code>), the resolver/aggregator
-        (<code>GenaiProviderManager</code>), a delegating base implementation (<code>GenaiAdapter</code>), and per-invocation usage
-        metrics (<code>Usage</code>).
+        Defines the <code>Genai</code> contract, provider selection via <code>GenaiProviderManager</code>, a delegating adapter,
+        and token usage reporting via <code>Usage</code>.
       </li>
       <li>
-        Supports resolving providers via a short provider name (used in the <code>Provider:Model</code> format) or by fully-qualified
-        class name.
+        Supports resolving providers via a short provider name (used in the <code>Provider:Model</code> format) or by
+        fully-qualified class name.
       </li>
     </ul>
   </li>
@@ -98,36 +94,37 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.provider.openai</code></strong> – OpenAI provider implementation.
     <ul>
       <li>
-        Builds OpenAI API requests from prompts, optional system instructions, file inputs, and registered tools, then
-        maps results into the common provider contract and usage metrics.
+        Builds OpenAI requests from prompts/instructions, optional file inputs, and registered tools; maps results into
+        the common contract and usage metrics.
       </li>
     </ul>
   </li>
 
   <li>
-    <strong><code>org.machanism.machai.ai.provider.gemini</code></strong> – Google Gemini integration.
+    <strong><code>org.machanism.machai.ai.provider.gemini</code></strong> – Google Gemini provider integration.
     <ul>
       <li>
-        Translates the provider-agnostic request state into Gemini API calls.
+        Adapts the common request model to Gemini APIs (note: some operations may be scaffolded depending on provider
+        implementation status).
       </li>
     </ul>
   </li>
 
   <li>
-    <strong><code>org.machanism.machai.ai.provider.claude</code></strong> – Anthropic Claude integration.
+    <strong><code>org.machanism.machai.ai.provider.claude</code></strong> – Anthropic Claude provider integration.
     <ul>
       <li>
-        Adapts the common provider contract to Claude models.
+        Adapts the common contract to Claude models.
       </li>
     </ul>
   </li>
 
   <li>
-    <strong><code>org.machanism.machai.ai.provider.codemie</code></strong> – EPAM CodeMie integration.
+    <strong><code>org.machanism.machai.ai.provider.codemie</code></strong> – EPAM CodeMie provider integration.
     <ul>
       <li>
-        Authenticates via an OpenID Connect (OIDC) token endpoint to obtain an access token, configures
-        an OpenAI-compatible client, and delegates calls based on the configured model prefix.
+        Authenticates against an OpenID Connect (OIDC) token endpoint to obtain an access token, configures an
+        OpenAI-compatible client, and delegates calls based on the configured model prefix.
       </li>
     </ul>
   </li>
@@ -136,8 +133,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong><code>org.machanism.machai.ai.provider.none</code></strong> – offline/no-op provider.
     <ul>
       <li>
-        Never calls an external model; accumulates prompts/instructions and can optionally persist them to local log
-        files for auditing.
+        Never calls an external model; accumulates prompts and can optionally persist them to local log files.
       </li>
       <li>
         Unsupported capabilities (for example embeddings) throw <code>UnsupportedOperationException</code>.
@@ -168,7 +164,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li>Execute the request and record token usage.</li>
 </ol>
 
-<pre>{@code
+<pre>
+{@code
 Configurator conf = ...;
 
 // Resolve Provider:Model (for example: "OpenAI:gpt-4o-mini").
@@ -186,7 +183,8 @@ String answer = provider.perform();
 Usage usage = provider.usage();
 GenaiProviderManager.addUsage(usage);
 GenaiProviderManager.logUsage();
-}</pre>
+}
+</pre>
 
 <h2>Operational notes</h2>
 <ul>

@@ -31,20 +31,22 @@
  *
  * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a no-op implementation of
  * {@link org.machanism.machai.ai.manager.Genai} intended for environments where external model backends are disabled,
- * unavailable, or not permitted. Instead of contacting an LLM, it accumulates prompts in memory and can optionally
- * persist instructions and prompts to local files.
+ * unavailable, or not permitted.
+ *
+ * <p>Instead of contacting a model, it accumulates prompt text in memory and, when configured, writes both the
+ * accumulated prompts and the configured instructions to local files.
  *
  * <h2>Behavior</h2>
  * <ul>
  *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)} appends prompt text to an in-memory
- *       buffer, separating entries with {@link org.machanism.machai.ai.manager.Genai#PARAGRAPH_SEPARATOR}.</li>
- *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} never calls an LLM and always returns
- *       {@code null}. When configured via {@link org.machanism.machai.ai.provider.none.NoneProvider#inputsLog(java.io.File)},
- *       it writes the accumulated prompts to the configured log file and clears the buffer.</li>
- *   <li>When instructions are configured via
- *       {@link org.machanism.machai.ai.provider.none.NoneProvider#instructions(String)}, they are written to an
- *       file named {@code instructions.txt} in the same directory as the inputs log (or to the process user directory
- *       when the log file has no parent directory).</li>
+ *       buffer separated by {@link org.machanism.machai.ai.manager.Genai#PARAGRAPH_SEPARATOR}.</li>
+ *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} returns {@code null}. If an inputs log file
+ *       is configured via {@link org.machanism.machai.ai.provider.none.NoneProvider#inputsLog(java.io.File)}, prompts are
+ *       written to that file and the buffer is cleared.</li>
+ *   <li>If instructions are set via
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#instructions(String)}, they are written to
+ *       {@code instructions.txt} next to the inputs log (or to the process user directory when the log file has no
+ *       parent directory).</li>
  *   <li>Unsupported capabilities (for example,
  *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String, long)}) throw
  *       {@link java.lang.UnsupportedOperationException}.</li>

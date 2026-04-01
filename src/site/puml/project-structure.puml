@@ -1,4 +1,4 @@
-' @guidance: For each module, use information from its pom.xml file to create or update the PlantUML dependency diagram bellow.
+' @guidance: create or update the plantuml dependency diagram for the project.
 @startuml
 
 title Machai Project - Module Dependencies
@@ -30,14 +30,12 @@ component "machai\n(root pom)" as machai_root <<pom>>
 component "project-layout" as project_layout
 component "genai-client" as genai_client
 component "bindex-core" as bindex_core
-component "machai-cli" as machai_cli
 component "ghostwriter" as ghostwriter
 component "gw-maven-plugin" as gw_maven_plugin
 
 machai_root ..> project_layout : module
 machai_root ..> genai_client : module
 machai_root ..> bindex_core : module
-machai_root ..> machai_cli : module
 machai_root ..> ghostwriter : module
 machai_root ..> gw_maven_plugin : module
 
@@ -51,8 +49,6 @@ bindex_core --> genai_client
 ghostwriter --> project_layout
 ghostwriter --> genai_client
 ghostwriter --> bindex_core
-
-machai_cli --> ghostwriter
 
 gw_maven_plugin --> ghostwriter
 

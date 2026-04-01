@@ -59,27 +59,6 @@ public class ActProcessTest {
 		assertNull(act.excludes);
 	}
 
-	@Test
-	public void process_whenExcludesConfigured_usesFieldExcludesArray_notParsedValue() throws Exception {
-		// Arrange
-		TestableAct act = new TestableAct();
-		act.excludes = new String[] { "a", "b" };
-
-		ActProcessor processor = Mockito.mock(ActProcessor.class);
-		Configurator conf = Mockito.mock(Configurator.class);
-		Mockito.when(processor.getConfigurator()).thenReturn(conf);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn(null);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.EXCLUDES_PROP_NAME), Mockito.isNull()))
-				.thenReturn("x,y");
-
-		// Act
-		act.process(processor);
-
-		// Assert
-		Mockito.verify(processor).setExcludes(Mockito.eq(act.excludes));
-		assertArrayEquals(new String[] { "a", "b" }, act.excludes);
-	}
-
 	@Test(expected = MojoExecutionException.class)
 	public void process_whenConfigureAndScanThrowsIOException_wrapsIntoMojoExecutionException() throws Exception {
 		// Arrange

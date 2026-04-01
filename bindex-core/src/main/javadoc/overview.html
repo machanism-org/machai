@@ -92,13 +92,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </p>
 <ul>
   <li>
-    <strong><code>org.machanism.machai.bindex</code></strong> &mdash; generates, persists, registers, and retrieves Bindex documents.
-    Supports local workflows (create/update a project&apos;s <code>bindex.json</code>) and registry workflows (store and search
-    Bindexes in MongoDB), including semantic retrieval with dependency expansion and assembling prompt-ready inputs
-    for downstream LLM-assisted tasks.
+    <strong><code>org.machanism.machai.bindex</code></strong> &mdash; MongoDB-backed persistence and semantic retrieval for
+    <code>org.machanism.machai.schema.Bindex</code> metadata. Key responsibilities include registration, CRUD-style access,
+    and vector-search-based retrieval that can expand results via dependencies.
   </li>
   <li>
-    <strong><code>org.machanism.machai.bindex.builder</code></strong> &mdash; builders that generate
+    <strong><code>org.machanism.machai.bindex.builder</code></strong> &mdash; project-layout-specific builders that generate
     <code>org.machanism.machai.schema.Bindex</code> by assembling project context and delegating generation to a configured
     <code>org.machanism.machai.ai.manager.Genai</code> provider.
   </li>
@@ -114,12 +113,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Key types</h2>
 <ul>
-  <li><code>org.machanism.machai.bindex.BindexCreator</code>: creates or updates <code>bindex.json</code> for a project.</li>
-  <li><code>org.machanism.machai.bindex.BindexBuilderFactory</code>: selects a builder based on the detected project layout.</li>
-  <li><code>org.machanism.machai.bindex.BindexRegister</code>: registers a local <code>bindex.json</code> in the registry.</li>
-  <li><code>org.machanism.machai.bindex.BindexRepository</code>: persistence primitives for registry operations.</li>
-  <li><code>org.machanism.machai.bindex.Picker</code>: performs semantic search and expands results via dependencies.</li>
-  <li><code>org.machanism.machai.bindex.builder.BindexBuilder</code>: base class for project-layout-specific builders.</li>
+  <li><code>org.machanism.machai.bindex.BindexRepository</code>: MongoDB persistence for stored Bindex documents.</li>
+  <li><code>org.machanism.machai.bindex.Picker</code>: registers and semantically searches Bindexes; expands results via dependencies.</li>
+  <li><code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code>: tool surface for LLM-assisted operations on Bindex data.</li>
 </ul>
 
 <h2>Class diagram</h2>
@@ -129,33 +125,20 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Usage examples</h2>
 
-<h3>Create or update <code>bindex.json</code></h3>
+<h3>Pick libraries</h3>
 <pre>{@code
 Configurator config = ...;
-ProjectLayout layout = ...;
+Picker picker = new Picker("openai", null, config);
 
-new BindexCreator("openai", config)
-    .update(true)
-    .processFolder(layout);
+List<Bindex> selected = picker.pick("http client with oauth2 support");
 }</pre>
 
-<h3>Register <code>bindex.json</code> in the registry</h3>
+<h3>Load a registered Bindex by id</h3>
 <pre>{@code
 Configurator config = ...;
-ProjectLayout layout = ...;
+BindexRepository repo = new BindexRepository(config);
 
-new BindexRegister("openai", null, config)
-    .update(true)
-    .processFolder(layout);
-}</pre>
-
-<h3>Pick libraries and assemble prompt inputs</h3>
-<pre>{@code
-Configurator config = ...;
-ProjectLayout layout = ...;
-
-List<Bindex> selected = new Picker("openai", null, config)
-    .pick("http client with oauth2 support");
+Optional<Bindex> bindex = repo.findById("org.example:lib");
 }</pre>
 
 <h2>Operational notes</h2>

@@ -56,12 +56,12 @@ canonical: https://machai.machanism.org/gw-maven-plugin/index.html
 
 ## Introduction
 
-GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds so that any project assets (source code, documentation, project site content, and other scanned files) can be evaluated against embedded `@guidance:` blocks and updated consistently over time.
+GW Maven Plugin is the primary adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven builds so that project assets (source code, documentation, project site content, and other scanned files) can be evaluated against embedded `@guidance:` blocks and updated consistently over time.
 
 The plugin provides Maven goals (Mojos) in `org.machanism.machai.gw.maven` that delegate to Ghostwriter processors:
 
-- **Guided processing** (`gw:gw`, `gw:reactor`) via `GuidanceProcessor` for scanning a tree and applying guidance-driven updates.
-- **Action processing** (`gw:act`, `gw:act-reactor`) via `ActProcessor` for applying an interactive or predefined “act” prompt across a scanned document set.
+- **Guided processing** (`gw:gw`, `gw:reactor`) using `GuidanceProcessor` for scanning a directory tree and applying guidance-driven updates.
+- **Action processing** (`gw:act`, `gw:act-reactor`) using `ActProcessor` for applying an interactive or predefined “act” prompt across a scanned document set.
 
 Credentials can optionally be sourced from Maven `settings.xml` via `-Dgenai.serverId=...`, keeping secrets out of source control while still enabling CI-friendly execution.
 
@@ -78,7 +78,7 @@ In practice, you point the plugin at a scan root (commonly `src/site`, but any f
 
 ## Key Features
 
-- **Guided File Processing integration** using Ghostwriter processors.
+- **Guided File Processing integration** via Ghostwriter processors.
 - **Guided goals**:
   - `gw:gw`: aggregator goal that can run without a `pom.xml` and processes modules in reverse order (sub-modules first, then parents), similar to the Ghostwriter CLI.
   - `gw:reactor`: processes projects using standard Maven reactor dependency ordering.
@@ -120,7 +120,7 @@ mvn gw:gw -Dgenai.serverId=my-genai
 ### Java Version
 
 - **Build/toolchain requirement (from `pom.xml`):** Java **8** (`maven.compiler.release=8`).
-- **Functional/runtime requirements:** may be higher depending on your Maven runtime and the resolved Ghostwriter/GenAI provider stack. Ensure your Java runtime is compatible with your Maven version and the resolved Ghostwriter dependencies.
+- **Functional/runtime requirements:** The plugin runs inside Maven, so you must also use a Java runtime compatible with your Maven version and the resolved MachAI Ghostwriter/GenAI provider stack. In practice, this may require a newer runtime even if the plugin itself is compiled for Java 8.
 
 ### Basic Usage
 
@@ -130,7 +130,7 @@ Run guided processing:
 mvn gw:gw
 ```
 
-Scan a specific documentation directory:
+Scan a specific directory:
 
 ```bash
 mvn gw:gw -Dgw.scanDir=src\\site
@@ -171,7 +171,7 @@ Common configuration parameters (usable as `-D...` system properties or via `<co
 | Parameter | Description | Default |
 |---|---|---|
 | `gw.model` | Provider/model identifier forwarded to Ghostwriter (example: `openai:gpt-4o-mini`). | *(none)* |
-| `gw.scanDir` | Scan root directory to process. If not provided, defaults to the execution root directory for `gw:gw` and (typically) the module base directory for reactor-style usage. | *(varies by goal)* |
+| `gw.scanDir` | Scan root directory to process. If not provided, defaults to the execution root directory for `gw:gw` and typically the module base directory for reactor-style usage. | *(varies by goal)* |
 | `gw.instructions` | Instruction locations consumed by the workflow (for example, file paths or classpath locations). | *(none)* |
 | `gw.excludes` | Exclude patterns/paths to skip while scanning. | *(none)* |
 | `genai.serverId` | `settings.xml` `<server>` id used to load GenAI credentials (and optional provider-specific fields) into workflow properties. | *(none)* |

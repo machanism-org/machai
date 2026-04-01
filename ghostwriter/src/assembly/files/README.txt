@@ -2,7 +2,7 @@ Ghostwriter CLI
 
 Application Overview
 
-Machai Ghostwriter is a guided, AI-assisted processing engine delivered as a Java CLI. It scans a repository (source code, tests, documentation, diagrams, and other assets), extracts embedded "@guidance:" directives (or applies a default prompt when guidance is absent), and executes the resulting prompts against a configured GenAI provider to generate and maintain project-wide documentation and code improvements.
+Machai Ghostwriter is a guided, AI-assisted processing engine delivered as a Java CLI. It scans a repository (source code, tests, documentation, diagrams, and other assets), extracts embedded "@guidance:" directives (or applies a default prompt when guidance is absent), and executes the resulting prompts against the configured GenAI provider to generate and maintain project-wide documentation and code improvements.
 
 Conceptual foundation (Guided File Processing):
 https://www.machanism.org/guided-file-processing/index.html
@@ -18,7 +18,7 @@ Key features
 - Excludes support (comma-separated; exact paths plus glob:/regex: matchers).
 - Optional multi-threaded processing (--threads).
 - Optional logging of provider inputs per processed file (--logInputs).
-- Act mode for running predefined prompts (--act) and custom act bundles (--acts).
+- Act mode for executing prompts (--act) and custom act bundles (--acts).
 
 Typical use cases
 - Generate or update documentation across a repository.
@@ -27,7 +27,7 @@ Typical use cases
 
 Supported GenAI providers
 - CodeMie
-- OpenAI-compatible services (provider/model selection like OpenAI:gpt-5.1)
+- OpenAI-compatible services
 
 
 Installation Instructions

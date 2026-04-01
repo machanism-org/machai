@@ -30,8 +30,8 @@
  * OpenAI provider implementation for MachAI.
  *
  * <p>
- * This package provides an OpenAI-backed {@link org.machanism.machai.ai.manager.Genai} implementation
- * ({@link org.machanism.machai.ai.provider.openai.OpenAIProvider}). It builds OpenAI Responses API requests from
+ * This package contains the OpenAI-backed {@link org.machanism.machai.ai.manager.Genai} implementation
+ * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}. It builds OpenAI Responses API requests from
  * MachAI prompts, optional system instructions, file inputs, and registered tools, then converts the model output
  * into plain-text results and MachAI token-usage metrics.
  * </p>
@@ -63,15 +63,9 @@
  * <p>
  * The provider is initialized via
  * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider#init(org.machanism.macha.core.commons.configurator.Configurator)}
- * and reads the following configuration keys:
+ * and reads configuration keys such as {@code OPENAI_API_KEY}, {@code chatModel}, and optional values like
+ * {@code OPENAI_BASE_URL}, {@code GENAI_TIMEOUT}, {@code MAX_OUTPUT_TOKENS}, {@code MAX_TOOL_CALLS}, and
+ * {@code embedding.model}.
  * </p>
- * <ul>
- *   <li>{@code OPENAI_API_KEY} (required): OpenAI API key.</li>
- *   <li>{@code CHAT_MODEL} (required): model identifier used for responses (for example {@code gpt-4.1}).</li>
- *   <li>{@code OPENAI_BASE_URL} (optional): base URL override for OpenAI-compatible endpoints.</li>
- *   <li>{@code GENAI_TIMEOUT} (optional): timeout in seconds for API requests.</li>
- *   <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum output tokens per response.</li>
- *   <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls allowed per response.</li>
- * </ul>
  */
 package org.machanism.machai.ai.provider.openai;
