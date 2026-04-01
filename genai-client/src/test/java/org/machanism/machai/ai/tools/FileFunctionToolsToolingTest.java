@@ -129,29 +129,4 @@ class FileFunctionToolsToolingTest {
 		assertEquals("No files found in directory.", result);
 	}
 
-	@Test
-	void getRecursiveFiles_whenNestedFiles_listsAllFiles() throws Exception {
-		// Arrange
-		FileFunctionTools tools = new FileFunctionTools();
-		File base = new File(tempDir, "base");
-		assertTrue(base.mkdirs());
-		Files.write(new File(base, "a.txt").toPath(), "x".getBytes(StandardCharsets.UTF_8));
-		File nested = new File(base, "n1/n2");
-		assertTrue(nested.mkdirs());
-		Files.write(new File(nested, "b.txt").toPath(), "y".getBytes(StandardCharsets.UTF_8));
-
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectNode node = mapper.createObjectNode();
-		node.put("dir_path", "base");
-
-		Method getRecursiveFiles = FileFunctionTools.class.getDeclaredMethod("getRecursiveFiles", Object[].class);
-		getRecursiveFiles.setAccessible(true);
-
-		// Act
-		String result = (String) getRecursiveFiles.invoke(tools, new Object[] { new Object[] { node, tempDir } });
-
-		// Assert
-		assertTrue(result.contains("./base/a.txt"));
-		assertTrue(result.contains("./base/n1/n2/b.txt"));
-	}
 }

@@ -37,6 +37,7 @@ import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
+import com.openai.models.embeddings.EmbeddingModel;
 import com.openai.models.files.FileCreateParams;
 import com.openai.models.files.FileObject;
 import com.openai.models.files.FilePurpose;
@@ -94,8 +95,6 @@ import com.openai.services.blocking.ModelService;
  */
 public class OpenAIProvider implements Genai {
 
-	private static final String EMBEDDING_MODEL = "text-embedding-005";
-
 	/** Logger instance for this provider. */
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
@@ -105,7 +104,9 @@ public class OpenAIProvider implements Genai {
 	/** Default maximum number of tokens the model may generate. */
 	public static final long MAX_OUTPUT_TOKENS = 18000;
 
-	/** Default request timeout in seconds used when {@code GENAI_TIMEOUT} is unset. */
+	/**
+	 * Default request timeout in seconds used when {@code GENAI_TIMEOUT} is unset.
+	 */
 	private static final long TIMEOUT_SEC = 600;
 
 	/** Active model identifier used in {@link #perform()}. */
@@ -142,6 +143,8 @@ public class OpenAIProvider implements Genai {
 
 	private Configurator config;
 
+	private String embeddingModel;
+
 	/**
 	 * Initializes the provider from the given configuration.
 	 *
@@ -155,6 +158,7 @@ public class OpenAIProvider implements Genai {
 
 		maxOutputTokens = config.getLong("MAX_OUTPUT_TOKENS", MAX_OUTPUT_TOKENS);
 		maxToolCalls = config.getLong("MAX_TOOL_CALLS", MAX_TOOL_CALLS);
+		embeddingModel = config.get("embedding.model", null);
 	}
 
 	/**
@@ -368,7 +372,7 @@ public class OpenAIProvider implements Genai {
 	public List<Double> embedding(String text, long dimensions) {
 		List<Double> embedding = null;
 		if (text != null) {
-			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(EMBEDDING_MODEL)
+			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(embeddingModel)
 					.dimensions(dimensions).build();
 			CreateEmbeddingResponse response = getClient().embeddings().create(params);
 
