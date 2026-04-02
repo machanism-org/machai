@@ -215,9 +215,9 @@ public class Act extends AbstractGWGoal {
 		String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
-		logger.info("Starting scan of directory: {}", resolvedScanDir);
+		logger.info("Starting scan of path: {}", resolvedScanDir);
 		actProcessor.scanDocuments(basedir, resolvedScanDir);
-		logger.info("Finished scanning directory: {}", resolvedScanDir);
+		logger.info("Finished scanning path: {}", resolvedScanDir);
 	}
 
 	/**

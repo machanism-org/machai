@@ -122,11 +122,11 @@ public final class Ghostwriter {
 		int exitCode = 0;
 		try {
 			for (String scanDir : scanDirs) {
-				logger.info("Starting scan of directory: {}", scanDir);
+				logger.info("Starting scan of path: {}", scanDir);
 				File projectDir = processor.getProjectDir();
 
 				processor.scanDocuments(projectDir, scanDir);
-				logger.info("Finished scanning directory: {}", scanDir);
+				logger.info("Finished scanning path: {}", scanDir);
 			}
 
 		} catch (ProcessTerminationException e) {

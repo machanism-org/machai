@@ -211,7 +211,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 				scanDir = projectDir.getAbsolutePath();
 			}
 
-			logger.info("Starting scan of directory: {}", scanDir);
+			logger.info("Starting scan of path: {}", scanDir);
 			processor.scanDocuments(projectBasedir, scanDir);
 			logger.info("Scanning finished.");
 
