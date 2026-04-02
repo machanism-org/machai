@@ -122,7 +122,7 @@ class AIFileProcessorCoverageTest {
 		String line = processor.getDirInfoLine(java.util.Arrays.asList(null, "missing-dir"), projectDir);
 
 		// Assert
-		assertEquals(AIFileProcessor.NOT_DEFINED, line);
+		assertEquals(AIFileProcessor.NOT_DEFINED_VALUE, line);
 	}
 
 	@Test
@@ -143,7 +143,7 @@ class AIFileProcessorCoverageTest {
 
 		// Assert
 		assertNotNull(info);
-		assertTrue(info.contains("not defined"), "Expected 'not defined' placeholder to appear");
+		assertTrue(info.contains(AIFileProcessor.NOT_DEFINED_VALUE), "Expected 'not defined' placeholder to appear");
 		assertTrue(info.contains("src\\main\\java\\X.java") || info.contains("src/main/java/X.java"),
 				"Expected relative file path to be included");
 	}

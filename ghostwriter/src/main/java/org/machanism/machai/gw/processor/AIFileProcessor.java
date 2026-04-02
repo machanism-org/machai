@@ -67,7 +67,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	/**
 	 * String used in generated output when a value is absent in project metadata.
 	 */
-	public static final String NOT_DEFINED = "not defined";
+	public static final String NOT_DEFINED_VALUE = "<NOT_DEFINED_VALUE>";
+
+	/**
+	 * String used in generated output when a value is empty in project metadata.
+	 */
+	private static final String EMPTY_VALUE = "<EMPTY>";
 
 	/**
 	 * Temporary directory name for documentation inputs under
@@ -205,11 +210,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		Collection<String> modules = projectLayout.getModules();
 
 		content.add(SystemUtils.OS_NAME);
-		content.add(projectLayout.getProjectName() != null ? projectLayout.getProjectName() : NOT_DEFINED);
+		content.add(projectLayout.getProjectName() != null ? projectLayout.getProjectName() : NOT_DEFINED_VALUE);
 		content.add(projectLayout.getProjectId());
 		content.add(projectDir.getName());
-		content.add(Objects.toString(parentId, NOT_DEFINED));
-		content.add(parentDir != null ? parentDir.getName() : NOT_DEFINED);
+		content.add(Objects.toString(parentId, NOT_DEFINED_VALUE));
+		content.add(parentDir != null ? parentDir.getName() : NOT_DEFINED_VALUE);
 
 		String relativePath = ProjectLayout.getRelativePath(getProjectDir(), projectDir);
 		content.add(relativePath);
@@ -240,18 +245,22 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *
 	 * @param sources    directory list from the layout
 	 * @param projectDir project root directory
-	 * @return formatted directory list, or {@link #NOT_DEFINED} if none apply
+	 * @return formatted directory list, or {@link #NOT_DEFINED_VALUE} if none apply
 	 */
 	String getDirInfoLine(Collection<String> sources, File projectDir) {
 		String line = null;
-		if (sources != null && !sources.isEmpty()) {
-			List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())
-					.map(e -> "`" + e + "`").collect(Collectors.toList());
-			line = StringUtils.join(dirs, ", ");
+		if (sources != null) {
+			if (!sources.isEmpty()) {
+				List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())
+						.map(e -> "`" + e + "`").collect(Collectors.toList());
+				line = StringUtils.join(dirs, ", ");
+			} else {
+				line = EMPTY_VALUE;
+			}
 		}
 
 		if (StringUtils.isBlank(line)) {
-			line = NOT_DEFINED;
+			line = NOT_DEFINED_VALUE;
 		}
 		return line;
 	}
