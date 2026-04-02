@@ -48,23 +48,23 @@ canonical: https://machai.machanism.org/bindex-core/index.html
 
 ## Introduction
 
-Bindex Core (`org.machanism.machai:bindex-core`) is a Java library that provides the core primitives for working with **Bindex** metadata in the MachAI ecosystem.
+Bindex Core (`org.machanism.machai:bindex-core`) is a Java library that provides the core building blocks for working with **Bindex** metadata in the MachAI ecosystem.
 
-A *Bindex* is a JSON document describing a library/project with stable identity and discovery metadata (for example: id, name, version, description, classification facets such as domains/layers/languages/integrations, and dependency identifiers). Bindex Core focuses on:
+A *Bindex* is a structured JSON document describing a software library/project with stable identity and discovery metadata (such as id, name, version, description, classification facets like domains/layers/languages/integrations, plus dependency identifiers). Bindex Core focuses on enabling automated, machine-friendly library discovery and integration by:
 
 - Persisting Bindex documents in a MongoDB-backed registry.
 - Enriching stored records with vector embeddings for semantic retrieval.
 - Using a GenAI provider to classify free-text queries into structured classification objects that can drive filtered vector search.
-- Exposing these capabilities as function tools so LLM-driven workflows can fetch a Bindex, retrieve the schema, pick candidate libraries, or register a local Bindex file.
+- Exposing these capabilities as function tools so LLM-driven workflows can retrieve a Bindex, retrieve the schema, recommend candidate libraries, or register a local Bindex file.
 
 ## Overview
 
 Bindex Core enables an end-to-end “register and pick” workflow:
 
-1. **Register** Bindex documents into MongoDB, storing the serialized JSON payload plus searchable projection fields (id/name/version and facet arrays) together with a classification embedding vector.
-2. **Classify** a natural-language query into structured classification objects using a schema-guided prompt derived from the Bindex JSON schema.
-3. **Search** MongoDB using vector search against stored embeddings, applying facet filters (for example language and layer) and a configurable minimum similarity score.
-4. **Consume** results (Bindex documents) in downstream automation via direct API calls or GenAI function tools.
+1. **Register**: serialize and persist a Bindex into MongoDB, storing the raw JSON plus indexed projection fields (id/name/version and facet arrays) together with a classification embedding vector.
+2. **Classify**: convert a natural-language query into one or more structured classification objects using a schema-guided prompt derived from the Bindex JSON schema.
+3. **Search**: run MongoDB vector search against stored embeddings, applying facet filters (for example by language and layer) and a configurable minimum similarity score.
+4. **Consume**: return matching Bindex documents (and expand results with transitive dependencies) for downstream automation via direct API calls or GenAI function tools.
 
 ### Architecture (C4 overview)
 
@@ -73,7 +73,7 @@ Bindex Core enables an end-to-end “register and pick” workflow:
 At a high level, the library centers around a semantic picker that orchestrates:
 
 - A GenAI provider for schema-guided classification and embedding generation.
-- A MongoDB registry for persistence and vector search.
+- A MongoDB-backed registry for persistence and vector search.
 - A tool-integration layer that exposes Bindex operations as callable tools for LLM-assisted workflows.
 
 ## Key Features
@@ -89,11 +89,11 @@ At a high level, the library centers around a semantic picker that orchestrates:
 
 ### assembly
 
-Helps implement an application task by using Bindex-based library recommendations. Use it when you want the assistant to pick suitable libraries for a user request, fetch their full Bindex metadata, and assemble a working solution with minimal “from scratch” code (including creating files, building, and fixing errors).
+Implements an application task by leveraging Bindex-based library recommendations. Use it when you want the assistant to recommend suitable libraries, retrieve full Bindex metadata for selected candidates, and assemble a working solution in a project (including creating files and building/fixing errors).
 
 ### bindex
 
-Guides the assistant to analyze a project and create or update a `bindex.json` file that conforms to the Bindex schema. Use it when you need to generate high-quality Bindex metadata for a project and (optionally) register it into the Bindex registry if the file exists.
+Generates or updates a `bindex.json` file for the current project based on source and documentation content, ensuring it conforms to the Bindex schema. Use it when you need to produce high-quality Bindex metadata for a project and optionally register it if the file exists.
 
 ## Configuration
 

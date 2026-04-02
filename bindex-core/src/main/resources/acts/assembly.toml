@@ -32,7 +32,6 @@ inputs = '''
 - Make the project functional.
 - Ask the user if the necessary information required.
 - Create a detailed description in the README.md file.
-- The `.machai` folder is reserved for LLM activity logging and should be ignored during all operations. Do not read, modify, or include any files from the `.machai` directory.
 - Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
 
 # User Query
