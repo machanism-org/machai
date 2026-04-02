@@ -272,7 +272,8 @@ class WebFunctionToolsTest {
 	}
 
 	@Test
-	void fillHeader_whenHeadersNull_doesNothing() throws Exception {
+	void fillHeader_whenHeadersNull_doesNothing() throws IOException {
+		// Sonar java:S1130 - remove redundant thrown exception type.
 		// Arrange
 		WebFunctionTools tools = new WebFunctionTools();
 		FakeHttpURLConnection conn = new FakeHttpURLConnection(URI.create("http://example.com").toURL());
@@ -285,7 +286,8 @@ class WebFunctionToolsTest {
 	}
 
 	@Test
-	void fillHeader_whenHeaderLineMissingEquals_isIgnored() throws Exception {
+	void fillHeader_whenHeaderLineMissingEquals_isIgnored() throws IOException {
+		// Sonar java:S1130 - remove redundant thrown exception type.
 		// Arrange
 		WebFunctionTools tools = new WebFunctionTools();
 		FakeHttpURLConnection conn = new FakeHttpURLConnection(URI.create("http://example.com").toURL());
@@ -299,7 +301,8 @@ class WebFunctionToolsTest {
 	}
 
 	@Test
-	void fillHeader_whenHeadersContainPlaceholders_resolvesUsingConfigurator() throws Exception {
+	void fillHeader_whenHeadersContainPlaceholders_resolvesUsingConfigurator() throws IOException {
+		// Sonar java:S1130 - remove redundant thrown exception type.
 		// Arrange
 		WebFunctionTools tools = new WebFunctionTools();
 		Map<String, String> map = new HashMap<>();
@@ -377,7 +380,7 @@ class WebFunctionToolsTest {
 	}
 
 	@Test
-	void callRestApi_whenResponseStreamNull_returnsFallbackMessage() throws Exception {
+	void callRestApi_whenResponseStreamNull_returnsFallbackMessage()  {
 		// Arrange
 		WebFunctionTools tools = new WebFunctionTools() {
 			@Override
@@ -441,7 +444,7 @@ class WebFunctionToolsTest {
 	@Test
 	void callRestApi_whenResponseBodyPresent_returnsFullResponseText() throws Exception {
 		// Arrange
-		FakeHttpURLConnection fakeConn = new FakeHttpURLConnection(new URL("http://example.com/api"));
+		FakeHttpURLConnection fakeConn = new FakeHttpURLConnection(URI.create("http://example.com/api").toURL());
 		fakeConn.setResponseCodeAndMessage(200, "OK");
 		fakeConn.setInput("hello\nworld\n");
 
@@ -469,7 +472,7 @@ class WebFunctionToolsTest {
 	@Test
 	void callRestApi_whenBodyWithPost_writesBodyAndEnablesOutput() throws Exception {
 		// Arrange
-		FakeHttpURLConnection fakeConn = new FakeHttpURLConnection(new URL("http://example.com/api"));
+		FakeHttpURLConnection fakeConn = new FakeHttpURLConnection(URI.create("http://example.com/api").toURL());
 		fakeConn.setResponseCodeAndMessage(200, "OK");
 		fakeConn.setInput("ok\n");
 
@@ -519,13 +522,13 @@ class WebFunctionToolsTest {
 	}
 
 	@Test
-	void getWebContent_whenHttpSchemeFetchesAndReturnsTextOnly() throws Exception {
+	void getWebContent_whenHttpSchemeFetchesAndReturnsTextOnly()  {
 		// Arrange
 		WebFunctionTools tools = new WebFunctionTools() {
 			@Override
 			HttpURLConnection getConnection(URI uri, String headers) {
 				try {
-					FakeHttpURLConnection conn = new FakeHttpURLConnection(uri.toURL());
+					FakeHttpURLConnection conn = new FakeHttpURLConnection(urlFrom(uri));
 					conn.setResponseCodeAndMessage(200, "OK");
 					conn.setInput("<html><body><p>Hello</p></body></html>");
 					return conn;
@@ -595,11 +598,7 @@ class WebFunctionToolsTest {
 		assertFalse(result.contains("<p>"));
 	}
 
-	/**
-	 * Sonar java:S1874
-	 * This helper exists solely for building a fake {@link HttpURLConnection} in tests.
-	 */
-	@SuppressWarnings("java:S1874")
+	// Sonar java:S1874 - avoid using deprecated URL( String ) constructor.
 	private static URL urlFrom(URI uri) {
 		try {
 			return uri.toURL();

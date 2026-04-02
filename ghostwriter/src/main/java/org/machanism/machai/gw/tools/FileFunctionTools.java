@@ -72,6 +72,9 @@ public class FileFunctionTools implements FunctionTools {
 	/** JSON field name for the optional character-set parameter. */
 	private static final String CHARSET_NAME_FIELD = "charsetName";
 
+	/** JSON field name for directory path parameters. */
+	private static final String DIR_PATH_FIELD = "dir_path";
+
 	/**
 	 * Registers file read/write/list tools into the provided provider.
 	 *
@@ -95,6 +98,27 @@ public class FileFunctionTools implements FunctionTools {
 				"dir_path:string:optional:Path to the folder to list contents recursively.");
 	}
 
+	private static File resolveDirFromOptionalPath(File workingDir, JsonNode dirPathNode) {
+		if (dirPathNode == null) {
+			return workingDir;
+		}
+		String path = dirPathNode.asText();
+		if (StringUtils.isBlank(path)) {
+			return workingDir;
+		}
+		return new File(workingDir, path);
+	}
+
+	private static void logToolCall(String toolName, Object[] params, Object result) {
+		if (logger.isInfoEnabled()) {
+			logger.info("{}: {}, Result: {}", toolName, Arrays.toString(params),
+					StringUtils.abbreviate(Objects.toString(result), 60).replace(Genai.LINE_SEPARATOR, ""));
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("{}: {}, Result: {}", toolName, Arrays.toString(params), result);
+		}
+	}
+
 	/**
 	 * Implements {@code get_recursive_file_list}.
 	 *
@@ -112,38 +136,22 @@ public class FileFunctionTools implements FunctionTools {
 	 */
 	private Object getRecursiveFiles(Object[] params) {
 		File workingDir = (File) params[1];
-		JsonNode jsonNode = ((JsonNode) params[0]).get("dir_path");
-		File directory;
-		if (jsonNode != null) {
-			String filePath = jsonNode.textValue();
-			if (StringUtils.isBlank(filePath)) {
-				directory = workingDir;
-			} else {
-				directory = new File(workingDir, filePath);
-			}
-		} else {
-			directory = workingDir;
-		}
+		JsonNode dirPathNode = ((JsonNode) params[0]).get(DIR_PATH_FIELD);
+		File directory = resolveDirFromOptionalPath(workingDir, dirPathNode);
+
 		List<File> listFiles = listFilesRecursively(directory);
 		List<String> files = new ArrayList<>();
-		Object result = null;
+		Object result;
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
-				String relativePath = getRelativePath(workingDir, file, true);
-				files.add(relativePath);
+				files.add(getRelativePath(workingDir, file, true));
 			}
-
 			result = files;
 		} else {
 			result = "No files found in directory.";
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("List files recursively: {}, Result: {}", Arrays.toString(params),
-					StringUtils.abbreviate(Objects.toString(result), 60).replace(Genai.LINE_SEPARATOR, ""));
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("List files recursively: {}, Result: {}", Arrays.toString(params), result);
-		}
+
+		logToolCall("List files recursively", params, result);
 		return result;
 	}
 
@@ -163,23 +171,20 @@ public class FileFunctionTools implements FunctionTools {
 	 *         directory does not exist or is empty
 	 */
 	private Object listFiles(Object[] params) {
-		JsonNode dirNode = ((JsonNode) params[0]).get("dir_path");
-		String filePath = dirNode == null ? null : dirNode.asText();
+		JsonNode dirNode = ((JsonNode) params[0]).get(DIR_PATH_FIELD);
 		File workingDir = (File) params[1];
 		if (logger.isInfoEnabled()) {
-			logger.info("List files: [{}, {}]", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH),
-					workingDir);
+			logger.info("List files: [{}, {}]", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH), workingDir);
 		}
 		logger.debug("List files: [{}, {}]", params[0], workingDir);
 
-		File directory = new File(workingDir, StringUtils.defaultIfBlank(filePath, "."));
+		File directory = resolveDirFromOptionalPath(workingDir, dirNode);
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
 			List<String> result = new ArrayList<>();
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					String relativePath = getRelativePath(workingDir, file, true);
-					result.add(relativePath);
+					result.add(getRelativePath(workingDir, file, true));
 				}
 
 				return StringUtils.join(result, ",");
@@ -349,16 +354,15 @@ public class FileFunctionTools implements FunctionTools {
 		List<File> allFiles = new ArrayList<>();
 		String name = directory.getName();
 		String[] excludeDirs = ProjectLayout.getExcludeDirs();
-		if (!Strings.CS.equalsAny(name, excludeDirs)) {
-			if (directory.exists() && directory.isDirectory()) {
-				File[] files = directory.listFiles();
-				if (files != null) {
-					for (File file : files) {
-						if (file.isFile()) {
-							allFiles.add(file);
-						} else if (file.isDirectory()) {
-							allFiles.addAll(listFilesRecursively(file));
-						}
+		if (!Strings.CS.equalsAny(name, excludeDirs) && directory.exists() && directory.isDirectory()) {
+			// Sonar java:S1066 - merge nested if statements for clarity.
+			File[] files = directory.listFiles();
+			if (files != null) {
+				for (File file : files) {
+					if (file.isFile()) {
+						allFiles.add(file);
+					} else if (file.isDirectory()) {
+						allFiles.addAll(listFilesRecursively(file));
 					}
 				}
 			}

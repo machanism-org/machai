@@ -77,9 +77,9 @@ public class Act extends AbstractGWGoal {
 	/**
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
-	@SuppressWarnings("java:S1700")
+	// Sonar java:S1700 - rename field to a meaningful name
 	@Parameter(property = Ghostwriter.ACT_PROP_NAME, required = false)
-	protected String act;
+	protected String actPrompt;
 
 	/**
 	 * Optional directory containing predefined action definitions.
@@ -179,7 +179,7 @@ public class Act extends AbstractGWGoal {
 	}
 
 	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
-		String savedAct = act;
+		String savedAct = actPrompt;
 		if (savedAct == null) {
 			applyActPrompt(actProcessor.getConfigurator());
 			Properties userProperties = session.getUserProperties();

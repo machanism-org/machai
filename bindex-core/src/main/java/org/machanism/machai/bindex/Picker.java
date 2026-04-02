@@ -92,8 +92,6 @@ public class Picker {
 	/** Result limit for vector search operations. */
 	private static final int VECTOR_SEARCH_LIMITS = 250;
 
-	private String embeddingModelName = "text-embedding-3-small";
-
 	/** MongoDB field name used to store the serialized Bindex JSON payload. */
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 

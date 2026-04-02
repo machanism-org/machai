@@ -1,6 +1,5 @@
 package org.machanism.machai.gw.maven;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
@@ -31,7 +30,7 @@ public class ActProcessTest {
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(processor.getConfigurator()).thenReturn(conf);
 		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn("c:/acts");
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
+		Mockito.when(conf.get(Ghostwriter.EXCLUDES_PROP_NAME, null)).thenReturn(null);
 
 		// Act
 		act.process(processor);
@@ -49,7 +48,7 @@ public class ActProcessTest {
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(processor.getConfigurator()).thenReturn(conf);
 		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn(null);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
+		Mockito.when(conf.get(Ghostwriter.EXCLUDES_PROP_NAME, null)).thenReturn(null);
 
 		// Act
 		act.process(processor);
@@ -72,7 +71,7 @@ public class ActProcessTest {
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(processor.getConfigurator()).thenReturn(conf);
 		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn(null);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.EXCLUDES_PROP_NAME), Mockito.isNull())).thenReturn(null);
+		Mockito.when(conf.get(Ghostwriter.EXCLUDES_PROP_NAME, null)).thenReturn(null);
 
 		// Act
 		act.process(processor);

@@ -38,7 +38,7 @@ inputs = '''
   - If necessary, update the `pom.xml` to add or update dependencies required for static method testing.
 - **Ensure that overall test coverage for the required source folder is at least 90%**
 - Achieve comprehensive coverage of all core logic, edge cases, and error handling scenarios.
-- Refactor or enhance existing tests to improve clarity, maintainability, and coverage where necessary.
+- Refactoring is allowed, if it is strongly required for test coverage.
 - **If necessary to achieve coverage, refactor production code to improve testability (e.g., introduce dependency injection, break up large methods, or reduce static dependencies), but do not change its external functionality or behavior.**
 - Use descriptive test method names and meaningful assertions.
 - Follow the Arrange-Act-Assert (AAA) structure in each test.

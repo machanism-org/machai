@@ -372,15 +372,14 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 				continue;
 			}
 			PathMatcher matcher = getPatternPath(exclude);
-			if (matcher != null) {
-				if (matcher.matches(path)) {
-					return true;
-				}
-			} else {
+			if (matcher == null) {
 				String relative = path.toString();
 				if (Strings.CS.equals(relative, exclude) || Strings.CS.equals(path.getFileName().toString(), exclude)) {
 					return true;
 				}
+			} else if (matcher.matches(path)) {
+				// Sonar java:S135 - removed extra continue by using an else-if.
+				return true;
 			}
 		}
 

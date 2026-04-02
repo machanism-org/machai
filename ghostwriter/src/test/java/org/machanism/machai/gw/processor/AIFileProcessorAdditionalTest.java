@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.Genai;
-import org.machanism.machai.project.layout.ProjectLayout;
 
 class AIFileProcessorAdditionalTest {
 
@@ -30,7 +29,8 @@ class AIFileProcessorAdditionalTest {
 		String scanDir = ".";
 
 		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> processor.scanDocuments(null, scanDir));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> processor.scanDocuments(null, scanDir));
 
 		// Assert
 		assertTrue(ex.getMessage().contains("projectDir"));
@@ -44,7 +44,8 @@ class AIFileProcessorAdditionalTest {
 		String scanDir = "  ";
 
 		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> processor.scanDocuments(projectDir, scanDir));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> processor.scanDocuments(projectDir, scanDir));
 
 		// Assert
 		assertTrue(ex.getMessage().contains("scanDir"));

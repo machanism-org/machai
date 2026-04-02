@@ -7,7 +7,6 @@ import java.nio.file.Files;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.machanism.machai.gw.tools.FileFunctionTools;
 
 class FileFunctionToolsTest {
 
@@ -15,10 +14,23 @@ class FileFunctionToolsTest {
 	File tempDir;
 
 	@Test
-	void getRelativePath_whenNullArgs_returnsNull() {
+	void getRelativePath_whenNullDir_thenReturnsNull() {
 		// Arrange
 		File dir = null;
 		File file = new File(".");
+
+		// Act
+		String result = FileFunctionTools.getRelativePath(dir, file, true);
+
+		// Assert
+		assertNull(result);
+	}
+
+	@Test
+	void getRelativePath_whenNullFile_thenReturnsNull() {
+		// Arrange
+		File dir = tempDir;
+		File file = null;
 
 		// Act
 		String result = FileFunctionTools.getRelativePath(dir, file, true);
@@ -71,7 +83,7 @@ class FileFunctionToolsTest {
 	}
 
 	@Test
-	void getRelativePath_whenNotDescendant_returnsRelativeWithDots() {
+	void getRelativePath_whenNotDescendant_thenReturnsParentRelativePath() {
 		// Arrange
 		File dir = new File(tempDir, "dir");
 		File file = new File(tempDir, "other");
@@ -81,5 +93,18 @@ class FileFunctionToolsTest {
 
 		// Assert
 		assertEquals("../other", result);
+	}
+
+	@Test
+	void getRelativePath_whenEmptyRelativePath_thenReturnsDot() {
+		// Arrange
+		File dir = tempDir;
+		File file = new File(tempDir.getAbsolutePath());
+
+		// Act
+		String result = FileFunctionTools.getRelativePath(dir, file, false);
+
+		// Assert
+		assertEquals(".", result);
 	}
 }

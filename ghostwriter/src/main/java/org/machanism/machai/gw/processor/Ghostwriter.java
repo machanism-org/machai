@@ -22,69 +22,32 @@ import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Command-line entry point for Ghostwriter.
- *
- * <p>
- * This CLI bootstraps configuration, parses command-line options, and invokes a
- * processor to scan a directory tree for supported files. For each file,
- * Ghostwriter extracts embedded {@code @guidance} directives and submits the
- * resulting prompt to the configured GenAI provider.
- * </p>
- *
- * <h2>Usage</h2>
- *
- * <pre>{@code
- * java -jar gw.jar <scanDir> [options]
- * }</pre>
- *
- * <p>
- * The {@code <scanDir>} argument may be a directory path (relative to the
- * configured project root), or a {@code glob:} / {@code regex:} expression as
- * supported by {@link java.nio.file.FileSystem#getPathMatcher(String)}.
- * </p>
- */
 public final class Ghostwriter {
 
-	/**
-	 * Continuation marker used by {@link #readText(String)} to allow users to enter
-	 * multi-line values via standard input.
-	 */
 	public static final String MULTIPLE_LINES_BREAKER = "\\";
 
-	/** Logger for the Ghostwriter application. */
 	private static Logger logger;
-	
+
 	public static final String PROJECT_DIR_PROP_NAME = "project.dir";
 
-	/** Default Ghostwriter properties file name. */
 	public static final String GW_PROPERTIES_FILE_NAME = "gw.properties";
 
-	/** System property key to override the Ghostwriter configuration file path. */
 	public static final String CONFIG_PROP_NAME = "gw.config";
 
-	/** System property key indicating the Ghostwriter home directory. */
 	public static final String HOME_PROP_NAME = "gw.home";
 
-	/** Configuration key specifying the GenAI provider/model to use. */
 	public static final String MODEL_PROP_NAME = "gw.model";
 
-	/** Configuration key containing optional system instructions. */
 	public static final String INSTRUCTIONS_PROP_NAME = "instructions";
 
-	/** Configuration key containing comma-separated scan exclusions. */
 	public static final String EXCLUDES_PROP_NAME = "gw.excludes";
 
-	/** Configuration key containing comma-separated scan exclusions. */
 	public static final String ACTS_LOCATION_PROP_NAME = "acts.location";
 
-	/** Configuration key containing comma-separated scan exclusions. */
 	public static final String ACT_PROP_NAME = "gw.act";
 
-	/** Configuration key enabling multi-threaded processing. */
 	public static final String THREADS_PROP_NAME = "gw.threads";
 
-	/** Configuration key specifying a default scan directory/pattern. */
 	public static final String SCAN_DIR_PROP_NAME = "gw.scanDir";
 
 	public static final String NONRECURSIVE_PROP_NAME = "gw.nonRecursive";
@@ -93,16 +56,8 @@ public final class Ghostwriter {
 
 	public static final String INTERACTIVE_MODE_PROP_NAME = "gw.interactive";
 
-	/** Processor implementation used by this CLI instance. */
 	private final AIFileProcessor processor;
 
-	/**
-	 * Creates a new Ghostwriter CLI instance.
-	 *
-	 * @param genai     provider key/name (including model), e.g.
-	 *                  {@code OpenAI:gpt-5.1}
-	 * @param processor processor implementation
-	 */
 	public Ghostwriter(String genai, AIFileProcessor processor) {
 		if (StringUtils.isBlank(genai)) {
 			throw new IllegalArgumentException("No GenAI provider/model configured. Set '" + MODEL_PROP_NAME
@@ -112,22 +67,24 @@ public final class Ghostwriter {
 		this.processor = processor;
 	}
 
-	/**
-	 * Performs a scan of the provided scan directories/patterns.
-	 *
-	 * @param scanDirs scan directory arguments
-	 * @return exit code (0 for success)
-	 * @throws IOException if scanning fails while reading files
-	 */
+	private static void logScanStart(String scanDir) {
+		logger.info("Starting scan of path: {}", scanDir);
+	}
+
+	private static void logScanFinish(String scanDir) {
+		logger.info("Finished scanning path: {}", scanDir);
+	}
+
+	// Sonar java:S3776 - reduced Cognitive Complexity by extracting logger helpers.
 	public int perform(String[] scanDirs) throws IOException {
 		int exitCode = 0;
 		try {
 			for (String scanDir : scanDirs) {
-				logger.info("Starting scan of path: {}", scanDir);
+				logScanStart(scanDir);
 				File projectDir = processor.getProjectDir();
 
 				processor.scanDocuments(projectDir, scanDir);
-				logger.info("Finished scanning path: {}", scanDir);
+				logScanFinish(scanDir);
 			}
 
 		} catch (ProcessTerminationException e) {
@@ -147,18 +104,6 @@ public final class Ghostwriter {
 		return exitCode;
 	}
 
-	/**
-	 * Initializes Ghostwriter configuration.
-	 *
-	 * <p>
-	 * The configuration file defaults to {@link #GW_PROPERTIES_FILE_NAME} in the
-	 * resolved home directory, but can be overridden via the
-	 * {@link #CONFIG_PROP_NAME} system property.
-	 * </p>
-	 *
-	 * @param projectDir optional root directory used to resolve the home directory
-	 * @return initialized configuration
-	 */
 	static PropertiesConfigurator initializeConfiguration(File projectDir) {
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
@@ -191,12 +136,6 @@ public final class Ghostwriter {
 		return config;
 	}
 
-	/**
-	 * Prints the Ghostwriter CLI help text, including usage instructions, option
-	 * descriptions, and example commands.
-	 *
-	 * @param options the configured CLI options to display in the help message
-	 */
 	static void help(Options options) {
 		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n\n"
 				+ "Usage:\n  java -jar gw.jar <scanDir> [options]\n\n"
@@ -213,17 +152,6 @@ public final class Ghostwriter {
 		formatter.printHelp("java -jar gw.jar <scanDir> [options]", header, options, footer, true);
 	}
 
-	/**
-	 * Reads multi-line text from standard input.
-	 *
-	 * <p>
-	 * Input is read until a line does not end with {@link #MULTIPLE_LINES_BREAKER}
-	 * or until EOF.
-	 * </p>
-	 *
-	 * @param prompt prompt to display before reading
-	 * @return the entered text (never {@code null})
-	 */
 	@SuppressWarnings("java:S106")
 	public static String readText(String prompt) {
 		System.out.print(prompt);
@@ -246,11 +174,6 @@ public final class Ghostwriter {
 		return sb.toString();
 	}
 
-	/**
-	 * Sets file/directory excludes.
-	 *
-	 * @param excludes exclude list
-	 */
 	public void setExcludes(String[] excludes) {
 		if (excludes != null) {
 			logger.info("Excludes: {}", Arrays.toString(excludes));
@@ -258,11 +181,6 @@ public final class Ghostwriter {
 		}
 	}
 
-	/**
-	 * Sets the system instructions used for provider execution.
-	 *
-	 * @param instructions instruction text, URL, or {@code file:} reference
-	 */
 	public void setInstructions(String instructions) {
 		if (instructions != null) {
 			if (logger.isInfoEnabled()) {
@@ -273,32 +191,16 @@ public final class Ghostwriter {
 		}
 	}
 
-	/**
-	 * Sets default guidance applied when embedded guidance tag directives are not
-	 * present.
-	 *
-	 * @param defaultGuidance default guidance text, URL, or {@code file:} reference
-	 */
 	public void setDefaultPrompt(String defaultGuidance) {
 		if (defaultGuidance != null) {
 			processor.setDefaultPrompt(defaultGuidance);
 		}
 	}
 
-	/**
-	 * Enables or disables request input logging.
-	 *
-	 * @param logInputs {@code true} to log inputs
-	 */
 	public void setLogInputs(boolean logInputs) {
 		processor.setLogInputs(logInputs);
 	}
 
-	/**
-	 * Enables or disables multi-threaded module processing.
-	 *
-	 * @param multiThreadCount the configured worker count
-	 */
 	public void setDegreeOfConcurrency(String multiThreadCount) {
 		if (multiThreadCount != null) {
 			int value = Integer.parseInt(multiThreadCount);
@@ -370,13 +272,6 @@ public final class Ghostwriter {
 		return scanDirs;
 	}
 
-	/**
-	 * Main entry point.
-	 *
-	 * @param args command line arguments
-	 * @throws IOException    if scanning fails while reading files
-	 * @throws ParseException if command-line arguments cannot be parsed
-	 */
 	public static void main(String[] args) throws IOException, ParseException {
 		Options options = new Options();
 		Option helpOption = new Option("h", "help", false, "Show this help message and exit.");
@@ -390,7 +285,8 @@ public final class Ghostwriter {
 		Option projectDirOpt = new Option("d", PROJECT_DIR_PROP_NAME, true,
 				"Specify the path to the root directory for file processing.");
 
-		Option genaiOpt = new Option("m", "model", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
+		Option genaiOpt = new Option("m", "model", true,
+				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
 
 		Option instructionsOpt = Option.builder("i").longOpt(INSTRUCTIONS_PROP_NAME)
 				.desc("Specify system instructions as plain text, by URL, or by file path. "

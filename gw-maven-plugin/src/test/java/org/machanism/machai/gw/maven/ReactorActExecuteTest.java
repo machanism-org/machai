@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
-import org.machanism.machai.project.layout.ProjectLayout;
 
 public class ReactorActExecuteTest {
 
@@ -99,7 +98,11 @@ public class ReactorActExecuteTest {
 		goal.execute();
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Accepted
+	 * Sonar java:S1172 - kept parameter 'type' to aid type safety at call sites and for readability.
+	 */
+	@SuppressWarnings({ "java:S1172", "unchecked" })
 	private static <T> T getPrivateField(Object target, String fieldName, Class<T> type) throws Exception {
 		Class<?> c = target.getClass();
 		while (c != null) {

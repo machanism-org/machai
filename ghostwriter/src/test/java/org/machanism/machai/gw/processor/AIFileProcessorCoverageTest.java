@@ -20,10 +20,6 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.project.layout.DefaultProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
-/**
- * Additional tests focused on previously uncovered branches/paths in
- * {@link AIFileProcessor}.
- */
 class AIFileProcessorCoverageTest {
 
 	@TempDir
@@ -31,16 +27,13 @@ class AIFileProcessorCoverageTest {
 
 	@Test
 	void parseScanDir_whenDot_usesProjectDirAndDefaultPromptNull_addsRecursiveGlob() {
-		// Arrange
 		File projectDir = tempDir.toFile();
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "Any:Model");
 		processor.setDefaultPrompt(null);
 
-		// Act
 		String pattern = processor.parseScanDir(projectDir, ".");
 
-		// Assert
 		assertTrue(pattern.startsWith("glob:"), "Expected glob pattern");
 		assertTrue(pattern.endsWith("{,/**}"), "Expected recursive glob when defaultPrompt is null");
 		assertEquals(projectDir.getAbsolutePath(), processor.getScanDir().getAbsolutePath(),
@@ -49,7 +42,6 @@ class AIFileProcessorCoverageTest {
 
 	@Test
 	void parseScanDir_whenAbsoluteOutsideProject_throwsIllegalArgumentException() {
-		// Arrange
 		File projectDir = tempDir.toFile();
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "Any:Model");
@@ -59,7 +51,6 @@ class AIFileProcessorCoverageTest {
 		}
 		final String outsidePath = outside.getAbsolutePath();
 
-		// Act + Assert
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 				() -> processor.parseScanDir(projectDir, outsidePath));
 		assertTrue(ex.getMessage().contains("must be located within"));
@@ -67,11 +58,9 @@ class AIFileProcessorCoverageTest {
 
 	@Test
 	void scanDocuments_whenProjectDirIsNull_throwsIllegalArgumentException() {
-		// Arrange
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Any:Model");
 
-		// Act + Assert
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 				() -> processor.scanDocuments(null, "src"));
 		assertEquals("projectDir must not be null", ex.getMessage());
@@ -79,11 +68,9 @@ class AIFileProcessorCoverageTest {
 
 	@Test
 	void scanDocuments_whenScanDirIsBlank_throwsIllegalArgumentException() {
-		// Arrange
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Any:Model");
 
-		// Act + Assert
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 				() -> processor.scanDocuments(tempDir.toFile(), "  "));
 		assertEquals("scanDir must not be blank", ex.getMessage());
@@ -91,11 +78,9 @@ class AIFileProcessorCoverageTest {
 
 	@Test
 	void scanDocuments_whenScanDirEqualsProjectDirAbsolute_setsScanDirToProjectDir() throws Exception {
-		// Arrange
 		File projectDir = tempDir.toFile();
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 
-		// Avoid heavy scanning by overriding scanFolder to no-op.
 		AIFileProcessor noScan = new AIFileProcessor(projectDir, configurator, "Any:Model") {
 			@Override
 			public void scanFolder(File projectDir) {
@@ -103,31 +88,25 @@ class AIFileProcessorCoverageTest {
 			}
 		};
 
-		// Act
 		noScan.scanDocuments(projectDir, projectDir.getAbsolutePath());
 
-		// Assert
 		assertEquals(projectDir.getAbsolutePath(), noScan.getScanDir().getAbsolutePath());
 		assertNull(noScan.getPathMatcher(), "PathMatcher should remain null when scanDir equals projectDir");
 	}
 
 	@Test
 	void getDirInfoLine_whenAllMissingOrNull_returnsNotDefined() {
-		// Arrange
 		File projectDir = tempDir.toFile();
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "Any:Model");
 
-		// Act
 		String line = processor.getDirInfoLine(java.util.Arrays.asList(null, "missing-dir"), projectDir);
 
-		// Assert
 		assertEquals(AIFileProcessor.NOT_DEFINED_VALUE, line);
 	}
 
 	@Test
 	void getProjectStructureDescription_whenNullNames_usesNotDefinedAndIncludesRelativeFile() throws IOException {
-		// Arrange
 		File projectDir = tempDir.toFile();
 		Files.createDirectories(tempDir.resolve("src/main/java"));
 		Path filePath = tempDir.resolve("src/main/java/X.java");
@@ -138,10 +117,8 @@ class AIFileProcessorCoverageTest {
 
 		ProjectLayout layout = new DefaultProjectLayout().projectDir(projectDir);
 
-		// Act
 		String info = processor.getProjectStructureDescription(layout, filePath.toFile());
 
-		// Assert
 		assertNotNull(info);
 		assertTrue(info.contains(AIFileProcessor.NOT_DEFINED_VALUE), "Expected 'not defined' placeholder to appear");
 		assertTrue(info.contains("src\\main\\java\\X.java") || info.contains("src/main/java/X.java"),
@@ -149,34 +126,31 @@ class AIFileProcessorCoverageTest {
 	}
 
 	@Test
-	void processFolder_wrapsIOExceptionIntoIllegalArgumentException() {
-		// Arrange
+	void processFolder_wrapsExceptionIntoIllegalArgumentException() {
 		File projectDir = tempDir.toFile();
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 
 		AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "Any:Model") {
 			@Override
-			public String process(ProjectLayout projectLayout, File file, String instructions, String prompt) throws IOException {
-				throw new IOException("boom");
+			public String process(ProjectLayout projectLayout, File file, String instructions, String prompt) {
+				throw new IllegalArgumentException(new IOException("boom"));
 			}
 		};
 		processor.setDefaultPrompt("x");
 
 		ProjectLayout layout = new DefaultProjectLayout().projectDir(projectDir);
 
-		// Act + Assert
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> processor.processFolder(layout));
-		assertTrue(ex.getCause() instanceof IOException);
+		assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		assertTrue(ex.getCause().getCause() instanceof IOException);
 	}
 
 	@Test
 	void readFromFilePath_whenMissing_throwsIllegalArgumentExceptionWithPathInMessage() {
-		// Arrange
 		File projectDir = tempDir.toFile();
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "Any:Model");
 
-		// Act + Assert
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
 				() -> processor.readFromFilePath("does-not-exist.txt"));
 		assertTrue(ex.getMessage().contains("Failed to read file:"));
@@ -185,21 +159,17 @@ class AIFileProcessorCoverageTest {
 
 	@Test
 	void tryToGetInstructionsFromReference_whenNull_returnsNull_viaReflection() throws Exception {
-		// Arrange
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 		Method m = AIFileProcessor.class.getDeclaredMethod("tryToGetInstructionsFromReference", String.class);
 		m.setAccessible(true);
 
-		// Act
 		Object result = invokeTryToGetInstructionsFromReference(m, processor, null);
 
-		// Assert
 		assertNull(result);
 	}
 
 	@Test
 	void tryToGetInstructionsFromReference_whenFilePrefix_readsAndParses_viaReflection() throws Exception {
-		// Arrange
 		Path p = tempDir.resolve("i.txt");
 		Files.write(p, "a\n\n b".getBytes(StandardCharsets.UTF_8));
 
@@ -207,10 +177,8 @@ class AIFileProcessorCoverageTest {
 		Method m = AIFileProcessor.class.getDeclaredMethod("tryToGetInstructionsFromReference", String.class);
 		m.setAccessible(true);
 
-		// Act
 		String result = (String) invokeTryToGetInstructionsFromReference(m, processor, "file:" + p.toAbsolutePath());
 
-		// Assert
 		assertNotNull(result);
 		assertTrue(result.contains("a"));
 		assertTrue(result.contains("b"));
@@ -219,25 +187,29 @@ class AIFileProcessorCoverageTest {
 
 	@Test
 	void tryToGetInstructionsFromReference_whenHttpPrefix_withInvalidUrl_throwsInvocationCauseIOException() throws Exception {
-		// Arrange
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 		Method m = AIFileProcessor.class.getDeclaredMethod("tryToGetInstructionsFromReference", String.class);
 		m.setAccessible(true);
 		String reference = "http://localhost:0/does-not-exist";
 
-		// Sonar java:S5778 - extracted helper so the assertThrows lambda contains only one invocation.
 		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
-				() -> invokeTryToGetInstructionsFromReference(m, processor, reference));
+				invokeTryToGetInstructionsFromReferenceExecutable(m, processor, reference));
 
-		// Assert
 		assertTrue(ex.getCause() instanceof IOException, "Expected IOException from URL read");
 	}
 
-	/**
-	* FalsePositive
-	* Sonar java:S5778 reports multiple throwable invocations due to reflection internals; the test already uses a helper so the lambda has a single call.
-	*/
-	@SuppressWarnings("java:S5778")
+	// Sonar java:S5778 - ensure the lambda contains only a single call that may throw.
+	private static org.junit.jupiter.api.function.Executable invokeTryToGetInstructionsFromReferenceExecutable(Method m,
+			AIFileProcessor processor, String reference) {
+		return () -> {
+			try {
+				invokeTryToGetInstructionsFromReference(m, processor, reference);
+			} catch (IllegalAccessException e) {
+				throw new AssertionError(e);
+			}
+		};
+	}
+
 	private static Object invokeTryToGetInstructionsFromReference(Method m, AIFileProcessor processor, String reference)
 			throws IllegalAccessException, InvocationTargetException {
 		return m.invoke(processor, reference);

@@ -38,8 +38,11 @@ class ReviewerTest {
 	void perform_defaultImplementationContract_isInvokableByImplementations() {
 		// Arrange
 		Reviewer reviewer = new TestReviewer();
+		File projectDir = new File(".");
+		File file = new File("x");
 
 		// Act + Assert
-		assertThrows(UnsupportedOperationException.class, () -> reviewer.perform(new File("."), new File("x")));
+		// Sonar java:S5778 - ensure lambda has only one potentially-throwing invocation.
+		assertThrows(UnsupportedOperationException.class, () -> reviewer.perform(projectDir, file));
 	}
 }

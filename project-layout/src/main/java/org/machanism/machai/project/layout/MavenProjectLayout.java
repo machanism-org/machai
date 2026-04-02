@@ -11,8 +11,6 @@ import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.gradle.internal.impldep.javax.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A Maven-specific {@link ProjectLayout} implementation.
@@ -33,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MavenProjectLayout extends ProjectLayout {
 
-	private static final Logger logger = LoggerFactory.getLogger(MavenProjectLayout.class);
+	// Sonar java:S1068 - removed unused logger field.
 	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
 	private Model model;

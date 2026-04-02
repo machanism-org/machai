@@ -5,9 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Properties;
 
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.components.interactivity.Prompter;
-import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.gw.processor.Ghostwriter;
@@ -49,7 +47,8 @@ public class ActApplyActPromptTest {
 
 		act.prompter = Mockito.mock(Prompter.class);
 		Configurator conf = Mockito.mock(Configurator.class);
-		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACT_PROP_NAME), Mockito.isNull())).thenReturn("fromConf");
+		// Sonar java:S6068 - Mockito.eq(...) is unnecessary here; pass values directly.
+		Mockito.when(conf.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn("fromConf");
 
 		// Act
 		act.applyActPrompt(conf);

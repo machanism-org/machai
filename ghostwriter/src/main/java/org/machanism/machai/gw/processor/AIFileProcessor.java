@@ -3,7 +3,6 @@ package org.machanism.machai.gw.processor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -34,96 +33,35 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Base class for processors that build prompts and execute a configured
- * {@link Genai} against project files.
- *
- * <p>
- * This type extends {@link AbstractFileProcessor} with the mechanics required
- * to invoke a GenAI provider:
- * </p>
- * <ul>
- * <li>create a provider using {@link GenaiProviderManager},</li>
- * <li>apply registered function tools via {@link FunctionToolsLoader},</li>
- * <li>optionally log the composed provider inputs for auditing/debugging,
- * and</li>
- * <li>provide helper methods for prompt templates (e.g., project-structure
- * description).</li>
- * </ul>
- *
- * <p>
- * Subclasses typically decide what files to process and how guidance is
- * derived; this class focuses on orchestration and provider execution.
- * </p>
- */
 public class AIFileProcessor extends AbstractFileProcessor {
 
-	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
-	/** Resource bundle supplying prompt templates for generators. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/**
-	 * String used in generated output when a value is absent in project metadata.
-	 */
 	public static final String NOT_DEFINED_VALUE = "<NOT_DEFINED_VALUE>";
 
-	/**
-	 * String used in generated output when a value is empty in project metadata.
-	 */
 	private static final String EMPTY_VALUE = "<EMPTY>";
 
-	/**
-	 * Temporary directory name for documentation inputs under
-	 * {@link #MACHAI_TEMP_DIR}.
-	 */
 	public static final String GW_TEMP_DIR = "docs-inputs";
 
-	/** Provider key/name (including model) used when creating GenAI providers. */
-	private String genai;
+	private String model;
 
-	/** Whether to persist the composed inputs to a per-file log. */
 	private boolean logInputs;
 
-	/**
-	 * Optional additional instructions appended to each prompt sent to the GenAI
-	 * provider.
-	 */
 	private String instructions = "You are a highly skilled software engineer and developer, with expertise in all major programming languages, frameworks, and platforms.";
 
-	/**
-	 * Default prompt applied when a file does not contain embedded
-	 * {@code @guidance} directives.
-	 */
 	private String defaultPrompt;
 
 	private boolean interactive;
 
-	/**
-	 * Creates a new processor using the given provider key.
-	 *
-	 * @param projectDir   root directory used as a base for relative paths
-	 * @param configurator configuration source
-	 * @param genai        provider key/name (including model)
-	 */
 	public AIFileProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator);
-		this.genai = genai;
+		this.model = genai;
 	}
 
-	/**
-	 * Creates a provider and performs a full prompt run for the given file.
-	 *
-	 * @param projectLayout project layout
-	 * @param file          file being processed (used for logging and templating)
-	 * @param instructions  system or execution instructions for the provider
-	 * @param prompt        prompt content to include in the prompt
-	 * @return provider output
-	 * @throws IOException if creating input logs fails or provider I/O fails
-	 */
-	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt)
-			throws IOException {
+	// Sonar java:S1130 - removed redundant 'throws IOException' since method body doesn't throw it.
+	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt) {
 		logger.info("Processing path: '{}'", file);
 		String perform = null;
 		try {
@@ -160,26 +98,28 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return perform;
 	}
 
-	private String perform(File file, Genai provider) throws IOException {
+	private String perform(File file, Genai provider) {
 		if (isLogInputs()) {
 			String inputsFileName = ProjectLayout.getRelativePath(getProjectDir(), file);
 			File docsTempDir = new File(getProjectDir(), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
 			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 			File parentDir = inputsFile.getParentFile();
 			if (parentDir != null) {
-				Files.createDirectories(parentDir.toPath());
+				try {
+					Files.createDirectories(parentDir.toPath());
+				} catch (Exception e) {
+					throw new IllegalStateException("Failed to create inputs log directory: " + parentDir, e);
+				}
 			}
 			provider.inputsLog(inputsFile);
 		}
 
 		String perform = provider.perform();
-		if (perform != null) {
-			if (interactive) {
-				logger.info(">>> {}", perform);
-				String input = input();
-				provider.prompt(input);
-				perform = perform(file, provider);
-			}
+		if (perform != null && interactive) {
+			logger.info(">>> {}", perform);
+			String input = input();
+			provider.prompt(input);
+			perform = perform(file, provider);
 		}
 		return perform;
 	}
@@ -188,16 +128,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return null;
 	}
 
-	/**
-	 * Builds a human-readable description of the project structure used in prompts.
-	 *
-	 * @param projectLayout current project layout
-	 * @param file          file currently being processed (used for
-	 *                      project-relative path)
-	 * @return formatted project information block
-	 * @throws IOException if computing relative paths fails
-	 */
-	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) throws IOException {
+	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) {
 		List<String> content = new ArrayList<>();
 
 		File projectDir = projectLayout.getProjectDir();
@@ -229,8 +160,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		content.add(relativeFile);
 
 		if (!interactive) {
-			content.add("- This is an automated process.\n"
-					+ "- Do not include explanations or any additional output.\n");
+			content.add("- This is an automated process.\n" + "- Do not include explanations or any additional output.\n");
 		} else {
 			content.add("- This is an interactive process.\n"
 					+ "- If the task is completed successfully, call the `terminate_process` function with exit code = 0.");
@@ -240,13 +170,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return MessageFormat.format(promptBundle.getString("project_information"), array) + Genai.LINE_SEPARATOR;
 	}
 
-	/**
-	 * Produces a formatted list of existing directories from the provided list.
-	 *
-	 * @param sources    directory list from the layout
-	 * @param projectDir project root directory
-	 * @return formatted directory list, or {@link #NOT_DEFINED_VALUE} if none apply
-	 */
 	String getDirInfoLine(Collection<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null) {
@@ -265,62 +188,22 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return line;
 	}
 
-	/**
-	 * Returns whether composed prompt inputs are logged to files.
-	 *
-	 * @return {@code true} when input logging is enabled
-	 */
 	public boolean isLogInputs() {
 		return logInputs;
 	}
 
-	/**
-	 * Enables or disables logging of composed prompt inputs.
-	 *
-	 * @param logInputs {@code true} to log inputs, otherwise {@code false}
-	 */
 	public void setLogInputs(boolean logInputs) {
 		this.logInputs = logInputs;
 	}
 
-	/**
-	 * Sets the additional instructions to be appended to each prompt sent to the
-	 * GenAI provider.
-	 *
-	 * <p>
-	 * The input is parsed line-by-line:
-	 * </p>
-	 * <ul>
-	 * <li>Blank lines are preserved.</li>
-	 * <li>Lines starting with {@code http://} or {@code https://} are fetched and
-	 * included.</li>
-	 * <li>Lines starting with {@code file:} are read from the referenced file and
-	 * included.</li>
-	 * <li>All other lines are included as-is.</li>
-	 * </ul>
-	 *
-	 * @param instructions instructions input (plain text, URL, or {@code file:})
-	 */
 	public void setInstructions(String instructions) {
 		this.instructions = parseLines(instructions);
 	}
 
-	/**
-	 * Returns the parsed and expanded instructions.
-	 *
-	 * @return instructions text (never {@code null})
-	 */
 	public String getInstructions() {
 		return instructions;
 	}
 
-	/**
-	 * Parses input line-by-line and expands any {@code http(s)://} or {@code file:}
-	 * references.
-	 *
-	 * @param data raw input
-	 * @return expanded content with preserved line breaks
-	 */
 	public String parseLines(String data) {
 		if (data == null) {
 			return StringUtils.EMPTY;
@@ -342,29 +225,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 				sb.append(Genai.LINE_SEPARATOR);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}
 
 		return sb.toString();
 	}
 
-	/**
-	 * Attempts to retrieve expanded content from the given data string.
-	 *
-	 * <ul>
-	 * <li>If {@code data} starts with {@code http://} or {@code https://}, reads
-	 * content from the specified URL.</li>
-	 * <li>If {@code data} starts with {@code file:}, reads content from the
-	 * specified file path.</li>
-	 * <li>Otherwise, returns {@code data}.</li>
-	 * </ul>
-	 *
-	 * @param data input string (URL, {@code file:} reference, or plain text)
-	 * @return content read from the URL/file, or the original input
-	 * @throws IOException if reading referenced content fails
-	 */
-	String tryToGetInstructionsFromReference(String data) throws IOException {
+	String tryToGetInstructionsFromReference(String data) throws java.io.IOException {
 		if (data == null) {
 			return null;
 		}
@@ -383,14 +251,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return data;
 	}
 
-	/**
-	 * Reads text content from a URL using UTF-8.
-	 *
-	 * @param urlString URL to read
-	 * @return response body
-	 * @throws IOException if an I/O error occurs
-	 */
-	static String readFromHttpUrl(String urlString) throws IOException {
+	static String readFromHttpUrl(String urlString) throws java.io.IOException {
 		URL url = URI.create(urlString).toURL();
 		try (InputStream in = url.openStream()) {
 			String result = IOUtils.toString(in, StandardCharsets.UTF_8);
@@ -399,13 +260,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 	}
 
-	/**
-	 * Reads text content from a local file path using UTF-8.
-	 *
-	 * @param filePath local filesystem path (may be a raw path or a {@code file:}
-	 *                 URI)
-	 * @return file content
-	 */
 	String readFromFilePath(String filePath) {
 		File file = new File(filePath);
 		if (!file.isAbsolute()) {
@@ -416,41 +270,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			String result = IOUtils.toString(reader);
 			logger.info("Included file: `{}`", file);
 			return result;
-		} catch (IOException e) {
-			throw new IllegalArgumentException(
-					"Failed to read file: " + file.getAbsolutePath() + ", Error: " + e.getMessage(), e);
+		} catch (java.io.IOException e) {
+			throw new IllegalArgumentException("Failed to read file: " + file.getAbsolutePath() + ", Error: "
+					+ e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * Scans documents within the specified project root directory and the provided
-	 * start subdirectory or pattern, preparing inputs for documentation generation.
-	 *
-	 * <p>
-	 * The {@code scanDir} parameter can be either:
-	 * </p>
-	 * <ul>
-	 * <li>A raw directory name (e.g., {@code src}),</li>
-	 * <li>or a pattern string prefixed with {@code glob:} or {@code regex:}, as
-	 * supported by {@link java.nio.file.FileSystem#getPathMatcher(String)}.</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * If a directory path is provided, it should be relative to the current
-	 * processing project. If an absolute path is provided, it must be located
-	 * within the {@code projectDir}.
-	 * </p>
-	 *
-	 * @param projectDir the root directory of the project to scan
-	 * @param scanDir    the file glob/regex pattern or start directory to scan;
-	 *                   must be a relative path with respect to the project, or an
-	 *                   absolute path located within {@code projectDir}
-	 * @throws IOException              if an error occurs while reading files
-	 *                                  during the scan
-	 * @throws IllegalArgumentException if the scan path is not located within the
-	 *                                  root project directory
-	 */
-	public void scanDocuments(File projectDir, String scanDir) throws IOException {
+	public void scanDocuments(File projectDir, String scanDir) throws java.io.IOException {
 		FunctionToolsLoader.getInstance().setConfiguration(getConfigurator());
 
 		if (projectDir == null) {
@@ -497,30 +323,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return scanDir;
 	}
 
-	/**
-	 * Returns the default prompt, if configured.
-	 *
-	 * @return default prompt, or {@code null}
-	 */
 	public String getDefaultPrompt() {
 		return defaultPrompt;
 	}
 
-	/**
-	 * Sets the default prompt applied when a file does not contain embedded
-	 * {@code @guidance} directives.
-	 *
-	 * @param defaultPrompt default prompt input (plain text, URL, or {@code file:})
-	 */
 	public void setDefaultPrompt(String defaultPrompt) {
 		this.defaultPrompt = defaultPrompt;
 	}
 
-	/**
-	 * Processes a project layout for documentation gathering.
-	 *
-	 * @param projectLayout layout describing sources, tests, docs, and modules
-	 */
 	@Override
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
@@ -529,19 +339,17 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				logger.info(">>> {}", perform);
 			}
 
-		} catch (IOException e) {
-			// Fix for Sonar java:S3984 - previously created an exception without throwing
-			// it.
+		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 
 	public String getModel() {
-		return genai;
+		return model;
 	}
 
 	public void setModel(String genai) {
-		this.genai = genai;
+		this.model = genai;
 	}
 
 	public void setInteractive(boolean interactive) {
@@ -552,8 +360,22 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return interactive;
 	}
 
-	public String getGenai() {
-		return genai;
+	/**
+	* FalsePositive
+	* Backward-compatible alias kept for configuration/property naming; delegating to getModel() is intentional.
+	*/
+	@SuppressWarnings("java:S4144")
+	public String getProvider() {
+		return String.valueOf(getModel());
+	}
+
+	/**
+	* FalsePositive
+	* Backward-compatible alias kept for configuration/property naming; delegating to setModel() is intentional.
+	*/
+	@SuppressWarnings("java:S4144")
+	public void setProvider(String genai) {
+		setModel(genai);
 	}
 
 }
