@@ -2,19 +2,19 @@ Ghostwriter CLI
 
 Application Overview
 
-Machai Ghostwriter is a repository-wide automation engine delivered as a Java CLI. It scans a project directory (source code, tests, documentation, diagrams, and other assets), extracts embedded "@guidance" directives from files (or applies a default prompt when guidance is absent), builds prompts that include project context, and uses a configured GenAI provider/model to generate or update content in-place.
+Machai Ghostwriter is a repository-wide automation engine delivered as a Java CLI. It scans a project directory (source code, tests, documentation, diagrams, and other assets), extracts embedded "@guidance" directives from files, and uses a configured GenAI provider/model to generate or update content in-place—turning your repository into a self-describing, continuously maintained knowledge base.
 
 Conceptual foundation (Guided File Processing):
 https://www.machanism.org/guided-file-processing/index.html
 
 Key features
-- Processes arbitrary project files (source, tests, Markdown, site content, diagrams, text).
-- Targets files by directory, glob matcher (glob:...), or regex matcher (regex:...), with configurable excludes.
-- Guidance-first prompting via embedded "@guidance" directives in project files.
-- Optional system instructions (plain text, URLs, or file: references).
-- Optional request input logging for auditing/debugging (--logInputs).
-- Act mode for running predefined prompt templates.
-- Configurable concurrency via worker threads (--threads).
+- Scans directories or patterns (raw paths, glob: patterns, regex: patterns).
+- Extracts embedded "@guidance" directives from project files and uses them as the source of truth.
+- Supports system instructions from inline text, URL content, or file: references.
+- Excludes paths via configuration or CLI.
+- Optional Act mode for executing predefined prompts.
+- Configurable degree of concurrency via worker threads (--threads).
+- Optional request input logging to dedicated log files (--logInputs).
 
 Typical use cases
 - Generate or update documentation across a repository.
@@ -30,10 +30,11 @@ Installation Instructions
 
 Prerequisites
 - Java 8.
+- Network access to your selected GenAI provider endpoint (depending on provider).
 - A configured GenAI provider/model:
   - Property: gw.model
   - Or CLI option: -m / --model
-- (Optional) Configuration file gw.properties in the Ghostwriter home directory (gw.home).
+- (Optional) Configuration file gw.properties in the resolved Ghostwriter home directory.
 
 Build / install
 - Build from source with Maven from the repository root.
@@ -43,9 +44,9 @@ Configuration file location
 - Default configuration file name: gw.properties
 - Home directory resolution (used to locate gw.properties):
   1) -Dgw.home=<path>
-  2) otherwise, the CLI projectDir (if provided)
+  2) otherwise, the CLI project directory (-d/--project.dir) if provided
   3) otherwise, the current user directory
-- Override config file name/path (resolved relative to gw.home):
+- Override config file path/name (resolved relative to gw.home):
   -Dgw.config=gw.properties
   -Dgw.config=conf/gw.properties
 
@@ -118,7 +119,7 @@ Configuration properties (from org.machanism.machai.gw.processor.Ghostwriter)
 - Default: unset.
 - Usage context: used by processor implementation(s).
 
-10) inputs (genai.logInputs)
+10) inputs (Genai.LOG_INPUTS_PROP_NAME)
 - Description: Enables request input logging to dedicated log files.
 - Default: false.
 - Usage context: from gw.properties; can also be enabled via -l/--logInputs.
@@ -142,9 +143,9 @@ How configuration values are interpreted
 Instructions (-i/--instructions and the instructions property)
 - Input is processed line-by-line:
   - blank lines preserved
-  - lines starting with http:// or https:// are fetched and included
-  - lines starting with file: are read and included (relative paths resolved against the project directory)
-  - other lines are included as-is
+  - lines starting with http:// or https:// are loaded from the specified URL
+  - lines starting with file: are loaded from the specified file path
+  - other lines are used as-is
 - Multi-line stdin input ends when a line does not end with "\\" (backslash).
 
 CLI options summary
@@ -221,7 +222,7 @@ Common issues
 Logs and debug
 - Standard logs are written via SLF4J (logging backend depends on the runtime classpath).
 - Provider usage is logged at the end of execution.
-- If -l/--logInputs is enabled (or genai.logInputs=true), Ghostwriter writes dedicated log files containing provider request inputs.
+- If -l/--logInputs is enabled (or inputs=true), Ghostwriter writes dedicated log files containing provider request inputs.
 
 
 Contact & Documentation

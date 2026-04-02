@@ -10,7 +10,7 @@
 	<fileSets>
 		<fileSet>
 			<outputDirectory>/</outputDirectory>
-			<directory>src/assembly/files</directory>
+			<directory>src/pack/files</directory>
 			<includes>
 				<include>**</include>
 			</includes>
