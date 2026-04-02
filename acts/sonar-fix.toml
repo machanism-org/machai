@@ -1,7 +1,7 @@
 inputs = '''
 # Context
 
-- This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task.
+- This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
 - Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
 - Do not change variable plaiceholder `${...}` to `%...%`, it should be use as is because will be change by the agent application.
 - The main source and resource files are located in: `[Main Source & Resource Folders]`.
