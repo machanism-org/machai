@@ -19,7 +19,6 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
-import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +54,8 @@ public final class Ghostwriter {
 
 	/** Logger for the Ghostwriter application. */
 	private static Logger logger;
+	
+	public static final String PROJECT_DIR_PROP_NAME = "project.dir";
 
 	/** Default Ghostwriter properties file name. */
 	public static final String GW_PROPERTIES_FILE_NAME = "gw.properties";
@@ -386,7 +387,7 @@ public final class Ghostwriter {
 				.desc("The degree of concurrency for the processing to improve performance.")
 				.hasArg(true).build();
 
-		Option projectDirOpt = new Option("d", ProjectLayout.PROJECT_DIR_PROP_NAME, true,
+		Option projectDirOpt = new Option("d", PROJECT_DIR_PROP_NAME, true,
 				"Specify the path to the root directory for file processing.");
 
 		Option genaiOpt = new Option("m", "model", true, "Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1').");
@@ -467,7 +468,7 @@ public final class Ghostwriter {
 		}
 
 		if (projectDir == null) {
-			projectDir = config.getFile(ProjectLayout.PROJECT_DIR_PROP_NAME, null);
+			projectDir = config.getFile(PROJECT_DIR_PROP_NAME, null);
 			if (projectDir == null) {
 				projectDir = SystemUtils.getUserDir();
 			}

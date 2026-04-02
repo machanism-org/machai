@@ -6,209 +6,30 @@ For each property, provide its name, description, default value (if any), and us
 canonical: https://machai.machanism.org/ghostwriter/preparation-to-start.html
 ---
 
-# Preparation to Start
+## Ghostwriter configuration properties
 
-## Prerequisites
+The Ghostwriter CLI reads configuration from a properties file (default: `gw.properties`) and from system properties (for example: `-Dgw.home=...`). Some values can also be overridden via CLI options.
 
-Before you begin, ensure your environment meets the following requirements:
+### System properties
 
-- **Java Development Kit (JDK) 8 or higher**
-  [Download JDK](https://adoptopenjdk.net/) or use your system’s package manager.
-
-- **Active subscription to OpenAI or CodeMie API service**
-  You must have a valid and active subscription to either the OpenAI or CodeMie API service to access GenAI features in Ghostwriter.
-  Make sure you have your API credentials ready.
-
-## Installation Steps
-
-### 1. Download the Ghostwriter CLI Bundle
-
-Get the latest Ghostwriter CLI bundle:
-[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/gw.zip/download)
-
-### 2. Extract the Bundle
-
-Unpack the downloaded archive (`gw.zip`) to a dedicated folder of your choice.
-
-### 3. Add the Folder to Your System PATH
-
-Update your system’s PATH environment variable to include the folder where you extracted Ghostwriter CLI.
-This allows you to run the CLI from any directory.
-
-### 4. Set the `GW_HOME` Environment Variable
-
-Create an environment variable named `GW_HOME` and set its value to the path of the extracted folder.
-
-#### Example Setup
-
-**Windows:**
-1. Extract `gw.zip` to `C:\machai\ghostwriter`
-2. Add `C:\machai\ghostwriter` to your PATH
-3. Set `GW_HOME` to `C:\machai\ghostwriter`
-
-**Linux/macOS:**
-1. Extract `gw.zip` to `/opt/machai/ghostwriter`
-2. Add `/opt/machai/ghostwriter` to your PATH (e.g., in `.bashrc` or `.zshrc`)
-3. Set `GW_HOME` to `/opt/machai/ghostwriter`
-
-### Configuration
-
-#### Customizing Ghostwriter with `gw.properties`
-
-Ghostwriter CLI offers flexible configuration using a `gw.properties` file. This file lets you define default options, paths, credentials, and behavior for your Ghostwriter environment.
-
-> The `gw.properties` file is **optional**. It provides default values for configuration settings, but any of these values can be overridden at runtime using Java system properties (e.g., `-Dproperty=value`) or command-line options.
->
-> **Configuration file resolution (`gw.home` and `gw.config`):**
->
-> - `gw.home` (home directory) is resolved in this order:
->   - Java system property / configuration value read by `PropertiesConfigurator#getFile("gw.home", null)` (typically provided via `-Dgw.home=...`).
->   - Otherwise the CLI `--projectDir/-d` option value, if provided.
->   - Otherwise the current working directory (`user.dir`).
-> - The config file path is then resolved as:
->   - `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`
->
-> To use a custom configuration file name (resolved relative to `gw.home`), set:
-> `-Dgw.config=custom.properties`
-
-**Where to place it:**
-Save your `gw.properties` file in the directory selected as `gw.home` (see above).
-Ghostwriter automatically loads this file at startup.
-
-## Configuration Properties Reference
-
-The following properties are read by the Ghostwriter CLI bootstrap (`src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java`). They can be supplied via `gw.properties` unless noted otherwise. Many can also be overridden via Java system properties and/or CLI options.
-
-| Property name | Description | Default value | Usage context |
+| Property | Description | Default | Usage context |
 |---|---|---|---|
-| `gw.config` | Properties file name to load at startup (resolved relative to `gw.home`). | `gw.properties` | Used when building the config file path: `new File(gwHomeDir, System.getProperty("gw.config", "gw.properties"))`. **System property only** (not read from `gw.properties`). |
-| `gw.home` | Ghostwriter home directory used to resolve `gw.config`. Ghostwriter also sets `System.setProperty("gw.home", gwHomeDir.getAbsolutePath())` after resolving it. | If not set: CLI `--projectDir/-d` value (if provided); else `user.dir`. | Resolved in `initializeConfiguration(...)` via `config.getFile("gw.home", null)`; acts as the base directory when locating the configuration file. |
-| `gw.model` | GenAI provider and model identifier (example: `OpenAI:gpt-5.1`). | `null` (required; must be non-blank). | Loaded via `config.get("gw.model", null)` and optionally overridden by CLI `-m/--model`. If blank, Ghostwriter throws `IllegalArgumentException`. Passed into `ActProcessor`/`GuidanceProcessor`. |
-| `instructions` | Optional system instructions input. Supports plain text, URL lines (`http(s)://...`), and `file:` lines. | `null`. | Loaded via `config.get("instructions", null)` and optionally overridden by CLI `-i/--instructions`. If `-i` is specified without a value, instructions are read from stdin via `readText(...)` (multi-line supported with `\\` line continuation). Applied via `AIFileProcessor#setInstructions(...)`. |
-| `gw.excludes` | Comma-separated list of directories to exclude from processing. | `null`. | Loaded via `config.get("gw.excludes", null)` and split by `,`. Optionally overridden by CLI `-e/--excludes`. Applied via `AIFileProcessor#setExcludes(...)`. |
-| `acts.location` | Default directory containing act prompt files (used when running in Act mode and `--acts` is not provided). | `null`. | In Act mode, when `--acts` is not provided, read via `config.get("acts.location", null)` and applied via `ActProcessor#setActsLocation(...)`. |
-| `gw.act` | Default act prompt text (used when running in Act mode and `--act` is provided with no value). | `null`. | In Act mode, used by `resolveActPrompt(...)` as the initial default prompt: `config.get("gw.act", null)`, overridden by CLI `--act` value or stdin via `readText("Act")`. |
-| `gw.threads` | Degree of concurrency for processing. | `null` (unset). | Loaded via `config.get("gw.threads", null)` and optionally overridden by CLI `-t/--threads <count>`. Parsed as an integer and applied via `AIFileProcessor#setDegreeOfConcurrency(int)` (via `Ghostwriter#setDegreeOfConcurrency(String)`). |
-| `inputs` | Enables logging of composed LLM request inputs to dedicated log files. | `false`. | Loaded via `config.getBoolean("inputs", false)` (same key as `Genai.LOG_INPUTS_PROP_NAME`) and optionally overridden by CLI `-l/--logInputs` (presence forces `true`). Applied via `AIFileProcessor#setLogInputs(boolean)`. |
-| `project.dir` | Root directory used as the base directory for scanning/processing when CLI `--projectDir/-d` is not provided. | If not set: `user.dir`. | When `-d/--projectDir` is not provided, Ghostwriter loads it via `config.getFile("project.dir", null)` (same key as `ProjectLayout.PROJECT_DIR_PROP_NAME`) and falls back to `SystemUtils.getUserDir()`. Passed to processors and used as the base for `scanDocuments(projectDir, scanDir)`. |
-| `gw.scanDir` | Default scan target used when no `<scanDir>` arguments are provided on the command line. | If unset: `user.dir` absolute path. | When there are no CLI scanDir args, Ghostwriter reads `config.get("gw.scanDir", null)`; if absent, it scans `SystemUtils.getUserDir().getAbsolutePath()` (see `resolveScanDirs(...)`). |
-| `gw.nonRecursive` | Declared constant only (not used by `Ghostwriter` currently). | N/A. | Present as `public static final String NONRECURSIVE_PROP_NAME = "gw.nonRecursive";` but not referenced elsewhere in this class. |
-| `gw.interactive` | Declared constant only (not used by `Ghostwriter` currently). | N/A. | Present as `public static final String INTERACTIVE_MODE_PROP_NAME = "gw.interactive";` but not referenced elsewhere in this class. |
+| `gw.home` | Ghostwriter home directory. Used as the base directory for resolving the configuration file. | If not set: `projectDir` (from `-d/--projectDir`) if provided; else the current user directory. | Resolved by `initializeConfiguration(...)`; also written back as a system property to the resolved absolute path. |
+| `gw.config` | Overrides the configuration file name/path resolved within `gw.home`. | `gw.properties` | Used by `initializeConfiguration(...)` to locate the properties file as `<gw.home>/<gw.config>`. |
 
-> Notes:
-> - `GW_HOME` is an environment variable you may set for convenience, but `Ghostwriter` itself resolves `gw.home` via configuration/system properties (it does not read `GW_HOME` directly).
-> - The CLI option `--acts <dir>` is not a `gw.*` property; it is a command-line-only override for the directory containing act prompt files.
-> - Act mode is enabled via `--act` and is also a command-line-only option (not a `gw.*` property).
+### Properties from `gw.properties`
 
-### Act Mode
-
-Ghostwriter also supports **Act mode**, which loads predefined prompts from classpath resource bundles and executes them interactively.
-
-- CLI option: `--act [<prompt...>]`
-- Prompt bundle location: `src/main/resources/act/<name>.properties` (packaged as `act/<name>.properties`)
-
-In Act mode, the text passed to `--act` (or stdin if omitted) is used as the default prompt.
-
-**Example:**
-
-```text
-java -jar gw.jar --act "Improve readability and add tests"
-```
-
-**Sample `gw.properties`:**
-
-```properties
-# GenAI provider and model
-# (required)
-gw.model=CodeMie:gpt-5-2-2025-12-11
-
-# Enable logging of input prompts
-inputs=true
-
-# Default instructions and guidance (optional)
-instructions=file:C:\\projects\\MDDA-BPD\\instructions.txt
-
-# Exclude directories (optional)
-gw.excludes=target,.git
-
-# Degree of concurrency (optional)
-# NOTE: when unset, the code treats it as "not specified" (null);
-# it is only applied when explicitly set (or -t/--threads is used).
-gw.threads=4
-
-# Root directory (optional)
-# Used when -d/--projectDir is not provided.
-project.dir=C:\\projects\\machai
-
-# Optional: default scan target when no <scanDir> args are provided
-# gw.scanDir=src
-
-# Optional: choose a different properties file name (resolved relative to gw.home)
-# (set as a Java system property; not read from gw.properties)
-# -Dgw.config=custom.properties
-
-# Optional: override gwHomeDir (base directory used to resolve gw.config)
-# (set as a Java system property; not read from gw.properties)
-# -Dgw.home=C:\\machai\\ghostwriter
-
-# Optional: Act mode defaults
-# acts.location=C:\\machai\\ghostwriter\\acts
-# gw.act=Improve readability and add tests
-```
-
-### Overriding Settings: Command-Line Options
-
-Ghostwriter CLI supports overriding several configuration properties via command-line options.
-
-To view all available command-line options, run:
-
-```text
-C:\projects\machanism.org\machai>java -jar \\opt\\gw\\gw.jar -h
-usage: java -jar gw.jar <scanDir> [options]
-
-Ghostwriter CLI - Scan and process directories or files using GenAI
-guidance.
-
-Usage:
-  java -jar gw.jar <scanDir> [options]
-
-  <scanDir> specifies the scanning path or pattern.
-    - Use a relative path with respect to the current project directory.
-    - If an absolute path is provided, it must be located within the root
-project directory.
-    - Supported patterns: raw directory names, glob patterns (e.g.,
-"glob:**/*.java"), or regex patterns (e.g., "regex:^.*\/[^\/]+\.java$").
-
-Options:
- -e,--excludes <arg>       Specify a comma-separated list of directories
-                           to exclude from processing.
- -h,--help                 Show this help message and exit.
- -i,--instructions <arg>   Specify system instructions as plain text, by
-                           URL, or by file path. Each line of input is
-                           processed: blank lines are preserved, lines
-                           starting with 'http://' or 'https://' are
-                           loaded from the specified URL, lines starting
-                           with 'file:' are loaded from the specified file
-                           path, and other lines are used as-is. If the
-                           option is used without a value, you will be
-                           prompted to enter instruction text via standard
-                           input (stdin).
- -l,--logInputs            Log LLM request inputs to dedicated log files.
- -m,--model <arg>          Set the GenAI provider and model (e.g.,
-                           'OpenAI:gpt-5.1').
- -d,--projectDir <arg>     Specify the path to the root directory for file
-                           processing.
- -t,--threads <arg>        The degree of concurrency for the processing to
-                           improve performance.
-
-Examples:
-  java -jar gw.jar C:\projects\project
-  java -jar gw.jar src\project
-  java -jar gw.jar "glob:**/*.java"
-  java -jar gw.jar "regex:^.*\/[^\/]+\.java$"
-09:59:07.662 INFO  GenAI token usage information not found.
-09:59:07.678 INFO  File processing completed.
-```
-
-**Advanced Configuration:**
-For a complete list of supported properties and detailed explanations, see the [Ghostwriter configuration reference](https://machai.machanism.org/ghostwriter/docs.html#configuration).
+| Property | Description | Default | Usage context |
+|---|---|---|---|
+| `gw.model` | GenAI provider and model to use (format: `Provider:Model`, e.g., `OpenAI:gpt-5.1`). | None (required) | Read at startup; can be overridden by `-m/--model`. Used to create the processor/provider. |
+| `instructions` | Optional system instructions. Each line may be plain text, a URL (`http://`/`https://`) to load, or a `file:` reference to load content from a file; other lines are used as-is. | `null` | Read at startup; can be overridden by `-i/--instructions`. Passed to `processor.setInstructions(...)`. |
+| `gw.excludes` | Comma-separated list of directories (or path fragments) to exclude from processing. | `null` | Read at startup; can be overridden by `-e/--excludes`. Passed to `processor.setExcludes(...)`. |
+| `acts.location` | Path to the directory containing act prompt files (Act mode). | `null` | Used only in Act mode when `-as/--acts` is not provided. Passed to `ActProcessor.setActsLocation(...)`. |
+| `gw.act` | Default act prompt/act selection for Act mode. | `null` | Used only in Act mode as the default act prompt. Can be overridden by `-a/--act` (and if `-a/--act` is provided with no value, Ghostwriter prompts on stdin). |
+| `gw.threads` | Degree of concurrency (worker thread count) for processing. | `null` | Read at startup; can be overridden by `-t/--threads`. Passed to `processor.setDegreeOfConcurrency(int)`. |
+| `gw.scanDir` | Default scan directory or path matcher expression to scan when no `<scanDir>` CLI argument is provided. | If absent and no CLI scanDir is provided: current user directory absolute path. | Used by `resolveScanDirs(...)` to determine scan targets when `cmd.getArgs()` is empty. |
+| `projectDir` (value of `ProjectLayout.PROJECT_DIR_PROP_NAME`) | Root directory used for file processing. | If not set and `-d` not provided: current user directory. | Used as the root directory for processing; logged as `Root directory:` and passed into processors. |
+| `logInputs` (value of `Genai.LOG_INPUTS_PROP_NAME`) | Enables LLM request input logging to dedicated log files. | `false` | Read at startup; can be forced on by `-l/--logInputs`. Passed to `processor.setLogInputs(boolean)`. |
+| `gw.interactive` | Enables interactive mode. | Not used | Declared in `Ghostwriter.java` but not referenced by the current implementation. |
+| `gw.nonRecursive` | Disables recursive scanning. | Not used | Declared in `Ghostwriter.java` but not referenced by the current implementation. |
+| `inputs` | Input selection/override. | Not used | Declared in `Ghostwriter.java` but not referenced by the current implementation. |

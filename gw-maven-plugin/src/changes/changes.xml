@@ -80,7 +80,7 @@
 <ul>
   <li>Fixed GenAI model property naming.</li>
   <li>Fixed null-safe formatting fallback for Act input templates.</li>
-  <li>Adjusted processors to use the project directory consistently (replacing <code>gw.rootDir</code> usage; renamed <code>rootDir</code> to <code>projectDir</code>; aligned CLI option to <code>--projectDir</code>/<code>-d</code>).</li>
+  <li>Adjusted processors to use the project directory consistently (replacing <code>gw.rootDir</code> usage; renamed <code>rootDir</code> to <code>projectDir</code>; aligned CLI option to <code>--project.dir</code>/<code>-d</code>).</li>
 </ul>
 
 <h3>Refactoring</h3>
