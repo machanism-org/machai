@@ -42,14 +42,14 @@
 			<link rel="stylesheet" href="https://machai.machanism.org/css/site.css">
 		]]>
 		</head>
-		<menu ref="parent" />
-        <menu name="Get Started">
+        <menu>
             <item name="Overview" href="index.html" />
             <item name="Preparation to Start" href="preparation-to-start.html" />
             <item name="Project Workflow" href="project-workflow.html" />
             <item name="Guidance File Processing" href="guidance.html" />
             <item name="Act" href="act.html" />
         </menu>
+		<menu ref="parent" />
 		<menu ref="reports" />
 		<menu ref="changes" />
 		<footer><![CDATA[©2025-2026 Machanism.org. All Rights Reserved.

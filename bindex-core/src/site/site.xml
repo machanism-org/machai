@@ -19,7 +19,7 @@
 				<projectId>machanism-org/machai</projectId>
 				<ribbonOrientation>right</ribbonOrientation>
 				<ribbonColor>black</ribbonColor>
-      		</gitHub>
+			</gitHub>
 		</fluidoSkin>
 	</custom>
 	<bannerLeft>
@@ -41,7 +41,12 @@
 			<link rel="stylesheet" href="https://machai.machanism.org/css/site.css">
 		]]>
 		</head>
- 
+
+		<menu>
+			<item name="Overview" href="index.html" />
+			<item name="Bindex" href="bindex.html" />
+			<item name="Project Assembly" href="project-assembly.html" />
+		</menu>
 		<menu ref="parent" />
 		<menu ref="modules" />
 		<menu ref="reports" />
