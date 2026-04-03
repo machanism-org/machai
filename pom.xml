@@ -12,7 +12,11 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries and Maven tooling that unify access to multiple GenAI providers, generate and consume Bindex metadata for library discovery and reuse, and automate repository-scale documentation updates from embedded guidance using Ghostwriter.</description>
+	<description>Machai is a multi-module toolkit for GenAI-enabled developer
+		automation. It provides Java libraries and Maven tooling that unify
+		access to multiple GenAI providers, generate and consume Bindex metadata
+		for library discovery and reuse, and automate repository-scale
+		documentation updates from embedded guidance using Ghostwriter.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -272,24 +276,41 @@
 				<artifactId>plantuml-maven-plugin</artifactId>
 				<version>0.4.15</version>
 				<configuration>
-					<sourceFiles>
-						<directory>${basedir}</directory>
-						<includes>
-							<include>src/site/puml/**/*.*</include>
-							<include>target/generated-docs/puml/*.*</include>
-						</includes>
-					</sourceFiles>
 					<outputDirectory>${project.build.directory}/site/images</outputDirectory>
-					<stripPath>src/site/puml</stripPath>
 					<format>PNG</format>
 				</configuration>
 				<executions>
 					<execution>
-						<id>plantuml-generate</id>
+						<id>puml-images</id>
 						<phase>site</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
+						<configuration>
+							<sourceFiles>
+								<directory>${basedir}</directory>
+								<includes>
+									<include>src/site/puml/**/*.*</include>
+								</includes>
+							</sourceFiles>
+							<stripPath>src/site/puml</stripPath>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generated-docs-images</id>
+						<phase>site</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<sourceFiles>
+								<directory>${basedir}</directory>
+								<includes>
+									<include>target/generated-docs/puml/*.*</include>
+								</includes>
+							</sourceFiles>
+							<stripPath>target/generated-docs/puml</stripPath>
+						</configuration>
 					</execution>
 				</executions>
 				<dependencies>
