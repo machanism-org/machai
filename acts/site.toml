@@ -1,23 +1,25 @@
 instructions = '''
 You are an AI assistant tasked with automating the process of building a Maven project site and synchronizing it to a Cloudflare bucket.
+'''
 
-Follow these steps:
+inputs = '''
+# Task
+
+## Default Steps 
 
 1. **Build the Maven Project Site:**
    - Run the following command to generate the project site:
      ```
-     mvn -q clean install site site:stage
+     mvn -q site site:stage
      ```
-   - Ensure the build completes successfully and the site is generated in the directory specified by the environment variable `MACHAI_SITE`.
 
 2. **Synchronize the Site to Cloudflare:**
    - Do not change the placeholder variable `${...}`, it will be changed by the application.
    - Use the `rclone sync` command to synchronize the local site directory to the Cloudflare bucket.
-   - The local directory path is given by the environment variable `MACHAI_SITE`.
    - The Cloudflare bucket name is `machai`.
    - The sync command should look like:
      ```
-     rclone sync "${MACHAI_SITE}" r2:machai -P
+     rclone sync "${site.dir}" r2:${cf.bucket} -P
      ```
    - Ensure the synchronization completes without errors.
 
@@ -25,23 +27,18 @@ Follow these steps:
    - After synchronization, verify that the contents of the Cloudflare bucket match the local site directory.
 
 4. **Clarity and Brevity:**
+   - Use the minimum `tailResultSize` for the command execution result.
    - Output only the essential commands and status messages.
    - Avoid unnecessary explanations unless clarification is requested.
 
-5. Ensure that all line breaks in your output use only the LF character (\n). Do not use CR (\r) or CRLF (\r\n) line endings. 
-   All multi-line output must consistently use LF as the sole line separator.
-'''
+## Additional User Query
 
-inputs = '''
-# Task
-
-Build the Maven project site and synchronize it to the Cloudflare bucket.
-
-1. Run `mvn clean install site site:stage` to generate the project site.
-2. Use `rclone sync "${MACHAI_SITE}" r2:machai -P` to upload the site to the Cloudflare bucket.
-3. Verify the synchronization was successful.
-
+```
 %s
 '''
 
+prompt = "perform default steps"
+
 gw.nonRecursive = "true"
+cf.bucket = "machai"
+site.dir = "${MACHAI_SITE}"

@@ -5,18 +5,19 @@ basedOn = "unit-tests"
 inputs = '''
 %s
 
+- Use `tailResultSize`: 1024 for the command execution result.
 - **After test creation or updates are complete—either because the coverage threshold is met or further improvement is not possible—run the Sonar Maven plugin:**  
   Execute:  
   ```
-  mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+  mvn sonar:sonar \
     -Dsonar.token=${sonar.token} \
     -Dsonar.host.url=http://${sonar.host} \
-    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
   ```
+- Report the result of the task execution, terminate the process with exit code: 1 in case of an error.
 '''
 
 severities="LOW,MEDIUM,HIGH,BLOCKER"
 sonar.host="192.168.0.177:9000"
-sonar.token="sqa_1ca2fc4cb0449e8a70c08933bb8a82cba89d91df"
+sonar.token="squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
 
 

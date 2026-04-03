@@ -1,5 +1,7 @@
 inputs = '''
-# Context
+%s
+
+## Context
 
 - This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
 - Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
@@ -14,15 +16,13 @@ inputs = '''
 - When processing source code, the path from the Sonar issue report to the source file should be used starting with `src/`; characters before it should be removed.
 - If remaining (still OPEN) issues requiring further iteration: continue with the next iteration and address these remaining items one-by-one (including fetching next pages if possible or needed). 
 
-# Additional Instruction
+## Additional Instruction
 
+- Use `tailResultSize`: 1024 for the command execution result.
 - Ensure all fixes are applied to the correct source files and are properly tested.
 — Re-run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=http://${sonar.url}`.
 - If After re-running the API query, Sonar still reports issues. the next iteration should fetch the next pages (or increase `ps`) and continue fixing issue-by-issue.
 — Run the Sonar plugin command before get the report.
-
-%s
-
 — Re-run the Sonar plugin command to check the result of the fix.
 '''
 
