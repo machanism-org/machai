@@ -15,15 +15,6 @@ instructions = '''
 You are an expert Java developer and security engineer.  
 You are given a SonarQube report in JSON format, which lists code issues detected in a Java project.  
 Your task is to generate precise, minimal, and effective code fixes for each issue, following best practices and SonarQube recommendations.
-
-**Instructions:**
-- For each issue in the JSON, identify the file, line number, rule, and message.
-- Briefly explain the root cause of the issue.
-- Fix all issues.
-— If automatic processing of the correction is not possible, create a SuppressWarnings request if this is acceptable.
-- If the fix requires context (e.g., method or class), include enough surrounding code for clarity.
-- If the issue is a false positive or cannot be auto-fixed, explain why and suggest a manual review.
-- Do not change code style or logic beyond what is necessary to fix the issue.
 '''
 
 # =========================
@@ -37,20 +28,22 @@ Your task is to generate precise, minimal, and effective code fixes for each iss
 inputs = '''
 # Task  
 
-You need to fix SonarQube issues in the project.
-
-# Instructions
-
-- Thoroughly test all fixes to ensure they do not introduce new issues.
-- If you encounter any build failures, resolve them completely before proceeding to the next issue.
-	 
-%s	 
-	 
+## Default Rules
+   
 1. **Select and Review the Appropriate SonarQube Report:**  
    - If the project has `Modules`, then skip next steps for current project and continue.
    - Use SonarQube Web API to get the `Sonar Report` by url: [SONARQUBE_URL]. 
    - If the response returns an error, the process is terminated using the Function tool and the exit code `500` is returned.
    - If the response is not successfully, then immediately skip all the following steps and complete the task.
+   - For each issue in the JSON, identify the file, line number, rule, and message.
+   - Briefly explain the root cause of the issue.
+   - You need to fix SonarQube issues in the project.
+   - If automatic processing of the correction is not possible, create a SuppressWarnings request if this is acceptable.
+   - If the fix requires context (e.g., method or class), include enough surrounding code for clarity.
+   - If the issue is a false positive or cannot be auto-fixed, explain why and suggest a manual review.
+   - Do not change code style or logic beyond what is necessary to fix the issue.
+   - Thoroughly test all fixes to ensure they do not introduce new issues.
+   - If you encounter any build failures, resolve them completely before proceeding to the next issue.
 
 2. **Fix All SonarQube Issues for report:**  
    - Review and address each issue identified in the SonarQube report.
@@ -59,7 +52,6 @@ You need to fix SonarQube issues in the project.
    - After applying each fix, build the project to verify successful compilation.
 
 3. Make sure all sonar detected issues are fixed.
----
 
 ## Special Rules for Using @SuppressWarnings in SonarQube Issue Fixes
 
@@ -114,4 +106,12 @@ You need to fix SonarQube issues in the project.
    */
   @SuppressWarnings("java:SXXXX")
   ```
+
+## User Query
+
+```
+%s	 
+```
 '''
+
+prompt = "Perform the default and special rules."
