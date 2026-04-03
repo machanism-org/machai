@@ -1,7 +1,6 @@
 package org.machanism.machai.gw.maven;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -29,7 +28,8 @@ class ActScanDocumentsTest {
 		assertDoesNotThrow(() -> goal.scanDocuments(processor));
 
 		// Assert
-		verify(processor).scanDocuments(eq(goal.basedir), eq(goal.basedir.getAbsolutePath()));
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(processor).scanDocuments(goal.basedir, goal.basedir.getAbsolutePath());
 	}
 
 	@Test
@@ -48,6 +48,7 @@ class ActScanDocumentsTest {
 		assertDoesNotThrow(() -> goal.scanDocuments(processor));
 
 		// Assert
-		verify(processor).scanDocuments(eq(goal.basedir), eq("custom-scan"));
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(processor).scanDocuments(goal.basedir, "custom-scan");
 	}
 }

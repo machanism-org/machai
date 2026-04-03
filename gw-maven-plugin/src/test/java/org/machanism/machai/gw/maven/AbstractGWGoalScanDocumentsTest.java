@@ -2,7 +2,6 @@ package org.machanism.machai.gw.maven;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -53,10 +52,14 @@ class AbstractGWGoalScanDocumentsTest {
 		goal.scanDocuments(processor);
 
 		// Assert
-		verify(processor, times(1)).setExcludes(eq(goal.excludes));
-		verify(processor, times(1)).setInstructions(eq("some-instructions"));
-		verify(processor, times(1)).setLogInputs(eq(true));
-		verify(processor, times(1)).scanDocuments(eq(new File(".")), eq(new File(".").getAbsolutePath()));
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(processor, times(1)).setExcludes(goal.excludes);
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(processor, times(1)).setInstructions("some-instructions");
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(processor, times(1)).setLogInputs(true);
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(processor, times(1)).scanDocuments(new File("."), new File(".").getAbsolutePath());
 	}
 
 	@Test
@@ -82,6 +85,7 @@ class AbstractGWGoalScanDocumentsTest {
 
 		// Act + Assert
 		assertThrows(MojoExecutionException.class, () -> goal.scanDocuments(processor));
-		verify(log, times(1)).error(eq(boom));
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(log, times(1)).error(boom);
 	}
 }

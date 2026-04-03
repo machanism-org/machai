@@ -188,26 +188,33 @@ class AIFileProcessorCoverageTest {
 	@Test
 	void tryToGetInstructionsFromReference_whenHttpPrefix_withInvalidUrl_throwsInvocationCauseIOException() throws Exception {
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
-		Method m = AIFileProcessor.class.getDeclaredMethod("tryToGetInstructionsFromReference", String.class);
-		m.setAccessible(true);
+		Method method = AIFileProcessor.class.getDeclaredMethod("tryToGetInstructionsFromReference", String.class);
+		method.setAccessible(true);
 		String reference = "http://localhost:0/does-not-exist";
 
 		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
-				invokeTryToGetInstructionsFromReferenceExecutable(m, processor, reference));
+				new InvokeTryToGetInstructionsFromReferenceExecutable(method, processor, reference));
 
 		assertTrue(ex.getCause() instanceof IOException, "Expected IOException from URL read");
 	}
 
-	// Sonar java:S5778 - ensure the lambda contains only a single call that may throw.
-	private static org.junit.jupiter.api.function.Executable invokeTryToGetInstructionsFromReferenceExecutable(Method m,
-			AIFileProcessor processor, String reference) {
-		return () -> {
-			try {
-				invokeTryToGetInstructionsFromReference(m, processor, reference);
-			} catch (IllegalAccessException e) {
-				throw new AssertionError(e);
-			}
-		};
+	private static final class InvokeTryToGetInstructionsFromReferenceExecutable
+			implements org.junit.jupiter.api.function.Executable {
+		private final Method method;
+		private final AIFileProcessor processor;
+		private final String reference;
+
+		private InvokeTryToGetInstructionsFromReferenceExecutable(Method method, AIFileProcessor processor,
+				String reference) {
+			this.method = method;
+			this.processor = processor;
+			this.reference = reference;
+		}
+
+		@Override
+		public void execute() throws Throwable {
+			invokeTryToGetInstructionsFromReference(method, processor, reference);
+		}
 	}
 
 	private static Object invokeTryToGetInstructionsFromReference(Method m, AIFileProcessor processor, String reference)

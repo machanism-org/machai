@@ -387,6 +387,23 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
+	 * Adds a file to the result when it is eligible for the requested pattern.
+	 *
+	 * @param result     collection of matches
+	 * @param matcher    optional path matcher
+	 * @param projectDir project root
+	 * @param file       candidate file
+	 */
+	void addMatchingFile(List<File> result, PathMatcher matcher, File projectDir, File file) {
+		String path = ProjectLayout.getRelativePath(projectDir, file);
+		if (path != null && !Strings.CI.containsAny(path, ProjectLayout.getExcludeDirs())
+				&& !shouldExcludePath(new File(path).toPath()) && (matcher == null || matcher.matches(file.toPath()))) {
+			// Sonar java:S135 - collapsed loop branching to avoid multiple continue statements.
+			result.add(file);
+		}
+	}
+
+	/**
 	 * Tests whether a scan pattern string is a {@code glob:} or {@code regex:}
 	 * matcher.
 	 *
@@ -458,18 +475,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		files.sort(Comparator.comparingInt((File f) -> pathDepth(f.getPath())).reversed());
 
 		for (File file : files) {
-			String path = ProjectLayout.getRelativePath(projectDir, file);
-			if (path == null) {
-				continue;
-			}
-
-			if (Strings.CI.containsAny(path, ProjectLayout.getExcludeDirs()) || shouldExcludePath(new File(path).toPath())) {
-				continue;
-			}
-
-			if (matcher == null || matcher.matches(file.toPath())) {
-				result.add(file);
-			}
+			addMatchingFile(result, matcher, projectDir, file);
 		}
 
 		return result;

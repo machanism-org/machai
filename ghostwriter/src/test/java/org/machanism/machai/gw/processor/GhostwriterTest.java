@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.cli.CommandLine;
@@ -57,8 +58,9 @@ class GhostwriterTest {
 		options.addOption("a", "act", true, "act");
 		CommandLine cmd = new DefaultParser().parse(options, new String[] { "--act", "help" });
 		PropertiesConfigurator config = new PropertiesConfigurator();
+		Path actsDir = Files.createDirectory(tempDir.resolve("acts"));
+		config.set(Ghostwriter.ACTS_LOCATION_PROP_NAME, actsDir.toString());
 
-		// initialize logger used by Ghostwriter
 		Ghostwriter.initializeConfiguration(tempDir.toFile());
 
 		AIFileProcessor p = Ghostwriter.createProcessor(cmd, tempDir.toFile(), config, "Any:Model");

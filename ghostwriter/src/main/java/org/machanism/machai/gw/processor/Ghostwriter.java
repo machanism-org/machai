@@ -75,7 +75,38 @@ public final class Ghostwriter {
 		logger.info("Finished scanning path: {}", scanDir);
 	}
 
-	// Sonar java:S3776 - reduced Cognitive Complexity by extracting logger helpers.
+	private static void logInstructions(String instructions) {
+		if (logger.isInfoEnabled()) {
+			// Sonar java:S2629 - evaluate abbreviate only when INFO logging is enabled.
+			logger.info("Instructions: {}", abbreviateInstructions(instructions));
+		}
+	}
+
+	private static String abbreviateInstructions(String instructions) {
+		return StringUtils.abbreviate(instructions, 60);
+	}
+
+	private static void applyActPrompt(CommandLine cmd, PropertiesConfigurator config, AIFileProcessor processor) {
+		String defaultPrompt = resolveActPrompt(cmd, config);
+		logDefaultPrompt("Act", defaultPrompt);
+		processor.setDefaultPrompt(defaultPrompt);
+	}
+
+	private static File resolveProjectDir(CommandLine cmd, Option projectDirOpt, PropertiesConfigurator config) {
+		File projectDir = null;
+		if (cmd.hasOption(projectDirOpt)) {
+			projectDir = new File(cmd.getOptionValue(projectDirOpt));
+		}
+		if (projectDir == null) {
+			projectDir = config.getFile(PROJECT_DIR_PROP_NAME, null);
+			if (projectDir == null) {
+				projectDir = SystemUtils.getUserDir();
+			}
+		}
+		return projectDir;
+	}
+
+	// Sonar java:S3776 - reduced Cognitive Complexity by extracting CLI resolution helpers.
 	public int perform(String[] scanDirs) throws IOException {
 		int exitCode = 0;
 		try {
@@ -125,7 +156,7 @@ public final class Ghostwriter {
 		logger.info("Home directory: {}", gwHomeDir);
 
 		try {
-			File configFile = new File(gwHomeDir, System.getProperty(CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME));
+			File configFile = resolveConfigFile(gwHomeDir);
 			config.setConfiguration(configFile.getAbsolutePath());
 		} catch (IOException e) {
 			// The property file is not defined, ignore.
@@ -134,6 +165,11 @@ public final class Ghostwriter {
 		}
 
 		return config;
+	}
+
+	private static File resolveConfigFile(File gwHomeDir) {
+		String configFileName = System.getProperty(CONFIG_PROP_NAME, GW_PROPERTIES_FILE_NAME);
+		return new File(gwHomeDir, configFileName);
 	}
 
 	static void help(Options options) {
@@ -183,10 +219,7 @@ public final class Ghostwriter {
 
 	public void setInstructions(String instructions) {
 		if (instructions != null) {
-			if (logger.isInfoEnabled()) {
-				// Sonar java:S2629 - avoid eager string construction when INFO is disabled.
-				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
-			}
+			logInstructions(instructions);
 			processor.setInstructions(instructions);
 		}
 	}
@@ -211,12 +244,9 @@ public final class Ghostwriter {
 	static AIFileProcessor createProcessor(CommandLine cmd, File projectDir, PropertiesConfigurator config,
 			String genai) {
 		AIFileProcessor processor;
-		String defaultPrompt;
 		if (cmd.hasOption("act")) {
 			processor = createActProcessor(cmd, projectDir, config, genai);
-			defaultPrompt = resolveActPrompt(cmd, config);
-			logDefaultPrompt("Act", defaultPrompt);
-			processor.setDefaultPrompt(defaultPrompt);
+			applyActPrompt(cmd, config, processor);
 		} else {
 			processor = new GuidanceProcessor(projectDir, genai, config);
 		}
@@ -323,12 +353,7 @@ public final class Ghostwriter {
 			return;
 		}
 
-		File projectDir = null;
-		if (cmd.hasOption(projectDirOpt)) {
-			projectDir = new File(cmd.getOptionValue(projectDirOpt));
-		}
-
-		PropertiesConfigurator config = initializeConfiguration(projectDir);
+		PropertiesConfigurator config = initializeConfiguration(null);
 
 		String genai = config.get(MODEL_PROP_NAME, null);
 		if (cmd.hasOption(genaiOpt)) {
@@ -363,13 +388,7 @@ public final class Ghostwriter {
 			logInputs = true;
 		}
 
-		if (projectDir == null) {
-			projectDir = config.getFile(PROJECT_DIR_PROP_NAME, null);
-			if (projectDir == null) {
-				projectDir = SystemUtils.getUserDir();
-			}
-		}
-
+		File projectDir = resolveProjectDir(cmd, projectDirOpt, config);
 		logger.info("Root directory: {}", projectDir);
 
 		try {

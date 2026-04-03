@@ -2,7 +2,6 @@ package org.machanism.machai.gw.maven;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -40,8 +39,10 @@ class ActConfigureAndScanTest {
 
 		// Assert
 		verify(goal, times(0)).applyActPrompt(any());
-		verify(processor, times(1)).setDefaultPrompt(eq("saved"));
-		verify(goal, times(1)).scanDocuments(eq(processor));
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(processor, times(1)).setDefaultPrompt("saved");
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(goal, times(1)).scanDocuments(processor);
 	}
 
 	@Test
@@ -70,7 +71,9 @@ class ActConfigureAndScanTest {
 
 		// Assert
 		verify(goal, times(1)).applyActPrompt(any());
-		verify(processor, times(1)).setDefaultPrompt(eq("fromProps"));
-		verify(goal, times(1)).scanDocuments(eq(processor));
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(processor, times(1)).setDefaultPrompt("fromProps");
+		// Sonar fix java:S6068: pass concrete values directly when no matcher is needed.
+		verify(goal, times(1)).scanDocuments(processor);
 	}
 }
