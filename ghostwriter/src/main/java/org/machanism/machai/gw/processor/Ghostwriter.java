@@ -42,7 +42,7 @@ public final class Ghostwriter {
 
 	public static final String EXCLUDES_PROP_NAME = "gw.excludes";
 
-	public static final String ACTS_LOCATION_PROP_NAME = "acts.location";
+	public static final String ACTS_LOCATION_PROP_NAME = "gw.acts";
 
 	public static final String ACT_PROP_NAME = "gw.act";
 

@@ -41,7 +41,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dt><b>{@code -Dgw.act}</b> / {@code &lt;act&gt;}</dt>
  * <dd>Action text/prompt to apply. If omitted, the goal reads it interactively.</dd>
  *
- * <dt><b>{@code -Dgw.acts}</b> / {@code &lt;locations&gt;}</dt>
+ * <dt><b>{@code -Dgw.acts}</b> / {@code &lt;acts&gt;}</dt>
  * <dd>Optional directory containing predefined action definitions.</dd>
  * </dl>
  *
@@ -62,7 +62,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </pre>
  *
  * <pre>
- * mvn gw:act -Dgw.acts=src\\site\\locations -DlogInputs=true
+ * mvn gw:act -Dgw.acts=src\\site\\acts -DlogInputs=true
  * </pre>
  */
 @Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false, defaultPhase = LifecyclePhase.PACKAGE)
@@ -85,7 +85,7 @@ public class Act extends AbstractGWGoal {
 	 * Optional directory containing predefined action definitions.
 	 */
 	@Parameter(property = Ghostwriter.ACTS_LOCATION_PROP_NAME, required = false)
-	private String locations;
+	private String acts;
 
 	private static final Object MONITOR = new Object();
 
@@ -147,7 +147,7 @@ public class Act extends AbstractGWGoal {
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
-			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.ACTS_LOCATION_PROP_NAME, this.locations);
+			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.ACTS_LOCATION_PROP_NAME, this.acts);
 
 			if (actsLocation != null) {
 				logger.info("Custom acts location specified: {}", actsLocation);
