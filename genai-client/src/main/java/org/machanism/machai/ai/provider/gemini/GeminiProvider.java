@@ -1,8 +1,6 @@
 package org.machanism.machai.ai.provider.gemini;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -49,32 +47,6 @@ public class GeminiProvider implements Genai {
 	@Override
 	public void prompt(String text) {
 		// TODO Implement Gemini prompt aggregation.
-	}
-
-	/**
-	 * Adds a local file as an input to the current request context.
-	 *
-	 * @param file
-	 *            file to attach
-	 * @throws IOException
-	 *             if the file cannot be read or uploaded
-	 */
-	@Override
-	public void addFile(File file) throws IOException {
-		// TODO Implement file upload/attachment.
-	}
-
-	/**
-	 * Adds a file (referenced by URL) as an input to the current request context.
-	 *
-	 * @param fileUrl
-	 *            URL of the file to attach
-	 * @throws IOException
-	 *             if the file cannot be read or uploaded
-	 */
-	@Override
-	public void addFile(URL fileUrl) throws IOException {
-		// TODO Implement URL-based attachment.
 	}
 
 	/**

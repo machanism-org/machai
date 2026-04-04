@@ -1,11 +1,9 @@
 package org.machanism.machai.ai.provider.openai;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +14,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -37,9 +34,6 @@ import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
-import com.openai.models.files.FileCreateParams;
-import com.openai.models.files.FileObject;
-import com.openai.models.files.FilePurpose;
 import com.openai.models.models.Model;
 import com.openai.models.responses.FunctionTool;
 import com.openai.models.responses.FunctionTool.Parameters;
@@ -172,43 +166,6 @@ public class OpenAIProvider implements Genai {
 	public void prompt(String text) {
 		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
 				.addInputTextContent(text).build();
-		inputs.add(ResponseInputItem.ofMessage(message));
-	}
-
-	/**
-	 * Uploads a file to OpenAI and adds its server-side reference to the current
-	 * request inputs.
-	 *
-	 * @param file local file to upload
-	 * @throws IOException if reading file fails
-	 */
-	@Override
-	public void addFile(File file) throws IOException {
-		try (FileInputStream input = new FileInputStream(file)) {
-			FileCreateParams params = FileCreateParams.builder().file(IOUtils.toByteArray(input))
-					.purpose(FilePurpose.USER_DATA).build();
-			FileObject fileObject = getClient().files().create(params);
-
-			ResponseInputFile.Builder inputFileBuilder = ResponseInputFile.builder().fileId(fileObject.id());
-
-			Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
-					.addContent(inputFileBuilder.build()).build();
-			inputs.add(ResponseInputItem.ofMessage(message));
-		}
-	}
-
-	/**
-	 * Adds a file input by URL.
-	 *
-	 * @param fileUrl the URL of the input file
-	 * @throws IOException on network error
-	 */
-	@Override
-	public void addFile(URL fileUrl) throws IOException {
-		ResponseInputFile.Builder inputFileBuilder = ResponseInputFile.builder().fileUrl(fileUrl.toString());
-
-		Message message = com.openai.models.responses.ResponseInputItem.Message.builder().role(Role.USER)
-				.addContent(inputFileBuilder.build()).build();
 		inputs.add(ResponseInputItem.ofMessage(message));
 	}
 

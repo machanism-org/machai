@@ -258,16 +258,6 @@ class WebFunctionToolsTest {
 		}
 
 		@Override
-		public void addFile(File file) {
-			// Sonar fix java:S1186: test stub intentionally does nothing because file ingestion is not exercised here.
-		}
-
-		@Override
-		public void addFile(URL url) {
-			// Sonar fix java:S1186: test stub intentionally does nothing because URL ingestion is not exercised here.
-		}
-
-		@Override
 		public java.util.List<Double> embedding(String text, long timeout) {
 			return null;
 		}

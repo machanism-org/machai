@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public final class Ghostwriter {
 
 	public static final String MULTIPLE_LINES_BREAKER = "\\";
+	private static final int LOG_PROMPT_MAX_LENGTH = 60;
 
 	private static Logger logger;
 
@@ -78,12 +79,12 @@ public final class Ghostwriter {
 	private static void logInstructions(String instructions) {
 		if (logger.isInfoEnabled()) {
 			// Sonar java:S2629 - evaluate abbreviate only when INFO logging is enabled.
-			logger.info("Instructions: {}", abbreviateInstructions(instructions));
+			logger.info("Instructions: {}", abbreviateForLogging(instructions));
 		}
 	}
 
-	private static String abbreviateInstructions(String instructions) {
-		return StringUtils.abbreviate(instructions, 60);
+	private static String abbreviateForLogging(String text) {
+		return StringUtils.abbreviate(text, LOG_PROMPT_MAX_LENGTH);
 	}
 
 	private static void applyActPrompt(CommandLine cmd, PropertiesConfigurator config, AIFileProcessor processor) {
@@ -106,7 +107,8 @@ public final class Ghostwriter {
 		return projectDir;
 	}
 
-	// Sonar java:S3776 - reduced Cognitive Complexity by extracting CLI resolution helpers.
+	// Sonar java:S3776 - reduced Cognitive Complexity by extracting CLI resolution
+	// helpers.
 	public int perform(String[] scanDirs) throws IOException {
 		int exitCode = 0;
 		try {
@@ -284,7 +286,9 @@ public final class Ghostwriter {
 
 	static void logDefaultPrompt(String label, String prompt) {
 		if (prompt != null && logger.isInfoEnabled()) {
-			logger.info("{}: {}", label, StringUtils.abbreviate(prompt, 60));
+			// Sonar java:S2629 - precompute only inside the enabled logging branch.
+			String abbreviatedPrompt = abbreviateForLogging(prompt);
+			logger.info("{}: {}", label, abbreviatedPrompt);
 		}
 	}
 

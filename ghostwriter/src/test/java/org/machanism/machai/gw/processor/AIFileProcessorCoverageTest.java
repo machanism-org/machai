@@ -176,8 +176,9 @@ class AIFileProcessorCoverageTest {
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 		Method m = AIFileProcessor.class.getDeclaredMethod("tryToGetInstructionsFromReference", String.class);
 		m.setAccessible(true);
+		String fileReference = buildFileReference(p);
 
-		String result = (String) invokeTryToGetInstructionsFromReference(m, processor, "file:" + p.toAbsolutePath());
+		String result = (String) invokeTryToGetInstructionsFromReference(m, processor, fileReference);
 
 		assertNotNull(result);
 		assertTrue(result.contains("a"));
@@ -191,36 +192,36 @@ class AIFileProcessorCoverageTest {
 		Method method = AIFileProcessor.class.getDeclaredMethod("tryToGetInstructionsFromReference", String.class);
 		method.setAccessible(true);
 		String reference = "http://localhost:0/does-not-exist";
-		org.junit.jupiter.api.function.Executable invocation =
-				new InvokeTryToGetInstructionsFromReferenceExecutable(method, processor, reference);
+		ThrowingInvocation executable = new ThrowingInvocation(method, processor, reference);
 
-		// Sonar java:S5778 - keep a single potentially exception-throwing invocation inside assertThrows.
-		InvocationTargetException ex = assertThrows(InvocationTargetException.class, invocation);
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class, executable::invoke);
 
 		assertTrue(ex.getCause() instanceof IOException, "Expected IOException from URL read");
 	}
 
-	private static final class InvokeTryToGetInstructionsFromReferenceExecutable
-			implements org.junit.jupiter.api.function.Executable {
+	private static String buildFileReference(Path path) {
+		return "file:" + path.toAbsolutePath();
+	}
+
+	private static Object invokeTryToGetInstructionsFromReference(Method method, AIFileProcessor processor, String reference)
+			throws IllegalAccessException, InvocationTargetException {
+		return method.invoke(processor, reference);
+	}
+
+	private static final class ThrowingInvocation {
 		private final Method method;
 		private final AIFileProcessor processor;
 		private final String reference;
 
-		private InvokeTryToGetInstructionsFromReferenceExecutable(Method method, AIFileProcessor processor,
-				String reference) {
+		private ThrowingInvocation(Method method, AIFileProcessor processor, String reference) {
 			this.method = method;
 			this.processor = processor;
 			this.reference = reference;
 		}
 
-		@Override
-		public void execute() throws Throwable {
-			invokeTryToGetInstructionsFromReference(method, processor, reference);
+		Object invoke() throws IllegalAccessException, InvocationTargetException {
+			// Sonar java:S5778 - encapsulate reflection so assertThrows references a single executable method.
+			return method.invoke(processor, reference);
 		}
-	}
-
-	private static Object invokeTryToGetInstructionsFromReference(Method m, AIFileProcessor processor, String reference)
-			throws IllegalAccessException, InvocationTargetException {
-		return m.invoke(processor, reference);
 	}
 }

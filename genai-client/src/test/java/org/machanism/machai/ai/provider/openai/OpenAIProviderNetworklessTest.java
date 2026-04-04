@@ -10,8 +10,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.URI;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -152,21 +150,6 @@ class OpenAIProviderNetworklessTest {
     }
 
     @Test
-    void addFile_byUrl_shouldAddInputItem() throws Exception {
-        // Arrange
-        provider.init(minimalConfig());
-        URL url = URI.create("https://example.com/file.txt").toURL();
-
-        // Act
-        provider.addFile(url);
-
-        // Assert
-        @SuppressWarnings("unchecked")
-        List<Object> inputs = (List<Object>) getField(OpenAIProvider.class, provider, "inputs");
-        assertEquals(1, inputs.size());
-    }
-
-    @Test
     void setTimeout_shouldUpdateTimeout() {
         // Arrange
         provider.init(minimalConfig());
@@ -176,26 +159,6 @@ class OpenAIProviderNetworklessTest {
 
         // Assert
         assertEquals(99L, provider.getTimeout());
-    }
-
-    @Test
-    void logInputs_writerOverload_shouldWriteInputText_andFileUrl() throws Exception {
-        // Arrange
-        provider.init(minimalConfig());
-        provider.instructions("inst");
-        provider.prompt("p1");
-        provider.addFile(URI.create("https://example.com/a.txt").toURL());
-
-        java.io.StringWriter out = new java.io.StringWriter();
-
-        // Act
-        invokePrivate(provider, OpenAIProvider.class, "logInputs", new Class<?>[] { java.io.Writer.class }, new Object[] { out });
-
-        // Assert
-        String text = out.toString();
-        assertTrue(text.contains("inst"));
-        assertTrue(text.contains("p1"));
-        assertTrue(text.contains("Add resource by URL"));
     }
 
     @Test

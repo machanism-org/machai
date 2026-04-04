@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.net.URI;
-import java.net.URL;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -15,7 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
 
 /**
- * Unit tests focused on {@link OpenAIProvider} core logic that does not require network access.
+ * Unit tests focused on {@link OpenAIProvider} core logic that does not require
+ * network access.
  */
 class OpenAIProviderTest {
 
@@ -147,20 +146,6 @@ class OpenAIProviderTest {
 
 		// Assert
 		assertNull(result);
-	}
-
-	@Test
-	void addFile_byUrl_shouldAddUserMessageInput_withoutNetwork() throws Exception {
-		// Arrange
-		provider.init(minimalConfig());
-		URL url = URI.create("https://example.com/file.txt").toURL();
-
-		// Act
-		provider.addFile(url);
-
-		// Assert
-		List<?> inputs = (List<?>) getField("inputs");
-		assertEquals(1, inputs.size());
 	}
 
 	@Test

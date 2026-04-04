@@ -1,8 +1,6 @@
 package org.machanism.machai.ai.manager;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -59,16 +57,6 @@ public class GenaiAdapter implements Genai {
 	@Override
 	public void prompt(String text) {
 		provider.prompt(text);
-	}
-
-	@Override
-	public void addFile(File file) throws IOException {
-		provider.addFile(file);
-	}
-
-	@Override
-	public void addFile(URL fileUrl) throws IOException {
-		provider.addFile(fileUrl);
 	}
 
 	@Override

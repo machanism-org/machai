@@ -25,8 +25,6 @@ class GenAIAdapterTest {
 	private static final class RecordingProvider implements Genai {
 		Configurator initConf;
 		String prompted;
-		File addedFile;
-		URL addedUrl;
 		String toolName;
 		String toolDescription;
 		ToolFunction toolFunction;
@@ -49,16 +47,6 @@ class GenAIAdapterTest {
 		@Override
 		public void prompt(String text) {
 			this.prompted = text;
-		}
-
-		@Override
-		public void addFile(File file) throws IOException {
-			this.addedFile = file;
-		}
-
-		@Override
-		public void addFile(URL fileUrl) throws IOException {
-			this.addedUrl = fileUrl;
 		}
 
 		@Override
@@ -122,15 +110,11 @@ class GenAIAdapterTest {
 		RecordingProvider provider = new RecordingProvider();
 		Genai adapter = new TestAdapter(provider);
 		Configurator conf = null;
-		File file = new File("test.txt");
-		URL url = URI.create("https://example.test/file").toURL();
 		Genai.ToolFunction fn = params -> "done";
 
 		// Act
 		adapter.init(conf);
 		adapter.prompt("hello");
-		adapter.addFile(file);
-		adapter.addFile(url);
 		List<Double> embedding = adapter.embedding("abc", 42);
 		adapter.addTool("t", "d", fn, "p1", "p2");
 		adapter.instructions("sys");
@@ -143,8 +127,6 @@ class GenAIAdapterTest {
 		// Assert
 		assertSame(conf, provider.initConf);
 		assertEquals("hello", provider.prompted);
-		assertSame(file, provider.addedFile);
-		assertSame(url, provider.addedUrl);
 		assertEquals(Arrays.asList(1.0, 2.0), embedding);
 		assertEquals("abc", provider.embeddedText);
 		assertEquals(42, provider.embeddedDimensions);

@@ -26,16 +26,6 @@ class CommandFunctionToolsApplyToolsTest {
 		}
 
 		@Override
-		public void addFile(java.io.File file) {
-			// not used
-		}
-
-		@Override
-		public void addFile(java.net.URL fileUrl) {
-			// not used
-		}
-
-		@Override
 		public java.util.List<Double> embedding(String text, long timeout) {
 			return null;
 		}

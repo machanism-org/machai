@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
@@ -128,44 +127,6 @@ class GeminiProviderTest {
 	}
 
 	@Test
-	void addFile_file_shouldNotThrow_evenWhenFileDoesNotExist() {
-		// Arrange
-		GeminiProvider provider = new GeminiProvider();
-		File missing = new File("target/does-not-exist.txt");
-
-		// Act + Assert
-		assertDoesNotThrow(() -> provider.addFile(missing));
-	}
-
-	@Test
-	void addFile_file_shouldAcceptNull() {
-		// Arrange
-		GeminiProvider provider = new GeminiProvider();
-
-		// Act + Assert
-		assertDoesNotThrow(() -> provider.addFile((File) null));
-	}
-
-	@Test
-	void addFile_url_shouldNotThrow() throws Exception {
-		// Arrange
-		GeminiProvider provider = new GeminiProvider();
-		URL url = URI.create("https://example.com/file.txt").toURL();
-
-		// Act + Assert
-		assertDoesNotThrow(() -> provider.addFile(url));
-	}
-
-	@Test
-	void addFile_url_shouldAcceptNull() {
-		// Arrange
-		GeminiProvider provider = new GeminiProvider();
-
-		// Act + Assert
-		assertDoesNotThrow(() -> provider.addFile((URL) null));
-	}
-
-	@Test
 	void inputsLog_shouldNotThrow_withNullDir() {
 		// Arrange
 		GeminiProvider provider = new GeminiProvider();
@@ -243,21 +204,6 @@ class GeminiProviderTest {
 
 		// Act + Assert
 		assertDoesNotThrow(() -> provider.promptBundle(bundle));
-	}
-
-	@Test
-	void addFile_methodSignatures_shouldDeclareIOException() throws NoSuchMethodException {
-		// Arrange
-		Method fileMethod = GeminiProvider.class.getMethod("addFile", File.class);
-		Method urlMethod = GeminiProvider.class.getMethod("addFile", URL.class);
-
-		// Act
-		boolean fileDeclaresIo = declaresExceptionAssignableTo(fileMethod.getExceptionTypes(), IOException.class);
-		boolean urlDeclaresIo = declaresExceptionAssignableTo(urlMethod.getExceptionTypes(), IOException.class);
-
-		// Assert
-		org.junit.jupiter.api.Assertions.assertTrue(fileDeclaresIo);
-		org.junit.jupiter.api.Assertions.assertTrue(urlDeclaresIo);
 	}
 
 	@Test

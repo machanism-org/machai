@@ -28,16 +28,6 @@ class FunctionToolsLoaderTest {
 		}
 
 		@Override
-		public void addFile(java.io.File file) {
-			// not used
-		}
-
-		@Override
-		public void addFile(java.net.URL file) {
-			// not used
-		}
-
-		@Override
 		public java.util.List<Double> embedding(String text, long size) {
 			return java.util.Collections.emptyList();
 		}

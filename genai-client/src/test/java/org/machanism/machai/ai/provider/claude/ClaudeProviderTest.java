@@ -37,33 +37,8 @@ class ClaudeProviderTest {
 		ClaudeProvider provider = new ClaudeProvider();
 
 		// Act
-		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.prompt("hi"));
-
-		// Assert
-		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
-	}
-
-	@Test
-	void addFile_file_shouldThrowUnsupportedOperationException_withExpectedMessage() {
-		// Arrange
-		ClaudeProvider provider = new ClaudeProvider();
-		File file = new File("some-file.txt");
-
-		// Act
-		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.addFile(file));
-
-		// Assert
-		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
-	}
-
-	@Test
-	void addFile_url_shouldThrowUnsupportedOperationException_withExpectedMessage() throws Exception {
-		// Arrange
-		ClaudeProvider provider = new ClaudeProvider();
-		URL url = URI.create("file:some-file.txt").toURL();
-
-		// Act
-		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.addFile(url));
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class,
+				() -> provider.prompt("hi"));
 
 		// Assert
 		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
@@ -122,7 +97,7 @@ class ClaudeProviderTest {
 	@Test
 	void promptBundle_shouldThrowUnsupportedOperationException_withExpectedMessage() {
 		// Arrange
-		ClaudeProvider provider = new ClaudeProvider();		
+		ClaudeProvider provider = new ClaudeProvider();
 		ResourceBundle bundle = new ResourceBundle() {
 			@Override
 			protected Object handleGetObject(String key) {
@@ -150,7 +125,8 @@ class ClaudeProviderTest {
 		File log = new File("inputs.log");
 
 		// Act
-		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.inputsLog(log));
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class,
+				() -> provider.inputsLog(log));
 
 		// Assert
 		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
@@ -163,7 +139,8 @@ class ClaudeProviderTest {
 		File dir = new File(".");
 
 		// Act
-		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> provider.setWorkingDir(dir));
+		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class,
+				() -> provider.setWorkingDir(dir));
 
 		// Assert
 		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());
@@ -198,9 +175,10 @@ class ClaudeProviderTest {
 	}
 
 	@Test
-	void allNotImplementedPublicApiMethods_shouldThrowUnsupportedOperationExceptionWithExpectedMessage() throws Exception {
+	void allNotImplementedPublicApiMethods_shouldThrowUnsupportedOperationExceptionWithExpectedMessage()
+			throws Exception {
 		// Arrange
-		ClaudeProvider provider = new ClaudeProvider();		
+		ClaudeProvider provider = new ClaudeProvider();
 		File file = new File("some-file.txt");
 		URL url = URI.create("file:some-file.txt").toURL();
 		ResourceBundle bundle = new ResourceBundle() {
@@ -219,8 +197,6 @@ class ClaudeProviderTest {
 		assertAll(
 				() -> assertNotImplemented(() -> provider.init(null)),
 				() -> assertNotImplemented(() -> provider.prompt("x")),
-				() -> assertNotImplemented(() -> provider.addFile(file)),
-				() -> assertNotImplemented(() -> provider.addFile(url)),
 				() -> assertNotImplemented(provider::perform),
 				() -> assertNotImplemented(provider::clear),
 				() -> assertNotImplemented(() -> provider.addTool("name", "desc", args -> "ok", "p1")),
@@ -231,7 +207,8 @@ class ClaudeProviderTest {
 				() -> assertNotImplemented(provider::usage));
 	}
 
-	// Sonar java:S5778: reduce the number of potentially-throwing invocations inside a lambda.
+	// Sonar java:S5778: reduce the number of potentially-throwing invocations
+	// inside a lambda.
 	private static void assertNotImplemented(ThrowingRunnable action) {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, action::run);
 		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URL;
 import java.util.List;
 
 import org.apache.commons.lang.SystemUtils;
@@ -77,26 +76,6 @@ public class NoneProvider implements Genai {
 	public void prompt(String text) {
 		prompts.append(text);
 		prompts.append(Genai.PARAGRAPH_SEPARATOR);
-	}
-
-	/**
-	 * Ignores the provided file.
-	 *
-	 * @param file ignored
-	 */
-	@Override
-	public void addFile(File file) {
-		// No-op in NoneProvider.
-	}
-
-	/**
-	 * Ignores the provided URL.
-	 *
-	 * @param fileUrl ignored
-	 */
-	@Override
-	public void addFile(URL fileUrl) {
-		// No-op in NoneProvider.
 	}
 
 	/**

@@ -2,7 +2,6 @@ package org.machanism.machai.ai.manager;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -95,22 +94,6 @@ public interface Genai {
 	 * @param text the prompt text
 	 */
 	void prompt(String text);
-
-	/**
-	 * Adds a local file resource for provider processing.
-	 *
-	 * @param file the file to add
-	 * @throws IOException for I/O errors (including file-not-found)
-	 */
-	void addFile(File file) throws IOException;
-
-	/**
-	 * Adds a remote file resource for provider processing.
-	 *
-	 * @param fileUrl the URL of the file
-	 * @throws IOException for I/O errors (including file-not-found)
-	 */
-	void addFile(URL fileUrl) throws IOException;
 
 	/**
 	 * Computes an embedding vector for the provided text.

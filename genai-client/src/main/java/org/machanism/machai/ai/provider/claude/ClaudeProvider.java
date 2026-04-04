@@ -1,8 +1,6 @@
 package org.machanism.machai.ai.provider.claude;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -31,16 +29,6 @@ public class ClaudeProvider implements Genai {
 
 	@Override
 	public void prompt(String text) {
-		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
-	}
-
-	@Override
-	public void addFile(File file) throws IOException {
-		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
-	}
-
-	@Override
-	public void addFile(URL fileUrl) throws IOException {
 		throw new UnsupportedOperationException("ClaudeProvider is not implemented yet.");
 	}
 

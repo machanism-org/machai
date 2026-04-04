@@ -9,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,29 +55,6 @@ class NoneProviderTest {
 
 		// Act + Assert
 		assertThrows(UnsupportedOperationException.class, () -> provider.embedding("text", 3));
-	}
-
-	@Test
-	void addFile_file_isNoOp() {
-		// Arrange
-		NoneProvider provider = new NoneProvider();
-		provider.prompt("x");
-
-		// Act + Assert
-		assertDoesNotThrow(() -> provider.addFile(new File("does-not-matter.txt")));
-		assertEquals("x\n\n", provider.getPrompts());
-	}
-
-	@Test
-	void addFile_url_isNoOp() {
-		// Arrange
-		NoneProvider provider = new NoneProvider();
-		provider.prompt("x");
-		URL url = assertDoesNotThrow(() -> URI.create("https://example.com").toURL());
-
-		// Act + Assert
-		assertDoesNotThrow(() -> provider.addFile(url));
-		assertEquals("x\n\n", provider.getPrompts());
 	}
 
 	@Test

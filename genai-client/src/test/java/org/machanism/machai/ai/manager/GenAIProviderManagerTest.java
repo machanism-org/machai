@@ -113,16 +113,6 @@ class GenAIProviderManagerTest {
 		}
 
 		@Override
-		public void addFile(java.io.File file) throws java.io.IOException {
-			// no-op
-		}
-
-		@Override
-		public void addFile(java.net.URL fileUrl) throws java.io.IOException {
-			// no-op
-		}
-
-		@Override
 		public java.util.List<Double> embedding(String text, long dimensions) {
 			return java.util.Collections.emptyList();
 		}
@@ -300,16 +290,6 @@ class GenAIProviderManagerTest {
 
 		@Override
 		public void prompt(String text) {
-			// no-op
-		}
-
-		@Override
-		public void addFile(java.io.File file) throws java.io.IOException {
-			// no-op
-		}
-
-		@Override
-		public void addFile(java.net.URL fileUrl) throws java.io.IOException {
 			// no-op
 		}
 
