@@ -191,9 +191,11 @@ class AIFileProcessorCoverageTest {
 		Method method = AIFileProcessor.class.getDeclaredMethod("tryToGetInstructionsFromReference", String.class);
 		method.setAccessible(true);
 		String reference = "http://localhost:0/does-not-exist";
+		org.junit.jupiter.api.function.Executable invocation =
+				new InvokeTryToGetInstructionsFromReferenceExecutable(method, processor, reference);
 
-		InvocationTargetException ex = assertThrows(InvocationTargetException.class,
-				new InvokeTryToGetInstructionsFromReferenceExecutable(method, processor, reference));
+		// Sonar java:S5778 - keep a single potentially exception-throwing invocation inside assertThrows.
+		InvocationTargetException ex = assertThrows(InvocationTargetException.class, invocation);
 
 		assertTrue(ex.getCause() instanceof IOException, "Expected IOException from URL read");
 	}
