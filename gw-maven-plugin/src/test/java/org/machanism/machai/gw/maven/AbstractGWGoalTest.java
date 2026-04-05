@@ -11,7 +11,7 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.provider.Genai;
 
 /**
  * Unit tests for {@link AbstractGWGoal}.

@@ -12,6 +12,7 @@ inputs = '''
      ```
      mvn -q site site:stage
      ```
+   - Check the maven execution status and terminate the task with exitCode: 1 if an error occurs.
 
 2. **Synchronize the Site to Cloudflare:**
    - Do not change the placeholder variable `${...}`, it will be changed by the application.

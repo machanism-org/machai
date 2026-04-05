@@ -15,6 +15,8 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 class GenAIProviderManagerTest {
 

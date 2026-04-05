@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
  * Anthropic-backed implementation of MachAI's {@link Genai}

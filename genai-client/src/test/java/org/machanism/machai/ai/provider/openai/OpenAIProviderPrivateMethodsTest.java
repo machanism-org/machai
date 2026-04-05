@@ -15,8 +15,8 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -43,14 +43,14 @@ class OpenAIProviderPrivateMethodsTest {
         // Arrange
         provider.init(minimalConfig());
 
-        Genai.ToolFunction tool = args -> {
+        ToolFunction tool = args -> {
             throw new IOException("boom");
         };
 
         Method safelyInvokeTool = OpenAIProvider.class.getDeclaredMethod(
                 "safelyInvokeTool",
                 String.class,
-                Genai.ToolFunction.class,
+                ToolFunction.class,
                 Object[].class);
         safelyInvokeTool.setAccessible(true);
 

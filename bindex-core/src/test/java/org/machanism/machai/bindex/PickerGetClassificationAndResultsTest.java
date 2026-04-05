@@ -16,7 +16,7 @@ import java.util.Collections;
 
 import org.bson.Document;
 import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.provider.Genai;
 
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;

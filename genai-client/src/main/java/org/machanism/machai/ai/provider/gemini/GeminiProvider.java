@@ -6,8 +6,9 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
  * MachAI {@link Genai} implementation for Google's Gemini models.

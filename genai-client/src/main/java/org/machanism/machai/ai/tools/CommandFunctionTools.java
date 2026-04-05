@@ -20,7 +20,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.provider.Genai;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

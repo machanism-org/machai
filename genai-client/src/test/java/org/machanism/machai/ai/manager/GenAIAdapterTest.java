@@ -6,13 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.GenaiAdapter;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 class GenAIAdapterTest {
 
@@ -110,7 +111,7 @@ class GenAIAdapterTest {
 		RecordingProvider provider = new RecordingProvider();
 		Genai adapter = new TestAdapter(provider);
 		Configurator conf = null;
-		Genai.ToolFunction fn = params -> "done";
+		ToolFunction fn = params -> "done";
 
 		// Act
 		adapter.init(conf);

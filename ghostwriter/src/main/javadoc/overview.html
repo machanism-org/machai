@@ -62,7 +62,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <li><strong>Traverse</strong> the filesystem and choose files to process.</li>
     <li><strong>Extract</strong> guidance blocks using a file-format-aware reviewer.</li>
     <li><strong>Compose</strong> prompts (optionally using reusable Act templates).</li>
-    <li><strong>Dispatch</strong> requests via {@code org.machanism.machai.ai.manager.Genai} and apply results in-place.</li>
+    <li><strong>Dispatch</strong> requests via {@code org.machanism.machai.ai.provider.Genai} and apply results in-place.</li>
   </ul>
 </section>
 
@@ -76,7 +76,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <p>
     This package contains the Ghostwriter command-line entry point ({@code org.machanism.machai.gw.processor.Ghostwriter}) and the processor
     implementations that scan a project directory, select matching files, extract prompts (either from embedded {@code @guidance:} directives
-    or from Act templates), and execute those prompts against a configured {@code org.machanism.machai.ai.manager.Genai} provider.
+    or from Act templates), and execute those prompts against a configured {@code org.machanism.machai.ai.provider.Genai} provider.
   </p>
   <h4>Core types</h4>
   <ul>

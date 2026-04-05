@@ -12,8 +12,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;

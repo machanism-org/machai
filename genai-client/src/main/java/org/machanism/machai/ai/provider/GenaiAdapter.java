@@ -1,9 +1,11 @@
-package org.machanism.machai.ai.manager;
+package org.machanism.machai.ai.provider;
 
 import java.io.File;
 import java.util.List;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
  * Delegating {@link Genai} implementation.
@@ -42,7 +44,7 @@ public class GenaiAdapter implements Genai {
 	 * @param provider the provider to delegate to
 	 * @throws IllegalArgumentException if {@code provider} is {@code null}
 	 */
-	protected void setProvider(Genai provider) {
+	public void setProvider(Genai provider) {
 		if (provider == null) {
 			throw new IllegalArgumentException("provider must not be null");
 		}

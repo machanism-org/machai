@@ -14,7 +14,7 @@ import java.util.Collections;
 
 import org.bson.Document;
 import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.schema.Bindex;
 
 import com.mongodb.client.FindIterable;

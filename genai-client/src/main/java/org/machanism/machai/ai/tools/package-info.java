@@ -35,32 +35,37 @@
  */
 
 /**
- * Host-integrated function tools exposed to a {@link org.machanism.machai.ai.manager.Genai}.
+ * Host-side function tooling for integrating controlled local capabilities with a
+ * {@link org.machanism.machai.ai.provider.Genai} provider.
  *
- * <p>
- * This package contains host-side “tool installers” (SPI implementations) that register named functions with a
- * {@link org.machanism.machai.ai.manager.Genai} provider. Tools are executed inside the host application and are
- * designed to keep access scoped (for example, to a project working directory) and observable (via host logging).
- * </p>
+ * <p>This package contains the service-provider interface and concrete tool installers used to expose selected
+ * host functionality to AI provider implementations. The tools in this package focus on capabilities that are
+ * commonly needed during assisted development workflows, such as command execution, HTTP access, and package-level
+ * tool discovery and registration.</p>
  *
- * <h2>Responsibilities</h2>
+ * <h2>Package responsibilities</h2>
  * <ul>
- *   <li><b>Tool registration</b>: implementations of {@link org.machanism.machai.ai.tools.FunctionTools} register
- *       tools via
- *       {@link org.machanism.machai.ai.manager.Genai#addTool(String, String, org.machanism.machai.ai.manager.Genai.ToolFunction, String...)}.</li>
- *   <li><b>Discovery and wiring</b>: installers are typically discovered using {@link java.util.ServiceLoader} and
- *       applied by {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
- *   <li><b>Scoped execution</b>: tools interpret paths relative to a host-supplied working directory, bound output
- *       sizes, and apply validation/deny checks for potentially risky operations.</li>
+ *   <li>Define the {@link org.machanism.machai.ai.tools.FunctionTools} SPI used by tool installers.</li>
+ *   <li>Discover and apply tool installers through {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
+ *   <li>Provide host-managed command execution with validation and bounded output capture.</li>
+ *   <li>Provide HTTP and REST access helpers for web content retrieval and API invocation.</li>
+ *   <li>Support security-related checks and utility types used by installed tools.</li>
  * </ul>
  *
- * <h2>Key components</h2>
+ * <h2>Key types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} – SPI implemented by tool installers</li>
- *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} – discovers and applies installers</li>
- *   <li>{@link org.machanism.machai.gw.tools.FileFunctionTools} – file-system utilities relative to a working directory</li>
- *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} – command execution and process termination</li>
- *   <li>{@link org.machanism.machai.ai.tools.WebFunctionTools} – HTTP fetching and REST calls</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} - SPI for registering tools with a provider.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} - singleton loader that discovers and applies tool installers.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.CommandFunctionTools} - installs command execution and termination tools.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.WebFunctionTools} - installs web content and REST API tools.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.CommandSecurityChecker} - evaluates deny-list rules for command validation.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.LimitedStringBuilder} - retains only the trailing portion of large text output.</li>
  * </ul>
+ *
+ * <h2>Usage notes</h2>
+ * <p>Tool implementations are executed within the host application rather than by the model itself. As a result,
+ * callers should ensure that working directories, network access, configuration values, and security policies are
+ * supplied and enforced by the surrounding runtime. Paths are expected to be resolved relative to a host-provided
+ * project directory, and configuration placeholders may be resolved through an injected configurator.</p>
  */
 package org.machanism.machai.ai.tools;

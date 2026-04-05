@@ -27,29 +27,33 @@
  */
 
 /**
- * No-op (offline) {@link org.machanism.machai.ai.manager.Genai} provider.
+ * Provides a no-op {@link org.machanism.machai.ai.provider.Genai} implementation for offline, disabled, or test-only
+ * execution paths.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, a no-op implementation of
- * {@link org.machanism.machai.ai.manager.Genai} intended for environments where external model backends are disabled,
- * unavailable, or not permitted.
+ * <p>This package contains {@link org.machanism.machai.ai.provider.none.NoneProvider}, which satisfies the
+ * {@link org.machanism.machai.ai.provider.Genai} contract without invoking any external model backend. It is useful
+ * when AI integration must be turned off while still preserving the surrounding application flow and prompt assembly
+ * behavior.
  *
- * <p>Instead of contacting a model, it accumulates prompt text in memory and, when configured, writes both the
- * accumulated prompts and the configured instructions to local files.
+ * <p>The provider collects prompt content in memory, optionally persists configured instructions and prompt input to
+ * local files during execution, and reports zero usage because no remote or local model inference is performed.
  *
- * <h2>Behavior</h2>
+ * <h2>Supported behavior</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)} appends prompt text to an in-memory
- *       buffer separated by {@link org.machanism.machai.ai.manager.Genai#PARAGRAPH_SEPARATOR}.</li>
- *   <li>{@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} returns {@code null}. If an inputs log file
- *       is configured via {@link org.machanism.machai.ai.provider.none.NoneProvider#inputsLog(java.io.File)}, prompts are
- *       written to that file and the buffer is cleared.</li>
- *   <li>If instructions are set via
- *       {@link org.machanism.machai.ai.provider.none.NoneProvider#instructions(String)}, they are written to
- *       {@code instructions.txt} next to the inputs log (or to the process user directory when the log file has no
- *       parent directory).</li>
- *   <li>Unsupported capabilities (for example,
- *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String, long)}) throw
- *       {@link java.lang.UnsupportedOperationException}.</li>
+ *   <li>Accumulates prompt text passed through
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#prompt(String)}.</li>
+ *   <li>Optionally writes the prompt buffer to a configured log file through
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#inputsLog(java.io.File)} when
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#perform()} is invoked.</li>
+ *   <li>Optionally writes configured instructions to a sibling {@code instructions.txt} file.</li>
+ *   <li>Returns {@code null} from execution and zero-valued usage metrics.</li>
+ * </ul>
+ *
+ * <h2>Unsupported behavior</h2>
+ * <ul>
+ *   <li>Embedding generation via
+ *       {@link org.machanism.machai.ai.provider.none.NoneProvider#embedding(String, long)}.</li>
+ *   <li>Tool execution and working-directory configuration beyond interface compatibility no-ops.</li>
  * </ul>
  *
  * <h2>Example</h2>

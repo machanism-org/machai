@@ -9,7 +9,7 @@ class FunctionToolsSetConfiguratorTest {
 
 	private static final class TestTools implements FunctionTools {
 		@Override
-		public void applyTools(org.machanism.machai.ai.manager.Genai provider) {
+		public void applyTools(org.machanism.machai.ai.provider.Genai provider) {
 			// not used
 		}
 	}

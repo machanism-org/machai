@@ -16,8 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.Genai;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,12 +79,12 @@ public final class Ghostwriter {
 	private static void logInstructions(String instructions) {
 		if (logger.isInfoEnabled()) {
 			// Sonar java:S2629 - evaluate abbreviate only when INFO logging is enabled.
-			logger.info("Instructions: {}", abbreviateForLogging(instructions));
+			logger.info("Instructions: {}", abbreviateInstructions(instructions));
 		}
 	}
 
-	private static String abbreviateForLogging(String text) {
-		return StringUtils.abbreviate(text, LOG_PROMPT_MAX_LENGTH);
+	private static String abbreviateInstructions(String instructions) {
+		return StringUtils.abbreviate(instructions, LOG_PROMPT_MAX_LENGTH);
 	}
 
 	private static void applyActPrompt(CommandLine cmd, PropertiesConfigurator config, AIFileProcessor processor) {
@@ -287,7 +287,7 @@ public final class Ghostwriter {
 	static void logDefaultPrompt(String label, String prompt) {
 		if (prompt != null && logger.isInfoEnabled()) {
 			// Sonar java:S2629 - precompute only inside the enabled logging branch.
-			String abbreviatedPrompt = abbreviateForLogging(prompt);
+			String abbreviatedPrompt = abbreviateInstructions(prompt);
 			logger.info("{}: {}", label, abbreviatedPrompt);
 		}
 	}

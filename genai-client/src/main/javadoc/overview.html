@@ -47,7 +47,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Architecture overview</h2>
 <p>
-  The central provider contract is defined by <code>org.machanism.machai.ai.manager.Genai</code>. Provider resolution,
+  The central provider contract is defined by <code>org.machanism.machai.ai.provider.Genai</code>. Provider resolution,
   instantiation, and usage aggregation are handled by
   <code>org.machanism.machai.ai.manager.GenaiProviderManager</code>. Concrete provider implementations adapt the shared
   contract to specific backends (for example OpenAI, Google Gemini, Anthropic Claude, EPAM CodeMie, and an offline

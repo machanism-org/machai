@@ -1,10 +1,11 @@
-package org.machanism.machai.ai.manager;
+package org.machanism.machai.ai.provider;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
  * Contract for a generative-AI provider integration.
@@ -64,22 +65,6 @@ public interface Genai {
 	 * Paragraph separator used when composing prompts.
 	 */
 	String PARAGRAPH_SEPARATOR = "\n\n";
-
-	/**
-	 * Functional interface representing a tool callable by a provider during a run.
-	 */
-	@FunctionalInterface
-	interface ToolFunction {
-
-		/**
-		 * Executes the tool.
-		 *
-		 * @param params provider-specific parameters
-		 * @return tool result (provider-specific; commonly serialized to JSON)
-		 * @throws IOException if tool execution fails
-		 */
-		Object apply(Object[] params) throws IOException;
-	}
 
 	/**
 	 * Initializes the provider with application configuration.

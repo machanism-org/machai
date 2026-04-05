@@ -90,7 +90,7 @@ This design provides:
 ### Basic Usage
 
 ```java
-import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 
 Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4.1");

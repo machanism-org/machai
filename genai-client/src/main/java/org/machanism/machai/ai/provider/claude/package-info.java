@@ -27,31 +27,14 @@
  */
 
 /**
- * Provides the Gemini-specific implementation of MachAI's provider abstraction.
+ * Provides Anthropic Claude integration for the MachAI generative AI abstraction layer.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.gemini.GeminiProvider},
- * a {@link org.machanism.machai.ai.provider.Genai} implementation intended to translate
- * MachAI request concepts such as prompts, system instructions, tool registration,
- * embeddings, usage reporting, and file-based context into calls to Google's Gemini
- * models.</p>
+ * <p>This package contains the Claude-specific implementation of the {@link org.machanism.machai.ai.provider.Genai}
+ * contract. Its classes are intended to adapt Anthropic Claude models to the common provider lifecycle used by the
+ * application, including initialization, prompt accumulation, instruction handling, tool registration, usage
+ * reporting, and embedding requests.
  *
- * <p>The current package represents an early-stage integration scaffold. The public API
- * documents the intended behavior of the provider while several operations remain marked
- * as not yet implemented. Even in this incomplete state, the package defines the expected
- * lifecycle for Gemini-backed interactions, including initialization, prompt collection,
- * execution, and usage inspection.</p>
- *
- * <h2>Usage overview</h2>
- * <p>Typical interaction starts by creating and initializing the provider, optionally
- * configuring instructions or tools, submitting prompt content, and then invoking the
- * request.</p>
- *
- * <pre>
- * Genai genai = new GeminiProvider();
- * genai.init(conf);
- * genai.instructions("You are a helpful assistant.");
- * genai.prompt("Summarize the following text.");
- * String response = genai.perform();
- * </pre>
+ * <p>The current implementation is a provider scaffold and defines the package location for Claude support while the
+ * concrete behavior is completed incrementally.
  */
-package org.machanism.machai.ai.provider.gemini;
+package org.machanism.machai.ai.provider.claude;

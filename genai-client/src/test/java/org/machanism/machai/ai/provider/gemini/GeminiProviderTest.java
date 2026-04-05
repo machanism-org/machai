@@ -7,9 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ListResourceBundle;
@@ -18,7 +16,8 @@ import java.util.ResourceBundle;
 import org.apache.commons.lang.NotImplementedException;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.Genai;
+import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
  * Unit tests for {@link GeminiProvider}.
@@ -120,7 +119,7 @@ class GeminiProviderTest {
 	void addTool_shouldNotThrow_withRealFunctionAndParams() {
 		// Arrange
 		GeminiProvider provider = new GeminiProvider();
-		Genai.ToolFunction function = args -> "ok";
+		ToolFunction function = args -> "ok";
 
 		// Act + Assert
 		assertDoesNotThrow(() -> provider.addTool("tool", "desc", function, "a", "b"));

@@ -16,29 +16,32 @@
  */
 
 /**
- * Provider-agnostic client API for MachAI generative-AI integrations.
+ * Provider-agnostic generative AI client API for MachAI.
  *
- * <p>This package defines the public abstractions used to compose and execute LLM/GenAI requests while keeping callers
- * decoupled from vendor SDKs, authentication strategies, and transport details.
+ * <p>This package defines the top-level abstractions used to work with large language models and related AI services
+ * without coupling application code to a specific vendor SDK, transport, or authentication mechanism. It serves as
+ * the entry point for configuring providers, building prompts and instructions, attaching host-executed tools, and
+ * collecting usage information from completed interactions.
  *
- * <h2>Sub-packages</h2>
+ * <h2>Package scope</h2>
  * <ul>
- *   <li><strong>Manager API / SPI</strong> ({@code org.machanism.machai.ai.manager}) &ndash; provider contracts,
- *       selection, and usage aggregation (for example {@link org.machanism.machai.ai.manager.Genai},
- *       {@link org.machanism.machai.ai.manager.GenaiProviderManager}, and
- *       {@link org.machanism.machai.ai.manager.Usage}).</li>
- *   <li><strong>Providers</strong> ({@code org.machanism.machai.ai.provider.*}) &ndash; concrete backend integrations
- *       (for example OpenAI, Google Gemini, EPAM CodeMie) and offline/no-op providers.</li>
- *   <li><strong>Tools</strong> ({@code org.machanism.machai.ai.tools}) &ndash; host-executed capabilities that can be
- *       registered with providers for tool/function calling, typically discovered and applied via
- *       {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
+ *   <li><strong>Manager infrastructure</strong> in {@code org.machanism.machai.ai.manager} resolves provider/model
+ *   identifiers, initializes provider implementations, and aggregates token usage statistics.</li>
+ *   <li><strong>Provider contracts and implementations</strong> in {@code org.machanism.machai.ai.provider} define the
+ *   common {@link org.machanism.machai.ai.provider.Genai} API together with concrete integrations such as OpenAI,
+ *   Gemini, CodeMie, and no-op/offline providers.</li>
+ *   <li><strong>Host-side tool integration</strong> in {@code org.machanism.machai.ai.tools} exposes controlled local
+ *   capabilities such as command execution and HTTP access that can be registered with compatible providers for tool
+ *   or function calling.</li>
  * </ul>
  *
- * <h2>Typical workflow</h2>
+ * <h2>Typical usage flow</h2>
  * <ol>
- *   <li>Select a provider/model identifier (for example {@code OpenAI:gpt-4o-mini}).</li>
- *   <li>Configure instructions, prompts, and optional attachments/tools.</li>
- *   <li>Execute the request and record aggregated token usage.</li>
+ *   <li>Resolve a provider using a provider/model identifier such as {@code OpenAI:gpt-4o-mini}.</li>
+ *   <li>Configure system instructions, user prompts, and any optional provider settings.</li>
+ *   <li>Optionally discover and register host-side tools through
+ *   {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.</li>
+ *   <li>Execute the request through the selected provider and inspect or aggregate usage metrics.</li>
  * </ol>
  *
  * <h2>Example</h2>
@@ -49,7 +52,6 @@
  * provider.instructions("You are a concise assistant.");
  * provider.prompt("Summarize this repository.");
  *
- * // Optional: register host-side tools (file/command/web) if enabled
  * FunctionToolsLoader.getInstance().setConfiguration(conf);
  * FunctionToolsLoader.getInstance().applyTools(provider);
  *
@@ -57,5 +59,9 @@
  * GenaiProviderManager.addUsage(provider.usage());
  * GenaiProviderManager.logUsage();
  * </pre>
+ *
+ * <p>The package is designed so higher-level application code can remain focused on prompt orchestration and result
+ * handling while provider selection, provider-specific execution details, and host capability registration are managed
+ * by the corresponding sub-packages.
  */
 package org.machanism.machai.ai;
