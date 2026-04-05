@@ -23,7 +23,7 @@ skinparam arrow {
 legend left
   <b>Legend</b>
   A --> B : A depends on B
-  A ..> B : A includes B as a Maven module
+  A ..> B : parent POM includes B as a Maven module
 endlegend
 
 component "machai\n(root pom)" as machai_root <<pom>>
@@ -46,7 +46,7 @@ bindex_core --> genai_client
 
 ghostwriter --> project_layout
 ghostwriter --> genai_client
-ghostwriter --> bindex_core : optional
+ghostwriter --> bindex_core
 
 gw_maven_plugin --> ghostwriter
 
