@@ -60,7 +60,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		this.model = genai;
 	}
 
-	// Sonar java:S1130 - removed redundant 'throws IOException' since method body doesn't throw it.
+	// Sonar java:S1130 - removed redundant 'throws IOException' since method body
+	// doesn't throw it.
 	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt) {
 		logger.info("Processing path: '{}'", file);
 		String perform = null;
@@ -118,8 +119,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		if (perform != null && interactive) {
 			logger.info(">>> {}", perform);
 			String input = input();
-			provider.prompt(input);
-			perform = perform(file, provider);
+			if (input != null) {
+				provider.prompt(input);
+				perform = perform(file, provider);
+			}
 		}
 		return perform;
 	}
@@ -160,7 +163,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		content.add(relativeFile);
 
 		if (!interactive) {
-			content.add("- This is an automated process.\n" + "- Do not include explanations or any additional output.\n");
+			content.add(
+					"- This is an automated process.\n- Do not include explanations or any additional output.\n");
 		} else {
 			content.add("- This is an interactive process.\n"
 					+ "- If the task is completed successfully, call the `terminate_process` function with exit code = 0.");
@@ -307,13 +311,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				scanDirFile = new File(getProjectDir(), scanDir);
 			}
 		}
-		super.setScanDir(scanDirFile);
 		String relativePath = ProjectLayout.getRelativePath(projectDir, scanDirFile);
 		if (relativePath == null) {
-			throw new IllegalArgumentException(
-					"Error: The specified scan path must be located within the root project directory: "
-							+ projectDir.getAbsolutePath());
+			relativePath = ".";
+			scanDirFile = getProjectDir();
 		}
+		super.setScanDir(scanDirFile);
 
 		if (getDefaultPrompt() == null) {
 			scanDir = "glob:" + relativePath + "{,/**}";
@@ -361,18 +364,18 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	* FalsePositive
-	* Backward-compatible alias kept for configuration/property naming; delegating to getModel() is intentional.
-	*/
+	 * FalsePositive Backward-compatible alias kept for configuration/property
+	 * naming; delegating to getModel() is intentional.
+	 */
 	@SuppressWarnings("java:S4144")
 	public String getProvider() {
 		return String.valueOf(getModel());
 	}
 
 	/**
-	* FalsePositive
-	* Backward-compatible alias kept for configuration/property naming; delegating to setModel() is intentional.
-	*/
+	 * FalsePositive Backward-compatible alias kept for configuration/property
+	 * naming; delegating to setModel() is intentional.
+	 */
 	@SuppressWarnings("java:S4144")
 	public void setProvider(String genai) {
 		setModel(genai);

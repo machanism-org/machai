@@ -68,14 +68,6 @@ public final class Ghostwriter {
 		this.processor = processor;
 	}
 
-	private static void logScanStart(String scanDir) {
-		logger.info("Starting scan of path: {}", scanDir);
-	}
-
-	private static void logScanFinish(String scanDir) {
-		logger.info("Finished scanning path: {}", scanDir);
-	}
-
 	private static void logInstructions(String instructions) {
 		if (logger.isInfoEnabled()) {
 			// Sonar java:S2629 - evaluate abbreviate only when INFO logging is enabled.
@@ -113,11 +105,10 @@ public final class Ghostwriter {
 		int exitCode = 0;
 		try {
 			for (String scanDir : scanDirs) {
-				logScanStart(scanDir);
 				File projectDir = processor.getProjectDir();
-
+				logger.info("Starting scan of path: {}", scanDir);
 				processor.scanDocuments(projectDir, scanDir);
-				logScanFinish(scanDir);
+				logger.info("Finished scanning path: {}", scanDir);
 			}
 
 		} catch (ProcessTerminationException e) {
@@ -192,7 +183,7 @@ public final class Ghostwriter {
 
 	@SuppressWarnings("java:S106")
 	public static String readText(String prompt) {
-		System.out.print(prompt);
+		System.out.print(prompt + ": ");
 
 		StringBuilder sb = new StringBuilder();
 		try (Scanner scanner = new Scanner(System.in)) {
@@ -257,7 +248,11 @@ public final class Ghostwriter {
 
 	static AIFileProcessor createActProcessor(CommandLine cmd, File projectDir, PropertiesConfigurator config,
 			String genai) {
-		ActProcessor processor = new ActProcessor(projectDir, config, genai);
+		ActProcessor processor = new ActProcessor(projectDir, config, genai) {
+			protected String input() {
+				return readText(">>>");
+			}
+		};
 
 		// Sonar java:S1854 - avoid useless assignment; only read when needed.
 		if (cmd.hasOption("acts")) {
@@ -301,7 +296,7 @@ public final class Ghostwriter {
 			}
 		}
 		if (scanDirs == null || scanDirs.length == 0) {
-			scanDirs = new String[] { SystemUtils.getUserDir().getAbsolutePath() };
+			scanDirs = new String[] { "." };
 		}
 		return scanDirs;
 	}
@@ -372,8 +367,7 @@ public final class Ghostwriter {
 			instructions = cmd.getOptionValue(instructionsOpt);
 
 			if (instructions == null) {
-				instructions = readText("No instructions were provided as an option value.\n"
-						+ "Please enter the instructions text below.");
+				instructions = readText("Instructions");
 			}
 		}
 
