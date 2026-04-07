@@ -14,9 +14,7 @@
 	<properties>
 		<maven.compiler.release>8</maven.compiler.release>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
-		<plantuml-generator.scanPackages>org.machanism.machai.gw*</plantuml-generator.scanPackages>
-		<!-- Sonar/CI: keep JUnit5 artifacts aligned to avoid classpath
-		mismatches -->
+		<plantuml-generator.scanPackages>org.machanism.machai.gw.*</plantuml-generator.scanPackages>
 		<junit.jupiter.version>5.10.2</junit.jupiter.version>
 	</properties>
 
@@ -31,6 +29,11 @@
 					<version>${maven.version}</version>
 					<scope>compile</scope>
 				</dependency>
+				<dependency>
+					<groupId>org.machanism.machai</groupId>
+					<artifactId>bindex-core</artifactId>
+					<version>1.1.1-SNAPSHOT</version>
+				</dependency>
 			</dependencies>
 
 			<build>
@@ -39,14 +42,13 @@
 						<artifactId>maven-assembly-plugin</artifactId>
 						<configuration>
 							<finalName>gw</finalName>
+							<outputDirectory>
+								${env.MACHANISM_PACK_DIR}/machai</outputDirectory>
 							<archive>
 								<manifest>
 									<mainClass>
 										org.machanism.machai.gw.processor.Ghostwriter</mainClass>
 								</manifest>
-								<manifestEntries>
-									<Class-Path><![CDATA[lib/ae.jar lib/web-ae-plugin.jar]]></Class-Path>
-								</manifestEntries>
 							</archive>
 						</configuration>
 						<executions>
@@ -107,11 +109,6 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>genai-client</artifactId>
-			<version>1.1.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.machanism.machai</groupId>
-			<artifactId>bindex-core</artifactId>
 			<version>1.1.1-SNAPSHOT</version>
 		</dependency>
 
