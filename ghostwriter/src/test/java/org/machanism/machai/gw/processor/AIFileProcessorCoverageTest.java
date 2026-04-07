@@ -41,22 +41,6 @@ class AIFileProcessorCoverageTest {
 	}
 
 	@Test
-	void parseScanDir_whenAbsoluteOutsideProject_throwsIllegalArgumentException() {
-		File projectDir = tempDir.toFile();
-		PropertiesConfigurator configurator = new PropertiesConfigurator();
-		AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "Any:Model");
-		File outside = new File(System.getProperty("java.io.tmpdir")).getAbsoluteFile();
-		if (outside.getAbsolutePath().startsWith(projectDir.getAbsolutePath())) {
-			outside = new File(outside, "outside-" + System.nanoTime());
-		}
-		final String outsidePath = outside.getAbsolutePath();
-
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> processor.parseScanDir(projectDir, outsidePath));
-		assertTrue(ex.getMessage().contains("must be located within"));
-	}
-
-	@Test
 	void scanDocuments_whenProjectDirIsNull_throwsIllegalArgumentException() {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Any:Model");

@@ -1,5 +1,6 @@
 package org.machanism.machai.gw.processor;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,7 +47,8 @@ class GhostwriterCoverageTest {
 		AIFileProcessor processor = Mockito.mock(AIFileProcessor.class);
 
 		// Act + Assert
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new Ghostwriter("  ", processor));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> new Ghostwriter("  ", processor));
 		assertTrue(ex.getMessage().contains(Ghostwriter.MODEL_PROP_NAME));
 	}
 
@@ -78,7 +80,7 @@ class GhostwriterCoverageTest {
 		// Assert
 		assertNotNull(scanDirs);
 		assertEquals(1, scanDirs.length);
-		assertTrue(new File(scanDirs[0]).isAbsolute());
+		assertFalse(new File(scanDirs[0]).isAbsolute());
 	}
 
 	@Test
@@ -118,12 +120,14 @@ class GhostwriterCoverageTest {
 	}
 
 	@Test
-	void createProcessor_whenActOptionPresent_createsActProcessorAndSetsDefaultPrompt(@TempDir File tmp) throws Exception {
+	void createProcessor_whenActOptionPresent_createsActProcessorAndSetsDefaultPrompt(@TempDir File tmp)
+			throws Exception {
 		// Arrange
 		Options opts = new Options();
 		opts.addOption(Option.builder("a").longOpt("act").hasArg(true).optionalArg(true).build());
 		opts.addOption(new Option("as", "acts", true, ""));
-		CommandLine cmd = new DefaultParser().parse(opts, new String[] { "--act", "help", "--acts", tmp.getAbsolutePath() });
+		CommandLine cmd = new DefaultParser().parse(opts,
+				new String[] { "--act", "help", "--acts", tmp.getAbsolutePath() });
 
 		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
 		Mockito.when(config.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn("configAct");

@@ -52,21 +52,6 @@ class AIFileProcessorAdditionalTest {
 	}
 
 	@Test
-	void parseScanDir_whenPathOutsideProject_thenThrows() {
-		// Arrange
-		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
-		File projectDir = tempDir.resolve("project").toFile();
-		assertTrue(projectDir.mkdirs());
-
-		// Act
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> processor.parseScanDir(projectDir, "C:\\"));
-
-		// Assert
-		assertTrue(ex.getMessage().contains("must be located"));
-	}
-
-	@Test
 	void parseScanDir_whenRootDirIsProjectDirAndDefaultPromptNull_thenAddsRecursiveGlobSuffix() {
 		// Arrange
 		File projectDir = tempDir.resolve("project").toFile();

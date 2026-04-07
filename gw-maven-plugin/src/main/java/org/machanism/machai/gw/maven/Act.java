@@ -125,7 +125,7 @@ public class Act extends AbstractGWGoal {
 			@Override
 			protected String input() {
 				try {
-					return readText("act");
+					return readText(">>>");
 				} catch (PrompterException e) {
 					throw new IllegalArgumentException(e);
 				}
@@ -197,7 +197,7 @@ public class Act extends AbstractGWGoal {
 				if (savedAct == null) {
 					String actValue = conf.get(Ghostwriter.ACT_PROP_NAME, null);
 					if (actValue == null) {
-						actValue = readText("act");
+						actValue = readText("Act");
 					}
 					userProperties.setProperty(Ghostwriter.ACT_PROP_NAME, actValue);
 				} else {
