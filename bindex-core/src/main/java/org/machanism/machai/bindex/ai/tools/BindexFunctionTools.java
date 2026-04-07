@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -208,6 +209,10 @@ public class BindexFunctionTools implements FunctionTools {
 		File workingDir = (File) params[1];
 		String fileName = props.get("fileName").asText();
 
+		if (logger.isInfoEnabled()) {
+			logger.info("Register Bindex: {}", Arrays.toString(params));
+		}
+
 		Picker picker = new Picker(configurator.get("gw.model"), null, configurator);
 		File bindexFile = new File(workingDir, fileName);
 
@@ -219,11 +224,12 @@ public class BindexFunctionTools implements FunctionTools {
 				String recordId = picker.create(bindex);
 				result = "RecordId: " + recordId;
 			} catch (IOException e) {
-				logger.debug("registerBindex failed.", e);
+				logger.error("registerBindex failed.", e);
 				result = "Error: " + e.getMessage();
 			}
 		} else {
 			result = "file not found";
+			logger.error("Bindex file not found: {}", bindexFile);
 		}
 
 		return result;
