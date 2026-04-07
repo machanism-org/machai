@@ -24,6 +24,7 @@ legend left
   <b>Legend</b>
   A --> B : A depends on B
   A ..> B : parent POM includes B as a Maven module
+  A -up-|> B : A inherits from parent POM B
 endlegend
 
 component "machai\n(root pom)" as machai_root <<pom>>
@@ -39,15 +40,20 @@ machai_root ..> bindex_core : module
 machai_root ..> ghostwriter : module
 machai_root ..> gw_maven_plugin : module
 
-' Dependencies between modules (from module pom.xml)
+project_layout -up-|> machai_root : parent
 
+genai_client -up-|> machai_root : parent
+
+bindex_core -up-|> machai_root : parent
 bindex_core --> project_layout
 bindex_core --> genai_client
 
+ghostwriter -up-|> machai_root : parent
 ghostwriter --> project_layout
 ghostwriter --> genai_client
-ghostwriter --> bindex_core
+ghostwriter --> bindex_core : pack profile
 
+gw_maven_plugin -up-|> machai_root : parent
 gw_maven_plugin --> ghostwriter
 
 @enduml

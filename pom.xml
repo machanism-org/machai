@@ -96,22 +96,6 @@
 			</distributionManagement>
 		</profile>
 		<profile>
-			<id>pack</id>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<artifactId>maven-assembly-plugin</artifactId>
-							<configuration>
-								<outputDirectory>
-									${env.MACHANISM_PACK_DIR}/machai</outputDirectory>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-		<profile>
 			<id>auto-acts</id>
 			<build>
 				<plugins>
@@ -139,6 +123,12 @@
 								</configuration>
 							</execution>
 						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.machanism.machai</groupId>
+								<artifactId>bindex-core</artifactId>
+							</dependency>
+						</dependencies>
 					</plugin>
 				</plugins>
 			</build>
