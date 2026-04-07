@@ -20,6 +20,7 @@ Perform user query bellow:
 
 # Generation Rules
 
+This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
 These rules must be followed if the `bindex.json` file needs to be created or updated; otherwise, they should be ignored.
 
 Generate the `bindex.json` based on information extracted from [Main Source & Resource Folders] and [Documentation Folders] directories.
