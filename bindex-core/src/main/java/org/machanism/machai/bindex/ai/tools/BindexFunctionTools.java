@@ -131,18 +131,15 @@ public class BindexFunctionTools implements FunctionTools {
 	private String getBindex(Object[] params) throws JsonProcessingException {
 		JsonNode props = (JsonNode) params[0];
 		String id = props.get("id").asText();
-		// Sonar java:S1488 - return expression directly instead of using a temporary variable.
-		return getBindex(id);
-	}
-
-	private String getBindex(String id) throws JsonProcessingException {
 		Bindex bindex = getBindexRepository().getBindex(id);
 		ObjectMapper objectMapper = new ObjectMapper();
-		String bindexJson = bindex == null ? "null" : objectMapper.writeValueAsString(bindex);
+		String bindexJson = bindex == null ? "<not found>" : objectMapper.writeValueAsString(bindex);
 		if (logger.isInfoEnabled()) {
-			logger.info("Retrieved bindex: {}",
-					StringUtils.abbreviate(bindexJson, 120).replace(Genai.LINE_SEPARATOR, " ").replace("\r",
-							""));
+			if (bindex != null) {
+				logger.info("Bindex: {}", StringUtils.abbreviate(bindexJson, MAXWIDTH));
+			} else {
+				logger.info("Bindex not found, id: {}", id);
+			}
 		}
 		return bindexJson;
 	}

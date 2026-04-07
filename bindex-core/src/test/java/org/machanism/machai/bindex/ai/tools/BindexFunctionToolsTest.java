@@ -79,7 +79,7 @@ class BindexFunctionToolsTest {
 		String out = invokeGetBindexWithInjectedRepository(tools, repository, new Object[] { props });
 
 		// Assert
-		assertEquals("null", out);
+		assertEquals("<not found>", out);
 		Mockito.verify(repository).getBindex("missing");
 	}
 

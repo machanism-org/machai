@@ -24,22 +24,6 @@ import org.machanism.machai.schema.Bindex;
 class BindexFunctionToolsCoverageExpansionTest {
 
 	@Test
-	void getBindex_shouldReturnNullLiteralWhenRepositoryDoesNotContainRecord() throws Exception {
-		BindexFunctionTools tools = new BindexFunctionTools();
-		BindexRepository repository = mock(BindexRepository.class);
-		when(repository.getBindex("missing")).thenReturn(null);
-		Field field = BindexFunctionTools.class.getDeclaredField("bindexRepository");
-		field.setAccessible(true);
-		field.set(tools, repository);
-		Method method = BindexFunctionTools.class.getDeclaredMethod("getBindex", String.class);
-		method.setAccessible(true);
-
-		String result = (String) method.invoke(tools, "missing");
-
-		assertEquals("null", result);
-	}
-
-	@Test
 	void getRecommendedLibraries_shouldConvertBindexesToElementsAndSkipNulls() throws Exception {
 		BindexFunctionTools tools = new BindexFunctionTools();
 		Configurator configurator = mock(Configurator.class);
