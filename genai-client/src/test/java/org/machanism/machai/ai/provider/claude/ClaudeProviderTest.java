@@ -207,8 +207,6 @@ class ClaudeProviderTest {
 				() -> assertNotImplemented(provider::usage));
 	}
 
-	// Sonar java:S5778: reduce the number of potentially-throwing invocations
-	// inside a lambda.
 	private static void assertNotImplemented(ThrowingRunnable action) {
 		UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, action::run);
 		assertEquals(NOT_IMPLEMENTED_MSG, ex.getMessage());

@@ -60,8 +60,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		this.model = genai;
 	}
 
-	// Sonar java:S1130 - removed redundant 'throws IOException' since method body
-	// doesn't throw it.
 	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt) {
 		logger.info("Processing path: '{}'", file);
 		String perform = null;

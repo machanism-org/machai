@@ -355,7 +355,6 @@ public class FileFunctionTools implements FunctionTools {
 		String name = directory.getName();
 		String[] excludeDirs = ProjectLayout.getExcludeDirs();
 		if (!Strings.CS.equalsAny(name, excludeDirs) && directory.exists() && directory.isDirectory()) {
-			// Sonar java:S1066 - merge nested if statements for clarity.
 			File[] files = directory.listFiles();
 			if (files != null) {
 				for (File file : files) {

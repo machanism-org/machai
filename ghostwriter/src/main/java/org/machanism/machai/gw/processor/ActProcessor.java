@@ -70,9 +70,7 @@ public class ActProcessor extends AIFileProcessor {
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
 
-	// Sonar java:S1192 - Avoid duplicated string literals.
 	private static final String HTTP_PREFIX = "http://";
-	// Sonar java:S1192 - Avoid duplicated string literals.
 	private static final String HTTPS_PREFIX = "https://";
 
 	/** Optional directory containing external {@code *.toml} act files. */
@@ -263,7 +261,6 @@ public class ActProcessor extends AIFileProcessor {
 			}
 
 		} else {
-			// Sonar java:S1075 - do not hard-code path delimiter.
 			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";
 			String uriString = Strings.CS.endsWith(name, TOML_EXTENSION) ? name : base + name + TOML_EXTENSION;
 			path = URI.create(uriString).toURL().toString();

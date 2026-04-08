@@ -66,13 +66,11 @@ public class BindexRepository {
 			throw new IllegalArgumentException("config must not be null");
 		}
 
-		// Sonar java:S2095 - keep MongoClient as an instance field and close it when the repository is closed.
 		this.mongoClient = createMongoClient(config);
 		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
 		this.collection = database.getCollection(CONNECTION);
 	}
 
-	// Sonar java:S2095 - caller (repository) owns the created client and must close it.
 	private static MongoClient createMongoClient(Configurator config) {
 		String password = config.get(BINDEX_REG_PASSWORD_PROP_NAME, null);
 
@@ -95,7 +93,6 @@ public class BindexRepository {
 	 * @return MongoDB collection handle
 	 */
 	public static MongoCollection<Document> getCollection(Configurator config) {
-		// Sonar java:S1135 - required bridge method for legacy callers.
 		return new BindexRepository(config).collection;
 	}
 

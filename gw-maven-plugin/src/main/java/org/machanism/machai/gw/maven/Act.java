@@ -77,7 +77,6 @@ public class Act extends AbstractGWGoal {
 	/**
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
-	// Sonar java:S1700 - rename field to a meaningful name
 	@Parameter(property = Ghostwriter.ACT_PROP_NAME, required = false)
 	protected String actPrompt;
 

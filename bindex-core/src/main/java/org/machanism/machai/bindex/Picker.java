@@ -137,8 +137,6 @@ public class Picker {
 		this.provider = GenaiProviderManager.getProvider(genai, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
-		// Sonar java:S3010 - avoid mutating a static field from an instance
-		// constructor.
 		this.collection = BindexRepository.getCollection(config);
 	}
 
@@ -308,7 +306,6 @@ public class Picker {
 			}
 		}
 
-		// Sonar java:S1488/java:S1602/java:S1612 - simplify stream mapping.
 		return classificatioResults.stream().map(this::getBindex).filter(b -> b != null).collect(Collectors.toList());
 	}
 

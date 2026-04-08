@@ -31,7 +31,6 @@ import org.gradle.internal.impldep.javax.annotation.Nullable;
  */
 public class MavenProjectLayout extends ProjectLayout {
 
-	// Sonar java:S1068 - removed unused logger field.
 	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
 	private Model model;

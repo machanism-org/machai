@@ -70,7 +70,6 @@ public final class Ghostwriter {
 
 	private static void logInstructions(String instructions) {
 		if (logger.isInfoEnabled()) {
-			// Sonar java:S2629 - evaluate abbreviate only when INFO logging is enabled.
 			logger.info("Instructions: {}", abbreviateInstructions(instructions));
 		}
 	}
@@ -99,8 +98,6 @@ public final class Ghostwriter {
 		return projectDir;
 	}
 
-	// Sonar java:S3776 - reduced Cognitive Complexity by extracting CLI resolution
-	// helpers.
 	public int perform(String[] scanDirs) throws IOException {
 		int exitCode = 0;
 		try {
@@ -254,7 +251,6 @@ public final class Ghostwriter {
 			}
 		};
 
-		// Sonar java:S1854 - avoid useless assignment; only read when needed.
 		if (cmd.hasOption("acts")) {
 			String acts = cmd.getOptionValue("acts");
 			logger.info("Custom acts location specified: {}", acts);
@@ -281,7 +277,6 @@ public final class Ghostwriter {
 
 	static void logDefaultPrompt(String label, String prompt) {
 		if (prompt != null && logger.isInfoEnabled()) {
-			// Sonar java:S2629 - precompute only inside the enabled logging branch.
 			String abbreviatedPrompt = abbreviateInstructions(prompt);
 			logger.info("{}: {}", label, abbreviatedPrompt);
 		}

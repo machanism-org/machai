@@ -378,7 +378,6 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 					return true;
 				}
 			} else if (matcher.matches(path)) {
-				// Sonar java:S135 - removed extra continue by using an else-if.
 				return true;
 			}
 		}
@@ -398,7 +397,6 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		String path = ProjectLayout.getRelativePath(projectDir, file);
 		if (path != null && !Strings.CI.containsAny(path, ProjectLayout.getExcludeDirs())
 				&& !shouldExcludePath(new File(path).toPath()) && (matcher == null || matcher.matches(file.toPath()))) {
-			// Sonar java:S135 - collapsed loop branching to avoid multiple continue statements.
 			result.add(file);
 		}
 	}

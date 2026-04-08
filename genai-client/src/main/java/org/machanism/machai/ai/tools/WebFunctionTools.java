@@ -177,7 +177,6 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
-	// Sonar java:S1141/java:S3776: Extract nested try blocks / reduce cognitive complexity.
 	private String readFileUriContent(Object[] params, String charsetName, URI uri) {
 		File workingDir = (File) params[1];
 		String path = uri.getPath();
@@ -188,7 +187,6 @@ public class WebFunctionTools implements FunctionTools {
 		return readFileContent(file, charsetName);
 	}
 
-	// Sonar java:S1141/java:S3776: Keep the main method linear by moving HTTP flow to a helper.
 	private String fetchHttpContent(String requestId, String selector, String headers, int timeout, String charsetName,
 			boolean textOnly, URI uri) throws IOException {
 		HttpURLConnection connection = getConnection(uri, headers);
@@ -199,7 +197,6 @@ public class WebFunctionTools implements FunctionTools {
 		return renderTextOnlyIfRequested(textOnly, response);
 	}
 
-	// Sonar java:S1141: Extract file reading (previously nested try/catch) to a helper.
 	private String readFileContent(File file, String charsetName) {
 		try (FileInputStream io = new FileInputStream(file)) {
 			return IOUtils.toString(io, charsetName);
