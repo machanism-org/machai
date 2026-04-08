@@ -1,8 +1,0 @@
-{
-  "name": "mockJsProject",
-  "version": "1.0.0",
-  "workspaces": [
-    "workspaceA",
-    "workspaceB"
-  ]
-}

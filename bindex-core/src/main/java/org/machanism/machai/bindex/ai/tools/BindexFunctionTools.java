@@ -162,8 +162,8 @@ public class BindexFunctionTools implements FunctionTools {
 	private String getBindexSchema(Object[] params) throws IOException {
 		URL systemResource = Bindex.class.getResource(BindexRepository.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bindex schema: {}",
+		if (logger.isInfoEnabled()) {
+			logger.info("Bindex schema: {}",
 					StringUtils.abbreviate(schema, 120).replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""));
 		}
 		return schema;

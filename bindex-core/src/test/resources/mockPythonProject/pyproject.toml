@@ -1,7 +1,0 @@
-[project]
-name = "mockPythonProject"
-version = "1.0.0"
-classifiers = [
-  "Public",
-  "API"
-]
