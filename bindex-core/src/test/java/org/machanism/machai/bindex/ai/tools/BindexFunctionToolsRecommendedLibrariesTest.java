@@ -23,7 +23,7 @@ class BindexFunctionToolsRecommendedLibrariesTest {
 	void getRecommendedLibraries_buildsResultFromPickerOutput_andFiltersNulls() throws Exception {
 		// Arrange
 		Configurator configurator = Mockito.mock(Configurator.class);
-		Mockito.when(configurator.get(Picker.MODEL_PROP_NAME, Picker.DEFAULT_MODEL)).thenReturn("model-x");
+		Mockito.when(configurator.get(Picker.MODEL_PROP_NAME)).thenReturn("model-x");
 		Mockito.when(configurator.getDouble(Picker.SCORE_PROP_NAME, Picker.DEFAULT_SCORE_VALUE)).thenReturn(0.42d);
 		Mockito.when(configurator.get("BINDEX_REPO_URL", null)).thenReturn("http://repo.example");
 

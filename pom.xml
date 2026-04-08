@@ -126,6 +126,7 @@
 							<dependency>
 								<groupId>org.machanism.machai</groupId>
 								<artifactId>bindex-core</artifactId>
+								<version>1.1.1-SNAPSHOT</version>
 							</dependency>
 						</dependencies>
 					</plugin>
