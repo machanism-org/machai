@@ -18,11 +18,11 @@
 	"properties": {
 		"id": {
 			"type": "string",
-			"description": "A unique identifier for the artifact."
+			"description": "A unique identifier for the artifact (e.g., groupId:artifactId:version)."
 		},
 		"name": {
 			"type": "string",
-			"description": "The full name of the artifact or library. For Maven artifacts, use groupId:artifactId."
+			"description": "The full name of the artifact, typically formatted as groupId:artifactId for Maven artifacts."
 		},
 		"version": {
 			"type": "string",
