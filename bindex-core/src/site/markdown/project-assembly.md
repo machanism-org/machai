@@ -16,65 +16,110 @@ canonical: https://machai.machanism.org/bindex-core/project-assembly.html
 
 # AI Assembly
 
-AI Assembly is a Machanism solution that helps you create an initial working application by combining:
+AI Assembly is a Machanism feature that helps create the first practical version of an application from a plain-language request. Instead of only producing isolated code snippets, it works with the Machanism library ecosystem and structured library metadata so the generated result is closer to a real project that can be built, reviewed, and extended.
 
-- Your natural-language request (what you want to build)
-- A curated catalog of libraries, each described by a `bindex.json` metadata file
-- An AI assistant that recommends and integrates the most relevant libraries based on intent (semantic search), not just keyword matches
-
-Unlike generic “generate code” workflows, AI Assembly is designed to start from structured library metadata so the generated project is practical, maintainable, and grounded in real, reusable components. You stay in control by reviewing the selected libraries and the generated code.
+In simple terms, you describe what you want to build, AI Assembly finds libraries that fit the request, reads their metadata, and generates the initial project structure, configuration, and code needed to get started.
 
 Reference: https://machanism.org/ai-assembly/index.html
 
-## How it works (high level)
+## How it works
 
-1. **Describe your goal**: Provide a short request describing the application or feature.
-2. **Pick libraries**: The assistant searches the indexed `bindex.json` metadata and recommends libraries that match the intent of your request.
-3. **Retrieve details**: For selected candidates, the assistant fetches detailed Bindex metadata (features, integration notes, examples).
-4. **Assemble the project**: The assistant generates or updates project files (dependencies, configuration, code, docs) and wires the libraries together.
-5. **Verify and iterate**: You review the output and refine requirements; the assistant can rebuild and fix issues until the project builds and behaves as expected.
+AI Assembly is built around `bindex.json`, a structured description file generated for libraries in the Machanism ecosystem. These files can include information such as:
+
+- what a library does
+- how it can be integrated
+- example usage
+- build and dependency information
+- authorship, licensing, and related metadata
+
+This metadata is indexed for semantic search. That means the system can search by meaning and intent, not only by exact words. When you submit a request, AI Assembly uses that indexed information to identify libraries that best match the goal.
+
+The overall flow is straightforward:
+
+1. **You describe the application or feature**
+   - The request is written in natural language and can include the purpose, important features, and any known technical preferences.
+2. **Relevant libraries are picked**
+   - The system searches the indexed `bindex.json` data and recommends libraries that appear to fit the request.
+3. **Detailed library metadata is analyzed**
+   - The selected library descriptions are retrieved so the assistant can understand integration details, examples, and supported capabilities.
+4. **The project is assembled**
+   - The assistant generates the initial project structure, build configuration, source files, and integration points.
+5. **The developer reviews the result**
+   - The generated project is a practical starting point, but the developer is still responsible for validating functionality, quality, and security.
+
+## Why use AI Assembly
+
+AI Assembly is useful when you want more than a small example and need a realistic starting project. It helps combine:
+
+- a natural-language project request
+- recommended libraries from the Machanism ecosystem
+- structured metadata from `bindex.json`
+- AI-assisted generation of files and initial implementation
+
+This makes it helpful for quickly producing a project foundation that can then be refined by the developer.
 
 # Act: Assembly
 
-This project includes an Act named **Assembly** (defined in `src/main/resources/acts/assembly.toml`).
-
-## What it is
-
-The **Assembly** act guides the assistant to implement a user task by **selecting and integrating recommended libraries** using Bindex metadata.
-
-It is intended for creating a working starting point: a project structure, dependencies, configuration, and initial code that uses established libraries whenever possible.
+This project includes an Act named **Assembly**, defined in `src/main/resources/acts/assembly.toml`.
 
 ## Purpose
 
-Use **Assembly** when you want to build something new (or add a major feature) and want the assistant to:
+The **Assembly** act is designed to implement a user request by finding suitable libraries and using them to build the requested application or feature.
 
-- Recommend relevant libraries from the curated ecosystem
-- Use each library’s `bindex.json` details (including examples) to integrate it correctly
-- Produce a functional, buildable project instead of isolated snippets
+Its main goal is to help generate a functional project foundation quickly. Instead of starting from nothing, it encourages the assistant to reuse appropriate public libraries described in Bindex metadata and assemble the required project around them.
 
 ## When to use it
 
-Use **Assembly** when you:
+Use the **Assembly** act when you:
 
-- Have a natural-language description of what you want (e.g., “REST API for …”, “CLI tool that …”, “integration with …”)
-- Prefer using established libraries over custom code
-- Want the assistant to generate and update multiple project files (build config, source code, documentation)
-- Want an interactive workflow where the assistant can ask follow-up questions to clarify missing requirements
+- want to create a new application or a significant new feature
+- have a request written in natural language
+- want help identifying suitable libraries for the task
+- want the assistant to generate or update multiple project files
+- need a practical, buildable starting point rather than a simple code sample
 
-## What it does (from `assembly.toml`)
+## What the act does
 
-The act instructs the assistant to:
+According to `assembly.toml`, the **Assembly** act guides the assistant to:
 
-- Read the Bindex schema (`get_bindex_schema`) to understand the metadata format
-- Request library recommendations from the catalog (`pick_libraries`) using the user’s query
-- Fetch detailed metadata for chosen libraries (`get_bindex`)
-- Implement the requested functionality using those libraries when possible
-- Create/update all necessary files in the current project folder
-- Clean and build the project and fix any errors introduced during changes
-- Update `README.md` with a detailed description of what was created
-- Ask for missing information when needed (the act is interactive: `gw.interactive = true`)
+- implement the user task comprehensively and correctly
+- use `get_bindex_schema` to understand the Bindex JSON structure
+- use `pick_libraries` with the user's request to find recommended libraries
+- analyze the recommended libraries and decide which ones best fit the request
+- use `get_bindex` to retrieve detailed metadata for suitable libraries
+- rely on those libraries when possible instead of writing everything from scratch
+- create all necessary files in the project folder
+- add the required code and publicly available dependencies
+- clean and build the project, then fix errors after making changes
+- ask the user for missing information when needed
+- create a detailed description in `README.md`
 
-## Notes
+## Important behavior
 
-- The act includes a recommendation threshold (`pick.score = 0.86`) to keep suggestions focused on strong matches.
-- It is designed to work with function tools for filesystem and command-line actions (use `cmd /c` on Windows).
+The `assembly.toml` configuration also shows several practical details:
+
+- the act is **interactive** (`gw.interactive = true`), which means it can ask follow-up questions when important information is missing
+- it uses a recommendation score threshold (`pick.score = 0.86`) so the library suggestions stay focused on stronger matches
+- it is intended to work with both file-system and command-line tools during implementation
+- it explicitly reminds the assistant to use `cmd /c` on Windows and `sh -c` on Unix-like systems for shell execution
+
+## In simple words
+
+If you know what you want to build but are not sure which libraries to use, **Assembly** is the act for that situation.
+
+It helps turn requests such as:
+
+- “Create a REST API for user login”
+- “Build a command-line tool for processing files”
+- “Generate an application that integrates with a specific platform”
+
+into an initial project with recommended libraries, configuration, source code, and documentation.
+
+## Summary
+
+The **Assembly** act is intended for project creation and structured implementation. It helps move from a high-level request to a practical starting application by:
+
+- finding relevant libraries
+- reading their metadata and examples
+- generating the required project files
+- producing an initial implementation that the developer can review and continue building

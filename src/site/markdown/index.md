@@ -82,8 +82,8 @@ At a high level:
 
 - Project Layout provides reusable project layout modeling utilities.
 - GenAI Client provides the shared abstraction for working with GenAI providers.
-- Bindex Core builds on Project Layout and GenAI Client to support Bindex metadata and semantic library discovery.
-- Ghostwriter uses the shared libraries to perform guidance-driven repository automation.
+- Bindex Core builds on GenAI Client to support Bindex metadata and semantic library discovery.
+- Ghostwriter uses Project Layout and GenAI Client for guidance-driven repository automation, and can optionally include Bindex Core in packaged CLI distributions.
 - GW Maven Plugin integrates Ghostwriter workflows into standard Maven execution.
 
 ## Installation
@@ -91,7 +91,7 @@ At a high level:
 ### Prerequisites
 
 - Git
-- Java 17 recommended for building the full project
+- Java 8 or later to build the modules, with Java 17 recommended for the full project toolchain and site workflows
 - Maven 3.8.1 or later
 
 ### Clone and build
@@ -152,7 +152,7 @@ You can consume individual modules as Maven dependencies for project layout hand
 
 ## License
 
-Licensed under the Apache License, Version 2.0. See [LICENSE.txt](../../LICENSE.txt).
+Licensed under the Apache License, Version 2.0. See [LICENSE.txt](LICENSE.txt).
 
 ## Contact and support
 

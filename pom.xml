@@ -29,7 +29,6 @@
 		<gw.model>CodeMie:gpt-5.4-2026-03-05</gw.model>
 		<bindex.model>${gw.model}</bindex.model>
 		<genai.serverId>CodeMie</genai.serverId>
-		<gw.rootProjectLast>true</gw.rootProjectLast>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 

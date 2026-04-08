@@ -45,13 +45,12 @@ project_layout -up-|> machai_root : parent
 genai_client -up-|> machai_root : parent
 
 bindex_core -up-|> machai_root : parent
-bindex_core --> project_layout
 bindex_core --> genai_client
 
 ghostwriter -up-|> machai_root : parent
 ghostwriter --> project_layout
 ghostwriter --> genai_client
-ghostwriter --> bindex_core : pack profile
+ghostwriter ..> bindex_core : pack profile
 
 gw_maven_plugin -up-|> machai_root : parent
 gw_maven_plugin --> ghostwriter

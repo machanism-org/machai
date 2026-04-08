@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,7 +17,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.bindex.BindexRepository;
 import org.machanism.machai.schema.Bindex;
 
 class BindexFunctionToolsCoverageExpansionTest {
