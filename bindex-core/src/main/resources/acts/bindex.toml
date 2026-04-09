@@ -16,6 +16,10 @@ inputs = '''
 
 **Instructions:**
 
+- If a bindex.json file exists, review its contents to ensure it aligns with the current project requirements. 
+- **Important:** If the file already contains the necessary and correct configurations, do not modify it, as it may include intentional changes made by the developer. 
+    Only update the bindex.json file if you identify discrepancies or outdated information that need to be corrected according to the project’s current specifications.
+
 - This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
 
 - Get bindex json schema via `get_bindex_schema` functional tool.

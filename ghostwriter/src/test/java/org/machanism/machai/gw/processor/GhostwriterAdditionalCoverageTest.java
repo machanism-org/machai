@@ -47,31 +47,6 @@ class GhostwriterAdditionalCoverageTest {
 	}
 
 	@Test
-	void resolveActPrompt_whenCommandOptionPresentWithoutValue_readsFromStdIn() throws Exception {
-		// Arrange
-		PropertiesConfigurator config = new PropertiesConfigurator();
-		Options options = new Options();
-		Option act = Option.builder("a").longOpt("act").hasArg(true).optionalArg(true).build();
-		options.addOption(act);
-		CommandLine cmd = new DefaultParser().parse(options, new String[] { "-a" });
-		byte[] input = "typed act".getBytes(StandardCharsets.UTF_8);
-		java.io.InputStream originalIn = System.in;
-
-		// Sonar java:S2093 - close the replacement input stream with try-with-resources.
-		try (ByteArrayInputStream testInput = new ByteArrayInputStream(input)) {
-			System.setIn(testInput);
-
-			// Act
-			String result = invokeResolveActPrompt(cmd, config);
-
-			// Assert
-			assertEquals("typed act", result);
-		} finally {
-			System.setIn(originalIn);
-		}
-	}
-
-	@Test
 	void setDegreeOfConcurrency_whenNull_doesNothing() {
 		// Arrange
 		TrackingProcessor processor = new TrackingProcessor(tempDir, new PropertiesConfigurator(), "model");

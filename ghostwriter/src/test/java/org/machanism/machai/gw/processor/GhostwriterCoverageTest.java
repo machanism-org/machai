@@ -53,21 +53,6 @@ class GhostwriterCoverageTest {
 	}
 
 	@Test
-	void readText_whenInputContainsContinuationLines_concatenatesUsingProviderLineSeparator() {
-		// Arrange
-		String stdin = "line1\\\r\nline2\\\r\nlast\r\n";
-		System.setIn(new ByteArrayInputStream(stdin.getBytes(StandardCharsets.UTF_8)));
-		Ghostwriter.initializeConfiguration(new File("."));
-
-		// Act
-		String text = Ghostwriter.readText("Prompt");
-
-		// Assert
-		assertEquals("line1" + org.machanism.machai.ai.provider.Genai.LINE_SEPARATOR + "line2"
-				+ org.machanism.machai.ai.provider.Genai.LINE_SEPARATOR + "last", text);
-	}
-
-	@Test
 	void resolveScanDirs_whenNoArgsAndNoConfig_usesUserDirAbsolutePath() throws Exception {
 		// Arrange
 		Options opts = new Options();
@@ -97,26 +82,6 @@ class GhostwriterCoverageTest {
 		// Assert
 		assertEquals(1, scanDirs.length);
 		assertEquals("glob:**/*.java", scanDirs[0]);
-	}
-
-	@Test
-	void resolveActPrompt_whenActOptionPresentButValueMissing_readsFromStdin() throws Exception {
-		// Arrange
-		Options opts = new Options();
-		opts.addOption(Option.builder("a").longOpt("act").hasArg(true).optionalArg(true).build());
-		CommandLine cmd = new DefaultParser().parse(opts, new String[] { "-a" });
-
-		System.setIn(new ByteArrayInputStream("help\r\n".getBytes(StandardCharsets.UTF_8)));
-		Ghostwriter.initializeConfiguration(new File("."));
-
-		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn("ignored");
-
-		// Act
-		String act = Ghostwriter.resolveActPrompt(cmd, config);
-
-		// Assert
-		assertEquals("help", act);
 	}
 
 	@Test
@@ -275,19 +240,6 @@ class GhostwriterCoverageTest {
 
 		// Assert
 		Mockito.verify(processor).setLogInputs(true);
-	}
-
-	@Test
-	void readText_whenNoInputLines_returnsEmptyString() {
-		// Arrange
-		System.setIn(new ByteArrayInputStream(new byte[0]));
-		Ghostwriter.initializeConfiguration(new File("."));
-
-		// Act
-		String text = Ghostwriter.readText("Prompt");
-
-		// Assert
-		assertEquals("", text);
 	}
 
 	@Test

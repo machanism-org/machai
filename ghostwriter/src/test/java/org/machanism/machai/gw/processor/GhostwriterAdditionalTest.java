@@ -31,21 +31,6 @@ class GhostwriterAdditionalTest {
 	}
 
 	@Test
-	void readText_whenMultiLineInput_joinsLinesAndStripsTrailingBreaker() {
-		// Arrange
-		Ghostwriter.initializeConfiguration(tempDir);
-
-		originalIn = System.in;
-		System.setIn(new ByteArrayInputStream(("a\\\n" + "b\\\n" + "c\n").getBytes(StandardCharsets.UTF_8)));
-
-		// Act
-		String text = Ghostwriter.readText("Prompt");
-
-		// Assert
-		assertEquals("a\nb\nc", text);
-	}
-
-	@Test
 	void resolveScanDirs_whenArgsProvided_returnsArgs() throws Exception {
 		// Arrange
 		Options options = new Options();

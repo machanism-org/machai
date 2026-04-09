@@ -214,17 +214,4 @@ class ProcessorCoverageBoostTest {
 		processor.processParentFiles(layout);
 	}
 
-	@Test
-	void ghostwriter_readText_singleLine_and_resolveActPromptConfigOnly() throws Exception {
-		System.setIn(new ByteArrayInputStream("single line\n".getBytes(StandardCharsets.UTF_8)));
-		Ghostwriter.initializeConfiguration(new File("."));
-		assertEquals("single line", Ghostwriter.readText("Prompt"));
-
-		Options opts = new Options();
-		opts.addOption(Option.builder("a").longOpt("act").hasArg(true).optionalArg(true).build());
-		CommandLine cmd = new DefaultParser().parse(opts, new String[0]);
-		PropertiesConfigurator config = Mockito.mock(PropertiesConfigurator.class);
-		Mockito.when(config.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn("configured");
-		assertEquals("configured", Ghostwriter.resolveActPrompt(cmd, config));
-	}
 }

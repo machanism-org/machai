@@ -49,6 +49,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class BindexFunctionTools implements FunctionTools {
 
+	public static final String MODEL_PROP_NAME = "gw.model";
+
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
 
 	private static final int MAXWIDTH = 160;
@@ -178,7 +180,7 @@ public class BindexFunctionTools implements FunctionTools {
 
 		String prompt = props.get("prompt").asText();
 
-		String model = configurator.get(Picker.MODEL_PROP_NAME);
+		String model = configurator.get(Picker.MODEL_PROP_NAME, configurator.get(MODEL_PROP_NAME));
 		Double score = configurator.getDouble(Picker.SCORE_PROP_NAME, Picker.DEFAULT_SCORE_VALUE);
 		String registerUrl = configurator.get("BINDEX_REPO_URL", null);
 
@@ -213,7 +215,7 @@ public class BindexFunctionTools implements FunctionTools {
 			logger.info("Register Bindex: {}", Arrays.toString(params));
 		}
 
-		String model = configurator.get("gw.model");
+		String model = configurator.get(MODEL_PROP_NAME);
 		Picker picker = new Picker(model, null, configurator);
 		File bindexFile = new File(workingDir, fileName);
 

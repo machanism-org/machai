@@ -14,6 +14,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.SystemProperties;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
@@ -56,6 +57,8 @@ public final class Ghostwriter {
 	public static final String INPUTS_PROPERTY_NAME = "inputs";
 
 	public static final String INTERACTIVE_MODE_PROP_NAME = "gw.interactive";
+
+	private static Scanner scanner = new Scanner(System.in);
 
 	private final AIFileProcessor processor;
 
@@ -183,20 +186,19 @@ public final class Ghostwriter {
 		System.out.print(prompt + ": ");
 
 		StringBuilder sb = new StringBuilder();
-		try (Scanner scanner = new Scanner(System.in)) {
-			while (scanner.hasNextLine()) {
-				String nextLine = scanner.nextLine();
-				if (Strings.CS.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
-					sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER))
-							.append(Genai.LINE_SEPARATOR);
-					logger.info("\t");
-				} else {
-					sb.append(nextLine);
-					break;
-				}
+		while (scanner.hasNextLine()) {
+			String nextLine = scanner.nextLine();
+			if (Strings.CS.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
+				sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER))
+						.append(Genai.LINE_SEPARATOR);
+				System.out.print("\t");
+			} else {
+				sb.append(nextLine);
+				break;
 			}
 		}
 
+		System.out.println("― ©" + SystemProperties.getUserName());
 		return sb.toString();
 	}
 
