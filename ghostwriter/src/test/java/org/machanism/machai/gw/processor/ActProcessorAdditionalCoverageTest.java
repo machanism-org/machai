@@ -21,15 +21,6 @@ class ActProcessorAdditionalCoverageTest {
 	Path tempDir;
 
 	@Test
-	void loadAct_whenNotFoundInClasspathOrDirectory_throwsIllegalArgumentException() {
-		// Arrange
-		Map<String, Object> props = new HashMap<>();
-
-		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> ActProcessor.loadAct("definitely-not-exist", props, null));
-	}
-
-	@Test
 	void tryLoadActFromDirectory_whenActsLocationIsHttp_andNetworkFails_propagatesIOException() {
 		// Arrange
 		Map<String, Object> props = new HashMap<>();

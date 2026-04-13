@@ -98,9 +98,9 @@ public class ActProcessor extends AIFileProcessor {
 	 * </p>
 	 *
 	 * @param act act name plus optional prompt text
+	 * @throws IOException
 	 */
-	@Override
-	public void setDefaultPrompt(String act) {
+	public void setAct(String act) throws IOException {
 		act = StringUtils.defaultIfBlank(act, "help");
 		String name = StringUtils.substringBefore(StringUtils.defaultString(act), " ");
 		if (StringUtils.isBlank(name)) {
@@ -124,21 +124,16 @@ public class ActProcessor extends AIFileProcessor {
 
 		Map<String, Object> actData = new HashMap<>();
 
-		try {
-			loadAct(name, actData, actsLocation);
+		loadAct(name, actData, actsLocation);
 
-			Object mainValue = actData.get(Ghostwriter.INPUTS_PROPERTY_NAME);
-			if (mainValue instanceof String) {
-				String actPrompt = Objects.toString(actData.get("prompt"), "");
-				String value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(prompt, actPrompt));
-				actData.put(Ghostwriter.INPUTS_PROPERTY_NAME, value);
-			}
-
-			applyActData(actData);
-
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
+		Object mainValue = actData.get(Ghostwriter.INPUTS_PROPERTY_NAME);
+		if (mainValue instanceof String) {
+			String actPrompt = Objects.toString(actData.get("prompt"), "");
+			String value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(prompt, actPrompt));
+			actData.put(Ghostwriter.INPUTS_PROPERTY_NAME, value);
 		}
+
+		applyActData(actData);
 	}
 
 	/**
@@ -177,7 +172,7 @@ public class ActProcessor extends AIFileProcessor {
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
-			throw new IllegalArgumentException("Act: `" + name + "` not found.");
+			throw new ActNotFound(name);
 		}
 
 		String basedOn = null;

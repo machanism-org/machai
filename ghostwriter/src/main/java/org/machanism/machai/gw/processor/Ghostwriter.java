@@ -81,10 +81,11 @@ public final class Ghostwriter {
 		return StringUtils.abbreviate(instructions, LOG_PROMPT_MAX_LENGTH);
 	}
 
-	private static void applyActPrompt(CommandLine cmd, PropertiesConfigurator config, AIFileProcessor processor) {
+	private static void applyActPrompt(CommandLine cmd, PropertiesConfigurator config, AIFileProcessor processor)
+			throws IOException {
 		String defaultPrompt = resolveActPrompt(cmd, config);
 		logDefaultPrompt("Act", defaultPrompt);
-		processor.setDefaultPrompt(defaultPrompt);
+		((ActProcessor) processor).setAct(defaultPrompt);
 	}
 
 	private static File resolveProjectDir(CommandLine cmd, Option projectDirOpt, PropertiesConfigurator config) {
@@ -183,11 +184,18 @@ public final class Ghostwriter {
 
 	@SuppressWarnings("java:S106")
 	public static String readText(String prompt) {
-		System.out.print(prompt + ": ");
+		prompt = prompt + ": ";
+		System.out.print(prompt);
 
 		StringBuilder sb = new StringBuilder();
+		int length = prompt.length();
+		int maxlen = length;
 		while (scanner.hasNextLine()) {
 			String nextLine = scanner.nextLine();
+			length += nextLine.length();
+			if (length > maxlen) {
+				maxlen = length;
+			}
 			if (Strings.CS.endsWith(nextLine, MULTIPLE_LINES_BREAKER)) {
 				sb.append(StringUtils.substringBeforeLast(nextLine, MULTIPLE_LINES_BREAKER))
 						.append(Genai.LINE_SEPARATOR);
@@ -196,9 +204,10 @@ public final class Ghostwriter {
 				sb.append(nextLine);
 				break;
 			}
+			length = 8;
 		}
 
-		System.out.println("― ©" + SystemProperties.getUserName());
+		System.out.println(StringUtils.leftPad("― ©" + SystemProperties.getUserName(), maxlen));
 		return sb.toString();
 	}
 
@@ -234,7 +243,7 @@ public final class Ghostwriter {
 	}
 
 	static AIFileProcessor createProcessor(CommandLine cmd, File projectDir, PropertiesConfigurator config,
-			String genai) {
+			String genai) throws IOException {
 		AIFileProcessor processor;
 		if (cmd.hasOption("act")) {
 			processor = createActProcessor(cmd, projectDir, config, genai);
@@ -402,7 +411,8 @@ public final class Ghostwriter {
 			if (exitCode != 0) {
 				System.exit(exitCode);
 			}
-
+		} catch (ActNotFound e) {
+			logger.error(e.getMessage());
 		} catch (IOException e) {
 			logger.error("I/O error occurred during file processing: {}", e.getMessage(), e);
 		}
