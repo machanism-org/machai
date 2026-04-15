@@ -145,7 +145,7 @@ public final class Ghostwriter {
 
 		String version = Ghostwriter.class.getPackage().getImplementationVersion();
 		if (version != null) {
-			logger.info("Ghostwriter {} (Machai project)", version);
+			logger.info("Ghostwriter {} (Machai Project)", version);
 		}
 		logger.info("Home directory: {}", gwHomeDir);
 

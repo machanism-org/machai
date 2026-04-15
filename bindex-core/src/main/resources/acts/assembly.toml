@@ -17,25 +17,24 @@ You must implement user tasks.
 
 - You have ability to work with local file system and command line.
 - Bindex JSON is a structured library description containing key information about each artifact, along with usage examples. Use functional tool `get_bindex_schema` to get the bindex schema. 
-- When selecting libraries for a user task, always use the `pick_libraries` function tool.  
-	- If the task involves updating an existing project, extend the user’s initial query with relevant context about the current project state and the specific update required.  
-	- Pass this extended query as the value of the prompt parameter to the `pick_libraries` function tool.  
-- Carefully analyze the description of each library and determine which libraries match the user's query.
-- For each suitable library, request its Bindex file using the `get_bindex` function tool to get detailed information in Bindex format.
-- When possible, use these libraries to avoid writing code from scratch.
-- Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
+- Use `cmd /c` for Windows (e.g. `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g. `sh -c 'your-command'`) to ensure proper shell execution.
 '''
 
 inputs = '''
 # Task
 
+- Use the `pick_libraries` function tool to request information about recommended libraries. Pass the user's initial query as the prompt parameter value.
+- Carefully analyze the description of each library and determine which libraries match the user's request.
+- For each matching library, query its Bindex file using the `get_bindex` function tool to get detailed information in Bindex format.
+- **IMPORTENT: To avoid writing code from scratch, use the recommended libraries based on the information in the bindex file.**
+
 - Create all necessary files in the project folder.
-- Always search for libraries through Bindex if you need functionality to create or update a project.
-- Add the necessary code and publicly available libraries to achieve the desired result.
+- Always search for libraries via Bindex if you need functionality to create or update the project.
+- Add the necessary code and public libraries to achieve the desired result.
 — Clean and build the project, and fix any errors after making changes to the code.
 - Make the project functional.
 - Create a detailed description in the README.md file.
-- Ask the user if the necessary information required.
+- Ask the user if the necessary information is needed.
 - Use the default "Clean Architecture" template unless specified by the user.
 
 # User Query
@@ -43,9 +42,9 @@ inputs = '''
 %s
 
 '''
-
+prompt = "User query is not defined, please ask the user for it."
 gw.interactive = true
 gw.nonRecursive = true
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
 embedding.model = "text-embedding-005"
-pick.score = 0.9
+pick.score = 0.86
