@@ -13,10 +13,8 @@ import org.apache.commons.lang3.SystemProperties;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
@@ -72,7 +70,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act -Dgw.acts=src\\site\\acts -DlogInputs=true
  * </pre>
  */
-@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false, defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE)
+@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false)
 public class Act extends AbstractGWGoal {
 
 	/**
@@ -141,8 +139,6 @@ public class Act extends AbstractGWGoal {
 			}
 		};
 		
-		actProcessor.addTool(new ClassFunctionalTools(project));
-
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		actProcessor.setNonRecursive(nonRecursive);
@@ -227,6 +223,7 @@ public class Act extends AbstractGWGoal {
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
 		logger.info("Starting scan of path: {}", resolvedScanDir);
+		actProcessor.addTool(new ClassFunctionalTools(project));
 		actProcessor.scanDocuments(basedir, resolvedScanDir);
 		logger.info("Finished scanning path: {}", resolvedScanDir);
 	}

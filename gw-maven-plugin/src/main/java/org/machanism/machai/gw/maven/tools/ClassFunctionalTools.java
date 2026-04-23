@@ -74,9 +74,9 @@ public class ClassFunctionalTools implements FunctionTools {
 	public void applyTools(Genai provider) {
 		provider.addTool(
 				"find_class",
-				"Retrieves a list of fully qualified class names for the specified class group. Provide the 'className' property to get all matching classes.",
+				"Finds and returns a list of fully qualified Java class names that match the provided regular expression pattern. Use the 'className' property to specify the pattern for matching class short names.",
 				this::findClass,
-				"className:string:required:Regular expression pattern to find all matching classes by short name.");
+				"className:string:required:Regular expression pattern to match class short names.");
 
 		provider.addTool(
 				"get_class_info",
@@ -108,71 +108,71 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 	private String getClassInfo(Object... args) {
-	    JsonNode props = (JsonNode) args[0];
-	    if (logger.isInfoEnabled()) {
-	        logger.info("Get classInfo: {}", Arrays.toString(args));
-	    }
+		JsonNode props = (JsonNode) args[0];
+		if (logger.isInfoEnabled()) {
+			logger.info("Get classInfo: {}", Arrays.toString(args));
+		}
 
-	    String className = props.get("className").asText();
+		String className = props.get("className").asText();
 
-	    StringBuilder info = new StringBuilder();
-	    try {
-	        Class<?> clazz = classLoader.loadClass(className);
+		StringBuilder info = new StringBuilder();
+		try {
+			Class<?> clazz = classLoader.loadClass(className);
 
-	        // Class name and modifiers
-	        info.append("Class: ").append(clazz.getName()).append("\n");
-	        info.append("Modifiers: ").append(Modifier.toString(clazz.getModifiers())).append("\n");
+			// Class name and modifiers
+			info.append("Class: ").append(clazz.getName()).append("\n");
+			info.append("Modifiers: ").append(Modifier.toString(clazz.getModifiers())).append("\n");
 
-	        // Superclass
-	        if (clazz.getSuperclass() != null) {
-	            info.append("Superclass: ").append(clazz.getSuperclass().getName()).append("\n");
-	        }
+			// Superclass
+			if (clazz.getSuperclass() != null) {
+				info.append("Superclass: ").append(clazz.getSuperclass().getName()).append("\n");
+			}
 
-	        // Interfaces
-	        Class<?>[] interfaces = clazz.getInterfaces();
-	        if (interfaces.length > 0) {
-	            info.append("Interfaces: ").append(Arrays.toString(
-	                    Arrays.stream(interfaces).map(Class::getName).toArray())).append("\n");
-	        }
+			// Interfaces
+			Class<?>[] interfaces = clazz.getInterfaces();
+			if (interfaces.length > 0) {
+				info.append("Interfaces: ").append(Arrays.toString(
+						Arrays.stream(interfaces).map(Class::getName).toArray())).append("\n");
+			}
 
-	        // Fields (exclude private)
-	        info.append("Fields:\n");
-	        for (Field field : clazz.getDeclaredFields()) {
-	            if (!Modifier.isPrivate(field.getModifiers())) {
-	                info.append("  ").append(Modifier.toString(field.getModifiers()))
-	                        .append(" ").append(field.getType().getName())
-	                        .append(" ").append(field.getName()).append("\n");
-	            }
-	        }
+			// Fields (exclude private)
+			info.append("Fields:\n");
+			for (Field field : clazz.getDeclaredFields()) {
+				if (!Modifier.isPrivate(field.getModifiers())) {
+					info.append("  ").append(Modifier.toString(field.getModifiers()))
+							.append(" ").append(field.getType().getName())
+							.append(" ").append(field.getName()).append("\n");
+				}
+			}
 
-	        // Constructors
-	        info.append("Constructors:\n");
-	        for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-	            info.append("  ").append(Modifier.toString(constructor.getModifiers()))
-	                    .append(" ").append(constructor.getName())
-	                    .append(Arrays.toString(constructor.getParameterTypes())).append("\n");
-	        }
+			// Constructors
+			info.append("Constructors:\n");
+			for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
+				info.append("  ").append(Modifier.toString(constructor.getModifiers()))
+						.append(" ").append(constructor.getName())
+						.append(Arrays.toString(constructor.getParameterTypes())).append("\n");
+			}
 
-	        // Methods (exclude private)
-	        info.append("Methods:\n");
-	        for (Method method : clazz.getDeclaredMethods()) {
-	            if (!Modifier.isPrivate(method.getModifiers())) {
-	                info.append("  ").append(Modifier.toString(method.getModifiers()))
-	                        .append(" ").append(method.getReturnType().getName())
-	                        .append(" ").append(method.getName())
-	                        .append(Arrays.toString(method.getParameterTypes())).append("\n");
-	            }
-	        }
+			// Methods (exclude private)
+			info.append("Methods:\n");
+			for (Method method : clazz.getDeclaredMethods()) {
+				if (!Modifier.isPrivate(method.getModifiers())) {
+					info.append("  ").append(Modifier.toString(method.getModifiers()))
+							.append(" ").append(method.getReturnType().getName())
+							.append(" ").append(method.getName())
+							.append(Arrays.toString(method.getParameterTypes())).append("\n");
+				}
+			}
 
-	        // Annotations
-	        info.append("Annotations:\n");
-	        for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-	            info.append("  ").append(annotation.toString()).append("\n");
-	        }
+			// Annotations
+			info.append("Annotations:\n");
+			for (Annotation annotation : clazz.getDeclaredAnnotations()) {
+				info.append("  ").append(annotation.toString()).append("\n");
+			}
 
-	    } catch (ClassNotFoundException e) {
-	        info.append("Class not found: ").append(className).append("\n");
-	    }
-	    return info.toString();
+		} catch (ClassNotFoundException e) {
+			info.append("Class not found: ").append(className).append("\n");
+		}
+		return info.toString();
 	}
 }
