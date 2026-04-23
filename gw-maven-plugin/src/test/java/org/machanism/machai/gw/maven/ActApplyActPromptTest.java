@@ -1,11 +1,15 @@
 package org.machanism.machai.gw.maven;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Properties;
 
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.components.interactivity.Prompter;
+import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.gw.processor.Ghostwriter;
@@ -15,7 +19,6 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenSavedActExists_doesNotPromptAndKeepsValue() throws Exception {
-		// Arrange
 		Act act = new Act();
 		Properties userProps = new Properties();
 		userProps.setProperty(Ghostwriter.ACT_PROP_NAME, "saved");
@@ -27,17 +30,14 @@ public class ActApplyActPromptTest {
 		act.prompter = Mockito.mock(Prompter.class);
 		Configurator conf = Mockito.mock(Configurator.class);
 
-		// Act
 		act.applyActPrompt(conf);
 
-		// Assert
 		Mockito.verifyNoInteractions(act.prompter);
 		assertEquals("saved", userProps.getProperty(Ghostwriter.ACT_PROP_NAME));
 	}
 
 	@Test
 	public void applyActPrompt_whenNoSavedAct_andConfigProvidesAct_savesIt() throws Exception {
-		// Arrange
 		Act act = new Act();
 		Properties userProps = new Properties();
 
@@ -47,15 +47,58 @@ public class ActApplyActPromptTest {
 
 		act.prompter = Mockito.mock(Prompter.class);
 		Configurator conf = Mockito.mock(Configurator.class);
-		// Sonar java:S6068 - Mockito.eq(...) is unnecessary here; pass values directly.
 		Mockito.when(conf.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn("fromConf");
 
-		// Act
 		act.applyActPrompt(conf);
 
-		// Assert
 		assertEquals("fromConf", userProps.getProperty(Ghostwriter.ACT_PROP_NAME));
 		Mockito.verifyNoInteractions(act.prompter);
 	}
 
+	@Test
+	public void applyActPrompt_whenNoSavedActAndNoConfiguredAct_promptsAndStoresInput() throws Exception {
+		Act act = new Act();
+		Properties userProps = new Properties();
+
+		MavenSession session = Mockito.mock(MavenSession.class);
+		Mockito.when(session.getUserProperties()).thenReturn(userProps);
+		act.session = session;
+
+		Prompter prompter = Mockito.mock(Prompter.class);
+		Mockito.when(prompter.prompt("Act")).thenReturn("prompted-act");
+		act.prompter = prompter;
+
+		Configurator conf = Mockito.mock(Configurator.class);
+		Mockito.when(conf.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn(null);
+
+		act.applyActPrompt(conf);
+
+		assertEquals("prompted-act", userProps.getProperty(Ghostwriter.ACT_PROP_NAME));
+		Mockito.verify(prompter).prompt("Act");
+	}
+
+	@Test
+	public void applyActPrompt_whenPrompterFails_wrapsInMojoExecutionException() throws Exception {
+		Act act = new Act();
+		Properties userProps = new Properties();
+
+		MavenSession session = Mockito.mock(MavenSession.class);
+		Mockito.when(session.getUserProperties()).thenReturn(userProps);
+		act.session = session;
+
+		Prompter prompter = Mockito.mock(Prompter.class);
+		Mockito.when(prompter.prompt("Act")).thenThrow(new PrompterException("boom"));
+		act.prompter = prompter;
+
+		Configurator conf = Mockito.mock(Configurator.class);
+		Mockito.when(conf.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn(null);
+
+		try {
+			act.applyActPrompt(conf);
+			fail("Expected MojoExecutionException");
+		} catch (MojoExecutionException e) {
+			assertTrue(e.getMessage().contains(Ghostwriter.ACT_PROP_NAME));
+			assertTrue(e.getCause() instanceof PrompterException);
+		}
+	}
 }

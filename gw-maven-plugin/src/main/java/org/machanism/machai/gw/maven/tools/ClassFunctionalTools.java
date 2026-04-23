@@ -11,9 +11,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,10 +29,6 @@ import com.google.common.reflect.ClassPath;
 public class ClassFunctionalTools implements FunctionTools {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClassFunctionalTools.class);
-
-	private static Map<String, Map<String, Map<String, List<ClassInfo>>>> scoppedClassMap = new HashMap<>();
-
-	private static Map<String, List<ClassInfo>> classMap = new HashMap<>();
 
 	private ImmutableSet<com.google.common.reflect.ClassPath.ClassInfo> classes;
 
@@ -74,23 +68,22 @@ public class ClassFunctionalTools implements FunctionTools {
 	public void applyTools(Genai provider) {
 		provider.addTool(
 				"find_class",
-				"Finds and returns a list of fully qualified Java class names that match the provided regular expression pattern. Use the 'className' property to specify the pattern for matching class short names.",
+				"Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
+						+ "Specify the 'className' property to define the pattern for matching class short names.",
 				this::findClass,
 				"className:string:required:Regular expression pattern to match class short names.");
 
 		provider.addTool(
-				"get_class_info",
-				"Retrieves detailed information about a Java class by its fully qualified name. Provide the 'className' property to get all class details.",
-				this::getClassInfo,
-				"className:string:required:Fully qualified class name to retrieve information.");
+			    "get_class_info",
+			    "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
+			    + "Specify the 'className' property to obtain all available details for the class.",
+			    this::getClassInfo,
+			    "className:string:required:Fully qualified class name to retrieve information."
+			);
 	}
 
 	private String findClass(Object... args) {
 		JsonNode props = (JsonNode) args[0];
-		if (logger.isInfoEnabled()) {
-			logger.info("Find class: {}", Arrays.toString(args));
-		}
-
 		String className = props.get("className").asText();
 
 		Pattern pattern = Pattern.compile(className);
@@ -98,13 +91,19 @@ public class ClassFunctionalTools implements FunctionTools {
 				.filter(entry -> pattern.matcher(entry.getSimpleName()).matches())
 				.collect(Collectors.toList());
 
-		String join = "Class not found.";
+		String classes = "Class not found.";
 		if (list != null) {
 			List<String> collect = list.stream().map(e -> e.getName())
 					.collect(Collectors.toList());
-			join = StringUtils.join(collect, ",");
+			classes = StringUtils.join(collect, ",");
 		}
-		return join;
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Find class: {}, Found: {}. {}", Arrays.toString(args), list.size(),
+					StringUtils.abbreviate(classes, 120));
+		}
+
+		return classes;
 	}
 
 	private String getClassInfo(Object... args) {

@@ -102,7 +102,7 @@ public class Act extends AbstractGWGoal {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
-		
+
 		PropertiesConfigurator configuration = getConfiguration();
 
 		String model = configuration.get(Ghostwriter.MODEL_PROP_NAME, this.model);
@@ -138,7 +138,7 @@ public class Act extends AbstractGWGoal {
 				}
 			}
 		};
-		
+
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		actProcessor.setNonRecursive(nonRecursive);
@@ -223,7 +223,11 @@ public class Act extends AbstractGWGoal {
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
 		logger.info("Starting scan of path: {}", resolvedScanDir);
-		actProcessor.addTool(new ClassFunctionalTools(project));
+
+		if (session.getRequest().isProjectPresent()) {
+			actProcessor.addTool(new ClassFunctionalTools(project));
+		}
+
 		actProcessor.scanDocuments(basedir, resolvedScanDir);
 		logger.info("Finished scanning path: {}", resolvedScanDir);
 	}
