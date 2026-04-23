@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.gson.JsonObject;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
@@ -265,6 +266,10 @@ public class OpenAIProvider implements Genai {
 
 		Object value = callFunction(functionCall);
 		Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
+		
+		if(callFunction instanceof JsonObject) {
+			callFunction = callFunction.toString();
+		}
 
 		inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
 				.callId(functionCall.callId()).outputAsJson(callFunction).build()));
