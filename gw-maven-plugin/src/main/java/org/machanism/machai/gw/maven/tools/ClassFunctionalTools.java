@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.maven.tools;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -9,13 +10,25 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -25,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * Provides function tools for discovering project classes and retrieving
@@ -43,10 +58,14 @@ public class ClassFunctionalTools implements FunctionTools {
 	 */
 	private ImmutableSet<com.google.common.reflect.ClassPath.ClassInfo> classes;
 
+	private Map<String, String> classPathMap = new HashMap<>();
+
 	/**
 	 * Class loader built from the Maven project classpath and output directories.
 	 */
 	private URLClassLoader classLoader;
+
+	private Map<String, String> artifactMap = new HashMap<>();
 
 	/**
 	 * Creates a new instance backed by the supplied Maven project's classpath.
@@ -57,33 +76,8 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *                                  created
 	 */
 	public ClassFunctionalTools(MavenProject project) {
-		try {
-			List<String> compileClasspathElements = project.getCompileClasspathElements();
-			String testOutputDirectory = project.getBuild().getTestOutputDirectory();
-
-			String outputDirectory = project.getBuild().getOutputDirectory();
-
-			List<String> arrayList = new ArrayList<>();
-			arrayList.addAll(compileClasspathElements);
-			arrayList.add(testOutputDirectory);
-			arrayList.add(outputDirectory);
-
-			URL[] urls = arrayList.stream().map(p -> {
-				try {
-					return new File(p).toURI().toURL();
-				} catch (MalformedURLException e) {
-					throw new IllegalArgumentException(e);
-				}
-			}).collect(Collectors.toList())
-					.toArray(new URL[0]);
-
-			classLoader = URLClassLoader.newInstance(urls);
-			ClassPath classPath = ClassPath.from(classLoader);
-			classes = classPath.getAllClasses();
-
-		} catch (Exception e) {
-			throw new IllegalArgumentException(e);
-		}
+		loadClassList(project);
+		loadClassLocations(project);
 	}
 
 	/**
@@ -101,12 +95,12 @@ public class ClassFunctionalTools implements FunctionTools {
 				"className:string:required:Regular expression pattern to match class short names.");
 
 		provider.addTool(
-			    "get_class_info",
-			    "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
-			    + "Specify the 'className' property to obtain all available details for the class.",
-			    this::getClassInfo,
-			    "className:string:required:Fully qualified class name to retrieve information."
-			);
+				"get_class_info",
+				"Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
+						+ "Specify the 'className' property to obtain all available details for the class. "
+						+ "Returns a structured JSON object containing class name, modifiers, superclass, interfaces, fields, constructors, methods, annotations, and class path.",
+				this::getClassInfo,
+				"className:string:required:Fully qualified class name to retrieve information.");
 	}
 
 	/**
@@ -153,72 +147,201 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * @return a formatted textual description of the requested class, or a not
 	 *         found message when the class cannot be loaded
 	 */
-	private String getClassInfo(Object... args) {
+	private JsonObject getClassInfo(Object... args) {
 		JsonNode props = (JsonNode) args[0];
 		if (logger.isInfoEnabled()) {
 			logger.info("Get classInfo: {}", Arrays.toString(args));
 		}
 
 		String className = props.get("className").asText();
+		JsonObject info = new JsonObject();
 
-		StringBuilder info = new StringBuilder();
 		try {
 			Class<?> clazz = classLoader.loadClass(className);
 
 			// Class name and modifiers
-			info.append("Class: ").append(clazz.getName()).append("\n");
-			info.append("Modifiers: ").append(Modifier.toString(clazz.getModifiers())).append("\n");
+			info.addProperty("className", clazz.getName());
+			info.addProperty("modifiers", Modifier.toString(clazz.getModifiers()));
 
 			// Superclass
 			if (clazz.getSuperclass() != null) {
-				info.append("Superclass: ").append(clazz.getSuperclass().getName()).append("\n");
+				info.addProperty("superclass", clazz.getSuperclass().getName());
 			}
 
 			// Interfaces
 			Class<?>[] interfaces = clazz.getInterfaces();
-			if (interfaces.length > 0) {
-				info.append("Interfaces: ").append(Arrays.toString(
-						Arrays.stream(interfaces).map(Class::getName).toArray())).append("\n");
+			JsonArray interfacesArray = new JsonArray();
+			for (Class<?> iface : interfaces) {
+				interfacesArray.add(iface.getName());
 			}
+			info.add("interfaces", interfacesArray);
 
 			// Fields (exclude private)
-			info.append("Fields:\n");
+			JsonArray fieldsArray = new JsonArray();
 			for (Field field : clazz.getDeclaredFields()) {
 				if (!Modifier.isPrivate(field.getModifiers())) {
-					info.append("  ").append(Modifier.toString(field.getModifiers()))
-							.append(" ").append(field.getType().getName())
-							.append(" ").append(field.getName()).append("\n");
+					JsonObject fieldObj = new JsonObject();
+					fieldObj.addProperty("modifiers", Modifier.toString(field.getModifiers()));
+					fieldObj.addProperty("type", field.getType().getName());
+					fieldObj.addProperty("name", field.getName());
+					fieldsArray.add(fieldObj);
 				}
 			}
+			info.add("fields", fieldsArray);
 
 			// Constructors
-			info.append("Constructors:\n");
+			JsonArray constructorsArray = new JsonArray();
 			for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-				info.append("  ").append(Modifier.toString(constructor.getModifiers()))
-						.append(" ").append(constructor.getName())
-						.append(Arrays.toString(constructor.getParameterTypes())).append("\n");
+				JsonObject ctorObj = new JsonObject();
+				ctorObj.addProperty("modifiers", Modifier.toString(constructor.getModifiers()));
+				ctorObj.addProperty("name", constructor.getName());
+				JsonArray paramsArray = new JsonArray();
+				for (Class<?> paramType : constructor.getParameterTypes()) {
+					paramsArray.add(paramType.getName());
+				}
+				ctorObj.add("parameterTypes", paramsArray);
+				constructorsArray.add(ctorObj);
 			}
+			info.add("constructors", constructorsArray);
 
 			// Methods (exclude private)
-			info.append("Methods:\n");
+			JsonArray methodsArray = new JsonArray();
 			for (Method method : clazz.getDeclaredMethods()) {
 				if (!Modifier.isPrivate(method.getModifiers())) {
-					info.append("  ").append(Modifier.toString(method.getModifiers()))
-							.append(" ").append(method.getReturnType().getName())
-							.append(" ").append(method.getName())
-							.append(Arrays.toString(method.getParameterTypes())).append("\n");
+					JsonObject methodObj = new JsonObject();
+					methodObj.addProperty("modifiers", Modifier.toString(method.getModifiers()));
+					methodObj.addProperty("returnType", method.getReturnType().getName());
+					methodObj.addProperty("name", method.getName());
+					JsonArray paramsArray = new JsonArray();
+					for (Class<?> paramType : method.getParameterTypes()) {
+						paramsArray.add(paramType.getName());
+					}
+					methodObj.add("parameterTypes", paramsArray);
+					methodsArray.add(methodObj);
 				}
 			}
+			info.add("methods", methodsArray);
 
 			// Annotations
-			info.append("Annotations:\n");
+			JsonArray annotationsArray = new JsonArray();
 			for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-				info.append("  ").append(annotation.toString()).append("\n");
+				annotationsArray.add(annotation.toString());
+			}
+			info.add("annotations", annotationsArray);
+
+			String path = classPathMap.get(className);
+			info.addProperty("path", path);
+
+			String id = artifactMap.get(className);
+			if (id != null) {
+				info.addProperty("artifact", id);
 			}
 
 		} catch (ClassNotFoundException e) {
-			info.append("Class not found: ").append(className).append("\n");
+			info.addProperty("error", "Class not found: " + className);
 		}
-		return info.toString();
+		return info;
 	}
+
+	private void loadClassLocations(MavenProject project) {
+		try {
+			String outputDirectory = project.getBuild().getOutputDirectory();
+			Set<Artifact> artifacts = project.getArtifacts();
+			scanClassesByPath(outputDirectory, null);
+			scanClassesByPath(artifacts);
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	private void scanClassesByPath(Set<Artifact> artifacts)
+			throws IOException {
+		for (Artifact artifact : artifacts) {
+			String id = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion();
+			scanClassesByPath(artifact.getFile().getAbsolutePath(), id);
+		}
+	}
+
+	public void scanClassesByPath(String path, String id) throws IOException {
+		try {
+			File artifact = new File(path);
+
+			List<String> classList = new ArrayList<>();
+
+			if (artifact.isFile()) {
+				try (JarFile jar = new JarFile(artifact)) {
+					for (Enumeration<JarEntry> entries = jar.entries(); entries.hasMoreElements();) {
+						JarEntry entry = entries.nextElement();
+						String name = entry.getName();
+						classList.add(name);
+					}
+				}
+			} else {
+				Path pathDir = Paths.get(path);
+
+				Files.walk(pathDir)
+						.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".class"))
+						.forEach(p -> classList
+								.add(p.toString().replace("\\", "/").replace(path.replace("\\", "/") + "/", "")));
+			}
+
+			for (String name : classList) {
+				if (Strings.CS.endsWith(name, ".class")
+						&& !Strings.CS.startsWithAny(name, "META-INF", "module-info")) {
+					try {
+						name = StringUtils.substringBeforeLast(name, ".");
+						String className = StringUtils.substringAfterLast(name, "/");
+						String packageName = StringUtils.substringBeforeLast(name, "/");
+
+						packageName = StringUtils.replaceChars(packageName, '/', '.');
+
+						String fullClassName = packageName + "." + className;
+						Class<?> class1 = classLoader.loadClass(fullClassName);
+
+						int modifiers = class1.getModifiers();
+						if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) {
+							classPathMap.put(fullClassName, path);
+							artifactMap.put(fullClassName, id);
+						}
+					} catch (Throwable e) {
+						logger.debug("Class {}, Error: {}", name, e.getMessage());
+					}
+				}
+			}
+		} catch (NoSuchFileException e) {
+			// TODO: handle exception
+		}
+	}
+
+	private void loadClassList(MavenProject project) {
+		try {
+			List<String> compileClasspathElements = project.getCompileClasspathElements();
+			String testOutputDirectory = project.getBuild().getTestOutputDirectory();
+
+			String outputDirectory = project.getBuild().getOutputDirectory();
+
+			List<String> arrayList = new ArrayList<>();
+			arrayList.addAll(compileClasspathElements);
+			arrayList.add(testOutputDirectory);
+			arrayList.add(outputDirectory);
+
+			URL[] urls = arrayList.stream().map(p -> {
+				try {
+					return new File(p).toURI().toURL();
+				} catch (MalformedURLException e) {
+					throw new IllegalArgumentException(e);
+				}
+			}).collect(Collectors.toList())
+					.toArray(new URL[0]);
+
+			classLoader = URLClassLoader.newInstance(urls);
+			ClassPath classPath = ClassPath.from(classLoader);
+			classes = classPath.getAllClasses();
+
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
 }

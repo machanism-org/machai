@@ -15,6 +15,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
@@ -70,7 +71,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act -Dgw.acts=src\\site\\acts -DlogInputs=true
  * </pre>
  */
-@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false)
+@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class Act extends AbstractGWGoal {
 
 	/**
