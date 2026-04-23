@@ -26,14 +26,36 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 
+/**
+ * Provides function tools for discovering project classes and retrieving
+ * reflective details about them.
+ * <p>
+ * This implementation builds a dedicated {@link URLClassLoader} from the Maven
+ * project's compile classpath and output directories, then exposes helper tools
+ * that can be registered with a {@link Genai} provider.
+ */
 public class ClassFunctionalTools implements FunctionTools {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClassFunctionalTools.class);
 
+	/**
+	 * All classes visible from the constructed project class loader.
+	 */
 	private ImmutableSet<com.google.common.reflect.ClassPath.ClassInfo> classes;
 
+	/**
+	 * Class loader built from the Maven project classpath and output directories.
+	 */
 	private URLClassLoader classLoader;
 
+	/**
+	 * Creates a new instance backed by the supplied Maven project's classpath.
+	 *
+	 * @param project the Maven project used to resolve classpath and output
+	 *                directories
+	 * @throws IllegalArgumentException if the class loader or class path cannot be
+	 *                                  created
+	 */
 	public ClassFunctionalTools(MavenProject project) {
 		try {
 			List<String> compileClasspathElements = project.getCompileClasspathElements();
@@ -64,6 +86,11 @@ public class ClassFunctionalTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Registers class-related tools with the given AI provider.
+	 *
+	 * @param provider the provider that receives the tool registrations
+	 */
 	@Override
 	public void applyTools(Genai provider) {
 		provider.addTool(
@@ -82,6 +109,15 @@ public class ClassFunctionalTools implements FunctionTools {
 			);
 	}
 
+	/**
+	 * Finds fully qualified class names whose simple names match the supplied
+	 * regular expression.
+	 *
+	 * @param args tool invocation arguments; the first argument is expected to be a
+	 *             {@link JsonNode} containing a {@code className} property
+	 * @return a comma-separated list of matching class names, or {@code Class not
+	 *         found.} when no matches are available
+	 */
 	private String findClass(Object... args) {
 		JsonNode props = (JsonNode) args[0];
 		String className = props.get("className").asText();
@@ -106,6 +142,17 @@ public class ClassFunctionalTools implements FunctionTools {
 		return classes;
 	}
 
+	/**
+	 * Returns reflective information for the specified class.
+	 * <p>
+	 * The generated output may include modifiers, superclass, interfaces,
+	 * non-private fields, constructors, non-private methods, and annotations.
+	 *
+	 * @param args tool invocation arguments; the first argument is expected to be a
+	 *             {@link JsonNode} containing a {@code className} property
+	 * @return a formatted textual description of the requested class, or a not
+	 *         found message when the class cannot be loaded
+	 */
 	private String getClassInfo(Object... args) {
 		JsonNode props = (JsonNode) args[0];
 		if (logger.isInfoEnabled()) {
