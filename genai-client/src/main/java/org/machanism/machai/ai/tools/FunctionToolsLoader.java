@@ -10,16 +10,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Discovers and applies {@link FunctionTools} implementations using {@link ServiceLoader}.
+ * Discovers and applies {@link FunctionTools} implementations using
+ * {@link ServiceLoader}.
  *
  * <p>
- * This class is the host-side entry point for registering a curated set of local capabilities (for example,
- * file access, command execution, and HTTP retrieval) with a {@link Genai}. Implementations are discovered from
- * the classpath (typically via {@code META-INF/services} provider configuration) and then applied to the provider
- * in discovery order.
+ * This class is the host-side entry point for registering a curated set of
+ * local capabilities (for example, file access, command execution, and HTTP
+ * retrieval) with a {@link Genai}. Implementations are discovered from the
+ * classpath (typically via {@code META-INF/services} provider configuration)
+ * and then applied to the provider in discovery order.
  * </p>
  *
  * <h2>Usage</h2>
+ * 
  * <pre>{@code
  * Configurator conf = ...;
  * Genai provider = ...;
@@ -43,14 +46,15 @@ public class FunctionToolsLoader {
 	 * Private constructor to prevent external instantiation.
 	 *
 	 * <p>
-	 * Discovers available {@link FunctionTools} implementations using {@link ServiceLoader}.
+	 * Discovers available {@link FunctionTools} implementations using
+	 * {@link ServiceLoader}.
 	 * </p>
 	 */
 	private FunctionToolsLoader() {
 		ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
 		for (FunctionTools functionTool : functionToolServiceLoader) {
 			functionTools.add(functionTool);
-			logger.debug("FunctionTool: {}", functionTool.getClass().getName());
+			logger.info("FunctionTool: {}", functionTool.getClass().getName());
 		}
 	}
 
@@ -78,9 +82,10 @@ public class FunctionToolsLoader {
 	 * Supplies configuration to all discovered tool installers.
 	 *
 	 * <p>
-	 * Not all {@link FunctionTools} implementations use configuration, but the loader provides a centralized way
-	 * to propagate a {@link Configurator} to all tool installers (for example, for resolving header placeholders in
-	 * web requests).
+	 * Not all {@link FunctionTools} implementations use configuration, but the
+	 * loader provides a centralized way to propagate a {@link Configurator} to all
+	 * tool installers (for example, for resolving header placeholders in web
+	 * requests).
 	 * </p>
 	 *
 	 * @param configurator configuration source used by tool installers
