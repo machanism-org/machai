@@ -95,9 +95,6 @@ public class OpenAIProvider implements Genai {
 	/** Logger instance for this provider. */
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
-	/** Default maximum number of tool calls allowed per response. */
-	public static final long MAX_TOOL_CALLS = 200;
-
 	/** Default maximum number of tokens the model may generate. */
 	public static final long MAX_OUTPUT_TOKENS = 18000;
 
@@ -154,7 +151,7 @@ public class OpenAIProvider implements Genai {
 		chatModel = config.get("chatModel");
 
 		maxOutputTokens = config.getLong("MAX_OUTPUT_TOKENS", MAX_OUTPUT_TOKENS);
-		maxToolCalls = config.getLong("MAX_TOOL_CALLS", MAX_TOOL_CALLS);
+		maxToolCalls = config.getLong("MAX_TOOL_CALLS", 0L);
 		embeddingModel = config.get("embedding.model", null);
 	}
 
@@ -312,7 +309,9 @@ public class OpenAIProvider implements Genai {
 	private ResponseCreateParams createResponseBuilder(List<ResponseInputItem> inputs) {
 		Builder builder = ResponseCreateParams.builder().model(chatModel);
 
-		builder.maxToolCalls(maxToolCalls);
+		if (maxToolCalls > 0) {
+			builder.maxToolCalls(maxToolCalls);
+		}
 		builder.maxOutputTokens(maxOutputTokens);
 		builder.instructions(instructions);
 		builder.inputOfResponse(inputs);

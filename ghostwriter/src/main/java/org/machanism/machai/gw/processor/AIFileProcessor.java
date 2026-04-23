@@ -28,7 +28,9 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
+import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
+import org.machanism.machai.ai.tools.ToolFunction;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private boolean interactive;
 
+	private List<FunctionTools> toolFunctions = new ArrayList<>();
+
 	public AIFileProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator);
 		this.model = genai;
@@ -66,6 +70,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		try {
 			Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
 			FunctionToolsLoader.getInstance().applyTools(provider);
+			toolFunctions.stream().forEach(ft -> ft.applyTools(provider));
 
 			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
@@ -379,4 +384,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		setModel(genai);
 	}
 
+	public void addTool(FunctionTools toolFunction) {
+		toolFunctions.add(toolFunction);
+	}
 }

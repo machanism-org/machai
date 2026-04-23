@@ -1,27 +1,23 @@
 package org.machanism.machai.gw.maven.tools;
 
 import java.io.File;
-import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.apache.maven.project.MavenProject;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -29,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.ClassPath;
 
 public class ClassFunctionalTools implements FunctionTools {
 
@@ -38,49 +36,20 @@ public class ClassFunctionalTools implements FunctionTools {
 
 	private static Map<String, List<ClassInfo>> classMap = new HashMap<>();
 
-	@Override
-	public void applyTools(Genai provider) {
-		provider.addTool(
-				"find_class",
-				"Retrieves a list of fully qualified class names for the specified class group. Provide the 'className' property to get all matching classes.",
-				this::findClass,
-				"className:string:required:Regular expression pattern to find all matching classes by short name.");
-	}
+	private ImmutableSet<com.google.common.reflect.ClassPath.ClassInfo> classes;
 
-	private String findClass(Object... args) {
-		JsonNode props = (JsonNode) args[0];
-		String className = props.get("className").asText();
+	private URLClassLoader classLoader;
 
-		Pattern pattern = Pattern.compile(className);
-		List<Entry<String, List<ClassInfo>>> list = classMap.entrySet().stream()
-				.filter(entry -> pattern.matcher(entry.getKey()).matches())
-				.collect(Collectors.toList());
-
-		String join = "Class not found.";
-		if (list != null) {
-			List<String> collect = list.stream().map(e -> e.getKey())
-					.collect(Collectors.toList());
-			join = StringUtils.join(collect, ",");
-		}
-		return join;
-	}
-
-	public static void scanProjectClasses(MavenProject project) {
+	public ClassFunctionalTools(MavenProject project) {
 		try {
-
-//			List<String> compileClasspathElements = project.getCompileClasspathElements();
-//			List<String> runtimeClasspathElements = project.getRuntimeClasspathElements();
-//			String testOutputDirectory = project.getBuild().getTestOutputDirectory();
+			List<String> compileClasspathElements = project.getCompileClasspathElements();
+			String testOutputDirectory = project.getBuild().getTestOutputDirectory();
 
 			String outputDirectory = project.getBuild().getOutputDirectory();
-			List<String> dependencyArtifacts = project.getArtifacts().stream().map(a -> a.getFile().toString())
-					.collect(Collectors.toList());
 
 			List<String> arrayList = new ArrayList<>();
-//			arrayList.addAll(compileClasspathElements);
-//			arrayList.addAll(runtimeClasspathElements);
-//			arrayList.add(testOutputDirectory);
-			arrayList.addAll(dependencyArtifacts);
+			arrayList.addAll(compileClasspathElements);
+			arrayList.add(testOutputDirectory);
 			arrayList.add(outputDirectory);
 
 			URL[] urls = arrayList.stream().map(p -> {
@@ -92,90 +61,118 @@ public class ClassFunctionalTools implements FunctionTools {
 			}).collect(Collectors.toList())
 					.toArray(new URL[0]);
 
-			URLClassLoader classLoader = URLClassLoader.newInstance(urls);
-
-//			scanClassesByPath(compileClasspathElements, "CompileClasspathElements", classLoader);
-//			scanClassesByPath(runtimeClasspathElements, "RuntimeClasspathElements", classLoader);
-//			scanClassesByPath(testOutputDirectory, "TestOutputDirectory", classLoader);
-			scanClassesByPath(outputDirectory, "OutputDirectory", classLoader);
-			scanClassesByPath(dependencyArtifacts, "DependencyArtifacts", classLoader);
+			classLoader = URLClassLoader.newInstance(urls);
+			ClassPath classPath = ClassPath.from(classLoader);
+			classes = classPath.getAllClasses();
 
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}
-
-		for (String scope : scoppedClassMap.keySet()) {
-			Map<String, Map<String, List<ClassInfo>>> pathMap = scoppedClassMap.get(scope);
-			for (String path : pathMap.keySet()) {
-				Map<String, List<ClassInfo>> packages = pathMap.get(path);
-				for (Entry<String, List<ClassInfo>> classInfoEntry : packages.entrySet()) {
-					for (ClassInfo classInfo : classInfoEntry.getValue()) {
-						// System.out.println(classInfo.getName());
-					}
-				}
-			}
-		}
 	}
 
-	private static void scanClassesByPath(List<String> pathList, String scope, URLClassLoader classLoader)
-			throws IOException {
-		for (String path : pathList) {
-			scanClassesByPath(path, scope, classLoader);
-		}
+	@Override
+	public void applyTools(Genai provider) {
+		provider.addTool(
+				"find_class",
+				"Retrieves a list of fully qualified class names for the specified class group. Provide the 'className' property to get all matching classes.",
+				this::findClass,
+				"className:string:required:Regular expression pattern to find all matching classes by short name.");
+
+		provider.addTool(
+				"get_class_info",
+				"Retrieves detailed information about a Java class by its fully qualified name. Provide the 'className' property to get all class details.",
+				this::getClassInfo,
+				"className:string:required:Fully qualified class name to retrieve information.");
 	}
 
-	public static void scanClassesByPath(String path, String scope, URLClassLoader classLoader) throws IOException {
-		File artifact = new File(path);
-
-		List<String> classList = new ArrayList<>();
-
-		if (artifact.isFile()) {
-			try (JarFile jar = new JarFile(artifact)) {
-				for (Enumeration<JarEntry> entries = jar.entries(); entries.hasMoreElements();) {
-					JarEntry entry = entries.nextElement();
-					String name = entry.getName();
-					classList.add(name);
-				}
-			}
-		} else {
-			Path pathDir = Paths.get(path);
-
-			Files.walk(pathDir)
-					.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".class"))
-					.forEach(p -> classList
-							.add(p.toString().replace("\\", "/").replace(path.replace("\\", "/") + "/", "")));
+	private String findClass(Object... args) {
+		JsonNode props = (JsonNode) args[0];
+		if (logger.isInfoEnabled()) {
+			logger.info("Find class: {}", Arrays.toString(args));
 		}
 
-		for (String name : classList) {
-			if (Strings.CS.endsWith(name, ".class")
-					&& !Strings.CS.startsWithAny(name, "META-INF", "module-info")) {
-				try {
-					name = StringUtils.substringBeforeLast(name, ".");
-					String className = StringUtils.substringAfterLast(name, "/");
-					String packageName = StringUtils.substringBeforeLast(name, "/");
+		String className = props.get("className").asText();
 
-					packageName = StringUtils.replaceChars(packageName, '/', '.');
+		Pattern pattern = Pattern.compile(className);
+		List<com.google.common.reflect.ClassPath.ClassInfo> list = classes.stream()
+				.filter(entry -> pattern.matcher(entry.getSimpleName()).matches())
+				.collect(Collectors.toList());
 
-					String fullClassName = packageName + "." + className;
-					Class<?> class1 = classLoader.loadClass(fullClassName);
-
-					int modifiers = class1.getModifiers();
-					if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) {
-						ClassInfo classInfo = new ClassInfo(packageName, className, scope, path);
-						scoppedClassMap
-								.computeIfAbsent(scope, k -> new HashMap<>())
-								.computeIfAbsent(path, k -> new HashMap<>())
-								.computeIfAbsent((packageName), k -> new ArrayList<>())
-								.add(classInfo);
-
-						classMap.computeIfAbsent((className), k -> new ArrayList<>())
-								.add(classInfo);
-					}
-				} catch (Throwable e) {
-					logger.debug("Class {}, Error: {}", name, e.getMessage());
-				}
-			}
+		String join = "Class not found.";
+		if (list != null) {
+			List<String> collect = list.stream().map(e -> e.getName())
+					.collect(Collectors.toList());
+			join = StringUtils.join(collect, ",");
 		}
+		return join;
 	}
 
+	private String getClassInfo(Object... args) {
+	    JsonNode props = (JsonNode) args[0];
+	    if (logger.isInfoEnabled()) {
+	        logger.info("Get classInfo: {}", Arrays.toString(args));
+	    }
+
+	    String className = props.get("className").asText();
+
+	    StringBuilder info = new StringBuilder();
+	    try {
+	        Class<?> clazz = classLoader.loadClass(className);
+
+	        // Class name and modifiers
+	        info.append("Class: ").append(clazz.getName()).append("\n");
+	        info.append("Modifiers: ").append(Modifier.toString(clazz.getModifiers())).append("\n");
+
+	        // Superclass
+	        if (clazz.getSuperclass() != null) {
+	            info.append("Superclass: ").append(clazz.getSuperclass().getName()).append("\n");
+	        }
+
+	        // Interfaces
+	        Class<?>[] interfaces = clazz.getInterfaces();
+	        if (interfaces.length > 0) {
+	            info.append("Interfaces: ").append(Arrays.toString(
+	                    Arrays.stream(interfaces).map(Class::getName).toArray())).append("\n");
+	        }
+
+	        // Fields (exclude private)
+	        info.append("Fields:\n");
+	        for (Field field : clazz.getDeclaredFields()) {
+	            if (!Modifier.isPrivate(field.getModifiers())) {
+	                info.append("  ").append(Modifier.toString(field.getModifiers()))
+	                        .append(" ").append(field.getType().getName())
+	                        .append(" ").append(field.getName()).append("\n");
+	            }
+	        }
+
+	        // Constructors
+	        info.append("Constructors:\n");
+	        for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
+	            info.append("  ").append(Modifier.toString(constructor.getModifiers()))
+	                    .append(" ").append(constructor.getName())
+	                    .append(Arrays.toString(constructor.getParameterTypes())).append("\n");
+	        }
+
+	        // Methods (exclude private)
+	        info.append("Methods:\n");
+	        for (Method method : clazz.getDeclaredMethods()) {
+	            if (!Modifier.isPrivate(method.getModifiers())) {
+	                info.append("  ").append(Modifier.toString(method.getModifiers()))
+	                        .append(" ").append(method.getReturnType().getName())
+	                        .append(" ").append(method.getName())
+	                        .append(Arrays.toString(method.getParameterTypes())).append("\n");
+	            }
+	        }
+
+	        // Annotations
+	        info.append("Annotations:\n");
+	        for (Annotation annotation : clazz.getDeclaredAnnotations()) {
+	            info.append("  ").append(annotation.toString()).append("\n");
+	        }
+
+	    } catch (ClassNotFoundException e) {
+	        info.append("Class not found: ").append(className).append("\n");
+	    }
+	    return info.toString();
+	}
 }

@@ -16,6 +16,7 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
@@ -23,6 +24,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.gw.maven.tools.ClassFunctionalTools;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.MavenProjectLayout;
@@ -70,7 +72,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act -Dgw.acts=src\\site\\acts -DlogInputs=true
  * </pre>
  */
-@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false, defaultPhase = LifecyclePhase.PACKAGE)
+@Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false, defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class Act extends AbstractGWGoal {
 
 	/**
@@ -102,6 +104,7 @@ public class Act extends AbstractGWGoal {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
+		
 		PropertiesConfigurator configuration = getConfiguration();
 
 		String model = configuration.get(Ghostwriter.MODEL_PROP_NAME, this.model);
@@ -137,6 +140,8 @@ public class Act extends AbstractGWGoal {
 				}
 			}
 		};
+		
+		actProcessor.addTool(new ClassFunctionalTools(project));
 
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
@@ -191,7 +196,7 @@ public class Act extends AbstractGWGoal {
 			Properties userProperties = session.getUserProperties();
 			savedAct = userProperties.getProperty(Ghostwriter.ACT_PROP_NAME);
 		}
-		actProcessor.setDefaultPrompt(savedAct);
+		actProcessor.setAct(savedAct);
 		scanDocuments(actProcessor);
 	}
 
@@ -256,4 +261,5 @@ public class Act extends AbstractGWGoal {
 
 		return sb.toString();
 	}
+
 }

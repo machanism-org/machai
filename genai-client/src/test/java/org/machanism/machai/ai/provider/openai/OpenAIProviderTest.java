@@ -37,7 +37,6 @@ class OpenAIProviderTest {
 
 		// Assert
 		assertEquals(OpenAIProvider.MAX_OUTPUT_TOKENS, getField("maxOutputTokens"));
-		assertEquals(OpenAIProvider.MAX_TOOL_CALLS, getField("maxToolCalls"));
 	}
 
 	@Test
