@@ -24,8 +24,8 @@
 		<maven.version>3.8.1</maven.version>
 		<stagingDirectory>${env.MACHAI_SITE}</stagingDirectory>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
-		<acts.location>
-			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</acts.location>
+		<gw.acts>
+			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</gw.acts>
 		<gw.model>CodeMie:gpt-5.4-2026-03-05</gw.model>
 		<bindex.model>${gw.model}</bindex.model>
 		<genai.serverId>CodeMie</genai.serverId>
@@ -93,45 +93,6 @@
 						https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
-		</profile>
-		<profile>
-			<id>auto-acts</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.machanism.machai</groupId>
-						<artifactId>gw-maven-plugin</artifactId>
-						<version>1.1.2-SNAPSHOT</version>
-						<executions>
-							<execution>
-								<id>sonar-tests</id>
-								<goals>
-									<goal>act</goal>
-								</goals>
-								<configuration>
-									<act>sonar-tests</act>
-								</configuration>
-							</execution>
-							<execution>
-								<id>sonar-fix</id>
-								<goals>
-									<goal>act</goal>
-								</goals>
-								<configuration>
-									<act>sonar-fix</act>
-								</configuration>
-							</execution>
-						</executions>
-						<dependencies>
-							<dependency>
-								<groupId>org.machanism.machai</groupId>
-								<artifactId>bindex-core</artifactId>
-								<version>1.1.2-SNAPSHOT</version>
-							</dependency>
-						</dependencies>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 
