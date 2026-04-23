@@ -50,3 +50,4 @@ Use the available function tool to provide information about Ghostwriter acts.
 
 gw.scanDir="."
 gw.nonRecursive="true"
+gw.interactive = true
