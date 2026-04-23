@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
@@ -69,7 +70,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn gw:act-reactor -Dgw.act="Rewrite headings" -Dgw.scanDir=src\\site
  * </pre>
  */
-@Mojo(name = "act-reactor", aggregator = false, threadSafe = true, requiresProject = true)
+@Mojo(name = "act-reactor", aggregator = false, threadSafe = true, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class ReactorAct extends Act {
 
 	@Override

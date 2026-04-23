@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
@@ -87,7 +88,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * &lt;/plugin&gt;
  * </pre>
  */
-@Mojo(name = "reactor", threadSafe = true)
+@Mojo(name = "reactor", threadSafe = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class ReactorGW extends AbstractGWGoal {
 
     @Override

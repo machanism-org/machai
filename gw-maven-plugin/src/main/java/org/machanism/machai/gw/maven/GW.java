@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
@@ -141,7 +142,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * @see AbstractGWGoal
  */
-@Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false)
+@Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class GW extends AbstractGWGoal {
 
 	@Override
