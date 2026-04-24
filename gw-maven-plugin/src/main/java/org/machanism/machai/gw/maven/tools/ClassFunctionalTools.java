@@ -63,7 +63,13 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *                                  created
 	 */
 	public ClassFunctionalTools(MavenProject project) {
+		scanProjectClasses(project);
+	}
 
+	public ClassFunctionalTools() {
+	}
+
+	public void scanProjectClasses(MavenProject project) {
 		File basedir = project.getBasedir();
 
 		ClassInfoHolder classInfoHolder = new ClassInfoHolder(project);

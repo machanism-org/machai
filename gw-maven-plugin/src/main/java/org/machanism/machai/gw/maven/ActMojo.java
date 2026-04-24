@@ -92,6 +92,8 @@ public class ActMojo extends AbstractGWMojo {
 	@Parameter(property = Ghostwriter.ACTS_LOCATION_PROP_NAME, required = false)
 	private String acts;
 
+	private ClassFunctionalTools toolFunction = new ClassFunctionalTools();
+
 	private static final Object MONITOR = new Object();
 
 	/**
@@ -120,6 +122,9 @@ public class ActMojo extends AbstractGWMojo {
 
 					Model model = mavenProjectLayout.getModel();
 					for (MavenProject mavenProject : session.getAllProjects()) {
+						if (session.getRequest().isProjectPresent()) {
+							toolFunction.scanProjectClasses(mavenProject);
+						}
 						if (Strings.CS.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
 							mavenProjectLayout.model(mavenProject.getModel());
 							break;
@@ -143,6 +148,10 @@ public class ActMojo extends AbstractGWMojo {
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		actProcessor.setNonRecursive(nonRecursive);
+
+		if (session.getRequest().isProjectPresent()) {
+			actProcessor.addTool(toolFunction);
+		}
 
 		boolean isParallel = session.isParallel();
 		if (isParallel) {
