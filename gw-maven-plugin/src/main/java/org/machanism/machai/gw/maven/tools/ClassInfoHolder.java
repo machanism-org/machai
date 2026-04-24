@@ -35,10 +35,11 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 /**
  * Holds class discovery and lookup data for a single Maven project.
  * <p>
- * This class builds a dedicated {@link URLClassLoader} from the project's compile
- * classpath together with its main and test output directories. It then scans
- * visible classes and records the physical location and artifact coordinates for
- * public and protected classes that can be loaded from that classpath.
+ * This class builds a dedicated {@link URLClassLoader} from the project's
+ * compile classpath together with its main and test output directories. It then
+ * scans visible classes and records the physical location and artifact
+ * coordinates for public and protected classes that can be loaded from that
+ * classpath.
  */
 public class ClassInfoHolder {
 
@@ -67,14 +68,29 @@ public class ClassInfoHolder {
 	private Map<String, String> artifactMap = new HashMap<>();
 
 	/**
+	 * Maven project used as the source of classpath, output directory, and
+	 * dependency metadata.
+	 */
+	private MavenProject project;
+
+	/**
 	 * Creates a holder for the supplied Maven project and eagerly initializes class
 	 * discovery metadata.
 	 *
 	 * @param project the Maven project whose classpath and artifacts are inspected
 	 */
 	public ClassInfoHolder(MavenProject project) {
-		loadClassList(project);
-		loadClassLocations(project);
+		this.project = project;
+	}
+
+	/**
+	 * Lazily initializes class discovery state on first access.
+	 */
+	private void init() {
+		if (classes == null) {
+			loadClassList(project);
+			loadClassLocations(project);
+		}
 	}
 
 	/**
@@ -163,6 +179,8 @@ public class ClassInfoHolder {
 	 */
 	public void scanClassesByPath(String path, String id) throws IOException {
 		try {
+			init();
+
 			File artifact = new File(path);
 
 			List<String> classList = new ArrayList<>();
@@ -219,6 +237,8 @@ public class ClassInfoHolder {
 	 * @return matching class metadata entries
 	 */
 	public List<ClassInfo> findClasses(String className) {
+		init();
+
 		Pattern pattern = Pattern.compile(className);
 		return classes.stream()
 				.filter(entry -> pattern.matcher(entry.getSimpleName()).matches())
@@ -233,6 +253,7 @@ public class ClassInfoHolder {
 	 * @throws ClassNotFoundException if the class cannot be loaded
 	 */
 	public Class<?> loadClass(String className) throws ClassNotFoundException {
+		init();
 		return classLoader.loadClass(className);
 	}
 
@@ -243,6 +264,7 @@ public class ClassInfoHolder {
 	 * @return the directory or jar path for the class, or {@code null} if unknown
 	 */
 	public String getClassPath(String className) {
+		init();
 		return classPathMap.get(className);
 	}
 
@@ -255,6 +277,7 @@ public class ClassInfoHolder {
 	 *         {@code null} when the class does not originate from a dependency
 	 */
 	public String getArtifactId(String className) {
+		init();
 		return artifactMap.get(className);
 	}
 

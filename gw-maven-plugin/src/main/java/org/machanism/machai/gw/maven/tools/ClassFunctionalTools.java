@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +27,9 @@ import com.google.gson.JsonObject;
  * Provides function tools for discovering project classes and retrieving
  * reflective details about them.
  * <p>
- * This implementation builds a dedicated {@link URLClassLoader} from the Maven
- * project's compile classpath and output directories, then exposes helper tools
- * that can be registered with a {@link Genai} provider.
+ * This implementation keeps per-project {@link ClassInfoHolder} instances keyed
+ * by working directory so tool calls can resolve classes in the correct Maven
+ * module context.
  * <p>
  * <b>Usage Restriction: aggregator = false</b>
  * <p>
@@ -48,10 +47,17 @@ import com.google.gson.JsonObject;
  */
 public class ClassFunctionalTools implements FunctionTools {
 
+	/**
+	 * Message returned when a tool call is made for a project that has not been
+	 * scanned and registered in this instance.
+	 */
 	private static final String FT_NOT_SUPPORTED_FOR_PROJECT_MSG = "The function tool don't support this function tool.";
 
 	private static final Logger logger = LoggerFactory.getLogger(ClassFunctionalTools.class);
 
+	/**
+	 * Holds class metadata by Maven project base directory.
+	 */
 	private Map<File, ClassInfoHolder> classInfoProjectMap = new HashMap<File, ClassInfoHolder>();
 
 	/**
@@ -59,16 +65,25 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *
 	 * @param project the Maven project used to resolve classpath and output
 	 *                directories
-	 * @throws IllegalArgumentException if the class loader or class path cannot be
-	 *                                  created
 	 */
 	public ClassFunctionalTools(MavenProject project) {
 		scanProjectClasses(project);
 	}
 
+	/**
+	 * Creates an empty instance. Projects must be registered later through
+	 * {@link #scanProjectClasses(MavenProject)} before tool invocations can resolve
+	 * class information.
+	 */
 	public ClassFunctionalTools() {
 	}
 
+	/**
+	 * Registers a project by scanning and caching class metadata for its base
+	 * directory.
+	 *
+	 * @param project the Maven project to register
+	 */
 	public void scanProjectClasses(MavenProject project) {
 		File basedir = project.getBasedir();
 
@@ -104,9 +119,12 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * regular expression.
 	 *
 	 * @param params tool invocation arguments; the first argument is expected to be
-	 *               a {@link JsonNode} containing a {@code className} property
-	 * @return a comma-separated list of matching class names, or {@code Class not
-	 *         found.} when no matches are available
+	 *               a {@link JsonNode} containing a {@code className} property and
+	 *               the second a {@link File} representing the current working
+	 *               directory
+	 * @return a comma-separated list of matching class names, {@code Class not
+	 *         found.} when no matches are available, or the unsupported-project
+	 *         message when no project context is registered
 	 */
 	private String findClass(Object... params) {
 		File workingDir = (File) params[1];
@@ -138,12 +156,16 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * Returns reflective information for the specified class.
 	 * <p>
 	 * The generated output may include modifiers, superclass, interfaces,
-	 * non-private fields, constructors, non-private methods, and annotations.
+	 * non-private fields, constructors, non-private methods, annotations, class
+	 * path, and dependency artifact coordinates.
 	 *
 	 * @param params tool invocation arguments; the first argument is expected to be
-	 *               a {@link JsonNode} containing a {@code className} property
-	 * @return a formatted textual description of the requested class, or a not
-	 *         found message when the class cannot be loaded
+	 *               a {@link JsonNode} containing a {@code className} property and
+	 *               the second a {@link File} representing the current working
+	 *               directory
+	 * @return a JSON object describing the requested class or containing an
+	 *         {@code error} property when the class or project context cannot be
+	 *         resolved
 	 */
 	private JsonObject getClassInfo(Object... params) {
 		JsonObject info = new JsonObject();
