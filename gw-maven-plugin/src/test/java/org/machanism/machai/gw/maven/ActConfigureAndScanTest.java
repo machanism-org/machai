@@ -16,7 +16,7 @@ import org.machanism.machai.gw.processor.Ghostwriter;
 
 public class ActConfigureAndScanTest {
 
-	static class TestableAct extends Act {
+	static class TestableAct extends ActMojo {
 		boolean applyActPromptCalled;
 		boolean scanDocumentsCalled;
 

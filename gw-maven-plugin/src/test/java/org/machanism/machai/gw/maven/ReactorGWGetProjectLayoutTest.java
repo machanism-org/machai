@@ -22,7 +22,7 @@ class ReactorGWGetProjectLayoutTest {
 	@Test
 	void execute_shouldUseDetectedProjectLayoutAndPopulateMavenModel() throws Exception {
 		// Arrange
-		ReactorGW goal = new ReactorGW();
+		GWPerModuleMojo goal = new GWPerModuleMojo();
 		goal.basedir = new File(".");
 
 		MavenProject project = new MavenProject();
@@ -52,7 +52,7 @@ class ReactorGWGetProjectLayoutTest {
 				}
 			};
 
-			// Act
+			// ActMojo
 			ProjectLayout detected = processor.getProjectLayout(new File("."));
 
 			// Assert

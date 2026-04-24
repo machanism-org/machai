@@ -19,7 +19,7 @@ class ActScanDocumentsTest {
 
 	@Test
 	void scanDocuments_shouldDefaultToBasedirWhenNoScanDirProvided() throws Exception {
-		Act goal = new Act();
+		ActMojo goal = new ActMojo();
 		goal.basedir = new File(".");
 		goal.session = mock(MavenSession.class);
 		MavenExecutionRequest request = mock(MavenExecutionRequest.class);
@@ -37,7 +37,7 @@ class ActScanDocumentsTest {
 
 	@Test
 	void scanDocuments_shouldUseSuperScanDirWhenProvided() throws Exception {
-		Act goal = new Act();
+		ActMojo goal = new ActMojo();
 		goal.basedir = new File(".");
 		goal.scanDir = "custom-scan";
 		goal.session = mock(MavenSession.class);
@@ -57,7 +57,7 @@ class ActScanDocumentsTest {
 
 	@Test
 	void scanDocuments_shouldUseConfiguredScanDirWhenGoalScanDirIsNull() throws Exception {
-		Act goal = new Act();
+		ActMojo goal = new ActMojo();
 		goal.basedir = new File(".");
 		goal.session = mock(MavenSession.class);
 		MavenExecutionRequest request = mock(MavenExecutionRequest.class);

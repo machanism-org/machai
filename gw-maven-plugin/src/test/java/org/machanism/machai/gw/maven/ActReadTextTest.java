@@ -54,7 +54,7 @@ public class ActReadTextTest {
 		}
 	}
 
-	static class TestableAct extends Act {
+	static class TestableAct extends ActMojo {
 		void setPrompter(Prompter prompter) {
 			this.prompter = prompter;
 		}
@@ -66,7 +66,7 @@ public class ActReadTextTest {
 		TestableAct act = new TestableAct();
 		act.setPrompter(new QueuePrompter("Hello world"));
 
-		// Act
+		// ActMojo
 		String text = act.readText("Act");
 
 		// Assert
@@ -80,7 +80,7 @@ public class ActReadTextTest {
 		TestableAct act = new TestableAct();
 		act.setPrompter(new QueuePrompter("Line1" + breaker, "Line2" + breaker, "Last"));
 
-		// Act
+		// ActMojo
 		String text = act.readText("Act");
 
 		// Assert
@@ -94,7 +94,7 @@ public class ActReadTextTest {
 		TestableAct act = new TestableAct();
 		act.setPrompter(new QueuePrompter("Only" + breaker));
 
-		// Act
+		// ActMojo
 		String text = act.readText("Act");
 
 		// Assert

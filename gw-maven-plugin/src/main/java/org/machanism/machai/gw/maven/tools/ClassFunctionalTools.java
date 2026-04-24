@@ -48,6 +48,20 @@ import com.google.gson.JsonObject;
  * This implementation builds a dedicated {@link URLClassLoader} from the Maven
  * project's compile classpath and output directories, then exposes helper tools
  * that can be registered with a {@link Genai} provider.
+ * <p>
+ * <b>Usage Restriction: aggregator = false</b>
+ * <p>
+ * This class is designed to be used only in Maven Mojo executions where
+ * <code>aggregator = false</code>. When a Mojo is run as an aggregator
+ * (<code>aggregator = true</code>), it operates at the reactor (multi-module)
+ * level and may not have access to the correct, fully resolved classpath or
+ * output directories for each individual module. Attempting to use this tool in
+ * aggregator mode can result in incomplete or incorrect class discovery,
+ * classloader conflicts, or missing class details, as the classpath may not
+ * accurately reflect the context of a single module. For reliable and
+ * predictable results, always use this tool in non-aggregator (per-module)
+ * executions, where the MavenProject context is guaranteed to represent a
+ * single module with its own classpath and output directories.
  */
 public class ClassFunctionalTools implements FunctionTools {
 

@@ -14,11 +14,11 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.Genai;
 
 /**
- * Unit tests for {@link AbstractGWGoal}.
+ * Unit tests for {@link AbstractGWMojo}.
  */
 public class AbstractGWGoalTest {
 
-	static class TestGoal extends AbstractGWGoal {
+	static class TestGoal extends AbstractGWMojo {
 		@Override
 		public void execute() throws MojoExecutionException {
 			// not used
@@ -26,7 +26,7 @@ public class AbstractGWGoalTest {
 	}
 
 	private static void setField(Object target, String fieldName, Object value) throws Exception {
-		Field f = AbstractGWGoal.class.getDeclaredField(fieldName);
+		Field f = AbstractGWMojo.class.getDeclaredField(fieldName);
 		f.setAccessible(true);
 		f.set(target, value);
 	}
@@ -37,7 +37,7 @@ public class AbstractGWGoalTest {
 		TestGoal goal = new TestGoal();
 		setField(goal, "settings", null);
 
-		// Act
+		// ActMojo
 		try {
 			goal.getConfiguration();
 			fail("Expected MojoExecutionException");
@@ -55,7 +55,7 @@ public class AbstractGWGoalTest {
 		setField(goal, "settings", settings);
 		setField(goal, "serverId", "missing");
 
-		// Act
+		// ActMojo
 		try {
 			goal.getConfiguration();
 			fail("Expected MojoExecutionException");
@@ -78,7 +78,7 @@ public class AbstractGWGoalTest {
 		setField(goal, "settings", settings);
 		setField(goal, "serverId", "s1");
 
-		// Act
+		// ActMojo
 		PropertiesConfigurator cfg = goal.getConfiguration();
 
 		// Assert
@@ -99,7 +99,7 @@ public class AbstractGWGoalTest {
 		setField(goal, "settings", settings);
 		setField(goal, "serverId", "s1");
 
-		// Act
+		// ActMojo
 		PropertiesConfigurator cfg = goal.getConfiguration();
 
 		// Assert

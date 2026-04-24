@@ -15,18 +15,18 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Targets the private static helper methods in {@link GW} via reflection.
+ * Targets the private static helper methods in {@link GWMojo} via reflection.
  */
 public class GWPrivateMethodsTest {
 
 	private static Method getResolveMethod() throws Exception {
-		Method m = GW.class.getDeclaredMethod("resolveProjectByArtifactId", java.util.List.class, Model.class);
+		Method m = GWMojo.class.getDeclaredMethod("resolveProjectByArtifactId", java.util.List.class, Model.class);
 		m.setAccessible(true);
 		return m;
 	}
 
 	private static Method getToCoordMethod() throws Exception {
-		Method m = GW.class.getDeclaredMethod("toCoord", MavenProject.class);
+		Method m = GWMojo.class.getDeclaredMethod("toCoord", MavenProject.class);
 		m.setAccessible(true);
 		return m;
 	}
@@ -47,7 +47,7 @@ public class GWPrivateMethodsTest {
 		Model model = new Model();
 		model.setArtifactId("a");
 
-		// Act + Assert
+		// ActMojo + Assert
 		assertNull(resolve.invoke(null, null, model));
 		assertNull(resolve.invoke(null, Collections.emptyList(), model));
 		assertNull(resolve.invoke(null, Collections.singletonList(newProject("g", "a", "1", new File("."))), null));
@@ -60,7 +60,7 @@ public class GWPrivateMethodsTest {
 		Model model = new Model();
 		model.setArtifactId("   ");
 
-		// Act
+		// ActMojo
 		Object result = resolve.invoke(null,
 				Collections.singletonList(newProject("g", "a", "1", new File("."))), model);
 
@@ -77,7 +77,7 @@ public class GWPrivateMethodsTest {
 		MavenProject p1 = newProject("g", "other", "1", new File("module1"));
 		MavenProject p2 = newProject("g", "target", "1", new File("module2"));
 
-		// Act
+		// ActMojo
 		Object result = resolve.invoke(null, Arrays.asList(p1, p2), model);
 
 		// Assert
@@ -93,7 +93,7 @@ public class GWPrivateMethodsTest {
 		MavenProject p1 = newProject("g", "dup", "1", new File("m1"));
 		MavenProject p2 = newProject("g", "dup", "2", new File("m2"));
 
-		// Act
+		// ActMojo
 		try {
 			resolve.invoke(null, Arrays.asList(p1, p2), model);
 			Assert.fail("Expected IllegalStateException due to multiple matching projects"); // Sonar java:S2699
@@ -110,7 +110,7 @@ public class GWPrivateMethodsTest {
 		// Arrange
 		Method toCoord = getToCoordMethod();
 
-		// Act
+		// ActMojo
 		Object coord = toCoord.invoke(null, new Object[] { null });
 
 		// Assert
@@ -123,7 +123,7 @@ public class GWPrivateMethodsTest {
 		Method toCoord = getToCoordMethod();
 		MavenProject p = new MavenProject();
 
-		// Act
+		// ActMojo
 		String coord = (String) toCoord.invoke(null, p);
 
 		// Assert

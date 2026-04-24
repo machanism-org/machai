@@ -11,6 +11,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.gw.maven.tools.ClassFunctionalTools;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.ProjectLayoutManager;
@@ -18,22 +19,22 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Maven goal {@code gw:act-reactor} that runs an action against the execution-root project using Maven's standard
+ * Maven goal {@code gw:act-per-module} that runs an action against the execution-root project using Maven's standard
  * reactor build context.
  *
  * <p>
- * Unlike {@link Act} (which is an aggregator and can discover/scan modules itself), this goal executes as part of a
+ * Unlike {@link ActMojo} (which is an aggregator and can discover/scan modules itself), this goal executes as part of a
  * standard reactor build. It typically targets the execution-root project only and delegates the scan to
  * {@link ActProcessor}.
  * </p>
  *
  * <h2>Parameters</h2>
  * <p>
- * This goal does not introduce additional parameters beyond those supported by {@link Act} and
- * {@link AbstractGWGoal}.
+ * This goal does not introduce additional parameters beyond those supported by {@link ActMojo} and
+ * {@link AbstractGWMojo}.
  * </p>
  *
- * <h3>Inherited parameters (from {@link Act})</h3>
+ * <h3>Inherited parameters (from {@link ActMojo})</h3>
  * <dl>
  * <dt><b>{@code -Dgw.act}</b> / {@code &lt;act&gt;}</dt>
  * <dd>Action text/prompt to apply. If omitted, the goal reads it interactively.</dd>
@@ -42,7 +43,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>Optional directory containing predefined action definitions.</dd>
  * </dl>
  *
- * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
+ * <h3>Inherited parameters (from {@link AbstractGWMojo})</h3>
  * <dl>
  * <dt><b>{@code -Dgw.model}</b> / {@code &lt;model&gt;}</dt>
  * <dd>Provider/model identifier forwarded to the workflow. Example: {@code openai:gpt-4o-mini}.</dd>
@@ -63,15 +64,15 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <h2>Usage examples</h2>
  *
  * <pre>
- * mvn gw:act-reactor
+ * mvn gw:act-per-module
  * </pre>
  *
  * <pre>
- * mvn gw:act-reactor -Dgw.act="Rewrite headings" -Dgw.scanDir=src\\site
+ * mvn gw:act-per-module -Dgw.act="Rewrite headings" -Dgw.scanDir=src\\site
  * </pre>
  */
-@Mojo(name = "act-reactor", aggregator = false, threadSafe = true, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class ReactorAct extends Act {
+@Mojo(name = "act-per-module", aggregator = false, threadSafe = true, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+public class ActPerModuleMojo extends ActMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -106,6 +107,10 @@ public class ReactorAct extends Act {
 			}
 		};
 
+		if (session.getRequest().isProjectPresent()) {
+			actProcessor.addTool(new ClassFunctionalTools(project));
+		}
+		
 		process(actProcessor);
 	}
 

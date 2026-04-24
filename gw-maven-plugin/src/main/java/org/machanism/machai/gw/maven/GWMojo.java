@@ -50,7 +50,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <h2>Parameters</h2>
  * <p>
  * This goal defines the following parameter in addition to those inherited from
- * {@link AbstractGWGoal}.
+ * {@link AbstractGWMojo}.
  * </p>
  *
  * <dl>
@@ -62,10 +62,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </dd>
  * </dl>
  *
- * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
+ * <h3>Inherited parameters (from {@link AbstractGWMojo})</h3>
  * <p>
- * The following parameters are defined on {@link AbstractGWGoal} and are
- * available to this goal. Refer to {@link AbstractGWGoal} for the authoritative
+ * The following parameters are defined on {@link AbstractGWMojo} and are
+ * available to this goal. Refer to {@link AbstractGWMojo} for the authoritative
  * list and exact semantics.
  * </p>
  *
@@ -140,10 +140,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn -pl :my-module gw:gw
  * </pre>
  *
- * @see AbstractGWGoal
+ * @see AbstractGWMojo
  */
 @Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class GW extends AbstractGWGoal {
+public class GWMojo extends AbstractGWMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {

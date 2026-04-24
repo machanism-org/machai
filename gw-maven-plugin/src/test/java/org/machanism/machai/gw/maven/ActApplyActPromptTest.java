@@ -19,7 +19,7 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenSavedActExists_doesNotPromptAndKeepsValue() throws Exception {
-		Act act = new Act();
+		ActMojo act = new ActMojo();
 		Properties userProps = new Properties();
 		userProps.setProperty(Ghostwriter.ACT_PROP_NAME, "saved");
 
@@ -38,7 +38,7 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenNoSavedAct_andConfigProvidesAct_savesIt() throws Exception {
-		Act act = new Act();
+		ActMojo act = new ActMojo();
 		Properties userProps = new Properties();
 
 		MavenSession session = Mockito.mock(MavenSession.class);
@@ -57,7 +57,7 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenNoSavedActAndNoConfiguredAct_promptsAndStoresInput() throws Exception {
-		Act act = new Act();
+		ActMojo act = new ActMojo();
 		Properties userProps = new Properties();
 
 		MavenSession session = Mockito.mock(MavenSession.class);
@@ -79,7 +79,7 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenPrompterFails_wrapsInMojoExecutionException() throws Exception {
-		Act act = new Act();
+		ActMojo act = new ActMojo();
 		Properties userProps = new Properties();
 
 		MavenSession session = Mockito.mock(MavenSession.class);

@@ -13,7 +13,7 @@ public class GWToCoordTest {
 	@Test
 	public void toCoord_allFieldsPresent_formatsAsGavAndBasedir() throws Exception {
 		// Arrange
-		Method toCoord = GW.class.getDeclaredMethod("toCoord", MavenProject.class);
+		Method toCoord = GWMojo.class.getDeclaredMethod("toCoord", MavenProject.class);
 		toCoord.setAccessible(true);
 
 		MavenProject p = new MavenProject();
@@ -23,7 +23,7 @@ public class GWToCoordTest {
 		File basedir = new File("some-dir");
 		p.setFile(new File(basedir, "pom.xml"));
 
-		// Act
+		// ActMojo
 		String coord = (String) toCoord.invoke(null, p);
 
 		// Assert

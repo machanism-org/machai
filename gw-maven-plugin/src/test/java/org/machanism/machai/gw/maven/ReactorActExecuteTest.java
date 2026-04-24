@@ -24,7 +24,7 @@ public class ReactorActExecuteTest {
 	@Test
 	public void execute_whenCalled_processesWithActProcessorThatUsesDetectedProjectLayout() throws Exception {
 		// Arrange
-		ReactorAct goal = Mockito.spy(new ReactorAct());
+		ActPerModuleMojo goal = Mockito.spy(new ActPerModuleMojo());
 
 		File basedir = new File(".").getCanonicalFile();
 		goal.basedir = basedir;
@@ -44,7 +44,7 @@ public class ReactorActExecuteTest {
 		goal.session = session;
 
 		Settings settings = new Settings();
-		Field settingsField = AbstractGWGoal.class.getDeclaredField("settings");
+		Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
 		settingsField.setAccessible(true);
 		settingsField.set(goal, settings);
 
@@ -58,7 +58,7 @@ public class ReactorActExecuteTest {
 		ArgumentCaptor<ActProcessor> processorCaptor = ArgumentCaptor.forClass(ActProcessor.class);
 		Mockito.doNothing().when(goal).process(processorCaptor.capture());
 
-		// Act
+		// ActMojo
 		goal.execute();
 
 		// Assert
@@ -74,7 +74,7 @@ public class ReactorActExecuteTest {
 	@Test(expected = MojoExecutionException.class)
 	public void execute_whenApplyActPromptFails_throwsMojoExecutionException() throws Exception {
 		// Arrange
-		ReactorAct goal = Mockito.spy(new ReactorAct());
+		ActPerModuleMojo goal = Mockito.spy(new ActPerModuleMojo());
 
 		File basedir = new File(".").getCanonicalFile();
 		goal.basedir = basedir;
@@ -85,7 +85,7 @@ public class ReactorActExecuteTest {
 		goal.session = session;
 
 		Settings settings = new Settings();
-		Field settingsField = AbstractGWGoal.class.getDeclaredField("settings");
+		Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
 		settingsField.setAccessible(true);
 		settingsField.set(goal, settings);
 
@@ -94,7 +94,7 @@ public class ReactorActExecuteTest {
 
 		Mockito.doThrow(new MojoExecutionException("boom")).when(goal).applyActPrompt(Mockito.any(Configurator.class));
 
-		// Act
+		// ActMojo
 		goal.execute();
 	}
 

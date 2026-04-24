@@ -102,15 +102,12 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public void setAct(String act) throws IOException {
 		act = StringUtils.defaultIfBlank(act, "help");
-		String name = StringUtils.substringBefore(StringUtils.defaultString(act), " ");
-		if (StringUtils.isBlank(name)) {
-			throw new IllegalArgumentException("Act name must not be blank. Usage: --act <name> [prompt]");
-		}
 
 		String defaultPrompt = getDefaultPrompt();
 
+		String name;
 		String prompt;
-		Matcher matcher = FIRST_WHITESPACE.matcher(StringUtils.defaultString(act));
+		Matcher matcher = FIRST_WHITESPACE.matcher(act);
 		if (matcher.find()) {
 			int start = matcher.start();
 			String substringAfter = StringUtils.substring(act, start);

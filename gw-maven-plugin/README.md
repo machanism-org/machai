@@ -10,8 +10,8 @@ GW Maven Plugin is the primary adapter for the MachAI [Ghostwriter application](
 
 The plugin provides Maven goals (Mojos) in `org.machanism.machai.gw.maven` that delegate to Ghostwriter processors:
 
-- **Guided processing** (`gw:gw`, `gw:reactor`) using `GuidanceProcessor` for scanning a directory tree and applying guidance-driven updates.
-- **Action processing** (`gw:act`, `gw:act-reactor`) using `ActProcessor` for applying an interactive or predefined “act” prompt across a scanned document set.
+- **Guided processing** (`gw:gw`, `gw:gw-per-module`) using `GuidanceProcessor` for scanning a directory tree and applying guidance-driven updates.
+- **Action processing** (`gw:act`, `gw:act-per-module`) using `ActProcessor` for applying an interactive or predefined “act” prompt across a scanned document set.
 
 Credentials can optionally be sourced from Maven `settings.xml` via `-Dgenai.serverId=...`, keeping secrets out of source control while still enabling CI-friendly execution.
 
@@ -43,9 +43,9 @@ mvn -pl gw-maven-plugin -am clean verify
 GW Maven Plugin provides Maven goals (Mojos) that orchestrate Ghostwriter processors:
 
 - `gw:gw`: aggregator goal; processes modules in reverse order (sub-modules first, then parents) and can run without a `pom.xml`.
-- `gw:reactor`: processes modules using Maven reactor dependency ordering; can optionally defer execution-root processing.
+- `gw:gw-per-module`: processes modules using Maven reactor dependency ordering; can optionally defer execution-root processing.
 - `gw:act`: interactive action prompt applied across scanned documents.
-- `gw:act-reactor`: reactor-friendly variant of `gw:act` for execution-root processing.
+- `gw:act-per-module`: reactor-friendly variant of `gw:act` for execution-root processing.
 - `gw:clean`: deletes temporary artifacts created during GW processing.
 
 ### Examples

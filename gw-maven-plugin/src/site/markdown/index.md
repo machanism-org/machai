@@ -60,8 +60,8 @@ GW Maven Plugin is the primary adapter for the [Ghostwriter application](https:/
 
 The plugin provides Maven goals (Mojos) in `org.machanism.machai.gw.maven` that delegate to Ghostwriter processors:
 
-- **Guided processing** (`gw:gw`, `gw:reactor`) using `GuidanceProcessor` for scanning a directory tree and applying guidance-driven updates.
-- **Action processing** (`gw:act`, `gw:act-reactor`) using `ActProcessor` for applying an interactive or predefined “act” prompt across a scanned document set.
+- **Guided processing** (`gw:gw`, `gw:gw-per-module`) using `GuidanceProcessor` for scanning a directory tree and applying guidance-driven updates.
+- **Action processing** (`gw:act`, `gw:act-per-module`) using `ActProcessor` for applying an interactive or predefined “act” prompt across a scanned document set.
 
 Credentials can optionally be sourced from Maven `settings.xml` via `-Dgenai.serverId=...`, keeping secrets out of source control while still enabling CI-friendly execution.
 
@@ -81,10 +81,10 @@ In practice, you point the plugin at a scan root (commonly `src/site`, but any f
 - **Guided File Processing integration** via Ghostwriter processors.
 - **Guided goals**:
   - `gw:gw`: aggregator goal that can run without a `pom.xml` and processes modules in reverse order (sub-modules first, then parents), similar to the Ghostwriter CLI.
-  - `gw:reactor`: processes projects using standard Maven reactor dependency ordering.
+  - `gw:gw-per-module`: processes projects using standard Maven reactor dependency ordering.
 - **Action goals**:
   - `gw:act`: applies an action prompt; prompts interactively if `gw.act` is not provided.
-  - `gw:act-reactor`: reactor-friendly variant intended to run in the execution-root project context.
+  - `gw:act-per-module`: reactor-friendly variant intended to run in the execution-root project context.
 - **Configurable scan root, instructions, and exclusions** to focus processing on specific trees (for example documentation sources).
 - **Credential integration with Maven settings** via `-Dgenai.serverId=...` (forwards server credentials and optional extra fields to the workflow).
 - **Optional input logging** via `-DlogInputs=true`.
@@ -154,8 +154,8 @@ mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\\site
 2. **Embed `@guidance:` blocks** in files where you want repeatable automation.
 3. **Run a goal**:
    - Use `gw:gw` for aggregator-style processing (reverse module order, CLI-like behavior).
-   - Use `gw:reactor` for reactor dependency ordering.
-   - Use `gw:act` / `gw:act-reactor` for targeted prompt-driven rewrites.
+   - Use `gw:gw-per-module` for reactor dependency ordering.
+   - Use `gw:act` / `gw:act-per-module` for targeted prompt-driven rewrites.
 4. **Review changes** in your VCS diff.
 5. **Commit updates** to keep documentation and other assets synchronized with code.
 6. (Optional) **Clean temporary artifacts**:
@@ -176,8 +176,8 @@ Common configuration parameters (usable as `-D...` system properties or via `<co
 | `gw.excludes` | Exclude patterns/paths to skip while scanning. | *(none)* |
 | `genai.serverId` | `settings.xml` `<server>` id used to load GenAI credentials (and optional provider-specific fields) into workflow properties. | *(none)* |
 | `logInputs` | Logs the list of input files passed to the workflow. | `false` |
-| `gw.act` | For `gw:act` / `gw:act-reactor`: the action prompt to apply (interactive if omitted for `gw:act`). | *(none)* |
-| `gw.acts` | For `gw:act` / `gw:act-reactor`: directory containing predefined action definitions. | *(none)* |
+| `gw.act` | For `gw:act` / `gw:act-per-module`: the action prompt to apply (interactive if omitted for `gw:act`). | *(none)* |
+| `gw.acts` | For `gw:act` / `gw:act-per-module`: directory containing predefined action definitions. | *(none)* |
 
 ## Resources
 

@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class for GW Maven plugin goals.
+ * Base class for GWMojo Maven plugin goals.
  *
  * <p>
  * This class centralizes shared configuration parameters and the common
@@ -74,9 +74,9 @@ import org.slf4j.LoggerFactory;
  * mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site -DlogInputs=true
  * </pre>
  */
-public abstract class AbstractGWGoal extends AbstractMojo {
+public abstract class AbstractGWMojo extends AbstractMojo {
 
-	static final Logger logger = LoggerFactory.getLogger(AbstractGWGoal.class);
+	static final Logger logger = LoggerFactory.getLogger(AbstractGWMojo.class);
 
 	/**
 	 * Provider/model identifier to pass to the workflow.
@@ -143,7 +143,7 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 	@Parameter(defaultValue = "${reactorProjects}", readonly = true)
 	protected List<MavenProject> reactorProjects;
 
-	protected AbstractGWGoal() {
+	protected AbstractGWMojo() {
 		super();
 	}
 
@@ -223,9 +223,6 @@ public abstract class AbstractGWGoal extends AbstractMojo {
 			}
 
 			logger.info("Starting scan of path: {}", scanDir);
-			if (session.getRequest().isProjectPresent()) {
-				processor.addTool(new ClassFunctionalTools(project));
-			}
 
 			processor.scanDocuments(projectBasedir, scanDir);
 			logger.info("Scanning finished.");

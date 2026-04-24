@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 
 public class CleanTest {
 
-	static class TestableClean extends Clean {
+	static class TestableClean extends CleanMojo {
 		void setBasedir(File basedir) {
 			this.basedir = basedir;
 		}
@@ -27,7 +27,7 @@ public class CleanTest {
 		clean.setBasedir(basedir);
 
 		try (MockedStatic<GuidanceProcessor> mocked = Mockito.mockStatic(GuidanceProcessor.class)) {
-			// Act
+			// ActMojo
 			clean.execute();
 
 			// Assert
@@ -46,7 +46,7 @@ public class CleanTest {
 		try (MockedStatic<GuidanceProcessor> mocked = Mockito.mockStatic(GuidanceProcessor.class)) {
 			mocked.when(() -> GuidanceProcessor.deleteTempFiles(basedir)).thenThrow(boom);
 
-			// Act
+			// ActMojo
 			try {
 				clean.execute();
 				fail("Expected MojoExecutionException");

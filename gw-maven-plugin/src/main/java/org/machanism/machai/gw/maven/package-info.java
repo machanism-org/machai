@@ -1,34 +1,34 @@
 /**
- * Maven plugin goals (Mojos) for running MachAI Ghostwriter (GW) guided document processing.
+ * Maven plugin goals (Mojos) for running MachAI Ghostwriter (GWMojo) guided document processing.
  *
  * <p>
  * The goals in this package provide Maven integrations around the Ghostwriter document-processing workflow.
  * They scan documentation trees (commonly {@code src/site}) for embedded {@code @guidance:} blocks and
- * apply guided transformations using the GW processors.
+ * apply guided transformations using the GWMojo processors.
  * </p>
  *
  * <h2>Goals</h2>
  * <ul>
  * <li>
- * {@link org.machanism.machai.gw.maven.GW} ({@code gw:gw}) - Aggregator goal that can run without a
+ * {@link org.machanism.machai.gw.maven.GWMojo} ({@code gw:gw}) - Aggregator goal that can run without a
  * {@code pom.xml}. Processes modules in reverse order (sub-modules first, then parent modules), similar
  * to the Ghostwriter CLI.
  * </li>
  * <li>
- * {@link org.machanism.machai.gw.maven.ReactorGW} ({@code gw:reactor}) - Processes modules using standard
+ * {@link org.machanism.machai.gw.maven.GWPerModuleMojo} ({@code gw:gw-per-module}) - Processes modules using standard
  * Maven reactor dependency ordering.
  * </li>
  * <li>
- * {@link org.machanism.machai.gw.maven.Act} ({@code gw:act}) - Interactive goal for running a predefined
+ * {@link org.machanism.machai.gw.maven.ActMojo} ({@code gw:act}) - Interactive goal for running a predefined
  * action prompt over scanned documents.
  * </li>
  * <li>
- * {@link org.machanism.machai.gw.maven.ReactorAct} ({@code gw:act-reactor}) - Reactor-friendly variant of
+ * {@link org.machanism.machai.gw.maven.ActPerModuleMojo} ({@code gw:act-per-module}) - Reactor-friendly variant of
  * {@code gw:act} intended to run in the execution-root project context.
  * </li>
  * <li>
- * {@link org.machanism.machai.gw.maven.Clean} ({@code gw:clean}) - Deletes temporary artifacts created by
- * GW processing (typically bound to Maven's {@code clean} lifecycle).
+ * {@link org.machanism.machai.gw.maven.CleanMojo} ({@code gw:clean}) - Deletes temporary artifacts created by
+ * GWMojo processing (typically bound to Maven's {@code clean} lifecycle).
  * </li>
  * </ul>
  *
@@ -46,7 +46,7 @@
  * </pre>
  *
  * <pre>
- * mvn gw:reactor -Dgw.scanDir=src\\site
+ * mvn gw:gw-per-module -Dgw.scanDir=src\\site
  * </pre>
  */
 package org.machanism.machai.gw.maven;

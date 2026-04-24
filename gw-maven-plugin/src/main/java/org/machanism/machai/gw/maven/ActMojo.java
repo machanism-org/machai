@@ -50,10 +50,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>Optional directory containing predefined action definitions.</dd>
  * </dl>
  *
- * <h3>Inherited parameters (from {@link AbstractGWGoal})</h3>
+ * <h3>Inherited parameters (from {@link AbstractGWMojo})</h3>
  * <p>
  * This goal also supports all common parameters defined by
- * {@link AbstractGWGoal} (for example {@code -Dgw.model}, {@code -Dgw.scanDir},
+ * {@link AbstractGWMojo} (for example {@code -Dgw.model}, {@code -Dgw.scanDir},
  * {@code -Dgw.excludes}, {@code -Dgenai.serverId}, and {@code -DlogInputs}).
  * </p>
  *
@@ -72,7 +72,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </pre>
  */
 @Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class Act extends AbstractGWGoal {
+public class ActMojo extends AbstractGWMojo {
 
 	/**
 	 * Interactive prompt provider used to collect action input.
@@ -224,11 +224,6 @@ public class Act extends AbstractGWGoal {
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
 		logger.info("Starting scan of path: {}", resolvedScanDir);
-
-		if (session.getRequest().isProjectPresent()) {
-			actProcessor.addTool(new ClassFunctionalTools(project));
-		}
-
 		actProcessor.scanDocuments(basedir, resolvedScanDir);
 		logger.info("Finished scanning path: {}", resolvedScanDir);
 	}

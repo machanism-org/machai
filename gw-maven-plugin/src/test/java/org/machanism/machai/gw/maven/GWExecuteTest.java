@@ -14,14 +14,14 @@ import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationExce
 import org.mockito.Mockito;
 
 /**
- * Tests for {@link GW#execute()} error-handling paths.
+ * Tests for {@link GWMojo#execute()} error-handling paths.
  */
 public class GWExecuteTest {
 
 	@Test
 	public void execute_whenScanDocumentsThrowsProcessTerminationException_wrapsInMojoExecutionException() throws Exception {
 		// Arrange
-		GW gw = Mockito.spy(new GW());
+		GWMojo gw = Mockito.spy(new GWMojo());
 
 		gw.project = new MavenProject();
 		gw.project.setFile(new File("pom.xml"));
@@ -38,8 +38,8 @@ public class GWExecuteTest {
 		Mockito.when(session.getUserProperties()).thenReturn(new java.util.Properties());
 		gw.session = session;
 
-		// Settings is required by AbstractGWGoal.getConfiguration()
-		java.lang.reflect.Field settingsField = AbstractGWGoal.class.getDeclaredField("settings");
+		// Settings is required by AbstractGWMojo.getConfiguration()
+		java.lang.reflect.Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
 		settingsField.setAccessible(true);
 		settingsField.set(gw, new Settings());
 
@@ -47,7 +47,7 @@ public class GWExecuteTest {
 		Mockito.doThrow(pte).when(gw)
 				.scanDocuments(Mockito.any(org.machanism.machai.gw.processor.GuidanceProcessor.class));
 
-		// Act + Assert
+		// ActMojo + Assert
 		MojoExecutionException ex = assertThrows(MojoExecutionException.class, gw::execute);
 		org.junit.Assert.assertTrue(ex.getMessage().contains("exit code: 7"));
 		org.junit.Assert.assertSame(pte, ex.getCause());

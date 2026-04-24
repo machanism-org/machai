@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 
 public class ActProcessTest {
 
-	static class TestableAct extends Act {
+	static class TestableAct extends ActMojo {
 		boolean configureAndScanCalled;
 
 		@Override
@@ -32,7 +32,7 @@ public class ActProcessTest {
 		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn("c:/acts");
 		Mockito.when(conf.get(Ghostwriter.EXCLUDES_PROP_NAME, null)).thenReturn(null);
 
-		// Act
+		// ActMojo
 		act.process(processor);
 
 		// Assert
@@ -50,7 +50,7 @@ public class ActProcessTest {
 		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn(null);
 		Mockito.when(conf.get(Ghostwriter.EXCLUDES_PROP_NAME, null)).thenReturn(null);
 
-		// Act
+		// ActMojo
 		act.process(processor);
 
 		// Assert
@@ -61,7 +61,7 @@ public class ActProcessTest {
 	@Test(expected = MojoExecutionException.class)
 	public void process_whenConfigureAndScanThrowsIOException_wrapsIntoMojoExecutionException() throws Exception {
 		// Arrange
-		Act act = new Act() {
+		ActMojo act = new ActMojo() {
 			@Override
 			public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
 				throw new IOException("boom");
@@ -73,7 +73,7 @@ public class ActProcessTest {
 		Mockito.when(conf.get(Mockito.eq(Ghostwriter.ACTS_LOCATION_PROP_NAME), Mockito.any())).thenReturn(null);
 		Mockito.when(conf.get(Ghostwriter.EXCLUDES_PROP_NAME, null)).thenReturn(null);
 
-		// Act
+		// ActMojo
 		act.process(processor);
 	}
 }

@@ -23,7 +23,7 @@ public class ReactorActTest {
 	@Test
 	public void scanDocuments_whenNotExecutionRootProject_butActProcessorAlreadyNonRecursive_logsSkipMessage() throws Exception {
 		// Arrange
-		ReactorAct act = new ReactorAct();
+		ActPerModuleMojo act = new ActPerModuleMojo();
 		File basedir = new File(".").getAbsoluteFile();
 		act.basedir = basedir;
 		act.project = projectWithModules(0);
@@ -35,13 +35,13 @@ public class ReactorActTest {
 		act.session = session;
 
 		Log log = Mockito.mock(Log.class);
-		ReactorAct spy = Mockito.spy(act);
+		ActPerModuleMojo spy = Mockito.spy(act);
 		Mockito.doReturn(log).when(spy).getLog();
 
 		ActProcessor processor = Mockito.mock(ActProcessor.class);
 		Mockito.when(processor.isNonRecursive()).thenReturn(true);
 
-		// Act
+		// ActMojo
 		spy.scanDocuments(processor);
 
 		// Assert

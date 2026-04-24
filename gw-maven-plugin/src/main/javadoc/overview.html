@@ -99,24 +99,24 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <ul>
   <li>
-    <strong><code>gw:gw</code></strong> (<code>org.machanism.machai.gw.maven.GW</code>) &mdash; Aggregator goal that can run without a
+    <strong><code>gw:gw</code></strong> (<code>org.machanism.machai.gw.maven.GWMojo</code>) &mdash; Aggregator goal that can run without a
     <code>pom.xml</code>. Processes modules in reverse order (sub-modules first, then parent modules), similar
     to the Ghostwriter CLI.
   </li>
   <li>
-    <strong><code>gw:reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorGW</code>) &mdash; Processes modules using standard
+    <strong><code>gw:gw-per-module</code></strong> (<code>org.machanism.machai.gw.maven.GWPerModuleMojo</code>) &mdash; Processes modules using standard
     Maven reactor dependency ordering.
   </li>
   <li>
-    <strong><code>gw:act</code></strong> (<code>org.machanism.machai.gw.maven.Act</code>) &mdash; Interactive goal for running a predefined
+    <strong><code>gw:act</code></strong> (<code>org.machanism.machai.gw.maven.ActMojo</code>) &mdash; Interactive goal for running a predefined
     action prompt over scanned documents.
   </li>
   <li>
-    <strong><code>gw:act-reactor</code></strong> (<code>org.machanism.machai.gw.maven.ReactorAct</code>) &mdash; Reactor-friendly variant of
+    <strong><code>gw:act-per-module</code></strong> (<code>org.machanism.machai.gw.maven.ActPerModuleMojo</code>) &mdash; Reactor-friendly variant of
     <code>gw:act</code> intended to run in the execution-root project context.
   </li>
   <li>
-    <strong><code>gw:clean</code></strong> (<code>org.machanism.machai.gw.maven.Clean</code>) &mdash; Deletes temporary artifacts created by
+    <strong><code>gw:clean</code></strong> (<code>org.machanism.machai.gw.maven.CleanMojo</code>) &mdash; Deletes temporary artifacts created by
     GW processing (typically bound to Maven&apos;s <code>clean</code> lifecycle).
   </li>
 </ul>
@@ -136,7 +136,7 @@ mvn gw:gw
 </pre>
 
 <pre>
-mvn gw:reactor -Dgw.scanDir=src\\site
+mvn gw:gw-per-module -Dgw.scanDir=src\\site
 </pre>
 
 <h2>Class diagram</h2>
