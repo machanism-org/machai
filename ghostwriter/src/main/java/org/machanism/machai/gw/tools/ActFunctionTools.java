@@ -60,7 +60,7 @@ public class ActFunctionTools implements FunctionTools {
 
 	public Set<String> getBaseActList() throws IOException {
 		Set<String> result = new HashSet<>();
-		CodeSource codeSource = Ghostwriter.class.getProtectionDomain().getCodeSource();
+		CodeSource codeSource = getClass().getProtectionDomain().getCodeSource();
 
 		URL location = codeSource.getLocation();
 		String jarFilePath = location.toString();

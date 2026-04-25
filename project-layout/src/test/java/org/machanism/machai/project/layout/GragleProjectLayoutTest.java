@@ -138,6 +138,7 @@ class GragleProjectLayoutTest {
 				});
 	}
 
+	@SuppressWarnings("unchecked")
 	private static DomainObjectSet<GradleProject> domainObjectSetOfProjects(String... names) {
 		List<GradleProject> children = Arrays.stream(names).map(GragleProjectLayoutTest::leafProject)
 				.collect(Collectors.toList());

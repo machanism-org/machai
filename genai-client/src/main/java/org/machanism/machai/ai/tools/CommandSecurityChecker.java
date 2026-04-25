@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

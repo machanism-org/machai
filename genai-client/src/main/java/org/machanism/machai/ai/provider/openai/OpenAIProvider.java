@@ -14,8 +14,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.manager.Usage;
@@ -265,7 +265,7 @@ public class OpenAIProvider implements Genai {
 		inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
 		Object value = callFunction(functionCall);
-		Object callFunction = ObjectUtils.defaultIfNull(value, StringUtils.EMPTY);
+		Object callFunction = ObjectUtils.getIfNull(value, StringUtils.EMPTY);
 		
 		if(callFunction instanceof JsonObject) {
 			callFunction = callFunction.toString();

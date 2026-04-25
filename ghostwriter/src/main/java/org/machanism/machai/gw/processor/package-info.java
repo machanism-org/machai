@@ -3,7 +3,7 @@
  *
  * <p>
  * This package contains the Ghostwriter command-line entry point
- * ({@link org.machanism.machai.gw.processor.Ghostwriter}) and the processor implementations that scan a project
+ * ({@link org.org.machanism.machai.gw.processor.Ghostwriter}) and the processor implementations that scan a project
  * directory, select matching files, extract prompts (either from embedded {@code @guidance:} directives or from act
  * templates), and execute those prompts against a configured
  * {@link org.machanism.machai.ai.provider.Genai} provider.

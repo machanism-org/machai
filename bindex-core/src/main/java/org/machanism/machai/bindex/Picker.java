@@ -18,7 +18,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.bson.BsonArray;
 import org.bson.BsonDouble;
@@ -278,7 +279,7 @@ public class Picker {
 		}
 
 		String classificationStr = getClassification(query);
-		if (StringUtils.startsWith(classificationStr, "```json")) {
+		if (Strings.CS.startsWith(classificationStr, "```json")) {
 			classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
 		}
 		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);

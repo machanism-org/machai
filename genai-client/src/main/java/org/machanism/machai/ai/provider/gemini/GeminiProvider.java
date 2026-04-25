@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.provider.Genai;

@@ -1,6 +1,6 @@
 package org.machanism.machai.bindex;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -78,7 +78,7 @@ public class BindexRepository {
 		password = password == null ? PUBLILC_USER_NAME : password;
 
 		String url = config.get("BINDEX_REPO_URL", DB_URL);
-		url = StringUtils.replace(url, "://", "://" + username + ":" + password + "@");
+		url = Strings.CS.replace(url, "://", "://" + username + ":" + password + "@");
 		return MongoClients.create(url);
 	}
 
