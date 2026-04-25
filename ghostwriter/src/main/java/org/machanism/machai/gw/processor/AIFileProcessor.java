@@ -126,6 +126,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				if (!Strings.CS.equals(input.toLowerCase().trim(), "exit")) {
 					provider.prompt(input);
 					perform = perform(file, provider);
+				} else {
+					perform = null;
 				}
 			}
 		}

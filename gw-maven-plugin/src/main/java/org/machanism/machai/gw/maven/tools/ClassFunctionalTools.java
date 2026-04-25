@@ -84,22 +84,25 @@ public class ClassFunctionalTools implements FunctionTools {
 	 */
 	@Override
 	public void applyTools(Genai provider) {
-		provider.addTool(
-				"find_class",
-				"Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
-						+ "Specify the 'className' property to define the pattern for matching class short names.",
-				this::findClass,
-				"className:string:required:Regular expression pattern to match class short names.");
+	    provider.addTool(
+	        "find_class",
+	        "Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
+	        + "Specify the 'className' property to define the pattern for matching class short names. "
+	        + "Note: The results reflect the initial state of the project and may become outdated after code or configuration changes.",
+	        this::findClass,
+	        "className:string:required:Regular expression pattern to match class short names."
+	    );
 
-		provider.addTool(
-				"get_class_info",
-				"Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
-						+ "Specify the 'className' property to obtain all available details for the class. "
-						+ "Returns a structured JSON object containing class name, modifiers, superclass, interfaces, fields, constructors, methods, annotations, and class path.",
-				this::getClassInfo,
-				"className:string:required:Fully qualified class name to retrieve information.");
+	    provider.addTool(
+	        "get_class_info",
+	        "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
+	        + "Specify the 'className' property to obtain all available details for the class. "
+	        + "Returns a structured JSON object containing class name, modifiers, superclass, interfaces, fields, constructors, methods, annotations, and class path. "
+	        + "Note: The information reflects the initial state of the project and may become outdated after code or configuration changes.",
+	        this::getClassInfo,
+	        "className:string:required:Fully qualified class name to retrieve information."
+	    );
 	}
-
 	/**
 	 * Finds fully qualified class names whose simple names match the supplied
 	 * regular expression.
