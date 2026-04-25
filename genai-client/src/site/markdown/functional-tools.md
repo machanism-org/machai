@@ -12,162 +12,185 @@ canonical: https://machai.machanism.org/genai-client/functional-tools.html
 
 # Functional Tools
 
-Functional tools are host-provided capabilities that can be registered with the GenAI provider and executed locally by the application. They are designed to let an AI workflow interact with the local environment in a controlled way, especially for command execution and HTTP-based access.
+Functional tools are host-provided capabilities that the GenAI client can register and execute locally. They let AI-assisted workflows interact with the operating system and remote resources in a controlled way. In this project, the functional tool infrastructure is implemented in `org.machanism.machai.ai.tools` and organized around tool installers, support classes, and runtime safety helpers.
 
-The tools in this project are installed through the `org.machanism.machai.ai.tools` package. The main user-facing tools currently come from two tool sets:
-
-- `CommandFunctionTools` for command execution and controlled termination
-- `WebFunctionTools` for web page retrieval and REST API calls
-
-## Tool Set Overview
+## Functional Tool Sets
 
 ### `CommandFunctionTools`
-Provides tools for running shell commands inside the project context and for stopping execution intentionally.
+Registers tools for command execution and intentional process termination.
+
+**What it is for**
+- Running command-line tasks from an AI workflow
+- Executing project-local commands in a controlled working directory
+- Stopping execution immediately when a workflow must fail fast
 
 **Main features**
-- Runs commands through Java `ProcessBuilder`
-- Restricts execution to a working directory inside the project
-- Supports custom environment variables
-- Limits returned output to the tail of the captured result
-- Applies deny-list based command validation
-- Can terminate the current process with a chosen exit code
+- Executes commands through Java `ProcessBuilder`
+- Restricts the working directory to a relative location inside the project
+- Captures both standard output and standard error
+- Limits large output to a configurable tail section
+- Supports environment variable injection
+- Applies deny-list validation before execution
+- Supports explicit process termination with a custom message and exit code
 
-**Included tools**
-- `run_command_line_tool`
-- `terminate_process`
+#### `run_command_line_tool`
+Executes a system command locally.
 
-### `WebFunctionTools`
-Provides tools for retrieving content from web pages and calling REST endpoints.
-
-**Main features**
-- Performs HTTP GET requests
-- Performs generic REST calls with configurable HTTP methods
-- Supports optional headers and request body
-- Supports HTTP Basic authentication through URL user info
-- Can extract selected HTML fragments using CSS selectors
-- Can convert HTML responses into plain text
-- Supports configurable timeout and charset
-
-**Included tools**
-- `get_web_content`
-- `call_rest_api`
-
-## Functional Tool Reference
-
-### `run_command_line_tool`
-Executes a system command using Java's `ProcessBuilder`.
-
-**Best use cases**
-- Running project-local build commands
-- Launching safe development utilities
-- Inspecting generated output from tools
-- Automating controlled command-line tasks from an AI workflow
+**Typical use cases**
+- Running build or test commands
+- Inspecting generated project output
+- Launching safe local utilities needed by an automated workflow
 
 **Behavior**
-- The command must be provided explicitly.
-- The working directory must remain within the current project directory.
-- Output is captured from both standard output and error output.
-- If the result is too large, only the last part of the output is returned.
-- The command is checked against deny-list rules before execution.
-- If a command runs too long, it may be forcibly terminated.
-- On Windows, shell commands should be executed with `cmd /c`.
-- On Unix-like systems, shell commands should be executed with `sh -c`.
+- Reads the command from the tool input.
+- Resolves `${...}` placeholders through the configured runtime configurator when available.
+- Rejects invalid or unsafe commands using `CommandSecurityChecker`.
+- Uses a working directory that must remain inside the current project.
+- Reads command output concurrently from standard output and error streams.
+- Returns only the last part of very large output when the configured limit is exceeded.
+- Appends the process exit code to the returned result.
+- On Windows, shell commands should be wrapped with `cmd /c`.
+- On Unix-like systems, shell commands should be wrapped with `sh -c`.
 
 **Input parameters**
 - `command` *(required, string)*: The command to execute.
 - `env` *(optional, string)*: Environment variables as `NAME=VALUE` pairs separated by newline characters.
 - `dir` *(optional, string)*: Relative working directory inside the project. Defaults to the project root.
-- `tailResultSize` *(optional, integer)*: Maximum number of characters returned from the end of command output. Default is `1024`.
-- `charsetName` *(optional, string)*: Character encoding used to read process output. Default is `UTF-8`.
+- `tailResultSize` *(optional, integer)*: Maximum number of characters returned from the end of the captured output. Default is `1024`.
+- `charsetName` *(optional, string)*: Character encoding used to decode process output. Default is `UTF-8`.
 
-### `terminate_process`
-Immediately terminates execution by throwing a host-side termination exception.
+#### `terminate_process`
+Terminates the current process flow immediately.
 
-**Best use cases**
-- Stopping a workflow after a fatal validation error
-- Ending execution intentionally when a required condition is not met
-- Returning a specific process exit code to the host application
+**Typical use cases**
+- Ending a workflow after a fatal validation failure
+- Returning a non-zero exit code to the host environment
+- Aborting execution intentionally when a required precondition is not met
 
 **Behavior**
-- Always ends the current tool flow by throwing a termination exception.
-- Can include a human-readable message.
-- Can include a wrapped cause message.
-- Can return a custom exit code.
+- Always throws a host-side termination exception.
+- Supports a custom message.
+- Supports an optional wrapped cause message.
+- Supports a custom exit code.
 
 **Input parameters**
 - `message` *(optional, string)*: Exception message. Default is `Process terminated by function tool.`
-- `cause` *(optional, string)*: Optional cause message used to create an underlying exception.
-- `exitCode` *(optional, integer)*: Exit code to return. Default is `1`.
+- `cause` *(optional, string)*: Optional cause message wrapped in an exception.
+- `exitCode` *(optional, integer)*: Exit code returned to the host. Default is `1`.
 
-### `get_web_content`
-Fetches the content of a web page using an HTTP GET request.
+### `WebFunctionTools`
+Registers tools for fetching web content and calling HTTP APIs.
 
-**Best use cases**
-- Downloading page content for analysis
-- Extracting part of an HTML page with a CSS selector
-- Converting web content to readable plain text
-- Reading local content through a `file:` URI when supported by the host runtime
+**What it is for**
+- Downloading web pages for analysis
+- Extracting selected HTML fragments from a page
+- Converting web content into readable plain text
+- Calling REST endpoints with configurable methods, headers, and request bodies
+
+**Main features**
+- Performs HTTP GET requests for page retrieval
+- Performs generic REST API calls using configurable HTTP methods
+- Supports custom request headers
+- Supports request bodies for methods such as `POST`, `PUT`, and `PATCH`
+- Supports HTTP Basic authentication through URL user info
+- Supports optional CSS selector extraction for HTML content
+- Supports plain-text rendering of HTML responses
+- Supports configurable timeout and character encoding
+- Can resolve `${...}` placeholders in URLs and header values
+- Supports reading `file:` URIs through the host environment
+
+#### `get_web_content`
+Fetches the content of a web page or supported `file:` URI.
+
+**Typical use cases**
+- Retrieving a full HTML page
+- Extracting only the matching part of a page with a CSS selector
+- Converting HTML to plain text for easier downstream processing
+- Reading file-based content through a `file:` URI when supported by the runtime
 
 **Behavior**
-- Sends an HTTP GET request to the provided URL.
+- Sends an HTTP `GET` request for network URLs.
 - Supports optional request headers.
 - Supports HTTP Basic authentication through URL user info such as `https://user:password@host/path`.
-- Can return full HTML or plain text.
-- Can limit the returned result to elements matching a CSS selector.
-- Can read from a `file:` URI as well as HTTP(S).
-- Returns the HTTP status line at the beginning of the response for network calls.
+- Returns an HTTP status line followed by response content for network calls.
+- Can restrict the result to elements matching a CSS selector.
+- Can convert HTML to plain text when `textOnly` is enabled.
+- For `file:` URIs, reads content from the resolved file instead of performing a network request.
 
 **Input parameters**
-- `url` *(required, string)*: The target URL.
+- `url` *(required, string)*: The target URL or supported `file:` URI.
 - `headers` *(optional, string)*: HTTP headers as `NAME=VALUE` pairs separated by newline characters.
 - `timeout` *(optional, integer)*: Maximum wait time in milliseconds. Default is `10000`.
 - `charsetName` *(optional, string)*: Character set used to decode the response. Default is `UTF-8`.
-- `textOnly` *(optional, boolean)*: If `true`, strips HTML and returns plain text.
+- `textOnly` *(optional, boolean)*: If `true`, returns plain text instead of HTML.
 - `selector` *(optional, string)*: CSS selector used to extract matching content before rendering.
 
-### `call_rest_api`
-Executes a REST API request to a target URL using a configurable HTTP method.
+#### `call_rest_api`
+Executes a REST-style HTTP request to a target endpoint.
 
-**Best use cases**
-- Calling JSON APIs from a workflow
-- Sending POST, PUT, PATCH, or DELETE requests
-- Testing or inspecting HTTP endpoints
-- Passing custom headers and request payloads to remote services
+**Typical use cases**
+- Calling JSON or text-based APIs from a workflow
+- Sending `POST`, `PUT`, `PATCH`, or `DELETE` requests
+- Testing remote endpoints with custom headers and request bodies
 
 **Behavior**
 - Uses `GET` by default when no method is provided.
-- Supports custom headers.
-- Supports request body content for methods such as `POST`, `PUT`, and `PATCH`.
-- Supports configurable timeout and charset.
+- Supports configurable headers and request body content.
+- Supports timeout and character encoding options.
 - Supports HTTP Basic authentication through URL user info.
-- Returns the HTTP status line followed by the response body when available.
+- Returns an HTTP status line followed by the response body when available.
 
 **Input parameters**
 - `url` *(required, string)*: The REST endpoint URL.
 - `method` *(optional, string)*: HTTP method such as `GET`, `POST`, `PUT`, `PATCH`, or `DELETE`. Default is `GET`.
 - `headers` *(optional, string)*: HTTP headers as `NAME=VALUE` pairs separated by newline characters.
-- `body` *(optional, string)*: Request body to send for supported methods.
+- `body` *(optional, string)*: Request body sent for supported methods.
 - `timeout` *(optional, integer)*: Maximum wait time in milliseconds. Default is `10000`.
 - `charsetName` *(optional, string)*: Character set used for request and response handling. Default is `UTF-8`.
 
-## Supporting Classes
-
-These classes are part of the functional tool infrastructure and help the main tools work correctly.
+## Supporting Infrastructure
 
 ### `FunctionTools`
-The service-provider interface for tool sets. Implementations register one or more named tools with the GenAI provider.
+Defines the service-provider interface for functional tool sets.
+
+**Purpose**
+- Gives each tool set a standard way to register its tools with `Genai`
+- Provides optional configurator injection through `setConfigurator(...)`
+- Provides placeholder replacement support for values containing `${...}`
 
 ### `FunctionToolsLoader`
-Discovers `FunctionTools` implementations through Java `ServiceLoader` and applies them to the provider.
+Discovers and applies available `FunctionTools` implementations by using Java `ServiceLoader`.
+
+**Purpose**
+- Loads tool installers from the classpath
+- Applies all discovered tool sets to the active GenAI provider
+- Propagates shared configuration to tool installers
 
 ### `ToolFunction`
-A functional interface representing the executable logic behind a tool call.
+Represents the executable contract for a tool implementation.
+
+**Purpose**
+- Defines the callback shape used to execute a tool with runtime parameters
+- Allows tool logic to return structured results and throw `IOException` when needed
 
 ### `CommandSecurityChecker`
-Loads and evaluates deny-list rules used to reject unsafe commands before execution.
+Performs deny-list validation for command execution.
+
+**Purpose**
+- Loads operating-system-specific deny-list rules
+- Supports regular-expression and keyword-based checks
+- Rejects commands that match unsafe patterns before execution starts
 
 ### `DenyException`
-Signals that a command matched a deny-list rule and should not be executed.
+Exception type raised when a command fails deny-list validation.
+
+**Purpose**
+- Signals that command execution must be blocked
+- Carries the reason for the deny-list match
 
 ### `LimitedStringBuilder`
-Stores only the last part of long output so that command results remain bounded and manageable.
+Keeps only the last part of a growing string.
+
+**Purpose**
+- Prevents command output capture from growing without limit
+- Preserves the most recent output, which is usually the most useful diagnostic section

@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -23,48 +23,41 @@ public class PythonReviewer implements Reviewer {
 
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/**
-	 * Returns the file extensions supported by this reviewer.
-	 *
-	 * @return an array containing {@code "py"}
-	 */
 	@Override
 	public String[] getSupportedFileExtensions() {
 		return new String[] { "py" };
 	}
 
-	/**
-	 * Reviews the provided Python file and, if guidance is present, returns a formatted prompt fragment.
-	 *
-	 * @param projectDir    the project root directory used to compute a project-relative path for context
-	 * @param guidancesFile the Python file to analyze
-	 * @return a formatted prompt fragment, or {@code null} when the file does not contain guidance
-	 * @throws IOException if an error occurs while reading the file
-	 */
 	@Override
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
-		if (!Strings.CS.contains(content, GuidanceProcessor.GUIDANCE_TAG_NAME)) {
+		if (!content.contains(GuidanceProcessor.GUIDANCE_TAG_NAME)) {
 			return null;
 		}
 
-		Pattern pattern = Pattern.compile(
-				"(?:#\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*))"
-						+ "|(?:[\"']{3}\\s*" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\\s*(.*?)\\s*[\"']{3})",
-				Pattern.DOTALL);
-		Matcher matcher = pattern.matcher(content);
-		if (!matcher.find()) {
-			return null;
+		Matcher lineMatcher = Pattern.compile("(?m)^\\s*#\\s*" + Pattern.quote(GuidanceProcessor.GUIDANCE_TAG_NAME)
+				+ "\\s*:?[ \\t]*(.*)$").matcher(content);
+		if (lineMatcher.find()) {
+			String guidanceText = lineMatcher.group(1);
+			if (StringUtils.isBlank(guidanceText)) {
+				return null;
+			}
+			return MessageFormat.format(promptBundle.getString("python_file"), guidancesFile.getName(),
+					ProjectLayout.getRelativePath(projectDir, guidancesFile), guidanceText.trim());
 		}
 
-		String guidanceText = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
-		if (guidanceText == null) {
-			return null;
+		Matcher tripleMatcher = Pattern.compile("(?:\"\"\"|''')\\s*" + Pattern.quote(GuidanceProcessor.GUIDANCE_TAG_NAME)
+				+ "\\s*:?[ \\t]*(.*?)(?:\"\"\"|''')", Pattern.DOTALL).matcher(content);
+		if (tripleMatcher.find()) {
+			String guidanceText = tripleMatcher.group(1);
+			if (StringUtils.isBlank(guidanceText)) {
+				return null;
+			}
+			return MessageFormat.format(promptBundle.getString("python_file"), guidancesFile.getName(),
+					ProjectLayout.getRelativePath(projectDir, guidancesFile), guidanceText.trim());
 		}
 
-		String relativePath = ProjectLayout.getRelativePath(projectDir, guidancesFile);
-		return MessageFormat.format(promptBundle.getString("python_file"), guidancesFile.getName(), relativePath,
-				guidanceText.trim());
+		return null;
 	}
 
 }

@@ -12,7 +12,9 @@ canonical: https://machai.machanism.org/gw-maven-plugin/functional-tools.html
 
 # Function Tools
 
-The GW Maven Plugin provides function tools for discovering Java classes and reading structured class metadata from the Maven project classpath. These tools are intended for AI-assisted workflows that need to inspect project or dependency classes without manually searching source and jar files.
+The GW Maven Plugin includes function tools that help AI-driven workflows inspect Java types available from the current Maven project. These tools can search for candidate classes by simple name and return structured reflective metadata for a specific class.
+
+The tools in this page are implemented by the classes in `src/main/java/org/machanism/machai/gw/maven/tools` and operate against class information collected from the Maven project classpath.
 
 ## Available Function Tools
 
@@ -20,18 +22,18 @@ The GW Maven Plugin provides function tools for discovering Java classes and rea
 
 Finds fully qualified Java class names whose simple class names match a regular expression.
 
-#### What it does
+#### General description
 
-This tool searches the classes visible from the current Maven project context and returns matching fully qualified class names as a comma-separated list.
+Use this tool when you know all or part of a class name but do not know its package. It searches the classes visible to the current Maven project and returns matching fully qualified class names.
 
-It is useful when you know part of a class name, or want to locate candidate classes before requesting full details with `get_class_info`.
+This makes it a good first step before calling `get_class_info`.
 
 #### Features
 
-- Searches using the class simple name, not the full package name.
-- Supports regular expression matching.
-- Works across classes available from the scanned project classpath.
-- Returns a compact result that can be used as input for follow-up inspection.
+- Matches against the simple class name rather than the full package name
+- Supports regular expression patterns
+- Searches classes visible from the current Maven project context
+- Returns a compact list of matches that can be used in follow-up inspection
 
 #### Input parameters
 
@@ -41,7 +43,7 @@ It is useful when you know part of a class name, or want to locate candidate cla
 
 #### Output
 
-Returns a comma-separated list of fully qualified class names.
+Returns matching fully qualified class names as a comma-separated list.
 
 If no class matches, the tool returns:
 
@@ -49,11 +51,17 @@ If no class matches, the tool returns:
 Class not found.
 ```
 
-#### Typical use cases
+If the current project has not been registered for tool support, the tool returns:
 
-- Find all classes whose names match `.*Service`
-- Search for a known type when the package name is unknown
-- Discover candidate classes before using `get_class_info`
+```text
+The function tool don't support this function tool.
+```
+
+#### Appropriate use cases
+
+- Find classes such as `.*Service` or `.*Controller`
+- Discover the package of a known type name
+- Collect candidate class names before requesting detailed metadata
 
 #### Example
 
@@ -69,33 +77,26 @@ Input:
 
 ### `get_class_info`
 
-Returns detailed reflective metadata for a specific fully qualified Java class name.
+Returns structured metadata for a specific fully qualified Java class name.
 
-#### What it does
+#### General description
 
-This tool loads a class from the current Maven project classpath and returns structured JSON describing the class.
+Use this tool when you already know the exact fully qualified class name and want details about the class structure. It loads the class from the current Maven project context and produces JSON describing the type and selected members.
 
-The response can include:
-
-- Class name
-- Modifiers
-- Superclass
-- Implemented interfaces
-- Non-private fields
-- Constructors
-- Non-private methods
-- Declared annotations
-- Classpath location
-- Maven artifact coordinates for dependency classes
-- Source file path when available in the project sources
+The response is designed for AI-friendly consumption and helps with analysis of both project classes and dependency classes.
 
 #### Features
 
-- Provides structured JSON output for reliable downstream use.
-- Includes both type hierarchy and member information.
-- Exposes origin details such as jar or output path.
-- Identifies dependency artifact coordinates when the class comes from a resolved artifact.
-- Resolves project source file paths for classes available in compile source roots.
+- Returns structured JSON output
+- Includes class name and Java modifiers
+- Includes superclass and implemented interfaces
+- Includes non-private declared fields
+- Includes declared constructors
+- Includes non-private declared methods
+- Includes declared annotations
+- Includes origin metadata such as classpath location
+- Includes dependency coordinates when the class comes from a Maven artifact
+- Includes source file path when a matching project source file is available
 
 #### Input parameters
 
@@ -105,21 +106,21 @@ The response can include:
 
 #### Output
 
-Returns a JSON object with class metadata. Common properties include:
+Returns a JSON object. Common properties include:
 
 | Property | Description |
 | --- | --- |
 | `className` | Fully qualified class name |
 | `modifiers` | Java modifiers for the class |
 | `superclass` | Fully qualified superclass name, when present |
-| `interfaces` | Array of implemented interface names |
-| `fields` | Array of non-private declared fields |
-| `constructors` | Array of declared constructors |
-| `methods` | Array of non-private declared methods |
-| `annotations` | Array of declared annotation strings |
+| `interfaces` | Implemented interface names |
+| `fields` | Non-private declared fields with modifier, type, and name |
+| `constructors` | Declared constructors with modifiers and parameter types |
+| `methods` | Non-private declared methods with modifiers, return type, name, and parameter types |
+| `annotations` | Declared annotations on the class |
 | `path` | Directory or jar path where the class was resolved |
-| `artifact` | Maven coordinates in `groupId:artifactId:version` form, when the class comes from a dependency |
-| `sourcePath` | Source file path, when a matching project source file exists |
+| `artifact` | Maven coordinates in `groupId:artifactId:version` form when the class comes from a dependency |
+| `sourcePath` | Matching project source file path when available |
 
 If the class cannot be found, the tool returns an error object such as:
 
@@ -129,13 +130,21 @@ If the class cannot be found, the tool returns an error object such as:
 }
 ```
 
-#### Typical use cases
+If the current project has not been registered for tool support, the tool returns an error object such as:
 
-- Inspect available methods on a known class
+```json
+{
+  "error": "The function tool don't support this function tool."
+}
+```
+
+#### Appropriate use cases
+
+- Inspect the accessible structure of a known class
+- Review constructors, methods, and fields for analysis tasks
 - Understand inheritance and implemented interfaces
-- Determine whether a class comes from project code or a dependency
-- Locate the source file for a project class
-- Review accessible fields and constructors during analysis
+- Check whether a class comes from project code or a dependency
+- Locate the matching project source file when available
 
 #### Example
 
@@ -147,20 +156,19 @@ Input:
 }
 ```
 
-## Supporting Components
-
-The function tools are backed by internal helper classes in `org.machanism.machai.gw.maven.tools`.
+## Supporting Classes
 
 ### `ClassFunctionalTools`
 
-This class registers the available function tools with the AI provider and handles tool execution for class lookup and class inspection.
+This class registers the function tools with the AI provider and handles execution of `find_class` and `get_class_info` for the current Maven project context.
 
 ### `ClassInfoHolder`
 
-This helper builds a class loader from the Maven project classpath, scans available classes, and tracks metadata such as class origin paths, source file locations, and dependency artifact coordinates.
+This class builds and uses a class loader based on the Maven project classpath. It scans available classes, supports regular-expression class discovery, loads classes for reflection, and tracks related metadata such as class origin path, source path, and Maven artifact coordinates.
 
 ## Notes
 
 - Tool results reflect the scanned project state and may become outdated after code or configuration changes.
-- Class discovery uses the Maven project context, so results depend on the current project and its resolved classpath.
-- `find_class` matches against simple class names, while `get_class_info` requires a fully qualified class name.
+- `find_class` matches simple class names, not package names.
+- `get_class_info` requires a fully qualified class name.
+- Metadata availability depends on the current Maven project classpath and source roots.

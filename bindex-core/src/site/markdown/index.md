@@ -66,42 +66,42 @@ canonical: https://machai.machanism.org/bindex-core/index.html
 
 ## Introduction
 
-Bindex Core provides the core runtime needed to manage Bindex metadata within the MachAI ecosystem. It focuses on describing software libraries and projects as structured metadata, storing those records in MongoDB, enriching them with embeddings for semantic retrieval, and exposing the result through tools that AI-assisted workflows can call directly.
+Bindex Core provides the core services for Bindex metadata management in the MachAI ecosystem. It combines structured metadata storage, semantic recommendation, schema-based classification, and AI function-tool integration so projects and assistants can discover reusable libraries, inspect their metadata, and register new library descriptors from local workspaces.
 
-The project combines repository services, semantic recommendation logic, and GenAI tool registration into a single library. It supports creating and updating metadata records, retrieving them by identifier, loading the JSON schema that defines the metadata format, and recommending suitable libraries from a natural-language prompt. This makes it useful for automated project assembly, dependency discovery, metadata cataloging, and schema-driven documentation workflows.
+The module is designed to make library reuse more reliable and automation-friendly. Instead of relying only on informal descriptions, it works with schema-compliant metadata documents, persists them in a shared repository, enriches them with embedding vectors, and exposes lookup and recommendation capabilities through callable tools. This helps teams standardize library discovery, improve recommendation quality, and support higher-level implementation workflows driven by Ghostwriter and related tooling.
 
 ## Overview
 
-Bindex Core supports a metadata lifecycle built around registration, retrieval, and semantic library selection:
+Bindex Core supports a metadata-driven workflow for discovering, registering, and reusing software libraries:
 
-1. **Metadata registration**: a structured metadata document is serialized, normalized, embedded, and stored with searchable classification fields.
-2. **Schema-guided interpretation**: a natural-language requirement is converted into structured classification data aligned with the Bindex schema.
-3. **Semantic recommendation**: vector search and metadata filters are used to identify relevant libraries by language, architectural layer, and similarity score.
-4. **AI tool integration**: metadata access, schema lookup, recommendation, and file-based registration are exposed as tools for automated implementation workflows.
+1. **Repository access** manages MongoDB connectivity and stores serialized metadata records together with searchable fields.
+2. **Semantic picking** converts natural-language requests into structured classifications, generates embeddings, and performs vector search with language and architectural-layer filtering.
+3. **Tool integration** exposes retrieval, schema inspection, recommendation, and registration operations as callable AI tools.
+4. **Workflow templates** provide reusable prompts for library selection, metadata generation, and assembly-oriented implementation flows.
 
 ### Architecture
 
 ![C4 Diagram](./images/c4-diagram.png)
 
-The architecture centers on a metadata workflow that connects persistence, semantic retrieval, and AI tool integration.
+The architecture is organized around a small set of collaborating responsibilities.
 
-- A repository component manages structured metadata documents in MongoDB and provides direct lookup and deletion operations.
-- A semantic selection component generates classification prompts and embeddings, stores indexed metadata, and performs vector-based recommendation queries.
-- A tool integration component exposes metadata retrieval, schema access, recommendation, and working-directory registration for AI-assisted automation.
-- External services provide language-model prompting, embedding generation, vector-capable database storage, schema resources, and access to local metadata files.
+- A repository layer handles database connections and direct metadata persistence and retrieval.
+- A semantic selection layer interprets user requests, generates embeddings from classification data, and queries the shared repository for relevant libraries.
+- A tool layer bridges these capabilities into AI-assisted workflows by registering callable operations for lookup, schema access, recommendation, and local metadata registration.
+- Supporting resources define the metadata schema and workflow templates that guide discovery and implementation tasks.
 
-Together, these parts allow the project to move from structured library descriptions to searchable semantic recommendations that can be used in automation and documentation workflows.
+Together, these parts allow a user request to move from natural-language intent to structured library recommendations backed by stored metadata.
 
 ## Key Features
 
-- Persist Bindex metadata documents in MongoDB.
-- Store serialized metadata together with normalized fields for filtering and lookup.
-- Generate and store classification embeddings for semantic vector search.
-- Convert natural-language requests into structured classification queries based on the Bindex schema.
-- Recommend libraries using similarity thresholds plus language and layer filters.
-- Retrieve registered metadata directly by Bindex identifier.
-- Expose metadata lookup, schema access, recommendation, and registration as GenAI function tools.
-- Register a metadata file from the current working directory for reuse in automated workflows.
+- Persist Bindex metadata as serialized JSON documents in MongoDB.
+- Resolve repository access through configurable connection settings, including registration-capable access.
+- Generate embeddings from classification metadata for semantic library search.
+- Classify natural-language requests into schema-aligned metadata criteria.
+- Filter recommendations by programming language and architectural layer.
+- Expose metadata lookup, schema retrieval, recommendation, and registration as AI function tools.
+- Register local `bindex.json` files from the working directory into the shared repository.
+- Provide reusable workflow acts for discovery, metadata authoring, and project assembly.
 
 ## How to use
 
@@ -125,36 +125,46 @@ If you use `gw-maven-plugin`, you need to add this library by the dependency, e.
 </plugin>
 ```
 
-After adding the dependency, the library can participate in Ghostwriter-driven workflows to retrieve registered metadata, inspect the Bindex schema, recommend matching libraries from a requirement prompt, and register a root-level Bindex file from the working directory.
+After adding the dependency, Bindex Core can be used in Ghostwriter-driven workflows to:
+
+- retrieve a registered metadata document by Bindex identifier,
+- load the bundled Bindex schema,
+- request semantic library recommendations from a natural-language prompt,
+- register a local `bindex.json` file into the shared repository.
 
 ## Acts
 
 ### `assembly`
 
-Use this act when you want an assistant to implement a software task by selecting and applying suitable libraries from the Bindex registry. It is intended for project assembly workflows where the assistant should request recommendations, inspect detailed metadata, create or update project files, add dependencies, build the project, and iterate until the implementation works.
+Use this act when the goal is to implement a user request by assembling a solution with recommended libraries. It is intended for end-to-end development workflows where the assistant should discover libraries, inspect their metadata, update the project, build it, and iterate until the requested behavior is implemented.
 
 ### `bindex`
 
-Use this act when you want to create or update a `bindex.json` file for a library or project. It is intended for metadata authoring workflows where the assistant should produce schema-compliant library metadata with realistic examples, and register the root-level metadata file when it exists.
+Use this act when creating or updating a `bindex.json` file for a project or library. It is best suited for metadata-authoring workflows where the assistant analyzes source code and documentation, generates schema-compliant metadata, includes practical examples, and can register the file when it exists in the project root.
+
+### `pick`
+
+Use this act when the task is to recommend suitable libraries for a requirement without implementing the solution itself. It is ideal for discovery workflows where the assistant should request recommendations, review the returned metadata summaries, and present relevant options to the user.
 
 ## Configuration
 
 | Parameter | Description | Default value |
 |---|---|---|
-| `pick.model` | GenAI model used for semantic classification and library recommendation. | `CodeMie:gpt-5-2-2025-12-11` |
-| `pick.score` | Minimum similarity score required for recommendation results. | `0.85` |
-| `BINDEX_REPO_URL` | MongoDB connection URI for the Bindex repository. | `mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0` |
-| `BINDEX_REG_PASSWORD` | Password used to enable privileged registration access. | unset |
-| `gw.model` | GenAI model used by the registration tool when reading a local Bindex file. | unset |
-| `embedding.model` | Embedding model used by Ghostwriter and related semantic workflows. | `text-embedding-005` |
-| `gw.interactive` | Enables interactive behavior for the assembly act. | `true` |
-| `gw.scanDir` | Scan scope used by the bindex act when working with project files. | `glob:.` |
+| `BINDEX_REPO_URL` | MongoDB connection URI for the shared Bindex repository. | `mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0` |
+| `BINDEX_REG_PASSWORD` | Password that enables registration-capable repository access. | unset |
+| `pick.model` | GenAI model used for classification and recommendation workflows. | `CodeMie:gpt-5.4-2026-03-05` |
+| `pick.score` | Minimum similarity threshold for semantic recommendation results. | `0.86` |
+| `gw.model` | GenAI model used by Bindex-related workflow tools. | `CodeMie:gpt-5.4-2026-03-05` |
+| `embedding.model` | Embedding model used for semantic indexing and search. | `text-embedding-005` |
+| `gw.interactive` | Enables interactive execution for applicable acts. | `true` |
+| `gw.nonRecursive` | Limits processing to the current project scope for applicable acts. | `true` |
+| `gw.scanDir` | Scan scope used by the metadata-generation workflow. | `glob:.` |
 
 ## Resources
 
 - [Project site](https://machai.machanism.org/bindex-core/index.html)
-- [GitHub repository](https://github.com/machanism-org/machai)
-- [Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
 - [Ghostwriter CLI](https://machai.machanism.org/ghostwriter/index.html)
 - [GW Maven Plugin](https://machai.machanism.org/gw-maven-plugin/index.html)
-- [GitHub issues](https://github.com/machanism-org/machai/issues)
+- [GitHub repository](https://github.com/machanism-org/machai)
+- [Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
+- [Issue tracker](https://github.com/machanism-org/machai/issues)

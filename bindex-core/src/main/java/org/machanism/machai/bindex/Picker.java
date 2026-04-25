@@ -80,6 +80,19 @@ public class Picker {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Picker.class);
 
+	private static final String CLASSIFICATION_INSTRUCTION = "**You are a system architect should detected:**\n\n"
+			+ "- What programming language is used for implementation? It must be one of the following: Java, JavaScript, TypeScript, or Python.\n"
+			+ "- What is the target environment?\n"
+			+ "- What is the subject area of the requested application? You should focus on key subject areas, such as user management, product catalog, etc.\n\n"
+			+ "**Classification json object has following schema:**\n\n"
+			+ "```json\n"
+			+ "{0}\n"
+			+ "```\n\n"
+			+ "You need to parse the user request below and provide a JSON array with separate classifications for all the **required leyers** "
+			+ "to find libraries that meet those requirements to build the application the user requested.\n\n"
+			+ "**User request: **\n\n"
+			+ "{1}\n";
+	
 	private static final String INDEXNAME = "vector_index";
 	private static final String LANGUAGES_PROPERTY_NAME = "languages";
 	private static final String DOMAINS_PROPERTY_NAME = "domains";
@@ -95,8 +108,6 @@ public class Picker {
 
 	/** MongoDB field name used to store the serialized Bindex JSON payload. */
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
-
-	private static final ResourceBundle PROMPT_BUNDLE = ResourceBundle.getBundle("prompts");
 
 	private static final String VERSION_FIELD_NAME = "version";
 	private static final String SCORE_FIELD_NAME = "score";
@@ -355,8 +366,7 @@ public class Picker {
 		JsonNode jsonNode = schemaJson.get("properties").get("classification");
 		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
 
-		String classificationQuery = MessageFormat.format(PROMPT_BUNDLE.getString("classification_instruction"),
-				classificationSchema, query);
+		String classificationQuery = MessageFormat.format(CLASSIFICATION_INSTRUCTION, classificationSchema, query);
 		provider.prompt(classificationQuery);
 		return provider.perform();
 	}
