@@ -186,13 +186,6 @@ class OpenAIProviderNetworklessTest {
         return f.get(target);
     }
 
-    private static Object invokePrivate(Object target, Class<?> declaringClass, String method, Class<?>[] types, Object[] args)
-            throws Exception {
-        Method m = declaringClass.getDeclaredMethod(method, types);
-        m.setAccessible(true);
-        return m.invoke(target, args);
-    }
-
     static Object fakeModelService(List<String> modelIds) {
         try {
             Class<?> modelServiceType = Class.forName("com.openai.services.blocking.ModelService");

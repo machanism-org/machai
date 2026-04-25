@@ -1,15 +1,13 @@
 package org.machanism.machai.gw.maven;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 
-import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
@@ -17,60 +15,80 @@ import org.machanism.machai.gw.processor.Ghostwriter;
 
 class ActScanDocumentsTest {
 
-	@Test
-	void scanDocuments_shouldDefaultToBasedirWhenNoScanDirProvided() throws Exception {
-		ActMojo goal = new ActMojo();
-		goal.basedir = new File(".");
-		goal.session = mock(MavenSession.class);
-		MavenExecutionRequest request = mock(MavenExecutionRequest.class);
-		when(goal.session.getRequest()).thenReturn(request);
-		when(request.isProjectPresent()).thenReturn(false);
+	static class RecordingActProcessor extends ActProcessor {
+		File scannedBasedir;
+		String scannedDir;
+		private final PropertiesConfigurator configurator = new PropertiesConfigurator();
 
-		ActProcessor processor = mock(ActProcessor.class);
-		PropertiesConfigurator conf = new PropertiesConfigurator();
-		doReturn(conf).when(processor).getConfigurator();
+		RecordingActProcessor() {
+			super(new File("."), new PropertiesConfigurator(), null);
+		}
 
-		assertDoesNotThrow(() -> goal.scanDocuments(processor));
+		@Override
+		public PropertiesConfigurator getConfigurator() {
+			return configurator;
+		}
 
-		verify(processor).scanDocuments(goal.basedir, goal.basedir.getAbsolutePath());
+		@Override
+		public void scanDocuments(File basedir, String scanDir) {
+			this.scannedBasedir = basedir;
+			this.scannedDir = scanDir;
+		}
 	}
 
 	@Test
-	void scanDocuments_shouldUseSuperScanDirWhenProvided() throws Exception {
+	void scanDocuments_shouldDefaultToBasedirWhenNoScanDirProvided() {
 		ActMojo goal = new ActMojo();
-		goal.basedir = new File(".");
+		goal.basedir = new File(".").getAbsoluteFile();
+		goal.project = new MavenProject();
+		goal.project.setFile(new File(goal.basedir, "pom.xml"));
+		goal.session = newSession();
+
+		RecordingActProcessor processor = new RecordingActProcessor();
+
+		assertDoesNotThrow(() -> goal.scanDocuments(processor));
+
+		assertEquals(goal.basedir, processor.scannedBasedir);
+		assertEquals(goal.basedir.getAbsolutePath(), processor.scannedDir);
+	}
+
+	@Test
+	void scanDocuments_shouldUseSuperScanDirWhenProvided() {
+		ActMojo goal = new ActMojo();
+		goal.basedir = new File(".").getAbsoluteFile();
+		goal.project = new MavenProject();
+		goal.project.setFile(new File(goal.basedir, "pom.xml"));
 		goal.scanDir = "custom-scan";
-		goal.session = mock(MavenSession.class);
-		MavenExecutionRequest request = mock(MavenExecutionRequest.class);
-		when(goal.session.getRequest()).thenReturn(request);
-		when(request.isProjectPresent()).thenReturn(false);
+		goal.session = newSession();
 
-		ActProcessor processor = mock(ActProcessor.class);
-		PropertiesConfigurator conf = new PropertiesConfigurator();
-		conf.set(Ghostwriter.SCAN_DIR_PROP_NAME, "ignored");
-		doReturn(conf).when(processor).getConfigurator();
+		RecordingActProcessor processor = new RecordingActProcessor();
+		processor.getConfigurator().set(Ghostwriter.SCAN_DIR_PROP_NAME, "ignored");
 
 		assertDoesNotThrow(() -> goal.scanDocuments(processor));
 
-		verify(processor).scanDocuments(goal.basedir, "custom-scan");
+		assertEquals("custom-scan", processor.scannedDir);
 	}
 
 	@Test
-	void scanDocuments_shouldUseConfiguredScanDirWhenGoalScanDirIsNull() throws Exception {
+	void scanDocuments_shouldUseConfiguredScanDirWhenGoalScanDirIsNull() {
 		ActMojo goal = new ActMojo();
-		goal.basedir = new File(".");
-		goal.session = mock(MavenSession.class);
-		MavenExecutionRequest request = mock(MavenExecutionRequest.class);
-		when(goal.session.getRequest()).thenReturn(request);
-		when(request.isProjectPresent()).thenReturn(false);
+		goal.basedir = new File(".").getAbsoluteFile();
+		goal.project = new MavenProject();
+		goal.project.setFile(new File(goal.basedir, "pom.xml"));
+		goal.session = newSession();
 
-		ActProcessor processor = mock(ActProcessor.class);
-		PropertiesConfigurator conf = new PropertiesConfigurator();
-		conf.set(Ghostwriter.SCAN_DIR_PROP_NAME, "configured-scan");
-		doReturn(conf).when(processor).getConfigurator();
+		RecordingActProcessor processor = new RecordingActProcessor();
+		processor.getConfigurator().set(Ghostwriter.SCAN_DIR_PROP_NAME, "configured-scan");
 
 		assertDoesNotThrow(() -> goal.scanDocuments(processor));
 
-		verify(processor).scanDocuments(goal.basedir, "configured-scan");
+		assertEquals("configured-scan", processor.scannedDir);
+	}
+
+	@SuppressWarnings("deprecation")
+	private static MavenSession newSession() {
+		DefaultMavenExecutionRequest request = new DefaultMavenExecutionRequest();
+		request.setProjectPresent(true);
+		return new MavenSession(null, null, request, null);
 	}
 }

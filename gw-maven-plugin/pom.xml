@@ -46,13 +46,15 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>5.18.0</version>
+			<!-- Sonar-related build stability fix: keep Mockito Java 8 compatible for tests on release 8 -->
+			<version>4.11.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-inline</artifactId>
-			<version>5.2.0</version>
+			<!-- Sonar-related build stability fix: align inline mock maker with mockito-core on Java 8 -->
+			<version>4.11.0</version>
 			<scope>test</scope>
 		</dependency>
 

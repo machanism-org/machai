@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -185,7 +184,6 @@ class ProcessorCoverageBoostTest {
 		processor.processParentFiles(layout);
 		processor.processFile(layout, file);
 
-		// Sonar java:S5785 - use assertNotNull for explicit null checks in tests.
 		assertNotNull(processor);
 	}
 

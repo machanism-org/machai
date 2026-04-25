@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,7 +40,7 @@ class GhostwriterAndProcessorCoverageTest {
 	void ghostwriterPerform_returnsExitCodeFromProcessTerminationException() throws Exception {
 		AIFileProcessor processor = mock(AIFileProcessor.class);
 		when(processor.getProjectDir()).thenReturn(tempDir);
-		doThrow(new ProcessTerminationException("stop", 7)).when(processor).scanDocuments(eq(tempDir), eq("."));
+		doThrow(new ProcessTerminationException("stop", 7)).when(processor).scanDocuments(tempDir, ".");
 		Ghostwriter ghostwriter = new Ghostwriter("provider:model", processor);
 		initializeLogger();
 
@@ -54,7 +53,7 @@ class GhostwriterAndProcessorCoverageTest {
 	void ghostwriterPerform_returnsOneOnIllegalArgumentException() throws Exception {
 		AIFileProcessor processor = mock(AIFileProcessor.class);
 		when(processor.getProjectDir()).thenReturn(tempDir);
-		doThrow(new IllegalArgumentException("bad")).when(processor).scanDocuments(eq(tempDir), eq("."));
+		doThrow(new IllegalArgumentException("bad")).when(processor).scanDocuments(tempDir, ".");
 		Ghostwriter ghostwriter = new Ghostwriter("provider:model", processor);
 		initializeLogger();
 
@@ -173,6 +172,7 @@ class GhostwriterAndProcessorCoverageTest {
 	void aiFileProcessor_addTool_storesFunctionTool() throws Exception {
 		AIFileProcessor processor = new AIFileProcessor(tempDir, new PropertiesConfigurator(), "provider:model");
 		org.machanism.machai.ai.tools.FunctionTools tool = provider -> {
+			// Sonar java:S1186 - empty lambda body is intentional for storage verification only.
 		};
 
 		processor.addTool(tool);
@@ -280,10 +280,12 @@ class GhostwriterAndProcessorCoverageTest {
 
 		@Override
 		protected void processParentFiles(ProjectLayout projectLayout) {
+			// Sonar java:S1186 - no parent-file processing is required for this test stub.
 		}
 
 		@Override
 		protected void processFile(ProjectLayout projectLayout, File file) {
+			// Sonar java:S1186 - no file processing is required for this test stub.
 		}
 	}
 }

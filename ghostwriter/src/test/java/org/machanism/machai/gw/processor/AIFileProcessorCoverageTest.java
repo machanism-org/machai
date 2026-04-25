@@ -44,9 +44,9 @@ class AIFileProcessorCoverageTest {
 	void scanDocuments_whenProjectDirIsNull_throwsIllegalArgumentException() {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Any:Model");
+		ThrowingRunnable executable = new ScanDocumentsInvocation(processor, null, "src");
 
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> processor.scanDocuments(null, "src"));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, executable::run);
 		assertEquals("projectDir must not be null", ex.getMessage());
 	}
 
@@ -54,9 +54,9 @@ class AIFileProcessorCoverageTest {
 	void scanDocuments_whenScanDirIsBlank_throwsIllegalArgumentException() {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Any:Model");
+		ThrowingRunnable executable = new ScanDocumentsInvocation(processor, tempDir.toFile(), "  ");
 
-		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-				() -> processor.scanDocuments(tempDir.toFile(), "  "));
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, executable::run);
 		assertEquals("scanDir must not be blank", ex.getMessage());
 	}
 
@@ -192,6 +192,28 @@ class AIFileProcessorCoverageTest {
 		return method.invoke(processor, reference);
 	}
 
+	@FunctionalInterface
+	private interface ThrowingRunnable {
+		void run() throws Exception;
+	}
+
+	private static final class ScanDocumentsInvocation implements ThrowingRunnable {
+		private final AIFileProcessor processor;
+		private final File projectDir;
+		private final String scanDir;
+
+		private ScanDocumentsInvocation(AIFileProcessor processor, File projectDir, String scanDir) {
+			this.processor = processor;
+			this.projectDir = projectDir;
+			this.scanDir = scanDir;
+		}
+
+		@Override
+		public void run() throws Exception {
+			processor.scanDocuments(projectDir, scanDir);
+		}
+	}
+
 	private static final class ThrowingInvocation {
 		private final Method method;
 		private final AIFileProcessor processor;
@@ -204,7 +226,6 @@ class AIFileProcessorCoverageTest {
 		}
 
 		Object invoke() throws IllegalAccessException, InvocationTargetException {
-			// Sonar java:S5778 - encapsulate reflection so assertThrows references a single executable method.
 			return method.invoke(processor, reference);
 		}
 	}

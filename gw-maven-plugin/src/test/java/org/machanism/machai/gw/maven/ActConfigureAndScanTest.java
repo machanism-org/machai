@@ -1,13 +1,10 @@
 package org.machanism.machai.gw.maven;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import java.util.Properties;
 
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
@@ -33,20 +30,37 @@ public class ActConfigureAndScanTest {
 		}
 	}
 
+	static class RecordingActProcessor extends ActProcessor {
+		String act;
+		private final PropertiesConfigurator configurator = new PropertiesConfigurator();
+
+		RecordingActProcessor() {
+			super(new java.io.File("."), new PropertiesConfigurator(), null);
+		}
+
+		@Override
+		public PropertiesConfigurator getConfigurator() {
+			return configurator;
+		}
+
+		@Override
+		public void setAct(String act) {
+			this.act = act;
+		}
+	}
+
 	@Test
 	public void configureAndScan_whenActPromptAlreadySet_usesItWithoutPrompting() throws Exception {
 		TestableAct goal = new TestableAct();
 		goal.actPrompt = "explicit-act";
-		goal.session = mock(MavenSession.class);
-		doReturn(new Properties()).when(goal.session).getUserProperties();
+		Properties userProperties = new Properties();
+		goal.session = newSession(userProperties);
 
-		ActProcessor processor = mock(ActProcessor.class);
-		PropertiesConfigurator conf = new PropertiesConfigurator();
-		doReturn(conf).when(processor).getConfigurator();
+		RecordingActProcessor processor = new RecordingActProcessor();
 
 		goal.configureAndScan(processor);
 
-		verify(processor).setAct("explicit-act");
+		assertEquals("explicit-act", processor.act);
 		assertEquals(false, goal.applyActPromptCalled);
 		assertEquals(true, goal.scanDocumentsCalled);
 	}
@@ -56,17 +70,21 @@ public class ActConfigureAndScanTest {
 		TestableAct goal = new TestableAct();
 		Properties userProperties = new Properties();
 		userProperties.setProperty(Ghostwriter.ACT_PROP_NAME, "saved-from-user-props");
-		goal.session = mock(MavenSession.class);
-		doReturn(userProperties).when(goal.session).getUserProperties();
+		goal.session = newSession(userProperties);
 
-		ActProcessor processor = mock(ActProcessor.class);
-		PropertiesConfigurator conf = new PropertiesConfigurator();
-		doReturn(conf).when(processor).getConfigurator();
+		RecordingActProcessor processor = new RecordingActProcessor();
 
 		goal.configureAndScan(processor);
 
-		verify(processor).setAct("saved-from-user-props");
+		assertEquals("saved-from-user-props", processor.act);
 		assertEquals(true, goal.applyActPromptCalled);
 		assertEquals(true, goal.scanDocumentsCalled);
+	}
+
+	@SuppressWarnings("deprecation")
+	private static MavenSession newSession(Properties userProperties) {
+		DefaultMavenExecutionRequest request = new DefaultMavenExecutionRequest();
+		request.setUserProperties(userProperties);
+		return new MavenSession(null, null, request, null);
 	}
 }

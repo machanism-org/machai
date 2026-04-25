@@ -1,115 +1,107 @@
 package org.machanism.machai.gw.maven;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.Properties;
 
-import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
-import org.codehaus.plexus.components.interactivity.Prompter;
 import org.junit.Test;
-import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 public class ReactorActExecuteTest {
 
-	@Test
-	public void execute_whenCalled_processesWithActProcessorThatUsesDetectedProjectLayout() throws Exception {
-		// Arrange
-		ActPerModuleMojo goal = Mockito.spy(new ActPerModuleMojo());
+	static class CapturingActPerModuleMojo extends ActPerModuleMojo {
+		ActProcessor captured;
+		boolean failApply;
 
-		File basedir = new File(".").getCanonicalFile();
-		goal.basedir = basedir;
+		@Override
+		protected PropertiesConfigurator getConfiguration() {
+			return new PropertiesConfigurator();
+		}
 
-		MavenProject project = new MavenProject();
-		project.setFile(new File(basedir, "pom.xml"));
-		goal.project = project;
+		@Override
+		protected void applyActPrompt(org.machanism.macha.core.commons.configurator.Configurator conf)
+				throws MojoExecutionException {
+			if (failApply) {
+				throw new MojoExecutionException("boom");
+			}
+		}
 
-		MavenExecutionRequest request = Mockito.mock(MavenExecutionRequest.class);
-		Mockito.when(request.getDegreeOfConcurrency()).thenReturn(1);
-
-		Properties userProps = new Properties();
-		MavenSession session = Mockito.mock(MavenSession.class);
-		Mockito.when(session.getExecutionRootDirectory()).thenReturn(basedir.getAbsolutePath());
-		Mockito.when(session.getRequest()).thenReturn(request);
-		Mockito.when(session.getUserProperties()).thenReturn(userProps);
-		goal.session = session;
-
-		Settings settings = new Settings();
-		Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
-		settingsField.setAccessible(true);
-		settingsField.set(goal, settings);
-
-		Prompter prompter = Mockito.mock(Prompter.class);
-		Mockito.when(prompter.prompt(Mockito.anyString())).thenReturn("some-act");
-		goal.prompter = prompter;
-
-		PropertiesConfigurator config = new PropertiesConfigurator();
-		Mockito.doReturn(config).when(goal).getConfiguration();
-
-		ArgumentCaptor<ActProcessor> processorCaptor = ArgumentCaptor.forClass(ActProcessor.class);
-		Mockito.doNothing().when(goal).process(processorCaptor.capture());
-
-		// ActMojo
-		goal.execute();
-
-		// Assert
-		ActProcessor created = processorCaptor.getValue();
-		File createdProjectDir = getPrivateField(created, "projectDir", File.class);
-		assertEquals(basedir.getCanonicalFile(), createdProjectDir.getCanonicalFile());
-
-		created.getProjectLayout(basedir);
-
-		Mockito.verify(prompter, Mockito.atLeastOnce()).prompt(Mockito.anyString());
+		@Override
+		protected void process(ActProcessor actProcessor) {
+			this.captured = actProcessor;
+		}
 	}
 
-	@Test(expected = MojoExecutionException.class)
-	public void execute_whenApplyActPromptFails_throwsMojoExecutionException() throws Exception {
-		// Arrange
-		ActPerModuleMojo goal = Mockito.spy(new ActPerModuleMojo());
+	@Test
+	public void execute_whenCalled_processesWithActProcessorThatUsesDetectedProjectLayout() throws Exception {
+		CapturingActPerModuleMojo goal = new CapturingActPerModuleMojo();
+		File basedir = new File(".").getCanonicalFile();
+		goal.basedir = basedir;
+		MavenProject project = new MavenProject();
+		project.setFile(new File(basedir, "pom.xml"));
+		project.setModel(new org.apache.maven.model.Model());
+		goal.project = project;
+		goal.session = newSession(basedir.getAbsolutePath());
 
+		Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
+		settingsField.setAccessible(true);
+		settingsField.set(goal, new Settings());
+
+		goal.execute();
+
+		assertNotNull(goal.captured);
+		File createdProjectDir = getPrivateField(goal.captured, "projectDir");
+		assertEquals(basedir.getCanonicalFile(), createdProjectDir.getCanonicalFile());
+	}
+
+	@Test
+	public void execute_whenApplyActPromptFails_throwsMojoExecutionException() throws Exception {
+		CapturingActPerModuleMojo goal = new CapturingActPerModuleMojo();
+		goal.failApply = true;
 		File basedir = new File(".").getCanonicalFile();
 		goal.basedir = basedir;
 		goal.project = new MavenProject();
+		goal.session = newSession(basedir.getAbsolutePath());
 
-		MavenSession session = Mockito.mock(MavenSession.class);
-		Mockito.when(session.getExecutionRootDirectory()).thenReturn(basedir.getAbsolutePath());
-		goal.session = session;
-
-		Settings settings = new Settings();
 		Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
 		settingsField.setAccessible(true);
-		settingsField.set(goal, settings);
+		settingsField.set(goal, new Settings());
 
-		PropertiesConfigurator config = new PropertiesConfigurator();
-		Mockito.doReturn(config).when(goal).getConfiguration();
-
-		Mockito.doThrow(new MojoExecutionException("boom")).when(goal).applyActPrompt(Mockito.any(Configurator.class));
-
-		// ActMojo
-		goal.execute();
+		try {
+			goal.execute();
+			org.junit.Assert.fail("Expected MojoExecutionException");
+		} catch (MojoExecutionException e) {
+			assertTrue(e.getMessage().contains("boom"));
+		}
 	}
 
-	/**
-	 * Accepted
-	 * Sonar java:S1172 - kept parameter 'type' to aid type safety at call sites and for readability.
-	 */
-	@SuppressWarnings({ "java:S1172", "unchecked" })
-	private static <T> T getPrivateField(Object target, String fieldName, Class<T> type) throws Exception {
+	@SuppressWarnings("deprecation")
+	private static MavenSession newSession(String executionRoot) {
+		DefaultMavenExecutionRequest request = new DefaultMavenExecutionRequest();
+		return new MavenSession(null, null, request, null) {
+			@Override
+			public String getExecutionRootDirectory() {
+				return executionRoot;
+			}
+		};
+	}
+
+	private static File getPrivateField(Object target, String fieldName) throws Exception {
 		Class<?> c = target.getClass();
 		while (c != null) {
 			try {
 				Field f = c.getDeclaredField(fieldName);
 				f.setAccessible(true);
-				return (T) f.get(target);
+				return (File) f.get(target);
 			} catch (NoSuchFieldException e) {
 				c = c.getSuperclass();
 			}

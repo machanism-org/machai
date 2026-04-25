@@ -1,55 +1,55 @@
 package org.machanism.machai.gw.maven;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
-import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 import org.junit.Test;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
-import org.mockito.Mockito;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 
-/**
- * Tests for {@link GWMojo#execute()} error-handling paths.
- */
 public class GWExecuteTest {
+
+	static class ThrowingGWMojo extends GWMojo {
+		@Override
+		protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
+			throw new ProcessTerminationException("stop", 7);
+		}
+	}
 
 	@Test
 	public void execute_whenScanDocumentsThrowsProcessTerminationException_wrapsInMojoExecutionException() throws Exception {
-		// Arrange
-		GWMojo gw = Mockito.spy(new GWMojo());
-
+		ThrowingGWMojo gw = new ThrowingGWMojo();
 		gw.project = new MavenProject();
 		gw.project.setFile(new File("pom.xml"));
 		gw.basedir = new File(".").getAbsoluteFile();
+		gw.session = newSession();
 
-		MavenExecutionRequest request = Mockito.mock(MavenExecutionRequest.class);
-		Mockito.when(request.getDegreeOfConcurrency()).thenReturn(2);
-
-		MavenSession session = Mockito.mock(MavenSession.class);
-		Mockito.when(session.getExecutionRootDirectory()).thenReturn(gw.basedir.getAbsolutePath());
-		Mockito.when(session.getAllProjects()).thenReturn(java.util.Collections.singletonList(new MavenProject()));
-		Mockito.when(session.isParallel()).thenReturn(false);
-		Mockito.when(session.getRequest()).thenReturn(request);
-		Mockito.when(session.getUserProperties()).thenReturn(new java.util.Properties());
-		gw.session = session;
-
-		// Settings is required by AbstractGWMojo.getConfiguration()
-		java.lang.reflect.Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
+		Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
 		settingsField.setAccessible(true);
 		settingsField.set(gw, new Settings());
 
-		ProcessTerminationException pte = new ProcessTerminationException("stop", 7);
-		Mockito.doThrow(pte).when(gw)
-				.scanDocuments(Mockito.any(org.machanism.machai.gw.processor.GuidanceProcessor.class));
+		try {
+			gw.execute();
+			org.junit.Assert.fail("Expected MojoExecutionException");
+		} catch (MojoExecutionException ex) {
+			assertTrue(ex.getMessage().contains("exit code: 7"));
+			assertTrue(ex.getCause() instanceof ProcessTerminationException);
+			assertSame("stop", ex.getCause().getMessage());
+		}
+	}
 
-		// ActMojo + Assert
-		MojoExecutionException ex = assertThrows(MojoExecutionException.class, gw::execute);
-		org.junit.Assert.assertTrue(ex.getMessage().contains("exit code: 7"));
-		org.junit.Assert.assertSame(pte, ex.getCause());
+	@SuppressWarnings("deprecation")
+	private static MavenSession newSession() {
+		DefaultMavenExecutionRequest request = new DefaultMavenExecutionRequest();
+		request.setProjectPresent(true);
+		return new MavenSession(null, null, request, null);
 	}
 }

@@ -257,6 +257,7 @@ public final class Ghostwriter {
 	static AIFileProcessor createActProcessor(CommandLine cmd, File projectDir, PropertiesConfigurator config,
 			String genai) {
 		ActProcessor processor = new ActProcessor(projectDir, config, genai) {
+			@Override
 			protected String input() {
 				return readText(">>>");
 			}
@@ -288,8 +289,7 @@ public final class Ghostwriter {
 
 	static void logDefaultPrompt(String label, String prompt) {
 		if (prompt != null && logger.isInfoEnabled()) {
-			String abbreviatedPrompt = abbreviateInstructions(prompt);
-			logger.info("{}: {}", label, abbreviatedPrompt);
+			logger.info("{}: {}", label, abbreviateInstructions(prompt));
 		}
 	}
 

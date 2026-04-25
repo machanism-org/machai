@@ -11,15 +11,14 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -182,52 +181,69 @@ public class ClassInfoHolder {
 			init();
 
 			File artifact = new File(path);
-
-			List<String> classList = new ArrayList<>();
-
-			if (artifact.isFile()) {
-				try (JarFile jar = new JarFile(artifact)) {
-					for (Enumeration<JarEntry> entries = jar.entries(); entries.hasMoreElements();) {
-						JarEntry entry = entries.nextElement();
-						String name = entry.getName();
-						classList.add(name);
-					}
-				}
-			} else {
-				Path pathDir = Paths.get(path);
-
-				Files.walk(pathDir)
-						.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".class"))
-						.forEach(p -> classList
-								.add(p.toString().replace("\\", "/").replace(path.replace("\\", "/") + "/", "")));
-			}
+			List<String> classList = getClassEntries(path, artifact);
 
 			for (String name : classList) {
-				if (Strings.CS.endsWith(name, ".class")
-						&& !Strings.CS.startsWithAny(name, "META-INF", "module-info")) {
-					try {
-						name = StringUtils.substringBeforeLast(name, ".");
-						String className = StringUtils.substringAfterLast(name, "/");
-						String packageName = StringUtils.substringBeforeLast(name, "/");
-
-						packageName = StringUtils.replaceChars(packageName, '/', '.');
-
-						String fullClassName = packageName + "." + className;
-						Class<?> class1 = classLoader.loadClass(fullClassName);
-
-						int modifiers = class1.getModifiers();
-						if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) {
-							classPathMap.put(fullClassName, path);
-							artifactMap.put(fullClassName, id);
-						}
-					} catch (Throwable e) {
-						logger.debug("Class {}, Error: {}", name, e.getMessage());
-					}
-				}
+				processClassEntry(path, id, name);
 			}
 		} catch (NoSuchFileException e) {
-			// TODO: handle exception
+			logger.debug("Skipped missing class path: {}", path);
 		}
+	}
+
+	private List<String> getClassEntries(String path, File artifact) throws IOException {
+		List<String> classList = new ArrayList<>();
+		if (artifact.isFile()) {
+			addJarEntries(artifact, classList);
+		} else {
+			addDirectoryEntries(path, classList);
+		}
+		return classList;
+	}
+
+	private void addJarEntries(File artifact, List<String> classList) throws IOException {
+		try (JarFile jar = new JarFile(artifact)) {
+			classList.addAll(jar.stream().map(e -> e.getName()).collect(Collectors.toList()));
+		}
+	}
+
+	private void addDirectoryEntries(String path, List<String> classList) throws IOException {
+		Path pathDir = Paths.get(path);
+		try (Stream<Path> pathStream = Files.walk(pathDir)) {
+			pathStream.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".class"))
+					.forEach(p -> classList
+							.add(p.toString().replace("\\", "/").replace(path.replace("\\", "/") + "/", "")));
+		}
+	}
+
+	private void processClassEntry(String path, String id, String name) {
+		if (!isSupportedClassEntry(name)) {
+			return;
+		}
+		try {
+			String fullClassName = toClassName(name);
+			Class<?> class1 = classLoader.loadClass(fullClassName);
+			int modifiers = class1.getModifiers();
+			if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) {
+				classPathMap.put(fullClassName, path);
+				artifactMap.put(fullClassName, id);
+			}
+		} catch (Exception | LinkageError e) {
+			logger.debug("Class {}, Error: {}", name, e.getMessage());
+		}
+	}
+
+	private boolean isSupportedClassEntry(String name) {
+		return Strings.CS.endsWith(name, ".class")
+				&& !Strings.CS.startsWithAny(name, "META-INF", "module-info");
+	}
+
+	private String toClassName(String name) {
+		String normalizedName = StringUtils.substringBeforeLast(name, ".");
+		String simpleClassName = StringUtils.substringAfterLast(normalizedName, "/");
+		String packageName = StringUtils.substringBeforeLast(normalizedName, "/");
+		packageName = StringUtils.replaceChars(packageName, '/', '.');
+		return packageName + "." + simpleClassName;
 	}
 
 	/**
@@ -280,7 +296,7 @@ public class ClassInfoHolder {
 	 *         project source roots
 	 */
 	public String getSourcePath(String className) {
-		String sourceClassName = StringUtils.substringBefore(className, "$" );
+		String sourceClassName = StringUtils.substringBefore(className, "$");
 		String relativePath = StringUtils.replaceChars(sourceClassName, '.', File.separatorChar) + ".java";
 
 		for (String sourceRoot : project.getCompileSourceRoots()) {

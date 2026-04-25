@@ -23,7 +23,6 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.gw.maven.tools.ClassFunctionalTools;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.MavenProjectLayout;
@@ -117,17 +116,8 @@ public class ActMojo extends AbstractGWMojo {
 
 				if (projectLayout instanceof MavenProjectLayout) {
 					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
-
 					Model model = mavenProjectLayout.getModel();
-					for (MavenProject mavenProject : session.getAllProjects()) {
-						if (session.getRequest().isProjectPresent()) {
-							classFunctionTools.scanProjectClasses(mavenProject);
-						}
-						if (Strings.CS.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
-							mavenProjectLayout.model(mavenProject.getModel());
-							break;
-						}
-					}
+					updateMavenProjectLayout(mavenProjectLayout, model);
 				}
 
 				return projectLayout;
@@ -154,6 +144,18 @@ public class ActMojo extends AbstractGWMojo {
 		}
 
 		process(actProcessor);
+	}
+
+	private void updateMavenProjectLayout(MavenProjectLayout mavenProjectLayout, Model model) {
+		for (MavenProject mavenProject : session.getAllProjects()) {
+			if (session.getRequest().isProjectPresent()) {
+				classFunctionTools.scanProjectClasses(mavenProject);
+			}
+			if (Strings.CS.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
+				mavenProjectLayout.model(mavenProject.getModel());
+				break;
+			}
+		}
 	}
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
@@ -236,7 +238,7 @@ public class ActMojo extends AbstractGWMojo {
 			classFunctionTools.scanProjectClasses(project);
 			actProcessor.addTool(classFunctionTools);
 		}
-		
+
 		actProcessor.scanDocuments(basedir, resolvedScanDir);
 		logger.info("Finished scanning path: {}", resolvedScanDir);
 	}
@@ -254,11 +256,18 @@ public class ActMojo extends AbstractGWMojo {
 	 * @return the collected text
 	 * @throws PrompterException if prompting fails
 	 */
+	@SuppressWarnings("java:S106")
 	public String readText(String prompt) throws PrompterException {
 		StringBuilder sb = new StringBuilder();
 		String line;
+		int length = prompt.length();
+		int maxlen = length;
 		while ((line = prompter.prompt(prompt)) != null) {
 			prompt = "\t";
+			length += line.length();
+			if (length > maxlen) {
+				maxlen = length;
+			}
 			if (Strings.CS.endsWith(line, Ghostwriter.MULTIPLE_LINES_BREAKER)) {
 				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER))
 						.append(Genai.LINE_SEPARATOR);
@@ -266,8 +275,9 @@ public class ActMojo extends AbstractGWMojo {
 				sb.append(line);
 				break;
 			}
+			length = 8;
 		}
-		System.out.println("― ©" + SystemProperties.getUserName());
+		System.out.println(StringUtils.leftPad("― ©" + SystemProperties.getUserName(), maxlen));
 
 		return sb.toString();
 	}

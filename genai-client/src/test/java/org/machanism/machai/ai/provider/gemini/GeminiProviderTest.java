@@ -229,13 +229,4 @@ class GeminiProviderTest {
 		// Assert
 		assertSame(List.class, returnType);
 	}
-
-	private static boolean declaresExceptionAssignableTo(Class<?>[] declared, Class<?> expected) {
-		for (Class<?> ex : declared) {
-			if (expected.isAssignableFrom(ex)) {
-				return true;
-			}
-		}
-		return false;
-	}
 }

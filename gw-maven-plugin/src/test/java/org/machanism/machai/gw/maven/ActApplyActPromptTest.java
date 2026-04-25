@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Properties;
 
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.components.interactivity.Prompter;
@@ -22,10 +23,7 @@ public class ActApplyActPromptTest {
 		ActMojo act = new ActMojo();
 		Properties userProps = new Properties();
 		userProps.setProperty(Ghostwriter.ACT_PROP_NAME, "saved");
-
-		MavenSession session = Mockito.mock(MavenSession.class);
-		Mockito.when(session.getUserProperties()).thenReturn(userProps);
-		act.session = session;
+		act.session = newSession(userProps);
 
 		act.prompter = Mockito.mock(Prompter.class);
 		Configurator conf = Mockito.mock(Configurator.class);
@@ -33,17 +31,13 @@ public class ActApplyActPromptTest {
 		act.applyActPrompt(conf);
 
 		Mockito.verifyNoInteractions(act.prompter);
-		assertEquals("saved", userProps.getProperty(Ghostwriter.ACT_PROP_NAME));
+		assertEquals("saved", act.session.getUserProperties().getProperty(Ghostwriter.ACT_PROP_NAME));
 	}
 
 	@Test
 	public void applyActPrompt_whenNoSavedAct_andConfigProvidesAct_savesIt() throws Exception {
 		ActMojo act = new ActMojo();
-		Properties userProps = new Properties();
-
-		MavenSession session = Mockito.mock(MavenSession.class);
-		Mockito.when(session.getUserProperties()).thenReturn(userProps);
-		act.session = session;
+		act.session = newSession(new Properties());
 
 		act.prompter = Mockito.mock(Prompter.class);
 		Configurator conf = Mockito.mock(Configurator.class);
@@ -51,18 +45,14 @@ public class ActApplyActPromptTest {
 
 		act.applyActPrompt(conf);
 
-		assertEquals("fromConf", userProps.getProperty(Ghostwriter.ACT_PROP_NAME));
+		assertEquals("fromConf", act.session.getUserProperties().getProperty(Ghostwriter.ACT_PROP_NAME));
 		Mockito.verifyNoInteractions(act.prompter);
 	}
 
 	@Test
 	public void applyActPrompt_whenNoSavedActAndNoConfiguredAct_promptsAndStoresInput() throws Exception {
 		ActMojo act = new ActMojo();
-		Properties userProps = new Properties();
-
-		MavenSession session = Mockito.mock(MavenSession.class);
-		Mockito.when(session.getUserProperties()).thenReturn(userProps);
-		act.session = session;
+		act.session = newSession(new Properties());
 
 		Prompter prompter = Mockito.mock(Prompter.class);
 		Mockito.when(prompter.prompt("Act")).thenReturn("prompted-act");
@@ -73,18 +63,14 @@ public class ActApplyActPromptTest {
 
 		act.applyActPrompt(conf);
 
-		assertEquals("prompted-act", userProps.getProperty(Ghostwriter.ACT_PROP_NAME));
+		assertEquals("prompted-act", act.session.getUserProperties().getProperty(Ghostwriter.ACT_PROP_NAME));
 		Mockito.verify(prompter).prompt("Act");
 	}
 
 	@Test
 	public void applyActPrompt_whenPrompterFails_wrapsInMojoExecutionException() throws Exception {
 		ActMojo act = new ActMojo();
-		Properties userProps = new Properties();
-
-		MavenSession session = Mockito.mock(MavenSession.class);
-		Mockito.when(session.getUserProperties()).thenReturn(userProps);
-		act.session = session;
+		act.session = newSession(new Properties());
 
 		Prompter prompter = Mockito.mock(Prompter.class);
 		Mockito.when(prompter.prompt("Act")).thenThrow(new PrompterException("boom"));
@@ -100,5 +86,12 @@ public class ActApplyActPromptTest {
 			assertTrue(e.getMessage().contains(Ghostwriter.ACT_PROP_NAME));
 			assertTrue(e.getCause() instanceof PrompterException);
 		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private static MavenSession newSession(Properties userProperties) {
+		DefaultMavenExecutionRequest request = new DefaultMavenExecutionRequest();
+		request.setUserProperties(userProperties);
+		return new MavenSession(null, null, request, null);
 	}
 }

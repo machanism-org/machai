@@ -6,19 +6,16 @@ public class ActNotFound extends IOException {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	// Sonar java:S1165 - exception state is immutable after construction.
+	private final String name;
 
 	public ActNotFound(String name) {
 		super("Act: `" + name + "` not found.");
-		this.setName(name);
+		this.name = name;
 	}
 
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 }

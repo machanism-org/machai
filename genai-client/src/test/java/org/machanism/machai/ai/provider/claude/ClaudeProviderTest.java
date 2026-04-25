@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -175,12 +173,9 @@ class ClaudeProviderTest {
 	}
 
 	@Test
-	void allNotImplementedPublicApiMethods_shouldThrowUnsupportedOperationExceptionWithExpectedMessage()
-			throws Exception {
+	void allNotImplementedPublicApiMethods_shouldThrowUnsupportedOperationExceptionWithExpectedMessage() {
 		// Arrange
 		ClaudeProvider provider = new ClaudeProvider();
-		File file = new File("some-file.txt");
-		URL url = URI.create("file:some-file.txt").toURL();
 		ResourceBundle bundle = new ResourceBundle() {
 			@Override
 			protected Object handleGetObject(String key) {

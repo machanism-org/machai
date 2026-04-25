@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -106,7 +105,7 @@ class GenAIAdapterTest {
 	}
 
 	@Test
-	void allMethods_delegateToUnderlyingProvider() throws IOException {
+	void allMethods_delegateToUnderlyingProvider() {
 		// Arrange
 		RecordingProvider provider = new RecordingProvider();
 		Genai adapter = new TestAdapter(provider);
