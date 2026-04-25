@@ -13,118 +13,140 @@ canonical: https://machai.machanism.org/ghostwriter/guidance.html
 
 # Guidance
 
-Guidance lets you place short, human-written instructions inside files in your project (documentation, source code, or configuration). Ghostwriter scans your project, finds those `@guidance:` instructions, and uses them to decide what to generate or update.
+Guidance is the part of Ghostwriter that lets you place short instructions directly inside a project file. These instructions use the `@guidance:` tag. When Ghostwriter runs, it finds those instructions and uses them to decide how that file should be updated.
 
-Because the instruction lives inside the file it applies to, the “what to do” stays with the content over time. This makes it easier to re-run Ghostwriter later and get consistent results.
+This makes file updates easier to repeat. The instructions stay with the file, so the purpose of the file and the expected changes are documented in the same place.
 
-For an overview of this workflow, see: [Guided File Processing](https://machanism.org/guided-file-processing/index.html).
+For a broader introduction to this workflow, see [Guided File Processing](https://machanism.org/guided-file-processing/index.html).
 
 ## What `GuidanceProcessor` does
 
-`GuidanceProcessor` is the part of Ghostwriter that runs “guided file processing”. It scans your project folders, finds files that contain `@guidance:` instructions, and then asks the configured AI provider to update those files.
+`GuidanceProcessor` is the Ghostwriter class that manages guided file processing. Its job is to scan the project, identify files that can contain guidance, read the `@guidance:` text, and send the resulting request to the configured AI provider.
 
-It is traversal-based: it reads files and folders. It does not build your project or resolve dependencies.
+In simple terms, it works like this:
 
-In simple terms, it:
+1. It walks through the project folders.
+2. It decides which files or directories should be considered.
+3. It selects a reviewer based on the file type, such as Markdown or Java.
+4. The reviewer reads the file and extracts any `@guidance:` instructions.
+5. `GuidanceProcessor` prepares the instructions used for AI processing.
+6. Ghostwriter updates the file using the configured AI provider.
 
-- walks through your project directories,
-- picks a “reviewer” for each file type (based on its file extension, such as `.md` or `.java`),
-- uses that reviewer to extract any `@guidance:` text from the file,
-- combines your guidance with standard processing rules,
-- sends the final request to the configured AI provider,
-- and applies the returned update.
+This process is based on file traversal. It does not build the project or try to resolve project dependencies.
 
-## How it fits into Ghostwriter
+## How guidance fits into Ghostwriter
 
-Ghostwriter can work in different ways (for example, running an “Act” template or processing files). Guidance is the mechanism that makes file processing repeatable: the instructions live in the file itself.
+Ghostwriter supports different ways of working with AI-generated content. Guidance is the feature that makes file-by-file updates structured and repeatable.
 
-A typical guided workflow looks like this:
+Instead of writing one large prompt outside the project, you place small instructions inside each file. That means:
 
-1. Add a `@guidance:` comment block to a file you want updated.
-2. Run Ghostwriter against your project root.
-3. `GuidanceProcessor` scans for files to consider and chooses a reviewer based on file extension.
-4. The reviewer extracts the guidance text from the file.
-5. `GuidanceProcessor` builds a final prompt (system instructions + documentation rules + your guidance, or a default prompt).
-6. Ghostwriter calls your configured AI provider and writes the result back.
+- the instructions stay close to the content they affect,
+- future updates can follow the same rules,
+- and team members can understand the purpose of the file more easily.
 
-### Reviewers (how guidance is discovered)
+This approach is especially useful for documentation, configuration files, and source files that need clear, repeatable updates.
 
-Guidance is not hard-coded per file type. Instead, Ghostwriter uses `Reviewer` implementations:
+## Key methods in `GuidanceProcessor`
 
-- Each reviewer declares which file extensions it supports.
-- `GuidanceProcessor` loads reviewers using Java’s `ServiceLoader`.
-- It keeps a lookup map keyed by extension (for example, `md` or `java`).
-- If no reviewer exists for a file type, that file is skipped (unless a default prompt is configured).
+### `loadReviewers()`
 
-## Key methods (what they do)
+This method loads all available reviewers using Java's `ServiceLoader` mechanism. A reviewer knows how to inspect a certain type of file and extract guidance from it.
 
-- `loadReviewers()`
-  - Finds all `Reviewer` implementations via `ServiceLoader`.
-  - Registers each reviewer by the file extensions it supports.
-  - Normalizes extensions so `.MD`, `md`, and `.md` all match the same way.
+### `normalizeExtensionKey(String extension)`
 
-- `match(file, projectDir)`
-  - Decides whether a file/folder should be considered.
-  - If no path filter is configured, it only processes the project directory itself when a default prompt is present.
+This helper method cleans up file extensions so Ghostwriter can match them consistently. For example, it treats `.md` and `md` as the same file type.
 
-- `processModule(projectDir, module)`
-  - In multi-module projects, decides which modules should be scanned.
-  - If a scan directory is configured, it only scans modules that match (or contain) that scan directory.
+### `match(File file, File projectDir)`
 
-- `processParentFiles(projectLayout)`
-  - Processes files directly under the parent project directory while skipping module directories.
-  - If a default prompt is configured and the project directory matches, it can also process the project directory itself.
+This method decides whether a file or directory should be processed. It applies the current path-matching rules and default-prompt behavior.
 
-- `parseFile(projectDir, file)`
-  - Chooses a reviewer based on file extension.
-  - Uses that reviewer to extract `@guidance:` instructions from the file.
+### `processModule(File projectDir, String module)`
 
-- `process(projectLayout, file, guidance)`
-  - Builds the final instruction text.
-  - Adds standard documentation-processing rules (including the operating system name, such as `Windows 11`) before handing off to the base AI file-processing layer.
+For multi-module projects, this method decides whether a module should be scanned. If a scan directory is configured, only matching modules are processed.
 
-## Practical example: update a documentation page
+### `processParentFiles(ProjectLayout projectLayout)`
 
-### Step 1: Choose a file
+This method processes files directly under the main project directory while skipping module folders. It can also apply a default prompt to the project directory itself when configured.
 
-Pick the file you want Ghostwriter to help update.
+### `processFile(ProjectLayout projectLayout, File file)`
 
-Example: `src/site/markdown/guidance.md`
+This is the main per-file processing step. It checks whether the file matches, extracts guidance, and either uses that guidance or falls back to the default prompt.
 
-### Step 2: Add a `@guidance:` block
+### `process(ProjectLayout projectLayout, File file, String guidance)`
 
-Add a short instruction block near the top of the file. Keep it specific.
+This method prepares the final processing instructions and hands them off to the base AI file-processing layer. It also adds standard documentation-processing rules, including the current operating system name.
+
+### `parseFile(File projectDir, File file)`
+
+This method chooses the correct reviewer for a file based on its extension. The reviewer then reads the file and extracts the guidance text.
+
+### `getReviewerForExtension(String extension)`
+
+This method looks up the reviewer associated with a given file extension.
+
+### `deleteTempFiles(File basedir)`
+
+This utility method removes the temporary folder used for input logs created during guided processing.
+
+## Practical example
+
+The example below shows how someone might use guidance to update a documentation page.
+
+### Step 1: Pick a file
+
+Choose the file you want Ghostwriter to improve.
+
+Example:
+
+`src/site/markdown/guidance.md`
+
+### Step 2: Add a guidance block
+
+Place a `@guidance:` comment in the file.
 
 Example:
 
 ```markdown
 <!-- @guidance:
-Update this page for first-time users.
-Add one step-by-step example.
-Keep the tone clear and practical.
+Rewrite this page for first-time users.
+Add a simple example.
+Keep the language clear and short.
 -->
 ```
 
 ### Step 3: Run Ghostwriter
 
-Run Ghostwriter in whatever way you normally run the project (for example, via your preferred command line, IDE run configuration, or build tool integration).
+Run Ghostwriter from the project root using your normal workflow.
 
-What happens:
+During processing, Ghostwriter will:
 
-- Ghostwriter scans from your configured project root.
-- For each matching file, `GuidanceProcessor` selects a reviewer and extracts the `@guidance:` text.
-- If the file has guidance, that guidance is used to build the prompt.
-- If the file does not have guidance but a default prompt is configured, the default prompt is used instead.
-- The configured AI provider is called and returns the updated content.
+- scan the project,
+- find the file,
+- choose the correct reviewer,
+- extract the guidance text,
+- build the final request,
+- and generate an updated version of the file.
 
 ### Step 4: Review the result
 
-Review the change like any other code or documentation change.
+Check the updated content just as you would review any documentation or code change.
 
-If you leave the `@guidance:` block in place, you can run Ghostwriter again later and it will follow the same instructions.
+If you keep the guidance block in the file, Ghostwriter can follow the same instructions again in a future run.
 
-## Tips for writing good guidance
+## Why this feature is useful
 
-- Prefer one clear goal per file.
-- Mention important constraints (tone, length, required sections, required links).
-- If formatting matters (headings, lists, code blocks), say so directly.
+Guidance is helpful because it makes AI-assisted updates more predictable. Instead of rewriting instructions every time, you keep them in the file itself.
+
+That gives you:
+
+- more consistent results,
+- clearer expectations for each file,
+- easier repeat use over time,
+- and a workflow that is friendly to both technical and non-technical users.
+
+## Tips for writing effective guidance
+
+- Keep the instruction focused on one main goal.
+- Mention anything that must be included, such as sections, links, or formatting.
+- Say if the tone should be simple, technical, formal, or beginner-friendly.
+- Add examples when you want the output to be easier to follow.

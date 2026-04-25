@@ -120,11 +120,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		String perform = provider.perform();
 		if (perform != null && interactive) {
-			logger.info(">>> {}", perform);
+			logger.info(">>>: {}", perform);
 			String input = input();
 			if (input != null) {
-				provider.prompt(input);
-				perform = perform(file, provider);
+				if (!Strings.CS.equals(input.toLowerCase().trim(), "exit")) {
+					provider.prompt(input);
+					perform = perform(file, provider);
+				}
 			}
 		}
 		return perform;

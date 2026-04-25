@@ -28,51 +28,14 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This class centralizes shared configuration parameters and the common
  * scan/execute flow. Concrete goals typically configure goal-specific behavior
- * (for example, reactor aggregation, processing order, or threading) and then
- * delegate to {@link #scanDocuments(GuidanceProcessor)}.
+ * and delegate to {@link #scanDocuments(GuidanceProcessor)}.
  * </p>
  *
- * <h2>Common parameters</h2>
- * <dl>
- * <dt><b>{@code -Dgw.model}</b> / {@code &lt;model&gt;}</dt>
- * <dd>Provider/model identifier to pass to the workflow.</dd>
- *
- * <dt><b>{@code -Dgw.scanDir}</b> / {@code &lt;scanDir&gt;}</dt>
- * <dd>Optional scan root override. When omitted, defaults to the execution root
- * directory.</dd>
- *
- * <dt><b>{@code -Dgw.instructions}</b> / {@code &lt;instructions&gt;}</dt>
- * <dd>Instruction locations (for example, file paths or classpath locations)
- * consumed by the workflow.</dd>
- *
- * <dt><b>{@code -Dgw.excludes}</b> / {@code &lt;excludes&gt;}</dt>
- * <dd>Exclude patterns/paths to skip while scanning documentation sources.</dd>
- *
- * <dt><b>{@code -Dgenai.serverId}</b> / {@code &lt;serverId&gt;}</dt>
- * <dd>{@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
- * credentials.</dd>
- *
- * <dt><b>{@code -DlogInputs}</b></dt>
- * <dd>Whether to log the list of input files passed to the workflow.
  * <p>
- * Default: {@code false}
+ * It also resolves optional GenAI credentials from Maven {@code settings.xml}
+ * and exposes them to the processing pipeline through a
+ * {@link PropertiesConfigurator}.
  * </p>
- * </dd>
- * </dl>
- *
- * <h2>Credentials</h2>
- * <p>
- * If {@code -Dgenai.serverId} is provided, this goal reads credentials from
- * {@code ~/.m2/settings.xml} {@code &lt;servers&gt;&lt;server&gt;} and forwards
- * them to the workflow as {@code genai.username}/{@code genai.password}
- * properties.
- * </p>
- *
- * <h2>Examples</h2>
- *
- * <pre>
- * mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src\\site -DlogInputs=true
- * </pre>
  */
 public abstract class AbstractGWMojo extends AbstractMojo {
 
@@ -94,69 +57,70 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	@Parameter(property = Ghostwriter.SCAN_DIR_PROP_NAME)
 	String scanDir;
 	/**
-	 * Instruction locations (for example, file paths or classpath locations)
-	 * consumed by the workflow.
+	 * Instruction locations consumed by the workflow.
 	 */
 	@Parameter(property = Ghostwriter.INSTRUCTIONS_PROP_NAME, name = "instructions")
 	protected String instructions;
 	/**
-	 * Exclude patterns/paths that should be skipped when scanning documentation
-	 * sources.
+	 * Exclude patterns or paths skipped during scanning.
 	 */
 	@Parameter(property = Ghostwriter.EXCLUDES_PROP_NAME, name = "excludes")
 	protected String[] excludes;
 	/**
 	 * The current Maven project.
-	 *
-	 * <p>
-	 * Used to derive whether the invocation is effectively non-recursive (for
-	 * example, when running against a parent POM without building the full
-	 * reactor).
-	 * </p>
 	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
 	/**
-	 * The Maven session used to access reactor projects.
+	 * The current Maven session.
 	 */
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	protected MavenSession session;
 	/**
-	 * The Maven settings used to resolve credentials from {@code settings.xml}.
+	 * Maven settings used to resolve credentials from {@code settings.xml}.
 	 */
 	@Parameter(readonly = true, defaultValue = "${settings}")
 	private Settings settings;
 	/**
-	 * {@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
-	 * credentials.
+	 * Maven {@code server} id used to resolve GenAI credentials.
 	 */
 	@Parameter(property = Genai.SERVERID_PROP_NAME, required = false)
 	private String serverId;
 	/**
-	 * Whether to log the list of input files passed to the workflow.
+	 * Whether to log the list of workflow input files.
 	 */
 	@Parameter(property = Genai.LOG_INPUTS_PROP_NAME, defaultValue = "false")
 	protected boolean logInputs;
 	/**
-	 * Reactor projects for the current Maven session.
+	 * Reactor projects available in the current Maven session.
 	 */
 	@Parameter(defaultValue = "${reactorProjects}", readonly = true)
 	protected List<MavenProject> reactorProjects;
 
+	/**
+	 * Tool set exposed to the processor for class-related project introspection.
+	 */
+	protected ClassFunctionalTools classFunctionTools = new ClassFunctionalTools();
+
+	/**
+	 * Creates the base mojo instance.
+	 */
 	protected AbstractGWMojo() {
 		super();
 	}
 
 	/**
-	 * Builds a {@link PropertiesConfigurator} for workflow execution.
+	 * Builds the processor configuration.
 	 *
 	 * <p>
-	 * When {@code genai.serverId} is set, credentials are read from Maven settings.
+	 * If a Maven server id is configured, this method reads the matching server
+	 * entry from {@code settings.xml} and copies its username, password, and any
+	 * custom XML configuration values into the returned configurator.
 	 * </p>
 	 *
-	 * @return a configurator populated with any available workflow properties
-	 * @throws MojoExecutionException if Maven settings are not available or
-	 *                                configured incorrectly
+	 * @return configuration for downstream workflow execution
+	 * @throws MojoExecutionException if Maven settings are unavailable or the
+	 *                                configured server cannot be found
 	 */
 	protected PropertiesConfigurator getConfiguration() throws MojoExecutionException {
 		if (settings == null) {
@@ -193,10 +157,18 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	}
 
 	/**
-	 * Configures and runs a {@link GuidanceProcessor} scan for the current module.
+	 * Configures and executes document scanning for the current project context.
 	 *
-	 * @param processor processor instance to configure and run
-	 * @throws MojoExecutionException if processing fails
+	 * <p>
+	 * This method applies configured excludes, optional instructions, input logging,
+	 * and scan directory selection before invoking
+	 * {@link GuidanceProcessor#scanDocuments(File, String)}. When a Maven project is
+	 * present in the request, class-related helper tools are also registered with
+	 * the processor.
+	 * </p>
+	 *
+	 * @param processor the processor to configure and execute
+	 * @throws MojoExecutionException if scanning or processing fails
 	 */
 	protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
 
@@ -223,6 +195,9 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 			}
 
 			logger.info("Starting scan of path: {}", scanDir);
+			if (session.getRequest().isProjectPresent()) {
+				processor.addTool(classFunctionTools);
+			}
 
 			processor.scanDocuments(projectBasedir, scanDir);
 			logger.info("Scanning finished.");

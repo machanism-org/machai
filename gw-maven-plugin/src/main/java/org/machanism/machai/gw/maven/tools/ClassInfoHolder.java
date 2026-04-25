@@ -269,6 +269,31 @@ public class ClassInfoHolder {
 	}
 
 	/**
+	 * Returns the source file path for the supplied fully qualified class name.
+	 * <p>
+	 * The method searches the Maven project's compile source roots for a matching
+	 * Java source file. For nested classes, the top-level declaring class source
+	 * file is returned.
+	 *
+	 * @param className the fully qualified class name
+	 * @return the source file path, or {@code null} if no source file exists in the
+	 *         project source roots
+	 */
+	public String getSourcePath(String className) {
+		String sourceClassName = StringUtils.substringBefore(className, "$" );
+		String relativePath = StringUtils.replaceChars(sourceClassName, '.', File.separatorChar) + ".java";
+
+		for (String sourceRoot : project.getCompileSourceRoots()) {
+			Path sourcePath = Paths.get(sourceRoot, relativePath);
+			if (Files.isRegularFile(sourcePath)) {
+				return sourcePath.toString();
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Returns the Maven artifact coordinates associated with the supplied fully
 	 * qualified class name.
 	 *

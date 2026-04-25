@@ -24,26 +24,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
- * Provides function tools for discovering project classes and retrieving
- * reflective details about them.
+ * Provides function-tool integrations for discovering Java classes and reading
+ * reflective metadata from the classpath of one or more Maven projects.
  * <p>
- * This implementation keeps per-project {@link ClassInfoHolder} instances keyed
- * by working directory so tool calls can resolve classes in the correct Maven
- * module context.
- * <p>
- * <b>Usage Restriction: aggregator = false</b>
- * <p>
- * This class is designed to be used only in Maven Mojo executions where
- * <code>aggregator = false</code>. When a Mojo is run as an aggregator
- * (<code>aggregator = true</code>), it operates at the reactor (multi-module)
- * level and may not have access to the correct, fully resolved classpath or
- * output directories for each individual module. Attempting to use this tool in
- * aggregator mode can result in incomplete or incorrect class discovery,
- * classloader conflicts, or missing class details, as the classpath may not
- * accurately reflect the context of a single module. For reliable and
- * predictable results, always use this tool in non-aggregator (per-module)
- * executions, where the MavenProject context is guaranteed to represent a
- * single module with its own classpath and output directories.
+ * Instances maintain a cache of {@link ClassInfoHolder} objects keyed by Maven
+ * project base directory, allowing tool invocations to resolve classes relative
+ * to the current working project.
  */
 public class ClassFunctionalTools implements FunctionTools {
 
@@ -259,6 +245,11 @@ public class ClassFunctionalTools implements FunctionTools {
 				String id = classInfoHolder.getArtifactId(className);
 				if (id != null) {
 					info.addProperty("artifact", id);
+				}
+
+				String sourcePath = classInfoHolder.getSourcePath(className);
+				if (sourcePath != null) {
+					info.addProperty("sourcePath", sourcePath);
 				}
 
 			} catch (ClassNotFoundException e) {

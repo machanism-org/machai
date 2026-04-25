@@ -15,7 +15,6 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
-import org.machanism.machai.gw.maven.tools.ClassFunctionalTools;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.MavenProjectLayout;
@@ -146,8 +145,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
 @Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class GWMojo extends AbstractGWMojo {
 
-	private ClassFunctionalTools toolFunction = new ClassFunctionalTools();
-
 	@Override
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator config = getConfiguration();
@@ -167,7 +164,7 @@ public class GWMojo extends AbstractGWMojo {
 					MavenProject matchingProject = resolveProjectByArtifactId(session.getAllProjects(), model);
 					if (matchingProject != null) {
 						if (session.getRequest().isProjectPresent()) {
-							toolFunction.scanProjectClasses(matchingProject);
+							classFunctionTools.scanProjectClasses(matchingProject);
 						}
 
 						mavenProjectLayout.model(matchingProject.getModel());
@@ -186,10 +183,6 @@ public class GWMojo extends AbstractGWMojo {
 		if (isParallel) {
 			int data = session.getRequest().getDegreeOfConcurrency();
 			processor.setDegreeOfConcurrency(data);
-		}
-
-		if (session.getRequest().isProjectPresent()) {
-			processor.addTool(toolFunction);
 		}
 
 		try {

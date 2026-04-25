@@ -92,8 +92,6 @@ public class ActMojo extends AbstractGWMojo {
 	@Parameter(property = Ghostwriter.ACTS_LOCATION_PROP_NAME, required = false)
 	private String acts;
 
-	private ClassFunctionalTools toolFunction = new ClassFunctionalTools();
-
 	private static final Object MONITOR = new Object();
 
 	/**
@@ -123,7 +121,7 @@ public class ActMojo extends AbstractGWMojo {
 					Model model = mavenProjectLayout.getModel();
 					for (MavenProject mavenProject : session.getAllProjects()) {
 						if (session.getRequest().isProjectPresent()) {
-							toolFunction.scanProjectClasses(mavenProject);
+							classFunctionTools.scanProjectClasses(mavenProject);
 						}
 						if (Strings.CS.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
 							mavenProjectLayout.model(mavenProject.getModel());
@@ -148,10 +146,6 @@ public class ActMojo extends AbstractGWMojo {
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		actProcessor.setNonRecursive(nonRecursive);
-
-		if (session.getRequest().isProjectPresent()) {
-			actProcessor.addTool(toolFunction);
-		}
 
 		boolean isParallel = session.isParallel();
 		if (isParallel) {
@@ -203,7 +197,9 @@ public class ActMojo extends AbstractGWMojo {
 			savedAct = userProperties.getProperty(Ghostwriter.ACT_PROP_NAME);
 		}
 		actProcessor.setAct(savedAct);
-		scanDocuments(actProcessor);
+		if (savedAct != null) {
+			scanDocuments(actProcessor);
+		}
 	}
 
 	protected void applyActPrompt(Configurator conf) throws MojoExecutionException {
@@ -215,6 +211,9 @@ public class ActMojo extends AbstractGWMojo {
 					String actValue = conf.get(Ghostwriter.ACT_PROP_NAME, null);
 					if (actValue == null) {
 						actValue = readText("Act");
+						if (Strings.CS.equals(actValue.toLowerCase().trim(), "exit")) {
+							return;
+						}
 					}
 					userProperties.setProperty(Ghostwriter.ACT_PROP_NAME, actValue);
 				} else {
@@ -233,6 +232,11 @@ public class ActMojo extends AbstractGWMojo {
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
 		logger.info("Starting scan of path: {}", resolvedScanDir);
+		if (session.getRequest().isProjectPresent()) {
+			classFunctionTools.scanProjectClasses(project);
+			actProcessor.addTool(classFunctionTools);
+		}
+		
 		actProcessor.scanDocuments(basedir, resolvedScanDir);
 		logger.info("Finished scanning path: {}", resolvedScanDir);
 	}
