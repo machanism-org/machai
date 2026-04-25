@@ -134,7 +134,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return a newline-separated list of project-relative file paths, or a message
 	 *         if no files are found
 	 */
-	private Object getRecursiveFiles(Object[] params) {
+	public Object getRecursiveFiles(Object[] params) {
 		File workingDir = (File) params[1];
 		JsonNode dirPathNode = ((JsonNode) params[0]).get(DIR_PATH_FIELD);
 		File directory = resolveDirFromOptionalPath(workingDir, dirPathNode);
@@ -170,7 +170,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return a comma-separated list of project-relative paths, or a message if the
 	 *         directory does not exist or is empty
 	 */
-	private Object listFiles(Object[] params) {
+	public Object listFiles(Object[] params) {
 		JsonNode dirNode = ((JsonNode) params[0]).get(DIR_PATH_FIELD);
 		File workingDir = (File) params[1];
 		if (logger.isInfoEnabled()) {
@@ -209,7 +209,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param params tool arguments
 	 * @return success message, or an error message if writing fails
 	 */
-	private Object writeFile(Object[] params) {
+	public Object writeFile(Object[] params) {
 		String result;
 		JsonNode props = (JsonNode) params[0];
 		String filePath = props.get(FILE_PATH_FIELD).asText();
@@ -321,7 +321,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return file content as text, or a message if the file does not exist
 	 * @throws IllegalArgumentException on I/O error
 	 */
-	private Object readFile(Object[] params) {
+	public Object readFile(Object[] params) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Read file: {}", Arrays.toString(params));
 		}

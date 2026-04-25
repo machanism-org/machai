@@ -112,7 +112,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *         found.} when no matches are available, or the unsupported-project
 	 *         message when no project context is registered
 	 */
-	private String findClass(Object... params) {
+	public String findClass(Object... params) {
 		File workingDir = (File) params[1];
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(workingDir);
 		String classes = "Class not found.";
@@ -153,7 +153,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *         {@code error} property when the class or project context cannot be
 	 *         resolved
 	 */
-	private JsonObject getClassInfo(Object... params) {
+	public JsonObject getClassInfo(Object... params) {
 		JsonObject info = new JsonObject();
 
 		File workingDir = (File) params[1];

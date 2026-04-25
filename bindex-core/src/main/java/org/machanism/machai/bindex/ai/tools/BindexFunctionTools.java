@@ -131,7 +131,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws JsonProcessingException
 	 * @throws IllegalStateException   if the repository has not been configured yet
 	 */
-	private String getBindex(Object[] params) throws JsonProcessingException {
+	public String getBindex(Object[] params) throws JsonProcessingException {
 		JsonNode props = (JsonNode) params[0];
 		String id = props.get("id").asText();
 		Bindex bindex = getBindexRepository().getBindex(id);
@@ -161,7 +161,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @return the Bindex schema resource content as JSON string
 	 * @throws IOException
 	 */
-	private String getBindexSchema(Object[] params) throws IOException {
+	public String getBindexSchema(Object[] params) throws IOException {
 		URL systemResource = Bindex.class.getResource(BindexRepository.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		if (logger.isInfoEnabled()) {
@@ -171,7 +171,7 @@ public class BindexFunctionTools implements FunctionTools {
 		return schema;
 	}
 
-	private List<BindexElement> getRecommendedLibraries(Object[] params) throws IOException {
+	public List<BindexElement> getRecommendedLibraries(Object[] params) throws IOException {
 		JsonNode props = (JsonNode) params[0];
 		if (logger.isInfoEnabled()) {
 			logger.info("Picking for: {}", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH));
@@ -206,7 +206,7 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	private String registerBindex(Object[] params) throws JsonProcessingException {
+	public String registerBindex(Object[] params) throws JsonProcessingException {
 		JsonNode props = (JsonNode) params[0];
 		File workingDir = (File) params[1];
 		String fileName = props.get("fileName").asText();

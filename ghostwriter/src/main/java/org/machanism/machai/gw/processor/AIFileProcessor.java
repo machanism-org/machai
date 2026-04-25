@@ -387,7 +387,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	public void addTool(FunctionTools toolFunction) {
-		logger.info("FunctionTool: {}", toolFunction.getClass().getName());
+		logger.info("FunctionTools: {}", toolFunction.getClass().getName());
 		toolFunctions.add(toolFunction);
 	}
 }

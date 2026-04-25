@@ -53,7 +53,7 @@ public class ActFunctionTools implements FunctionTools {
 	 *
 	 * @throws IOException
 	 */
-	private Object getActList(Object... args) throws IOException {
+	public Object getActList(Object... args) throws IOException {
 		List<String> result = getBaseActList().stream().map(line -> "- `" + line).collect(Collectors.toList());
 		return StringUtils.join(result, Genai.LINE_SEPARATOR);
 	}
@@ -90,7 +90,7 @@ public class ActFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	private Object getActDetails(Object... params) throws IOException {
+	public Object getActDetails(Object... params) throws IOException {
 		Map<String, Object> properties = new HashMap<>();
 		try {
 			JsonNode props = (JsonNode) params[0];
