@@ -19,7 +19,7 @@
 				<projectId>machanism-org/machai</projectId>
 				<ribbonOrientation>right</ribbonOrientation>
 				<ribbonColor>black</ribbonColor>
-      		</gitHub>
+			</gitHub>
 		</fluidoSkin>
 	</custom>
 	<bannerLeft>
@@ -47,10 +47,14 @@
 			<link rel="manifest" href="/site.webmanifest">
 			]]>
 		</head>
-		<links >
+		<links>
 			<item name="GitHub"
 				href="https://github.com/machanism-org/machai" />
 		</links>
+		<menu>
+			<item name="Overview" href="index.html" />
+			<item name="Functional Tools" href="functional-tools.html" />
+		</menu>
 		<menu ref="parent" />
 		<menu ref="modules" />
 		<menu ref="reports" />

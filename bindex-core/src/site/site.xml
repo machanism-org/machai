@@ -46,6 +46,7 @@
 			<item name="Overview" href="index.html" />
 			<item name="Bindex" href="bindex.html" />
 			<item name="Project Assembly" href="project-assembly.html" />
+			<item name="Functional Tools" href="functional-tools.html" />
 		</menu>
 		<menu ref="parent" />
 		<menu ref="modules" />

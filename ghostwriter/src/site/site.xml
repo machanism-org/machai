@@ -47,6 +47,7 @@
             <item name="Project Workflow" href="project-workflow.html" />
             <item name="Guidance File Processing" href="guidance.html" />
             <item name="Act" href="act.html" />
+            <item name="Functional Tools" href="functional-tools.html" />
         </menu>
 		<menu ref="parent" />
 		<menu ref="reports" />

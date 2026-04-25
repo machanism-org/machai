@@ -19,7 +19,7 @@
 				<projectId>machanism-org/machai</projectId>
 				<ribbonOrientation>right</ribbonOrientation>
 				<ribbonColor>black</ribbonColor>
-      		</gitHub>
+			</gitHub>
 		</fluidoSkin>
 	</custom>
 	<bannerLeft>
@@ -42,11 +42,12 @@
 			<link rel="stylesheet" href="https://machai.machanism.org/css/site.css">
 		]]>
 		</head>
- 
+
 		<menu>
-            <item name="Overview" href="index.html" />
-            <item name="Preparation to Start" href="preparation-to-start.html" />
-        </menu>
+			<item name="Overview" href="index.html" />
+			<item name="Preparation to Start" href="preparation-to-start.html" />
+			<item name="Functional Tools" href="functional-tools.html" />
+		</menu>
 		<menu ref="parent" />
 		<menu ref="modules" />
 		<menu ref="reports" />
