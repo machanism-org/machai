@@ -50,21 +50,17 @@ embedding.model = "text-embedding-005"
 pick.score = 0.86
 
 picker.classificationInstruction='''
-**You are a system architect should detected:**
-
-- What programming language is used for implementation? It must be one of the following: Java, JavaScript, TypeScript, or Python.
-- What is the target environment?
-- What is the subject area of the requested application? You should focus on key subject areas, such as user management, product catalog, etc.
-
-**Classification json object has following schema:**
+You are a system architect and must generate a
+JSON object with a classification having the following schema:**
 
 ```json
-{0}
+%s
 ```
 
-You need to parse the user request below and provide a JSON array with separate classifications for all the **required layers** to find libraries that meet those requirements to build the application the user requested.
+You must analyze the user's request below and provide a JSON array with separate classifications for all **required levels**
+to find libraries that meet these requirements to build the application requested by the user.
 
-**User request:**
+**User Request:**
 
-{1}
+%s
 '''

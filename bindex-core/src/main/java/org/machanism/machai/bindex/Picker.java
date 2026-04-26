@@ -81,7 +81,7 @@ public class Picker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Picker.class);
 
 	private static final String CLASSIFICATION_INSTRUCTION_PROP_NAME = "picker.classificationInstruction";
-	
+
 	private static final String INDEXNAME = "vector_index";
 	private static final String LANGUAGES_PROPERTY_NAME = "languages";
 	private static final String DOMAINS_PROPERTY_NAME = "domains";
@@ -137,7 +137,7 @@ public class Picker {
 		}
 
 		this.configurator = config;
-		
+
 		this.provider = GenaiProviderManager.getProvider(genai, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
@@ -359,7 +359,8 @@ public class Picker {
 		JsonNode jsonNode = schemaJson.get("properties").get("classification");
 		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
 
-		String classificationQuery = MessageFormat.format(configurator.get(CLASSIFICATION_INSTRUCTION_PROP_NAME), classificationSchema, query);
+		String classificationQuery = String.format(configurator.get(CLASSIFICATION_INSTRUCTION_PROP_NAME),
+				classificationSchema, query);
 		provider.prompt(classificationQuery);
 		return provider.perform();
 	}
