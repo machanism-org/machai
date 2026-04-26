@@ -260,8 +260,8 @@ public class ActMojo extends AbstractGWMojo {
 	public String readText(String prompt) throws PrompterException {
 		StringBuilder sb = new StringBuilder();
 		String line;
-		int length = prompt.length();
-		int maxlen = length + 5;
+		int length = prompt.length() + 2;
+		int maxlen = length;
 		while ((line = prompter.prompt(prompt)) != null) {
 			prompt = "\t";
 			length += line.length();
