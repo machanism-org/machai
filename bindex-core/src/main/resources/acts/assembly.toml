@@ -48,19 +48,3 @@ gw.nonRecursive = true
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
 embedding.model = "text-embedding-005"
 pick.score = 0.86
-
-picker.classificationInstruction='''
-You are a system architect and must generate a
-JSON object with a classification having the following schema:**
-
-```json
-%s
-```
-
-You must analyze the user's request below and provide a JSON array with separate classifications for all **required levels**
-to find libraries that meet these requirements to build the application requested by the user.
-
-**User Request:**
-
-%s
-'''
