@@ -49,8 +49,6 @@ Executes a system command locally.
 - Reads command output concurrently from standard output and error streams.
 - Returns only the last part of very large output when the configured limit is exceeded.
 - Appends the process exit code to the returned result.
-- On Windows, shell commands should be wrapped with `cmd /c`.
-- On Unix-like systems, shell commands should be wrapped with `sh -c`.
 
 **Input parameters**
 - `command` *(required, string)*: The command to execute.
