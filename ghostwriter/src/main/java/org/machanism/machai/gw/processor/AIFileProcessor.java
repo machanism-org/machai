@@ -177,7 +177,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 
 		Object[] array = content.toArray(new String[0]);
-		return MessageFormat.format(promptBundle.getString("project_information"), array) + Genai.LINE_SEPARATOR;
+		String projectInformation = promptBundle.getString("project_information");
+		projectInformation = String.format(projectInformation, array);
+		return projectInformation + Genai.LINE_SEPARATOR;
 	}
 
 	String getDirInfoLine(Collection<String> sources, File projectDir) {

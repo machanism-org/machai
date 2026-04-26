@@ -50,7 +50,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	/**
 	 * Constructs a processor.
 	 *
-	 * @param projectDir      root directory used as a base for relative paths
+	 * @param projectDir   root directory used as a base for relative paths
 	 * @param genai        provider key/name to use
 	 * @param configurator configuration source
 	 */
@@ -208,9 +208,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @throws IOException if provider execution fails
 	 */
 	protected String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
-		String effectiveInstructions = MessageFormat.format(promptBundle.getString("sys_instructions"),
-				getInstructions());
-		String instructions = MessageFormat.format(promptBundle.getString("sys_instructions"), effectiveInstructions);
+		String sys_instructions = promptBundle.getString("sys_instructions");
+		String instructions = String.format(sys_instructions, getInstructions());
 
 		StringBuilder guidanceBuilder = new StringBuilder();
 		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
