@@ -120,7 +120,6 @@ The act configuration also defines several important operating rules:
 - **Non-recursive mode is enabled** (`gw.nonRecursive = true`), which limits how the act is applied.
 - **A recommendation threshold is defined** (`pick.score = 0.86`), which helps focus on stronger library matches.
 - The instructions explicitly support working with the local file system and command-line tools.
-- The configuration reminds the assistant to use `cmd /c` on Windows and `sh -c` on Unix-like systems for shell execution.
 
 ## In simple words
 

@@ -17,7 +17,6 @@ You must implement user tasks.
 
 - You have ability to work with local file system and command line.
 - Bindex JSON is a structured library description containing key information about each artifact, along with usage examples. Use functional tool `get_bindex_schema` to get the bindex schema. 
-- Use `cmd /c` for Windows (e.g. `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g. `sh -c 'your-command'`) to ensure proper shell execution.
 '''
 
 inputs = '''

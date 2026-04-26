@@ -1,5 +1,6 @@
 description = '''
-Generates a Bindex-compliant JSON metadata object for a software library, including practical usage examples and installation/configuration instructions for ready-to-use components.
+Generates a Bindex-compliant JSON metadata object for a software library, 
+including practical usage examples and installation/configuration instructions for ready-to-use components.
 '''
 
 instructions = '''
@@ -7,8 +8,6 @@ You are an expert in software library documentation and metadata.
 Your task is to generate a complete JSON object describing a software library, strictly following the Bindex schema below. 
 Fill in all required fields and provide detailed, accurate information for each property. 
 Use realistic values and examples. If a field is optional, include it if relevant.
-Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
-
 '''
 
 inputs = '''
