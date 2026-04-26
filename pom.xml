@@ -6,7 +6,7 @@
 
 	<groupId>org.machanism.machai</groupId>
 	<artifactId>machai</artifactId>
-	<version>1.1.2</version>
+	<version>1.1.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Machai Project</name>
@@ -196,7 +196,7 @@
 				<plugin>
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>gw-maven-plugin</artifactId>
-					<version>1.1.2</version>
+					<version>1.1.3-SNAPSHOT</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
