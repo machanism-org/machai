@@ -15,7 +15,6 @@ inputs = '''
    - if an error occurs, terminate the task with exitCode: 1.
 
 2. **Synchronize the Site to Cloudflare:**
-   - Do not change the placeholder variable `${...}`, it will be changed by the application.
    - Use the `rclone sync` command to synchronize the local site directory to the Cloudflare bucket.
    - The Cloudflare bucket name is `machai`.
    - The sync command should look like:
