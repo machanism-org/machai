@@ -261,7 +261,7 @@ public class ActMojo extends AbstractGWMojo {
 		StringBuilder sb = new StringBuilder();
 		String line;
 		int length = prompt.length();
-		int maxlen = length;
+		int maxlen = length + 5;
 		while ((line = prompter.prompt(prompt)) != null) {
 			prompt = "\t";
 			length += line.length();

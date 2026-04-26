@@ -80,18 +80,7 @@ public class Picker {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Picker.class);
 
-	private static final String CLASSIFICATION_INSTRUCTION = "**You are a system architect should detected:**\n\n"
-			+ "- What programming language is used for implementation? It must be one of the following: Java, JavaScript, TypeScript, or Python.\n"
-			+ "- What is the target environment?\n"
-			+ "- What is the subject area of the requested application? You should focus on key subject areas, such as user management, product catalog, etc.\n\n"
-			+ "**Classification json object has following schema:**\n\n"
-			+ "```json\n"
-			+ "{0}\n"
-			+ "```\n\n"
-			+ "You need to parse the user request below and provide a JSON array with separate classifications for all the **required leyers** "
-			+ "to find libraries that meet those requirements to build the application the user requested.\n\n"
-			+ "**User request: **\n\n"
-			+ "{1}\n";
+	private static final String CLASSIFICATION_INSTRUCTION_PROP_NAME = "picker.classificationInstruction";
 	
 	private static final String INDEXNAME = "vector_index";
 	private static final String LANGUAGES_PROPERTY_NAME = "languages";
@@ -126,6 +115,8 @@ public class Picker {
 	private Double score = DEFAULT_SCORE_VALUE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
 
+	private Configurator configurator;
+
 	/**
 	 * Constructs a {@link Picker} for registration and semantic search.
 	 *
@@ -145,6 +136,8 @@ public class Picker {
 			throw new IllegalArgumentException("config must not be null");
 		}
 
+		this.configurator = config;
+		
 		this.provider = GenaiProviderManager.getProvider(genai, config);
 		FunctionToolsLoader.getInstance().applyTools(provider);
 
@@ -366,7 +359,7 @@ public class Picker {
 		JsonNode jsonNode = schemaJson.get("properties").get("classification");
 		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
 
-		String classificationQuery = MessageFormat.format(CLASSIFICATION_INSTRUCTION, classificationSchema, query);
+		String classificationQuery = MessageFormat.format(configurator.get(CLASSIFICATION_INSTRUCTION_PROP_NAME), classificationSchema, query);
 		provider.prompt(classificationQuery);
 		return provider.perform();
 	}

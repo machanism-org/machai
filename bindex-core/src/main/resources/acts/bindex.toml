@@ -62,6 +62,27 @@ These rules must be followed if the `bindex.json` file needs to be register; oth
 '''
 
 prompt = "Create or update bindex.json"
+
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
 embedding.model = "text-embedding-005"
 gw.scanDir = "glob:."
+
+picker.classificationInstruction='''
+**You are a system architect should detected:**
+
+- What programming language is used for implementation? It must be one of the following: Java, JavaScript, TypeScript, or Python.
+- What is the target environment?
+- What is the subject area of the requested application? You should focus on key subject areas, such as user management, product catalog, etc.
+
+**Classification json object has following schema:**
+
+```json
+{0}
+```
+
+You need to parse the user request below and provide a JSON array with separate classifications for all the **required layers** to find libraries that meet those requirements to build the application the user requested.
+
+**User request:**
+
+{1}
+'''

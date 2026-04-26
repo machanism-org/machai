@@ -11,11 +11,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bson.BsonDocument;
@@ -25,6 +27,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
@@ -71,8 +74,8 @@ class PickerCoverageExpansionTest {
 		assertEquals("artifact:demo", stored.getString("id"));
 		assertEquals("demo", stored.getString("name"));
 		assertEquals("1.0.0", stored.getString("version"));
-		assertEquals(Collections.singleton("java"), stored.get("languages"));
-		assertEquals(Collections.singleton("rest"), stored.get("integrations"));
+		assertEquals(Collections.singleton("java"), new HashSet<>((Collection<String>) stored.get("languages")));
+		assertEquals(Collections.singleton("rest"), new HashSet<>((Collection<String>) stored.get("integrations")));
 		assertNotNull(stored.get("classification_embedding"));
 	}
 
@@ -139,6 +142,9 @@ class PickerCoverageExpansionTest {
 		when(provider.perform()).thenReturn("```json\n[{\"domains\":[\"build\"],\"layers\":[\"Adapters\"],\"languages\":[{\"name\":\"Java\"}],\"integrations\":[]}]\n```");
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Arrays.asList(0.1, 0.2));
 		Picker picker = new Picker(collection, provider);
+		Configurator configurator = mock(Configurator.class);
+		when(configurator.get("picker.classificationInstruction")).thenReturn("{1}");
+		setField(picker, "configurator", configurator);
 		picker.setScore(0.0);
 
 		List<Bindex> result = picker.pick("find build libs");
@@ -195,5 +201,11 @@ class PickerCoverageExpansionTest {
 		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class));
 		Double result = picker.getScore("unknown");
 		assertNull(result);
+	}
+
+	private static void setField(Object target, String fieldName, Object value) throws Exception {
+		Field field = target.getClass().getDeclaredField(fieldName);
+		field.setAccessible(true);
+		field.set(target, value);
 	}
 }

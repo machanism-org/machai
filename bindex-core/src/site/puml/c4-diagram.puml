@@ -4,9 +4,9 @@
 ' - If a C4 Component diagram already exists, update it to accurately reflect the current architecture, key components, and their relationships.
 ' - If no diagram exists, generate a new one that clearly represents all major components, their responsibilities, and interactions within the project.
 ' - Use PlantUML C4-PlantUML syntax and best practices for clarity and maintainability.
-' - Include only relevant components, interfaces, and external systems; remove or omit unnecessary details e.g.: jsonschema2pojo, "Bindex JSON Schema".
+' - Include only relevant components from `/src/main/java` and external systems: `mongodb`, `genaiProvider`, `fileSystem`; remove or omit unnecessary details.
 ' - Organize the diagram for readability, avoiding complexity and clutter.
-' - Save the diagram in the designated location according to the project structure.
+' - Add SHOW_LEGEND() at the end of the puml code.
 @startuml
 !includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
@@ -14,28 +14,29 @@ LAYOUT_LEFT_RIGHT()
 
 title Bindex Core - C4 Component Diagram
 
-Person(dev, "Developer / AI Workflow", "Uses library recommendation, schema access, and Bindex registration capabilities")
-System_Ext(mongo, "MongoDB", "Stores serialized Bindex documents, search facets, and classification embeddings")
-System_Ext(genai, "GenAI Provider", "Executes prompts and generates embeddings for semantic selection")
+Person(user, "Developer / Build Process", "Invokes Bindex function tools and library recommendation workflows")
+System_Ext(fileSystem, "Working Directory", "Provides Bindex JSON files for registration requests")
+System_Ext(genaiProvider, "GenAI Provider", "Performs classification prompts and embedding generation")
+System_Ext(mongodb, "MongoDB", "Stores registered Bindex documents and supports vector-search retrieval")
 
-System_Boundary(bindex_core, "Bindex Core") {
-  Component(picker, "Picker", "Java", "Core semantic selection service that classifies requests, creates embeddings, performs vector search, and registers Bindex documents")
-  Component(repository, "BindexRepository", "Java", "MongoDB repository that creates collection access and supports Bindex lookup and deletion")
-  Component(functionTools, "BindexFunctionTools", "Java", "Function tool adapter that exposes get_bindex, get_bindex_schema, pick_libraries, and register_bindex for GenAI workflows")
-  Component(actsResources, "Act Templates", "TOML resources", "Assembly, bindex, and pick workflow templates used to drive AI-assisted project tasks")
-  Component(schemaResource, "Bindex Schema Resource", "JSON resource", "Classpath schema definition used for classification prompts and schema retrieval")
+System_Boundary(bindexCore, "Bindex Core") {
+  Component(bindexFunctionTools, "BindexFunctionTools", "Java / FunctionTools", "Registers AI-callable tools for Bindex lookup, schema retrieval, recommendation, and file-based registration")
+  Component(picker, "Picker", "Java", "Creates classification embeddings, stores Bindex records, classifies prompts, and performs semantic library selection")
+  Component(repository, "BindexRepository", "Java", "Creates MongoDB collection access and provides Bindex lookup and deletion operations")
 }
 
-Rel(dev, functionTools, "Invokes Bindex tool functions", "Function calls")
-Rel(dev, picker, "Uses semantic library selection", "API")
-Rel(functionTools, repository, "Loads registered Bindex metadata", "Repository calls")
-Rel(functionTools, picker, "Triggers library recommendation and registration flows", "API")
-Rel(functionTools, schemaResource, "Returns schema content", "Classpath resource")
-Rel(functionTools, actsResources, "Supports AI workflow definitions", "Resource usage")
-Rel(picker, repository, "Obtains MongoDB collection access", "Repository usage")
-Rel(repository, mongo, "Reads and writes Bindex documents", "MongoDB Driver")
-Rel(picker, mongo, "Deletes, inserts, queries, and vector-searches metadata", "MongoDB Driver")
-Rel(picker, genai, "Prompts for classification and requests embeddings", "GenAI client")
-Rel(picker, schemaResource, "Loads classification schema fragment", "Classpath resource")
+Rel(user, bindexFunctionTools, "Calls exposed Bindex tools")
+Rel(user, picker, "Uses recommendation and registration workflows")
 
+Rel(bindexFunctionTools, repository, "Reads Bindex documents through")
+Rel(bindexFunctionTools, picker, "Delegates recommendation and registration to")
+Rel(bindexFunctionTools, fileSystem, "Reads Bindex JSON files from")
+
+Rel(picker, genaiProvider, "Sends classification prompts and embedding requests to")
+Rel(picker, mongodb, "Stores records and runs vector searches in")
+Rel(picker, repository, "Shares repository-backed collection access with")
+
+Rel(repository, mongodb, "Creates client connections to")
+
+SHOW_LEGEND()
 @enduml

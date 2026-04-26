@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +17,7 @@ import java.util.Collections;
 
 import org.bson.Document;
 import org.junit.jupiter.api.Test;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
 
 import com.mongodb.client.AggregateIterable;
@@ -29,6 +31,9 @@ class PickerGetClassificationAndResultsTest {
 		Genai genai = mock(Genai.class);
 		when(genai.perform()).thenReturn("[{\"domains\":[\"java\"],\"layers\":[\"backend\"],\"languages\":[],\"integrations\":[]}]");
 		Picker picker = new Picker(mock(MongoCollection.class), genai);
+		Configurator configurator = mock(Configurator.class);
+		when(configurator.get("picker.classificationInstruction")).thenReturn("{1}");
+		setField(picker, "configurator", configurator);
 
 		Method method = Picker.class.getDeclaredMethod("getClassification", String.class);
 		method.setAccessible(true);
@@ -103,5 +108,11 @@ class PickerGetClassificationAndResultsTest {
 		// Act + Assert
 		assertThrows(java.lang.reflect.InvocationTargetException.class, () -> method.invoke(picker, "idx", "path", "q", 1,
 				new org.bson.conversions.Bson[0]));
+	}
+
+	private static void setField(Object target, String fieldName, Object value) throws Exception {
+		Field field = target.getClass().getDeclaredField(fieldName);
+		field.setAccessible(true);
+		field.set(target, value);
 	}
 }
