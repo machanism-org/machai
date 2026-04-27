@@ -12,6 +12,7 @@ inputs = '''
      ```
      mvn -q site site:stage
      ```
+   - Note: for output site dir is used: <stagingDirectory> pom.xml property. 
    - if an error occurs, terminate the task with exitCode: 1.
 
 2. **Synchronize the Site to Cloudflare:**
