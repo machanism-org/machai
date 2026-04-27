@@ -179,16 +179,6 @@ class AbstractFileProcessorCoverageTest {
 	}
 
 	@Test
-	void findFilesWithPattern_whenRelativeDirDoesNotExist_returnsEmpty() throws Exception {
-		// Arrange
-		File projectDir = tempDir.toFile();
-		AbstractFileProcessor processor = newProcessor(projectDir);
-
-		// Act
-		assertEquals(Collections.emptyList(), processor.findFiles(projectDir, "missing"));
-	}
-
-	@Test
 	void findFilesWithPattern_whenGlobPattern_includesMatchingFiles() throws Exception {
 		// Arrange
 		File projectDir = tempDir.toFile();

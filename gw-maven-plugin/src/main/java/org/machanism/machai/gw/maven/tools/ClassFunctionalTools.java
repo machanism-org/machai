@@ -4,8 +4,8 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +19,6 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 /**
  * Provides function-tool integrations for discovering Java classes and reading
@@ -114,7 +110,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * regular expression.
 	 *
 	 * @param params tool invocation arguments; the first argument is expected to be
-	 *               a {@link JsonNode} containing a {@code className} property and
+	 *               a {@link HashMap} containing a {@code className} property and
 	 *               the second a {@link File} representing the current working
 	 *               directory
 	 * @return a comma-separated list of matching class names, {@code Class not
@@ -125,12 +121,14 @@ public class ClassFunctionalTools implements FunctionTools {
 		File workingDir = (File) params[1];
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(workingDir);
 		String classes = "Class not found.";
+		List<com.google.common.reflect.ClassPath.ClassInfo> list = null;
 		if (classInfoHolder != null) {
-			JsonNode props = (JsonNode) params[0];
-			String className = props.get(CLASS_NAME_PROPERTY).asText();
+			@SuppressWarnings("unchecked")
+			HashMap<String, Object> props = (HashMap<String, Object>) params[0];
+			String className = (String) props.get(CLASS_NAME_PROPERTY);
 
-			List<com.google.common.reflect.ClassPath.ClassInfo> list = classInfoHolder.findClasses(className);
-			if (list != null) {
+			list = classInfoHolder.findClasses(className);
+			if (list != null && !list.isEmpty()) {
 				List<String> collect = list.stream().map(e -> e.getName())
 						.collect(Collectors.toList());
 				classes = StringUtils.join(collect, ",");
@@ -143,7 +141,8 @@ public class ClassFunctionalTools implements FunctionTools {
 		return classes;
 	}
 
-	private void logFindClass(Object[] params, List<com.google.common.reflect.ClassPath.ClassInfo> list, String classes) {
+	private void logFindClass(Object[] params, List<com.google.common.reflect.ClassPath.ClassInfo> list,
+			String classes) {
 		if (logger.isInfoEnabled()) {
 			int foundSize = list == null ? 0 : list.size();
 			logger.info("Find class: {}, Found: {}. {}", Arrays.toString(params), foundSize,
@@ -159,41 +158,44 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * path, and dependency artifact coordinates.
 	 *
 	 * @param params tool invocation arguments; the first argument is expected to be
-	 *               a {@link JsonNode} containing a {@code className} property and
+	 *               a {@link HashMap} containing a {@code className} property and
 	 *               the second a {@link File} representing the current working
 	 *               directory
-	 * @return a JSON object describing the requested class or containing an
+	 * @return a HashMap describing the requested class or containing an
 	 *         {@code error} property when the class or project context cannot be
 	 *         resolved
 	 */
-	public JsonObject getClassInfo(Object... params) {
-		JsonObject info = new JsonObject();
+	public HashMap<String, Object> getClassInfo(Object... params) {
+		HashMap<String, Object> info = new HashMap<>();
 
 		File workingDir = (File) params[1];
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(workingDir);
 		if (classInfoHolder != null) {
-			JsonNode props = (JsonNode) params[0];
+			@SuppressWarnings("unchecked")
+			HashMap<String, Object> props = (HashMap<String, Object>) params[0];
 			if (logger.isInfoEnabled()) {
 				logger.info("Get classInfo: {}", Arrays.toString(params));
 			}
 
-			String className = props.get(CLASS_NAME_PROPERTY).asText();
+			String className = (String) props.get(CLASS_NAME_PROPERTY);
 
 			try {
 				Class<?> clazz = classInfoHolder.loadClass(className);
 				populateClassInfo(info, classInfoHolder, className, clazz);
 			} catch (ClassNotFoundException e) {
-				info.addProperty("error", "Class not found: " + className);
+				info.put("error", "Class not found: " + className);
 			}
 		} else {
-			info.addProperty("error", FT_NOT_SUPPORTED_FOR_PROJECT_MSG);
+			info.put("error", FT_NOT_SUPPORTED_FOR_PROJECT_MSG);
 		}
 		return info;
 	}
 
-	private void populateClassInfo(JsonObject info, ClassInfoHolder classInfoHolder, String className, Class<?> clazz) {
-		info.addProperty(CLASS_NAME_PROPERTY, clazz.getName());
-		info.addProperty(MODIFIERS_PROPERTY, Modifier.toString(clazz.getModifiers()));
+	@SuppressWarnings("unchecked")
+	private void populateClassInfo(HashMap<String, Object> info, ClassInfoHolder classInfoHolder, String className,
+			Class<?> clazz) {
+		info.put(CLASS_NAME_PROPERTY, clazz.getName());
+		info.put(MODIFIERS_PROPERTY, Modifier.toString(clazz.getModifiers()));
 		addSuperclass(info, clazz);
 		addInterfaces(info, clazz);
 		addFields(info, clazz);
@@ -203,86 +205,82 @@ public class ClassFunctionalTools implements FunctionTools {
 		addLocationMetadata(info, classInfoHolder, className);
 	}
 
-	private void addSuperclass(JsonObject info, Class<?> clazz) {
+	private void addSuperclass(HashMap<String, Object> info, Class<?> clazz) {
 		if (clazz.getSuperclass() != null) {
-			info.addProperty("superclass", clazz.getSuperclass().getName());
+			info.put("superclass", clazz.getSuperclass().getName());
 		}
 	}
 
-	private void addInterfaces(JsonObject info, Class<?> clazz) {
-		JsonArray interfacesArray = new JsonArray();
-		for (Class<?> iface : clazz.getInterfaces()) {
-			interfacesArray.add(iface.getName());
-		}
-		info.add("interfaces", interfacesArray);
+	private void addInterfaces(HashMap<String, Object> info, Class<?> clazz) {
+		List<String> interfacesList = Arrays.stream(clazz.getInterfaces())
+				.map(Class::getName)
+				.collect(Collectors.toList());
+		info.put("interfaces", interfacesList);
 	}
 
-	private void addFields(JsonObject info, Class<?> clazz) {
-		JsonArray fieldsArray = new JsonArray();
+	private void addFields(HashMap<String, Object> info, Class<?> clazz) {
+		List<Map<String, Object>> fieldsList = new ArrayList<>();
 		forEachNonPrivate(clazz.getDeclaredFields(), field -> {
-			JsonObject fieldObj = new JsonObject();
-			fieldObj.addProperty(MODIFIERS_PROPERTY, Modifier.toString(field.getModifiers()));
-			fieldObj.addProperty("type", field.getType().getName());
-			fieldObj.addProperty("name", field.getName());
-			fieldsArray.add(fieldObj);
+			Map<String, Object> fieldObj = new HashMap<>();
+			fieldObj.put(MODIFIERS_PROPERTY, Modifier.toString(field.getModifiers()));
+			fieldObj.put("type", field.getType().getName());
+			fieldObj.put("name", field.getName());
+			fieldsList.add(fieldObj);
 		});
-		info.add("fields", fieldsArray);
+		info.put("fields", fieldsList);
 	}
 
-	private void addConstructors(JsonObject info, Class<?> clazz) {
-		JsonArray constructorsArray = new JsonArray();
+	private void addConstructors(HashMap<String, Object> info, Class<?> clazz) {
+		List<Map<String, Object>> constructorsList = new ArrayList<>();
 		for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-			JsonObject ctorObj = new JsonObject();
-			ctorObj.addProperty(MODIFIERS_PROPERTY, Modifier.toString(constructor.getModifiers()));
-			ctorObj.addProperty("name", constructor.getName());
-			ctorObj.add("parameterTypes", toParameterTypes(constructor.getParameterTypes()));
-			constructorsArray.add(ctorObj);
+			Map<String, Object> ctorObj = new HashMap<>();
+			ctorObj.put(MODIFIERS_PROPERTY, Modifier.toString(constructor.getModifiers()));
+			ctorObj.put("name", constructor.getName());
+			ctorObj.put("parameterTypes", toParameterTypes(constructor.getParameterTypes()));
+			constructorsList.add(ctorObj);
 		}
-		info.add("constructors", constructorsArray);
+		info.put("constructors", constructorsList);
 	}
 
-	private void addMethods(JsonObject info, Class<?> clazz) {
-		JsonArray methodsArray = new JsonArray();
+	private void addMethods(HashMap<String, Object> info, Class<?> clazz) {
+		List<Map<String, Object>> methodsList = new ArrayList<>();
 		forEachNonPrivate(clazz.getDeclaredMethods(), method -> {
-			JsonObject methodObj = new JsonObject();
-			methodObj.addProperty(MODIFIERS_PROPERTY, Modifier.toString(method.getModifiers()));
-			methodObj.addProperty("returnType", method.getReturnType().getName());
-			methodObj.addProperty("name", method.getName());
-			methodObj.add("parameterTypes", toParameterTypes(method.getParameterTypes()));
-			methodsArray.add(methodObj);
+			Map<String, Object> methodObj = new HashMap<>();
+			methodObj.put(MODIFIERS_PROPERTY, Modifier.toString(method.getModifiers()));
+			methodObj.put("returnType", method.getReturnType().getName());
+			methodObj.put("name", method.getName());
+			methodObj.put("parameterTypes", toParameterTypes(method.getParameterTypes()));
+			methodsList.add(methodObj);
 		});
-		info.add("methods", methodsArray);
+		info.put("methods", methodsList);
 	}
 
-	private void addAnnotations(JsonObject info, Class<?> clazz) {
-		JsonArray annotationsArray = new JsonArray();
-		for (Annotation annotation : clazz.getDeclaredAnnotations()) {
-			annotationsArray.add(annotation.toString());
-		}
-		info.add("annotations", annotationsArray);
+	private void addAnnotations(HashMap<String, Object> info, Class<?> clazz) {
+		List<String> annotationsList = Arrays.stream(clazz.getDeclaredAnnotations())
+				.map(Annotation::toString)
+				.collect(Collectors.toList());
+		info.put("annotations", annotationsList);
 	}
 
-	private void addLocationMetadata(JsonObject info, ClassInfoHolder classInfoHolder, String className) {
+	private void addLocationMetadata(HashMap<String, Object> info, ClassInfoHolder classInfoHolder, String className) {
 		String path = classInfoHolder.getClassPath(className);
-		info.addProperty("path", path);
+		info.put("path", path);
 
 		String id = classInfoHolder.getArtifactId(className);
 		if (id != null) {
-			info.addProperty("artifact", id);
+			info.put("artifact", id);
 		}
 
 		String sourcePath = classInfoHolder.getSourcePath(className);
 		if (sourcePath != null) {
-			info.addProperty("sourcePath", sourcePath);
+			info.put("sourcePath", sourcePath);
 		}
 	}
 
-	private JsonArray toParameterTypes(Class<?>[] parameterTypes) {
-		JsonArray paramsArray = new JsonArray();
-		for (Class<?> paramType : parameterTypes) {
-			paramsArray.add(paramType.getName());
-		}
-		return paramsArray;
+	private List<String> toParameterTypes(Class<?>[] parameterTypes) {
+		return Arrays.stream(parameterTypes)
+				.map(Class::getName)
+				.collect(Collectors.toList());
 	}
 
 	private <T extends Member> void forEachNonPrivate(T[] members, Consumer<T> consumer) {

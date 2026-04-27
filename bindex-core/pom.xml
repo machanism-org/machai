@@ -40,12 +40,6 @@
 			<artifactId>mongodb-driver-sync</artifactId>
 			<version>5.6.4</version>
 		</dependency>
-		<!-- Java library for working with OpenAI models -->
-		<dependency>
-			<groupId>dev.langchain4j</groupId>
-			<artifactId>langchain4j-open-ai</artifactId>
-			<version>0.35.0</version>
-		</dependency>
 		<dependency>
 			<groupId>org.tomlj</groupId>
 			<artifactId>tomlj</artifactId>

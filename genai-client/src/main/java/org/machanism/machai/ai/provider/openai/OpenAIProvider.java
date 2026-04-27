@@ -28,7 +28,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.gson.JsonObject;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
@@ -264,10 +263,6 @@ public class OpenAIProvider implements Genai {
 
 		Object value = callFunction(functionCall);
 		Object callFunction = ObjectUtils.getIfNull(value, StringUtils.EMPTY);
-		
-		if(callFunction instanceof JsonObject) {
-			callFunction = callFunction.toString();
-		}
 
 		inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
 				.callId(functionCall.callId()).outputAsJson(callFunction).build()));
@@ -412,6 +407,7 @@ public class OpenAIProvider implements Genai {
 
 	private void logInputs(Writer streamWriter) throws IOException {
 		streamWriter.write(StringUtils.defaultString(instructions));
+		streamWriter.write("-----------------------------------------");
 		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
 		for (ResponseInputItem responseInputItem : inputs) {
 			String inputText = "";
