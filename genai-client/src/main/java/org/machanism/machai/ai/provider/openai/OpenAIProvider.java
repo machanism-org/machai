@@ -407,6 +407,7 @@ public class OpenAIProvider implements Genai {
 
 	private void logInputs(Writer streamWriter) throws IOException {
 		streamWriter.write(StringUtils.defaultString(instructions));
+		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
 		streamWriter.write("-----------------------------------------");
 		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
 		for (ResponseInputItem responseInputItem : inputs) {
