@@ -30,6 +30,15 @@
 		<bindex.model>${gw.model}</bindex.model>
 		<genai.serverId>CodeMie</genai.serverId>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<jackson.version>2.18.2</jackson.version>
+		<maven.shared.utils.version>3.4.2</maven.shared.utils.version>
+		<guava.version>33.5.0-jre</guava.version>
+		<guice.version>5.1.0</guice.version>
+		<error.prone.annotations.version>2.33.0</error.prone.annotations.version>
+		<bytebuddy.version>1.14.12</bytebuddy.version>
+		<kotlin.version>1.9.10</kotlin.version>
+		<plexus.utils.version>3.6.0</plexus.utils.version>
+		<sisu.version>0.9.0.M4</sisu.version>
 	</properties>
 
 	<profiles>
@@ -115,6 +124,83 @@
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>2.0.17</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.inject</groupId>
+				<artifactId>guice</artifactId>
+				<version>${guice.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.errorprone</groupId>
+				<artifactId>error_prone_annotations</artifactId>
+				<version>${error.prone.annotations.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy</artifactId>
+				<version>${bytebuddy.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy-agent</artifactId>
+				<version>${bytebuddy.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.shared</groupId>
+				<artifactId>maven-shared-utils</artifactId>
+				<version>${maven.shared.utils.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.plexus</groupId>
+				<artifactId>plexus-utils</artifactId>
+				<version>${plexus.utils.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sisu</groupId>
+				<artifactId>org.eclipse.sisu.inject</artifactId>
+				<version>${sisu.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sisu</groupId>
+				<artifactId>org.eclipse.sisu.plexus</artifactId>
+				<version>${sisu.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-stdlib</artifactId>
+				<version>${kotlin.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-stdlib-jdk7</artifactId>
+				<version>${kotlin.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-stdlib-jdk8</artifactId>
+				<version>${kotlin.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-reflect</artifactId>
+				<version>${kotlin.version}</version>
 			</dependency>
 
 			<!-- Test dependencies -->
