@@ -208,8 +208,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @throws IOException if provider execution fails
 	 */
 	protected String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
-		String sys_instructions = promptBundle.getString("sys_instructions");
-		String instructions = String.format(sys_instructions, getInstructions());
+		String guidanceSysInstructions = promptBundle.getString("guidance_sys_instructions");
+		String instructions = String.format(guidanceSysInstructions, getInstructions());
 
 		StringBuilder guidanceBuilder = new StringBuilder();
 		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");

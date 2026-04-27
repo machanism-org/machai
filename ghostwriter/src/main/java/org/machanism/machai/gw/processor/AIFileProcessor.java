@@ -73,8 +73,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			File projectDir = projectLayout.getProjectDir();
 			provider.setWorkingDir(projectDir);
 
-			String additionalInstructions = promptBundle.getString("additional_instructions");
-			provider.instructions(instructions + "\n\n" + additionalInstructions);
+			String sysInstructions = promptBundle.getString("sys_instructions");
+			String finalInstructions = String.format(sysInstructions, getInstructions());
+
+			provider.instructions(finalInstructions);
 
 			String projectInfo = getProjectStructureDescription(projectLayout, file);
 
