@@ -20,6 +20,8 @@ import org.machanism.machai.ai.tools.FunctionTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * Provides function-tool integrations for discovering Java classes and reading
  * reflective metadata from the classpath of one or more Maven projects.
@@ -121,13 +123,11 @@ public class ClassFunctionalTools implements FunctionTools {
 		File workingDir = (File) params[1];
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(workingDir);
 		String classes = "Class not found.";
-		List<com.google.common.reflect.ClassPath.ClassInfo> list = null;
 		if (classInfoHolder != null) {
-			@SuppressWarnings("unchecked")
-			HashMap<String, Object> props = (HashMap<String, Object>) params[0];
-			String className = (String) props.get(CLASS_NAME_PROPERTY);
+			String className = getClassNameParam(params[0]);
 
-			list = classInfoHolder.findClasses(className);
+			List<com.google.common.reflect.ClassPath.ClassInfo> list = classInfoHolder.findClasses(className);
+
 			if (list != null && !list.isEmpty()) {
 				List<String> collect = list.stream().map(e -> e.getName())
 						.collect(Collectors.toList());
@@ -171,13 +171,11 @@ public class ClassFunctionalTools implements FunctionTools {
 		File workingDir = (File) params[1];
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(workingDir);
 		if (classInfoHolder != null) {
-			@SuppressWarnings("unchecked")
-			HashMap<String, Object> props = (HashMap<String, Object>) params[0];
 			if (logger.isInfoEnabled()) {
 				logger.info("Get classInfo: {}", Arrays.toString(params));
 			}
 
-			String className = (String) props.get(CLASS_NAME_PROPERTY);
+			String className = getClassNameParam(params[0]);
 
 			try {
 				Class<?> clazz = classInfoHolder.loadClass(className);
@@ -189,6 +187,20 @@ public class ClassFunctionalTools implements FunctionTools {
 			info.put("error", FT_NOT_SUPPORTED_FOR_PROJECT_MSG);
 		}
 		return info;
+	}
+
+	private String getClassNameParam(Object param) {
+		if (param instanceof JsonNode) {
+			JsonNode props = (JsonNode) param;
+			JsonNode classNameNode = props.get(CLASS_NAME_PROPERTY);
+			return classNameNode == null ? null : classNameNode.asText();
+		}
+		if (param instanceof Map<?, ?>) {
+			Map<?, ?> props = (Map<?, ?>) param;
+			Object className = props.get(CLASS_NAME_PROPERTY);
+			return className == null ? null : String.valueOf(className);
+		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
