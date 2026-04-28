@@ -26,7 +26,6 @@ Your operating principles:
    under the current root, report it as NOT FOUND and skip the fix.
 8. Always use relative paths from the project root.
 9. If build failed, terminate the task with `exitCode`: `1` and the problem description.
-10. The command to execute. Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.
 '''
 
 # ============================================================
