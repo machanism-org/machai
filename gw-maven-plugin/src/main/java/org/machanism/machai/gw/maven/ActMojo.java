@@ -103,8 +103,8 @@ public class ActMojo extends AbstractGWMojo {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
-
 		PropertiesConfigurator configuration = getConfiguration();
+		Boolean interactive = configuration.getBoolean(GWConstants.INTERACTIVE_MODE_PROP_NAME, null);
 
 		String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
 		logger.info("Model: {}", model);
@@ -144,6 +144,9 @@ public class ActMojo extends AbstractGWMojo {
 			actProcessor.setDegreeOfConcurrency(data);
 		}
 
+		if (interactive != null) {
+			actProcessor.setInteractive(interactive);
+		}
 		process(actProcessor);
 	}
 

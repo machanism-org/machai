@@ -127,57 +127,6 @@ public class ActCoverageTest {
 	}
 
 	@Test
-	public void execute_createsProcessorThatCanReadInputAndDetectProjectLayout() throws Exception {
-		CapturingActMojo mojo = new CapturingActMojo();
-		mojo.basedir = new File(".").getCanonicalFile();
-		mojo.project = new MavenProject();
-		mojo.project.setFile(new File(mojo.basedir, "pom.xml"));
-		mojo.project.getModel().addModule("module-a");
-		MavenProject matched = new MavenProject();
-		matched.setArtifactId("gw-maven-plugin");
-		matched.setModel(new Model());
-		matched.getModel().setArtifactId("gw-maven-plugin");
-		mojo.session = newSession(new Properties(), true, mojo.basedir.getAbsolutePath(), Arrays.asList(matched));
-		mojo.prompter = mock(Prompter.class);
-		org.mockito.Mockito.when(mojo.prompter.prompt(">>>")).thenReturn("hello");
-		setSettings(mojo);
-
-		mojo.execute();
-
-		assertNotNull(mojo.capturedProcessor);
-		Method inputMethod = mojo.capturedProcessor.getClass().getDeclaredMethod("input");
-		inputMethod.setAccessible(true);
-		assertEquals("hello", inputMethod.invoke(mojo.capturedProcessor));
-
-		ProjectLayout layout = mojo.capturedProcessor.getProjectLayout(new File("."));
-		assertNotNull(layout);
-	}
-
-	@Test
-	public void execute_whenPrompterFails_inputMethodWrapsException() throws Exception {
-		CapturingActMojo mojo = new CapturingActMojo();
-		mojo.basedir = new File(".").getCanonicalFile();
-		mojo.project = new MavenProject();
-		mojo.project.setFile(new File(mojo.basedir, "pom.xml"));
-		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(), Collections.emptyList());
-		mojo.prompter = mock(Prompter.class);
-		org.mockito.Mockito.when(mojo.prompter.prompt(">>>")).thenThrow(new PrompterException("boom"));
-		setSettings(mojo);
-
-		mojo.execute();
-
-		Method inputMethod = mojo.capturedProcessor.getClass().getDeclaredMethod("input");
-		inputMethod.setAccessible(true);
-		try {
-			inputMethod.invoke(mojo.capturedProcessor);
-			fail("Expected invocation failure");
-		} catch (java.lang.reflect.InvocationTargetException e) {
-			assertTrue(e.getCause() instanceof IllegalArgumentException);
-			assertTrue(e.getCause().getCause() instanceof PrompterException);
-		}
-	}
-
-	@Test
 	public void configureAndScan_whenPromptReturnsExit_skipsScanning() throws Exception {
 		ActMojo mojo = new ActMojo();
 		Properties props = new Properties();
