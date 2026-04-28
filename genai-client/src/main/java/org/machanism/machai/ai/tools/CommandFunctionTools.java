@@ -280,7 +280,9 @@ public class CommandFunctionTools implements FunctionTools {
 			pb.directory(workingDir);
 
 			if (props.has("env")) {
-				Map<String, String> envMap = parseEnv(props.get("env").asText());
+				String envStr = props.get("env").asText();
+				envStr = replace(envStr, configurator);
+				Map<String, String> envMap = parseEnv(envStr);
 				pb.environment().putAll(envMap);
 			}
 
