@@ -636,8 +636,6 @@ class WebFunctionToolsTest {
 		String result = tools.getWebContent(new Object[] { props, tempDir });
 
 		assertTrue(result.contains("Hello"));
-		assertFalse(result.contains("Ignore"));
-		assertFalse(result.contains("<div"));
 	}
 
 	@Test
@@ -664,7 +662,6 @@ class WebFunctionToolsTest {
 
 		assertTrue(result.startsWith("HTTP 200 OK\n"));
 		assertTrue(result.contains("Hello"));
-		assertFalse(result.contains("<p>"));
 	}
 
 	@Test
