@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>machai</artifactId>
-		<version>1.1.4-SNAPSHOT</version>
+		<version>1.1.5</version>
 	</parent>
 	<packaging>maven-plugin</packaging>
 
@@ -105,7 +105,7 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>ghostwriter</artifactId>
-			<version>1.1.4-SNAPSHOT</version>
+			<version>1.1.5</version>
 		</dependency>
 
 		<dependency>
