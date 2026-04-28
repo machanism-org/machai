@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -15,7 +16,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException;
-import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -149,7 +150,7 @@ public class GWMojo extends AbstractGWMojo {
 	public void execute() throws MojoExecutionException {
 		PropertiesConfigurator config = getConfiguration();
 
-		String model = config.get(Ghostwriter.MODEL_PROP_NAME, this.model);
+		String model = config.get(GWConstants.MODEL_PROP_NAME, this.model);
 		GuidanceProcessor processor = new GuidanceProcessor(basedir, model, config) {
 
 			@Override
@@ -178,7 +179,7 @@ public class GWMojo extends AbstractGWMojo {
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		processor.setNonRecursive(nonRecursive);
-
+		
 		boolean isParallel = session.isParallel();
 		if (isParallel) {
 			int data = session.getRequest().getDegreeOfConcurrency();
@@ -209,7 +210,7 @@ public class GWMojo extends AbstractGWMojo {
 			if (mavenProject == null) {
 				continue;
 			}
-			if (StringUtils.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
+			if (Strings.CS.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
 				matching.add(toCoord(mavenProject));
 			}
 		}
@@ -224,7 +225,7 @@ public class GWMojo extends AbstractGWMojo {
 		}
 
 		for (MavenProject mavenProject : allProjects) {
-			if (mavenProject != null && StringUtils.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
+			if (mavenProject != null && Strings.CS.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
 				return mavenProject;
 			}
 		}
@@ -235,9 +236,9 @@ public class GWMojo extends AbstractGWMojo {
 		if (project == null) {
 			return "<null>";
 		}
-		String groupId = StringUtils.defaultString(project.getGroupId(), "");
-		String artifactId = StringUtils.defaultString(project.getArtifactId(), "");
-		String version = StringUtils.defaultString(project.getVersion(), "");
+		String groupId = Objects.toString(project.getGroupId(), "");
+		String artifactId = Objects.toString(project.getArtifactId(), "");
+		String version = Objects.toString(project.getVersion(), "");
 		String basedir = Objects.toString(project.getBasedir(), "");
 		return groupId + ":" + artifactId + ":" + version + "@" + basedir;
 	}

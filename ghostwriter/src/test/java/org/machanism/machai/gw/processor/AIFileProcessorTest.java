@@ -57,6 +57,7 @@ class AIFileProcessorTest {
 		assertThrows(IllegalArgumentException.class, () -> p.readFromFilePath("missing.txt"));
 	}
 
+	@SuppressWarnings("restriction")
 	@Test
 	void readFromHttpUrl_whenValid_thenReturnsContent() throws Exception {
 		HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
@@ -72,6 +73,7 @@ class AIFileProcessorTest {
 		}
 	}
 
+	@SuppressWarnings("restriction")
 	static class FixedHandler implements HttpHandler {
 		private final String response;
 

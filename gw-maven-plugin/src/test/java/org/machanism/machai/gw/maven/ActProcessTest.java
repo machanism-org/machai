@@ -14,7 +14,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
-import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.gw.processor.GWConstants;
 
 public class ActProcessTest {
 
@@ -62,7 +62,7 @@ public class ActProcessTest {
 	public void process_whenActsLocationProvided_setsActsLocation() throws Exception {
 		TestableAct act = new TestableAct();
 		RecordingActProcessor processor = new RecordingActProcessor();
-		processor.getConfigurator().set(Ghostwriter.ACTS_LOCATION_PROP_NAME, "c:/acts");
+		processor.getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, "c:/acts");
 
 		act.process(processor);
 
@@ -87,7 +87,7 @@ public class ActProcessTest {
 	public void process_whenExcludesConfigured_splitsAndUsesConfiguredValues() throws Exception {
 		TestableAct act = new TestableAct();
 		RecordingActProcessor processor = new RecordingActProcessor();
-		processor.getConfigurator().set(Ghostwriter.EXCLUDES_PROP_NAME, "one,two");
+		processor.getConfigurator().set(GWConstants.EXCLUDES_PROP_NAME, "one,two");
 
 		act.process(processor);
 

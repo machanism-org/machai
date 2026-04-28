@@ -34,62 +34,128 @@ canonical: https://machai.machanism.org/ghostwriter/act.html
 
 # Act
 
-The Act feature lets Ghostwriter run a named, reusable task from a TOML file.
-An act bundles together instructions for the AI, a prompt template, and optional Ghostwriter settings such as scan scope, recursion, thread count, and interactive mode. This makes common work easier to repeat because users can launch a prepared workflow instead of rewriting the same request every time.
+An Act is a reusable task definition for Ghostwriter.
+It is stored in a TOML file and gives Ghostwriter a prepared way to work, instead of requiring the user to write the full setup every time.
 
-In simple terms, an act is a saved recipe for working with the project.
-You choose the act by name, optionally add your own request text, and Ghostwriter combines that information with the act configuration before processing files.
+In practice, an act can provide:
 
-## What an act does
+- a user-friendly description;
+- AI instructions;
+- a prompt template;
+- optional default prompt text;
+- Ghostwriter runtime settings such as scan scope, recursion, thread count, model, excludes, and interactive mode;
+- inherited values from another act.
 
-An act can define:
+Acts are useful when the same kind of work needs to be repeated, such as writing code documentation, generating unit tests, preparing release notes, or reviewing quality issues.
 
-- `description`: a short explanation of what the act is for.
-- `instructions`: the system-level guidance sent to the AI.
-- `inputs`: the prompt template used to build the final user request.
-- `prompt`: a default prompt value used when the user does not provide one.
-- `basedOn`: another act to inherit from.
-- `gw.*` properties such as `gw.scanDir`, `gw.nonRecursive`, `gw.interactive`, `gw.threads`, and `gw.excludes`.
-- Additional properties that are forwarded into the configurator for other parts of the application or functional tools.
+## What the Act feature does
 
-Built-in acts are loaded from `src/main/resources/acts`.
-Ghostwriter can also load acts from a user-defined location, and a custom act can override or extend a built-in act with the same name.
+The Act feature lets Ghostwriter:
 
-## How Act works in Ghostwriter
+1. load a named TOML file;
+2. optionally combine it with a parent act through inheritance;
+3. merge built-in and custom act definitions;
+4. build the final prompt from the act template and user input;
+5. apply the act settings to the current Ghostwriter run;
+6. process matching project files using the resulting instructions.
 
-The main logic is implemented in `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java`.
-Its role is to load an act, merge inherited values, build the final prompt, and apply the act settings to the current run.
+This makes acts the configurable task layer of the project.
+They connect reusable task definitions with actual project processing.
 
-At a high level, the process is:
+## Where acts come from
 
-1. Ghostwriter receives an act command.
-2. The act name and optional prompt text are separated.
-3. Ghostwriter loads the act TOML data.
-4. If the act inherits from another act through `basedOn`, the parent act is loaded first.
-5. Built-in and custom values are merged.
-6. The `inputs` template is combined with the user prompt or default prompt.
-7. Ghostwriter applies act settings such as instructions, scan options, model, and interactive mode.
-8. Files are processed using the final instructions and prompt.
+The built-in acts in this project are stored in:
 
-## Interactive and non-interactive use
+- `src/main/resources/acts`
 
-Acts support two main ways of working.
+The current built-in act files are:
+
+- `code-doc.toml`
+- `commit.toml`
+- `grype-fix.toml`
+- `help.toml`
+- `release-notes.toml`
+- `sonar-fix.toml`
+- `task.toml`
+- `unit-tests.toml`
+
+Ghostwriter can also load acts from a user-defined act directory.
+If a custom act has the same name as a built-in act, both can participate in the final result.
+The custom act can override or extend the built-in one.
+
+## How Act is processed
+
+The main processing logic is implemented in:
+
+- `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java`
+
+This class is responsible for parsing the act command, loading TOML data, handling inheritance, composing values, and applying the result to the processor.
+
+### Main methods and responsibilities
+
+#### `setAct(String act)`
+
+This method starts act processing.
+It:
+
+- uses `help` when no act name is provided;
+- splits the input into the act name and optional prompt text;
+- loads the act data;
+- builds the final `inputs` value;
+- applies the act properties to the running processor.
+
+#### `loadAct(String name, Map<String, Object> properties, String actsLocation)`
+
+This method loads act data from:
+
+- a user-defined directory, when available;
+- the built-in classpath resources.
+
+It also checks `basedOn` and loads parent acts first.
+
+#### `setActData(Map<String, Object> properties, TomlParseResult toml)`
+
+This method copies TOML values into the working property map.
+It also performs string composition when a value already exists.
+That is how inherited templates can be extended instead of simply replaced.
+
+#### `applyActData(Map<String, Object> properties)`
+
+This method applies the loaded values to Ghostwriter.
+Depending on the property name, it can:
+
+- set instructions;
+- set the final default prompt;
+- enable or disable interactive mode;
+- change thread count;
+- set excludes;
+- disable recursion;
+- set the model;
+- forward other values into the configurator.
+
+## Interactive and non-interactive mode
+
+Acts can be used in two different ways.
 
 ### Non-interactive mode
 
-In non-interactive mode, the act behaves like a predefined command.
-You run it once, Ghostwriter applies the act settings, and the task proceeds without entering a chat session.
+A non-interactive act behaves like a ready-to-run command.
+You launch it, Ghostwriter applies the act configuration, and the task runs without opening a chat workflow.
 
-This mode is useful when:
+This is best when:
 
-- the task is well defined in advance;
-- the act already contains enough instructions;
-- you want repeatable automation;
-- no back-and-forth discussion is needed.
+- the task is already clear;
+- the act contains enough instructions by itself;
+- repeatable automation is preferred.
 
-Typical examples are documentation generation, release note generation, vulnerability remediation, and unit test creation.
+Examples of mainly non-interactive acts in this project include:
 
-You activate this by using an act that does not enable `gw.interactive`, or by using configuration that keeps interactive mode disabled.
+- `code-doc`
+- `commit`
+- `grype-fix`
+- `release-notes`
+- `sonar-fix`
+- `unit-tests`
 
 Example:
 
@@ -97,24 +163,27 @@ Example:
 --act code-doc
 ```
 
-You can also add extra request text:
+Or with extra request text:
 
 ```text
---act release-notes Prepare notes for the next release
+--act release-notes Prepare the next release entry
 ```
 
 ### Interactive mode
 
-In interactive mode, the act is used as a chat-oriented helper.
-This is useful when the user does not yet know the full request before starting, or when the task needs clarification while the conversation continues.
+An interactive act starts Ghostwriter in a chat-like mode.
+This is useful when the user does not yet know the full request before starting or expects to refine the request during the conversation.
 
-An interactive act enables `gw.interactive = true`.
-Built-in examples include:
+Interactive mode is enabled with:
+
+```toml
+gw.interactive = true
+```
+
+Built-in interactive acts include:
 
 - `help`
 - `task`
-
-When interactive mode is active, the act gives Ghostwriter a starting role and prompt structure, but the user can continue the conversation and refine the request.
 
 Example:
 
@@ -122,103 +191,111 @@ Example:
 --act help
 ```
 
-or:
+Or:
 
 ```text
---act task Help me plan a refactoring of the parser package
+--act task Help me design a safer parser update
 ```
 
-### Reserved interactive command
+### Reserved command name
 
-The name `exit` is reserved for terminating a process.
-It must not be used as an act name or interactive command for normal act execution.
+The act name or interactive command `exit` is reserved for terminating a process.
+It must not be used as a normal act name.
 
 ## Using the `prompt` property
 
-An act can define a `prompt` property to supply a default prompt value.
-This is used when the user starts the act without providing prompt text after the act name.
+An act can define a `prompt` property to provide default prompt text.
+This value is helpful when the user runs the act without adding any request text after the act name.
 
-This is especially helpful when an act should perform a standard action even if the user gives no extra details.
-
-For example, `src/main/resources/acts/sonar-fix.toml` contains:
+Example from `sonar-fix.toml`:
 
 ```toml
 prompt = "Perform the default and special rules."
 ```
 
-That means a command such as:
+That allows this command to run with meaningful prompt content even when the user provides nothing more:
 
 ```text
 --act sonar-fix
 ```
 
-can still run with a meaningful default request.
+### How the prompt is chosen
 
-If the user does provide text, that user text takes priority.
-If no text is provided, Ghostwriter falls back to the processor default prompt, and the act-level `prompt` value can then be used when building the final `inputs` content.
+In `setAct`, Ghostwriter first determines the user prompt text.
+
+- If the user writes text after the act name, that text is used.
+- If not, Ghostwriter uses the processor's current default prompt.
+- When the act `inputs` template is built, the act-level `prompt` value is available as a fallback value.
+
+This makes the `prompt` property a practical default for acts that should still do something useful even with no additional user text.
 
 ## How the final prompt is built
 
-The `inputs` property is a template.
-Most built-in acts include `%s` inside `inputs`.
+Most acts define an `inputs` property containing `%s`.
 Ghostwriter replaces `%s` with the effective prompt text.
 
-That effective prompt text usually comes from one of these sources:
+Example pattern:
 
-1. the prompt text entered by the user after the act name;
-2. the processor's current default prompt;
-3. the act's `prompt` property, when used as the fallback during prompt construction.
+```toml
+inputs = '''
+# Task
 
-This allows one act file to stay reusable while still accepting task-specific details.
+%s
+'''
+```
+
+If the user runs:
+
+```text
+--act task Explain the current module structure
+```
+
+Ghostwriter inserts the user text into `%s` and uses the result as the final prompt.
 
 ## Inheritance and overriding
 
-Ghostwriter supports inheritance through the `basedOn` property.
-This is one of the most important parts of the Act feature.
+Acts support inheritance through the `basedOn` property.
+This allows one act to reuse another act and only change the parts that need to be different.
 
-### How inheritance works
+### Basic inheritance
 
-When an act contains:
+Example:
 
 ```toml
 basedOn = "parent-act"
 ```
 
-Ghostwriter first loads `parent-act`, then loads the child act.
-The child act can reuse the parent configuration and override only the values it wants to change.
+When this appears, Ghostwriter loads `parent-act` first and then applies the child act.
 
-### What can be inherited
+### Sources involved in the final result
 
-Any TOML value handled by the processor can be inherited, including:
+The final act data can be influenced by several sources:
 
-- `instructions`
-- `inputs`
-- `description`
-- `prompt`
-- `gw.*` values
-- other forwarded configuration properties
+1. built-in act values;
+2. custom act values from the configured act directory;
+3. parent act values loaded through `basedOn`;
+4. existing configurator values already active in Ghostwriter.
 
-### How values are merged
+### How loading order works
 
-The merge behavior is not just simple replacement.
-String values can be composed using `%s`.
-This is important for templates.
+Based on `ActProcessor.loadAct`, Ghostwriter does the following:
 
-The processor applies values in this general order:
+1. try to load the custom act;
+2. try to load the built-in act;
+3. determine `basedOn`, preferring the custom act value when present;
+4. recursively load the parent act first;
+5. keep merging values into one shared property map.
 
-1. load custom act data if available;
-2. load built-in act data if available;
-3. determine `basedOn` from the custom act first, otherwise from the built-in act;
-4. if `basedOn` exists, load the parent recursively;
-5. merge child values into the accumulated property map;
-6. when applying the final properties, replace `%s` with inherited configurator values when relevant.
+If neither custom nor built-in data exists, the act is considered missing.
 
-### String template inheritance
+### How string inheritance works
 
-If a property already exists and a later string value is loaded for the same key, Ghostwriter combines them by replacing `%s` in the existing value with the new value.
-This allows a child act to extend a parent template instead of replacing it completely.
+`setActData` does more than plain replacement.
+If the same string key already exists in the property map, the processor replaces `%s` inside the existing value with the new value.
 
-A simple example:
+That means a parent template can be extended by a child.
+
+Example:
 
 Parent act:
 
@@ -233,173 +310,172 @@ basedOn = "parent"
 instructions = "Add Java-specific rules."
 ```
 
-Resulting instructions:
+Result:
 
 ```text
 Base instructions: Add Java-specific rules.
 ```
 
-The same pattern can be used for `inputs` and other string properties.
+This can be used with:
 
-### Configurator inheritance during apply
+- `instructions`
+- `inputs`
+- `description`
+- `prompt`
+- other string properties
 
-After act data is loaded, Ghostwriter applies it to the current configuration.
-If the configurator already contains a value for the same key, and the act value contains `%s`, Ghostwriter replaces `%s` with the existing configurator value.
-This allows current runtime defaults to flow into the act.
+### How configurator inheritance works during apply
 
-In practice, that means values can come from several places:
+`applyActData` performs another important step.
+If the configurator already has a value for the same key, and the act value contains `%s`, Ghostwriter replaces `%s` with the existing configurator value.
 
-- built-in act files;
-- custom act files;
-- parent acts via `basedOn`;
-- current configurator defaults already active in the processor.
+So inheritance is not only between parent and child act files.
+It can also include runtime defaults that already exist in the configurator.
 
-The later applied value can override earlier values, or extend them through `%s`.
+### When values override instead of extend
 
-## Placeholders in `${...}` format
+If a child value does not rely on `%s`, it effectively replaces the older value.
+This gives act authors both options:
 
-Some values may contain placeholder variables written as `${...}`.
-These placeholders are for runtime substitution by functional tools or configuration sources.
+- extend a parent value with `%s`;
+- override a parent value with a complete replacement.
 
-Examples of what they may refer to include:
+## Placeholder variables in `${...}` format
+
+Some act values may contain placeholder variables in the `${...}` format.
+These placeholders are meant for dynamic substitution at runtime by functional tools or configuration sources.
+
+Typical uses include retrieving values from:
 
 - environment variables;
 - system properties;
 - action properties;
 - configurator-provided values;
-- other runtime parameters.
+- similar runtime sources.
 
 Important rules:
 
-- `${...}` placeholders must remain exactly as written.
-- They must not be resolved, rewritten, or altered by the LLM.
-- They are intentionally preserved so the application or tools can replace them later.
+- `${...}` must remain exactly as written.
+- The LLM must not resolve, change, or rewrite these placeholders.
+- They are intentionally preserved for runtime processing by the application.
 
-This placeholder format is different from `%s`.
+This is different from `%s`:
 
-- `%s` is used by Ghostwriter to compose inherited templates and inject prompt text.
+- `%s` is used by Ghostwriter to compose prompts and inherited string templates.
 - `${...}` is used for later dynamic substitution by the surrounding system.
+
+## Using an absolute TOML path
+
+An absolute path to a TOML file can be used as the act name.
+When that happens, Ghostwriter loads that file directly.
+
+In this case, hierarchy using classpath resources is not supported.
+That means the file is treated as a direct act source instead of part of the normal built-in classpath act hierarchy.
 
 ## Built-in acts
 
-Ghostwriter includes the following built-in act files in `src/main/resources/acts`.
-Each one targets a specific type of work.
-
 ### `code-doc`
 
-Purpose: add or update code documentation comments.
+Purpose: add or update documentation comments in source code.
 
-Use this act when you want Ghostwriter to write or improve Javadoc, docstrings, or similar code comments without changing program logic. It is useful for improving maintainability and helping future developers understand the code.
+Use this act when you want Ghostwriter to improve Javadoc, docstrings, or similar code comments without changing the code logic itself.
+It focuses on clear documentation, language-appropriate comment style, and returning only the updated file content.
 
 ### `commit`
 
-Purpose: analyze local changes and prepare or execute grouped commits.
+Purpose: analyze project changes and prepare or execute commits.
 
-Use this act when you want help reviewing modified files, grouping related changes, creating commit messages in the project's style, and running version control commands. It is aimed at automating commit preparation and execution.
+Use this act when you want Ghostwriter to inspect modified files, group related changes, create commit messages in the project's style, and run version control commands through the command tool.
+It is intended for commit automation and structured commit preparation.
 
 ### `grype-fix`
 
-Purpose: fix dependency vulnerabilities found by Grype.
+Purpose: fix dependency vulnerabilities reported by Grype.
 
-Use this act when you have Grype scan results and want Ghostwriter to update affected dependencies, verify the build, and document the changes. It is especially useful for Maven projects and dependency maintenance.
+Use this act when you have Grype scan results and want Ghostwriter to update vulnerable dependencies, verify the Maven build, and document why the dependencies were changed.
+It is especially useful for vulnerability remediation in Maven projects.
 
 ### `help`
 
-Purpose: explain the Act feature itself.
+Purpose: explain how acts work and help users inspect them.
 
-Use this act when you want to list acts, inspect a specific act, understand act inheritance, or get user-friendly guidance on how act configuration works. This act is interactive.
+Use this act when you want to list acts, understand act configuration, inspect a specific act, or learn how inheritance and overrides behave.
+This act runs in interactive mode.
 
 ### `release-notes`
 
 Purpose: generate release notes from commit history.
 
-Use this act when you want Ghostwriter to collect relevant commit messages, group changes, and add a new release entry to `src/changes/changes.xml`. It is intended for release preparation.
+Use this act when you want Ghostwriter to collect commit messages, group them by change type, and add a new release entry to `src/changes/changes.xml`.
+It is intended for release preparation work.
 
 ### `sonar-fix`
 
 Purpose: review and fix SonarQube issues.
 
-Use this act when you want Ghostwriter to analyze a SonarQube report, apply minimal code corrections, and use carefully documented `@SuppressWarnings` annotations only when necessary. It also defines a default `prompt` value.
+Use this act when you want Ghostwriter to process SonarQube report data, apply focused Java fixes, and use tightly controlled `@SuppressWarnings` handling only when necessary.
+This act also defines a default `prompt` value.
 
 ### `task`
 
-Purpose: provide a generic project-aware assistant.
+Purpose: provide a general project-aware assistant template.
 
-Use this act when you want an interactive starting point for a custom request that does not fit one of the more specialized acts. It is a simple general-purpose act.
+Use this act when your request does not fit a more specialized act.
+It is a minimal interactive act that passes the user's prompt into a simple task template.
 
 ### `unit-tests`
 
-Purpose: improve test coverage by generating or updating unit tests.
+Purpose: generate or improve unit tests.
 
-Use this act when you want Ghostwriter to analyze coverage, update existing tests, create missing tests, and help move the project toward stronger automated test coverage.
+Use this act when you want Ghostwriter to build the project, analyze JaCoCo coverage, update existing tests, create missing tests, and improve overall test coverage for the project.
 
-## Loading acts from different locations
+## Step-by-step usage examples
 
-Ghostwriter can load acts from more than one source.
-
-### Built-in classpath acts
-
-Built-in acts are loaded from the classpath under `/acts`, which in this project corresponds to `src/main/resources/acts`.
-
-### User-defined acts
-
-A separate acts directory can be configured.
-If an act exists there, Ghostwriter loads it as a custom act.
-A custom act can complement or override a built-in act with the same name.
-
-### Absolute TOML path
-
-An absolute path to a TOML file can also be used as the act name.
-When the file name is an absolute TOML path, Ghostwriter loads that file directly.
-In that case, hierarchy using classpath resources is not supported.
-
-## Practical examples
-
-### Example 1: run a predefined task
+### Example 1: run a ready-made act
 
 ```text
 --act code-doc
 ```
 
-Ghostwriter loads the `code-doc` act, uses its documentation-focused instructions, builds the prompt from its `inputs`, and processes matching files.
+Ghostwriter loads the `code-doc` act, applies its documentation instructions, builds the final prompt from its `inputs`, and processes the matching files.
 
-### Example 2: run an act with extra request text
+### Example 2: run an act with your own request text
 
 ```text
---act unit-tests Focus on parser edge cases and static utility methods
+--act unit-tests Focus on parser edge cases and static helper methods
 ```
 
-Ghostwriter uses `unit-tests` and inserts the extra request into the `%s` slot in the act's `inputs` template.
+Ghostwriter inserts the extra request into the act's `%s` template and uses the result as the final prompt.
 
-### Example 3: ask for act help interactively
+### Example 3: start an interactive act
 
 ```text
 --act help Explain how basedOn works
 ```
 
-Ghostwriter starts the interactive help act and uses the provided question inside the act's prompt template.
+Ghostwriter starts the `help` act in interactive mode and uses the supplied request as the starting question.
 
-### Example 4: use a default prompt from the act
+### Example 4: rely on an act default prompt
 
 ```text
 --act sonar-fix
 ```
 
-If no extra prompt text is provided, the act can still proceed using its default `prompt` value together with its predefined `inputs` instructions.
+If no additional text is provided, the act can still proceed using its default `prompt` behavior together with its predefined `inputs` template.
 
-## Why Act matters in this project
+## Summary
 
-The Act feature gives Ghostwriter a reusable, configurable way to perform common project tasks.
-Instead of hardcoding one workflow for every situation, the project uses TOML-based acts to define repeatable behavior in a form that is easy to read, version, customize, and extend.
+The Act feature gives Ghostwriter a flexible way to package reusable work into TOML files.
+It lets the project define repeatable tasks in a form that is easy to version, extend, override, and run.
 
-This helps Ghostwriter fit many use cases, including:
+In this project, acts support important workflows such as:
 
-- code documentation;
-- unit test generation;
-- commit support;
+- documentation updates;
+- commit preparation;
+- vulnerability remediation;
 - release note generation;
-- security and quality remediation;
-- interactive project guidance.
+- SonarQube issue fixing;
+- unit test generation;
+- interactive user guidance.
 
-In short, acts are the project's configurable task layer.
-They connect project-aware AI processing with reusable instructions and runtime settings.
+In short, acts are how Ghostwriter turns reusable configuration into practical project-aware actions.

@@ -21,7 +21,7 @@ For a broader introduction to this workflow, see [Guided File Processing](https:
 
 ## What `GuidanceProcessor` does
 
-`GuidanceProcessor` is the Ghostwriter class that manages guided file processing. It scans the project, finds supported files, reads their `@guidance:` instructions through file reviewers, and passes the processing request to the configured AI provider.
+`GuidanceProcessor` is the Ghostwriter class that manages guided file processing. It scans the project tree, finds files that match the current rules, selects a reviewer for each supported file type, extracts any `@guidance:` instructions, and sends the work to the configured AI provider.
 
 In simple terms, it works like this:
 
@@ -29,44 +29,45 @@ In simple terms, it works like this:
 2. `GuidanceProcessor` checks which files or directories should be included.
 3. It picks a reviewer that understands the file type.
 4. The reviewer reads the file and extracts the `@guidance:` text.
-5. `GuidanceProcessor` prepares the final processing instructions.
+5. `GuidanceProcessor` prepares the processing instructions.
 6. Ghostwriter sends the request to the AI provider and updates the file.
 
-This process is based on scanning files in the project tree. It does not build the project or resolve dependencies.
+This is a scan-based process. It works by traversing the project directory and does not build the project or resolve dependencies.
 
 ## How guidance fits into Ghostwriter
 
-Ghostwriter supports workflows that help apply AI updates in a structured way. Guidance is the feature that makes file-by-file updates repeatable.
+Ghostwriter supports structured AI workflows for updating project files. Guidance is the feature that makes file-by-file processing repeatable and easier to manage.
 
 Instead of writing one large prompt outside the project, you place short instructions inside each file. This means:
 
 - the instructions stay close to the content they affect,
 - future updates can follow the same rules,
+- supported file types can be processed in a consistent way,
 - and other people can quickly understand the purpose of the file.
 
-This approach is especially useful for documentation, configuration files, and source files that benefit from clear, repeatable update rules.
+This approach is especially useful for documentation and other files that benefit from clear, reusable update rules.
 
 ## Key methods in `GuidanceProcessor`
 
 ### `loadReviewers()`
 
-Loads all available reviewers through Java's `ServiceLoader`. A reviewer knows how to inspect a supported file type and extract any `@guidance:` text.
+Loads available reviewers by using Java's `ServiceLoader`. A reviewer knows how to inspect a supported file type and extract any `@guidance:` text.
 
 ### `normalizeExtensionKey(String extension)`
 
-Normalizes file extensions so Ghostwriter can match them consistently. For example, it treats `.md` and `md` as the same type.
+Normalizes file extensions so Ghostwriter can match them reliably. For example, it treats `.md` and `md` as the same file type.
 
 ### `match(File file, File projectDir)`
 
-Decides whether a file or directory should be processed. It applies the configured path-matching rules and the default prompt behavior.
+Decides whether a file or directory should be processed. It applies path-matching rules and also supports default guidance behavior when no specific guidance is found.
 
 ### `processModule(File projectDir, String module)`
 
-Handles module directories in multi-module projects. When a scan directory is configured, it limits processing to matching modules.
+Handles module directories in multi-module projects. If a scan directory is configured, it limits processing to modules that match that scope.
 
 ### `processParentFiles(ProjectLayout projectLayout)`
 
-Processes files directly under the main project directory while skipping module folders. It can also apply a default prompt to the main project directory itself.
+Processes files and folders directly under the main project directory while skipping module folders. It can also process the main project directory itself when a default prompt is configured.
 
 ### `processFile(ProjectLayout projectLayout, File file)`
 
@@ -74,7 +75,7 @@ This is the main per-file processing step. It checks whether the file should be 
 
 ### `process(ProjectLayout projectLayout, File file, String guidance)`
 
-Builds the final system instructions and passes the request to the AI file-processing layer. It also adds standard documentation-processing instructions, including the current operating system name.
+Builds the final instructions sent to the AI layer. It adds standard documentation-processing instructions, includes the current operating system name, and then passes the request to the parent AI file processor.
 
 ### `parseFile(File projectDir, File file)`
 
@@ -86,7 +87,7 @@ Looks up the reviewer registered for a specific file extension.
 
 ### `deleteTempFiles(File basedir)`
 
-Removes the temporary input-log folder created during guided processing.
+Removes the temporary input-log directory created during guided processing.
 
 ## Step-by-step example
 

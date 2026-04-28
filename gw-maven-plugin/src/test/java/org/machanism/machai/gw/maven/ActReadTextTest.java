@@ -27,7 +27,8 @@ public class ActReadTextTest {
 			return lines.poll();
 		}
 
-		// Sonar java:S1172 - defaultReply is part of Prompter API; avoid unused parameter by using it
+		// Sonar java:S1172 - defaultReply is part of Prompter API; avoid unused
+		// parameter by using it
 		public String prompt(String message, String defaultReply) throws PrompterException {
 			return (defaultReply != null) ? defaultReply : prompt(message);
 		}
@@ -76,7 +77,7 @@ public class ActReadTextTest {
 	@Test
 	public void readText_multipleLinesWithBreaker_concatenatesWithNewlines() throws Exception {
 		// Arrange
-		String breaker = org.machanism.machai.gw.processor.Ghostwriter.MULTIPLE_LINES_BREAKER;
+		String breaker = org.machanism.machai.gw.processor.GWConstants.MULTIPLE_LINES_BREAKER;
 		TestableAct act = new TestableAct();
 		act.setPrompter(new QueuePrompter("Line1" + breaker, "Line2" + breaker, "Last"));
 
@@ -90,7 +91,7 @@ public class ActReadTextTest {
 	@Test
 	public void readText_breakerOnLastLine_dropsBreakerAndKeepsTrailingNewline() throws Exception {
 		// Arrange
-		String breaker = org.machanism.machai.gw.processor.Ghostwriter.MULTIPLE_LINES_BREAKER;
+		String breaker = org.machanism.machai.gw.processor.GWConstants.MULTIPLE_LINES_BREAKER;
 		TestableAct act = new TestableAct();
 		act.setPrompter(new QueuePrompter("Only" + breaker));
 

@@ -20,6 +20,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.Ghostwriter;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -97,7 +98,7 @@ public class ActFunctionTools implements FunctionTools {
 			String actName = props.get("actName").asText();
 			String custom = props.has("custom") ? props.get("custom").asText() : null;
 
-			String acts = configurator.get(Ghostwriter.ACTS_LOCATION_PROP_NAME, null);
+			String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 			if (custom == null) {
 				ActProcessor.loadAct(actName, properties, acts);
 			} else {

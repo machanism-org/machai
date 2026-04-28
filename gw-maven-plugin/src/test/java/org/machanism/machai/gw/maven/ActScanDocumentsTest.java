@@ -11,7 +11,7 @@ import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
-import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.gw.processor.GWConstants;
 
 class ActScanDocumentsTest {
 
@@ -62,7 +62,7 @@ class ActScanDocumentsTest {
 		goal.session = newSession();
 
 		RecordingActProcessor processor = new RecordingActProcessor();
-		processor.getConfigurator().set(Ghostwriter.SCAN_DIR_PROP_NAME, "ignored");
+		processor.getConfigurator().set(GWConstants.SCAN_DIR_PROP_NAME, "ignored");
 
 		assertDoesNotThrow(() -> goal.scanDocuments(processor));
 
@@ -78,7 +78,7 @@ class ActScanDocumentsTest {
 		goal.session = newSession();
 
 		RecordingActProcessor processor = new RecordingActProcessor();
-		processor.getConfigurator().set(Ghostwriter.SCAN_DIR_PROP_NAME, "configured-scan");
+		processor.getConfigurator().set(GWConstants.SCAN_DIR_PROP_NAME, "configured-scan");
 
 		assertDoesNotThrow(() -> goal.scanDocuments(processor));
 

@@ -24,6 +24,7 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -82,13 +83,13 @@ public class ActMojo extends AbstractGWMojo {
 	/**
 	 * Action prompt text. If not set, the goal prompts the user interactively.
 	 */
-	@Parameter(property = Ghostwriter.ACT_PROP_NAME, required = false)
+	@Parameter(property = GWConstants.ACT_PROP_NAME, required = false)
 	protected String actPrompt;
 
 	/**
 	 * Optional directory containing predefined action definitions.
 	 */
-	@Parameter(property = Ghostwriter.ACTS_LOCATION_PROP_NAME, required = false)
+	@Parameter(property = GWConstants.ACTS_LOCATION_PROP_NAME, required = false)
 	private String acts;
 
 	private static final Object MONITOR = new Object();
@@ -105,7 +106,7 @@ public class ActMojo extends AbstractGWMojo {
 
 		PropertiesConfigurator configuration = getConfiguration();
 
-		String model = configuration.get(Ghostwriter.MODEL_PROP_NAME, this.model);
+		String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
 		logger.info("Model: {}", model);
 
 		ActProcessor actProcessor = new ActProcessor(basedir, configuration, model) {
@@ -160,7 +161,7 @@ public class ActMojo extends AbstractGWMojo {
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
-			String actsLocation = actProcessor.getConfigurator().get(Ghostwriter.ACTS_LOCATION_PROP_NAME, this.acts);
+			String actsLocation = actProcessor.getConfigurator().get(GWConstants.ACTS_LOCATION_PROP_NAME, this.acts);
 
 			if (actsLocation != null) {
 				logger.info("Custom acts location specified: {}", actsLocation);
@@ -168,7 +169,7 @@ public class ActMojo extends AbstractGWMojo {
 			}
 
 			String[] effectiveExcludes = null;
-			String excludesStr = actProcessor.getConfigurator().get(Ghostwriter.EXCLUDES_PROP_NAME, null);
+			String excludesStr = actProcessor.getConfigurator().get(GWConstants.EXCLUDES_PROP_NAME, null);
 			if (excludesStr != null) {
 				effectiveExcludes = StringUtils.split(excludesStr, ",");
 			}
@@ -196,7 +197,9 @@ public class ActMojo extends AbstractGWMojo {
 		if (savedAct == null) {
 			applyActPrompt(actProcessor.getConfigurator());
 			Properties userProperties = session.getUserProperties();
-			savedAct = userProperties.getProperty(Ghostwriter.ACT_PROP_NAME);
+			savedAct = userProperties.getProperty(GWConstants.ACT_PROP_NAME);
+		} else {
+			logger.info("Act: {}", savedAct);
 		}
 		actProcessor.setAct(savedAct);
 		if (savedAct != null) {
@@ -208,28 +211,28 @@ public class ActMojo extends AbstractGWMojo {
 		synchronized (MONITOR) {
 			try {
 				Properties userProperties = session.getUserProperties();
-				String savedAct = userProperties.getProperty(Ghostwriter.ACT_PROP_NAME);
+				String savedAct = userProperties.getProperty(GWConstants.ACT_PROP_NAME);
 				if (savedAct == null) {
-					String actValue = conf.get(Ghostwriter.ACT_PROP_NAME, null);
+					String actValue = conf.get(GWConstants.ACT_PROP_NAME, null);
 					if (actValue == null) {
 						actValue = readText("Act");
 						if (Strings.CS.equals(actValue.toLowerCase().trim(), "exit")) {
 							return;
 						}
 					}
-					userProperties.setProperty(Ghostwriter.ACT_PROP_NAME, actValue);
+					userProperties.setProperty(GWConstants.ACT_PROP_NAME, actValue);
 				} else {
-					logger.info("act: {}", savedAct);
+					logger.info("Act: {}", savedAct);
 				}
 			} catch (PrompterException e) {
 				throw new MojoExecutionException(
-						"Failed to read '" + Ghostwriter.ACT_PROP_NAME + "' prompt interactively.", e);
+						"Failed to read '" + GWConstants.ACT_PROP_NAME + "' prompt interactively.", e);
 			}
 		}
 	}
 
 	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
-		String gwScanDir = actProcessor.getConfigurator().get(Ghostwriter.SCAN_DIR_PROP_NAME, null);
+		String gwScanDir = actProcessor.getConfigurator().get(GWConstants.SCAN_DIR_PROP_NAME, null);
 		String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
@@ -268,8 +271,8 @@ public class ActMojo extends AbstractGWMojo {
 			if (length > maxlen) {
 				maxlen = length;
 			}
-			if (Strings.CS.endsWith(line, Ghostwriter.MULTIPLE_LINES_BREAKER)) {
-				sb.append(StringUtils.substringBeforeLast(line, Ghostwriter.MULTIPLE_LINES_BREAKER))
+			if (Strings.CS.endsWith(line, GWConstants.MULTIPLE_LINES_BREAKER)) {
+				sb.append(StringUtils.substringBeforeLast(line, GWConstants.MULTIPLE_LINES_BREAKER))
 						.append(Genai.LINE_SEPARATOR);
 			} else {
 				sb.append(line);

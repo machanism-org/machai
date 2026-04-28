@@ -289,12 +289,12 @@ public class CommandFunctionTools implements FunctionTools {
 
 			Future<?> stdoutFuture = executor.get()
 					.submit(() -> readStream(process.getInputStream(), charsetName, output,
-							line -> logger.info("[CMD {}] [OUTPUT] {}", commandId, line),
+							line -> logger.info("[CMD {}] [STD] {}", commandId, line),
 							e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
 
 			Future<?> stderrFuture = executor.get()
 					.submit(() -> readStream(process.getErrorStream(), charsetName, output,
-							line -> logger.error("[CMD {}] [ERROR] {}", commandId, line),
+							line -> logger.info("[CMD {}] [ERR] {}", commandId, line),
 							e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
 
 			return waitAndCollect(process, stdoutFuture, stderrFuture, output, commandId);

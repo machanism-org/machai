@@ -12,87 +12,89 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter provides a small set of functional tools that let the model inspect reusable act templates and interact with files inside the current working directory. These tools are designed to support prompt-driven workflows, project inspection, and controlled file operations.
+Ghostwriter provides functional tools that help a model discover reusable Act templates and safely work with files inside the current project working directory. These tools support prompt-driven workflows, project exploration, and controlled file operations.
 
 ## Act tools
 
 ### `build_in_list_acts`
-Lists the built-in Act templates available to Ghostwriter.
+Returns the built-in Act templates packaged with Ghostwriter.
 
 **What it does**
-- Scans the packaged built-in Act definitions stored as TOML files.
-- Returns the Act name together with its description.
-- Helps users quickly discover which reusable prompt templates are available.
+- Scans the built-in `acts` resources available from the application package.
+- Finds Act definitions stored as `.toml` files.
+- Loads each Act description and formats the results as a readable list.
 
-**When to use it**
-- When you want to browse the available Acts before selecting one.
-- When building a workflow that depends on predefined prompt templates.
+**Feature highlights**
+- Quick discovery of reusable workflow templates.
+- Useful for browsing available Acts before choosing one.
+- Returns a simple human-readable list instead of a large structured payload.
 
 **Input parameters**
 This tool does not require any input parameters.
 
 **Result**
-- A list of built-in Act names with short descriptions.
+- A formatted list of built-in Act names and descriptions.
 
 ### `load_act_details`
-Loads the details of a specific Act template.
+Loads the details of a specific Act template by name.
 
 **What it does**
-- Retrieves the configuration of an Act by name.
-- Can load the effective Act, a custom user-defined Act, or only the built-in version.
-- Returns the Act properties, such as instructions, description, and input template values when available.
+- Retrieves an Act definition using the provided Act name.
+- Can load the effective Act, only a custom user-defined Act, or only the built-in Act.
+- Returns the resolved Act properties, such as instructions, description, and template-related values.
 
-**When to use it**
-- When you need to inspect the full definition of an Act.
-- When comparing custom Acts with built-in Acts.
-- When editing or debugging Act configuration.
+**Feature highlights**
+- Supports inspecting a single Act in detail.
+- Helps compare custom Acts with built-in Acts.
+- Useful for troubleshooting Act resolution and configuration.
 
 **Input parameters**
-- `actName` *(string, required)*: The name of the Act to load.
+- `actName` *(string, required)*: Name of the Act to load.
 - `custom` *(boolean, optional)*:
-  - `true`: load only the user-defined custom Act.
-  - `false`: load only the built-in Act.
-  - not provided: load the effective Act using the configured Act resolution.
+  - `true`: load only the custom Act from the configured Acts directory.
+  - `false`: load only the built-in packaged Act.
+  - omitted: load the effective Act using normal Ghostwriter Act resolution.
 
 **Result**
-- A structured object containing the Act details.
-- If the Act cannot be loaded, the tool returns an error message.
+- A structured object containing the loaded Act properties.
+- If the Act cannot be resolved, the tool returns an error message.
 
 ## File system tools
 
 ### `read_file_from_file_system`
-Reads the contents of a text file from disk.
+Reads a text file from the file system.
 
 **What it does**
 - Opens a file relative to the current working directory.
-- Reads the file using the requested character set.
-- Returns the full file content as text.
+- Reads the entire file as text.
+- Uses the requested character encoding, or `UTF-8` by default.
 
-**When to use it**
-- When reviewing source code, configuration files, documentation, or templates.
-- When another task needs the exact current contents of a file.
+**Feature highlights**
+- Good for reviewing source files, configuration, templates, and documentation.
+- Returns the exact current file content.
+- Keeps file access scoped to the host-controlled working directory.
 
 **Input parameters**
 - `file_path` *(string, required)*: Path to the file to read.
 - `charsetName` *(string, optional)*: Character encoding to use. Default: `UTF-8`.
 
 **Result**
-- The text content of the file.
+- The full file content as text.
 - If the file does not exist, the tool returns `File not found.`
 
 ### `write_file_to_file_system`
 Writes text content to a file on disk.
 
 **What it does**
-- Creates a new file if it does not exist.
-- Overwrites the file content if the file already exists.
-- Creates missing parent directories when needed.
-- Writes using the requested character set.
+- Writes the provided text to a file relative to the current working directory.
+- Updates an existing file or creates a new one if it does not exist.
+- Creates missing parent directories before writing a new file.
+- Uses the requested character encoding, or `UTF-8` by default.
 
-**When to use it**
-- When generating new files.
-- When updating documentation, source code, or configuration files.
-- When applying model-generated changes back into the project.
+**Feature highlights**
+- Supports both file creation and full-content replacement.
+- Helpful for generating or updating source code, documentation, and configuration files.
+- Returns a clear success message indicating whether a file was written or updated.
 
 **Input parameters**
 - `file_path` *(string, required)*: Path to the file to create or update.
@@ -100,45 +102,49 @@ Writes text content to a file on disk.
 - `charsetName` *(string, optional)*: Character encoding to use. Default: `UTF-8`.
 
 **Result**
-- A success message indicating whether the file was written or updated.
-- If writing fails, the tool returns an error message.
+- `File written successfully: ...` when a new file is created.
+- `File updated successfully: ...` when an existing file is overwritten.
+- An error message if writing fails.
 
 ### `list_files_in_directory`
-Lists files and directories directly inside a folder.
+Lists files and directories directly inside a specific folder.
 
 **What it does**
 - Reads the immediate contents of a directory.
 - Returns project-relative paths.
-- Does not recurse into subdirectories.
+- Does not recurse into nested directories.
+- Uses the current working directory when no path is provided.
 
-**When to use it**
-- When exploring the top-level contents of a folder.
-- When you need a quick overview before reading or editing files.
+**Feature highlights**
+- Good for a quick overview of a folder.
+- Useful before opening or editing files.
+- Returns a compact comma-separated result.
 
 **Input parameters**
-- `dir_path` *(string, optional)*: Directory path to inspect. If omitted or blank, the current working directory is used.
+- `dir_path` *(string, optional)*: Path to the directory to inspect. If omitted or blank, the current working directory is used.
 
 **Result**
-- A comma-separated list of files and directories.
-- If the directory is missing or empty, the tool returns `No files found in directory.`
+- A comma-separated list of project-relative files and directories.
+- If the directory is missing, invalid, or empty, the tool returns `No files found in directory.`
 
 ### `get_recursive_file_list`
 Recursively lists files under a directory.
 
 **What it does**
-- Traverses a directory and all nested subdirectories.
+- Traverses the selected directory and all nested subdirectories.
 - Returns files only, not directories.
-- Produces project-relative paths using forward slashes.
+- Produces project-relative paths with forward slashes.
 - Skips excluded directories defined by the project layout.
+- Uses the current working directory when no path is provided.
 
-**When to use it**
-- When searching a project area for candidate files.
-- When collecting all files under a source, resource, or documentation folder.
-- When you need a broader project inventory before making changes.
+**Feature highlights**
+- Useful for collecting a full file inventory under a source, test, or documentation folder.
+- Helps locate candidate files before analysis or updates.
+- Filters out excluded project directories during recursion.
 
 **Input parameters**
 - `dir_path` *(string, optional)*: Root directory to scan recursively. If omitted or blank, the current working directory is used.
 
 **Result**
-- A list of file paths found under the selected directory.
+- A list of project-relative file paths found under the selected directory.
 - If no files are found, the tool returns `No files found in directory.`

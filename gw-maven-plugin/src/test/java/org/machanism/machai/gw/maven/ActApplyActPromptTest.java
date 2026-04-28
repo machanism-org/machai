@@ -13,7 +13,7 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.gw.processor.GWConstants;
 import org.mockito.Mockito;
 
 public class ActApplyActPromptTest {
@@ -22,7 +22,7 @@ public class ActApplyActPromptTest {
 	public void applyActPrompt_whenSavedActExists_doesNotPromptAndKeepsValue() throws Exception {
 		ActMojo act = new ActMojo();
 		Properties userProps = new Properties();
-		userProps.setProperty(Ghostwriter.ACT_PROP_NAME, "saved");
+		userProps.setProperty(GWConstants.ACT_PROP_NAME, "saved");
 		act.session = newSession(userProps);
 
 		act.prompter = Mockito.mock(Prompter.class);
@@ -31,7 +31,7 @@ public class ActApplyActPromptTest {
 		act.applyActPrompt(conf);
 
 		Mockito.verifyNoInteractions(act.prompter);
-		assertEquals("saved", act.session.getUserProperties().getProperty(Ghostwriter.ACT_PROP_NAME));
+		assertEquals("saved", act.session.getUserProperties().getProperty(GWConstants.ACT_PROP_NAME));
 	}
 
 	@Test
@@ -41,11 +41,11 @@ public class ActApplyActPromptTest {
 
 		act.prompter = Mockito.mock(Prompter.class);
 		Configurator conf = Mockito.mock(Configurator.class);
-		Mockito.when(conf.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn("fromConf");
+		Mockito.when(conf.get(GWConstants.ACT_PROP_NAME, null)).thenReturn("fromConf");
 
 		act.applyActPrompt(conf);
 
-		assertEquals("fromConf", act.session.getUserProperties().getProperty(Ghostwriter.ACT_PROP_NAME));
+		assertEquals("fromConf", act.session.getUserProperties().getProperty(GWConstants.ACT_PROP_NAME));
 		Mockito.verifyNoInteractions(act.prompter);
 	}
 
@@ -59,11 +59,11 @@ public class ActApplyActPromptTest {
 		act.prompter = prompter;
 
 		Configurator conf = Mockito.mock(Configurator.class);
-		Mockito.when(conf.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn(null);
+		Mockito.when(conf.get(GWConstants.ACT_PROP_NAME, null)).thenReturn(null);
 
 		act.applyActPrompt(conf);
 
-		assertEquals("prompted-act", act.session.getUserProperties().getProperty(Ghostwriter.ACT_PROP_NAME));
+		assertEquals("prompted-act", act.session.getUserProperties().getProperty(GWConstants.ACT_PROP_NAME));
 		Mockito.verify(prompter).prompt("Act");
 	}
 
@@ -77,13 +77,13 @@ public class ActApplyActPromptTest {
 		act.prompter = prompter;
 
 		Configurator conf = Mockito.mock(Configurator.class);
-		Mockito.when(conf.get(Ghostwriter.ACT_PROP_NAME, null)).thenReturn(null);
+		Mockito.when(conf.get(GWConstants.ACT_PROP_NAME, null)).thenReturn(null);
 
 		try {
 			act.applyActPrompt(conf);
 			fail("Expected MojoExecutionException");
 		} catch (MojoExecutionException e) {
-			assertTrue(e.getMessage().contains(Ghostwriter.ACT_PROP_NAME));
+			assertTrue(e.getMessage().contains(GWConstants.ACT_PROP_NAME));
 			assertTrue(e.getCause() instanceof PrompterException);
 		}
 	}

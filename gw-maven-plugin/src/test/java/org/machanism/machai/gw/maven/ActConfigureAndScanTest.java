@@ -9,6 +9,7 @@ import org.apache.maven.execution.MavenSession;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.Ghostwriter;
 
 public class ActConfigureAndScanTest {
@@ -69,7 +70,7 @@ public class ActConfigureAndScanTest {
 	public void configureAndScan_whenActPromptMissing_readsSavedActFromUserProperties() throws Exception {
 		TestableAct goal = new TestableAct();
 		Properties userProperties = new Properties();
-		userProperties.setProperty(Ghostwriter.ACT_PROP_NAME, "saved-from-user-props");
+		userProperties.setProperty(GWConstants.ACT_PROP_NAME, "saved-from-user-props");
 		goal.session = newSession(userProperties);
 
 		RecordingActProcessor processor = new RecordingActProcessor();

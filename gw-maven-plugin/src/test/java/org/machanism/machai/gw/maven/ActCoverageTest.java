@@ -26,7 +26,7 @@ import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
-import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -203,7 +203,7 @@ public class ActCoverageTest {
 
 		mojo.applyActPrompt(mock(org.machanism.macha.core.commons.configurator.Configurator.class));
 
-		assertNull(props.getProperty(Ghostwriter.ACT_PROP_NAME));
+		assertNull(props.getProperty(GWConstants.ACT_PROP_NAME));
 	}
 
 	@Test

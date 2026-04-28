@@ -85,7 +85,7 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public ActProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator, genai);
-		actsLocation = configurator.get(Ghostwriter.ACTS_LOCATION_PROP_NAME, null);
+		actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 	}
 
 	/**
@@ -123,11 +123,11 @@ public class ActProcessor extends AIFileProcessor {
 
 		loadAct(name, actData, actsLocation);
 
-		Object mainValue = actData.get(Ghostwriter.INPUTS_PROPERTY_NAME);
+		Object mainValue = actData.get(GWConstants.INPUTS_PROPERTY_NAME);
 		if (mainValue instanceof String) {
 			String actPrompt = Objects.toString(actData.get("prompt"), "");
 			String value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(prompt, actPrompt));
-			actData.put(Ghostwriter.INPUTS_PROPERTY_NAME, value);
+			actData.put(GWConstants.INPUTS_PROPERTY_NAME, value);
 		}
 
 		applyActData(actData);
@@ -197,7 +197,7 @@ public class ActProcessor extends AIFileProcessor {
 	public static TomlParseResult tryLoadActFromClasspath(Map<String, Object> properties, String name)
 			throws IOException {
 		String path = ACTS_BASENAME_PREFIX + name + TOML_EXTENSION;
-		URL resource = Ghostwriter.class.getResource(path);
+		URL resource = GWConstants.class.getResource(path);
 		if (resource == null) {
 			return null;
 		}
@@ -338,31 +338,31 @@ public class ActProcessor extends AIFileProcessor {
 					value = Strings.CS.replace(value, "%s", StringUtils.defaultString(inheritValue));
 				}
 				switch (key) {
-				case Ghostwriter.INSTRUCTIONS_PROP_NAME:
+				case GWConstants.INSTRUCTIONS_PROP_NAME:
 					super.setInstructions(value);
 					break;
 
-				case Ghostwriter.INPUTS_PROPERTY_NAME:
+				case GWConstants.INPUTS_PROPERTY_NAME:
 					super.setDefaultPrompt(value);
 					break;
 
-				case Ghostwriter.THREADS_PROP_NAME:
+				case GWConstants.THREADS_PROP_NAME:
 					super.setDegreeOfConcurrency(Integer.parseInt(value));
 					break;
 
-				case Ghostwriter.EXCLUDES_PROP_NAME:
+				case GWConstants.EXCLUDES_PROP_NAME:
 					super.setExcludes(StringUtils.split(value, ","));
 					break;
 
-				case Ghostwriter.NONRECURSIVE_PROP_NAME:
+				case GWConstants.NONRECURSIVE_PROP_NAME:
 					super.setNonRecursive(Boolean.parseBoolean(value));
 					break;
 
-				case Ghostwriter.INTERACTIVE_MODE_PROP_NAME:
+				case GWConstants.INTERACTIVE_MODE_PROP_NAME:
 					super.setInteractive(Boolean.parseBoolean(value));
 					break;
 
-				case Ghostwriter.MODEL_PROP_NAME:
+				case GWConstants.MODEL_PROP_NAME:
 					super.setModel(value);
 					getConfigurator().set(key, value);
 					break;
@@ -390,7 +390,7 @@ public class ActProcessor extends AIFileProcessor {
 			}
 		}
 		this.actsLocation = actsLocation;
-		getConfigurator().set(Ghostwriter.ACTS_LOCATION_PROP_NAME, actsLocation);
+		getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, actsLocation);
 	}
 
 	/**

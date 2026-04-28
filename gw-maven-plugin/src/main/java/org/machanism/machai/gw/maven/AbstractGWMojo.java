@@ -17,7 +17,7 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.maven.tools.ClassFunctionalTools;
-import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	/**
 	 * Provider/model identifier to pass to the workflow.
 	 */
-	@Parameter(property = Ghostwriter.MODEL_PROP_NAME)
+	@Parameter(property = GWConstants.MODEL_PROP_NAME)
 	protected String model;
 	/**
 	 * The Maven module base directory.
@@ -54,17 +54,17 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	/**
 	 * Optional scan root override.
 	 */
-	@Parameter(property = Ghostwriter.SCAN_DIR_PROP_NAME)
+	@Parameter(property = GWConstants.SCAN_DIR_PROP_NAME)
 	String scanDir;
 	/**
 	 * Instruction locations consumed by the workflow.
 	 */
-	@Parameter(property = Ghostwriter.INSTRUCTIONS_PROP_NAME, name = "instructions")
+	@Parameter(property = GWConstants.INSTRUCTIONS_PROP_NAME, name = "instructions")
 	protected String instructions;
 	/**
 	 * Exclude patterns or paths skipped during scanning.
 	 */
-	@Parameter(property = Ghostwriter.EXCLUDES_PROP_NAME, name = "excludes")
+	@Parameter(property = GWConstants.EXCLUDES_PROP_NAME, name = "excludes")
 	protected String[] excludes;
 	/**
 	 * The current Maven project.
