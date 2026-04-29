@@ -86,8 +86,7 @@ For every issue:
      (e.g., confirmed false positive or upstream API limitation beyond project scope).
 4. Generate a unique Git branch name `FIX_ISSUES_BRANCH` using the following format: `ai-fix-sec-sonar-iss/<DD-MM-YY>-<seqId>`
    - `<DD-MM-YY>` should be replaced with the current day, month, and year (e.g., `28-04-26` for April 28, 2026).
-   - `<seqId>` should be a unique sequence identifier: incrementing number to ensure the branch name is unique, 
-       even if multiple branches are created on the same day.
+   - `<seqId>`    - `<seqId>` should be a GUID (Globally Unique Identifier) value to ensure the branch name is unique, even if multiple branches are created on the same day.
 5. The final branch name must not conflict with any existing branch names in the repository.
     **Example:** `ai-fix-sec-sonar-iss/28-04-26-001`
 
