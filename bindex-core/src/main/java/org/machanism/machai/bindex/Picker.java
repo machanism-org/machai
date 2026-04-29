@@ -289,7 +289,7 @@ public class Picker {
 
 		String instructionTemplate = DEFAULT_CLASSIFICATION_INSTRUCTION;
 		if (configurator != null) {
-			String configuredInstruction = configurator.get(CLASSIFICATION_INSTRUCTION_PROP_NAME);
+			String configuredInstruction = configurator.get(CLASSIFICATION_INSTRUCTION_PROP_NAME, null);
 			if (configuredInstruction != null) {
 				instructionTemplate = configuredInstruction;
 			}
