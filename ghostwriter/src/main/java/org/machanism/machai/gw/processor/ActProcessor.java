@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -79,7 +81,9 @@ public class ActProcessor extends AIFileProcessor {
 
 	private String[] prompts;
 
-	private int activeActId = 1;
+	private int activeEpisodeId = 1;
+
+	private List<Integer> episodeIds;
 
 	/**
 	 * Creates an act processor.
@@ -123,6 +127,14 @@ public class ActProcessor extends AIFileProcessor {
 			name = act;
 			prompt = defaultPrompt;
 		}
+
+		String episodeIds = StringUtils.substringBetween(name, "[", "]");
+		if (episodeIds != null) {
+			this.episodeIds = Arrays.asList(StringUtils.split(episodeIds)).stream().map(id -> Integer.parseInt(id))
+					.collect(Collectors.toList());
+		}
+
+		name = StringUtils.substringBefore(name, "[");
 
 		Map<String, Object> actData = new HashMap<>();
 
@@ -397,7 +409,8 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	public String getDefaultPrompt() {
-		return ArrayUtils.isNotEmpty(prompts) ? prompts[activeActId - 1] : null;
+		int id = episodeIds == null ? activeEpisodeId - 1 : episodeIds.get(activeEpisodeId - 1);
+		return ArrayUtils.isNotEmpty(prompts) ? prompts[id] : null;
 	}
 
 	/**
@@ -420,15 +433,15 @@ public class ActProcessor extends AIFileProcessor {
 	public void scanDocuments(File projectDir, String scanDir) throws java.io.IOException {
 		do {
 			if (prompts.length > 1) {
-				logger.info("---------------- Episode #{} ---------------- ", activeActId);
+				logger.info("---------------- Episode #{} ---------------- ", episodeIds != null ? episodeIds.get(activeEpisodeId) : activeEpisodeId);
 			}
 			super.scanDocuments(projectDir, scanDir);
 		} while (nextAct());
 	}
 
 	private boolean nextAct() {
-		activeActId++;
-		return activeActId <= prompts.length;
+		activeEpisodeId++;
+		return episodeIds != null ? activeEpisodeId <= episodeIds.size() : activeEpisodeId <= prompts.length;
 	}
 
 	/**
