@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -75,6 +76,10 @@ public class ActProcessor extends AIFileProcessor {
 
 	/** Optional directory containing external {@code *.toml} act files. */
 	private String actsLocation;
+
+	private String[] prompts;
+
+	private int activeActId = 1;
 
 	/**
 	 * Creates an act processor.
@@ -343,7 +348,7 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 
 				case GWConstants.INPUTS_PROPERTY_NAME:
-					super.setDefaultPrompt(value);
+					setPrompts(value);
 					break;
 
 				case GWConstants.THREADS_PROP_NAME:
@@ -371,9 +376,28 @@ public class ActProcessor extends AIFileProcessor {
 					getConfigurator().set(key, value);
 					break;
 				}
+			} else if (valueObj instanceof List && GWConstants.INPUTS_PROPERTY_NAME.equals(key)) {
+				String[] prompts = (String[]) ((List) valueObj).toArray(new String[0]);
+				setPrompts(prompts);
 			}
 		}
 
+	}
+
+	public void setPrompts(String... value) {
+		prompts = value;
+	}
+
+	public String[] getPrompts() {
+		return prompts;
+	}
+
+	public void setDefaultPrompt(String defaultPrompt) {
+		prompts = new String[] { defaultPrompt };
+	}
+
+	public String getDefaultPrompt() {
+		return ArrayUtils.isNotEmpty(prompts) ? prompts[activeActId - 1] : null;
 	}
 
 	/**
@@ -393,6 +417,20 @@ public class ActProcessor extends AIFileProcessor {
 		getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, actsLocation);
 	}
 
+	public void scanDocuments(File projectDir, String scanDir) throws java.io.IOException {
+		do {
+			if (prompts.length > 1) {
+				logger.info("---------------- Episode #{} ---------------- ", activeActId);
+			}
+			super.scanDocuments(projectDir, scanDir);
+		} while (nextAct());
+	}
+
+	private boolean nextAct() {
+		activeActId++;
+		return activeActId <= prompts.length;
+	}
+
 	/**
 	 * Processes non-module files and directories directly under the project
 	 * directory.
@@ -408,7 +446,7 @@ public class ActProcessor extends AIFileProcessor {
 			processFile(projectLayout, child);
 		}
 
-		if (match(scanProjectDir, scanProjectDir) && getDefaultPrompt() != null
+		if (match(scanProjectDir, scanProjectDir) && getPrompts() != null
 				&& !shouldExcludePath(scanProjectDir.toPath())) {
 			String perform = process(projectLayout, scanProjectDir, getInstructions(), getDefaultPrompt());
 			if (perform != null) {
