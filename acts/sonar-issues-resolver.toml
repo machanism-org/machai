@@ -38,6 +38,7 @@ inputs = ['''
 - Use clear, descriptive names for all classes, methods, and variables.
 - Ensure all code is testable and covered by unit tests.
 - Remove or refactor any code that is unused, redundant, or unnecessarily complex.
+- When generating multiple tests that follow the same structure but use different input values or scenarios, implement them as a single parameterized test instead of separate, nearly identical test methods.
 - Ensure each method retains its unique purpose, naming, and test coverage.  
 - After refactoring, verify that all tests pass and that the code remains clear and maintainable.
 - Do not suppress SonarQube warnings unless absolutely necessary and justified (e.g., confirmed false positives).
@@ -172,7 +173,7 @@ mvn -q \
    -Dsonar.projectName=[Project Identifier]\
    -Dsonar.branch.name=[FIX_ISSUES_BRANCH]\
    -Dsonar.qualitygate.wait=true\
-   -Dsonar.qualitygate.timeout=1000\
+   -Dsonar.qualitygate.timeout=10000\
    verify\
    -Dsonar.organization=[Project Identifier]\
    sonar:sonar`
