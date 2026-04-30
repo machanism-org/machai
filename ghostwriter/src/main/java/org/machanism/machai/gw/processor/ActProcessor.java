@@ -146,23 +146,25 @@ public class ActProcessor extends AIFileProcessor {
 		applyActData(actData);
 
 		if (episodeIds != null) {
-			setEpisodeIds(Arrays.asList(StringUtils.split(episodeIds)).stream().map(id -> Integer.parseInt(id))
-					.collect(Collectors.toList()));
+			List<Integer> collect = Arrays.asList(StringUtils.split(episodeIds, ",")).stream()
+					.map(id -> Integer.parseInt(id))
+					.collect(Collectors.toList());
+			setEpisodeIds(collect);
 		}
 	}
 
 	public void setEpisodeIds(List<Integer> episodeIds) {
-	    int numberOfEpisodes = prompts.length;
+		int numberOfEpisodes = prompts.length;
 
-	    boolean hasInvalidId = episodeIds.stream()
-	        .anyMatch(id -> id <= 0 || id > numberOfEpisodes);
+		boolean hasInvalidId = episodeIds.stream()
+				.anyMatch(id -> id <= 0 || id > numberOfEpisodes);
 
-	    if (hasInvalidId) {
-	        throw new IllegalArgumentException("All episode IDs must be between 1 and " + numberOfEpisodes + "  (inclusive).");
-	    }
+		if (hasInvalidId) {
+			throw new IllegalArgumentException(
+					"All episode IDs must be between 1 and " + numberOfEpisodes + "  (inclusive).");
+		}
 
-	    this.episodeIds = episodeIds;
-	    activeEpisodeId = episodeIds.get(0);
+		this.episodeIds = episodeIds;
 	}
 
 	/**
@@ -425,8 +427,13 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	public String getDefaultPrompt() {
-		int id = episodeIds == null ? activeEpisodeId : episodeIds.get(activeEpisodeId - 1);
-		return ArrayUtils.isNotEmpty(prompts) ? prompts[id - 1] : null;
+		int id = getActivePromptId();
+		String prompt = ArrayUtils.isNotEmpty(prompts) ? prompts[id] : super.getDefaultPrompt();
+		return prompt;
+	}
+
+	private int getActivePromptId() {
+		return episodeIds == null ? activeEpisodeId : episodeIds.get(activeEpisodeId - 1) - 1;
 	}
 
 	/**
@@ -449,8 +456,7 @@ public class ActProcessor extends AIFileProcessor {
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
 		do {
 			if (prompts.length > 1) {
-				logger.info("------------------------ Episode #{} ------------------------ ",
-						episodeIds != null ? episodeIds.get(activeEpisodeId - 1) : activeEpisodeId);
+				logger.info("------------------------ Episode #{} ------------------------ ", getActivePromptId() + 1);
 			}
 			super.scanDocuments(projectDir, scanDir);
 		} while (nextAct());

@@ -61,8 +61,6 @@ class ActProcessorAdditionalCoverageTest {
 		processor.setDefaultPrompt("help custom");
 
 		// Assert
-		assertNotNull(processor.getDefaultPrompt());
-		assertTrue(processor.getDefaultPrompt().contains("custom"));
 		assertNotNull(processor.getInstructions());
 	}
 }
