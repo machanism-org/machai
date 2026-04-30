@@ -176,7 +176,7 @@ public class CommandFunctionTools implements FunctionTools {
 						+ "Only explicitly allowed commands can be executed for security reasons. "
 						+ "Supports setting environment variables, working directory, output tail size, and character encoding.",
 				this::executeCommand,
-				"command:string:required:The command to execute. Use `cmd /c` for Windows (e.g., `cmd /c your-command`) and `sh -c` for Unix/Linux (e.g., `sh -c 'your-command'`) to ensure proper shell execution.",
+				"command:string:required:The command to execute.",
 				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). If omitted, the subprocess inherits the current process environment.",
 				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. If omitted, the current project directory is used.",
 				"tailResultSize:integer:optional:The maximum number of characters to display from the end of the command output. If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "

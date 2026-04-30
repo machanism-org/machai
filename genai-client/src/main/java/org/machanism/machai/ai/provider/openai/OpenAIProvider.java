@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.manager.Usage;
@@ -365,7 +366,7 @@ public class OpenAIProvider implements Genai {
 			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
 			Object result = null;
 			for (Entry<Tool, ToolFunction> entry : entrySet) {
-				if (StringUtils.equals(name, entry.getKey().asFunction().name())) {
+				if (Strings.CS.equals(name, entry.getKey().asFunction().name())) {
 					result = safelyInvokeTool(name, entry.getValue(), arguments);
 					break;
 				}
