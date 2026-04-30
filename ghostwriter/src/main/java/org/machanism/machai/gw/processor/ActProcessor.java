@@ -129,10 +129,6 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		String episodeIds = StringUtils.substringBetween(name, "[", "]");
-		if (episodeIds != null) {
-			this.episodeIds = Arrays.asList(StringUtils.split(episodeIds)).stream().map(id -> Integer.parseInt(id))
-					.collect(Collectors.toList());
-		}
 
 		name = StringUtils.substringBefore(name, "[");
 
@@ -148,6 +144,25 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		applyActData(actData);
+
+		if (episodeIds != null) {
+			setEpisodeIds(Arrays.asList(StringUtils.split(episodeIds)).stream().map(id -> Integer.parseInt(id))
+					.collect(Collectors.toList()));
+		}
+	}
+
+	public void setEpisodeIds(List<Integer> episodeIds) {
+	    int numberOfEpisodes = prompts.length;
+
+	    boolean hasInvalidId = episodeIds.stream()
+	        .anyMatch(id -> id <= 0 || id > numberOfEpisodes);
+
+	    if (hasInvalidId) {
+	        throw new IllegalArgumentException("All episode IDs must be between 1 and " + numberOfEpisodes + "  (inclusive).");
+	    }
+
+	    this.episodeIds = episodeIds;
+	    activeEpisodeId = episodeIds.get(0);
 	}
 
 	/**
@@ -389,6 +404,7 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 				}
 			} else if (valueObj instanceof List && GWConstants.INPUTS_PROPERTY_NAME.equals(key)) {
+				@SuppressWarnings({ "unchecked", "rawtypes" })
 				String[] prompts = (String[]) ((List) valueObj).toArray(new String[0]);
 				setPrompts(prompts);
 			}
@@ -409,8 +425,8 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	public String getDefaultPrompt() {
-		int id = episodeIds == null ? activeEpisodeId - 1 : episodeIds.get(activeEpisodeId - 1);
-		return ArrayUtils.isNotEmpty(prompts) ? prompts[id] : null;
+		int id = episodeIds == null ? activeEpisodeId : episodeIds.get(activeEpisodeId - 1);
+		return ArrayUtils.isNotEmpty(prompts) ? prompts[id - 1] : null;
 	}
 
 	/**
@@ -430,10 +446,11 @@ public class ActProcessor extends AIFileProcessor {
 		getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, actsLocation);
 	}
 
-	public void scanDocuments(File projectDir, String scanDir) throws java.io.IOException {
+	public void scanDocuments(File projectDir, String scanDir) throws IOException {
 		do {
 			if (prompts.length > 1) {
-				logger.info("---------------- Episode #{} ---------------- ", episodeIds != null ? episodeIds.get(activeEpisodeId) : activeEpisodeId);
+				logger.info("------------------------ Episode #{} ------------------------ ",
+						episodeIds != null ? episodeIds.get(activeEpisodeId - 1) : activeEpisodeId);
 			}
 			super.scanDocuments(projectDir, scanDir);
 		} while (nextAct());

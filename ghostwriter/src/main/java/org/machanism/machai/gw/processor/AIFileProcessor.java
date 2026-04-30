@@ -347,7 +347,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	@Override
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
-			String perform = process(projectLayout, projectLayout.getProjectDir(), instructions, defaultPrompt);
+			String perform = process(projectLayout, projectLayout.getProjectDir(), instructions, getDefaultPrompt());
 			if (perform != null) {
 				logger.info(">>> {}", perform);
 			}
