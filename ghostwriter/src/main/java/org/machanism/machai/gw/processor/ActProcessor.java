@@ -86,6 +86,8 @@ public class ActProcessor extends AIFileProcessor {
 
 	private List<Integer> episodeIds;
 
+	private Integer requestedEpisodeId;
+
 	/**
 	 * Creates an act processor.
 	 *
@@ -434,7 +436,9 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	private int getActivePromptId() {
-		return episodeIds == null ? activeEpisodeId - 1 : episodeIds.get(activeEpisodeId - 1) - 1;
+		return requestedEpisodeId != null
+				? requestedEpisodeId
+				: (episodeIds == null ? activeEpisodeId - 1 : episodeIds.get(activeEpisodeId - 1) - 1);
 	}
 
 	/**
@@ -464,7 +468,7 @@ public class ActProcessor extends AIFileProcessor {
 			} catch (MoveToEpisodeException e) {
 				String episodeId = e.getEpisodeId();
 				if (episodeId != null) {
-					this.activeEpisodeId = Integer.parseInt(episodeId);
+					this.requestedEpisodeId = Integer.parseInt(episodeId);
 					continue;
 				}
 			}
