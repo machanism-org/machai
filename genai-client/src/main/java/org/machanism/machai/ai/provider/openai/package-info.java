@@ -31,25 +31,30 @@
  *
  * <p>
  * This package contains the OpenAI-backed {@link org.machanism.machai.ai.provider.Genai}
- * implementation used by MachAI to submit prompts, optional system instructions, file inputs,
- * and locally registered tools through the OpenAI Responses API. It also exposes embedding
- * generation support and translates OpenAI usage data into MachAI usage metrics.
+ * implementation used by MachAI to submit prompts, optional system instructions,
+ * file references, and locally registered tools through the OpenAI Responses API.
+ * It also provides embedding generation support and maps OpenAI token accounting to
+ * MachAI usage metrics.
  * </p>
  *
  * <p>
- * The central type in this package is
- * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, which manages request
- * construction, response parsing, tool-call execution, input logging, and client configuration.
- * Tool definitions added through the provider are exposed as OpenAI function tools, and tool-call
- * responses are fed back into the conversation until the model returns a final answer.
+ * The primary type in this package is
+ * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, which manages
+ * provider initialization, request construction, response parsing, function-tool
+ * execution, input logging, timeout handling, and OpenAI client creation. During a
+ * request, tool definitions registered through the provider are exposed as OpenAI
+ * function tools, and tool-call outputs are appended to the conversation until the
+ * model returns a final message.
  * </p>
  *
  * <h2>Configuration overview</h2>
  * <p>
- * The provider is initialized from a configurator and supports settings such as
+ * The package relies on provider configuration values such as
  * {@code OPENAI_API_KEY}, {@code chatModel}, {@code OPENAI_BASE_URL},
  * {@code GENAI_TIMEOUT}, {@code MAX_OUTPUT_TOKENS}, {@code MAX_TOOL_CALLS}, and
- * {@code embedding.model}.
+ * {@code embedding.model}. These settings control authentication, endpoint
+ * selection, response generation limits, tool-calling behavior, request timeouts,
+ * and embedding model selection.
  * </p>
  *
  * <h2>Typical usage</h2>

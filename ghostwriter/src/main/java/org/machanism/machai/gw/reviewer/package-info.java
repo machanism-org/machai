@@ -1,39 +1,29 @@
 /**
- * File-format-specific reviewers that scan project files for embedded {@code @guidance} directives and transform
- * them into normalized prompt fragments for Ghostwriter processing.
+ * Provides reviewer components that inspect project files for embedded
+ * {@code @guidance} directives and convert matching artifacts into normalized
+ * prompt fragments for the Ghostwriter processing pipeline.
  *
- * <p>The package centers on the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider interface
- * (SPI). Each implementation supports one or more file extensions, understands the comment or literal syntax of
- * its target format, detects whether the file contains the
- * {@link org.machanism.machai.gw.processor.GuidanceProcessor#GUIDANCE_TAG_NAME @guidance} marker, and produces a
- * formatted fragment using templates from the {@code document-prompts} resource bundle.
+ * <p>The central contract in this package is
+ * {@link org.machanism.machai.gw.reviewer.Reviewer}, a service-provider interface
+ * for format-specific reviewers. Implementations understand the comment, literal,
+ * or naming conventions of their target file types, detect the presence of the
+ * {@link org.machanism.machai.gw.processor.GuidanceProcessor#GUIDANCE_TAG_NAME @guidance}
+ * marker, and return prompt fragments based on templates loaded from the
+ * {@code document-prompts} resource bundle.
  *
- * <h2>Reviewer workflow</h2>
- * <ol>
- *   <li>Read a candidate file, typically as UTF-8 text.</li>
- *   <li>Detect a supported embedded guidance form such as line comments, block comments, HTML comments,
- *       triple-quoted strings, or a dedicated {@code @guidance.txt} file.</li>
- *   <li>Compute a stable project-relative path via
- *       {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)}.</li>
- *   <li>Format and return a prompt fragment for downstream Ghostwriter stages, or return {@code null} when the
- *       file does not contain relevant guidance.</li>
- * </ol>
+ * <p>The package includes reviewers for Java source, Markdown, HTML/XML,
+ * TypeScript, Python, PlantUML, and dedicated text guidance files. Reviewers
+ * typically read files as UTF-8 text, verify whether embedded guidance is present,
+ * compute a stable project-relative path by using
+ * {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)},
+ * and then produce a formatted fragment for downstream Ghostwriter stages.
  *
- * <h2>Included implementations</h2>
- * <ul>
- *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer} for Java sources, including
- *       {@code package-info.java}</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer} for Markdown documents with embedded HTML
- *       comments</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer} for HTML and XML files</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer} for TypeScript sources</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer} for Python sources</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer} for PlantUML diagrams</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} for standalone guidance text files</li>
- * </ul>
- *
- * <p>Together, these reviewers provide the format-aware extraction layer that bridges source artifacts and the
- * prompt-generation pipeline.
+ * <p>{@link org.machanism.machai.gw.reviewer.JavaReviewer} includes special handling
+ * for {@code package-info.java}, while
+ * {@link org.machanism.machai.gw.reviewer.TextReviewer} supports standalone
+ * {@code @guidance.txt} files. Other reviewers focus on the guidance embedding
+ * syntax of their respective formats, such as HTML comments, Python comments,
+ * or TypeScript block comments.
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer
  */

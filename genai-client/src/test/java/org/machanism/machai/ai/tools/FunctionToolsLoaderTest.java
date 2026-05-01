@@ -161,24 +161,37 @@ class FunctionToolsLoaderTest {
 	}
 
 	@Test
-	void applyTools_appliesAllDiscoveredToolsInOrder() throws Exception {
+	void applyTools_withNoDiscoveredTools_doesNothing() {
 		// Arrange
 		FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
 		CountingProvider provider = new CountingProvider();
 
+		// Act
+		loader.applyTools(provider);
+
+		// Assert
+		assertEquals(0, provider.adds.get());
+	}
+
+	@Test
+	void applyTools_appliesEveryConfiguredTool() throws Exception {
+		// Arrange
+		FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
+		CountingProvider provider = new CountingProvider();
 		AtomicInteger applied = new AtomicInteger();
+
 		FunctionTools t1 = new FunctionTools() {
 			@Override
-			public void applyTools(Genai p) {
+			public void applyTools(Genai provider) {
 				applied.incrementAndGet();
-				p.addTool("a", "", args -> null);
+				provider.addTool("one", "desc", (params, workingDir) -> null);
 			}
 		};
 		FunctionTools t2 = new FunctionTools() {
 			@Override
-			public void applyTools(Genai p) {
+			public void applyTools(Genai provider) {
 				applied.incrementAndGet();
-				p.addTool("b", "", args -> null);
+				provider.addTool("two", "desc", (params, workingDir) -> null);
 			}
 		};
 

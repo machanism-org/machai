@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.tools;
+package org.machanism.machai.gw.tools;
 
 /**
  * Exception thrown when a command fails a deny-list security check.

@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.tools;
+package org.machanism.machai.gw.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,7 +13,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
@@ -22,6 +21,7 @@ import org.apache.commons.lang3.Strings;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.FunctionTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,13 +151,12 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param params tool arguments
 	 * @return response content or an error message
 	 */
-	public String getWebContent(Object[] params) {
+	public String getWebContent(JsonNode props, File projectDir) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 		if (logger.isInfoEnabled()) {
-			logger.info("Fetching web content [{}]: {}", requestId, Arrays.toString(params));
+			logger.info("Fetching web content [{}]: {}, {}", requestId, props, projectDir);
 		}
 
-		JsonNode props = (JsonNode) params[0];
 		String url = props.get("url").asText();
 
 		url = replace(url, configurator);
@@ -173,7 +172,7 @@ public class WebFunctionTools implements FunctionTools {
 			URI uri = URI.create(url);
 			String response;
 			if ("file".equals(uri.getScheme())) {
-				response = readFileUriContent(params, charsetName, uri);
+				response = readFileUriContent(projectDir, charsetName, uri);
 			} else {
 				response = fetchHttpContent(requestId, selector, headers, timeout, charsetName, textOnly, uri);
 			}
@@ -190,8 +189,7 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
-	private String readFileUriContent(Object[] params, String charsetName, URI uri) {
-		File workingDir = (File) params[1];
+	private String readFileUriContent(File workingDir, String charsetName, URI uri) {
 		String path = uri.getPath();
 		File file = new File(path);
 		if (!file.isAbsolute()) {
@@ -351,13 +349,12 @@ public class WebFunctionTools implements FunctionTools {
 	 * @return response content including an initial HTTP status line, or an error
 	 *         message
 	 */
-	public String callRestApi(Object[] params) {
+	public String callRestApi(JsonNode props, File projectDir) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 		if (logger.isInfoEnabled()) {
-			logger.info("Executing REST call [{}]: {}", requestId, Arrays.toString(params));
+			logger.info("Executing REST call [{}]: {}, {}", requestId, props, projectDir);
 		}
 
-		JsonNode props = (JsonNode) params[0];
 		String url = props.get("url").asText();
 
 		url = replace(url, configurator);

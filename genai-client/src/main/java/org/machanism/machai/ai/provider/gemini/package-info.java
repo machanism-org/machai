@@ -27,24 +27,24 @@
  */
 
 /**
- * Provides the Gemini-specific implementation of MachAI's provider abstraction.
+ * Provides MachAI integration components for Google's Gemini models.
  *
- * <p>This package contains {@link org.machanism.machai.ai.provider.gemini.GeminiProvider},
- * a {@link org.machanism.machai.ai.provider.Genai} implementation intended to translate
- * MachAI request concepts such as prompts, system instructions, tool registration,
- * embeddings, usage reporting, and file-based context into calls to Google's Gemini
- * models.</p>
+ * <p>This package contains the Gemini-specific {@link org.machanism.machai.ai.provider.Genai}
+ * implementation used by MachAI to translate provider-neutral AI operations into Gemini-backed
+ * requests.</p>
  *
- * <p>The current package represents an early-stage integration scaffold. The public API
- * documents the intended behavior of the provider while several operations remain marked
- * as not yet implemented. Even in this incomplete state, the package defines the expected
- * lifecycle for Gemini-backed interactions, including initialization, prompt collection,
- * execution, and usage inspection.</p>
+ * <p>The package currently centers on {@link org.machanism.machai.ai.provider.gemini.GeminiProvider},
+ * which defines the expected lifecycle for provider initialization, prompt collection, instruction
+ * handling, tool registration, embedding generation, request execution, working-directory
+ * coordination, and usage reporting.</p>
+ *
+ * <p>At present, the implementation is primarily structural and documents the intended behavior of
+ * the Gemini integration while several operations still act as placeholders pending full Gemini API
+ * support.</p>
  *
  * <h2>Usage overview</h2>
- * <p>Typical interaction starts by creating and initializing the provider, optionally
- * configuring instructions or tools, submitting prompt content, and then invoking the
- * request.</p>
+ * <p>Typical usage consists of creating the provider, initializing it with configuration,
+ * supplying instructions and prompts, and then executing the request.</p>
  *
  * <pre>
  * Genai genai = new GeminiProvider();

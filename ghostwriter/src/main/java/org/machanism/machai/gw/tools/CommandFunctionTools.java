@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.tools;
+package org.machanism.machai.gw.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -21,6 +20,7 @@ import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.FunctionTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,8 +207,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @return never returns; always throws
 	 * @throws ProcessTerminationException always thrown to terminate execution
 	 */
-	public String terminateProcess(Object[] params) {
-		JsonNode props = (JsonNode) params[0];
+	public String terminateProcess(JsonNode props, File projectDir) {
 		String message = props.has("message") ? props.get("message").asText("Process terminated by function tool.")
 				: "Process terminated by function tool.";
 		String cause = props.has("cause") ? props.get("cause").asText(null) : null;
@@ -237,20 +236,18 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @throws IOException if the process cannot be started or I/O occurs while
 	 *                     resolving paths
 	 */
-	public String executeCommand(Object[] params) throws IOException {
+	public String executeCommand(JsonNode props, File projectDir) throws IOException {
 		String commandId = Integer.toHexString(RANDOM.nextInt());
 		if (logger.isInfoEnabled()) {
-			logger.info("Run shell command [{}]: {}", commandId, Arrays.toString(params));
+			logger.info("Run shell command [{}]: {}, {}", commandId, props, projectDir);
 		}
 
-		JsonNode props = (JsonNode) params[0];
 		String command = props.get("command").asText();
 
 		command = replace(command, configurator);
 
 		String dir = props.has("dir") ? props.get("dir").asText(".") : ".";
 
-		File projectDir = (File) params[1];
 		File workingDir = resolveWorkingDir(projectDir, dir);
 		if (workingDir == null) {
 			return "Error: Invalid working directory.";

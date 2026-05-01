@@ -84,6 +84,9 @@ import com.openai.services.blocking.ModelService;
  * {@value #TIMEOUT_SEC} seconds.</li>
  * <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum number of output tokens.
  * Defaults to {@value #MAX_OUTPUT_TOKENS}.</li>
+ * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls the model
+ * may issue in a single response loop. A value of {@code 0} leaves the limit
+ * unset.</li>
  * <li>{@code embedding.model} (optional): embedding model identifier used by
  * {@link #embedding(String, long)}. If unset, embedding generation may fail due
  * to missing model selection.</li>
@@ -359,15 +362,14 @@ public class OpenAIProvider implements Genai {
 	 */
 	private Object callFunction(ResponseFunctionToolCall functionCall) {
 		String name = functionCall.name();
-		Object[] arguments = new Object[2];
 		try {
-			arguments[0] = new ObjectMapper().readTree(functionCall.arguments());
-			arguments[1] = workingDir;
+			JsonNode params = new ObjectMapper().readTree(functionCall.arguments());
+			File file = workingDir;
 			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
 			Object result = null;
 			for (Entry<Tool, ToolFunction> entry : entrySet) {
 				if (Strings.CS.equals(name, entry.getKey().asFunction().name())) {
-					result = safelyInvokeTool(name, entry.getValue(), arguments);
+					result = safelyInvokeTool(name, entry.getValue(), params, file);
 					break;
 				}
 			}
@@ -377,9 +379,9 @@ public class OpenAIProvider implements Genai {
 		}
 	}
 
-	private Object safelyInvokeTool(String name, ToolFunction tool, Object[] arguments) {
+	private Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File workingDir) {
 		try {
-			return tool.apply(arguments);
+			return tool.apply(params, workingDir);
 		} catch (IOException e) {
 			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 					+ e.getMessage();

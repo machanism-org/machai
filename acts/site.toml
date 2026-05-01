@@ -13,7 +13,7 @@ inputs = '''
      mvn -q site site:stage
      ```
    - Note: for output site dir is used: <stagingDirectory> pom.xml property. 
-   - if an error occurs, terminate the task with exitCode: 1.
+   - if an error occurs, terminate the task with exitCode: 1 with a description.
 
 2. **Synchronize the Site to Cloudflare:**
    - Use the `rclone sync` command to synchronize the local site directory to the Cloudflare bucket.

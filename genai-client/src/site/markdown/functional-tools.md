@@ -2,8 +2,8 @@
 <!-- @guidance: 
 Create the `Function Tolls` page:
 - Analyze classes in the folder: `src/main/java/org/machanism/machai/ai/tools`.
-- Write a general description of the each functional tool.
-- Describe a feature and input parameters.
+- Describe the feature.
+- Write a general description how to create a custom functional tool.
 - Organize your output so that each act is easy to identify and understand.
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
@@ -12,183 +12,229 @@ canonical: https://machai.machanism.org/genai-client/functional-tools.html
 
 # Functional Tools
 
-Functional tools are host-provided capabilities that the GenAI client can register and execute locally. They let AI-assisted workflows interact with the operating system and remote resources in a controlled way. In this project, the functional tool infrastructure is implemented in `org.machanism.machai.ai.tools` and organized around tool installers, support classes, and runtime safety helpers.
+Functional tools allow the host application to expose selected local capabilities to a `Genai` provider as callable tools. This keeps provider integrations focused on model communication while tool-specific behavior is implemented, discovered, and registered through a dedicated extension mechanism.
 
-## Functional Tool Sets
+These tools are useful when AI-assisted workflows need controlled access to host-side operations such as file handling, HTTP requests, command execution, or other application-defined actions.
 
-### `CommandFunctionTools`
-Registers tools for command execution and intentional process termination.
+## Feature overview
 
-**What it is for**
-- Running command-line tasks from an AI workflow
-- Executing project-local commands in a controlled working directory
-- Stopping execution immediately when a workflow must fail fast
+The `org.machanism.machai.ai.tools` package defines the infrastructure for:
 
-**Main features**
-- Executes commands through Java `ProcessBuilder`
-- Restricts the working directory to a relative location inside the project
-- Captures both standard output and standard error
-- Limits large output to a configurable tail section
-- Supports environment variable injection
-- Applies deny-list validation before execution
-- Supports explicit process termination with a custom message and exit code
+- contributing tool installers,
+- discovering them automatically with Java `ServiceLoader`,
+- optionally injecting runtime configuration,
+- and registering executable tool functions with a `Genai` provider.
 
-#### `run_command_line_tool`
-Executes a system command locally.
+In practice, this means the application can add or remove tool sets without changing the core provider integration code.
 
-**Typical use cases**
-- Running build or test commands
-- Inspecting generated project output
-- Launching safe local utilities needed by an automated workflow
-
-**Behavior**
-- Reads the command from the tool input.
-- Resolves `${...}` placeholders through the configured runtime configurator when available.
-- Rejects invalid or unsafe commands using `CommandSecurityChecker`.
-- Uses a working directory that must remain inside the current project.
-- Reads command output concurrently from standard output and error streams.
-- Returns only the last part of very large output when the configured limit is exceeded.
-- Appends the process exit code to the returned result.
-
-**Input parameters**
-- `command` *(required, string)*: The command to execute.
-- `env` *(optional, string)*: Environment variables as `NAME=VALUE` pairs separated by newline characters.
-- `dir` *(optional, string)*: Relative working directory inside the project. Defaults to the project root.
-- `tailResultSize` *(optional, integer)*: Maximum number of characters returned from the end of the captured output. Default is `1024`.
-- `charsetName` *(optional, string)*: Character encoding used to decode process output. Default is `UTF-8`.
-
-#### `terminate_process`
-Terminates the current process flow immediately.
-
-**Typical use cases**
-- Ending a workflow after a fatal validation failure
-- Returning a non-zero exit code to the host environment
-- Aborting execution intentionally when a required precondition is not met
-
-**Behavior**
-- Always throws a host-side termination exception.
-- Supports a custom message.
-- Supports an optional wrapped cause message.
-- Supports a custom exit code.
-
-**Input parameters**
-- `message` *(optional, string)*: Exception message. Default is `Process terminated by function tool.`
-- `cause` *(optional, string)*: Optional cause message wrapped in an exception.
-- `exitCode` *(optional, integer)*: Exit code returned to the host. Default is `1`.
-
-### `WebFunctionTools`
-Registers tools for fetching web content and calling HTTP APIs.
-
-**What it is for**
-- Downloading web pages for analysis
-- Extracting selected HTML fragments from a page
-- Converting web content into readable plain text
-- Calling REST endpoints with configurable methods, headers, and request bodies
-
-**Main features**
-- Performs HTTP GET requests for page retrieval
-- Performs generic REST API calls using configurable HTTP methods
-- Supports custom request headers
-- Supports request bodies for methods such as `POST`, `PUT`, and `PATCH`
-- Supports HTTP Basic authentication through URL user info
-- Supports optional CSS selector extraction for HTML content
-- Supports plain-text rendering of HTML responses
-- Supports configurable timeout and character encoding
-- Can resolve `${...}` placeholders in URLs and header values
-- Supports reading `file:` URIs through the host environment
-
-#### `get_web_content`
-Fetches the content of a web page or supported `file:` URI.
-
-**Typical use cases**
-- Retrieving a full HTML page
-- Extracting only the matching part of a page with a CSS selector
-- Converting HTML to plain text for easier downstream processing
-- Reading file-based content through a `file:` URI when supported by the runtime
-
-**Behavior**
-- Sends an HTTP `GET` request for network URLs.
-- Supports optional request headers.
-- Supports HTTP Basic authentication through URL user info such as `https://user:password@host/path`.
-- Returns an HTTP status line followed by response content for network calls.
-- Can restrict the result to elements matching a CSS selector.
-- Can convert HTML to plain text when `textOnly` is enabled.
-- For `file:` URIs, reads content from the resolved file instead of performing a network request.
-
-**Input parameters**
-- `url` *(required, string)*: The target URL or supported `file:` URI.
-- `headers` *(optional, string)*: HTTP headers as `NAME=VALUE` pairs separated by newline characters.
-- `timeout` *(optional, integer)*: Maximum wait time in milliseconds. Default is `10000`.
-- `charsetName` *(optional, string)*: Character set used to decode the response. Default is `UTF-8`.
-- `textOnly` *(optional, boolean)*: If `true`, returns plain text instead of HTML.
-- `selector` *(optional, string)*: CSS selector used to extract matching content before rendering.
-
-#### `call_rest_api`
-Executes a REST-style HTTP request to a target endpoint.
-
-**Typical use cases**
-- Calling JSON or text-based APIs from a workflow
-- Sending `POST`, `PUT`, `PATCH`, or `DELETE` requests
-- Testing remote endpoints with custom headers and request bodies
-
-**Behavior**
-- Uses `GET` by default when no method is provided.
-- Supports configurable headers and request body content.
-- Supports timeout and character encoding options.
-- Supports HTTP Basic authentication through URL user info.
-- Returns an HTTP status line followed by the response body when available.
-
-**Input parameters**
-- `url` *(required, string)*: The REST endpoint URL.
-- `method` *(optional, string)*: HTTP method such as `GET`, `POST`, `PUT`, `PATCH`, or `DELETE`. Default is `GET`.
-- `headers` *(optional, string)*: HTTP headers as `NAME=VALUE` pairs separated by newline characters.
-- `body` *(optional, string)*: Request body sent for supported methods.
-- `timeout` *(optional, integer)*: Maximum wait time in milliseconds. Default is `10000`.
-- `charsetName` *(optional, string)*: Character set used for request and response handling. Default is `UTF-8`.
-
-## Supporting Infrastructure
+## Package contents
 
 ### `FunctionTools`
-Defines the service-provider interface for functional tool sets.
 
-**Purpose**
-- Gives each tool set a standard way to register its tools with `Genai`
-- Provides optional configurator injection through `setConfigurator(...)`
-- Provides placeholder replacement support for values containing `${...}`
+`FunctionTools` is the main extension interface for contributing one or more functional tools.
+
+#### Purpose
+
+Use this interface when you want to package related tool registrations into a reusable installer that can be discovered automatically.
+
+#### Main responsibilities
+
+- Register tools with a provider through `applyTools(Genai provider)`.
+- Optionally accept a `Configurator` through `setConfigurator(Configurator configurator)`.
+- Resolve configuration placeholders with `replace(String value, Configurator conf)`.
+
+#### Important behavior
+
+The `replace(...)` helper scans text for `${...}` placeholders and tries to resolve them from the provided `Configurator`.
+
+- If a placeholder can be resolved, the value is substituted.
+- If a placeholder cannot be resolved, it remains unchanged.
+- Resolution is repeated for multiple passes, which allows nested configuration values to be expanded.
+- If no `Configurator` is available, the original value is returned as-is.
+
+#### When to use it
+
+Use `FunctionTools` when you need a clean, reusable way to register one or more host-side tools such as:
+
+- a file utility tool set,
+- an internal service integration,
+- a project automation tool,
+- a command execution helper,
+- or any application-specific action exposed to the model.
 
 ### `FunctionToolsLoader`
-Discovers and applies available `FunctionTools` implementations by using Java `ServiceLoader`.
 
-**Purpose**
-- Loads tool installers from the classpath
-- Applies all discovered tool sets to the active GenAI provider
-- Propagates shared configuration to tool installers
+`FunctionToolsLoader` is the runtime loader responsible for discovering and applying all available `FunctionTools` implementations.
+
+#### Purpose
+
+It acts as the central entry point for installing functional tools into a `Genai` provider.
+
+#### Main responsibilities
+
+- Discover `FunctionTools` implementations from the classpath using `ServiceLoader`.
+- Expose a singleton instance through `getInstance()`.
+- Pass shared configuration to all discovered implementations through `setConfiguration(Configurator configurator)`.
+- Apply each discovered tool installer to a provider through `applyTools(Genai provider)`.
+
+#### Important behavior
+
+When the loader is created, it scans the classpath for service implementations of `FunctionTools`. Each discovered implementation is stored and later reused when configuration is set or tools are applied.
+
+#### When to use it
+
+Use `FunctionToolsLoader` during application startup or provider initialization when you want all available tool installers to be discovered and registered automatically.
 
 ### `ToolFunction`
-Represents the executable contract for a tool implementation.
 
-**Purpose**
-- Defines the callback shape used to execute a tool with runtime parameters
-- Allows tool logic to return structured results and throw `IOException` when needed
+`ToolFunction` is the functional interface representing the executable logic behind a registered tool.
 
-### `CommandSecurityChecker`
-Performs deny-list validation for command execution.
+#### Purpose
 
-**Purpose**
-- Loads operating-system-specific deny-list rules
-- Supports regular-expression and keyword-based checks
-- Rejects commands that match unsafe patterns before execution starts
+It provides the callable operation that runs when the provider invokes a tool.
 
-### `DenyException`
-Exception type raised when a command fails deny-list validation.
+#### Main responsibilities
 
-**Purpose**
-- Signals that command execution must be blocked
-- Carries the reason for the deny-list match
+- Accept tool parameters as a Jackson `JsonNode`.
+- Receive the current working directory as a `File`.
+- Execute the requested host-side operation.
+- Return a provider-specific result object.
+- Allow failures to be reported through `IOException`.
 
-### `LimitedStringBuilder`
-Keeps only the last part of a growing string.
+#### Method shape
 
-**Purpose**
-- Prevents command output capture from growing without limit
-- Preserves the most recent output, which is usually the most useful diagnostic section
+A `ToolFunction` implementation uses this contract:
+
+```java
+Object apply(JsonNode params, File workingDir) throws IOException;
+```
+
+#### When to use it
+
+Use `ToolFunction` when implementing the actual action a tool should perform, especially when tool input is naturally expressed as structured JSON and execution may depend on the working directory.
+
+## How the feature works
+
+The functional tools mechanism typically follows this flow:
+
+1. Create one or more classes that implement `FunctionTools`.
+2. Register those classes through Java `ServiceLoader`.
+3. Start the application and obtain `FunctionToolsLoader.getInstance()`.
+4. Provide configuration with `setConfiguration(...)` if needed.
+5. Apply discovered tool installers to the active `Genai` provider with `applyTools(...)`.
+6. Let the provider call the registered `ToolFunction` implementations when a tool is invoked.
+
+This design separates tool registration from provider logic and makes local capabilities easier to extend, test, and maintain.
+
+## Typical use cases
+
+Functional tools are a good fit when a model needs controlled access to host-side capabilities such as:
+
+- reading or processing local project files,
+- invoking local automation commands,
+- calling internal or external HTTP services,
+- gathering environment-specific information,
+- integrating with application APIs,
+- or performing targeted utility actions during a model interaction.
+
+## How to create a custom functional tool
+
+To create a custom functional tool, implement `FunctionTools`, register it for discovery, and add one or more provider tools inside `applyTools(...)`.
+
+### Step 1: Create a `FunctionTools` implementation
+
+```java
+package com.example.tools;
+
+import java.io.File;
+import java.io.IOException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.FunctionTools;
+
+public class ExampleFunctionTools implements FunctionTools {
+
+    private Configurator configurator;
+
+    @Override
+    public void setConfigurator(Configurator configurator) {
+        this.configurator = configurator;
+    }
+
+    @Override
+    public void applyTools(Genai provider) {
+        provider.addTool(
+            "example_tool",
+            "Processes a text value and returns a simple response.",
+            (JsonNode params, File workingDir) -> {
+                String input = params != null && params.has("input") ? params.get("input").asText() : "";
+                return "Processed: " + input;
+            },
+            "input",
+            "Text value to process"
+        );
+    }
+}
+```
+
+### Step 2: Register the implementation with `ServiceLoader`
+
+Create the following file:
+
+`src/main/resources/META-INF/services/org.machanism.machai.ai.tools.FunctionTools`
+
+Add the fully qualified class name of your implementation:
+
+```text
+com.example.tools.ExampleFunctionTools
+```
+
+If the file contains multiple implementation names, each discovered installer can be applied by the loader.
+
+### Step 3: Apply the tools at runtime
+
+```java
+Configurator conf = ...;
+Genai provider = ...;
+
+FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
+loader.setConfiguration(conf);
+loader.applyTools(provider);
+```
+
+### Step 4: Resolve configuration values when needed
+
+If your tool needs runtime values such as endpoints, tokens, headers, or feature flags, store the provided `Configurator` and use the `replace(...)` helper.
+
+```java
+String endpoint = replace("${my.service.url}", configurator);
+```
+
+If `${my.service.url}` cannot be resolved, it remains unchanged.
+
+## Practical design guidance
+
+When implementing custom functional tools, follow these recommendations:
+
+- Use stable, descriptive tool names.
+- Keep each tool focused on one clear responsibility.
+- Write short descriptions that help the provider choose the right tool.
+- Validate incoming JSON parameters before using them.
+- Use the supplied working directory intentionally and safely.
+- Prefer configuration-based values over hard-coded environment details.
+- Handle `IOException` and other failures in a predictable way.
+- Apply security controls before exposing file, command, or network operations.
+- Return results in a format that is easy for the provider and model to interpret.
+
+## Choosing the right type
+
+- Use `FunctionTools` to define and register a reusable set of related tools.
+- Use `FunctionToolsLoader` to discover all available tool installers and apply them centrally.
+- Use `ToolFunction` to implement the executable body of a single registered tool.
+
+## Summary
+
+The `org.machanism.machai.ai.tools` package provides the extension layer for host-managed tool capabilities in the `GenAI Client`. It enables the application to discover tool installers, inject configuration, register callable functions, and expose controlled local behavior to a `Genai` provider in a structured and extensible way.

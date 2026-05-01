@@ -152,7 +152,7 @@ public class GWCoverageTest {
 
 			@Override
 			protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
-				throw new org.machanism.machai.ai.tools.CommandFunctionTools.ProcessTerminationException("stop", 9);
+				throw new org.machanism.machai.gw.tools.CommandFunctionTools.ProcessTerminationException("stop", 9);
 			}
 		};
 		mojo.basedir = new File(".").getCanonicalFile();

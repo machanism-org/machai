@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.tools;
+package org.machanism.machai.gw.tools;
 
 import java.io.IOException;
 import java.net.URL;

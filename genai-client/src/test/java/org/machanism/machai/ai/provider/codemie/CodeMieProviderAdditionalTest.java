@@ -44,7 +44,6 @@ class CodeMieProviderAdditionalTest {
 		server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
 		server.createContext("/token", handler);
 		server.start();
-
 		String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/token";
 
 		// Act
@@ -69,17 +68,16 @@ class CodeMieProviderAdditionalTest {
 		server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
 		server.createContext("/token", handler);
 		server.start();
-
 		String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/token";
 
 		// Act
-		String token = CodeMieProvider.getToken(url, "client", "secret");
+		String token = CodeMieProvider.getToken(url, "client", "secret value");
 
 		// Assert
 		assertEquals("svc", token);
 		assertTrue(handler.requestBody.startsWith("grant_type=client_credentials"));
 		assertTrue(handler.requestBody.contains("client_id=client"));
-		assertTrue(handler.requestBody.contains("client_secret=secret"));
+		assertTrue(handler.requestBody.contains("client_secret=secret+value"));
 	}
 
 	private static byte[] readAllBytesCompat(InputStream in) throws IOException {

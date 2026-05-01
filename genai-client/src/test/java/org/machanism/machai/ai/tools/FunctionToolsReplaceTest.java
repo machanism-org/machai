@@ -2,8 +2,11 @@ package org.machanism.machai.ai.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -18,10 +21,10 @@ class FunctionToolsReplaceTest {
 	}
 
 	private static final class MapConfigurator implements Configurator {
-		private final java.util.Map<String, String> map;
+		private final Map<String, String> map;
 		private final String name;
 
-		private MapConfigurator(String name, java.util.Map<String, String> map) {
+		private MapConfigurator(String name, Map<String, String> map) {
 			this.name = name;
 			this.map = map;
 		}
@@ -117,13 +120,27 @@ class FunctionToolsReplaceTest {
 	}
 
 	@Test
-	void replace_whenConfiguratorNull_returnsOriginal() {
+	void replace_whenConfiguratorNull_returnsOriginalInstance() {
 		// Arrange
 		TestTools tools = new TestTools();
 		String value = "Hello ${name}";
 
 		// Act
 		String result = tools.replace(value, null);
+
+		// Assert
+		assertSame(value, result);
+	}
+
+	@Test
+	void replace_whenPlainTextProvided_returnsOriginalText() {
+		// Arrange
+		TestTools tools = new TestTools();
+		Configurator conf = new MapConfigurator("test", new HashMap<>());
+		String value = "Hello world";
+
+		// Act
+		String result = tools.replace(value, conf);
 
 		// Assert
 		assertEquals(value, result);
@@ -133,7 +150,7 @@ class FunctionToolsReplaceTest {
 	void replace_whenPlaceholderMissing_keepsPlaceholderAndTerminates() {
 		// Arrange
 		TestTools tools = new TestTools();
-		Configurator conf = new MapConfigurator("test", new java.util.HashMap<>());
+		Configurator conf = new MapConfigurator("test", new HashMap<>());
 		String value = "Hello ${name}";
 
 		// Act
@@ -144,10 +161,10 @@ class FunctionToolsReplaceTest {
 	}
 
 	@Test
-	void replace_whenSinglePlaceholder_present_replaces() {
+	void replace_whenSinglePlaceholderPresent_replacesValue() {
 		// Arrange
 		TestTools tools = new TestTools();
-		java.util.Map<String, String> map = new java.util.HashMap<>();
+		Map<String, String> map = new HashMap<>();
 		map.put("name", "Viktor");
 		Configurator conf = new MapConfigurator("test", map);
 
@@ -159,10 +176,86 @@ class FunctionToolsReplaceTest {
 	}
 
 	@Test
+	void replace_whenSamePlaceholderAppearsMultipleTimes_replacesEveryOccurrence() {
+		// Arrange
+		TestTools tools = new TestTools();
+		Map<String, String> map = new HashMap<>();
+		map.put("name", "Viktor");
+		Configurator conf = new MapConfigurator("test", map);
+
+		// Act
+		String result = tools.replace("${name}-${name}-${name}", conf);
+
+		// Assert
+		assertEquals("Viktor-Viktor-Viktor", result);
+	}
+
+	@Test
+	void replace_whenMultiplePlaceholdersPresent_replacesAllResolvableValues() {
+		// Arrange
+		TestTools tools = new TestTools();
+		Map<String, String> map = new HashMap<>();
+		map.put("greeting", "Hello");
+		map.put("name", "Viktor");
+		Configurator conf = new MapConfigurator("test", map);
+
+		// Act
+		String result = tools.replace("${greeting} ${name}", conf);
+
+		// Assert
+		assertEquals("Hello Viktor", result);
+	}
+
+	@Test
+	void replace_whenPlaceholderValueIsEmptyString_replacesWithEmptyString() {
+		// Arrange
+		TestTools tools = new TestTools();
+		Map<String, String> map = new HashMap<>();
+		map.put("name", "");
+		Configurator conf = new MapConfigurator("test", map);
+
+		// Act
+		String result = tools.replace("Hello ${name}!", conf);
+
+		// Assert
+		assertEquals("Hello !", result);
+	}
+
+	@Test
+	void replace_whenPlaceholderResolvesToTextContainingNonPlaceholderDollarBrace_returnsResolvedText() {
+		// Arrange
+		TestTools tools = new TestTools();
+		Map<String, String> map = new HashMap<>();
+		map.put("value", "cost is $5");
+		Configurator conf = new MapConfigurator("test", map);
+
+		// Act
+		String result = tools.replace("The ${value}", conf);
+
+		// Assert
+		assertEquals("The cost is $5", result);
+	}
+
+	@Test
+	void replace_whenMixedResolvableAndUnresolvablePlaceholders_keepsUnknownValues() {
+		// Arrange
+		TestTools tools = new TestTools();
+		Map<String, String> map = new HashMap<>();
+		map.put("name", "Viktor");
+		Configurator conf = new MapConfigurator("test", map);
+
+		// Act
+		String result = tools.replace("Hello ${name} from ${city}", conf);
+
+		// Assert
+		assertEquals("Hello Viktor from ${city}", result);
+	}
+
+	@Test
 	void replace_whenNestedPlaceholders_resolvesRecursively() {
 		// Arrange
 		TestTools tools = new TestTools();
-		java.util.Map<String, String> map = new java.util.HashMap<>();
+		Map<String, String> map = new HashMap<>();
 		map.put("a", "${b}");
 		map.put("b", "final");
 		Configurator conf = new MapConfigurator("test", map);
@@ -172,5 +265,62 @@ class FunctionToolsReplaceTest {
 
 		// Assert
 		assertEquals("Value=final", result);
+	}
+
+	@Test
+	void replace_whenNestedPlaceholdersBecomePartiallyUnresolvable_returnsLastPartiallyResolvedValue() {
+		// Arrange
+		TestTools tools = new TestTools();
+		Map<String, String> map = new HashMap<>();
+		map.put("outer", "${inner}");
+		Configurator conf = new MapConfigurator("test", map);
+
+		// Act
+		String result = tools.replace("Value=${outer}", conf);
+
+		// Assert
+		assertEquals("Value=${inner}", result);
+	}
+
+	@Test
+	void replace_whenResolutionChainExceedsIterationLimit_stopsAfterTenPasses() {
+		// Arrange
+		TestTools tools = new TestTools();
+		Map<String, String> map = new HashMap<>();
+		map.put("a1", "${a2}");
+		map.put("a2", "${a3}");
+		map.put("a3", "${a4}");
+		map.put("a4", "${a5}");
+		map.put("a5", "${a6}");
+		map.put("a6", "${a7}");
+		map.put("a7", "${a8}");
+		map.put("a8", "${a9}");
+		map.put("a9", "${a10}");
+		map.put("a10", "${a11}");
+		map.put("a11", "${a12}");
+		map.put("a12", "done");
+		Configurator conf = new MapConfigurator("test", map);
+
+		// Act
+		String result = tools.replace("${a1}", conf);
+
+		// Assert
+		assertEquals("${a11}", result);
+	}
+
+	@Test
+	void replace_whenPlaceholdersReferenceEachOther_stopsWhenReplacementNoLongerChanges() {
+		// Arrange
+		TestTools tools = new TestTools();
+		Map<String, String> map = new HashMap<>();
+		map.put("a", "${b}");
+		map.put("b", "${a}");
+		Configurator conf = new MapConfigurator("test", map);
+
+		// Act
+		String result = tools.replace("${a}", conf);
+
+		// Assert
+		assertEquals("${a}", result);
 	}
 }

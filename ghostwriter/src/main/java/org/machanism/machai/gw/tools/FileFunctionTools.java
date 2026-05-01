@@ -10,7 +10,6 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -109,13 +108,13 @@ public class FileFunctionTools implements FunctionTools {
 		return new File(workingDir, path);
 	}
 
-	private static void logToolCall(String toolName, Object[] params, Object result) {
+	private static void logToolCall(String toolName, JsonNode props, File workingDir, Object result) {
 		if (logger.isInfoEnabled()) {
-			logger.info("{}: {}, Result: {}", toolName, Arrays.toString(params),
+			logger.info("{}: {}, {}, Result: {}", toolName, props, workingDir,
 					StringUtils.abbreviate(Objects.toString(result), 60).replace(Genai.LINE_SEPARATOR, ""));
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("{}: {}, Result: {}", toolName, Arrays.toString(params), result);
+			logger.debug("{}: {}, Result: {}", toolName, props, result);
 		}
 	}
 
@@ -134,9 +133,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return a newline-separated list of project-relative file paths, or a message
 	 *         if no files are found
 	 */
-	public Object getRecursiveFiles(Object[] params) {
-		File workingDir = (File) params[1];
-		JsonNode dirPathNode = ((JsonNode) params[0]).get(DIR_PATH_FIELD);
+	public Object getRecursiveFiles(JsonNode params, File workingDir) {
+		JsonNode dirPathNode = params.get(DIR_PATH_FIELD);
 		File directory = resolveDirFromOptionalPath(workingDir, dirPathNode);
 
 		List<File> listFiles = listFilesRecursively(directory);
@@ -151,7 +149,7 @@ public class FileFunctionTools implements FunctionTools {
 			result = "No files found in directory.";
 		}
 
-		logToolCall("List files recursively", params, result);
+		logToolCall("List files recursively", params, workingDir, result);
 		return result;
 	}
 
@@ -170,13 +168,12 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return a comma-separated list of project-relative paths, or a message if the
 	 *         directory does not exist or is empty
 	 */
-	public Object listFiles(Object[] params) {
-		JsonNode dirNode = ((JsonNode) params[0]).get(DIR_PATH_FIELD);
-		File workingDir = (File) params[1];
+	public Object listFiles(JsonNode params, File workingDir) {
+		JsonNode dirNode = params.get(DIR_PATH_FIELD);
 		if (logger.isInfoEnabled()) {
-			logger.info("List files: [{}, {}]", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH), workingDir);
+			logger.info("List files: [{}, {}]", StringUtils.abbreviate(String.valueOf(params), MAXWIDTH), workingDir);
 		}
-		logger.debug("List files: [{}, {}]", params[0], workingDir);
+		logger.debug("List files: [{}, {}]", params, workingDir);
 
 		File directory = resolveDirFromOptionalPath(workingDir, dirNode);
 		if (directory.isDirectory()) {
@@ -209,13 +206,11 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param params tool arguments
 	 * @return success message, or an error message if writing fails
 	 */
-	public Object writeFile(Object[] params) {
+	public Object writeFile(JsonNode props, File workingDir) {
 		String result;
-		JsonNode props = (JsonNode) params[0];
 		String filePath = props.get(FILE_PATH_FIELD).asText();
 		String text = props.get("text").asText();
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText() : DEFAULT_CHARSET;
-		File workingDir = (File) params[1];
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Write file: [{}, {}]", toStringFields(props, FILE_PATH_FIELD, CHARSET_NAME_FIELD, "text"),
@@ -321,17 +316,15 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return file content as text, or a message if the file does not exist
 	 * @throws IllegalArgumentException on I/O error
 	 */
-	public Object readFile(Object[] params) {
+	public Object readFile(JsonNode props, File workingDir) {
 		if (logger.isInfoEnabled()) {
-			logger.info("Read file: {}", Arrays.toString(params));
+			logger.info("Read file: {}, {}", props, workingDir);
 		}
 
-		JsonNode props = (JsonNode) params[0];
 		String filePath = props.get(FILE_PATH_FIELD).asText();
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
 				: DEFAULT_CHARSET;
 
-		File workingDir = (File) params[1];
 		String result;
 		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
 			result = IOUtils.toString(io, charsetName);

@@ -1,5 +1,6 @@
 package org.machanism.machai.ai.provider.openai;
 
+import java.lang.reflect.Method;
 import java.util.Optional;
 
 import com.openai.models.responses.Response;
@@ -18,28 +19,7 @@ final class OpenAIProviderToolInvocationTestSupport {
     }
 
     static Response responseWithMessage(String text, ResponseUsage usageOrNull) {
-        ResponseOutputText outputText = ResponseOutputText.builder().text(text).build();
-
-        // ResponseOutputMessage.Content is a generated type; construct via builder if present.
-        Object contentObj;
-        try {
-            Class<?> contentType = Class.forName("com.openai.models.responses.ResponseOutputMessage$Content");
-            Object builder = contentType.getMethod("builder").invoke(null);
-            contentType.getMethod("outputText", ResponseOutputText.class).invoke(builder, outputText);
-            contentObj = contentType.getMethod("build").invoke(builder);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
-
-        ResponseOutputMessage.Builder msgBuilder = ResponseOutputMessage.builder();
-        try {
-            msgBuilder.getClass().getMethod("addContent", contentObj.getClass()).invoke(msgBuilder, contentObj);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
-
-        ResponseOutputItem item = ResponseOutputItem.ofMessage(msgBuilder.build());
-
+        ResponseOutputItem item = outputMessageItem(text);
         Response.Builder responseBuilder = Response.builder().addOutput(item);
         if (usageOrNull != null) {
             responseBuilder.usage(usageOrNull);
@@ -54,6 +34,47 @@ final class OpenAIProviderToolInvocationTestSupport {
             responseBuilder.usage(usageOrNull);
         }
         return responseBuilder.build();
+    }
+
+    static ResponseOutputItem outputMessageItem(String text) {
+        ResponseOutputText outputText = ResponseOutputText.builder().text(text).build();
+
+        Object contentObj;
+        try {
+            Class<?> contentType = Class.forName("com.openai.models.responses.ResponseOutputMessage$Content");
+            Object builder = contentType.getMethod("builder").invoke(null);
+            invokeFirstMatching(builder, "outputText", outputText);
+            contentObj = builder.getClass().getMethod("build").invoke(builder);
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+
+        ResponseOutputMessage.Builder msgBuilder = ResponseOutputMessage.builder();
+        try {
+            msgBuilder.getClass().getMethod("addContent", contentObj.getClass()).invoke(msgBuilder, contentObj);
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+
+        return ResponseOutputItem.ofMessage(msgBuilder.build());
+    }
+
+    static ResponseOutputItem reasoningItem(String text) {
+        try {
+            Class<?> contentType = Class.forName("com.openai.models.responses.ResponseReasoningItem$Content");
+            Object content = contentType.getMethod("builder").invoke(null);
+            invokeFirstMatching(content, "text", text);
+            Object builtContent = content.getClass().getMethod("build").invoke(content);
+
+            Class<?> reasoningType = Class.forName("com.openai.models.responses.ResponseReasoningItem");
+            Object builder = reasoningType.getMethod("builder").invoke(null);
+            invokeFirstMatching(builder, "addContent", builtContent);
+            Object reasoning = builder.getClass().getMethod("build").invoke(builder);
+            return (ResponseOutputItem) ResponseOutputItem.class.getMethod("ofReasoning", reasoningType).invoke(null,
+                    reasoning);
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
     }
 
     static ResponseUsage usage(long inputTokens, long cached, long outputTokens) {
@@ -75,5 +96,16 @@ final class OpenAIProviderToolInvocationTestSupport {
 
     static Optional<ResponseUsage> optionalUsage(ResponseUsage usage) {
         return Optional.ofNullable(usage);
+    }
+
+    private static void invokeFirstMatching(Object target, String methodName, Object argument) throws Exception {
+        for (Method method : target.getClass().getMethods()) {
+            if (method.getName().equals(methodName) && method.getParameterCount() == 1
+                    && method.getParameterTypes()[0].isAssignableFrom(argument.getClass())) {
+                method.invoke(target, argument);
+                return;
+            }
+        }
+        throw new NoSuchMethodException(methodName);
     }
 }

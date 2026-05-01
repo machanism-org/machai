@@ -1,3 +1,40 @@
+/**
+ * Provides host-integrated function tool implementations used by Ghostwriter to
+ * expose local file-system, command-line, web, and act-management capabilities
+ * to AI providers.
+ *
+ * <p>
+ * Classes in this package register concrete tools with
+ * {@link org.machanism.machai.ai.provider.Genai} instances so that higher-level
+ * workflows can safely interact with the current project, external resources,
+ * and Ghostwriter runtime features.
+ * </p>
+ *
+ * <p>
+ * The package includes tool registrars for:
+ * </p>
+ * <ul>
+ * <li>reading, writing, and listing files relative to a host-supplied working
+ * directory</li>
+ * <li>executing validated command-line processes with bounded output capture</li>
+ * <li>retrieving web content and invoking REST endpoints</li>
+ * <li>loading act definitions and maintaining project-scoped context
+ * variables</li>
+ * <li>signaling workflow control transitions such as moving to another
+ * episode</li>
+ * </ul>
+ *
+ * <p>
+ * Supporting types provide bounded output buffering and command deny-list
+ * enforcement used by the command execution tools.
+ * </p>
+ *
+ * <p>
+ * These tools are intended to operate within a host-controlled execution model
+ * where working directories, configuration, security constraints, and network
+ * policies are supplied by the surrounding application.
+ * </p>
+ */
 /*-
  * @guidance:
  * **Task:**  
@@ -33,41 +70,4 @@
  *     - Do not use escaping in `{@code ...}` tags.   
  *     - When showing `${...}` variable placeholders, do not use escaping or wrap them in `{@code ...}`.
  */
-
-/**
- * Defines the host-side tool registration contracts used to expose executable capabilities to a
- * {@link org.machanism.machai.ai.provider.Genai} provider.
- *
- * <p>
- * This package contains the service-provider interface for contributing tool collections, a loader
- * that discovers and applies those contributions through Java's
- * {@link java.util.ServiceLoader} mechanism, and a functional contract representing executable tool
- * implementations. Together, these types provide the infrastructure required to bind local
- * application features such as file operations, HTTP integrations, or command execution into an AI
- * provider's tool invocation model.
- * </p>
- *
- * <p>
- * Typical usage starts by obtaining the singleton
- * {@link org.machanism.machai.ai.tools.FunctionToolsLoader}, optionally providing a
- * {@link org.machanism.macha.core.commons.configurator.Configurator} for runtime configuration, and
- * then applying all discovered tools to a provider instance.
- * </p>
- *
- * <ul>
- * <li>{@link org.machanism.machai.ai.tools.FunctionTools} defines how a tool contributor registers
- * one or more tools with a provider and optionally consumes configuration.</li>
- * <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} discovers available contributors and
- * installs them into the provider at startup.</li>
- * <li>{@link org.machanism.machai.ai.tools.ToolFunction} models the executable unit invoked when a
- * registered tool is called.</li>
- * </ul>
- *
- * <p>
- * Configuration-aware implementations may resolve externalized values, including placeholders such
- * as ${...}, by delegating to a
- * {@link org.machanism.macha.core.commons.configurator.Configurator} before registering or invoking
- * tools.
- * </p>
- */
-package org.machanism.machai.ai.tools;
+package org.machanism.machai.gw.tools;

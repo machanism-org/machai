@@ -29,28 +29,35 @@
 /**
  * Provides integration with the EPAM CodeMie Code Assistant platform.
  *
- * <p>This package contains a {@link org.machanism.machai.ai.provider.Genai} implementation that acquires OAuth 2.0
- * access tokens from the CodeMie OpenID Connect token endpoint, configures an OpenAI-compatible base URL and API key,
- * and delegates request execution to the appropriate downstream provider for the selected model family.</p>
+ * <p>This package contains the {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider} implementation,
+ * which acquires OAuth 2.0 access tokens from the CodeMie OpenID Connect token endpoint and configures the
+ * CodeMie Code Assistant REST API as an OpenAI-compatible backend for downstream model providers.</p>
  *
- * <h2>Supported model routing</h2>
+ * <h2>Primary responsibilities</h2>
  * <ul>
- * <li>Models whose identifiers start with {@code gpt-} are delegated to the OpenAI-compatible provider.</li>
- * <li>Models whose identifiers start with {@code gemini-} are delegated to the Gemini provider.</li>
- * <li>Models whose identifiers start with {@code claude-} are delegated to the Claude provider.</li>
+ * <li>Authenticate against CodeMie using either the OAuth 2.0 password grant or client credentials grant.</li>
+ * <li>Populate OpenAI-compatible configuration values required by delegated providers.</li>
+ * <li>Select the downstream provider implementation based on the configured chat model prefix.</li>
  * </ul>
  *
- * <h2>Authentication behavior</h2>
+ * <h2>Model delegation</h2>
  * <ul>
- * <li>If {@code GENAI_USERNAME} contains {@code @}, the provider uses the OAuth 2.0 password grant flow.</li>
+ * <li>{@code gpt-} models, and blank model names, are handled through the OpenAI-compatible provider path.</li>
+ * <li>{@code gemini-} models are delegated to the Gemini provider after CodeMie authorization succeeds.</li>
+ * <li>{@code claude-} models are delegated to the Claude provider after CodeMie authorization succeeds.</li>
+ * </ul>
+ *
+ * <h2>Authentication selection</h2>
+ * <ul>
+ * <li>If {@code GENAI_USERNAME} contains {@code @}, the provider uses the password grant flow.</li>
  * <li>Otherwise, the provider uses the client credentials grant flow.</li>
  * </ul>
  *
- * <h2>Configuration</h2>
+ * <h2>Key configuration inputs</h2>
  * <ul>
  * <li>{@code GENAI_USERNAME}: user e-mail address or client identifier.</li>
  * <li>{@code GENAI_PASSWORD}: password or client secret.</li>
- * <li>{@code chatModel}: target model identifier used to choose the downstream provider.</li>
+ * <li>{@code chatModel}: target model identifier used to choose the delegated provider.</li>
  * <li>{@code AUTH_URL}: optional override for the default CodeMie token endpoint.</li>
  * </ul>
  */

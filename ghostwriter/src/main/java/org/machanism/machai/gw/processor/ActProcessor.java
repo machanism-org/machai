@@ -473,18 +473,18 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	private boolean nextAct() {
-		if (requestedEpisodeId > 0) {
-			if (requestedEpisodeId == null) {
-				activeEpisodeId++;
-				return episodeIds != null ? activeEpisodeId <= episodeIds.size() : activeEpisodeId <= prompts.length;
-			} else {
+		if (requestedEpisodeId == null) {
+			activeEpisodeId++;
+			return episodeIds != null ? activeEpisodeId <= episodeIds.size() : activeEpisodeId <= prompts.length;
+		} else {
+			if (requestedEpisodeId > 0) {
 				activeEpisodeId = requestedEpisodeId;
 				requestedEpisodeId = 0;
 				episodeIds = null;
 				return true;
+			} else {
+				return false;
 			}
-		} else {
-			return false;
 		}
 	}
 

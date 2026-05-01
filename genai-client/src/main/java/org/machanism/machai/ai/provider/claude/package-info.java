@@ -27,14 +27,19 @@
  */
 
 /**
- * Provides Anthropic Claude integration for the MachAI generative AI abstraction layer.
+ * Provides Anthropic Claude integration for the MachAI generative AI provider layer.
  *
  * <p>This package contains the Claude-specific implementation of the {@link org.machanism.machai.ai.provider.Genai}
- * contract. Its classes are intended to adapt Anthropic Claude models to the common provider lifecycle used by the
- * application, including initialization, prompt accumulation, instruction handling, tool registration, usage
- * reporting, and embedding requests.
+ * contract used by MachAI. It adapts Claude models to the framework's common provider interface so callers can submit
+ * prompts, configure system instructions, register tools, inspect usage, manage working-directory context, and request
+ * embeddings through a consistent API.
  *
- * <p>The current implementation is a provider scaffold and defines the package location for Claude support while the
- * concrete behavior is completed incrementally.
+ * <p>The package currently centers on {@link org.machanism.machai.ai.provider.claude.ClaudeProvider}, which defines
+ * the Claude provider entry point and the required method surface for integrating Anthropic services into the wider
+ * MachAI runtime.
+ *
+ * <p>Client code typically interacts with this package through the
+ * {@link org.machanism.machai.ai.provider.Genai} abstraction rather than referencing provider-specific implementation
+ * details directly.
  */
 package org.machanism.machai.ai.provider.claude;

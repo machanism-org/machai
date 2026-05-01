@@ -131,8 +131,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws JsonProcessingException
 	 * @throws IllegalStateException   if the repository has not been configured yet
 	 */
-	public String getBindex(Object[] params) throws JsonProcessingException {
-		JsonNode props = (JsonNode) params[0];
+	public String getBindex(JsonNode props, File workingDir) throws JsonProcessingException {
 		String id = props.get("id").asText();
 		Bindex bindex = getBindexRepository().getBindex(id);
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -161,7 +160,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @return the Bindex schema resource content as JSON string
 	 * @throws IOException
 	 */
-	public String getBindexSchema(Object[] params) throws IOException {
+	public String getBindexSchema(JsonNode props, File workingDir) throws IOException {
 		URL systemResource = Bindex.class.getResource(BindexRepository.BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		if (logger.isInfoEnabled()) {
@@ -171,12 +170,11 @@ public class BindexFunctionTools implements FunctionTools {
 		return schema;
 	}
 
-	public List<BindexElement> getRecommendedLibraries(Object[] params) throws IOException {
-		JsonNode props = (JsonNode) params[0];
+	public List<BindexElement> getRecommendedLibraries(JsonNode props, File workingDir) throws IOException {
 		if (logger.isInfoEnabled()) {
-			logger.info("Picking for: {}", StringUtils.abbreviate(String.valueOf(params[0]), MAXWIDTH));
+			logger.info("Picking for: {}", StringUtils.abbreviate(String.valueOf(props), MAXWIDTH));
 		}
-		logger.debug("Picking for: {}", params[0]);
+		logger.debug("Picking for: {}", props);
 
 		String prompt = props.get("prompt").asText();
 
@@ -206,13 +204,11 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	public String registerBindex(Object[] params) throws JsonProcessingException {
-		JsonNode props = (JsonNode) params[0];
-		File workingDir = (File) params[1];
+	public String registerBindex(JsonNode props, File workingDir) throws JsonProcessingException {
 		String fileName = props.get("fileName").asText();
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Register Bindex: {}", Arrays.toString(params));
+			logger.info("Register Bindex: {}, {}", props, workingDir);
 		}
 
 		String model = configurator.get(MODEL_PROP_NAME);
