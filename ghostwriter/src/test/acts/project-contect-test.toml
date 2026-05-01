@@ -3,9 +3,14 @@
 # ============================================================
 inputs = ['''
 Save to a project context variable `MY_VAR` with value: `HELLO!`.
-Move to next episode.
+Move to episode: 4.
+''',
+'''
+Show me `HI!`.
 ''',
 '''
 Show me the project context variable `MY_VAR`.
-```
+''',
+'''
+Show me `BYE!`.
 ''']

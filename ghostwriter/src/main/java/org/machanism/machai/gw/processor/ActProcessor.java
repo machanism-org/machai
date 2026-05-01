@@ -436,9 +436,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	private int getActivePromptId() {
-		return requestedEpisodeId != null
-				? requestedEpisodeId
-				: (episodeIds == null ? activeEpisodeId - 1 : episodeIds.get(activeEpisodeId - 1) - 1);
+		return (episodeIds == null ? activeEpisodeId - 1 : episodeIds.get(activeEpisodeId - 1) - 1);
 	}
 
 	/**
@@ -469,15 +467,25 @@ public class ActProcessor extends AIFileProcessor {
 				String episodeId = e.getEpisodeId();
 				if (episodeId != null) {
 					this.requestedEpisodeId = Integer.parseInt(episodeId);
-					continue;
 				}
 			}
 		} while (nextAct());
 	}
 
 	private boolean nextAct() {
-		activeEpisodeId++;
-		return episodeIds != null ? activeEpisodeId <= episodeIds.size() : activeEpisodeId <= prompts.length;
+		if (requestedEpisodeId > 0) {
+			if (requestedEpisodeId == null) {
+				activeEpisodeId++;
+				return episodeIds != null ? activeEpisodeId <= episodeIds.size() : activeEpisodeId <= prompts.length;
+			} else {
+				activeEpisodeId = requestedEpisodeId;
+				requestedEpisodeId = 0;
+				episodeIds = null;
+				return true;
+			}
+		} else {
+			return false;
+		}
 	}
 
 	/**
