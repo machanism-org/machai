@@ -1,0 +1,17 @@
+# ============================================================
+# Input Template
+# ============================================================
+inputs = ['''
+Save to a project context variable `MY_VAR` with value: `HELLO!`.
+''',
+'''
+Show me `HI!`.
+Use project context variable to iteration calculation.  
+Repeat this episode 4 times.
+''',
+'''
+Show me the project context variable `MY_VAR`.
+''',
+'''
+Show me `BYE!`.
+''']

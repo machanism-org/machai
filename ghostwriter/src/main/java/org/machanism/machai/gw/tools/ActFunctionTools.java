@@ -72,6 +72,11 @@ public class ActFunctionTools implements FunctionTools {
 				"Moves to the next episode, or to the episode specified by 'id' if provided. Use this to control episode navigation in the project context.",
 				this::moveToEpisode,
 				"id:string:optional:The ID of the episode to move to.");
+
+		provider.addTool(
+				"repeate_episode",
+				"Repeats the current episode. This function terminates the current execution and restarts the same episode, preserving the context.",
+				this::repeateEpisode);
 	}
 
 	/**
@@ -231,6 +236,22 @@ public class ActFunctionTools implements FunctionTools {
 		String targetId = props.has("id") ? props.get("id").asText() : null;
 
 		throw new MoveToEpisodeException(targetId);
+	}
+
+	/**
+	 * Repeats the current episode by throwing a RepeatEpisodeException.
+	 * 
+	 * @param props      The first argument is expected to be a JsonNode (can be
+	 *                   empty or contain context).
+	 * @param workingDir The project directory.
+	 * @return Never returns normally; always throws RepeatEpisodeException.
+	 */
+	public Object repeateEpisode(JsonNode props, File workingDir) {
+		if (logger.isInfoEnabled()) {
+			logger.info("Repeat episode: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+		}
+		throw new RepeatEpisodeException();
 	}
 
 	@Override

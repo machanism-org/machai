@@ -1,7 +1,7 @@
 package org.machanism.machai.gw.tools;
 
 public class MoveToEpisodeException extends RuntimeException {
-	private static final long serialVersionUID = -1L;
+	private static final long serialVersionUID = 1L;
 	private final String episodeId;
 
 	public MoveToEpisodeException(String episodeId) {

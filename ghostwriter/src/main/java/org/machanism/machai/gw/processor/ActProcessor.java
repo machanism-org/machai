@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
+import org.machanism.machai.gw.tools.RepeatEpisodeException;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -458,11 +459,23 @@ public class ActProcessor extends AIFileProcessor {
 
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
 		do {
-			if (prompts.length > 1) {
-				logger.info("------------------------ Episode #{} ------------------------ ", getActivePromptId() + 1);
-			}
 			try {
-				super.scanDocuments(projectDir, scanDir);
+				boolean repeate;
+				int iteration = 1;
+				do {
+					repeate = false;
+					if (prompts.length > 1) {
+						logger.info(StringUtils.center(" Episode #" + (getActivePromptId() + 1)
+								+ (iteration > 1 ? " [Iteration: " + iteration + "]) " : " "), 80, "-"));
+					}
+					try {
+						super.scanDocuments(projectDir, scanDir);
+					} catch (RepeatEpisodeException e) {
+						repeate = true;
+					}
+					iteration++;
+				} while (repeate);
+
 			} catch (MoveToEpisodeException e) {
 				String episodeId = e.getEpisodeId();
 				if (episodeId != null) {
