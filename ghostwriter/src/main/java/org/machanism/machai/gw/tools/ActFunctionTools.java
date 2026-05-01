@@ -21,10 +21,15 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class ActFunctionTools implements FunctionTools {
+
+	/** Logger for shell tool execution and diagnostics. */
+	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
 
 	private static final String TOML_EXTENSION = ".toml";
 
@@ -61,13 +66,12 @@ public class ActFunctionTools implements FunctionTools {
 				"Retrieves the value of a variable from the project-specific context. Use this to access a named variable associated with a particular project for act execution or prompt templates.",
 				this::getProjectContextVariable,
 				"name:string:required:The name of the context variable to retrieve.");
-		
+
 		provider.addTool(
-			    "move_to_episode",
-			    "Moves to the next episode, or to the episode specified by 'id' if provided. Use this to control episode navigation in the project context.",
-			    this::moveToEpisode,
-			    "id:string:optional:The ID of the episode to move to."
-			);
+				"move_to_episode",
+				"Moves to the next episode, or to the episode specified by 'id' if provided. Use this to control episode navigation in the project context.",
+				this::moveToEpisode,
+				"id:string:optional:The ID of the episode to move to.");
 	}
 
 	/**
@@ -76,7 +80,12 @@ public class ActFunctionTools implements FunctionTools {
 	 *
 	 * @throws IOException
 	 */
-	public Object getActList(Object... args) throws IOException {
+	public Object getActList(JsonNode params, File workingDir) throws IOException {
+		if (logger.isInfoEnabled()) {
+			logger.info("Get act list: {}, {}", StringUtils.abbreviate(String.valueOf(params), 80)
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+		}
+
 		List<String> result = getBaseActList().stream().map(line -> "- `" + line).collect(Collectors.toList());
 		return StringUtils.join(result, Genai.LINE_SEPARATOR);
 	}
@@ -113,10 +122,14 @@ public class ActFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	public Object getActDetails(Object... params) throws IOException {
+	public Object getActDetails(JsonNode props, File workingDir) throws IOException {
+		if (logger.isInfoEnabled()) {
+			logger.info("Get act details: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+		}
+
 		Map<String, Object> properties = new HashMap<>();
 		try {
-			JsonNode props = (JsonNode) params[0];
 			String actName = props.get("actName").asText();
 			String custom = props.has("custom") ? props.get("custom").asText() : null;
 
@@ -144,13 +157,15 @@ public class ActFunctionTools implements FunctionTools {
 	 *               'name' and 'value' properties.
 	 * @return A confirmation message or error.
 	 */
-	public Object putProjectContextVariable(Object... params) {
+	public Object putProjectContextVariable(JsonNode props, File workingDir) {
+		if (logger.isInfoEnabled()) {
+			logger.info("Put project context variable: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+		}
+
 		try {
-			JsonNode props = (JsonNode) params[0];
 			String name = props.get("name").asText();
 			String value = props.get("value").asText();
-
-			File workingDir = (File) params[1];
 
 			Map<String, String> context = contextProjectMap.computeIfAbsent(workingDir, k -> new HashMap<>());
 			context.put(name, value);
@@ -170,13 +185,11 @@ public class ActFunctionTools implements FunctionTools {
 	 *               project directory.
 	 * @return The value of the context variable, or a message if not found.
 	 */
-	public Object getProjectContextVariable(Object... params) {
+	public Object getProjectContextVariable(JsonNode props, File workingDir) {
+
 		Object result;
 		try {
-			JsonNode props = (JsonNode) params[0];
 			String name = props.get("name").asText();
-
-			File workingDir = (File) params[1];
 
 			Map<String, String> context = contextProjectMap.get(workingDir);
 			if (context == null) {
@@ -192,6 +205,12 @@ public class ActFunctionTools implements FunctionTools {
 		} catch (Exception e) {
 			result = "Failed to get context variable: " + e.getMessage();
 		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Get project context variable: {}, {}, Value: {}", props,
+					workingDir, StringUtils.abbreviate(String.valueOf(result), 80));
+		}
+
 		return result;
 	}
 
@@ -203,11 +222,15 @@ public class ActFunctionTools implements FunctionTools {
 	 *               representing the project directory.
 	 * @return Never returns normally; always throws MoveToEpisodeException.
 	 */
-	public Object moveToEpisode(Object... params) {
-	    JsonNode props = (JsonNode) params[0];
-	    String targetId = props.has("id") ? props.get("id").asText() : null;
+	public Object moveToEpisode(JsonNode props, File workingDir) {
+		if (logger.isInfoEnabled()) {
+			logger.info("Move to episode: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+		}
 
-	    throw new MoveToEpisodeException(targetId);
+		String targetId = props.has("id") ? props.get("id").asText() : null;
+
+		throw new MoveToEpisodeException(targetId);
 	}
 
 	@Override

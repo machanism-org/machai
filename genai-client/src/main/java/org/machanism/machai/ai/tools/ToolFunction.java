@@ -18,5 +18,5 @@ public interface ToolFunction {
 	 * @return tool result (provider-specific; commonly serialized to JSON)
 	 * @throws IOException if tool execution fails
 	 */
-	Object apply(JsonNode params, File workingDir ) throws IOException;
+	Object apply(JsonNode params, File workingDir) throws IOException;
 }
