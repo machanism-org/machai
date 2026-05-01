@@ -30,6 +30,8 @@ public class ActFunctionTools implements FunctionTools {
 
 	private Configurator configurator;
 
+	private Map<File, Map<String, String>> contextProjectMap = new HashMap<>();
+
 	@Override
 	public void applyTools(Genai provider) {
 		provider.addTool(
@@ -45,6 +47,27 @@ public class ActFunctionTools implements FunctionTools {
 				"actName:string:required:The name of the Act to load.",
 				"custom:boolean:optional:If true, retrieves the Act definition only from the user-defined (custom) acts directory. "
 						+ "If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts.");
+
+		provider.addTool(
+				"put_project_context_variable",
+				"Sets or updates a variable in the project-specific context. Use this to store or update a named variable associated with a particular project, making it available for act execution or prompt templates. "
+						+ "It can be used to pass a variable to the next episode of an act.",
+				this::putProjectContextVariable,
+				"name:string:required:The name of the context variable.",
+				"value:string:required:The value to assign to the context variable.");
+
+		provider.addTool(
+				"get_project_context_variable",
+				"Retrieves the value of a variable from the project-specific context. Use this to access a named variable associated with a particular project for act execution or prompt templates.",
+				this::getProjectContextVariable,
+				"name:string:required:The name of the context variable to retrieve.");
+		
+		provider.addTool(
+			    "move_to_episode",
+			    "Moves to the next episode, or to the episode specified by 'id' if provided. Use this to control episode navigation in the project context.",
+			    this::moveToEpisode,
+			    "id:string:optional:The ID of the episode to move to."
+			);
 	}
 
 	/**
@@ -112,6 +135,79 @@ public class ActFunctionTools implements FunctionTools {
 		}
 
 		return properties;
+	}
+
+	/**
+	 * Sets a variable in the act context.
+	 * 
+	 * @param params The first argument is expected to be a JsonNode containing
+	 *               'name' and 'value' properties.
+	 * @return A confirmation message or error.
+	 */
+	public Object putProjectContextVariable(Object... params) {
+		try {
+			JsonNode props = (JsonNode) params[0];
+			String name = props.get("name").asText();
+			String value = props.get("value").asText();
+
+			File workingDir = (File) params[1];
+
+			Map<String, String> context = contextProjectMap.computeIfAbsent(workingDir, k -> new HashMap<>());
+			context.put(name, value);
+
+			return "Context variable '" + name + "' set to '" + value + "' for project: " + workingDir;
+
+		} catch (Exception e) {
+			return "Failed to set context variable: " + e.getMessage();
+		}
+	}
+
+	/**
+	 * Retrieves the value of a variable from the project-specific context.
+	 * 
+	 * @param params The first argument is expected to be a JsonNode containing
+	 *               'name' property. The second argument is a File representing the
+	 *               project directory.
+	 * @return The value of the context variable, or a message if not found.
+	 */
+	public Object getProjectContextVariable(Object... params) {
+		Object result;
+		try {
+			JsonNode props = (JsonNode) params[0];
+			String name = props.get("name").asText();
+
+			File workingDir = (File) params[1];
+
+			Map<String, String> context = contextProjectMap.get(workingDir);
+			if (context == null) {
+				result = "No context found for project: " + workingDir;
+			} else {
+				String value = context.get(name);
+				if (value == null) {
+					result = "Context variable '" + name + "' not found for project: " + workingDir;
+				} else {
+					result = value;
+				}
+			}
+		} catch (Exception e) {
+			result = "Failed to get context variable: " + e.getMessage();
+		}
+		return result;
+	}
+
+	/**
+	 * Moves to the next episode, or to the episode specified by 'id' if provided.
+	 * 
+	 * @param params The first argument is expected to be a JsonNode containing an
+	 *               optional 'id' property. The second argument is a File
+	 *               representing the project directory.
+	 * @return Never returns normally; always throws MoveToEpisodeException.
+	 */
+	public Object moveToEpisode(Object... params) {
+	    JsonNode props = (JsonNode) params[0];
+	    String targetId = props.has("id") ? props.get("id").asText() : null;
+
+	    throw new MoveToEpisodeException(targetId);
 	}
 
 	@Override

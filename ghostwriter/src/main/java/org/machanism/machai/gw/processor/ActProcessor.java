@@ -21,6 +21,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -433,7 +434,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	private int getActivePromptId() {
-		return episodeIds == null ? activeEpisodeId : episodeIds.get(activeEpisodeId - 1) - 1;
+		return episodeIds == null ? activeEpisodeId - 1 : episodeIds.get(activeEpisodeId - 1) - 1;
 	}
 
 	/**
@@ -458,7 +459,15 @@ public class ActProcessor extends AIFileProcessor {
 			if (prompts.length > 1) {
 				logger.info("------------------------ Episode #{} ------------------------ ", getActivePromptId() + 1);
 			}
-			super.scanDocuments(projectDir, scanDir);
+			try {
+				super.scanDocuments(projectDir, scanDir);
+			} catch (MoveToEpisodeException e) {
+				String episodeId = e.getEpisodeId();
+				if (episodeId != null) {
+					this.activeEpisodeId = Integer.parseInt(episodeId);
+					continue;
+				}
+			}
 		} while (nextAct());
 	}
 

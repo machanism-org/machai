@@ -1,0 +1,11 @@
+# ============================================================
+# Input Template
+# ============================================================
+inputs = ['''
+Save to a project context variable `MY_VAR` with value: `HELLO!`.
+Move to next episode.
+''',
+'''
+Show me the project context variable `MY_VAR`.
+```
+''']
