@@ -255,7 +255,7 @@ public class ActFunctionTools implements FunctionTools {
 		if (props != null && props.has("message")) {
 			String message = props.get("message").asText();
 			if (StringUtils.isNotBlank(message)) {
-				logger.info("Repeat episode message: {}", message);
+				logger.info(">>> {}", message);
 			}
 		}
 		throw new RepeatEpisodeException();
