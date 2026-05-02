@@ -68,6 +68,12 @@ public class ActProcessor extends AIFileProcessor {
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
+	private static final String STOP_SYMBOL = ".";
+
+	private static final String SEPARATOR_CHARS = ",";
+
+	private static final String EPISODE_DELIMETER = ":";
+
 	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
 
@@ -89,6 +95,8 @@ public class ActProcessor extends AIFileProcessor {
 	private List<Integer> episodeIds;
 
 	private Integer requestedEpisodeId;
+
+	private boolean disableNormalOrder;
 
 	/**
 	 * Creates an act processor.
@@ -133,9 +141,8 @@ public class ActProcessor extends AIFileProcessor {
 			prompt = defaultPrompt;
 		}
 
-		String episodeIds = StringUtils.substringBetween(name, "[", "]");
-
-		name = StringUtils.substringBefore(name, "[");
+		String episodeIds = StringUtils.substringAfterLast(name, EPISODE_DELIMETER);
+		name = StringUtils.substringBeforeLast(name, EPISODE_DELIMETER);
 
 		Map<String, Object> actData = new HashMap<>();
 
@@ -160,11 +167,20 @@ public class ActProcessor extends AIFileProcessor {
 		applyActData(actData);
 
 		if (episodeIds != null) {
-			List<Integer> collect = Arrays.asList(StringUtils.split(episodeIds, ",")).stream()
+			if (Strings.CS.endsWith(episodeIds, STOP_SYMBOL)) {
+				setDisableNormalOrder(true);
+				episodeIds = StringUtils.substringBefore(episodeIds, STOP_SYMBOL);
+			}
+
+			List<Integer> collect = Arrays.asList(StringUtils.split(episodeIds, SEPARATOR_CHARS)).stream()
 					.map(id -> Integer.parseInt(id))
 					.collect(Collectors.toList());
 			setEpisodeIds(collect);
 		}
+	}
+
+	public void setDisableNormalOrder(boolean disableNormalOrder) {
+		this.disableNormalOrder = disableNormalOrder;
 	}
 
 	private String applayPrompt(String prompt, Map<String, Object> actData, String mainValue) {
@@ -405,7 +421,7 @@ public class ActProcessor extends AIFileProcessor {
 					break;
 
 				case GWConstants.EXCLUDES_PROP_NAME:
-					super.setExcludes(StringUtils.split(value, ","));
+					super.setExcludes(StringUtils.split(value, SEPARATOR_CHARS));
 					break;
 
 				case GWConstants.NONRECURSIVE_PROP_NAME:
@@ -456,12 +472,12 @@ public class ActProcessor extends AIFileProcessor {
 
 	public String getDefaultPrompt() {
 		int id = getActivePromptId();
-		String prompt = ArrayUtils.isNotEmpty(prompts) ? prompts[id] : super.getDefaultPrompt();
+		String prompt = ArrayUtils.isNotEmpty(prompts) ? prompts[id - 1] : super.getDefaultPrompt();
 		return prompt;
 	}
 
 	private int getActivePromptId() {
-		return (episodeIds == null ? activeEpisodeId - 1 : episodeIds.get(activeEpisodeId - 1) - 1);
+		return (episodeIds == null ? activeEpisodeId : episodeIds.get(activeEpisodeId - 1));
 	}
 
 	/**
@@ -489,11 +505,12 @@ public class ActProcessor extends AIFileProcessor {
 				do {
 					repeate = false;
 					if (prompts.length > 1) {
-						logger.info(StringUtils.center(" Episode #" + (getActivePromptId() + 1)
+						logger.info(StringUtils.center(" Episode #" + (getActivePromptId())
 								+ (iteration > 1 ? " [Iteration: " + iteration + "]) " : " "), 80, "-"));
 					}
 					try {
 						super.scanDocuments(projectDir, scanDir);
+
 					} catch (RepeatEpisodeException e) {
 						repeate = true;
 					}
@@ -511,8 +528,24 @@ public class ActProcessor extends AIFileProcessor {
 
 	private boolean nextAct() {
 		if (requestedEpisodeId == null) {
-			activeEpisodeId++;
-			return episodeIds != null ? activeEpisodeId <= episodeIds.size() : activeEpisodeId <= prompts.length;
+			int currentActiveEpisodeId = getActivePromptId();
+			this.activeEpisodeId++;
+
+			boolean result;
+			if (episodeIds != null) {
+				result = activeEpisodeId <= episodeIds.size();
+				if (!result) {
+					episodeIds = null;
+					this.activeEpisodeId = currentActiveEpisodeId + 1;
+					result = disableNormalOrder ? false : activeEpisodeId <= prompts.length;
+				}
+
+			} else {
+				result = activeEpisodeId <= prompts.length;
+			}
+
+			return result;
+
 		} else {
 			if (requestedEpisodeId > 0) {
 				activeEpisodeId = requestedEpisodeId;
