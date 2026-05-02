@@ -79,14 +79,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			provider.instructions(finalInstructions);
 
 			String projectInfo = getProjectStructureDescription(projectLayout, file);
-
-			StringBuilder promptBuilder = new StringBuilder();
-			promptBuilder.append(projectInfo).append(Genai.LINE_SEPARATOR);
+			provider.prompt(projectInfo);
 
 			String promptLines = parseLines(prompt);
-			promptBuilder.append(promptLines);
+			provider.prompt(promptLines);
 
-			provider.prompt(promptBuilder.toString());
 			perform = perform(file, provider);
 
 		} catch (ProcessTerminationException e) {
