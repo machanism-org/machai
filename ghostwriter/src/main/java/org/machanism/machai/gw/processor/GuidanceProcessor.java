@@ -264,7 +264,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 */
 	public static boolean deleteTempFiles(File basedir) {
 		File file = new File(basedir, ProjectProcessor.MACHAI_TEMP_DIR + File.separator + AIFileProcessor.GW_TEMP_DIR);
-		logger.info("Removing '{}' inputs log file.", file);
+		logger.info("Removing `{}` inputs log file.", file);
 		return FileUtils.deleteQuietly(file);
 	}
 

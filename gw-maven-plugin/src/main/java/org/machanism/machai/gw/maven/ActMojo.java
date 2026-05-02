@@ -239,7 +239,7 @@ public class ActMojo extends AbstractGWMojo {
 		String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
 		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
 
-		logger.info("Starting scan of path: {}", resolvedScanDir);
+		logger.info("Starting scan of path: `{}`", resolvedScanDir);
 		if (session.getRequest().isProjectPresent()) {
 			classFunctionTools.scanProjectClasses(project);
 			actProcessor.addTool(classFunctionTools);

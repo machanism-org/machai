@@ -141,22 +141,20 @@ public class ActProcessor extends AIFileProcessor {
 
 		loadAct(name, actData, actsLocation);
 
-		if (prompt != null) {
-			prompt = StringUtils.trim(prompt);
+		prompt = StringUtils.trim(prompt);
 
-			Object mainValue = actData.get(GWConstants.INPUTS_PROPERTY_NAME);
-			if (mainValue instanceof String) {
-				String value = applayPrompt(prompt, actData, (String) mainValue);
-				actData.put(GWConstants.INPUTS_PROPERTY_NAME, value);
+		Object mainValue = actData.get(GWConstants.INPUTS_PROPERTY_NAME);
+		if (mainValue instanceof String) {
+			String value = applayPrompt(prompt, actData, (String) mainValue);
+			actData.put(GWConstants.INPUTS_PROPERTY_NAME, value);
 
-			} else if (mainValue instanceof List) {
-				List<String> inputs = new ArrayList<>();
-				for (String value : (List<String>) mainValue) {
-					String episode = applayPrompt(prompt, actData, value);
-					inputs.add(episode);
-				}
-				actData.put(GWConstants.INPUTS_PROPERTY_NAME, inputs);
+		} else if (mainValue instanceof List) {
+			List<String> inputs = new ArrayList<>();
+			for (String value : (List<String>) mainValue) {
+				String episode = applayPrompt(prompt, actData, value);
+				inputs.add(episode);
 			}
+			actData.put(GWConstants.INPUTS_PROPERTY_NAME, inputs);
 		}
 
 		applyActData(actData);
@@ -429,11 +427,19 @@ public class ActProcessor extends AIFileProcessor {
 				}
 			} else if (valueObj instanceof List && GWConstants.INPUTS_PROPERTY_NAME.equals(key)) {
 				@SuppressWarnings({ "unchecked", "rawtypes" })
-				String[] prompts = (String[]) ((List) valueObj).toArray(new String[0]);
-				setPrompts(prompts);
+				List<String> prompts = (List) valueObj;
+				List<String> updateValue = new ArrayList<String>();
+				for (String value : prompts) {
+					String inheritValue = getConfigurator().get(key, null);
+					if (inheritValue != null) {
+						value = Strings.CS.replace(value, "%s", StringUtils.defaultString(inheritValue));
+					}
+					updateValue.add(value);
+				}
+
+				setPrompts(updateValue.toArray(new String[0]));
 			}
 		}
-
 	}
 
 	public void setPrompts(String... value) {

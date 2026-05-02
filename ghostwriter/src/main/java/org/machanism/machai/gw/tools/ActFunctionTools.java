@@ -88,8 +88,7 @@ public class ActFunctionTools implements FunctionTools {
 	 */
 	public Object getActList(JsonNode params, File workingDir) throws IOException {
 		if (logger.isInfoEnabled()) {
-			logger.info("Get act list: {}, {}", StringUtils.abbreviate(String.valueOf(params), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+			logger.info("Get act list.");
 		}
 
 		List<String> result = getBaseActList().stream().map(line -> "- `" + line).collect(Collectors.toList());

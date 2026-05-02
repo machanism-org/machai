@@ -54,7 +54,7 @@ public class FunctionToolsLoader {
 		ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
 		for (FunctionTools functionTool : functionToolServiceLoader) {
 			functionTools.add(functionTool);
-			logger.info("FunctionTools: {}", functionTool.getClass().getName());
+			logger.debug("FunctionTools: {}", functionTool.getClass().getName());
 		}
 	}
 

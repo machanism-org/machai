@@ -231,9 +231,9 @@ public final class Ghostwriter {
 			int exitCode = 0;
 			try {
 				for (String scanDir : scanDirs) {
-					logger.info("Starting scan of path: {}", scanDir);
+					logger.info("Starting scan of path: `{}`", scanDir);
 					processor.scanDocuments(projectDir, scanDir);
-					logger.info("Finished scanning path: {}", scanDir);
+					logger.info("Finished scanning path: `{}`", scanDir);
 				}
 			} catch (ProcessTerminationException e) {
 				logger.error("Process terminated: {}, Exit code: {}", e.getMessage(), e.getExitCode());

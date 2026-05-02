@@ -194,7 +194,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 				scanDir = projectDir.getAbsolutePath();
 			}
 
-			logger.info("Starting scan of path: {}", scanDir);
+			logger.info("Starting scan of path: `{}`", scanDir);
 			if (session.getRequest().isProjectPresent()) {
 				processor.addTool(classFunctionTools);
 			}

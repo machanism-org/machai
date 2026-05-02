@@ -63,7 +63,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt) {
-		logger.info("Processing path: '{}'", file);
+		logger.info("Processing path: `{}`", file);
 		String perform = null;
 		try {
 			Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
@@ -389,7 +389,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	public void addTool(FunctionTools toolFunction) {
-		logger.info("FunctionTools: {}", toolFunction.getClass().getName());
+		logger.debug("FunctionTools: {}", toolFunction.getClass().getName());
 		toolFunctions.add(toolFunction);
 	}
 }

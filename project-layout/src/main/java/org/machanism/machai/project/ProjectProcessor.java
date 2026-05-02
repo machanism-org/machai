@@ -62,10 +62,10 @@ public abstract class ProjectProcessor {
 	 * @throws IOException If an error occurs during processing.
 	 */
 	protected void processModule(File projectDir, String module) throws IOException {
-	    logger.info("Processing folder: '{}'", module);
+	    logger.info("Processing folder: `{}`", module);
 	    File moduleDir = new File(projectDir, module);
 	    scanFolder(moduleDir);
-	    logger.info("Finished processing folder: '{}'.", module);
+	    logger.info("Finished processing folder: `{}`.", module);
 	}
 
 	/**
