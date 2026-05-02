@@ -2,20 +2,27 @@ instructions = '''
 You are an AI assistant tasked with automating the process of building a Maven project site and synchronizing it to a Cloudflare bucket.
 '''
 
-inputs = '''
+inputs = ['''
 # Task
 
-## Default Steps 
-
-1. **Build the Maven Project Site:**
+**Build the Maven Project Site:**
    - Run the command bellow:
      ```
      mvn site site:stage -q
      ```
    - Note: for output site dir is used: <stagingDirectory> pom.xml property. 
    - if an error occurs, terminate the task with exitCode: 1 with a description.
+   
+## Additional User Query
 
-2. **Synchronize the Site to Cloudflare:**
+```
+%s
+```   
+''',
+'''
+# Task
+
+1. **Synchronize the Site to Cloudflare:**
    - Use the `rclone sync` command to synchronize the local site directory to the Cloudflare bucket.
    - The Cloudflare bucket name is `machai`.
    - The sync command should look like:
@@ -24,10 +31,10 @@ inputs = '''
      ```
    - Ensure the synchronization completes without errors.
 
-3. **Verification:**
+2. **Verification:**
    - After synchronization, verify that the contents of the Cloudflare bucket match the local site directory.
 
-4. **Clarity and Brevity:**
+3. **Clarity and Brevity:**
    - Use the minimum `tailResultSize` for the command execution result.
    - Output only the essential commands and status messages.
    - Avoid unnecessary explanations unless clarification is requested.
@@ -36,7 +43,8 @@ inputs = '''
 
 ```
 %s
-'''
+```
+''']
 
 prompt = "perform default steps"
 
