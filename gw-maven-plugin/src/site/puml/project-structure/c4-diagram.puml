@@ -1,0 +1,51 @@
+' @guidance:
+' Create or update the C4 Component-level PlantUML diagram for the project.
+'
+' - If a C4 Component diagram already exists.
+' - If no diagram exists, generate a new one that clearly represents all major components, their responsibilities, and interactions within the project.
+' - Use PlantUML C4-PlantUML syntax and best practices for clarity and maintainability.
+' - Include only relevant components from `/src/main/java` and external systems; remove or omit unnecessary details.
+' - Organize the diagram for readability, avoiding complexity and clutter.
+' - Add SHOW_LEGEND() at the end of the puml code.
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title GW Maven Plugin - C4 Component Diagram
+
+Person(developer, "Developer", "Runs Maven goals to automate guided documentation workflows")
+System_Ext(mavenRuntime, "Maven Runtime", "Provides plugin execution context, reactor session, settings, and project metadata")
+System_Ext(genaiProvider, "GenAI Provider", "Executes Ghostwriter and act prompts through the Ghostwriter library")
+System_Ext(fileSystem, "Project File System", "Contains source, documentation, generated files, and temporary workflow artifacts")
+System_Ext(mavenRepo, "Maven Repositories", "Provide project dependencies and plugin artifacts on the classpath")
+
+System_Boundary(gwPlugin, "GW Maven Plugin") {
+  Component(pluginGoals, "Plugin Goals", "GWMojo, GWPerModuleMojo, ActMojo, ActPerModuleMojo, CleanMojo", "Exposes Maven goals for guided scanning, per-module processing, interactive acts, and cleanup")
+  Component(sharedMojoBase, "AbstractGWMojo", "Abstract base class", "Centralizes common parameter handling, Maven settings resolution, scan configuration, and tool registration")
+  Component(guidedProcessing, "Guided Processing Pipeline", "GuidanceProcessor", "Scans documentation trees, applies guidance-driven workflows, and orchestrates Ghostwriter processing")
+  Component(actProcessing, "Act Processing Pipeline", "ActProcessor", "Runs interactive or predefined acts against scanned project content")
+  Component(classTools, "Class Introspection Tools", "ClassFunctionalTools", "Registers AI function tools and exposes class discovery and reflection-based project metadata")
+  Component(classMetadata, "Class Metadata Cache", "ClassInfoHolder", "Builds project classloaders, indexes classes, resolves artifacts, and maps classes to source/output locations")
+}
+
+Rel(developer, pluginGoals, "Invokes Maven goals", "mvn gw:gw / gw:act / clean")
+Rel(mavenRuntime, pluginGoals, "Creates and configures mojos")
+Rel(pluginGoals, sharedMojoBase, "Uses shared execution flow and parameters")
+Rel(pluginGoals, guidedProcessing, "Runs guided document processing", "gw / gw-per-module")
+Rel(pluginGoals, actProcessing, "Runs act-based processing", "act / act-per-module")
+Rel(pluginGoals, fileSystem, "Deletes temporary files", "clean")
+Rel(sharedMojoBase, guidedProcessing, "Configures excludes, instructions, scan roots, and logging")
+Rel(sharedMojoBase, actProcessing, "Supplies configuration and scan context")
+Rel(sharedMojoBase, classTools, "Registers class-aware tools when Maven project context exists")
+Rel(guidedProcessing, fileSystem, "Scans and updates guided files")
+Rel(actProcessing, fileSystem, "Scans and updates guided files")
+Rel(guidedProcessing, genaiProvider, "Sends workflow prompts and content")
+Rel(actProcessing, genaiProvider, "Sends act prompts and content")
+Rel(classTools, classMetadata, "Creates and queries cached class information")
+Rel(classMetadata, mavenRepo, "Inspects dependency artifacts and jars")
+Rel(classMetadata, fileSystem, "Reads compiled outputs and Java source paths")
+Rel(sharedMojoBase, mavenRuntime, "Reads session, settings.xml, reactor projects, and execution root from")
+Rel(guidedProcessing, classTools, "Uses function tools for class lookup and reflective metadata")
+Rel(actProcessing, classTools, "Uses function tools for class lookup and reflective metadata")
+
+SHOW_LEGEND()
+@enduml
