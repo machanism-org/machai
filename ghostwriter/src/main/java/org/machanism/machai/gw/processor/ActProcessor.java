@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -140,11 +141,22 @@ public class ActProcessor extends AIFileProcessor {
 
 		loadAct(name, actData, actsLocation);
 
-		Object mainValue = actData.get(GWConstants.INPUTS_PROPERTY_NAME);
-		if (mainValue instanceof String) {
-			String actPrompt = Objects.toString(actData.get("prompt"), "");
-			String value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(prompt, actPrompt));
-			actData.put(GWConstants.INPUTS_PROPERTY_NAME, value);
+		if (prompt != null) {
+			prompt = StringUtils.trim(prompt);
+
+			Object mainValue = actData.get(GWConstants.INPUTS_PROPERTY_NAME);
+			if (mainValue instanceof String) {
+				String value = applayPrompt(prompt, actData, (String) mainValue);
+				actData.put(GWConstants.INPUTS_PROPERTY_NAME, value);
+
+			} else if (mainValue instanceof List) {
+				List<String> inputs = new ArrayList<>();
+				for (String value : (List<String>) mainValue) {
+					String episode = applayPrompt(prompt, actData, value);
+					inputs.add(episode);
+				}
+				actData.put(GWConstants.INPUTS_PROPERTY_NAME, inputs);
+			}
 		}
 
 		applyActData(actData);
@@ -155,6 +167,12 @@ public class ActProcessor extends AIFileProcessor {
 					.collect(Collectors.toList());
 			setEpisodeIds(collect);
 		}
+	}
+
+	private String applayPrompt(String prompt, Map<String, Object> actData, String mainValue) {
+		String actPrompt = Objects.toString(actData.get("prompt"), "");
+		String value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(prompt, actPrompt));
+		return value;
 	}
 
 	public void setEpisodeIds(List<Integer> episodeIds) {

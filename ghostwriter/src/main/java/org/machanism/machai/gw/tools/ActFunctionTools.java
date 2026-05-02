@@ -76,7 +76,8 @@ public class ActFunctionTools implements FunctionTools {
 		provider.addTool(
 				"repeate_episode",
 				"Repeats the current episode. This function terminates the current execution and restarts the same episode, preserving the context.",
-				this::repeateEpisode);
+				this::repeateEpisode,
+				"message:string:optional:A custom response message to output before repeating the episode.");
 	}
 
 	/**
@@ -250,6 +251,12 @@ public class ActFunctionTools implements FunctionTools {
 		if (logger.isInfoEnabled()) {
 			logger.info("Repeat episode: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
 					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+		}
+		if (props != null && props.has("message")) {
+			String message = props.get("message").asText();
+			if (StringUtils.isNotBlank(message)) {
+				logger.info("Repeat episode message: {}", message);
+			}
 		}
 		throw new RepeatEpisodeException();
 	}
