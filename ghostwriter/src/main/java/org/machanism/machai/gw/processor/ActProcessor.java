@@ -166,7 +166,7 @@ public class ActProcessor extends AIFileProcessor {
 
 		applyActData(actData);
 
-		if (episodeIds != null) {
+		if (StringUtils.isNoneBlank(episodeIds)) {
 			if (Strings.CS.endsWith(episodeIds, STOP_SYMBOL)) {
 				setDisableNormalOrder(true);
 				episodeIds = StringUtils.substringBefore(episodeIds, STOP_SYMBOL);
@@ -472,7 +472,8 @@ public class ActProcessor extends AIFileProcessor {
 
 	public String getDefaultPrompt() {
 		int id = getActivePromptId();
-		String prompt = ArrayUtils.isNotEmpty(prompts) ? prompts[id - 1] : super.getDefaultPrompt();
+		String prompt = ArrayUtils.isNotEmpty(prompts) ? (prompts != null ? prompts[id - 1] : null)
+				: super.getDefaultPrompt();
 		return prompt;
 	}
 
