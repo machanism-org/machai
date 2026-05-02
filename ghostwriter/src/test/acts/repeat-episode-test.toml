@@ -3,15 +3,25 @@
 # ============================================================
 inputs = ['''
 Save to a project context variable `MY_VAR` with value: `HELLO!`.
+
+%s
 ''',
 '''
-Show me `HI!`.
-Use project context variable to iteration calculation.  
-Repeat this episode 4 times.
+# Task
+
+- %s 
+
+- Ensure the `EPISODE_ITERATION` variable is accurately incremented and stored in the project context on each repeat.
+- If the project context variable `EPISODE_ITERATION` is not defined, set the value to 1, otherwise increase it by 1.
+- If the value of the project context variable `EPISODE_ITERATION` is less than 4, repeat this episode.
+
 ''',
 '''
 Show me the project context variable `MY_VAR`.
 ''',
 '''
+%s
+
 Show me `BYE!`.
+
 ''']

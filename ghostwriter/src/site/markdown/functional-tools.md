@@ -12,7 +12,7 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter provides functional tools that let a model inspect Act templates, manage project-scoped context, navigate multi-episode workflows, work with files inside the active project, run approved command-line processes, and retrieve content from web and REST endpoints.
+Ghostwriter provides function tools that help a model discover and inspect Act templates, store project-scoped workflow state, control episode-based execution, read and write files in the active project, run approved command-line commands, and retrieve content from web pages and REST endpoints.
 
 ## Act and workflow tools
 
@@ -20,14 +20,14 @@ Ghostwriter provides functional tools that let a model inspect Act templates, ma
 Lists the built-in Act templates packaged with Ghostwriter.
 
 **What it does**
-- Scans the built-in `acts` resources bundled with the application.
-- Detects Act definitions stored as `.toml` files.
+- Scans built-in `acts/*.toml` resources bundled with the application.
 - Loads each Act description and formats the result as a readable list.
+- Returns one line per available built-in Act.
 
 **Features**
 - Helps you quickly discover which built-in Acts are available.
-- Returns a concise summary rather than raw TOML content.
-- Useful when choosing an Act for a workflow or exploring Ghostwriter capabilities.
+- Returns a friendly summary instead of raw TOML content.
+- Useful when exploring Ghostwriter capabilities before choosing an Act.
 
 **Input parameters**
 This tool does not take any input parameters.
@@ -39,6 +39,7 @@ Loads the details of a specific Act template.
 - Resolves an Act by the provided name.
 - Can load the effective Act, only the custom Act, or only the built-in Act.
 - Returns the collected Act properties for inspection.
+- Reports a readable message when the Act cannot be resolved.
 
 **Features**
 - Helps review an Act before running or editing it.
@@ -76,11 +77,12 @@ Retrieves a value from the current project context.
 - Looks up a previously stored variable by name.
 - Searches only within the context associated with the active project directory.
 - Returns the stored value when it exists.
+- Returns a clear message when the project context or variable is missing.
 
 **Features**
 - Useful for continuing multi-step workflows.
 - Lets Acts and prompts reuse values saved earlier.
-- Returns clear messages when the project context or variable is missing.
+- Keeps context values isolated by project.
 
 **Input parameters**
 - `name` *(string, required)*: Name of the context variable to retrieve.
@@ -102,6 +104,23 @@ Moves execution to the next episode or to a specific episode.
 **Input parameters**
 - `id` *(string, optional)*: ID of the episode to move to. If omitted, Ghostwriter moves to the next episode.
 
+### `repeate_episode`
+Repeats the current episode.
+
+**What it does**
+- Stops the current execution path.
+- Requests Ghostwriter to restart the same episode.
+- Preserves the existing project context for the repeated run.
+- Uses an internal exception-based signal to trigger the repeat.
+
+**Features**
+- Useful when a step should be retried with updated context.
+- Helps implement loop-like behavior inside multi-episode workflows.
+- Keeps previously stored context values available during the retry.
+
+**Input parameters**
+This tool does not take any input parameters.
+
 ## File system tools
 
 ### `read_file_from_file_system`
@@ -111,11 +130,12 @@ Reads a text file from the file system.
 - Opens a file relative to the current project working directory.
 - Reads the entire file as text.
 - Uses the requested character encoding, or `UTF-8` by default.
+- Returns `File not found.` when the target file does not exist.
 
 **Features**
 - Useful for reviewing source files, configuration files, templates, and documentation.
 - Returns the exact current content of the selected file.
-- Returns `File not found.` when the target file does not exist.
+- Supports custom text decoding when a different charset is needed.
 
 **Input parameters**
 - `file_path` *(string, required)*: Path to the file to read.
@@ -126,7 +146,7 @@ Writes text content to a file on disk.
 
 **What it does**
 - Writes the provided text to a file relative to the current project working directory.
-- Updates an existing file or creates a new one when needed.
+- Updates an existing file or creates a new file when needed.
 - Creates missing parent directories before writing a new file.
 - Uses the requested character encoding, or `UTF-8` by default.
 
@@ -182,16 +202,17 @@ Executes a system command from inside the current project.
 
 **What it does**
 - Runs a command by using Java process execution on the host machine.
+- Resolves command text and optional environment values before execution.
 - Restricts the working directory to the current project directory or one of its subdirectories.
-- Can add environment variables for the subprocess.
 - Captures both standard output and error output.
 - Returns only the last part of the collected output when the result is larger than the configured limit.
+- Appends a final line that reports the command exit code.
 
 **Features**
 - Supports controlled shell access for build, test, and inspection commands.
-- Applies security checks to reject unsafe command fragments.
+- Applies deny-list security checks to reject unsafe command fragments.
 - Prevents execution outside the active project tree.
-- Adds an exit-code line to the returned output.
+- Supports custom environment variables in `NAME=VALUE` format.
 - Supports configurable output decoding and timeout handling.
 
 **Input parameters**
@@ -230,12 +251,12 @@ Fetches content from a web page by using an HTTP GET request.
 - Can apply custom request headers.
 - Can return the full response, selected HTML content, or plain text only.
 - Can also read from a `file:` URL relative to the current working directory when needed.
+- Includes the HTTP status line in HTTP responses.
 
 **Features**
 - Useful for pulling reference pages, documentation, and structured page fragments.
 - Supports CSS selector extraction for targeted content retrieval.
 - Can strip HTML and return readable text when `textOnly` is enabled.
-- Includes the HTTP status line in the response.
 - Supports configurable timeout and response decoding.
 
 **Input parameters**
@@ -259,7 +280,7 @@ Executes a REST API call to a remote endpoint.
 **Features**
 - Useful for calling JSON APIs, webhooks, and service endpoints from a workflow.
 - Supports request timeouts and character-set configuration.
-- Writes request bodies for `POST`, `PUT`, and `PATCH` requests.
+- Sends request bodies for `POST`, `PUT`, and `PATCH` requests.
 - Reuses the same header handling used by the web content tool.
 
 **Input parameters**
