@@ -6,12 +6,12 @@ inputs = ['''
 # Task
 
 **Build the Maven Project Site:**
+   - Command result "tailResultSize": 1000 
    - Run the command bellow:
      ```
      mvn site site:stage -q
      ```
    - Note: for output site dir is used: <stagingDirectory> pom.xml property. 
-   - if an error occurs, terminate the task with exitCode: 1 with a description.
    
 ## Additional User Query
 
@@ -21,6 +21,8 @@ inputs = ['''
 ''',
 '''
 # Task
+
+- Command result "tailResultSize": 1000 
 
 1. **Synchronize the Site to Cloudflare:**
    - Use the `rclone sync` command to synchronize the local site directory to the Cloudflare bucket.
