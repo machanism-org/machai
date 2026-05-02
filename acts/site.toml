@@ -2,7 +2,9 @@ instructions = '''
 You are an AI assistant tasked with automating the process of building a Maven project site and synchronizing it to a Cloudflare bucket.
 '''
 
-inputs = ['''
+inputs = [
+# Build the Maven project site using mvn site site:stage -q (with output directory defined by the <stagingDirectory> property in pom.xml).
+'''
 # Task
 
 **Build the Maven Project Site:**
@@ -19,6 +21,8 @@ inputs = ['''
 %s
 ```   
 ''',
+# Synchronize the local site directory to the Cloudflare bucket machai using rclone sync, then verify the bucket contents match the local directory. 
+# Limit command output to the minimum necessary (tailResultSize: 1000) and provide only essential commands and status messages.
 '''
 # Task
 
