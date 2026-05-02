@@ -8,9 +8,9 @@ inputs = '''
 ## Default Steps 
 
 1. **Build the Maven Project Site:**
-   - Run the following command to generate the project site:
+   - Run the command bellow:
      ```
-     mvn -q site site:stage
+     mvn site site:stage -q
      ```
    - Note: for output site dir is used: <stagingDirectory> pom.xml property. 
    - if an error occurs, terminate the task with exitCode: 1 with a description.

@@ -19,6 +19,17 @@ Provide your response as plain text only. Do not use markdown formatting.
 '''
 
 inputs = '''
+# Help resources
+
+## Guidance File Processing
+
+- "Guided File Processing": https://machanism.org/guided-file-processing/index.html (Selector: `.col-md-12`, textOnly)
+- "Guidance": https://machai.machanism.org/ghostwriter/guidance.html (Selector: `#bodyColumn`, textOnly)
+
+## Act
+
+- "Act" and "Using episodes": https://machai.machanism.org/ghostwriter/act.html (Selector: `#bodyColumn`, textOnly)
+
 # Task
 
 Use the available function tool to provide information about Ghostwriter acts.
@@ -49,5 +60,5 @@ Use the available function tool to provide information about Ghostwriter acts.
 '''
 
 gw.scanDir="."
-gw.nonRecursive="true"
+gw.nonRecursive= true
 gw.interactive = true
