@@ -1,11 +1,14 @@
 # ============================================================
 # Input Template
 # ============================================================
-inputs = ['''
+inputs = [
+# --------------------------- EPISODE #1 ------------------------------------
+'''
 Save to a project context variable `MY_VAR` with value: `HELLO!`.
 
 %s
 ''',
+# --------------------------- EPISODE #2 ------------------------------------
 '''
 # Task
 
@@ -13,12 +16,14 @@ Save to a project context variable `MY_VAR` with value: `HELLO!`.
 
 - Ensure the `EPISODE_ITERATION` variable is accurately incremented and stored in the project context on each repeat.
 - If the project context variable `EPISODE_ITERATION` is not defined, set the value to 1, otherwise increase it by 1.
-- If the value of the project context variable `EPISODE_ITERATION` is less than 4, repeat this episode.
+- If the value of the project context variable `EPISODE_ITERATION` is less than 2, repeat this episode.
 
 ''',
+# --------------------------- EPISODE #3 ------------------------------------
 '''
 Show me the project context variable `MY_VAR`.
 ''',
+# --------------------------- EPISODE #4 ------------------------------------
 '''
 %s
 
