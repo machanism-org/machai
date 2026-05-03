@@ -13,9 +13,9 @@ canonical: https://machai.machanism.org/ghostwriter/guidance.html
 
 # Guidance
 
-Guidance is a Ghostwriter feature that lets you add simple file-specific instructions directly inside supported project files by using the `@guidance:` tag. When Ghostwriter scans a project, `GuidanceProcessor` finds those instructions, asks the correct reviewer to read them, and prepares the request that is sent to the configured AI provider.
+Guidance is a Ghostwriter feature that lets a file include its own update instructions by using the `@guidance:` tag. When Ghostwriter scans a project, `GuidanceProcessor` finds those instructions, asks the correct reviewer to read them, and sends the prepared request to the configured AI provider.
 
-This makes updates easier to repeat because the instructions stay with the file they belong to. Instead of keeping a separate prompt somewhere else, the file can describe how it should be updated.
+This keeps instructions close to the file they belong to. Instead of storing update notes somewhere else, the file itself can describe how it should be processed.
 
 For a broader introduction to this workflow, see [Guided File Processing](https://machanism.org/guided-file-processing/index.html).
 
@@ -23,41 +23,41 @@ For a broader introduction to this workflow, see [Guided File Processing](https:
 
 `GuidanceProcessor` is the part of Ghostwriter that manages guided file processing.
 
-In simple terms, it does the following:
+In simple terms, it:
 
-1. scans the project folders,
-2. checks which files or directories match the current scan rules,
-3. picks a reviewer for the file type,
-4. reads any `@guidance:` instructions from the file,
-5. falls back to a default prompt when no file-specific guidance is found,
+1. scans the project structure,
+2. checks which files and folders match the current scan rules,
+3. chooses a reviewer based on the file type,
+4. reads any `@guidance:` instructions found in the file,
+5. uses a default prompt when no file-specific guidance is available,
 6. adds standard processing instructions,
-7. and sends the work to the AI processing layer.
+7. and passes the request to the AI processing layer.
 
-It supports both single-module and multi-module projects. In multi-module projects, child modules are processed before the parent project directory. This is a traversal-based process, so it walks the project structure but does not build the project or resolve dependencies.
+It works with both single-module and multi-module projects. In multi-module projects, child modules are processed before the parent project directory. This is a traversal process only, so it walks the project tree without building the project or resolving dependencies.
 
-## Purpose of the feature
+## Purpose of the guidance feature
 
-The purpose of guidance is to let each file describe how Ghostwriter should handle it during AI-assisted processing.
+The guidance feature lets each supported file explain how Ghostwriter should handle it during AI-assisted processing.
 
 This helps teams:
 
-- keep instructions close to the content they affect,
-- make future updates more consistent,
+- keep instructions next to the content they affect,
+- make repeated updates more consistent,
 - reuse the same file-specific rules over time,
-- and make the workflow easier to understand for both technical and non-technical users.
+- and make the workflow easier to understand.
 
-Guidance is especially useful for documentation and other files where style, structure, or audience needs to stay consistent.
+Guidance is especially helpful for documentation, templates, and other files where the style, structure, or audience should stay consistent.
 
 ## How guidance fits into Ghostwriter
 
-Ghostwriter can process project files with AI support. Guidance is the feature that makes that processing more organized and repeatable.
+Ghostwriter can process project files with AI support. Guidance makes that processing more organized and easier to repeat.
 
-Instead of writing one large external prompt for the whole project, you can place small instructions inside the exact file that needs attention. That means:
+Instead of creating one large external prompt for the entire project, you can place small instructions directly inside the exact file that needs attention. That means:
 
-- the intent is visible where the content lives,
-- other team members can quickly see what the file is supposed to do,
-- updates can follow the same rules later,
-- and supported file types can be handled in a consistent way.
+- the goal is visible where the content lives,
+- other team members can quickly understand the file's purpose,
+- future updates can follow the same rules,
+- and supported file types can be handled in a more predictable way.
 
 ## Key methods in `GuidanceProcessor`
 
@@ -67,7 +67,7 @@ Loads reviewer implementations by using Java's `ServiceLoader`. Each reviewer de
 
 ### `normalizeExtensionKey(String extension)`
 
-Converts file extensions into a consistent lower-case format so matching works even if the extension is written with or without a leading dot.
+Converts file extensions into a consistent lower-case form so matching works whether the extension is written with or without a leading dot.
 
 ### `match(File file, File projectDir)`
 
@@ -75,15 +75,15 @@ Checks whether a file or directory should be processed. If no path matcher is co
 
 ### `processModule(File projectDir, String module)`
 
-Handles module directories in multi-module projects. When a scan directory is configured, it makes sure only relevant modules are processed.
+Handles modules in multi-module projects. When a scan directory is configured, it makes sure only relevant modules are processed.
 
 ### `processParentFiles(ProjectLayout projectLayout)`
 
-Processes files and folders that belong directly to the main project directory while skipping module directories. It can also process the parent project directory itself when default guidance is available.
+Processes files and folders that belong directly to the main project directory while skipping module directories. It can also process the project directory itself when default guidance is available.
 
 ### `processFile(ProjectLayout projectLayout, File file)`
 
-Performs the main file-level work. It checks whether the file matches the rules, extracts file-specific guidance through a reviewer, and uses the default prompt if needed.
+Handles the main file-level work. It checks whether the file matches the rules, extracts file-specific guidance through a reviewer, and uses the default prompt if needed.
 
 ### `process(ProjectLayout projectLayout, File file, String guidance)`
 
@@ -101,9 +101,48 @@ Returns the reviewer that is registered for a given file extension.
 
 Removes the temporary input log directory created during guided processing.
 
+## The Act feature and how it relates
+
+Ghostwriter also includes an Act feature, implemented by `ActProcessor`. An act is a reusable prompt template stored in a `.toml` file.
+
+While guidance puts instructions inside a specific file, an act gives Ghostwriter a reusable prompt workflow that can be applied across matching files. Both features support AI-assisted processing, but they solve different needs:
+
+- guidance is file-focused,
+- acts are template-focused,
+- guidance reads instructions already stored in the file,
+- and acts load instructions from predefined Act definitions.
+
+In the overall project, both processors build on the same AI file-processing foundation. This helps Ghostwriter support both reusable workflows and file-specific instructions.
+
+### Key methods in `ActProcessor`
+
+#### `setAct(String act)`
+
+Loads an Act definition, applies its prompt data, and prepares any episode-based execution settings.
+
+#### `loadAct(String name, Map<String, Object> properties, String actsLocation)`
+
+Loads an Act from built-in resources or a user-defined location and supports Act inheritance through the `basedOn` property.
+
+#### `tryLoadActFromClasspath(...)`
+
+Reads built-in Act definitions packaged with the application.
+
+#### `tryLoadActFromDirectory(...)`
+
+Reads custom Act definitions from a local directory or URL.
+
+#### `applyActData(Map<String, Object> properties)`
+
+Applies the loaded Act settings to the processor configuration.
+
+#### `scanDocuments(File projectDir, String scanDir)`
+
+Runs the Act processing flow, including support for episode-based execution, repeated episodes, and moves between episodes.
+
 ## Reviewers and supported file types
 
-`GuidanceProcessor` does not understand every file format by itself. It relies on reviewer implementations that know how to detect `@guidance:` instructions in different file types.
+`GuidanceProcessor` does not parse every file format on its own. It relies on reviewer implementations that know how to detect `@guidance:` instructions in different file types.
 
 Examples in this project include reviewers for:
 
@@ -160,9 +199,9 @@ During processing, Ghostwriter will:
 
 Read the updated file and confirm that it follows the guidance.
 
-If you leave the guidance block in the file, Ghostwriter can reuse those same instructions in future runs.
+If you keep the guidance block in the file, Ghostwriter can reuse those same instructions in future runs.
 
-## Practical real-world use
+## Practical example
 
 A documentation team can place update instructions directly inside important pages.
 
@@ -170,7 +209,7 @@ For example:
 
 - a release notes page can ask Ghostwriter to keep entries short and grouped by version,
 - a getting started page can ask for beginner-friendly language,
-- and a technical reference page can ask for a more formal structure.
+- and a technical reference page can ask for a more structured format.
 
 Because the guidance stays in each file, the expected style and purpose remain visible over time.
 
@@ -183,7 +222,7 @@ That gives you:
 - more consistent results,
 - clearer expectations for each file,
 - easier reuse over time,
-- and a workflow that supports both technical and non-technical users.
+- and a workflow that is easier for both technical and non-technical users.
 
 ## Tips for writing effective guidance
 

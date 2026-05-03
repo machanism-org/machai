@@ -58,13 +58,13 @@ canonical: https://machai.machanism.org/ghostwriter/index.html
 
 ## Introduction
 
-Ghostwriter is an AI-powered command-line automation and documentation engine in the Machai ecosystem. It scans repository content, detects embedded `@guidance` instructions, and applies GenAI-assisted updates directly to project files. Its main benefit is that automation intent lives inside the repository itself, close to the source code, documentation, project site content, configuration, diagrams, and other governed artifacts, making updates easier to review, repeat, and integrate into day-to-day engineering workflows.
+Ghostwriter is a command-line AI automation and documentation engine for repository-wide maintenance in the Machai ecosystem. It scans project content, detects embedded `@guidance` instructions, and uses GenAI-assisted processing to update source files, documentation, project site pages, diagrams, configuration, and other governed artifacts. The main benefit is that automation intent stays inside the repository, close to the files it controls, so teams can review, repeat, and operationalize changes more easily across local workflows and CI/CD pipelines.
 
-Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html). Rather than relying only on ad hoc prompting, Ghostwriter uses repository-embedded instructions to make project maintenance structured, auditable, reusable, and applicable across the full range of project files.
+Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html). Instead of relying only on one-off prompts, Ghostwriter uses persistent repository-embedded guidance so project maintenance becomes structured, auditable, reusable, and applicable across the full range of project files.
 
 ## Overview
 
-Ghostwriter processes scan targets such as directories, glob patterns, and regular-expression patterns. It initializes runtime settings, resolves the project root, loads configuration, selects the active model and execution mode, applies excludes and optional instructions, and then runs guided AI processing across eligible repository artifacts.
+Ghostwriter accepts scan targets such as directories, glob patterns, and regular-expression patterns. It initializes runtime settings, resolves the project root, loads configuration, selects the active model and execution mode, applies excludes and optional instructions, and then runs guided AI processing across eligible repository artifacts.
 
 In guidance-driven execution, it traverses the repository, extracts embedded directives, prepares project-aware prompts, invokes the configured GenAI backend, and writes generated results back to the working tree. In Act mode, it executes reusable prompt templates and can expose controlled tools for file access, web retrieval, REST calls, command execution, and act discovery.
 
@@ -72,7 +72,7 @@ In guidance-driven execution, it traverses the repository, extracts embedded dir
 
 ![C4 Diagram](./images/c4-diagram.png)
 
-The diagram shows a layered command-line architecture centered on a runtime entry point that initializes execution and dispatches work. A configuration layer provides runtime settings, while project layout resolution contributes metadata about modules and relevant source, test, and documentation areas. A shared scanning and AI-processing pipeline handles repository traversal, filtering, prompt construction, provider interaction, and write-back across supported file types. Two main execution paths sit on top of that pipeline: one focused on embedded guidance in repository artifacts and another focused on reusable act-driven workflows. Supporting integrations provide controlled access to local files, remote resources, and provider tooling, while logging and usage tracking capture operational activity.
+The diagram shows a layered command-line system centered on a runtime entry point that initializes execution and dispatches work. A configuration layer provides runtime settings, while project layout resolution contributes metadata about modules and relevant source, test, and documentation areas. A shared scanning and AI-processing pipeline handles repository traversal, filtering, prompt construction, provider interaction, and write-back across supported file types. Two main execution paths sit on top of that pipeline: one focused on embedded guidance in repository artifacts and another focused on reusable act-driven workflows. Supporting integrations provide controlled access to local files, remote resources, and provider tooling, while logging and usage tracking capture operational activity.
 
 ## Machai Ghostwriter vs. Other Tools
 
@@ -176,7 +176,7 @@ The CLI options below are derived from `Ghostwriter.java` and the built-in help 
 | `-d`, `--project.dir <path>` | Specify the path to the root directory for file processing. | `project.dir` from configuration, otherwise the current user directory |
 | `-t`, `--threads <n>` | Set the degree of concurrency for processing to improve performance. | `gw.threads` from configuration |
 | `-m`, `--model <provider:model>` | Set the GenAI provider and model, for example `OpenAI:gpt-5.1`. | `gw.model` from configuration |
-| `-i`, `--instructions [value]` | Specify system instructions as plain text, by URL, or by `file:` path. If used without a value, instructions are read from standard input. Each line is processed, preserving blank lines and resolving URL and file references. | `instructions` from configuration |
+| `-i`, `--instructions [value]` | Specify system instructions as plain text, by URL, or by file path. If used without a value, instructions are read from standard input. Each line is processed, preserving blank lines and resolving URL and file references. | `instructions` from configuration |
 | `-e`, `--excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` from configuration |
 | `-l`, `--logInputs` | Log LLM request inputs to dedicated log files. | `false` unless enabled in configuration |
 | `-as`, `--acts <path>` | Specify the path to the directory containing predefined act prompt files for processing. | `gw.acts` from configuration |

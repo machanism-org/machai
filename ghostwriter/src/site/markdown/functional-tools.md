@@ -12,22 +12,28 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter provides function tools that help a model discover and inspect Act templates, store project-scoped workflow state, control episode-based execution, read and write files in the active project, run approved command-line commands, and retrieve content from web pages and REST endpoints.
+Ghostwriter provides function tools that let a model inspect available Acts, manage project-scoped workflow state, control episode flow, work with files in the active project, run approved shell commands, and retrieve content from web pages or REST APIs.
+
+## Tool groups
+
+- **Act and workflow tools** help discover Act templates, inspect their definitions, store temporary workflow values, and control episode transitions.
+- **File system tools** help read, write, and enumerate files relative to the active project directory.
+- **Command and process tools** help run validated commands inside the project and stop execution when necessary.
+- **Web and API tools** help download page content and call HTTP endpoints.
 
 ## Act and workflow tools
 
 ### `build_in_list_acts`
 Lists the built-in Act templates packaged with Ghostwriter.
 
-**What it does**
-- Scans built-in `acts/*.toml` resources bundled with the application.
-- Loads each Act description and formats the result as a readable list.
-- Returns one line per available built-in Act.
+**Description**
+Use this tool when you want a quick overview of the built-in Acts that ship with Ghostwriter. It reads the packaged `acts/*.toml` resources, loads each Act description, and returns a readable list.
 
 **Features**
-- Helps you quickly discover which built-in Acts are available.
-- Returns a friendly summary instead of raw TOML content.
-- Useful when exploring Ghostwriter capabilities before choosing an Act.
+- Discovers built-in Acts bundled with the application.
+- Returns a user-friendly list instead of raw TOML files.
+- Includes each Act name together with its description.
+- Useful when choosing an Act to inspect or run next.
 
 **Input parameters**
 This tool does not take any input parameters.
@@ -35,36 +41,33 @@ This tool does not take any input parameters.
 ### `load_act_details`
 Loads the details of a specific Act template.
 
-**What it does**
-- Resolves an Act by the provided name.
-- Can load the effective Act, only the custom Act, or only the built-in Act.
-- Returns the collected Act properties for inspection.
-- Reports a readable message when the Act cannot be resolved.
+**Description**
+Use this tool when you need to inspect one Act in detail. It resolves the requested Act by name and returns its collected properties, such as instructions, prompts, and other Act configuration values. It can load the effective Act, only the custom Act, or only the built-in version.
 
 **Features**
-- Helps review an Act before running or editing it.
-- Useful for comparing built-in and custom versions of the same Act.
-- Supports troubleshooting when Act resolution does not behave as expected.
+- Loads one Act by name.
+- Supports effective resolution or explicit built-in/custom lookup.
+- Useful for reviewing an Act before editing or executing it.
+- Returns a readable message if the Act cannot be resolved.
 
 **Input parameters**
 - `actName` *(string, required)*: Name of the Act to load.
 - `custom` *(boolean, optional)*:
-  - `true`: Load only the user-defined Act from the configured Acts directory.
+  - `true`: Load only the user-defined Act.
   - `false`: Load only the built-in packaged Act.
-  - omitted: Load the effective Act using the normal resolution process.
+  - omitted: Load the effective Act using normal resolution.
 
 ### `put_project_context_variable`
 Stores or updates a variable in the current project context.
 
-**What it does**
-- Saves a name/value pair for the active project directory.
-- Keeps the value in project-scoped context storage.
-- Makes the saved value available to later workflow steps.
+**Description**
+Use this tool to save a named value for the active project so later steps in the same workflow can reuse it. The value is stored only for the current project context, which makes it useful for passing temporary state between tool calls or episodes.
 
 **Features**
-- Useful for passing values between tool calls.
-- Helps multi-step Acts keep temporary state.
-- Keeps values tied to the current project instead of sharing them globally.
+- Saves a name/value pair for the current project.
+- Supports updating an existing variable.
+- Helps multi-step workflows share state.
+- Keeps values isolated to the active project directory.
 
 **Input parameters**
 - `name` *(string, required)*: Name of the context variable.
@@ -73,16 +76,14 @@ Stores or updates a variable in the current project context.
 ### `get_project_context_variable`
 Retrieves a value from the current project context.
 
-**What it does**
-- Looks up a previously stored variable by name.
-- Searches only within the context associated with the active project directory.
-- Returns the stored value when it exists.
-- Returns a clear message when the project context or variable is missing.
+**Description**
+Use this tool to read a value that was previously stored with `put_project_context_variable`. It searches the project-scoped context for the active working directory and returns the stored value or a readable message when the variable is missing.
 
 **Features**
-- Useful for continuing multi-step workflows.
-- Lets Acts and prompts reuse values saved earlier.
-- Keeps context values isolated by project.
+- Reads previously stored workflow values.
+- Looks up variables only inside the active project context.
+- Useful for continuing multi-step or multi-episode flows.
+- Returns clear feedback when a context or variable does not exist.
 
 **Input parameters**
 - `name` *(string, required)*: Name of the context variable to retrieve.
@@ -90,16 +91,14 @@ Retrieves a value from the current project context.
 ### `move_to_episode`
 Moves execution to the next episode or to a specific episode.
 
-**What it does**
-- Signals Ghostwriter to change workflow execution to another episode.
-- Moves to the next episode when no identifier is provided.
-- Targets a specific episode when an ID is supplied.
-- Uses an internal exception-based mechanism to trigger navigation.
+**Description**
+Use this tool to control episode-based workflow navigation. If no ID is supplied, Ghostwriter advances to the next episode. If an ID is provided, execution jumps directly to that episode.
 
 **Features**
-- Supports branching and controlled multi-episode flows.
-- Works for both sequential progression and explicit episode jumps.
-- Provides a simple control mechanism for Act orchestration.
+- Supports sequential workflow progression.
+- Supports explicit jumps to a named episode.
+- Useful for branching and guided workflow control.
+- Designed for Act orchestration rather than data retrieval.
 
 **Input parameters**
 - `id` *(string, optional)*: ID of the episode to move to. If omitted, Ghostwriter moves to the next episode.
@@ -107,35 +106,31 @@ Moves execution to the next episode or to a specific episode.
 ### `repeate_episode`
 Repeats the current episode.
 
-**What it does**
-- Stops the current execution path.
-- Requests Ghostwriter to restart the same episode.
-- Preserves the existing project context for the repeated run.
-- Uses an internal exception-based signal to trigger the repeat.
+**Description**
+Use this tool when the current episode should be retried. Ghostwriter restarts the same episode and preserves the existing project context, which allows a workflow to retry after updating temporary state.
 
 **Features**
-- Useful when a step should be retried with updated context.
-- Helps implement loop-like behavior inside multi-episode workflows.
-- Keeps previously stored context values available during the retry.
+- Repeats the current episode.
+- Preserves project-scoped context values.
+- Useful for retry and loop-like workflow behavior.
+- Can log a custom message before the repeat happens.
 
 **Input parameters**
-This tool does not take any input parameters.
+- `message` *(string, optional)*: Custom response message to output before repeating the episode.
 
 ## File system tools
 
 ### `read_file_from_file_system`
 Reads a text file from the file system.
 
-**What it does**
-- Opens a file relative to the current project working directory.
-- Reads the entire file as text.
-- Uses the requested character encoding, or `UTF-8` by default.
-- Returns `File not found.` when the target file does not exist.
+**Description**
+Use this tool to inspect the current contents of a file in the active project. The path is resolved relative to the working directory provided by Ghostwriter, and the file is returned as text using the selected character set.
 
 **Features**
-- Useful for reviewing source files, configuration files, templates, and documentation.
-- Returns the exact current content of the selected file.
-- Supports custom text decoding when a different charset is needed.
+- Reads full file content as text.
+- Works with paths relative to the current project.
+- Supports custom text decoding.
+- Returns `File not found.` when the target file does not exist.
 
 **Input parameters**
 - `file_path` *(string, required)*: Path to the file to read.
@@ -144,16 +139,14 @@ Reads a text file from the file system.
 ### `write_file_to_file_system`
 Writes text content to a file on disk.
 
-**What it does**
-- Writes the provided text to a file relative to the current project working directory.
-- Updates an existing file or creates a new file when needed.
-- Creates missing parent directories before writing a new file.
-- Uses the requested character encoding, or `UTF-8` by default.
+**Description**
+Use this tool to create a new file or fully replace the contents of an existing file. The path is resolved relative to the active project directory, and missing parent directories are created automatically when needed.
 
 **Features**
-- Supports full-file creation and replacement.
-- Useful for generating or updating source code, documentation, and configuration files.
-- Returns a clear success message for both new and updated files.
+- Creates new files when they do not exist.
+- Replaces the full content of existing files.
+- Creates missing parent directories automatically.
+- Supports configurable character encoding.
 
 **Input parameters**
 - `file_path` *(string, required)*: Path to the file to create or update.
@@ -163,16 +156,14 @@ Writes text content to a file on disk.
 ### `list_files_in_directory`
 Lists files and directories directly inside a specific folder.
 
-**What it does**
-- Reads the immediate contents of a directory.
-- Returns project-relative paths.
-- Does not recurse into nested folders.
-- Uses the current working directory when no path is provided.
+**Description**
+Use this tool when you need a quick overview of the immediate contents of a folder. It does not recurse into nested subdirectories and returns project-relative paths.
 
 **Features**
-- Useful for getting a quick overview of a folder.
-- Helps identify candidate files before reading or updating them.
-- Returns a compact comma-separated list.
+- Lists immediate children of a directory.
+- Returns both files and directories.
+- Does not scan nested folders.
+- Uses the current working directory when no path is provided.
 
 **Input parameters**
 - `dir_path` *(string, optional)*: Path to the directory to inspect. If omitted or blank, the current working directory is used.
@@ -180,17 +171,14 @@ Lists files and directories directly inside a specific folder.
 ### `get_recursive_file_list`
 Recursively lists files under a directory.
 
-**What it does**
-- Traverses the selected directory and all nested subdirectories.
-- Returns files only, not directories.
-- Produces project-relative paths with forward slashes.
-- Skips excluded directories defined by the project layout.
-- Uses the current working directory when no path is provided.
+**Description**
+Use this tool when you need a deeper inventory of files under a folder. It traverses nested subdirectories, returns files only, and skips excluded directories defined by the project layout.
 
 **Features**
-- Useful for collecting a full file inventory under a source, test, or documentation folder.
-- Helps locate files before analysis or editing.
-- Avoids excluded directories during recursive scanning.
+- Recursively scans subdirectories.
+- Returns files only, not directories.
+- Produces project-relative paths.
+- Skips excluded directories while scanning.
 
 **Input parameters**
 - `dir_path` *(string, optional)*: Root directory to scan recursively. If omitted or blank, the current working directory is used.
@@ -200,40 +188,35 @@ Recursively lists files under a directory.
 ### `run_command_line_tool`
 Executes a system command from inside the current project.
 
-**What it does**
-- Runs a command by using Java process execution on the host machine.
-- Resolves command text and optional environment values before execution.
-- Restricts the working directory to the current project directory or one of its subdirectories.
-- Captures both standard output and error output.
-- Returns only the last part of the collected output when the result is larger than the configured limit.
-- Appends a final line that reports the command exit code.
+**Description**
+Use this tool to run approved shell commands for tasks such as builds, tests, or project inspection. The command runs inside the current project or one of its subdirectories, captures both standard output and error output, and returns only the tail of the collected output when the result is large.
 
 **Features**
-- Supports controlled shell access for build, test, and inspection commands.
-- Applies deny-list security checks to reject unsafe command fragments.
-- Prevents execution outside the active project tree.
-- Supports custom environment variables in `NAME=VALUE` format.
-- Supports configurable output decoding and timeout handling.
+- Runs commands inside the current project tree.
+- Rejects unsafe command fragments through deny-list checks.
+- Supports custom environment variables.
+- Captures both stdout and stderr.
+- Limits returned output to a configurable tail size.
+- Reports the final process exit code.
 
 **Input parameters**
 - `command` *(string, required)*: Command to execute.
 - `env` *(string, optional)*: Environment variables as `NAME=VALUE` pairs separated by LF line breaks.
-- `dir` *(string, optional)*: Working directory relative to the project directory. Must stay inside the project. Default: current project directory.
+- `dir` *(string, optional)*: Working directory relative to the project directory. Must remain inside the project. Default: current project directory.
 - `tailResultSize` *(integer, optional)*: Maximum number of characters returned from the end of the output. Default: `1024`.
 - `charsetName` *(string, optional)*: Character encoding used to read command output. Default: `UTF-8`.
 
 ### `terminate_process`
 Terminates the current workflow by throwing a process termination exception.
 
-**What it does**
-- Stops execution immediately.
-- Returns control to the host application with a message and exit code.
-- Can attach a cause message for additional error context.
+**Description**
+Use this tool when execution should stop immediately because of a fatal validation failure, an unsupported condition, or another controlled shutdown scenario.
 
 **Features**
-- Useful for fatal validation failures or controlled shutdown conditions.
-- Lets a tool invocation end the workflow intentionally.
-- Supports a custom exit code instead of always using a generic failure value.
+- Stops workflow execution immediately.
+- Supports a custom message.
+- Supports an optional cause message.
+- Supports a custom exit code.
 
 **Input parameters**
 - `message` *(string, optional)*: Exception message to use. Default: `Process terminated by function tool.`
@@ -245,19 +228,16 @@ Terminates the current workflow by throwing a process termination exception.
 ### `get_web_content`
 Fetches content from a web page by using an HTTP GET request.
 
-**What it does**
-- Downloads content from an HTTP or HTTPS URL.
-- Supports Basic authentication through URL user information.
-- Can apply custom request headers.
-- Can return the full response, selected HTML content, or plain text only.
-- Can also read from a `file:` URL relative to the current working directory when needed.
-- Includes the HTTP status line in HTTP responses.
+**Description**
+Use this tool to download content from an HTTP or HTTPS page, or to read a local `file:` URL when needed. It supports custom request headers, CSS selector extraction, and plain-text rendering for HTML responses.
 
 **Features**
-- Useful for pulling reference pages, documentation, and structured page fragments.
-- Supports CSS selector extraction for targeted content retrieval.
-- Can strip HTML and return readable text when `textOnly` is enabled.
-- Supports configurable timeout and response decoding.
+- Fetches content over HTTP or HTTPS with `GET`.
+- Supports Basic authentication through URL user information.
+- Can apply custom headers.
+- Can extract matching HTML fragments with a CSS selector.
+- Can convert HTML content to readable plain text.
+- Includes the HTTP status line in the result for HTTP responses.
 
 **Input parameters**
 - `url` *(string, required)*: URL of the page to fetch. Supports user information for Basic authentication.
@@ -270,18 +250,15 @@ Fetches content from a web page by using an HTTP GET request.
 ### `call_rest_api`
 Executes a REST API call to a remote endpoint.
 
-**What it does**
-- Sends an HTTP request to the specified URL.
-- Supports configurable HTTP methods such as `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`.
-- Can include custom headers and an optional request body.
-- Supports Basic authentication through URL user information.
-- Returns the HTTP status line together with the response body.
+**Description**
+Use this tool when a workflow needs to call an HTTP endpoint directly. It supports multiple HTTP methods, optional headers, and an optional request body for write-oriented operations such as `POST`, `PUT`, or `PATCH`.
 
 **Features**
-- Useful for calling JSON APIs, webhooks, and service endpoints from a workflow.
-- Supports request timeouts and character-set configuration.
-- Sends request bodies for `POST`, `PUT`, and `PATCH` requests.
-- Reuses the same header handling used by the web content tool.
+- Supports methods such as `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`.
+- Can send custom headers.
+- Can send a request body for supported methods.
+- Supports Basic authentication through URL user information.
+- Returns the HTTP status line together with the response body.
 
 **Input parameters**
 - `url` *(string, required)*: URL of the REST endpoint. Supports user information for Basic authentication.
