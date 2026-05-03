@@ -68,11 +68,11 @@ public class ActProcessor extends AIFileProcessor {
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
-	private static final String STOP_SYMBOL = ".";
+	private static final String STOP_SYMBOL = "!";
 
 	private static final String SEPARATOR_CHARS = ",";
 
-	private static final String EPISODE_DELIMETER = ":";
+	private static final String EPISODE_DELIMETER = "#";
 
 	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
