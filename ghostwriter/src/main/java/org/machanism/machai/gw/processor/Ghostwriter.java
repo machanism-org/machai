@@ -129,7 +129,8 @@ public final class Ghostwriter {
 		}
 	}
 
-	private static RuntimeSettings loadRuntimeSettings(CommandLine cmd, PropertiesConfigurator config, Scanner scanner) {
+	private static RuntimeSettings loadRuntimeSettings(CommandLine cmd, PropertiesConfigurator config,
+			Scanner scanner) {
 		RuntimeSettings settings = new RuntimeSettings();
 		settings.genai = resolveGenai(cmd, config);
 		settings.instructions = resolveInstructions(cmd, config, scanner);
@@ -271,7 +272,8 @@ public final class Ghostwriter {
 				.append(Genai.LINE_SEPARATOR);
 	}
 
-	private static void configureActsLocation(CommandLine cmd, PropertiesConfigurator config, ActProcessor actProcessor) {
+	private static void configureActsLocation(CommandLine cmd, PropertiesConfigurator config,
+			ActProcessor actProcessor) {
 		String actsLocation = cmd.hasOption(ACTS_OPTION) ? cmd.getOptionValue(ACTS_OPTION)
 				: config.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 		if (actsLocation == null) {
@@ -306,6 +308,8 @@ public final class Ghostwriter {
 		if (instructions == null) {
 			return;
 		}
+		// Sonar java:S2629: avoid unnecessary abbreviation work unless INFO logging is
+		// enabled.
 		logAbbreviatedMessage("Instructions", instructions);
 		processor.setInstructions(instructions);
 	}
@@ -314,7 +318,9 @@ public final class Ghostwriter {
 		if (excludes == null) {
 			return;
 		}
-		LOGGER.info("Excludes: {}", Arrays.toString(excludes));
+		if (LOGGER.isInfoEnabled()) {
+			LOGGER.info("Excludes: {}", Arrays.toString(excludes));
+		}
 		processor.setExcludes(excludes);
 	}
 

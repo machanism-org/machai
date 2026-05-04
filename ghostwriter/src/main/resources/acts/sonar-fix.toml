@@ -1,9 +1,8 @@
 description = '''
-Automates end-to-end remediation of SonarQube impactSoftwareQualities SECURITY issues with specified impactSeverities (BLOCKER, CRITICAL, MAJOR, MINOR, INFO)
-in Java projects. Fetches open security findings via the SonarQube Web API, applies precise and
-minimal code fixes for each rule violation, verifies the build after every change, and enforces
-strict @SuppressWarnings rules when suppression is the only option. Designed for multi-module Maven
-projects running on enterprise cloud-native environments.
+Review and fix all SonarQube-detected issues in the project according to best practices and security guidelines. 
+Do not modify SonarQube configuration, plugin settings, or quality gates. All code changes must compile, pass all tests, 
+and be fully covered by unit tests. For each issue, apply the recommended fix, document changes, and ensure no new issues
+are introduced. After all fixes, save the list of updated files to the UPDATED_FILES_REPORT project context variable.
 '''
 
 # ============================================================
@@ -17,11 +16,7 @@ and SonarQube rule remediation (java:S* rule set). Also you are acting as a DevO
 # ============================================================
 # Input Template
 # ============================================================
-inputs = [
-# Review and fix all SonarQube-detected issues in the project according to best practices and security guidelines. 
-# Do not modify SonarQube configuration, plugin settings, or quality gates. All code changes must compile, pass all tests, 
-# and be fully covered by unit tests. For each issue, apply the recommended fix, document changes, and ensure no new issues
-# are introduced. After all fixes, save the list of updated files to the UPDATED_FILES_REPORT project context variable.
+inputs = 
 '''
 # Special Instructions
 - Do NOT modify `.sonarqube/` configuration, `pom.xml` Sonar plugin settings, or quality gate
@@ -57,8 +52,7 @@ inputs = [
 
 # Task
 
-## Fetch and Triage
-### 1. SonarQube API URL
+## 1. SonarQube API URL
     - If `COMPONENT_KEYS` is not defined use `COMPONENT_KEYS` based on the `Project Layout` parameters:
       - If `Relative Path from Root Directory` is not `.`, set `COMPONENT_KEYS` = `[Parent Directory Name]:[Project Identifier]`, otherwice: `COMPONENT_KEYS` = `[Project Identifier]`.
     - Construct the `SONARQUBE_URL` as follows:  `${SONAR_HOST_URL}/api/issues/search?componentKeys=[COMPONENT_KEYS]&ps=20` and other required query parameters.
@@ -68,7 +62,7 @@ inputs = [
     - If the API returns an error (non-2xx), terminate with exit code `500`.
     - If the response contains zero issues, terminate the task with exitCode: `0` with the description message.
 
-### 2. Call the SonarQube API URL constructed above and Review the Appropriate SonarQube Report: 
+## 2. Call the SonarQube API URL constructed above and Review the Appropriate SonarQube Report: 
    - If the project has `Modules`, then skip next steps for current project and continue.
    - If the response returns an error, the process is terminated using the Function tool and the exit code `500` is returned.
    - If the response is not successfully, then immediately skip all the following steps and complete the task with exitCode: 0.
@@ -118,13 +112,13 @@ inputs = [
    - Thoroughly test all fixes to ensure they do not introduce new issues.
    - If you encounter any build failures, resolve them completely before proceeding to the next issue.
 
-### 2. **Fix All SonarQube Issues for report:**  
+## 3. **Fix All SonarQube Issues for report:**  
    - Review and address each issue identified in the SonarQube report.
    - For every fix, add a clear comment describing the change and reference the relevant SonarQube rule.
    - **Follow best practices and adhere to all relevant coding standards when implementing fixes. Ensure your solutions are robust, maintainable, and consistent with industry standards.**
    - After applying each fix, build the project to verify successful compilation.
 
-### 3. Ensure and Maximize Unit Test Coverage
+## 4. Ensure and Maximize Unit Test Coverage
 
 - **Review all source code changes** and generate new, high-quality unit tests to cover any uncovered logic.
 - **Do not modify existing tests** that are passing and correct; only fix or update tests that are failing, redundant, or incorrect.
@@ -156,10 +150,10 @@ inputs = [
 - Add concise comments for complex or non-obvious logic.
 - Validate that the code builds and all tests pass after changes.
 
-### 4. Make sure all sonar detected issues are fixed.
+## 5. Make sure all sonar detected issues are fixed.
 
-### 5. Save to the project context variable: `UPDATED_FILES_REPORT` the list of changed files.
+## 6. Save to the project context variable: `UPDATED_FILES_REPORT` the list of changed files.
 
-''']
+'''
 
 gw.scanDir = "glob:."

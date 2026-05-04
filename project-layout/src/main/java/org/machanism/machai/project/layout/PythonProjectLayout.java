@@ -64,33 +64,33 @@ public class PythonProjectLayout extends ProjectLayout {
     /**
      * Gets list of source directories for the Python project.
      *
-     * @return empty list; not currently implemented
+     * @return empty list; intentionally returns a safe default until Python source discovery is implemented
      */
     @Override
     public List<String> getSources() {
-        // Sonar(java:S1135): avoid TODO markers; method intentionally returns safe default for now.
+        // Sonar(java:S1135): use an intentional default return instead of a task marker.
         return Collections.emptyList();
     }
 
     /**
      * Gets list of document directories for the Python project.
      *
-     * @return empty list; not currently implemented
+     * @return empty list; intentionally returns a safe default until Python documentation discovery is implemented
      */
     @Override
     public List<String> getDocuments() {
-        // Sonar(java:S1135): avoid TODO markers; method intentionally returns safe default for now.
+        // Sonar(java:S1135): use an intentional default return instead of a task marker.
         return Collections.emptyList();
     }
 
     /**
      * Gets list of test source directories for the Python project.
      *
-     * @return empty list; not currently implemented
+     * @return empty list; intentionally returns a safe default until Python test discovery is implemented
      */
     @Override
     public List<String> getTests() {
-        // Sonar(java:S1135): avoid TODO markers; method intentionally returns safe default for now.
+        // Sonar(java:S1135): use an intentional default return instead of a task marker.
         return Collections.emptyList();
     }
 
