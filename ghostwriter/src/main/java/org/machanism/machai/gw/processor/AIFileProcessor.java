@@ -65,38 +65,41 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt) {
 		logger.info("Processing path: `{}`", file);
 		String perform = null;
-		try {
-			Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
-			FunctionToolsLoader.getInstance().applyTools(provider);
-			toolFunctions.stream().forEach(ft -> ft.applyTools(provider));
+		if (StringUtils.isNoneBlank(prompt)) {
+			try {
+				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
+				FunctionToolsLoader.getInstance().applyTools(provider);
+				toolFunctions.stream().forEach(ft -> ft.applyTools(provider));
 
-			File projectDir = projectLayout.getProjectDir();
-			provider.setWorkingDir(projectDir);
+				File projectDir = projectLayout.getProjectDir();
+				provider.setWorkingDir(projectDir);
 
-			String sysInstructions = promptBundle.getString("sys_instructions");
-			String finalInstructions = String.format(sysInstructions, getInstructions());
+				String sysInstructions = promptBundle.getString("sys_instructions");
+				String finalInstructions = String.format(sysInstructions, getInstructions());
 
-			provider.instructions(finalInstructions);
+				provider.instructions(finalInstructions);
 
-			String projectInfo = getProjectStructureDescription(projectLayout, file);
-			provider.prompt(projectInfo);
+				String projectInfo = getProjectStructureDescription(projectLayout, file);
+				provider.prompt(projectInfo);
 
-			String promptLines = parseLines(prompt);
-			provider.prompt(promptLines);
+				String promptLines = parseLines(prompt);
+				provider.prompt(promptLines);
 
-			perform = perform(file, provider);
+				perform = perform(file, provider);
 
-		} catch (ProcessTerminationException e) {
-			if (e.getExitCode() != 0) {
-				throw e;
+			} catch (ProcessTerminationException e) {
+				if (e.getExitCode() != 0) {
+					throw e;
+				}
+				perform = e.getMessage();
+
+			} finally {
+				logger.info("Finished processing path: {}", file.getAbsolutePath());
+
 			}
-			perform = e.getMessage();
-
-		} finally {
-			logger.info("Finished processing path: {}", file.getAbsolutePath());
-
+		} else {
+			logger.info("Received an empty prompt. Skipping processing.");
 		}
-
 		return perform;
 	}
 

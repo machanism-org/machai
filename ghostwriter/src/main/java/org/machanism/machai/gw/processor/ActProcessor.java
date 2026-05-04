@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArraySorter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -385,8 +386,35 @@ public class ActProcessor extends AIFileProcessor {
 				properties.put(key, Double.toString(value));
 			}
 			if (entry.getValue() instanceof TomlArray) {
-				List<Object> value = ((TomlArray) entry.getValue()).toList();
-				properties.put(key, value);
+				List<Object> values = ((TomlArray) entry.getValue()).toList();
+
+				List<String> mainValues = (List<String>) properties.get(key);
+				if (mainValues == null) {
+					mainValues = new ArrayList<String>();
+				}
+
+				List<String> result = new ArrayList<String>();
+
+				for (int i = 0; i < Math.max(values.size(), mainValues.size()); i++) {
+					String value;
+					try {
+						value = (String) values.get(i);
+					} catch (IndexOutOfBoundsException e) {
+						value = null;
+					}
+
+					String mainValue;
+					try {
+						mainValue = mainValues.get(i);
+						mainValue = Strings.CS.replace(mainValue, "%s", Objects.toString(value, "%s"));
+					} catch (IndexOutOfBoundsException e) {
+						mainValue = value;
+					}
+
+					result.add(mainValue);
+				}
+
+				properties.put(key, result);
 			}
 		}
 	}
