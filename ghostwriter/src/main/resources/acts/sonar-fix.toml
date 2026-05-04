@@ -55,7 +55,7 @@ inputs =
 ## 1. SonarQube API URL
     - If `COMPONENT_KEYS` is not defined use `COMPONENT_KEYS` based on the `Project Layout` parameters:
       - If `Relative Path from Root Directory` is not `.`, set `COMPONENT_KEYS` = `[Parent Directory Name]:[Project Identifier]`, otherwice: `COMPONENT_KEYS` = `[Project Identifier]`.
-    - Construct the `SONARQUBE_URL` as follows:  `${SONAR_HOST_URL}/api/issues/search?componentKeys=[COMPONENT_KEYS]&ps=20` and other required query parameters.
+    - Construct the `SONARQUBE_URL` as follows:  `${sonar.host}/api/issues/search?componentKeys=[COMPONENT_KEYS]&ps=20` and other required query parameters.
     - Use this URL to retrieve SonarQube issues for the relevant project component.
     - Connect to the SonarQube API using value as is without substitution for URL: `SONARQUBE_URL` value and header auth with `${SONAR_TOKEN}`.
     - Use this SonarQube API URL to fetch all open `impactSoftwareQualities`: `${QUALITIES}` and specified `impactSeverities`: `${SEVERITY}, findings for the specified [Project Identifier] project.

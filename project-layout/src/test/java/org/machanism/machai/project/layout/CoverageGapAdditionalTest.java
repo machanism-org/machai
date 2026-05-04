@@ -1,118 +1,263 @@
 package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
 
-import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Resource;
+import org.gradle.tooling.model.DomainObjectSet;
+import org.gradle.tooling.model.GradleProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class CoverageGapAdditionalTest {
 
-    @TempDir
-    Path tempDir;
+	@TempDir
+	Path tempDir;
 
-    @Test
-    void pythonProject_shouldReturnFalseWhenPyprojectCannotBeRead() throws Exception {
-        Path projectDir = tempDir.resolve("python-io-failure");
-        Files.createDirectories(projectDir);
-        Files.createDirectory(projectDir.resolve("pyproject.toml"));
+	@Test
+	void projectLayoutGetRelativePathStaticReturnsNullForOutsideFileWhenAddSingleDotFalse() {
+		// Arrange
+		File baseDir = tempDir.resolve("base").toFile();
+		File outsideFile = tempDir.resolveSibling("outside-file.txt").toFile();
 
-        boolean result = PythonProjectLayout.isPythonProject(projectDir.toFile());
+		// Act
+		String relativePath = ProjectLayout.getRelativePath(baseDir, outsideFile, false);
 
-        assertFalse(result);
-    }
+		// Assert
+		assertNull(relativePath);
+	}
 
-    @Test
-    void gradleProject_getProjectIdAndName_shouldReturnEmptyWhenProjectDirectoryIsMissing() {
-        GragleProjectLayout layout = new GragleProjectLayout();
+	@Test
+	void pomReaderGetProjectModelThrowsForMissingPomFile() {
+		// Arrange
+		PomReader reader = new PomReader();
+		File missingPom = tempDir.resolve("missing.xml").toFile();
 
-        assertEquals("", layout.getProjectId());
-        assertEquals("", layout.getProjectName());
-    }
+		// Act
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> reader.getProjectModel(missingPom));
 
-    @Test
-    void jscriptModules_shouldIgnoreWorkspaceDirectoryWithoutPackageJson() throws Exception {
-        Path projectDir = tempDir.resolve("js-workspaces");
-        Files.createDirectories(projectDir);
-        Files.write(projectDir.resolve("package.json"),
-                ("{\"name\":\"root\",\"workspaces\":[\"packages/*\"]}").getBytes(StandardCharsets.UTF_8));
-        Files.createDirectories(projectDir.resolve("packages/app"));
+		// Assert
+		assertTrue(exception.getMessage().contains("POM file:"));
+	}
 
-        JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(projectDir.toFile());
+	@Test
+	void jscriptGetModulesReturnsMatchingWorkspaceDirectories() throws Exception {
+		// Arrange
+		Files.write(tempDir.resolve("package.json"), "{\"name\":\"root\",\"workspaces\":[\"*\"]}"
+				.getBytes(StandardCharsets.UTF_8));
+		Path childDir = Files.createDirectories(tempDir.resolve("child-module"));
+		Files.write(childDir.resolve("package.json"), "{}".getBytes(StandardCharsets.UTF_8));
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
 
-        List<String> modules = layout.getModules();
+		// Act
+		Collection<String> modules = layout.getModules();
 
-        assertTrue(modules.isEmpty());
-    }
+		// Assert
+		assertEquals(Collections.singletonList("child-module"), modules);
+	}
 
-    @Test
-    void pomReader_shouldWrapReadFailureWhenPomFileIsDirectory() throws Exception {
-        Path pomDir = tempDir.resolve("pom-as-directory");
-        Files.createDirectories(pomDir);
+	@Test
+	void gragleGetProjectReturnsNullWhenToolingApiFails() throws Exception {
+		// Arrange
+		Path projectDir = Files.createDirectories(tempDir.resolve("gradle-project"));
+		Files.write(projectDir.resolve("build.gradle"), "plugins {}".getBytes(StandardCharsets.UTF_8));
+		GragleProjectLayout layout = new GragleProjectLayout().projectDir(projectDir.toFile());
 
-        PomReader reader = new PomReader();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> invokeGetProjectModel(reader, pomDir)); // Sonar fix java:S5778
+		// Act
+		Object project = invokePrivateGetProject(layout);
 
-        assertTrue(exception.getMessage().contains("POM file:"));
-        assertNotNull(exception.getCause());
-    }
+		// Assert
+		assertNull(project);
+	}
 
-    private void invokeGetProjectModel(PomReader reader, Path pomDir) {
-        reader.getProjectModel(pomDir.toFile());
-    }
+	@Test
+	void gragleGetProjectIdAndNameReturnEmptyStringWhenCachedProjectIsNull() {
+		// Arrange
+		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
 
-    @Test
-    void projectLayout_relativePathShouldPrefixOutsidePathWhenDotPrefixRequested() throws Exception {
-        Path baseDir = tempDir.resolve("base");
-        Path outsideDir = tempDir.resolve("outside");
-        Files.createDirectories(baseDir);
-        Files.createDirectories(outsideDir);
-        Path outsideFile = outsideDir.resolve("file.txt");
-        Files.write(outsideFile, new byte[0]);
+		// Act
+		String projectId = layout.getProjectId();
+		String projectName = layout.getProjectName();
 
-        String relative = ProjectLayout.getRelativePath(baseDir.toFile(), outsideFile.toFile(), true);
+		// Assert
+		assertEquals("", projectId);
+		assertEquals("", projectName);
+	}
 
-        assertTrue(relative.startsWith("./"));
-        assertTrue(relative.replace("\\", "/").endsWith("/outside/file.txt"));
-    }
+	@Test
+	void gragleGetModulesReturnsChildProjectNamesWhenChildrenExist() throws Exception {
+		// Arrange
+		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		DomainObjectSet<GradleProject> children = domainObjectSet(gradleProject("module-a", emptyDomainObjectSet()),
+				gradleProject("module-b", emptyDomainObjectSet()));
+		setProject(layout, gradleProject("root", children));
 
-    @Test
-    void mavenProjectLayout_getSourcesShouldKeepRelativeResourceDirectoryUnchanged() throws IOException {
-        Path projectDir = tempDir.resolve("maven-relative-resource");
-        Files.createDirectories(projectDir);
-        Files.createDirectories(projectDir.resolve("src/main/java"));
+		// Act
+		Collection<String> modules = layout.getModules();
 
-        Model model = new Model();
-        model.setModelVersion("4.0.0");
-        model.setArtifactId("artifact");
-        model.setVersion("1");
+		// Assert
+		assertEquals(2, modules.size());
+		assertTrue(modules.contains("module-a"));
+		assertTrue(modules.contains("module-b"));
+	}
 
-        Build build = new Build();
-        build.setSourceDirectory(projectDir.resolve("src/main/java").toString());
-        Resource resource = new Resource();
-        resource.setDirectory("src/main/resources");
-        build.addResource(resource);
-        model.setBuild(build);
+	@Test
+	void mavenGetSourcesKeepsRelativeResourceDirectoriesAndConvertsAbsoluteOnes() {
+		// Arrange
+		Path projectDir = tempDir.resolve("maven-project");
+		projectDir.toFile().mkdirs();
+		Model model = new Model();
+		model.setArtifactId("artifact");
+		org.apache.maven.model.Build build = new org.apache.maven.model.Build();
+		build.setSourceDirectory(projectDir.resolve("src/main/java").toFile().getAbsolutePath());
+		org.apache.maven.model.Resource relativeResource = new org.apache.maven.model.Resource();
+		relativeResource.setDirectory("src/main/resources");
+		org.apache.maven.model.Resource absoluteResource = new org.apache.maven.model.Resource();
+		absoluteResource.setDirectory(projectDir.resolve("src/shared/resources").toFile().getAbsolutePath());
+		build.addResource(relativeResource);
+		build.addResource(absoluteResource);
+		model.setBuild(build);
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(projectDir.toFile()).model(model);
 
-        MavenProjectLayout layout = new MavenProjectLayout().projectDir(projectDir.toFile()).model(model);
+		// Act
+		Collection<String> sources = layout.getSources();
 
-        Set<String> sources = layout.getSources();
+		// Assert
+		assertTrue(sources.contains("src/main/java"));
+		assertTrue(sources.contains("src/main/resources"));
+		assertTrue(sources.contains("src/shared/resources"));
+	}
 
-        assertTrue(sources.contains("src/main/java"));
-        assertTrue(sources.contains("src/main/resources"));
-    }
+	@Test
+	void mavenGetTestsReturnsEmptyListWhenBuildIsNull() {
+		// Arrange
+		Model model = new Model();
+		model.setArtifactId("artifact");
+		MavenProjectLayout layout = new MavenProjectLayout().projectDir(tempDir.toFile()).model(model);
+
+		// Act
+		Collection<String> tests = layout.getTests();
+
+		// Assert
+		assertNotNull(tests);
+		assertTrue(tests.isEmpty());
+	}
+
+	@Test
+	void jscriptGetProjectIdReturnsNameFromPackageJson() throws Exception {
+		// Arrange
+		Files.write(tempDir.resolve("package.json"), "{\"name\":\"workspace-root\"}".getBytes(StandardCharsets.UTF_8));
+		JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
+
+		// Act
+		String projectId = layout.getProjectId();
+
+		// Assert
+		assertEquals("workspace-root", projectId);
+	}
+
+	private static Object invokePrivateGetProject(GragleProjectLayout layout) throws Exception {
+		Method method = GragleProjectLayout.class.getDeclaredMethod("getProject");
+		method.setAccessible(true);
+		return method.invoke(layout);
+	}
+
+	private static void setProject(GragleProjectLayout layout, GradleProject project) throws Exception {
+		Field field = GragleProjectLayout.class.getDeclaredField("project");
+		field.setAccessible(true);
+		field.set(layout, project);
+	}
+
+	private static GradleProject gradleProject(String name, DomainObjectSet<GradleProject> children) {
+		return (GradleProject) Proxy.newProxyInstance(GradleProject.class.getClassLoader(),
+				new Class<?>[] { GradleProject.class }, (proxy, method, args) -> {
+					switch (method.getName()) {
+					case "getName":
+						return name;
+					case "getChildren":
+						return children;
+					default:
+						return defaultValue(method.getReturnType());
+					}
+				});
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> DomainObjectSet<T> emptyDomainObjectSet() {
+		return (DomainObjectSet<T>) Proxy.newProxyInstance(DomainObjectSet.class.getClassLoader(),
+				new Class<?>[] { DomainObjectSet.class }, (proxy, method, args) -> {
+					switch (method.getName()) {
+					case "isEmpty":
+						return true;
+					case "getAll":
+						return Collections.emptyList();
+					case "iterator":
+						return Collections.emptyIterator();
+					default:
+						return defaultValue(method.getReturnType());
+					}
+				});
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> DomainObjectSet<T> domainObjectSet(T... items) {
+		return (DomainObjectSet<T>) Proxy.newProxyInstance(DomainObjectSet.class.getClassLoader(),
+				new Class<?>[] { DomainObjectSet.class }, (proxy, method, args) -> {
+					switch (method.getName()) {
+					case "isEmpty":
+						return items.length == 0;
+					case "getAll":
+						return java.util.Arrays.asList(items);
+					case "iterator":
+						return java.util.Arrays.asList(items).iterator();
+					default:
+						return defaultValue(method.getReturnType());
+					}
+				});
+	}
+
+	private static Object defaultValue(Class<?> returnType) {
+		if (!returnType.isPrimitive()) {
+			return null;
+		}
+		if (returnType == boolean.class) {
+			return false;
+		}
+		if (returnType == byte.class) {
+			return (byte) 0;
+		}
+		if (returnType == short.class) {
+			return (short) 0;
+		}
+		if (returnType == int.class) {
+			return 0;
+		}
+		if (returnType == long.class) {
+			return 0L;
+		}
+		if (returnType == float.class) {
+			return 0f;
+		}
+		if (returnType == double.class) {
+			return 0d;
+		}
+		if (returnType == char.class) {
+			return (char) 0;
+		}
+		return null;
+	}
 }

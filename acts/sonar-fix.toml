@@ -1,8 +1,9 @@
+
 inputs = ['''
 
 ## Additional Instruction
 
-— Run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${SONAR_TOKEN} -Dsonar.host.url=${SONAR_HOST_URL}`.
+— Run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=${sonar.host}`.
 - Use `tailResultSize`: 1024 for the command execution result.
 - Ensure all fixes are applied to the correct source files and are properly tested.
 - This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
@@ -11,7 +12,7 @@ inputs = ['''
 
 %s
 
-— Re-run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${SONAR_TOKEN} -Dsonar.host.url=${SONAR_HOST_URL}`.
+— Re-run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=${sonar.host}`.
 - If After re-running the API query, Sonar still reports issues. the next iteration should fetch the next pages (or increase `ps`) and continue fixing issue-by-issue.
 — Re-run the Sonar plugin command to check the result of the fix.
 '''
@@ -22,7 +23,7 @@ gw.scanDir = "glob:."
 QUALITIES = "SECURITY,MAINTAINABILITY,RELIABILITY"
 SEVERITY = "LOW,MEDIUM,HIGH,BLOCKER"
 
-SONAR_HOST_URL = "http://192.168.0.177:9000"
-SONAR_TOKEN = "squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
+sonar.host = "http://192.168.0.177:9000"
+sonar.token = "squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
 
 

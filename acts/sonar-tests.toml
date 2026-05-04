@@ -11,13 +11,12 @@ inputs = '''
   ```
   mvn sonar:sonar \
     -Dsonar.token=${sonar.token} \
-    -Dsonar.host.url=http://${sonar.host} \
+    -Dsonar.host.url=${sonar.host} \
   ```
 - Report the result of the task execution, terminate the process with exit code: 1 in case of an error.
 '''
 
-severities="LOW,MEDIUM,HIGH,BLOCKER"
-sonar.host="192.168.0.177:9000"
-sonar.token="squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
+sonar.host = "http://192.168.0.177:9000"
+sonar.token = "squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
 
 

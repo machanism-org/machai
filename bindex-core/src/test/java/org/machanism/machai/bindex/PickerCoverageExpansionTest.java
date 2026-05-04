@@ -44,6 +44,7 @@ class PickerCoverageExpansionTest {
 
 	@Test
 	void create_shouldInsertDocumentWithNormalizedFields() throws Exception {
+		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		Genai provider = mock(Genai.class);
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Arrays.asList(0.11, 0.22));
@@ -65,8 +66,10 @@ class PickerCoverageExpansionTest {
 		classification.setIntegrations(Collections.singletonList("REST"));
 		bindex.setClassification(classification);
 
+		// Act
 		String id = picker.create(bindex);
 
+		// Assert
 		assertNotNull(id);
 		org.mockito.ArgumentCaptor<Document> captor = org.mockito.ArgumentCaptor.forClass(Document.class);
 		verify(collection).insertOne(captor.capture());
@@ -81,6 +84,7 @@ class PickerCoverageExpansionTest {
 
 	@Test
 	void create_shouldRethrowMongoCommandExceptionFromInsert() {
+		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		Genai provider = mock(Genai.class);
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Collections.singletonList(0.5));
@@ -98,11 +102,13 @@ class PickerCoverageExpansionTest {
 		classification.setIntegrations(Collections.emptyList());
 		bindex.setClassification(classification);
 
+		// Act + Assert
 		assertThrows(MongoCommandException.class, () -> picker.create(bindex));
 	}
 
 	@Test
 	void getEmbeddingBson_shouldRequestEmbeddingFromProvider() throws Exception {
+		// Arrange
 		Genai provider = mock(Genai.class);
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Arrays.asList(1.5, 2.5));
 		Picker picker = new Picker(mock(MongoCollection.class), provider);
@@ -114,13 +120,16 @@ class PickerCoverageExpansionTest {
 		classification.setLanguages(Collections.singletonList(language));
 		classification.setIntegrations(Collections.emptyList());
 
+		// Act
 		picker.getEmbeddingBson(classification, 2);
 
+		// Assert
 		verify(provider).embedding(anyString(), anyLong());
 	}
 
 	@Test
 	void pick_shouldParseMarkdownJsonAndReturnOnlyExistingBindexes() throws Exception {
+		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		FindIterable<Document> findIterable = mock(FindIterable.class);
 		when(collection.find(any(Bson.class))).thenReturn(findIterable);
@@ -143,12 +152,14 @@ class PickerCoverageExpansionTest {
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Arrays.asList(0.1, 0.2));
 		Picker picker = new Picker(collection, provider);
 		Configurator configurator = mock(Configurator.class);
-		when(configurator.get("picker.classificationInstruction")).thenReturn("{1}");
+		when(configurator.get("picker.classificationInstruction", null)).thenReturn("%2$s");
 		setField(picker, "configurator", configurator);
 		picker.setScore(0.0);
 
+		// Act
 		List<Bindex> result = picker.pick("find build libs");
 
+		// Assert
 		assertEquals(1, result.size());
 		assertEquals("lib-a:2.0", result.get(0).getId());
 		assertEquals(Double.valueOf(0.93), picker.getScore("lib-a:2.0"));
@@ -157,6 +168,7 @@ class PickerCoverageExpansionTest {
 
 	@Test
 	void getResults_shouldKeepHighestVersionPerLibraryName() throws Exception {
+		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		AggregateIterable<Document> aggregateIterable = mock(AggregateIterable.class);
 		when(collection.aggregate(any(List.class))).thenReturn(aggregateIterable);
@@ -174,14 +186,45 @@ class PickerCoverageExpansionTest {
 		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class, int.class, Bson[].class);
 		method.setAccessible(true);
 
+		// Act
 		@SuppressWarnings("unchecked")
 		Collection<String> result = (Collection<String>) method.invoke(picker, "idx", "path", "query", 1, new Bson[0]);
 
+		// Assert
+		assertEquals(Collections.singletonList("lib:2.0"), new ArrayList<>(result));
+	}
+
+	@Test
+	void getResults_shouldKeepExistingHigherVersionWhenLowerVersionAppearsLater() throws Exception {
+		// Arrange
+		MongoCollection<Document> collection = mock(MongoCollection.class);
+		AggregateIterable<Document> aggregateIterable = mock(AggregateIterable.class);
+		when(collection.aggregate(any(List.class))).thenReturn(aggregateIterable);
+		when(aggregateIterable.into(any())).thenAnswer(invocation -> {
+			@SuppressWarnings("unchecked")
+			Collection<Document> out = invocation.getArgument(0);
+			out.add(new Document("id", "lib:2.0").append("name", "lib").append("version", "2.0").append("score", 0.95));
+			out.add(new Document("id", "lib:1.0").append("name", "lib").append("version", "1.0").append("score", 0.80));
+			return out;
+		});
+		Genai provider = mock(Genai.class);
+		when(provider.embedding(anyString(), anyLong())).thenReturn(Collections.singletonList(0.2));
+		Picker picker = new Picker(collection, provider);
+
+		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class, int.class, Bson[].class);
+		method.setAccessible(true);
+
+		// Act
+		@SuppressWarnings("unchecked")
+		Collection<String> result = (Collection<String>) method.invoke(picker, "idx", "path", "query", 1, (Object) null);
+
+		// Assert
 		assertEquals(Collections.singletonList("lib:2.0"), new ArrayList<>(result));
 	}
 
 	@Test
 	void getRegistredId_shouldReturnObjectIdStringWhenDocumentExists() {
+		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		FindIterable<Document> iterable = mock(FindIterable.class);
 		ObjectId objectId = new ObjectId();
@@ -191,15 +234,22 @@ class PickerCoverageExpansionTest {
 		Bindex bindex = new Bindex();
 		bindex.setId("found");
 
+		// Act
 		String result = picker.getRegistredId(bindex);
 
+		// Assert
 		assertEquals(objectId.toString(), result);
 	}
 
 	@Test
 	void getScore_shouldReturnNullWhenIdUnknown() {
+		// Arrange
 		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class));
+
+		// Act
 		Double result = picker.getScore("unknown");
+
+		// Assert
 		assertNull(result);
 	}
 
