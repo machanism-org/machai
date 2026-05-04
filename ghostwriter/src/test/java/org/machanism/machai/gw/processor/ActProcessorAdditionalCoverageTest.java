@@ -1,5 +1,6 @@
 package org.machanism.machai.gw.processor;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,19 +22,13 @@ class ActProcessorAdditionalCoverageTest {
 
 	@Test
 	void tryLoadActFromDirectory_whenActsLocationIsHttp_andNetworkFails_propagatesIOException() {
-		// Arrange
 		Map<String, Object> props = new HashMap<>();
-
-		// Act + Assert
-		// The implementation only swallows FileNotFoundException; other I/O failures
-		// propagate.
 		assertThrows(Exception.class,
 				() -> ActProcessor.tryLoadActFromDirectory(props, "missing", "http://nonexistent.invalid"));
 	}
 
 	@Test
 	void tryLoadActFromDirectory_whenActsLocationIsFileAndExists_populatesProperties() throws Exception {
-		// Arrange
 		Path actsDir = tempDir.resolve("acts");
 		Files.createDirectories(actsDir);
 		Files.write(actsDir.resolve("x.toml"),
@@ -41,25 +36,28 @@ class ActProcessorAdditionalCoverageTest {
 
 		Map<String, Object> props = new HashMap<>();
 
-		// Act
 		assertNotNull(ActProcessor.tryLoadActFromDirectory(props, "x", actsDir.toString()));
-
-		// Assert
 		assertEquals("i", props.get("instructions"));
 		assertEquals("p %s", props.get("inputs"));
 	}
 
 	@Test
-	void setDefaultPrompt_whenBlank_usesHelpActName_andAppliesInputsTemplateFormatting() {
-		// Arrange
+	void setAct_whenEpisodeSelectionUsesStopSymbol_disablesNormalOrderAndSelectsEpisodes() throws Exception {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		ActProcessor processor = new ActProcessor(tempDir.toFile(), configurator, "Any:Model");
-		processor.setDefaultPrompt("help");
+		processor.setPrompts("episode-1", "episode-2", "episode-3");
 
-		// Act
-		processor.setDefaultPrompt("help custom");
+		Path actsDir = tempDir.resolve("acts");
+		Files.createDirectories(actsDir);
+		Files.write(actsDir.resolve("custom.toml"),
+				("instructions='i'\n" + "inputs=['first %s','second %s','third %s']\n")
+						.getBytes(StandardCharsets.UTF_8));
+			processor.setActsLocation(actsDir.toString());
 
-		// Assert
-		assertNotNull(processor.getInstructions());
+		processor.setAct("custom#2!");
+
+		assertArrayEquals(new String[] { "first episode-1", "second episode-1", "third episode-1" },
+				processor.getPrompts());
+		assertEquals("second episode-1", processor.getDefaultPrompt());
 	}
 }

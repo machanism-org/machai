@@ -1,31 +1,28 @@
-inputs = '''
-%s
-
-## Context
-
-- This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
-- The main source and resource files are located in: `[Main Source & Resource Folders]`.
-- Determine the correct value for [COMPONENT_KEYS] based on the `Project Layout` parameters:
-  - If [Child Projects]: `not defined`: set [COMPONENT_KEYS] to `[Project Identifier]`
-    else set [COMPONENT_KEYS] to `[Project Identifier]`.
-- Construct the `SONARQUBE_URL` as follows: 
-`http://${sonar.token}:@${sonar.url}/api/issues/search?issueStatuses=OPEN&impactSeverities=${severities}&componentKeys=org.machanism.machai:[COMPONENT_KEYS]&ps=30`
-- Use this URL to retrieve SonarQube issues for the relevant project component.
-- When processing source code, the path from the Sonar issue report to the source file should be used starting with `src/`; characters before it should be removed.
-- If remaining (still OPEN) issues requiring further iteration: continue with the next iteration and address these remaining items one-by-one (including fetching next pages if possible or needed). 
+inputs = ['''
 
 ## Additional Instruction
 
+— Run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${SONAR_TOKEN} -Dsonar.host.url=${SONAR_HOST_URL}`.
 - Use `tailResultSize`: 1024 for the command execution result.
 - Ensure all fixes are applied to the correct source files and are properly tested.
-— Re-run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=http://${sonar.url}`.
+- This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
+- Determine the correct value for [COMPONENT_KEYS] based on the `Project Layout` parameters:
+  - If [Child Projects]: `not defined`: set `COMPONENT_KEYS` to `org.machanism.machai:[Project Identifier]` else set `COMPONENT_KEYS` to `[Project Identifier]`.
+
+%s
+
+— Re-run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${SONAR_TOKEN} -Dsonar.host.url=${SONAR_HOST_URL}`.
 - If After re-running the API query, Sonar still reports issues. the next iteration should fetch the next pages (or increase `ps`) and continue fixing issue-by-issue.
-— Run the Sonar plugin command before get the report.
 — Re-run the Sonar plugin command to check the result of the fix.
 '''
+]
 
-gw.scanDir="glob:."
-severities="LOW,MEDIUM,HIGH,BLOCKER"
-sonar.url="192.168.0.177:9000"
-sonar.token="squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
+gw.scanDir = "glob:."
+
+QUALITIES = "SECURITY,MAINTAINABILITY,RELIABILITY"
+SEVERITY = "LOW,MEDIUM,HIGH,BLOCKER"
+
+SONAR_HOST_URL = "http://192.168.0.177:9000"
+SONAR_TOKEN = "squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
+
 

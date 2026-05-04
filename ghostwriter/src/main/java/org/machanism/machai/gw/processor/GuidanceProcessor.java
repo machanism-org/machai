@@ -205,9 +205,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @param file          file currently being processed
 	 * @param guidance      extracted guidance and/or default guidance
 	 * @return provider output
-	 * @throws IOException if provider execution fails
 	 */
-	protected String process(ProjectLayout projectLayout, File file, String guidance) throws IOException {
+	@Override
+	public String process(ProjectLayout projectLayout, File file, String guidance) {
 		String guidanceSysInstructions = promptBundle.getString("guidance_sys_instructions");
 		String instructions = String.format(guidanceSysInstructions, getInstructions());
 

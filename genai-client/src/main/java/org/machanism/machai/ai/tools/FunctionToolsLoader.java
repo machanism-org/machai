@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Viktor Tovstyi
  */
+@SuppressWarnings("java:S6548")
 public class FunctionToolsLoader {
 
 	private static final Logger logger = LoggerFactory.getLogger(FunctionToolsLoader.class);

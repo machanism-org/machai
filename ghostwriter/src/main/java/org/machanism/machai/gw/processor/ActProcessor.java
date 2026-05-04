@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArraySorter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -127,7 +126,6 @@ public class ActProcessor extends AIFileProcessor {
 		act = StringUtils.defaultIfBlank(act, "help");
 
 		String defaultPrompt = getDefaultPrompt();
-
 		String name;
 		String prompt;
 		Matcher matcher = FIRST_WHITESPACE.matcher(act);
@@ -135,49 +133,55 @@ public class ActProcessor extends AIFileProcessor {
 			int start = matcher.start();
 			String substringAfter = StringUtils.substring(act, start);
 			prompt = StringUtils.defaultIfBlank(substringAfter, StringUtils.defaultString(defaultPrompt));
-
 			name = StringUtils.substring(act, 0, start);
 		} else {
 			name = act;
 			prompt = defaultPrompt;
 		}
 
-		String episodeIds = StringUtils.substringAfterLast(name, EPISODE_DELIMETER);
+		String episodeSelection = StringUtils.substringAfterLast(name, EPISODE_DELIMETER);
 		name = StringUtils.substringBeforeLast(name, EPISODE_DELIMETER);
 
 		Map<String, Object> actData = new HashMap<>();
-
 		loadAct(name, actData, actsLocation);
 
 		prompt = StringUtils.trim(prompt);
+		applyPromptValues(prompt, actData);
+		applyActData(actData);
+		applyEpisodeSelection(episodeSelection);
+	}
 
+	private void applyPromptValues(String prompt, Map<String, Object> actData) {
 		Object mainValue = actData.get(GWConstants.INPUTS_PROPERTY_NAME);
 		if (mainValue instanceof String) {
-			String value = applayPrompt(prompt, actData, (String) mainValue);
-			actData.put(GWConstants.INPUTS_PROPERTY_NAME, value);
+			actData.put(GWConstants.INPUTS_PROPERTY_NAME, applayPrompt(prompt, actData, (String) mainValue));
+			return;
+		}
 
-		} else if (mainValue instanceof List) {
+		if (mainValue instanceof List) {
 			List<String> inputs = new ArrayList<>();
 			for (String value : (List<String>) mainValue) {
-				String episode = applayPrompt(prompt, actData, value);
-				inputs.add(episode);
+				inputs.add(applayPrompt(prompt, actData, value));
 			}
 			actData.put(GWConstants.INPUTS_PROPERTY_NAME, inputs);
 		}
+	}
 
-		applyActData(actData);
-
-		if (StringUtils.isNoneBlank(episodeIds)) {
-			if (Strings.CS.endsWith(episodeIds, STOP_SYMBOL)) {
-				setDisableNormalOrder(true);
-				episodeIds = StringUtils.substringBefore(episodeIds, STOP_SYMBOL);
-			}
-
-			List<Integer> collect = Arrays.asList(StringUtils.split(episodeIds, SEPARATOR_CHARS)).stream()
-					.map(id -> Integer.parseInt(id))
-					.collect(Collectors.toList());
-			setEpisodeIds(collect);
+	private void applyEpisodeSelection(String episodeSelection) {
+		if (StringUtils.isBlank(episodeSelection)) {
+			return;
 		}
+
+		String configuredEpisodeSelection = episodeSelection;
+		if (Strings.CS.endsWith(configuredEpisodeSelection, STOP_SYMBOL)) {
+			setDisableNormalOrder(true);
+			configuredEpisodeSelection = StringUtils.substringBefore(configuredEpisodeSelection, STOP_SYMBOL);
+		}
+
+		List<Integer> selectedEpisodeIds = Arrays.stream(StringUtils.split(configuredEpisodeSelection, SEPARATOR_CHARS))
+				.map(Integer::parseInt)
+				.collect(Collectors.toList());
+		setEpisodeIds(selectedEpisodeIds);
 	}
 
 	public void setDisableNormalOrder(boolean disableNormalOrder) {
@@ -186,22 +190,18 @@ public class ActProcessor extends AIFileProcessor {
 
 	private String applayPrompt(String prompt, Map<String, Object> actData, String mainValue) {
 		String actPrompt = Objects.toString(actData.get("prompt"), "");
-		String value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(prompt, actPrompt));
-		return value;
+		return Strings.CS.replace(mainValue, "%s", Objects.toString(prompt, actPrompt));
 	}
 
-	public void setEpisodeIds(List<Integer> episodeIds) {
+	public void setEpisodeIds(List<Integer> selectedEpisodeIds) {
 		int numberOfEpisodes = prompts.length;
-
-		boolean hasInvalidId = episodeIds.stream()
-				.anyMatch(id -> id <= 0 || id > numberOfEpisodes);
-
+		boolean hasInvalidId = selectedEpisodeIds.stream().anyMatch(id -> id <= 0 || id > numberOfEpisodes);
 		if (hasInvalidId) {
 			throw new IllegalArgumentException(
 					"All episode IDs must be between 1 and " + numberOfEpisodes + "  (inclusive).");
 		}
 
-		this.episodeIds = episodeIds;
+		this.episodeIds = selectedEpisodeIds;
 	}
 
 	/**
@@ -295,11 +295,9 @@ public class ActProcessor extends AIFileProcessor {
 		TomlParseResult toml = null;
 		if (isAbsolute(name)) {
 			toml = loadActToml(name);
-		} else {
-			if (actsLocation != null) {
-				String absolutePath = getAssolutePath(name, actsLocation);
-				toml = loadActToml(absolutePath);
-			}
+		} else if (actsLocation != null) {
+			String absolutePath = getAssolutePath(name, actsLocation);
+			toml = loadActToml(absolutePath);
 		}
 
 		if (toml != null) {
@@ -386,37 +384,43 @@ public class ActProcessor extends AIFileProcessor {
 				properties.put(key, Double.toString(value));
 			}
 			if (entry.getValue() instanceof TomlArray) {
-				List<Object> values = ((TomlArray) entry.getValue()).toList();
-
-				List<String> mainValues = (List<String>) properties.get(key);
-				if (mainValues == null) {
-					mainValues = new ArrayList<String>();
-				}
-
-				List<String> result = new ArrayList<String>();
-
-				for (int i = 0; i < Math.max(values.size(), mainValues.size()); i++) {
-					String value;
-					try {
-						value = (String) values.get(i);
-					} catch (IndexOutOfBoundsException e) {
-						value = null;
-					}
-
-					String mainValue;
-					try {
-						mainValue = mainValues.get(i);
-						mainValue = Strings.CS.replace(mainValue, "%s", Objects.toString(value, "%s"));
-					} catch (IndexOutOfBoundsException e) {
-						mainValue = value;
-					}
-
-					result.add(mainValue);
-				}
-
+				List<String> result = mergeTomlArrayValues(properties.get(key), ((TomlArray) entry.getValue()).toList());
 				properties.put(key, result);
 			}
 		}
+	}
+
+	private static List<String> mergeTomlArrayValues(Object existingValue, List<Object> values) {
+		List<String> mainValues = toStringList(existingValue);
+		List<String> result = new ArrayList<>();
+		int maxSize = Math.max(values.size(), mainValues.size());
+		for (int i = 0; i < maxSize; i++) {
+			String value = getValueAt(values, i);
+			result.add(resolveMergedValue(mainValues, i, value));
+		}
+		return result;
+	}
+
+	private static List<String> toStringList(Object existingValue) {
+		if (existingValue instanceof String) {
+			return Arrays.asList((String) existingValue);
+		}
+		if (existingValue instanceof List) {
+			return (List<String>) existingValue;
+		}
+		return new ArrayList<>();
+	}
+
+	private static String getValueAt(List<Object> values, int index) {
+		return index < values.size() ? (String) values.get(index) : null;
+	}
+
+	private static String resolveMergedValue(List<String> mainValues, int index, String value) {
+		if (index >= mainValues.size()) {
+			return value;
+		}
+		String mainValue = mainValues.get(index);
+		return Strings.CS.replace(mainValue, "%s", Objects.toString(value, "%s"));
 	}
 
 	/**
@@ -430,60 +434,62 @@ public class ActProcessor extends AIFileProcessor {
 			String key = entry.getKey();
 			Object valueObj = entry.getValue();
 			if (valueObj instanceof String) {
-				String value = (String) valueObj;
-				String inheritValue = getConfigurator().get(key, null);
-				if (inheritValue != null) {
-					value = Strings.CS.replace(value, "%s", StringUtils.defaultString(inheritValue));
-				}
-				switch (key) {
-				case GWConstants.INSTRUCTIONS_PROP_NAME:
-					super.setInstructions(value);
-					break;
-
-				case GWConstants.INPUTS_PROPERTY_NAME:
-					setPrompts(value);
-					break;
-
-				case GWConstants.THREADS_PROP_NAME:
-					super.setDegreeOfConcurrency(Integer.parseInt(value));
-					break;
-
-				case GWConstants.EXCLUDES_PROP_NAME:
-					super.setExcludes(StringUtils.split(value, SEPARATOR_CHARS));
-					break;
-
-				case GWConstants.NONRECURSIVE_PROP_NAME:
-					super.setNonRecursive(Boolean.parseBoolean(value));
-					break;
-
-				case GWConstants.INTERACTIVE_MODE_PROP_NAME:
-					super.setInteractive(Boolean.parseBoolean(value));
-					break;
-
-				case GWConstants.MODEL_PROP_NAME:
-					super.setModel(value);
-					getConfigurator().set(key, value);
-					break;
-
-				default:
-					getConfigurator().set(key, value);
-					break;
-				}
+				applyStringActData(key, (String) valueObj);
 			} else if (valueObj instanceof List && GWConstants.INPUTS_PROPERTY_NAME.equals(key)) {
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				List<String> prompts = (List) valueObj;
-				List<String> updateValue = new ArrayList<String>();
-				for (String value : prompts) {
-					String inheritValue = getConfigurator().get(key, null);
-					if (inheritValue != null) {
-						value = Strings.CS.replace(value, "%s", StringUtils.defaultString(inheritValue));
-					}
-					updateValue.add(value);
-				}
-
-				setPrompts(updateValue.toArray(new String[0]));
+				setPrompts(resolvePromptValues((List<String>) valueObj));
 			}
 		}
+	}
+
+	private void applyStringActData(String key, String valueObj) {
+		String value = resolveInheritedValue(key, valueObj);
+		applyStringProperty(key, value);
+	}
+
+	private String resolveInheritedValue(String key, String value) {
+		String inheritValue = getConfigurator().get(key, null);
+		if (inheritValue != null) {
+			return Strings.CS.replace(value, "%s", StringUtils.defaultString(inheritValue));
+		}
+		return value;
+	}
+
+	private void applyStringProperty(String key, String value) {
+		switch (key) {
+		case GWConstants.INSTRUCTIONS_PROP_NAME:
+			super.setInstructions(value);
+			break;
+		case GWConstants.INPUTS_PROPERTY_NAME:
+			setPrompts(value);
+			break;
+		case GWConstants.THREADS_PROP_NAME:
+			super.setDegreeOfConcurrency(Integer.parseInt(value));
+			break;
+		case GWConstants.EXCLUDES_PROP_NAME:
+			super.setExcludes(StringUtils.split(value, SEPARATOR_CHARS));
+			break;
+		case GWConstants.NONRECURSIVE_PROP_NAME:
+			super.setNonRecursive(Boolean.parseBoolean(value));
+			break;
+		case GWConstants.INTERACTIVE_MODE_PROP_NAME:
+			super.setInteractive(Boolean.parseBoolean(value));
+			break;
+		case GWConstants.MODEL_PROP_NAME:
+			super.setModel(value);
+			getConfigurator().set(key, value);
+			break;
+		default:
+			getConfigurator().set(key, value);
+			break;
+		}
+	}
+
+	private String[] resolvePromptValues(List<String> promptValues) {
+		List<String> updateValue = new ArrayList<>();
+		for (String value : promptValues) {
+			updateValue.add(resolveInheritedValue(GWConstants.INPUTS_PROPERTY_NAME, value));
+		}
+		return updateValue.toArray(new String[0]);
 	}
 
 	public void setPrompts(String... value) {
@@ -494,19 +500,22 @@ public class ActProcessor extends AIFileProcessor {
 		return prompts;
 	}
 
+	@Override
 	public void setDefaultPrompt(String defaultPrompt) {
 		prompts = new String[] { defaultPrompt };
 	}
 
+	@Override
 	public String getDefaultPrompt() {
+		if (ArrayUtils.isEmpty(prompts)) {
+			return super.getDefaultPrompt();
+		}
 		int id = getActivePromptId();
-		String prompt = ArrayUtils.isNotEmpty(prompts) ? (prompts != null ? prompts[id - 1] : null)
-				: super.getDefaultPrompt();
-		return prompt;
+		return prompts[id - 1];
 	}
 
 	private int getActivePromptId() {
-		return (episodeIds == null ? activeEpisodeId : episodeIds.get(activeEpisodeId - 1));
+		return episodeIds == null ? activeEpisodeId : episodeIds.get(activeEpisodeId - 1);
 	}
 
 	/**
@@ -526,65 +535,86 @@ public class ActProcessor extends AIFileProcessor {
 		getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, actsLocation);
 	}
 
+	@Override
 	public void scanDocuments(File projectDir, String scanDir) throws IOException {
 		do {
-			try {
-				boolean repeate;
-				int iteration = 1;
-				do {
-					repeate = false;
-					if (prompts.length > 1) {
-						logger.info(StringUtils.center(" Episode #" + (getActivePromptId())
-								+ (iteration > 1 ? " [Iteration: " + iteration + "]) " : " "), 80, "-"));
-					}
-					try {
-						super.scanDocuments(projectDir, scanDir);
-
-					} catch (RepeatEpisodeException e) {
-						repeate = true;
-					}
-					iteration++;
-				} while (repeate);
-
-			} catch (MoveToEpisodeException e) {
-				String episodeId = e.getEpisodeId();
-				if (episodeId != null) {
-					this.requestedEpisodeId = Integer.parseInt(episodeId);
-				}
-			}
+			runCurrentEpisode(projectDir, scanDir);
 		} while (nextAct());
 	}
 
-	private boolean nextAct() {
-		if (requestedEpisodeId == null) {
-			int currentActiveEpisodeId = getActivePromptId();
-			this.activeEpisodeId++;
-
-			boolean result;
-			if (episodeIds != null) {
-				result = activeEpisodeId <= episodeIds.size();
-				if (!result) {
-					episodeIds = null;
-					this.activeEpisodeId = currentActiveEpisodeId + 1;
-					result = disableNormalOrder ? false : activeEpisodeId <= prompts.length;
-				}
-
-			} else {
-				result = activeEpisodeId <= prompts.length;
-			}
-
-			return result;
-
-		} else {
-			if (requestedEpisodeId > 0) {
-				activeEpisodeId = requestedEpisodeId;
-				requestedEpisodeId = 0;
-				episodeIds = null;
-				return true;
-			} else {
-				return false;
+	private void runCurrentEpisode(File projectDir, String scanDir) throws IOException {
+		try {
+			runEpisodeIterations(projectDir, scanDir);
+		} catch (MoveToEpisodeException e) {
+			String episodeId = e.getEpisodeId();
+			if (episodeId != null) {
+				this.requestedEpisodeId = Integer.parseInt(episodeId);
 			}
 		}
+	}
+
+	private void runEpisodeIterations(File projectDir, String scanDir) throws IOException {
+		boolean repeate;
+		int iteration = 1;
+		do {
+			repeate = false;
+			logEpisodeHeader(iteration);
+			try {
+				super.scanDocuments(projectDir, scanDir);
+			} catch (RepeatEpisodeException e) {
+				repeate = true;
+			}
+			iteration++;
+		} while (repeate);
+	}
+
+	private void logEpisodeHeader(int iteration) {
+		if (prompts.length <= 1 || !logger.isInfoEnabled()) {
+			return;
+		}
+		String title = buildEpisodeTitle(iteration);
+		logger.info("{}", StringUtils.center(title, 80, "-"));
+	}
+
+	private String buildEpisodeTitle(int iteration) {
+		String iterationLabel = iteration > 1 ? " [Iteration: " + iteration + "]) " : " ";
+		return " Episode #" + getActivePromptId() + iterationLabel;
+	}
+
+	private boolean nextAct() {
+		if (requestedEpisodeId != null) {
+			return moveToRequestedEpisode();
+		}
+		return advanceToNextEpisode();
+	}
+
+	private boolean moveToRequestedEpisode() {
+		if (requestedEpisodeId <= 0) {
+			return false;
+		}
+		activeEpisodeId = requestedEpisodeId;
+		requestedEpisodeId = 0;
+		episodeIds = null;
+		return true;
+	}
+
+	private boolean advanceToNextEpisode() {
+		int currentActivePromptId = getActivePromptId();
+		activeEpisodeId++;
+		if (episodeIds == null) {
+			return activeEpisodeId <= prompts.length;
+		}
+		return advanceFromSelectedEpisodes(currentActivePromptId);
+	}
+
+	private boolean advanceFromSelectedEpisodes(int currentActivePromptId) {
+		boolean hasMoreSelectedEpisodes = activeEpisodeId <= episodeIds.size();
+		if (hasMoreSelectedEpisodes) {
+			return true;
+		}
+		episodeIds = null;
+		activeEpisodeId = currentActivePromptId + 1;
+		return !disableNormalOrder && activeEpisodeId <= prompts.length;
 	}
 
 	/**
@@ -604,7 +634,7 @@ public class ActProcessor extends AIFileProcessor {
 
 		if (match(scanProjectDir, scanProjectDir) && getPrompts() != null
 				&& !shouldExcludePath(scanProjectDir.toPath())) {
-			String perform = process(projectLayout, scanProjectDir, getInstructions(), getDefaultPrompt());
+			String perform = process(projectLayout, scanProjectDir, getDefaultPrompt());
 			if (perform != null) {
 				logger.info(">>> {}", perform);
 			}
@@ -620,7 +650,7 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	@Override
 	protected void processFile(ProjectLayout projectLayout, File file) throws IOException {
-		process(projectLayout, file, getInstructions(), getDefaultPrompt());
+		process(projectLayout, file, getDefaultPrompt());
 	}
 
 }

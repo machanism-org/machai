@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -16,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.manager.Usage;
@@ -368,7 +368,7 @@ public class OpenAIProvider implements Genai {
 			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
 			Object result = null;
 			for (Entry<Tool, ToolFunction> entry : entrySet) {
-				if (Strings.CS.equals(name, entry.getKey().asFunction().name())) {
+				if (hasSameToolName(name, entry.getKey())) {
 					result = safelyInvokeTool(name, entry.getValue(), params, file);
 					break;
 				}
@@ -377,6 +377,15 @@ public class OpenAIProvider implements Genai {
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+
+	private boolean hasSameToolName(String toolName, Tool tool) {
+		// Sonar java:S1874: avoid deprecated StringUtils equality helpers.
+		return normalize(toolName).equals(normalize(tool.asFunction().name()));
+	}
+
+	private String normalize(String value) {
+		return StringUtils.defaultString(value).toLowerCase(Locale.ROOT);
 	}
 
 	private Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File workingDir) {
@@ -466,7 +475,7 @@ public class OpenAIProvider implements Genai {
 		if (paramsDesc != null) {
 			for (String pDesc : paramsDesc) {
 				String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
-				if (desc.length >= 3 && StringUtils.equals(desc[2], "required")) {
+				if (desc.length >= 3 && isRequiredParameter(desc[2])) {
 					requiredProps.add(desc[0]);
 				}
 				Map<String, String> value = new HashMap<>();
@@ -484,6 +493,11 @@ public class OpenAIProvider implements Genai {
 		toolBuilder.parameters(params);
 		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
 		toolMap.put(tool, function);
+	}
+
+	private boolean isRequiredParameter(String parameterFlag) {
+		// Sonar java:S1874: avoid deprecated StringUtils equality helpers.
+		return normalize(parameterFlag).equals("required");
 	}
 
 	/**

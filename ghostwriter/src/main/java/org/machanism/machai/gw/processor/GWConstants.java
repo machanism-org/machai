@@ -1,6 +1,9 @@
 package org.machanism.machai.gw.processor;
 
-public class GWConstants {
+public final class GWConstants {
+
+	private GWConstants() {
+	}
 
 	public static final String PROJECT_DIR_PROP_NAME = "project.dir";
 	public static final String GW_PROPERTIES_FILE_NAME = "gw.properties";

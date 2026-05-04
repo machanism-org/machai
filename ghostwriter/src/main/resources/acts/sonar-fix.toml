@@ -59,12 +59,12 @@ inputs = [
 
 ## Fetch and Triage
 ### 1. SonarQube API URL
-    - Determine the correct value for `COMPONENT_KEYS` based on the `Project Layout` parameters:
+    - If `COMPONENT_KEYS` is not defined use `COMPONENT_KEYS` based on the `Project Layout` parameters:
       - If `Relative Path from Root Directory` is not `.`, set `COMPONENT_KEYS` = `[Parent Directory Name]:[Project Identifier]`, otherwice: `COMPONENT_KEYS` = `[Project Identifier]`.
-    - Construct the `SONARQUBE_URL` as follows:  `${SONAR_HOST_URL}/api/issues/search?componentKeys=[Parent Directory Name]:[Project Identifier]&ps=20` and other required query parameters.
+    - Construct the `SONARQUBE_URL` as follows:  `${SONAR_HOST_URL}/api/issues/search?componentKeys=[COMPONENT_KEYS]&ps=20` and other required query parameters.
     - Use this URL to retrieve SonarQube issues for the relevant project component.
     - Connect to the SonarQube API using value as is without substitution for URL: `SONARQUBE_URL` value and header auth with `${SONAR_TOKEN}`.
-    - Use this SonarQube API URL to fetch all open `impactSoftwareQualities`: `SECURITY` and specified `impactSeverities`: `${SEVERITY}, findings for the specified [Project Identifier] project.
+    - Use this SonarQube API URL to fetch all open `impactSoftwareQualities`: `${QUALITIES}` and specified `impactSeverities`: `${SEVERITY}, findings for the specified [Project Identifier] project.
     - If the API returns an error (non-2xx), terminate with exit code `500`.
     - If the response contains zero issues, terminate the task with exitCode: `0` with the description message.
 
@@ -160,115 +160,6 @@ inputs = [
 
 ### 5. Save to the project context variable: `UPDATED_FILES_REPORT` the list of changed files.
 
-''',
-# Review the list of changed files from the UPDATED_FILES_REPORT project context variable. 
-# For each change, generate new, high-quality unit tests to cover any uncovered logic, 
-# aiming for maximum meaningful coverage. Do not modify existing passing tests or comments; 
-# only update or add tests as needed. Ensure all new tests follow project structure and style guidelines, 
-# avoid deep nesting, and validate that the project builds and all tests pass after your changes.
-'''
-# Task
-
-## 1. Show me the list of changed files from project context variable: `UPDATED_FILES_REPORT`.
-
-## 2. Review `UPDATED_FILES_REPORT` and create additional unit test.
-- **Review all source code changes** and generate new, high-quality unit tests to cover any uncovered logic.
-- **Do not modify existing tests** that are passing and correct; only fix or update tests that are failing, redundant, or incorrect.
-- **Aim for the highest possible coverage**:  
-  - Cover all core logic, edge cases, and error handling scenarios.
-  - Include tests for all public methods, important private logic (where feasible), and all branches and conditions.
-- **Do not edit or remove existing comments** in source code or unit tests.
-- **Do not remove any existing tests** unless they are clearly redundant or incorrect; prefer updating or supplementing them.
-- **Place all new test files** in the designated test directory, mirroring the package structure of the source files.
-- **Validate the project build and test suite** after changes. If any errors or test failures are detected, fix them.
-- **Refactor code only if absolutely necessary** to enable or improve test coverage, and document any such changes.
-- **Strive for 100% coverage** where practical, but prioritize meaningful tests that verify real behavior over superficial coverage.
-- When generating or refactoring code, **do not nest more than 3 levels** of control statements (`if`, `for`, `while`, `switch`, `try`, etc.).  
-    If deeper nesting is required, refactor the code by:
-    - Extracting inner logic into separate methods or functions.
-    - Using early returns or breaks to reduce nesting.
-    - Applying guard clauses to simplify control flow.
-- For lambda expressions:
-  - Each lambda must contain at most **one invocation** that may throw a runtime exception.
-  - If multiple such calls are needed, extract them into a separate method or handle exceptions within the lambda.
-  - Keep lambda bodies simple and focused.
-- **Do not generate lines longer than 120 characters.**  
-  Split long lines with proper line breaks and indentation.
-- Remove or refactor unused, redundant, or overly complex code.
-- For similar tests, use parameterized tests instead of duplicating test methods.
-- Maintain unique method purposes, clear naming, and thorough test coverage.
-- Do not suppress SonarQube warnings unless absolutely necessary and justified.
-- Follow consistent code style and formatting per industry standards and project guidelines.
-- Add concise comments for complex or non-obvious logic.
-- Validate that the code builds and all tests pass after changes.
-''',
-# Generate a unique Git branch name in the format ai-fix-sec-sonar-iss/<DD-MM-YY>-<GUID>, stage and commit grouped changes with clear messages, 
-# run all git and build commands automatically, and push the branch with a merge request. Terminate with an error if the build fails. 
-# Output all commands and commit messages in plain text.
-'''
-# Task
-
-## Generate a unique Git branch name
-
-The new branch name `FIX_ISSUES_BRANCH` should have the following format: `ai-fix-sec-sonar-iss/<DD-MM-YY>-<seqId>`
-   - `<DD-MM-YY>` should be replaced with the current day, month, and year (e.g., `28-04-26` for April 28, 2026).
-   - `<seqId>` should be a GUID (Globally Unique Identifier) value to ensure the branch name is unique, even if multiple branches are created on the same day.
-   **Example:** `ai-fix-sec-sonar-iss/28-04-26-34c6c439-5d62-4629-ba68-795d73dd6a65`
-
-## Commit Changes
-### 1. Analyze the Provided Changes:
-   - Carefully review the modifications in the project files. Identify the purpose, scope, and impact of the changes.  
-   - Group changes by type (e.g., feature, fix, refactor, docs, chore) and prepare separate actions for each group.
-
-### 2. Generate Commit Messages:
-   - For each group, write a concise, descriptive commit message that accurately summarizes the changes.
-   — Describe the essence of what exactly was changed.  
-   - Use bullet points to highlight multiple key modifications within a group.  
-   - Ensure messages follow best practices (imperative mood, present tense, clear and specific).
-
-### 3. Provide Git Commands:
-   - Output the exact git command(s) required to stage and commit each group of changes, using the generated commit messages.  
-   - Assume the user is in the project root directory and that all relevant files should be included.
-
-### 4. Execute System Commands:
-   - Use the `run_command_line_tool` to execute all system commands (including git commands) automatically as part of the process.
-   - Do not prompt the user for confirmation before running any commands; execute them directly as required.
-
-### 5. Formatting:
-   - Present each commit message and its corresponding git command(s) in clearly separated sections.  
-   - Use code blocks for commands.  
-   - Output should be plain text.
- 
-### 6. Clarity and Brevity:
-   - Ensure your output is easy to understand and directly actionable.  
-   - Avoid unnecessary explanations unless clarification is requested.
-
-## Build Verification
-
-### 1. Run the full build: 
-
-```
-mvn verify sonar:sonar -q \
-   -Dsonar.projectKey=[Project Identifier]\
-   -Dsonar.projectName=[Project Identifier]\
-   -Dsonar.branch.name=[FIX_ISSUES_BRANCH]\
-   -Dsonar.qualitygate.wait=true\
-   -Dsonar.qualitygate.timeout=10000\
-   -Dsonar.organization=[Project Identifier]
-```
-
-### 2. If build failed, terminate the task with `exitCode`: `1` and the problem description.
-
-## Push branch and open Merge Request
-Build a concise `MR_TITLE` from the rules and files fixed, then push the branch and create the MR in a single command using GitLab push options:
-```bash
-git push \
-  -o merge_request.create \
-  -o merge_request.target=main \
-  -o "merge_request.title=[MR_TITLE]" \
-  -o merge_request.remove_source_branch \
-  origin [FIX_ISSUES_BRANCH]
-```
 ''']
 
 gw.scanDir = "glob:."

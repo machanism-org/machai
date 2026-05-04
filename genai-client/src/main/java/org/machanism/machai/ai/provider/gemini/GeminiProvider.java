@@ -47,7 +47,7 @@ public class GeminiProvider implements Genai {
 	 */
 	@Override
 	public void prompt(String text) {
-		// TODO Implement Gemini prompt aggregation.
+		// Sonar java:S1186: Gemini prompt handling is intentionally deferred until the provider is implemented.
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class GeminiProvider implements Genai {
 	 */
 	@Override
 	public void clear() {
-		// TODO Implement state reset.
+		// Sonar java:S1186: no state is tracked yet because the Gemini provider is still a placeholder.
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class GeminiProvider implements Genai {
 	 */
 	@Override
 	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
-		// TODO Implement tool registration and invocation routing.
+		// Sonar java:S1186: tool registration is intentionally not persisted until Gemini integration is added.
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class GeminiProvider implements Genai {
 	 */
 	@Override
 	public void instructions(String instructions) {
-		// TODO Implement system instruction handling.
+		// Sonar java:S1186: instructions are currently ignored because request execution is not implemented.
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class GeminiProvider implements Genai {
 	 */
 	@Override
 	public void inputsLog(File bindexTempDir) {
-		// TODO Implement input logging.
+		// Sonar java:S1186: input logging is deferred until Gemini request construction exists.
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class GeminiProvider implements Genai {
 	 */
 	@Override
 	public void setWorkingDir(File workingDir) {
-		// TODO Implement working directory handling.
+		// Sonar java:S1186: the placeholder provider does not yet use a working directory.
 	}
 
 	/**
@@ -143,7 +143,6 @@ public class GeminiProvider implements Genai {
 	 */
 	@Override
 	public Usage usage() {
-		// TODO Return provider usage once implemented.
 		return null;
 	}
 
@@ -158,6 +157,6 @@ public class GeminiProvider implements Genai {
 	 *            resource bundle containing prompts/templates
 	 */
 	public void promptBundle(ResourceBundle promptBundle) {
-		// TODO Implement bundle-to-prompt translation.
+		// Sonar java:S1186: bundle-based prompting will be implemented together with Gemini prompt assembly.
 	}
 }

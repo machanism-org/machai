@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class ActFunctionTools implements FunctionTools {
 
 	/** Logger for shell tool execution and diagnostics. */
-	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
+	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);
 
 	private static final String TOML_EXTENSION = ".toml";
 
@@ -41,41 +41,48 @@ public class ActFunctionTools implements FunctionTools {
 	public void applyTools(Genai provider) {
 		provider.addTool(
 				"build_in_list_acts",
-				"Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable prompt templates stored as TOML files, "
-						+ "which define instructions and input templates for common workflows.",
+				"Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable "
+						+ "prompt templates stored as TOML files, which define instructions and input templates for "
+						+ "common workflows.",
 				this::getActList);
 
 		provider.addTool(
 				"load_act_details",
-				"Loads the details of a specific Act template, including its instructions, input template, and configuration options. Useful for inspecting or editing Act definitions.",
+				"Loads the details of a specific Act template, including its instructions, input template, and "
+						+ "configuration options. Useful for inspecting or editing Act definitions.",
 				this::getActDetails,
 				"actName:string:required:The name of the Act to load.",
-				"custom:boolean:optional:If true, retrieves the Act definition only from the user-defined (custom) acts directory. "
-						+ "If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts.");
+				"custom:boolean:optional:If true, retrieves the Act definition only from the user-defined (custom) "
+						+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
+						+ "effective user-defined acts.");
 
 		provider.addTool(
 				"put_project_context_variable",
-				"Sets or updates a variable in the project-specific context. Use this to store or update a named variable associated with a particular project, making it available for act execution or prompt templates. "
-						+ "It can be used to pass a variable to the next episode of an act.",
+				"Sets or updates a variable in the project-specific context. Use this to store or update a named "
+						+ "variable associated with a particular project, making it available for act execution or "
+						+ "prompt templates. It can be used to pass a variable to the next episode of an act.",
 				this::putProjectContextVariable,
 				"name:string:required:The name of the context variable.",
 				"value:string:required:The value to assign to the context variable.");
 
 		provider.addTool(
 				"get_project_context_variable",
-				"Retrieves the value of a variable from the project-specific context. Use this to access a named variable associated with a particular project for act execution or prompt templates.",
+				"Retrieves the value of a variable from the project-specific context. Use this to access a named "
+						+ "variable associated with a particular project for act execution or prompt templates.",
 				this::getProjectContextVariable,
 				"name:string:required:The name of the context variable to retrieve.");
 
 		provider.addTool(
 				"move_to_episode",
-				"Moves to the next episode, or to the episode specified by 'id' if provided. Use this to control episode navigation in the project context.",
+				"Moves to the next episode, or to the episode specified by 'id' if provided. Use this to control "
+						+ "episode navigation in the project context.",
 				this::moveToEpisode,
 				"id:string:optional:The ID of the episode to move to.");
 
 		provider.addTool(
 				"repeate_episode",
-				"Repeats the current episode. This function terminates the current execution and restarts the same episode, preserving the context.",
+				"Repeats the current episode. This function terminates the current execution and restarts the same "
+						+ "episode, preserving the context.",
 				this::repeateEpisode,
 				"message:string:optional:A custom response message to output before repeating the episode.");
 	}
@@ -109,22 +116,26 @@ public class ActFunctionTools implements FunctionTools {
 
 			File file = new File(jarFilePath);
 			try (ZipFile jarFile = new ZipFile(file)) {
-				jarFile.stream().forEach(entry -> {
-					String actName = StringUtils.substringBetween(entry.getName(), "acts/", TOML_EXTENSION);
-					Map<String, Object> properties = new HashMap<>();
-					if (actName != null) {
-						try {
-							ActProcessor.tryLoadActFromClasspath(properties, actName);
-							result.add("`" + actName + "`: " + Objects.toString(properties.get("description")));
-						} catch (IOException e) {
-							throw new IllegalArgumentException(e);
-						}
-					}
-				});
+				jarFile.stream().forEach(entry -> addActDescription(result, entry.getName()));
 			}
 		}
 
 		return result;
+	}
+
+	private void addActDescription(Set<String> result, String entryName) {
+		String actName = StringUtils.substringBetween(entryName, "acts/", TOML_EXTENSION);
+		if (actName == null) {
+			return;
+		}
+
+		Map<String, Object> properties = new HashMap<>();
+		try {
+			ActProcessor.tryLoadActFromClasspath(properties, actName);
+			result.add("`" + actName + "`: " + Objects.toString(properties.get("description")));
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	public Object getActDetails(JsonNode props, File workingDir) throws IOException {
@@ -172,7 +183,7 @@ public class ActFunctionTools implements FunctionTools {
 			String name = props.get("name").asText();
 			String value = props.get("value").asText();
 
-			Map<String, String> context = contextProjectMap.computeIfAbsent(workingDir, k -> new HashMap<>());
+			Map<String, String> context = contextProjectMap.computeIfAbsent(workingDir, key -> new HashMap<>());
 			context.put(name, value);
 
 			return "Context variable '" + name + "' set to '" + value + "' for project: " + workingDir;

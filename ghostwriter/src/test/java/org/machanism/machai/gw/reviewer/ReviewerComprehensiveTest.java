@@ -12,11 +12,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 
 class ReviewerComprehensiveTest {
@@ -31,32 +34,15 @@ class ReviewerComprehensiveTest {
         assertArrayEquals(new String[] { "html", "htm", "xml" }, result);
     }
 
-    @Test
-    void htmlReviewer_perform_returnsNullWhenGuidanceCommentIsMissing() throws IOException {
+    @ParameterizedTest
+    @MethodSource("htmlReviewerScenarios")
+    void htmlReviewer_perform_handlesGuidanceScenarios(String relativePath, String content, boolean expectPrompt)
+            throws IOException {
         HtmlReviewer reviewer = new HtmlReviewer();
         Path project = createProjectDirectory();
-        Path file = writeFile(project, "index.html", "<html><body>No guidance</body></html>\n");
+        Path file = writeFile(project, relativePath, content);
         String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void htmlReviewer_perform_returnsNullWhenGuidanceTagIsOutsideHtmlComment() throws IOException {
-        HtmlReviewer reviewer = new HtmlReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "page.xml", "<node>@guidance: ignore</node>\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void htmlReviewer_perform_formatsPromptWhenGuidanceCommentExists() throws IOException {
-        HtmlReviewer reviewer = new HtmlReviewer();
-        Path project = createProjectDirectory();
-        String content = "<!-- @guidance: include section -->\n<html><body>Hi</body></html>\n";
-        Path file = writeFile(project, "web/index.html", content);
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
+        assertPromptExpectation(expectPrompt, result);
     }
 
     @Test
@@ -78,43 +64,15 @@ class ReviewerComprehensiveTest {
         assertEquals(expected, result);
     }
 
-    @Test
-    void javaReviewer_perform_returnsNullWhenGuidanceTagIsMissing() throws IOException {
+    @ParameterizedTest
+    @MethodSource("javaGuidanceFiles")
+    void javaReviewer_perform_handlesGuidanceScenarios(String relativePath, String content, boolean expectPrompt)
+            throws IOException {
         JavaReviewer reviewer = new JavaReviewer();
         Path project = createProjectDirectory();
-        Path file = writeFile(project, "src/main/java/A.java", "public class A {}\n");
+        Path file = writeFile(project, relativePath, content);
         String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void javaReviewer_perform_returnsNullWhenGuidanceTagAppearsOnlyInStringLiteral() throws IOException {
-        JavaReviewer reviewer = new JavaReviewer();
-        Path project = createProjectDirectory();
-        String content = "public class A { String value = \"" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\"; }\n";
-        Path file = writeFile(project, "A.java", content);
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void javaReviewer_perform_formatsPromptForLineCommentGuidance() throws IOException {
-        JavaReviewer reviewer = new JavaReviewer();
-        Path project = createProjectDirectory();
-        String content = "// @guidance: keep this file\npublic class A {}\n";
-        Path file = writeFile(project, "src/main/java/A.java", content);
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
-    }
-
-    @Test
-    void javaReviewer_perform_formatsPromptForBlockCommentGuidance() throws IOException {
-        JavaReviewer reviewer = new JavaReviewer();
-        Path project = createProjectDirectory();
-        String content = "/* @guidance: keep this block */\npublic class A {}\n";
-        Path file = writeFile(project, "A.java", content);
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
+        assertPromptExpectation(expectPrompt, result);
     }
 
     @Test
@@ -143,33 +101,15 @@ class ReviewerComprehensiveTest {
         assertArrayEquals(new String[] { "md" }, result);
     }
 
-    @Test
-    void markdownReviewer_perform_returnsNullWhenGuidanceCommentIsMissing() throws IOException {
+    @ParameterizedTest
+    @MethodSource("markdownGuidanceFiles")
+    void markdownReviewer_perform_handlesGuidanceScenarios(String relativePath, String content, boolean expectPrompt)
+            throws IOException {
         MarkdownReviewer reviewer = new MarkdownReviewer();
         Path project = createProjectDirectory();
-        Path file = writeFile(project, "README.md", "# Title\n");
+        Path file = writeFile(project, relativePath, content);
         String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void markdownReviewer_perform_formatsPromptWhenGuidanceCommentExists() throws IOException {
-        MarkdownReviewer reviewer = new MarkdownReviewer();
-        Path project = createProjectDirectory();
-        String content = "<!-- @guidance: explain -->\n# Guide\n";
-        Path file = writeFile(project, "docs/guide.md", content);
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
-    }
-
-    @Test
-    void markdownReviewer_perform_formatsPromptWhenCommentRunsToEndOfFile() throws IOException {
-        MarkdownReviewer reviewer = new MarkdownReviewer();
-        Path project = createProjectDirectory();
-        String content = "<!-- @guidance: explain\n# Guide\n";
-        Path file = writeFile(project, "docs/open.md", content);
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
+        assertPromptExpectation(expectPrompt, result);
     }
 
     @Test
@@ -186,23 +126,15 @@ class ReviewerComprehensiveTest {
         assertThrows(NullPointerException.class, () -> reviewer.perform(null, file));
     }
 
-    @Test
-    void pumlReviewer_perform_returnsNullWhenGuidanceTagIsMissing() throws IOException {
+    @ParameterizedTest
+    @MethodSource("pumlGuidanceFiles")
+    void pumlReviewer_perform_handlesGuidanceScenarios(String relativePath, String content, boolean expectPrompt)
+            throws IOException {
         PumlReviewer reviewer = new PumlReviewer();
         Path project = createProjectDirectory();
-        Path file = writeFile(project, "diagram.puml", "@startuml\nAlice -> Bob\n@enduml\n");
+        Path file = writeFile(project, relativePath, content);
         String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void pumlReviewer_perform_formatsPromptWhenGuidanceTagExists() throws IOException {
-        PumlReviewer reviewer = new PumlReviewer();
-        Path project = createProjectDirectory();
-        String content = "' @guidance: include\n@startuml\nAlice -> Bob\n@enduml\n";
-        Path file = writeFile(project, "docs/diagram.puml", content);
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
+        assertPromptExpectation(expectPrompt, result);
     }
 
     @Test
@@ -212,49 +144,15 @@ class ReviewerComprehensiveTest {
         assertArrayEquals(new String[] { "py" }, result);
     }
 
-    @Test
-    void pythonReviewer_perform_returnsNullWhenGuidanceTagIsMissing() throws IOException {
+    @ParameterizedTest
+    @MethodSource("pythonGuidanceFiles")
+    void pythonReviewer_perform_handlesGuidanceScenarios(String relativePath, String content, boolean expectPrompt)
+            throws IOException {
         PythonReviewer reviewer = new PythonReviewer();
         Path project = createProjectDirectory();
-        Path file = writeFile(project, "a.py", "print('hi')\n");
+        Path file = writeFile(project, relativePath, content);
         String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void pythonReviewer_perform_returnsNullWhenGuidanceTagAppearsOnlyInRegularString() throws IOException {
-        PythonReviewer reviewer = new PythonReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "a.py", "x = '@guidance: not a comment'\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void pythonReviewer_perform_formatsPromptForLineCommentGuidance() throws IOException {
-        PythonReviewer reviewer = new PythonReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "src/a.py", "# @guidance: keep\nprint('hi')\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
-    }
-
-    @Test
-    void pythonReviewer_perform_formatsPromptForTripleQuotedGuidance() throws IOException {
-        PythonReviewer reviewer = new PythonReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "b.py", "\"\"\" @guidance: doc text \"\"\"\nprint('hi')\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
-    }
-
-    @Test
-    void pythonReviewer_perform_returnsNullWhenGuidanceTextIsEmpty() throws IOException {
-        PythonReviewer reviewer = new PythonReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "empty-guidance.py", "# @guidance\nprint('x')\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
+        assertPromptExpectation(expectPrompt, result);
     }
 
     @Test
@@ -264,22 +162,15 @@ class ReviewerComprehensiveTest {
         assertArrayEquals(new String[] { "txt" }, result);
     }
 
-    @Test
-    void textReviewer_perform_returnsNullWhenFileNameDoesNotMatchGuidanceFile() throws IOException {
+    @ParameterizedTest
+    @MethodSource("textReviewerScenarios")
+    void textReviewer_perform_handlesGuidanceScenarios(String relativePath, String content, boolean expectPrompt)
+            throws IOException {
         TextReviewer reviewer = new TextReviewer();
         Path project = createProjectDirectory();
-        Path file = writeFile(project, "notes.txt", "hello\n");
+        Path file = writeFile(project, relativePath, content);
         String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void textReviewer_perform_formatsPromptWhenGuidanceFileNameMatches() throws IOException {
-        TextReviewer reviewer = new TextReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "src/test/@guidance.txt", "Line1\nLine2");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
+        assertPromptExpectation(expectPrompt, result);
     }
 
     @Test
@@ -306,73 +197,15 @@ class ReviewerComprehensiveTest {
         assertArrayEquals(new String[] { "ts" }, result);
     }
 
-    @Test
-    void typeScriptReviewer_perform_returnsNullWhenGuidanceTagIsMissing() throws IOException {
+    @ParameterizedTest
+    @MethodSource("typeScriptGuidanceFiles")
+    void typeScriptReviewer_perform_handlesGuidanceScenarios(String relativePath, String content,
+            boolean expectPrompt) throws IOException {
         TypeScriptReviewer reviewer = new TypeScriptReviewer();
         Path project = createProjectDirectory();
-        Path file = writeFile(project, "a.ts", "const x = 1;\n");
+        Path file = writeFile(project, relativePath, content);
         String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void typeScriptReviewer_perform_returnsNullWhenGuidanceTagAppearsOnlyInStringLiteral() throws IOException {
-        TypeScriptReviewer reviewer = new TypeScriptReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "d.ts", "const tag = \"@guidance: not-a-comment\";\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void typeScriptReviewer_perform_formatsPromptForLineCommentGuidance() throws IOException {
-        TypeScriptReviewer reviewer = new TypeScriptReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "src/a.ts", "// @guidance: keep\nconst x = 1;\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
-    }
-
-    @Test
-    void typeScriptReviewer_perform_formatsPromptForBlockCommentGuidance() throws IOException {
-        TypeScriptReviewer reviewer = new TypeScriptReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "b.ts", "/* @guidance: keep block */\nconst x = 1;\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
-    }
-
-    @Test
-    void typeScriptReviewer_perform_formatsPromptUsingFirstMatchingGuidanceWhenMultipleExist() throws IOException {
-        TypeScriptReviewer reviewer = new TypeScriptReviewer();
-        Path project = createProjectDirectory();
-        String content = String.join("\n",
-                "// @guidance: first",
-                "const x = 1;",
-                "// @guidance: second",
-                "const y = 2;",
-                "");
-        Path file = writeFile(project, "c.ts", content);
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNotNull(result);
-    }
-
-    @Test
-    void typeScriptReviewer_perform_returnsNullWhenBlockCommentIsNotClosed() throws IOException {
-        TypeScriptReviewer reviewer = new TypeScriptReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "e.ts", "/* @guidance: keep\nconst x = 1;\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
-    }
-
-    @Test
-    void typeScriptReviewer_perform_returnsNullWhenGuidanceTextIsEmpty() throws IOException {
-        TypeScriptReviewer reviewer = new TypeScriptReviewer();
-        Path project = createProjectDirectory();
-        Path file = writeFile(project, "empty-guidance.ts", "// @guidance\nconst x = 1;\n");
-        String result = reviewer.perform(project.toFile(), file.toFile());
-        assertNull(result);
+        assertPromptExpectation(expectPrompt, result);
     }
 
     @Test
@@ -402,6 +235,77 @@ class ReviewerComprehensiveTest {
         String[] extensions = reviewer.getSupportedFileExtensions();
         assertEquals("project:sample.txt", result);
         assertArrayEquals(new String[] { "a", "b" }, extensions);
+    }
+
+    private void assertPromptExpectation(boolean expectPrompt, String result) {
+        if (expectPrompt) {
+            assertNotNull(result);
+            return;
+        }
+        assertNull(result);
+    }
+
+    private static Stream<Arguments> htmlReviewerScenarios() {
+        return Stream.of(
+                Arguments.of("index.html", "<html><body>No guidance</body></html>\n", false),
+                Arguments.of("page.xml", "<node>@guidance: ignore</node>\n", false),
+                Arguments.of("web/index.html",
+                        "<!-- @guidance: include section -->\n<html><body>Hi</body></html>\n", true));
+    }
+
+    private static Stream<Arguments> javaGuidanceFiles() {
+        return Stream.of(
+                Arguments.of("src/main/java/A.java", "public class A {}\n", false),
+                Arguments.of("A.java",
+                        "public class A { String value = \"" + GuidanceProcessor.GUIDANCE_TAG_NAME + "\"; }\n",
+                        false),
+                Arguments.of("src/main/java/B.java", "// @guidance: keep this file\npublic class B {}\n", true),
+                Arguments.of("B.java", "/* @guidance: keep this block */\npublic class B {}\n", true));
+    }
+
+    private static Stream<Arguments> markdownGuidanceFiles() {
+        return Stream.of(
+                Arguments.of("README.md", "# Title\n", false),
+                Arguments.of("docs/guide.md", "<!-- @guidance: explain -->\n# Guide\n", true),
+                Arguments.of("docs/open.md", "<!-- @guidance: explain\n# Guide\n", true));
+    }
+
+    private static Stream<Arguments> pumlGuidanceFiles() {
+        return Stream.of(
+                Arguments.of("diagram.puml", "@startuml\nAlice -> Bob\n@enduml\n", false),
+                Arguments.of("docs/diagram.puml", "' @guidance: include\n@startuml\nAlice -> Bob\n@enduml\n", true));
+    }
+
+    private static Stream<Arguments> pythonGuidanceFiles() {
+        return Stream.of(
+                Arguments.of("a.py", "print('hi')\n", false),
+                Arguments.of("a.py", "x = '@guidance: not a comment'\n", false),
+                Arguments.of("empty-guidance.py", "# @guidance\nprint('x')\n", false),
+                Arguments.of("src/a.py", "# @guidance: keep\nprint('hi')\n", true),
+                Arguments.of("b.py", "\"\"\" @guidance: doc text \"\"\"\nprint('hi')\n", true));
+    }
+
+    private static Stream<Arguments> textReviewerScenarios() {
+        return Stream.of(
+                Arguments.of("notes.txt", "hello\n", false),
+                Arguments.of("src/test/@guidance.txt", "Line1\nLine2", true));
+    }
+
+    private static Stream<Arguments> typeScriptGuidanceFiles() {
+        String multipleGuidanceContent = String.join("\n",
+                "// @guidance: first",
+                "const x = 1;",
+                "// @guidance: second",
+                "const y = 2;",
+                "");
+        return Stream.of(
+                Arguments.of("a.ts", "const x = 1;\n", false),
+                Arguments.of("d.ts", "const tag = \"@guidance: not-a-comment\";\n", false),
+                Arguments.of("empty-guidance.ts", "// @guidance\nconst x = 1;\n", false),
+                Arguments.of("src/a.ts", "// @guidance: keep\nconst x = 1;\n", true),
+                Arguments.of("b.ts", "/* @guidance: keep block */\nconst x = 1;\n", true),
+                Arguments.of("c.ts", multipleGuidanceContent, true),
+                Arguments.of("e.ts", "/* @guidance: keep\nconst x = 1;\n", false));
     }
 
     private Path createProjectDirectory() throws IOException {

@@ -62,20 +62,24 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		this.model = genai;
 	}
 
-	public String process(ProjectLayout projectLayout, File file, String instructions, String prompt) {
+	public String process(ProjectLayout projectLayout, File file, String prompt) {
+		return process(projectLayout, file, getInstructions(), prompt);
+	}
+
+	protected String process(ProjectLayout projectLayout, File file, String instructions, String prompt) {
 		logger.info("Processing path: `{}`", file);
 		String perform = null;
 		if (StringUtils.isNoneBlank(prompt)) {
 			try {
 				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
 				FunctionToolsLoader.getInstance().applyTools(provider);
-				toolFunctions.stream().forEach(ft -> ft.applyTools(provider));
+				toolFunctions.forEach(ft -> ft.applyTools(provider));
 
 				File projectDir = projectLayout.getProjectDir();
 				provider.setWorkingDir(projectDir);
 
 				String sysInstructions = promptBundle.getString("sys_instructions");
-				String finalInstructions = String.format(sysInstructions, getInstructions());
+				String finalInstructions = String.format(sysInstructions, instructions);
 
 				provider.instructions(finalInstructions);
 
@@ -347,7 +351,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	@Override
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
-			String perform = process(projectLayout, projectLayout.getProjectDir(), instructions, getDefaultPrompt());
+			String perform = process(projectLayout, projectLayout.getProjectDir(), getDefaultPrompt());
 			if (perform != null) {
 				logger.info(">>> {}", perform);
 			}

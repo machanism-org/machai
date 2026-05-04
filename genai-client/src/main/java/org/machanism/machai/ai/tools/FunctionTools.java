@@ -15,7 +15,7 @@ import org.machanism.machai.ai.provider.Genai;
  * <p>
  * Implementations contribute one or more named tools via
  * {@link Genai#addTool(String, String, org.machanism.machai.ai.provider.Genai.ToolFunction, String...)}. Tools are
- * typically discovered via {@link java.util.ServiceLoader} and applied at runtime by {@link FunctionToolsLoader}.
+ * typically discovered via {@link java.util.ServiceLoader} and applied at runtime.
  * </p>
  *
  * <p>

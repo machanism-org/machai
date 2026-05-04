@@ -11,7 +11,6 @@ import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
@@ -95,8 +94,7 @@ class OpenAIProviderNetworklessTest {
     @Test
     void embedding_shouldReturnNullWhenTextNull() {
         provider.init(minimalConfig());
-        List<Double> embedding = provider.embedding(null, 10);
-        assertNull(embedding);
+        assertNull(provider.embedding(null, 10));
     }
 
     private Configurator minimalConfig() {
@@ -106,14 +104,14 @@ class OpenAIProviderNetworklessTest {
         return config;
     }
 
-    static Object fakeModelService(List<String> modelIds) {
+    static Object fakeModelService() {
         try {
             Class<?> modelServiceType = Class.forName("com.openai.services.blocking.ModelService");
             return Proxy.newProxyInstance(OpenAIProviderNetworklessTest.class.getClassLoader(),
                     new Class<?>[] { modelServiceType },
                     (proxy, method, args) -> {
                         if ("list".equals(method.getName())) {
-                            return fakeModelListPage(modelIds);
+                            return fakeModelListPage();
                         }
                         return defaultValue(method.getReturnType());
                     });
@@ -122,7 +120,7 @@ class OpenAIProviderNetworklessTest {
         }
     }
 
-    private static Object fakeModelListPage(List<String> modelIds) {
+    private static Object fakeModelListPage() {
         try {
             Class<?> pageType = Class.forName("com.openai.core.Page");
             return Proxy.newProxyInstance(OpenAIProviderNetworklessTest.class.getClassLoader(),
@@ -170,7 +168,7 @@ class OpenAIProviderNetworklessTest {
                 @Override
                 public Object invoke(Object proxy, Method method, Object[] args) {
                     if ("models".equals(method.getName())) {
-                        return fakeModelService(Collections.singletonList("m1"));
+                        return fakeModelService();
                     }
                     if ("responses".equals(method.getName()) || "embeddings".equals(method.getName())
                             || "files".equals(method.getName())) {

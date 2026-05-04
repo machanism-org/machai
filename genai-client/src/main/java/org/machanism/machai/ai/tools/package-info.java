@@ -48,22 +48,6 @@
  * </p>
  *
  * <p>
- * Typical usage starts by obtaining the singleton
- * {@link org.machanism.machai.ai.tools.FunctionToolsLoader}, optionally providing a
- * {@link org.machanism.macha.core.commons.configurator.Configurator} for runtime configuration, and
- * then applying all discovered tools to a provider instance.
- * </p>
- *
- * <ul>
- * <li>{@link org.machanism.machai.ai.tools.FunctionTools} defines how a tool contributor registers
- * one or more tools with a provider and optionally consumes configuration.</li>
- * <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} discovers available contributors and
- * installs them into the provider at startup.</li>
- * <li>{@link org.machanism.machai.ai.tools.ToolFunction} models the executable unit invoked when a
- * registered tool is called.</li>
- * </ul>
- *
- * <p>
  * Configuration-aware implementations may resolve externalized values, including placeholders such
  * as ${...}, by delegating to a
  * {@link org.machanism.macha.core.commons.configurator.Configurator} before registering or invoking
