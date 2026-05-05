@@ -370,7 +370,11 @@ public class WebFunctionTools implements FunctionTools {
 			response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
 					.append(Genai.LINE_SEPARATOR);
 
-			return parseResult(requestId, charsetName, connection, responseCode, response);
+			String result = parseResult(requestId, charsetName, connection, responseCode, response);
+			if (logger.isInfoEnabled()) {
+				logger.info("[REST {}] Response: {}", requestId, StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
+			}
+			return result;
 
 		} catch (Exception e) {
 			logger.error("[REST {}] IO error during REST call: {}", requestId, e.getMessage(), e);

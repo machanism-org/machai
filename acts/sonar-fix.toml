@@ -8,7 +8,7 @@ inputs = ['''
 - Ensure all fixes are applied to the correct source files and are properly tested.
 - This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
 - Determine the correct value for [COMPONENT_KEYS] based on the `Project Layout` parameters:
-  - If [Child Projects]: `not defined`: set `COMPONENT_KEYS` to `org.machanism.machai:[Project Identifier]` else set `COMPONENT_KEYS` to `[Project Identifier]`.
+  - If [Modules]: `<NOT_DEFINED_VALUE>`: set `COMPONENT_KEYS` to `org.machanism.machai:[Project Identifier]` else set `COMPONENT_KEYS` to `[Project Identifier]`.
 
 %s
 
@@ -18,12 +18,13 @@ inputs = ['''
 '''
 ]
 
-gw.scanDir = "glob:."
+[gw]
+scanDir = "glob:."
 
-QUALITIES = "SECURITY,MAINTAINABILITY,RELIABILITY"
-SEVERITY = "LOW,MEDIUM,HIGH,BLOCKER"
-
-sonar.host = "http://192.168.0.177:9000"
-sonar.token = "squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
+[sonar]
+qualities = "SECURITY,MAINTAINABILITY,RELIABILITY"
+severity = "LOW,MEDIUM,HIGH,BLOCKER"
+host = "http://192.168.0.177:9000"
+token = "squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
 
 
