@@ -53,6 +53,7 @@ import com.openai.models.responses.ResponseInputItem.Message.Role;
 import com.openai.models.responses.ResponseOutputItem;
 import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputMessage.Content;
+import com.openai.models.responses.ResponseOutputText;
 import com.openai.models.responses.ResponseReasoningItem;
 import com.openai.models.responses.ResponseUsage;
 import com.openai.models.responses.Tool;
@@ -302,9 +303,18 @@ public class OpenAIProvider implements Genai {
 		ResponseOutputMessage outMessage = item.asMessage();
 		for (Content content : outMessage.content()) {
 			Optional<com.openai.models.responses.ResponseOutputText> maybeOutputText = content.outputText();
-			String candidate = maybeOutputText.map(com.openai.models.responses.ResponseOutputText::text).orElse(null);
-			if (StringUtils.isNotBlank(candidate)) {
-				return candidate;
+			if (maybeOutputText.isPresent()) {
+				ResponseOutputText responseOutputText = maybeOutputText.get();
+				if (responseOutputText != null) {
+					try {
+						String candidate = responseOutputText.text();
+						if (StringUtils.isNotBlank(candidate)) {
+							return candidate;
+						}
+					} catch (Exception e) {
+						return null;
+					}
+				}
 			}
 		}
 		return null;

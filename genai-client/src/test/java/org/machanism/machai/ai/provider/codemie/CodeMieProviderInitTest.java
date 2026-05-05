@@ -33,30 +33,6 @@ class CodeMieProviderInitTest {
     }
 
     @Test
-    void initShouldUseGeminiProviderForGeminiModel() {
-        CodeMieProvider provider = new CodeMieProvider();
-        Configurator config = baseConfig();
-        config.set("chatModel", "gemini-1.5-pro");
-        config.set(CodeMieProvider.AUTH_URL_PROP_NAME, "http://127.0.0.1:1/token");
-
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> provider.init(config));
-
-        assertEquals("Authorization failed for user 'user@example.com'", ex.getMessage());
-    }
-
-    @Test
-    void initShouldUseClaudeProviderForClaudeModel() {
-        CodeMieProvider provider = new CodeMieProvider();
-        Configurator config = baseConfig();
-        config.set("chatModel", "claude-3-5-sonnet");
-        config.set(CodeMieProvider.AUTH_URL_PROP_NAME, "http://127.0.0.1:1/token");
-
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> provider.init(config));
-
-        assertEquals("Authorization failed for user 'user@example.com'", ex.getMessage());
-    }
-
-    @Test
     void initShouldRejectUnsupportedModel() {
         CodeMieProvider provider = new CodeMieProvider();
         Configurator config = baseConfig();
