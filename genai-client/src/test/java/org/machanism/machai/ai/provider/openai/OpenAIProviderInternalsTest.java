@@ -73,8 +73,8 @@ class OpenAIProviderInternalsTest {
         setPrivateField(provider, "maxOutputTokens", Long.valueOf(123L));
 
         @SuppressWarnings("unchecked")
-        List<com.openai.models.responses.ResponseInputItem> inputs = (List<com.openai.models.responses.ResponseInputItem>) getPrivateField(
-                provider, "inputs");
+        List<com.openai.models.responses.ResponseInputItem> inputs =
+                (List<com.openai.models.responses.ResponseInputItem>) getPrivateField(provider, "inputs");
 
         ResponseCreateParams params = (ResponseCreateParams) invoke(provider, "createResponseBuilder",
                 new Class<?>[] { List.class }, inputs);
@@ -94,8 +94,8 @@ class OpenAIProviderInternalsTest {
         setPrivateField(provider, "maxToolCalls", Long.valueOf(0L));
 
         @SuppressWarnings("unchecked")
-        List<com.openai.models.responses.ResponseInputItem> inputs = (List<com.openai.models.responses.ResponseInputItem>) getPrivateField(
-                provider, "inputs");
+        List<com.openai.models.responses.ResponseInputItem> inputs =
+                (List<com.openai.models.responses.ResponseInputItem>) getPrivateField(provider, "inputs");
 
         ResponseCreateParams params = (ResponseCreateParams) invoke(provider, "createResponseBuilder",
                 new Class<?>[] { List.class }, inputs);
@@ -161,8 +161,8 @@ class OpenAIProviderInternalsTest {
         }, "value:string:required:text");
 
         @SuppressWarnings("unchecked")
-        java.util.Map<com.openai.models.responses.Tool, ToolFunction> toolMap = (java.util.Map<com.openai.models.responses.Tool, ToolFunction>) getPrivateField(
-                provider, "toolMap");
+        java.util.Map<com.openai.models.responses.Tool, ToolFunction> toolMap =
+                (java.util.Map<com.openai.models.responses.Tool, ToolFunction>) getPrivateField(provider, "toolMap");
         com.openai.models.responses.Tool tool = toolMap.keySet().iterator().next();
 
         Object result = invoke(provider, "hasSameToolName",
@@ -190,8 +190,8 @@ class OpenAIProviderInternalsTest {
         }, "name:string:required:person name", "age:number:optional:person age");
 
         @SuppressWarnings("unchecked")
-        java.util.Map<com.openai.models.responses.Tool, ToolFunction> toolMap = (java.util.Map<com.openai.models.responses.Tool, ToolFunction>) getPrivateField(
-                provider, "toolMap");
+        java.util.Map<com.openai.models.responses.Tool, ToolFunction> toolMap =
+                (java.util.Map<com.openai.models.responses.Tool, ToolFunction>) getPrivateField(provider, "toolMap");
         assertEquals(1, toolMap.size());
         com.openai.models.responses.Tool tool = toolMap.keySet().iterator().next();
         com.openai.models.responses.FunctionTool functionTool = tool.asFunction();
@@ -213,8 +213,8 @@ class OpenAIProviderInternalsTest {
         }, (String[]) null);
 
         @SuppressWarnings("unchecked")
-        java.util.Map<com.openai.models.responses.Tool, ToolFunction> toolMap = (java.util.Map<com.openai.models.responses.Tool, ToolFunction>) getPrivateField(
-                provider, "toolMap");
+        java.util.Map<com.openai.models.responses.Tool, ToolFunction> toolMap =
+                (java.util.Map<com.openai.models.responses.Tool, ToolFunction>) getPrivateField(provider, "toolMap");
         assertEquals(1, toolMap.size());
     }
 
@@ -222,12 +222,19 @@ class OpenAIProviderInternalsTest {
     void addToolShouldFailWhenDescriptorDoesNotContainEnoughParts() {
         OpenAIProvider provider = initializedProvider();
 
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> provider.addTool("Echo", "desc", new ToolFunction() {
+        ToolFunction toolFunction = new ToolFunction() {
             @Override
             public Object apply(JsonNode params, File workingDir) {
                 return null;
             }
-        }, "broken"));
+        };
+
+        assertThrows(ArrayIndexOutOfBoundsException.class,
+                () -> addBrokenTool(provider, toolFunction));
+    }
+
+    private static void addBrokenTool(OpenAIProvider provider, ToolFunction toolFunction) {
+        provider.addTool("Echo", "desc", toolFunction, "broken");
     }
 
     private static OpenAIProvider initializedProvider() {
