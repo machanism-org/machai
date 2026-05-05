@@ -26,7 +26,7 @@
 		<maven.javadoc.skip>true</maven.javadoc.skip>
 		<gw.acts>
 			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</gw.acts>
-		<gw.model>CodeMie:gpt-5.4-2026-03-05</gw.model>
+		<gw.model>CodeMie:gpt-5.5-2026-04-24</gw.model>
 		<bindex.model>${gw.model}</bindex.model>
 		<genai.serverId>CodeMie</genai.serverId>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
