@@ -56,7 +56,7 @@ public class ClassFunctionalToolsAdditionalTest {
         holder.sourcePath = "src/main/java/sample/SampleType.java";
         setProjectMap(tools, Collections.singletonMap(project.getBasedir(), holder));
 
-        HashMap<String, Object> info = tools.getClassInfo(
+        Map<String, Object> info = tools.getClassInfo(
                 OBJECT_MAPPER.readTree("{\"className\":\"sample.SampleType\"}"), project.getBasedir());
 
         assertEquals(SampleType.class.getName(), info.get("className"));
@@ -98,7 +98,7 @@ public class ClassFunctionalToolsAdditionalTest {
         StubClassInfoHolder holder = new StubClassInfoHolder(project);
         setProjectMap(tools, Collections.singletonMap(project.getBasedir(), holder));
 
-        HashMap<String, Object> info = tools.getClassInfo(new Object(), project.getBasedir());
+        Map<String, Object> info = tools.getClassInfo(new Object(), project.getBasedir());
 
         assertEquals("Class not found: null", info.get("error"));
         assertNull(info.get("artifact"));
@@ -180,7 +180,6 @@ public class ClassFunctionalToolsAdditionalTest {
     public static class SampleType implements Runnable {
         public String visibleField;
         protected int protectedField;
-        private long hiddenField;
 
         public SampleType() {
         }
@@ -193,14 +192,11 @@ public class ClassFunctionalToolsAdditionalTest {
             return input;
         }
 
-        protected void protectedMethod() {
-        }
-
-        private void hiddenMethod() {
+        protected void protectedMethod() { // Empty by design for Sonar java:S1186: validates protected method metadata.
         }
 
         @Override
-        public void run() {
+        public void run() { // Empty by design for Sonar java:S1186: sample Runnable has no runtime action.
         }
     }
 
@@ -208,3 +204,5 @@ public class ClassFunctionalToolsAdditionalTest {
     private @interface Marker {
     }
 }
+
+

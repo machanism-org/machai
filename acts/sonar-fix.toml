@@ -6,7 +6,8 @@ inputs = ['''
 — Run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=${sonar.host}`.
 - Use `tailResultSize`: 1024 for the command execution result.
 - Ensure all fixes are applied to the correct source files and are properly tested.
-- Report the result of the task execution, terminate the process with exit code: 1 in case of an error.
+- If build failed, report the result of the task execution and terminate the process with exit code: 1 in case of an error.
+
 - This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
 - Determine the correct value for [COMPONENT_KEYS] based on the `Project Layout` parameters:
   - If [Modules]: `<NOT_DEFINED_VALUE>`: set `COMPONENT_KEYS` to `org.machanism.machai:[Project Identifier]` else set `COMPONENT_KEYS` to `[Project Identifier]`.

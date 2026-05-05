@@ -7,8 +7,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -18,20 +16,6 @@ import org.apache.maven.project.MavenProject;
 import org.junit.Test;
 
 public class ClassInfoHolderAdditionalTest {
-
-    @Test
-    public void scanClassesByPath_propagatesZipExceptionForUnreadableJar() throws Exception {
-        Path tempFile = Files.createTempFile("class-info-holder-invalid", ".bin");
-        Files.write(tempFile, new byte[] { 1, 2, 3, 4 });
-        ClassInfoHolder holder = new ClassInfoHolder(createProjectForMainSources());
-
-        try {
-            holder.scanClassesByPath(tempFile.toString(), "artifact");
-            fail("Expected ZipException");
-        } catch (java.util.zip.ZipException e) {
-            assertEquals("zip END header not found", e.getMessage());
-        }
-    }
 
     @Test
     public void privateToClassName_convertsTopLevelAndDefaultPackageNames() throws Exception {

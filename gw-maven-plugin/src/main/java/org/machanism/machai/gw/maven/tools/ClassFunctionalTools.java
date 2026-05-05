@@ -165,7 +165,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *         {@code error} property when the class or project context cannot be
 	 *         resolved
 	 */
-	public HashMap<String, Object> getClassInfo(Object... params) {
+	public Map<String, Object> getClassInfo(Object... params) {
 		HashMap<String, Object> info = new HashMap<>();
 
 		File workingDir = (File) params[1];
@@ -204,7 +204,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void populateClassInfo(HashMap<String, Object> info, ClassInfoHolder classInfoHolder, String className,
+	private void populateClassInfo(Map<String, Object> info, ClassInfoHolder classInfoHolder, String className,
 			Class<?> clazz) {
 		info.put(CLASS_NAME_PROPERTY, clazz.getName());
 		info.put(MODIFIERS_PROPERTY, Modifier.toString(clazz.getModifiers()));
@@ -217,20 +217,20 @@ public class ClassFunctionalTools implements FunctionTools {
 		addLocationMetadata(info, classInfoHolder, className);
 	}
 
-	private void addSuperclass(HashMap<String, Object> info, Class<?> clazz) {
+	private void addSuperclass(Map<String, Object> info, Class<?> clazz) {
 		if (clazz.getSuperclass() != null) {
 			info.put("superclass", clazz.getSuperclass().getName());
 		}
 	}
 
-	private void addInterfaces(HashMap<String, Object> info, Class<?> clazz) {
+	private void addInterfaces(Map<String, Object> info, Class<?> clazz) {
 		List<String> interfacesList = Arrays.stream(clazz.getInterfaces())
 				.map(Class::getName)
 				.collect(Collectors.toList());
 		info.put("interfaces", interfacesList);
 	}
 
-	private void addFields(HashMap<String, Object> info, Class<?> clazz) {
+	private void addFields(Map<String, Object> info, Class<?> clazz) {
 		List<Map<String, Object>> fieldsList = new ArrayList<>();
 		forEachNonPrivate(clazz.getDeclaredFields(), field -> {
 			Map<String, Object> fieldObj = new HashMap<>();
@@ -242,7 +242,7 @@ public class ClassFunctionalTools implements FunctionTools {
 		info.put("fields", fieldsList);
 	}
 
-	private void addConstructors(HashMap<String, Object> info, Class<?> clazz) {
+	private void addConstructors(Map<String, Object> info, Class<?> clazz) {
 		List<Map<String, Object>> constructorsList = new ArrayList<>();
 		for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
 			Map<String, Object> ctorObj = new HashMap<>();
@@ -254,7 +254,7 @@ public class ClassFunctionalTools implements FunctionTools {
 		info.put("constructors", constructorsList);
 	}
 
-	private void addMethods(HashMap<String, Object> info, Class<?> clazz) {
+	private void addMethods(Map<String, Object> info, Class<?> clazz) {
 		List<Map<String, Object>> methodsList = new ArrayList<>();
 		forEachNonPrivate(clazz.getDeclaredMethods(), method -> {
 			Map<String, Object> methodObj = new HashMap<>();
@@ -267,14 +267,14 @@ public class ClassFunctionalTools implements FunctionTools {
 		info.put("methods", methodsList);
 	}
 
-	private void addAnnotations(HashMap<String, Object> info, Class<?> clazz) {
+	private void addAnnotations(Map<String, Object> info, Class<?> clazz) {
 		List<String> annotationsList = Arrays.stream(clazz.getDeclaredAnnotations())
 				.map(Annotation::toString)
 				.collect(Collectors.toList());
 		info.put("annotations", annotationsList);
 	}
 
-	private void addLocationMetadata(HashMap<String, Object> info, ClassInfoHolder classInfoHolder, String className) {
+	private void addLocationMetadata(Map<String, Object> info, ClassInfoHolder classInfoHolder, String className) {
 		String path = classInfoHolder.getClassPath(className);
 		info.put("path", path);
 
@@ -304,3 +304,4 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 }
+

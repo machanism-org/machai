@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 public class ClassFunctionalToolsTest {
 
 	@Test
-	public void scanProjectClassesAndFindClass_returnMatchingClassNames() throws Exception {
+	public void scanProjectClassesAndFindClass_returnMatchingClassNames() {
 		MavenProject project = createProjectForMainSources();
 		ClassFunctionalTools tools = new ClassFunctionalTools();
 
@@ -34,7 +34,7 @@ public class ClassFunctionalToolsTest {
 	}
 
 	@Test
-	public void findClass_returnsNotFoundWhenNoClassesMatch() throws Exception {
+	public void findClass_returnsNotFoundWhenNoClassesMatch() {
 		MavenProject project = createProjectForMainSources();
 		ClassFunctionalTools tools = new ClassFunctionalTools(project);
 
@@ -46,7 +46,7 @@ public class ClassFunctionalToolsTest {
 	}
 
 	@Test
-	public void findClass_returnsUnsupportedMessageForUnknownProject() throws Exception {
+	public void findClass_returnsUnsupportedMessageForUnknownProject() {
 		ClassFunctionalTools tools = new ClassFunctionalTools();
 
 		HashMap<String, Object> props = new HashMap<>();
@@ -57,13 +57,13 @@ public class ClassFunctionalToolsTest {
 	}
 
 	@Test
-	public void getClassInfo_returnsDetailedMetadataForProjectClass() throws Exception {
+	public void getClassInfo_returnsDetailedMetadataForProjectClass() {
 		MavenProject project = createProjectForMainSources();
 		ClassFunctionalTools tools = new ClassFunctionalTools(project);
 
 		HashMap<String, Object> props = new HashMap<>();
 		props.put("className", "org.machanism.machai.gw.maven.tools.ClassInfoHolder");
-		HashMap<String, Object> info = tools.getClassInfo(props, project.getBasedir());
+		Map<String, Object> info = tools.getClassInfo(props, project.getBasedir());
 
 		assertEquals("org.machanism.machai.gw.maven.tools.ClassInfoHolder", info.get("className"));
 		assertTrue(((String) info.get("modifiers")).contains("public"));
@@ -85,24 +85,24 @@ public class ClassFunctionalToolsTest {
 	}
 
 	@Test
-	public void getClassInfo_returnsClassNotFoundErrorWhenTypeIsMissing() throws Exception {
+	public void getClassInfo_returnsClassNotFoundErrorWhenTypeIsMissing() {
 		MavenProject project = createProjectForMainSources();
 		ClassFunctionalTools tools = new ClassFunctionalTools(project);
 
 		HashMap<String, Object> props = new HashMap<>();
 		props.put("className", "missing.Type");
-		HashMap<String, Object> info = tools.getClassInfo(props, project.getBasedir());
+		Map<String, Object> info = tools.getClassInfo(props, project.getBasedir());
 
 		assertEquals("Class not found: missing.Type", info.get("error"));
 	}
 
 	@Test
-	public void getClassInfo_returnsUnsupportedErrorForUnknownProject() throws Exception {
+	public void getClassInfo_returnsUnsupportedErrorForUnknownProject() {
 		ClassFunctionalTools tools = new ClassFunctionalTools();
 
 		HashMap<String, Object> props = new HashMap<>();
 		props.put("className", "missing.Type");
-		HashMap<String, Object> info = tools.getClassInfo(props, new File("missing-project"));
+		Map<String, Object> info = tools.getClassInfo(props, new File("missing-project"));
 
 		assertEquals("The function tool don't support this function tool.", info.get("error"));
 	}
@@ -122,7 +122,7 @@ public class ClassFunctionalToolsTest {
 	}
 
 	@Test
-	public void scanProjectClasses_registersProjectByBasedir() throws Exception {
+	public void scanProjectClasses_registersProjectByBasedir() throws ReflectiveOperationException {
 		MavenProject project = createProjectForMainSources();
 		ClassFunctionalTools tools = new ClassFunctionalTools();
 
@@ -155,3 +155,4 @@ public class ClassFunctionalToolsTest {
 		return project;
 	}
 }
+

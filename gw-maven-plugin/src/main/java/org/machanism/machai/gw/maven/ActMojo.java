@@ -77,6 +77,7 @@ public class ActMojo extends AbstractGWMojo {
 	/**
 	 * Interactive prompt provider used to collect action input.
 	 */
+	@SuppressWarnings("deprecation")
 	@Component
 	protected Prompter prompter;
 

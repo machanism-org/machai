@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
-import org.machanism.machai.gw.processor.Ghostwriter;
 
 public class ActConfigureAndScanTest {
 
