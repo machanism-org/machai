@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -52,12 +53,17 @@ class ActFunctionToolsAdditionalTest {
 
         ObjectNode repeatProps = MAPPER.createObjectNode();
         repeatProps.put("message", "again");
+        File projectDir = tempDir.toFile();
 
         MoveToEpisodeException moveException = assertThrows(MoveToEpisodeException.class,
-                () -> tools.moveToEpisode(moveProps, tempDir.toFile()));
-        assertThrows(RepeatEpisodeException.class, () -> tools.repeateEpisode(repeatProps, tempDir.toFile()));
+                () -> tools.moveToEpisode(moveProps, projectDir));
+        assertThrows(RepeatEpisodeException.class, () -> repeatEpisode(tools, repeatProps, projectDir));
 
         assertEquals("ep-2", moveException.getEpisodeId());
+    }
+
+    private static void repeatEpisode(ActFunctionTools tools, ObjectNode repeatProps, File projectDir) {
+        tools.repeateEpisode(repeatProps, projectDir);
     }
 
     @Test
@@ -70,6 +76,6 @@ class ActFunctionToolsAdditionalTest {
 
         Object result = tools.getActDetails(props, tempDir.toFile());
 
-        assertTrue(result.toString().length() > 0);
+        assertTrue(!result.toString().isEmpty());
     }
 }

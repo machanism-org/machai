@@ -277,11 +277,8 @@ public class ActProcessor extends AIFileProcessor {
 		TomlParseResult toml = Toml.parse(tomlStr);
 		setActData(properties, toml);
 
-		if (toml != null) {
-			setActData(properties, toml);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Load act: `{}` from classpath.", name);
-			}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Load act: `{}` from classpath.", name);
 		}
 
 		return toml;
@@ -373,47 +370,49 @@ public class ActProcessor extends AIFileProcessor {
 	static void setActData(Map<String, Object> properties, TomlParseResult toml) {
 		Set<Entry<String, Object>> props = toml.dottedEntrySet();
 		for (Entry<String, Object> entry : props) {
-			String key = entry.getKey();
-			if (entry.getValue() instanceof String) {
-				String value = (String) entry.getValue();
-				Object mainValue = properties.get(key);
-				if (mainValue instanceof String) {
-					value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(value, "%s"));
-					properties.put(key, value);
-				} else if (mainValue instanceof List) {
-					@SuppressWarnings("unchecked")
-					List<String> mainValueList = (List<String>) mainValue;
-					List<String> result = new ArrayList<>();
-					for (String mainValueItem : mainValueList) {
-						if (mainValueList.isEmpty()) {
-							result.add(Strings.CS.replace(mainValueList.get(0), "%s", Objects.toString(value, "%s")));
-						} else {
-							result.add(mainValueItem);
-						}
-					}
-					properties.put(key, result);
-				} else {
-					properties.put(key, value);
-				}
-			}
-			if (entry.getValue() instanceof Boolean) {
-				Boolean value = (Boolean) entry.getValue();
-				properties.put(key, Boolean.toString(value));
-			}
-			if (entry.getValue() instanceof Integer) {
-				Integer value = (Integer) entry.getValue();
-				properties.put(key, Integer.toString(value));
-			}
-			if (entry.getValue() instanceof Double) {
-				Double value = (Double) entry.getValue();
-				properties.put(key, Double.toString(value));
-			}
-			if (entry.getValue() instanceof TomlArray) {
-				List<String> result = mergeTomlArrayValues(properties.get(key),
-						((TomlArray) entry.getValue()).toList());
-				properties.put(key, result);
+			setActDataEntry(properties, entry);
+		}
+	}
+
+	private static void setActDataEntry(Map<String, Object> properties, Entry<String, Object> entry) {
+		String key = entry.getKey();
+		Object value = entry.getValue();
+		if (value instanceof String) {
+			putStringActData(properties, key, (String) value);
+		} else if (value instanceof Boolean) {
+			properties.put(key, Boolean.toString((Boolean) value));
+		} else if (value instanceof Integer) {
+			properties.put(key, Integer.toString((Integer) value));
+		} else if (value instanceof Double) {
+			properties.put(key, Double.toString((Double) value));
+		} else if (value instanceof TomlArray) {
+			List<String> result = mergeTomlArrayValues(properties.get(key), ((TomlArray) value).toList());
+			properties.put(key, result);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void putStringActData(Map<String, Object> properties, String key, String value) {
+		Object mainValue = properties.get(key);
+		if (mainValue instanceof String) {
+			properties.put(key, Strings.CS.replace((String) mainValue, "%s", Objects.toString(value, "%s")));
+		} else if (mainValue instanceof List) {
+			properties.put(key, mergeStringWithListValue((List<String>) mainValue, value));
+		} else {
+			properties.put(key, value);
+		}
+	}
+
+	private static List<String> mergeStringWithListValue(List<String> mainValueList, String value) {
+		List<String> result = new ArrayList<>();
+		for (String mainValueItem : mainValueList) {
+			if (mainValueItem.isEmpty()) {
+				result.add(mainValueItem);
+			} else {
+				result.add(Strings.CS.replace(mainValueItem, "%s", Objects.toString(value, "%s")));
 			}
 		}
+		return result;
 	}
 
 	private static List<String> mergeTomlArrayValues(Object existingValue, List<Object> values) {

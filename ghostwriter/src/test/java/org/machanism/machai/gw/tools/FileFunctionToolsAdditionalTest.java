@@ -23,7 +23,7 @@ class FileFunctionToolsAdditionalTest {
     Path tempDir;
 
     @Test
-    void writeFileShouldCreateDirectoriesAndReadBackWithRequestedCharset() throws Exception {
+    void writeFileShouldCreateDirectoriesAndReadBackWithRequestedCharset() {
         FileFunctionTools tools = new FileFunctionTools();
         ObjectNode writeProps = MAPPER.createObjectNode();
         writeProps.put("file_path", "nested/data.txt");
