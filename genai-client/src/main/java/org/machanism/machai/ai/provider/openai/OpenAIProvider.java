@@ -34,6 +34,8 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
+import com.openai.models.Reasoning;
+import com.openai.models.ReasoningEffort;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.models.Model;
@@ -317,6 +319,7 @@ public class OpenAIProvider implements Genai {
 		builder.maxOutputTokens(maxOutputTokens);
 		builder.instructions(instructions);
 		builder.inputOfResponse(inputs);
+		builder.reasoning(Reasoning.builder().effort(ReasoningEffort.NONE).build());
 
 		return builder.tools(new ArrayList<>(toolMap.keySet())).build();
 	}
