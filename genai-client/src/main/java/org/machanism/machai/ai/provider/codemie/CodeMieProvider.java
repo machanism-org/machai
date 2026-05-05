@@ -15,8 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
-import org.machanism.machai.ai.provider.claude.ClaudeProvider;
-import org.machanism.machai.ai.provider.gemini.GeminiProvider;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 
 import com.openai.client.OpenAIClient;

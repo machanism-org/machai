@@ -32,32 +32,32 @@ canonical: https://machai.machanism.org/genai-client/index.html
 
 ## Introduction
 
-GenAI Client is a Java library for integrating JVM applications with generative AI providers through a shared, provider-agnostic API. It supplies the core abstractions used to build prompt-driven workflows, execute model requests, invoke tools during model runs, and generate embeddings for search and retrieval scenarios.
+GenAI Client is a Java library designed for seamless integration with generative AI providers. It provides foundational prompt management, model execution, tool/function calling, embedding support, and usage reporting so JVM applications can add AI-powered features through a consistent provider-agnostic API.
 
-The library helps teams add AI functionality without coupling application logic to a single provider SDK. By standardizing configuration, execution, and usage reporting across providers, it makes it easier to switch models, test integrations, support disabled-AI environments, and evolve AI-enabled features across the MachAI ecosystem.
+The library reduces direct coupling to individual provider SDKs. Applications can build prompt-driven workflows, semantic search, retrieval, automated content generation, and intelligent project assembly while keeping provider selection, authentication, request limits, and runtime behavior configurable across the MachAI and Machanism ecosystem.
 
 ## Overview
 
 This project provides the central provider contract and supporting infrastructure for GenAI integrations in MachAI.
 
-- `Genai` defines a common interface for prompts, instructions, execution, embeddings, tool registration, working-directory propagation, and usage reporting.
+- `Genai` defines the common lifecycle and operations for initialization, instructions, prompts, file references, request execution, embeddings, tool registration, working-directory propagation, cleanup, and usage reporting.
 - `GenaiProviderManager` resolves providers from identifiers such as `OpenAI:gpt-4.1`, initializes them from a `Configurator`, and aggregates token usage.
-- `OpenAIProvider` delivers the most complete implementation, including prompt execution, tool calling, embeddings, and request logging.
-- `CodeMieProvider` authenticates against CodeMie and delegates execution to a compatible downstream provider based on the configured model name.
-- `NoneProvider` supports offline, disabled, and test scenarios without invoking any external AI service.
+- `OpenAIProvider` is the production-ready OpenAI-compatible implementation, including prompt execution through the OpenAI Responses API, iterative tool calling, embeddings, request logging, and usage mapping.
+- `CodeMieProvider` authenticates against EPAM CodeMie and delegates execution to an OpenAI-compatible downstream provider configured for the CodeMie Code Assistant API.
+- `NoneProvider` supports disabled, offline, and test scenarios without invoking external AI services.
 
 This abstraction lets applications keep a stable integration layer while changing models, providers, or runtime environments.
 
 ## Key Features
 
 - Unified `Genai` API for prompts, instructions, execution, embeddings, and tool registration.
-- Provider resolution through `GenaiProviderManager` using `Provider:model` selectors.
-- OpenAI-backed implementation with support for response execution, function tool calling, input logging, and embeddings.
-- CodeMie integration with OAuth-based token acquisition and provider delegation by model prefix.
+- Provider resolution through `GenaiProviderManager` using `Provider:model` selectors or fully qualified provider class names.
+- OpenAI-compatible implementation with support for response execution, function tool calling, input logging, timeout configuration, output-token limits, and embeddings.
+- CodeMie integration with OAuth-based token acquisition and OpenAI-compatible backend configuration.
 - No-op provider for offline, disabled, and test environments.
 - Token usage tracking via `Usage` and aggregated logging via `GenaiProviderManager`.
 - Working-directory propagation for tool handlers that need file-system context.
-- Extensible tool function integration through `ToolFunction` and provider-specific tool registration.
+- Extensible tool function integration through `ToolFunction`, `FunctionTools`, and Java `ServiceLoader` discovery.
 
 ## Getting Started
 
@@ -159,12 +159,12 @@ and generate the content for this section following net format:
 
 ### OpenAI
 
-`OpenAIProvider` is the primary production-ready provider in this module. It adapts the OpenAI Java SDK Responses API to the MachAI `Genai` contract and supports prompting, file inputs, tool/function calling, and embedding generation.
+`OpenAIProvider` is the primary production-ready provider in this module. It adapts the OpenAI Java SDK Responses API to the MachAI `Genai` contract and supports prompt submission, optional system instructions, file references, locally registered tools, embedding generation, timeout handling, input logging, response parsing, function-tool execution, and OpenAI token accounting mapped to MachAI usage metrics.
 
 Configuration values are read from the `Configurator` passed to `init(...)`.
 
-- `chatModel` (required): model identifier sent to the OpenAI Responses API, such as `gpt-4.1` or `gpt-4o`.
-- `OPENAI_API_KEY` (required): API key used to authenticate with the OpenAI API.
+- `chatModel` (required): model identifier sent to the OpenAI Responses API, such as `gpt-4.1` or `gpt-4o-mini`.
+- `OPENAI_API_KEY` (required): API key used to authenticate with the OpenAI API or compatible backend.
 - `OPENAI_BASE_URL` (optional): base URL override for OpenAI-compatible endpoints.
 - `GENAI_TIMEOUT` (optional): request timeout in seconds. Defaults to `600`.
 - `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to `18000`.
@@ -174,7 +174,7 @@ Configuration values are read from the `Configurator` passed to `init(...)`.
 Capabilities include:
 
 - Prompt execution through `perform()`.
-- Iterative function tool calling with tool-output feedback.
+- Iterative function tool calling with tool-output feedback until a final model message is returned.
 - Input logging to local files.
 - Working-directory propagation to tool handlers.
 - Embedding generation.
@@ -184,54 +184,40 @@ Thread safety: not thread-safe.
 
 ### CodeMie
 
-`CodeMieProvider` integrates with EPAM CodeMie. It authenticates against a CodeMie OpenID Connect token endpoint to obtain an OAuth 2.0 access token, configures the CodeMie Code Assistant API as an OpenAI-compatible backend, and delegates execution to another provider implementation.
+`CodeMieProvider` integrates with EPAM CodeMie. It authenticates against a CodeMie OpenID Connect token endpoint to obtain an OAuth 2.0 access token, configures the CodeMie Code Assistant API as an OpenAI-compatible backend, and delegates execution to an internal provider instance.
 
 Authentication modes:
 
-- Password grant is used when `GENAI_USERNAME` contains `@`.
-- Client credentials grant is used otherwise.
+- Password grant is used when `GENAI_USERNAME` contains `@`, which is the typical e-mail login mode.
+- Client credentials grant is used otherwise for service-to-service authentication.
 
 After retrieving a token, the provider sets:
 
 - `OPENAI_BASE_URL` to `https://codemie.lab.epam.com/code-assistant-api/v1`
 - `OPENAI_API_KEY` to the retrieved access token
 
-Delegation is selected from the configured `chatModel`:
-
-- `gpt-*` or blank model names delegate to `OpenAIProvider`.
-- `gemini-*` model names delegate to `GeminiProvider`.
-- `claude-*` model names delegate to `ClaudeProvider`.
-
 Configuration:
 
 - `GENAI_USERNAME` (required): user e-mail or client id.
 - `GENAI_PASSWORD` (required): password or client secret.
-- `chatModel` (required): model identifier.
+- `chatModel` (required): model identifier passed to the delegated provider, for example `gpt-4o-mini`.
 - `AUTH_URL` (optional): token endpoint override.
+
+The current source delegates to `OpenAIProvider`, which enables CodeMie access through the same OpenAI-compatible execution, tool-calling, logging, embedding, and usage-reporting behavior described for the OpenAI provider.
 
 Thread safety: not thread-safe.
 
-### Claude
-
-`ClaudeProvider` is an Anthropic-backed implementation of the MachAI `Genai` abstraction.
-
-Its documented purpose is to adapt the Anthropic Java SDK to the MachAI provider interface. The current implementation is not finished: `init(Configurator)` and the core prompt, execution, tool, logging, working-directory, and usage methods all throw `UnsupportedOperationException`. The `embedding(String, long)` method currently returns an empty list.
-
-Thread safety: not documented; treat as not thread-safe.
-
-### Gemini
-
-`GeminiProvider` is intended to integrate Google's Gemini models with the MachAI `Genai` API.
-
-Its documented design covers MachAI abstractions for prompts, tool definitions, files or attachments, and usage reporting mapped onto Gemini APIs. The current implementation is explicitly marked as a placeholder. `init(Configurator)`, `perform()`, and `embedding(...)` throw `NotImplementedException`, while other operations remain TODO stubs.
-
-Thread safety: not documented; treat as not thread-safe.
-
 ### None
 
-`NoneProvider` is a no-op implementation of `Genai` intended for environments where no external LLM integration should be used.
+`NoneProvider` is a no-operation `Genai` implementation for disabled, offline, test, or prompt-capture scenarios.
 
-It accumulates prompt text in memory, can optionally write instructions and prompts to local files when `inputsLog(File)` is configured, performs no network calls, and always returns `null` from `perform()`. Unsupported capabilities such as `embedding(String, long)` throw `UnsupportedOperationException`.
+It fulfills the provider contract without invoking any local or remote AI model. Instructions and prompts are accumulated in memory, and when `inputsLog(File)` is configured they can be written to local log files for inspection. Calling `perform()` performs no network activity and returns `null`, while unsupported capabilities such as `embedding(String, long)` throw `UnsupportedOperationException`.
+
+Typical use cases include:
+
+- Running application flows when AI execution is intentionally disabled.
+- Testing provider integration paths without contacting an external service.
+- Capturing generated prompts and instructions for review.
 
 Thread safety: not documented; treat as not thread-safe.
 

@@ -31,20 +31,13 @@
  *
  * <p>This package contains the {@link org.machanism.machai.ai.provider.codemie.CodeMieProvider} implementation,
  * which acquires OAuth 2.0 access tokens from the CodeMie OpenID Connect token endpoint and configures the
- * CodeMie Code Assistant REST API as an OpenAI-compatible backend for downstream model providers.</p>
+ * CodeMie Code Assistant REST API as an OpenAI-compatible backend for downstream AI operations.</p>
  *
  * <h2>Primary responsibilities</h2>
  * <ul>
  * <li>Authenticate against CodeMie using either the OAuth 2.0 password grant or client credentials grant.</li>
- * <li>Populate OpenAI-compatible configuration values required by delegated providers.</li>
- * <li>Select the downstream provider implementation based on the configured chat model prefix.</li>
- * </ul>
- *
- * <h2>Model delegation</h2>
- * <ul>
- * <li>{@code gpt-} models, and blank model names, are handled through the OpenAI-compatible provider path.</li>
- * <li>{@code gemini-} models are delegated to the Gemini provider after CodeMie authorization succeeds.</li>
- * <li>{@code claude-} models are delegated to the Claude provider after CodeMie authorization succeeds.</li>
+ * <li>Populate OpenAI-compatible configuration values required by the delegated OpenAI provider.</li>
+ * <li>Expose CodeMie through the common {@code Genai} provider abstraction used by the application.</li>
  * </ul>
  *
  * <h2>Authentication selection</h2>
@@ -57,7 +50,6 @@
  * <ul>
  * <li>{@code GENAI_USERNAME}: user e-mail address or client identifier.</li>
  * <li>{@code GENAI_PASSWORD}: password or client secret.</li>
- * <li>{@code chatModel}: target model identifier used to choose the delegated provider.</li>
  * <li>{@code AUTH_URL}: optional override for the default CodeMie token endpoint.</li>
  * </ul>
  */

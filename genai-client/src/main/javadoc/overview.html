@@ -40,32 +40,33 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Purpose and scope</h2>
 <p>
-  This module provides a provider-agnostic API for working with generative AI services from Java applications. It
-  centralizes provider selection, request composition, optional host-side tool registration, embedding generation, and
-  usage reporting so that callers can integrate multiple model backends through a consistent contract instead of coding
-  directly against vendor-specific SDKs.
+  GenAI Client provides the provider-neutral integration layer used by MachAI applications to interact with large
+  language models and related AI services without binding application code to a single vendor SDK, authentication flow,
+  endpoint, or execution mode. It centralizes provider resolution, model selection, prompt and instruction collection,
+  optional host-side function tools, embedding generation, request execution, and token-usage reporting.
 </p>
 <p>
-  The project is structured around a small public abstraction surface and a set of provider implementations. Higher-level
-  code typically resolves a provider from a <code>Provider:Model</code> identifier, configures instructions and prompts,
-  optionally exposes local tools such as file system or HTTP integrations, performs the request, and records token usage.
+  The library is intended for request-oriented workflows. Callers resolve a concrete provider from a model identifier,
+  initialize it with runtime configuration, add instructions, prompts, files, URLs, or input logs, optionally register
+  controlled local tools, execute the request, and then aggregate the returned usage metrics.
 </p>
 
 <h2>Architecture overview</h2>
 <p>
-  The root package <code>org.machanism.machai.ai</code> defines the overall API surface and describes the interaction flow
-  used across the module. Provider resolution and cross-request token accounting are handled by
-  <code>org.machanism.machai.ai.manager</code>, whose central entry point is
-  <code>org.machanism.machai.ai.manager.GenaiProviderManager</code>. The provider abstraction itself is defined by
-  <code>org.machanism.machai.ai.provider.Genai</code>, with <code>GenaiAdapter</code> offering a delegating base for adapter
-  or decorator-style implementations.
+  The root package <code>org.machanism.machai.ai</code> defines the high-level client API and organizes the manager,
+  provider, implementation, and tool packages. Provider resolution and cross-request token accounting are handled by
+  <code>org.machanism.machai.ai.manager</code>, whose main entry point is
+  <code>org.machanism.machai.ai.manager.GenaiProviderManager</code>. The common provider contract is
+  <code>org.machanism.machai.ai.provider.Genai</code>, and <code>GenaiAdapter</code> supplies a delegating base for adapter
+  and decorator implementations.
 </p>
 <p>
-  Concrete integrations live under <code>org.machanism.machai.ai.provider</code>. These include an OpenAI implementation,
-  an EPAM CodeMie integration that authenticates and routes to downstream providers, skeletal Gemini and Claude
-  implementations, and a no-operation provider for offline or disabled execution paths. Tool registration infrastructure
-  is provided by <code>org.machanism.machai.ai.tools</code>, where service-loaded contributors can register executable
-  functions with compatible providers.
+  Concrete providers live below <code>org.machanism.machai.ai.provider</code>. The OpenAI implementation submits prompts,
+  instructions, files, and registered tools through the OpenAI Responses API and also supports embeddings. The CodeMie
+  provider authenticates with EPAM CodeMie and configures an OpenAI-compatible downstream endpoint. The no-operation
+  provider preserves the provider workflow for disabled, offline, and testing scenarios without contacting an AI
+  backend. Tool infrastructure in <code>org.machanism.machai.ai.tools</code> discovers service-loaded contributors and
+  registers executable callbacks with compatible providers.
 </p>
 
 <p>
@@ -75,84 +76,79 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Package structure</h2>
 <ul>
   <li>
-    <strong><code>org.machanism.machai.ai</code></strong> – root package for the provider-neutral client API.
+    <strong><code>org.machanism.machai.ai</code></strong> – root package for the provider-agnostic generative AI client API.
     <ul>
-      <li>Describes the overall purpose of the module and the typical flow for resolving providers, building requests, and handling responses.</li>
+      <li>Coordinates provider management, provider contracts, concrete backend integrations, host-side tools, and usage monitoring.</li>
+      <li>Documents the standard flow for resolving a provider, configuring a request, executing it, and reporting token consumption.</li>
     </ul>
   </li>
   <li>
-    <strong><code>org.machanism.machai.ai.manager</code></strong> – provider resolution and usage tracking.
+    <strong><code>org.machanism.machai.ai.manager</code></strong> – provider resolution and token-usage aggregation.
     <ul>
-      <li>Resolves provider implementations from identifiers such as <code>OpenAI:gpt-4o-mini</code> or fully qualified class names.</li>
-      <li>Initializes providers with configuration, preserves selected chat-model information, and aggregates <code>Usage</code> records for logging and cost analysis.</li>
+      <li>Resolves identifiers such as <code>OpenAI:gpt-4o-mini</code> into concrete provider classes.</li>
+      <li>Supports fully qualified custom provider class names and falls back to the <code>none</code> provider for model-only identifiers.</li>
+      <li>Stores the selected <code>chatModel</code> in configuration and aggregates immutable <code>Usage</code> records for summary logging.</li>
     </ul>
   </li>
   <li>
     <strong><code>org.machanism.machai.ai.provider</code></strong> – common provider contracts and shared abstractions.
     <ul>
-      <li>Defines the <code>Genai</code> lifecycle, including initialization, prompting, execution, embedding generation, tool registration, and cleanup.</li>
-      <li>Contains the shared adapter type used to forward operations to another provider implementation.</li>
+      <li>Defines initialization, instructions, prompts, execution, embeddings, input logging, tool registration, usage inspection, and cleanup.</li>
+      <li>Provides a delegating adapter for wrapping or decorating existing provider implementations.</li>
     </ul>
   </li>
   <li>
-    <strong><code>org.machanism.machai.ai.provider.openai</code></strong> – OpenAI Responses API integration.
+    <strong><code>org.machanism.machai.ai.provider.openai</code></strong> – OpenAI provider integration.
     <ul>
-      <li>Builds requests from instructions, prompts, files, and registered tools; handles iterative tool calls; supports embeddings; and maps token counts into MachAI usage metrics.</li>
+      <li>Builds OpenAI Responses API requests from instructions, prompts, file references, and registered function tools.</li>
+      <li>Executes iterative tool calls until a final model message is produced, supports embedding generation, and maps provider token accounting to MachAI usage metrics.</li>
     </ul>
   </li>
   <li>
-    <strong><code>org.machanism.machai.ai.provider.codemie</code></strong> – CodeMie authentication and provider routing.
+    <strong><code>org.machanism.machai.ai.provider.codemie</code></strong> – EPAM CodeMie integration.
     <ul>
-      <li>Obtains OAuth 2.0 access tokens from the CodeMie OIDC endpoint, configures an OpenAI-compatible base URL, and routes requests to OpenAI-, Gemini-, or Claude-oriented providers based on model prefixes.</li>
+      <li>Obtains OAuth 2.0 access tokens using password or client-credentials authentication.</li>
+      <li>Configures CodeMie Code Assistant as an OpenAI-compatible backend for delegated AI operations.</li>
     </ul>
   </li>
   <li>
-    <strong><code>org.machanism.machai.ai.provider.gemini</code></strong> – Gemini provider package.
+    <strong><code>org.machanism.machai.ai.provider.none</code></strong> – disabled, offline, and test execution support.
     <ul>
-      <li>Defines the Gemini-backed implementation surface for adapting the common provider workflow to Google Gemini models.</li>
+      <li>Collects prompts, optionally writes instructions and inputs to local log files, returns no generated response, and reports zero usage.</li>
+      <li>Allows application control flow to remain intact when model execution is intentionally suppressed.</li>
     </ul>
   </li>
   <li>
-    <strong><code>org.machanism.machai.ai.provider.claude</code></strong> – Claude provider package.
+    <strong><code>org.machanism.machai.ai.tools</code></strong> – service-provider infrastructure for function tools.
     <ul>
-      <li>Defines the Anthropic Claude integration point used to align Claude models with the shared provider contract.</li>
-    </ul>
-  </li>
-  <li>
-    <strong><code>org.machanism.machai.ai.provider.none</code></strong> – offline and no-operation execution.
-    <ul>
-      <li>Collects prompts without invoking a model, can persist instructions and inputs to local files, returns no generated response, and reports zero usage.</li>
-    </ul>
-  </li>
-  <li>
-    <strong><code>org.machanism.machai.ai.tools</code></strong> – host-side function tool registration.
-    <ul>
-      <li>Defines tool contributor contracts, a service-loader-based installer, and executable tool functions that expose controlled local capabilities to compatible providers.</li>
+      <li>Defines tool contributor and executable callback contracts.</li>
+      <li>Uses Java <code>ServiceLoader</code> discovery to apply configured local capabilities to compatible generative AI providers.</li>
     </ul>
   </li>
 </ul>
 
 <h2>Configuration and runtime behavior</h2>
 <p>
-  Provider implementations are initialized from application configuration and use that configuration to resolve model
-  names, credentials, endpoint locations, timeout settings, token limits, and optional logging behavior. OpenAI support
-  uses provider-specific settings such as API keys and base URLs, while CodeMie support derives access tokens from user
-  or client credentials before delegating to a downstream provider implementation.
+  Providers are initialized from application configuration. Common settings include the selected <code>chatModel</code>,
+  provider credentials, base URLs, timeouts, output-token limits, tool-call limits, embedding model names, and input-log
+  destinations. OpenAI uses settings such as <code>OPENAI_API_KEY</code> and <code>OPENAI_BASE_URL</code>. CodeMie uses
+  credentials such as <code>GENAI_USERNAME</code>, <code>GENAI_PASSWORD</code>, and an optional <code>AUTH_URL</code> before
+  delegating to its downstream compatible endpoint.
 </p>
 <p>
-  Tool registration is intentionally separated from provider resolution. This allows applications to expose local
-  capabilities only when required and only for providers that support tool or function calling. Because these tools may
-  execute commands, access files, or call remote endpoints through the host process, deployments should apply careful
-  configuration and access controls.
+  Tool registration is separate from provider creation. This separation lets applications expose local capabilities only
+  for requests that require them and only for providers that support function or tool calling. Tool implementations may
+  access host resources, call remote endpoints, or execute domain-specific logic, so production deployments should
+  configure and restrict them deliberately.
 </p>
 
 <h2>Typical workflow</h2>
 <ol>
-  <li>Resolve a provider using a model identifier such as <code>OpenAI:gpt-4o-mini</code>.</li>
-  <li>Initialize the provider with application configuration and model-specific settings.</li>
+  <li>Resolve a provider using a model identifier such as <code>OpenAI:gpt-4o-mini</code>, a custom provider class name, or a disabled/offline model selection.</li>
+  <li>Initialize the provider with application configuration so provider-specific credentials, endpoints, limits, and model settings are available.</li>
   <li>Optionally apply service-loaded host tools through <code>FunctionToolsLoader</code>.</li>
-  <li>Supply system instructions, prompts, and optional file or URL inputs.</li>
-  <li>Execute the request, inspect the generated response, and record usage metrics.</li>
+  <li>Supply system instructions, prompts, and optional file, URL, or input-log data.</li>
+  <li>Execute the request, consume the generated response or embeddings, and record usage metrics.</li>
 </ol>
 
 <p>{@code
@@ -173,10 +169,11 @@ GenaiProviderManager.logUsage();
 
 <h2>Usage notes</h2>
 <ul>
-  <li>Provider instances are generally mutable and should be treated as request-scoped objects rather than shared singletons.</li>
-  <li>The no-operation provider is useful for tests, offline execution, and prompt logging workflows where application control flow must remain intact without contacting external AI services.</li>
-  <li>Embedding support and advanced runtime behavior depend on the selected provider implementation.</li>
-  <li>Aggregated usage reporting in the manager layer helps track overall token consumption across multiple requests.</li>
+  <li>Provider instances are mutable and should generally be treated as request-scoped objects rather than shared singletons.</li>
+  <li>The no-operation provider is useful for tests, offline execution, prompt logging, and disabled AI workflows.</li>
+  <li>Embedding support, tool calling, token accounting details, and request options depend on the selected provider implementation.</li>
+  <li>Aggregated usage reporting in the manager layer helps track total input, cached input, and output token consumption across multiple requests.</li>
+  <li>Configuration values may contain placeholders such as ${...}; leave those placeholders available for runtime substitution by the application configuration layer.</li>
 </ul>
 
 </body>
