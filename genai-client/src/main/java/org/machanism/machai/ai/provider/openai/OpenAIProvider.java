@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.manager.Usage;
@@ -329,7 +330,10 @@ public class OpenAIProvider implements Genai {
 		builder.maxOutputTokens(maxOutputTokens);
 		builder.instructions(instructions);
 		builder.inputOfResponse(inputs);
-		builder.reasoning(Reasoning.builder().effort(ReasoningEffort.NONE).build());
+
+		if (Strings.CS.startsWithAny(chatModel, "gpt-5.5")) {
+			builder.reasoning(Reasoning.builder().effort(ReasoningEffort.NONE).build());
+		}
 
 		return builder.tools(new ArrayList<>(toolMap.keySet())).build();
 	}
@@ -451,6 +455,8 @@ public class OpenAIProvider implements Genai {
 					inputText = "Data invalid: " + responseInputItem;
 				}
 				streamWriter.write(inputText);
+				streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+				streamWriter.write("-----------------------------------------");
 				streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
 			}
 		}

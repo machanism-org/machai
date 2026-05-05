@@ -12,7 +12,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
@@ -26,20 +25,22 @@ import com.openai.client.OpenAIClient;
  * {@link Genai} implementation that integrates with EPAM CodeMie.
  *
  * <p>
- * This provider authenticates against a CodeMie OpenID Connect (OIDC) token endpoint to obtain an OAuth 2.0 access
- * token and then configures an OpenAI-compatible backend (CodeMie Code Assistant REST API).
+ * This provider authenticates against a CodeMie OpenID Connect (OIDC) token
+ * endpoint to obtain an OAuth 2.0 access token and then configures an
+ * OpenAI-compatible backend (CodeMie Code Assistant REST API).
  * </p>
  *
  * <h2>Authentication modes</h2>
  * <ul>
- * <li><b>Password grant</b> is used when {@code GENAI_USERNAME} contains {@code "@"} (typical e-mail login).</li>
+ * <li><b>Password grant</b> is used when {@code GENAI_USERNAME} contains
+ * {@code "@"} (typical e-mail login).</li>
  * <li><b>Client credentials</b> is used otherwise (service-to-service).</li>
  * </ul>
  *
  * <h2>Provider delegation</h2>
  * <p>
- * After retrieving a token, this provider sets the following configuration keys before delegating to a downstream
- * provider:
+ * After retrieving a token, this provider sets the following configuration keys
+ * before delegating to a downstream provider:
  * </p>
  * <ul>
  * <li>{@code OPENAI_BASE_URL} to {@link #BASE_URL}</li>
@@ -50,7 +51,8 @@ import com.openai.client.OpenAIClient;
  * Delegation is selected based on the configured {@code chatModel} prefix:
  * </p>
  * <ul>
- * <li>{@code gpt-*} (or blank/unspecified) models delegate to {@link OpenAIProvider}</li>
+ * <li>{@code gpt-*} (or blank/unspecified) models delegate to
+ * {@link OpenAIProvider}</li>
  * <li>{@code gemini-*} models delegate to {@link GeminiProvider}</li>
  * <li>{@code claude-*} models delegate to {@link ClaudeProvider}</li>
  * </ul>
@@ -63,7 +65,8 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 	public static final String AUTH_URL_PROP_NAME = "AUTH_URL";
 
 	/**
-	 * Configuration/environment key used by OpenAI-compatible clients to provide the API key.
+	 * Configuration/environment key used by OpenAI-compatible clients to provide
+	 * the API key.
 	 *
 	 * <p>
 	 * For CodeMie this value is set to the retrieved OAuth 2.0 access token.
@@ -98,8 +101,8 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 	 * <ul>
 	 * <li>{@code GENAI_USERNAME} – user e-mail or client id.</li>
 	 * <li>{@code GENAI_PASSWORD} – password or client secret.</li>
-	 * <li>{@code chatModel} – model identifier (for example {@code gpt-4o-mini}, {@code gemini-1.5-pro},
-	 * {@code claude-3-5-sonnet}).</li>
+	 * <li>{@code chatModel} – model identifier (for example {@code gpt-4o-mini},
+	 * {@code gemini-1.5-pro}, {@code claude-3-5-sonnet}).</li>
 	 * </ul>
 	 *
 	 * <p>
@@ -110,13 +113,12 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 	 * </ul>
 	 *
 	 * @param conf configuration source
-	 * @throws IllegalArgumentException if a configuration conflict is detected, authorization fails, or an unsupported
-	 *                                  model is configured
+	 * @throws IllegalArgumentException if a configuration conflict is detected,
+	 *                                  authorization fails, or an unsupported model
+	 *                                  is configured
 	 */
 	@Override
 	public void init(Configurator conf) {
-		String chatModel = conf.get("chatModel");
-
 		if (System.getenv(OPENAI_API_KEY) != null) {
 			throw new IllegalArgumentException(
 					"Configuration conflict detected: Please unset the 'OPENAI_API_KEY' environment variable to avoid conflicts with the current configuration.");
@@ -128,71 +130,42 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 		String password = conf.get(Genai.PASSWORD_PROP_NAME);
 		String resolvedAuthUrl = conf.get(AUTH_URL_PROP_NAME, AUTH_URL);
 
-		if (Strings.CS.startsWithAny(chatModel, "gpt-", "gemini-") || StringUtils.isBlank(chatModel)) {
-			provider = new OpenAIProvider() {
-				/**
-				 * Builds (and caches) an {@link OpenAIClient} after ensuring the current configuration contains an
-				 * {@code OPENAI_API_KEY} value.
-				 *
-				 * <p>
-				 * The access token is requested lazily at client creation time so that initialization can fail fast on
-				 * authorization errors.
-				 * </p>
-				 *
-				 * @return OpenAI-compatible client configured for the CodeMie backend
-				 * @throws IllegalArgumentException if token acquisition fails
-				 */
-				@Override
-				protected OpenAIClient getClient() {
-					try {
-						String token = getToken(resolvedAuthUrl, username, password);
-						conf.set(OPENAI_API_KEY, token);
-					} catch (IOException e) {
-						throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
-					}
-
-					return super.getClient();
+		provider = new OpenAIProvider() {
+			/**
+			 * Builds (and caches) an {@link OpenAIClient} after ensuring the current
+			 * configuration contains an {@code OPENAI_API_KEY} value.
+			 *
+			 * <p>
+			 * The access token is requested lazily at client creation time so that
+			 * initialization can fail fast on authorization errors.
+			 * </p>
+			 *
+			 * @return OpenAI-compatible client configured for the CodeMie backend
+			 * @throws IllegalArgumentException if token acquisition fails
+			 */
+			@Override
+			protected OpenAIClient getClient() {
+				try {
+					String token = getToken(resolvedAuthUrl, username, password);
+					conf.set(OPENAI_API_KEY, token);
+				} catch (IOException e) {
+					throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
 				}
-			};
-			setProvider(provider);
-		} else if (Strings.CS.startsWithAny(chatModel, "gemini-")) {
-			conf.set(OPENAI_API_KEY, authorize(resolvedAuthUrl, username, password));
-			provider = new GeminiProvider();
-			setProvider(provider);
-		} else if (Strings.CS.startsWithAny(chatModel, "claude-")) {
-			conf.set(OPENAI_API_KEY, authorize(resolvedAuthUrl, username, password));
-			provider = new ClaudeProvider();
-			setProvider(provider);
-		} else {
-			throw new IllegalArgumentException("Unsupported model: '" + chatModel + "'.");
-		}
+
+				return super.getClient();
+			}
+		};
+		setProvider(provider);
 
 		super.init(conf);
-	}
-
-	/**
-	 * Obtains an access token and rethrows failures as {@link IllegalArgumentException}.
-	 *
-	 * @param resolvedAuthUrl token endpoint URL
-	 * @param username        user e-mail (password grant) or client id (client credentials)
-	 * @param password        password (password grant) or client secret (client credentials)
-	 * @return access token
-	 * @throws IllegalArgumentException if authorization fails
-	 */
-	private static String authorize(String resolvedAuthUrl, String username, String password) {
-		try {
-			return getToken(resolvedAuthUrl, username, password);
-		} catch (IOException e) {
-			throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
-		}
 	}
 
 	/**
 	 * Requests an OAuth 2.0 access token from the given token endpoint.
 	 *
 	 * <p>
-	 * The request uses {@code application/x-www-form-urlencoded} and selects the grant type based on the
-	 * {@code username} value:
+	 * The request uses {@code application/x-www-form-urlencoded} and selects the
+	 * grant type based on the {@code username} value:
 	 * </p>
 	 * <ul>
 	 * <li>{@code password} if the username contains {@code "@"}.</li>
@@ -200,10 +173,13 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 	 * </ul>
 	 *
 	 * @param url      token endpoint URL
-	 * @param username user e-mail (password grant) or client id (client credentials)
-	 * @param password password (password grant) or client secret (client credentials)
+	 * @param username user e-mail (password grant) or client id (client
+	 *                 credentials)
+	 * @param password password (password grant) or client secret (client
+	 *                 credentials)
 	 * @return the {@code access_token} value extracted from the response
-	 * @throws IOException if the HTTP request fails, returns a non-200 response, or the token cannot be read
+	 * @throws IOException if the HTTP request fails, returns a non-200 response, or
+	 *                     the token cannot be read
 	 */
 	public static String getToken(String url, String username, String password) throws IOException {
 		String queryTemplate;
@@ -244,7 +220,8 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 	}
 
 	/**
-	 * URL-encodes a value for {@code application/x-www-form-urlencoded} request bodies.
+	 * URL-encodes a value for {@code application/x-www-form-urlencoded} request
+	 * bodies.
 	 *
 	 * @param value value to encode
 	 * @return encoded value using UTF-8

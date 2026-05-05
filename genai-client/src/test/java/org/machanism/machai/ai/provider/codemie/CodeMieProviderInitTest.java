@@ -32,30 +32,6 @@ class CodeMieProviderInitTest {
         assertEquals(CodeMieProvider.BASE_URL, config.get("OPENAI_BASE_URL"));
     }
 
-    @Test
-    void initShouldRejectUnsupportedModel() {
-        CodeMieProvider provider = new CodeMieProvider();
-        Configurator config = baseConfig();
-        config.set("chatModel", "unsupported-model");
-
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> provider.init(config));
-
-        assertEquals("Unsupported model: 'unsupported-model'.", ex.getMessage());
-    }
-
-    @Test
-    void authorizeShouldWrapIoException() throws Exception {
-        Method method = CodeMieProvider.class.getDeclaredMethod("authorize", String.class, String.class, String.class);
-        method.setAccessible(true);
-
-        Throwable throwable = assertThrows(Throwable.class,
-                () -> method.invoke(null, "http://127.0.0.1:1/token", "name", "secret"));
-
-        Throwable cause = throwable.getCause();
-        assertInstanceOf(IllegalArgumentException.class, cause);
-        assertEquals("Authorization failed for user 'name'", cause.getMessage());
-    }
-
     private static Configurator baseConfig() {
         return new MapBackedConfigurator();
     }
