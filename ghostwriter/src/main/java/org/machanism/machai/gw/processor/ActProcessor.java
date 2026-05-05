@@ -276,6 +276,14 @@ public class ActProcessor extends AIFileProcessor {
 		String tomlStr = IOUtils.toString(resource, StandardCharsets.UTF_8);
 		TomlParseResult toml = Toml.parse(tomlStr);
 		setActData(properties, toml);
+
+		if (toml != null) {
+			setActData(properties, toml);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Load act: `{}` from classpath.", name);
+			}
+		}
+
 		return toml;
 	}
 
@@ -302,6 +310,9 @@ public class ActProcessor extends AIFileProcessor {
 
 		if (toml != null) {
 			setActData(properties, toml);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Load act: `{}` from directory.", name);
+			}
 		}
 
 		return toml;
@@ -368,8 +379,22 @@ public class ActProcessor extends AIFileProcessor {
 				Object mainValue = properties.get(key);
 				if (mainValue instanceof String) {
 					value = Strings.CS.replace((String) mainValue, "%s", Objects.toString(value, "%s"));
+					properties.put(key, value);
+				} else if (mainValue instanceof List) {
+					@SuppressWarnings("unchecked")
+					List<String> mainValueList = (List<String>) mainValue;
+					List<String> result = new ArrayList<>();
+					for (String mainValueItem : mainValueList) {
+						if (mainValueList.isEmpty()) {
+							result.add(Strings.CS.replace(mainValueList.get(0), "%s", Objects.toString(value, "%s")));
+						} else {
+							result.add(mainValueItem);
+						}
+					}
+					properties.put(key, result);
+				} else {
+					properties.put(key, value);
 				}
-				properties.put(key, value);
 			}
 			if (entry.getValue() instanceof Boolean) {
 				Boolean value = (Boolean) entry.getValue();
@@ -384,7 +409,8 @@ public class ActProcessor extends AIFileProcessor {
 				properties.put(key, Double.toString(value));
 			}
 			if (entry.getValue() instanceof TomlArray) {
-				List<String> result = mergeTomlArrayValues(properties.get(key), ((TomlArray) entry.getValue()).toList());
+				List<String> result = mergeTomlArrayValues(properties.get(key),
+						((TomlArray) entry.getValue()).toList());
 				properties.put(key, result);
 			}
 		}
