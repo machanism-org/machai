@@ -57,7 +57,7 @@ inputs =
       - If `Relative Path from Root Directory` is not `.`, set `COMPONENT_KEYS` = `[Parent Directory Name]:[Project Identifier]`, otherwice: `COMPONENT_KEYS` = `[Project Identifier]`.
     - Construct the `SONARQUBE_URL` as follows:  `${sonar.host}/api/issues/search?componentKeys=[COMPONENT_KEYS]&ps=20` and other required query parameters.
     - Use this URL to retrieve SonarQube issues for the relevant project component.
-    - Connect to the SonarQube API using value as is without substitution for URL: `SONARQUBE_URL` value and header auth with `${sonar.token}`.
+    - **IMPORTANT:** Connect to the SonarQube API using value as is without substitution for URL: `SONARQUBE_URL` value and **header auth with `${sonar.token}`**.
     - Use this SonarQube API URL to fetch all open `impactSoftwareQualities`: `${sonar.qualities}` and specified `impactSeverities`: `${sonar.severity}, findings for the specified [Project Identifier] project.
     - If the API returns an error (non-2xx), terminate with exit code `500`.
     - If the response contains zero issues, terminate the task with exitCode: `0` with the description message.
