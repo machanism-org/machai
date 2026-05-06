@@ -3,112 +3,13 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-    <release version="1.0.0" date="2026-03-09">
-      <action dev="dev" type="add"><![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Add bindex builder classes.</li>
-  <li>Add MongoDB integration and EmbeddingProvider.</li>
-  <li>Add BindexCommand and improve CLI behavior (debug/overwrite flags).</li>
-  <li>Add “assembly” command and ApplicationAssembly; implement assemble.txt prompt generation.</li>
-  <li>Support recursive sub-module processing.</li>
-  <li>Add search-bindex diagram.</li>
-</ul>
-<h3>Fixes</h3>
-<ul>
-  <li>Fix CLI issues; ensure FileInputStream is properly closed.</li>
-  <li>Fix GenAIProvider debug mode and improve find result output.</li>
-</ul>
-<h3>Refactoring</h3>
-<ul>
-  <li>Extract AssemblyCommand into a separate class; remove unused file(s).</li>
-</ul>
-<h3>Documentation</h3>
-<ul>
-  <li>Add and iteratively update README; add/update project logo and documentation assets.</li>
-</ul>
-<h3>Chores</h3>
-<ul>
-  <li>Add Maven assembly plugin configuration.</li>
-  <li>Introduce default user DB for read access.</li>
-  <li>Add LICENSE file.</li>
-</ul>
-]]></action>
-    </release>
-
-    <release version="1.0.1" date="2026-03-14">
-      <action dev="dev" type="add"><![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Add command-line properties replacement support (CommandFunctionTools).</li>
-  <li>Introduce <code>ToolFunction</code> interface.</li>
-  <li>Add unit-test creation guidance tag.</li>
-</ul>
-<h3>Fixes</h3>
-<ul>
-  <li>Apply deny-check per command part instead of the entire command line.</li>
-  <li>Handle error responses correctly in <code>callRestApi</code>.</li>
-  <li>Fix prompt default selection, method naming, and <code>custom</code> parameter processing.</li>
-</ul>
-<h3>Refactoring</h3>
-<ul>
-  <li>Relax method visibility from <code>private</code> to package-private where needed.</li>
-  <li>Miscellaneous Sonar-driven cleanups.</li>
-</ul>
-<h3>Tests</h3>
-<ul>
-  <li>Add and expand automated test coverage.</li>
-</ul>
-]]></action>
-    </release>
-
-    <release version="1.0.2" date="2026-03-23">
-      <action dev="dev" type="add"><![CDATA[
-<h3>Fixes</h3>
-<ul>
-  <li>Pin/fix dependency versions.</li>
-  <li>Stop logging OpenAI provider responses; reduce tool-loading log verbosity.</li>
-  <li>Normalize line-feed handling (use <code>StringUtils.LF</code>).</li>
-</ul>
-<h3>Refactoring</h3>
-<ul>
-  <li>Remove <code>ToolHandlingResult</code> inner class.</li>
-  <li>Remove Sonar-related inline comments.</li>
-</ul>
-<h3>Tests</h3>
-<ul>
-  <li>Add OpenAI tool-invocation unit tests.</li>
-</ul>
-<h3>Chores</h3>
-<ul>
-  <li>Update bindex.json examples/descriptions and dependency list.</li>
-</ul>
-]]></action>
-    </release>
-
-    <release version="1.0.3" date="2026-03-30">
-      <action dev="dev" type="add"><![CDATA[
-<h3>Fixes</h3>
-<ul>
-  <li>Fix OpenAI provider tool-call input handling.</li>
-  <li>Fix guidance tag definition and PlantUML Maven plugin configuration.</li>
-</ul>
-<h3>Documentation</h3>
-<ul>
-  <li>Update site documentation and Javadoc overview/instructions.</li>
-  <li>Update GenAI provider documentation.</li>
-</ul>
-<h3>Chores</h3>
-<ul>
-  <li>Increase <code>MAX_OUTPUT_TOKENS</code> to 18000.</li>
-  <li>Update function tools (including file write behavior) and bindex.json files.</li>
-  <li>Return <code>null</code> for non-<code>pom</code> packaging projects.</li>
-</ul>
-<h3>Tests</h3>
-<ul>
-  <li>Update and improve provider/function-tool test coverage.</li>
-</ul>
-]]></action>
-    </release>
-  </body>
+   
+  <release version="1.1.0" date="2026-04-05">
+<action dev="dev" type="add">
+<![CDATA[
+<ul><li>Added a unified GenAI provider API for prompt instructions, execution, embeddings, tool registration, working-directory context, cleanup, and usage reporting.</li><li>Added provider resolution through <code>GenaiProviderManager</code>, including <code>Provider:model</code> selectors, fully qualified provider classes, provider initialization, and aggregated token usage.</li><li>Added an OpenAI-compatible provider with Responses API execution, function tool calling, input logging, timeout and output-token configuration, embeddings, and usage mapping.</li><li>Added EPAM CodeMie integration with OAuth token acquisition and delegation to an OpenAI-compatible backend.</li><li>Added a no-op provider for disabled, offline, test, and prompt-capture scenarios.</li><li>Added extensible functional tools support with <code>FunctionTools</code>, <code>FunctionToolsLoader</code>, <code>ToolFunction</code>, Java <code>ServiceLoader</code> discovery, configurable placeholder resolution, and working-directory-aware tool execution.</li></ul>
+]]>
+</action>
+</release>
+</body>
 </document>

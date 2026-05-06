@@ -3,122 +3,15 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-    <release version="1.0.0" date="2026-03-09">
+
+    <release version="1.1.0" date="2026-04-05">
       <action dev="dev" type="add"><![CDATA[
-<h3>Features</h3>
 <ul>
-  <li>Initial CLI capabilities, including <code>conf</code>, <code>process</code>/<code>docs</code, <code>prompt</code>, <code>bindex</code>, and <code>assembly</code> workflows.</li>
-  <li>Maven plugin support (gw-maven-plugin) with goals for running Ghostwriter/Acts, plus assembly and packaging defaults.</li>
-  <li>Act/TOML template system with inheritance (<code>basedOn</code>), placeholders, deterministic property application, custom <code>actDir</code>, non-interactive mode, and improved error handling.</li>
-  <li>GenAI provider integrations and tooling (OpenAI, CodeMie; placeholders for Claude/Gemini) with function tools (web fetch, REST calls, bindex schema) and usage logging.</li>
-  <li>Project layout detection and processing for Maven, Gradle, JavaScript, and default layouts, including module discovery and improved root/scanDir handling.</li>
-  <li>Documentation site and guides (README/site docs), including updated CLI usage examples and Act authoring guidance.</li>
+  <li>Added documentation for standardized project folder modeling across sources, resources, tests, and documentation directories.</li>
+  <li>Documented built-in layout definitions for Maven, Gradle, JavaScript, Python, and default project structures.</li>
+  <li>Added guidance for resolving layout paths relative to a project base directory and deriving layout metadata from project files such as pom.xml.</li>
 </ul>
-
-<h3>Fixes</h3>
-<ul>
-  <li>Security and dependency fixes reported by Grype (including CVE/GHSA findings) and improved command denylist enforcement.</li>
-  <li>Stability improvements across scanning and processing (rootDir/scanDir defaults, path matching, ordering, and null handling).</li>
-  <li>Provider reliability fixes (OpenAI follow-up requests/timeouts/BadRequest handling; CodeMie token refresh).</li>
-</ul>
-
-<h3>Refactoring</h3>
-<ul>
-  <li>Refined prompt and tool output normalization (LF line endings, newline normalization) and simplified Act prompt flow.</li>
-  <li>Shared module/file processing logic and reorganized tool/provider APIs for maintainability.</li>
-</ul>
-
-<h3>Documentation</h3>
-<ul>
-  <li>Expanded documentation for Acts, CLI options, defaults, and project processing behavior; multiple site updates (icons, manifest, navigation).</li>
-</ul>
-
-<h3>Chores</h3>
-<ul>
-  <li>Project bootstrap tasks: version bumps through snapshots/releases, packaging/assembly descriptor updates, and test/doc maintenance.</li>
-</ul>
-]]></action>
-    </release>
-    <release version="1.0.1" date="2026-03-14">
-      <action dev="dev" type="add"><![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Add unit test creation guidance tag.</li>
-</ul>
-
-<h3>Fixes</h3>
-<ul>
-  <li>Apply multiple Sonar-related fixes (via <code>sonar-fix</code> act), including a revert of an earlier attempt.</li>
-</ul>
-
-<h3>Documentation</h3>
-<ul>
-  <li>Update Javadocs.</li>
-</ul>
-
-<h3>Chores</h3>
-<ul>
-  <li>Add tests (generated via <code>gw:gw</code>).</li>
-</ul>
-]]></action>
-    </release>
-    <release version="1.0.2" date="2026-03-23">
-      <action dev="dev" type="add"><![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Add project-layout unit tests.</li>
-</ul>
-
-<h3>Fixes</h3>
-<ul>
-  <li>Adjust MavenProjectLayout module discovery nullability.</li>
-  <li>Fix property names and update related documentation.</li>
-  <li>Fix failing tests.</li>
-</ul>
-
-<h3>Refactoring</h3>
-<ul>
-  <li>Remove effective POM model building.</li>
-  <li>Remove leftover <code>// Sonar</code> comments.</li>
-</ul>
-
-<h3>Chores</h3>
-<ul>
-  <li>Update bindex.json files.</li>
-  <li>Update project-layout POM model builder dependencies.</li>
-  <li>Update tests for POM reader and module defaults.</li>
-  <li>Update log output messages; set <code>gw.nonRecursive="true"</code> for the <code>site</code> act.</li>
-</ul>
-]]></action>
-    </release>
-    <release version="1.0.3" date="2026-03-30">
-      <action dev="dev" type="add"><![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Add <code>ProjectProcessorProcessModule</code> test.</li>
-</ul>
-
-<h3>Fixes</h3>
-<ul>
-  <li>Return <code>null</code> for non-<code>pom</code> package projects.</li>
-  <li>Fix guidance tag definition.</li>
-  <li>Fix <code>plantuml-maven-plugin</code> configuration.</li>
-  <li>Fix Sonar issues.</li>
-</ul>
-
-<h3>Documentation</h3>
-<ul>
-  <li>Update project-layout docs.</li>
-  <li>Update Javadoc and overview instructions.</li>
-  <li>Update <code>guidance</code> tags.</li>
-</ul>
-
-<h3>Chores</h3>
-<ul>
-  <li>Update tests and expand coverage for Maven project layout.</li>
-  <li>Update <code>bindex.json</code> files.</li>
-</ul>
-]]></action>
+      ]]></action>
     </release>
   </body>
 </document>

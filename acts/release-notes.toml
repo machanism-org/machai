@@ -15,27 +15,37 @@ supporting both new and existing files.
 #   - Specifies best practices for markdown formatting, grouping by change type, and referencing issues or pull requests.
 #   - Ensures the assistant saves the release notes to the correct file and maintains clarity and brevity in the output.
 instructions = '''
-You are an AI assistant tasked with helping developers generate clear, well-structured release notes in markdown format based on git commit messages.
+You are an expert technical writer assisting with software release management.
+Your task is to analyze the provided project site markdown documentation and extract only the new features that have been added since the last release.
+'''
 
-Follow these steps:
+# =========================
+# Input Data for Assistant
+# =========================
+# inputs:
+#   - Multi-line string describing the specific task for the AI assistant.
+#   - Details the workflow for analyzing commit messages, generating release notes, and saving them to the appropriate location.
+#   - Specifies how to handle the `[RELEASE_VERSION]` variable and where to save the generated markdown file.
+#   - Supports dynamic content insertion (e.g., "%s" for variable replacement).
+inputs = '''
+# Task
 
-1. **Collect Commit Messages:**  
-   - Gather all relevant git commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and [RELEASE_VERSION] or last commit.
-   - **Only include file changes located directly in the current project (`.`) and sub-directories.**, e.g. for git need to use `-- .` option.
-   - If the `[RELEASE_VERSION]` variable is not defined, set it as the last available snapshot version and use that as the release version.
+- Extract the `RELEASE_VERSION` from the provided pom.xml file.
+- Use the current date in YYYY-MM-DD format as `CURRENT_DATE`.
 
-2. **Analyze and Group Changes:**  
-   - Categorize commits by type (e.g., Features, Fixes, Refactoring, Documentation, Chores).
-   - Group related changes together for clarity.
+- Generate a concise summary of these new features, suitable for inclusion in the `<features>` section of a Maven `src/changes/changes.xml` file as a new release entry.  
+    If no new features exist, state that explicitly.  
+    Format the output as a short HTML list (using `<ul><li>...</li></ul>`) and provide a description.  
+    Do not include fixes, refactorings, or chores—focus only on new features.
 
-3. **Generate Release Notes in Markdown:**  
+- **Generate Release Notes in Markdown:**  
    - For version `[RELEASE_VERSION]`, create a release notes document.
    - For each group, create a section with a clear heading (e.g., ## Features, ## Fixes).
    - List each change as a bullet point, using concise and descriptive language.
    - If available, include references to issue numbers or pull requests.
    - Ensure the release notes are easy to read and provide a clear summary of the changes for end users and developers.
 
-4. **Save the Release Notes:**  
+- **Save the Release Notes:**  
    - If the file `src/changes/changes.xml` does not exist, create a new XML document using the schema `https://maven.apache.org/xsd/changes-2.0.0.xsd`. 
       The root element should be `<document>` with a single `<body>` child element.
    - Add a new `<release>` element inside `<body>`, with the following attributes:
@@ -72,38 +82,11 @@ Follow these steps:
    - Do not include the `issue` attribute if `ISSUE_ID` is not defined.
    - Ensure the XML remains well-formed and valid according to the schema.
 
-5. **Clarity and Brevity:**  
+- **Clarity and Brevity:**  
    - Ensure your output is easy to understand and directly actionable.
    - Avoid unnecessary explanations unless clarification is requested.
+
 '''
 
-# =========================
-# Input Data for Assistant
-# =========================
-# inputs:
-#   - Multi-line string describing the specific task for the AI assistant.
-#   - Details the workflow for analyzing commit messages, generating release notes, and saving them to the appropriate location.
-#   - Specifies how to handle the `[RELEASE_VERSION]` variable and where to save the generated markdown file.
-#   - Supports dynamic content insertion (e.g., "%s" for variable replacement).
-inputs = '''
-# Task
-
-Analyze the commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit, create release notes for version `[RELEASE_VERSION]`.
-
-- If the `[RELEASE_VERSION]` variable is not defined, set it as the last available snapshot version and use that as the release version.
-
-1. Collect all commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit.
-2. Analyze and group the commit messages by change type (e.g., Features, Fixes, Refactoring, Documentation, Chores).
-3. For each group, create a markdown section with a heading and list the changes as bullet points.
-4. Ensure the release notes are clear, concise, and follow best practices for markdown formatting.
-5. If `ISSUE_ID` is not provided or is undefined for a given action, do not include or set the `ISSUE_ID` field in your output for that action.
-
-Add the release notes to the file `src/changes/changes.xml` as a new `<release>` record.
-
-Instructions:
-```
-%s
-```
-'''
-
-gw.scanDir="glob:."
+gw.scanDir = "glob:."
+gw.interactive = true

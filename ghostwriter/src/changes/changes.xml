@@ -3,133 +3,16 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-    <release version="1.0.0" date="2026-03-09">
-      <action dev="dev" type="add">
-        <![CDATA[
-<h3>Features</h3>
+    <release version="1.1.0" date="2026-04-05">
+      <action dev="dev" type="add"><![CDATA[
 <ul>
-  <li>CLI commands for indexing and assembly workflows (bindex, register, assembly), including debug/overwrite flags and directory targeting.</li>
-  <li>BIndex generation and update support (including Maven and Python/JavaScript builders) with schema evolution (layers, scores, constructors, examples).</li>
-  <li>Vector/semantic search improvements: classification vs description embeddings, score thresholds, filtering by language/domains/integration, and better result reporting.</li>
-  <li>GenAI integration enhancements: provider abstraction, multi-call functional tools, prompt templates via resource bundles, and parent/sub-module processing.</li>
-  <li>New Maven plugins/modules added, including ghostwriter-maven-plugin and assembly-maven-plugin.</li>
+  <li>Added repository-embedded guidance processing for repeatable AI-assisted updates across source code, documentation, site pages, configuration, diagrams, and other project artifacts.</li>
+  <li>Added Act mode for reusable TOML-based prompt workflows, including built-in acts, inheritance, default prompts, interactive and non-interactive execution, and episode-based multi-step automation.</li>
+  <li>Added function tools for act discovery, project-context variables, episode navigation, file-system operations, approved command execution, process termination, web content retrieval, and REST API calls.</li>
+  <li>Added flexible project scanning with directory, glob, and regular-expression targets, configurable exclusions, concurrency, additional instructions, and optional LLM input logging.</li>
+  <li>Added project-root workflow support for local and CI/CD automation using current working directory resolution or configured project directory settings.</li>
 </ul>
-<h3>Fixes</h3>
-<ul>
-  <li>Resolved issues in prompt templates and guidance handling (markdown guidance tag, guidance file pathing, Java prompt generation).</li>
-  <li>Fixed project layout/path handling and root-directory file processing; improved project structure description generation.</li>
-  <li>Fixed BIndex/plugin issues (NPE, required property handling, effective model retrieval, plugin property names) and corrected JS/Python edge cases (file extension filters, private Python packages).</li>
-  <li>Fixed logging and output behavior (inputs log paths/location, debug mode behavior, stream closing).</li>
-</ul>
-<h3>Refactoring</h3>
-<ul>
-  <li>Extracted/reshaped core abstractions (GenAIProvider, FunctionTools, Reviewer classes, ProjectLayout vs BindexBuilder, AssemblyCommand).</li>
-  <li>Renamed/reorganized modules and directories (e.g., bindex-core naming, CLI folder rename, documents module movements) and general cleanup.</li>
-</ul>
-<h3>Documentation</h3>
-<ul>
-  <li>Substantial README and site documentation updates, including diagrams, images, and improved Javadoc coverage across main sources.</li>
-  <li>Added and refined prompt/recipe documentation and examples for supported workflows.</li>
-</ul>
-<h3>Chores</h3>
-<ul>
-  <li>Release and build metadata updates (pom descriptions, javadoc plugin config, versioning and release tags).</li>
-  <li>Added/updated project assets (logos, screenshots) and housekeeping changes (tests, file renames, excludes).</li>
-</ul>
-        ]]>
-      </action>
-    </release>
-
-    <release version="1.0.1" date="2026-03-14">
-      <action dev="dev" type="add">
-        <![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Added support for loading Acts from URL locations.</li>
-  <li>Added built-in Act listing tool and improved Act discovery/logging.</li>
-  <li>Improved CLI help and Act listing output (including Act descriptions).</li>
-  <li>Added unit-test creation guidance and expanded unit-test Act templates.</li>
-</ul>
-<h3>Fixes</h3>
-<ul>
-  <li>Fixed NPE and corrected handling of Act properties (inputs formatting, inheritance, and placeholder processing).</li>
-  <li>Fixed log path handling.</li>
-  <li>Fixed prompt defaults, a method name, and <code>custom</code> parameter processing.</li>
-</ul>
-<h3>Refactoring</h3>
-<ul>
-  <li>Removed unsupported <code>prologue</code>/<code>epilogue</code> Act properties after initial experimentation.</li>
-</ul>
-<h3>Documentation</h3>
-<ul>
-  <li>Updated release-notes Act template and refined guidance/rules (including Windows <code>cmd /c</code> usage).</li>
-</ul>
-<h3>Chores</h3>
-<ul>
-  <li>Improved GW/Act concurrency and updated CLI options for <code>ActCommand</code> and <code>GWCommand</code>.</li>
-  <li>Added JUnit Jupiter params dependency and expanded test coverage.</li>
-</ul>
-        ]]>
-      </action>
-    </release>
-
-    <release version="1.0.2" date="2026-03-23">
-      <action dev="dev" type="add">
-        <![CDATA[
-<h3>Fixes</h3>
-<ul>
-  <li>Fixed Act input template formatting to be null-safe (including a fallback path).</li>
-  <li>Fixed Act loader behavior for missing custom Act directories and improved absolute-path/URL handling.</li>
-  <li>Corrected GenAI model property naming and related configuration property names.</li>
-  <li>Improved AIFileProcessor logging (result logging added, null handling improved).</li>
-  <li>Improved processing to consistently use the project directory as the base path.</li>
-</ul>
-<h3>Documentation</h3>
-<ul>
-  <li>Updated docs for guidance defaults, <code>scanDir</code> configuration, and corrected property names.</li>
-  <li>Adjusted help/commit Act prompt structure and instructions; added <code>site.toml</code> Act template.</li>
-</ul>
-<h3>Chores</h3>
-<ul>
-  <li>Updated dependency versions to address vulnerabilities reported by Grype and adjusted POM security override configuration.</li>
-  <li>Refreshed generated <code>bindex.json</code> files and removed unused Maven dependencies.</li>
-  <li>Minor cleanup (task template cleanup, removed Sonar comments, standardized LF usage).</li>
-</ul>
-        ]]>
-      </action>
-    </release>
-
-    <release version="1.0.3" date="2026-03-30">
-      <action dev="dev" type="add">
-        <![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Added <code>code-doc</code> Act template for generating code documentation.</li>
-  <li>Improved interactive mode support.</li>
-</ul>
-<h3>Fixes</h3>
-<ul>
-  <li>Improved graceful tool termination handling (including treating <code>exitCode=0</code> terminations as normal output and ensuring processing completion logging).</li>
-  <li>Fixed Act processor URL handling and prompt interpolation.</li>
-  <li>Fixed processor file-scan matching and concurrency option handling.</li>
-  <li>Fixed console prompt output in <code>Ghostwriter.readText</code>.</li>
-  <li>Corrected guidance tag definition and Maven PlantUML plugin configuration.</li>
-</ul>
-<h3>Refactoring</h3>
-<ul>
-  <li>Updated Act behavior and aligned Acts location property usage across processors.</li>
-</ul>
-<h3>Documentation</h3>
-<ul>
-  <li>Updated site documentation, Javadoc, and <code>act.md</code>.</li>
-</ul>
-<h3>Chores</h3>
-<ul>
-  <li>Moved <code>assembly.toml</code> into built-in Acts resources.</li>
-  <li>Updated dependencies, refreshed <code>bindex.json</code> files, and expanded test coverage.</li>
-</ul>
-        ]]>
-      </action>
+      ]]></action>
     </release>
   </body>
 </document>

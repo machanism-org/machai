@@ -3,137 +3,32 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-    <release version="1.0.0" date="2026-03-09">
-      <action dev="dev" type="add">
-        <![CDATA[
-<h3>Features</h3>
+   
+    <release version="1.1.0" date="2026-04-05">
+      <action dev="dev" type="add"><![CDATA[
+<p>New feature summary for GW Maven Plugin 1.1.8-SNAPSHOT:</p>
 <ul>
-  <li>Initial release of the GW Maven Plugin, providing the <code>gw</code> goal for AI-assisted project processing and code/documentation generation.</li>
-  <li>GenAI provider support and configuration (including OpenAI-compatible providers and CodeMie integration), with request timeouts and usage logging.</li>
-  <li>Instruction and guidance support via files and CLI properties/options, with default guidance handling and path matching/glob/regex support.</li>
-  <li>Multi-threaded module processing with configurable timeouts and improved command execution/output handling.</li>
-  <li>Packaging and distribution improvements (delivery pack/zip and Maven assembly packaging profiles).</li>
+  <li>Integrated Ghostwriter guided file processing into Maven goals for repeatable project file updates.</li>
+  <li>Added prompt-driven act workflows, including reusable act definitions and interactive act input.</li>
+  <li>Added execution-root and per-module goals for guided and act-based processing across Maven reactor projects.</li>
+  <li>Added Maven settings integration for provider credentials via <code>genai.serverId</code>.</li>
+  <li>Added configurable processing options for model selection, scan directories, instructions, exclusions, act locations, action prompts, threading, and input logging.</li>
+  <li>Added Java class discovery and reflective inspection tools for project-aware AI-assisted analysis.</li>
+  <li>Added a cleanup goal for removing temporary workflow artifacts.</li>
 </ul>
 
-<h3>Fixes</h3>
-<ul>
-  <li>Resolved numerous path/root-directory and scanning issues (scanDir processing, root project execution, file ordering/sorting, exclusion handling, and non-path pattern matching).</li>
-  <li>Fixed null handling and NPEs in configuration and processing flows; improved error and log messages.</li>
-  <li>Corrected CLI/help text and option processing (threads, guidance, instructions/excludes parsing, serverId optionality).</li>
-  <li>Improved provider robustness (OpenAI request timeout, CodeMie authUrl handling, synchronized web calls).</li>
-</ul>
+## Features
 
-<h3>Refactoring</h3>
-<ul>
-  <li>Extracted and reorganized components (project layout handling, function tools, provider interfaces/manager) and cleaned up dependencies/imports.</li>
-  <li>Renamed and standardized modules/goals/packages (e.g., plugin goal to <code>gw</code>, package renames, configurator usage).</li>
-</ul>
-
-<h3>Documentation</h3>
-<ul>
-  <li>Added and updated extensive documentation (README/site pages, Javadoc, guidance examples, prompt templates) and improved download/help references.</li>
-</ul>
-
-<h3>Chores</h3>
-<ul>
-  <li>Version bumps and release preparations across multiple snapshot/release iterations leading to 1.0.0.</li>
-  <li>Build/test maintenance (test updates/disablements, pack profile adjustments, logging output tweaks).</li>
-</ul>
-        ]]>
-      </action>
-    </release>
-
-    <release version="1.0.1" date="2026-03-14">
-      <action dev="dev" type="add">
-        <![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Added support for loading <code>acts</code> locations from URLs.</li>
-  <li>Improved concurrency handling for GW/Act execution and extended CLI options for <code>ActCommand</code> and <code>GWCommand</code>.</li>
-</ul>
-
-<h3>Fixes</h3>
-<ul>
-  <li>Fixed <code>nonRecursive</code> mode processing.</li>
-  <li>Improved Act prompt parsing and <code>scanDir</code> resolution.</li>
-  <li>Sonar-related fixes applied via <code>gw:act</code> (<code>sonar-fix</code>).</li>
-</ul>
-
-<h3>Chores</h3>
-<ul>
-  <li>Aligned the Maven Act goal option naming/behavior for <code>acts</code> location and performed minor import optimizations.</li>
-</ul>
-        ]]>
-      </action>
-    </release>
-
-    <release version="1.0.2" date="2026-03-23">
-      <action dev="dev" type="add">
-        <![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Added unit tests for <code>gw-maven-plugin</code>.</li>
-  <li>Updated reactor build behavior to scan documents correctly in multi-module builds.</li>
-</ul>
-
-<h3>Fixes</h3>
-<ul>
-  <li>Fixed GenAI model property naming.</li>
-  <li>Fixed null-safe formatting fallback for Act input templates.</li>
-  <li>Adjusted processors to use the project directory consistently (replacing <code>gw.rootDir</code> usage; renamed <code>rootDir</code> to <code>projectDir</code>; aligned CLI option to <code>--project.dir</code>/<code>-d</code>).</li>
-</ul>
-
-<h3>Refactoring</h3>
-<ul>
-  <li>Refactored GW model variable naming and standardized line-feed handling (use <code>StringUtils.LF</code>).</li>
-</ul>
-
-<h3>Documentation</h3>
-<ul>
-  <li>Updated documentation alongside the GenAI model property rename.</li>
-</ul>
-
-<h3>Chores</h3>
-<ul>
-  <li>Removed the effective POM requirement toggle.</li>
-  <li>Updated <code>bindex.json</code> files and cleaned up Sonar comments.</li>
-  <li>Maintenance updates from automated <code>gw:gw</code> runs.</li>
-</ul>
-        ]]>
-      </action>
-    </release>
-
-    <release version="1.0.3" date="2026-03-30">
-      <action dev="dev" type="add">
-        <![CDATA[
-<h3>Features</h3>
-<ul>
-  <li>Added Maven plugin integration tests for Act/GW goals.</li>
-  <li>Improved Act handling and behavior, including prompt label casing and prompt restore in reactor executions.</li>
-</ul>
-
-<h3>Fixes</h3>
-<ul>
-  <li>Fixed property constant usage across plugin goals (including <code>logInputs</code>, Ghostwriter constants, Act constants, and line separator handling).</li>
-  <li>Fixed scan exclusion handling and deferred root scan logging.</li>
-  <li>Fixed custom/override <code>acts</code> location resolution and related Act goal logging/messages.</li>
-  <li>Fixed guidance tag definition and PlantUML Maven plugin configuration.</li>
-  <li>Removed support for <code>gw.rootProjectLast</code>.</li>
-</ul>
-
-<h3>Documentation</h3>
-<ul>
-  <li>Updated site docs, Javadoc (including overview formatting guidance), and related tests/documents.</li>
-</ul>
-
-<h3>Chores</h3>
-<ul>
-  <li>Normalized GW plugin line endings.</li>
-  <li>Updated <code>bindex.json</code> metadata files.</li>
-  <li>General maintenance updates to GenAI settings mapping and test coverage.</li>
-</ul>
-        ]]>
-      </action>
+- Integrated Ghostwriter guided file processing directly into Maven goals for repeatable source, documentation, and site updates.
+- Added prompt-driven act workflows with support for reusable act definitions and interactive input when no explicit action prompt is supplied.
+- Added execution-root and per-module goal variants for guided and act-based processing in standard Maven reactor workflows.
+- Added support for reverse-order execution-root guided processing so submodules can be processed before parent projects.
+- Added support for running the main guided goal without requiring a Maven project in the current directory.
+- Added Maven <code>settings.xml</code> integration for provider credentials and custom configuration via <code>genai.serverId</code>.
+- Added configurable processing parameters for model selection, scan roots, instructions, exclusions, act locations, prompts, threading, and input logging.
+- Added Java class discovery and reflective inspection function tools for project-aware analysis, including class matching, member metadata, source paths, and dependency artifact origins.
+- Added a cleanup goal for removing temporary Ghostwriter workflow artifacts.
+]]></action>
     </release>
   </body>
 </document>
