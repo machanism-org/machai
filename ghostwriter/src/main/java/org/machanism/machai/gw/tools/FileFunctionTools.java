@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -95,7 +98,29 @@ public class FileFunctionTools implements FunctionTools {
 		provider.addTool("get_recursive_file_list",
 				"List files recursively in a directory (includes files in subdirectories).", this::getRecursiveFiles,
 				"dir_path:string:optional:Path to the folder to list contents recursively.");
-	}
+
+		provider.addTool(
+			    "apply_patch_to_file",
+			    "Use this tool to update a small part of a file efficiently. "
+			    + "Apply a unified diff patch to a file, updating only the specified parts. "
+			    + "The patch must be in unified diff format (as produced by `diff -u` or `git diff`) and should apply only the specified change.\n"
+			    + "\n"
+			    + "**Instructions:**\n"
+			    + "- Output only the patch in unified diff format.\n"
+			    + "- Do not include any explanations or extra text.\n"
+			    + "- The patch should start with the standard diff headers (e.g., `--- filename`, `+++ filename`).\n"
+			    + "- Use `@@ -start,len +start,len @@` hunk headers.\n"
+			    + "- Include only the minimal context necessary for the patch to apply (typically 3 lines before and after the change, or less if at the start/end of the file).\n"
+			    + "- For each change, use:\n"
+			    + "  - `-` to indicate lines to be removed,\n"
+			    + "  - `+` to indicate lines to be added,\n"
+			    + "  - a space for unchanged context lines.\n"
+			    + "- Do not include unchanged parts of the file outside the minimal context.",
+			    this::applyPatchToFile,
+			    "file_path:string:required:The path to the file to be patched.",
+			    "patch:string:required:The unified diff patch to apply.",
+			    "charsetName:string:optional:The name of the requested charset. Default: " + DEFAULT_CHARSET
+			);	}
 
 	private static File resolveDirFromOptionalPath(File workingDir, JsonNode dirPathNode) {
 		if (dirPathNode == null) {
@@ -404,5 +429,26 @@ public class FileFunctionTools implements FunctionTools {
 		}
 
 		return relativePath;
+	}
+
+	private Object applyPatchToFile(JsonNode props, File workingDir) {
+		String filePath = props.get("file_path").asText();
+		String patch = props.get("patch").asText();
+		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText() : DEFAULT_CHARSET;
+		if (logger.isInfoEnabled()) {
+			logger.info("Update file: [{}, {}]", toStringFields(props, "file_path", "patch", CHARSET_NAME_FIELD),
+					workingDir);
+		}
+		logger.debug("Update file: [{}, {}]", props, workingDir);
+
+		try {
+			// Split patch into lines
+			List<String> patchLines = Arrays.asList(patch.split("\\r?\\n"));
+			// Apply patch (using the PatchApplier from previous example)
+			PatchApplier.applyPatch(filePath, patchLines, Charset.forName(charsetName));
+			return "Patch applied successfully.";
+		} catch (Exception e) {
+			return "Failed to apply patch: " + e.getMessage();
+		}
 	}
 }
