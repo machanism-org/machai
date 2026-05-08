@@ -132,7 +132,8 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 		}
 
 		if (session.getRequest().isProjectPresent()) {
-			processor.addTool(new ClassFunctionalTools(project));
+			classFunctionTools.scanProjectClasses(project);
+			processor.addTool(classFunctionTools);
 		}
 
 		try {
