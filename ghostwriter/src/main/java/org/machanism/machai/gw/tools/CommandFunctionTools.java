@@ -361,6 +361,24 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Retrieves the chunk of previously captured command output that immediately
+	 * precedes the current tail window.
+	 *
+	 * <p>
+	 * The command output is read from the persisted log file associated with the
+	 * supplied {@code commandId}. The returned substring starts at
+	 * {@code max(0, currentTailOffset - tailResultSize)} and ends at
+	 * {@code currentTailOffset}, after being clamped to the available log length.
+	 * </p>
+	 *
+	 * @param props      tool arguments containing {@code commandId},
+	 *                   {@code tailResultSize}, {@code currentTailOffset}, and an
+	 *                   optional {@code charsetName}
+	 * @param projectDir project root directory used to resolve the command log file
+	 * @return the previous log chunk, or an empty string if no earlier chunk exists
+	 * @throws IOException if the command log path cannot be resolved
+	 */
 	public Object getPreviousLogChunk(JsonNode props, File projectDir) throws IOException {
 		String commandId = props.get("commandId").asText();
 		if (logger.isInfoEnabled()) {
@@ -597,14 +615,27 @@ public class CommandFunctionTools implements FunctionTools {
 	private static final class ExecutorServiceAutoCloseable implements AutoCloseable {
 		private final ExecutorService executor;
 
+		/**
+		 * Creates a wrapper for the supplied executor service.
+		 *
+		 * @param executor executor service to expose through this closeable wrapper
+		 */
 		private ExecutorServiceAutoCloseable(ExecutorService executor) {
 			this.executor = executor;
 		}
 
+		/**
+		 * Returns the wrapped executor service.
+		 *
+		 * @return wrapped executor service
+		 */
 		private ExecutorService get() {
 			return executor;
 		}
 
+		/**
+		 * Shuts down the wrapped executor immediately.
+		 */
 		@Override
 		public void close() {
 			executor.shutdownNow();
