@@ -7,8 +7,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -16,6 +19,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
@@ -225,6 +230,21 @@ public class CommandFunctionTools implements FunctionTools {
 				"currentTailOffset:integer:required:The offset or position in the log where the current tail result starts.",
 				"charsetName:string:optional:The character encoding to use for reading log output. Default: "
 						+ DEFAULT_CHARSET);
+		provider.addTool(
+				"get_command_log_matches",
+				"Searches the command log for all text matching the provided regular expression (regexp).\n"
+						+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"
+						+ "\n"
+						+ "**Instructions:**\n"
+						+ "- Specify the command execution session identifier (`commandId`).\n"
+						+ "- Provide a valid Java regular expression (`regexp`).\n"
+						+ "- Optionally specify the character encoding for reading the log file.\n"
+						+ "- The tool returns a list of all matching text segments from the log.",
+				this::getCommandLogMatches,
+				"commandId:string:required:The identifier of the command execution session.",
+				"regexp:string:required:The Java regular expression to search for in the log.",
+				"charsetName:string:optional:The character encoding to use for reading log output. Default: "
+						+ DEFAULT_CHARSET);
 	}
 
 	/**
@@ -272,7 +292,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 *                     resolving paths
 	 */
 	public String executeCommand(JsonNode props, File projectDir) throws IOException {
-		String commandId = Integer.toHexString(RANDOM.nextInt());
+		String commandId = Long.toHexString(RANDOM.nextLong());
 		if (logger.isInfoEnabled()) {
 			logger.info("Run shell command [{}]: {}, {}", commandId, props, projectDir);
 		}
@@ -410,14 +430,70 @@ public class CommandFunctionTools implements FunctionTools {
 			if (start >= end) {
 				return ""; // No previous chunk available
 			}
-			
-			start = start > logContent.length() - 1 ? logContent.length() - 1:  start;
-			end = end > logContent.length() - 1 ? logContent.length() - 1:  end;
-			
+
+			start = start > logContent.length() - 1 ? logContent.length() - 1 : start;
+			end = end > logContent.length() - 1 ? logContent.length() - 1 : end;
+
 			return logContent.substring(start, end);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to read log file: " + e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Searches a persisted command log for all substrings matching the supplied
+	 * Java regular expression.
+	 *
+	 * @param props      tool arguments containing {@code commandId},
+	 *                   {@code regexp}, and an optional {@code charsetName}
+	 * @param projectDir project root directory used to resolve the command log file
+	 * @return a list of match descriptors, each containing the matched text, start
+	 *         and end offsets within the line, and the zero-based line number
+	 * @throws IllegalArgumentException if required parameters are missing or the
+	 *                                  log file does not exist
+	 */
+	public Object getCommandLogMatches(JsonNode props, File projectDir) {
+		String commandId = props.has("commandId") ? props.get("commandId").asText() : "";
+		String regexp = props.has("regexp") ? props.get("regexp").asText() : "";
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(DEFAULT_CHARSET)
+				: DEFAULT_CHARSET;
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Get command log matches [{}]: {}, {}", commandId, props, projectDir);
+		}
+
+		if (commandId.isEmpty() || regexp.isEmpty()) {
+			throw new IllegalArgumentException("commandId and regexp are required.");
+		}
+
+		Path logPath = LimitedStringBuilder.getCommandLogPath(projectDir, commandId);
+		if (!Files.exists(logPath)) {
+			throw new IllegalArgumentException("Log file for commandId not found: " + commandId);
+		}
+
+		List<Map<String, Object>> matches = new ArrayList<>();
+		Pattern pattern = Pattern.compile(regexp);
+
+		try {
+			List<String> lines = Files.readAllLines(logPath, Charset.forName(charsetName));
+			int lineNumber = 0;
+			for (String line : lines) {
+				Matcher matcher = pattern.matcher(line);
+				while (matcher.find()) {
+					Map<String, Object> matchInfo = new HashMap<>();
+					matchInfo.put("text", matcher.group());
+					matchInfo.put("start", matcher.start());
+					matchInfo.put("end", matcher.end());
+					matchInfo.put("line", lineNumber + 1);
+					matches.add(matchInfo);
+				}
+				lineNumber++;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to read log file: " + e.getMessage(), e);
+		}
+
+		return matches;
 	}
 
 	/**
@@ -598,6 +674,13 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Configures this tool set with the shared application configurator and
+	 * initializes the command security checker.
+	 *
+	 * @param configurator configuration source used by command and environment
+	 *                     processing
+	 */
 	@Override
 	public void setConfigurator(Configurator configurator) {
 		this.configurator = configurator;

@@ -12,13 +12,13 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter provides function tools that let a model inspect available Acts, manage project-scoped workflow state, control episode flow, read and update files in the active project, run approved shell commands, inspect previous command output, and retrieve content from web pages or REST APIs.
+Ghostwriter provides function tools that let a model work with Act templates, manage project-scoped workflow state, navigate episode-based flows, inspect and modify files inside the active project, run approved shell commands, inspect stored command logs, and fetch content from web pages or REST endpoints.
 
 ## Tool groups
 
-- **Act and workflow tools** help discover Act templates, inspect their definitions, store temporary workflow values, and control episode transitions.
+- **Act and workflow tools** help discover available Acts, inspect Act definitions, store temporary workflow values, and control episode transitions.
 - **File system tools** help read, write, patch, and enumerate files relative to the active project directory.
-- **Command and process tools** help run validated commands, review earlier command log output, and stop execution when necessary.
+- **Command and process tools** help run validated commands, inspect command log history, search command logs, and stop execution when necessary.
 - **Web and API tools** help download page content and call HTTP endpoints.
 
 ## Act and workflow tools
@@ -27,13 +27,13 @@ Ghostwriter provides function tools that let a model inspect available Acts, man
 Lists the built-in Act templates packaged with Ghostwriter.
 
 **Description**
-Use this tool when you want a quick overview of the built-in Acts that ship with Ghostwriter. It scans bundled `acts/*.toml` resources, loads each Act description, and returns a readable list of available templates.
+Use this tool when you want a quick overview of the built-in Acts that ship with Ghostwriter. It scans the bundled Act resources, reads each Act description, and returns a readable list of available templates.
 
 **Features**
-- Discovers built-in Acts bundled with the application.
+- Discovers built-in Acts packaged with the application.
 - Loads the description for each discovered Act.
-- Returns a user-friendly list instead of raw TOML files.
-- Useful when choosing an Act to inspect or run next.
+- Returns a readable list instead of raw TOML files.
+- Useful when selecting an Act to inspect next.
 
 **Input parameters**
 This tool does not take any input parameters.
@@ -42,12 +42,12 @@ This tool does not take any input parameters.
 Loads the details of a specific Act template.
 
 **Description**
-Use this tool when you need to inspect one Act in detail. It resolves the requested Act by name and returns its collected properties, such as instructions, input templates, and other configuration values. It can load the effective Act, only the custom Act, or only the built-in version.
+Use this tool when you need to inspect one Act in detail. It resolves the requested Act by name and returns collected properties such as instructions, templates, and configuration values. It can load the effective Act, only the custom Act, or only the built-in version.
 
 **Features**
 - Loads one Act by name.
 - Supports effective resolution or explicit built-in/custom lookup.
-- Returns the Act properties as structured data.
+- Returns Act properties as structured data.
 - Returns a readable message if the Act cannot be resolved.
 
 **Input parameters**
@@ -77,7 +77,7 @@ Use this tool to save a named value for the active project so later steps in the
 Retrieves a value from the current project context.
 
 **Description**
-Use this tool to read a value that was previously stored with `put_project_context_variable`. It searches the project-scoped context for the active working directory and returns the stored value or a readable message when the variable is missing.
+Use this tool to read a value that was previously stored with `put_project_context_variable`. It searches the project-scoped context for the active working directory and returns either the stored value or a readable message when the variable is missing.
 
 **Features**
 - Reads previously stored workflow values.
@@ -113,7 +113,7 @@ Use this tool when the current episode should be retried. Ghostwriter restarts t
 - Repeats the current episode.
 - Preserves project-scoped context values.
 - Useful for retry and loop-like workflow behavior.
-- Can log a custom message before the repeat happens.
+- Can emit a custom message before the repeat happens.
 
 **Input parameters**
 - `message` *(string, optional)*: Custom response message to output before repeating the episode.
@@ -187,13 +187,13 @@ Use this tool when you need a deeper inventory of files under a folder. It trave
 Applies a unified diff patch to a file.
 
 **Description**
-Use this tool when you want to update only a small section of a file instead of rewriting the entire file. It accepts a unified diff patch, applies matching hunks to the target file, and creates parent directories when needed for the output file.
+Use this tool when you want to update only a small section of a file instead of rewriting the entire file. It accepts a unified diff patch, applies matching hunks to the target file, and reports whether the patch operation succeeded.
 
 **Features**
-- Applies unified diff hunks to an existing file.
-- Can create the target file if it does not already exist.
+- Applies unified diff hunks to a target file.
 - Works best for focused, minimal file edits.
 - Supports configurable character encoding.
+- Returns a success or failure message after patch processing.
 
 **Input parameters**
 - `file_path` *(string, required)*: Path to the file to patch.
@@ -206,13 +206,14 @@ Use this tool when you want to update only a small section of a file instead of 
 Executes a system command from inside the current project.
 
 **Description**
-Use this tool to run approved shell commands for tasks such as builds, tests, or project inspection. The command runs inside the current project or one of its subdirectories, captures both standard output and error output, and returns only the tail of the collected output when the result is large.
+Use this tool to run approved shell commands for tasks such as builds, tests, or project inspection. The command runs inside the current project or one of its subdirectories, captures both standard output and error output, stores a command log, and returns only the tail of the collected output when the result is large.
 
 **Features**
 - Runs commands inside the current project tree.
 - Rejects unsafe command fragments through deny-list checks.
 - Supports custom environment variables.
 - Captures both stdout and stderr.
+- Stores command output for later inspection.
 - Limits returned output to a configurable tail size.
 - Reports the final process exit code.
 
@@ -239,6 +240,23 @@ Use this tool when a previous `run_command_line_tool` result was truncated to a 
 - `commandId` *(string, required)*: Identifier of the command execution session.
 - `tailResultSize` *(integer, required)*: Size of the earlier chunk to retrieve.
 - `currentTailOffset` *(integer, required)*: Offset where the currently visible tail starts.
+- `charsetName` *(string, optional)*: Character encoding used to read the stored log. Default: `UTF-8`.
+
+### `get_command_log_matches`
+Searches a command log by using a regular expression.
+
+**Description**
+Use this tool when you need to extract matching text fragments from the stored output of a previous command execution. It reads the saved command log, applies a Java regular expression line by line, and returns structured match details for every match.
+
+**Features**
+- Searches persisted command output with a Java regular expression.
+- Returns every match, not just the first one.
+- Includes matched text together with line and position metadata.
+- Useful for extracting errors, warnings, identifiers, or custom patterns.
+
+**Input parameters**
+- `commandId` *(string, required)*: Identifier of the command execution session.
+- `regexp` *(string, required)*: Java regular expression to search for in the log.
 - `charsetName` *(string, optional)*: Character encoding used to read the stored log. Default: `UTF-8`.
 
 ### `terminate_task`
@@ -273,6 +291,7 @@ Use this tool to download content from an HTTP or HTTPS page, or to read a local
 - Can extract matching HTML fragments with a CSS selector.
 - Can convert HTML content to readable plain text.
 - Includes the HTTP status line in the result for HTTP responses.
+- Can read local content through a `file:` URL.
 
 **Input parameters**
 - `url` *(string, required)*: URL of the page to fetch. Supports user information for Basic authentication.
@@ -286,7 +305,7 @@ Use this tool to download content from an HTTP or HTTPS page, or to read a local
 Executes a REST API call to a remote endpoint.
 
 **Description**
-Use this tool when a workflow needs to call an HTTP endpoint directly. It supports multiple HTTP methods, optional headers, and an optional request body for write-oriented operations such as `POST`, `PUT`, or `PATCH`.
+Use this tool when a workflow needs to call an HTTP endpoint directly. It supports multiple HTTP methods, optional headers, optional timeouts, and an optional request body for write-oriented operations such as `POST`, `PUT`, or `PATCH`.
 
 **Features**
 - Supports methods such as `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`.
@@ -294,6 +313,7 @@ Use this tool when a workflow needs to call an HTTP endpoint directly. It suppor
 - Can send a request body for supported methods.
 - Supports Basic authentication through URL user information.
 - Returns the HTTP status line together with the response body.
+- Uses configurable response decoding.
 
 **Input parameters**
 - `url` *(string, required)*: URL of the REST endpoint. Supports user information for Basic authentication.
