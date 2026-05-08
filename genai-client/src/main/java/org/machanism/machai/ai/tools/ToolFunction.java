@@ -7,6 +7,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Functional interface representing a tool callable by a provider during a run.
+ *
+ * <p>
+ * Implementations typically receive structured arguments parsed from a model tool
+ * invocation request together with the provider working directory context.
+ * </p>
  */
 @FunctionalInterface
 public interface ToolFunction {
@@ -14,7 +19,8 @@ public interface ToolFunction {
 	/**
 	 * Executes the tool.
 	 *
-	 * @param params provider-specific parameters
+	 * @param params provider-specific parameters, typically parsed from JSON
+	 * @param workingDir provider working directory context; may be {@code null}
 	 * @return tool result (provider-specific; commonly serialized to JSON)
 	 * @throws IOException if tool execution fails
 	 */

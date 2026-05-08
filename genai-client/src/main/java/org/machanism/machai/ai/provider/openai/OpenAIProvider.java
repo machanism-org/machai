@@ -35,7 +35,6 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
-import com.openai.core.http.Headers;
 import com.openai.models.Reasoning;
 import com.openai.models.ReasoningEffort;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
@@ -55,7 +54,6 @@ import com.openai.models.responses.ResponseInputItem.Message.Role;
 import com.openai.models.responses.ResponseOutputItem;
 import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputMessage.Content;
-import com.openai.models.responses.Tool.Mcp.ConnectorId;
 import com.openai.models.responses.ResponseOutputText;
 import com.openai.models.responses.ResponseReasoningItem;
 import com.openai.models.responses.ResponseUsage;
@@ -64,15 +62,13 @@ import com.openai.models.responses.WebSearchTool;
 import com.openai.models.responses.WebSearchTool.UserLocation;
 import com.openai.services.blocking.ModelService;
 
-/* @guidance: add to the OpenAIProvider class javadoc add information about configuration variable. */
-
 /**
  * OpenAI-backed {@link Genai} implementation.
  *
  * <p>
  * This provider adapts the MachAI provider abstraction to the OpenAI Java SDK
- * Responses API. It supports prompting, file inputs, tool/function calling, and
- * embedding generation.
+ * Responses API. It supports prompting, file inputs, tool/function calling,
+ * optional web search and MCP tools, and embedding generation.
  * </p>
  *
  * <h2>Configuration</h2>
@@ -82,7 +78,7 @@ import com.openai.services.blocking.ModelService;
  * </p>
  * <ul>
  * <li>{@code chatModel} (required): model identifier passed to the OpenAI
- * Responses API (for example, {@code gpt-4.1} or {@code gpt-4o}).</li>
+ * Responses API, for example {@code gpt-4.1} or {@code gpt-4o}.</li>
  * <li>{@code OPENAI_API_KEY} (required): API key used to authenticate with the
  * OpenAI API.</li>
  * <li>{@code OPENAI_BASE_URL} (optional): base URL for OpenAI-compatible
@@ -96,11 +92,25 @@ import com.openai.services.blocking.ModelService;
  * may issue in a single response loop. A value of {@code 0} leaves the limit
  * unset.</li>
  * <li>{@code embedding.model} (optional): embedding model identifier used by
- * {@link #embedding(String, long)}. If unset, embedding generation may fail due
- * to missing model selection.</li>
+ * {@link #embedding(String, long)}.</li>
+ * <li>{@code WebSearchTool.type} (optional): enables the built-in web search
+ * tool when present.</li>
+ * <li>{@code WebSearchTool.city} (optional): city value for the web search user
+ * location.</li>
+ * <li>{@code WebSearchTool.country} (optional): country value for the web search
+ * user location.</li>
+ * <li>{@code WebSearchTool.region} (optional): region value for the web search
+ * user location.</li>
+ * <li>{@code MCP.url}, {@code MCP.label}, {@code MCP.description},
+ * {@code MCP.authorization} (optional): registers an MCP server tool.</li>
+ * <li>{@code MCP_1.url}, {@code MCP_1.label}, {@code MCP_1.description},
+ * {@code MCP_1.authorization} and similarly numbered groups (optional):
+ * registers additional MCP server tools.</li>
  * </ul>
  */
 public class OpenAIProvider implements Genai {
+
+	private static final String MCP_PROP_NAME_PREFIX = "MCP";
 
 	/** Logger instance for this provider. */
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
@@ -145,15 +155,16 @@ public class OpenAIProvider implements Genai {
 	/** Maximum number of tool calls permitted per response. */
 	private Long maxToolCalls;
 
+	/** Configuration source used to initialize clients and provider features. */
 	private Configurator config;
 
+	/** Embedding model identifier used by {@link #embedding(String, long)}. */
 	private String embeddingModel;
 
 	/**
 	 * Initializes the provider from the given configuration.
 	 *
-	 * @param config provider configuration (must contain {@code OPENAI_API_KEY} and
-	 *               {@code chatModel})
+	 * @param config provider configuration source
 	 */
 	@Override
 	public void init(Configurator config) {
@@ -168,6 +179,9 @@ public class OpenAIProvider implements Genai {
 		addMcpServer();
 	}
 
+	/**
+	 * Adds the built-in OpenAI web search tool when configured.
+	 */
 	public void addWebSearch() {
 		String type = config.get("WebSearchTool.type", null);
 		String city = config.get("WebSearchTool.city", null);
@@ -199,30 +213,44 @@ public class OpenAIProvider implements Genai {
 		}
 	}
 
+	/**
+	 * Adds one or more MCP server tools from configuration.
+	 */
 	public void addMcpServer() {
-		String url = config.get("MCP.url", null);
-		String label = config.get("MCP.label", null);
-		String description = config.get("MCP.description", null);
-		String authorization = config.get("MCP.authorization", null);
+		int i = 0;
+		String url = null;
+		do {
+			String id = "";
 
-		if (url != null) {
-			com.openai.models.responses.Tool.Mcp.Builder builder = Tool.Mcp.builder();
-			builder.serverUrl(url);
-
-			if (label != null) {
-				builder.serverLabel(label);
-			}
-			if (description != null) {
-				builder.serverDescription(description);
+			if (i > 0) {
+				id = "_" + i;
 			}
 
-			if (authorization != null) {
-				builder.authorization(authorization);
+			String propName = MCP_PROP_NAME_PREFIX + id;
+			url = config.get(propName + ".url", null);
+			String label = config.get(propName + ".label", null);
+			String description = config.get(propName + ".description", null);
+			String authorization = config.get(propName + ".authorization", null);
+
+			if (url != null) {
+				com.openai.models.responses.Tool.Mcp.Builder builder = Tool.Mcp.builder();
+				builder.serverUrl(url);
+
+				if (label != null) {
+					builder.serverLabel(label);
+				}
+				if (description != null) {
+					builder.serverDescription(description);
+				}
+				if (authorization != null) {
+					builder.authorization(authorization);
+				}
+
+				Tool tool = Tool.ofMcp(builder.build());
+				toolMap.put(tool, null);
 			}
 
-			Tool tool = Tool.ofMcp(builder.build());
-			toolMap.put(tool, null);
-		}
+		} while (url != null || i++ == 0);
 	}
 
 	/**
@@ -246,8 +274,8 @@ public class OpenAIProvider implements Genai {
 	 * produced.
 	 * </p>
 	 *
-	 * @return the final model response text (may be {@code null} if no text was
-	 *         produced)
+	 * @return the final model response text, or {@code null} if no text was
+	 *         produced
 	 */
 	@Override
 	public String perform() {
@@ -330,6 +358,12 @@ public class OpenAIProvider implements Genai {
 		return null;
 	}
 
+	/**
+	 * Records a function call in the conversation, executes it, and appends the
+	 * resulting function output item.
+	 *
+	 * @param functionCall the function call returned by the model
+	 */
 	private void handleFunctionCall(ResponseFunctionToolCall functionCall) {
 		inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
@@ -340,6 +374,12 @@ public class OpenAIProvider implements Genai {
 				.callId(functionCall.callId()).outputAsJson(callFunction).build()));
 	}
 
+	/**
+	 * Extracts reasoning text from a response output item when present.
+	 *
+	 * @param item response output item
+	 * @return reasoning text, or {@code null} when unavailable
+	 */
 	private String extractReasoningText(ResponseOutputItem item) {
 		if (!item.isReasoning()) {
 			return null;
@@ -350,6 +390,12 @@ public class OpenAIProvider implements Genai {
 		return maybeContent.map(this::firstNonBlankReasoning).orElse(null);
 	}
 
+	/**
+	 * Returns the first non-blank reasoning fragment.
+	 *
+	 * @param contents reasoning content fragments
+	 * @return first non-blank reasoning text, or {@code null} when none exists
+	 */
 	private String firstNonBlankReasoning(List<com.openai.models.responses.ResponseReasoningItem.Content> contents) {
 		for (com.openai.models.responses.ResponseReasoningItem.Content content : contents) {
 			String reasoning = content.text();
@@ -361,6 +407,12 @@ public class OpenAIProvider implements Genai {
 		return null;
 	}
 
+	/**
+	 * Extracts text content from a message output item.
+	 *
+	 * @param item response output item
+	 * @return message text, or {@code null} when unavailable
+	 */
 	private String extractMessageText(ResponseOutputItem item) {
 		if (!item.isMessage()) {
 			return null;
@@ -385,6 +437,12 @@ public class OpenAIProvider implements Genai {
 		return null;
 	}
 
+	/**
+	 * Builds the request parameters for the OpenAI Responses API.
+	 *
+	 * @param inputs input items to send
+	 * @return immutable request parameters
+	 */
 	private ResponseCreateParams createResponseBuilder(List<ResponseInputItem> inputs) {
 		Builder builder = ResponseCreateParams.builder().model(chatModel);
 
@@ -461,15 +519,39 @@ public class OpenAIProvider implements Genai {
 		}
 	}
 
+	/**
+	 * Compares a requested tool name with a registered tool name using normalized,
+	 * case-insensitive matching.
+	 *
+	 * @param toolName requested tool name
+	 * @param tool     registered tool
+	 * @return {@code true} when both names match after normalization
+	 */
 	private boolean hasSameToolName(String toolName, Tool tool) {
 		// Sonar java:S1874: avoid deprecated StringUtils equality helpers.
 		return normalize(toolName).equals(normalize(tool.asFunction().name()));
 	}
 
+	/**
+	 * Normalizes a string for case-insensitive comparisons.
+	 *
+	 * @param value source value
+	 * @return lower-cased value, or an empty string when the input is {@code null}
+	 */
 	private String normalize(String value) {
 		return StringUtils.defaultString(value).toLowerCase(Locale.ROOT);
 	}
 
+	/**
+	 * Safely invokes a tool function and converts {@link IOException}s into a
+	 * textual error payload suitable for the model conversation.
+	 *
+	 * @param name       tool name
+	 * @param tool       tool handler
+	 * @param params     parsed tool parameters
+	 * @param workingDir working directory passed to the tool
+	 * @return tool output or a formatted error message
+	 */
 	private Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File workingDir) {
 		try {
 			return tool.apply(params, workingDir);
@@ -499,6 +581,12 @@ public class OpenAIProvider implements Genai {
 		}
 	}
 
+	/**
+	 * Serializes the current instructions and input items to the supplied writer.
+	 *
+	 * @param streamWriter destination writer
+	 * @throws IOException when writing fails
+	 */
 	private void logInputs(Writer streamWriter) throws IOException {
 		streamWriter.write(StringUtils.defaultString(instructions));
 		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
@@ -579,6 +667,12 @@ public class OpenAIProvider implements Genai {
 		toolMap.put(tool, function);
 	}
 
+	/**
+	 * Determines whether the supplied parameter flag marks a required parameter.
+	 *
+	 * @param parameterFlag descriptor flag value
+	 * @return {@code true} when the flag equals {@code required}, ignoring case
+	 */
 	private boolean isRequiredParameter(String parameterFlag) {
 		// Sonar java:S1874: avoid deprecated StringUtils equality helpers.
 		return normalize(parameterFlag).equals("required");
@@ -587,7 +681,7 @@ public class OpenAIProvider implements Genai {
 	/**
 	 * Sets system-level instructions applied to subsequent requests.
 	 *
-	 * @param instructions instruction text (may be {@code null} to clear)
+	 * @param instructions instruction text, or {@code null} to clear
 	 */
 	@Override
 	public void instructions(String instructions) {
@@ -597,7 +691,7 @@ public class OpenAIProvider implements Genai {
 	/**
 	 * Enables request input logging to the given file.
 	 *
-	 * @param inputsLog file for input logging (may be {@code null} to disable)
+	 * @param inputsLog file for input logging, or {@code null} to disable
 	 */
 	@Override
 	public void inputsLog(File inputsLog) {
@@ -607,7 +701,7 @@ public class OpenAIProvider implements Genai {
 	/**
 	 * Sets the working directory passed to tool handlers.
 	 *
-	 * @param workingDir working directory (may be {@code null})
+	 * @param workingDir working directory, or {@code null}
 	 */
 	@Override
 	public void setWorkingDir(File workingDir) {
@@ -670,7 +764,7 @@ public class OpenAIProvider implements Genai {
 	}
 
 	/**
-	 * Sets a request timeout (in seconds) for new clients created by this provider.
+	 * Sets a request timeout in seconds for new clients created by this provider.
 	 *
 	 * @param timeout timeout in seconds; use {@code 0} to use SDK defaults
 	 */
