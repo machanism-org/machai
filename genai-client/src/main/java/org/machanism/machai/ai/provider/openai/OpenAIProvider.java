@@ -54,10 +54,12 @@ import com.openai.models.responses.ResponseInputItem.Message.Role;
 import com.openai.models.responses.ResponseOutputItem;
 import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputMessage.Content;
+import com.openai.models.responses.WebSearchTool.UserLocation;
 import com.openai.models.responses.ResponseOutputText;
 import com.openai.models.responses.ResponseReasoningItem;
 import com.openai.models.responses.ResponseUsage;
 import com.openai.models.responses.Tool;
+import com.openai.models.responses.WebSearchTool;
 import com.openai.services.blocking.ModelService;
 
 /* @guidance: add to the OpenAIProvider class javadoc add information about configuration variable. */
@@ -159,6 +161,35 @@ public class OpenAIProvider implements Genai {
 		maxOutputTokens = config.getLong("MAX_OUTPUT_TOKENS", MAX_OUTPUT_TOKENS);
 		maxToolCalls = config.getLong("MAX_TOOL_CALLS", 0L);
 		embeddingModel = config.get("embedding.model", null);
+
+		addWebSearch(config.get("WebSearchTool.type", null), config.get("WebSearchTool.city", null),
+				config.get("WebSearchTool.country", null), config.get("WebSearchTool.region", null));
+	}
+
+	public void addWebSearch(String type, String city, String country, String region) {
+		if (type != null) {
+			UserLocation.Builder location = UserLocation.builder();
+			location.type(WebSearchTool.UserLocation.Type.APPROXIMATE);
+
+			com.openai.models.responses.WebSearchTool.Builder webSearch = WebSearchTool.builder()
+					.type(WebSearchTool.Type.of(type));
+
+			if (city != null) {
+				location.city(city);
+			}
+
+			if (country != null) {
+				location.country(country);
+			}
+
+			if (region != null) {
+				location.region(region);
+			}
+
+			webSearch.userLocation(location.build());
+			Tool tool = Tool.ofWebSearch(webSearch.build());
+			toolMap.put(tool, null);
+		}
 	}
 
 	/**
@@ -335,7 +366,8 @@ public class OpenAIProvider implements Genai {
 			builder.reasoning(Reasoning.builder().effort(ReasoningEffort.NONE).build());
 		}
 
-		return builder.tools(new ArrayList<>(toolMap.keySet())).build();
+		builder.tools(new ArrayList<>(toolMap.keySet()));
+		return builder.build();
 	}
 
 	/**
@@ -385,7 +417,7 @@ public class OpenAIProvider implements Genai {
 			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
 			Object result = null;
 			for (Entry<Tool, ToolFunction> entry : entrySet) {
-				if (hasSameToolName(name, entry.getKey())) {
+				if (entry.getValue() != null && hasSameToolName(name, entry.getKey())) {
 					result = safelyInvokeTool(name, entry.getValue(), params, file);
 					break;
 				}
