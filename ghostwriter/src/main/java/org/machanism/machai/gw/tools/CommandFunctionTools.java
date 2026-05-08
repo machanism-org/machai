@@ -172,18 +172,27 @@ public class CommandFunctionTools implements FunctionTools {
 	public void applyTools(Genai provider) {
 		provider.addTool(
 				"run_command_line_tool",
-				"Executes a system command using Java's ProcessBuilder for controlled and secure execution. "
-						+ "Only explicitly allowed commands can be executed for security reasons. "
-						+ "Supports setting environment variables, working directory, output tail size, and character encoding.",
+				"Executes a system command using Java's ProcessBuilder for controlled and secure execution.\n"
+						+ "Only explicitly allowed commands can be executed for security reasons.\n"
+						+ "Supports setting environment variables, working directory, output tail size, and character encoding.\n"
+						+ "\n"
+						+ "**Shell Execution Instructions:**\n"
+						+ "- For Windows, always wrap your command with `cmd /c` (e.g., `cmd /c your-command`).\n"
+						+ "- For Unix/Linux, always wrap your command with `sh -c` (e.g., `sh -c 'your-command'`).\n"
+						+ "- This ensures the command is executed within the appropriate system shell, enabling features like piping, redirection, and environment variable expansion.\n"
+						+ "- If you do not use the correct shell wrapper, your command may fail or behave unexpectedly.\n"
+						+ "\n"
+						+ "Examples:\n"
+						+ "- Windows: `cmd /c dir`\n"
+						+ "- Unix/Linux: `sh -c 'ls -la | grep .java'`\n",
 				this::executeCommand,
-				"command:string:required:The command to execute.",
+				"command:string:required:The command to execute. Must be wrapped as described above for your OS.",
 				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). If omitted, the subprocess inherits the current process environment.",
 				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. If omitted, the current project directory is used.",
 				"tailResultSize:integer:optional:The maximum number of characters to display from the end of the command output. If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
 						+ DEFAULT_RESULT_TAIL_SIZE,
 				"charsetName:string:optional:The character encoding to use for reading command output. Default: "
 						+ DEFAULT_CHARSET);
-
 		provider.addTool("terminate_process",
 				"Throws an exception to immediately terminate the process. Useful for signaling fatal errors or controlled shutdowns from within a function tool. Supports specifying a custom exit code.",
 				this::terminateProcess,

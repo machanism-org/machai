@@ -175,4 +175,48 @@ public class PatchApplierTest {
         List<String> resultLines = Files.readAllLines(targetFile, StandardCharsets.UTF_8);
         assertEquals(expectedLines, resultLines);
     }
+
+    @Test
+    void testContentMatchReplacement() throws IOException {
+        Path targetFile = tempDir.resolve("content_match.txt");
+        List<String> originalLines = Arrays.asList(
+                "Line 1", "Line 2", "Target A", "Target B", "Line 5"
+        );
+        Files.write(targetFile, originalLines, StandardCharsets.UTF_8);
+
+        List<String> patchLines = Arrays.asList(
+                "@@ -100,2 +100,2 @@",
+                " Target A",
+                "-Target B",
+                "+Target B updated"
+        );
+
+        PatchApplier.applyPatch(targetFile.toString(), patchLines, StandardCharsets.UTF_8);
+
+        List<String> expectedLines = Arrays.asList("Line 1", "Line 2", "Target A", "Target B updated", "Line 5");
+        List<String> resultLines = Files.readAllLines(targetFile, StandardCharsets.UTF_8);
+        assertEquals(expectedLines, resultLines);
+    }
+
+    @Test
+    void testContentMatchAddition() throws IOException {
+        Path targetFile = tempDir.resolve("content_match_add.txt");
+        List<String> originalLines = Arrays.asList(
+                "Line 1", "Line 2", "Target A", "Target B", "Line 5"
+        );
+        Files.write(targetFile, originalLines, StandardCharsets.UTF_8);
+
+        List<String> patchLines = Arrays.asList(
+                "@@ -100,2 +100,3 @@",
+                " Target A",
+                " Target B",
+                "+Target C"
+        );
+
+        PatchApplier.applyPatch(targetFile.toString(), patchLines, StandardCharsets.UTF_8);
+
+        List<String> expectedLines = Arrays.asList("Line 1", "Line 2", "Target A", "Target B", "Target C", "Line 5");
+        List<String> resultLines = Files.readAllLines(targetFile, StandardCharsets.UTF_8);
+        assertEquals(expectedLines, resultLines);
+    }
 }
