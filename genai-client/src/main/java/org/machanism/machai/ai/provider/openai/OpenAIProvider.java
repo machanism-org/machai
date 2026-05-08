@@ -164,14 +164,16 @@ public class OpenAIProvider implements Genai {
 		maxToolCalls = config.getLong("MAX_TOOL_CALLS", 0L);
 		embeddingModel = config.get("embedding.model", null);
 
-		addWebSearch(config.get("WebSearchTool.type", null), config.get("WebSearchTool.city", null),
-				config.get("WebSearchTool.country", null), config.get("WebSearchTool.region", null));
-
-		addMcpServer(config.get("MCP.url", null), config.get("MCP.label", null), config.get("MCP.description", null),
-				config.get("MCP.authorization", null));
+		addWebSearch();
+		addMcpServer();
 	}
 
-	public void addWebSearch(String type, String city, String country, String region) {
+	public void addWebSearch() {
+		String type = config.get("WebSearchTool.type", null);
+		String city = config.get("WebSearchTool.city", null);
+		String country = config.get("WebSearchTool.country", null);
+		String region = config.get("WebSearchTool.region", null);
+
 		if (type != null) {
 			UserLocation.Builder location = UserLocation.builder();
 			location.type(WebSearchTool.UserLocation.Type.APPROXIMATE);
@@ -197,7 +199,12 @@ public class OpenAIProvider implements Genai {
 		}
 	}
 
-	public void addMcpServer(String url, String label, String description, String authorization) {
+	public void addMcpServer() {
+		String url = config.get("MCP.url", null);
+		String label = config.get("MCP.label", null);
+		String description = config.get("MCP.description", null);
+		String authorization = config.get("MCP.authorization", null);
+
 		if (url != null) {
 			com.openai.models.responses.Tool.Mcp.Builder builder = Tool.Mcp.builder();
 			builder.serverUrl(url);

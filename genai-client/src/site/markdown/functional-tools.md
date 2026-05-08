@@ -2,6 +2,7 @@
 <!-- @guidance: 
 Create the `Function Tolls` page:
 - Analyze classes in the folder: `src/main/java/org/machanism/machai/ai/tools`.
+- Analize methods: addMcpServer() and addWebSearch() in the class `/src/main/java/org/machanism/machai/ai/provider/openai/OpenAIProvider.java` and describe toml acl configuration properties for use it.
 - Describe the feature.
 - Write a general description how to create a custom functional tool.
 - Organize your output so that each act is easy to identify and understand.
@@ -12,142 +13,216 @@ canonical: https://machai.machanism.org/genai-client/functional-tools.html
 
 # Functional Tools
 
-Functional tools allow the host application to expose selected local capabilities to a `Genai` provider as callable tools. This keeps provider integrations focused on model communication while tool-specific behavior is implemented, discovered, and registered through a dedicated extension mechanism.
+Functional tools let the host application expose selected local capabilities to a `Genai` provider as callable tools. They are the integration layer between the AI model and controlled application-side actions such as file access, HTTP calls, command execution, or custom business operations.
 
-These tools are useful when AI-assisted workflows need controlled access to host-side operations such as file handling, HTTP requests, command execution, or other application-defined actions.
+The feature is built around the package `org.machanism.machai.ai.tools` and the OpenAI provider support in `OpenAIProvider`. Together, these pieces allow the application to discover tool installers, pass configuration into them, register callable functions, and optionally attach OpenAI-native tools such as web search and MCP servers.
 
 ## Feature overview
 
-The `org.machanism.machai.ai.tools` package defines the infrastructure for:
+The functional tools feature provides:
 
-- contributing tool installers,
-- discovering them automatically with Java `ServiceLoader`,
-- optionally injecting runtime configuration,
-- and registering executable tool functions with a `Genai` provider.
+- a standard interface for contributing tool sets,
+- a runtime loader based on Java `ServiceLoader`,
+- a function contract for executable tool logic,
+- configuration placeholder resolution for tool setup,
+- registration of host-managed tools through `Genai.addTool(...)`,
+- and OpenAI-specific support for native tools configured from TOML properties.
 
-In practice, this means the application can add or remove tool sets without changing the core provider integration code.
+This design keeps provider communication separate from application-specific capabilities. The provider focuses on talking to the model, while tool implementations focus on what the host application can safely do.
 
-## Package contents
+## Package `org.machanism.machai.ai.tools`
+
+The package contains the core infrastructure for functional tools.
 
 ### `FunctionTools`
 
-`FunctionTools` is the main extension interface for contributing one or more functional tools.
+`FunctionTools` is the main extension interface for contributing one or more tools to a provider.
 
-#### Purpose
+#### What it does
 
-Use this interface when you want to package related tool registrations into a reusable installer that can be discovered automatically.
+A class implementing `FunctionTools` acts as a tool installer. Its job is to register one or more tools with a `Genai` instance inside `applyTools(Genai provider)`.
 
-#### Main responsibilities
+#### Key methods
 
-- Register tools with a provider through `applyTools(Genai provider)`.
-- Optionally accept a `Configurator` through `setConfigurator(Configurator configurator)`.
-- Resolve configuration placeholders with `replace(String value, Configurator conf)`.
+- `applyTools(Genai provider)` registers the tools exposed by that implementation.
+- `setConfigurator(Configurator configurator)` optionally receives configuration before tool registration.
+- `replace(String value, Configurator conf)` resolves `${...}` placeholders using values from the configurator.
 
 #### Important behavior
 
-The `replace(...)` helper scans text for `${...}` placeholders and tries to resolve them from the provided `Configurator`.
+The default `replace(...)` method performs repeated placeholder resolution for up to 10 passes.
 
-- If a placeholder can be resolved, the value is substituted.
-- If a placeholder cannot be resolved, it remains unchanged.
-- Resolution is repeated for multiple passes, which allows nested configuration values to be expanded.
-- If no `Configurator` is available, the original value is returned as-is.
+- If a placeholder has a matching configuration value, it is replaced.
+- If a placeholder cannot be resolved, it stays unchanged.
+- Nested or chained configuration values can be expanded across multiple passes.
+- If no configurator is available, the original string is returned unchanged.
 
-#### When to use it
+This is useful for tool installers that need configurable endpoints, headers, tokens, labels, or other runtime values.
 
-Use `FunctionTools` when you need a clean, reusable way to register one or more host-side tools such as:
+#### Typical use case
 
-- a file utility tool set,
-- an internal service integration,
-- a project automation tool,
-- a command execution helper,
-- or any application-specific action exposed to the model.
+Use `FunctionTools` when you want to package a related set of capabilities, such as:
+
+- REST utility tools,
+- file system helpers,
+- project automation functions,
+- command-line wrappers,
+- or domain-specific integration tools.
 
 ### `FunctionToolsLoader`
 
-`FunctionToolsLoader` is the runtime loader responsible for discovering and applying all available `FunctionTools` implementations.
+`FunctionToolsLoader` is the runtime loader that discovers and applies all available `FunctionTools` implementations.
 
-#### Purpose
+#### What it does
 
-It acts as the central entry point for installing functional tools into a `Genai` provider.
+It uses Java `ServiceLoader` to scan the classpath for implementations of `FunctionTools`, stores them, optionally injects configuration, and applies them to a provider.
 
-#### Main responsibilities
+#### Key methods
 
-- Discover `FunctionTools` implementations from the classpath using `ServiceLoader`.
-- Expose a singleton instance through `getInstance()`.
-- Pass shared configuration to all discovered implementations through `setConfiguration(Configurator configurator)`.
-- Apply each discovered tool installer to a provider through `applyTools(Genai provider)`.
+- `getInstance()` returns the singleton loader.
+- `setConfiguration(Configurator configurator)` passes shared configuration to all discovered installers.
+- `applyTools(Genai provider)` calls `applyTools(...)` on each discovered installer.
 
 #### Important behavior
 
-When the loader is created, it scans the classpath for service implementations of `FunctionTools`. Each discovered implementation is stored and later reused when configuration is set or tools are applied.
+Discovery happens when the singleton loader is created. Every implementation listed in the Java service registration file can then be configured and applied in discovery order.
 
-#### When to use it
+#### Typical use case
 
-Use `FunctionToolsLoader` during application startup or provider initialization when you want all available tool installers to be discovered and registered automatically.
+Use `FunctionToolsLoader` during application startup or provider initialization when you want all functional tool installers on the classpath to be activated automatically.
 
 ### `ToolFunction`
 
-`ToolFunction` is the functional interface representing the executable logic behind a registered tool.
+`ToolFunction` is the functional interface for the executable logic behind a registered tool.
 
-#### Purpose
+#### What it does
 
-It provides the callable operation that runs when the provider invokes a tool.
+It represents the callback that is executed when the provider invokes a host-managed function tool.
 
-#### Main responsibilities
-
-- Accept tool parameters as a Jackson `JsonNode`.
-- Receive the current working directory as a `File`.
-- Execute the requested host-side operation.
-- Return a provider-specific result object.
-- Allow failures to be reported through `IOException`.
-
-#### Method shape
-
-A `ToolFunction` implementation uses this contract:
+#### Method contract
 
 ```java
 Object apply(JsonNode params, File workingDir) throws IOException;
 ```
 
-#### When to use it
+#### Parameters and return value
 
-Use `ToolFunction` when implementing the actual action a tool should perform, especially when tool input is naturally expressed as structured JSON and execution may depend on the working directory.
+- `params` contains the tool arguments as JSON.
+- `workingDir` gives the current working directory context.
+- The return value is provider-specific and is typically serialized back to the model.
+- `IOException` allows tool execution failures to be reported.
 
-## How the feature works
+#### Typical use case
 
-The functional tools mechanism typically follows this flow:
+Use `ToolFunction` when implementing the actual action performed by a tool, especially when the input is structured JSON and execution may need access to the current project directory.
+
+## How functional tools work
+
+A typical execution flow looks like this:
 
 1. Create one or more classes that implement `FunctionTools`.
-2. Register those classes through Java `ServiceLoader`.
-3. Start the application and obtain `FunctionToolsLoader.getInstance()`.
-4. Provide configuration with `setConfiguration(...)` if needed.
-5. Apply discovered tool installers to the active `Genai` provider with `applyTools(...)`.
-6. Let the provider call the registered `ToolFunction` implementations when a tool is invoked.
+2. Register them through Java `ServiceLoader`.
+3. Initialize the AI provider.
+4. Pass configuration to `FunctionToolsLoader`.
+5. Apply all discovered tools to the provider.
+6. When the model issues a function call, the provider executes the matching `ToolFunction`.
+7. The tool result is returned to the provider and can be fed back into the conversation.
 
-This design separates tool registration from provider logic and makes local capabilities easier to extend, test, and maintain.
+This separation makes tool registration modular, reusable, and easier to maintain.
 
-## Typical use cases
+## OpenAI provider support for native tools
 
-Functional tools are a good fit when a model needs controlled access to host-side capabilities such as:
+The OpenAI implementation also supports two OpenAI-native tool types configured directly from provider properties:
 
-- reading or processing local project files,
-- invoking local automation commands,
-- calling internal or external HTTP services,
-- gathering environment-specific information,
-- integrating with application APIs,
-- or performing targeted utility actions during a model interaction.
+- web search via `addWebSearch()`,
+- and MCP server registration via `addMcpServer()`.
+
+These tools are not registered through `Genai.addTool(...)` callbacks. Instead, they are added to the provider tool list as OpenAI-native tool definitions.
+
+## OpenAI web search configuration
+
+The method `addWebSearch()` reads configuration values from the provider `Configurator` and, when enabled, registers an OpenAI `WebSearchTool`.
+
+### How it works
+
+The method reads these properties:
+
+- `WebSearchTool.type`
+- `WebSearchTool.city`
+- `WebSearchTool.country`
+- `WebSearchTool.region`
+
+If `WebSearchTool.type` is set, the provider creates a web search tool and attaches an approximate user location object. The city, country, and region values are optional and are only added when present.
+
+### TOML configuration properties
+
+Use properties like the following in your TOML configuration:
+
+```toml
+WebSearchTool.type = "web_search_preview"
+WebSearchTool.city = "Prague"
+WebSearchTool.country = "CZ"
+WebSearchTool.region = "Prague"
+```
+
+### Property reference
+
+- `WebSearchTool.type`: enables the feature and sets the OpenAI web search tool type.
+- `WebSearchTool.city`: optional city value for approximate user location.
+- `WebSearchTool.country`: optional country value for approximate user location.
+- `WebSearchTool.region`: optional region or state value for approximate user location.
+
+### When to use it
+
+Use web search when model responses should be able to incorporate current public web information rather than relying only on the model’s built-in knowledge.
+
+## OpenAI MCP server configuration
+
+The method `addMcpServer()` reads configuration values from the provider `Configurator` and, when enabled, registers an OpenAI MCP tool definition.
+
+### How it works
+
+The method reads these properties:
+
+- `MCP.url`
+- `MCP.label`
+- `MCP.description`
+- `MCP.authorization`
+
+If `MCP.url` is set, the provider creates an MCP tool entry pointing to that server. The label, description, and authorization values are optional and are included only when configured.
+
+### TOML configuration properties
+
+Use properties like the following in your TOML configuration:
+
+```toml
+MCP.url = "https://example.org/mcp"
+MCP.label = "Project MCP"
+MCP.description = "MCP server for project-specific tools"
+MCP.authorization = "Bearer your-token"
+```
+
+### Property reference
+
+- `MCP.url`: enables MCP support and sets the server URL.
+- `MCP.label`: optional human-readable server label.
+- `MCP.description`: optional server description.
+- `MCP.authorization`: optional authorization value sent to the MCP endpoint.
+
+### When to use it
+
+Use MCP when you want the OpenAI provider to connect to an external Model Context Protocol server that exposes additional tools outside the local Java process.
 
 ## How to create a custom functional tool
 
-To create a custom functional tool, implement `FunctionTools`, register it for discovery, and add one or more provider tools inside `applyTools(...)`.
+To create a custom host-managed tool, implement `FunctionTools`, register it for discovery, and add tools through the provider.
 
-### Step 1: Create a `FunctionTools` implementation
+### Step 1: Create a tool installer
 
 ```java
 package com.example.tools;
 
 import java.io.File;
-import java.io.IOException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -168,21 +243,28 @@ public class ExampleFunctionTools implements FunctionTools {
     public void applyTools(Genai provider) {
         provider.addTool(
             "example_tool",
-            "Processes a text value and returns a simple response.",
+            "Processes an input value and returns a simple response.",
             (JsonNode params, File workingDir) -> {
                 String input = params != null && params.has("input") ? params.get("input").asText() : "";
-                return "Processed: " + input;
+                String prefix = replace("${example.prefix}", configurator);
+                return prefix + input;
             },
-            "input",
-            "Text value to process"
+            "input:string:required:Text value to process"
         );
     }
 }
 ```
 
+This example shows the most common pattern:
+
+- store the configurator if your tools need runtime values,
+- register tools inside `applyTools(...)`,
+- define a clear tool name and description,
+- and implement the tool body as a `ToolFunction` lambda.
+
 ### Step 2: Register the implementation with `ServiceLoader`
 
-Create the following file:
+Create this service registration file:
 
 `src/main/resources/META-INF/services/org.machanism.machai.ai.tools.FunctionTools`
 
@@ -192,9 +274,9 @@ Add the fully qualified class name of your implementation:
 com.example.tools.ExampleFunctionTools
 ```
 
-If the file contains multiple implementation names, each discovered installer can be applied by the loader.
+If the file contains multiple implementation names, all of them can be discovered and applied.
 
-### Step 3: Apply the tools at runtime
+### Step 3: Apply tools at runtime
 
 ```java
 Configurator conf = ...;
@@ -205,36 +287,45 @@ loader.setConfiguration(conf);
 loader.applyTools(provider);
 ```
 
-### Step 4: Resolve configuration values when needed
+### Step 4: Understand parameter descriptors
 
-If your tool needs runtime values such as endpoints, tokens, headers, or feature flags, store the provided `Configurator` and use the `replace(...)` helper.
+The OpenAI provider method `addTool(String name, String description, ToolFunction function, String... paramsDesc)` expects parameter descriptors in this format:
 
-```java
-String endpoint = replace("${my.service.url}", configurator);
+```text
+name:type:required:description
 ```
 
-If `${my.service.url}` cannot be resolved, it remains unchanged.
+Example:
+
+```text
+input:string:required:Text value to process
+limit:integer:optional:Maximum number of items
+```
+
+From these descriptors, the provider builds a JSON Schema object for the tool parameters and marks any parameter with `required` as required in the schema.
 
 ## Practical design guidance
 
-When implementing custom functional tools, follow these recommendations:
+When building custom tools, follow these recommendations:
 
-- Use stable, descriptive tool names.
-- Keep each tool focused on one clear responsibility.
-- Write short descriptions that help the provider choose the right tool.
-- Validate incoming JSON parameters before using them.
-- Use the supplied working directory intentionally and safely.
-- Prefer configuration-based values over hard-coded environment details.
+- Use short, stable, descriptive tool names.
+- Keep each tool focused on a single responsibility.
+- Validate JSON input before using it.
+- Use the provided `workingDir` carefully and intentionally.
+- Prefer configuration over hard-coded environment values.
+- Use `replace(...)` when runtime values may contain `${...}` placeholders.
+- Return results in a format that the provider and model can interpret easily.
 - Handle `IOException` and other failures in a predictable way.
-- Apply security controls before exposing file, command, or network operations.
-- Return results in a format that is easy for the provider and model to interpret.
+- Apply security controls before exposing file, command, or network access.
 
-## Choosing the right type
+## When to choose each mechanism
 
-- Use `FunctionTools` to define and register a reusable set of related tools.
-- Use `FunctionToolsLoader` to discover all available tool installers and apply them centrally.
-- Use `ToolFunction` to implement the executable body of a single registered tool.
+- Use `FunctionTools` for host-managed Java tools registered through `Genai.addTool(...)`.
+- Use `FunctionToolsLoader` to discover and apply all tool installers centrally.
+- Use `ToolFunction` for the executable body of a host-managed tool.
+- Use `addWebSearch()` when you want the OpenAI provider to expose OpenAI web search.
+- Use `addMcpServer()` when you want the OpenAI provider to expose an external MCP server.
 
 ## Summary
 
-The `org.machanism.machai.ai.tools` package provides the extension layer for host-managed tool capabilities in the `GenAI Client`. It enables the application to discover tool installers, inject configuration, register callable functions, and expose controlled local behavior to a `Genai` provider in a structured and extensible way.
+The functional tools feature gives the `GenAI Client` a structured way to expose controlled capabilities to AI providers. The `org.machanism.machai.ai.tools` package handles discovery, configuration, and registration of host-managed tools, while `OpenAIProvider` adds support for OpenAI-native web search and MCP server tools through TOML configuration. Together, these mechanisms make the platform extensible, configurable, and practical for real-world AI-assisted workflows.
