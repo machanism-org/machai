@@ -382,7 +382,7 @@ public class CommandFunctionTools implements FunctionTools {
 	public Object getPreviousLogChunk(JsonNode props, File projectDir) throws IOException {
 		String commandId = props.get("commandId").asText();
 		if (logger.isInfoEnabled()) {
-			logger.info("Run shell command [{}]: {}, {}", commandId, props, projectDir);
+			logger.info("Get log chunk [{}]: {}, {}", commandId, props, projectDir);
 		}
 
 		Integer tailResultSize = props.has("tailResultSize")
