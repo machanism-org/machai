@@ -15,7 +15,7 @@ class LimitedStringBuilderTest {
 
 		// Act
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new LimitedStringBuilder(invalidSize));
+				() -> new LimitedStringBuilder(invalidSize, null, null));
 
 		// Assert
 		assertEquals("maxSize must be positive", exception.getMessage());
@@ -24,7 +24,7 @@ class LimitedStringBuilderTest {
 	@Test
 	void appendShouldIgnoreNullAndSupportFluentUsage() {
 		// Arrange
-		LimitedStringBuilder builder = new LimitedStringBuilder(5);
+		LimitedStringBuilder builder = new LimitedStringBuilder(5, null, null);
 
 		// Act
 		LimitedStringBuilder returned = builder.append(null).append("abc");
@@ -38,20 +38,20 @@ class LimitedStringBuilderTest {
 	@Test
 	void appendShouldKeepOnlyLastCharactersWhenTextExceedsLimit() {
 		// Arrange
-		LimitedStringBuilder builder = new LimitedStringBuilder(5);
+		LimitedStringBuilder builder = new LimitedStringBuilder(5, null, null);
 
 		// Act
 		builder.append("ab").append("cdefgh");
 
 		// Assert
 		assertEquals(5, builder.length());
-		assertEquals("(Previous content has been truncated)...defgh", builder.getLastText());
+		assertEquals("(Previous content has been truncated, commandId: `null`)...defgh", builder.getLastText());
 	}
 
 	@Test
 	void clearShouldRemoveContentAndResetTruncationPrefix() {
 		// Arrange
-		LimitedStringBuilder builder = new LimitedStringBuilder(4);
+		LimitedStringBuilder builder = new LimitedStringBuilder(4, null, null);
 		builder.append("123456");
 
 		// Act

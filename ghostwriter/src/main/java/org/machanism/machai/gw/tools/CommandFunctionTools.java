@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.HashMap;
@@ -193,12 +194,37 @@ public class CommandFunctionTools implements FunctionTools {
 						+ DEFAULT_RESULT_TAIL_SIZE,
 				"charsetName:string:optional:The character encoding to use for reading command output. Default: "
 						+ DEFAULT_CHARSET);
-		provider.addTool("terminate_process",
-				"Throws an exception to immediately terminate the process. Useful for signaling fatal errors or controlled shutdowns from within a function tool. Supports specifying a custom exit code.",
+		provider.addTool(
+				"terminate_task",
+				"Terminates the task by sending an exit code.\n"
+						+ "Use this function to end a process when required by user request or critical process logic.\n"
+						+ "\n"
+						+ "**Important Note:**\n"
+						+ "- **IMPORTANT:** Do **not** call this function if the process has finished successfully, to prevent unintended termination of tasks running in interactive mode.\n"
+						+ "- Calling this function with `exitCode 0` will terminate the process immediately.\n"
+						+ "- Only use `exitCode 0` for explicit user requests or when strongly needed by the process logic.\n"
+						+ "- Improper use may disrupt ongoing tasks or interactive sessions.",
 				this::terminateProcess,
 				"message:string:optional:The exception message to use. Defaults to 'Process terminated by function tool.'",
 				"cause:string:optional:An optional cause message. If provided, it is wrapped in a new Exception as the cause.",
 				"exitCode:integer:optional:The exit code to return when terminating the process. Defaults to 1 if not specified.");
+		provider.addTool(
+				"get_previous_log_chunk",
+				"Retrieves the previous chunk of log output from a command execution, immediately preceding the last returned tail result.\n"
+						+ "Use this to fetch earlier log data when only the tail of the output was previously returned (e.g., for paginated log viewing or scrolling up).\n"
+						+ "\n"
+						+ "**Instructions:**\n"
+						+ "- Specify the command execution session identifier (`commandId`).\n"
+						+ "- Provide the current tail offset (the position in the log where the last tail result started).\n"
+						+ "- Set the chunk size to match the previous tail size, unless a different size is desired.\n"
+						+ "- The tool will return the log chunk immediately before the current tail, or as much as is available if the beginning of the log is reached.\n"
+						+ "- No overlap with the current tail result is included.",
+				this::getPreviousLogChunk,
+				"commandId:string:required:The identifier of the command execution session.",
+				"tailResultSize:integer:required:The size of the log chunk to retrieve (in characters or lines, as supported).",
+				"currentTailOffset:integer:required:The offset or position in the log where the current tail result starts.",
+				"charsetName:string:optional:The character encoding to use for reading log output. Default: "
+						+ DEFAULT_CHARSET);
 	}
 
 	/**
@@ -220,7 +246,7 @@ public class CommandFunctionTools implements FunctionTools {
 		String message = props.has("message") ? props.get("message").asText("Process terminated by function tool.")
 				: "Process terminated by function tool.";
 		String cause = props.has("cause") ? props.get("cause").asText(null) : null;
-		int exitCode = props.has("exitCode") ? props.get("exitCode").asInt(1) : 1;
+		int exitCode = props.has("exitCode") ? props.get("exitCode").asInt(0) : 0;
 
 		if (cause != null) {
 			throw new ProcessTerminationException(message, new Exception(cause), exitCode);
@@ -275,7 +301,7 @@ public class CommandFunctionTools implements FunctionTools {
 				: DEFAULT_CHARSET;
 
 		Process prc = null;
-		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize);
+		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize, commandId, projectDir);
 
 		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 				Executors.newFixedThreadPool(2))) {
@@ -332,6 +358,47 @@ public class CommandFunctionTools implements FunctionTools {
 			if (prc != null && prc.isAlive()) {
 				prc.destroyForcibly();
 			}
+		}
+	}
+
+	public Object getPreviousLogChunk(JsonNode props, File projectDir) throws IOException {
+		String commandId = props.get("commandId").asText();
+		if (logger.isInfoEnabled()) {
+			logger.info("Run shell command [{}]: {}, {}", commandId, props, projectDir);
+		}
+
+		Integer tailResultSize = props.has("tailResultSize")
+				? props.get("tailResultSize").asInt(DEFAULT_RESULT_TAIL_SIZE)
+				: DEFAULT_RESULT_TAIL_SIZE;
+		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(DEFAULT_CHARSET)
+				: DEFAULT_CHARSET;
+
+		Integer currentTailOffset = props.get("currentTailOffset").asInt();
+
+		if (commandId == null || tailResultSize == null || currentTailOffset == null) {
+			throw new IllegalArgumentException("commandId, tailResultSize, and currentTailOffset are required.");
+		}
+
+		Path logPath = LimitedStringBuilder.getCommandLogPath(projectDir, commandId);
+		if (!Files.exists(logPath)) {
+			throw new IllegalArgumentException("Log file for commandId not found: " + commandId);
+		}
+
+		try {
+			byte[] logBytes = Files.readAllBytes(logPath);
+			String logContent = new String(logBytes, Charset.forName(charsetName));
+			int start = Math.max(0, currentTailOffset - tailResultSize);
+			int end = currentTailOffset;
+			if (start >= end) {
+				return ""; // No previous chunk available
+			}
+			
+			start = start > logContent.length() - 1 ? logContent.length() - 1:  start;
+			end = end > logContent.length() - 1 ? logContent.length() - 1:  end;
+			
+			return logContent.substring(start, end);
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to read log file: " + e.getMessage(), e);
 		}
 	}
 
