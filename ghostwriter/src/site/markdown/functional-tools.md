@@ -12,13 +12,13 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter provides function tools that let a model inspect available Acts, manage project-scoped workflow state, control episode flow, work with files in the active project, run approved shell commands, and retrieve content from web pages or REST APIs.
+Ghostwriter provides function tools that let a model inspect available Acts, manage project-scoped workflow state, control episode flow, read and update files in the active project, run approved shell commands, inspect previous command output, and retrieve content from web pages or REST APIs.
 
 ## Tool groups
 
 - **Act and workflow tools** help discover Act templates, inspect their definitions, store temporary workflow values, and control episode transitions.
-- **File system tools** help read, write, and enumerate files relative to the active project directory.
-- **Command and process tools** help run validated commands inside the project and stop execution when necessary.
+- **File system tools** help read, write, patch, and enumerate files relative to the active project directory.
+- **Command and process tools** help run validated commands, review earlier command log output, and stop execution when necessary.
 - **Web and API tools** help download page content and call HTTP endpoints.
 
 ## Act and workflow tools
@@ -27,12 +27,12 @@ Ghostwriter provides function tools that let a model inspect available Acts, man
 Lists the built-in Act templates packaged with Ghostwriter.
 
 **Description**
-Use this tool when you want a quick overview of the built-in Acts that ship with Ghostwriter. It reads the packaged `acts/*.toml` resources, loads each Act description, and returns a readable list.
+Use this tool when you want a quick overview of the built-in Acts that ship with Ghostwriter. It scans bundled `acts/*.toml` resources, loads each Act description, and returns a readable list of available templates.
 
 **Features**
 - Discovers built-in Acts bundled with the application.
+- Loads the description for each discovered Act.
 - Returns a user-friendly list instead of raw TOML files.
-- Includes each Act name together with its description.
 - Useful when choosing an Act to inspect or run next.
 
 **Input parameters**
@@ -42,12 +42,12 @@ This tool does not take any input parameters.
 Loads the details of a specific Act template.
 
 **Description**
-Use this tool when you need to inspect one Act in detail. It resolves the requested Act by name and returns its collected properties, such as instructions, prompts, and other Act configuration values. It can load the effective Act, only the custom Act, or only the built-in version.
+Use this tool when you need to inspect one Act in detail. It resolves the requested Act by name and returns its collected properties, such as instructions, input templates, and other configuration values. It can load the effective Act, only the custom Act, or only the built-in version.
 
 **Features**
 - Loads one Act by name.
 - Supports effective resolution or explicit built-in/custom lookup.
-- Useful for reviewing an Act before editing or executing it.
+- Returns the Act properties as structured data.
 - Returns a readable message if the Act cannot be resolved.
 
 **Input parameters**
@@ -183,6 +183,23 @@ Use this tool when you need a deeper inventory of files under a folder. It trave
 **Input parameters**
 - `dir_path` *(string, optional)*: Root directory to scan recursively. If omitted or blank, the current working directory is used.
 
+### `apply_patch_to_file`
+Applies a unified diff patch to a file.
+
+**Description**
+Use this tool when you want to update only a small section of a file instead of rewriting the entire file. It accepts a unified diff patch, applies matching hunks to the target file, and creates parent directories when needed for the output file.
+
+**Features**
+- Applies unified diff hunks to an existing file.
+- Can create the target file if it does not already exist.
+- Works best for focused, minimal file edits.
+- Supports configurable character encoding.
+
+**Input parameters**
+- `file_path` *(string, required)*: Path to the file to patch.
+- `patch` *(string, required)*: Unified diff patch content to apply.
+- `charsetName` *(string, optional)*: Character encoding to use. Default: `UTF-8`.
+
 ## Command and process tools
 
 ### `run_command_line_tool`
@@ -200,14 +217,32 @@ Use this tool to run approved shell commands for tasks such as builds, tests, or
 - Reports the final process exit code.
 
 **Input parameters**
-- `command` *(string, required)*: Command to execute.
+- `command` *(string, required)*: Command to execute. Wrap it with the appropriate shell for the current operating system, such as `cmd /c ...` on Windows or `sh -c ...` on Unix-like systems.
 - `env` *(string, optional)*: Environment variables as `NAME=VALUE` pairs separated by LF line breaks.
 - `dir` *(string, optional)*: Working directory relative to the project directory. Must remain inside the project. Default: current project directory.
 - `tailResultSize` *(integer, optional)*: Maximum number of characters returned from the end of the output. Default: `1024`.
 - `charsetName` *(string, optional)*: Character encoding used to read command output. Default: `UTF-8`.
 
-### `terminate_process`
-Terminates the current workflow by throwing a process termination exception.
+### `get_previous_log_chunk`
+Returns the previous part of a command log.
+
+**Description**
+Use this tool when a previous `run_command_line_tool` result was truncated to a tail section and you need to inspect earlier output. It reads the stored command log and returns the chunk immediately before the current tail position.
+
+**Features**
+- Reads earlier output from a stored command log.
+- Supports paged backward navigation through command output.
+- Lets workflows inspect long-running command results in smaller sections.
+- Uses the same configurable character decoding as the command tool.
+
+**Input parameters**
+- `commandId` *(string, required)*: Identifier of the command execution session.
+- `tailResultSize` *(integer, required)*: Size of the earlier chunk to retrieve.
+- `currentTailOffset` *(integer, required)*: Offset where the currently visible tail starts.
+- `charsetName` *(string, optional)*: Character encoding used to read the stored log. Default: `UTF-8`.
+
+### `terminate_task`
+Terminates the current workflow with an exit code.
 
 **Description**
 Use this tool when execution should stop immediately because of a fatal validation failure, an unsupported condition, or another controlled shutdown scenario.
@@ -221,7 +256,7 @@ Use this tool when execution should stop immediately because of a fatal validati
 **Input parameters**
 - `message` *(string, optional)*: Exception message to use. Default: `Process terminated by function tool.`
 - `cause` *(string, optional)*: Optional cause message wrapped as the underlying exception cause.
-- `exitCode` *(integer, optional)*: Exit code to return. Default: `1`.
+- `exitCode` *(integer, optional)*: Exit code to return. Default: `0`.
 
 ## Web and API tools
 

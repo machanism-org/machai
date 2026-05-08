@@ -163,7 +163,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * "Process terminated by function tool."</li>
 	 * <li><b>cause</b> (string, optional): Optional cause message; wrapped in an
 	 * {@link Exception}.</li>
-	 * <li><b>exitCode</b> (integer, optional): Exit code; defaults to 1.</li>
+	 * <li><b>exitCode</b> (integer, optional): Exit code; defaults to 0.</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -207,7 +207,7 @@ public class CommandFunctionTools implements FunctionTools {
 				this::terminateProcess,
 				"message:string:optional:The exception message to use. Defaults to 'Process terminated by function tool.'",
 				"cause:string:optional:An optional cause message. If provided, it is wrapped in a new Exception as the cause.",
-				"exitCode:integer:optional:The exit code to return when terminating the process. Defaults to 1 if not specified.");
+				"exitCode:integer:optional:The exit code to return when terminating the process. Defaults to 0 if not specified.");
 		provider.addTool(
 				"get_previous_log_chunk",
 				"Retrieves the previous chunk of log output from a command execution, immediately preceding the last returned tail result.\n"
