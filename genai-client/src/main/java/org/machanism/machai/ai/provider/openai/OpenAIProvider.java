@@ -35,6 +35,7 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonString;
 import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
+import com.openai.core.http.Headers;
 import com.openai.models.Reasoning;
 import com.openai.models.ReasoningEffort;
 import com.openai.models.embeddings.CreateEmbeddingResponse;
@@ -54,12 +55,13 @@ import com.openai.models.responses.ResponseInputItem.Message.Role;
 import com.openai.models.responses.ResponseOutputItem;
 import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputMessage.Content;
-import com.openai.models.responses.WebSearchTool.UserLocation;
+import com.openai.models.responses.Tool.Mcp.ConnectorId;
 import com.openai.models.responses.ResponseOutputText;
 import com.openai.models.responses.ResponseReasoningItem;
 import com.openai.models.responses.ResponseUsage;
 import com.openai.models.responses.Tool;
 import com.openai.models.responses.WebSearchTool;
+import com.openai.models.responses.WebSearchTool.UserLocation;
 import com.openai.services.blocking.ModelService;
 
 /* @guidance: add to the OpenAIProvider class javadoc add information about configuration variable. */
@@ -164,6 +166,9 @@ public class OpenAIProvider implements Genai {
 
 		addWebSearch(config.get("WebSearchTool.type", null), config.get("WebSearchTool.city", null),
 				config.get("WebSearchTool.country", null), config.get("WebSearchTool.region", null));
+
+		addMcpServer(config.get("MCP.url", null), config.get("MCP.label", null), config.get("MCP.description", null),
+				config.get("MCP.authorization", null));
 	}
 
 	public void addWebSearch(String type, String city, String country, String region) {
@@ -188,6 +193,27 @@ public class OpenAIProvider implements Genai {
 
 			webSearch.userLocation(location.build());
 			Tool tool = Tool.ofWebSearch(webSearch.build());
+			toolMap.put(tool, null);
+		}
+	}
+
+	public void addMcpServer(String url, String label, String description, String authorization) {
+		if (url != null) {
+			com.openai.models.responses.Tool.Mcp.Builder builder = Tool.Mcp.builder();
+			builder.serverUrl(url);
+
+			if (label != null) {
+				builder.serverLabel(label);
+			}
+			if (description != null) {
+				builder.serverDescription(description);
+			}
+
+			if (authorization != null) {
+				builder.authorization(authorization);
+			}
+
+			Tool tool = Tool.ofMcp(builder.build());
 			toolMap.put(tool, null);
 		}
 	}
