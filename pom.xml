@@ -103,6 +103,88 @@
 				</repository>
 			</distributionManagement>
 		</profile>
+
+		<profile>
+			<id>pack</id>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<artifactId>maven-assembly-plugin</artifactId>
+							<executions>
+								<execution>
+									<id>build-artifact</id>
+									<phase>install</phase>
+									<goals>
+										<goal>single</goal>
+									</goals>
+									<configuration>
+										<finalName>gw</finalName>
+										<appendAssemblyId>false</appendAssemblyId>
+										<descriptors>
+											<descriptor>
+												src/assembly/assembly-jar.xml</descriptor>
+										</descriptors>
+										<outputDirectory>
+											${project.build.directory}</outputDirectory>
+										<archive>
+											<manifest>
+												<mainClass>
+													org.machanism.machai.gw.processor.Ghostwriter</mainClass>
+											</manifest>
+											<manifestEntries>
+												<Class-Path>
+													${plugins-class-path}</Class-Path>
+												<Implementation-Version>
+													${project.version}</Implementation-Version>
+											</manifestEntries>
+										</archive>
+									</configuration>
+								</execution>
+								<execution>
+									<id>delivery-pack</id>
+									<phase>install</phase>
+									<goals>
+										<goal>single</goal>
+									</goals>
+									<configuration>
+										<outputDirectory>
+											${env.MACHANISM_PACK_DIR}/machai/${artifactId}</outputDirectory>
+										<finalName>gw</finalName>
+										<appendAssemblyId>false</appendAssemblyId>
+										<descriptors>
+											<descriptor>
+												src/assembly/assembly.xml</descriptor>
+										</descriptors>
+									</configuration>
+								</execution>
+							</executions>
+						</plugin>
+						<plugin>
+							<artifactId>maven-antrun-plugin</artifactId>
+							<version>3.0.0</version>
+							<executions>
+								<execution>
+									<id>copy-to-releases</id>
+									<phase>install</phase>
+									<configuration>
+										<target>
+											<copy
+												file="${env.MACHANISM_PACK_DIR}/machai/${artifactId}/gw.zip"
+												tofile="${env.MACHANISM_PACK_DIR}/machai/${artifactId}/releases/gw-${project.version}.zip"
+												overwrite="true" />
+										</target>
+									</configuration>
+									<goals>
+										<goal>run</goal>
+									</goals>
+								</execution>
+							</executions>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
 	</profiles>
 
 	<modules>

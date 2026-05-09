@@ -39,52 +39,20 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<configuration>
-							<finalName>gw</finalName>
-							<outputDirectory>
-								${env.MACHANISM_PACK_DIR}/machai</outputDirectory>
-							<archive>
-								<manifest>
-									<mainClass>
-										org.machanism.machai.gw.processor.Ghostwriter</mainClass>
-								</manifest>
-							</archive>
-						</configuration>
 						<executions>
 							<execution>
 								<id>build-artifact</id>
-								<phase>install</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<appendAssemblyId>false</appendAssemblyId>
-									<descriptors>
-										<descriptor>
-											src/assembly/assembly-jar.xml</descriptor>
-									</descriptors>
-									<outputDirectory>${project.build.directory}</outputDirectory>
-									<archive>
-										<manifestEntries>
-											<Class-Path>${plugins-class-path}</Class-Path>
-											<Implementation-Version>
-												${project.version}</Implementation-Version>
-										</manifestEntries>
-									</archive>
-								</configuration>
 							</execution>
 							<execution>
 								<id>delivery-pack</id>
-								<phase>install</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<appendAssemblyId>false</appendAssemblyId>
-									<descriptors>
-										<descriptor>src/assembly/assembly.xml</descriptor>
-									</descriptors>
-								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-to-releases</id>
 							</execution>
 						</executions>
 					</plugin>
@@ -133,7 +101,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-		</dependency>		
+		</dependency>
 
 		<!-- Maven libraries -->
 		<dependency>
