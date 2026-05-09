@@ -79,6 +79,7 @@ inputs = '''
 [gw]
 # Directory pattern to scan for changes. "glob:." means the current directory and all subdirectories.
 scanDir = "glob:."
+interactive = true
 
 # =========================
 # Functional Tool Command Section

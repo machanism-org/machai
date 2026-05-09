@@ -102,8 +102,8 @@ class CommandFunctionToolsAdditionalTest {
 		CommandFunctionTools tools = new CommandFunctionTools();
 		ObjectMapper mapper = new ObjectMapper();
 
-		CommandFunctionTools.TaskTerminationException defaultException = assertThrows(
-				CommandFunctionTools.TaskTerminationException.class,
+		TaskTerminationException defaultException = assertThrows(
+				TaskTerminationException.class,
 				() -> tools.terminateTask(mapper.createObjectNode(), tempDir.toFile()));
 		assertEquals("Task terminated by function tool.", defaultException.getMessage());
 		assertEquals(0, defaultException.getExitCode());
@@ -112,8 +112,8 @@ class CommandFunctionToolsAdditionalTest {
 		props.put("message", "stop now");
 		props.put("cause", "because");
 		props.put("exitCode", 42);
-		CommandFunctionTools.TaskTerminationException customException = assertThrows(
-				CommandFunctionTools.TaskTerminationException.class,
+		TaskTerminationException customException = assertThrows(
+				TaskTerminationException.class,
 				() -> tools.terminateTask(props, tempDir.toFile()));
 		assertEquals("stop now", customException.getMessage());
 		assertEquals("because", customException.getCause().getMessage());
@@ -122,7 +122,7 @@ class CommandFunctionToolsAdditionalTest {
 
 	@Test
 	void commandTerminationExceptionShouldExposeExitCode() {
-		CommandFunctionTools.TaskTerminationException ex = new CommandFunctionTools.TaskTerminationException(
+		TaskTerminationException ex = new TaskTerminationException(
 				"stop", 7);
 		assertEquals(7, ex.getExitCode());
 	}

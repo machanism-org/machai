@@ -13,7 +13,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 import org.junit.Test;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
-import org.machanism.machai.gw.tools.CommandFunctionTools.TaskTerminationException;
+import org.machanism.machai.gw.tools.TaskTerminationException;
 
 public class GWExecuteTest {
 

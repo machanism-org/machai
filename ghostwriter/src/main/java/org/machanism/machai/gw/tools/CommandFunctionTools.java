@@ -95,47 +95,6 @@ public class CommandFunctionTools implements FunctionTools {
 	private static final SecureRandom RANDOM = new SecureRandom();
 
 	/**
-	 * Runtime exception used by {@code terminate_process} to signal early
-	 * termination to the host.
-	 */
-	public static class TaskTerminationException extends RuntimeException {
-		private static final long serialVersionUID = -4615360980518233932L;
-		private final int exitCode;
-
-		/**
-		 * Creates a termination exception.
-		 *
-		 * @param message  message to expose to the host
-		 * @param exitCode desired process exit code
-		 */
-		public TaskTerminationException(String message, int exitCode) {
-			super(message);
-			this.exitCode = exitCode;
-		}
-
-		/**
-		 * Creates a termination exception.
-		 *
-		 * @param message  message to expose to the host
-		 * @param cause    underlying cause
-		 * @param exitCode desired process exit code
-		 */
-		public TaskTerminationException(String message, Throwable cause, int exitCode) {
-			super(message, cause);
-			this.exitCode = exitCode;
-		}
-
-		/**
-		 * Returns the desired exit code.
-		 *
-		 * @return exit code
-		 */
-		public int getExitCode() {
-			return exitCode;
-		}
-	}
-
-	/**
 	 * Registers system command and process control tools with the provided
 	 * {@link Genai}.
 	 *
@@ -201,10 +160,9 @@ public class CommandFunctionTools implements FunctionTools {
 		provider.addTool(
 				"terminate_task",
 				"Terminates the task by sending an exit code.\n"
-						+ "Use this function to end a process when required by user request or critical process logic.\n"
+						+ "Use this function to end a process when required by user request or process logic.\n"
 						+ "\n"
 						+ "**Important Note:**\n"
-						+ "- **IMPORTANT:** Do **not** call this function if the process has finished successfully, to prevent unintended termination of tasks running in interactive mode.\n"
 						+ "- Calling this function with `exitCode 0` will terminate the process immediately.\n"
 						+ "- Only use `exitCode 0` for explicit user requests or when strongly needed by the process logic.\n"
 						+ "- Improper use may disrupt ongoing tasks or interactive sessions.",

@@ -28,7 +28,7 @@ import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
-import org.machanism.machai.gw.tools.CommandFunctionTools.TaskTerminationException;
+import org.machanism.machai.gw.tools.TaskTerminationException;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

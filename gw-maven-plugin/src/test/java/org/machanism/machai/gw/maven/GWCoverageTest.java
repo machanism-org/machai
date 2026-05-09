@@ -19,6 +19,7 @@ import org.apache.maven.settings.Settings;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
+import org.machanism.machai.gw.tools.TaskTerminationException;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 public class GWCoverageTest {
@@ -152,7 +153,7 @@ public class GWCoverageTest {
 
 			@Override
 			protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
-				throw new org.machanism.machai.gw.tools.CommandFunctionTools.TaskTerminationException("stop", 9);
+				throw new TaskTerminationException("stop", 9);
 			}
 		};
 		mojo.basedir = new File(".").getCanonicalFile();

@@ -18,7 +18,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.gw.tools.CommandFunctionTools.TaskTerminationException;
+import org.machanism.machai.gw.tools.TaskTerminationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
