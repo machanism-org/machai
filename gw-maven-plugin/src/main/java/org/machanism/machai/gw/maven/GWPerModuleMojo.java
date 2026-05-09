@@ -10,7 +10,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
-import org.machanism.machai.gw.tools.TaskTerminationException;
+import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -137,7 +137,7 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 
 		try {
 			scanDocuments(processor);
-		} catch (TaskTerminationException e) {
+		} catch (ProcessTerminationException e) {
 			throw new MojoExecutionException(
 					"Process terminated while scanning documents: " + e.getMessage() + " (exit code: " + e.getExitCode()
 							+ ")",

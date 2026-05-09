@@ -60,12 +60,12 @@ inputs =
     - **IMPORTANT:** Connect to the SonarQube API using value as is without substitution for URL: `SONARQUBE_URL` value and **header auth with `${sonar.token}`**.
     - Use this SonarQube API URL to fetch all open `impactSoftwareQualities`: `${sonar.qualities}` and specified `impactSeverities`: `${sonar.severity}, findings for the specified [Project Identifier] project.
     - If the API returns an error (non-2xx), terminate with exit code `500`.
-    - If the response contains zero issues, terminate the task with exitCode: `0` with the description message.
+    - If the response contains zero issues, complete the task with with the description message.
 
 ## 2. Call the SonarQube API URL constructed above and Review the Appropriate SonarQube Report: 
    - If the project has `Modules`, then skip next steps for current project and continue.
    - If the response returns an error, the process is terminated using the Function tool and the exit code `500` is returned.
-   - If the response is not successfully, then immediately skip all the following steps and complete the task with exitCode: 0.
+   - If the response is not successfully, then immediately skip all the following steps and complete the task.
    - For each issue in the JSON, identify the file, line number, rule, and message.
    - Briefly explain the root cause of the issue.
    - You need to fix issues described in the SonarQube report.

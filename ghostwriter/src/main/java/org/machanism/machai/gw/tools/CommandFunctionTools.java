@@ -58,12 +58,14 @@ import com.fasterxml.jackson.databind.JsonNode;
  * <li>{@code run_command_line_tool} – executes a command line and returns
  * output</li>
  * <li>{@code terminate_process} – aborts execution by throwing a
- * {@link TaskTerminationException}</li>
+ * {@link ProcessTerminationException}</li>
  * </ul>
  *
  * @author Viktor Tovstyi
  */
 public class CommandFunctionTools implements FunctionTools {
+
+	static final String TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE = "Execution terminated by function tool.";
 
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
@@ -143,7 +145,8 @@ public class CommandFunctionTools implements FunctionTools {
 						+ "**Shell Execution Instructions:**\n"
 						+ "- For Windows, always wrap your command with `cmd /c` (e.g., `cmd /c your-command`).\n"
 						+ "- For Unix/Linux, always wrap your command with `sh -c` (e.g., `sh -c 'your-command'`).\n"
-						+ "- This ensures the command is executed within the appropriate system shell, enabling features like piping, redirection, and environment variable expansion.\n"
+						+ "- This ensures the command is executed within the appropriate system shell, enabling features like piping, "
+						+ "redirection, and environment variable expansion.\n"
 						+ "- If you do not use the correct shell wrapper, your command may fail or behave unexpectedly.\n"
 						+ "\n"
 						+ "Examples:\n"
@@ -151,25 +154,27 @@ public class CommandFunctionTools implements FunctionTools {
 						+ "- Unix/Linux: `sh -c 'ls -la | grep .java'`\n",
 				this::executeCommand,
 				"command:string:required:The command to execute. Must be wrapped as described above for your OS.",
-				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). If omitted, the subprocess inherits the current process environment.",
-				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. If omitted, the current project directory is used.",
-				"tailResultSize:integer:optional:The maximum number of characters to display from the end of the command output. If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
+				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). "
+						+ "If omitted, the subprocess inherits the current process environment.",
+				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. "
+						+ "If omitted, the current project directory is used.",
+				"tailResultSize:integer:optional:The maximum number of characters to display from the end of the command output. "
+						+ "If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
 						+ DEFAULT_RESULT_TAIL_SIZE,
 				"charsetName:string:optional:The character encoding to use for reading command output. Default: "
 						+ DEFAULT_CHARSET);
 		provider.addTool(
-				"terminate_task",
-				"Terminates the task by sending an exit code.\n"
-						+ "Use this function to end a process when required by user request or process logic.\n"
-						+ "\n"
-						+ "**Important Note:**\n"
-						+ "- Calling this function with `exitCode 0` will terminate the process immediately.\n"
-						+ "- Only use `exitCode 0` for explicit user requests or when strongly needed by the process logic.\n"
-						+ "- Improper use may disrupt ongoing tasks or interactive sessions.",
-				this::terminateTask,
-				"message:string:optional:The exception message to use. Defaults to 'Task terminated by function tool.'",
-				"cause:string:optional:An optional cause message. If provided, it is wrapped in a new Exception as the cause.",
-				"exitCode:integer:optional:The exit code to return when terminating the task. Defaults to 0 if not specified.");
+				"terminate_execution",
+				"Terminate the application by sending an exit code.",
+				this::terminateExecution,
+				"message:string:optional:The exception message to use. Defaults to '"
+						+ TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE + "'",
+				"exitCode:integer:optional:The exit code to return when terminating the execution. Defaults to 0 if not specified.");
+		provider.addTool(
+				"complete_task",
+				"Terminate the current task without terminating the application. This function is used to terminate an interactive session with the user within the context of the current task.",
+				this::completeTask,
+				"message:string:optional:The message to use upon completion.");
 		provider.addTool(
 				"get_previous_log_chunk",
 				"Retrieves the previous chunk of log output from a command execution, immediately preceding the last returned tail result.\n"
@@ -209,7 +214,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 *
 	 * <p>
 	 * Reads {@code message}, {@code cause}, and {@code exitCode} from the supplied
-	 * {@link JsonNode} and throws a {@link TaskTerminationException}. This
+	 * {@link JsonNode} and throws a {@link ProcessTerminationException}. This
 	 * mechanism allows a tool invocation to abort the overall workflow with an
 	 * explicit exit code.
 	 * </p>
@@ -217,22 +222,46 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param params tool invocation parameters (expects a single {@link JsonNode}
 	 *               argument)
 	 * @return never returns; always throws
-	 * @throws TaskTerminationException always thrown to terminate execution
+	 * @throws ProcessTerminationException always thrown to terminate execution
 	 */
-	public String terminateTask(JsonNode props, File projectDir) {
+	public String terminateExecution(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Terminate the task: {}, {}", props, projectDir);
 		}
 
-		String message = props.has("message") ? props.get("message").asText("Task terminated by function tool.")
-				: "Task terminated by function tool.";
-		String cause = props.has("cause") ? props.get("cause").asText(null) : null;
+		String message = props.has("message") ? props.get("message").asText(TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE)
+				: TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE;
 		int exitCode = props.has("exitCode") ? props.get("exitCode").asInt(0) : 0;
 
-		if (cause != null) {
-			throw new TaskTerminationException(message, new Exception(cause), exitCode);
+		throw new ProcessTerminationException(message, exitCode);
+	}
+
+	/**
+	 * Completes the current task by throwing a {@link CompleteTask} exception.
+	 * <p>
+	 * This method is intended to be used as a function tool for terminating a
+	 * process when requested by the user or dictated by process logic. It logs the
+	 * task completion and uses a custom message if provided in the properties.
+	 * </p>
+	 *
+	 * @param props      JSON node containing optional properties, such as a custom
+	 *                   completion message.
+	 * @param projectDir The project directory associated with the task.
+	 * @return This method does not return normally; it always throws
+	 *         {@link CompleteTask}.
+	 * @throws CompleteTask Always thrown to signal task completion.
+	 */
+	public String completeTask(JsonNode props, File projectDir) {
+		if (logger.isInfoEnabled()) {
+			logger.info("Completing the task with properties: {} in project directory: {}", props, projectDir);
 		}
-		throw new TaskTerminationException(message, exitCode);
+
+		String message = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE;
+		if (props != null && props.has("message")) {
+			message = props.get("message").asText(null);
+		}
+
+		throw new CompleteTask(message);
 	}
 
 	/**

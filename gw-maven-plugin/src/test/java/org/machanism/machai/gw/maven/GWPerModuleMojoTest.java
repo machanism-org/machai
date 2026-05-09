@@ -17,7 +17,7 @@ import org.apache.maven.settings.Settings;
 import org.junit.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
-import org.machanism.machai.gw.tools.TaskTerminationException;
+import org.machanism.machai.gw.tools.ProcessTerminationException;
 
 public class GWPerModuleMojoTest {
 
@@ -111,7 +111,7 @@ public class GWPerModuleMojoTest {
             if ("custom-scan".equals(this.scanDir)) {
                 return;
             }
-            throw new TaskTerminationException("boom", 7);
+            throw new ProcessTerminationException("boom", 7);
         }
     }
 }
