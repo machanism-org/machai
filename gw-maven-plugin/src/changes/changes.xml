@@ -30,5 +30,24 @@
 - Added a cleanup goal for removing temporary Ghostwriter workflow artifacts.
 ]]></action>
     </release>
+
+    <release version="1.1.8" date="2026-05-09">
+      <action dev="dev" type="add"><![CDATA[
+<p>New feature summary for GW Maven Plugin 1.1.8:</p>
+<ul>
+  <li>Added Maven goals for Ghostwriter guided processing and prompt-driven act workflows across project files.</li>
+  <li>Added execution-root and per-module processing modes to support both aggregated and reactor-aligned workflows.</li>
+  <li>Added Java class discovery and inspection function tools for project-aware analysis during processing.</li>
+  <li>Added Maven settings-based credential loading through <code>genai.serverId</code> for provider integration.</li>
+</ul>
+
+## Features
+
+- Added Maven goals for Ghostwriter guided processing and prompt-driven act workflows across source, documentation, site, and other project files.
+- Added execution-root and per-module goal variants to support both aggregated orchestration and standard Maven reactor-aligned processing.
+- Added Java class discovery and reflective inspection function tools to support project-aware analysis from the current Maven context.
+- Added Maven <code>settings.xml</code> integration through <code>genai.serverId</code> for loading provider credentials during plugin execution.
+]]></action>
+    </release>
   </body>
 </document>
