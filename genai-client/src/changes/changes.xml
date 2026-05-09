@@ -11,5 +11,12 @@
 ]]>
 </action>
 </release>
+  <release version="1.1.8" date="2026-05-09">
+<action dev="dev" type="add">
+<![CDATA[
+<h2>Features</h2><ul><li>Added WebSearchTool support for web search integration.</li><li>Added MCP server support, including helper methods for web search and MCP server registration.</li><li>Implemented support for multiple MCP server definitions.</li><li>Added support for <code>gemini-</code> family models in the CodeMie provider.</li></ul><h2>Fixes</h2><ul><li>Set reasoning defaults to prevent reasoning-related issues, including <code>ReasoningEffort.NONE</code> handling for supported models.</li><li>Fixed multi-MCP registration handling for repeated <code>addMcpServer()</code> definitions.</li><li>Renamed <code>ProcessTerminationException</code> to <code>TaskTerminationException</code> for clearer task termination semantics.</li><li>Updated recursive file discovery to use <code>ProjectLayout.findFiles(directory)</code> and include excluded directory handling.</li></ul><h2>Documentation</h2><ul><li>Updated Javadoc and release notes.</li><li>Extended system and final instructions to include excluded directory configuration such as <code>.machai</code>.</li></ul><h2>Tests and Maintenance</h2><ul><li>Added tests and addressed multiple sonar issues.</li><li>Performed CodeMie provider cleanup and related maintenance updates.</li><li>Released version <code>1.1.8</code>.</li></ul>
+]]>
+</action>
+</release>
 </body>
 </document>

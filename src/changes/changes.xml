@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+<body>
+<release version="1.1.8" date="2026-05-09">
+<action dev="dev" type="add">
+<![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Added MCP server support, including multi-server definitions and related integration helpers.</li>
+  <li>Added web search integration through the new WebSearch tool and helper methods for web search and MCP server registration.</li>
+  <li>Added new functional tools for applying file patches, searching command logs, and reading previous command log chunks.</li>
+  <li>Expanded CodeMie provider support to include the <code>gemini-</code> model family and enabled broader model processing support.</li>
+</ul>
+<h2>Fixes</h2>
+<ul>
+  <li>Fixed interactive mode execution and corrected <code>changes.xml</code> formatting.</li>
+  <li>Fixed act prompt processing and string property inheritance behavior.</li>
+  <li>Fixed class functional tool initialization and corrected log message behavior.</li>
+  <li>Adjusted default exit code handling and improved command-line tool documentation.</li>
+  <li>Updated final instructions and exclusion handling, including support for additional excluded directories such as <code>.machai</code>.</li>
+</ul>
+<h2>Refactoring</h2>
+<ul>
+  <li>Renamed <code>ProcessTerminationException</code> to <code>TaskTerminationException</code>.</li>
+  <li>Improved internal file discovery by using project layout directory scanning utilities in recursive file operations.</li>
+  <li>Performed cleanup and javadoc improvements across provider and tooling code.</li>
+</ul>
+<h2>Documentation</h2>
+<ul>
+  <li>Updated javadocs, act files, release notes, and related documentation.</li>
+</ul>
+<h2>Chores</h2>
+<ul>
+  <li>Added and updated tests, addressed sonar issues, and updated the configured GW model.</li>
+  <li>Prepared the 1.1.8 release version update.</li>
+</ul>
+]]>
+</action>
+</release>
+</body>
+</document>

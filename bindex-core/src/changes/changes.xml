@@ -11,5 +11,12 @@
 ]]>
     </action>
   </release>
+  <release version="1.1.8" date="2026-05-09">
+    <action dev="dev" type="add">
+<![CDATA[
+<h2>Fixes</h2><ul><li>Fixed Sonar-reported issues to improve code quality and maintainability.</li></ul><h2>Tests</h2><ul><li>Added tests to improve verification coverage.</li></ul><h2>Documentation</h2><ul><li>Updated release notes for the current release.</li></ul><h2>Chores</h2><ul><li>Updated the project version for the 1.1.8 release.</li></ul>
+]]>
+    </action>
+  </release>
   </body>
 </document>

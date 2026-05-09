@@ -33,21 +33,17 @@
 
     <release version="1.1.8" date="2026-05-09">
       <action dev="dev" type="add"><![CDATA[
-<p>New feature summary for GW Maven Plugin 1.1.8:</p>
+<h2>Fixes</h2>
 <ul>
-  <li>Added Maven goals for Ghostwriter guided processing and prompt-driven act workflows across project files.</li>
-  <li>Added execution-root and per-module processing modes to support both aggregated and reactor-aligned workflows.</li>
-  <li>Added Java class discovery and inspection function tools for project-aware analysis during processing.</li>
-  <li>Added Maven settings-based credential loading through <code>genai.serverId</code> for provider integration.</li>
+  <li>Fixed interactive mode execution behavior and corrected <code>changes.xml</code> formatting.</li>
+  <li>Fixed initialization of <code>ClassFunctionalTools</code>.</li>
+  <li>Applied additional Sonar-related fixes.</li>
 </ul>
-
-<p>Features:</p>
+<h2>Chores</h2>
 <ul>
-  <li>Added Maven goals for Ghostwriter guided processing and prompt-driven act workflows across source, documentation, site, and other project files.
-  <li>Added execution-root and per-module goal variants to support both aggregated orchestration and standard Maven reactor-aligned processing.
-  <li>Added Java class discovery and reflective inspection function tools to support project-aware analysis from the current Maven context.
-  <li>Added Maven <code>settings.xml</code> integration through <code>genai.serverId</code> for loading provider credentials during plugin execution.
-<ul>
+  <li>Updated release notes, <code>changes.xml</code>, and added test coverage for the release cycle.</li>
+  <li>Improved project layout handling by adding exclude directory propagation, using project layout file discovery for recursive file listing, supporting multi-MCP definitions, and renaming <code>ProcessTerminationException</code> to <code>TaskTerminationException</code>.</li>
+</ul>
 ]]></action>
     </release>
   </body>

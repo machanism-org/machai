@@ -13,5 +13,25 @@
 </ul>
       ]]></action>
     </release>
+
+    <release version="1.1.8" date="2026-05-09">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Fixes</h2>
+<ul>
+  <li>Fixed multi MCP server handling in <code>addMcpServer()</code>.</li>
+  <li>Resolved Sonar-reported issues to improve code quality and maintainability.</li>
+</ul>
+<h2>Refactoring</h2>
+<ul>
+  <li>Renamed <code>ProcessTerminationException</code> to <code>TaskTerminationException</code>.</li>
+  <li>Updated recursive file lookup to use <code>ProjectLayout.findFiles(directory)</code> in the functional tool implementation.</li>
+</ul>
+<h2>Chores</h2>
+<ul>
+  <li>Added <code>ProjectLayout.getExcludeDirs()</code> to final and system instructions, including <code>.machai</code> in the excluded directories list.</li>
+  <li>Added automated tests and refreshed release notes for version 1.1.8.</li>
+</ul>
+      ]]></action>
+    </release>
   </body>
 </document>

@@ -14,5 +14,26 @@
 </ul>
       ]]></action>
     </release>
+    <release version="1.1.8" date="2026-05-09">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Fixes</h2>
+<ul>
+  <li>Fixed interactive mode execution and improved action formatting in <code>changes.xml</code>.</li>
+  <li>Fixed act prompt processing and corrected string property inheritance across act definitions.</li>
+  <li>Fixed the default task termination exit code behavior and improved command log messaging.</li>
+</ul>
+<h2>Features</h2>
+<ul>
+  <li>Added support for <code>gemini-</code> family models in the CodeMie provider.</li>
+  <li>Added the <code>apply_patch_to_file</code> function tool for targeted file updates.</li>
+  <li>Added the <code>get_previous_log_chunk</code> and <code>get_command_log_matches</code> function tools for command log inspection.</li>
+  <li>Expanded project layout instructions and exclusions handling, including recursive file discovery updates, multi-MCP definition support, and inclusion of <code>.machai</code> in excluded directories.</li>
+</ul>
+<h2>Documentation</h2>
+<ul>
+  <li>Updated release notes, Javadoc, act files, and the <code>run_command_line_tool</code> description.</li>
+</ul>
+      ]]></action>
+    </release>
   </body>
 </document>
