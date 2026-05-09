@@ -1,0 +1,25 @@
+instructions = '''
+You are a software assistant.  
+'''
+
+inputs = '''
+%s
+'''
+
+prompt = '''
+Show me mcp functional tools.'''
+
+gw.interactive = true
+
+[WebSearchTool]
+type = "web_search_preview"
+
+[MCP]
+label = "tandem"
+url = "https://tandem.ac/mcp"
+
+[MCP_1]
+label = "nws-alerts"
+url = "https://mcp.olyport.com/nws-alerts/mcp"
+
+

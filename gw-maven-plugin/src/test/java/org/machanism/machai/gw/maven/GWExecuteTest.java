@@ -13,14 +13,14 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 import org.junit.Test;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
-import org.machanism.machai.gw.tools.CommandFunctionTools.ProcessTerminationException;
+import org.machanism.machai.gw.tools.CommandFunctionTools.TaskTerminationException;
 
 public class GWExecuteTest {
 
 	static class ThrowingGWMojo extends GWMojo {
 		@Override
 		protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
-			throw new ProcessTerminationException("stop", 7);
+			throw new TaskTerminationException("stop", 7);
 		}
 	}
 
@@ -41,7 +41,7 @@ public class GWExecuteTest {
 			org.junit.Assert.fail("Expected MojoExecutionException");
 		} catch (MojoExecutionException ex) {
 			assertTrue(ex.getMessage().contains("exit code: 7"));
-			assertTrue(ex.getCause() instanceof ProcessTerminationException);
+			assertTrue(ex.getCause() instanceof TaskTerminationException);
 			assertSame("stop", ex.getCause().getMessage());
 		}
 	}

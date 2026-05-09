@@ -17,7 +17,7 @@ import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
-import org.machanism.machai.gw.tools.CommandFunctionTools.ProcessTerminationException;
+import org.machanism.machai.gw.tools.CommandFunctionTools.TaskTerminationException;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -188,7 +188,7 @@ public class GWMojo extends AbstractGWMojo {
 
 		try {
 			scanDocuments(processor);
-		} catch (ProcessTerminationException e) {
+		} catch (TaskTerminationException e) {
 			getLog().error("Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")");
 			throw new MojoExecutionException(
 					"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);

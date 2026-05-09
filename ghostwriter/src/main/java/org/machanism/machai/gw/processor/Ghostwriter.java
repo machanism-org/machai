@@ -18,7 +18,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.gw.tools.CommandFunctionTools.ProcessTerminationException;
+import org.machanism.machai.gw.tools.CommandFunctionTools.TaskTerminationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -349,7 +349,7 @@ public final class Ghostwriter {
 				processor.scanDocuments(projectDir, scanDir);
 				LOGGER.info("Finished scanning path: `{}`", scanDir);
 			}
-		} catch (ProcessTerminationException e) {
+		} catch (TaskTerminationException e) {
 			exitCode = handleProcessTermination(e);
 		} catch (IllegalArgumentException e) {
 			exitCode = handleProcessingFailure("Error", e);
@@ -362,7 +362,7 @@ public final class Ghostwriter {
 		return exitCode;
 	}
 
-	private static int handleProcessTermination(ProcessTerminationException exception) {
+	private static int handleProcessTermination(TaskTerminationException exception) {
 		LOGGER.error("Process terminated: {}, Exit code: {}", exception.getMessage(), exception.getExitCode());
 		return exception.getExitCode();
 	}

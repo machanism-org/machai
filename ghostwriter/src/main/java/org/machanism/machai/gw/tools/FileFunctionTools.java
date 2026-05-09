@@ -160,7 +160,7 @@ public class FileFunctionTools implements FunctionTools {
 		JsonNode dirPathNode = params.get(DIR_PATH_FIELD);
 		File directory = resolveDirFromOptionalPath(workingDir, dirPathNode);
 
-		List<File> listFiles = listFilesRecursively(directory);
+		List<File> listFiles = ProjectLayout.findFiles(directory);
 		List<String> files = new ArrayList<>();
 		Object result;
 		if (!listFiles.isEmpty()) {
@@ -204,6 +204,7 @@ public class FileFunctionTools implements FunctionTools {
 			List<String> result = new ArrayList<>();
 			if (listFiles != null) {
 				for (File file : listFiles) {
+					
 					result.add(getRelativePath(workingDir, file, true));
 				}
 

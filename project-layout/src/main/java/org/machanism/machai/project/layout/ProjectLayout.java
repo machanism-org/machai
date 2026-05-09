@@ -54,7 +54,7 @@ public abstract class ProjectLayout {
 	 */
 	private static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
 			ProjectProcessor.MACHAI_TEMP_DIR, "target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
-			".classpath", ".settings", ".settings", ".project", ".m2" };
+			".classpath", ".settings", ".settings", ".project", ".m2", ".machai" };
 
 	private File projectDir;
 

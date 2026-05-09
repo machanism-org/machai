@@ -97,8 +97,8 @@ import com.openai.services.blocking.ModelService;
  * tool when present.</li>
  * <li>{@code WebSearchTool.city} (optional): city value for the web search user
  * location.</li>
- * <li>{@code WebSearchTool.country} (optional): country value for the web search
- * user location.</li>
+ * <li>{@code WebSearchTool.country} (optional): country value for the web
+ * search user location.</li>
  * <li>{@code WebSearchTool.region} (optional): region value for the web search
  * user location.</li>
  * <li>{@code MCP.url}, {@code MCP.label}, {@code MCP.description},
@@ -250,7 +250,7 @@ public class OpenAIProvider implements Genai {
 				toolMap.put(tool, null);
 			}
 
-		} while (url != null || i++ == 0);
+		} while (i++ == 0 || url != null);
 	}
 
 	/**
@@ -325,6 +325,7 @@ public class OpenAIProvider implements Genai {
 	 * @return response string, potentially after one or more tool call iterations
 	 */
 	private String parseResponse(Response response) {
+		String result = null;
 		Response current = response;
 		while (current != null) {
 			boolean anyToolCalls = false;
@@ -345,17 +346,19 @@ public class OpenAIProvider implements Genai {
 			}
 
 			if (!anyToolCalls) {
-				return text;
+				result = text;
+				break;
+
+			} else {
+				ResponseCreateParams params = createResponseBuilder(this.inputs);
+
+				logger.debug("Sending follow-up request to LLM service for tool call resolution.");
+				current = getClient().responses().create(params);
+				captureUsage(current.usage());
 			}
-
-			ResponseCreateParams params = createResponseBuilder(this.inputs);
-
-			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
-			current = getClient().responses().create(params);
-			captureUsage(current.usage());
 		}
 
-		return null;
+		return result;
 	}
 
 	/**

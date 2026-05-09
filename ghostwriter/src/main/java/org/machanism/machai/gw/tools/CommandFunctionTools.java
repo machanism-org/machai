@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +58,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  * <li>{@code run_command_line_tool} – executes a command line and returns
  * output</li>
  * <li>{@code terminate_process} – aborts execution by throwing a
- * {@link ProcessTerminationException}</li>
+ * {@link TaskTerminationException}</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -99,7 +98,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Runtime exception used by {@code terminate_process} to signal early
 	 * termination to the host.
 	 */
-	public static class ProcessTerminationException extends RuntimeException {
+	public static class TaskTerminationException extends RuntimeException {
 		private static final long serialVersionUID = -4615360980518233932L;
 		private final int exitCode;
 
@@ -109,7 +108,7 @@ public class CommandFunctionTools implements FunctionTools {
 		 * @param message  message to expose to the host
 		 * @param exitCode desired process exit code
 		 */
-		public ProcessTerminationException(String message, int exitCode) {
+		public TaskTerminationException(String message, int exitCode) {
 			super(message);
 			this.exitCode = exitCode;
 		}
@@ -121,7 +120,7 @@ public class CommandFunctionTools implements FunctionTools {
 		 * @param cause    underlying cause
 		 * @param exitCode desired process exit code
 		 */
-		public ProcessTerminationException(String message, Throwable cause, int exitCode) {
+		public TaskTerminationException(String message, Throwable cause, int exitCode) {
 			super(message, cause);
 			this.exitCode = exitCode;
 		}
@@ -209,10 +208,10 @@ public class CommandFunctionTools implements FunctionTools {
 						+ "- Calling this function with `exitCode 0` will terminate the process immediately.\n"
 						+ "- Only use `exitCode 0` for explicit user requests or when strongly needed by the process logic.\n"
 						+ "- Improper use may disrupt ongoing tasks or interactive sessions.",
-				this::terminateProcess,
-				"message:string:optional:The exception message to use. Defaults to 'Process terminated by function tool.'",
+				this::terminateTask,
+				"message:string:optional:The exception message to use. Defaults to 'Task terminated by function tool.'",
 				"cause:string:optional:An optional cause message. If provided, it is wrapped in a new Exception as the cause.",
-				"exitCode:integer:optional:The exit code to return when terminating the process. Defaults to 0 if not specified.");
+				"exitCode:integer:optional:The exit code to return when terminating the task. Defaults to 0 if not specified.");
 		provider.addTool(
 				"get_previous_log_chunk",
 				"Retrieves the previous chunk of log output from a command execution, immediately preceding the last returned tail result.\n"
@@ -248,11 +247,11 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implements the {@code terminate_process} tool.
+	 * Implements the {@code terminate_task} tool.
 	 *
 	 * <p>
 	 * Reads {@code message}, {@code cause}, and {@code exitCode} from the supplied
-	 * {@link JsonNode} and throws a {@link ProcessTerminationException}. This
+	 * {@link JsonNode} and throws a {@link TaskTerminationException}. This
 	 * mechanism allows a tool invocation to abort the overall workflow with an
 	 * explicit exit code.
 	 * </p>
@@ -260,18 +259,22 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param params tool invocation parameters (expects a single {@link JsonNode}
 	 *               argument)
 	 * @return never returns; always throws
-	 * @throws ProcessTerminationException always thrown to terminate execution
+	 * @throws TaskTerminationException always thrown to terminate execution
 	 */
-	public String terminateProcess(JsonNode props, File projectDir) {
-		String message = props.has("message") ? props.get("message").asText("Process terminated by function tool.")
-				: "Process terminated by function tool.";
+	public String terminateTask(JsonNode props, File projectDir) {
+		if (logger.isInfoEnabled()) {
+			logger.info("Terminate the task: {}, {}", props, projectDir);
+		}
+
+		String message = props.has("message") ? props.get("message").asText("Task terminated by function tool.")
+				: "Task terminated by function tool.";
 		String cause = props.has("cause") ? props.get("cause").asText(null) : null;
 		int exitCode = props.has("exitCode") ? props.get("exitCode").asInt(0) : 0;
 
 		if (cause != null) {
-			throw new ProcessTerminationException(message, new Exception(cause), exitCode);
+			throw new TaskTerminationException(message, new Exception(cause), exitCode);
 		}
-		throw new ProcessTerminationException(message, exitCode);
+		throw new TaskTerminationException(message, exitCode);
 	}
 
 	/**
@@ -288,7 +291,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 *
 	 * @param params tool arguments
 	 * @return command output bounded to the configured tail size
-	 * @throws IOException if the process cannot be started or I/O occurs while
+	 * @throws IOException if the task cannot be started or I/O occurs while
 	 *                     resolving paths
 	 */
 	public String executeCommand(JsonNode props, File projectDir) throws IOException {

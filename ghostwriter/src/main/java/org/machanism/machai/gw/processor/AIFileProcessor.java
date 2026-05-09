@@ -28,7 +28,7 @@ import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
-import org.machanism.machai.gw.tools.CommandFunctionTools.ProcessTerminationException;
+import org.machanism.machai.gw.tools.CommandFunctionTools.TaskTerminationException;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +79,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				provider.setWorkingDir(projectDir);
 
 				String sysInstructions = promptBundle.getString("sys_instructions");
-				String finalInstructions = String.format(sysInstructions, instructions);
+				String finalInstructions = String.format(sysInstructions, instructions,
+						StringUtils.join(ProjectLayout.getExcludeDirs(), ", "));
 
 				provider.instructions(finalInstructions);
 
@@ -91,7 +92,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				perform = perform(file, provider);
 
-			} catch (ProcessTerminationException e) {
+			} catch (TaskTerminationException e) {
 				if (e.getExitCode() != 0) {
 					throw e;
 				}
@@ -124,8 +125,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 
 		String perform = provider.perform();
-		if (perform != null && interactive) {
-			logger.info(">>>: {}", perform);
+		if (perform != null || interactive) {
+
+			if (perform != null) {
+				logger.info(">>>: {}", perform);
+			}
+
 			String input = input();
 			if (input != null) {
 				if (!Strings.CS.equals(input.toLowerCase().trim(), "exit")) {
