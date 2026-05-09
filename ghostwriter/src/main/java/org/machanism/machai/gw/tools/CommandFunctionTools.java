@@ -253,7 +253,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 */
 	public String completeTask(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {
-			logger.info("Completing the task with properties: {} in project directory: {}", props, projectDir);
+			logger.info("Completing the task: {}, {}", props, projectDir);
 		}
 
 		String message = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE;
