@@ -16,34 +16,6 @@ This act automates the process of documenting and committing code changes in a p
 # provide git commands, and format the output.
 instructions = '''
 You are an AI assistant tasked with helping developers document and commit their code changes efficiently. 
-When given a set of project file changes (such as a diff or summary), follow these steps:
-
-1. **Analyze the Provided Changes:**  
-   Carefully review the modifications in the project files. Identify the purpose, scope, and impact of the changes.  
-   Group changes by type (e.g., feature, fix, refactor, docs, chore) and prepare separate actions for each group.
-
-2. **Generate Commit Messages:**  
-   - For each group, write a concise, descriptive commit message that accurately summarizes the changes.
-   — Describe the essence of what exactly was changed.  
-   - Use bullet points to highlight multiple key modifications within a group.  
-   - Ensure messages follow best practices (imperative mood, present tense, clear and specific).
-
-3. **Provide Git Commands:**  
-   - Output the exact git command(s) required to stage and commit each group of changes, using the generated commit messages.  
-   - Assume the user is in the project root directory and that all relevant files should be included.
-
-4. **Execute System Commands:**  
-   - Use the `run_command_line_tool` to execute all system commands (including git commands) automatically as part of the process.
-   - Do not prompt the user for confirmation before running any commands; execute them directly as required.
-
-5. **Formatting:**  
-   - Present each commit message and its corresponding git command(s) in clearly separated sections.  
-   - Use code blocks for commands.  
-   - Output should be plain text.
- 
-6. **Clarity and Brevity:**  
-   - Ensure your output is easy to understand and directly actionable.  
-   - Avoid unnecessary explanations unless clarification is requested.
 '''
 
 # =========================
@@ -56,18 +28,42 @@ When given a set of project file changes (such as a diff or summary), follow the
 inputs = '''
 # Task
 
-1. Check the status of the current folder (`.`), e.g for git: `git status .`.  
-   - If there are no changes in this directory, display a message indicating that no changes were found and skip all subsequent actions.
+- Check the status of the current folder (`.`), e.g for git: `git status .`.  
+- If there are no changes in this directory, skip following steps and stop the task.
    - Otherwise: Automatically execute the appropriate git or svn commands to commit each group separately using the functional tool, according to the version control system in use.
 
-2. If changes are present, analyze and group the modified files in the current folder by related change type or logical modification (e.g., feature, fix, refactor, docs, chore).  
+- **Analyze the Provided Changes:**  
+   Carefully review the modifications in the project files. Identify the purpose, scope, and impact of the changes.  
+   Group changes by type (e.g., feature, fix, refactor, docs, chore) and prepare separate actions for each group.
+
+- **Generate Commit Messages:**  
+   - For each group, write a meaningful message about the changes made, accurately summarizing them.
+   - Describe the essence of what exactly was changed from a functional point of view.
+   - Use bullet points to highlight multiple key modifications within a group.  
+   - Ensure messages follow best practices.
+
+- **Provide Git Commands:**  
+   - Output the exact git command(s) required to stage and commit each group of changes, using the generated commit messages.  
+   - Assume the user is in the project root directory and that all relevant files should be included.
+
+- **Formatting:**  
+   - Present each commit message and its corresponding git command(s) in clearly separated sections.  
+   - Use code blocks for commands.  
+   - Output should be plain text.
+ 
+- **Clarity and Brevity:**  
+   - Ensure your output is easy to understand and directly actionable.  
+   - Avoid unnecessary explanations unless clarification is requested.
+
+
+- If changes are present, analyze and group the modified files in the current folder by related change type or logical modification (e.g., feature, fix, refactor, docs, chore).  
    - Only include files located directly in the current directory (`.`) and changes in sub-directories.
 
-3. For each group, generate a commit message that:
+- For each group, generate a commit message that:
    - Follows best practices (clear, concise, imperative mood, present tense, and specific).
    - **IMPORTENT: Adopts the style and format of several historical commit messages from the project.**
        
-4. Output format: Provide your response as plain text only. Do not use markdown formatting.
+- Output format: Provide your response as plain text only. Do not use markdown formatting.
 
 %s
 '''
