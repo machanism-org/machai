@@ -18,7 +18,6 @@
       <action dev="dev" type="add"><![CDATA[
 <h2>Fixes</h2>
 <ul>
-  <li>Fixed interactive mode execution and improved action formatting in <code>changes.xml</code>.</li>
   <li>Fixed act prompt processing and corrected string property inheritance across act definitions.</li>
   <li>Fixed the default task termination exit code behavior and improved command log messaging.</li>
 </ul>

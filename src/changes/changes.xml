@@ -15,7 +15,6 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
 </ul>
 <h2>Fixes</h2>
 <ul>
-  <li>Fixed interactive mode execution and corrected <code>changes.xml</code> formatting.</li>
   <li>Fixed act prompt processing and string property inheritance behavior.</li>
   <li>Fixed class functional tool initialization and corrected log message behavior.</li>
   <li>Adjusted default exit code handling and improved command-line tool documentation.</li>

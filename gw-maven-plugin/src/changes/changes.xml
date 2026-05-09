@@ -35,13 +35,11 @@
       <action dev="dev" type="add"><![CDATA[
 <h2>Fixes</h2>
 <ul>
-  <li>Fixed interactive mode execution behavior and corrected <code>changes.xml</code> formatting.</li>
   <li>Fixed initialization of <code>ClassFunctionalTools</code>.</li>
   <li>Applied additional Sonar-related fixes.</li>
 </ul>
 <h2>Chores</h2>
 <ul>
-  <li>Updated release notes, <code>changes.xml</code>, and added test coverage for the release cycle.</li>
   <li>Improved project layout handling by adding exclude directory propagation, using project layout file discovery for recursive file listing, supporting multi-MCP definitions, and renaming <code>ProcessTerminationException</code> to <code>TaskTerminationException</code>.</li>
 </ul>
 ]]></action>
