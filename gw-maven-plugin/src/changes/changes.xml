@@ -6,7 +6,7 @@
    
     <release version="1.1.0" date="2026-04-05">
       <action dev="dev" type="add"><![CDATA[
-<h2>Fixes</h2>
+<h2>Features</h2>
 <ul>
   <li>Integrated Ghostwriter guided file processing directly into Maven goals for repeatable source, documentation, and site updates.
   <li>Added prompt-driven act workflows with support for reusable act definitions and interactive input when no explicit action prompt is supplied.
