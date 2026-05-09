@@ -5,6 +5,7 @@
   <body>
     <release version="1.1.0" date="2026-04-05">
       <action dev="dev" type="add"><![CDATA[
+      <h2>Features</h2>
 <ul>
   <li>Added repository-embedded guidance processing for repeatable AI-assisted updates across source code, documentation, site pages, configuration, diagrams, and other project artifacts.</li>
   <li>Added Act mode for reusable TOML-based prompt workflows, including built-in acts, inheritance, default prompts, interactive and non-interactive execution, and episode-based multi-step automation.</li>
