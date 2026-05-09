@@ -17,17 +17,17 @@
   <li>Added a cleanup goal for removing temporary workflow artifacts.</li>
 </ul>
 
-## Features
-
-- Integrated Ghostwriter guided file processing directly into Maven goals for repeatable source, documentation, and site updates.
-- Added prompt-driven act workflows with support for reusable act definitions and interactive input when no explicit action prompt is supplied.
-- Added execution-root and per-module goal variants for guided and act-based processing in standard Maven reactor workflows.
-- Added support for reverse-order execution-root guided processing so submodules can be processed before parent projects.
-- Added support for running the main guided goal without requiring a Maven project in the current directory.
-- Added Maven <code>settings.xml</code> integration for provider credentials and custom configuration via <code>genai.serverId</code>.
-- Added configurable processing parameters for model selection, scan roots, instructions, exclusions, act locations, prompts, threading, and input logging.
-- Added Java class discovery and reflective inspection function tools for project-aware analysis, including class matching, member metadata, source paths, and dependency artifact origins.
-- Added a cleanup goal for removing temporary Ghostwriter workflow artifacts.
+<p>Features:</p>
+<ul>
+  <li>Integrated Ghostwriter guided file processing directly into Maven goals for repeatable source, documentation, and site updates.
+  <li>Added prompt-driven act workflows with support for reusable act definitions and interactive input when no explicit action prompt is supplied.
+  <li>Added execution-root and per-module goal variants for guided and act-based processing in standard Maven reactor workflows.
+  <li>Added support for reverse-order execution-root guided processing so submodules can be processed before parent projects.
+  <li>Added support for running the main guided goal without requiring a Maven project in the current directory.
+  <li>Added Maven <code>settings.xml</code> integration for provider credentials and custom configuration via <code>genai.serverId</code>.
+  <li>Added configurable processing parameters for model selection, scan roots, instructions, exclusions, act locations, prompts, threading, and input logging.
+  <li>Added Java class discovery and reflective inspection function tools for project-aware analysis, including class matching, member metadata, source paths, and dependency artifact origins.
+  <li>Added a cleanup goal for removing temporary Ghostwriter workflow artifacts.
 ]]></action>
     </release>
 
@@ -41,12 +41,13 @@
   <li>Added Maven settings-based credential loading through <code>genai.serverId</code> for provider integration.</li>
 </ul>
 
-## Features
-
-- Added Maven goals for Ghostwriter guided processing and prompt-driven act workflows across source, documentation, site, and other project files.
-- Added execution-root and per-module goal variants to support both aggregated orchestration and standard Maven reactor-aligned processing.
-- Added Java class discovery and reflective inspection function tools to support project-aware analysis from the current Maven context.
-- Added Maven <code>settings.xml</code> integration through <code>genai.serverId</code> for loading provider credentials during plugin execution.
+<p>Features:</p>
+<ul>
+  <li>Added Maven goals for Ghostwriter guided processing and prompt-driven act workflows across source, documentation, site, and other project files.
+  <li>Added execution-root and per-module goal variants to support both aggregated orchestration and standard Maven reactor-aligned processing.
+  <li>Added Java class discovery and reflective inspection function tools to support project-aware analysis from the current Maven context.
+  <li>Added Maven <code>settings.xml</code> integration through <code>genai.serverId</code> for loading provider credentials during plugin execution.
+<ul>
 ]]></action>
     </release>
   </body>
