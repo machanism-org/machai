@@ -12,14 +12,14 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter provides function tools that let a model work with Act templates, manage project-scoped workflow state, navigate episode-based flows, inspect and modify files inside the active project, run approved shell commands, inspect stored command logs, and fetch content from web pages or REST endpoints.
+Ghostwriter provides function tools that let a model discover and inspect Act templates, keep project-scoped workflow state, navigate episode-based flows, work with files inside the active project, run approved command-line operations, inspect stored command logs, and retrieve content from web pages or REST endpoints.
 
 ## Tool groups
 
 - **Act and workflow tools** help discover available Acts, inspect Act definitions, store temporary workflow values, and control episode transitions.
 - **File system tools** help read, write, patch, and enumerate files relative to the active project directory.
-- **Command and process tools** help run validated commands, inspect command log history, search command logs, and stop execution when necessary.
-- **Web and API tools** help download page content and call HTTP endpoints.
+- **Command and process tools** help run approved commands, inspect command log history, search command logs, and finish or terminate execution when necessary.
+- **Web and API tools** help download web content and call HTTP endpoints.
 
 ## Act and workflow tools
 
@@ -27,13 +27,13 @@ Ghostwriter provides function tools that let a model work with Act templates, ma
 Lists the built-in Act templates packaged with Ghostwriter.
 
 **Description**
-Use this tool when you want a quick overview of the built-in Acts that ship with Ghostwriter. It scans the bundled Act resources, reads each Act description, and returns a readable list of available templates.
+Use this tool when you need a quick overview of the built-in Acts that ship with Ghostwriter. It scans packaged Act resources and returns a readable list of Act names together with their descriptions.
 
 **Features**
 - Discovers built-in Acts packaged with the application.
-- Loads the description for each discovered Act.
-- Returns a readable list instead of raw TOML files.
-- Useful when selecting an Act to inspect next.
+- Reads each Act description before returning the list.
+- Returns a user-friendly summary instead of raw TOML source.
+- Helpful when choosing the next Act to inspect.
 
 **Input parameters**
 This tool does not take any input parameters.
@@ -42,32 +42,32 @@ This tool does not take any input parameters.
 Loads the details of a specific Act template.
 
 **Description**
-Use this tool when you need to inspect one Act in detail. It resolves the requested Act by name and returns collected properties such as instructions, templates, and configuration values. It can load the effective Act, only the custom Act, or only the built-in version.
+Use this tool when you need to inspect one Act in detail. It loads the requested Act by name and returns its collected properties, such as instructions, templates, and configuration values. It can resolve the effective Act, only the custom Act, or only the built-in Act.
 
 **Features**
-- Loads one Act by name.
-- Supports effective resolution or explicit built-in/custom lookup.
+- Loads a single Act by name.
+- Supports effective, built-in-only, and custom-only resolution.
 - Returns Act properties as structured data.
-- Returns a readable message if the Act cannot be resolved.
+- Returns a readable message if the Act cannot be found.
 
 **Input parameters**
 - `actName` *(string, required)*: Name of the Act to load.
 - `custom` *(boolean, optional)*:
   - `true`: Load only the user-defined Act.
   - `false`: Load only the built-in packaged Act.
-  - omitted: Load the effective Act using normal resolution.
+  - omitted: Load the effective Act using the normal resolution order.
 
 ### `put_project_context_variable`
 Stores or updates a variable in the current project context.
 
 **Description**
-Use this tool to save a named value for the active project so later steps in the same workflow can reuse it. The value is stored only for the current project context, which makes it useful for passing temporary state between tool calls or episodes.
+Use this tool to save a named value for the active project so later workflow steps can reuse it. The value is stored only for the current project context, which makes it useful for passing temporary state between tool calls or episodes.
 
 **Features**
 - Saves a name/value pair for the current project.
-- Supports updating an existing variable.
-- Helps multi-step workflows share state.
-- Keeps values isolated to the active project directory.
+- Updates an existing variable when the name already exists.
+- Helps multi-step workflows share temporary state.
+- Keeps stored values isolated to the active project directory.
 
 **Input parameters**
 - `name` *(string, required)*: Name of the context variable.
@@ -77,13 +77,13 @@ Use this tool to save a named value for the active project so later steps in the
 Retrieves a value from the current project context.
 
 **Description**
-Use this tool to read a value that was previously stored with `put_project_context_variable`. It searches the project-scoped context for the active working directory and returns either the stored value or a readable message when the variable is missing.
+Use this tool to read a value that was previously stored with `put_project_context_variable`. It looks up the variable only inside the active project context and returns either the stored value or a readable message when the context or variable is missing.
 
 **Features**
 - Reads previously stored workflow values.
 - Looks up variables only inside the active project context.
-- Useful for continuing multi-step or multi-episode flows.
-- Returns clear feedback when a context or variable does not exist.
+- Useful for continuing multi-step or multi-episode workflows.
+- Returns clear feedback when a variable is not available.
 
 **Input parameters**
 - `name` *(string, required)*: Name of the context variable to retrieve.
@@ -107,7 +107,7 @@ Use this tool to control episode-based workflow navigation. If no ID is supplied
 Repeats the current episode.
 
 **Description**
-Use this tool when the current episode should be retried. Ghostwriter restarts the same episode and preserves the existing project context, which allows a workflow to retry after updating temporary state.
+Use this tool when the current episode should be retried. Ghostwriter restarts the same episode and preserves the existing project context, which is useful after updating workflow state.
 
 **Features**
 - Repeats the current episode.
@@ -187,11 +187,11 @@ Use this tool when you need a deeper inventory of files under a folder. It trave
 Applies a unified diff patch to a file.
 
 **Description**
-Use this tool when you want to update only a small section of a file instead of rewriting the entire file. It accepts a unified diff patch, applies matching hunks to the target file, and reports whether the patch operation succeeded.
+Use this tool when you want to update only a focused part of a file instead of rewriting the whole file. It accepts a unified diff patch, applies the patch to the target file, and reports whether the operation succeeded.
 
 **Features**
 - Applies unified diff hunks to a target file.
-- Works best for focused, minimal file edits.
+- Designed for small, focused file edits.
 - Supports configurable character encoding.
 - Returns a success or failure message after patch processing.
 
@@ -210,7 +210,7 @@ Use this tool to run approved shell commands for tasks such as builds, tests, or
 
 **Features**
 - Runs commands inside the current project tree.
-- Rejects unsafe command fragments through deny-list checks.
+- Applies command deny checks before execution.
 - Supports custom environment variables.
 - Captures both stdout and stderr.
 - Stores command output for later inspection.
@@ -233,7 +233,7 @@ Use this tool when a previous `run_command_line_tool` result was truncated to a 
 **Features**
 - Reads earlier output from a stored command log.
 - Supports paged backward navigation through command output.
-- Lets workflows inspect long-running command results in smaller sections.
+- Helps inspect long-running command results in smaller sections.
 - Uses the same configurable character decoding as the command tool.
 
 **Input parameters**
@@ -259,21 +259,35 @@ Use this tool when you need to extract matching text fragments from the stored o
 - `regexp` *(string, required)*: Java regular expression to search for in the log.
 - `charsetName` *(string, optional)*: Character encoding used to read the stored log. Default: `UTF-8`.
 
-### `terminate_task`
-Terminates the current workflow with an exit code.
+### `end_task`
+Ends the current task without terminating the application.
+
+**Description**
+Use this tool when the current interactive task should finish cleanly while allowing the application to continue running. It is useful for concluding a user-driven workflow without treating the situation as a fatal error.
+
+**Features**
+- Ends only the current task.
+- Leaves the application running.
+- Supports a custom completion message.
+- Useful for interactive workflows and controlled handoff points.
+
+**Input parameters**
+- `message` *(string, optional)*: Message to use upon completion.
+
+### `terminate_execution`
+Terminates the application by sending an exit code.
 
 **Description**
 Use this tool when execution should stop immediately because of a fatal validation failure, an unsupported condition, or another controlled shutdown scenario.
 
 **Features**
-- Stops workflow execution immediately.
-- Supports a custom message.
-- Supports an optional cause message.
+- Stops execution immediately.
+- Supports a custom termination message.
 - Supports a custom exit code.
+- Useful for controlled shutdown scenarios.
 
 **Input parameters**
-- `message` *(string, optional)*: Exception message to use. Default: `Process terminated by function tool.`
-- `cause` *(string, optional)*: Optional cause message wrapped as the underlying exception cause.
+- `message` *(string, optional)*: Exception message to use. Default: `Execution terminated by function tool.`
 - `exitCode` *(integer, optional)*: Exit code to return. Default: `0`.
 
 ## Web and API tools
