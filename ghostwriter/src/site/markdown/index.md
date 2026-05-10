@@ -34,7 +34,7 @@ Let me know if you want it even shorter or tailored for a specific toolset!
    - **Prerequisites:** List all required software, services, and environment settings.
    - **Download:**  
      Add a download link for the Ghostwriter CLI application jar:  
-     `[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download)`
+      [![Download Ghostwriter](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/downloadd)
    - **Basic Usage:** Provide an example command to run the application.
    - **Typical Workflow:** Outline the step-by-step process for using the project artifacts.
    - **Java Version:** State the required Java version as defined in `pom.xml`, and clarify any additional functional requirements.
@@ -58,13 +58,13 @@ canonical: https://machai.machanism.org/ghostwriter/index.html
 
 ## Introduction
 
-Ghostwriter is a command-line AI automation and documentation engine for repository-wide maintenance in the Machai ecosystem. It scans project content, detects embedded `@guidance` instructions, and uses GenAI-assisted processing to update source files, documentation, project site pages, diagrams, configuration, and other governed artifacts. The main benefit is that automation intent stays inside the repository, close to the files it controls, so teams can review, repeat, and operationalize changes more easily across local workflows and CI/CD pipelines.
+Ghostwriter is a repository-wide AI automation and documentation engine in the Machai ecosystem. It scans project content, finds embedded `@guidance` instructions, and applies GenAI-assisted processing to source code, documentation, project site content, configuration, diagrams, and other governed artifacts. Its core benefit is that maintenance intent stays in the repository, close to the files it controls, making updates more reviewable, repeatable, and suitable for both local development and CI/CD execution.
 
-Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html). Instead of relying only on one-off prompts, Ghostwriter uses persistent repository-embedded guidance so project maintenance becomes structured, auditable, reusable, and applicable across the full range of project files.
+Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html). Instead of relying only on one-time prompts, Ghostwriter uses persistent repository-embedded guidance so project-wide maintenance becomes structured, auditable, reusable, and effective across the full range of project files.
 
 ## Overview
 
-Ghostwriter accepts scan targets such as directories, glob patterns, and regular-expression patterns. It initializes runtime settings, resolves the project root, loads configuration, selects the active model and execution mode, applies excludes and optional instructions, and then runs guided AI processing across eligible repository artifacts.
+Ghostwriter runs as a command-line application that accepts scan targets such as directories, glob patterns, and regular-expression patterns. It initializes runtime settings, resolves the project root, loads configuration, selects the active model and execution mode, applies excludes and optional instructions, and then executes guided AI processing across eligible repository artifacts.
 
 In guidance-driven execution, it traverses the repository, extracts embedded directives, prepares project-aware prompts, invokes the configured GenAI backend, and writes generated results back to the working tree. In Act mode, it executes reusable prompt templates and can expose controlled tools for file access, web retrieval, REST calls, command execution, and act discovery.
 
@@ -72,7 +72,7 @@ In guidance-driven execution, it traverses the repository, extracts embedded dir
 
 ![C4 Diagram](./images/c4-diagram.png)
 
-The diagram shows a layered command-line system centered on a runtime entry point that initializes execution and dispatches work. A configuration layer provides runtime settings, while project layout resolution contributes metadata about modules and relevant source, test, and documentation areas. A shared scanning and AI-processing pipeline handles repository traversal, filtering, prompt construction, provider interaction, and write-back across supported file types. Two main execution paths sit on top of that pipeline: one focused on embedded guidance in repository artifacts and another focused on reusable act-driven workflows. Supporting integrations provide controlled access to local files, remote resources, and provider tooling, while logging and usage tracking capture operational activity.
+The diagram presents a layered command-line system centered on a runtime entry point that initializes execution and dispatches work. A configuration layer supplies runtime settings, while project-layout resolution contributes metadata about modules and important source, test, and documentation areas. A shared scanning and AI-processing pipeline handles repository traversal, filtering, prompt construction, provider interaction, and write-back across supported file types. Two principal execution paths sit on top of this pipeline: one focused on embedded guidance in repository artifacts and another focused on reusable act-driven workflows. Supporting integrations provide controlled access to local files, remote resources, and provider tooling, while logging and usage tracking capture operational activity.
 
 ## Machai Ghostwriter vs. Other Tools
 
@@ -134,7 +134,7 @@ Machai Ghostwriter is unique because it combines repository-embedded guidance, r
 
 ### Download
 
-[![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download)
+[![Download Ghostwriter](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/downloadd)
 
 ### Basic Usage
 

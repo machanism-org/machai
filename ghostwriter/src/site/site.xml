@@ -45,7 +45,7 @@
         <menu>
             <item name="Overview" href="index.html" />
             <item name="Project Workflow" href="project-workflow.html" />
-            <item name="Guidance File Processing" href="guidance.html" />
+            <item name="Guidance Tag" href="guidance-tag.html" />
             <item name="Act" href="act.html" />
             <item name="Functional Tools" href="functional-tools.html" />
         </menu>

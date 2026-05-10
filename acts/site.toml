@@ -13,7 +13,7 @@ inputs = [
    - Command result "tailResultSize": 1000 
    - Run the command bellow:
      ```
-     mvn site site:stage -q
+     mvn clean site site:stage -q
      ```
    - Note: for output site dir is used: <stagingDirectory> pom.xml property. 
    
