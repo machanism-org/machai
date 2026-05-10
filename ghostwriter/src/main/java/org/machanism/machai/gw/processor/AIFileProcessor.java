@@ -28,7 +28,7 @@ import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
-import org.machanism.machai.gw.tools.CompleteTask;
+import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -93,7 +93,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				perform = perform(file, provider);
 
-			} catch (CompleteTask e) {
+			} catch (EndTaskException e) {
 				perform = e.getMessage();
 
 			} finally {

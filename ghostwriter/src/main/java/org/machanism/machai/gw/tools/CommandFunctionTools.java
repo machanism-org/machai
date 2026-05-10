@@ -171,9 +171,9 @@ public class CommandFunctionTools implements FunctionTools {
 						+ TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE + "'",
 				"exitCode:integer:optional:The exit code to return when terminating the execution. Defaults to 0 if not specified.");
 		provider.addTool(
-				"complete_task",
-				"Terminate the current task without terminating the application. This function is used to terminate an interactive session with the user within the context of the current task.",
-				this::completeTask,
+				"end_task",
+				"Ends the current task without terminating the application. Use this function to conclude an interactive session with the user, ensuring that only the current task is finished while the application remains active. This tool is ideal for gracefully completing user-driven tasks in interactive mode, allowing further operations or tasks to continue.",
+				this::endTask,
 				"message:string:optional:The message to use upon completion.");
 		provider.addTool(
 				"get_previous_log_chunk",
@@ -237,7 +237,7 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Completes the current task by throwing a {@link CompleteTask} exception.
+	 * Completes the current task by throwing a {@link EndTaskException} exception.
 	 * <p>
 	 * This method is intended to be used as a function tool for terminating a
 	 * process when requested by the user or dictated by process logic. It logs the
@@ -248,12 +248,12 @@ public class CommandFunctionTools implements FunctionTools {
 	 *                   completion message.
 	 * @param projectDir The project directory associated with the task.
 	 * @return This method does not return normally; it always throws
-	 *         {@link CompleteTask}.
-	 * @throws CompleteTask Always thrown to signal task completion.
+	 *         {@link EndTaskException}.
+	 * @throws EndTaskException Always thrown to signal task completion.
 	 */
-	public String completeTask(JsonNode props, File projectDir) {
+	public String endTask(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {
-			logger.info("Completing the task: {}, {}", props, projectDir);
+			logger.info("Ending task: {}, {}", props, projectDir);
 		}
 
 		String message = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE;
@@ -261,7 +261,7 @@ public class CommandFunctionTools implements FunctionTools {
 			message = props.get("message").asText(null);
 		}
 
-		throw new CompleteTask(message);
+		throw new EndTaskException(message);
 	}
 
 	/**
