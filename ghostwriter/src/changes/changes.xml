@@ -37,23 +37,14 @@
     </release>
     <release version="1.1.9" date="2026-05-10">
       <action dev="dev" type="add"><![CDATA[
-<h2>Features</h2>
-<ul>
-  <li>Added the <code>get_command_log_matches</code> function tool for searching command logs by regular expression.</li>
-  <li>Added the <code>get_previous_log_chunk</code> function tool for retrieving earlier command log output.</li>
-  <li>Added the <code>apply_patch_to_file</code> function tool for targeted unified-diff file updates.</li>
-  <li>Added support for <code>gemini-</code> family models in the CodeMie provider.</li>
-</ul>
 <h2>Fixes</h2>
 <ul>
-  <li>Fixed act prompt processing and string property inheritance across act definitions.</li>
-  <li>Fixed default task termination handling, including the zero exit-code default and renamed termination exception flow.</li>
-  <li>Fixed interactive mode execution and refined related task termination behavior.</li>
-  <li>Fixed recursive file discovery and exclusion handling, including support for multi-MCP definitions and exclusion of <code>.machai</code> directories.</li>
+  <li>Improved task termination handling across processing and command execution flows.</li>
+  <li>Corrected the end-task exception naming and refined command log messaging.</li>
 </ul>
 <h2>Chores</h2>
 <ul>
-  <li>Improved the release pack profile.</li>
+  <li>Improved the release pack profile configuration.</li>
 </ul>
       ]]></action>
     </release>
