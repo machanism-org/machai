@@ -90,7 +90,13 @@ inputs = '''
 
 Analyze the commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit, create release notes for version `[RELEASE_VERSION]`.
 
+**Rule:**  
+- Strictly exclude any documentation changes from the release notes. 
+- Do not add, mention, or summarize any documentation updates, even if they are present in the commit messages or file changes.
+- Do not mention about project version update.
 - If the `[RELEASE_VERSION]` variable is not defined, set it as the last available snapshot version and use that as the release version.
+- If there are no changes, skip following steps and complete the task.
+- If no changes were made to the code, skip the following steps and complete the task.
 
 1. Collect all commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit.
 2. Analyze and group the commit messages by change type (e.g., Features, Fixes, Refactoring, Documentation, Chores).
