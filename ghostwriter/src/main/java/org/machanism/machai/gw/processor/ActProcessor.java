@@ -151,6 +151,7 @@ public class ActProcessor extends AIFileProcessor {
 		applyEpisodeSelection(episodeSelection);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void applyPromptValues(String prompt, Map<String, Object> actData) {
 		Object mainValue = actData.get(GWConstants.INPUTS_PROPERTY_NAME);
 		if (mainValue instanceof String) {
@@ -426,6 +427,7 @@ public class ActProcessor extends AIFileProcessor {
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static List<String> toStringList(Object existingValue) {
 		if (existingValue instanceof String) {
 			return Arrays.asList((String) existingValue);
@@ -454,6 +456,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param properties properties loaded from TOML acts
 	 */
+	@SuppressWarnings("unchecked")
 	void applyActData(Map<String, Object> properties) {
 		for (Entry<String, Object> entry : properties.entrySet()) {
 			String key = entry.getKey();

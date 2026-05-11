@@ -378,24 +378,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return interactive;
 	}
 
-	/**
-	 * FalsePositive Backward-compatible alias kept for configuration/property
-	 * naming; delegating to getModel() is intentional.
-	 */
-	@SuppressWarnings("java:S4144")
-	public String getProvider() {
-		return String.valueOf(getModel());
-	}
-
-	/**
-	 * FalsePositive Backward-compatible alias kept for configuration/property
-	 * naming; delegating to setModel() is intentional.
-	 */
-	@SuppressWarnings("java:S4144")
-	public void setProvider(String genai) {
-		setModel(genai);
-	}
-
 	public void addTool(FunctionTools toolFunction) {
 		logger.debug("FunctionTools: {}", toolFunction.getClass().getName());
 		toolFunctions.add(toolFunction);
