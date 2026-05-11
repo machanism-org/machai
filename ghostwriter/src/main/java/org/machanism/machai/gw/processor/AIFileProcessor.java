@@ -131,11 +131,18 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			}
 			String input = input();
 			if (input != null) {
-				if (!Strings.CS.equals(input.toLowerCase().trim(), "exit")) {
+				switch (input.toLowerCase().trim()) {
+				case "continue":
+					perform = null;			
+					break;
+
+				case "exit":
+					throw new ProcessTerminationException(0);
+
+				default:
 					provider.prompt(input);
 					perform = perform(file, provider);
-				} else {
-					perform = null;
+					break;
 				}
 			}
 		}
