@@ -34,11 +34,19 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * File processor implementation that prepares project context and prompts for a
+ * configured AI provider and optionally supports interactive execution.
+ */
 public class AIFileProcessor extends AbstractFileProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
+
+	private static final String EXIT_SPECIAL_PROMPT_COMMAND = "exit";
+
+	private static final String CONTINUE_SPECIAL_PROMPT_COMMAND = "continue";
 
 	public static final String NOT_DEFINED_VALUE = "<NOT_DEFINED_VALUE>";
 
@@ -60,11 +68,26 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
+	/**
+	 * Creates a processor for the given project directory and AI provider identifier.
+	 * 
+	 * @param projectDir    the project root directory
+	 * @param configurator  the application configuration
+	 * @param genai         the AI provider or model identifier
+	 */
 	public AIFileProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator);
 		this.model = genai;
 	}
 
+	/**
+	 * Processes the given file using the currently configured instructions.
+	 * 
+	 * @param projectLayout the current project layout metadata
+	 * @param file          the file to process
+	 * @param prompt        the prompt to send to the AI provider
+	 * @return the provider response, or {@code null} when no response is produced
+	 */
 	public String process(ProjectLayout projectLayout, File file, String prompt) {
 		return process(projectLayout, file, getInstructions(), prompt);
 	}
@@ -132,11 +155,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			String input = input();
 			if (input != null) {
 				switch (input.toLowerCase().trim()) {
-				case "continue":
+				case CONTINUE_SPECIAL_PROMPT_COMMAND:
 					perform = null;			
 					break;
 
-				case "exit":
+				case EXIT_SPECIAL_PROMPT_COMMAND:
 					throw new ProcessTerminationException(0);
 
 				default:
@@ -153,6 +176,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return null;
 	}
 
+	/**
+	 * Builds the formatted project structure description that is supplied to the AI
+	 * provider as contextual information.
+	 * 
+	 * @param projectLayout the current project layout metadata
+	 * @param file          the file currently being processed
+	 * @return the formatted project structure description
+	 */
 	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) {
 		List<String> content = new ArrayList<>();
 
@@ -198,6 +229,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return projectInformation + Genai.LINE_SEPARATOR;
 	}
 
+	/**
+	 * Returns a formatted line describing existing directories from the supplied
+	 * collection.
+	 * 
+	 * @param sources    the directory paths to inspect
+	 * @param projectDir the project root used to resolve relative paths
+	 * @return a formatted description line for the directories
+	 */
 	String getDirInfoLine(Collection<String> sources, File projectDir) {
 		String line = null;
 		if (sources != null) {
@@ -216,22 +255,50 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return line;
 	}
 
+	/**
+	 * Indicates whether provider input logging is enabled.
+	 * 
+	 * @return {@code true} when input logging is enabled; otherwise {@code false}
+	 */
 	public boolean isLogInputs() {
 		return logInputs;
 	}
 
+	/**
+	 * Enables or disables logging of provider inputs.
+	 * 
+	 * @param logInputs {@code true} to enable input logging; otherwise {@code false}
+	 */
 	public void setLogInputs(boolean logInputs) {
 		this.logInputs = logInputs;
 	}
 
+	/**
+	 * Sets the base instructions used for processing after normalizing line content
+	 * and resolving supported references.
+	 * 
+	 * @param instructions the raw instruction text
+	 */
 	public void setInstructions(String instructions) {
 		this.instructions = parseLines(instructions);
 	}
 
+	/**
+	 * Returns the current base instructions used for processing.
+	 * 
+	 * @return the configured instruction text
+	 */
 	public String getInstructions() {
 		return instructions;
 	}
 
+	/**
+	 * Normalizes multi-line input and resolves supported line references such as
+	 * HTTP URLs and {@code file:} references.
+	 * 
+	 * @param data the input text to parse
+	 * @return the normalized text
+	 */
 	public String parseLines(String data) {
 		if (data == null) {
 			return StringUtils.EMPTY;
@@ -260,6 +327,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return sb.toString();
 	}
 
+	/**
+	 * Resolves a single instruction line that may point to external content.
+	 * 
+	 * @param data the instruction line to inspect
+	 * @return the resolved content, or the original line when no reference is found,
+	 *         or {@code null} when the input is {@code null}
+	 * @throws java.io.IOException if referenced remote content cannot be read
+	 */
 	String tryToGetInstructionsFromReference(String data) throws java.io.IOException {
 		if (data == null) {
 			return null;
@@ -279,6 +354,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return data;
 	}
 
+	/**
+	 * Reads UTF-8 text content from the given HTTP or HTTPS URL.
+	 * 
+	 * @param urlString the URL to read
+	 * @return the response content as text
+	 * @throws java.io.IOException if the URL cannot be read
+	 */
 	static String readFromHttpUrl(String urlString) throws java.io.IOException {
 		URL url = URI.create(urlString).toURL();
 		try (InputStream in = url.openStream()) {
@@ -288,6 +370,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 	}
 
+	/**
+	 * Reads UTF-8 text content from the given file path.
+	 * 
+	 * @param filePath the absolute or project-relative file path
+	 * @return the file content as text
+	 */
 	String readFromFilePath(String filePath) {
 		File file = new File(filePath);
 		if (!file.isAbsolute()) {
@@ -304,6 +392,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 	}
 
+	/**
+	 * Configures scanning based on the provided directory or path pattern and then
+	 * starts scanning the project folder.
+	 * 
+	 * @param projectDir the project root directory
+	 * @param scanDir    the directory or path matcher expression to scan
+	 * @throws java.io.IOException if scanning fails
+	 */
 	public void scanDocuments(File projectDir, String scanDir) throws java.io.IOException {
 		if (projectDir == null) {
 			throw new IllegalArgumentException("projectDir must not be null");
@@ -324,6 +420,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		scanFolder(projectDir);
 	}
 
+	/**
+	 * Resolves the effective scan directory and converts it into a glob expression
+	 * when required.
+	 * 
+	 * @param projectDir the base project directory
+	 * @param scanDir    the configured scan directory
+	 * @return the resolved path matcher expression
+	 */
 	String parseScanDir(File projectDir, String scanDir) {
 		File scanDirFile = new File(scanDir);
 		if (!scanDirFile.isAbsolute()) {
@@ -348,14 +452,29 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return scanDir;
 	}
 
+	/**
+	 * Returns the default prompt used for folder processing.
+	 * 
+	 * @return the default prompt
+	 */
 	public String getDefaultPrompt() {
 		return defaultPrompt;
 	}
 
+	/**
+	 * Sets the default prompt used for folder processing.
+	 * 
+	 * @param defaultPrompt the default prompt text
+	 */
 	public void setDefaultPrompt(String defaultPrompt) {
 		this.defaultPrompt = defaultPrompt;
 	}
 
+	/**
+	 * Processes the project root folder using the configured default prompt.
+	 * 
+	 * @param projectLayout the current project layout metadata
+	 */
 	@Override
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
@@ -369,22 +488,48 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 	}
 
+	/**
+	 * Returns the configured AI model or provider identifier.
+	 * 
+	 * @return the model or provider identifier
+	 */
 	public String getModel() {
 		return model;
 	}
 
+	/**
+	 * Sets the AI model or provider identifier.
+	 * 
+	 * @param genai the model or provider identifier
+	 */
 	public void setModel(String genai) {
 		this.model = genai;
 	}
 
+	/**
+	 * Enables or disables interactive processing mode.
+	 * 
+	 * @param interactive {@code true} to enable interactive mode; otherwise
+	 *                    {@code false}
+	 */
 	public void setInteractive(boolean interactive) {
 		this.interactive = interactive;
 	}
 
+	/**
+	 * Indicates whether interactive processing mode is enabled.
+	 * 
+	 * @return {@code true} when interactive mode is enabled; otherwise {@code false}
+	 */
 	public boolean isInteractive() {
 		return interactive;
 	}
 
+	/**
+	 * Adds a tool definition that will be exposed to the AI provider.
+	 * 
+	 * @param toolFunction the tool definition to add
+	 */
 	public void addTool(FunctionTools toolFunction) {
 		logger.debug("FunctionTools: {}", toolFunction.getClass().getName());
 		toolFunctions.add(toolFunction);
