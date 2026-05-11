@@ -33,8 +33,8 @@ inputs = '''
 # Task
 
 - Check the status of the current folder (`.`), e.g for git: `git status .`.  
-- If there are no changes in this directory, skip following steps and stop the task.
-   - Otherwise: Automatically execute the appropriate git or svn commands to commit each group separately 
+- **IMPORTANT: If there are no changes in this directory for this project folder, immediately end the task.**
+- Otherwise: Automatically execute the appropriate git or svn commands to commit each group separately 
       using the functional tool, according to the version control system in use.
 
 - **Analyze the Provided Changes:**  

@@ -58,6 +58,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private List<FunctionTools> toolFunctions = new ArrayList<>();
 
+	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
+
 	public AIFileProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator);
 		this.model = genai;
@@ -73,7 +75,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		if (StringUtils.isNoneBlank(prompt)) {
 			try {
 				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
-				FunctionToolsLoader.getInstance().applyTools(provider);
+				functionToolsLoader.applyTools(provider, getConfigurator());
 				toolFunctions.forEach(ft -> ft.applyTools(provider));
 
 				File projectDir = projectLayout.getProjectDir();
@@ -296,8 +298,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	public void scanDocuments(File projectDir, String scanDir) throws java.io.IOException {
-		FunctionToolsLoader.getInstance().setConfiguration(getConfigurator());
-
 		if (projectDir == null) {
 			throw new IllegalArgumentException("projectDir must not be null");
 		}
