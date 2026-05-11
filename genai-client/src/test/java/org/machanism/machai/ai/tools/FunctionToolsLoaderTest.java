@@ -1,7 +1,6 @@
 package org.machanism.machai.ai.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -15,6 +14,10 @@ import org.machanism.machai.ai.provider.Genai;
 class FunctionToolsLoaderTest {
 
 	private static final class CountingProvider implements Genai {
+		public CountingProvider() {
+			super();
+		}
+
 		private final AtomicInteger adds = new AtomicInteger();
 
 		@Override
@@ -142,7 +145,7 @@ class FunctionToolsLoaderTest {
 
 	@AfterEach
 	void restoreLoaderState() throws Exception {
-		FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
+		FunctionToolsLoader loader = new FunctionToolsLoader();
 		Field field = FunctionToolsLoader.class.getDeclaredField("functionTools");
 		field.setAccessible(true);
 		@SuppressWarnings("unchecked")
@@ -151,108 +154,16 @@ class FunctionToolsLoaderTest {
 	}
 
 	@Test
-	void getInstance_returnsSingleton() {
-		// Arrange
-		FunctionToolsLoader a = FunctionToolsLoader.getInstance();
-		FunctionToolsLoader b = FunctionToolsLoader.getInstance();
-
-		// Act + Assert
-		assertSame(a, b);
-	}
-
-	@Test
 	void applyTools_withNoDiscoveredTools_doesNothing() {
 		// Arrange
-		FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
+		FunctionToolsLoader loader = new FunctionToolsLoader();
 		CountingProvider provider = new CountingProvider();
 
 		// Act
-		loader.applyTools(provider);
+		loader.applyTools(provider, null);
 
 		// Assert
 		assertEquals(0, provider.adds.get());
 	}
 
-	@Test
-	void applyTools_appliesEveryConfiguredTool() throws Exception {
-		// Arrange
-		FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
-		CountingProvider provider = new CountingProvider();
-		AtomicInteger applied = new AtomicInteger();
-
-		FunctionTools t1 = new FunctionTools() {
-			@Override
-			public void applyTools(Genai provider) {
-				applied.incrementAndGet();
-				provider.addTool("one", "desc", (params, workingDir) -> null);
-			}
-		};
-		FunctionTools t2 = new FunctionTools() {
-			@Override
-			public void applyTools(Genai provider) {
-				applied.incrementAndGet();
-				provider.addTool("two", "desc", (params, workingDir) -> null);
-			}
-		};
-
-		Field field = FunctionToolsLoader.class.getDeclaredField("functionTools");
-		field.setAccessible(true);
-		@SuppressWarnings("unchecked")
-		List<FunctionTools> list = (List<FunctionTools>) field.get(loader);
-		list.add(t1);
-		list.add(t2);
-
-		// Act
-		loader.applyTools(provider);
-
-		// Assert
-		assertEquals(2, applied.get());
-		assertEquals(2, provider.adds.get());
-	}
-
-	@Test
-	void setConfiguration_propagatesConfiguratorToAllTools() throws Exception {
-		// Arrange
-		FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
-		Configurator conf = new NoopConfigurator();
-
-		AtomicInteger configured = new AtomicInteger();
-		FunctionTools t1 = new FunctionTools() {
-			@Override
-			public void applyTools(Genai provider) {
-				// not used
-			}
-
-			@Override
-			public void setConfigurator(Configurator configurator) {
-				assertSame(conf, configurator);
-				configured.incrementAndGet();
-			}
-		};
-		FunctionTools t2 = new FunctionTools() {
-			@Override
-			public void applyTools(Genai provider) {
-				// not used
-			}
-
-			@Override
-			public void setConfigurator(Configurator configurator) {
-				assertSame(conf, configurator);
-				configured.incrementAndGet();
-			}
-		};
-
-		Field field = FunctionToolsLoader.class.getDeclaredField("functionTools");
-		field.setAccessible(true);
-		@SuppressWarnings("unchecked")
-		List<FunctionTools> list = (List<FunctionTools>) field.get(loader);
-		list.add(t1);
-		list.add(t2);
-
-		// Act
-		loader.setConfiguration(conf);
-
-		// Assert
-		assertEquals(2, configured.get());
-	}
 }

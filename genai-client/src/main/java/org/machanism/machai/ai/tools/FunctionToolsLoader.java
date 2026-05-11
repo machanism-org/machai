@@ -10,15 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Discovers and applies {@link FunctionTools} implementations using
- * {@link ServiceLoader}.
+ * Discovers and applies {@link FunctionTools} implementations using Java's
+ * {@link ServiceLoader} mechanism.
  *
  * <p>
- * This class is the host-side entry point for registering a curated set of
- * local capabilities (for example, file access, command execution, and HTTP
- * retrieval) with a {@link Genai}. Implementations are discovered from the
- * classpath (typically via {@code META-INF/services} provider configuration)
- * and then applied to the provider in discovery order.
+ * This class serves as the host-side entry point for registering a curated set
+ * of local capabilities (such as file access, command execution, and HTTP
+ * retrieval) with a {@link Genai} provider. Implementations are discovered from
+ * the classpath (typically via {@code META-INF/services} provider
+ * configuration) and then applied to the provider in discovery order.
  * </p>
  *
  * <h2>Usage</h2>
@@ -26,32 +26,28 @@ import org.slf4j.LoggerFactory;
  * <pre>{@code
  * Configurator conf = ...;
  * Genai provider = ...;
- * FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
+ * FunctionToolsLoader loader = new FunctionToolsLoader();
  * loader.setConfiguration(conf);
  * loader.applyTools(provider);
- * }
- * </pre>
+ * }</pre>
+ *
+ * <p>
+ * Alternatively, you may use a singleton pattern if desired.
+ * </p>
  *
  * @author Viktor Tovstyi
  */
-@SuppressWarnings("java:S6548")
 public class FunctionToolsLoader {
 
 	private static final Logger logger = LoggerFactory.getLogger(FunctionToolsLoader.class);
 
-	private static final FunctionToolsLoader INSTANCE = new FunctionToolsLoader();
-
 	private final List<FunctionTools> functionTools = new ArrayList<>();
 
 	/**
-	 * Private constructor to prevent external instantiation.
-	 *
-	 * <p>
-	 * Discovers available {@link FunctionTools} implementations using
-	 * {@link ServiceLoader}.
-	 * </p>
+	 * Constructs a new {@code FunctionToolsLoader} and discovers available
+	 * {@link FunctionTools} implementations using {@link ServiceLoader}.
 	 */
-	private FunctionToolsLoader() {
+	public FunctionToolsLoader() {
 		ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
 		for (FunctionTools functionTool : functionToolServiceLoader) {
 			functionTools.add(functionTool);
@@ -60,40 +56,26 @@ public class FunctionToolsLoader {
 	}
 
 	/**
-	 * Returns the singleton instance.
+	 * Applies all discovered {@link FunctionTools} installers to the given
+	 * provider.
 	 *
-	 * @return singleton loader
+	 * @param provider the {@link Genai} provider instance to augment with tool
+	 *                 functions
 	 */
-	public static FunctionToolsLoader getInstance() {
-		return INSTANCE;
-	}
-
-	/**
-	 * Applies all discovered tool installers to the given provider.
-	 *
-	 * @param provider provider instance to augment with tool functions
-	 */
-	public void applyTools(Genai provider) {
+	public void applyTools(Genai provider, Configurator configurator) {
 		for (FunctionTools functionTool : functionTools) {
-			functionTool.applyTools(provider);
+			Class<? extends FunctionTools> functionToolsClass = functionTool.getClass();
+			FunctionTools newInstance;
+			try {
+				newInstance = functionToolsClass.newInstance();
+				newInstance.setConfigurator(configurator);
+				newInstance.applyTools(provider);
+
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new IllegalArgumentException("FunctionTools class initialization failed: " + functionToolsClass,
+						e);
+			}
 		}
 	}
 
-	/**
-	 * Supplies configuration to all discovered tool installers.
-	 *
-	 * <p>
-	 * Not all {@link FunctionTools} implementations use configuration, but the
-	 * loader provides a centralized way to propagate a {@link Configurator} to all
-	 * tool installers (for example, for resolving header placeholders in web
-	 * requests).
-	 * </p>
-	 *
-	 * @param configurator configuration source used by tool installers
-	 */
-	public void setConfiguration(Configurator configurator) {
-		for (FunctionTools functionTool : functionTools) {
-			functionTool.setConfigurator(configurator);
-		}
-	}
 }
