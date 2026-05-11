@@ -14,6 +14,7 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.maven.tools.ClassFunctionalTools;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
+import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -117,7 +118,13 @@ public class ActPerModuleMojo extends ActMojo {
 			actProcessor.addTool(classFunctionTools);
 		}
 
-		process(actProcessor);
+		try {
+			process(actProcessor);
+		} catch (ProcessTerminationException e) {
+			if (e.getExitCode() != 0) {
+				throw e;
+			}
+		}
 	}
 
 	@Override

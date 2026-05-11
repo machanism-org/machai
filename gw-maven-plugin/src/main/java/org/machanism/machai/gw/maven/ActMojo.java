@@ -23,9 +23,11 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.Ghostwriter;
+import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
@@ -148,7 +150,14 @@ public class ActMojo extends AbstractGWMojo {
 		if (interactive != null) {
 			actProcessor.setInteractive(interactive);
 		}
-		process(actProcessor);
+
+		try {
+			process(actProcessor);
+		} catch (ProcessTerminationException e) {
+			if (e.getExitCode() != 0) {
+				throw e;
+			}
+		}
 	}
 
 	private void updateMavenProjectLayout(MavenProjectLayout mavenProjectLayout, Model model) {
@@ -220,7 +229,8 @@ public class ActMojo extends AbstractGWMojo {
 					String actValue = conf.get(GWConstants.ACT_PROP_NAME, null);
 					if (actValue == null) {
 						actValue = readText("Act");
-						if (Strings.CS.equals(actValue.toLowerCase().trim(), "exit")) {
+						if (Strings.CS.equals(actValue.toLowerCase().trim(),
+								AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND)) {
 							return;
 						}
 					}
