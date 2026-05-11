@@ -82,14 +82,18 @@ public class Picker {
 	private Double score = DEFAULT_SCORE_VALUE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
 	private Configurator configurator;
+	
+	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
 	/**
 	 * Creates a picker backed by the configured Bindex repository and a named GenAI
 	 * provider.
 	 *
-	 * @param genai the provider identifier used to resolve the GenAI implementation
-	 * @param uri the repository URI
-	 * @param config the project configuration used for repository and prompt settings
+	 * @param genai  the provider identifier used to resolve the GenAI
+	 *               implementation
+	 * @param uri    the repository URI
+	 * @param config the project configuration used for repository and prompt
+	 *               settings
 	 */
 	public Picker(String genai, String uri, Configurator config) {
 		if (genai == null) {
@@ -100,15 +104,16 @@ public class Picker {
 		}
 		this.configurator = config;
 		this.provider = GenaiProviderManager.getProvider(genai, config);
-		FunctionToolsLoader.getInstance().applyTools(provider);
+		functionToolsLoader.applyTools(provider, config);
 		this.collection = BindexRepository.getCollection(config);
 	}
 
 	/**
 	 * Creates a picker with explicit dependencies.
 	 *
-	 * @param collection the MongoDB collection used to store and query Bindex documents
-	 * @param provider the GenAI provider used for prompt execution and embeddings
+	 * @param collection the MongoDB collection used to store and query Bindex
+	 *                   documents
+	 * @param provider   the GenAI provider used for prompt execution and embeddings
 	 */
 	Picker(MongoCollection<Document> collection, Genai provider) {
 		if (collection == null) {
@@ -127,7 +132,7 @@ public class Picker {
 	 * @param bindex the Bindex definition to persist
 	 * @return the inserted MongoDB identifier as a string
 	 * @throws JsonProcessingException if the Bindex or its classification cannot be
-	 *         serialized
+	 *                                 serialized
 	 */
 	public String create(Bindex bindex) throws JsonProcessingException {
 		if (bindex == null) {
@@ -140,7 +145,8 @@ public class Picker {
 			collection.deleteOne(Filters.eq(ID_FIELD_NAME, id));
 
 			Classification classification = bindex.getClassification();
-			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName).distinct()
+			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
+					.distinct()
 					.collect(Collectors.toSet());
 			Set<String> integrations = classification.getIntegrations().stream().map(String::toLowerCase).distinct()
 					.collect(Collectors.toSet());
@@ -149,8 +155,10 @@ public class Picker {
 				LOGGER.warn("No language defined for: {}.", id);
 			}
 
-			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson).append(NAME_FIELD_NAME, bindex.getName())
-					.append(VERSION_FIELD_NAME, bindex.getVersion()).append(DOMAINS_PROPERTY_NAME, classification.getDomains())
+			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson)
+					.append(NAME_FIELD_NAME, bindex.getName())
+					.append(VERSION_FIELD_NAME, bindex.getVersion())
+					.append(DOMAINS_PROPERTY_NAME, classification.getDomains())
 					.append(LAYERS_PROPERTY_NAME, classification.getLayers()).append(LANGUAGES_PROPERTY_NAME, languages)
 					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
 					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
@@ -169,10 +177,11 @@ public class Picker {
 	}
 
 	/**
-	 * Generates the BSON array representation of the embedding for a classification.
+	 * Generates the BSON array representation of the embedding for a
+	 * classification.
 	 *
 	 * @param classification the classification to embed
-	 * @param dimensions the embedding dimensions requested from the provider
+	 * @param dimensions     the embedding dimensions requested from the provider
 	 * @return the embedding encoded as a BSON array
 	 * @throws JsonProcessingException if the classification cannot be serialized
 	 */
@@ -223,7 +232,8 @@ public class Picker {
 		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
 		Collection<String> classificatioResults = new HashSet<>();
 		for (Classification classification : classifications) {
-			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName).distinct()
+			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
+					.distinct()
 					.collect(Collectors.toSet());
 			List<Layer> layers = classification.getLayers();
 			if (LOGGER.isInfoEnabled()) {
@@ -242,7 +252,8 @@ public class Picker {
 	}
 
 	/**
-	 * Serializes a classification into JSON text for prompt and embedding generation.
+	 * Serializes a classification into JSON text for prompt and embedding
+	 * generation.
 	 *
 	 * @param classification the classification to serialize
 	 * @return the serialized JSON representation
@@ -256,7 +267,8 @@ public class Picker {
 	 * Recursively adds the dependencies of the given Bindex to the provided set.
 	 *
 	 * @param dependencies the target set that accumulates dependency identifiers
-	 * @param bindexId the root Bindex identifier whose dependency graph is traversed
+	 * @param bindexId     the root Bindex identifier whose dependency graph is
+	 *                     traversed
 	 */
 	void addDependencies(Set<String> dependencies, String bindexId) {
 		Bindex bindex = getBindex(bindexId);
@@ -325,14 +337,14 @@ public class Picker {
 	 * Executes a vector search and returns matching library coordinates in
 	 * {@code name:version} form.
 	 *
-	 * @param indexName the MongoDB vector index name
+	 * @param indexName    the MongoDB vector index name
 	 * @param propertyPath the embedded property path used by the vector search
-	 * @param query the text to embed and search for
-	 * @param dimensions the embedding dimensions requested from the provider
-	 * @param bsons optional aggregation stages appended after vector search
-	 * @return a collection of unique library coordinates using the preferred version
+	 * @param query        the text to embed and search for
+	 * @param dimensions   the embedding dimensions requested from the provider
+	 * @param bsons        optional aggregation stages appended after vector search
+	 * @return a collection of unique library coordinates using the preferred
+	 *         version
 	 */
-	@SuppressWarnings({ "java:S3012" })
 	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
 			Bson... bsons) {
 		Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
@@ -344,9 +356,10 @@ public class Picker {
 				pipeline.add(bson);
 			}
 		}
-		pipeline.add(Aggregates.project(Projections.fields(Projections.exclude("_id"), Projections.include(ID_FIELD_NAME),
-				Projections.include(NAME_FIELD_NAME), Projections.include(VERSION_FIELD_NAME),
-				Projections.metaVectorSearchScore(SCORE_FIELD_NAME))));
+		pipeline.add(
+				Aggregates.project(Projections.fields(Projections.exclude("_id"), Projections.include(ID_FIELD_NAME),
+						Projections.include(NAME_FIELD_NAME), Projections.include(VERSION_FIELD_NAME),
+						Projections.metaVectorSearchScore(SCORE_FIELD_NAME))));
 		pipeline.add(Aggregates.match(Filters.gte(SCORE_FIELD_NAME, score)));
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
@@ -370,7 +383,8 @@ public class Picker {
 			}
 			libraryVersionMap.put(name, version);
 		}
-		return libraryVersionMap.entrySet().stream().map(entry -> entry.getKey() + ":" + entry.getValue())
+		return libraryVersionMap.entrySet().stream()
+				.map(entry -> entry.getKey() + ":" + entry.getValue())
 				.collect(Collectors.toList());
 	}
 
@@ -378,7 +392,8 @@ public class Picker {
 	 * Normalizes a language name for repository matching.
 	 *
 	 * @param language the language to normalize
-	 * @return the normalized lowercase language name without any parenthetical suffix
+	 * @return the normalized lowercase language name without any parenthetical
+	 *         suffix
 	 */
 	static String getNormalizedLanguageName(Language language) {
 		String lang = language.getName().toLowerCase().trim();
