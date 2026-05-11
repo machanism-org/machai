@@ -44,9 +44,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	private static final String EXIT_SPECIAL_PROMPT_COMMAND = "exit";
+	public static final String EXIT_SPECIAL_PROMPT_COMMAND = "exit";
 
-	private static final String CONTINUE_SPECIAL_PROMPT_COMMAND = "continue";
+	public static final String CONTINUE_SPECIAL_PROMPT_COMMAND = "continue";
 
 	public static final String NOT_DEFINED_VALUE = "<NOT_DEFINED_VALUE>";
 
