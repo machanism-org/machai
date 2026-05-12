@@ -43,5 +43,14 @@
 </ul>
 ]]></action>
     </release>
+
+    <release version="1.1.10" date="2026-05-12">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Fixes</h2>
+<ul>
+  <li>Improved commit handling and interactive exit flow for more reliable plugin execution.</li>
+</ul>
+]]></action>
+    </release>
   </body>
 </document>

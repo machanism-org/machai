@@ -48,5 +48,24 @@
 </ul>
       ]]></action>
     </release>
+    <release version="1.1.10" date="2026-05-12">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Added <code>push_project_context_variable</code> and <code>pop_project_context_variable</code> function tools for project context management.</li>
+</ul>
+<h2>Fixes</h2>
+<ul>
+  <li>Improved commit handling and interactive exit flow behavior.</li>
+  <li>Updated function tool loading to use configuration-aware instance-based initialization.</li>
+  <li>Moved command log storage to the <code>java.io.tmpdir</code> directory.</li>
+</ul>
+<h2>Refactoring</h2>
+<ul>
+  <li>Extracted project context function tools into a dedicated class and exposed processor prompt command constants for reuse.</li>
+  <li>Removed unused methods and cleaned up processor internals.</li>
+</ul>
+      ]]></action>
+    </release>
   </body>
 </document>

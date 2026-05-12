@@ -17,6 +17,7 @@ Ghostwriter provides function tools that let a model discover and inspect Act te
 ## Tool groups
 
 - **Act and workflow tools** help discover available Acts, inspect Act definitions, store temporary workflow values, and control episode transitions.
+- **Project context tools** help keep project-scoped variables for multi-step workflows.
 - **File system tools** help read, write, patch, and enumerate files relative to the active project directory.
 - **Command and process tools** help run approved commands, inspect command log history, search command logs, and finish or terminate execution when necessary.
 - **Web and API tools** help download web content and call HTTP endpoints.
@@ -27,13 +28,13 @@ Ghostwriter provides function tools that let a model discover and inspect Act te
 Lists the built-in Act templates packaged with Ghostwriter.
 
 **Description**
-Use this tool when you need a quick overview of the built-in Acts that ship with Ghostwriter. It scans packaged Act resources and returns a readable list of Act names together with their descriptions.
+Use this tool when you need a quick overview of the built-in Acts that ship with Ghostwriter. It scans packaged Act resources, loads each Act description, and returns a readable summary of the available Act names.
 
 **Features**
 - Discovers built-in Acts packaged with the application.
-- Reads each Act description before returning the list.
+- Loads each Act description before returning the list.
 - Returns a user-friendly summary instead of raw TOML source.
-- Helpful when choosing the next Act to inspect.
+- Helps you decide which Act to inspect next.
 
 **Input parameters**
 This tool does not take any input parameters.
@@ -56,37 +57,6 @@ Use this tool when you need to inspect one Act in detail. It loads the requested
   - `true`: Load only the user-defined Act.
   - `false`: Load only the built-in packaged Act.
   - omitted: Load the effective Act using the normal resolution order.
-
-### `put_project_context_variable`
-Stores or updates a variable in the current project context.
-
-**Description**
-Use this tool to save a named value for the active project so later workflow steps can reuse it. The value is stored only for the current project context, which makes it useful for passing temporary state between tool calls or episodes.
-
-**Features**
-- Saves a name/value pair for the current project.
-- Updates an existing variable when the name already exists.
-- Helps multi-step workflows share temporary state.
-- Keeps stored values isolated to the active project directory.
-
-**Input parameters**
-- `name` *(string, required)*: Name of the context variable.
-- `value` *(string, required)*: Value to store.
-
-### `get_project_context_variable`
-Retrieves a value from the current project context.
-
-**Description**
-Use this tool to read a value that was previously stored with `put_project_context_variable`. It looks up the variable only inside the active project context and returns either the stored value or a readable message when the context or variable is missing.
-
-**Features**
-- Reads previously stored workflow values.
-- Looks up variables only inside the active project context.
-- Useful for continuing multi-step or multi-episode workflows.
-- Returns clear feedback when a variable is not available.
-
-**Input parameters**
-- `name` *(string, required)*: Name of the context variable to retrieve.
 
 ### `move_to_episode`
 Moves execution to the next episode or to a specific episode.
@@ -117,6 +87,71 @@ Use this tool when the current episode should be retried. Ghostwriter restarts t
 
 **Input parameters**
 - `message` *(string, optional)*: Custom response message to output before repeating the episode.
+
+## Project context tools
+
+### `put_project_context_variable`
+Stores or updates a variable in the current project context.
+
+**Description**
+Use this tool to save a named value for the active project so later workflow steps can reuse it. The value is stored only for the current project context, which makes it useful for passing temporary state between tool calls or episodes.
+
+**Features**
+- Saves a name/value pair for the current project.
+- Updates an existing variable when the name already exists.
+- Helps multi-step workflows share temporary state.
+- Keeps stored values isolated to the active project directory.
+
+**Input parameters**
+- `name` *(string, required)*: Name of the context variable.
+- `value` *(string, required)*: Value to store.
+
+### `get_project_context_variable`
+Retrieves a value from the current project context.
+
+**Description**
+Use this tool to read a value that was previously stored in the active project context. It looks up the requested variable for the current project and returns the saved value or a readable message when the variable is unavailable.
+
+**Features**
+- Reads previously stored workflow values.
+- Looks up variables only inside the active project context.
+- Useful for continuing multi-step or multi-episode workflows.
+- Returns clear feedback when a variable is not available.
+
+**Input parameters**
+- `name` *(string, required)*: Name of the context variable to retrieve.
+
+### `push_project_context_variable`
+Pushes a value into a project context variable.
+
+**Description**
+Use this tool when a context variable should behave like a stack or queue. If the variable does not exist, Ghostwriter creates a list. If it already contains a string, the value is converted into a list and the new item is appended.
+
+**Features**
+- Appends a value to a project-scoped variable.
+- Automatically creates a list when needed.
+- Converts a stored string into a list when appending more values.
+- Useful for accumulating workflow items across multiple steps.
+
+**Input parameters**
+- `name` *(string, required)*: Name of the context variable.
+- `value` *(string, required)*: Value to push to the context variable.
+
+### `pop_project_context_variable`
+Removes and returns a value from a project context variable.
+
+**Description**
+Use this tool when a context variable is being used like a stack or queue and one item should be removed. It supports both LIFO and FIFO behavior and can also remove a plain string value directly.
+
+**Features**
+- Removes and returns one stored value.
+- Supports both `LIFO` and `FIFO` list behavior.
+- Removes a plain string variable directly.
+- Cleans up the context entry when the last value is removed.
+
+**Input parameters**
+- `name` *(string, required)*: Name of the context variable.
+- `mode` *(string, optional)*: Pop mode, either `LIFO` (default) or `FIFO`.
 
 ## File system tools
 
@@ -206,11 +241,11 @@ Use this tool when you want to update only a focused part of a file instead of r
 Executes a system command from inside the current project.
 
 **Description**
-Use this tool to run approved shell commands for tasks such as builds, tests, or project inspection. The command runs inside the current project or one of its subdirectories, captures both standard output and error output, stores a command log, and returns only the tail of the collected output when the result is large.
+Use this tool to run approved shell commands for tasks such as builds, tests, or project inspection. The command runs inside the current project or one of its subdirectories, applies deny-list checks, captures both standard output and error output, stores a command log, and returns only the tail of the collected output when the result is large.
 
 **Features**
 - Runs commands inside the current project tree.
-- Applies command deny checks before execution.
+- Applies deny checks before execution.
 - Supports custom environment variables.
 - Captures both stdout and stderr.
 - Stores command output for later inspection.
@@ -296,7 +331,7 @@ Use this tool when execution should stop immediately because of a fatal validati
 Fetches content from a web page by using an HTTP GET request.
 
 **Description**
-Use this tool to download content from an HTTP or HTTPS page, or to read a local `file:` URL when needed. It supports custom request headers, CSS selector extraction, and plain-text rendering for HTML responses.
+Use this tool to download content from an HTTP or HTTPS page, or to read a local `file:` URL when needed. It supports custom request headers, CSS selector extraction, plain-text rendering for HTML responses, and Basic authentication through URL user information.
 
 **Features**
 - Fetches content over HTTP or HTTPS with `GET`.
