@@ -67,6 +67,12 @@ public class ActFunctionTools implements FunctionTools {
 						+ "episode, preserving the context.",
 				this::repeateEpisode,
 				"message:string:optional:A custom response message to output before repeating the episode.");
+
+		provider.addTool(
+				"perform_act",
+				"Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.",
+				this::performAct,
+				"actName:string:required:The name of the Act to perform.");
 	}
 
 	/**
@@ -187,6 +193,25 @@ public class ActFunctionTools implements FunctionTools {
 			}
 		}
 		throw new RepeatEpisodeException();
+	}
+
+	public Object performAct(JsonNode props, File workingDir) throws IOException {
+		if (logger.isInfoEnabled()) {
+			logger.info("Perform act: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+		}
+
+		ActProcessor actProcessor = new ActProcessor(workingDir, configurator, null);
+		String actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+		actProcessor.setActsLocation(actsLocation);
+
+		String actName = props.get("actName").asText();
+		actProcessor.setAct(actName);
+
+		String scanDir = configurator.get(GWConstants.SCAN_DIR_PROP_NAME, workingDir.getAbsolutePath());
+		actProcessor.scanDocuments(workingDir, scanDir);
+
+		return null;
 	}
 
 	@Override
