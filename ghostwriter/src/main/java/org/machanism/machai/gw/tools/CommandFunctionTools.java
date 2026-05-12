@@ -173,9 +173,9 @@ public class CommandFunctionTools implements FunctionTools {
 		provider.addTool(
 				"end_task",
 				"Use this function if the user has requested to `end the task`. Ends the current task without terminating the application. "
-				+ "Use this function to conclude an interactive session with the user, ensuring that only the current task is finished while the application remains active. "
-				+ "This tool is ideal for gracefully completing user-driven tasks in interactive mode, "
-				+ "allowing further operations or tasks to continue.",
+						+ "Use this function to conclude an interactive session with the user, ensuring that only the current task is finished while the application remains active. "
+						+ "This tool is ideal for gracefully completing user-driven tasks in interactive mode, "
+						+ "allowing further operations or tasks to continue.",
 				this::endTask,
 				"message:string:optional:The message to use upon completion.");
 		provider.addTool(
@@ -717,4 +717,5 @@ public class CommandFunctionTools implements FunctionTools {
 			executor.shutdownNow();
 		}
 	}
+
 }

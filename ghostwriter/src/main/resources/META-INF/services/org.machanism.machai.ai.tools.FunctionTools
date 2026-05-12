@@ -2,3 +2,4 @@ org.machanism.machai.gw.tools.ActFunctionTools
 org.machanism.machai.gw.tools.FileFunctionTools
 org.machanism.machai.gw.tools.WebFunctionTools
 org.machanism.machai.gw.tools.CommandFunctionTools
+org.machanism.machai.gw.tools.ProjectContextFunctionTools

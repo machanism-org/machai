@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * A {@link StringBuilder}-like helper that retains only the last
@@ -79,7 +78,14 @@ public class LimitedStringBuilder {
 	}
 
 	public static Path getCommandLogPath(File projectDir, String commandId) {
-		return Paths.get(projectDir.getAbsolutePath(), ".machai", "command-log", commandId + ".log");
+		String tempDir = System.getProperty("java.io.tmpdir");
+		Path logDir = new File(tempDir, "gw-command-logs").toPath();
+		try {
+			Files.createDirectories(logDir);
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to create log directory: " + logDir, e);
+		}
+		return logDir.resolve(commandId + ".log");
 	}
 
 	/**

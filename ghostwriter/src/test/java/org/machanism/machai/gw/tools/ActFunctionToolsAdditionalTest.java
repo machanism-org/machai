@@ -22,30 +22,6 @@ class ActFunctionToolsAdditionalTest {
     Path tempDir;
 
     @Test
-    void putAndGetProjectContextVariableShouldHandleSuccessMissingAndFailure() {
-        ActFunctionTools tools = new ActFunctionTools();
-        ObjectNode putProps = MAPPER.createObjectNode();
-        putProps.put("name", "episode");
-        putProps.put("value", "42");
-
-        ObjectNode getProps = MAPPER.createObjectNode();
-        getProps.put("name", "episode");
-
-        ObjectNode missingProps = MAPPER.createObjectNode();
-        missingProps.put("name", "missing");
-
-        Object putResult = tools.putProjectContextVariable(putProps, tempDir.toFile());
-        Object getResult = tools.getProjectContextVariable(getProps, tempDir.toFile());
-        Object missingResult = tools.getProjectContextVariable(missingProps, tempDir.toFile());
-        Object failedPutResult = tools.putProjectContextVariable(MAPPER.createObjectNode(), tempDir.toFile());
-
-        assertTrue(putResult.toString().contains("Context variable 'episode' set to '42'"));
-        assertEquals("42", getResult);
-        assertTrue(missingResult.toString().contains("not found"));
-        assertTrue(failedPutResult.toString().contains("Failed to set context variable"));
-    }
-
-    @Test
     void moveAndRepeatEpisodeShouldThrowExpectedExceptions() {
         ActFunctionTools tools = new ActFunctionTools();
         ObjectNode moveProps = MAPPER.createObjectNode();

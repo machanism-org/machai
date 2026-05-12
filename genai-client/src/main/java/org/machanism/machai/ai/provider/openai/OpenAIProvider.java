@@ -118,11 +118,6 @@ public class OpenAIProvider implements Genai {
 	/** Default maximum number of tokens the model may generate. */
 	public static final long MAX_OUTPUT_TOKENS = 18000;
 
-	/**
-	 * Default request timeout in seconds used when {@code GENAI_TIMEOUT} is unset.
-	 */
-	private static final long TIMEOUT_SEC = 600;
-
 	/** Active model identifier used in {@link #perform()}. */
 	private String chatModel;
 
@@ -730,14 +725,14 @@ public class OpenAIProvider implements Genai {
 	protected OpenAIClient getClient() {
 		String baseUrl = config.get("OPENAI_BASE_URL");
 		String privateKey = config.get("OPENAI_API_KEY");
-		timeoutSec = config.getLong("GENAI_TIMEOUT", TIMEOUT_SEC);
+		timeoutSec = config.getLong("GENAI_TIMEOUT", 0L);
 
 		OpenAIOkHttpClient.Builder clientBuilder = OpenAIOkHttpClient.builder();
 		clientBuilder.apiKey(privateKey);
 		if (baseUrl != null) {
 			clientBuilder.baseUrl(baseUrl);
 		}
-		if (timeoutSec > 0) {
+		if (timeoutSec != 0) {
 			Duration ofSeconds = Duration.ofSeconds(timeoutSec);
 			Timeout timeout = Timeout.builder().request(ofSeconds).read(ofSeconds).write(ofSeconds)
 					.connect(ofSeconds).build();
