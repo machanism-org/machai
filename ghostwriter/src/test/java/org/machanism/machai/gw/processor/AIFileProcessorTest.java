@@ -47,7 +47,7 @@ class AIFileProcessorTest {
 		Files.write(f.toPath(), java.util.Arrays.asList("x", "", "y"), StandardCharsets.UTF_8);
 
 		AIFileProcessor p = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
-		String out = p.tryToGetInstructionsFromReference("file:" + f.getAbsolutePath());
+		String out = p.tryToGetInstructionsFromReference(">>>file:" + f.getAbsolutePath());
 		assertEquals("x\n\n" + "y\n", out);
 	}
 
