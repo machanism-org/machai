@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
  */
 public class AIFileProcessor extends AbstractFileProcessor {
 
+	private static final String FILE_INCLUDED_MARKER = ">>>";
+
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
@@ -345,14 +347,17 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 
 		String trimmed = data.trim();
-		if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-			return parseLines(readFromHttpUrl(trimmed));
-		}
+		if (trimmed.startsWith(FILE_INCLUDED_MARKER)) {
+			trimmed = StringUtils.substringAfter(trimmed, FILE_INCLUDED_MARKER);
+			if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+				return parseLines(readFromHttpUrl(trimmed));
+			}
 
-		if (Strings.CS.startsWith(trimmed, "file:")) {
-			String filePath = StringUtils.substringAfter(trimmed, "file:");
-			filePath = StringSubstitutor.replaceSystemProperties(filePath);
-			return parseLines(readFromFilePath(filePath));
+			if (Strings.CS.startsWith(trimmed, "file:")) {
+				String filePath = StringUtils.substringAfter(trimmed, "file:");
+				filePath = StringSubstitutor.replaceSystemProperties(filePath);
+				return parseLines(readFromFilePath(filePath));
+			}
 		}
 
 		return data;
