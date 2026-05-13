@@ -3,6 +3,7 @@ package org.machanism.machai.gw.processor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -11,6 +12,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -69,11 +71,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
 	/**
-	 * Creates a processor for the given project directory and AI provider identifier.
+	 * Creates a processor for the given project directory and AI provider
+	 * identifier.
 	 * 
-	 * @param projectDir    the project root directory
-	 * @param configurator  the application configuration
-	 * @param genai         the AI provider or model identifier
+	 * @param projectDir   the project root directory
+	 * @param configurator the application configuration
+	 * @param genai        the AI provider or model identifier
 	 */
 	public AIFileProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator);
@@ -156,7 +159,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			if (input != null) {
 				switch (input.toLowerCase().trim()) {
 				case CONTINUE_SPECIAL_PROMPT_COMMAND:
-					perform = null;			
+					perform = null;
 					break;
 
 				case EXIT_SPECIAL_PROMPT_COMMAND:
@@ -267,7 +270,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	/**
 	 * Enables or disables logging of provider inputs.
 	 * 
-	 * @param logInputs {@code true} to enable input logging; otherwise {@code false}
+	 * @param logInputs {@code true} to enable input logging; otherwise
+	 *                  {@code false}
 	 */
 	public void setLogInputs(boolean logInputs) {
 		this.logInputs = logInputs;
@@ -331,8 +335,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Resolves a single instruction line that may point to external content.
 	 * 
 	 * @param data the instruction line to inspect
-	 * @return the resolved content, or the original line when no reference is found,
-	 *         or {@code null} when the input is {@code null}
+	 * @return the resolved content, or the original line when no reference is
+	 *         found, or {@code null} when the input is {@code null}
 	 * @throws java.io.IOException if referenced remote content cannot be read
 	 */
 	String tryToGetInstructionsFromReference(String data) throws java.io.IOException {
@@ -519,7 +523,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	/**
 	 * Indicates whether interactive processing mode is enabled.
 	 * 
-	 * @return {@code true} when interactive mode is enabled; otherwise {@code false}
+	 * @return {@code true} when interactive mode is enabled; otherwise
+	 *         {@code false}
 	 */
 	public boolean isInteractive() {
 		return interactive;

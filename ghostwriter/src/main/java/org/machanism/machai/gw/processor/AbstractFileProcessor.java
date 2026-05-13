@@ -262,7 +262,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		String path = relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + relativeScanPart;
 
 		if (pathMatcher == null) {
-			return scanDir != null && Strings.CS.equals(scanDir.getAbsolutePath(), file.getAbsolutePath());
+			return scanDir != null && scanDir.equals(file);
 		}
 
 		Path pathToMatch = new File(path).toPath();

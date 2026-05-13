@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -88,13 +88,9 @@ public class ActProcessor extends AIFileProcessor {
 	/** Optional directory containing external {@code *.toml} act files. */
 	private String actsLocation;
 
-	private String[] prompts;
+	private List<String> prompts = new ArrayList<>();
 
-	private int activeEpisodeId = 1;
-
-	private List<Integer> episodeIds;
-
-	private Integer requestedEpisodeId;
+	private List<Integer> episodeIds = new ArrayList<>();
 
 	private boolean disableNormalOrder;
 
@@ -195,7 +191,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	public void setEpisodeIds(List<Integer> selectedEpisodeIds) {
-		int numberOfEpisodes = prompts.length;
+		int numberOfEpisodes = prompts.size();
 		boolean hasInvalidId = selectedEpisodeIds.stream().anyMatch(id -> id <= 0 || id > numberOfEpisodes);
 		if (hasInvalidId) {
 			throw new IllegalArgumentException(
@@ -467,6 +463,12 @@ public class ActProcessor extends AIFileProcessor {
 				setPrompts(resolvePromptValues((List<String>) valueObj));
 			}
 		}
+		Object prompts = properties.get(GWConstants.INPUTS_PROPERTY_NAME);
+		if (prompts instanceof String) {
+			setDefaultPrompt((String) prompts);
+		} else if (prompts instanceof List && !((List<String>) prompts).isEmpty()) {
+			setDefaultPrompt(((List<String>) prompts).get(0));
+		}
 	}
 
 	private void applyStringActData(String key, String valueObj) {
@@ -488,7 +490,7 @@ public class ActProcessor extends AIFileProcessor {
 			super.setInstructions(value);
 			break;
 		case GWConstants.INPUTS_PROPERTY_NAME:
-			setPrompts(value);
+			setPrompts(Collections.singletonList(value));
 			break;
 		case GWConstants.THREADS_PROP_NAME:
 			super.setDegreeOfConcurrency(Integer.parseInt(value));
@@ -512,38 +514,20 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
-	private String[] resolvePromptValues(List<String> promptValues) {
+	private List<String> resolvePromptValues(List<String> promptValues) {
 		List<String> updateValue = new ArrayList<>();
 		for (String value : promptValues) {
 			updateValue.add(resolveInheritedValue(GWConstants.INPUTS_PROPERTY_NAME, value));
 		}
-		return updateValue.toArray(new String[0]);
+		return updateValue;
 	}
 
-	public void setPrompts(String... value) {
+	public void setPrompts(List<String> value) {
 		prompts = value;
 	}
 
-	public String[] getPrompts() {
+	public List<String> getPrompts() {
 		return prompts;
-	}
-
-	@Override
-	public void setDefaultPrompt(String defaultPrompt) {
-		prompts = new String[] { defaultPrompt };
-	}
-
-	@Override
-	public String getDefaultPrompt() {
-		if (ArrayUtils.isEmpty(prompts)) {
-			return super.getDefaultPrompt();
-		}
-		int id = getActivePromptId();
-		return prompts[id - 1];
-	}
-
-	private int getActivePromptId() {
-		return episodeIds == null ? activeEpisodeId : episodeIds.get(activeEpisodeId - 1);
 	}
 
 	/**
@@ -563,109 +547,116 @@ public class ActProcessor extends AIFileProcessor {
 		getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, actsLocation);
 	}
 
-	@Override
-	public void scanDocuments(File projectDir, String scanDir) throws IOException {
-		do {
-			runCurrentEpisode(projectDir, scanDir);
-		} while (nextAct());
-	}
-
-	private void runCurrentEpisode(File projectDir, String scanDir) throws IOException {
-		try {
-			runEpisodeIterations(projectDir, scanDir);
-		} catch (MoveToEpisodeException e) {
-			String episodeId = e.getEpisodeId();
-			if (episodeId != null) {
-				this.requestedEpisodeId = Integer.parseInt(episodeId);
-			}
-		}
-	}
-
-	private void runEpisodeIterations(File projectDir, String scanDir) throws IOException {
-		boolean repeate;
-		int iteration = 1;
-		do {
-			repeate = false;
-			logEpisodeHeader(iteration);
-			try {
-				super.scanDocuments(projectDir, scanDir);
-			} catch (RepeatEpisodeException e) {
-				repeate = true;
-			}
-			iteration++;
-		} while (repeate);
-	}
-
-	private void logEpisodeHeader(int iteration) {
-		if (prompts.length <= 1 || !logger.isInfoEnabled()) {
-			return;
-		}
-		String title = buildEpisodeTitle(iteration);
-		logger.info("{}", StringUtils.center(title, 80, "-"));
-	}
-
-	private String buildEpisodeTitle(int iteration) {
-		String iterationLabel = iteration > 1 ? " [Iteration: " + iteration + "]) " : " ";
-		return " Episode #" + getActivePromptId() + iterationLabel;
-	}
-
-	private boolean nextAct() {
-		if (requestedEpisodeId != null) {
-			return moveToRequestedEpisode();
-		}
-		return advanceToNextEpisode();
-	}
-
-	private boolean moveToRequestedEpisode() {
-		if (requestedEpisodeId <= 0) {
-			return false;
-		}
-		activeEpisodeId = requestedEpisodeId;
-		requestedEpisodeId = 0;
-		episodeIds = null;
-		return true;
-	}
-
-	private boolean advanceToNextEpisode() {
-		int currentActivePromptId = getActivePromptId();
-		activeEpisodeId++;
-		if (episodeIds == null) {
-			return activeEpisodeId <= prompts.length;
-		}
-		return advanceFromSelectedEpisodes(currentActivePromptId);
-	}
-
-	private boolean advanceFromSelectedEpisodes(int currentActivePromptId) {
-		boolean hasMoreSelectedEpisodes = activeEpisodeId <= episodeIds.size();
-		if (hasMoreSelectedEpisodes) {
-			return true;
-		}
-		episodeIds = null;
-		activeEpisodeId = currentActivePromptId + 1;
-		return !disableNormalOrder && activeEpisodeId <= prompts.length;
-	}
-
 	/**
-	 * Processes non-module files and directories directly under the project
-	 * directory.
+	 * Processes files and folders under the parent project directory (excluding
+	 * modules).
 	 */
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
-		File scanProjectDir = projectLayout.getProjectDir();
-		List<File> children = findFiles(scanProjectDir);
+		File projectDir = projectLayout.getProjectDir();
+		List<File> children = findFiles(projectDir);
 
-		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, scanProjectDir));
+		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
 
 		for (File child : children) {
 			processFile(projectLayout, child);
 		}
 
-		if (match(scanProjectDir, scanProjectDir) && getPrompts() != null
-				&& !shouldExcludePath(scanProjectDir.toPath())) {
-			String perform = process(projectLayout, scanProjectDir, getDefaultPrompt());
-			if (perform != null) {
-				logger.info(">>> {}", perform);
+		boolean match = match(projectDir, projectDir);
+		int requestedEpisodeId = 0;
+		if (match && getDefaultPrompt() != null) {
+			if (!episodeIds.isEmpty()) {
+				try {
+					requestedEpisodeId = requestedOrder(projectLayout, projectDir);
+					if (disableNormalOrder) {
+						return;
+					} else {
+						if (requestedEpisodeId < prompts.size() - 1) {
+							requestedEpisodeId++;
+						}
+					}
+				} catch (MoveToEpisodeException e) {
+					String episodeIdStr = e.getEpisodeId();
+					if (episodeIdStr != null) {
+						requestedEpisodeId = Integer.parseInt(episodeIdStr) - 1;
+					}
+				}
 			}
+
+			regularOrder(projectLayout, projectDir, requestedEpisodeId);
+		}
+	}
+
+	private int requestedOrder(ProjectLayout projectLayout, File projectDir) {
+		String episodeIdStr = null;
+		int i = 0;
+		String perform;
+		do {
+			for (i = 0; i < episodeIds.size(); i++) {
+				int iteration = 1;
+				boolean repeate;
+				do {
+					repeate = false;
+					try {
+						int id = episodeIds.get(i) - 1;
+						String prompt = prompts.get(id);
+						logEpisodeHeader(id, iteration++);
+						perform = process(projectLayout, projectDir, prompt);
+
+						if (perform != null) {
+							logger.info(">>> {}", perform);
+						}
+
+					} catch (RepeatEpisodeException e) {
+						repeate = true;
+					}
+				} while (repeate);
+			}
+		} while (episodeIdStr != null);
+
+		return i;
+	}
+
+	private void regularOrder(ProjectLayout projectLayout, File projectDir, int requestedEpisodeId) {
+		String episodeIdStr = null;
+		int i = 0;
+		String perform;
+		do {
+			try {
+				for (i = requestedEpisodeId; i < prompts.size(); i++) {
+					int iteration = 1;
+					boolean repeate;
+					do {
+						repeate = false;
+						try {
+							String prompt = prompts.get(i);
+							logEpisodeHeader(i, iteration++);
+							perform = process(projectLayout, projectDir, prompt);
+
+							if (perform != null) {
+								logger.info(">>> {}", perform);
+							}
+
+						} catch (RepeatEpisodeException e) {
+							repeate = true;
+						}
+					} while (repeate);
+				}
+			} catch (MoveToEpisodeException e) {
+				episodeIdStr = e.getEpisodeId();
+				if (episodeIdStr != null) {
+					requestedEpisodeId = Integer.parseInt(episodeIdStr) - 1;
+				}
+			}
+		} while (episodeIdStr != null);
+	}
+
+	private void logEpisodeHeader(int episodeId, int iteration) {
+		if ((!prompts.isEmpty() || iteration > 1) && logger.isInfoEnabled()) {
+			String iterationLabel = iteration > 1 ? " [Iteration: " + iteration + "]) " : " ";
+			String title = " Episode #" + (episodeId + 1) + iterationLabel;
+
+			logger.info("{}", StringUtils.center(title, 80, "-"));
 		}
 	}
 
