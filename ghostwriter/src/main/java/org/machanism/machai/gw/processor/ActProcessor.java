@@ -690,9 +690,4 @@ public class ActProcessor extends AIFileProcessor {
 		process(projectLayout, file, getDefaultPrompt());
 	}
 
-	@Override
-	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) {
-		String description = super.getProjectStructureDescription(projectLayout, file);
-		return description;
-	}
 }
