@@ -94,6 +94,8 @@ public class ActProcessor extends AIFileProcessor {
 
 	private boolean disableNormalOrder;
 
+	private String name;
+
 	/**
 	 * Creates an act processor.
 	 *
@@ -122,7 +124,6 @@ public class ActProcessor extends AIFileProcessor {
 		act = StringUtils.defaultIfBlank(act, "help");
 
 		String defaultPrompt = getDefaultPrompt();
-		String name;
 		String prompt;
 		Matcher matcher = FIRST_WHITESPACE.matcher(act);
 		if (matcher.find()) {
@@ -601,7 +602,7 @@ public class ActProcessor extends AIFileProcessor {
 						int id = episodeIds.get(i) - 1;
 						String prompt = prompts.get(id);
 						logEpisodeHeader(id, iteration++);
-						perform = process(projectLayout, projectDir, prompt);
+						perform = process(projectLayout, projectDir, prompt, id);
 
 						if (perform != null) {
 							logger.info(">>> {}", perform);
@@ -615,6 +616,20 @@ public class ActProcessor extends AIFileProcessor {
 		} while (episodeIdStr != null);
 
 		return i;
+	}
+
+	private String process(ProjectLayout projectLayout, File projectDir, String prompt, int episodeId) {
+		if (StringUtils.isNotBlank(prompt)) {
+			StringBuilder promptBuilder = new StringBuilder("# Act information\n\n");
+			promptBuilder.append("- Act name: `" + name + "`\n");
+			promptBuilder.append("- Episode Id: `" + (episodeId + 1) + "`\n");
+			promptBuilder.append("---");
+			promptBuilder.append("\n\n");
+			promptBuilder.append(prompt);
+			prompt = promptBuilder.toString();
+		}
+
+		return super.process(projectLayout, projectDir, prompt);
 	}
 
 	private void regularOrder(ProjectLayout projectLayout, File projectDir, int requestedEpisodeId) {
@@ -634,7 +649,7 @@ public class ActProcessor extends AIFileProcessor {
 						try {
 							String prompt = prompts.get(i);
 							logEpisodeHeader(i, iteration++);
-							perform = process(projectLayout, projectDir, prompt);
+							perform = process(projectLayout, projectDir, prompt, i);
 
 							if (perform != null) {
 								logger.info(">>> {}", perform);
@@ -675,4 +690,9 @@ public class ActProcessor extends AIFileProcessor {
 		process(projectLayout, file, getDefaultPrompt());
 	}
 
+	@Override
+	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) {
+		String description = super.getProjectStructureDescription(projectLayout, file);
+		return description;
+	}
 }
