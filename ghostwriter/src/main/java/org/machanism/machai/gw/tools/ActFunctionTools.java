@@ -59,7 +59,7 @@ public class ActFunctionTools implements FunctionTools {
 				"Moves to the next episode, or to the episode specified by 'id' if provided. Use this to control "
 						+ "episode navigation in the project context.",
 				this::moveToEpisode,
-				"id:string:optional:The ID of the episode to move to.");
+				"id:integer:optional:The ID of the episode to move to.");
 
 		provider.addTool(
 				"repeate_episode",
@@ -168,7 +168,7 @@ public class ActFunctionTools implements FunctionTools {
 					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
 		}
 
-		String targetId = props.has("id") ? props.get("id").asText() : null;
+		Integer targetId = props.has("id") ? props.get("id").asInt() : null;
 
 		throw new MoveToEpisodeException(targetId);
 	}

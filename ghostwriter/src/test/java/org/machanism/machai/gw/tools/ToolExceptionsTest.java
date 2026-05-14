@@ -23,14 +23,14 @@ class ToolExceptionsTest {
 	@Test
 	void moveToEpisodeExceptionShouldExposeSpecificEpisodeId() {
 		// Arrange
-		MoveToEpisodeException exception = new MoveToEpisodeException("ep-2");
+		MoveToEpisodeException exception = new MoveToEpisodeException(2);
 
 		// Act
 		String message = exception.getMessage();
 
 		// Assert
-		assertEquals("Move to episode: ep-2", message);
-		assertEquals("ep-2", exception.getEpisodeId());
+		assertEquals("Move to episode: 2", message);
+		assertEquals(2, exception.getEpisodeId());
 	}
 
 	@Test

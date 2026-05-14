@@ -576,9 +576,9 @@ public class ActProcessor extends AIFileProcessor {
 						}
 					}
 				} catch (MoveToEpisodeException e) {
-					String episodeIdStr = e.getEpisodeId();
+					Integer episodeIdStr = e.getEpisodeId();
 					if (episodeIdStr != null) {
-						requestedEpisodeId = Integer.parseInt(episodeIdStr) - 1;
+						requestedEpisodeId = episodeIdStr - 1;
 					}
 				}
 			}
@@ -618,10 +618,13 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	private void regularOrder(ProjectLayout projectLayout, File projectDir, int requestedEpisodeId) {
-		String episodeIdStr = null;
+		Integer moveToEpisodeId = null;
 		int i = 0;
 		String perform;
 		do {
+			if (moveToEpisodeId != null) {
+				requestedEpisodeId = moveToEpisodeId - 1;
+			}
 			try {
 				for (i = requestedEpisodeId; i < prompts.size(); i++) {
 					int iteration = 1;
@@ -643,16 +646,16 @@ public class ActProcessor extends AIFileProcessor {
 					} while (repeate);
 				}
 			} catch (MoveToEpisodeException e) {
-				episodeIdStr = e.getEpisodeId();
-				if (episodeIdStr != null) {
-					requestedEpisodeId = Integer.parseInt(episodeIdStr) - 1;
+				moveToEpisodeId = e.getEpisodeId();
+				if (moveToEpisodeId == null) {
+					moveToEpisodeId = i + 1;
 				}
 			}
-		} while (episodeIdStr != null);
+		} while (moveToEpisodeId != null);
 	}
 
 	private void logEpisodeHeader(int episodeId, int iteration) {
-		if ((!prompts.isEmpty() || iteration > 1) && logger.isInfoEnabled()) {
+		if ((prompts.size() > 1 || iteration > 1) && logger.isInfoEnabled()) {
 			String iterationLabel = iteration > 1 ? " [Iteration: " + iteration + "]) " : " ";
 			String title = " Episode #" + (episodeId + 1) + iterationLabel;
 

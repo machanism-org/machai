@@ -25,7 +25,7 @@ class ActFunctionToolsAdditionalTest {
     void moveAndRepeatEpisodeShouldThrowExpectedExceptions() {
         ActFunctionTools tools = new ActFunctionTools();
         ObjectNode moveProps = MAPPER.createObjectNode();
-        moveProps.put("id", "ep-2");
+        moveProps.put("id", "2");
 
         ObjectNode repeatProps = MAPPER.createObjectNode();
         repeatProps.put("message", "again");
@@ -35,7 +35,7 @@ class ActFunctionToolsAdditionalTest {
                 () -> tools.moveToEpisode(moveProps, projectDir));
         assertThrows(RepeatEpisodeException.class, () -> repeatEpisode(tools, repeatProps, projectDir));
 
-        assertEquals("ep-2", moveException.getEpisodeId());
+        assertEquals(2, moveException.getEpisodeId());
     }
 
     private static void repeatEpisode(ActFunctionTools tools, ObjectNode repeatProps, File projectDir) {
