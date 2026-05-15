@@ -178,6 +178,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	protected String input() {
+		logger.warn(
+				"Interactive mode is not supported in this environment. Please use a supported mode or refer to the documentation for available options.");
 		return null;
 	}
 
