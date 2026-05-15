@@ -81,5 +81,22 @@
 </ul>
       ]]></action>
     </release>
+    <release version="1.1.12" date="2026-05-15">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Added support for moving to an act episode by name through the <code>move_to_episode</code> workflow.</li>
+</ul>
+<h2>Fixes</h2>
+<ul>
+  <li>Improved <code>move_to_episode</code> handling and refined act episode prompt metadata.</li>
+  <li>Fixed an act processor variable naming issue and added a warning when interactive mode is not supported.</li>
+</ul>
+<h2>Refactoring</h2>
+<ul>
+  <li>Removed an unused method from the act processor implementation.</li>
+</ul>
+      ]]></action>
+    </release>
   </body>
 </document>

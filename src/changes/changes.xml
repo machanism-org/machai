@@ -80,5 +80,31 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
 ]]>
 </action>
 </release>
+  <release version="1.1.12" date="2026-05-15">
+<action dev="dev" type="add">
+<![CDATA[
+<h2>Features</h2><ul><li>Added project context function tools for pushing and popping context variables.</li><li>Moved command log storage to the system temporary directory for better runtime isolation.</li></ul><h2>Refactoring</h2><ul><li>Removed the singleton loader pattern to simplify component loading.</li><li>Extracted project context tooling into a dedicated <code>ProjectContextFunctionTools</code> class.</li></ul>
+]]>
+</action>
+</release>
+  <release version="1.1.12" date="2026-05-15">
+<action dev="dev" type="add">
+<![CDATA[
+<h2>Features</h2>
+<ul>
+  <li>Added support for moving to a target episode by name during act execution.</li>
+</ul>
+<h2>Fixes</h2>
+<ul>
+  <li>Improved move-to-episode handling, act processor episode prompt metadata, and interactive mode warning behavior.</li>
+  <li>Corrected an internal variable name used by the act processor.</li>
+</ul>
+<h2>Refactoring</h2>
+<ul>
+  <li>Removed an unused method from the act processor implementation.</li>
+</ul>
+]]>
+</action>
+</release>
 </body>
 </document>
