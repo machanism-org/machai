@@ -88,12 +88,19 @@ public class ActProcessor extends AIFileProcessor {
 	/** Optional directory containing external {@code *.toml} act files. */
 	private String actsLocation;
 
+	/** Ordered list of act episode prompts to execute. */
 	private List<String> episodes = new ArrayList<>();
 
+	/** Explicitly selected 1-based episode identifiers. */
 	private List<Integer> episodeIds = new ArrayList<>();
 
+	/**
+	 * Whether normal sequential execution should be skipped after explicit episode
+	 * processing.
+	 */
 	private boolean disableNormalOrder;
 
+	/** Current act name without prompt suffix or episode selector. */
 	private String name;
 
 	/**
@@ -182,15 +189,36 @@ public class ActProcessor extends AIFileProcessor {
 		setEpisodeIds(selectedEpisodeIds);
 	}
 
+	/**
+	 * Enables or disables continuation with the default episode execution order.
+	 *
+	 * @param disableNormalOrder {@code true} to stop after requested episodes,
+	 *                           {@code false} to continue with normal order
+	 */
 	public void setDisableNormalOrder(boolean disableNormalOrder) {
 		this.disableNormalOrder = disableNormalOrder;
 	}
 
+	/**
+	 * Replaces the act prompt placeholder in a template value.
+	 *
+	 * @param prompt   resolved prompt text
+	 * @param actData  loaded act properties
+	 * @param mainValue template string that may contain {@code %s}
+	 * @return prompt-expanded template string
+	 */
 	private String applayPrompt(String prompt, Map<String, Object> actData, String mainValue) {
 		String actPrompt = Objects.toString(actData.get("prompt"), "");
 		return Strings.CS.replace(mainValue, "%s", Objects.toString(prompt, actPrompt));
 	}
 
+	/**
+	 * Sets the list of explicitly requested episode identifiers.
+	 *
+	 * @param selectedEpisodeIds 1-based episode identifiers to execute
+	 * @throws IllegalArgumentException if any identifier is outside the available
+	 *                                  episode range
+	 */
 	public void setEpisodeIds(List<Integer> selectedEpisodeIds) {
 		int numberOfEpisodes = episodes.size();
 		boolean hasInvalidId = selectedEpisodeIds.stream().anyMatch(id -> id <= 0 || id > numberOfEpisodes);
@@ -313,6 +341,14 @@ public class ActProcessor extends AIFileProcessor {
 		return toml;
 	}
 
+	/**
+	 * Resolves an act file path or URL from an act name and configured act source.
+	 *
+	 * @param name         act name or file path
+	 * @param actsLocation base directory or URL for act definitions
+	 * @return absolute file path or URL string
+	 * @throws IOException if an explicitly referenced local act file does not exist
+	 */
 	private static String getAssolutePath(String name, String actsLocation) throws IOException {
 		String path = null;
 		if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
@@ -336,6 +372,14 @@ public class ActProcessor extends AIFileProcessor {
 		return path;
 	}
 
+	/**
+	 * Loads and parses an act TOML document from a local file or remote URL.
+	 *
+	 * @param name absolute file path or URL to the TOML resource
+	 * @return parsed TOML result, or {@code null} if a local file path does not
+	 *         exist
+	 * @throws IOException if reading the TOML resource fails
+	 */
 	private static TomlParseResult loadActToml(String name) throws IOException {
 		TomlParseResult toml = null;
 		if (!Strings.CS.startsWithAny(name, HTTP_PREFIX, HTTPS_PREFIX)) {
@@ -350,6 +394,13 @@ public class ActProcessor extends AIFileProcessor {
 		return toml;
 	}
 
+	/**
+	 * Determines whether the supplied act reference should be treated as an
+	 * explicit TOML path.
+	 *
+	 * @param name act reference to inspect
+	 * @return {@code true} if the reference already ends with {@code .toml}
+	 */
 	private static boolean isAbsolute(String name) {
 		return Strings.CS.endsWith(name, TOML_EXTENSION);
 	}
@@ -372,6 +423,12 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Applies a single TOML entry to the merged act property map.
+	 *
+	 * @param properties destination property map
+	 * @param entry      TOML entry to process
+	 */
 	private static void setActDataEntry(Map<String, Object> properties, Entry<String, Object> entry) {
 		String key = entry.getKey();
 		Object value = entry.getValue();
@@ -389,6 +446,13 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Stores a string property, merging it with any inherited value already present.
+	 *
+	 * @param properties destination property map
+	 * @param key        property name
+	 * @param value      property value from the current act
+	 */
 	@SuppressWarnings("unchecked")
 	private static void putStringActData(Map<String, Object> properties, String key, String value) {
 		Object mainValue = properties.get(key);
@@ -401,6 +465,13 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Merges a single string value into each string item of an inherited list.
+	 *
+	 * @param mainValueList inherited list value
+	 * @param value         string value to merge through {@code %s}
+	 * @return merged list result
+	 */
 	private static List<String> mergeStringWithListValue(List<String> mainValueList, String value) {
 		List<String> result = new ArrayList<>();
 		for (String mainValueItem : mainValueList) {
@@ -413,6 +484,13 @@ public class ActProcessor extends AIFileProcessor {
 		return result;
 	}
 
+	/**
+	 * Merges TOML array values with any existing inherited string or list value.
+	 *
+	 * @param existingValue existing property value, if any
+	 * @param values        TOML array values from the current act
+	 * @return merged string list
+	 */
 	private static List<String> mergeTomlArrayValues(Object existingValue, List<Object> values) {
 		List<String> mainValues = toStringList(existingValue);
 		List<String> result = new ArrayList<>();
@@ -424,6 +502,12 @@ public class ActProcessor extends AIFileProcessor {
 		return result;
 	}
 
+	/**
+	 * Converts an inherited property value to a list of strings.
+	 *
+	 * @param existingValue existing property value
+	 * @return list representation of the value, or an empty list if unsupported
+	 */
 	@SuppressWarnings("unchecked")
 	private static List<String> toStringList(Object existingValue) {
 		if (existingValue instanceof String) {
@@ -435,10 +519,25 @@ public class ActProcessor extends AIFileProcessor {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * Returns the string value at a list index.
+	 *
+	 * @param values source values
+	 * @param index  element index
+	 * @return the string value at the index, or {@code null} if out of bounds
+	 */
 	private static String getValueAt(List<Object> values, int index) {
 		return index < values.size() ? (String) values.get(index) : null;
 	}
 
+	/**
+	 * Resolves a merged value for an inherited prompt slot.
+	 *
+	 * @param mainValues inherited values
+	 * @param index      current position
+	 * @param value      overriding value for the position
+	 * @return merged value for the position
+	 */
 	private static String resolveMergedValue(List<String> mainValues, int index, String value) {
 		if (index >= mainValues.size()) {
 			return value;
@@ -472,11 +571,24 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Applies a single string property to processor state or configuration.
+	 *
+	 * @param key   property name
+	 * @param value property value
+	 */
 	private void applyStringActData(String key, String valueObj) {
 		String value = resolveInheritedValue(key, valueObj);
 		applyStringProperty(key, value);
 	}
 
+	/**
+	 * Resolves a property value against the current configurator for inheritance.
+	 *
+	 * @param key   property name
+	 * @param value act-defined value that may contain {@code %s}
+	 * @return resolved property value
+	 */
 	private String resolveInheritedValue(String key, String value) {
 		String inheritValue = getConfigurator().get(key, null);
 		if (inheritValue != null) {
@@ -485,6 +597,13 @@ public class ActProcessor extends AIFileProcessor {
 		return value;
 	}
 
+	/**
+	 * Applies a resolved string property by dispatching to the matching processor
+	 * setting.
+	 *
+	 * @param key   property name
+	 * @param value resolved property value
+	 */
 	private void applyStringProperty(String key, String value) {
 		switch (key) {
 		case GWConstants.INSTRUCTIONS_PROP_NAME:
@@ -515,6 +634,12 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Resolves inherited placeholders for each prompt episode.
+	 *
+	 * @param promptValues prompt values to resolve
+	 * @return resolved prompt list
+	 */
 	private List<String> resolvePromptValues(List<String> promptValues) {
 		List<String> updateValue = new ArrayList<>();
 		for (String value : promptValues) {
@@ -523,10 +648,20 @@ public class ActProcessor extends AIFileProcessor {
 		return updateValue;
 	}
 
+	/**
+	 * Replaces the current ordered episode list.
+	 *
+	 * @param episodes episode prompts to execute
+	 */
 	public void setEpisodes(List<String> episodes) {
 		this.episodes = episodes;
 	}
 
+	/**
+	 * Returns the configured episode prompts.
+	 *
+	 * @return configured episode prompt list
+	 */
 	public List<String> getEpisodes() {
 		return episodes;
 	}
@@ -585,6 +720,13 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Resolves the next episode index from a move request exception.
+	 *
+	 * @param requestedEpisodeId current fallback episode index
+	 * @param e                  exception describing the requested move
+	 * @return resolved zero-based episode index
+	 */
 	private Integer getEpisodeId(Integer requestedEpisodeId, MoveToEpisodeException e) {
 		Integer episodeIdStr = e.getEpisodeId();
 		if (episodeIdStr != null) {
@@ -595,9 +737,30 @@ public class ActProcessor extends AIFileProcessor {
 		return requestedEpisodeId;
 	}
 
+	/**
+	 * Returns the zero-based index of the episode whose prompt text contains a heading that matches the specified episode name.
+	 * <p>
+	 * The method scans each episode's prompt text, extracts the first line that appears between the heading marker "# " and the next newline character,
+	 * trims any leading or trailing whitespace, and compares it to the provided {@code episodeName}.
+	 * If a match is found, the corresponding episode index is returned.
+	 * </p>
+	 *
+	 * <p><b>Example:</b></p>
+	 * <pre>
+	 * episodes.get(0): "# Introduction\nWelcome to the show!"
+	 * episodes.get(1): "# Recap\nLast time on our show..."
+	 *
+	 * getEpisodeIdByName("Recap") returns 1
+	 * getEpisodeIdByName("Introduction") returns 0
+	 * </pre>
+	 *
+	 * @param episodeName the heading text to match (e.g., "Recap")
+	 * @return the zero-based index of the matching episode
+	 * @throws EpisodeNotFoundException if no episode with the specified heading exists
+	 */
 	private int getEpisodeIdByName(String episodeName) {
 		for (int i = 0; i < episodes.size(); i++) {
-			String firstHeaderLine = StringUtils.trimToEmpty(StringUtils.substringBetween(episodes.get(i), "# ", "\n"));
+			String firstHeaderLine = StringUtils.trimToEmpty(StringUtils.substringBetween(episodes.get(i), "#", "\n"));
 			if (firstHeaderLine != null) {
 				if (firstHeaderLine.equals(episodeName)) {
 					return i;
@@ -607,6 +770,13 @@ public class ActProcessor extends AIFileProcessor {
 		throw new EpisodeNotFoundException(episodeName);
 	}
 
+	/**
+	 * Executes only the explicitly requested episodes in the configured order.
+	 *
+	 * @param projectLayout active project layout
+	 * @param projectDir    project root directory
+	 * @return the index position reached in the requested episode id list
+	 */
 	private int requestedOrder(ProjectLayout projectLayout, File projectDir) {
 		String episodeIdStr = null;
 		int i = 0;
@@ -637,6 +807,15 @@ public class ActProcessor extends AIFileProcessor {
 		return i;
 	}
 
+	/**
+	 * Executes a single episode prompt after prepending act metadata.
+	 *
+	 * @param projectLayout active project layout
+	 * @param projectDir    file or directory being processed
+	 * @param prompt        episode prompt text
+	 * @param episodeId     zero-based episode index
+	 * @return provider result string, if any
+	 */
 	private String process(ProjectLayout projectLayout, File projectDir, String prompt, int episodeId) {
 		if (StringUtils.isNotBlank(prompt)) {
 			StringBuilder promptBuilder = new StringBuilder("# Act information\n\n");
@@ -651,6 +830,13 @@ public class ActProcessor extends AIFileProcessor {
 		return super.process(projectLayout, projectDir, prompt);
 	}
 
+	/**
+	 * Executes episodes sequentially, supporting repeat and move operations.
+	 *
+	 * @param projectLayout      active project layout
+	 * @param projectDir         project root directory
+	 * @param requestedEpisodeId zero-based starting episode index
+	 */
 	private void regularOrder(ProjectLayout projectLayout, File projectDir, int requestedEpisodeId) {
 		Integer moveToEpisodeId = null;
 		int i = 0;
@@ -685,6 +871,12 @@ public class ActProcessor extends AIFileProcessor {
 		} while (moveToEpisodeId != null);
 	}
 
+	/**
+	 * Logs a formatted episode banner for the current execution step.
+	 *
+	 * @param episodeId zero-based episode index
+	 * @param iteration current iteration number for the same episode
+	 */
 	private void logEpisodeHeader(int episodeId, int iteration) {
 		if ((episodes.size() > 1 || iteration > 1) && logger.isInfoEnabled()) {
 			String iterationLabel = iteration > 1 ? " [Iteration: " + iteration + "]) " : " ";

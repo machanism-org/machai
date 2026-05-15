@@ -5,9 +5,7 @@ You are an AI assistant tasked should perform the task.
 inputs = [
 # Build the Maven project site using mvn site site:stage -q (with output directory defined by the <stagingDirectory> property in pom.xml).
 '''
-# Task
-
-## Default Steps
+# Build the Site
 
 **Build the Maven Project Site:**
    - Command result "tailResultSize": 1000 
@@ -18,18 +16,12 @@ inputs = [
      ```
    - Note: for output site dir is used: <stagingDirectory> pom.xml property. 
    
-# User Query
-
-```
 %s
-```   
 ''',
 # Synchronize the local site directory to the Cloudflare bucket machai using rclone sync, then verify the bucket contents match the local directory. 
 # Limit command output to the minimum necessary (tailResultSize: 1000) and provide only essential commands and status messages.
 '''
-# Task
-
-## Default Steps
+# Upload the Site
 
 - Command result "tailResultSize": 1000 
 
@@ -50,11 +42,7 @@ inputs = [
    - Output only the essential commands and status messages.
    - Avoid unnecessary explanations unless clarification is requested.
 
-# User Query
-
-```
 %s
-```
 ''']
 
 prompt = "perform default steps"
