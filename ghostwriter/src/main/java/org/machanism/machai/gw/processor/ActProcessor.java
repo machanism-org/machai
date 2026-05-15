@@ -88,7 +88,7 @@ public class ActProcessor extends AIFileProcessor {
 	/** Optional directory containing external {@code *.toml} act files. */
 	private String actsLocation;
 
-	private List<String> prompts = new ArrayList<>();
+	private List<String> episodes = new ArrayList<>();
 
 	private List<Integer> episodeIds = new ArrayList<>();
 
@@ -192,7 +192,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	public void setEpisodeIds(List<Integer> selectedEpisodeIds) {
-		int numberOfEpisodes = prompts.size();
+		int numberOfEpisodes = episodes.size();
 		boolean hasInvalidId = selectedEpisodeIds.stream().anyMatch(id -> id <= 0 || id > numberOfEpisodes);
 		if (hasInvalidId) {
 			throw new IllegalArgumentException(
@@ -461,7 +461,7 @@ public class ActProcessor extends AIFileProcessor {
 			if (valueObj instanceof String) {
 				applyStringActData(key, (String) valueObj);
 			} else if (valueObj instanceof List && GWConstants.INPUTS_PROPERTY_NAME.equals(key)) {
-				setPrompts(resolvePromptValues((List<String>) valueObj));
+				setEpisodes(resolvePromptValues((List<String>) valueObj));
 			}
 		}
 		Object prompts = properties.get(GWConstants.INPUTS_PROPERTY_NAME);
@@ -491,7 +491,7 @@ public class ActProcessor extends AIFileProcessor {
 			super.setInstructions(value);
 			break;
 		case GWConstants.INPUTS_PROPERTY_NAME:
-			setPrompts(Collections.singletonList(value));
+			setEpisodes(Collections.singletonList(value));
 			break;
 		case GWConstants.THREADS_PROP_NAME:
 			super.setDegreeOfConcurrency(Integer.parseInt(value));
@@ -523,12 +523,12 @@ public class ActProcessor extends AIFileProcessor {
 		return updateValue;
 	}
 
-	public void setPrompts(List<String> value) {
-		prompts = value;
+	public void setEpisodes(List<String> episodes) {
+		this.episodes = episodes;
 	}
 
-	public List<String> getPrompts() {
-		return prompts;
+	public List<String> getEpisodes() {
+		return episodes;
 	}
 
 	/**
@@ -572,7 +572,7 @@ public class ActProcessor extends AIFileProcessor {
 					if (disableNormalOrder) {
 						return;
 					} else {
-						if (requestedEpisodeId < prompts.size() - 1) {
+						if (requestedEpisodeId < episodes.size() - 1) {
 							requestedEpisodeId++;
 						}
 					}
@@ -596,8 +596,8 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	private int getEpisodeIdByName(String episodeName) {
-		for (int i = 0; i < prompts.size(); i++) {
-			String firstHeaderLine = StringUtils.trimToEmpty(StringUtils.substringBetween(prompts.get(i), "# ", "\n"));
+		for (int i = 0; i < episodes.size(); i++) {
+			String firstHeaderLine = StringUtils.trimToEmpty(StringUtils.substringBetween(episodes.get(i), "# ", "\n"));
 			if (firstHeaderLine != null) {
 				if (firstHeaderLine.equals(episodeName)) {
 					return i;
@@ -619,9 +619,9 @@ public class ActProcessor extends AIFileProcessor {
 					repeate = false;
 					try {
 						int id = episodeIds.get(i) - 1;
-						String prompt = prompts.get(id);
+						String episode = episodes.get(id);
 						logEpisodeHeader(id, iteration++);
-						perform = process(projectLayout, projectDir, prompt, id);
+						perform = process(projectLayout, projectDir, episode, id);
 
 						if (perform != null) {
 							logger.info(">>> {}", perform);
@@ -660,15 +660,15 @@ public class ActProcessor extends AIFileProcessor {
 				requestedEpisodeId = moveToEpisodeId;
 			}
 			try {
-				for (i = requestedEpisodeId; i < prompts.size(); i++) {
+				for (i = requestedEpisodeId; i < episodes.size(); i++) {
 					int iteration = 1;
 					boolean repeate;
 					do {
 						repeate = false;
 						try {
-							String prompt = prompts.get(i);
+							String episode = episodes.get(i);
 							logEpisodeHeader(i, iteration++);
-							perform = process(projectLayout, projectDir, prompt, i);
+							perform = process(projectLayout, projectDir, episode, i);
 
 							if (perform != null) {
 								logger.info(">>> {}", perform);
@@ -686,7 +686,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	private void logEpisodeHeader(int episodeId, int iteration) {
-		if ((prompts.size() > 1 || iteration > 1) && logger.isInfoEnabled()) {
+		if ((episodes.size() > 1 || iteration > 1) && logger.isInfoEnabled()) {
 			String iterationLabel = iteration > 1 ? " [Iteration: " + iteration + "]) " : " ";
 			String title = " Episode #" + (episodeId + 1) + iterationLabel;
 
