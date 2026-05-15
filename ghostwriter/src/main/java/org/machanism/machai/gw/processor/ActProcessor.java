@@ -95,9 +95,6 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	private boolean disableNormalOrder;
 
-	/** Current act name without prompt suffix or episode selector. */
-	private String name;
-
 	/**
 	 * Creates an act processor.
 	 *
@@ -128,6 +125,7 @@ public class ActProcessor extends AIFileProcessor {
 		String defaultPrompt = getDefaultPrompt();
 		String prompt;
 		Matcher matcher = FIRST_WHITESPACE.matcher(act);
+		String name;
 		if (matcher.find()) {
 			int start = matcher.start();
 			String substringAfter = StringUtils.substring(act, start);
@@ -142,6 +140,7 @@ public class ActProcessor extends AIFileProcessor {
 		name = StringUtils.substringBeforeLast(name, EPISODE_DELIMETER);
 
 		Map<String, Object> actData = new HashMap<>();
+		episodes.setName(name);
 		loadAct(name, actData, actsLocation);
 
 		prompt = StringUtils.trim(prompt);
@@ -697,11 +696,8 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	private String process(ProjectLayout projectLayout, File projectDir, String prompt, int episodeId) {
 		if (StringUtils.isNotBlank(prompt)) {
-			StringBuilder promptBuilder = new StringBuilder("# Act information\n\n");
-			promptBuilder.append("- Act name: `" + name + "`\n");
-			promptBuilder.append("- Episode Id: `" + (episodeId + 1) + "`\n");
-			promptBuilder.append("---");
-			promptBuilder.append("\n\n");
+			StringBuilder promptBuilder = new StringBuilder();
+			promptBuilder.append(episodes.getEpisodeInformation(episodeId));
 			promptBuilder.append(prompt);
 			prompt = promptBuilder.toString();
 		}

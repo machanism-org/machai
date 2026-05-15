@@ -20,6 +20,8 @@ public class Episodes {
 	/** Explicitly selected 1-based episode identifiers. */
 	private List<Integer> selectedEpisodes = new ArrayList<>();
 
+	private String name;
+
 	/**
 	 * Sets the list of explicitly requested episode identifiers.
 	 *
@@ -68,7 +70,7 @@ public class Episodes {
 	 */
 	public int getEpisodeIdByName(String episodeName) {
 		for (int i = 0; i < episodes.size(); i++) {
-			String firstHeaderLine = StringUtils.trimToEmpty(StringUtils.substringBetween(episodes.get(i), "#", "\n"));
+			String firstHeaderLine = getEpisodeName(i);
 			if (firstHeaderLine != null) {
 				if (firstHeaderLine.equals(episodeName)) {
 					return i;
@@ -76,6 +78,10 @@ public class Episodes {
 			}
 		}
 		throw new EpisodeNotFoundException(episodeName);
+	}
+
+	private String getEpisodeName(int i) {
+		return StringUtils.trimToEmpty(StringUtils.substringBetween(episodes.get(i), "#", "\n"));
 	}
 
 	/**
@@ -110,6 +116,8 @@ public class Episodes {
 						}
 					} while (repeate);
 				}
+				moveToEpisodeId = null;
+				
 			} catch (MoveToEpisodeException e) {
 				moveToEpisodeId = getEpisodeId(moveToEpisodeId, e);
 			}
@@ -156,7 +164,7 @@ public class Episodes {
 	 * @param e                  exception describing the requested move
 	 * @return resolved zero-based episode index
 	 */
-	public Integer getEpisodeId(int requestedEpisodeId, MoveToEpisodeException e) {
+	public Integer getEpisodeId(Integer requestedEpisodeId, MoveToEpisodeException e) {
 		Integer episodeIdStr = e.getEpisodeId();
 		if (episodeIdStr != null) {
 			requestedEpisodeId = episodeIdStr - 1;
@@ -205,5 +213,38 @@ public class Episodes {
 
 	public int size() {
 		return episodes.size();
+	}
+
+	public String getEpisodeInformation(int episodeId) {
+		StringBuilder promptBuilder = new StringBuilder("# Act Information\n\n");
+		promptBuilder.append("- Act name: `" + getName() + "`\n");
+
+		if (!episodes.isEmpty()) {
+			promptBuilder.append("- Episode Id: " + (episodeId + 1) + "\n\n");
+
+			promptBuilder.append("Episodes:\n\n");
+			promptBuilder.append("| ID | EPISODE NAME |\n");
+			promptBuilder.append("|----|--------------|\n");
+			for (int i = 0; i < episodes.size(); i++) {
+				promptBuilder.append("| " + (i + 1) + " | " + StringUtils.defaultIfBlank(getEpisodeName(i), "<not defined>") + " |\n");
+			}
+
+			promptBuilder.append("---\n\n");
+		}
+		return promptBuilder.toString();
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 }
