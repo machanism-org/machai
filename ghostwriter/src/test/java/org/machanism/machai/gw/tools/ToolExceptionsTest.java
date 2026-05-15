@@ -10,7 +10,7 @@ class ToolExceptionsTest {
 	@Test
 	void moveToEpisodeExceptionShouldExposeNullEpisodeAsNextEpisodeMessage() {
 		// Arrange
-		MoveToEpisodeException exception = new MoveToEpisodeException(null);
+		MoveToEpisodeException exception = new MoveToEpisodeException(null, null);
 
 		// Act
 		String message = exception.getMessage();
@@ -23,7 +23,7 @@ class ToolExceptionsTest {
 	@Test
 	void moveToEpisodeExceptionShouldExposeSpecificEpisodeId() {
 		// Arrange
-		MoveToEpisodeException exception = new MoveToEpisodeException(2);
+		MoveToEpisodeException exception = new MoveToEpisodeException(2, null);
 
 		// Act
 		String message = exception.getMessage();

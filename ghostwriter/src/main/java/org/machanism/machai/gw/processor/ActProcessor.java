@@ -577,15 +577,34 @@ public class ActProcessor extends AIFileProcessor {
 						}
 					}
 				} catch (MoveToEpisodeException e) {
-					Integer episodeIdStr = e.getEpisodeId();
-					if (episodeIdStr != null) {
-						requestedEpisodeId = episodeIdStr - 1;
-					}
+					requestedEpisodeId = getEpisodeId(requestedEpisodeId, e);
 				}
 			}
 
 			regularOrder(projectLayout, projectDir, requestedEpisodeId);
 		}
+	}
+
+	private Integer getEpisodeId(Integer requestedEpisodeId, MoveToEpisodeException e) {
+		Integer episodeIdStr = e.getEpisodeId();
+		if (episodeIdStr != null) {
+			requestedEpisodeId = episodeIdStr - 1;
+		} else if (e.getName() != null) {
+			requestedEpisodeId = getEpisodeIdByName(e.getName());
+		}
+		return requestedEpisodeId;
+	}
+
+	private int getEpisodeIdByName(String episodeName) {
+		for (int i = 0; i < prompts.size(); i++) {
+			String firstHeaderLine = StringUtils.trimToEmpty(StringUtils.substringBetween(prompts.get(i), "# ", "\n"));
+			if (firstHeaderLine != null) {
+				if (firstHeaderLine.equals(episodeName)) {
+					return i;
+				}
+			}
+		}
+		throw new EpisodeNotFoundException(episodeName);
 	}
 
 	private int requestedOrder(ProjectLayout projectLayout, File projectDir) {
@@ -638,7 +657,7 @@ public class ActProcessor extends AIFileProcessor {
 		String perform;
 		do {
 			if (moveToEpisodeId != null) {
-				requestedEpisodeId = moveToEpisodeId - 1;
+				requestedEpisodeId = moveToEpisodeId;
 			}
 			try {
 				for (i = requestedEpisodeId; i < prompts.size(); i++) {
@@ -661,10 +680,7 @@ public class ActProcessor extends AIFileProcessor {
 					} while (repeate);
 				}
 			} catch (MoveToEpisodeException e) {
-				moveToEpisodeId = e.getEpisodeId();
-				if (moveToEpisodeId == null) {
-					moveToEpisodeId = i + 1;
-				}
+				moveToEpisodeId = getEpisodeId(moveToEpisodeId, e);
 			}
 		} while (moveToEpisodeId != null);
 	}

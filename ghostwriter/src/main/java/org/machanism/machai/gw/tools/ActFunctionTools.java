@@ -56,10 +56,11 @@ public class ActFunctionTools implements FunctionTools {
 
 		provider.addTool(
 				"move_to_episode",
-				"Moves to the next episode, or to the episode specified by 'id' if provided. Use this to control "
+				"Moves to the next episode, or to the episode specified by 'id' or 'name' if provided. Use this to control "
 						+ "episode navigation in the project context.",
 				this::moveToEpisode,
-				"id:integer:optional:The ID of the episode to move to.");
+				"id:integer:optional:The ID of the episode to move to.",
+				"name:string:optional:The name of the episode to move to.");
 
 		provider.addTool(
 				"repeate_episode",
@@ -169,8 +170,9 @@ public class ActFunctionTools implements FunctionTools {
 		}
 
 		Integer targetId = props.has("id") ? props.get("id").asInt() : null;
+		String name = props.has("name") ? props.get("name").asText() : null;
 
-		throw new MoveToEpisodeException(targetId);
+		throw new MoveToEpisodeException(targetId, name);
 	}
 
 	/**

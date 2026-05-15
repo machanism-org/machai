@@ -1,0 +1,36 @@
+# ============================================================
+# Input Template
+# ============================================================
+inputs = [
+'''
+# Third
+
+Save to a project context variable `MY_VAR` with value: `HELLO!`.
+
+Move to Fourth episode.
+
+%s
+''',
+'''
+# Second
+
+- %s 
+
+- Ensure the `EPISODE_ITERATION` variable is accurately incremented and stored in the project context on each repeat.
+- If the project context variable `EPISODE_ITERATION` is not defined, set the value to 1, otherwise increase it by 1.
+- If the value of the project context variable `EPISODE_ITERATION` is less than 2, repeat this episode.
+
+''',
+'''
+# Third
+
+Show me the project context variable `MY_VAR`.
+''',
+'''
+# Fourth
+
+%s
+
+Show me `BYE!`.
+
+''']
