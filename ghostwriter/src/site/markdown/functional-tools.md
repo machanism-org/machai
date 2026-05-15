@@ -12,11 +12,11 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter provides function tools that let a model discover and inspect Act templates, keep project-scoped workflow state, navigate episode-based flows, work with files inside the active project, run approved command-line operations, inspect stored command logs, and retrieve content from web pages or REST endpoints.
+Ghostwriter provides function tools that let a model discover and inspect Act templates, run Acts, keep project-scoped workflow state, navigate episode-based flows, work with files inside the active project, run approved command-line operations, inspect stored command logs, and retrieve content from web pages or REST endpoints.
 
 ## Tool groups
 
-- **Act and workflow tools** help discover available Acts, inspect Act definitions, store temporary workflow values, and control episode transitions.
+- **Act and workflow tools** help discover available Acts, inspect Act definitions, run Acts, store temporary workflow values, and control episode transitions.
 - **Project context tools** help keep project-scoped variables for multi-step workflows.
 - **File system tools** help read, write, patch, and enumerate files relative to the active project directory.
 - **Command and process tools** help run approved commands, inspect command log history, search command logs, and finish or terminate execution when necessary.
@@ -28,7 +28,7 @@ Ghostwriter provides function tools that let a model discover and inspect Act te
 Lists the built-in Act templates packaged with Ghostwriter.
 
 **Description**
-Use this tool when you need a quick overview of the built-in Acts that ship with Ghostwriter. It scans packaged Act resources, loads each Act description, and returns a readable summary of the available Act names.
+Use this tool when you need a quick overview of the Acts that ship with Ghostwriter. It scans built-in Act resources, loads each Act description, and returns a readable list of Act names together with their descriptions.
 
 **Features**
 - Discovers built-in Acts packaged with the application.
@@ -62,16 +62,17 @@ Use this tool when you need to inspect one Act in detail. It loads the requested
 Moves execution to the next episode or to a specific episode.
 
 **Description**
-Use this tool to control episode-based workflow navigation. If no ID is supplied, Ghostwriter advances to the next episode. If an ID is provided, execution jumps directly to that episode.
+Use this tool to control episode-based workflow navigation. If no parameters are supplied, Ghostwriter advances to the next episode. You can also jump directly to a target episode by numeric ID or by name.
 
 **Features**
 - Supports sequential workflow progression.
-- Supports explicit jumps to a named episode.
+- Supports direct jumps by episode ID.
+- Supports direct jumps by episode name.
 - Useful for branching and guided workflow control.
-- Designed for Act orchestration rather than data retrieval.
 
 **Input parameters**
-- `id` *(string, optional)*: ID of the episode to move to. If omitted, Ghostwriter moves to the next episode.
+- `id` *(integer, optional)*: ID of the episode to move to.
+- `name` *(string, optional)*: Name of the episode to move to.
 
 ### `repeate_episode`
 Repeats the current episode.
@@ -87,6 +88,21 @@ Use this tool when the current episode should be retried. Ghostwriter restarts t
 
 **Input parameters**
 - `message` *(string, optional)*: Custom response message to output before repeating the episode.
+
+### `perform_act`
+Performs a specific Act by name.
+
+**Description**
+Use this tool when a workflow should trigger another Act directly. Ghostwriter creates an Act processor for the current project, resolves the configured Acts location, scans project documents, and starts the requested Act.
+
+**Features**
+- Runs an Act by name.
+- Uses the current project as the execution context.
+- Scans project documents before running the Act.
+- Useful for chaining reusable workflows together.
+
+**Input parameters**
+- `actName` *(string, required)*: Name of the Act to perform.
 
 ## Project context tools
 
