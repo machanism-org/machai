@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Episodes {
+	private static final String HEADER_MARKER = "# ";
+
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(Episodes.class);
 
@@ -80,8 +82,36 @@ public class Episodes {
 		throw new EpisodeNotFoundException(episodeName);
 	}
 
-	private String getEpisodeName(int i) {
-		return StringUtils.trimToEmpty(StringUtils.substringBetween(episodes.get(i), "#", "\n"));
+	/**
+	 * Extracts and returns the episode name (heading) from the prompt text of the
+	 * episode at the specified index.
+	 * <p>
+	 * The method retrieves the episode prompt at index {@code i}, extracts the
+	 * substring between the first occurrence of the heading marker "#" and the next
+	 * newline character, and trims any leading or trailing whitespace. If the
+	 * extracted heading is empty after trimming, {@code null} is returned.
+	 * </p>
+	 *
+	 * <p>
+	 * <b>Example:</b>
+	 * </p>
+	 * 
+	 * <pre>
+	 * episodes.get(0): "# Introduction\nWelcome to the show!"
+	 * getEpisodeName(0) returns "Introduction"
+	 * </pre>
+	 *
+	 * @param i the zero-based index of the episode
+	 * @return the trimmed episode name, or {@code null} if no heading is found or
+	 *         the heading is empty
+	 */
+	public String getEpisodeName(int i) {
+		String episode = StringUtils.trim(episodes.get(i));
+		String header = null;
+		if (episode != null && episode.startsWith(HEADER_MARKER)) {
+			header = StringUtils.substringBetween(episode, HEADER_MARKER, "\n");
+		}
+		return StringUtils.trimToNull(header);
 	}
 
 	/**
@@ -117,7 +147,7 @@ public class Episodes {
 					} while (repeate);
 				}
 				moveToEpisodeId = null;
-				
+
 			} catch (MoveToEpisodeException e) {
 				moveToEpisodeId = getEpisodeId(moveToEpisodeId, e);
 			}
@@ -183,7 +213,14 @@ public class Episodes {
 	private void logEpisodeHeader(int episodeId, int iteration) {
 		if ((episodes.size() > 1 || iteration > 1) && logger.isInfoEnabled()) {
 			String iterationLabel = iteration > 1 ? " [Iteration: " + iteration + "]) " : " ";
-			String title = " Episode #" + (episodeId + 1) + iterationLabel;
+			String episodeName = getEpisodeName(episodeId);
+			if (episodeName != null) {
+				episodeName = " \"" + episodeName + "\"";
+			} else {
+				episodeName = StringUtils.EMPTY;
+			}
+
+			String title = " Episode #" + (episodeId + 1) + episodeName + iterationLabel;
 
 			logger.info("{}", StringUtils.center(title, 80, "-"));
 		}
@@ -217,18 +254,18 @@ public class Episodes {
 
 	public String getEpisodeInformation(int episodeId) {
 		StringBuilder promptBuilder = new StringBuilder("# Act Information\n\n");
-		promptBuilder.append("- Act name: `" + getName() + "`\n");
+		promptBuilder.append("- Act Name: `" + getName() + "`\n");
 
 		if (!episodes.isEmpty()) {
-			promptBuilder.append("- Episode Id: " + (episodeId + 1) + "\n\n");
-
 			promptBuilder.append("Episodes:\n\n");
 			promptBuilder.append("| ID | EPISODE NAME |\n");
 			promptBuilder.append("|----|--------------|\n");
 			for (int i = 0; i < episodes.size(); i++) {
-				promptBuilder.append("| " + (i + 1) + " | " + StringUtils.defaultIfBlank(getEpisodeName(i), "<not defined>") + " |\n");
+				promptBuilder.append("| " + (i + 1) + " | "
+						+ StringUtils.defaultIfBlank(getEpisodeName(i), "<not defined>") + " |\n");
 			}
 
+			promptBuilder.append("\n- Current Episode Id: " + (episodeId + 1) + "\n\n");
 			promptBuilder.append("---\n\n");
 		}
 		return promptBuilder.toString();
