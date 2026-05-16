@@ -11,22 +11,24 @@
  * </p>
  *
  * <p>
- * The package includes tool registrars for:
+ * The package includes tool registrars and supporting infrastructure for:
  * </p>
  * <ul>
- * <li>reading, writing, and listing files relative to a host-supplied working
- * directory</li>
- * <li>executing validated command-line processes with bounded output capture</li>
+ * <li>reading, writing, patching, and listing files relative to a
+ * host-supplied working directory</li>
+ * <li>executing validated command-line processes with bounded output capture
+ * and security checks</li>
  * <li>retrieving web content and invoking REST endpoints</li>
  * <li>loading act definitions and maintaining project-scoped context
  * variables</li>
- * <li>signaling workflow control transitions such as moving to another
- * episode</li>
+ * <li>signaling workflow control transitions such as ending tasks, repeating an
+ * episode, moving to another episode, or terminating execution</li>
  * </ul>
  *
  * <p>
- * Supporting types provide bounded output buffering and command deny-list
- * enforcement used by the command execution tools.
+ * Supporting types in the package implement bounded output buffering, command
+ * deny-list enforcement, patch application, and exception-based workflow
+ * signaling used by the registered tools.
  * </p>
  *
  * <p>

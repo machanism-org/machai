@@ -2,68 +2,70 @@
  * Ghostwriter processors and command-line orchestration.
  *
  * <p>
- * This package contains the filesystem-oriented processing pipeline used by the Ghostwriter CLI.
- * It includes the command-line entry point, base traversal support for single-module and
- * multi-module repositories, AI-backed processors for guidance-driven and act-driven workflows,
- * and shared constants and exceptions required to configure and execute scans.
+ * This package contains the filesystem-oriented execution pipeline used by the Ghostwriter CLI.
+ * It provides the command-line bootstrap, common project traversal support, AI-backed processors
+ * for {@code @guidance:} and act-driven workflows, and supporting types for episode sequencing,
+ * constants, and runtime exceptions.
  * </p>
  *
  * <p>
- * Processing in this package is rooted in {@link org.machanism.machai.project.layout.ProjectLayout}
- * metadata. Implementations inspect project directories, derive source, test, documentation, and
- * module structure from the detected layout, select matching files or directories, and assemble
- * prompts that are sent to a configured
- * {@link org.machanism.machai.ai.provider.Genai} provider. The package operates directly on the
- * filesystem and discovered project metadata rather than building the project or resolving its
- * dependency graph.
+ * Processing in this package is based on
+ * {@link org.machanism.machai.project.layout.ProjectLayout} metadata. Implementations inspect the
+ * current project directory, discover source, test, documentation, and module structure from the
+ * detected layout, select matching files or folders, and prepare prompts for a configured
+ * {@link org.machanism.machai.ai.provider.Genai} provider. The package works directly against the
+ * filesystem and project-layout metadata rather than compiling code or resolving dependencies.
  * </p>
  *
- * <h2>Primary processing types</h2>
+ * <h2>Primary processor types</h2>
  * <ul>
  *   <li>
- *     {@link org.machanism.machai.gw.processor.AbstractFileProcessor} provides shared traversal,
- *     module recursion, path filtering, exclusion handling, and scan-pattern support for concrete
- *     processors.
+ *     {@link org.machanism.machai.gw.processor.AbstractFileProcessor} defines shared traversal,
+ *     path filtering, exclusion handling, and module-recursion behavior for concrete processors.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.processor.AIFileProcessor} adds prompt construction, provider
- *     initialization, request-input logging, optional interactive execution, and function-tool
+ *     {@link org.machanism.machai.gw.processor.AIFileProcessor} adds prompt preparation,
+ *     provider initialization, request logging, interactive execution hooks, and function-tool
  *     integration.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.processor.GuidanceProcessor} extracts embedded
- *     {@code @guidance:} directives from supported files through registered
- *     {@link org.machanism.machai.gw.reviewer.Reviewer} implementations and submits the resulting
- *     work to the configured AI provider.
+ *     {@link org.machanism.machai.gw.processor.GuidanceProcessor} reads reviewer-supported files,
+ *     extracts embedded {@code @guidance:} directives, and submits the resulting work to the AI
+ *     provider.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.processor.ActProcessor} executes reusable TOML-defined acts,
- *     including inherited act definitions, external act locations, prompt episodes, and
- *     act-specific runtime configuration.
+ *     {@link org.machanism.machai.gw.processor.ActProcessor} loads TOML-defined acts, resolves
+ *     inheritance and external act locations, and executes prompt episodes against matching files
+ *     or directories.
  *   </li>
  * </ul>
  *
  * <h2>Supporting types</h2>
  * <ul>
  *   <li>
- *     {@link org.machanism.machai.gw.processor.Ghostwriter} is the CLI bootstrap class that parses
- *     command-line arguments, loads configuration, selects the processing mode, and starts scans.
+ *     {@link org.machanism.machai.gw.processor.Ghostwriter} is the CLI entry point that parses
+ *     arguments, loads configuration, selects the processing mode, and starts scans.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.processor.GWConstants} centralizes property names and related
+ *     {@link org.machanism.machai.gw.processor.Episodes} manages ordered or explicitly selected
+ *     act episodes, including repeat and move-to-episode control flow.
+ *   </li>
+ *   <li>
+ *     {@link org.machanism.machai.gw.processor.GWConstants} centralizes property names and other
  *     constants shared across the processing pipeline.
  *   </li>
  *   <li>
- *     {@link org.machanism.machai.gw.processor.ActNotFound} reports that a requested act could not
- *     be resolved from bundled or external act locations.
+ *     {@link org.machanism.machai.gw.processor.ActNotFound} and
+ *     {@link org.machanism.machai.gw.processor.EpisodeNotFoundException} report invalid act or
+ *     episode lookups during execution.
  *   </li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <p>
- * A Ghostwriter invocation creates either a
+ * A Ghostwriter invocation constructs either a
  * {@link org.machanism.machai.gw.processor.GuidanceProcessor} or an
- * {@link org.machanism.machai.gw.processor.ActProcessor}, applies configuration such as model
+ * {@link org.machanism.machai.gw.processor.ActProcessor}, applies runtime settings such as model
  * selection, instructions, excludes, interactive mode, and scan targets, and then scans one or
  * more project-relative paths or path patterns. Matching files are processed individually, while
  * project-level context is injected into prompts so downstream AI providers can make

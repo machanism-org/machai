@@ -10,6 +10,10 @@ import org.machanism.machai.gw.tools.RepeatEpisodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Maintains ordered act episodes and provides execution helpers for normal,
+ * selected, repeated, and redirected episode flow.
+ */
 public class Episodes {
 	private static final String HEADER_MARKER = "# ";
 
@@ -22,6 +26,7 @@ public class Episodes {
 	/** Explicitly selected 1-based episode identifiers. */
 	private List<Integer> selectedEpisodes = new ArrayList<>();
 
+	/** Logical act name associated with the episodes. */
 	private String name;
 
 	/**
@@ -115,13 +120,11 @@ public class Episodes {
 	}
 
 	/**
-	 * Executes episodes sequentially, supporting repeat and move operations.
-	 * 
-	 * @param startId
+	 * Executes episodes in regular order starting from the supplied zero-based
+	 * index while honoring repeat and move requests.
 	 *
-	 * @param projectLayout active project layout
-	 * @param projectDir    project root directory
-	 * @param startId       zero-based starting episode index
+	 * @param startId starting zero-based episode index
+	 * @param func    callback used to execute an episode
 	 */
 	public void regularOrder(Integer startId, BiFunction<Integer, String, String> func) {
 		Integer moveToEpisodeId = null;
@@ -154,6 +157,12 @@ public class Episodes {
 		} while (moveToEpisodeId != null);
 	}
 
+	/**
+	 * Executes only the explicitly selected episodes in their requested order.
+	 *
+	 * @param func callback used to execute an episode
+	 * @return the last processed selection index
+	 */
 	public int requestedOrder(BiFunction<Integer, String, String> func) {
 		String episodeIdStr = null;
 		int i = 0;
@@ -179,6 +188,13 @@ public class Episodes {
 		return i;
 	}
 
+	/**
+	 * Executes a single episode callback and logs any returned output.
+	 *
+	 * @param func    callback used to execute an episode
+	 * @param i       zero-based episode index supplied to the callback
+	 * @param episode episode prompt text
+	 */
 	private void execute(BiFunction<Integer, String, String> func, int i, String episode) {
 		String perform = func.apply(i, episode);
 
@@ -244,14 +260,30 @@ public class Episodes {
 		return episodes;
 	}
 
+	/**
+	 * Returns whether no explicit episode subset has been selected.
+	 *
+	 * @return {@code true} when regular order should be used
+	 */
 	public boolean isRegularOrder() {
 		return selectedEpisodes.isEmpty();
 	}
 
+	/**
+	 * Returns the number of configured episodes.
+	 *
+	 * @return episode count
+	 */
 	public int size() {
 		return episodes.size();
 	}
 
+	/**
+	 * Builds act metadata that is prepended to an episode prompt.
+	 *
+	 * @param episodeId zero-based current episode index
+	 * @return formatted act metadata block
+	 */
 	public String getEpisodeInformation(int episodeId) {
 		StringBuilder promptBuilder = new StringBuilder("# Act Information\n\n");
 		promptBuilder.append("- Act Name: `" + getName() + "`\n");
@@ -272,14 +304,18 @@ public class Episodes {
 	}
 
 	/**
-	 * @return the name
+	 * Returns the act name associated with these episodes.
+	 *
+	 * @return act name
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * @param name the name to set
+	 * Sets the act name associated with these episodes.
+	 *
+	 * @param name act name
 	 */
 	public void setName(String name) {
 		this.name = name;
