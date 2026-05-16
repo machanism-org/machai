@@ -3,7 +3,7 @@
 # ============================================================
 inputs = [
 '''
-## First
+# First
 
 Save to a project context variable `MY_VAR` with value: `HELLO!`.
 

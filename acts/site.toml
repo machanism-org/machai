@@ -3,25 +3,20 @@ You are an AI assistant tasked should perform the task.
 '''
 
 inputs = [
-# Build the Maven project site using mvn site site:stage -q (with output directory defined by the <stagingDirectory> property in pom.xml).
 '''
-# Build the Site
+# Build
 
-**Build the Maven Project Site:**
-   - Command result "tailResultSize": 1000 
-   - Run the command bellow:
-     ```
-     mvn clean install -q
-     mvn site site:stage -q
-     ```
-   - Note: for output site dir is used: <stagingDirectory> pom.xml property. 
+- Command result "tailResultSize": 1000 
+- Run the command bellow:
+  ```
+  mvn clean site site:stage -q
+  ```
+- Note: for output site dir is used: <stagingDirectory> pom.xml property. 
    
 %s
 ''',
-# Synchronize the local site directory to the Cloudflare bucket machai using rclone sync, then verify the bucket contents match the local directory. 
-# Limit command output to the minimum necessary (tailResultSize: 1000) and provide only essential commands and status messages.
 '''
-# Upload the Site
+# Upload
 
 - Command result "tailResultSize": 1000 
 
@@ -44,8 +39,6 @@ inputs = [
 
 %s
 ''']
-
-prompt = "perform default steps"
 
 gw.nonRecursive = "true"
 cf.bucket = "machai"
