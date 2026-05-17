@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.Description;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -663,6 +665,63 @@ public class OpenAIProvider implements Genai {
 		toolBuilder.parameters(params);
 		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
 		toolMap.put(tool, function);
+	}
+
+	/**
+	 * Registers a function tool for the current provider instance.
+	 *
+	 * <p>
+	 * The {@code paramsDesc} entries must follow the format
+	 * {@code name:type:required:description}. The parameter schema passed to OpenAI
+	 * is a JSON Schema object of type {@code object}.
+	 * </p>
+	 *
+	 * @param function    handler callback for tool execution
+	 */
+	@Override
+	public void addTool(ToolFunction function) {
+		try {
+			Method method;
+			Class<? extends ToolFunction> tfClass = function.getClass();
+			method = tfClass.getMethod("apply", JsonNode.class, File.class);
+			Description ftDescription = method.getAnnotation(Description.class);
+			String name = StringUtils.defaultIfBlank(ftDescription.name(),
+					tfClass.getSimpleName() + "_" + method.getName());
+			String description = ftDescription.value();
+
+			org.machanism.machai.ai.tools.Params paramsAnn = method.getParameters()[0]
+					.getAnnotation(org.machanism.machai.ai.tools.Params.class);
+
+			String[] paramsDesc = paramsAnn.value();
+
+			Map<String, Map<String, String>> fromValue = new HashMap<>();
+			ObjectMapper mapper = new ObjectMapper();
+			ArrayNode requiredProps = mapper.createArrayNode();
+			if (paramsDesc != null) {
+				for (String pDesc : paramsDesc) {
+					String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
+					if (desc.length >= 3 && isRequiredParameter(desc[2])) {
+						requiredProps.add(desc[0]);
+					}
+					Map<String, String> value = new HashMap<>();
+					value.put("type", desc[1]);
+					value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
+					fromValue.put(desc[0], value);
+				}
+			}
+			JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
+			JsonValue requiredVal = JsonValue.fromJsonNode(requiredProps);
+			Parameters params = Parameters.builder().putAdditionalProperty("properties", propsVal)
+					.putAdditionalProperty("type", JsonString.of("object"))
+					.putAdditionalProperty("required", requiredVal)
+					.build();
+			FunctionTool.Builder toolBuilder = FunctionTool.builder().name(name).description(description);
+			toolBuilder.parameters(params);
+			Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
+			toolMap.put(tool, function);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	/**

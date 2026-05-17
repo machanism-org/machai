@@ -235,4 +235,10 @@ public class NoneProvider implements Genai {
 	public void init(Configurator conf) {
 		// No-op.
 	}
+
+	@Override
+	public void addTool(ToolFunction function) {
+		// TODO Auto-generated method stub
+		
+	}
 }

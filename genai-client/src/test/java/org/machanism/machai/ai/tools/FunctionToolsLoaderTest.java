@@ -69,6 +69,12 @@ class FunctionToolsLoaderTest {
 		public org.machanism.machai.ai.manager.Usage usage() {
 			return new org.machanism.machai.ai.manager.Usage(0, 0, 0);
 		}
+
+		@Override
+		public void addTool(ToolFunction function) {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 
 	private static final class NoopConfigurator implements Configurator {
