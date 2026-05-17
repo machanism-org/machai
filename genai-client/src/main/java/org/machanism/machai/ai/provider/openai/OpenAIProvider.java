@@ -641,30 +641,7 @@ public class OpenAIProvider implements Genai {
 	 */
 	@Override
 	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
-		Map<String, Map<String, String>> fromValue = new HashMap<>();
-		ObjectMapper mapper = new ObjectMapper();
-		ArrayNode requiredProps = mapper.createArrayNode();
-		if (paramsDesc != null) {
-			for (String pDesc : paramsDesc) {
-				String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
-				if (desc.length >= 3 && isRequiredParameter(desc[2])) {
-					requiredProps.add(desc[0]);
-				}
-				Map<String, String> value = new HashMap<>();
-				value.put("type", desc[1]);
-				value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
-				fromValue.put(desc[0], value);
-			}
-		}
-		JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
-		JsonValue requiredVal = JsonValue.fromJsonNode(requiredProps);
-		Parameters params = Parameters.builder().putAdditionalProperty("properties", propsVal)
-				.putAdditionalProperty("type", JsonString.of("object")).putAdditionalProperty("required", requiredVal)
-				.build();
-		FunctionTool.Builder toolBuilder = FunctionTool.builder().name(name).description(description);
-		toolBuilder.parameters(params);
-		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
-		toolMap.put(tool, function);
+		addTool(function, name, description, paramsDesc);
 	}
 
 	/**
@@ -694,34 +671,38 @@ public class OpenAIProvider implements Genai {
 
 			String[] paramsDesc = paramsAnn.value();
 
-			Map<String, Map<String, String>> fromValue = new HashMap<>();
-			ObjectMapper mapper = new ObjectMapper();
-			ArrayNode requiredProps = mapper.createArrayNode();
-			if (paramsDesc != null) {
-				for (String pDesc : paramsDesc) {
-					String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
-					if (desc.length >= 3 && isRequiredParameter(desc[2])) {
-						requiredProps.add(desc[0]);
-					}
-					Map<String, String> value = new HashMap<>();
-					value.put("type", desc[1]);
-					value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
-					fromValue.put(desc[0], value);
-				}
-			}
-			JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
-			JsonValue requiredVal = JsonValue.fromJsonNode(requiredProps);
-			Parameters params = Parameters.builder().putAdditionalProperty("properties", propsVal)
-					.putAdditionalProperty("type", JsonString.of("object"))
-					.putAdditionalProperty("required", requiredVal)
-					.build();
-			FunctionTool.Builder toolBuilder = FunctionTool.builder().name(name).description(description);
-			toolBuilder.parameters(params);
-			Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
-			toolMap.put(tool, function);
+			addTool(function, name, description, paramsDesc);
 		} catch (NoSuchMethodException | SecurityException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+
+	private void addTool(ToolFunction function, String name, String description, String[] paramsDesc) {
+		Map<String, Map<String, String>> fromValue = new HashMap<>();
+		ObjectMapper mapper = new ObjectMapper();
+		ArrayNode requiredProps = mapper.createArrayNode();
+		if (paramsDesc != null) {
+			for (String pDesc : paramsDesc) {
+				String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
+				if (desc.length >= 3 && isRequiredParameter(desc[2])) {
+					requiredProps.add(desc[0]);
+				}
+				Map<String, String> value = new HashMap<>();
+				value.put("type", desc[1]);
+				value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
+				fromValue.put(desc[0], value);
+			}
+		}
+		JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
+		JsonValue requiredVal = JsonValue.fromJsonNode(requiredProps);
+		Parameters params = Parameters.builder().putAdditionalProperty("properties", propsVal)
+				.putAdditionalProperty("type", JsonString.of("object"))
+				.putAdditionalProperty("required", requiredVal)
+				.build();
+		FunctionTool.Builder toolBuilder = FunctionTool.builder().name(name).description(description);
+		toolBuilder.parameters(params);
+		Tool tool = Tool.ofFunction(toolBuilder.strict(false).build());
+		toolMap.put(tool, function);
 	}
 
 	/**
