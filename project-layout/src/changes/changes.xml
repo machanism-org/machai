@@ -33,5 +33,15 @@
 </ul>
       ]]></action>
     </release>
+
+    <release version="1.1.12" date="2026-05-18">
+      <action dev="dev" type="add"><![CDATA[
+<h2>Fixes</h2>
+<ul>
+  <li>Improved episode template prompt handling for user input.</li>
+  <li>Standardized log messages by using backticks instead of single quotes.</li>
+</ul>
+      ]]></action>
+    </release>
   </body>
 </document>

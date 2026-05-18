@@ -81,7 +81,7 @@
 </ul>
       ]]></action>
     </release>
-    <release version="1.1.12" date="2026-05-15">
+    <release version="1.1.12" date="2026-05-18">
       <action dev="dev" type="add"><![CDATA[
 <h2>Features</h2>
 <ul>
@@ -89,14 +89,15 @@
 </ul>
 <h2>Fixes</h2>
 <ul>
-  <li>Improved <code>move_to_episode</code> handling and refined act episode prompt metadata.</li>
-  <li>Fixed an act processor variable naming issue and added a warning when interactive mode is not supported.</li>
+  <li>Improved <code>move_to_episode</code> handling and corrected act processor variable usage.</li>
+  <li>Added a warning for unsupported interactive mode execution.</li>
+  <li>Updated act episode prompt metadata handling for more reliable episode processing.</li>
 </ul>
 <h2>Refactoring</h2>
 <ul>
-  <li>Removed an unused method from the act processor implementation.</li>
+  <li>Refactored episode execution handling and removed unused act processor code.</li>
 </ul>
       ]]></action>
     </release>
-  </body>
+   </body>
 </document>
