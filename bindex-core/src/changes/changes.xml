@@ -7,7 +7,7 @@
   <release version="1.1.0" date="2026-04-05">
     <action dev="dev" type="add">
 <![CDATA[
-<h2>Features</h2>
+<b>Features:</b>
 <ul><li>Added Bindex metadata management for schema-compliant library descriptors, including generation, registration, retrieval, and semantic discovery workflows.</li><li>Added AI-callable Bindex function tools for metadata lookup, schema retrieval, natural-language library recommendation, and local Bindex registration.</li><li>Added AI Assembly workflow support for turning natural-language implementation requests into buildable project foundations using recommended libraries and Bindex metadata.</li><li>Added reusable workflow acts for Bindex authoring, library picking, and assembly-oriented implementation.</li><li>Added MongoDB-backed Bindex repository support with embedding-based semantic search, language filtering, and architectural-layer filtering.</li></ul>
 ]]>
     </action>
@@ -15,14 +15,14 @@
   <release version="1.1.8" date="2026-05-09">
     <action dev="dev" type="add">
 <![CDATA[
-<h2>Fixes</h2><ul><li>Fixed Sonar-reported issues to improve code quality and maintainability.</li></ul><h2>Tests</h2><ul><li>Added tests to improve verification coverage.</li></ul><h2>Documentation</h2><ul><li>Updated release notes for the current release.</li></ul><h2>Chores</h2><ul><li>Updated the project version for the 1.1.8 release.</li></ul>
+<b>Fixes:</b><ul><li>Fixed Sonar-reported issues to improve code quality and maintainability.</li></ul><h2>Tests</h2><ul><li>Added tests to improve verification coverage.</li></ul><b>Documentation:</b><ul><li>Updated release notes for the current release.</li></ul><b>Chores:</b><ul><li>Updated the project version for the 1.1.8 release.</li></ul>
 ]]>
     </action>
   </release>
   <release version="1.1.10" date="2026-05-12">
     <action dev="dev" type="add">
 <![CDATA[
-<h2>Fixes</h2><ul><li>Improved picker tool loading behavior.</li></ul>
+<b>Fixes:</b><ul><li>Improved picker tool loading behavior.</li></ul>
 ]]>
     </action>
   </release>

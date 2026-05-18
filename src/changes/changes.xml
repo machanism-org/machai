@@ -6,31 +6,31 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
 <release version="1.1.8" date="2026-05-09">
 <action dev="dev" type="add">
 <![CDATA[
-<h2>Features</h2>
+<b>Features:</b>
 <ul>
   <li>Added MCP server support, including multi-server definitions and related integration helpers.</li>
   <li>Added web search integration through the new WebSearch tool and helper methods for web search and MCP server registration.</li>
   <li>Added new functional tools for applying file patches, searching command logs, and reading previous command log chunks.</li>
   <li>Expanded CodeMie provider support to include the <code>gemini-</code> model family and enabled broader model processing support.</li>
 </ul>
-<h2>Fixes</h2>
+<b>Fixes:</b>
 <ul>
   <li>Fixed act prompt processing and string property inheritance behavior.</li>
   <li>Fixed class functional tool initialization and corrected log message behavior.</li>
   <li>Adjusted default exit code handling and improved command-line tool documentation.</li>
   <li>Updated final instructions and exclusion handling, including support for additional excluded directories such as <code>.machai</code>.</li>
 </ul>
-<h2>Refactoring</h2>
+<b>Refactoring:</b>
 <ul>
   <li>Renamed <code>ProcessTerminationException</code> to <code>TaskTerminationException</code>.</li>
   <li>Improved internal file discovery by using project layout directory scanning utilities in recursive file operations.</li>
   <li>Performed cleanup and javadoc improvements across provider and tooling code.</li>
 </ul>
-<h2>Documentation</h2>
+<b>Documentation:</b>
 <ul>
   <li>Updated javadocs, act files, release notes, and related documentation.</li>
 </ul>
-<h2>Chores</h2>
+<b>Chores:</b>
 <ul>
   <li>Added and updated tests, addressed sonar issues, and updated the configured GW model.</li>
   <li>Prepared the 1.1.8 release version update.</li>
@@ -41,7 +41,7 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
   <release version="1.1.9" date="2026-05-10">
 <action dev="dev" type="add">
 <![CDATA[
-<h2>Fixes</h2>
+<b>Fixes:</b>
 <ul>
   <li>Improved task termination handling across Ghostwriter processors and Maven plugin execution.</li>
   <li>Corrected the end-task exception class naming for clearer task completion semantics.</li>
@@ -53,11 +53,11 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
   <release version="1.1.10" date="2026-05-12">
 <action dev="dev" type="add">
 <![CDATA[
-<h2>Features</h2>
+<b>Features:</b>
 <ul>
   <li>Added project context functional tools for pushing and popping project-scoped values.</li>
 </ul>
-<h2>Refactoring</h2>
+<b>Refactoring:</b>
 <ul>
   <li>Extracted project context tooling from act-specific tooling and simplified internal tool loading.</li>
   <li>Improved commit handling, interactive exit flow, picker tool loading, and constant organization.</li>
@@ -68,12 +68,12 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
   <release version="1.1.11" date="2026-05-14">
 <action dev="dev" type="add">
 <![CDATA[
-<h2>Features</h2>
+<b>Features:</b>
 <ul>
   <li>Added the <code>perform_act</code> function tool to trigger predefined act workflows.</li>
   <li>Added support for the <code>&gt;&gt;&gt;</code> file include marker to include content from URLs or file paths during processing.</li>
 </ul>
-<h2>Fixes</h2>
+<b>Fixes:</b>
 <ul>
   <li>Fixed act episode processing for multi-threaded execution.</li>
 </ul>
@@ -83,11 +83,11 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
   <release version="1.1.12" date="2026-05-18">
 <action dev="dev" type="add">
 <![CDATA[
-<h2>Features</h2>
+<b>Features:</b>
 <ul>
   <li>Added support for moving to an episode by name.</li>
 </ul>
-<h2>Fixes</h2>
+<b>Fixes:</b>
 <ul>
   <li>Improved <code>move_to_episode</code> handling.</li>
   <li>Corrected an internal variable name.</li>
