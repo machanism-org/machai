@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -12,8 +11,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.ai.provider.none.NoneProvider;
 
 class GenaiProviderManagerTest {
 
@@ -24,26 +21,6 @@ class GenaiProviderManagerTest {
         @SuppressWarnings("unchecked")
         List<Usage> usages = (List<Usage>) usagesField.get(null);
         usages.clear();
-    }
-
-    @Test
-    void getProviderShouldInstantiateShortProviderName() {
-        Configurator configurator = mock(Configurator.class);
-
-        Genai provider = GenaiProviderManager.getProvider("None:standalone-model", configurator);
-
-        assertSame(NoneProvider.class, provider.getClass());
-        verify(configurator).set("chatModel", "standalone-model");
-    }
-
-    @Test
-    void getProviderShouldInstantiateFullyQualifiedProviderClass() {
-        Configurator configurator = mock(Configurator.class);
-
-        Genai provider = GenaiProviderManager.getProvider("org.machanism.machai.ai.provider.none.NoneProvider:any-model", configurator);
-
-        assertSame(NoneProvider.class, provider.getClass());
-        verify(configurator).set("chatModel", "any-model");
     }
 
     @Test

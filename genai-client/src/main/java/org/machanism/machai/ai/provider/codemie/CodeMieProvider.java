@@ -12,11 +12,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
+import org.machanism.machai.ai.provider.claude.ClaudeProvider;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 
+import com.anthropic.client.AnthropicClient;
 import com.openai.client.OpenAIClient;
 
 /**
@@ -88,7 +91,7 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 	 * This base URL is used to configure the underlying OpenAI-compatible client.
 	 * </p>
 	 */
-	public static final String BASE_URL = "https://codemie.lab.epam.com/code-assistant-api/v1";
+	public static final String BASE_URL = "https://codemie.lab.epam.com/code-assistant-api";
 
 	/**
 	 * Initializes the provider using configuration values.
@@ -117,6 +120,8 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 	 */
 	@Override
 	public void init(Configurator conf) {
+		String chatModel = conf.get("chatModel");
+
 		if (System.getenv(OPENAI_API_KEY) != null) {
 			throw new IllegalArgumentException(
 					"Configuration conflict detected: Please unset the 'OPENAI_API_KEY' environment variable to avoid conflicts with the current configuration.");
@@ -132,31 +137,64 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 		System.setProperty(Genai.PASSWORD_PROP_NAME, password);
 		System.setProperty(AUTH_URL_PROP_NAME, resolvedAuthUrl);
 
-		provider = new OpenAIProvider() {
-			/**
-			 * Builds (and caches) an {@link OpenAIClient} after ensuring the current
-			 * configuration contains an {@code OPENAI_API_KEY} value.
-			 *
-			 * <p>
-			 * The access token is requested lazily at client creation time so that
-			 * initialization can fail fast on authorization errors.
-			 * </p>
-			 *
-			 * @return OpenAI-compatible client configured for the CodeMie backend
-			 * @throws IllegalArgumentException if token acquisition fails
-			 */
-			@Override
-			protected OpenAIClient getClient() {
-				try {
-					String token = getToken(resolvedAuthUrl, username, password);
-					conf.set(OPENAI_API_KEY, token);
-				} catch (IOException e) {
-					throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
-				}
+		if (Strings.CS.startsWithAny(chatModel, "gpt-", "gemini-") || StringUtils.isBlank(chatModel)) {
+			provider = new OpenAIProvider() {
+				/**
+				 * Builds (and caches) an {@link OpenAIClient} after ensuring the current
+				 * configuration contains an {@code OPENAI_API_KEY} value.
+				 *
+				 * <p>
+				 * The access token is requested lazily at client creation time so that
+				 * initialization can fail fast on authorization errors.
+				 * </p>
+				 *
+				 * @return OpenAI-compatible client configured for the CodeMie backend
+				 * @throws IllegalArgumentException if token acquisition fails
+				 */
+				@Override
+				protected OpenAIClient getClient() {
+					try {
+						String token = getToken(resolvedAuthUrl, username, password);
+						conf.set(OPENAI_API_KEY, token);
+					} catch (IOException e) {
+						throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
+					}
 
-				return super.getClient();
-			}
-		};
+					return super.getClient();
+				}
+			};
+			setProvider(provider);
+		} else if (Strings.CS.startsWithAny(chatModel, "claude-")) {
+			provider = new ClaudeProvider() {
+				/**
+				 * Builds (and caches) an {@link OpenAIClient} after ensuring the current
+				 * configuration contains an {@code OPENAI_API_KEY} value.
+				 *
+				 * <p>
+				 * The access token is requested lazily at client creation time so that
+				 * initialization can fail fast on authorization errors.
+				 * </p>
+				 *
+				 * @return OpenAI-compatible client configured for the CodeMie backend
+				 * @throws IllegalArgumentException if token acquisition fails
+				 */
+				@Override
+				protected AnthropicClient getClient() {
+					try {
+						String token = getToken(resolvedAuthUrl, username, password);
+						conf.set(OPENAI_API_KEY, token);
+					} catch (IOException e) {
+						throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
+					}
+
+					return super.getClient();
+				}
+			};
+			setProvider(provider);
+		} else {
+			throw new IllegalArgumentException("Unsupported model: '" + chatModel + "'.");
+		}
+
 		setProvider(provider);
 
 		super.init(conf);
