@@ -168,11 +168,4 @@
 		<url>https://github.com/machanism-org/machai/issues</url>
 	</issueManagement>
 
-	<developers>
-		<developer>
-			<name>Viktor Tovstyi</name>
-			<email>viktor.tovstyi@gmail.com</email>
-		</developer>
-	</developers>
-
 </project>

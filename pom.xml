@@ -149,7 +149,7 @@
 									</goals>
 									<configuration>
 										<outputDirectory>
-											${env.MACHANISM_PACK_DIR}/machai/${artifactId}</outputDirectory>
+											${env.MACHANISM_PACK_DIR}/machai/${project.artifactId}</outputDirectory>
 										<finalName>gw</finalName>
 										<appendAssemblyId>false</appendAssemblyId>
 										<descriptors>
@@ -170,8 +170,8 @@
 									<configuration>
 										<target>
 											<copy
-												file="${env.MACHANISM_PACK_DIR}/machai/${artifactId}/gw.zip"
-												tofile="${env.MACHANISM_PACK_DIR}/machai/${artifactId}/releases/gw-${project.version}.zip"
+												file="${env.MACHANISM_PACK_DIR}/machai/${project.artifactId}/gw.zip"
+												tofile="${env.MACHANISM_PACK_DIR}/machai/${project.artifactId}/releases/gw-${project.version}.zip"
 												overwrite="true" />
 										</target>
 									</configuration>
@@ -614,8 +614,20 @@
 
 	<developers>
 		<developer>
+			<id>viktort</id>
 			<name>Viktor Tovstyi</name>
 			<email>viktor.tovstyi@gmail.com</email>
+			<roles>
+				<role>Lead Developer</role>
+				<role>Project Maintainer</role>
+				<role>Architect</role>
+				<role>Release Manager</role>
+				<role>Documentation Author</role>
+				<role>Contributor</role>
+				<role>Support</role>
+			</roles>
+			<organization>Machanism.org</organization>
+			<organizationUrl>https://machanism.org</organizationUrl>
 		</developer>
 	</developers>
 </project>
