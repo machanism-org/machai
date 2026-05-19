@@ -69,7 +69,7 @@ inputs = '''
    - **IMPORTENT: Adopts the style and format of several historical commit messages from the project.**
        
 - Output format: Provide your response as plain text only. Do not use markdown formatting.
-- **IMPORTANT:** If all done, complete the task.
+- **IMPORTANT:** If all done, end the task.
 
 %s
 '''
