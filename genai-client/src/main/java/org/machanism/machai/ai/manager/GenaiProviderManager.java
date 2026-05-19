@@ -13,20 +13,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory/registry for resolving {@link Genai} implementations from a provider/model identifier and
- * aggregating per-run {@link Usage} metrics.
+ * Factory/registry for resolving {@link Genai} implementations from a
+ * provider/model identifier and aggregating per-run {@link Usage} metrics.
  *
- * <p>The model identifier is formatted as {@code Provider:Model} (for example, {@code OpenAI:gpt-4o-mini}). If the
- * provider portion is omitted (for example, {@code gpt-4o-mini}), the default provider is used.
+ * <p>
+ * The model identifier is formatted as {@code Provider:Model} (for example,
+ * {@code OpenAI:gpt-4o-mini}). If the provider portion is omitted (for example,
+ * {@code gpt-4o-mini}), the default provider is used.
  *
- * <p>Providers are instantiated via reflection. A provider can be referenced either by:
+ * <p>
+ * Providers are instantiated via reflection. A provider can be referenced
+ * either by:
  * <ul>
- *   <li>a short provider name (mapped to
- *   {@code org.machanism.machai.ai.provider.&lt;provider&gt;.&lt;Provider&gt;Provider}), or</li>
- *   <li>a fully-qualified class name.</li>
+ * <li>a short provider name (mapped to
+ * {@code org.machanism.machai.ai.provider.&lt;provider&gt;.&lt;Provider&gt;Provider}),
+ * or</li>
+ * <li>a fully-qualified class name.</li>
  * </ul>
  *
  * <h2>Usage</h2>
+ * 
  * <pre>{@code
  * Configurator conf = ...;
  * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
@@ -37,8 +43,9 @@ import org.slf4j.LoggerFactory;
  * GenaiProviderManager.logUsage();
  * }</pre>
  *
- * <p><strong>Thread-safety:</strong> Usage aggregation is backed by a static {@link ArrayList} and is not
- * synchronized.
+ * <p>
+ * <strong>Thread-safety:</strong> Usage aggregation is backed by a static
+ * {@link ArrayList} and is not synchronized.
  *
  * @author Viktor Tovstyi
  * @see Genai
@@ -54,20 +61,22 @@ public class GenaiProviderManager {
 	}
 
 	/**
-	 * Creates a provider instance for the given provider/model identifier and applies the selected model.
+	 * Creates a provider instance for the given provider/model identifier and
+	 * applies the selected model.
 	 *
-	 * @param chatModel the model identifier formatted as {@code Provider:Model} or just {@code Model}
+	 * @param chatModel the model identifier formatted as {@code Provider:Model} or
+	 *                  just {@code Model}
 	 * @param conf      configurator used to initialize the provider
 	 * @return a new provider instance configured with the requested model
-	 * @throws IllegalArgumentException if the provider cannot be resolved or instantiated
+	 * @throws IllegalArgumentException if the provider cannot be resolved or
+	 *                                  instantiated
 	 */
 	public static Genai getProvider(String chatModel, Configurator conf) {
 		String providerName = StringUtils.substringBefore(chatModel, ":");
 		String chatModelName = StringUtils.substringAfter(chatModel, ":");
 
 		if (StringUtils.isBlank(providerName)) {
-			providerName = NoneProvider.NAME;
-			chatModelName = chatModel;
+			return null;
 		}
 
 		String className;

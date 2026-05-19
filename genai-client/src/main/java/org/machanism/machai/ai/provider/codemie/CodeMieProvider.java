@@ -128,6 +128,10 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 		String password = conf.get(Genai.PASSWORD_PROP_NAME);
 		String resolvedAuthUrl = conf.get(AUTH_URL_PROP_NAME, AUTH_URL);
 
+		System.setProperty(Genai.USERNAME_PROP_NAME, username);
+		System.setProperty(Genai.PASSWORD_PROP_NAME, password);
+		System.setProperty(AUTH_URL_PROP_NAME, resolvedAuthUrl);
+
 		provider = new OpenAIProvider() {
 			/**
 			 * Builds (and caches) an {@link OpenAIClient} after ensuring the current
