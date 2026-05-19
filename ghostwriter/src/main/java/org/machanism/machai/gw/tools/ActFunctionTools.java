@@ -200,6 +200,43 @@ public class ActFunctionTools implements FunctionTools {
 		throw new RepeatEpisodeException();
 	}
 
+	/**
+	 * Performs an act operation based on the provided properties and working directory.
+	 * <p>
+	 * This method configures act execution using the supplied JSON properties and a working directory.
+	 * It logs the operation, parses environment properties, sets up the act processor, and scans documents
+	 * in the specified directory. The act name and other configuration parameters are extracted from the
+	 * {@code props} JSON node.
+	 * </p>
+	 *
+	 * <p>
+	 * <b>Properties in {@code props}:</b>
+	 * <ul>
+	 *   <li><b>actName</b> (required): The name of the act to perform.</li>
+	 *   <li><b>properties</b> (optional): A string containing environment-style key-value pairs (e.g., {@code "KEY1=VALUE1;KEY2=VALUE2"}).
+	 *     <ul>
+	 *       <li><b>model</b> ({@code GWConstants.MODEL_PROP_NAME}): The model to use for act processing. If not specified, defaults to {@code null}.</li>
+	 *       <li><b>scanDir</b> ({@code GWConstants.SCAN_DIR_PROP_NAME}): The directory to scan for documents. If not specified, defaults to the provided {@code workingDir} path.</li>
+	 *       <li><b>actsLocation</b> ({@code GWConstants.ACTS_LOCATION_PROP_NAME}): The location of act definitions. If not specified, defaults to {@code null}.</li>
+	 *     </ul>
+	 *   </li>
+	 * </ul>
+	 * </p>
+	 *
+	 * <p>
+	 * <b>Example:</b>
+	 * <pre>
+	 * JsonNode props = ...; // JSON with "actName" and optional "properties"
+	 * File workingDir = new File("/path/to/dir");
+	 * Object result = performAct(props, workingDir);
+	 * </pre>
+	 * </p>
+	 *
+	 * @param props      JSON node containing act configuration, including "actName" and optional "properties" string
+	 * @param workingDir the directory in which to perform the act operation
+	 * @return           a result object indicating the outcome of the act operation (typically "success")
+	 * @throws IOException if an I/O error occurs during document scanning or act processing
+	 */
 	public Object performAct(JsonNode props, File workingDir) throws IOException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Perform act: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)

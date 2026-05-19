@@ -153,14 +153,14 @@ public class ActProcessor extends AIFileProcessor {
 	private void applyPromptValues(String prompt, Map<String, Object> actData) {
 		Object mainValue = actData.get(GWConstants.INPUTS_PROPERTY_NAME);
 		if (mainValue instanceof String) {
-			actData.put(GWConstants.INPUTS_PROPERTY_NAME, applayPrompt(prompt, actData, (String) mainValue));
+			actData.put(GWConstants.INPUTS_PROPERTY_NAME, applyPrompt(prompt, actData, (String) mainValue));
 			return;
 		}
 
 		if (mainValue instanceof List) {
 			List<String> inputs = new ArrayList<>();
 			for (String value : (List<String>) mainValue) {
-				inputs.add(applayPrompt(prompt, actData, value));
+				inputs.add(applyPrompt(prompt, actData, value));
 			}
 			actData.put(GWConstants.INPUTS_PROPERTY_NAME, inputs);
 		}
@@ -201,7 +201,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param mainValue template string that may contain {@code %s}
 	 * @return prompt-expanded template string
 	 */
-	private String applayPrompt(String prompt, Map<String, Object> actData, String mainValue) {
+	private String applyPrompt(String prompt, Map<String, Object> actData, String mainValue) {
 		String actPrompt = Objects.toString(actData.get("prompt"), "");
 		return Strings.CS.replace(mainValue, "%s", Objects.toString(prompt, actPrompt));
 	}

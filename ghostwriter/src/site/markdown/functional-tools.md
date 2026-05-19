@@ -12,11 +12,11 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter provides function tools that let a model discover and inspect Act templates, run Acts, keep project-scoped workflow state, navigate episode-based flows, work with files inside the active project, run approved command-line operations, inspect stored command logs, and retrieve content from web pages or REST endpoints.
+Ghostwriter provides function tools that let a model discover and inspect Act templates, run Acts, manage project-scoped workflow state, navigate episode-based flows, work with files inside the active project, run approved command-line operations, inspect stored command logs, and retrieve content from web pages or REST endpoints.
 
 ## Tool groups
 
-- **Act and workflow tools** help discover available Acts, inspect Act definitions, run Acts, store temporary workflow values, and control episode transitions.
+- **Act and workflow tools** help discover available Acts, inspect Act definitions, run Acts, and control episode transitions.
 - **Project context tools** help keep project-scoped variables for multi-step workflows.
 - **File system tools** help read, write, patch, and enumerate files relative to the active project directory.
 - **Command and process tools** help run approved commands, inspect command log history, search command logs, and finish or terminate execution when necessary.
@@ -28,7 +28,7 @@ Ghostwriter provides function tools that let a model discover and inspect Act te
 Lists the built-in Act templates packaged with Ghostwriter.
 
 **Description**
-Use this tool when you need a quick overview of the Acts that ship with Ghostwriter. It scans built-in Act resources, loads each Act description, and returns a readable list of Act names together with their descriptions.
+Use this tool when you need a quick overview of the Acts that ship with Ghostwriter. It scans the built-in Act resources and returns a readable list of Act names together with their descriptions.
 
 **Features**
 - Discovers built-in Acts packaged with the application.
@@ -43,7 +43,7 @@ This tool does not take any input parameters.
 Loads the details of a specific Act template.
 
 **Description**
-Use this tool when you need to inspect one Act in detail. It loads the requested Act by name and returns its collected properties, such as instructions, templates, and configuration values. It can resolve the effective Act, only the custom Act, or only the built-in Act.
+Use this tool when you need to inspect one Act in detail. It loads the requested Act by name and returns collected properties such as instructions, templates, and configuration values. It can resolve the effective Act, only the custom Act, or only the built-in Act.
 
 **Features**
 - Loads a single Act by name.
@@ -93,16 +93,18 @@ Use this tool when the current episode should be retried. Ghostwriter restarts t
 Performs a specific Act by name.
 
 **Description**
-Use this tool when a workflow should trigger another Act directly. Ghostwriter creates an Act processor for the current project, resolves the configured Acts location, scans project documents, and starts the requested Act.
+Use this tool when a workflow should trigger another Act directly. Ghostwriter creates an Act processor for the current project, applies optional Act properties, resolves the configured Acts location, scans project documents, and starts the requested Act.
 
 **Features**
 - Runs an Act by name.
 - Uses the current project as the execution context.
+- Supports optional Act properties passed as newline-separated `NAME=VALUE` pairs.
 - Scans project documents before running the Act.
 - Useful for chaining reusable workflows together.
 
 **Input parameters**
 - `actName` *(string, required)*: Name of the Act to perform.
+- `properties` *(string, optional)*: Act properties as `NAME=VALUE` pairs separated by LF line breaks.
 
 ## Project context tools
 
