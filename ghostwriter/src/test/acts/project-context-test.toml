@@ -14,3 +14,6 @@ Show me the project context variable `MY_VAR`.
 '''
 Show me `BYE!`.
 ''']
+
+
+gw.model1 = "CodeMie:gpt-5.4-2026-03-05"

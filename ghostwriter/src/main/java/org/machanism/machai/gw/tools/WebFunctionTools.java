@@ -159,7 +159,7 @@ public class WebFunctionTools implements FunctionTools {
 
 		String url = props.get("url").asText();
 
-		url = replace(url, configurator);
+		url = CommandFunctionTools.replace(url, configurator);
 
 		String headers = props.has(HEADERS_FIELD) ? props.get(HEADERS_FIELD).asText(null) : null;
 		int timeout = props.has(TIMEOUT_FIELD) ? props.get(TIMEOUT_FIELD).asInt(TIMEOUT) : TIMEOUT;
@@ -357,7 +357,7 @@ public class WebFunctionTools implements FunctionTools {
 
 		String url = props.get("url").asText();
 
-		url = replace(url, configurator);
+		url = CommandFunctionTools.replace(url, configurator);
 
 		try {
 			String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
@@ -459,7 +459,7 @@ public class WebFunctionTools implements FunctionTools {
 					String name = headerLine.substring(0, idx).trim();
 					String value = headerLine.substring(idx + 1).trim();
 
-					value = replace(value, configurator);
+					value = CommandFunctionTools.replace(value, configurator);
 					connection.setRequestProperty(name, value);
 				}
 			}

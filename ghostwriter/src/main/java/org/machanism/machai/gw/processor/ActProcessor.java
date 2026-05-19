@@ -695,14 +695,8 @@ public class ActProcessor extends AIFileProcessor {
 	 * @return provider result string, if any
 	 */
 	private String process(ProjectLayout projectLayout, File projectDir, String prompt, int episodeId) {
-		if (StringUtils.isNotBlank(prompt)) {
-			StringBuilder promptBuilder = new StringBuilder();
-			promptBuilder.append(episodes.getEpisodeInformation(episodeId));
-			promptBuilder.append(prompt);
-			prompt = promptBuilder.toString();
-		}
-
-		return super.process(projectLayout, projectDir, prompt);
+		String episodeInformation = episodes.getEpisodeInformation(episodeId);
+		return super.process(projectLayout, projectDir, getInstructions(), episodeInformation, prompt);
 	}
 
 	/**

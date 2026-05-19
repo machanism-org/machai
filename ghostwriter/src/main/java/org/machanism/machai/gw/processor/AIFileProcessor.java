@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.PathMatcher;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -97,12 +98,16 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return process(projectLayout, file, getInstructions(), prompt);
 	}
 
-	protected String process(ProjectLayout projectLayout, File file, String instructions, String prompt) {
+	protected String process(ProjectLayout projectLayout, File file, String instructions, String... prompts) {
 		logger.info("Processing path: `{}`", file);
 		String perform = null;
-		if (StringUtils.isNoneBlank(prompt)) {
+		if (StringUtils.isNoneBlank(prompts)) {
 			try {
 				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
+				if(provider == null) {
+					throw new IllegalArgumentException("`gw.model` is required.");
+				}
+				
 				functionToolsLoader.applyTools(provider, getConfigurator());
 				toolFunctions.forEach(ft -> ft.applyTools(provider));
 
@@ -118,8 +123,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				String projectInfo = getProjectStructureDescription(projectLayout, file);
 				provider.prompt(projectInfo);
 
-				String promptLines = parseLines(prompt);
-				provider.prompt(promptLines);
+				for (String prompt : prompts) {
+					String promptLines = parseLines(prompt);
+					provider.prompt(promptLines);
+				}
 
 				perform = perform(file, provider);
 
@@ -423,7 +430,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			if (!isPathPattern(scanDir)) {
 				scanDir = parseScanDir(projectDir, scanDir);
 			}
-			super.setPathMatcher(FileSystems.getDefault().getPathMatcher(scanDir));
+			PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher(scanDir);
+			super.setPathMatcher(pathMatcher);
 		} else {
 			setScanDir(projectDir);
 		}

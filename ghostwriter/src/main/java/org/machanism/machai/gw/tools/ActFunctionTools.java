@@ -17,6 +17,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.gw.processor.ActProcessor;
@@ -73,7 +74,8 @@ public class ActFunctionTools implements FunctionTools {
 				"perform_act",
 				"Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.",
 				this::performAct,
-				"actName:string:required:The name of the Act to perform.");
+				"actName:string:required:The name of the Act to perform.",
+				"properties:string:optional:Act proprties, specified as NAME=VALUE pairs separated by newline (\\n).");
 	}
 
 	/**
@@ -203,7 +205,23 @@ public class ActFunctionTools implements FunctionTools {
 					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
 		}
 
-		ActProcessor actProcessor = new ActProcessor(workingDir, configurator, null);
+		PropertiesConfigurator configurator = new PropertiesConfigurator();
+
+		String model = null;
+		Map<String, String> properties;
+		if (props.has("properties")) {
+			String envStr = props.get("properties").asText();
+			properties = CommandFunctionTools.parseEnv(envStr, configurator);
+			properties.entrySet().stream().forEach(e -> configurator.set(e.getKey(), e.getValue()));
+			model = properties.get(GWConstants.MODEL_PROP_NAME);
+		}
+
+		if (configurator.get(GWConstants.SCAN_DIR_PROP_NAME, null) == null) {
+			configurator.set(GWConstants.SCAN_DIR_PROP_NAME,
+					this.configurator.get(GWConstants.SCAN_DIR_PROP_NAME, workingDir.getAbsolutePath()));
+		}
+
+		ActProcessor actProcessor = new ActProcessor(workingDir, configurator, model);
 		String actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 		actProcessor.setActsLocation(actsLocation);
 
@@ -211,9 +229,11 @@ public class ActFunctionTools implements FunctionTools {
 		actProcessor.setAct(actName);
 
 		String scanDir = configurator.get(GWConstants.SCAN_DIR_PROP_NAME, workingDir.getAbsolutePath());
+
+		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
 		actProcessor.scanDocuments(workingDir, scanDir);
 
-		return null;
+		return "success";
 	}
 
 	@Override

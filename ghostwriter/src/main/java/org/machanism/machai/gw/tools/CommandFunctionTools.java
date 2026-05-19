@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,6 +22,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.Strings;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -326,8 +329,7 @@ public class CommandFunctionTools implements FunctionTools {
 
 			if (props.has("env")) {
 				String envStr = props.get("env").asText();
-				envStr = replace(envStr, configurator);
-				Map<String, String> envMap = parseEnv(envStr);
+				Map<String, String> envMap = parseEnv(envStr, configurator);
 				pb.environment().putAll(envMap);
 			}
 
@@ -593,9 +595,12 @@ public class CommandFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param envString environment string
+	 * @param conf 
 	 * @return parsed environment variables
 	 */
-	public Map<String, String> parseEnv(String envString) {
+	public static Map<String, String> parseEnv(String envString, Configurator conf) {
+		envString = replace(envString, conf);
+		
 		Map<String, String> envMap = new HashMap<>();
 		if (envString == null || envString.isEmpty()) {
 			return envMap;
@@ -611,7 +616,7 @@ public class CommandFunctionTools implements FunctionTools {
 			if (idx > 0 && idx < line.length() - 1) {
 				String key = line.substring(0, idx).trim();
 				String value = line.substring(idx + 1).trim();
-				if (key.matches("[A-Za-z_]\\w*")) {
+				if (key.matches("[A-Za-z_]\\w*(\\.\\w+)*")) {
 					envMap.put(key, value);
 				}
 			}
@@ -718,4 +723,44 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Resolves ${...} placeholders using the provided configurator.
+	 *
+	 * <p>
+	 * Unresolvable placeholders are left as-is.
+	 * </p>
+	 *
+	 * @param value raw value that may contain placeholders
+	 * @param conf  configurator used for lookup; if {@code null}, the value is
+	 *              returned unchanged
+	 * @return resolved value
+	 */
+	public static String replace(String value, Configurator conf) {
+		if (value == null || conf == null) {
+			return value;
+		}
+
+		String current = value;
+		for (int i = 0; i < 10; i++) {
+			Properties properties = new Properties();
+
+			Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
+			Matcher matcher = pattern.matcher(current);
+			while (matcher.find()) {
+				String propName = matcher.group(1);
+				String propValue = conf.get(propName, null);
+				if (propValue != null) {
+					properties.put(propName, propValue);
+				}
+			}
+
+			String replaced = StringSubstitutor.replace(current, properties);
+			if (replaced.equals(current) || !Strings.CS.contains(replaced, "${")) {
+				return replaced;
+			}
+			current = replaced;
+		}
+
+		return current;
+	}
 }

@@ -44,10 +44,9 @@ class CommandFunctionToolsAdditionalTest {
 
 	@Test
 	void parseEnvShouldIgnoreInvalidAndKeepValidEntries() {
-		CommandFunctionTools tools = new CommandFunctionTools();
 		String env = "A=1\n#comment\nINVALID\n1BAD=x\nEMPTY=\nGOOD_NAME = spaced value \n";
 
-		Map<String, String> result = tools.parseEnv(env);
+		Map<String, String> result = CommandFunctionTools.parseEnv(env, null);
 
 		assertEquals(2, result.size());
 		assertEquals("1", result.get("A"));
@@ -56,10 +55,8 @@ class CommandFunctionToolsAdditionalTest {
 
 	@Test
 	void parseEnvShouldReturnEmptyMapForNullAndEmptyInput() {
-		CommandFunctionTools tools = new CommandFunctionTools();
-
-		assertTrue(tools.parseEnv(null).isEmpty());
-		assertTrue(tools.parseEnv("").isEmpty());
+		assertTrue(CommandFunctionTools.parseEnv(null, null).isEmpty());
+		assertTrue(CommandFunctionTools.parseEnv("", null).isEmpty());
 	}
 
 	@Test
