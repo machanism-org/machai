@@ -130,7 +130,7 @@ public class ActMojo extends AbstractGWMojo {
 			@Override
 			protected String input() {
 				try {
-					return readText(">>>");
+					return readText(Ghostwriter.USER_INPUT_PREFIX);
 				} catch (PrompterException e) {
 					throw new IllegalArgumentException(e);
 				}
