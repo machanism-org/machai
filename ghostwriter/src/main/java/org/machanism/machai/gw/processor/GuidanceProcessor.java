@@ -163,7 +163,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 					getDefaultPrompt());
 			String perform = process(projectLayout, projectDir, defaultGuidanceText);
 			if (perform != null) {
-				logger.info(">>> {}", perform);
+				logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
 			}
 		}
 	}
@@ -194,7 +194,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		}
 
 		if (perform != null) {
-			logger.info(">>> {}", perform);
+			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
 		}
 	}
 

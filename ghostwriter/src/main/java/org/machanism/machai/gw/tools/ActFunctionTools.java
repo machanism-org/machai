@@ -20,6 +20,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.slf4j.Logger;
@@ -193,7 +194,7 @@ public class ActFunctionTools implements FunctionTools {
 		if (props != null && props.has("message")) {
 			String message = props.get("message").asText();
 			if (StringUtils.isNotBlank(message)) {
-				logger.info(">>> {}", message);
+				logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, message);
 			}
 		}
 		throw new RepeatEpisodeException();

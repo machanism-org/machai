@@ -3,7 +3,6 @@ package org.machanism.machai.gw.processor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -13,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.PathMatcher;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,12 +41,14 @@ import org.slf4j.LoggerFactory;
  */
 public class AIFileProcessor extends AbstractFileProcessor {
 
-	private static final String FILE_INCLUDED_MARKER = ">>>";
-
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
+	public static final String LOG_OUTPUT_PREFIX = ">>> {}";
+	
+	public static final String FILE_INCLUDED_MARKER = ">>>";
+	
 	public static final String EXIT_SPECIAL_PROMPT_COMMAND = "exit";
 
 	public static final String CONTINUE_SPECIAL_PROMPT_COMMAND = "continue";
@@ -162,7 +162,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		String perform = provider.perform();
 		if (interactive) {
 			if (StringUtils.isNoneBlank(perform)) {
-				logger.info(">>> {}", perform);
+				logger.info(LOG_OUTPUT_PREFIX, perform);
 			}
 			String input = input();
 			if (input != null) {
@@ -499,7 +499,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		try {
 			String perform = process(projectLayout, projectLayout.getProjectDir(), getDefaultPrompt());
 			if (perform != null) {
-				logger.info(">>> {}", perform);
+				logger.info(LOG_OUTPUT_PREFIX, perform);
 			}
 
 		} catch (Exception e) {

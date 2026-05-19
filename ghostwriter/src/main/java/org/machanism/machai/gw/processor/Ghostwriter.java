@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class Ghostwriter {
 
+	public static final String USER_INPUT_PREFIX = ">>>";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
 	private static final String HELP_OPTION = "help";
 	private static final String THREADS_OPTION = "threads";
@@ -295,7 +297,7 @@ public final class Ghostwriter {
 	/**
 	 * Logs basic startup path information.
 	 *
-	 * @param gwHomeDir Ghostwriter home directory
+	 * @param gwHomeDir  Ghostwriter home directory
 	 * @param projectDir project root directory
 	 */
 	private static void logStartup(File gwHomeDir, File projectDir) {
@@ -383,7 +385,7 @@ public final class Ghostwriter {
 	 */
 	private static String readActInput(Scanner scanner) {
 		Console console = System.console();
-		formatConsole(console, ">>>: ");
+		formatConsole(console, USER_INPUT_PREFIX);
 		StringBuilder sb = new StringBuilder();
 		while (scanner.hasNextLine()) {
 			String nextLine = scanner.nextLine();
@@ -405,7 +407,7 @@ public final class Ghostwriter {
 	 */
 	private static void formatConsole(Console console, String message) {
 		if (console != null) {
-			console.format(message);
+			console.format(message + ": ");
 		}
 	}
 

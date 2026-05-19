@@ -199,7 +199,7 @@ public class Episodes {
 		String perform = func.apply(i, episode);
 
 		if (perform != null) {
-			logger.info(">>> {}", perform);
+			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
 		}
 	}
 
