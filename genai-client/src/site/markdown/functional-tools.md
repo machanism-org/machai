@@ -13,23 +13,22 @@ canonical: https://machai.machanism.org/genai-client/functional-tools.html
 
 # Functional Tools
 
-Functional tools let the host application expose controlled local capabilities to a `Genai` provider as callable tools. They create the bridge between the model and application-side actions such as file access, HTTP calls, command execution, or project-specific automation.
+Functional tools let the host application expose controlled local capabilities to a `Genai` provider as callable tools. They bridge the model with application-side actions such as file access, HTTP calls, command execution, and project-specific automation.
 
-The feature combines the tool SPI in `org.machanism.machai.ai.tools` with OpenAI-specific native tool support in `OpenAIProvider`. Together, they allow the application to discover tool installers, resolve configuration values, register host-managed function tools, and optionally enable OpenAI-native web search and MCP servers from TOML configuration.
+The feature combines the SPI in `org.machanism.machai.ai.tools` with OpenAI-specific native tool support in `OpenAIProvider`. Together, these parts allow the application to discover tool installers, register host-managed function tools, and optionally enable OpenAI-native web search and MCP servers from TOML configuration.
 
-## What the feature provides
+## What this feature provides
 
 Functional tools provide a structured way to:
 
 - contribute reusable tool sets,
 - discover tool installers through Java `ServiceLoader`,
-- execute tool logic through a common callback contract,
-- resolve configuration-driven values during tool setup,
+- execute tool logic through a shared callback contract,
 - register host-managed tools through `Genai.addTool(...)`,
 - enable OpenAI web search,
 - and connect the OpenAI provider to one or more MCP servers.
 
-This separation keeps provider communication concerns inside the provider implementation while tool behavior stays inside dedicated Java classes.
+This separation keeps provider communication inside the provider implementation while tool behavior stays in dedicated Java classes.
 
 ## Core package: `org.machanism.machai.ai.tools`
 
@@ -37,29 +36,20 @@ The package contains the main extension points used to publish functional tools.
 
 ### `FunctionTools`
 
-`FunctionTools` is the main service-provider interface for installing tools into a provider.
+`FunctionTools` is the service-provider interface for installing host-managed function tools into a provider.
 
 #### Purpose
 
-Each implementation represents a tool set installer. Inside `applyTools(Genai provider)`, it registers one or more tools that the provider can expose to the model.
+Each implementation represents a tool installer. Inside `applyTools(Genai provider)`, it registers one or more tools that the provider can expose to the model.
 
 #### Main members
 
 - `applyTools(Genai provider)` registers the tools for one implementation.
 - `setConfigurator(Configurator configurator)` optionally receives shared configuration before registration.
-- `replace(String value, Configurator conf)` resolves `${...}` placeholders using configuration values.
 
-#### Placeholder resolution behavior
+#### Runtime behavior
 
-The default `replace(...)` implementation:
-
-- returns the original value if the input or configurator is `null`,
-- scans the string for `${...}` placeholders,
-- replaces only placeholders that have a matching configuration key,
-- keeps unresolved placeholders unchanged,
-- and repeats resolution for up to 10 passes to support chained values.
-
-This is useful when a tool installer needs configurable URLs, headers, tokens, labels, or other deployment-specific values.
+Implementations are usually discovered with Java `ServiceLoader`. A tool installer can use the optional `Configurator` to read runtime configuration values such as URLs, API tokens, labels, or feature switches.
 
 #### When to use it
 
@@ -69,7 +59,7 @@ Implement `FunctionTools` when you want to contribute a related set of host-mana
 - HTTP utilities,
 - command execution helpers,
 - repository automation,
-- or domain-specific integration tools.
+- or domain-specific integrations.
 
 ### `FunctionToolsLoader`
 
@@ -77,17 +67,18 @@ Implement `FunctionTools` when you want to contribute a related set of host-mana
 
 #### Purpose
 
-It uses Java `ServiceLoader` to scan the classpath, collect all tool installers, optionally propagate configuration into them, and then apply them to a `Genai` provider.
+It uses Java `ServiceLoader` to scan the classpath, collect available tool installers, and apply them to a `Genai` provider.
 
 #### Main members
 
-- `getInstance()` returns the singleton loader.
-- `setConfiguration(Configurator configurator)` passes shared configuration to all discovered installers.
-- `applyTools(Genai provider)` invokes `applyTools(...)` on each discovered installer.
+- `FunctionToolsLoader()` discovers implementations available through `ServiceLoader`.
+- `applyTools(Genai provider, Configurator configurator)` creates a fresh instance of each discovered implementation, passes the shared configuration into it, and applies its tools to the provider.
 
 #### Runtime behavior
 
-Discovery happens when the singleton loader is initialized. Every implementation available through `META-INF/services` can then be configured and applied in discovery order.
+When the loader is created, it scans the classpath for `FunctionTools` implementations. During `applyTools(...)`, each discovered implementation class is instantiated again, receives the `Configurator`, and then registers its tools.
+
+This design avoids reusing already discovered instances directly during registration.
 
 #### When to use it
 
@@ -106,11 +97,11 @@ Object apply(JsonNode params, File workingDir) throws IOException;
 #### Parameters
 
 - `params` contains the tool arguments as structured JSON.
-- `workingDir` provides the current working directory context for the tool invocation.
+- `workingDir` provides the current working directory context for the tool invocation and may be `null`.
 
 #### Return value and errors
 
-- The returned object becomes the tool result that is sent back through the provider.
+- The returned object becomes the tool result sent back through the provider.
 - `IOException` can be thrown when execution fails.
 
 #### When to use it
@@ -124,8 +115,8 @@ A typical flow looks like this:
 1. Create one or more classes that implement `FunctionTools`.
 2. Register those classes with Java `ServiceLoader`.
 3. Create and initialize the AI provider.
-4. Pass configuration into `FunctionToolsLoader`.
-5. Apply all discovered tools to the provider.
+4. Call `FunctionToolsLoader.applyTools(provider, configurator)`.
+5. Each installer registers one or more tools by calling `Genai.addTool(...)`.
 6. When the model calls a registered tool, the provider executes the matching `ToolFunction`.
 7. The tool output is returned to the model as part of the response loop.
 
@@ -138,7 +129,7 @@ This design keeps registration modular and makes tool sets easy to package, test
 - host-managed function tools added through `addTool(...)`,
 - and OpenAI-native tools added by `addWebSearch()` and `addMcpServer()`.
 
-The `init(Configurator config)` method loads normal provider settings, then calls both native-tool methods so they can register any configured OpenAI-native tools immediately.
+During `init(Configurator config)`, the provider loads core settings, then calls both native-tool methods so they can register any configured OpenAI-native tools immediately.
 
 ## OpenAI web search
 
@@ -239,10 +230,10 @@ MCP_1.authorization = "Bearer admin-token"
 - `MCP.label`: optional human-readable label for the first MCP server.
 - `MCP.description`: optional description for the first MCP server.
 - `MCP.authorization`: optional authorization value for the first MCP server.
-- `MCP_1.url`, `MCP_2.url`, ...: required for additional MCP server entries.
-- `MCP_1.label`, `MCP_2.label`, ...: optional labels for additional MCP server entries.
-- `MCP_1.description`, `MCP_2.description`, ...: optional descriptions for additional MCP server entries.
-- `MCP_1.authorization`, `MCP_2.authorization`, ...: optional authorization values for additional MCP server entries.
+- `MCP_1.url`, `MCP_2.url`, and so on: required for additional MCP server entries.
+- `MCP_1.label`, `MCP_2.label`, and so on: optional labels for additional MCP server entries.
+- `MCP_1.description`, `MCP_2.description`, and so on: optional descriptions for additional MCP server entries.
+- `MCP_1.authorization`, `MCP_2.authorization`, and so on: optional authorization values for additional MCP server entries.
 
 ### Use case
 
@@ -310,7 +301,7 @@ public class ExampleFunctionTools implements FunctionTools {
             "Processes an input value and returns a simple response.",
             (JsonNode params, File workingDir) -> {
                 String input = params != null && params.has("input") ? params.get("input").asText() : "";
-                String prefix = replace("${example.prefix}", configurator);
+                String prefix = configurator != null ? configurator.get("example.prefix", "") : "";
                 return prefix + input;
             },
             "input:string:required:Text value to process"
@@ -346,9 +337,8 @@ If the file contains multiple class names, all of them can be discovered and app
 Configurator conf = ...;
 Genai provider = ...;
 
-FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
-loader.setConfiguration(conf);
-loader.applyTools(provider);
+FunctionToolsLoader loader = new FunctionToolsLoader();
+loader.applyTools(provider, conf);
 ```
 
 ### Step 4: Understand runtime invocation
@@ -372,7 +362,6 @@ When designing custom tools, follow these recommendations:
 - Validate JSON inputs before using them.
 - Use the provided `workingDir` carefully.
 - Prefer configuration values over hard-coded environment-specific data.
-- Use `replace(...)` when configuration values may contain `${...}` placeholders.
 - Return simple, structured results that are easy for the model to interpret.
 - Handle failures predictably.
 - Apply security restrictions before exposing file, network, or command capabilities.
@@ -388,4 +377,4 @@ When designing custom tools, follow these recommendations:
 
 ## Summary
 
-Functional tools give `GenAI Client` a consistent way to expose controlled application capabilities to AI providers. The `org.machanism.machai.ai.tools` package handles discovery, configuration, and host-managed tool registration, while `OpenAIProvider` adds OpenAI-native web search and MCP connectivity through TOML configuration. Together, these mechanisms make the platform extensible and practical for real-world AI-assisted workflows.
+Functional tools give `GenAI Client` a consistent way to expose controlled application capabilities to AI providers. The `org.machanism.machai.ai.tools` package handles discovery and host-managed tool registration, while `OpenAIProvider` adds OpenAI-native web search and MCP connectivity through TOML configuration. Together, these mechanisms make the platform extensible and practical for real-world AI-assisted workflows.
