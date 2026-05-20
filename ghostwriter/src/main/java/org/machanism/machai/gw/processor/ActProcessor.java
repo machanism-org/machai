@@ -660,7 +660,7 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		boolean match = match(projectDir, projectDir);
-		int requestedEpisodeId = 0;
+		int requestedEpisodeId = 1;
 		if (match && getDefaultPrompt() != null) {
 			if (!episodes.isRegularOrder()) {
 				try {
@@ -670,9 +670,7 @@ public class ActProcessor extends AIFileProcessor {
 					if (disableNormalOrder) {
 						return;
 					} else {
-						if (requestedEpisodeId < episodes.size() - 1) {
-							requestedEpisodeId++;
-						}
+						requestedEpisodeId++;
 					}
 				} catch (MoveToEpisodeException e) {
 					requestedEpisodeId = episodes.getEpisodeId(requestedEpisodeId, e);

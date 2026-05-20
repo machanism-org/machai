@@ -106,12 +106,12 @@ public class Episodes {
 	 * getEpisodeName(0) returns "Introduction"
 	 * </pre>
 	 *
-	 * @param i the zero-based index of the episode
+	 * @param episodeId the zero-based index of the episode
 	 * @return the trimmed episode name, or {@code null} if no heading is found or
 	 *         the heading is empty
 	 */
-	public String getEpisodeName(int i) {
-		String episode = StringUtils.trim(episodes.get(i));
+	public String getEpisodeName(int episodeId) {
+		String episode = StringUtils.trim(episodes.get(episodeId - 1));
 		String header = null;
 		if (episode != null && episode.startsWith(HEADER_MARKER)) {
 			header = StringUtils.substringBetween(episode, HEADER_MARKER, "\n");
@@ -134,7 +134,7 @@ public class Episodes {
 				startId = moveToEpisodeId;
 			}
 			try {
-				for (i = startId; i < episodes.size(); i++) {
+				for (i = startId - 1; i < episodes.size(); i++) {
 					int iteration = 1;
 					boolean repeate;
 					do {
@@ -165,19 +165,19 @@ public class Episodes {
 	 */
 	public int requestedOrder(BiFunction<Integer, String, String> func) {
 		String episodeIdStr = null;
-		int i = 0;
+		int episodeId = 0;
 		do {
-			for (i = 0; i < selectedEpisodes.size(); i++) {
+			for (int i = 0; i < selectedEpisodes.size(); i++) {
 				int iteration = 1;
 				boolean repeate;
 				do {
 					repeate = false;
 					try {
-						int id = selectedEpisodes.get(i) - 1;
-						String episode = episodes.get(id);
+						episodeId = selectedEpisodes.get(i);
+						String episode = episodes.get(episodeId - 1);
 
-						logEpisodeHeader(id, iteration++);
-						execute(func, i, episode);
+						logEpisodeHeader(episodeId, iteration++);
+						execute(func, episodeId, episode);
 					} catch (RepeatEpisodeException e) {
 						repeate = true;
 					}
@@ -185,7 +185,7 @@ public class Episodes {
 			}
 		} while (episodeIdStr != null);
 
-		return i;
+		return episodeId;
 	}
 
 	/**
@@ -213,7 +213,7 @@ public class Episodes {
 	public Integer getEpisodeId(Integer requestedEpisodeId, MoveToEpisodeException e) {
 		Integer episodeIdStr = e.getEpisodeId();
 		if (episodeIdStr != null) {
-			requestedEpisodeId = episodeIdStr - 1;
+			requestedEpisodeId = episodeIdStr;
 		} else if (e.getName() != null) {
 			requestedEpisodeId = getEpisodeIdByName(e.getName());
 		}
@@ -236,7 +236,7 @@ public class Episodes {
 				episodeName = StringUtils.EMPTY;
 			}
 
-			String title = " Episode #" + (episodeId + 1) + episodeName + iterationLabel;
+			String title = " Episode #" + episodeId + episodeName + iterationLabel;
 
 			logger.info("{}", StringUtils.center(title, 80, "-"));
 		}
@@ -292,7 +292,7 @@ public class Episodes {
 			promptBuilder.append("Episodes:\n\n");
 			promptBuilder.append("| ID | EPISODE NAME |\n");
 			promptBuilder.append("|----|--------------|\n");
-			for (int i = 0; i < episodes.size(); i++) {
+			for (int i = 1; i <= episodes.size(); i++) {
 				promptBuilder.append("| " + (i + 1) + " | "
 						+ StringUtils.defaultIfBlank(getEpisodeName(i), "<not defined>") + " |\n");
 			}
