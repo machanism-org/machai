@@ -66,16 +66,6 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 	public static final String AUTH_URL_PROP_NAME = "AUTH_URL";
 
 	/**
-	 * Configuration/environment key used by OpenAI-compatible clients to provide
-	 * the API key.
-	 *
-	 * <p>
-	 * For CodeMie this value is set to the retrieved OAuth 2.0 access token.
-	 * </p>
-	 */
-	public static final String OPENAI_API_KEY = "OPENAI_API_KEY";
-
-	/**
 	 * Default OpenID Connect token endpoint for CodeMie.
 	 *
 	 * <p>
@@ -122,12 +112,6 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 	public void init(Configurator conf) {
 		String chatModel = conf.get("chatModel");
 
-		if (System.getenv(OPENAI_API_KEY) != null) {
-			throw new IllegalArgumentException(
-					"Configuration conflict detected: Please unset the 'OPENAI_API_KEY' environment variable to avoid conflicts with the current configuration.");
-		}
-
-		conf.set("OPENAI_BASE_URL", BASE_URL);
 
 		String username = conf.get(Genai.USERNAME_PROP_NAME);
 		String password = conf.get(Genai.PASSWORD_PROP_NAME);
@@ -135,9 +119,10 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 
 		System.setProperty(Genai.USERNAME_PROP_NAME, username);
 		System.setProperty(Genai.PASSWORD_PROP_NAME, password);
-		System.setProperty(AUTH_URL_PROP_NAME, resolvedAuthUrl);
 
 		if (Strings.CS.startsWithAny(chatModel, "gpt-", "gemini-") || StringUtils.isBlank(chatModel)) {
+			conf.set(OpenAIProvider.OPENAI_BASE_URL_NAME, BASE_URL);
+			System.setProperty(AUTH_URL_PROP_NAME, resolvedAuthUrl);
 			provider = new OpenAIProvider() {
 				/**
 				 * Builds (and caches) an {@link OpenAIClient} after ensuring the current
@@ -165,6 +150,8 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 			};
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(chatModel, "claude-")) {
+			System.setProperty(ClaudeProvider.ANTHROPIC_BASE_URL, resolvedAuthUrl);
+			conf.set(ClaudeProvider.ANTHROPIC_BASE_URL, BASE_URL);
 			provider = new ClaudeProvider() {
 				/**
 				 * Builds (and caches) an {@link OpenAIClient} after ensuring the current
@@ -182,7 +169,7 @@ public class CodeMieProvider extends GenaiAdapter implements Genai {
 				protected AnthropicClient getClient() {
 					try {
 						String token = getToken(resolvedAuthUrl, username, password);
-						conf.set(OPENAI_API_KEY, token);
+						conf.set(ClaudeProvider.ANTHROPIC_API_KEY, token);
 					} catch (IOException e) {
 						throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
 					}

@@ -112,6 +112,18 @@ public class OpenAIProvider implements Genai {
 
 	private static final String MCP_PROP_NAME_PREFIX = "MCP";
 
+	/**
+	 * Configuration/environment key used by OpenAI-compatible clients to provide
+	 * the API key.
+	 *
+	 * <p>
+	 * For CodeMie this value is set to the retrieved OAuth 2.0 access token.
+	 * </p>
+	 */
+	public static final String OPENAI_API_KEY = "OPENAI_API_KEY";
+
+	public static final String OPENAI_BASE_URL_NAME = "OPENAI_BASE_URL";
+
 	/** Logger instance for this provider. */
 	private static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
 
