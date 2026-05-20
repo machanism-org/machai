@@ -65,18 +65,15 @@ import com.openai.services.blocking.ModelService;
 /**
  * OpenAI-backed {@link Genai} implementation.
  *
- * <p>
- * This provider adapts the MachAI provider abstraction to the OpenAI Java SDK
+ * &lt;p&gt;This provider adapts the MachAI provider abstraction to the OpenAI Java SDK
  * Responses API. It supports prompting, file inputs, tool/function calling,
  * optional web search and MCP tools, and embedding generation.
- * </p>
+ * &lt;/p&gt;
  *
  * <h2>Configuration</h2>
- * <p>
- * Configuration values are read from the {@link Configurator} passed to
+ * &lt;p&gt;Configuration values are read from the {@link Configurator} passed to
  * {@link #init(Configurator)}.
- * </p>
- * <ul>
+ * &lt;/p&gt;&lt;ul&gt;
  * <li>{@code chatModel} (required): model identifier passed to the OpenAI
  * Responses API, for example {@code gpt-4.1} or {@code gpt-4o}.</li>
  * <li>{@code OPENAI_API_KEY} (required): API key used to authenticate with the
@@ -84,8 +81,7 @@ import com.openai.services.blocking.ModelService;
  * <li>{@code OPENAI_BASE_URL} (optional): base URL for OpenAI-compatible
  * endpoints. If unset, the SDK default base URL is used.</li>
  * <li>{@code GENAI_TIMEOUT} (optional): request timeout in seconds. If missing,
- * {@code 0}, or negative, the SDK default timeouts are used. Defaults to
- * {@value #TIMEOUT_SEC} seconds.</li>
+ * {@code 0}, or negative, the SDK default timeouts are used.</li>
  * <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum number of output tokens.
  * Defaults to {@value #MAX_OUTPUT_TOKENS}.</li>
  * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls the model
@@ -106,8 +102,7 @@ import com.openai.services.blocking.ModelService;
  * <li>{@code MCP_1.url}, {@code MCP_1.label}, {@code MCP_1.description},
  * {@code MCP_1.authorization} and similarly numbered groups (optional):
  * registers additional MCP server tools.</li>
- * </ul>
- */
+ * &lt;/ul&gt;*/
 public class OpenAIProvider implements Genai {
 
 	private static final String MCP_PROP_NAME_PREFIX = "MCP";

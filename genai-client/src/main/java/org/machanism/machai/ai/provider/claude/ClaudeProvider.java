@@ -166,10 +166,10 @@ public class ClaudeProvider implements Genai {
 		boolean anyToolCalls = false;
 		String text = null;
 
-		if (!content.isEmpty()) {
-			ContentBlock contentBlock = content.get(content.size() - 1);
+		for (ContentBlock contentBlock : content) {
 			if (contentBlock.isText()) {
 				text = contentBlock.text().map(t -> t.text()).orElse(null);
+				prompt(text);
 			}
 			if (contentBlock.isToolUse()) {
 				ToolUseBlock toolUse = contentBlock.asToolUse();
@@ -193,20 +193,24 @@ public class ClaudeProvider implements Genai {
 	}
 
 	private void handleFunctionCall(ToolUseBlock toolUse) {
-		if (toolUse.isValid()) {
-			Object result = callFunction(toolUse);
+		MessageParam toolUseMessage = MessageParam.builder()
+				.role(MessageParam.Role.USER)
+				.content(toolUse.toString())
+				.build();
+		inputs.add(toolUseMessage);
 
-			ToolResultBlockParam toolResult = ToolResultBlockParam.builder()
-					.toolUseId(toolUse.id())
-					.content(Objects.toString(result))
-					.build();
-			ContentBlockParam toolContentBlock = ContentBlockParam.ofToolResult(toolResult);
-			MessageParam toolResultMessage = MessageParam.builder()
-					.role(MessageParam.Role.USER)
-					.content(toolContentBlock.toString())
-					.build();
-			inputs.add(toolResultMessage);
-		}
+		Object result = callFunction(toolUse);
+
+		ToolResultBlockParam toolResult = ToolResultBlockParam.builder()
+				.toolUseId(toolUse.id())
+				.content(Objects.toString(result))
+				.build();
+		ContentBlockParam toolContentBlock = ContentBlockParam.ofToolResult(toolResult);
+		MessageParam toolResultMessage = MessageParam.builder()
+				.role(MessageParam.Role.USER)
+				.content(toolContentBlock.toString())
+				.build();
+		inputs.add(toolResultMessage);
 	}
 
 	private Object callFunction(ToolUseBlock functionCall) {
