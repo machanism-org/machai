@@ -203,7 +203,8 @@ public class ClaudeProvider implements Genai {
 		if (response.isValid()) {
 			com.anthropic.models.messages.Usage responseUsage = response.usage();
 			long inputTokens = responseUsage.inputTokens();
-			long inputCachedTokens = responseUsage.cacheCreationInputTokens().get();
+			long inputCachedTokens = responseUsage.cacheCreationInputTokens().get()
+					+ responseUsage.cacheReadInputTokens().get();
 			long outputTokens = responseUsage.outputTokens();
 
 			lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
