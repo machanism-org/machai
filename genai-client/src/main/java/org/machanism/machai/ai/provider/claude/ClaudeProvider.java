@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
@@ -34,7 +35,6 @@ import com.anthropic.models.messages.ContentBlockParam;
 import com.anthropic.models.messages.Message;
 import com.anthropic.models.messages.MessageCreateParams;
 import com.anthropic.models.messages.MessageParam;
-import com.anthropic.models.messages.MessageParam.Content;
 import com.anthropic.models.messages.MessageParam.Role;
 import com.anthropic.models.messages.Tool;
 import com.anthropic.models.messages.Tool.InputSchema.Properties;
@@ -45,7 +45,7 @@ import com.anthropic.models.messages.ToolUseBlockParam;
 import com.anthropic.models.messages.ToolUseBlockParam.Input;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openai.models.responses.ResponseCreateParams;
+import com.openai.models.responses.ResponseUsage;
 
 /**
  * Anthropic-backed implementation of MachAI's {@link Genai} abstraction.
@@ -153,6 +153,7 @@ public class ClaudeProvider implements Genai {
 
 		logger.debug("Sending request to Claude service.");
 		Message response = getClient().messages().create(params);
+		captureUsage(response);
 
 		String result = parseResponse(response);
 
@@ -184,12 +185,32 @@ public class ClaudeProvider implements Genai {
 		} else {
 			MessageCreateParams params = createResponseBuilder(this.inputs);
 			response = getClient().messages().create(params);
+			captureUsage(response);
 
 			result = parseResponse(response);
 			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
 		}
 
 		return result;
+	}
+
+	/**
+	 * Extracts token usage from the response and stores it as {@link #usage()}.
+	 *
+	 * @param response optional usage information from the OpenAI response
+	 */
+	private void captureUsage(Message response) {
+		if (response.isValid()) {
+			com.anthropic.models.messages.Usage responseUsage = response.usage();
+			long inputTokens = responseUsage.inputTokens();
+			long inputCachedTokens = responseUsage.cacheCreationInputTokens().get();
+			long outputTokens = responseUsage.outputTokens();
+
+			lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
+			UsageStatistics.addUsage(chatModel, lastUsage);
+		} else {
+			lastUsage = new Usage(0, 0, 0);
+		}
 	}
 
 	private void handleFunctionCall(ToolUseBlock toolUse) {

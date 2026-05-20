@@ -19,8 +19,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
@@ -307,7 +307,7 @@ public class OpenAIProvider implements Genai {
 			long outputTokens = responseUsage.outputTokens();
 
 			lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
-			GenaiProviderManager.addUsage(lastUsage);
+			UsageStatistics.addUsage(chatModel, lastUsage);
 		} else {
 			lastUsage = new Usage(0, 0, 0);
 		}

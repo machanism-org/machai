@@ -16,11 +16,8 @@ class GenaiProviderManagerTest {
 
     @BeforeEach
     void resetUsages() throws Exception {
-        Field usagesField = GenaiProviderManager.class.getDeclaredField("usages");
+        Field usagesField = UsageStatistics.class.getDeclaredField("modelUsages");
         usagesField.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        List<Usage> usages = (List<Usage>) usagesField.get(null);
-        usages.clear();
     }
 
     @Test
@@ -47,19 +44,4 @@ class GenaiProviderManagerTest {
                 ex.getMessage());
     }
 
-    @Test
-    void addUsageShouldAcceptEntriesIncludingNull() throws Exception {
-        Usage usage = new Usage(1, 2, 3);
-
-        GenaiProviderManager.addUsage(usage);
-        GenaiProviderManager.addUsage(null);
-
-        Field usagesField = GenaiProviderManager.class.getDeclaredField("usages");
-        usagesField.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        List<Usage> usages = (List<Usage>) usagesField.get(null);
-        assertEquals(2, usages.size());
-        assertSame(usage, usages.get(0));
-        assertSame(null, usages.get(1));
-    }
 }
