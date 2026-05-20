@@ -9,9 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,18 +30,22 @@ import com.anthropic.core.JsonField;
 import com.anthropic.core.JsonValue;
 import com.anthropic.core.Timeout;
 import com.anthropic.models.messages.ContentBlock;
+import com.anthropic.models.messages.ContentBlockParam;
 import com.anthropic.models.messages.Message;
 import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.MessageParam;
 import com.anthropic.models.messages.MessageParam.Content;
+import com.anthropic.models.messages.MessageParam.Role;
 import com.anthropic.models.messages.Tool;
 import com.anthropic.models.messages.Tool.InputSchema.Properties;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.anthropic.models.messages.ToolResultBlockParam;
 import com.anthropic.models.messages.ToolUnion;
 import com.anthropic.models.messages.ToolUseBlock;
 import com.anthropic.models.messages.ToolUseBlockParam;
 import com.anthropic.models.messages.ToolUseBlockParam.Input;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openai.models.responses.ResponseCreateParams;
 
 /**
  * Anthropic-backed implementation of MachAI's {@link Genai} abstraction.
@@ -86,7 +91,7 @@ public class ClaudeProvider implements Genai {
 	private Long timeoutSec;
 
 	/** Accumulated prompt messages for the current conversation. */
-	private final List<com.anthropic.models.messages.MessageParam.Content> inputs = new ArrayList<>();
+	private final List<MessageParam> inputs = new ArrayList<>();
 
 	/** Optional instructions applied to the request. */
 	private String instructions;
@@ -125,7 +130,7 @@ public class ClaudeProvider implements Genai {
 	@Override
 	public void prompt(String text) {
 		if (StringUtils.isNotBlank(text)) {
-			inputs.add(Content.ofString(text));
+			inputs.add(MessageParam.builder().content(text).role(Role.USER).build());
 		}
 	}
 
@@ -158,31 +163,49 @@ public class ClaudeProvider implements Genai {
 	private String parseResponse(Message response) {
 		List<ContentBlock> content = response.content();
 		String result = null;
+		boolean anyToolCalls = false;
+		String text = null;
+
 		if (!content.isEmpty()) {
 			ContentBlock contentBlock = content.get(content.size() - 1);
 			if (contentBlock.isText()) {
-				result = contentBlock.text().map(t -> t.text()).orElse(null);
+				text = contentBlock.text().map(t -> t.text()).orElse(null);
 			}
 			if (contentBlock.isToolUse()) {
 				ToolUseBlock toolUse = contentBlock.asToolUse();
 				handleFunctionCall(toolUse);
+				anyToolCalls = true;
 			}
 		}
+
+		if (!anyToolCalls) {
+			result = text;
+
+		} else {
+			MessageCreateParams params = createResponseBuilder(this.inputs);
+			response = getClient().messages().create(params);
+
+			result = parseResponse(response);
+			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
+		}
+
 		return result;
 	}
 
 	private void handleFunctionCall(ToolUseBlock toolUse) {
-		// Execute your actual Java function
 		if (toolUse.isValid()) {
 			Object result = callFunction(toolUse);
 
-//            .addMessage(Message.builder()
-//                .role(Role.USER)
-//                .content(List.of(ToolResultBlock.builder()
-//                    .toolUseId(toolId)
-//                    .content(result)
-//                    .build()))
-//                .build())
+			ToolResultBlockParam toolResult = ToolResultBlockParam.builder()
+					.toolUseId(toolUse.id())
+					.content(Objects.toString(result))
+					.build();
+			ContentBlockParam toolContentBlock = ContentBlockParam.ofToolResult(toolResult);
+			MessageParam toolResultMessage = MessageParam.builder()
+					.role(MessageParam.Role.USER)
+					.content(toolContentBlock.toString())
+					.build();
+			inputs.add(toolResultMessage);
 		}
 	}
 
@@ -240,14 +263,12 @@ public class ClaudeProvider implements Genai {
 		return normalize(toolName).equals(normalize(name));
 	}
 
-	private MessageCreateParams createResponseBuilder(List<Content> inputs) {
+	private MessageCreateParams createResponseBuilder(List<MessageParam> inputs) {
 		MessageCreateParams.Builder paramsBuilder = MessageCreateParams.builder()
 				.model(chatModel)
 				.maxTokens(maxOutputTokens);
 
-		for (Content input : inputs) {
-			paramsBuilder.addUserMessage(input);
-		}
+		paramsBuilder.messages(inputs);
 
 		if (StringUtils.isNotBlank(instructions)) {
 			paramsBuilder.system(instructions);
