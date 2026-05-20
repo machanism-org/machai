@@ -1,7 +1,9 @@
 package org.machanism.machai.ai.provider.claude;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,10 +13,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
@@ -45,7 +47,6 @@ import com.anthropic.models.messages.ToolUseBlockParam;
 import com.anthropic.models.messages.ToolUseBlockParam.Input;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openai.models.responses.ResponseUsage;
 
 /**
  * Anthropic-backed implementation of MachAI's {@link Genai} abstraction.
@@ -82,6 +83,7 @@ public class ClaudeProvider implements Genai {
 	public static final long MAX_OUTPUT_TOKENS = 18000;
 
 	private static final Logger logger = LoggerFactory.getLogger(ClaudeProvider.class);
+	private static final String MCP_PROP_NAME_PREFIX = "MCP";
 
 	private Configurator config;
 	private String chatModel;
@@ -89,6 +91,9 @@ public class ClaudeProvider implements Genai {
 	private Long maxToolCalls;
 	private String embeddingModel;
 	private Long timeoutSec;
+
+	/** Optional log file for input data. */
+	private File inputsLog;
 
 	/** Accumulated prompt messages for the current conversation. */
 	private final List<MessageParam> inputs = new ArrayList<>();
@@ -120,6 +125,43 @@ public class ClaudeProvider implements Genai {
 		maxToolCalls = config.getLong("MAX_TOOL_CALLS", 0L);
 		embeddingModel = config.get("embedding.model", null);
 		timeoutSec = config.getLong("GENAI_TIMEOUT", 0L);
+
+		addWebSearch();
+		addMcpServer();
+	}
+
+	private void addMcpServer() {
+		int i = 0;
+		String url = null;
+		do {
+			String id = "";
+
+			if (i > 0) {
+				id = "_" + i;
+			}
+
+			String propName = MCP_PROP_NAME_PREFIX + id;
+			url = config.get(propName + ".url", null);
+			String label = config.get(propName + ".label", null);
+			String description = config.get(propName + ".description", null);
+			String authorization = config.get(propName + ".authorization", null);
+
+			if (url != null) {
+				throw new NotImplementedException();
+			}
+
+		} while (i++ == 0 || url != null);
+	}
+
+	private void addWebSearch() {
+		String type = config.get("WebSearchTool.type", null);
+		String city = config.get("WebSearchTool.city", null);
+		String country = config.get("WebSearchTool.country", null);
+		String region = config.get("WebSearchTool.region", null);
+
+		if (type != null) {
+			throw new NotImplementedException();
+		}
 	}
 
 	/**
@@ -148,6 +190,8 @@ public class ClaudeProvider implements Genai {
 			logger.warn("No inputs provided for Claude request.");
 			return null;
 		}
+
+		logInputs();
 
 		MessageCreateParams params = createResponseBuilder(inputs);
 
@@ -215,23 +259,39 @@ public class ClaudeProvider implements Genai {
 	}
 
 	private void handleFunctionCall(ToolUseBlock toolUse) {
+
+		ContentBlock toolUseBlock = ContentBlock.ofToolUse(toolUse);
+		List<ContentBlockParam> toolUseList = new ArrayList<>();
+		toolUseList.add(toolUseBlock.toParam());
 		MessageParam toolUseMessage = MessageParam.builder()
-				.role(MessageParam.Role.USER)
-				.content(toolUse.toString())
+				.role(MessageParam.Role.ASSISTANT)
+				.contentOfBlockParams(toolUseList)
 				.build();
 		inputs.add(toolUseMessage);
 
-		Object result = callFunction(toolUse);
+		Object result = null;
+
+		boolean error = false;
+		try {
+			result = callFunction(toolUse);
+		} catch (Exception e) {
+			result = e.getMessage();
+			error = true;
+		}
 
 		ToolResultBlockParam toolResult = ToolResultBlockParam.builder()
 				.toolUseId(toolUse.id())
 				.content(Objects.toString(result))
+				.isError(error)
 				.build();
 		ContentBlockParam toolContentBlock = ContentBlockParam.ofToolResult(toolResult);
+		ArrayList<ContentBlockParam> arrayList = new ArrayList<>();
+		arrayList.add(toolContentBlock);
 		MessageParam toolResultMessage = MessageParam.builder()
 				.role(MessageParam.Role.USER)
-				.content(toolContentBlock.toString())
+				.contentOfBlockParams(arrayList)
 				.build();
+
 		inputs.add(toolResultMessage);
 	}
 
@@ -388,14 +448,13 @@ public class ClaudeProvider implements Genai {
 	}
 
 	/**
-	 * Enables request input logging to the given file. (Not implemented for Claude
-	 * in this version.)
+	 * Enables request input logging to the given file.
 	 *
 	 * @param inputsLog file for input logging, or {@code null} to disable
 	 */
 	@Override
 	public void inputsLog(File inputsLog) {
-		// Not implemented
+		this.inputsLog = inputsLog;
 	}
 
 	/**
@@ -463,11 +522,43 @@ public class ClaudeProvider implements Genai {
 	}
 
 	/**
-	 * Loads inputs from a resource bundle.
-	 *
-	 * @param promptBundle resource bundle containing inputs
+	 * Writes the current request inputs to {@link #inputsLog} when logging is
+	 * enabled.
 	 */
-	public void promptBundle(ResourceBundle promptBundle) {
-		// Optional: implement loading inputs from a resource bundle if needed
+	void logInputs() {
+		if (inputsLog != null) {
+			File parentFile = inputsLog.getParentFile();
+			if (parentFile != null && !parentFile.exists()) {
+				parentFile.mkdirs();
+			}
+			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
+				logInputs(streamWriter);
+			} catch (IOException e) {
+				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
+			}
+		}
 	}
+
+	/**
+	 * Serializes the current instructions and input items to the supplied writer.
+	 *
+	 * @param streamWriter destination writer
+	 * @throws IOException when writing fails
+	 */
+	private void logInputs(Writer streamWriter) throws IOException {
+		streamWriter.write(StringUtils.defaultString(instructions));
+		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+		streamWriter.write("-----------------------------------------");
+		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+		for (MessageParam responseInputItem : inputs) {
+			String inputText = "";
+			String content = responseInputItem.content().asString();
+			streamWriter.write(content);
+			streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+			streamWriter.write("-----------------------------------------");
+			streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+		}
+		logger.debug("LLM Inputs: {}", inputsLog);
+	}
+
 }
