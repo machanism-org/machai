@@ -14,7 +14,7 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.maven.tools.ClassFunctionalTools;
 import org.machanism.machai.gw.processor.GWConstants;
@@ -207,7 +207,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 			throw new MojoExecutionException("File processing failed.", e);
 
 		} finally {
-			GenaiProviderManager.logUsage();
+			UsageStatistics.logUsage();
 			logger.info("File processing completed.");
 		}
 	}

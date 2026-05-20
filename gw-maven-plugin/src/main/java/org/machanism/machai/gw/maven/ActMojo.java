@@ -21,7 +21,7 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.ActProcessor;
@@ -201,7 +201,7 @@ public class ActMojo extends AbstractGWMojo {
 			getLog().error("I/O error occurred during file processing: " + e.getMessage());
 			throw new MojoExecutionException("I/O error occurred during file processing", e);
 		} finally {
-			GenaiProviderManager.logUsage();
+			UsageStatistics.logUsage();
 		}
 	}
 
