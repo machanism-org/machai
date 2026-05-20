@@ -20,7 +20,6 @@ Create the Act page as a Project Information page for the project:
 - For each act, create a section that includes:
   - The act's name.
   - A clear, concise description of the act's purpose and when it should be used.
-- The act name or interactive command: `exit` is reserved for terminating a process.
 - Describe the usage of placeholder variables, which should be used in the ${...} format. 
   Placeholders of this type are intended for dynamic substitution by functional tools at runtime. 
   The LLM must not alter, resolve, or modify these placeholders in any way. 
@@ -185,10 +184,6 @@ the prompt input:
 Type a single dot (`.`) on its own to **exit** the act, or a single
 greater-than sign (`>`) to **continue** to the next step or episode
 without supplying additional input.
-
-> **Reserved name.** The act name (and the interactive command) `exit`
-> is reserved and is always interpreted as a request to terminate the
-> current process.
 
 ## Default Prompt
 
