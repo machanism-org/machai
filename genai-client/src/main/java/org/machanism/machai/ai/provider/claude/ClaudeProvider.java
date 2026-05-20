@@ -1,6 +1,7 @@
 package org.machanism.machai.ai.provider.claude;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,13 +25,22 @@ import org.slf4j.LoggerFactory;
 import com.anthropic.client.AnthropicClient;
 import com.anthropic.client.okhttp.AnthropicOkHttpClient;
 import com.anthropic.client.okhttp.AnthropicOkHttpClient.Builder;
+import com.anthropic.core.JsonField;
 import com.anthropic.core.JsonValue;
 import com.anthropic.core.Timeout;
+import com.anthropic.models.messages.ContentBlock;
 import com.anthropic.models.messages.Message;
 import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.MessageParam.Content;
 import com.anthropic.models.messages.Tool;
 import com.anthropic.models.messages.Tool.InputSchema.Properties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.anthropic.models.messages.ToolUnion;
+import com.anthropic.models.messages.ToolUseBlock;
+import com.anthropic.models.messages.ToolUseBlockParam;
+import com.anthropic.models.messages.ToolUseBlockParam.Input;
 
 /**
  * Anthropic-backed implementation of MachAI's {@link Genai} abstraction.
@@ -74,7 +86,7 @@ public class ClaudeProvider implements Genai {
 	private Long timeoutSec;
 
 	/** Accumulated prompt messages for the current conversation. */
-	private final List<String> prompts = new ArrayList<>();
+	private final List<com.anthropic.models.messages.MessageParam.Content> inputs = new ArrayList<>();
 
 	/** Optional instructions applied to the request. */
 	private String instructions;
@@ -113,13 +125,13 @@ public class ClaudeProvider implements Genai {
 	@Override
 	public void prompt(String text) {
 		if (StringUtils.isNotBlank(text)) {
-			prompts.add(text);
+			inputs.add(Content.ofString(text));
 		}
 	}
 
 	/**
 	 * Executes a request using the currently configured model and accumulated
-	 * prompts.
+	 * inputs.
 	 *
 	 * @return the final model response text, or {@code null} if no text was
 	 *         produced
@@ -127,17 +139,114 @@ public class ClaudeProvider implements Genai {
 	@Override
 
 	public String perform() {
-		if (prompts.isEmpty()) {
-			logger.warn("No prompts provided for Claude request.");
+		if (inputs.isEmpty()) {
+			logger.warn("No inputs provided for Claude request.");
 			return null;
 		}
 
+		MessageCreateParams params = createResponseBuilder(inputs);
+
+		logger.debug("Sending request to Claude service.");
+		Message response = getClient().messages().create(params);
+
+		String result = parseResponse(response);
+
+		logger.debug("Received response from Claude service.");
+		return result;
+	}
+
+	private String parseResponse(Message response) {
+		List<ContentBlock> content = response.content();
+		String result = null;
+		if (!content.isEmpty()) {
+			ContentBlock contentBlock = content.get(content.size() - 1);
+			if (contentBlock.isText()) {
+				result = contentBlock.text().map(t -> t.text()).orElse(null);
+			}
+			if (contentBlock.isToolUse()) {
+				ToolUseBlock toolUse = contentBlock.asToolUse();
+				handleFunctionCall(toolUse);
+			}
+		}
+		return result;
+	}
+
+	private void handleFunctionCall(ToolUseBlock toolUse) {
+		// Execute your actual Java function
+		if (toolUse.isValid()) {
+			Object result = callFunction(toolUse);
+
+//            .addMessage(Message.builder()
+//                .role(Role.USER)
+//                .content(List.of(ToolResultBlock.builder()
+//                    .toolUseId(toolId)
+//                    .content(result)
+//                    .build()))
+//                .build())
+		}
+	}
+
+	private Object callFunction(ToolUseBlock functionCall) {
+		String name = functionCall.name();
+		ToolUseBlockParam param = functionCall.toParam();
+		JsonField<Input> params = param._input();
+
+		JsonNode node = new ObjectMapper().valueToTree(params);
+
+		Object result = null;
+		File file = workingDir;
+		Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
+		for (Entry<Tool, ToolFunction> entry : entrySet) {
+			if (entry.getValue() != null && hasSameToolName(name, entry.getKey())) {
+				result = safelyInvokeTool(name, entry.getValue(), node, file);
+				break;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Safely invokes a tool function and converts {@link IOException}s into a
+	 * textual error payload suitable for the model conversation.
+	 *
+	 * @param name       tool name
+	 * @param tool       tool handler
+	 * @param params     parsed tool parameters
+	 * @param workingDir working directory passed to the tool
+	 * @return tool output or a formatted error message
+	 */
+	private Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File workingDir) {
+		try {
+			return tool.apply(params, workingDir);
+		} catch (IOException e) {
+			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
+					+ e.getMessage();
+			logger.error(errMsg);
+			return errMsg;
+		}
+	}
+
+	/**
+	 * Compares a requested tool name with a registered tool name using normalized,
+	 * case-insensitive matching.
+	 *
+	 * @param toolName requested tool name
+	 * @param tool     registered tool
+	 * @return {@code true} when both names match after normalization
+	 */
+	private boolean hasSameToolName(String toolName, Tool tool) {
+		// Sonar java:S1874: avoid deprecated StringUtils equality helpers.
+		String name = tool.name();
+		return normalize(toolName).equals(normalize(name));
+	}
+
+	private MessageCreateParams createResponseBuilder(List<Content> inputs) {
 		MessageCreateParams.Builder paramsBuilder = MessageCreateParams.builder()
 				.model(chatModel)
 				.maxTokens(maxOutputTokens);
 
-		for (String prompt : prompts) {
-			paramsBuilder.addUserMessage(prompt);
+		for (Content input : inputs) {
+			paramsBuilder.addUserMessage(input);
 		}
 
 		if (StringUtils.isNotBlank(instructions)) {
@@ -148,23 +257,15 @@ public class ClaudeProvider implements Genai {
 		paramsBuilder.tools(tools);
 
 		MessageCreateParams params = paramsBuilder.build();
-
-		logger.debug("Sending request to Claude service.");
-		Message response = getClient().messages().create(params);
-
-		String result = response.content().isEmpty() ? null
-				: response.content().get(0).text().map(t -> t.text()).orElse(null);
-
-		logger.debug("Received response from Claude service.");
-		return result;
+		return params;
 	}
 
 	/**
-	 * Clears all accumulated prompts for the next request.
+	 * Clears all accumulated inputs for the next request.
 	 */
 	@Override
 	public void clear() {
-		prompts.clear();
+		inputs.clear();
 	}
 
 	/**
@@ -190,7 +291,7 @@ public class ClaudeProvider implements Genai {
 				Map<String, String> value = new HashMap<>();
 				value.put("type", desc[1]);
 				value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
-				
+
 				JsonValue requiredVal = JsonValue.from(value);
 				fromValue.put(desc[0], requiredVal);
 			}
@@ -315,11 +416,11 @@ public class ClaudeProvider implements Genai {
 	}
 
 	/**
-	 * Loads prompts from a resource bundle.
+	 * Loads inputs from a resource bundle.
 	 *
-	 * @param promptBundle resource bundle containing prompts
+	 * @param promptBundle resource bundle containing inputs
 	 */
 	public void promptBundle(ResourceBundle promptBundle) {
-		// Optional: implement loading prompts from a resource bundle if needed
+		// Optional: implement loading inputs from a resource bundle if needed
 	}
 }
