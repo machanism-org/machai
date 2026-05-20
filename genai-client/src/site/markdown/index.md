@@ -46,7 +46,6 @@ This project provides the central provider contract and supporting infrastructur
 - `OpenAIProvider` is the production-ready OpenAI-compatible implementation, including prompt execution through the OpenAI Responses API, iterative tool calling, embeddings, request logging, optional web search and MCP server tools, and usage mapping.
 - `ClaudeProvider` is the Anthropic-backed implementation built on top of the Anthropic Java SDK, supporting prompts, tool calling, and usage tracking.
 - `CodeMieProvider` authenticates against EPAM CodeMie and delegates execution to a downstream provider (`OpenAIProvider` for `gpt-*`/`gemini-*` models or `ClaudeProvider` for `claude-*` models) configured for the CodeMie Code Assistant API.
-- `NoneProvider` supports disabled, offline, and test scenarios without invoking external AI services.
 
 This abstraction lets applications keep a stable integration layer while changing models, providers, or runtime environments.
 
@@ -58,7 +57,6 @@ This abstraction lets applications keep a stable integration layer while changin
 - Anthropic Claude integration with prompt execution, tool calling, and configurable timeouts.
 - CodeMie integration with OAuth-based token acquisition and routing to OpenAI- or Claude-compatible backends based on the configured model.
 - Delegation through `GenaiAdapter` for composable provider decorators.
-- No-op provider for offline, disabled, and test environments.
 - Token usage tracking via `Usage` and aggregated logging via `GenaiProviderManager`.
 - Working-directory propagation for tool handlers that need file-system context.
 - Extensible tool function integration through `ToolFunction`, `FunctionTools`, and Java `ServiceLoader` discovery.
@@ -256,20 +254,6 @@ Configuration:
 The active downstream provider applies its own execution, tool-calling, logging, embedding, and usage-reporting behavior, as documented for OpenAI and Claude above.
 
 Thread safety: not thread-safe.
-
-### None
-
-`NoneProvider` is a no-operation `Genai` implementation for disabled, offline, test, or prompt-capture scenarios.
-
-It fulfills the provider contract without invoking any local or remote AI model. Instructions and prompts are accumulated in memory, and when `inputsLog(File)` is configured they can be written to local log files for inspection. Calling `perform()` performs no network activity and returns `null`, while unsupported capabilities such as `embedding(String, long)` throw `UnsupportedOperationException`.
-
-Typical use cases include:
-
-- Running application flows when AI execution is intentionally disabled.
-- Testing provider integration paths without contacting an external service.
-- Capturing generated prompts and instructions for review.
-
-Thread safety: not documented; treat as not thread-safe.
 
 ## Resources
 
