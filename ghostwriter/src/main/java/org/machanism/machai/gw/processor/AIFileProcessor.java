@@ -49,9 +49,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	
 	public static final String FILE_INCLUDED_MARKER = ">>>";
 	
-	public static final String EXIT_SPECIAL_PROMPT_COMMAND = "exit";
+	public static final String EXIT_SPECIAL_PROMPT_COMMAND = ".";
 
-	public static final String CONTINUE_SPECIAL_PROMPT_COMMAND = "continue";
+	public static final String CONTINUE_SPECIAL_PROMPT_COMMAND = ">";
 
 	public static final String NOT_DEFINED_VALUE = "<NOT_DEFINED_VALUE>";
 

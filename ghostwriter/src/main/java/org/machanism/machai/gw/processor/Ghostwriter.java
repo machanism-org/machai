@@ -16,7 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.slf4j.Logger;
@@ -566,7 +566,7 @@ public final class Ghostwriter {
 		} catch (Exception e) {
 			exitCode = handleProcessingFailure("Unexpected error", e);
 		} finally {
-			GenaiProviderManager.logUsage();
+			UsageStatistics.logUsage();
 			LOGGER.info("File processing completed.");
 		}
 		return exitCode;
