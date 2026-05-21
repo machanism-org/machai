@@ -123,26 +123,26 @@ public class Episodes {
 	 * Executes episodes in regular order starting from the supplied zero-based
 	 * index while honoring repeat and move requests.
 	 *
-	 * @param startId starting zero-based episode index
+	 * @param startEpisodeId starting zero-based episode index
 	 * @param func    callback used to execute an episode
 	 */
-	public void regularOrder(Integer startId, BiFunction<Integer, String, String> func) {
+	public void regularOrder(Integer startEpisodeId, BiFunction<Integer, String, String> func) {
 		Integer moveToEpisodeId = null;
-		int i = 0;
+		int episodeId = 0;
 		do {
 			if (moveToEpisodeId != null) {
-				startId = moveToEpisodeId;
+				startEpisodeId = moveToEpisodeId;
 			}
 			try {
-				for (i = startId - 1; i < episodes.size(); i++) {
+				for (episodeId = startEpisodeId; episodeId <= episodes.size(); episodeId++) {
 					int iteration = 1;
 					boolean repeate;
 					do {
 						repeate = false;
 						try {
-							String episode = episodes.get(i);
-							logEpisodeHeader(i, iteration++);
-							execute(func, i, episode);
+							String episode = episodes.get(episodeId - 1);
+							logEpisodeHeader(episodeId, iteration++);
+							execute(func, episodeId, episode);
 
 						} catch (RepeatEpisodeException e) {
 							repeate = true;
