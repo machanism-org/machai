@@ -43,6 +43,9 @@ import com.anthropic.models.messages.ToolUnion;
 import com.anthropic.models.messages.ToolUseBlock;
 import com.anthropic.models.messages.ToolUseBlockParam;
 import com.anthropic.models.messages.ToolUseBlockParam.Input;
+import com.anthropic.models.messages.UserLocation;
+import com.anthropic.models.messages.WebSearchTool20250305;
+import com.anthropic.models.messages.WebSearchTool20260209;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -87,6 +90,8 @@ public class ClaudeProvider extends AbstractAIProvider {
 	/** Maps tools to handler functions. */
 	private final Map<Tool, ToolFunction> toolMap = new HashMap<>();
 
+	private Object webSearchTool;
+
 	@Override
 	protected void addMcpServer() {
 		int i = 0;
@@ -100,10 +105,6 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 			String propName = MCP_PROP_NAME_PREFIX + id;
 			url = config.get(propName + ".url", null);
-//			String label = config.get(propName + ".label", null);
-//			String description = config.get(propName + ".description", null);
-//			String authorization = config.get(propName + ".authorization", null);
-
 			if (url != null) {
 				throw new NotImplementedException();
 			}
@@ -114,12 +115,42 @@ public class ClaudeProvider extends AbstractAIProvider {
 	@Override
 	protected void addWebSearch() {
 		String type = config.get("WebSearchTool.type", null);
-//		String city = config.get("WebSearchTool.city", null);
-//		String country = config.get("WebSearchTool.country", null);
-//		String region = config.get("WebSearchTool.region", null);
+		String city = config.get("WebSearchTool.city", null);
+		String country = config.get("WebSearchTool.country", null);
+		String region = config.get("WebSearchTool.region", null);
 
 		if (type != null) {
-			throw new NotImplementedException();
+
+			com.anthropic.models.messages.UserLocation.Builder locationBuilder = UserLocation.builder();
+			if (city != null) {
+				locationBuilder.city(city);
+			}
+
+			if (country != null) {
+				locationBuilder.country(country);
+			}
+
+			if (region != null) {
+				locationBuilder.region(region);
+			}
+
+			switch (type) {
+			case "WebSearchTool20260209":
+				com.anthropic.models.messages.WebSearchTool20260209.Builder builder1 = WebSearchTool20260209.builder();
+				builder1.userLocation(locationBuilder.build());
+				webSearchTool = builder1.build();
+				break;
+
+			case "WebSearchTool20250305":
+				com.anthropic.models.messages.WebSearchTool20250305.Builder builder2 = WebSearchTool20250305.builder();
+				builder2.userLocation(locationBuilder.build());
+				webSearchTool = builder2.build();
+				break;
+
+			default:
+				throw new IllegalArgumentException(
+						"Invalid WebSearchTool type provided. Supported types are: WebSearchTool20260209, WebSearchTool20250305.");
+			}
 		}
 	}
 
@@ -286,7 +317,22 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 		List<ToolUnion> tools = toolMap.keySet().stream().map(t -> ToolUnion.ofTool(t)).collect(Collectors.toList());
 		paramsBuilder.tools(tools);
-		
+
+		if (webSearchTool != null) {
+			switch (webSearchTool.getClass().getSimpleName()) {
+			case "WebSearchTool20260209":
+				paramsBuilder.addTool((WebSearchTool20260209) webSearchTool);
+				break;
+
+			case "WebSearchTool20250305":
+				paramsBuilder.addTool((WebSearchTool20250305) webSearchTool);
+				break;
+
+			default:
+				break;
+			}
+		}
+
 		MessageCreateParams params = paramsBuilder.build();
 		return params;
 	}
