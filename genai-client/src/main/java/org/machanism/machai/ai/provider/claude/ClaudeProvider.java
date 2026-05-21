@@ -272,18 +272,11 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 		Object result = null;
 
-		boolean error = false;
-		try {
-			result = callFunction(toolUse);
-		} catch (Exception e) {
-			result = e.getMessage();
-			error = true;
-		}
+		result = callFunction(toolUse);
 
 		BetaToolResultBlockParam toolResult = BetaToolResultBlockParam.builder()
 				.toolUseId(toolUse.id())
 				.content(Objects.toString(result))
-				.isError(error)
 				.build();
 		BetaContentBlockParam toolContentBlock = BetaContentBlockParam.ofToolResult(toolResult);
 		ArrayList<BetaContentBlockParam> arrayList = new ArrayList<>();
