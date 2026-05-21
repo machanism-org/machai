@@ -31,30 +31,36 @@
  *
  * <p>
  * This package contains the OpenAI-backed {@link org.machanism.machai.ai.provider.Genai}
- * implementation used by MachAI to submit prompts, optional system instructions,
- * file references, and locally registered tools through the OpenAI Responses API.
- * It also provides embedding generation support and maps OpenAI token accounting to
- * MachAI usage metrics.
+ * implementation used by MachAI to perform conversational completions, execute
+ * registered function tools, attach file-based inputs, invoke optional built-in
+ * OpenAI tools, and request embedding vectors through the OpenAI Java SDK.
  * </p>
  *
  * <p>
- * The primary type in this package is
- * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, which manages
- * provider initialization, request construction, response parsing, function-tool
- * execution, input logging, timeout handling, and OpenAI client creation. During a
- * request, tool definitions registered through the provider are exposed as OpenAI
- * function tools, and tool-call outputs are appended to the conversation until the
- * model returns a final message.
+ * Its central type, {@link org.machanism.machai.ai.provider.openai.OpenAIProvider},
+ * adapts the framework-level provider abstraction to the OpenAI Responses API. The
+ * provider is responsible for client construction, request assembly, conversation
+ * state management, tool registration, iterative tool-call resolution, response
+ * parsing, usage accounting, and request logging.
  * </p>
+ *
+ * <h2>Supported capabilities</h2>
+ * <ul>
+ * <li>Sending user prompts and optional system instructions to a configured chat model</li>
+ * <li>Supplying file references as request inputs</li>
+ * <li>Registering local Java callbacks as OpenAI function tools</li>
+ * <li>Enabling built-in web search and MCP server tools from configuration</li>
+ * <li>Generating embeddings with a configured embedding model</li>
+ * <li>Capturing token usage for framework-level statistics</li>
+ * </ul>
  *
  * <h2>Configuration overview</h2>
  * <p>
- * The package relies on provider configuration values such as
- * {@code OPENAI_API_KEY}, {@code chatModel}, {@code OPENAI_BASE_URL},
- * {@code GENAI_TIMEOUT}, {@code MAX_OUTPUT_TOKENS}, {@code MAX_TOOL_CALLS}, and
- * {@code embedding.model}. These settings control authentication, endpoint
- * selection, response generation limits, tool-calling behavior, request timeouts,
- * and embedding model selection.
+ * Typical configuration includes values such as {@code OPENAI_API_KEY},
+ * {@code OPENAI_BASE_URL}, {@code chatModel}, {@code GENAI_TIMEOUT},
+ * {@code MAX_OUTPUT_TOKENS}, {@code MAX_TOOL_CALLS}, and {@code embedding.model}.
+ * Additional namespaced settings control optional web-search and MCP tool
+ * registration.
  * </p>
  *
  * <h2>Typical usage</h2>

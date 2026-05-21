@@ -16,41 +16,38 @@
  */
 
 /**
- * Provider-agnostic generative AI client API for MachAI.
+ * Provider-agnostic generative AI integration for MachAI.
  *
- * <p>This root package defines the high-level integration layer used to interact with large language models and
- * related AI services without coupling application code to a specific vendor SDK, endpoint, authentication flow, or
- * execution mode. It organizes the contracts, provider implementations, provider-resolution infrastructure, tool
- * registration support, and usage accounting needed by higher-level MachAI workflows.</p>
+ * <p>This package defines the root API used to work with large language model providers, provider management,
+ * host-exposed tools, and usage tracking without coupling application code to a specific backend implementation.
+ * It serves as the entry point for configuring providers, preparing prompts and instructions, enabling tool calling,
+ * executing model requests, and collecting usage information across supported integrations.</p>
  *
- * <h2>Package scope</h2>
+ * <h2>Responsibilities</h2>
  * <ul>
- *   <li><strong>Provider management</strong> in {@link org.machanism.machai.ai.manager} resolves model identifiers,
- *       initializes concrete providers with runtime configuration, and aggregates token usage reported by completed
- *       AI interactions.</li>
- *   <li><strong>Provider contracts</strong> in {@link org.machanism.machai.ai.provider} define the common
- *       {@link org.machanism.machai.ai.provider.Genai} API used for initialization, instructions, prompts, execution,
- *       embeddings, input logging, tool registration, and usage reporting.</li>
- *   <li><strong>Provider implementations</strong> under {@code org.machanism.machai.ai.provider.*} integrate concrete
- *       backends such as OpenAI-compatible services, EPAM CodeMie, and the no-operation provider used for disabled or
- *       offline execution paths.</li>
- *   <li><strong>Host-side tools</strong> in {@link org.machanism.machai.ai.tools} discover and register controlled local
- *       callbacks through Java's {@link java.util.ServiceLoader} mechanism so compatible providers can expose
- *       application capabilities to model tool or function calls.</li>
+ *   <li><strong>Provider resolution and lifecycle</strong> via {@link org.machanism.machai.ai.manager}, including
+ *       lookup by provider/model identifier, initialization with runtime configuration, and aggregation of usage
+ *       metrics.</li>
+ *   <li><strong>Common provider contracts</strong> in {@link org.machanism.machai.ai.provider}, centered on the
+ *       {@link org.machanism.machai.ai.provider.Genai} interface for prompts, instructions, execution, embeddings,
+ *       file inputs, tool integration, and token accounting.</li>
+ *   <li><strong>Concrete provider implementations</strong> under {@code org.machanism.machai.ai.provider.*} for
+ *       specific backends such as OpenAI-compatible services, EPAM CodeMie, and fallback no-operation behavior.</li>
+ *   <li><strong>Function tool discovery and registration</strong> in {@link org.machanism.machai.ai.tools}, enabling
+ *       providers that support tool or function calling to expose controlled application capabilities through
+ *       {@link java.util.ServiceLoader}.</li>
  * </ul>
  *
- * <h2>Typical usage flow</h2>
+ * <h2>Typical workflow</h2>
  * <ol>
- *   <li>Resolve a provider using a provider/model identifier such as {@code OpenAI:gpt-4o-mini}, a custom provider
- *       class name, or a model name that falls back to the {@code none} provider.</li>
- *   <li>Initialize the provider through the manager with an application
- *       {@link org.machanism.macha.core.commons.configurator.Configurator} so model and backend-specific settings are
- *       available at runtime.</li>
- *   <li>Configure system instructions, user prompts, files, input logs, and optional provider-specific settings.</li>
- *   <li>Optionally apply tool providers through {@link org.machanism.machai.ai.tools.FunctionToolsLoader} before
- *       executing requests that support tool calling.</li>
- *   <li>Execute the request, consume the response or embeddings, and aggregate the returned
- *       {@link org.machanism.machai.ai.manager.Usage} metrics when reporting token consumption.</li>
+ *   <li>Select or resolve a provider for a model identifier such as {@code OpenAI:gpt-4o-mini}.</li>
+ *   <li>Initialize the provider using application configuration supplied through
+ *       {@link org.machanism.macha.core.commons.configurator.Configurator}.</li>
+ *   <li>Set instructions, prompts, optional files, and provider-specific options.</li>
+ *   <li>Apply discovered tools with {@link org.machanism.machai.ai.tools.FunctionToolsLoader} when tool calling is
+ *       needed.</li>
+ *   <li>Execute the request and record returned usage with
+ *       {@link org.machanism.machai.ai.manager.GenaiProviderManager}.</li>
  * </ol>
  *
  * <h2>Example</h2>
@@ -70,8 +67,8 @@
  * GenaiProviderManager.logUsage();
  * </pre>
  *
- * <p>The package is intended for application code that coordinates prompt construction and response handling while
- * delegating provider selection, backend-specific request execution, controlled tool exposure, and usage monitoring to
- * the corresponding sub-packages.</p>
+ * <p>Application code should depend on this package when it needs a stable, vendor-neutral entry point for AI
+ * interactions while delegating provider-specific behavior and runtime integration details to the corresponding
+ * sub-packages.</p>
  */
 package org.machanism.machai.ai;

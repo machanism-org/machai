@@ -35,27 +35,22 @@
  */
 
 /**
- * Provides the service-provider infrastructure for exposing application-defined tool functions to
- * generative AI providers.
+ * Provides the service-provider infrastructure for exposing host-defined functions as tools that
+ * can be registered with generative AI providers.
  *
- * <p>
- * The package defines the contracts used by host applications to publish local capabilities as
- * provider-invocable tools. A {@link org.machanism.machai.ai.tools.FunctionTools} implementation
- * registers one or more named tools with a {@link org.machanism.machai.ai.provider.Genai}
- * instance, while {@link org.machanism.machai.ai.tools.ToolFunction} represents the executable
- * callback that processes provider-supplied parameters and returns a result. The
- * {@link org.machanism.machai.ai.tools.FunctionToolsLoader} class discovers available tool
- * providers through Java's {@link java.util.ServiceLoader} mechanism and applies them to a target
- * AI provider.
- * </p>
+ * <p>This package defines the contracts and loader used to publish local application capabilities
+ * to a {@link org.machanism.machai.ai.provider.Genai} instance. Implementations of
+ * {@link org.machanism.machai.ai.tools.FunctionTools} register one or more named tools, while
+ * {@link org.machanism.machai.ai.tools.ToolFunction} represents the executable callback invoked
+ * when a provider requests a tool execution. {@link org.machanism.machai.ai.tools.FunctionToolsLoader}
+ * discovers available tool providers through Java's {@link java.util.ServiceLoader} mechanism and
+ * applies them to a target provider.</p>
  *
- * <p>
- * Tool providers may use this package to make controlled host capabilities available to model runs,
- * such as file-system access, HTTP retrieval, command execution, or other domain-specific
- * operations. Implementations can also receive a
- * {@link org.machanism.macha.core.commons.configurator.Configurator} from the loader to resolve
- * runtime configuration before tools are registered or invoked.
- * </p>
+ * <p>Tool implementations in this package are intended to bridge provider-initiated tool calls to
+ * controlled host-side functionality such as file access, HTTP retrieval, command execution, or
+ * other application-specific operations. When available, a
+ * {@link org.machanism.macha.core.commons.configurator.Configurator} can be supplied to tool
+ * providers so they can resolve runtime configuration before registering tools.</p>
  *
  * <h2>Typical usage</h2>
  *
@@ -63,15 +58,12 @@
  * Configurator configurator = ...;
  * Genai provider = ...;
  *
- * FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
- * loader.setConfiguration(configurator);
- * loader.applyTools(provider);
+ * FunctionToolsLoader loader = new FunctionToolsLoader();
+ * loader.applyTools(provider, configurator);
  * }</pre>
  *
- * <p>
- * Configuration values may contain placeholders such as ${...}; when supported by a tool provider,
- * these placeholders are resolved through the supplied configurator while unresolved values are left
- * unchanged.
- * </p>
+ * <p>Configuration values may contain placeholders such as ${...}; when supported by a tool
+ * provider, these placeholders are resolved through the supplied configurator while unresolved
+ * values remain unchanged.</p>
  */
 package org.machanism.machai.ai.tools;
