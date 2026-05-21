@@ -17,6 +17,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.manager.Usage;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
@@ -52,6 +54,7 @@ import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputMessage.Content;
 import com.openai.models.responses.ResponseOutputText;
 import com.openai.models.responses.ResponseReasoningItem;
+import com.openai.models.responses.ResponseUsage;
 import com.openai.models.responses.Tool;
 import com.openai.models.responses.WebSearchTool;
 import com.openai.models.responses.WebSearchTool.UserLocation;
@@ -194,8 +197,38 @@ public class OpenAIProvider extends AbstractAIProvider {
 		} while (i++ == 0 || url != null);
 	}
 
-	protected void addTool(String name, String description, Map<String, Map<String, String>> fromValue,
-			ObjectMapper mapper, ArrayNode requiredProps, ToolFunction function) {
+	/**
+	 * Registers a function tool for the current provider instance.
+	 *
+	 * <p>
+	 * The {@code paramsDesc} entries must follow the format
+	 * {@code name:type:required:description}. The parameter schema passed to OpenAI
+	 * is a JSON Schema object of type {@code object}.
+	 * </p>
+	 *
+	 * @param name        tool function name
+	 * @param description tool description
+	 * @param function    handler callback for tool execution
+	 * @param paramsDesc  parameter descriptors in the format
+	 *                    {@code name:type:required:description}
+	 */
+	@Override
+	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
+		Map<String, Map<String, String>> fromValue = new HashMap<>();
+		ObjectMapper mapper = new ObjectMapper();
+		ArrayNode requiredProps = mapper.createArrayNode();
+		if (paramsDesc != null) {
+			for (String pDesc : paramsDesc) {
+				String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
+				if (desc.length >= 3 && isRequiredParameter(desc[2])) {
+					requiredProps.add(desc[0]);
+				}
+				Map<String, String> value = new HashMap<>();
+				value.put("type", desc[1]);
+				value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
+				fromValue.put(desc[0], value);
+			}
+		}
 		JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
 		JsonValue requiredVal = JsonValue.fromJsonNode(requiredProps);
 		Parameters params = Parameters.builder().putAdditionalProperty("properties", propsVal)
@@ -446,7 +479,8 @@ public class OpenAIProvider extends AbstractAIProvider {
 			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
 			Object result = null;
 			for (Entry<Tool, ToolFunction> entry : entrySet) {
-				if (entry.getValue() != null && hasSameToolName(name, entry.getKey())) {
+				if (entry.getValue() != null
+						&& normalize(name).equals(normalize(normalize(entry.getKey().asFunction().name())))) {
 					result = safelyInvokeTool(name, entry.getValue(), params, file);
 					break;
 				}
@@ -500,6 +534,25 @@ public class OpenAIProvider extends AbstractAIProvider {
 		return client;
 	}
 
+	/**
+	 * Extracts token usage from the response and stores it as {@link #usage()}.
+	 *
+	 * @param usage optional usage information from the OpenAI response
+	 */
+	protected void captureUsage(Optional<ResponseUsage> usage) {
+		if (usage.isPresent()) {
+			ResponseUsage responseUsage = usage.get();
+			long inputTokens = responseUsage.inputTokens();
+			long inputCachedTokens = responseUsage.inputTokensDetails().cachedTokens();
+			long outputTokens = responseUsage.outputTokens();
+
+			lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
+			UsageStatistics.addUsage(chatModel, lastUsage);
+		} else {
+			lastUsage = new Usage(0, 0, 0);
+		}
+	}
+
 	protected void logInputsSpec(Writer streamWriter) throws IOException {
 		for (ResponseInputItem responseInputItem : inputs) {
 			String inputText = "";
@@ -517,10 +570,9 @@ public class OpenAIProvider extends AbstractAIProvider {
 					inputText = "Data invalid: " + responseInputItem;
 				}
 				streamWriter.write(inputText);
-				streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
-				streamWriter.write("-----------------------------------------");
-				streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+				streamWriter.write(AbstractAIProvider.LOG_SECTION_SEPARATOR);
 			}
 		}
 	}
+
 }

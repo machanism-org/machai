@@ -1,7 +1,6 @@
 package org.machanism.machai.ai.provider.claude;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.Duration;
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -18,10 +16,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.openai.AbstractAIProvider;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +45,7 @@ import com.anthropic.models.messages.ToolUseBlockParam;
 import com.anthropic.models.messages.ToolUseBlockParam.Input;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /**
  * Anthropic-backed implementation of MachAI's {@link Genai} abstraction.
@@ -76,61 +75,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Viktor Tovstyi
  * @since 1.1.13
  */
-public class ClaudeProvider implements Genai {
+public class ClaudeProvider extends AbstractAIProvider {
+
+	private static final Logger logger = LoggerFactory.getLogger(ClaudeProvider.class);
 
 	public static final String ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY";
 	public static final String ANTHROPIC_BASE_URL = "ANTHROPIC_BASE_URL";
-	public static final long MAX_OUTPUT_TOKENS = 18000;
-
-	private static final Logger logger = LoggerFactory.getLogger(ClaudeProvider.class);
-	private static final String MCP_PROP_NAME_PREFIX = "MCP";
-
-	private Configurator config;
-	private String chatModel;
-	private Long maxOutputTokens;
-	private Long maxToolCalls;
-	private String embeddingModel;
-	private Long timeoutSec;
-
-	/** Optional log file for input data. */
-	private File inputsLog;
 
 	/** Accumulated prompt messages for the current conversation. */
 	private final List<MessageParam> inputs = new ArrayList<>();
 
-	/** Optional instructions applied to the request. */
-	private String instructions;
-
-	/** Working directory passed to tool handlers as contextual information. */
-	private File workingDir;
-
 	/** Maps tools to handler functions. */
 	private final Map<Tool, ToolFunction> toolMap = new HashMap<>();
 
-	/**
-	 * Latest usage metrics captured from the most recent {@link #perform()} call.
-	 */
-	private Usage lastUsage = new Usage(0, 0, 0);
-
-	/**
-	 * Initializes the provider from the given configuration.
-	 *
-	 * @param config provider configuration source
-	 */
 	@Override
-	public void init(Configurator config) {
-		this.config = config;
-		chatModel = config.get("chatModel");
-		maxOutputTokens = config.getLong("MAX_OUTPUT_TOKENS", MAX_OUTPUT_TOKENS);
-		maxToolCalls = config.getLong("MAX_TOOL_CALLS", 0L);
-		embeddingModel = config.get("embedding.model", null);
-		timeoutSec = config.getLong("GENAI_TIMEOUT", 0L);
-
-		addWebSearch();
-		addMcpServer();
-	}
-
-	private void addMcpServer() {
+	protected void addMcpServer() {
 		int i = 0;
 		String url = null;
 		do {
@@ -153,7 +112,8 @@ public class ClaudeProvider implements Genai {
 		} while (i++ == 0 || url != null);
 	}
 
-	private void addWebSearch() {
+	@Override
+	protected void addWebSearch() {
 		String type = config.get("WebSearchTool.type", null);
 		String city = config.get("WebSearchTool.city", null);
 		String country = config.get("WebSearchTool.country", null);
@@ -306,47 +266,12 @@ public class ClaudeProvider implements Genai {
 		File file = workingDir;
 		Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
 		for (Entry<Tool, ToolFunction> entry : entrySet) {
-			if (entry.getValue() != null && hasSameToolName(name, entry.getKey())) {
+			if (entry.getValue() != null && normalize(name).equals(normalize(entry.getKey().name()))) {
 				result = safelyInvokeTool(name, entry.getValue(), node, file);
 				break;
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Safely invokes a tool function and converts {@link IOException}s into a
-	 * textual error payload suitable for the model conversation.
-	 *
-	 * @param name       tool name
-	 * @param tool       tool handler
-	 * @param params     parsed tool parameters
-	 * @param workingDir working directory passed to the tool
-	 * @return tool output or a formatted error message
-	 */
-	private Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File workingDir) {
-		try {
-			return tool.apply(params, workingDir);
-		} catch (IOException e) {
-			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
-					+ e.getMessage();
-			logger.error(errMsg);
-			return errMsg;
-		}
-	}
-
-	/**
-	 * Compares a requested tool name with a registered tool name using normalized,
-	 * case-insensitive matching.
-	 *
-	 * @param toolName requested tool name
-	 * @param tool     registered tool
-	 * @return {@code true} when both names match after normalization
-	 */
-	private boolean hasSameToolName(String toolName, Tool tool) {
-		// Sonar java:S1874: avoid deprecated StringUtils equality helpers.
-		String name = tool.name();
-		return normalize(toolName).equals(normalize(name));
 	}
 
 	private MessageCreateParams createResponseBuilder(List<MessageParam> inputs) {
@@ -428,57 +353,6 @@ public class ClaudeProvider implements Genai {
 	}
 
 	/**
-	 * Normalizes a string for case-insensitive comparisons.
-	 *
-	 * @param value source value
-	 * @return lower-cased value, or an empty string when the input is {@code null}
-	 */
-	private String normalize(String value) {
-		return StringUtils.defaultString(value).toLowerCase(Locale.ROOT);
-	}
-
-	/**
-	 * Sets system-level instructions applied to subsequent requests.
-	 *
-	 * @param instructions instruction text, or {@code null} to clear
-	 */
-	@Override
-	public void instructions(String instructions) {
-		this.instructions = instructions;
-	}
-
-	/**
-	 * Enables request input logging to the given file.
-	 *
-	 * @param inputsLog file for input logging, or {@code null} to disable
-	 */
-	@Override
-	public void inputsLog(File inputsLog) {
-		this.inputsLog = inputsLog;
-	}
-
-	/**
-	 * Sets the working directory passed to tool handlers.
-	 *
-	 * @param workingDir working directory, or {@code null}
-	 */
-	@Override
-	public void setWorkingDir(File workingDir) {
-		this.workingDir = workingDir;
-	}
-
-	/**
-	 * Returns token usage metrics captured from the most recent {@link #perform()}
-	 * call.
-	 *
-	 * @return usage metrics; never {@code null}
-	 */
-	@Override
-	public Usage usage() {
-		return lastUsage;
-	}
-
-	/**
 	 * Requests an embedding vector for the given input text. (Not implemented for
 	 * Claude in this version.)
 	 *
@@ -521,44 +395,15 @@ public class ClaudeProvider implements Genai {
 		return clientBuilder.build();
 	}
 
-	/**
-	 * Writes the current request inputs to {@link #inputsLog} when logging is
-	 * enabled.
-	 */
-	void logInputs() {
-		if (inputsLog != null) {
-			File parentFile = inputsLog.getParentFile();
-			if (parentFile != null && !parentFile.exists()) {
-				parentFile.mkdirs();
-			}
-			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
-				logInputs(streamWriter);
-			} catch (IOException e) {
-				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
-			}
-		}
-	}
-
-	/**
-	 * Serializes the current instructions and input items to the supplied writer.
-	 *
-	 * @param streamWriter destination writer
-	 * @throws IOException when writing fails
-	 */
-	private void logInputs(Writer streamWriter) throws IOException {
-		streamWriter.write(StringUtils.defaultString(instructions));
-		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
-		streamWriter.write("-----------------------------------------");
-		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+	@Override
+	protected void logInputsSpec(Writer streamWriter) throws IOException {
 		for (MessageParam responseInputItem : inputs) {
-			String inputText = "";
 			String content = responseInputItem.content().asString();
 			streamWriter.write(content);
 			streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
 			streamWriter.write("-----------------------------------------");
 			streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
 		}
-		logger.debug("LLM Inputs: {}", inputsLog);
 	}
 
 }
