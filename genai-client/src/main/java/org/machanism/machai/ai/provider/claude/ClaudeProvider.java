@@ -170,7 +170,10 @@ public class ClaudeProvider extends AbstractAIProvider {
 	@Override
 	public void prompt(String text) {
 		if (StringUtils.isNotBlank(text)) {
-			inputs.add(BetaMessageParam.builder().content(text).role(Role.USER).build());
+			com.anthropic.models.beta.messages.BetaMessageParam.Builder builder = BetaMessageParam.builder()
+					.content(text)
+					.role(Role.USER);
+			inputs.add(builder.build());
 		}
 	}
 
@@ -312,13 +315,13 @@ public class ClaudeProvider extends AbstractAIProvider {
 		return result;
 	}
 
-	private MessageCreateParams createResponseBuilder(List<BetaMessageParam> inputs2) {
+	private MessageCreateParams createResponseBuilder(List<BetaMessageParam> inputs) {
 		com.anthropic.models.beta.messages.MessageCreateParams.Builder paramsBuilder = com.anthropic.models.beta.messages.MessageCreateParams
 				.builder()
 				.model(chatModel)
 				.maxTokens(maxOutputTokens);
 
-		paramsBuilder.messages(inputs2);
+		paramsBuilder.messages(inputs);
 
 		if (StringUtils.isNotBlank(instructions)) {
 			paramsBuilder.system(instructions);
