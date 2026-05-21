@@ -11,15 +11,12 @@ inputs = [
   ```
   mvn clean site site:stage -q
   ```
-- Note: for output `site_dir` is used: <stagingDirectory> pom.xml property. 
-   
 %s
 ''',
 '''
 # Upload
 
 - Command result "tailResultSize": 1000 
-- **Do not** under any circumstances modify, replace, or alter any placeholder variables in the format `${...}`.  
 
 1. **Synchronize the Site to Cloudflare:**
    - Use the `rclone sync` command to synchronize the local site directory to the Cloudflare bucket.

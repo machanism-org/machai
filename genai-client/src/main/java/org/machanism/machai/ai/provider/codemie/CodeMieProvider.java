@@ -58,7 +58,7 @@ import com.openai.client.OpenAIClient;
  * <li>{@code claude-*} models delegate to {@link ClaudeProvider}</li>
  * </ul>
  */
-public class CodeMieProvider extends GenaiAdapter implements Genai {
+public class CodeMieProvider extends GenaiAdapter {
 
 	/**
 	 * Configuration key used to override the default token endpoint.
