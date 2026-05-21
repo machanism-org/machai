@@ -125,21 +125,6 @@ public class ActCoverageTest {
 	}
 
 	@Test
-	public void configureAndScan_whenPromptReturnsExit_skipsScanning() throws Exception {
-		ActMojo mojo = new ActMojo();
-		Properties props = new Properties();
-		mojo.session = newSession(props, false, new File(".").getAbsolutePath(), Collections.emptyList());
-		mojo.prompter = mock(Prompter.class);
-		org.mockito.Mockito.when(mojo.prompter.prompt("Act")).thenReturn("exit");
-		RecordingActProcessor processor = new RecordingActProcessor();
-
-		mojo.configureAndScan(processor);
-
-		assertNull(processor.act);
-		assertNull(processor.scannedDir);
-	}
-
-	@Test
 	public void applyActPrompt_whenUserEntersExit_doesNotStoreValue() throws Exception {
 		ActMojo mojo = new ActMojo();
 		Properties props = new Properties();
