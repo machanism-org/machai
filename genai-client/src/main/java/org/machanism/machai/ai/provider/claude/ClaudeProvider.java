@@ -14,7 +14,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.manager.UsageStatistics;
@@ -30,22 +29,20 @@ import com.anthropic.client.okhttp.AnthropicOkHttpClient.Builder;
 import com.anthropic.core.JsonField;
 import com.anthropic.core.JsonValue;
 import com.anthropic.core.Timeout;
-import com.anthropic.models.messages.ContentBlock;
-import com.anthropic.models.messages.ContentBlockParam;
-import com.anthropic.models.messages.Message;
-import com.anthropic.models.messages.MessageCreateParams;
-import com.anthropic.models.messages.MessageParam;
-import com.anthropic.models.messages.MessageParam.Role;
-import com.anthropic.models.messages.Tool;
-import com.anthropic.models.messages.Tool.InputSchema.Properties;
-import com.anthropic.models.messages.ToolResultBlockParam;
-import com.anthropic.models.messages.ToolUnion;
-import com.anthropic.models.messages.ToolUseBlock;
-import com.anthropic.models.messages.ToolUseBlockParam;
-import com.anthropic.models.messages.ToolUseBlockParam.Input;
+import com.anthropic.models.beta.messages.BetaContentBlock;
+import com.anthropic.models.beta.messages.BetaContentBlockParam;
+import com.anthropic.models.beta.messages.BetaMessage;
+import com.anthropic.models.beta.messages.BetaMessageParam;
+import com.anthropic.models.beta.messages.BetaMessageParam.Role;
+import com.anthropic.models.beta.messages.BetaRequestMcpServerUrlDefinition;
+import com.anthropic.models.beta.messages.BetaTool;
+import com.anthropic.models.beta.messages.BetaToolResultBlockParam;
+import com.anthropic.models.beta.messages.BetaToolUnion;
+import com.anthropic.models.beta.messages.BetaToolUseBlock;
+import com.anthropic.models.beta.messages.BetaToolUseBlockParam;
+import com.anthropic.models.beta.messages.BetaUsage;
+import com.anthropic.models.beta.messages.MessageCreateParams;
 import com.anthropic.models.messages.UserLocation;
-import com.anthropic.models.messages.WebSearchTool20250305;
-import com.anthropic.models.messages.WebSearchTool20260209;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -85,12 +82,14 @@ public class ClaudeProvider extends AbstractAIProvider {
 	public static final String ANTHROPIC_BASE_URL = "ANTHROPIC_BASE_URL";
 
 	/** Accumulated prompt messages for the current conversation. */
-	private final List<MessageParam> inputs = new ArrayList<>();
+	private final List<BetaMessageParam> inputs = new ArrayList<>();
 
 	/** Maps tools to handler functions. */
-	private final Map<Tool, ToolFunction> toolMap = new HashMap<>();
+	private final Map<BetaTool, ToolFunction> toolMap = new HashMap<>();
 
 	private Object webSearchTool;
+
+	private List<BetaRequestMcpServerUrlDefinition> mcpServers = new ArrayList<>();
 
 	@Override
 	protected void addMcpServer() {
@@ -105,8 +104,16 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 			String propName = MCP_PROP_NAME_PREFIX + id;
 			url = config.get(propName + ".url", null);
+			String label = config.get(propName + ".label", null);
+			String authorization = config.get(propName + ".authorization", null);
+
 			if (url != null) {
-				throw new NotImplementedException();
+				com.anthropic.models.beta.messages.BetaRequestMcpServerUrlDefinition.Builder builder = BetaRequestMcpServerUrlDefinition
+						.builder();
+				builder.authorizationToken(authorization);
+				builder.url(url);
+				builder.name(label);
+				mcpServers.add(builder.build());
 			}
 
 		} while (i++ == 0 || url != null);
@@ -120,7 +127,6 @@ public class ClaudeProvider extends AbstractAIProvider {
 		String region = config.get("WebSearchTool.region", null);
 
 		if (type != null) {
-
 			com.anthropic.models.messages.UserLocation.Builder locationBuilder = UserLocation.builder();
 			if (city != null) {
 				locationBuilder.city(city);
@@ -133,24 +139,6 @@ public class ClaudeProvider extends AbstractAIProvider {
 			if (region != null) {
 				locationBuilder.region(region);
 			}
-
-			switch (type) {
-			case "WebSearchTool20260209":
-				com.anthropic.models.messages.WebSearchTool20260209.Builder builder1 = WebSearchTool20260209.builder();
-				builder1.userLocation(locationBuilder.build());
-				webSearchTool = builder1.build();
-				break;
-
-			case "WebSearchTool20250305":
-				com.anthropic.models.messages.WebSearchTool20250305.Builder builder2 = WebSearchTool20250305.builder();
-				builder2.userLocation(locationBuilder.build());
-				webSearchTool = builder2.build();
-				break;
-
-			default:
-				throw new IllegalArgumentException(
-						"Invalid WebSearchTool type provided. Supported types are: WebSearchTool20260209, WebSearchTool20250305.");
-			}
 		}
 	}
 
@@ -162,7 +150,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 	@Override
 	public void prompt(String text) {
 		if (StringUtils.isNotBlank(text)) {
-			inputs.add(MessageParam.builder().content(text).role(Role.USER).build());
+			inputs.add(BetaMessageParam.builder().content(text).role(Role.USER).build());
 		}
 	}
 
@@ -186,7 +174,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 		MessageCreateParams params = createResponseBuilder(inputs);
 
 		logger.debug("Sending request to Claude service.");
-		Message response = getClient().messages().create(params);
+		BetaMessage response = getClient().beta().messages().create(params);
 		captureUsage(response);
 
 		String result = parseResponse(response);
@@ -195,19 +183,19 @@ public class ClaudeProvider extends AbstractAIProvider {
 		return result;
 	}
 
-	private String parseResponse(Message response) {
-		List<ContentBlock> content = response.content();
+	private String parseResponse(BetaMessage response) {
+		List<BetaContentBlock> content = response.content();
 		String result = null;
 		boolean anyToolCalls = false;
 		String text = null;
 
-		for (ContentBlock contentBlock : content) {
+		for (BetaContentBlock contentBlock : content) {
 			if (contentBlock.isText()) {
 				text = contentBlock.text().map(t -> t.text()).orElse(null);
 				prompt(text);
 			}
 			if (contentBlock.isToolUse()) {
-				ToolUseBlock toolUse = contentBlock.asToolUse();
+				BetaToolUseBlock toolUse = contentBlock.asToolUse();
 				handleFunctionCall(toolUse);
 				anyToolCalls = true;
 			}
@@ -218,7 +206,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 		} else {
 			MessageCreateParams params = createResponseBuilder(this.inputs);
-			response = getClient().messages().create(params);
+			response = getClient().beta().messages().create(params);
 			captureUsage(response);
 
 			result = parseResponse(response);
@@ -233,9 +221,9 @@ public class ClaudeProvider extends AbstractAIProvider {
 	 *
 	 * @param response optional usage information from the OpenAI response
 	 */
-	private void captureUsage(Message response) {
+	private void captureUsage(BetaMessage response) {
 		if (response.isValid()) {
-			com.anthropic.models.messages.Usage responseUsage = response.usage();
+			BetaUsage responseUsage = response.usage();
 			long inputTokens = responseUsage.inputTokens();
 			long inputCachedTokens = responseUsage.cacheCreationInputTokens().get()
 					+ responseUsage.cacheReadInputTokens().get();
@@ -248,14 +236,14 @@ public class ClaudeProvider extends AbstractAIProvider {
 		}
 	}
 
-	private void handleFunctionCall(ToolUseBlock toolUse) {
+	private void handleFunctionCall(BetaToolUseBlock toolUse) {
 
-		ContentBlock toolUseBlock = ContentBlock.ofToolUse(toolUse);
-		List<ContentBlockParam> toolUseList = new ArrayList<>();
+		BetaContentBlock toolUseBlock = BetaContentBlock.ofToolUse(toolUse);
+		List<BetaContentBlockParam> toolUseList = new ArrayList<>();
 		toolUseList.add(toolUseBlock.toParam());
-		MessageParam toolUseMessage = MessageParam.builder()
-				.role(MessageParam.Role.ASSISTANT)
-				.contentOfBlockParams(toolUseList)
+		BetaMessageParam toolUseMessage = BetaMessageParam.builder()
+				.role(BetaMessageParam.Role.ASSISTANT)
+				.contentOfBetaContentBlockParams(toolUseList)
 				.build();
 		inputs.add(toolUseMessage);
 
@@ -269,33 +257,33 @@ public class ClaudeProvider extends AbstractAIProvider {
 			error = true;
 		}
 
-		ToolResultBlockParam toolResult = ToolResultBlockParam.builder()
+		BetaToolResultBlockParam toolResult = BetaToolResultBlockParam.builder()
 				.toolUseId(toolUse.id())
 				.content(Objects.toString(result))
 				.isError(error)
 				.build();
-		ContentBlockParam toolContentBlock = ContentBlockParam.ofToolResult(toolResult);
-		ArrayList<ContentBlockParam> arrayList = new ArrayList<>();
+		BetaContentBlockParam toolContentBlock = BetaContentBlockParam.ofToolResult(toolResult);
+		ArrayList<BetaContentBlockParam> arrayList = new ArrayList<>();
 		arrayList.add(toolContentBlock);
-		MessageParam toolResultMessage = MessageParam.builder()
-				.role(MessageParam.Role.USER)
-				.contentOfBlockParams(arrayList)
+		BetaMessageParam toolResultMessage = BetaMessageParam.builder()
+				.role(BetaMessageParam.Role.USER)
+				.contentOfBetaContentBlockParams(arrayList)
 				.build();
 
 		inputs.add(toolResultMessage);
 	}
 
-	private Object callFunction(ToolUseBlock functionCall) {
-		String name = functionCall.name();
-		ToolUseBlockParam param = functionCall.toParam();
-		JsonField<Input> params = param._input();
+	private Object callFunction(BetaToolUseBlock toolUse) {
+		String name = toolUse.name();
+		BetaToolUseBlockParam param = toolUse.toParam();
+		JsonField<com.anthropic.models.beta.messages.BetaToolUseBlockParam.Input> params = param._input();
 
 		JsonNode node = new ObjectMapper().valueToTree(params);
 
 		Object result = null;
 		File file = workingDir;
-		Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
-		for (Entry<Tool, ToolFunction> entry : entrySet) {
+		Set<Entry<BetaTool, ToolFunction>> entrySet = toolMap.entrySet();
+		for (Entry<BetaTool, ToolFunction> entry : entrySet) {
 			if (entry.getValue() != null && normalize(name).equals(normalize(entry.getKey().name()))) {
 				result = safelyInvokeTool(name, entry.getValue(), node, file);
 				break;
@@ -304,35 +292,25 @@ public class ClaudeProvider extends AbstractAIProvider {
 		return result;
 	}
 
-	private MessageCreateParams createResponseBuilder(List<MessageParam> inputs) {
-		MessageCreateParams.Builder paramsBuilder = MessageCreateParams.builder()
+	private MessageCreateParams createResponseBuilder(List<BetaMessageParam> inputs2) {
+		com.anthropic.models.beta.messages.MessageCreateParams.Builder paramsBuilder = com.anthropic.models.beta.messages.MessageCreateParams
+				.builder()
 				.model(chatModel)
 				.maxTokens(maxOutputTokens);
 
-		paramsBuilder.messages(inputs);
+		paramsBuilder.messages(inputs2);
 
 		if (StringUtils.isNotBlank(instructions)) {
 			paramsBuilder.system(instructions);
 		}
 
-		List<ToolUnion> tools = toolMap.keySet().stream().map(t -> ToolUnion.ofTool(t)).collect(Collectors.toList());
+		List<BetaToolUnion> tools = toolMap.keySet().stream().map(t -> BetaToolUnion.ofBetaTool(t))
+				.collect(Collectors.toList());
 		paramsBuilder.tools(tools);
 
-		if (webSearchTool != null) {
-			switch (webSearchTool.getClass().getSimpleName()) {
-			case "WebSearchTool20260209":
-				paramsBuilder.addTool((WebSearchTool20260209) webSearchTool);
-				break;
-
-			case "WebSearchTool20250305":
-				paramsBuilder.addTool((WebSearchTool20250305) webSearchTool);
-				break;
-
-			default:
-				break;
-			}
+		if (!mcpServers.isEmpty()) {
+			paramsBuilder.mcpServers(mcpServers);
 		}
-
 		MessageCreateParams params = paramsBuilder.build();
 		return params;
 	}
@@ -374,24 +352,23 @@ public class ClaudeProvider extends AbstractAIProvider {
 			}
 		}
 
-		com.anthropic.models.messages.Tool.InputSchema.Properties.Builder builder = Properties.builder();
+		BetaTool.InputSchema.Properties.Builder builder = BetaTool.InputSchema.Properties.builder();
 		builder.additionalProperties(fromValue);
 
-		Properties properties = builder.build();
+		BetaTool.InputSchema.Properties properties = builder.build();
 
 		// Build the input schema (assuming Anthropic's Tool.InputSchema supports this)
-		com.anthropic.models.messages.Tool.InputSchema.Builder inputSchemaBuilder = com.anthropic.models.messages.Tool.InputSchema
-				.builder()
+		BetaTool.InputSchema.Builder inputSchemaBuilder = BetaTool.InputSchema.builder()
 				.properties(properties)
 				.required(requiredProps);
 
 		// Build the tool
-		com.anthropic.models.messages.Tool.Builder toolBuilder = com.anthropic.models.messages.Tool.builder()
+		BetaTool.Builder toolBuilder = BetaTool.builder()
 				.name(name)
 				.description(description)
 				.inputSchema(inputSchemaBuilder.build());
 
-		com.anthropic.models.messages.Tool tool = toolBuilder.build();
+		BetaTool tool = toolBuilder.build();
 
 		// Register the tool and its function
 		toolMap.put(tool, function); // Assuming toolMap is keyed by name; adjust as needed
@@ -442,7 +419,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 	@Override
 	protected void logInputsSpec(Writer streamWriter) throws IOException {
-		for (MessageParam responseInputItem : inputs) {
+		for (BetaMessageParam responseInputItem : inputs) {
 			String content = responseInputItem.content().asString();
 			streamWriter.write(content);
 			streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
