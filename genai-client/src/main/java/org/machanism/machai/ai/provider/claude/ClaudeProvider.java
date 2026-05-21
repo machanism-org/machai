@@ -41,8 +41,10 @@ import com.anthropic.models.beta.messages.BetaToolUnion;
 import com.anthropic.models.beta.messages.BetaToolUseBlock;
 import com.anthropic.models.beta.messages.BetaToolUseBlockParam;
 import com.anthropic.models.beta.messages.BetaUsage;
+import com.anthropic.models.beta.messages.BetaUserLocation;
+import com.anthropic.models.beta.messages.BetaWebSearchTool20250305;
+import com.anthropic.models.beta.messages.BetaWebSearchTool20260209;
 import com.anthropic.models.beta.messages.MessageCreateParams;
-import com.anthropic.models.messages.UserLocation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -127,7 +129,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 		String region = config.get("WebSearchTool.region", null);
 
 		if (type != null) {
-			com.anthropic.models.messages.UserLocation.Builder locationBuilder = UserLocation.builder();
+			BetaUserLocation.Builder locationBuilder = BetaUserLocation.builder();
 			if (city != null) {
 				locationBuilder.city(city);
 			}
@@ -138,6 +140,24 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 			if (region != null) {
 				locationBuilder.region(region);
+			}
+
+			switch (type) {
+			case "20260209":
+				BetaWebSearchTool20260209.Builder builder1 = BetaWebSearchTool20260209.builder();
+				builder1.userLocation(locationBuilder.build());
+				webSearchTool = builder1.build();
+				break;
+
+			case "20250305":
+				BetaWebSearchTool20250305.Builder builder2 = BetaWebSearchTool20250305.builder();
+				builder2.userLocation(locationBuilder.build());
+				webSearchTool = builder2.build();
+				break;
+
+			default:
+				throw new IllegalArgumentException(
+						"Invalid WebSearchTool type provided. Supported types are: 20260209, 20250305.");
 			}
 		}
 	}
@@ -311,6 +331,13 @@ public class ClaudeProvider extends AbstractAIProvider {
 		if (!mcpServers.isEmpty()) {
 			paramsBuilder.mcpServers(mcpServers);
 		}
+
+		if (webSearchTool instanceof BetaWebSearchTool20260209) {
+			paramsBuilder.addTool((BetaWebSearchTool20260209) webSearchTool);
+		} else if (webSearchTool instanceof BetaWebSearchTool20250305) {
+			paramsBuilder.addTool((BetaWebSearchTool20250305) webSearchTool);
+		}
+
 		MessageCreateParams params = paramsBuilder.build();
 		return params;
 	}
