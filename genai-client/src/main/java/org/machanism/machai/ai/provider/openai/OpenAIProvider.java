@@ -19,6 +19,7 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.manager.UsageStatistics;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;

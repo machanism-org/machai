@@ -1,24 +1,20 @@
-package org.machanism.machai.ai.provider.openai;
+package org.machanism.machai.ai.provider;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 public abstract class AbstractAIProvider implements Genai {
 
