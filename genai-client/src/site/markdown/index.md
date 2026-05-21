@@ -6,20 +6,11 @@ Generate or update the content as follows.
 1. Header
    - Project Title: need to use from pom.xml
    - Maven Central Badge ([![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
-# Introduction
-   - Full description of purpose and benefits.
 # Overview
-   - Explanation of the project function and value proposition.
-# Key Features
-   - Bulleted list highlighting the primary capabilities of the project.
-# Getting Started
-   - Prerequisites: List of required software and services.
-   - Environment Variables: Table describing necessary environment variables.
-   - Basic Usage: Example command to run the plugin.
-   - Typical Workflow: Step-by-step outline of how to use the project artifacts.
-# Configuration
+   - Full description the project based on package-info.java files in source folder..
+# Supported AI providers
+   - Describe all supported AP providers with configurations.
    - Table of common configuration parameters, their descriptions, and default values.
-   - Example: Command-line example showing how to configure and run the plugin with custom parameters.
 # Resources
    - List of relevant links (platform, GitHub, Maven).
 -->
@@ -30,234 +21,117 @@ canonical: https://machai.machanism.org/genai-client/index.html
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg)](https://central.sonatype.com/artifact/org.machanism.machai/genai-client)
 
-## Introduction
+GenAI Client is a Java library for provider-agnostic integration with generative AI services in the MachAI ecosystem. It defines a common API for prompt execution, instructions, tool calling, embeddings, file-aware requests, provider initialization, and usage tracking so application code can work with multiple AI backends through a single abstraction.
 
-GenAI Client is a Java library designed for seamless integration with generative AI providers. It provides foundational prompt management, model execution, tool/function calling, embedding support, and usage reporting so JVM applications can add AI-powered features through a consistent provider-agnostic API.
+The library centers on the `org.machanism.machai.ai` API and its subpackages:
 
-The library reduces direct coupling to individual provider SDKs. Applications can build prompt-driven workflows, semantic search, retrieval, automated content generation, and intelligent project assembly while keeping provider selection, authentication, request limits, and runtime behavior configurable across the MachAI and Machanism ecosystem.
+- `org.machanism.machai.ai` provides the root abstractions for vendor-neutral AI interactions.
+- `org.machanism.machai.ai.manager` resolves configured model identifiers into concrete provider implementations and aggregates token usage statistics.
+- `org.machanism.machai.ai.provider` defines the shared provider contract, reusable base implementations, and adapter support.
+- `org.machanism.machai.ai.provider.openai` integrates with the OpenAI Responses API, including embeddings, function tools, optional built-in web search, and MCP server tools.
+- `org.machanism.machai.ai.provider.claude` integrates with Anthropic Claude models, including prompts, usage tracking, local function tools, and optional web search support.
+- `org.machanism.machai.ai.provider.codemie` integrates with EPAM CodeMie by obtaining OAuth access tokens and delegating requests to OpenAI-compatible or Anthropic-compatible provider implementations based on the selected model.
+- `org.machanism.machai.ai.tools` supports discovery and registration of host-side tool functions that can be exposed to compatible providers.
 
-## Overview
-
-This project provides the central provider contract and supporting infrastructure for GenAI integrations in MachAI.
-
-- `Genai` defines the common lifecycle and operations for initialization, instructions, prompts, request execution, embeddings, tool registration, working-directory propagation, cleanup, and usage reporting.
-- `GenaiAdapter` is a delegating `Genai` implementation that forwards all calls to an underlying provider, enabling decoration with cross-cutting concerns such as logging, metrics, retries, or request shaping.
-- `GenaiProviderManager` resolves providers from identifiers such as `OpenAI:gpt-4.1`, initializes them from a `Configurator`, and aggregates token usage.
-- `OpenAIProvider` is the production-ready OpenAI-compatible implementation, including prompt execution through the OpenAI Responses API, iterative tool calling, embeddings, request logging, optional web search and MCP server tools, and usage mapping.
-- `ClaudeProvider` is the Anthropic-backed implementation built on top of the Anthropic Java SDK, supporting prompts, tool calling, and usage tracking.
-- `CodeMieProvider` authenticates against EPAM CodeMie and delegates execution to a downstream provider (`OpenAIProvider` for `gpt-*`/`gemini-*` models or `ClaudeProvider` for `claude-*` models) configured for the CodeMie Code Assistant API.
-
-This abstraction lets applications keep a stable integration layer while changing models, providers, or runtime environments.
-
-## Key Features
-
-- Unified `Genai` API for prompts, instructions, execution, embeddings, and tool registration.
-- Provider resolution through `GenaiProviderManager` using `Provider:model` selectors or fully qualified provider class names.
-- OpenAI-compatible implementation with support for response execution, function tool calling, input logging, timeout configuration, output-token limits, embeddings, optional built-in web search, and MCP server tools.
-- Anthropic Claude integration with prompt execution, tool calling, and configurable timeouts.
-- CodeMie integration with OAuth-based token acquisition and routing to OpenAI- or Claude-compatible backends based on the configured model.
-- Delegation through `GenaiAdapter` for composable provider decorators.
-- Token usage tracking via `Usage` and aggregated logging via `GenaiProviderManager`.
-- Working-directory propagation for tool handlers that need file-system context.
-- Extensible tool function integration through `ToolFunction`, `FunctionTools`, and Java `ServiceLoader` discovery.
-
-## Getting Started
-
-### Prerequisites
-
-- Java 8 or later.
-- Maven 3.x.
-- Access credentials for the provider you intend to use.
-- Network access to the selected AI service when using a remote provider.
-
-### Environment Variables
-
-| Variable | Required | Used by | Description |
-|---|---:|---|---|
-| `OPENAI_API_KEY` | Conditional | OpenAI / OpenAI-compatible | API key or bearer token used to authenticate requests. |
-| `OPENAI_BASE_URL` | No | OpenAI / OpenAI-compatible | Optional base URL override for compatible endpoints. |
-| `ANTHROPIC_API_KEY` | Conditional | Claude | API key used to authenticate with the Anthropic API. |
-| `ANTHROPIC_BASE_URL` | No | Claude | Optional base URL override for Anthropic-compatible endpoints. |
-| `GENAI_USERNAME` | Conditional | CodeMie | User e-mail for password grant or client id for client-credentials flow. |
-| `GENAI_PASSWORD` | Conditional | CodeMie | Password for password grant or client secret for client-credentials flow. |
-| `AUTH_URL` | No | CodeMie | Optional override for the OAuth token endpoint. |
-| `GENAI_TIMEOUT` | No | OpenAI / Claude | Request timeout in seconds. Default is `600` for OpenAI; SDK default for Claude. |
-| `MAX_OUTPUT_TOKENS` | No | OpenAI / Claude | Maximum number of output tokens. Default is `18000`. |
-| `MAX_TOOL_CALLS` | No | OpenAI / Claude | Maximum number of tool calls allowed in a response loop. Default is `0`. |
-| `embedding.model` | No | OpenAI / OpenAI-compatible | Embedding model identifier used by `embedding(...)`. |
-
-### Basic Usage
-
-```java
-import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
-import org.machanism.machai.ai.provider.Genai;
-
-Configurator conf = new Configurator();
-conf.set("OPENAI_API_KEY", System.getenv("OPENAI_API_KEY"));
-
-Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4.1", conf);
-provider.instructions("Answer concisely.");
-provider.prompt("Summarize this project in one paragraph.");
-String result = provider.perform();
-```
-
-### Typical Workflow
-
-1. Create or load a `Configurator` with provider-specific settings.
-2. Resolve a provider with `GenaiProviderManager.getProvider("Provider:model", conf)`.
-3. Optionally set instructions, input logging, a working directory, or tool functions.
-4. Add one or more prompts.
-5. Execute the request with `perform()`.
-6. Read the response and inspect `usage()` when token metrics are needed.
-7. Call `clear()` before reusing the same provider instance for a new interaction.
-
-## Configuration
-
-### Common configuration parameters
-
-| Parameter | Description | Default |
-|---|---|---|
-| `chatModel` | Provider model identifier set by `GenaiProviderManager` from the `Provider:model` selector. | None |
-| `OPENAI_API_KEY` | API key or access token for OpenAI-compatible backends. | None |
-| `OPENAI_BASE_URL` | Base URL override for OpenAI-compatible endpoints. | SDK/provider default |
-| `ANTHROPIC_API_KEY` | API key for the Anthropic API. | None |
-| `ANTHROPIC_BASE_URL` | Base URL override for Anthropic-compatible endpoints. | SDK/provider default |
-| `GENAI_USERNAME` | CodeMie username or client id. | None |
-| `GENAI_PASSWORD` | CodeMie password or client secret. | None |
-| `AUTH_URL` | CodeMie token endpoint override. | `https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token` |
-| `GENAI_TIMEOUT` | Request timeout in seconds. | `600` (OpenAI), SDK default (Claude) |
-| `MAX_OUTPUT_TOKENS` | Maximum output tokens. | `18000` |
-| `MAX_TOOL_CALLS` | Maximum tool calls per response loop. | `0` |
-| `embedding.model` | Embedding model identifier. | None |
-| `WebSearchTool.type` | Enables the OpenAI built-in web search tool when present. | Not set |
-| `WebSearchTool.city` / `WebSearchTool.country` / `WebSearchTool.region` | Approximate user location values for web search. | Not set |
-| `MCP.url` / `MCP.label` / `MCP.description` / `MCP.authorization` | Registers an MCP server tool (use `MCP_1.*`, `MCP_2.*`, ... for additional servers). | Not set |
-| `logInputs` | Enables writing provider inputs through provider-specific logging support. | Not set |
-| `genai.serverId` | Configurable server identifier exposed by the provider contract. | Not set |
-
-### Example: configure and run with custom parameters
-
-```java
-import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
-import org.machanism.machai.ai.provider.Genai;
-
-Configurator conf = new Configurator();
-conf.set("OPENAI_API_KEY", System.getenv("OPENAI_API_KEY"));
-conf.set("OPENAI_BASE_URL", System.getenv("OPENAI_BASE_URL"));
-conf.set("GENAI_TIMEOUT", "120");
-conf.set("MAX_OUTPUT_TOKENS", "4000");
-conf.set("MAX_TOOL_CALLS", "4");
-conf.set("embedding.model", "text-embedding-3-large");
-
-Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4.1", conf);
-provider.instructions("Use a professional tone.");
-provider.prompt("Explain how to add a custom tool.");
-String answer = provider.perform();
-```
-
-## Supported GenAI Providers
-<!-- 
-@guidance: 
-IMPORTANT: Update this section! Use from javadoc of classes from source folder which extend the GenAI interface 
-and generate the content for this section following net format:
-### [PROVIDER_NAME]
-... FULL DESCRIPTION ...
--->
+## Supported AI providers
 
 ### OpenAI
 
-`OpenAIProvider` is the primary production-ready provider in this module. It adapts the OpenAI Java SDK Responses API to the MachAI `Genai` contract and supports prompt submission, optional system instructions, file inputs, locally registered function tools, optional built-in web search, MCP server tools, embedding generation, timeout handling, input logging, response parsing, iterative function-tool execution, and OpenAI token accounting mapped to MachAI usage metrics.
+The OpenAI provider uses the OpenAI Java SDK and the Responses API to support:
 
-Configuration values are read from the `Configurator` passed to `init(...)`.
+- chat-style prompt execution
+- system instructions
+- embedding generation
+- local function tool registration
+- optional built-in web search
+- optional MCP server registration
+- usage tracking for input, cached input, and output tokens
 
-- `chatModel` (required): model identifier sent to the OpenAI Responses API, such as `gpt-4.1` or `gpt-4o-mini`.
-- `OPENAI_API_KEY` (required): API key used to authenticate with the OpenAI API or compatible backend.
-- `OPENAI_BASE_URL` (optional): base URL override for OpenAI-compatible endpoints.
-- `GENAI_TIMEOUT` (optional): request timeout in seconds. Defaults to `600`.
-- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to `18000`.
-- `MAX_TOOL_CALLS` (optional): maximum number of tool calls in a single response loop. A value of `0` leaves the limit unset.
-- `embedding.model` (optional): embedding model identifier used by `embedding(String, long)`.
-- `WebSearchTool.type` (optional): enables the built-in web search tool when present.
-- `WebSearchTool.city` / `WebSearchTool.country` / `WebSearchTool.region` (optional): approximate user-location values for web search.
-- `MCP.url`, `MCP.label`, `MCP.description`, `MCP.authorization` (optional): registers an MCP server tool. Numbered groups (`MCP_1.*`, `MCP_2.*`, ...) register additional servers.
+Typical selection format through the provider manager:
 
-Capabilities include:
+- `OpenAI:gpt-4o-mini`
+- `OpenAI:gpt-4.1`
 
-- Prompt execution through `perform()`.
-- Iterative function tool calling with tool-output feedback until a final model message is returned.
-- Optional built-in OpenAI web search tool.
-- Optional MCP server tool registration.
-- Input logging to local files.
-- Working-directory propagation to tool handlers.
-- Embedding generation.
-- Usage reporting through `Usage` and `GenaiProviderManager`.
+Primary OpenAI-specific configuration:
 
-Thread safety: not thread-safe.
+| Parameter | Description | Default |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | API key or compatible bearer token used to authenticate requests. | None |
+| `OPENAI_BASE_URL` | Optional base URL for OpenAI-compatible endpoints. | SDK default |
+| `embedding.model` | Model used for embedding requests. | None |
+| `WebSearchTool.type` | Enables the built-in OpenAI web search tool when set. | Disabled |
+| `WebSearchTool.city` | Optional city for approximate web search user location. | None |
+| `WebSearchTool.country` | Optional country for approximate web search user location. | None |
+| `WebSearchTool.region` | Optional region for approximate web search user location. | None |
+| `MCP.url` / `MCP_1.url`... | Registers one or more MCP server tools. | Disabled |
+| `MCP.label` / `MCP_1.label`... | Optional MCP server label. | None |
+| `MCP.description` / `MCP_1.description`... | Optional MCP server description. | None |
+| `MCP.authorization` / `MCP_1.authorization`... | Optional MCP server authorization value. | None |
 
 ### Claude
 
-`ClaudeProvider` is an Anthropic-backed `Genai` implementation built on top of the Anthropic Java SDK. It supports prompt execution, system instructions, function tool calling with tool-result feedback, and configurable timeouts and output limits.
+The Claude provider uses the Anthropic Java SDK to support:
 
-Configuration values are read from the `Configurator` passed to `init(...)`.
+- prompt execution against Claude models
+- system instructions
+- local function tool registration
+- optional Anthropic web search tool variants
+- usage tracking
 
-- `chatModel` (required): Anthropic model identifier, for example `claude-3-opus-20240229` or `claude-3-5-sonnet`.
-- `ANTHROPIC_API_KEY` (required): API key used to authenticate with the Anthropic API.
-- `ANTHROPIC_BASE_URL` (optional): base URL override for Anthropic-compatible endpoints.
-- `GENAI_TIMEOUT` (optional): request timeout in seconds. When missing, `0`, or negative, the SDK default timeouts are used.
-- `MAX_OUTPUT_TOKENS` (optional): maximum number of output tokens. Defaults to `18000`.
-- `MAX_TOOL_CALLS` (optional): maximum number of tool calls per response loop. A value of `0` leaves the limit unset.
-- `embedding.model` (optional): embedding model identifier (embeddings are not currently implemented for Claude).
+Typical selection format through the provider manager:
 
-Capabilities include:
+- `Claude:claude-3-5-sonnet`
+- `Claude:claude-3-opus-20240229`
 
-- Prompt execution through `perform()`.
-- Iterative function tool calling using Anthropic tool-use and tool-result blocks.
-- Working-directory propagation to tool handlers.
-- Usage reporting through `Usage`.
+Primary Claude-specific configuration:
 
-Limitations:
-
-- Embedding generation is not implemented and returns an empty list.
-- Input logging through `inputsLog(File)` is not implemented.
-
-Thread safety: not thread-safe.
+| Parameter | Description | Default |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | API key used to authenticate Anthropic requests. | None |
+| `ANTHROPIC_BASE_URL` | Optional base URL for Anthropic-compatible endpoints. | SDK default |
+| `WebSearchTool.type` | Anthropic web search tool type. Supported values include `WebSearchTool20260209` and `WebSearchTool20250305`. | Disabled |
+| `WebSearchTool.city` | Optional city for web search location. | None |
+| `WebSearchTool.country` | Optional country for web search location. | None |
+| `WebSearchTool.region` | Optional region for web search location. | None |
 
 ### CodeMie
 
-`CodeMieProvider` integrates with EPAM CodeMie. It authenticates against a CodeMie OpenID Connect token endpoint to obtain an OAuth 2.0 access token, configures the CodeMie Code Assistant API as the downstream backend, and delegates execution to an internal provider instance through the `GenaiAdapter` mechanism.
+The CodeMie provider authenticates against the EPAM CodeMie identity endpoint, retrieves an OAuth 2.0 access token, and delegates execution to a compatible downstream provider based on the configured `chatModel`.
 
-Authentication modes:
+Supported delegated model families in the current implementation:
 
-- Password grant is used when `GENAI_USERNAME` contains `@`, which is the typical e-mail login mode.
-- Client credentials grant is used otherwise for service-to-service authentication.
+- `gpt-*` and blank model values delegate to the OpenAI-compatible provider against the CodeMie base URL
+- `gemini-*` values are handled through the OpenAI-compatible path in the current implementation
+- `claude-*` values delegate to the Claude-compatible provider
 
-Provider delegation is selected based on the configured `chatModel` prefix:
+Typical selection format through the provider manager:
 
-- `gpt-*` models (or blank/unspecified) delegate to `OpenAIProvider`.
-- `gemini-*` models delegate to `OpenAIProvider` (OpenAI-compatible CodeMie endpoint).
-- `claude-*` models delegate to `ClaudeProvider`.
+- `CodeMie:gpt-4o-mini`
+- `CodeMie:claude-3-5-sonnet`
 
-After retrieving a token, the provider sets the appropriate downstream configuration:
+Primary CodeMie-specific configuration:
 
-- For OpenAI-compatible delegation: `OPENAI_BASE_URL` is set to `https://codemie.lab.epam.com/code-assistant-api` and `OPENAI_API_KEY` is set to the retrieved access token.
-- For Claude delegation: `ANTHROPIC_BASE_URL` is set to the CodeMie base URL and `ANTHROPIC_API_KEY` is set to the retrieved access token.
+| Parameter | Description | Default |
+| --- | --- | --- |
+| `GENAI_USERNAME` | User e-mail for password grant or client identifier for client-credentials grant. | None |
+| `GENAI_PASSWORD` | Password or client secret used to obtain the OAuth token. | None |
+| `AUTH_URL` | Optional override for the default CodeMie token endpoint. | `https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token` |
 
-Configuration:
+## Common configuration parameters
 
-- `GENAI_USERNAME` (required): user e-mail or client id.
-- `GENAI_PASSWORD` (required): password or client secret.
-- `chatModel` (required): model identifier passed to the delegated provider, for example `gpt-4o-mini`, `gemini-1.5-pro`, or `claude-3-5-sonnet`.
-- `AUTH_URL` (optional): token endpoint override.
+These parameters are shared across the provider abstraction or base provider initialization logic.
 
-The active downstream provider applies its own execution, tool-calling, logging, embedding, and usage-reporting behavior, as documented for OpenAI and Claude above.
-
-Thread safety: not thread-safe.
+| Parameter | Description | Default |
+| --- | --- | --- |
+| `chatModel` | Model name passed to the selected provider after provider resolution from `Provider:Model`. | None |
+| `MAX_OUTPUT_TOKENS` | Maximum number of output tokens requested from the model. | `18000` |
+| `MAX_TOOL_CALLS` | Maximum number of tool calls allowed in a response loop. `0` means unset. | `0` |
+| `GENAI_TIMEOUT` | Request timeout in seconds for provider SDK clients. `0` means SDK defaults. | `0` |
+| `logInputs` | Indicates whether provider inputs should be logged by the application workflow. | Provider/application-controlled |
+| `genai.serverId` | Target GenAI server identifier used by the application configuration model. | None |
 
 ## Resources
 
-- Project site: https://machai.machanism.org/genai-client/
-- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/genai-client
-- GitHub: https://github.com/machanism-org/machai
-- SCM URL: https://github.com/machanism-org/machai.git
+- [MachAI platform](https://machai.machanism.org/)
+- [GitHub repository](https://github.com/machanism-org/machai.git)
+- [Maven Central artifact](https://central.sonatype.com/artifact/org.machanism.machai/genai-client)
