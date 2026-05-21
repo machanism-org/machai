@@ -45,7 +45,6 @@ import com.anthropic.models.messages.ToolUseBlockParam;
 import com.anthropic.models.messages.ToolUseBlockParam.Input;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /**
  * Anthropic-backed implementation of MachAI's {@link Genai} abstraction.
@@ -101,9 +100,9 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 			String propName = MCP_PROP_NAME_PREFIX + id;
 			url = config.get(propName + ".url", null);
-			String label = config.get(propName + ".label", null);
-			String description = config.get(propName + ".description", null);
-			String authorization = config.get(propName + ".authorization", null);
+//			String label = config.get(propName + ".label", null);
+//			String description = config.get(propName + ".description", null);
+//			String authorization = config.get(propName + ".authorization", null);
 
 			if (url != null) {
 				throw new NotImplementedException();
@@ -115,9 +114,9 @@ public class ClaudeProvider extends AbstractAIProvider {
 	@Override
 	protected void addWebSearch() {
 		String type = config.get("WebSearchTool.type", null);
-		String city = config.get("WebSearchTool.city", null);
-		String country = config.get("WebSearchTool.country", null);
-		String region = config.get("WebSearchTool.region", null);
+//		String city = config.get("WebSearchTool.city", null);
+//		String country = config.get("WebSearchTool.country", null);
+//		String region = config.get("WebSearchTool.region", null);
 
 		if (type != null) {
 			throw new NotImplementedException();
@@ -287,7 +286,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 		List<ToolUnion> tools = toolMap.keySet().stream().map(t -> ToolUnion.ofTool(t)).collect(Collectors.toList());
 		paramsBuilder.tools(tools);
-
+		
 		MessageCreateParams params = paramsBuilder.build();
 		return params;
 	}
