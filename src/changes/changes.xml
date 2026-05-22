@@ -96,5 +96,31 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
 ]]>
 </action>
 </release>
+  <release version="1.1.13" date="2026-05-22">
+<action dev="dev" type="add">
+<![CDATA[
+<b>Features:</b>
+<ul>
+  <li>Added Claude provider support, including provider configuration routing, tool call handling, message structure updates, Beta API integration, and web search support.</li>
+  <li>Expanded CodeMie provider model routing and removed the None provider.</li>
+  <li>Improved provider resolution and functional tool integration.</li>
+</ul>
+<b>Fixes:</b>
+<ul>
+  <li>Fixed cache input token calculation in the Claude provider.</li>
+  <li>Fixed module processing logging level handling and act execution property handling.</li>
+  <li>Corrected <code>&lt;developers&gt;</code> information in POM files.</li>
+</ul>
+<b>Refactoring:</b>
+<ul>
+  <li>Refactored function call handling shared by Claude and OpenAI providers.</li>
+  <li>Refactored provider shared base implementations and moved <code>AbstractAIProvider</code> into the provider package.</li>
+  <li>Refactored usage tracking and Maven plugin usage statistics logging to per-model statistics management.</li>
+  <li>Refactored episode execution from 0-based to 1-based indexing for clearer episode handling.</li>
+  <li>Refactored MCP server and web search configuration loops into shared provider logic.</li>
+</ul>
+]]>
+</action>
+</release>
 </body>
 </document>

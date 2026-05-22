@@ -43,5 +43,14 @@
 </ul>
       ]]></action>
     </release>
+
+    <release version="1.1.13" date="2026-05-22">
+      <action dev="dev" type="add"><![CDATA[
+<b>Fixes:</b>
+<ul>
+  <li>Adjusted module processing logging levels.</li>
+</ul>
+      ]]></action>
+    </release>
   </body>
 </document>

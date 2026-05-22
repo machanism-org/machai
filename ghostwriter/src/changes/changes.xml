@@ -95,5 +95,19 @@
 </ul>
       ]]></action>
     </release>
+    <release version="1.1.13" date="2026-05-22">
+      <action dev="dev" type="add"><![CDATA[
+<b>Features:</b>
+<ul>
+  <li>Updated act execution property handling across built-in tools, command execution, and web integration.</li>
+</ul>
+<b>Fixes:</b>
+<ul>
+  <li>Improved special prompt command processing and usage statistics handling.</li>
+  <li>Refined act prompt handling and functional tool integration.</li>
+  <li>Switched episode indexing from 0-based to 1-based numbering for clearer act execution behavior.</li>
+</ul>
+      ]]></action>
+    </release>
    </body>
 </document>
