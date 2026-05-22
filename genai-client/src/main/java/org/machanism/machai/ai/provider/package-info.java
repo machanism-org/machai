@@ -16,49 +16,47 @@
  */
 
 /**
- * Defines the provider abstraction layer used by MachAI to integrate with concrete
- * generative AI services.
+ * Defines the provider abstraction layer that connects MachAI to concrete
+ * generative AI platforms through a shared, provider-neutral API.
  *
- * <p>This package contains the core {@link org.machanism.machai.ai.provider.Genai}
- * contract, reusable base implementations, and adapter types that let the rest of
- * the application interact with multiple AI backends through a consistent API.
- * Providers encapsulate configuration-driven initialization, prompt and instruction
- * collection, optional tool registration, input logging, embedding generation,
- * response execution, usage reporting, timeout handling, and provider-specific
- * client setup.</p>
+ * <p>This package contains the central {@link org.machanism.machai.ai.provider.Genai}
+ * contract together with reusable base and adapter implementations used to build
+ * provider integrations. It standardizes how the application initializes AI
+ * clients, supplies instructions and prompts, registers callable tools, generates
+ * embeddings, executes model requests, tracks usage, propagates working-directory
+ * context, and releases provider resources.</p>
  *
  * <h2>Core abstractions</h2>
  * <ul>
- * <li>{@link org.machanism.machai.ai.provider.Genai} defines the common provider
- * lifecycle and operations for conversational prompting, embedding generation,
- * tool registration, request execution, usage inspection, input logging, working
- * directory propagation, and session cleanup.</li>
+ * <li>{@link org.machanism.machai.ai.provider.Genai} defines the common lifecycle
+ * and operations for prompt execution, embedding generation, tool registration,
+ * usage inspection, input logging, and cleanup.</li>
  * <li>{@link org.machanism.machai.ai.provider.AbstractAIProvider} supplies shared
- * behavior for configurable providers, including configuration handling,
- * instructions management, request metadata, timeout configuration, input
- * logging, web-search and MCP tool setup, and safe invocation of registered
- * tools.</li>
- * <li>{@link org.machanism.machai.ai.provider.GenaiAdapter} provides a reusable
- * delegating implementation that forwards calls to another {@code Genai}
- * instance, making it suitable for adapter and decorator patterns.</li>
+ * infrastructure for configuration-backed providers, including instruction and
+ * prompt collection, timeout handling, request metadata, logging, optional web
+ * search and MCP tool support, and guarded invocation of registered tools.</li>
+ * <li>{@link org.machanism.machai.ai.provider.GenaiAdapter} provides a delegating
+ * implementation that forwards operations to another {@code Genai} instance,
+ * making it suitable for adapter, wrapper, and decorator scenarios.</li>
  * </ul>
  *
- * <h2>Provider specializations</h2>
+ * <h2>Provider implementations</h2>
  * <ul>
- * <li>{@code openai}: OpenAI Responses API integration for conversational
- * requests, embeddings, function tools, optional built-in tools such as web
- * search and MCP access, and token-usage tracking.</li>
- * <li>{@code codemie}: EPAM CodeMie integration that authenticates against the
- * CodeMie identity platform and delegates requests to compatible downstream
- * provider implementations according to the configured model family.</li>
- * <li>{@code claude}: Anthropic Claude integration for Claude-backed request
- * execution within the shared provider abstraction.</li>
+ * <li>{@code openai} contains the OpenAI-backed implementation for response
+ * generation, function-tool execution, embeddings, and usage reporting through
+ * OpenAI-compatible APIs.</li>
+ * <li>{@code codemie} contains the CodeMie integration that acquires platform
+ * access tokens and configures delegated providers for CodeMie-hosted model
+ * endpoints.</li>
+ * <li>{@code claude} contains the Anthropic Claude integration used to execute
+ * Claude-backed requests within the same shared provider model.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
- * <p>Application code typically obtains a concrete implementation from provider
- * management infrastructure, initializes it with configuration, adds optional
- * instructions and prompts, registers any required tools, and then invokes the
- * provider to produce a response, embeddings, and usage information.</p>
+ * <h2>Usage</h2>
+ * <p>Provider management code typically creates or resolves a concrete
+ * implementation, initializes it from runtime configuration, optionally adds
+ * instructions, prompts, files, and tools, and then invokes the provider to
+ * obtain generated content, embeddings, and usage statistics through the common
+ * API exposed by this package.</p>
  */
 package org.machanism.machai.ai.provider;

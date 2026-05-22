@@ -18,36 +18,39 @@
 /**
  * Provider-agnostic generative AI integration for MachAI.
  *
- * <p>This package defines the root API for working with large language model providers, provider selection,
- * provider lifecycle management, function tool integration, and usage accounting. It gives application code a
- * stable entry point for AI interactions while isolating provider-specific behavior in dedicated sub-packages.</p>
+ * <p>This package defines the root API and orchestration layer for working with large language model providers,
+ * provider resolution, request preparation, tool exposure, file-aware interactions, and usage accounting. It
+ * supplies the stable entry point used by application code while delegating implementation details to dedicated
+ * child packages for concrete providers and supporting infrastructure.</p>
  *
  * <h2>Scope</h2>
- * <p>The package organizes the abstractions and top-level services needed to configure a provider, prepare
- * prompts and instructions, attach optional files or tools, execute requests, and track consumption across
- * supported integrations.</p>
+ * <p>The package groups the top-level abstractions required to select a provider from a model identifier,
+ * initialize it with runtime configuration, build prompts and instructions, attach optional files or callable
+ * tools, execute requests, and collect provider-reported usage metrics for monitoring and logging.</p>
  *
- * <h2>Main areas</h2>
+ * <h2>Main package areas</h2>
  * <ul>
  *   <li><strong>Provider contracts</strong> in {@link org.machanism.machai.ai.provider}, centered on
- *       {@link org.machanism.machai.ai.provider.Genai} for text generation, embeddings, file-aware requests,
- *       tool calling, and usage reporting.</li>
- *   <li><strong>Provider management</strong> in {@link org.machanism.machai.ai.manager}, which resolves provider
- *       implementations from model identifiers, initializes them with runtime configuration, and aggregates usage
- *       metrics for monitoring and logging.</li>
- *   <li><strong>Tool exposure</strong> in {@link org.machanism.machai.ai.tools}, where host-side functions are
- *       discovered and applied so compatible providers can invoke controlled application capabilities.</li>
- *   <li><strong>Backend implementations</strong> in concrete {@code provider.*} sub-packages for supported services
- *       such as OpenAI-compatible integrations, EPAM CodeMie, and no-operation fallbacks.</li>
+ *       {@link org.machanism.machai.ai.provider.Genai} and related types for text generation, embeddings,
+ *       structured interactions, file handling, and usage reporting.</li>
+ *   <li><strong>Provider resolution and lifecycle management</strong> in
+ *       {@link org.machanism.machai.ai.manager}, which maps model identifiers to implementations, initializes
+ *       providers from configuration, and aggregates usage statistics.</li>
+ *   <li><strong>Function tool integration</strong> in {@link org.machanism.machai.ai.tools}, where application
+ *       functions are discovered, described, and exposed to compatible providers for controlled tool calling.</li>
+ *   <li><strong>Concrete provider implementations</strong> in child packages below
+ *       {@link org.machanism.machai.ai.provider}, including OpenAI-compatible integrations, EPAM CodeMie
+ *       support, and no-operation fallbacks.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <ol>
  *   <li>Resolve a provider for a configured model identifier.</li>
  *   <li>Initialize the provider with application configuration.</li>
- *   <li>Set instructions, prompts, and optional tool support.</li>
+ *   <li>Set system instructions and the user prompt.</li>
+ *   <li>Optionally attach files, embeddings, or callable tools.</li>
  *   <li>Execute the request and process the generated response.</li>
- *   <li>Collect and log usage information for observability.</li>
+ *   <li>Record usage information for observability and cost tracking.</li>
  * </ol>
  *
  * <h2>Example</h2>
@@ -67,7 +70,7 @@
  * GenaiProviderManager.logUsage();
  * </pre>
  *
- * <p>Use this package when application code needs a vendor-neutral API for AI features while delegating concrete
- * integration details to the child packages that implement provider-specific behavior.</p>
+ * <p>Use this package when code needs a vendor-neutral API for generative AI features while keeping provider-
+ * specific behavior isolated in child packages.</p>
  */
 package org.machanism.machai.ai;

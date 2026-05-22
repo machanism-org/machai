@@ -27,47 +27,42 @@
  */
 
 /**
- * Provider resolution and token-usage aggregation for generative AI integrations.
+ * Provider resolution and token-usage management for generative AI integrations.
  *
- * <p>This package contains utility and value types used to instantiate
- * {@link org.machanism.machai.ai.provider.Genai} implementations from configured chat-model identifiers
- * and to collect, aggregate, and log token-consumption information produced by those providers.
- * The package is intended to support the runtime selection of AI backends as well as operational
- * visibility into prompt and response token usage.
+ * <p>This package contains the components responsible for locating and instantiating
+ * {@link org.machanism.machai.ai.provider.Genai} implementations based on configured
+ * chat-model identifiers, as well as immutable usage records and a shared registry for
+ * collecting and logging token-consumption statistics.
  *
- * <h2>Core responsibilities</h2>
+ * <h2>Package responsibilities</h2>
  * <ul>
- *   <li>Resolve provider implementations from model identifiers such as {@code OpenAI:gpt-4o-mini}.</li>
+ *   <li>Resolve provider implementations from identifiers such as {@code OpenAI:gpt-4o-mini}.</li>
  *   <li>Apply the selected model name to a
  *   {@link org.machanism.macha.core.commons.configurator.Configurator} before provider initialization.</li>
- *   <li>Represent usage metrics for individual provider invocations with immutable value objects.</li>
- *   <li>Aggregate and log usage statistics for one or more configured models.</li>
+ *   <li>Represent token usage for individual provider invocations.</li>
+ *   <li>Aggregate token-usage entries by model identifier for logging and inspection.</li>
  * </ul>
  *
- * <h2>Included types</h2>
+ * <h2>Primary types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.manager.GenaiProviderManager} resolves and initializes provider
- *   instances for configured chat models.</li>
- *   <li>{@link org.machanism.machai.ai.manager.Usage} stores input, cached-input, and output token counts
- *   for a single provider call.</li>
- *   <li>{@link org.machanism.machai.ai.manager.UsageStatistics} collects usage records by model identifier
- *   and produces aggregated summaries for logging and inspection.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.GenaiProviderManager} resolves and initializes provider instances.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.Usage} stores token counts for a single provider interaction.</li>
+ *   <li>{@link org.machanism.machai.ai.manager.UsageStatistics} records and summarizes usage entries per model.</li>
  * </ul>
  *
- * <h2>Provider identifier resolution</h2>
- * <p>Provider identifiers are typically supplied in the form {@code Provider:Model}. When the provider
- * segment is a simple provider name, the corresponding implementation class is inferred using the naming
- * convention {@code org.machanism.machai.ai.provider.<provider-lowercase>.<Provider>Provider}. If the
- * provider segment already contains a package separator, it is treated as a fully qualified class name
- * and loaded directly.
+ * <h2>Provider resolution</h2>
+ * <p>Provider identifiers are expected in the form {@code Provider:Model}. When the provider part is a
+ * simple provider name, the implementation class is derived using the convention
+ * {@code org.machanism.machai.ai.provider.&lt;provider-lowercase&gt;.&lt;Provider&gt;Provider}. When the
+ * provider part already contains a package separator, it is treated as a fully qualified class name.
  *
- * <h2>Example</h2>
+ * <h2>Usage example</h2>
  * <pre>{@code
  * Configurator configurator = ...;
  * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", configurator);
- * String response = provider.perform();
  *
- * UsageStatistics.addUsage("OpenAI:gpt-4o-mini", provider.usage());
+ * Usage usage = provider.usage();
+ * UsageStatistics.addUsage("OpenAI:gpt-4o-mini", usage);
  * UsageStatistics.logUsageForModel("OpenAI:gpt-4o-mini");
  * }</pre>
  */
