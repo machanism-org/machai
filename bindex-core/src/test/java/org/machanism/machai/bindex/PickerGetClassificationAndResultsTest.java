@@ -18,6 +18,7 @@ import java.util.Collections;
 import org.bson.Document;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 
 import com.mongodb.client.AggregateIterable;
@@ -29,8 +30,9 @@ class PickerGetClassificationAndResultsTest {
 	void getClassification_shouldReturnText_fromProvider() throws Exception {
 		// Arrange
 		Genai genai = mock(Genai.class);
-		when(genai.perform()).thenReturn("[{\"domains\":[\"java\"],\"layers\":[\"backend\"],\"languages\":[],\"integrations\":[]}]");
-		Picker picker = new Picker(mock(MongoCollection.class), genai);
+		when(genai.perform())
+				.thenReturn("[{\"domains\":[\"java\"],\"layers\":[\"backend\"],\"languages\":[],\"integrations\":[]}]");
+		Picker picker = new Picker(mock(MongoCollection.class), genai, mock(EmbeddingProvider.class));
 		Configurator configurator = mock(Configurator.class);
 		when(configurator.get("picker.classificationInstruction")).thenReturn("{1}");
 		setField(picker, "configurator", configurator);
@@ -68,12 +70,13 @@ class PickerGetClassificationAndResultsTest {
 			return out;
 		});
 
-		Genai genai = mock(Genai.class);
+		EmbeddingProvider genai = mock(EmbeddingProvider.class);
 		when(genai.embedding(anyString(), anyInt())).thenReturn(Arrays.asList(0.1, 0.2));
-		Picker picker = new Picker(collection, genai);
+		Picker picker = new Picker(collection, mock(Genai.class), genai);
 		picker.setScore(0.0);
 
-		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class, int.class,
+		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class,
+				int.class,
 				org.bson.conversions.Bson[].class);
 		method.setAccessible(true);
 
@@ -97,17 +100,19 @@ class PickerGetClassificationAndResultsTest {
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		when(collection.aggregate(any())).thenThrow(new RuntimeException("boom"));
 
-		Genai genai = mock(Genai.class);
+		EmbeddingProvider genai = mock(EmbeddingProvider.class);
 		when(genai.embedding(anyString(), anyInt())).thenReturn(Collections.singletonList(0.1));
-		Picker picker = new Picker(collection, genai);
+		Picker picker = new Picker(collection, mock(Genai.class), genai);
 
-		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class, int.class,
+		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class,
+				int.class,
 				org.bson.conversions.Bson[].class);
 		method.setAccessible(true);
 
 		// Act + Assert
-		assertThrows(java.lang.reflect.InvocationTargetException.class, () -> method.invoke(picker, "idx", "path", "q", 1,
-				new org.bson.conversions.Bson[0]));
+		assertThrows(java.lang.reflect.InvocationTargetException.class,
+				() -> method.invoke(picker, "idx", "path", "q", 1,
+						new org.bson.conversions.Bson[0]));
 	}
 
 	private static void setField(Object target, String fieldName, Object value) throws Exception {

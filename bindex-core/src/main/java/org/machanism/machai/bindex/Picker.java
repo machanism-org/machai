@@ -26,6 +26,7 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.schema.Bindex;
@@ -79,10 +80,11 @@ public class Picker {
 
 	private final MongoCollection<Document> collection;
 	private final Genai provider;
+	private final EmbeddingProvider embeddingProvider;
 	private Double score = DEFAULT_SCORE_VALUE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
 	private Configurator configurator;
-	
+
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
 	/**
@@ -104,6 +106,9 @@ public class Picker {
 		}
 		this.configurator = config;
 		this.provider = GenaiProviderManager.getProvider(genai, config);
+
+		String embeddingModel = config.get("embedding.model", null);
+		this.embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, config);
 		functionToolsLoader.applyTools(provider, config);
 		this.collection = BindexRepository.getCollection(config);
 	}
@@ -115,7 +120,7 @@ public class Picker {
 	 *                   documents
 	 * @param provider   the GenAI provider used for prompt execution and embeddings
 	 */
-	Picker(MongoCollection<Document> collection, Genai provider) {
+	Picker(MongoCollection<Document> collection, Genai provider, EmbeddingProvider embeddingProvider) {
 		if (collection == null) {
 			throw new IllegalArgumentException("collection must not be null");
 		}
@@ -124,6 +129,7 @@ public class Picker {
 		}
 		this.collection = collection;
 		this.provider = provider;
+		this.embeddingProvider = embeddingProvider;
 	}
 
 	/**
@@ -193,7 +199,7 @@ public class Picker {
 			throw new IllegalArgumentException("dimensions must be > 0");
 		}
 		String text = getClassificationText(classification);
-		List<Double> descEmbedding = provider.embedding(text, dimensions);
+		List<Double> descEmbedding = embeddingProvider.embedding(text, dimensions);
 		return new BsonArray(descEmbedding.stream().map(BsonDouble::new).collect(Collectors.toList()));
 	}
 
@@ -347,7 +353,7 @@ public class Picker {
 	 */
 	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
 			Bson... bsons) {
-		Iterable<Double> queryEmbedding = provider.embedding(query, dimensions);
+		Iterable<Double> queryEmbedding = embeddingProvider.embedding(query, dimensions);
 		List<Bson> pipeline = new ArrayList<>();
 		pipeline.add(Aggregates.vectorSearch(fieldPath(propertyPath), queryEmbedding, indexName, VECTOR_SEARCH_LIMITS,
 				exactVectorSearchOptions()));

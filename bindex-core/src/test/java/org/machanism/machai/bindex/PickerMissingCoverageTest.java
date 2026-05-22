@@ -32,7 +32,7 @@ class PickerMissingCoverageTest {
 		Genai provider = mock(Genai.class);
 
 		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> new Picker(collection, provider));
+		assertThrows(IllegalArgumentException.class, () -> new Picker(collection, provider, null));
 	}
 
 	@Test
@@ -42,13 +42,13 @@ class PickerMissingCoverageTest {
 		Genai provider = null;
 
 		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> new Picker(collection, provider));
+		assertThrows(IllegalArgumentException.class, () -> new Picker(collection, provider, null));
 	}
 
 	@Test
 	void getBindex_shouldThrowIllegalArgumentException_whenIdIsNull() {
 		// Arrange
-		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class));
+		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class), null);
 
 		// Act + Assert
 		assertThrows(IllegalArgumentException.class, () -> picker.getBindex(null));
@@ -62,7 +62,7 @@ class PickerMissingCoverageTest {
 		// Disambiguate overloaded find(...) by casting to org.bson.conversions.Bson.
 		when(collection.find((org.bson.conversions.Bson) any())).thenReturn(iterable);
 		when(iterable.first()).thenReturn(null);
-		Picker picker = new Picker(collection, mock(Genai.class));
+		Picker picker = new Picker(collection, mock(Genai.class), null);
 
 		// Act
 		Bindex result = picker.getBindex("missing");
@@ -78,7 +78,7 @@ class PickerMissingCoverageTest {
 		FindIterable<Document> iterable = mock(FindIterable.class);
 		when(collection.find((org.bson.conversions.Bson) any())).thenReturn(iterable);
 		when(iterable.first()).thenReturn(new Document(Picker.BINDEX_PROPERTY_NAME, "not-json"));
-		Picker picker = new Picker(collection, mock(Genai.class));
+		Picker picker = new Picker(collection, mock(Genai.class), null);
 
 		// Act + Assert
 		assertThrows(IllegalArgumentException.class, () -> picker.getBindex("bad"));
@@ -91,7 +91,7 @@ class PickerMissingCoverageTest {
 		FindIterable<Document> iterable = mock(FindIterable.class);
 		when(collection.find((org.bson.conversions.Bson) any())).thenReturn(iterable);
 		when(iterable.first()).thenReturn(null);
-		Picker picker = new Picker(collection, mock(Genai.class));
+		Picker picker = new Picker(collection, mock(Genai.class), null);
 		Bindex bindex = new Bindex();
 		bindex.setId("id-1");
 
@@ -105,7 +105,7 @@ class PickerMissingCoverageTest {
 	@Test
 	void getClassificationText_privateMethod_shouldSerializeClassification() throws Exception {
 		// Arrange
-		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class));
+		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class), null);
 		org.machanism.machai.schema.Classification classification = new org.machanism.machai.schema.Classification();
 		classification.setDomains(Collections.singletonList("db"));
 
@@ -124,7 +124,7 @@ class PickerMissingCoverageTest {
 	@Test
 	void pick_shouldRejectNullQuery() {
 		// Arrange
-		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class));
+		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class), null);
 
 		// Act + Assert
 		assertThrows(IllegalArgumentException.class, () -> picker.pick(null));
@@ -133,7 +133,7 @@ class PickerMissingCoverageTest {
 	@Test
 	void create_shouldRejectNullBindex() {
 		// Arrange
-		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class));
+		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class), null);
 
 		// Act + Assert
 		assertThrows(IllegalArgumentException.class, () -> picker.create(null));
@@ -146,7 +146,7 @@ class PickerMissingCoverageTest {
 		// Make deleteOne throw MongoCommandException to enter catch block.
 		when(collection.deleteOne(any())).thenThrow(
 				new com.mongodb.MongoCommandException(new org.bson.BsonDocument("ok", new org.bson.BsonInt32(0)), null));
-		Picker picker = new Picker(collection, mock(Genai.class));
+		Picker picker = new Picker(collection, mock(Genai.class), null);
 		Bindex bindex = new Bindex();
 		bindex.setId("id");
 		bindex.setName("name");
@@ -160,7 +160,7 @@ class PickerMissingCoverageTest {
 	@Test
 	void setScore_shouldAllowNull_andGetScoreShouldReturnNullForUnknownId() {
 		// Arrange
-		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class));
+		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class), null);
 
 		// Act
 		assertDoesNotThrow(() -> picker.setScore(null));

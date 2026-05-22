@@ -42,7 +42,6 @@ class BindexFunctionToolsTest {
 		tools.applyTools(provider);
 
 		verify(provider).addTool(eq("get_bindex"), any(String.class), any(), eq("id:string:required:The bindex id."));
-		verify(provider).addTool(eq("get_bindex_schema"), any(String.class), any());
 		verify(provider).addTool(eq("pick_libraries"), any(String.class), any(),
 				eq("prompt:string:required:The user prompt describing project needs or requirements."));
 		verify(provider).addTool(eq("register_bindex"), any(String.class), any(),
@@ -77,16 +76,6 @@ class BindexFunctionToolsTest {
 		String result = tools.getBindex(props, new File("."));
 
 		assertEquals("<not found>", result);
-	}
-
-	@Test
-	void getBindexSchema_returnsSchemaContent() throws Exception {
-		BindexFunctionTools tools = new BindexFunctionTools();
-
-		String schema = tools.getBindexSchema(OBJECT_MAPPER.createObjectNode(), new File("."));
-
-		assertTrue(schema.contains("classification"));
-		assertTrue(schema.contains("properties"));
 	}
 
 	@Test

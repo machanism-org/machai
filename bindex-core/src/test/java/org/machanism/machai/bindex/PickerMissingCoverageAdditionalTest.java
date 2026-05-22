@@ -23,7 +23,7 @@ class PickerMissingCoverageAdditionalTest {
 
 	@Test
 	void addDependencies_shouldIgnoreAlreadyVisitedDependencies() {
-		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class)) {
+		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class), null) {
 			@Override
 			protected Bindex getBindex(String id) {
 				if ("root".equals(id)) {
@@ -54,14 +54,14 @@ class PickerMissingCoverageAdditionalTest {
 		FindIterable<Document> iterable = mock(FindIterable.class);
 		when(collection.find(any(org.bson.conversions.Bson.class))).thenReturn(iterable);
 		when(iterable.first()).thenReturn(new Document(Picker.BINDEX_PROPERTY_NAME, "not-json"));
-		Picker picker = new Picker(collection, mock(Genai.class));
+		Picker picker = new Picker(collection, mock(Genai.class), null);
 
 		assertThrows(IllegalArgumentException.class, () -> picker.getBindex("broken"));
 	}
 
 	@Test
 	void getClassificationText_shouldSerializeClassification() throws Exception {
-		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class));
+		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class), null);
 		org.machanism.machai.schema.Classification classification = new org.machanism.machai.schema.Classification();
 		classification.setDomains(Collections.singletonList("domain"));
 		classification.setLayers(Collections.emptyList());

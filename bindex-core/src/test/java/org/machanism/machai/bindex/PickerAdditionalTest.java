@@ -37,7 +37,7 @@ class PickerAdditionalTest {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		Genai provider = mock(Genai.class);
-		Picker picker = new Picker(collection, provider);
+		Picker picker = new Picker(collection, provider, null);
 
 		// Act + Assert
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -50,7 +50,7 @@ class PickerAdditionalTest {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		Genai provider = mock(Genai.class);
-		Picker picker = new Picker(collection, provider);
+		Picker picker = new Picker(collection, provider, null);
 		Classification classification = new Classification();
 
 		// Act + Assert
@@ -64,7 +64,7 @@ class PickerAdditionalTest {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		Genai provider = mock(Genai.class);
-		Picker picker = new Picker(collection, provider);
+		Picker picker = new Picker(collection, provider, null);
 
 		// Act + Assert
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> picker.getRegistredId(null));
@@ -76,7 +76,7 @@ class PickerAdditionalTest {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		Genai provider = mock(Genai.class);
-		Picker picker = new Picker(collection, provider);
+		Picker picker = new Picker(collection, provider, null);
 
 		Bindex bindex = new Bindex();
 		bindex.setId("lib:1.0");
@@ -113,7 +113,7 @@ class PickerAdditionalTest {
 			throw new UnsupportedOperationException("Unexpected method: " + method);
 		});
 		Genai provider = mock(Genai.class);
-		Picker picker = new Picker(collection, provider);
+		Picker picker = new Picker(collection, provider, null);
 
 		Set<String> deps = new HashSet<>();
 
@@ -146,7 +146,7 @@ class PickerAdditionalTest {
 		});
 
 		Genai provider = mock(Genai.class);
-		Picker picker = new Picker(collection, provider);
+		Picker picker = new Picker(collection, provider, null);
 
 		Set<String> deps = new HashSet<>();
 

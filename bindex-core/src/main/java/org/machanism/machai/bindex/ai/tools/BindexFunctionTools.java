@@ -35,7 +35,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <h2>Exposed tools</h2>
  * <ul>
  * <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
- * <li>{@code get_bindex_schema}: Returns the JSON schema that defines the
  * {@link Bindex} document shape.</li>
  * </ul>
  *
@@ -103,11 +102,6 @@ public class BindexFunctionTools implements FunctionTools {
 				"id:string:required:The bindex id.");
 
 		provider.addTool(
-				"get_bindex_schema",
-				"Retrieves the schema definition for bindex metadata.",
-				this::getBindexSchema);
-
-		provider.addTool(
 				"pick_libraries",
 				"Recommends libraries based on the user's prompt or project requirements.",
 				this::getRecommendedLibraries,
@@ -150,23 +144,6 @@ public class BindexFunctionTools implements FunctionTools {
 			bindexRepository = new BindexRepository(configurator);
 		}
 		return bindexRepository;
-	}
-
-	/**
-	 * Implementation for the {@code get_bindex_schema} function tool.
-	 *
-	 * @param params tool invocation parameters (not used)
-	 * @return the Bindex schema resource content as JSON string
-	 * @throws IOException
-	 */
-	public String getBindexSchema(JsonNode props, File workingDir) throws IOException {
-		URL systemResource = Bindex.class.getResource(BindexRepository.BINDEX_SCHEMA_RESOURCE);
-		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
-		if (logger.isInfoEnabled()) {
-			logger.info("Bindex schema: {}",
-					StringUtils.abbreviate(schema, 120).replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""));
-		}
-		return schema;
 	}
 
 	public List<BindexElement> getRecommendedLibraries(JsonNode props, File workingDir) throws IOException {

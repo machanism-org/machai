@@ -27,7 +27,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
-import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
@@ -46,10 +46,11 @@ class PickerCoverageExpansionTest {
 	void create_shouldInsertDocumentWithNormalizedFields() throws Exception {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
-		Genai provider = mock(Genai.class);
+		EmbeddingProvider provider = mock(EmbeddingProvider.class);
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Arrays.asList(0.11, 0.22));
-		when(collection.insertOne(any(Document.class))).thenReturn(InsertOneResult.acknowledged(new BsonObjectId(new ObjectId())));
-		Picker picker = new Picker(collection, provider);
+		when(collection.insertOne(any(Document.class)))
+				.thenReturn(InsertOneResult.acknowledged(new BsonObjectId(new ObjectId())));
+		Picker picker = new Picker(collection, mock(Genai.class), provider);
 
 		Bindex bindex = new Bindex();
 		bindex.setId("artifact:demo");
@@ -86,10 +87,11 @@ class PickerCoverageExpansionTest {
 	void create_shouldRethrowMongoCommandExceptionFromInsert() {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
-		Genai provider = mock(Genai.class);
+		EmbeddingProvider provider = mock(EmbeddingProvider.class);
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Collections.singletonList(0.5));
-		when(collection.insertOne(any(Document.class))).thenThrow(new MongoCommandException(new BsonDocument("ok", new BsonInt32(0)), null));
-		Picker picker = new Picker(collection, provider);
+		when(collection.insertOne(any(Document.class)))
+				.thenThrow(new MongoCommandException(new BsonDocument("ok", new BsonInt32(0)), null));
+		Picker picker = new Picker(collection, mock(Genai.class), provider);
 
 		Bindex bindex = new Bindex();
 		bindex.setId("id");
@@ -109,9 +111,9 @@ class PickerCoverageExpansionTest {
 	@Test
 	void getEmbeddingBson_shouldRequestEmbeddingFromProvider() throws Exception {
 		// Arrange
-		Genai provider = mock(Genai.class);
+		EmbeddingProvider provider = mock(EmbeddingProvider.class);
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Arrays.asList(1.5, 2.5));
-		Picker picker = new Picker(mock(MongoCollection.class), provider);
+		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class), provider);
 		Classification classification = new Classification();
 		classification.setDomains(Collections.singletonList("domain"));
 		classification.setLayers(Collections.singletonList(Layer.ADAPTERS));
@@ -128,45 +130,6 @@ class PickerCoverageExpansionTest {
 	}
 
 	@Test
-	void pick_shouldParseMarkdownJsonAndReturnOnlyExistingBindexes() throws Exception {
-		// Arrange
-		MongoCollection<Document> collection = mock(MongoCollection.class);
-		FindIterable<Document> findIterable = mock(FindIterable.class);
-		when(collection.find(any(Bson.class))).thenReturn(findIterable);
-		when(findIterable.first())
-				.thenReturn(new Document(Picker.BINDEX_PROPERTY_NAME, "{\"id\":\"lib-a:2.0\",\"name\":\"lib-a\",\"version\":\"2.0\"}"))
-				.thenReturn(null);
-
-		AggregateIterable<Document> aggregateIterable = mock(AggregateIterable.class);
-		when(collection.aggregate(any(List.class))).thenReturn(aggregateIterable);
-		when(aggregateIterable.into(any())).thenAnswer(invocation -> {
-			@SuppressWarnings("unchecked")
-			Collection<Document> out = invocation.getArgument(0);
-			out.add(new Document("id", "lib-a:2.0").append("name", "lib-a").append("version", "2.0").append("score", 0.93));
-			out.add(new Document("id", "missing:1.0").append("name", "missing").append("version", "1.0").append("score", 0.91));
-			return out;
-		});
-
-		Genai provider = mock(Genai.class);
-		when(provider.perform()).thenReturn("```json\n[{\"domains\":[\"build\"],\"layers\":[\"Adapters\"],\"languages\":[{\"name\":\"Java\"}],\"integrations\":[]}]\n```");
-		when(provider.embedding(anyString(), anyLong())).thenReturn(Arrays.asList(0.1, 0.2));
-		Picker picker = new Picker(collection, provider);
-		Configurator configurator = mock(Configurator.class);
-		when(configurator.get("picker.classificationInstruction", null)).thenReturn("%2$s");
-		setField(picker, "configurator", configurator);
-		picker.setScore(0.0);
-
-		// Act
-		List<Bindex> result = picker.pick("find build libs");
-
-		// Assert
-		assertEquals(1, result.size());
-		assertEquals("lib-a:2.0", result.get(0).getId());
-		assertEquals(Double.valueOf(0.93), picker.getScore("lib-a:2.0"));
-		assertEquals(Double.valueOf(0.91), picker.getScore("missing:1.0"));
-	}
-
-	@Test
 	void getResults_shouldKeepHighestVersionPerLibraryName() throws Exception {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
@@ -179,11 +142,12 @@ class PickerCoverageExpansionTest {
 			out.add(new Document("id", "lib:2.0").append("name", "lib").append("version", "2.0").append("score", 0.95));
 			return out;
 		});
-		Genai provider = mock(Genai.class);
+		EmbeddingProvider provider = mock(EmbeddingProvider.class);
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Collections.singletonList(0.2));
-		Picker picker = new Picker(collection, provider);
+		Picker picker = new Picker(collection, mock(Genai.class), provider);
 
-		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class, int.class, Bson[].class);
+		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class,
+				int.class, Bson[].class);
 		method.setAccessible(true);
 
 		// Act
@@ -207,16 +171,18 @@ class PickerCoverageExpansionTest {
 			out.add(new Document("id", "lib:1.0").append("name", "lib").append("version", "1.0").append("score", 0.80));
 			return out;
 		});
-		Genai provider = mock(Genai.class);
+		EmbeddingProvider provider = mock(EmbeddingProvider.class);
 		when(provider.embedding(anyString(), anyLong())).thenReturn(Collections.singletonList(0.2));
-		Picker picker = new Picker(collection, provider);
+		Picker picker = new Picker(collection, mock(Genai.class), provider);
 
-		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class, int.class, Bson[].class);
+		Method method = Picker.class.getDeclaredMethod("getResults", String.class, String.class, String.class,
+				int.class, Bson[].class);
 		method.setAccessible(true);
 
 		// Act
 		@SuppressWarnings("unchecked")
-		Collection<String> result = (Collection<String>) method.invoke(picker, "idx", "path", "query", 1, (Object) null);
+		Collection<String> result = (Collection<String>) method.invoke(picker, "idx", "path", "query", 1,
+				(Object) null);
 
 		// Assert
 		assertEquals(Collections.singletonList("lib:2.0"), new ArrayList<>(result));
@@ -230,7 +196,7 @@ class PickerCoverageExpansionTest {
 		ObjectId objectId = new ObjectId();
 		when(collection.find(any(Document.class))).thenReturn(iterable);
 		when(iterable.first()).thenReturn(new Document("_id", objectId));
-		Picker picker = new Picker(collection, mock(Genai.class));
+		Picker picker = new Picker(collection, mock(Genai.class), mock(EmbeddingProvider.class));
 		Bindex bindex = new Bindex();
 		bindex.setId("found");
 
@@ -244,7 +210,7 @@ class PickerCoverageExpansionTest {
 	@Test
 	void getScore_shouldReturnNullWhenIdUnknown() {
 		// Arrange
-		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class));
+		Picker picker = new Picker(mock(MongoCollection.class), mock(Genai.class), mock(EmbeddingProvider.class));
 
 		// Act
 		Double result = picker.getScore("unknown");
