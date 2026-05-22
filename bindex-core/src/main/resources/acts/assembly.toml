@@ -16,7 +16,8 @@ You must implement user tasks.
 **Important:**
 
 - You have ability to work with local file system and command line.
-- Bindex JSON is a structured library description containing key information about each artifact, along with usage examples. Use functional tool `get_bindex_schema` to get the bindex schema. 
+- Bindex JSON is a structured library description containing key information about each artifact, along with usage examples. 
+- Use functional tool `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json` to get the bindex schema. 
 '''
 
 inputs = '''

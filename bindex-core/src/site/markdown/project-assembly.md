@@ -102,7 +102,6 @@ Based on `assembly.toml`, the **Assembly** act guides the assistant to:
 - use `pick_libraries` with the user's query to find recommended libraries
 - analyze which recommended libraries actually match the request
 - use `get_bindex` to read detailed metadata for matching libraries
-- use `get_bindex_schema` to understand the Bindex structure
 - prefer suitable libraries instead of writing everything from scratch
 - create all necessary files in the project folder
 - add required code and public dependencies

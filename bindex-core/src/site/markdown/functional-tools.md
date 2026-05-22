@@ -33,22 +33,6 @@ Retrieves Bindex metadata for a specific project or library by its Bindex id.
 **Input parameters:**
 - `id` *(string, required)*: The Bindex identifier to retrieve.
 
-### `get_bindex_schema`
-Returns the JSON schema that defines the structure of a valid Bindex document.
-
-**Use this tool when:**
-- You need to understand the expected Bindex document format.
-- You want to validate generated or edited Bindex JSON.
-- You are preparing to create a new Bindex document and need the official schema.
-
-**Features:**
-- Loads the schema from the application resources.
-- Does not require any input parameters.
-- Returns the raw schema content as JSON text.
-
-**Input parameters:**
-- None.
-
 ### `pick_libraries`
 Recommends libraries that match a natural-language description of project requirements.
 

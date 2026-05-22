@@ -21,11 +21,11 @@ inputs = '''
 
 - This task should only be performed for projects that are not parent projects. If [Child Projects] contain modules, do not perform any actions in this task with exitCode: 0.
 
-- Get bindex json schema via `get_bindex_schema` functional tool.
-- Analyze bindex schema field descriptions and generate `bindex.json` for the project.
-- Analyze files from [Main Source & Resource Folders] and [Documentation Folders] directories.
+- Get bindex json schema from `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
+- Use bindex schema field descriptions and generate `bindex.json` for the project.
+- Use files from [Main Source & Resource Folders] and [Documentation Folders] directories.
 - Generate a `bindex.json` file for the project to make it easier to use as a library.
-- `bindex.json` file must be strictly conform to the Bindex schema provided by the `get_bindex_schema` functional tool.
+- `bindex.json` file must be strictly conform to the Bindex schema provided by the `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
 - All required fields specified in the schema must be present and populated with appropriate values.
 - Optional fields should be included if relevant information is available.
 - The JSON must be valid (parsable) and should not include any comments or extraneous text.
@@ -63,5 +63,5 @@ These rules must be followed if the `bindex.json` file needs to be register; oth
 prompt = "Create or update bindex.json"
 
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
-embedding.model = "text-embedding-005"
+embedding.model = "CodeMie:text-embedding-005"
 gw.scanDir = "glob:."

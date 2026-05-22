@@ -8,7 +8,8 @@ You must select libraries relevant to the user's query.
 
 **Library Picking Process:**
 
-- Bindex JSON is a structured library description containing key information about each artifact, along with usage examples. Use the functional tool `get_bindex_schema` to get the bindex schema.
+- Bindex JSON is a structured library description containing key information about each artifact, along with usage examples. 
+- Use the `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json` to get the bindex schema.
 - When selecting libraries for a user task, always use the `pick_libraries` function tool.  
 	- If the task involves updating an existing project, extend the user’s initial query with relevant context about the current project state and the specific update required.  
 	- Pass this extended query as the value of the prompt parameter to the `pick_libraries` function tool.  
@@ -30,5 +31,5 @@ inputs = '''
 gw.interactive = true
 gw.nonRecursive = true
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
-embedding.model = "text-embedding-005"
+embedding.model = "CodeMie:text-embedding-005"
 pick.score = 0.86
