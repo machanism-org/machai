@@ -84,6 +84,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 	public static final String ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY";
 	public static final String ANTHROPIC_BASE_URL = "ANTHROPIC_BASE_URL";
+	private static final String CACHE_THRESHOLD_PROP_NAME = "cacheThreshold";
 
 	private Long cacheThreshold = 10240L;
 
@@ -104,7 +105,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 	 */
 	@Override
 	public void init(Configurator config) {
-		cacheThreshold = config.getLong("CACHE_THRESHOLD_PROP_NAME", cacheThreshold);
+		cacheThreshold = config.getLong(CACHE_THRESHOLD_PROP_NAME, cacheThreshold);
 		super.init(config);
 	}
 
