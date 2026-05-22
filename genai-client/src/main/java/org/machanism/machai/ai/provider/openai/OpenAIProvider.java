@@ -127,75 +127,47 @@ public class OpenAIProvider extends AbstractAIProvider {
 	/**
 	 * Adds the built-in OpenAI web search tool when configured.
 	 */
-	public void addWebSearch() {
-		String type = config.get("WebSearchTool.type", null);
-		String city = config.get("WebSearchTool.city", null);
-		String country = config.get("WebSearchTool.country", null);
-		String region = config.get("WebSearchTool.region", null);
+	protected void addWebSearch(String type, String city, String country, String region) {
+		UserLocation.Builder location = UserLocation.builder();
+		location.type(WebSearchTool.UserLocation.Type.APPROXIMATE);
 
-		if (type != null) {
-			UserLocation.Builder location = UserLocation.builder();
-			location.type(WebSearchTool.UserLocation.Type.APPROXIMATE);
+		com.openai.models.responses.WebSearchTool.Builder webSearch = WebSearchTool.builder()
+				.type(WebSearchTool.Type.of(type));
 
-			com.openai.models.responses.WebSearchTool.Builder webSearch = WebSearchTool.builder()
-					.type(WebSearchTool.Type.of(type));
-
-			if (city != null) {
-				location.city(city);
-			}
-
-			if (country != null) {
-				location.country(country);
-			}
-
-			if (region != null) {
-				location.region(region);
-			}
-
-			webSearch.userLocation(location.build());
-			Tool tool = Tool.ofWebSearch(webSearch.build());
-			toolMap.put(tool, null);
+		if (city != null) {
+			location.city(city);
 		}
+
+		if (country != null) {
+			location.country(country);
+		}
+
+		if (region != null) {
+			location.region(region);
+		}
+
+		webSearch.userLocation(location.build());
+		Tool tool = Tool.ofWebSearch(webSearch.build());
+		toolMap.put(tool, null);
 	}
 
 	/**
 	 * Adds one or more MCP server tools from configuration.
 	 */
-	public void addMcpServer() {
-		int i = 0;
-		String url = null;
-		do {
-			String id = "";
+	protected void addMcpServer(String name, String url, String authorization, String description) {
+		com.openai.models.responses.Tool.Mcp.Builder builder = Tool.Mcp.builder();
+		builder.serverLabel(name);
+		builder.serverUrl(url);
 
-			if (i > 0) {
-				id = "_" + i;
-			}
+		if (description != null) {
+			builder.serverDescription(description);
+		}
+		if (authorization != null) {
+			builder.authorization(authorization);
+		}
 
-			String propName = MCP_PROP_NAME_PREFIX + id;
-			url = config.get(propName + ".url", null);
-			String label = config.get(propName + ".label", null);
-			String description = config.get(propName + ".description", null);
-			String authorization = config.get(propName + ".authorization", null);
-
-			if (url != null) {
-				com.openai.models.responses.Tool.Mcp.Builder builder = Tool.Mcp.builder();
-				builder.serverUrl(url);
-
-				if (label != null) {
-					builder.serverLabel(label);
-				}
-				if (description != null) {
-					builder.serverDescription(description);
-				}
-				if (authorization != null) {
-					builder.authorization(authorization);
-				}
-
-				Tool tool = Tool.ofMcp(builder.build());
-				toolMap.put(tool, null);
-			}
-
-		} while (i++ == 0 || url != null);
+		Tool tool = Tool.ofMcp(builder.build());
+		toolMap.put(tool, null);
 	}
 
 	/**

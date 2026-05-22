@@ -70,12 +70,46 @@ public abstract class AbstractAIProvider implements Genai {
 		embeddingModel = config.get("embedding.model", null);
 
 		addWebSearch();
-		addMcpServer();
+		addMcpServers();
 	}
 
-	protected abstract void addMcpServer();
+	protected void addMcpServers() {
+		int i = 0;
+		String url = null;
+		do {
+			String id = "";
 
-	protected abstract void addWebSearch();
+			if (i > 0) {
+				id = "_" + i;
+			}
+
+			String propName = MCP_PROP_NAME_PREFIX + id;
+			url = config.get(propName + ".url", null);
+			String name = config.get(propName + ".name", null);
+			String authorization = config.get(propName + ".authorization", null);
+			String description = config.get(propName + ".description", null);
+
+			if (name != null) {
+				addMcpServer(name, url, authorization, description);
+			}
+
+		} while (i++ == 0 || url != null);
+	}
+
+	protected abstract void addMcpServer(String label, String url, String authorization, String description);
+
+	protected void addWebSearch() {
+		String type = config.get("WebSearchTool.type", null);
+		String city = config.get("WebSearchTool.city", null);
+		String country = config.get("WebSearchTool.country", null);
+		String region = config.get("WebSearchTool.region", null);
+
+		if (type != null) {
+			addWebSearch(type, city, country, region);
+		}
+	}
+
+	protected abstract void addWebSearch(String type, String city, String country, String region);
 
 	/**
 	 * Normalizes a string for case-insensitive comparisons.

@@ -94,71 +94,47 @@ public class ClaudeProvider extends AbstractAIProvider {
 	private List<BetaRequestMcpServerUrlDefinition> mcpServers = new ArrayList<>();
 
 	@Override
-	protected void addMcpServer() {
-		int i = 0;
-		String url = null;
-		do {
-			String id = "";
-
-			if (i > 0) {
-				id = "_" + i;
-			}
-
-			String propName = MCP_PROP_NAME_PREFIX + id;
-			url = config.get(propName + ".url", null);
-			String label = config.get(propName + ".label", null);
-			String authorization = config.get(propName + ".authorization", null);
-
-			if (url != null) {
-				com.anthropic.models.beta.messages.BetaRequestMcpServerUrlDefinition.Builder builder = BetaRequestMcpServerUrlDefinition
-						.builder();
-				builder.authorizationToken(authorization);
-				builder.url(url);
-				builder.name(label);
-				mcpServers.add(builder.build());
-			}
-
-		} while (i++ == 0 || url != null);
+	protected void addMcpServer(String name, String url, String authorization, String description) {
+		com.anthropic.models.beta.messages.BetaRequestMcpServerUrlDefinition.Builder builder = BetaRequestMcpServerUrlDefinition
+				.builder();
+		builder.url(url);
+		builder.name(name);
+		if (authorization != null) {
+			builder.authorizationToken(authorization);
+		}
+		mcpServers.add(builder.build());
 	}
 
-	@Override
-	protected void addWebSearch() {
-		String type = config.get("WebSearchTool.type", null);
-		String city = config.get("WebSearchTool.city", null);
-		String country = config.get("WebSearchTool.country", null);
-		String region = config.get("WebSearchTool.region", null);
+	protected void addWebSearch(String type, String city, String country, String region) {
+		BetaUserLocation.Builder locationBuilder = BetaUserLocation.builder();
+		if (city != null) {
+			locationBuilder.city(city);
+		}
 
-		if (type != null) {
-			BetaUserLocation.Builder locationBuilder = BetaUserLocation.builder();
-			if (city != null) {
-				locationBuilder.city(city);
-			}
+		if (country != null) {
+			locationBuilder.country(country);
+		}
 
-			if (country != null) {
-				locationBuilder.country(country);
-			}
+		if (region != null) {
+			locationBuilder.region(region);
+		}
 
-			if (region != null) {
-				locationBuilder.region(region);
-			}
+		switch (type) {
+		case "20260209":
+			BetaWebSearchTool20260209.Builder builder1 = BetaWebSearchTool20260209.builder();
+			builder1.userLocation(locationBuilder.build());
+			webSearchTool = builder1.build();
+			break;
 
-			switch (type) {
-			case "20260209":
-				BetaWebSearchTool20260209.Builder builder1 = BetaWebSearchTool20260209.builder();
-				builder1.userLocation(locationBuilder.build());
-				webSearchTool = builder1.build();
-				break;
+		case "20250305":
+			BetaWebSearchTool20250305.Builder builder2 = BetaWebSearchTool20250305.builder();
+			builder2.userLocation(locationBuilder.build());
+			webSearchTool = builder2.build();
+			break;
 
-			case "20250305":
-				BetaWebSearchTool20250305.Builder builder2 = BetaWebSearchTool20250305.builder();
-				builder2.userLocation(locationBuilder.build());
-				webSearchTool = builder2.build();
-				break;
-
-			default:
-				throw new IllegalArgumentException(
-						"Invalid WebSearchTool type provided. Supported types are: 20260209, 20250305.");
-			}
+		default:
+			throw new IllegalArgumentException(
+					"Invalid WebSearchTool type provided. Supported types are: 20260209, 20250305.");
 		}
 	}
 
