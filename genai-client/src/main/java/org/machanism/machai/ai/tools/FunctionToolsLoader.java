@@ -27,13 +27,8 @@ import org.slf4j.LoggerFactory;
  * Configurator conf = ...;
  * Genai provider = ...;
  * FunctionToolsLoader loader = new FunctionToolsLoader();
- * loader.setConfiguration(conf);
- * loader.applyTools(provider);
+ * loader.applyTools(provider, conf);
  * }</pre>
- *
- * <p>
- * Alternatively, you may use a singleton pattern if desired.
- * </p>
  *
  * @author Viktor Tovstyi
  */
@@ -59,8 +54,17 @@ public class FunctionToolsLoader {
 	 * Applies all discovered {@link FunctionTools} installers to the given
 	 * provider.
 	 *
+	 * <p>
+	 * A fresh instance of each discovered tool installer class is created before
+	 * configuration and registration so that provider setup runs with isolated tool
+	 * state.
+	 * </p>
+	 *
 	 * @param provider the {@link Genai} provider instance to augment with tool
 	 *                 functions
+	 * @param configurator configurator passed to each discovered tool installer
+	 * @throws IllegalArgumentException if a discovered installer cannot be
+	 *                 instantiated
 	 */
 	public void applyTools(Genai provider, Configurator configurator) {
 		for (FunctionTools functionTool : functionTools) {

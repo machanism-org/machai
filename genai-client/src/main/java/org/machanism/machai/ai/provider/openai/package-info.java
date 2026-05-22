@@ -27,51 +27,39 @@
  */
 
 /**
- * OpenAI provider integration for MachAI.
+ * Provides OpenAI-based GenAI integration for MachAI.
  *
- * <p>
- * This package contains the OpenAI-backed {@link org.machanism.machai.ai.provider.Genai}
- * implementation used by MachAI to perform conversational completions, execute
- * registered function tools, attach file-based inputs, invoke optional built-in
- * OpenAI tools, and request embedding vectors through the OpenAI Java SDK.
- * </p>
+ * <p>This package contains the OpenAI-specific implementation of the
+ * {@link org.machanism.machai.ai.provider.Genai} abstraction used by MachAI to
+ * perform text generation and embedding requests through the OpenAI Java SDK.
+ * Its primary entry point,
+ * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, translates
+ * framework-level prompts, instructions, tools, and file inputs into OpenAI
+ * Responses API requests and converts the resulting responses back into the
+ * framework's expected structures.</p>
  *
- * <p>
- * Its central type, {@link org.machanism.machai.ai.provider.openai.OpenAIProvider},
- * adapts the framework-level provider abstraction to the OpenAI Responses API. The
- * provider is responsible for client construction, request assembly, conversation
- * state management, tool registration, iterative tool-call resolution, response
- * parsing, usage accounting, and request logging.
- * </p>
+ * <p>The provider supports conversational prompting, iterative function-tool
+ * execution, optional built-in OpenAI tools such as web search and MCP server
+ * access, embedding generation, token-usage tracking, and request logging for
+ * troubleshooting and observability.</p>
  *
- * <h2>Supported capabilities</h2>
+ * <h2>Typical responsibilities</h2>
  * <ul>
- * <li>Sending user prompts and optional system instructions to a configured chat model</li>
- * <li>Supplying file references as request inputs</li>
- * <li>Registering local Java callbacks as OpenAI function tools</li>
- * <li>Enabling built-in web search and MCP server tools from configuration</li>
- * <li>Generating embeddings with a configured embedding model</li>
- * <li>Capturing token usage for framework-level statistics</li>
+ * <li>Building and configuring an {@code OpenAIClient} instance from runtime configuration</li>
+ * <li>Collecting user prompts, instructions, and file-based inputs for a response request</li>
+ * <li>Registering Java callbacks as OpenAI function tools with JSON-schema parameters</li>
+ * <li>Resolving model-issued tool calls and continuing the response loop until final output is produced</li>
+ * <li>Generating embeddings and recording token usage statistics for completed requests</li>
  * </ul>
  *
- * <h2>Configuration overview</h2>
- * <p>
- * Typical configuration includes values such as {@code OPENAI_API_KEY},
- * {@code OPENAI_BASE_URL}, {@code chatModel}, {@code GENAI_TIMEOUT},
- * {@code MAX_OUTPUT_TOKENS}, {@code MAX_TOOL_CALLS}, and {@code embedding.model}.
- * Additional namespaced settings control optional web-search and MCP tool
- * registration.
- * </p>
- *
- * <h2>Typical usage</h2>
+ * <h2>Usage overview</h2>
  * <pre>
- * Configurator cfg = ...;
+ * Configurator configurator = ...;
  * OpenAIProvider provider = new OpenAIProvider();
- * provider.init(cfg);
+ * provider.init(configurator);
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Summarize the attached document.");
  * String answer = provider.perform();
- * Usage usage = provider.usage();
  * </pre>
  */
 package org.machanism.machai.ai.provider.openai;

@@ -9,7 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages and aggregates usage statistics for GenAI models.
+ * Central registry for aggregated GenAI token-usage statistics.
+ *
+ * <p>
+ * Usage entries are grouped by model identifier and can later be logged or
+ * queried programmatically. All access to the internal storage is synchronized on
+ * the shared map instance.
+ * </p>
  */
 public class UsageStatistics {
 
@@ -21,7 +27,7 @@ public class UsageStatistics {
 	 * Adds a single {@link Usage} record for a specific model identifier.
 	 *
 	 * @param modelId model identifier (e.g., "OpenAI:gpt-4o-mini")
-	 * @param usage   usage to add
+	 * @param usage usage to add
 	 */
 	public static void addUsage(String modelId, Usage usage) {
 		synchronized (modelUsages) {
@@ -35,7 +41,7 @@ public class UsageStatistics {
 	}
 
 	/**
-	 * Logs a summary of the aggregated {@link Usage} records (all models).
+	 * Logs usage summaries for every model currently present in the registry.
 	 */
 	public static void logUsage() {
 		modelUsages.keySet().stream().forEach(UsageStatistics::logUsageForModel);
@@ -73,7 +79,8 @@ public class UsageStatistics {
 	 * Returns the aggregated usage list for a specific model.
 	 *
 	 * @param modelId model identifier
-	 * @return list of Usage records, or empty list if none
+	 * @return defensive copy of the recorded usage entries for the model; never
+	 *         {@code null}
 	 */
 	public static List<Usage> getUsageForModel(String modelId) {
 		synchronized (modelUsages) {
@@ -85,7 +92,7 @@ public class UsageStatistics {
 	/**
 	 * Returns the aggregated usage map for all models.
 	 *
-	 * @return map of modelId to list of Usage records
+	 * @return shallow copy of the model-to-usage-list map
 	 */
 	public static Map<String, List<Usage>> getAllModelUsages() {
 		synchronized (modelUsages) {

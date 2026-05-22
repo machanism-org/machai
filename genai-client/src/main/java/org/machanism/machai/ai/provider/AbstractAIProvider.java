@@ -16,6 +16,16 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Base implementation of the {@link Genai} contract shared by concrete provider
+ * integrations.
+ *
+ * <p>
+ * This class centralizes common configuration handling, request input logging,
+ * tool invocation safety, MCP/web-search bootstrap logic, and usage accounting
+ * state used by subclasses such as OpenAI- and Claude-based providers.
+ * </p>
+ */
 public abstract class AbstractAIProvider implements Genai {
 
 	/** Logger instance for this provider. */
@@ -51,6 +61,14 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Embedding model identifier used by {@link #embedding(String, long)}. */
 	protected String embeddingModel;
 
+	/**
+	 * Creates a provider base instance.
+	 *
+	 * <p>
+	 * Subclasses are expected to complete initialization in
+	 * {@link #init(Configurator)}.
+	 * </p>
+	 */
 	public AbstractAIProvider() {
 		super();
 	}
@@ -73,6 +91,15 @@ public abstract class AbstractAIProvider implements Genai {
 		addMcpServers();
 	}
 
+	/**
+	 * Reads sequential MCP server configuration groups and registers them with the
+	 * concrete provider implementation.
+	 *
+	 * <p>
+	 * The method looks for configuration keys named {@code MCP.*}, then
+	 * {@code MCP_1.*}, {@code MCP_2.*}, and so on until no further URL is found.
+	 * </p>
+	 */
 	protected void addMcpServers() {
 		int i = 0;
 		String url = null;
@@ -96,8 +123,25 @@ public abstract class AbstractAIProvider implements Genai {
 		} while (i++ == 0 || url != null);
 	}
 
+	/**
+	 * Registers one MCP server/tool with the underlying provider SDK.
+	 *
+	 * @param label provider-visible MCP server label
+	 * @param url server endpoint URL
+	 * @param authorization optional authorization token/value
+	 * @param description optional human-readable description
+	 */
 	protected abstract void addMcpServer(String label, String url, String authorization, String description);
 
+	/**
+	 * Registers a web-search capability when enabled in configuration.
+	 *
+	 * <p>
+	 * The default implementation reads configuration values and delegates the
+	 * actual SDK-specific registration to
+	 * {@link #addWebSearch(String, String, String, String)}.
+	 * </p>
+	 */
 	protected void addWebSearch() {
 		String type = config.get("WebSearchTool.type", null);
 		String city = config.get("WebSearchTool.city", null);
@@ -109,6 +153,14 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 	}
 
+	/**
+	 * Registers a provider-specific web-search tool.
+	 *
+	 * @param type provider-specific web-search tool type/version
+	 * @param city optional user city
+	 * @param country optional user country
+	 * @param region optional user region
+	 */
 	protected abstract void addWebSearch(String type, String city, String country, String region);
 
 	/**
@@ -125,9 +177,9 @@ public abstract class AbstractAIProvider implements Genai {
 	 * Safely invokes a tool function and converts {@link IOException}s into a
 	 * textual error payload suitable for the model conversation.
 	 *
-	 * @param name       tool name
-	 * @param tool       tool handler
-	 * @param params     parsed tool parameters
+	 * @param name tool name
+	 * @param tool tool handler
+	 * @param params parsed tool parameters
 	 * @param workingDir working directory passed to the tool
 	 * @return tool output or a formatted error message
 	 */
@@ -175,6 +227,12 @@ public abstract class AbstractAIProvider implements Genai {
 		logger.debug("LLM Inputs: {}", inputsLog);
 	}
 
+	/**
+	 * Writes provider-specific input items to the supplied log writer.
+	 *
+	 * @param streamWriter destination writer
+	 * @throws IOException when writing fails
+	 */
 	protected abstract void logInputsSpec(Writer streamWriter) throws IOException;
 
 	/**
@@ -239,9 +297,14 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
-	 * Sets a request timeout in seconds for new clients created by this provider.
+	 * Sets the timeout value used by provider client creation.
+	 *
+	 * <p>
+	 * The second parameter is unused and retained only for API compatibility.
+	 * </p>
 	 *
 	 * @param timeout timeout in seconds; use {@code 0} to use SDK defaults
+	 * @param openAIProvider ignored compatibility parameter
 	 */
 	public void setTimeout(long timeout, OpenAIProvider openAIProvider) {
 		this.timeoutSec = timeout;
