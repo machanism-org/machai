@@ -60,8 +60,6 @@ public abstract class AbstractAIProvider implements Genai {
 	protected Long maxToolCalls;
 	/** Configuration source used to initialize clients and provider features. */
 	protected Configurator config;
-	/** Embedding model identifier used by {@link #embedding(String, long)}. */
-	protected String embeddingModel;
 
 	/**
 	 * Creates a provider base instance.
@@ -87,7 +85,6 @@ public abstract class AbstractAIProvider implements Genai {
 
 		maxOutputTokens = config.getLong("MAX_OUTPUT_TOKENS", MAX_OUTPUT_TOKENS);
 		maxToolCalls = config.getLong("MAX_TOOL_CALLS", 0L);
-		embeddingModel = config.get("embedding.model", null);
 
 		addWebSearch();
 		addMcpServers();

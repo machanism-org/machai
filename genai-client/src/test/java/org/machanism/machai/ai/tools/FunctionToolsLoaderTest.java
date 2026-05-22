@@ -31,11 +31,6 @@ class FunctionToolsLoaderTest {
 		}
 
 		@Override
-		public java.util.List<Double> embedding(String text, long size) {
-			return java.util.Collections.emptyList();
-		}
-
-		@Override
 		public void clear() {
 			// not used
 		}

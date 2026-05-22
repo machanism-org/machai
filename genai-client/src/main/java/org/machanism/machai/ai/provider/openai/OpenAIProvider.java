@@ -36,8 +36,6 @@ import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
 import com.openai.models.Reasoning;
 import com.openai.models.ReasoningEffort;
-import com.openai.models.embeddings.CreateEmbeddingResponse;
-import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.models.Model;
 import com.openai.models.responses.FunctionTool;
 import com.openai.models.responses.FunctionTool.Parameters;
@@ -85,8 +83,6 @@ import com.openai.services.blocking.ModelService;
  * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls the model
  * may issue in a single response loop. A value of {@code 0} leaves the limit
  * unset.</li>
- * <li>{@code embedding.model} (optional): embedding model identifier used by
- * {@link #embedding(String, long)}.</li>
  * <li>{@code WebSearchTool.type} (optional): enables the built-in web search
  * tool when present.</li>
  * <li>{@code WebSearchTool.city} (optional): city value for the web search user
@@ -131,10 +127,10 @@ public class OpenAIProvider extends AbstractAIProvider {
 		UserLocation.Builder location = UserLocation.builder();
 		location.type(WebSearchTool.UserLocation.Type.APPROXIMATE);
 
-		if(DEFAULT_WEBSEARCH_TYPE_NAME.equals(type)) {
+		if (DEFAULT_WEBSEARCH_TYPE_NAME.equals(type)) {
 			type = "web_search_preview";
 		}
-		
+
 		com.openai.models.responses.WebSearchTool.Builder webSearch = WebSearchTool.builder()
 				.type(WebSearchTool.Type.of(type));
 
@@ -410,28 +406,6 @@ public class OpenAIProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Requests an embedding vector for the given input text.
-	 *
-	 * @param text       input to embed
-	 * @param dimensions number of dimensions requested from the embedding model
-	 * @return embedding as a list of {@code double} values, or {@code null} when
-	 *         {@code text} is {@code null}
-	 */
-	@Override
-	public List<Double> embedding(String text, long dimensions) {
-		List<Double> embedding = null;
-		if (text != null) {
-			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(embeddingModel)
-					.dimensions(dimensions).build();
-			CreateEmbeddingResponse response = getClient().embeddings().create(params);
-
-			embedding = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
-		}
-
-		return embedding;
-	}
-
-	/**
 	 * Executes a function tool call by finding a registered tool with the same name
 	 * and delegating to its handler.
 	 *
@@ -481,7 +455,7 @@ public class OpenAIProvider extends AbstractAIProvider {
 	 *
 	 * @return OpenAI client
 	 */
-	protected OpenAIClient getClient() {
+	public OpenAIClient getClient() {
 		String baseUrl = config.get("OPENAI_BASE_URL");
 		String privateKey = config.get("OPENAI_API_KEY");
 		timeoutSec = config.getLong("GENAI_TIMEOUT", 0L);

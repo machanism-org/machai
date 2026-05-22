@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,8 +70,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Defaults to {@value #MAX_OUTPUT_TOKENS}.</li>
  * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls per
  * response. 0 leaves the limit unset.</li>
- * <li>{@code embedding.model} (optional): embedding model identifier (not used
- * in this implementation).</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -391,21 +388,6 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 		// Register the tool and its function
 		toolMap.put(tool, function); // Assuming toolMap is keyed by name; adjust as needed
-	}
-
-	/**
-	 * Requests an embedding vector for the given input text. (Not implemented for
-	 * Claude in this version.)
-	 *
-	 * @param text       input to embed
-	 * @param dimensions number of dimensions requested from the embedding model
-	 * @return embedding as a list of {@code double} values, or an empty list if not
-	 *         supported
-	 */
-	@Override
-	public List<Double> embedding(String text, long dimensions) {
-		logger.warn("Embeddings are not implemented for ClaudeProvider.");
-		return Collections.emptyList();
 	}
 
 	/**

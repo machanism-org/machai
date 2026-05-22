@@ -1,7 +1,6 @@
 package org.machanism.machai.ai.provider;
 
 import java.io.File;
-import java.util.List;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
@@ -65,11 +64,6 @@ public class GenaiAdapter implements Genai {
 	@Override
 	public void prompt(String text) {
 		provider.prompt(text);
-	}
-
-	@Override
-	public List<Double> embedding(String text, long dimensions) {
-		return provider.embedding(text, dimensions);
 	}
 
 	@Override

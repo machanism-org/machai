@@ -10,10 +10,13 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
 import org.machanism.machai.ai.provider.claude.ClaudeProvider;
@@ -21,6 +24,8 @@ import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 
 import com.anthropic.client.AnthropicClient;
 import com.openai.client.OpenAIClient;
+import com.openai.models.embeddings.CreateEmbeddingResponse;
+import com.openai.models.embeddings.EmbeddingCreateParams;
 
 /**
  * {@link Genai} implementation that integrates with EPAM CodeMie.
@@ -49,7 +54,7 @@ import com.openai.client.OpenAIClient;
  * </ul>
  *
  * <p>
- * Delegation is selected based on the configured {@code chatModel} prefix:
+ * Delegation is selected based on the configured {@code model} prefix:
  * </p>
  * <ul>
  * <li>{@code gpt-*} (or blank/unspecified) models delegate to
@@ -58,7 +63,7 @@ import com.openai.client.OpenAIClient;
  * <li>{@code claude-*} models delegate to {@link ClaudeProvider}</li>
  * </ul>
  */
-public class CodeMieProvider extends GenaiAdapter {
+public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 
 	/**
 	 * Configuration key used to override the default token endpoint.
@@ -83,6 +88,8 @@ public class CodeMieProvider extends GenaiAdapter {
 	 */
 	public static final String BASE_URL = "https://codemie.lab.epam.com/code-assistant-api";
 
+	private String model;
+
 	/**
 	 * Initializes the provider using configuration values.
 	 *
@@ -92,7 +99,7 @@ public class CodeMieProvider extends GenaiAdapter {
 	 * <ul>
 	 * <li>{@code GENAI_USERNAME} – user e-mail or client id.</li>
 	 * <li>{@code GENAI_PASSWORD} – password or client secret.</li>
-	 * <li>{@code chatModel} – model identifier (for example {@code gpt-4o-mini},
+	 * <li>{@code model} – model identifier (for example {@code gpt-4o-mini},
 	 * {@code gemini-1.5-pro}, {@code claude-3-5-sonnet}).</li>
 	 * </ul>
 	 *
@@ -110,8 +117,7 @@ public class CodeMieProvider extends GenaiAdapter {
 	 */
 	@Override
 	public void init(Configurator conf) {
-		String chatModel = conf.get("chatModel");
-
+		model = conf.get("chatModel");
 
 		String username = conf.get(Genai.USERNAME_PROP_NAME);
 		String password = conf.get(Genai.PASSWORD_PROP_NAME);
@@ -120,7 +126,7 @@ public class CodeMieProvider extends GenaiAdapter {
 		System.setProperty(Genai.USERNAME_PROP_NAME, username);
 		System.setProperty(Genai.PASSWORD_PROP_NAME, password);
 
-		if (Strings.CS.startsWithAny(chatModel, "gpt-", "gemini-") || StringUtils.isBlank(chatModel)) {
+		if (Strings.CS.startsWithAny(model, "gpt-", "gemini-") || StringUtils.isBlank(model)) {
 			conf.set(OpenAIProvider.OPENAI_BASE_URL_NAME, BASE_URL);
 			System.setProperty(AUTH_URL_PROP_NAME, resolvedAuthUrl);
 			provider = new OpenAIProvider() {
@@ -137,7 +143,7 @@ public class CodeMieProvider extends GenaiAdapter {
 				 * @throws IllegalArgumentException if token acquisition fails
 				 */
 				@Override
-				protected OpenAIClient getClient() {
+				public OpenAIClient getClient() {
 					try {
 						String token = getToken(resolvedAuthUrl, username, password);
 						conf.set(OPENAI_API_KEY, token);
@@ -149,7 +155,7 @@ public class CodeMieProvider extends GenaiAdapter {
 				}
 			};
 			setProvider(provider);
-		} else if (Strings.CS.startsWithAny(chatModel, "claude-")) {
+		} else if (Strings.CS.startsWithAny(model, "claude-")) {
 			System.setProperty(ClaudeProvider.ANTHROPIC_BASE_URL, resolvedAuthUrl);
 			conf.set(ClaudeProvider.ANTHROPIC_BASE_URL, BASE_URL);
 			provider = new ClaudeProvider() {
@@ -179,7 +185,7 @@ public class CodeMieProvider extends GenaiAdapter {
 			};
 			setProvider(provider);
 		} else {
-			throw new IllegalArgumentException("Unsupported model: '" + chatModel + "'.");
+			throw new IllegalArgumentException("Unsupported model: '" + model + "'.");
 		}
 
 		setProvider(provider);
@@ -260,4 +266,27 @@ public class CodeMieProvider extends GenaiAdapter {
 			throw new UncheckedIOException("UTF-8 encoding not supported", new IOException(e));
 		}
 	}
+
+	/**
+	 * Requests an embedding vector for the given input text.
+	 *
+	 * @param text       input to embed
+	 * @param dimensions number of dimensions requested from the embedding model
+	 * @return embedding as a list of {@code double} values, or {@code null} when
+	 *         {@code text} is {@code null}
+	 */
+	@Override
+	public List<Double> embedding(String text, long dimensions) {
+		List<Double> embedding = null;
+		if (text != null) {
+			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(model)
+					.dimensions(dimensions).build();
+			CreateEmbeddingResponse response = ((OpenAIProvider) provider).getClient().embeddings().create(params);
+
+			embedding = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
+		}
+
+		return embedding;
+	}
+
 }
