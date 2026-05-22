@@ -58,7 +58,7 @@ Primary OpenAI-specific configuration:
 | `OPENAI_API_KEY` | API key or compatible bearer token used to authenticate requests. | None |
 | `OPENAI_BASE_URL` | Optional base URL for OpenAI-compatible endpoints. | SDK default |
 | `embedding.model` | Model used for embedding requests. | None |
-| `WebSearchTool.type` | Enables the built-in OpenAI web search tool when set. | Disabled |
+| `WebSearchTool.type` | Enables the built-in OpenAI web search tool when set. The value `default` can be used to enable the default WebSearchTool for the current Provider. | Disabled |
 | `WebSearchTool.city` | Optional city for approximate web search user location. | None |
 | `WebSearchTool.country` | Optional country for approximate web search user location. | None |
 | `WebSearchTool.region` | Optional region for approximate web search user location. | None |
@@ -89,7 +89,7 @@ Primary Claude-specific configuration:
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | API key used to authenticate Anthropic requests. | None |
 | `ANTHROPIC_BASE_URL` | Optional base URL for Anthropic-compatible endpoints. | SDK default |
-| `WebSearchTool.type` | Anthropic web search tool type. Supported values are `20260209` and `20250305`. | Disabled |
+| `WebSearchTool.type` | Anthropic web search tool type. Supported values are `20260209`, `20250305`, and `default`. The value `default` can be used to enable the default WebSearchTool for the current Provider. | Disabled |
 | `WebSearchTool.city` | Optional city for web search location. | None |
 | `WebSearchTool.country` | Optional country for web search location. | None |
 | `WebSearchTool.region` | Optional region for web search location. | None |
