@@ -35,6 +35,8 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Default maximum number of tokens the model may generate. */
 	public static final long MAX_OUTPUT_TOKENS = 18000;
 
+	public static final String DEFAULT_WEBSEARCH_TYPE_NAME = "default";
+
 	public static final String LOG_SECTION_SEPARATOR = Genai.PARAGRAPH_SEPARATOR
 			+ "-----------------------------------------" + Genai.PARAGRAPH_SEPARATOR;
 
@@ -126,10 +128,10 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Registers one MCP server/tool with the underlying provider SDK.
 	 *
-	 * @param label provider-visible MCP server label
-	 * @param url server endpoint URL
+	 * @param label         provider-visible MCP server label
+	 * @param url           server endpoint URL
 	 * @param authorization optional authorization token/value
-	 * @param description optional human-readable description
+	 * @param description   optional human-readable description
 	 */
 	protected abstract void addMcpServer(String label, String url, String authorization, String description);
 
@@ -156,10 +158,10 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Registers a provider-specific web-search tool.
 	 *
-	 * @param type provider-specific web-search tool type/version
-	 * @param city optional user city
+	 * @param type    provider-specific web-search tool type/version
+	 * @param city    optional user city
 	 * @param country optional user country
-	 * @param region optional user region
+	 * @param region  optional user region
 	 */
 	protected abstract void addWebSearch(String type, String city, String country, String region);
 
@@ -177,9 +179,9 @@ public abstract class AbstractAIProvider implements Genai {
 	 * Safely invokes a tool function and converts {@link IOException}s into a
 	 * textual error payload suitable for the model conversation.
 	 *
-	 * @param name tool name
-	 * @param tool tool handler
-	 * @param params parsed tool parameters
+	 * @param name       tool name
+	 * @param tool       tool handler
+	 * @param params     parsed tool parameters
 	 * @param workingDir working directory passed to the tool
 	 * @return tool output or a formatted error message
 	 */
@@ -303,7 +305,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * The second parameter is unused and retained only for API compatibility.
 	 * </p>
 	 *
-	 * @param timeout timeout in seconds; use {@code 0} to use SDK defaults
+	 * @param timeout        timeout in seconds; use {@code 0} to use SDK defaults
 	 * @param openAIProvider ignored compatibility parameter
 	 */
 	public void setTimeout(long timeout, OpenAIProvider openAIProvider) {

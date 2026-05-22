@@ -120,6 +120,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 		}
 
 		switch (type) {
+		case DEFAULT_WEBSEARCH_TYPE_NAME:
 		case "20260209":
 			BetaWebSearchTool20260209.Builder builder1 = BetaWebSearchTool20260209.builder();
 			builder1.userLocation(locationBuilder.build());

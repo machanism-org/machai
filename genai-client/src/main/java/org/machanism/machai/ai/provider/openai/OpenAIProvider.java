@@ -131,6 +131,10 @@ public class OpenAIProvider extends AbstractAIProvider {
 		UserLocation.Builder location = UserLocation.builder();
 		location.type(WebSearchTool.UserLocation.Type.APPROXIMATE);
 
+		if(DEFAULT_WEBSEARCH_TYPE_NAME.equals(type)) {
+			type = "web_search_preview";
+		}
+		
 		com.openai.models.responses.WebSearchTool.Builder webSearch = WebSearchTool.builder()
 				.type(WebSearchTool.Type.of(type));
 
