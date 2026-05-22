@@ -4,8 +4,33 @@ import java.util.List;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 
+/**
+ * EmbeddingProvider defines the contract for AI embedding providers.
+ * <p>
+ * Implementations of this interface are responsible for initializing with application
+ * configuration and generating embedding vectors for input text. Embeddings are typically
+ * used for tasks such as semantic search, similarity comparison, and natural language processing.
+ * </p>
+ *
+ * <p>
+ * Example usage:
+ * <pre>
+ *     EmbeddingProvider provider = ...;
+ *     provider.init(configurator);
+ *     List&lt;Double&gt; vector = provider.embedding("example text", 384);
+ * </pre>
+ * </p>
+ *
+ * @author Viktor Tovstyi
+ * @since 1.1.14
+ */
 public interface EmbeddingProvider {
 
+	/**
+	 * Initializes the provider with application configuration.
+	 *
+	 * @param conf configuration source
+	 */
 	void init(Configurator conf);
 
 	/**
