@@ -203,7 +203,7 @@ At configuration level, the provider supports one base MCP group and additional 
 - `MCP.description`
 - `MCP.authorization`
 
-If `MCP.url` is present, the provider can register the first MCP server.
+If `MCP.name` is present, the provider registers the first MCP server. The loop continues to numbered groups as long as a `.url` value is found.
 
 ### TOML ACL configuration properties for additional MCP servers
 
@@ -245,12 +245,12 @@ MCP_1.authorization = "Bearer admin-token"
 
 ### Property reference
 
-- `MCP.url`: required for the first MCP server.
-- `MCP.name`: optional human-readable name for the first MCP server.
+- `MCP.url`: server endpoint URL for the first MCP server.
+- `MCP.name`: required human-readable label for the first MCP server. The server is registered only when this value is present.
 - `MCP.description`: optional description for the first MCP server.
 - `MCP.authorization`: optional authorization value for the first MCP server.
-- `MCP_1.url`, `MCP_2.url`, and higher: required for each additional MCP server.
-- `MCP_1.name`, `MCP_2.name`, and higher: optional names for additional MCP servers.
+- `MCP_1.url`, `MCP_2.url`, and higher: server endpoint URLs for each additional MCP server. The discovery loop continues as long as a `.url` value is present.
+- `MCP_1.name`, `MCP_2.name`, and higher: required labels for each additional MCP server. Each numbered server is registered only when its `.name` value is present.
 - `MCP_1.description`, `MCP_2.description`, and higher: optional descriptions for additional MCP servers.
 - `MCP_1.authorization`, `MCP_2.authorization`, and higher: optional authorization values for additional MCP servers.
 
