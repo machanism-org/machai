@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
@@ -29,6 +30,7 @@ import com.anthropic.client.okhttp.AnthropicOkHttpClient.Builder;
 import com.anthropic.core.JsonField;
 import com.anthropic.core.JsonValue;
 import com.anthropic.core.Timeout;
+import com.anthropic.models.beta.messages.BetaCacheControlEphemeral;
 import com.anthropic.models.beta.messages.BetaContentBlock;
 import com.anthropic.models.beta.messages.BetaContentBlockParam;
 import com.anthropic.models.beta.messages.BetaMessage;
@@ -83,6 +85,8 @@ public class ClaudeProvider extends AbstractAIProvider {
 	public static final String ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY";
 	public static final String ANTHROPIC_BASE_URL = "ANTHROPIC_BASE_URL";
 
+	private Long cacheThreshold = 10240L;
+
 	/** Accumulated prompt messages for the current conversation. */
 	private final List<BetaMessageParam> inputs = new ArrayList<>();
 
@@ -92,6 +96,17 @@ public class ClaudeProvider extends AbstractAIProvider {
 	private Object webSearchTool;
 
 	private List<BetaRequestMcpServerUrlDefinition> mcpServers = new ArrayList<>();
+
+	/**
+	 * Initializes the provider from the given configuration.
+	 *
+	 * @param config provider configuration source
+	 */
+	@Override
+	public void init(Configurator config) {
+		cacheThreshold = config.getLong("CACHE_THRESHOLD_PROP_NAME", cacheThreshold);
+		super.init(config);
+	}
 
 	@Override
 	protected void addMcpServer(String name, String url, String authorization, String description) {
@@ -247,15 +262,18 @@ public class ClaudeProvider extends AbstractAIProvider {
 				.build();
 		inputs.add(toolUseMessage);
 
-		Object result = null;
+		String result = Objects.toString(callFunction(toolUse));
 
-		result = callFunction(toolUse);
-
-		BetaToolResultBlockParam toolResult = BetaToolResultBlockParam.builder()
+		com.anthropic.models.beta.messages.BetaToolResultBlockParam.Builder toolResult = BetaToolResultBlockParam
+				.builder()
 				.toolUseId(toolUse.id())
-				.content(Objects.toString(result))
-				.build();
-		BetaContentBlockParam toolContentBlock = BetaContentBlockParam.ofToolResult(toolResult);
+				.content(result);
+
+		if (cacheThreshold != null && StringUtils.length(result) > cacheThreshold) {
+			toolResult.cacheControl(BetaCacheControlEphemeral.builder().build());
+		}
+
+		BetaContentBlockParam toolContentBlock = BetaContentBlockParam.ofToolResult(toolResult.build());
 		ArrayList<BetaContentBlockParam> arrayList = new ArrayList<>();
 		arrayList.add(toolContentBlock);
 		BetaMessageParam toolResultMessage = BetaMessageParam.builder()
