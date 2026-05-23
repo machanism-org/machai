@@ -150,6 +150,17 @@ public class ActMojo extends AbstractGWMojo {
 		if (interactive != null) {
 			actProcessor.setInteractive(interactive);
 		}
+		
+		if (instructions != null) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
+			}
+			actProcessor.setInstructions(instructions);
+		}
+
+		if (model != null) {
+			actProcessor.setModel(model);
+		}
 
 		try {
 			process(actProcessor);
