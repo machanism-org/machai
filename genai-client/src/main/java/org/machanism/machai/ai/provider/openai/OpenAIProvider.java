@@ -20,6 +20,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
+import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ import com.openai.core.JsonValue;
 import com.openai.core.Timeout;
 import com.openai.models.Reasoning;
 import com.openai.models.ReasoningEffort;
+import com.openai.models.embeddings.CreateEmbeddingResponse;
+import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.models.models.Model;
 import com.openai.models.responses.FunctionTool;
 import com.openai.models.responses.FunctionTool.Parameters;
@@ -97,7 +100,7 @@ import com.openai.services.blocking.ModelService;
  * {@code MCP_1.authorization} and similarly numbered groups (optional):
  * registers additional MCP server tools.</li> &lt;/ul&gt;
  */
-public class OpenAIProvider extends AbstractAIProvider {
+public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvider {
 
 	/** Logger instance for this provider. */
 	static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
@@ -524,6 +527,28 @@ public class OpenAIProvider extends AbstractAIProvider {
 				streamWriter.write(AbstractAIProvider.LOG_SECTION_SEPARATOR);
 			}
 		}
+	}
+
+	/**
+	 * Requests an embedding vector for the given input text.
+	 *
+	 * @param text       input to embed
+	 * @param dimensions number of dimensions requested from the embedding model
+	 * @return embedding as a list of {@code double} values, or {@code null} when
+	 *         {@code text} is {@code null}
+	 */
+	@Override
+	public List<Double> embedding(String text, long dimensions) {
+		List<Double> embedding = null;
+		if (text != null) {
+			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(chatModel)
+					.dimensions(dimensions).build();
+			CreateEmbeddingResponse response = getClient().embeddings().create(params);
+
+			embedding = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
+		}
+
+		return embedding;
 	}
 
 }

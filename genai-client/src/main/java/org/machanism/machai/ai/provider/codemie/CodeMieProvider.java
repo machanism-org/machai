@@ -88,6 +88,12 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 */
 	public static final String BASE_URL = "https://codemie.lab.epam.com/code-assistant-api";
 
+	private static final String[] OPENAI_COMPATIBLE_MODELS_PREFIXES = { "gpt-", "gemini-", "text-embedding-",
+			"codemie-text-embedding-",
+			"amazon.titan-embed-text-" };
+
+	private static final String[] CLAUDE_COMPATIBLE_MODELS_PREFIXES = { "claude-" };
+
 	private String model;
 
 	/**
@@ -126,22 +132,11 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 		System.setProperty(Genai.USERNAME_PROP_NAME, username);
 		System.setProperty(Genai.PASSWORD_PROP_NAME, password);
 
-		if (Strings.CS.startsWithAny(model, "gpt-", "gemini-") || StringUtils.isBlank(model)) {
+		if (Strings.CS.startsWithAny(model, OPENAI_COMPATIBLE_MODELS_PREFIXES)
+				|| StringUtils.isBlank(model)) {
 			conf.set(OpenAIProvider.OPENAI_BASE_URL_NAME, BASE_URL);
 			System.setProperty(AUTH_URL_PROP_NAME, resolvedAuthUrl);
 			provider = new OpenAIProvider() {
-				/**
-				 * Builds (and caches) an {@link OpenAIClient} after ensuring the current
-				 * configuration contains an {@code OPENAI_API_KEY} value.
-				 *
-				 * <p>
-				 * The access token is requested lazily at client creation time so that
-				 * initialization can fail fast on authorization errors.
-				 * </p>
-				 *
-				 * @return OpenAI-compatible client configured for the CodeMie backend
-				 * @throws IllegalArgumentException if token acquisition fails
-				 */
 				@Override
 				public OpenAIClient getClient() {
 					try {
@@ -155,22 +150,10 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 				}
 			};
 			setProvider(provider);
-		} else if (Strings.CS.startsWithAny(model, "claude-")) {
+		} else if (Strings.CS.startsWithAny(model, CLAUDE_COMPATIBLE_MODELS_PREFIXES)) {
 			System.setProperty(ClaudeProvider.ANTHROPIC_BASE_URL, resolvedAuthUrl);
 			conf.set(ClaudeProvider.ANTHROPIC_BASE_URL, BASE_URL);
 			provider = new ClaudeProvider() {
-				/**
-				 * Builds (and caches) an {@link OpenAIClient} after ensuring the current
-				 * configuration contains an {@code OPENAI_API_KEY} value.
-				 *
-				 * <p>
-				 * The access token is requested lazily at client creation time so that
-				 * initialization can fail fast on authorization errors.
-				 * </p>
-				 *
-				 * @return OpenAI-compatible client configured for the CodeMie backend
-				 * @throws IllegalArgumentException if token acquisition fails
-				 */
 				@Override
 				protected AnthropicClient getClient() {
 					try {
@@ -277,16 +260,10 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 */
 	@Override
 	public List<Double> embedding(String text, long dimensions) {
-		List<Double> embedding = null;
-		if (text != null) {
-			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(model)
-					.dimensions(dimensions).build();
-			CreateEmbeddingResponse response = ((OpenAIProvider) provider).getClient().embeddings().create(params);
-
-			embedding = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
+		if (provider instanceof EmbeddingProvider) {
+			((EmbeddingProvider) provider).embedding(text, dimensions);
 		}
-
-		return embedding;
+		throw new IllegalArgumentException("embedding not support for `" + model + "`");
 	}
 
 }
