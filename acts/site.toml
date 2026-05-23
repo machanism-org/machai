@@ -23,7 +23,7 @@ inputs = [
    - The Cloudflare bucket name is `${cf.bucket}`.
    - The sync command should look like:
      ```
-     rclone sync "${site.dir}" r2:${cf.bucket} -P
+     rclone sync `${site.dir}` `r2:${cf.bucket}` -P
      ```
    - Ensure the synchronization completes without errors.
 
