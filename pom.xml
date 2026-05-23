@@ -62,22 +62,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.11.2</version>
-						<configuration>
-							<doclint>none</doclint>
-							<show>package</show>
-							<useStandardDocletOptions>true</useStandardDocletOptions>
-							<bottom><![CDATA[&copy;2025-2026 Machanism.org. All Rights Reserved.]]></bottom>
-							<header><![CDATA[<h1><a href="${project.url}">${project.name}<a></h1>]]></header>
-						</configuration>
-						<executions>
-							<execution>
-								<id>attach-javadocs</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -324,6 +308,26 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.11.2</version>
+					<configuration>
+						<doclint>none</doclint>
+						<show>package</show>
+						<useStandardDocletOptions>true</useStandardDocletOptions>
+						<bottom><![CDATA[&copy;2025-2026 Machanism.org. All Rights Reserved.]]></bottom>
+						<header><![CDATA[<h1><a href="${project.url}">${project.name}<a></h1>]]></header>
+					</configuration>
+					<executions>
+						<execution>
+							<id>attach-javadocs</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
 					<version>5.5.0.6356</version>
@@ -558,15 +562,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.12.0</version>
-				<configuration>
-					<doclint>none</doclint>
-					<show>package</show>
-
-					<useStandardDocletOptions>true</useStandardDocletOptions>
-					<bottom><![CDATA[&copy;2025-2026 Machanism.org. All Rights Reserved.]]></bottom>
-					<header><![CDATA[<h1><a href="${project.url}">${project.name}</a></h1>]]></header>
-				</configuration>
 			</plugin>
 
 			<plugin>
