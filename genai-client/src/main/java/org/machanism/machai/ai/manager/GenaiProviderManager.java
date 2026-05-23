@@ -75,14 +75,21 @@ public class GenaiProviderManager {
 		}
 
 		try {
-			@SuppressWarnings("unchecked")
-			Class<? extends EmbeddingProvider> providerClass = (Class<? extends EmbeddingProvider>) Class.forName(className);
-			Constructor<? extends EmbeddingProvider> constructor = providerClass.getConstructor();
-			EmbeddingProvider provider = constructor.newInstance();
-			conf.set("embeddingModel", model);
-			provider.init(conf);
-			return provider;
-			
+			Class<?> forName = Class.forName(className);
+			if (forName.isInstance(EmbeddingProvider.class)) {
+				@SuppressWarnings("unchecked")
+				Class<? extends EmbeddingProvider> providerClass = (Class<? extends EmbeddingProvider>) forName;
+				Constructor<? extends EmbeddingProvider> constructor = providerClass.getConstructor();
+				EmbeddingProvider provider = constructor.newInstance();
+				conf.set("embeddingModel", model);
+				provider.init(conf);
+				return provider;
+			} else {
+				throw new IllegalArgumentException(
+						"Class `" + className + "` does not implement EmbeddingProvider. " +
+								"Please ensure the class is a valid provider implementation.");
+			}
+
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException
 				| NoSuchMethodException | SecurityException e) {
 			throw new IllegalArgumentException("Failed to initialize EmbeddingProvider provider '" + providerName
