@@ -314,11 +314,11 @@ public final class Ghostwriter {
 			}
 			length = 8;
 		}
-		String subscribe = StringUtils.leftPad("― ©" + SystemProperties.getUserName(), maxlen) + "\n";
+		String footer = StringUtils.leftPad("― ©" + SystemProperties.getUserName(), maxlen) + "\n";
 		if (console != null) {
-			console.format(subscribe);
+			console.format(footer);
 		} else {
-			System.out.print(subscribe);
+			System.out.print(footer);
 		}
 
 		return sb.toString();
