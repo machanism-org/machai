@@ -72,10 +72,10 @@ public interface Genai {
 
 	/**
 	 * Initializes the provider with application configuration.
-	 *
+	 * @param model TODO
 	 * @param conf configuration source
 	 */
-	void init(Configurator conf);
+	void init(String model, Configurator conf);
 
 	/**
 	 * Adds a user prompt to the current session.

@@ -57,8 +57,8 @@ public class GenaiAdapter implements Genai {
 	}
 
 	@Override
-	public void init(Configurator conf) {
-		provider.init(conf);
+	public void init(String model, Configurator conf) {
+		provider.init(model, conf);
 	}
 
 	@Override

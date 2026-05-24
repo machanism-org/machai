@@ -19,9 +19,8 @@ class CodeMieProviderInitTest {
     void initShouldUseOpenAiProviderForBlankModel() throws Exception {
         CodeMieProvider provider = new CodeMieProvider();
         Configurator config = baseConfig();
-        config.set("chatModel", "");
 
-        provider.init(config);
+        provider.init("", config);
 
         Object delegate = getDelegate(provider);
         assertNotNull(delegate);

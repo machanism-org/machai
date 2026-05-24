@@ -21,7 +21,7 @@ class FunctionToolsLoaderTest {
 		private final AtomicInteger adds = new AtomicInteger();
 
 		@Override
-		public void init(Configurator configurator) {
+		public void init(String model, Configurator configurator) {
 			// not used
 		}
 

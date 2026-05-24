@@ -28,10 +28,10 @@ public interface EmbeddingProvider {
 
 	/**
 	 * Initializes the provider with application configuration.
-	 *
+	 * @param model TODO
 	 * @param conf configuration source
 	 */
-	void init(Configurator conf);
+	void init(String model, Configurator conf);
 
 	/**
 	 * Computes an embedding vector for the provided text.

@@ -97,13 +97,12 @@ public class ClaudeProvider extends AbstractAIProvider {
 
 	/**
 	 * Initializes the provider from the given configuration.
-	 *
 	 * @param config provider configuration source
 	 */
 	@Override
-	public void init(Configurator config) {
+	public void init(String model, Configurator config) {
 		cacheThreshold = config.getLong(CACHE_THRESHOLD_PROP_NAME, cacheThreshold);
-		super.init(config);
+		super.init(model, config);
 	}
 
 	@Override

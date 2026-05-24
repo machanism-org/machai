@@ -46,8 +46,7 @@ public class GenaiProviderManager {
 			Class<? extends Genai> providerClass = (Class<? extends Genai>) Class.forName(className);
 			Constructor<? extends Genai> constructor = providerClass.getConstructor();
 			Genai provider = constructor.newInstance();
-			conf.set("chatModel", chatModelName);
-			provider.init(conf);
+			provider.init(chatModelName, conf);
 			return provider;
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException
 				| NoSuchMethodException | SecurityException e) {
@@ -76,13 +75,12 @@ public class GenaiProviderManager {
 
 		try {
 			Class<?> forName = Class.forName(className);
-			if (forName.isInstance(EmbeddingProvider.class)) {
+			if (EmbeddingProvider.class.isAssignableFrom(forName)) {
 				@SuppressWarnings("unchecked")
 				Class<? extends EmbeddingProvider> providerClass = (Class<? extends EmbeddingProvider>) forName;
 				Constructor<? extends EmbeddingProvider> constructor = providerClass.getConstructor();
 				EmbeddingProvider provider = constructor.newInstance();
-				conf.set("embeddingModel", model);
-				provider.init(conf);
+				provider.init(model, conf);
 				return provider;
 			} else {
 				throw new IllegalArgumentException(

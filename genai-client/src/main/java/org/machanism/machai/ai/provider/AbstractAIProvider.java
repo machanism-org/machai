@@ -66,7 +66,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 *
 	 * <p>
 	 * Subclasses are expected to complete initialization in
-	 * {@link #init(Configurator)}.
+	 * {@link #init(String, Configurator)}.
 	 * </p>
 	 */
 	public AbstractAIProvider() {
@@ -75,13 +75,12 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/**
 	 * Initializes the provider from the given configuration.
-	 *
 	 * @param config provider configuration source
 	 */
 	@Override
-	public void init(Configurator config) {
+	public void init(String model, Configurator config) {
 		this.config = config;
-		chatModel = config.get("chatModel");
+		chatModel = model;
 
 		maxOutputTokens = config.getLong("MAX_OUTPUT_TOKENS", MAX_OUTPUT_TOKENS);
 		maxToolCalls = config.getLong("MAX_TOOL_CALLS", 0L);
@@ -189,6 +188,7 @@ public abstract class AbstractAIProvider implements Genai {
 			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 					+ e.getMessage();
 			logger.error(errMsg);
+			logger.debug(errMsg, e);
 			return errMsg;
 		}
 	}

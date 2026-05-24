@@ -71,7 +71,7 @@ import com.openai.services.blocking.ModelService;
  * &lt;/p&gt;
  *
  * <h2>Configuration</h2> &lt;p&gt;Configuration values are read from the
- * {@link Configurator} passed to {@link #init(Configurator)}.
+ * {@link Configurator} passed to {@link #init(String, Configurator)}.
  * &lt;/p&gt;&lt;ul&gt;
  * <li>{@code chatModel} (required): model identifier passed to the OpenAI
  * Responses API, for example {@code gpt-4.1} or {@code gpt-4o}.</li>
