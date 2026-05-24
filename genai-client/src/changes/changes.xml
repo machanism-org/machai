@@ -4,6 +4,14 @@
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
    
+  <release version="1.1.14" date="2026-05-28">
+<action dev="dev" type="add">
+<![CDATA[
+<b>Features:</b><ul><li>Added dedicated embedding provider abstraction and manager lookup for improved embedding model support.</li><li>Added support for multi-line input with line breaker and user signature in readLine method.</li><li>Added instructions and model parameter handling in ActMojo for Maven plugin execution.</li></ul><b>Fixes:</b><ul><li>Fixed classification JSON detection in Picker and updated embedding model provider prefix in assembly act.</li><li>Fixed rclone command syntax in site.toml to use backticks for Windows compatibility.</li><li>Fixed null checks to prevent overwriting instructions and model properties in ActProcessor.</li><li>Fixed fallback to System.out.print for null console and added model logging in Ghostwriter.</li><li>Fixed missing return statement in embedding method of CodeMieProvider.</li></ul><b>Refactoring:</b><ul><li>Refactored embedding support across OpenAI and CodeMie providers with dedicated EmbeddingProvider type validation.</li><li>Refactored CodeMieProvider to use named inner classes for provider extensions.</li><li>Refactored provider initialization to pass model name as explicit parameter instead of through configuration.</li><li>Refactored bindex act to use multi-step inputs with dedicated javadoc generation.</li><li>Refactored maven-javadoc-plugin configuration from reporting to pluginManagement section.</li><li>Removed unused imports, dependencies, and methods across multiple modules.</li></ul>
+]]>
+</action>
+</release>
+   
   <release version="1.1.0" date="2026-04-05">
 <action dev="dev" type="add">
 <![CDATA[

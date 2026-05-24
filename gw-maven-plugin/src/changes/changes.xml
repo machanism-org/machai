@@ -62,5 +62,36 @@
 </ul>
 ]]></action>
     </release>
+
+    <release version="1.1.14" date="2026-05-24">
+      <action dev="dev" type="add"><![CDATA[
+<b>Features:</b>
+<ul>
+  <li>Added dedicated embedding provider abstraction and manager lookup for embedding-specific operations.</li>
+  <li>Added EmbeddingProvider type validation before instantiation in GenaiProviderManager.</li>
+  <li>Refactored embedding support across OpenAI and CodeMie providers with delegated embedding calls.</li>
+  <li>Added instructions and model parameter handling in ActMojo.</li>
+  <li>Added HTML parsing and text processing utilities dependencies.</li>
+</ul>
+<b>Fixes:</b>
+<ul>
+  <li>Fixed variable names in Ghostwriter processor.</li>
+  <li>Fixed classification JSON detection in Picker and updated embedding model provider prefix in assembly act.</li>
+  <li>Fixed missing return statement in embedding method of CodeMieProvider.</li>
+  <li>Fixed null checks to prevent overwriting instructions and model properties in ActProcessor.</li>
+  <li>Added fallback to System.out.print for null console and model logging in Ghostwriter.</li>
+</ul>
+<b>Refactoring:</b>
+<ul>
+  <li>Removed unused listFilesRecursively method and fixed unchecked cast warning in ProjectContextFunctionTools.</li>
+  <li>Removed unused imports from CodeMieProvider and BindexFunctionTools.</li>
+  <li>Removed unused dependencies from pom.xml.</li>
+  <li>Refactored CodeMieProvider to use named inner classes for provider extensions.</li>
+  <li>Refactored provider initialization to pass model name as explicit parameter instead of through configuration.</li>
+  <li>Refactored maven-javadoc-plugin configuration from reporting to pluginManagement section.</li>
+  <li>Refactored bindex act to use multi-step inputs with dedicated javadoc generation.</li>
+</ul>
+]]></action>
+    </release>
   </body>
 </document>

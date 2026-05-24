@@ -109,5 +109,27 @@
 </ul>
       ]]></action>
     </release>
+    <release version="1.1.14" date="2026-05-26">
+      <action dev="dev" type="add"><![CDATA[
+<b>Features:</b>
+<ul>
+  <li>Added dedicated embedding provider abstraction with OpenAI and CodeMie support, enabling specialized embedding model usage in Picker and bindex workflows.</li>
+  <li>Added ephemeral cache control for large tool results in ClaudeProvider to optimize prompt caching behavior.</li>
+  <li>Added web search tool support to ClaudeProvider with beta API integration.</li>
+  <li>Enhanced readLine method to support multi-line input with line breaker and user signature for improved interactive workflows.</li>
+</ul>
+<b>Fixes:</b>
+<ul>
+  <li>Fixed classification JSON detection in Picker and updated embedding model provider prefix handling.</li>
+  <li>Fixed null checks to prevent overwriting instructions and model properties in ActProcessor.</li>
+  <li>Fixed rclone command syntax in site.toml to use backticks for Windows compatibility.</li>
+</ul>
+<b>Refactoring:</b>
+<ul>
+  <li>Refactored provider initialization to pass model name as explicit parameter instead of through configuration.</li>
+  <li>Refactored AI provider architecture: extracted AbstractAIProvider base, created provider package, and standardized MCP server and web search configuration loops.</li>
+</ul>
+      ]]></action>
+    </release>
    </body>
 </document>
