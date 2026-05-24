@@ -14,6 +14,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.SystemProperties;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.UsageStatistics;
@@ -293,7 +294,34 @@ public final class Ghostwriter {
 		} else {
 			System.out.print(prompt);
 		}
-		return scanner.nextLine();
+
+		StringBuilder sb = new StringBuilder();
+		String line;
+		int length = prompt.length() + 2;
+		int maxlen = length;
+		while ((line = scanner.nextLine()) != null) {
+			prompt = "\t";
+			length += line.length();
+			if (length > maxlen) {
+				maxlen = length;
+			}
+			if (Strings.CS.endsWith(line, GWConstants.MULTIPLE_LINES_BREAKER)) {
+				sb.append(StringUtils.substringBeforeLast(line, GWConstants.MULTIPLE_LINES_BREAKER))
+						.append(Genai.LINE_SEPARATOR);
+			} else {
+				sb.append(line);
+				break;
+			}
+			length = 8;
+		}
+		String subscribe = StringUtils.leftPad("― ©" + SystemProperties.getUserName(), maxlen);
+		if (console != null) {
+			console.format(subscribe);
+		} else {
+			System.out.print(subscribe);
+		}
+
+		return sb.toString();
 	}
 
 	/**
