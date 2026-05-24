@@ -586,7 +586,9 @@ public class ActProcessor extends AIFileProcessor {
 	private void applyStringProperty(String key, String value) {
 		switch (key) {
 		case GWConstants.INSTRUCTIONS_PROP_NAME:
-			super.setInstructions(value);
+			if (super.getInstructions() == null) {
+				super.setInstructions(value);
+			}
 			break;
 		case GWConstants.INPUTS_PROPERTY_NAME:
 			episodes.setEpisodes(Collections.singletonList(value));
@@ -604,8 +606,10 @@ public class ActProcessor extends AIFileProcessor {
 			super.setInteractive(Boolean.parseBoolean(value));
 			break;
 		case GWConstants.MODEL_PROP_NAME:
-			super.setModel(value);
-			getConfigurator().set(key, value);
+			if (super.getModel() == null) {
+				super.setModel(value);
+				getConfigurator().set(key, value);
+			}
 			break;
 		default:
 			getConfigurator().set(key, value);
