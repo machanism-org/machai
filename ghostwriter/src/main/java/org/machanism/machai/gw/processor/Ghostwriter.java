@@ -290,6 +290,8 @@ public final class Ghostwriter {
 		Console console = System.console();
 		if (console != null) {
 			console.format(prompt);
+		} else {
+			System.out.print(prompt);
 		}
 		return scanner.nextLine();
 	}
@@ -369,7 +371,9 @@ public final class Ghostwriter {
 	 */
 	private static ActProcessor createActProcessor(Scanner scanner, PropertiesConfigurator config,
 			RuntimeSettings settings) {
-		return new ActProcessor(settings.projectDir, config, settings.genai) {
+		String genai = settings.genai;
+		LOGGER.info("Model: {}", genai);
+		return new ActProcessor(settings.projectDir, config, genai) {
 			@Override
 			protected String input() {
 				return readActInput(scanner);
