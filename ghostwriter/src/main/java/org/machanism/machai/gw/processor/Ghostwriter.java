@@ -297,7 +297,7 @@ public final class Ghostwriter {
 
 		StringBuilder sb = new StringBuilder();
 		String line;
-		int length = prompt.length() + 2;
+		int length = prompt.length();
 		int maxlen = length;
 		while ((line = scanner.nextLine()) != null) {
 			prompt = "\t";
@@ -314,7 +314,7 @@ public final class Ghostwriter {
 			}
 			length = 8;
 		}
-		String subscribe = StringUtils.leftPad("― ©" + SystemProperties.getUserName(), maxlen);
+		String subscribe = StringUtils.leftPad("― ©" + SystemProperties.getUserName(), maxlen) + "\n";
 		if (console != null) {
 			console.format(subscribe);
 		} else {
