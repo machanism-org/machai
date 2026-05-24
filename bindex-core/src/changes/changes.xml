@@ -3,19 +3,10 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-   
-  <release version="1.1.0" date="2026-04-05">
+  <release version="1.1.14" date="2026-05-15">
     <action dev="dev" type="add">
 <![CDATA[
-<b>Features:</b>
-<ul><li>Added Bindex metadata management for schema-compliant library descriptors, including generation, registration, retrieval, and semantic discovery workflows.</li><li>Added AI-callable Bindex function tools for metadata lookup, schema retrieval, natural-language library recommendation, and local Bindex registration.</li><li>Added AI Assembly workflow support for turning natural-language implementation requests into buildable project foundations using recommended libraries and Bindex metadata.</li><li>Added reusable workflow acts for Bindex authoring, library picking, and assembly-oriented implementation.</li><li>Added MongoDB-backed Bindex repository support with embedding-based semantic search, language filtering, and architectural-layer filtering.</li></ul>
-]]>
-    </action>
-  </release>
-  <release version="1.1.8" date="2026-05-09">
-    <action dev="dev" type="add">
-<![CDATA[
-<b>Fixes:</b><ul><li>Fixed Sonar-reported issues to improve code quality and maintainability.</li></ul><h2>Tests</h2><ul><li>Added tests to improve verification coverage.</li></ul><b>Documentation:</b><ul><li>Updated release notes for the current release.</li></ul><b>Chores:</b><ul><li>Updated the project version for the 1.1.8 release.</li></ul>
+<b>Features:</b><ul><li>Added dedicated embedding provider abstraction and manager lookup.</li><li>Added fallback to System.out.print for null console and model logging in Ghostwriter.</li><li>Added null checks to prevent overwriting instructions and model properties in ActProcessor.</li><li>Added EmbeddingProvider type validation before instantiation in GenaiProviderManager.</li><li>Enhanced readLine method to support multi-line input with line breaker and user signature.</li></ul><b>Fixes:</b><ul><li>Fixed a variable name.</li><li>Fixed classification JSON detection in Picker and updated embedding model provider prefix in assembly act.</li><li>Fixed rclone command syntax in site.toml to use backticks for Windows compatibility.</li><li>Removed unused listFilesRecursively method and fixed unchecked cast warning in ProjectContextFunctionTools.</li><li>Removed unused imports from CodeMieProvider and BindexFunctionTools.</li><li>Removed unused dependencies from pom.xml.</li></ul><b>Refactoring:</b><ul><li>Refactored CodeMieProvider to use named inner classes for provider extensions and fixed missing return statement in embedding method.</li><li>Refactored provider initialization to pass model name as explicit parameter instead of through configuration.</li><li>Refactored maven-javadoc-plugin configuration from reporting to pluginManagement section.</li><li>Refactored bindex act to use multi-step inputs with dedicated javadoc generation.</li><li>Refactored embedding support across OpenAI and CodeMie providers.</li></ul><b>Chores:</b><ul><li>Added dependencies for HTML parsing and text processing utilities.</li><li>Added instructions and model parameter handling in ActMojo.</li><li>Removed extra definitions in pom.xml.</li></ul>
 ]]>
     </action>
   </release>
@@ -26,10 +17,18 @@
 ]]>
     </action>
   </release>
-  <release version="1.1.14" date="2026-05-15">
+  <release version="1.1.8" date="2026-05-09">
     <action dev="dev" type="add">
 <![CDATA[
-<b>Features:</b><ul><li>Added dedicated embedding provider abstraction and manager lookup.</li><li>Added fallback to System.out.print for null console and model logging in Ghostwriter.</li><li>Added null checks to prevent overwriting instructions and model properties in ActProcessor.</li><li>Added EmbeddingProvider type validation before instantiation in GenaiProviderManager.</li><li>Enhanced readLine method to support multi-line input with line breaker and user signature.</li></ul><b>Fixes:</b><ul><li>Fixed a variable name.</li><li>Fixed classification JSON detection in Picker and updated embedding model provider prefix in assembly act.</li><li>Fixed rclone command syntax in site.toml to use backticks for Windows compatibility.</li><li>Removed unused listFilesRecursively method and fixed unchecked cast warning in ProjectContextFunctionTools.</li><li>Removed unused imports from CodeMieProvider and BindexFunctionTools.</li><li>Removed unused dependencies from pom.xml.</li></ul><b>Refactoring:</b><ul><li>Refactored CodeMieProvider to use named inner classes for provider extensions and fixed missing return statement in embedding method.</li><li>Refactored provider initialization to pass model name as explicit parameter instead of through configuration.</li><li>Refactored maven-javadoc-plugin configuration from reporting to pluginManagement section.</li><li>Refactored bindex act to use multi-step inputs with dedicated javadoc generation.</li><li>Refactored embedding support across OpenAI and CodeMie providers.</li></ul><b>Chores:</b><ul><li>Added dependencies for HTML parsing and text processing utilities.</li><li>Added instructions and model parameter handling in ActMojo.</li><li>Removed extra definitions in pom.xml.</li></ul>
+<b>Fixes:</b><ul><li>Fixed Sonar-reported issues to improve code quality and maintainability.</li></ul><h2>Tests</h2><ul><li>Added tests to improve verification coverage.</li></ul><b>Documentation:</b><ul><li>Updated release notes for the current release.</li></ul><b>Chores:</b><ul><li>Updated the project version for the 1.1.8 release.</li></ul>
+]]>
+    </action>
+  </release>
+  <release version="1.1.0" date="2026-04-05">
+    <action dev="dev" type="add">
+<![CDATA[
+<b>Features:</b>
+<ul><li>Added Bindex metadata management for schema-compliant library descriptors, including generation, registration, retrieval, and semantic discovery workflows.</li><li>Added AI-callable Bindex function tools for metadata lookup, schema retrieval, natural-language library recommendation, and local Bindex registration.</li><li>Added AI Assembly workflow support for turning natural-language implementation requests into buildable project foundations using recommended libraries and Bindex metadata.</li><li>Added reusable workflow acts for Bindex authoring, library picking, and assembly-oriented implementation.</li><li>Added MongoDB-backed Bindex repository support with embedding-based semantic search, language filtering, and architectural-layer filtering.</li></ul>
 ]]>
     </action>
   </release>

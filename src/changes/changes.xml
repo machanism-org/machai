@@ -43,6 +43,90 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
 ]]>
 </action>
 </release>
+<release version="1.1.13" date="2026-05-22">
+<action dev="dev" type="add">
+<![CDATA[
+<b>Features:</b>
+<ul>
+  <li>Added Claude provider support, including provider configuration routing, tool call handling, message structure updates, Beta API integration, and web search support.</li>
+  <li>Expanded CodeMie provider model routing and removed the None provider.</li>
+  <li>Improved provider resolution and functional tool integration.</li>
+</ul>
+<b>Fixes:</b>
+<ul>
+  <li>Fixed cache input token calculation in the Claude provider.</li>
+  <li>Fixed module processing logging level handling and act execution property handling.</li>
+  <li>Corrected <code>&lt;developers&gt;</code> information in POM files.</li>
+</ul>
+<b>Refactoring:</b>
+<ul>
+  <li>Refactored function call handling shared by Claude and OpenAI providers.</li>
+  <li>Refactored provider shared base implementations and moved <code>AbstractAIProvider</code> into the provider package.</li>
+  <li>Refactored usage tracking and Maven plugin usage statistics logging to per-model statistics management.</li>
+  <li>Refactored episode execution from 0-based to 1-based indexing for clearer episode handling.</li>
+  <li>Refactored MCP server and web search configuration loops into shared provider logic.</li>
+</ul>
+]]>
+</action>
+</release>
+<release version="1.1.12" date="2026-05-18">
+<action dev="dev" type="add">
+<![CDATA[
+<b>Features:</b>
+<ul>
+  <li>Added support for moving to an episode by name.</li>
+</ul>
+<b>Fixes:</b>
+<ul>
+  <li>Improved <code>move_to_episode</code> handling.</li>
+  <li>Corrected an internal variable name.</li>
+  <li>Added a warning for cases where interactive mode is not supported.</li>
+</ul>
+]]>
+</action>
+</release>
+<release version="1.1.11" date="2026-05-14">
+<action dev="dev" type="add">
+<![CDATA[
+<b>Features:</b>
+<ul>
+  <li>Added the <code>perform_act</code> function tool to trigger predefined act workflows.</li>
+  <li>Added support for the <code>&gt;&gt;&gt;</code> file include marker to include content from URLs or file paths during processing.</li>
+</ul>
+<b>Fixes:</b>
+<ul>
+  <li>Fixed act episode processing for multi-threaded execution.</li>
+</ul>
+]]>
+</action>
+</release>
+<release version="1.1.10" date="2026-05-12">
+<action dev="dev" type="add">
+<![CDATA[
+<b>Features:</b>
+<ul>
+  <li>Added project context functional tools for pushing and popping project-scoped values.</li>
+</ul>
+<b>Refactoring:</b>
+<ul>
+  <li>Extracted project context tooling from act-specific tooling and simplified internal tool loading.</li>
+  <li>Improved commit handling, interactive exit flow, picker tool loading, and constant organization.</li>
+</ul>
+]]>
+</action>
+</release>
+<release version="1.1.9" date="2026-05-10">
+<action dev="dev" type="add">
+<![CDATA[
+<b>Fixes:</b>
+<ul>
+  <li>Improved task termination handling across Ghostwriter processors and Maven plugin execution.</li>
+  <li>Corrected the end-task exception class naming for clearer task completion semantics.</li>
+  <li>Fixed an incorrect log message in command function tools.</li>
+</ul>
+]]>
+</action>
+</release>
 <release version="1.1.8" date="2026-05-09">
 <action dev="dev" type="add">
 <![CDATA[
@@ -74,90 +158,6 @@ xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.o
 <ul>
   <li>Added and updated tests, addressed sonar issues, and updated the configured GW model.</li>
   <li>Prepared the 1.1.8 release version update.</li>
-</ul>
-]]>
-</action>
-</release>
-  <release version="1.1.9" date="2026-05-10">
-<action dev="dev" type="add">
-<![CDATA[
-<b>Fixes:</b>
-<ul>
-  <li>Improved task termination handling across Ghostwriter processors and Maven plugin execution.</li>
-  <li>Corrected the end-task exception class naming for clearer task completion semantics.</li>
-  <li>Fixed an incorrect log message in command function tools.</li>
-</ul>
-]]>
-</action>
-</release>
-  <release version="1.1.10" date="2026-05-12">
-<action dev="dev" type="add">
-<![CDATA[
-<b>Features:</b>
-<ul>
-  <li>Added project context functional tools for pushing and popping project-scoped values.</li>
-</ul>
-<b>Refactoring:</b>
-<ul>
-  <li>Extracted project context tooling from act-specific tooling and simplified internal tool loading.</li>
-  <li>Improved commit handling, interactive exit flow, picker tool loading, and constant organization.</li>
-</ul>
-]]>
-</action>
-</release>
-  <release version="1.1.11" date="2026-05-14">
-<action dev="dev" type="add">
-<![CDATA[
-<b>Features:</b>
-<ul>
-  <li>Added the <code>perform_act</code> function tool to trigger predefined act workflows.</li>
-  <li>Added support for the <code>&gt;&gt;&gt;</code> file include marker to include content from URLs or file paths during processing.</li>
-</ul>
-<b>Fixes:</b>
-<ul>
-  <li>Fixed act episode processing for multi-threaded execution.</li>
-</ul>
-]]>
-</action>
-</release>
-  <release version="1.1.12" date="2026-05-18">
-<action dev="dev" type="add">
-<![CDATA[
-<b>Features:</b>
-<ul>
-  <li>Added support for moving to an episode by name.</li>
-</ul>
-<b>Fixes:</b>
-<ul>
-  <li>Improved <code>move_to_episode</code> handling.</li>
-  <li>Corrected an internal variable name.</li>
-  <li>Added a warning for cases where interactive mode is not supported.</li>
-</ul>
-]]>
-</action>
-</release>
-  <release version="1.1.13" date="2026-05-22">
-<action dev="dev" type="add">
-<![CDATA[
-<b>Features:</b>
-<ul>
-  <li>Added Claude provider support, including provider configuration routing, tool call handling, message structure updates, Beta API integration, and web search support.</li>
-  <li>Expanded CodeMie provider model routing and removed the None provider.</li>
-  <li>Improved provider resolution and functional tool integration.</li>
-</ul>
-<b>Fixes:</b>
-<ul>
-  <li>Fixed cache input token calculation in the Claude provider.</li>
-  <li>Fixed module processing logging level handling and act execution property handling.</li>
-  <li>Corrected <code>&lt;developers&gt;</code> information in POM files.</li>
-</ul>
-<b>Refactoring:</b>
-<ul>
-  <li>Refactored function call handling shared by Claude and OpenAI providers.</li>
-  <li>Refactored provider shared base implementations and moved <code>AbstractAIProvider</code> into the provider package.</li>
-  <li>Refactored usage tracking and Maven plugin usage statistics logging to per-model statistics management.</li>
-  <li>Refactored episode execution from 0-based to 1-based indexing for clearer episode handling.</li>
-  <li>Refactored MCP server and web search configuration loops into shared provider logic.</li>
 </ul>
 ]]>
 </action>

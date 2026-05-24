@@ -12,14 +12,14 @@
 </action>
 </release>
    
-  <release version="1.1.0" date="2026-04-05">
+  <release version="1.1.13" date="2026-05-22">
 <action dev="dev" type="add">
 <![CDATA[
-<b>Features:</b>
-<ul><li>Added a unified GenAI provider API for prompt instructions, execution, embeddings, tool registration, working-directory context, cleanup, and usage reporting.</li><li>Added provider resolution through <code>GenaiProviderManager</code>, including <code>Provider:model</code> selectors, fully qualified provider classes, provider initialization, and aggregated token usage.</li><li>Added an OpenAI-compatible provider with Responses API execution, function tool calling, input logging, timeout and output-token configuration, embeddings, and usage mapping.</li><li>Added EPAM CodeMie integration with OAuth token acquisition and delegation to an OpenAI-compatible backend.</li><li>Added a no-op provider for disabled, offline, test, and prompt-capture scenarios.</li><li>Added extensible functional tools support with <code>FunctionTools</code>, <code>FunctionToolsLoader</code>, <code>ToolFunction</code>, Java <code>ServiceLoader</code> discovery, configurable placeholder resolution, and working-directory-aware tool execution.</li></ul>
+<b>Features:</b><ul><li>Added Claude provider implementation with tool-call handling, structured message processing, beta API integration, and web search support.</li><li>Improved provider resolution and model routing for CodeMie and Claude-backed configurations.</li></ul><b>Fixes:</b><ul><li>Fixed cache input token calculation in <code>ClaudeProvider</code>.</li><li>Removed the deprecated <code>NoneProvider</code> from provider routing.</li></ul><b>Refactoring:</b><ul><li>Refactored shared provider infrastructure into a common abstract base for OpenAI and Claude integrations, including MCP server and web search configuration handling.</li><li>Refactored function call handling and per-model usage statistics management across provider implementations.</li><li>Updated function tools and provider manager internals for improved provider resolution and tool execution behavior.</li></ul>
 ]]>
 </action>
 </release>
+
   <release version="1.1.8" date="2026-05-09">
 <action dev="dev" type="add">
 <![CDATA[
@@ -27,10 +27,12 @@
 ]]>
 </action>
 </release>
-  <release version="1.1.13" date="2026-05-22">
+
+  <release version="1.1.0" date="2026-04-05">
 <action dev="dev" type="add">
 <![CDATA[
-<b>Features:</b><ul><li>Added Claude provider implementation with tool-call handling, structured message processing, beta API integration, and web search support.</li><li>Improved provider resolution and model routing for CodeMie and Claude-backed configurations.</li></ul><b>Fixes:</b><ul><li>Fixed cache input token calculation in <code>ClaudeProvider</code>.</li><li>Removed the deprecated <code>NoneProvider</code> from provider routing.</li></ul><b>Refactoring:</b><ul><li>Refactored shared provider infrastructure into a common abstract base for OpenAI and Claude integrations, including MCP server and web search configuration handling.</li><li>Refactored function call handling and per-model usage statistics management across provider implementations.</li><li>Updated function tools and provider manager internals for improved provider resolution and tool execution behavior.</li></ul>
+<b>Features:</b>
+<ul><li>Added a unified GenAI provider API for prompt instructions, execution, embeddings, tool registration, working-directory context, cleanup, and usage reporting.</li><li>Added provider resolution through <code>GenaiProviderManager</code>, including <code>Provider:model</code> selectors, fully qualified provider classes, provider initialization, and aggregated token usage.</li><li>Added an OpenAI-compatible provider with Responses API execution, function tool calling, input logging, timeout and output-token configuration, embeddings, and usage mapping.</li><li>Added EPAM CodeMie integration with OAuth token acquisition and delegation to an OpenAI-compatible backend.</li><li>Added a no-op provider for disabled, offline, test, and prompt-capture scenarios.</li><li>Added extensible functional tools support with <code>FunctionTools</code>, <code>FunctionToolsLoader</code>, <code>ToolFunction</code>, Java <code>ServiceLoader</code> discovery, configurable placeholder resolution, and working-directory-aware tool execution.</li></ul>
 ]]>
 </action>
 </release>

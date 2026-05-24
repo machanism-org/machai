@@ -3,67 +3,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-   
-    <release version="1.1.0" date="2026-04-05">
-      <action dev="dev" type="add"><![CDATA[
-<b>Features:</b>
-<ul>
-  <li>Integrated Ghostwriter guided file processing directly into Maven goals for repeatable source, documentation, and site updates.
-  <li>Added prompt-driven act workflows with support for reusable act definitions and interactive input when no explicit action prompt is supplied.
-  <li>Added execution-root and per-module goal variants for guided and act-based processing in standard Maven reactor workflows.
-  <li>Added support for reverse-order execution-root guided processing so submodules can be processed before parent projects.</li>
-  <li>Added support for running the main guided goal without requiring a Maven project in the current directory.</li>
-  <li>Added Maven <code>settings.xml</code> integration for provider credentials and custom configuration via <code>genai.serverId</code>.</li>
-  <li>Added configurable processing parameters for model selection, scan roots, instructions, exclusions, act locations, prompts, threading, and input logging.</li>
-  <li>Added Java class discovery and reflective inspection function tools for project-aware analysis, including class matching, member metadata, source paths, and dependency artifact origins.</li>
-  <li>Added a cleanup goal for removing temporary Ghostwriter workflow artifacts.</li>
-</ul>
-]]></action>
-    </release>
-
-    <release version="1.1.8" date="2026-05-09">
-      <action dev="dev" type="add"><![CDATA[
-<b>Fixes:</b>
-<ul>
-  <li>Fixed initialization of <code>ClassFunctionalTools</code>.</li>
-  <li>Applied additional Sonar-related fixes.</li>
-</ul>
-<b>Chores:</b>
-<ul>
-  <li>Improved project layout handling by adding exclude directory propagation, using project layout file discovery for recursive file listing, supporting multi-MCP definitions, and renaming <code>ProcessTerminationException</code> to <code>TaskTerminationException</code>.</li>
-</ul>
-]]></action>
-    </release>
-
-    <release version="1.1.9" date="2026-05-10">
-      <action dev="dev" type="add"><![CDATA[
-<b>Fixes:</b>
-<ul>
-  <li>Updated task termination handling across Maven goals for improved execution stability.</li>
-</ul>
-]]></action>
-    </release>
-
-    <release version="1.1.10" date="2026-05-12">
-      <action dev="dev" type="add"><![CDATA[
-<b>Fixes:</b>
-<ul>
-  <li>Improved commit handling and interactive exit flow for more reliable plugin execution.</li>
-</ul>
-]]></action>
-    </release>
-
-    <release version="1.1.13" date="2026-05-22">
-      <action dev="dev" type="add"><![CDATA[
-<b>Fixes:</b>
-<ul>
-  <li>Updated interactive prompt logging constants for more consistent prompt-related output.</li>
-  <li>Refactored usage statistics logging across Maven plugin mojos to improve logging behavior and maintainability.</li>
-</ul>
-]]></action>
-    </release>
-
-    <release version="1.1.14" date="2026-05-24">
+     <release version="1.1.14" date="2026-05-24">
       <action dev="dev" type="add"><![CDATA[
 <b>Features:</b>
 <ul>
@@ -90,6 +30,60 @@
   <li>Refactored provider initialization to pass model name as explicit parameter instead of through configuration.</li>
   <li>Refactored maven-javadoc-plugin configuration from reporting to pluginManagement section.</li>
   <li>Refactored bindex act to use multi-step inputs with dedicated javadoc generation.</li>
+</ul>
+]]></action>
+    </release>
+    <release version="1.1.13" date="2026-05-22">
+      <action dev="dev" type="add"><![CDATA[
+<b>Fixes:</b>
+<ul>
+  <li>Updated interactive prompt logging constants for more consistent prompt-related output.</li>
+  <li>Refactored usage statistics logging across Maven plugin mojos to improve logging behavior and maintainability.</li>
+</ul>
+]]></action>
+    </release>
+     <release version="1.1.10" date="2026-05-12">
+      <action dev="dev" type="add"><![CDATA[
+<b>Fixes:</b>
+<ul>
+  <li>Improved commit handling and interactive exit flow for more reliable plugin execution.</li>
+</ul>
+]]></action>
+    </release>
+    <release version="1.1.9" date="2026-05-10">
+      <action dev="dev" type="add"><![CDATA[
+<b>Fixes:</b>
+<ul>
+  <li>Updated task termination handling across Maven goals for improved execution stability.</li>
+</ul>
+]]></action>
+    </release>
+    <release version="1.1.8" date="2026-05-09">
+      <action dev="dev" type="add"><![CDATA[
+<b>Fixes:</b>
+<ul>
+  <li>Fixed initialization of <code>ClassFunctionalTools</code>.</li>
+  <li>Applied additional Sonar-related fixes.</li>
+</ul>
+<b>Chores:</b>
+<ul>
+  <li>Improved project layout handling by adding exclude directory propagation, using project layout file discovery for recursive file listing, supporting multi-MCP definitions, and renaming <code>ProcessTerminationException</code> to <code>TaskTerminationException</code>.</li>
+</ul>
+]]></action>
+    </release>
+    <release version="1.1.0" date="2026-04-05">
+      <action dev="dev" type="add"><![CDATA[
+<b>Features:</b>
+<ul>
+  <li>Integrated Ghostwriter guided file processing directly into Maven goals for repeatable source, documentation, and site updates.
+  <li>Added prompt-driven act workflows with support for reusable act definitions and interactive input when no explicit action prompt is supplied.
+  <li>Added execution-root and per-module goal variants for guided and act-based processing in standard Maven reactor workflows.
+  <li>Added support for reverse-order execution-root guided processing so submodules can be processed before parent projects.</li>
+  <li>Added support for running the main guided goal without requiring a Maven project in the current directory.</li>
+  <li>Added Maven <code>settings.xml</code> integration for provider credentials and custom configuration via <code>genai.serverId</code>.</li>
+  <li>Added configurable processing parameters for model selection, scan roots, instructions, exclusions, act locations, prompts, threading, and input logging.</li>
+  <li>Added Java class discovery and reflective inspection function tools for project-aware analysis, including class matching, member metadata, source paths, and dependency artifact origins.</li>
+  <li>Added a cleanup goal for removing temporary Ghostwriter workflow artifacts.</li>
 </ul>
 ]]></action>
     </release>
