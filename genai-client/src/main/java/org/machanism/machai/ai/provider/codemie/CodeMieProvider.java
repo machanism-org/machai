@@ -11,7 +11,6 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -24,8 +23,6 @@ import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 
 import com.anthropic.client.AnthropicClient;
 import com.openai.client.OpenAIClient;
-import com.openai.models.embeddings.CreateEmbeddingResponse;
-import com.openai.models.embeddings.EmbeddingCreateParams;
 
 /**
  * {@link Genai} implementation that integrates with EPAM CodeMie.
