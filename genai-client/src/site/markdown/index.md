@@ -21,120 +21,137 @@ canonical: https://machai.machanism.org/genai-client/index.html
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg)](https://central.sonatype.com/artifact/org.machanism.machai/genai-client)
 
-GenAI Client is a Java library designed for provider-agnostic generative AI integration in the MachAI ecosystem. It provides a unified API for prompt execution, system instructions, tool calling, embeddings, provider initialization, usage tracking, and configuration-driven provider resolution so application code can work with multiple AI backends through a consistent abstraction.
+# Overview
 
-The library is organized around the `org.machanism.machai.ai` API and its supporting packages:
+GenAI Client is a Java library that provides a vendor-neutral integration layer
+between Machai modules and Generative AI providers. It defines the root API and
+orchestration layer for working with large language model providers, including
+provider resolution, request preparation, tool exposure, file-aware
+interactions, and usage accounting. The library exposes a stable entry point for
+application code while delegating implementation details to dedicated child
+packages for concrete providers and supporting infrastructure.
 
-- `org.machanism.machai.ai` defines the root abstractions for vendor-neutral generative AI interactions.
-- `org.machanism.machai.ai.manager` resolves configured `Provider:Model` identifiers into concrete providers and aggregates token usage statistics.
-- `org.machanism.machai.ai.provider` defines the shared provider contract, reusable base implementations, and adapter support used across concrete integrations.
-- `org.machanism.machai.ai.provider.openai` integrates with the OpenAI Responses API, including prompt execution, embeddings, local function tools, optional built-in web search, optional MCP server tools, and usage tracking.
-- `org.machanism.machai.ai.provider.claude` integrates with Anthropic Claude models, including prompt execution, system instructions, local function tools, optional web search, optional MCP server registration, and usage tracking.
-- `org.machanism.machai.ai.provider.codemie` integrates with EPAM CodeMie by obtaining OAuth 2.0 access tokens and delegating requests to OpenAI-compatible or Anthropic-compatible provider implementations according to the configured model family.
-- `org.machanism.machai.ai.tools` provides the service-provider infrastructure for discovering and registering host-side tool functions that can be exposed to compatible AI providers.
+The library standardizes how applications:
 
-## Supported AI providers
+- Resolve a provider implementation from a configured model identifier such as
+  `OpenAI:gpt-4o-mini` or `CodeMie:claude-3-5-sonnet`.
+- Initialize provider clients from runtime configuration sources backed by the
+  `Configurator` abstraction.
+- Build prompts and system instructions, attach optional files, embeddings, and
+  callable tools, and execute requests against the selected model.
+- Discover and register host-defined function tools through Java's
+  `ServiceLoader` mechanism, exposing controlled local capabilities (such as
+  filesystem access, HTTP operations, or command execution) to the model in a
+  structured manner.
+- Enable optional built-in tools such as web search and Model Context Protocol
+  (MCP) servers without provider-specific glue code.
+- Collect provider-reported token usage metrics for monitoring, logging, and
+  cost tracking.
 
-### OpenAI
+The package is organized around several core areas:
 
-The OpenAI provider uses the OpenAI Java SDK and the Responses API to support:
+- **Provider contracts** in `org.machanism.machai.ai.provider`, centered on the
+  `Genai` interface and the `AbstractAIProvider` base class for text generation,
+  embeddings, structured interactions, file handling, and usage reporting.
+- **Provider resolution and lifecycle management** in
+  `org.machanism.machai.ai.manager`, which maps model identifiers to
+  implementations, initializes providers from configuration, and aggregates
+  usage statistics.
+- **Function tool integration** in `org.machanism.machai.ai.tools`, where
+  application functions are discovered, described, and exposed to compatible
+  providers for controlled tool calling.
+- **Concrete provider implementations** in child packages below
+  `org.machanism.machai.ai.provider`, including OpenAI-compatible integrations,
+  Anthropic Claude, and EPAM CodeMie support.
 
-- prompt execution with optional system instructions
-- embedding generation
-- local function tool registration with JSON-schema parameters
-- optional built-in web search
-- optional MCP server registration
-- usage tracking for input, cached input, and output tokens
+# Supported AI providers
 
-Typical provider manager identifiers include:
+The following provider implementations are bundled with the library. Provider
+identifiers passed to `GenaiProviderManager.getProvider(...)` use the form
+`Provider:Model`. When the provider part is a simple name, the implementation
+class is resolved by convention as
+`org.machanism.machai.ai.provider.<provider-lowercase>.<Provider>Provider`. When
+the provider part already contains a package separator, it is treated as a
+fully qualified class name.
 
-- `OpenAI:gpt-4o-mini`
-- `OpenAI:gpt-4.1`
+## OpenAI
 
-Primary OpenAI-specific configuration:
+Implementation: `org.machanism.machai.ai.provider.openai.OpenAIProvider`
 
-| Parameter | Description | Default |
-| --- | --- | --- |
-| `OPENAI_API_KEY` | API key or compatible bearer token used to authenticate requests. | None |
-| `OPENAI_BASE_URL` | Optional base URL for OpenAI-compatible endpoints. | SDK default |
-| `embedding.model` | Model used for embedding requests. | None |
-| `WebSearchTool.type` | Enables the built-in OpenAI web search tool when set. The value `default` can be used to enable the default WebSearchTool for the current Provider. | Disabled |
-| `WebSearchTool.city` | Optional city for approximate web search user location. | None |
-| `WebSearchTool.country` | Optional country for approximate web search user location. | None |
-| `WebSearchTool.region` | Optional region for approximate web search user location. | None |
-| `MCP.name` / `MCP_1.name`... | Registers one or more MCP server tools. | Disabled |
-| `MCP.url` / `MCP_1.url`... | Optional MCP server name. | None |
-| `MCP.description` / `MCP_1.description`... | Optional MCP server description. | None |
-| `MCP.authorization` / `MCP_1.authorization`... | Optional MCP server authorization value. | None |
+Adapts the framework-level `Genai` contract to the OpenAI Responses and
+Embeddings APIs through the OpenAI Java SDK. Supports text generation,
+function tool-calling, file-assisted prompting, embedding generation, and
+optional built-in tools such as web search and MCP servers.
 
-### Claude
+| Parameter         | Description                                              | Default |
+|-------------------|----------------------------------------------------------|---------|
+| `OPENAI_BASE_URL` | Base URL for the OpenAI-compatible API endpoint.         | (none, required) |
+| `OPENAI_API_KEY`  | API key used to authorize requests to the OpenAI API.    | (none, required) |
+| `GENAI_TIMEOUT`   | Request timeout in seconds. `0` uses the SDK default.    | `0`     |
 
-The Claude provider uses the Anthropic Java SDK to support:
+## Anthropic Claude
 
-- prompt execution against Claude models
-- system instructions
-- local function tool registration
-- optional Anthropic web search tool variants
-- optional MCP server registration
-- usage tracking for prompt, cache, and output tokens
+Implementation: `org.machanism.machai.ai.provider.claude.ClaudeProvider`
 
-Typical provider manager identifiers include:
+Executes requests against the Anthropic Claude API using the Anthropic Java
+SDK. Supports prompt caching threshold tuning and shares the same provider
+abstraction used by OpenAI integrations.
 
-- `Claude:claude-3-5-sonnet`
-- `Claude:claude-3-opus-20240229`
+| Parameter            | Description                                                      | Default |
+|----------------------|------------------------------------------------------------------|---------|
+| `ANTHROPIC_BASE_URL` | Base URL for the Anthropic API endpoint.                         | SDK default |
+| `ANTHROPIC_API_KEY`  | API key used to authorize requests to the Anthropic API.         | (none, required) |
+| `cacheThreshold`     | Minimum content length (characters) eligible for prompt caching. | provider default |
+| `GENAI_TIMEOUT`      | Request timeout in seconds. `0` uses the SDK default.            | `0`     |
 
-Primary Claude-specific configuration:
+## EPAM CodeMie
 
-| Parameter | Description | Default |
-| --- | --- | --- |
-| `ANTHROPIC_API_KEY` | API key used to authenticate Anthropic requests. | None |
-| `ANTHROPIC_BASE_URL` | Optional base URL for Anthropic-compatible endpoints. | SDK default |
-| `WebSearchTool.type` | Anthropic web search tool type. Supported values are `20260209`, `20250305`, and `default`. The value `default` can be used to enable the default WebSearchTool for the current Provider. | Disabled |
-| `WebSearchTool.city` | Optional city for web search location. | None |
-| `WebSearchTool.country` | Optional country for web search location. | None |
-| `WebSearchTool.region` | Optional region for web search location. | None |
-| `MCP.name` / `MCP_1.name`... | Registers one or more MCP server tools. | Disabled |
-| `MCP.url` / `MCP_1.url`... | Optional MCP server name. | None |
-| `MCP.authorization` / `MCP_1.authorization`... | Optional MCP server authorization token. | None |
+Implementation: `org.machanism.machai.ai.provider.codemie.CodeMieProvider`
 
-### CodeMie
+Bridges CodeMie-specific authentication and endpoint configuration with the
+shared provider abstraction. Resolves the appropriate OAuth 2.0 grant flow
+(password or client credentials) from supplied credentials, obtains a bearer
+token from the configured OpenID Connect token endpoint, and configures
+delegated provider implementations for supported model families, including
+OpenAI-compatible GPT models and Anthropic-compatible Claude models exposed
+through the CodeMie platform.
 
-The CodeMie provider authenticates against the EPAM CodeMie identity endpoint, retrieves an OAuth 2.0 access token, and delegates execution to a compatible downstream provider based on the configured `chatModel`.
-
-Supported delegated model families in the current implementation:
-
-- `gpt-*` and blank model values delegate to the OpenAI-compatible provider against the CodeMie API base URL
-- `gemini-*` values are currently handled through the OpenAI-compatible path
-- `claude-*` values delegate to the Claude-compatible provider
-
-Typical provider manager identifiers include:
-
-- `CodeMie:gpt-4o-mini`
-- `CodeMie:claude-3-5-sonnet`
-
-Primary CodeMie-specific configuration:
-
-| Parameter | Description | Default |
-| --- | --- | --- |
-| `GENAI_USERNAME` | User e-mail for password grant or client identifier for client-credentials grant. | None |
-| `GENAI_PASSWORD` | Password or client secret used to obtain the OAuth token. | None |
-| `AUTH_URL` | Optional override for the CodeMie token endpoint. | `https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token` |
+| Parameter         | Description                                                                  | Default |
+|-------------------|------------------------------------------------------------------------------|---------|
+| `GENAI_USERNAME`  | Username (or client id) used for the configured OAuth 2.0 grant.             | (none, required) |
+| `GENAI_PASSWORD`  | Password (or client secret) used for the configured OAuth 2.0 grant.         | (none, required) |
+| `AUTH_URL`        | OpenID Connect token endpoint URL.                                           | `https://auth.codemie.lab.epam.com/realms/codemie-prod/protocol/openid-connect/token` |
+| `GENAI_TIMEOUT`   | Request timeout in seconds. `0` uses the SDK default.                        | `0`     |
 
 ## Common configuration parameters
 
-These parameters are shared across provider initialization or provider selection.
+The following parameters are interpreted by `AbstractAIProvider` and apply to
+all bundled provider implementations.
 
-| Parameter | Description | Default |
-| --- | --- | --- |
-| `chatModel` | Model name passed to the selected provider after provider resolution from `Provider:Model`. | None |
-| `MAX_OUTPUT_TOKENS` | Maximum number of output tokens requested from the model. | `18000` |
-| `MAX_TOOL_CALLS` | Maximum number of tool calls allowed in a response loop. `0` means unset. | `0` |
-| `GENAI_TIMEOUT` | Request timeout in seconds for provider SDK clients. `0` means SDK defaults. | `0` |
-| `logInputs` | Indicates whether provider inputs should be logged by the application workflow. | Provider or application controlled |
-| `genai.serverId` | Target GenAI server identifier used by the application configuration model. | None |
+| Parameter                  | Description                                                              | Default |
+|----------------------------|--------------------------------------------------------------------------|---------|
+| `MAX_OUTPUT_TOKENS`        | Maximum number of tokens the model may generate per response.            | `18000` |
+| `MAX_TOOL_CALLS`           | Maximum number of tool-call iterations permitted per response.           | `0` (unlimited) |
+| `GENAI_TIMEOUT`            | Request timeout in seconds applied during client creation.               | `0` (SDK default) |
+| `WebSearchTool.type`       | Provider-specific web-search tool type. Enables web search when set.     | (disabled) |
+| `WebSearchTool.city`       | Optional user city used to localize web-search results.                  | (none) |
+| `WebSearchTool.country`    | Optional user country used to localize web-search results.               | (none) |
+| `WebSearchTool.region`     | Optional user region used to localize web-search results.                | (none) |
+| `MCP.url`                  | Endpoint URL of the first MCP server.                                    | (none) |
+| `MCP.name`                 | Provider-visible label of the first MCP server.                          | (none) |
+| `MCP.authorization`        | Optional authorization token/value for the first MCP server.             | (none) |
+| `MCP.description`          | Optional human-readable description of the first MCP server.             | (none) |
+| `MCP_<n>.url`              | Endpoint URL of additional MCP servers (`MCP_1.*`, `MCP_2.*`, ...).      | (none) |
+| `MCP_<n>.name`             | Provider-visible label of the additional MCP server.                     | (none) |
+| `MCP_<n>.authorization`    | Optional authorization for the additional MCP server.                    | (none) |
+| `MCP_<n>.description`      | Optional description for the additional MCP server.                      | (none) |
+| `logInputs`                | Optional file path to which request inputs are written for logging.      | (disabled) |
 
-## Resources
+# Resources
 
-- [MachAI platform](https://machai.machanism.org/)
-- [GitHub repository](https://github.com/machanism-org/machai.git)
+- [Machai platform documentation](https://machai.machanism.org/)
+- [GenAI Client Javadoc](https://machai.machanism.org/genai-client/apidocs/)
+- [GitHub repository](https://github.com/machanism-org/machai)
 - [Maven Central artifact](https://central.sonatype.com/artifact/org.machanism.machai/genai-client)
+- [Machai parent project](https://machai.machanism.org/)
+- [Configurator (Macha Core Commons)](https://macha.machanism.org/core/core-commons/configurator/apidocs/)
