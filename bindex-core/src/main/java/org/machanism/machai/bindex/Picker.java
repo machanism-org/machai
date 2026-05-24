@@ -232,7 +232,7 @@ public class Picker {
 			throw new IllegalArgumentException("query must not be null");
 		}
 		String classificationStr = getClassification(query);
-		if (Strings.CS.startsWith(classificationStr, "```json")) {
+		if (Strings.CS.contains(classificationStr, "```json")) {
 			classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
 		}
 		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
