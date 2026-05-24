@@ -65,6 +65,58 @@ import com.openai.models.embeddings.EmbeddingCreateParams;
  */
 public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 
+	private final class ClaudeProviderExtension extends ClaudeProvider {
+		private final Configurator conf;
+		private final String username;
+		private final String resolvedAuthUrl;
+		private final String password;
+
+		private ClaudeProviderExtension(Configurator conf, String username, String resolvedAuthUrl, String password) {
+			this.conf = conf;
+			this.username = username;
+			this.resolvedAuthUrl = resolvedAuthUrl;
+			this.password = password;
+		}
+
+		@Override
+		protected AnthropicClient getClient() {
+			try {
+				String token = getToken(resolvedAuthUrl, username, password);
+				conf.set(ClaudeProvider.ANTHROPIC_API_KEY, token);
+			} catch (IOException e) {
+				throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
+			}
+
+			return super.getClient();
+		}
+	}
+
+	private final class OpenAIProviderExtension extends OpenAIProvider {
+		private final Configurator conf;
+		private final String username;
+		private final String resolvedAuthUrl;
+		private final String password;
+
+		private OpenAIProviderExtension(Configurator conf, String username, String resolvedAuthUrl, String password) {
+			this.conf = conf;
+			this.username = username;
+			this.resolvedAuthUrl = resolvedAuthUrl;
+			this.password = password;
+		}
+
+		@Override
+		public OpenAIClient getClient() {
+			try {
+				String token = getToken(resolvedAuthUrl, username, password);
+				conf.set(OPENAI_API_KEY, token);
+			} catch (IOException e) {
+				throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
+			}
+
+			return super.getClient();
+		}
+	}
+
 	/**
 	 * Configuration key used to override the default token endpoint.
 	 */
@@ -115,15 +167,14 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 * <ul>
 	 * <li>{@code AUTH_URL} – token endpoint override.</li>
 	 * </ul>
-	 *
 	 * @param conf configuration source
+	 *
 	 * @throws IllegalArgumentException if a configuration conflict is detected,
 	 *                                  authorization fails, or an unsupported model
 	 *                                  is configured
 	 */
 	@Override
-	public void init(Configurator conf) {
-		model = conf.get("chatModel");
+	public void init(String model, Configurator conf) {
 
 		String username = conf.get(Genai.USERNAME_PROP_NAME);
 		String password = conf.get(Genai.PASSWORD_PROP_NAME);
@@ -136,36 +187,13 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 				|| StringUtils.isBlank(model)) {
 			conf.set(OpenAIProvider.OPENAI_BASE_URL_NAME, BASE_URL);
 			System.setProperty(AUTH_URL_PROP_NAME, resolvedAuthUrl);
-			provider = new OpenAIProvider() {
-				@Override
-				public OpenAIClient getClient() {
-					try {
-						String token = getToken(resolvedAuthUrl, username, password);
-						conf.set(OPENAI_API_KEY, token);
-					} catch (IOException e) {
-						throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
-					}
-
-					return super.getClient();
-				}
-			};
+			OpenAIProvider openAIProvider = new OpenAIProviderExtension(conf, username, resolvedAuthUrl, password);
+			provider = openAIProvider;
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(model, CLAUDE_COMPATIBLE_MODELS_PREFIXES)) {
 			System.setProperty(ClaudeProvider.ANTHROPIC_BASE_URL, resolvedAuthUrl);
 			conf.set(ClaudeProvider.ANTHROPIC_BASE_URL, BASE_URL);
-			provider = new ClaudeProvider() {
-				@Override
-				protected AnthropicClient getClient() {
-					try {
-						String token = getToken(resolvedAuthUrl, username, password);
-						conf.set(ClaudeProvider.ANTHROPIC_API_KEY, token);
-					} catch (IOException e) {
-						throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
-					}
-
-					return super.getClient();
-				}
-			};
+			provider = new ClaudeProviderExtension(conf, username, resolvedAuthUrl, password);
 			setProvider(provider);
 		} else {
 			throw new IllegalArgumentException("Unsupported model: '" + model + "'.");
@@ -173,7 +201,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 
 		setProvider(provider);
 
-		super.init(conf);
+		super.init(model, conf);
 	}
 
 	/**
@@ -261,7 +289,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	@Override
 	public List<Double> embedding(String text, long dimensions) {
 		if (provider instanceof EmbeddingProvider) {
-			((EmbeddingProvider) provider).embedding(text, dimensions);
+			return ((EmbeddingProvider) provider).embedding(text, dimensions);
 		}
 		throw new IllegalArgumentException("embedding not support for `" + model + "`");
 	}
