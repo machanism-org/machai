@@ -76,11 +76,11 @@ public class Episodes {
 	 *                                  exists
 	 */
 	public int getEpisodeIdByName(String episodeName) {
-		for (int i = 0; i < episodes.size(); i++) {
-			String firstHeaderLine = getEpisodeName(i);
+		for (int id = 1; id <= episodes.size(); id++) {
+			String firstHeaderLine = getEpisodeName(id);
 			if (firstHeaderLine != null) {
 				if (firstHeaderLine.equals(episodeName)) {
-					return i;
+					return id;
 				}
 			}
 		}
