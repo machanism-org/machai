@@ -46,13 +46,13 @@ public class ProjectContextFunctionTools implements FunctionTools {
 				"value:string:required:The value to push to the context variable.");
 
 		provider.addTool(
-			    "pop_project_context_variable",
-			    "Removes and returns a value from a project context variable. If the variable is a string, it is removed and returned. If it is a list, "
-			    + "the value is removed in LIFO (last-in, first-out) or FIFO (first-in, first-out) mode.",
-			    this::popProjectContextVariable,
-			    "name:string:required:The name of the context variable.",
-			    "mode:string:optional:Pop mode, either 'LIFO' (default) or 'FIFO'."
-			);	}
+				"pop_project_context_variable",
+				"Removes and returns a value from a project context variable. If the variable is a string, it is removed and returned. If it is a list, "
+						+ "the value is removed in LIFO (last-in, first-out) or FIFO (first-in, first-out) mode.",
+				this::popProjectContextVariable,
+				"name:string:required:The name of the context variable.",
+				"mode:string:optional:Pop mode, either 'LIFO' (default) or 'FIFO'.");
+	}
 
 	/**
 	 * Sets a variable in the act context.
@@ -142,7 +142,9 @@ public class ProjectContextFunctionTools implements FunctionTools {
 				list.add(value);
 				context.put(name, list);
 			} else if (existing instanceof List) {
-				((List<Object>) existing).add(value);
+				@SuppressWarnings("unchecked")
+				List<Object> list = (List<Object>) existing;
+				list.add(value);
 			} else {
 				return "Unsupported variable type for '" + name + "': " + existing.getClass();
 			}

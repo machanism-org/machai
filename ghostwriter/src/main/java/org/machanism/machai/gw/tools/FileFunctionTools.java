@@ -16,7 +16,6 @@ import java.util.Objects;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -359,31 +358,6 @@ public class FileFunctionTools implements FunctionTools {
 		}
 
 		return result;
-	}
-
-	/**
-	 * Collects all files under {@code directory} recursively.
-	 *
-	 * @param directory directory to start with
-	 * @return list of files (not directories)
-	 */
-	private List<File> listFilesRecursively(File directory) {
-		List<File> allFiles = new ArrayList<>();
-		String name = directory.getName();
-		String[] excludeDirs = ProjectLayout.getExcludeDirs();
-		if (!Strings.CS.equalsAny(name, excludeDirs) && directory.exists() && directory.isDirectory()) {
-			File[] files = directory.listFiles();
-			if (files != null) {
-				for (File file : files) {
-					if (file.isFile()) {
-						allFiles.add(file);
-					} else if (file.isDirectory()) {
-						allFiles.addAll(listFilesRecursively(file));
-					}
-				}
-			}
-		}
-		return allFiles;
 	}
 
 	/**
