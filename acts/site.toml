@@ -11,6 +11,8 @@ inputs = [
   ```
   mvn clean site site:stage -q
   ```
+- Move to the `Upload` episode.
+
 %s
 ''',
 '''
