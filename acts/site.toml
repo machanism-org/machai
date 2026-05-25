@@ -11,6 +11,7 @@ inputs = [
   ```
   mvn clean site site:stage -q
   ```
+  
 %s
 ''',
 '''

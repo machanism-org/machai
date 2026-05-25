@@ -240,11 +240,7 @@ public class CommandFunctionTools implements FunctionTools {
 				: TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE;
 		int exitCode = props.has("exitCode") ? props.get("exitCode").asInt(0) : 0;
 
-		if (exitCode == 0) {
-			throw new EndTaskException(message);
-		} else {
-			throw new ProcessTerminationException(message, exitCode);
-		}
+		throw new ProcessTerminationException(message, exitCode);
 	}
 
 	/**

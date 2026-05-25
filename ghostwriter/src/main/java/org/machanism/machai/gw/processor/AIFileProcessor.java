@@ -46,9 +46,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	public static final String LOG_OUTPUT_PREFIX = ">>> {}";
-	
+
 	public static final String FILE_INCLUDED_MARKER = ">>>";
-	
+
 	public static final String EXIT_SPECIAL_PROMPT_COMMAND = ".";
 
 	public static final String CONTINUE_SPECIAL_PROMPT_COMMAND = ">";
@@ -104,10 +104,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		if (StringUtils.isNoneBlank(prompts)) {
 			try {
 				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
-				if(provider == null) {
+				if (provider == null) {
 					throw new IllegalArgumentException("`gw.model` is required.");
 				}
-				
+
 				functionToolsLoader.applyTools(provider, getConfigurator());
 				toolFunctions.forEach(ft -> ft.applyTools(provider));
 
@@ -129,6 +129,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				perform = perform(file, provider);
+
+			} catch (ProcessTerminationException e) {
+				if (e.getExitCode() != 0) {
+					throw e;
+				}
+				perform = e.getMessage();
 
 			} catch (EndTaskException e) {
 				perform = e.getMessage();
