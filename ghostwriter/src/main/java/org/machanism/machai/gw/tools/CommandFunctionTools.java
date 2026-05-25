@@ -168,7 +168,8 @@ public class CommandFunctionTools implements FunctionTools {
 						+ DEFAULT_CHARSET);
 		provider.addTool(
 				"terminate_execution",
-				"Terminate the application by sending an exit code.",
+				"Terminates the application by sending an exit code. This function tool should only be used when explicitly requested by the user.  "
+						+ "Do not call this function automatically if task completed successfully.",
 				this::terminateExecution,
 				"message:string:optional:The exception message to use. Defaults to '"
 						+ TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE + "'",
@@ -239,7 +240,11 @@ public class CommandFunctionTools implements FunctionTools {
 				: TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE;
 		int exitCode = props.has("exitCode") ? props.get("exitCode").asInt(0) : 0;
 
-		throw new ProcessTerminationException(message, exitCode);
+		if (exitCode == 0) {
+			throw new EndTaskException(message);
+		} else {
+			throw new ProcessTerminationException(message, exitCode);
+		}
 	}
 
 	/**
@@ -595,12 +600,12 @@ public class CommandFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param envString environment string
-	 * @param conf 
+	 * @param conf
 	 * @return parsed environment variables
 	 */
 	public static Map<String, String> parseEnv(String envString, Configurator conf) {
 		envString = replace(envString, conf);
-		
+
 		Map<String, String> envMap = new HashMap<>();
 		if (envString == null || envString.isEmpty()) {
 			return envMap;

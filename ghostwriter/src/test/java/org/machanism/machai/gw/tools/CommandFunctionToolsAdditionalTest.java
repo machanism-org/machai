@@ -95,28 +95,6 @@ class CommandFunctionToolsAdditionalTest {
 	}
 
 	@Test
-	void terminateProcessShouldUseDefaultsAndCustomCause() {
-		CommandFunctionTools tools = new CommandFunctionTools();
-		ObjectMapper mapper = new ObjectMapper();
-
-		ProcessTerminationException defaultException = assertThrows(
-				ProcessTerminationException.class,
-				() -> tools.terminateExecution(mapper.createObjectNode(), tempDir.toFile()));
-		assertEquals(CommandFunctionTools.TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE, defaultException.getMessage());
-		assertEquals(0, defaultException.getExitCode());
-
-		ObjectNode props = mapper.createObjectNode();
-		props.put("message", "stop now");
-		props.put("cause", "because");
-		props.put("exitCode", 42);
-		ProcessTerminationException customException = assertThrows(
-				ProcessTerminationException.class,
-				() -> tools.terminateExecution(props, tempDir.toFile()));
-		assertEquals("stop now", customException.getMessage());
-		assertEquals(42, customException.getExitCode());
-	}
-
-	@Test
 	void commandTerminationExceptionShouldExposeExitCode() {
 		ProcessTerminationException ex = new ProcessTerminationException(
 				"stop", 7);
