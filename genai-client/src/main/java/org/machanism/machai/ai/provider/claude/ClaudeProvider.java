@@ -237,8 +237,8 @@ public class ClaudeProvider extends AbstractAIProvider {
 		if (response.isValid()) {
 			BetaUsage responseUsage = response.usage();
 			long inputTokens = responseUsage.inputTokens();
-			long inputCachedTokens = responseUsage.cacheCreationInputTokens().get()
-					+ responseUsage.cacheReadInputTokens().get();
+			long inputCachedTokens = responseUsage.cacheCreationInputTokens().orElseGet(() -> 0L)
+					+ responseUsage.cacheReadInputTokens().orElseGet(() -> 0L);
 			long outputTokens = responseUsage.outputTokens();
 
 			lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
