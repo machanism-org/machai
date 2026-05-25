@@ -297,7 +297,7 @@ public class Episodes {
 						+ StringUtils.defaultIfBlank(getEpisodeName(i), "<not defined>") + " |\n");
 			}
 
-			promptBuilder.append("\n- Current Episode Id: " + (episodeId + 1) + "\n\n");
+			promptBuilder.append("\n- Current Episode Id: " + (episodeId) + "\n\n");
 			promptBuilder.append("---\n\n");
 		}
 		return promptBuilder.toString();
